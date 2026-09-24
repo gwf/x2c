@@ -51,18 +51,10 @@ execution.
 - [REPL command](repl-command.md): active after external commands phases 1
   and 2. Moves the REPL to `commands/repl` and removes its command plumbing
   from the compiler.
-- [Meta lifetime certification](meta-lifetime-certification.md): active.
-  Replaces adoption phase 8; certifies ten methods for meta code through
-  the region table, decided September 24, 2026.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
   delivered as `9b71607f`. The
   [reproducibility record](generated-lisp-reproducibility.md) retains the
   earlier Lisp regeneration failure and the repaired result.
-
-- [Internal adoption campaign](internal-adoption-campaign.md): phases 1-6
-  are complete, and phase 7 moved the value operations to `meta`
-  prototypes. Its compiler-binding half needs a design; phase 8 continues as
-  meta lifetime certification.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
@@ -70,15 +62,16 @@ execution.
   template calls, representable literal results, and the API inventory are
   implemented. The represented-operation campaign is complete; the remaining
   methods are classified as excluded contracts, explicit adapters, defects, or
-  dependencies of the separate meta-capable protocol and lifetime-certification
-  work. Generalized `meta` declarations landed as `db86d4b7` through the
+  parked native-handle operations; nine lifetime-sensitive methods are
+  certified and `Var.token` stays private. Generalized `meta` declarations
+  landed as `db86d4b7` through the
   [meta recovery](archive/meta-recovery.md). The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and measurement
   of numeric Func's remaining per-call frame cost are open; the small-defect
   and system-header investigations record their outcomes. Meta-capable
-  protocols, lifetime certification and native extensions retain their
-  separate design and implementation status.
+  protocols and native extensions retain their separate design and
+  implementation status.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented, and
   scalar math is already callable; exposing Json, Diff, and Path text
@@ -114,6 +107,13 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Internal adoption campaign](archive/internal-adoption-campaign.md): done
+  2026-09-24; phases 1-7 delivered, phase 8 closed by the lifetime
+  certification. The 44 native-handle operations stay parked until a caller
+  exists.
+- [Meta lifetime certification](archive/meta-lifetime-certification.md):
+  done 2026-09-24 (`1e8de764` through `263fa39b`); nine methods are
+  meta-callable and `Var.token` stays private.
 - [Indentation dogfooding](archive/indentation-dogfooding.md): done; the
   script tools use `#pragma indent`, converted by `tools/indent-convert`.
 - [Indentation syntax](archive/indentation-syntax.md): done; `.xp`,

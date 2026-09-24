@@ -1,8 +1,18 @@
 # Internal adoption campaign
 
-> Status: active
-> Updated September 24, 2026. Phases 1-7 are complete. Phase 8 is replaced
-> by [meta-lifetime-certification.md](meta-lifetime-certification.md).
+> Status: done
+> Completed September 24, 2026. Phases 1-7 are complete; phase 7 ended with
+> `4084c865` and the compiler-operation rounds `23534fb2` and `cdc47116`.
+> Phase 8 was replaced and delivered by
+> [meta-lifetime-certification.md](meta-lifetime-certification.md)
+> (`1e8de764` through `263fa39b` and the `meta-job-lifetime` fixtures).
+>
+> Remaining backlog, not held open by this campaign:
+>
+> - The 44 native-handle and packed-storage operations listed in phase 7
+>   stay parked until a caller exists.
+> - Json, Diff and Path meta exposure is owned by
+>   [the REPL runtime surface plan](../repl-fit-and-runtime-surface.md).
 
 ## The result
 
@@ -52,9 +62,9 @@ The ready-tranche findings now stand as follows:
 This plan owns internal adoption and the deletion it enables. It coordinates
 with, but does not absorb, these existing efforts:
 
-- [Tooling ports](x2c-scripting-ports.md) owns translations of Python and shell
+- [Tooling ports](../x2c-scripting-ports.md) owns translations of Python and shell
   tools. This campaign only renames the two already-native x2c scripts.
-- [Meta authoring and coverage](meta-authoring-and-coverage.md) owns the method
+- [Meta authoring and coverage](../meta-authoring-and-coverage.md) owns the method
   inventory and representation boundaries. This campaign consumes its
   classifications after the generalized capability lands.
 - `codex/meta-values-types` owns its current generalized-meta implementation.
@@ -179,7 +189,7 @@ final exact-tree gate. The nested computed-capture replay limitation found in
 ## Generalized-meta tranche
 
 The dependency landed on dev as `db86d4b7` (see
-[meta recovery](archive/meta-recovery.md)). It supplies per-unit `meta
+[meta recovery](meta-recovery.md)). It supplies per-unit `meta
 static` values, compile-time structs in native bytes with C semantics for
 any complete struct (types take no `meta` marker), and bodyless native
 prototypes for the functions the compiler links. Ordinary calls to native
@@ -285,7 +295,7 @@ settled public decision.
 
 ## Lifetime-certified tranche
 
-### 8. Expand only from proved effects (replaced)
+### 8. Expand only from proved effects (replaced, done)
 
 Gary chose a redesign on September 24, 2026. The whole-project
 `region-escapes` pass this phase relied on was deleted in the explicit meta

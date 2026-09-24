@@ -219,7 +219,7 @@ it returns (`lib/lisp.x` `_call_lambda_slots`), so `return &local` or
 `&local` stored into a `meta static` read freed memory. The goal is for
 compile-time code to consume the compiler's shared lifetime analysis rather
 than add its own. The lifetime-certified tranche of the
-[internal adoption campaign](internal-adoption-campaign.md) depends on it.
+[internal adoption campaign](archive/internal-adoption-campaign.md) depends on it.
 
 Gary approved the design on 2026-09-22; the first delivery implements it.
 
@@ -379,5 +379,5 @@ Follow-ups:
 ## Unblocked elsewhere
 
 The generalized-meta tranche of the
-[internal adoption campaign](internal-adoption-campaign.md), starting with
+[internal adoption campaign](archive/internal-adoption-campaign.md), starting with
 Autodiff, was waiting on this work and can start now.

@@ -1,7 +1,35 @@
-> Status: active
-> Decided by Gary on September 24, 2026. This replaces phase 8 of
-> [internal-adoption-campaign.md](internal-adoption-campaign.md). The
-> decisions are recorded below.
+> Status: done
+> Decided by Gary and delivered to `dev` on September 24, 2026. This
+> replaced phase 8 of
+> [internal-adoption-campaign.md](internal-adoption-campaign.md), which is
+> also done. Nine of the ten methods are meta-callable; `Var.token` stays
+> private by decision 6.
+>
+> - Deliverable 1, rows and the install rule: `1e8de764`.
+> - Deliverable 2, `Job` finalizer: `7105e4cd`.
+> - Deliverable 3, the seven memory-only methods: `ac7141ae` (round one) and
+>   `5a699d64` (round two, fixtures).
+> - Deliverable 4, `List.job` in meta: `263fa39b` (round one, with
+>   `Var.job`, `Job.var` and `Job.start` marked; `Job.start` runs through a
+>   frame-owned adapter) and round two, the `meta-job-lifetime` fixtures.
+> - Deliverable 5, this closure.
+>
+> Repairs found along the way: Func assignment `5dc01eec`, destructuring
+> beside a cleanup `2f5f8a75`, Func casts `6f443c10`/`86ec93ce`, class
+> default prototypes `fe040bcd`, protocol default prototypes
+> `df0dc3b8`/`5d1306c0`, deferred class defaults `5615ca44`, and match cache
+> reachability by function name in `263fa39b`.
+>
+> Known limits:
+>
+> - Meta code has no try/catch, so the raise path of a frame-owned Job is
+>   checked by the region diagnostic and a manual probe, not by a fixture
+>   assertion.
+> - Meta code cannot pass an explicit NULL destination to
+>   `Var.fallback_iter`.
+> - `Var.file` is meta-callable, but nothing meta-callable produces a File.
+> - The `char` hole in a meta `%"..."` needs a `char_str` binding; this is
+>   queued.
 
 # Meta lifetime certification
 

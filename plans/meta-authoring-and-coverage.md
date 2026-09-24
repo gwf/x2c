@@ -12,6 +12,8 @@
 > recorded below. The 2026-09-21 addendum separates excluded native contracts,
 > adapter work and defects from work delegated to generalized `meta`
 > declarations and lifetime certification.
+> The ten lifetime-sensitive methods were reclassified on 2026-09-24:
+> nine are certified and meta-callable, and `Var.token` stays private.
 > September 23 local stabilization repairs composed String hash and
 > zero-valued Symbol parity; those commits are not yet on `dev`.
 
@@ -455,16 +457,15 @@ typed Array and Map conversions, `Var.jsonbool`, `Var.regex`,
 owners remain authoritative; generated metadata must replace manual binding
 rows rather than create a second inventory.
 
-Six more methods are eligible when their callback and allocation effects have
-complete summaries: `String.lines`, `String.splits`, `String.words`,
-`Var.as_iter`, `Var.fallback_iter` and `Var.adnode`. Four borrowed or
-finalized handles additionally need their owner or exact-once finalizer proved:
-`Var.token`, `Var.file`, `List.job` and `Var.job`. Scope ownership is enough
-for pure memory. Observable cleanup, such as closing a File or terminating a
-Job, must occur at the corresponding evaluator region boundary rather than be
-delayed indiscriminately until the compile-time session ends. Effectful File
-and Job operations also remain explicit trust choices even when their memory
-lifetimes are certified.
+The ten callback, allocation and handle methods are classified by the
+[meta lifetime certification](archive/meta-lifetime-certification.md), done
+on September 24, 2026. Nine are certified and meta-callable:
+`String.lines`, `String.splits`, `String.words`, `Var.as_iter`,
+`Var.fallback_iter`, `Var.adnode`, `Var.file`, `List.job` and `Var.job`.
+A Job started in meta code is finalized when the lowered function that
+started it returns or raises. `Var.token` is intentionally not meta: it is
+private in `lib/tokenizer.x`. Effectful File and Job operations remain
+explicit trust choices even with their lifetimes certified.
 
 The generalized marker does not make an unrepresentable C signature safe.
 Thirteen methods still need deliberate adapters: `String.c_compare`,
