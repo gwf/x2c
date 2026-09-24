@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 37
+- Compiler modules: 34
 - Runtime modules: 57
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -385,31 +385,6 @@ Public functions:
 
 `Compiler.check_regions`, `Compiler.check_meta_regions`,
 `Compiler.has_region_row`
-
-### [src/repl-input.x](../src/repl-input.x)
-
-inline terminal editing for the x2c REPL.
-
-Public functions:
-
-`ReplInput.new`, `ReplInput.read`, `ReplInput.remember`, `ReplInput.close`
-
-### [src/repl-session.x](../src/repl-session.x)
-
-persistent compiler submissions and inspection.
-
-Public functions:
-
-`ReplSession.new`, `ReplSession.symbols`, `ReplSession.inspect`,
-`ReplSession.complete_functions`, `ReplSession.complete`, `ReplSession.submit`
-
-### [src/repl.x](../src/repl.x)
-
-terminal client for persistent compiler submissions.
-
-Public functions:
-
-`repl_run`
 
 ### [src/report.x](../src/report.x)
 

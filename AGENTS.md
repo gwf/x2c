@@ -108,9 +108,7 @@ Direct destructive operations outside the requested change need approval.
   `report` owns progress and receipts, `bootstrap` owns the APE-to-native
   transition, `install` owns packages under the x2c home, `script` owns
   build-once script execution, `editor` owns the one-request semantic
-  adapter, `repl` owns terminal interaction, `repl-input` owns inline terminal
-  editing and history, `repl-session` owns persistent submissions and
-  inspection, and `utils` owns environment discovery and translation workers.
+  adapter, and `utils` owns environment discovery and translation workers.
 - `lib/` - representative runtime modules include string, list, array, map,
   var, varconvert, varops, iter, match, scope, block, buffer, error,
   exception, file, logger, scan, tokenizer, symbol, symbolset, atom, pool,
@@ -121,7 +119,8 @@ Direct destructive operations outside the requested change need approval.
   change `.x` sources and regenerate through the publication command below.
 - `builds/` - staged toolchains (`builds/0` drives local builds).
 - `commands/` - external commands built against the current compiler;
-  `commands/manifest.txt` records maturity and help summaries.
+  `commands/manifest.txt` records maturity and help summaries. `repl` owns
+  terminal interaction, editing, persistent submissions, and inspection.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,
   surfaced through `.agents/skills` for Codex and `.claude/skills` for Claude
   Code).

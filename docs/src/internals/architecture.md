@@ -26,6 +26,7 @@ lists the functions and types exposed by each compiler module.
 bin/        the bootstrap compiler binary
 bootstrap/  checked-in portable C for the compiler and the runtime
 builds/     self-host stages 0 through 3
+commands/   external commands built against the current compiler
 include/    links to runtime sources and stage-0 generated headers
 lib/        x2c runtime sources
 src/        x2c compiler sources
@@ -470,9 +471,8 @@ The modules under `src/` divide ownership as follows:
   the per-file translation loop, and output/exit policy;
 - `src/frontend.x` -- configured source stages, process translation support,
   and sequential unit Context/Type lifetimes;
-- `src/repl.x`, `src/repl-input.x`, `src/repl-session.x` -- terminal
-  interaction, inline editing and history, persistent submissions, and named
-  inspection over the frontend and evaluator;
+- `commands/repl/` -- terminal interaction, inline editing and history,
+  persistent submissions, and named inspection over the compiler session API;
 - `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
   target relationships, typed native build requests and incremental state,
   and host compile/archive/link actions;

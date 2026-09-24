@@ -1,1 +1,2 @@
 graph|experimental|Inspect x2c source graphs
+repl|shipped|Evaluate a supported x2c subset (experimental)

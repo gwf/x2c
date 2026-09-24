@@ -36,9 +36,6 @@ Functions and types exposed by each compiler module.
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
-| [`src/repl-input.x`](repl-input.md) | inline terminal editing for the x2c REPL. |
-| [`src/repl-session.x`](repl-session.md) | persistent compiler submissions and inspection. |
-| [`src/repl.x`](repl.md) | terminal client for persistent compiler submissions. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |

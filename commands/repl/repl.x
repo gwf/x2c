@@ -5,6 +5,10 @@
 #pragma once
 #include "cli.x"
 
+typedef struct ReplOptions {
+  int dump, stats, verbose_stats;
+} ReplOptions;
+
 #pragma private
 #include "repl-session.x"
 #include "repl-input.x"
@@ -327,7 +331,7 @@ static int _inspect(
 /** Runs the experimental REPL on stdin. Piped input continues after errors
     and exits with status one if any submission or command failed. Interactive
     errors leave the session usable; SIGINT retains its process-exit action. */
-int repl_run(CliRequest request) {
+int repl_run(CliRequest request, ReplOptions options) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
   ParsedUnit unit;
@@ -404,9 +408,9 @@ int repl_run(CliRequest request) {
     }
     pending += line + "\n";
     ReplResult result = session.submit(pending);
-    if (request.repl_dump && result.syntax)
+    if (options.dump && result.syntax)
       fprintf(stderr, "typed: %%%s\n", result.syntax.repr());
-    if (request.repl_dump && result.lowered)
+    if (options.dump && result.lowered)
       fprintf(stderr, "lowered: %s\n", result.lowered.repr());
     $let(unit.compiler.text, result.source) {
       foreach (Var entry, result.diagnostics)
@@ -431,10 +435,10 @@ int repl_run(CliRequest request) {
     }
     fflush(stdout);
   }
-  if (request.repl_stats || request.repl_verbose_stats)
+  if (options.stats || options.verbose_stats)
     _write_stats(
       Stderr, session, stats_pool, &machine_stats, stats_baseline,
-      request.repl_verbose_stats);
+      options.verbose_stats);
   if (pending.len()) { fputs("incomplete input at EOF\n", stderr); return 1; }
   return !interactive && failed;
 }

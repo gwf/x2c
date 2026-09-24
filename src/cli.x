@@ -27,7 +27,6 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int repl_dump, repl_stats, repl_verbose_stats;
   // The translation error limit; 0 reports every recoverable error.
   int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols;
@@ -67,7 +66,6 @@ enum {
   CLI_REMOVE    = 256,
   CLI_LIST      = 512,
   CLI_NEW       = 1024,
-  CLI_REPL      = 2048,
   // Commands that build native code from options on the command line.
   CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
@@ -93,8 +91,6 @@ static CliCommand cli_commands[] = {
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <new>,       CLI_NEW,       "Create a project that builds and runs" },
   { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
-  { <repl>,      CLI_REPL,
-    "Evaluate a supported x2c subset (experimental)" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from an APE binary" },
   { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
   { <install>,   CLI_INSTALL,   "Install a package into the home" },
@@ -106,7 +102,7 @@ static CliCommand cli_commands[] = {
 
 static CliOption cli_options[] = {
   { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
-    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW | CLI_REPL,
+    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW,
     <general>,
     "-h", NULL, "Show help and exit", 0, .alias = "--help" },
   { <version>, CLI_TOP, <global>, "-V", NULL,
@@ -136,12 +132,6 @@ static CliOption cli_options[] = {
     "Fail a unit that reports a warning", 1 },
   { <no-iface>, CLI_TRANSLATE, <source>, "--no-interfaces", NULL,
     "Collect every unit cold without reading .xi interfaces", 1 },
-  { <repl-dump>, CLI_REPL, <inspection>, "--dump", NULL,
-    "Print typed syntax and lowered Lisp for each submission", 0 },
-  { <repl-stats>, CLI_REPL, <inspection>, "--stats", NULL,
-    "Print Lisp execution counters", 0 },
-  { <vstats>, CLI_REPL, <inspection>, "--verbose-stats", NULL,
-    "Print detailed runtime statistics", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
   { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
@@ -201,7 +191,7 @@ static CliOption cli_options[] = {
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
   { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
-  { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_REPL, <source>,
+  { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--native-module", "<file>",
     "Load a native module for compile-time calls", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
@@ -597,19 +587,6 @@ static void _print_script_help(void) {
       scripts that no longer exist."));
 }
 
-static void _print_repl_help(void) {
-  puts(
-    $dedent(%"
-      Usage:
-        x2c repl [options]
-
-      Evaluate a supported x2c subset in an experimental interactive session.
-      Read submissions from standard input. Enter :help for session commands."));
-  _print_options(<repl>);
-  _print_help_row(
-    "@<file>", "Read additional options from a response file", 2);
-}
-
 static void _print_help(Symbol command) {
   $switch(command)
   {
@@ -619,7 +596,6 @@ static void _print_help(Symbol command) {
     case <run>:        _print_driver_help(command);
     case <new>:        _print_new_help();
     case <script>:     _print_script_help();
-    case <repl>:       _print_repl_help();
     case <bootstrap>:  _print_bootstrap_help();
     case <env>:        _print_env_help();
     case <install>:
@@ -929,9 +905,6 @@ static void _apply_option(
       else if (value == "never") c.color_mode = <never>;
       else x2c_driver_error(%"invalid color mode '$value'");
     case <debug>: c.debugging = 1;
-    case <repl-dump>: c.repl_dump = 1;
-    case <repl-stats>: c.repl_stats = 1;
-    case <vstats>: c.repl_verbose_stats = 1;
     case <out-dir>: c.out_dir = value;
     case <src-map>: c.source_map = 1;
     case <rebuild>: c.rebuild = 1;
@@ -1162,7 +1135,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!request.inputs || request.inputs.cdr()))
     x2c_driver_error(%"${name} requires exactly one operand");
-  if ((mask == CLI_LIST || mask == CLI_REPL) && request.inputs)
+  if (mask == CLI_LIST && request.inputs)
     x2c_driver_error(%"${name} accepts no operands");
   if (mask == CLI_SCRIPT && !request.inputs)
     x2c_driver_error("script requires a script file");

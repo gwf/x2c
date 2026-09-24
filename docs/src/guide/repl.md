@@ -1,6 +1,7 @@
 # Experimental REPL
 
-`x2c repl` evaluates a supported subset of x2c in a persistent session.
+`x2c repl` is a shipped external command that evaluates a supported subset
+of x2c in a persistent session.
 It uses the compiler's typed syntax and compile-time Lisp evaluator. It does
 not compile each submission to a native executable.
 
@@ -11,7 +12,8 @@ x2c repl --dump --stats
 ```
 
 No source file or checkout is needed when using an installed development
-build. The command reads standard input and accepts no file operands.
+build. The command reads standard input and accepts no file operands. It also
+runs directly as `x2c-repl` from the installation's `libexec/x2c` directory.
 
 ## Try a session
 

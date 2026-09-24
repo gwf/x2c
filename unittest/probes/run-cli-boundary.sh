@@ -9,6 +9,8 @@ FIXTURES="$ROOT/unittest/compiler-fixtures"
 rm -rf "$BUILD"
 mkdir -p "$BUILD/out" "$BUILD/a" "$BUILD/b" \
   "$BUILD/space dir" "$BUILD/includes/first" "$BUILD/includes/second"
+mkdir -p "$ROOT/builds/0/libexec"
+cp "$ROOT/commands/manifest.txt" "$ROOT/builds/0/libexec/commands.txt"
 
 "$X2C" --help >"$BUILD/top.help"
 "$X2C" translate --help >"$BUILD/translate.help"

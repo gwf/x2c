@@ -1,9 +1,17 @@
 # External commands
 
 > Status: active.
-> Gary approved this design on 2026-09-24. Phases 1 and 2 are implemented;
-> REPL migration and lint migration remain. This is the source of truth
+> Gary approved this design on 2026-09-24. Phases 1 and 2 are delivered;
+> phase 3 is implemented and undergoing publication checks. Lint remains.
+> This is the source of truth
 > for how external commands are built, found, run, tested, and shipped.
+
+Phase 3 gate measurement on the macOS checkout: a warm
+`make commands-check` took 34.54 s, and the shipped REPL test alone took
+1.94 s. The three compiler source translations in the prior gate totaled
+12.91 s; after removing the REPL they totaled 12.25 s. This does not
+establish a comparable offset for a new recurring check, so
+`commands-check` remains optional under decision 10.
 
 ## Goal
 

@@ -14,7 +14,6 @@
 #include "editor.x"
 #include "install.x"
 #include "script.x"
-#include "repl.x"
 #include "toolchain.x"
 #pragma private
 
@@ -625,8 +624,7 @@ int main(int argc, char **argv) {
   /* Reclaim command-owned Scope allocations and canonical values. */
   Context command = Context.open_isolated_named("compiler command");
   int result = request.command == <translate>
-    ? _run_translation(request, NULL, NULL)
-    : request.command == <repl> ? repl_run(request) : _run_build(request);
+    ? _run_translation(request, NULL, NULL) : _run_build(request);
   command.close();
   if (request.command == <script> && !result) result = script_run(request);
 #ifdef __COSMOPOLITAN__

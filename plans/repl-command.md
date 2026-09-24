@@ -3,7 +3,7 @@
 > Status: active.
 > The detailed plan for phase 3 of [external commands](external-commands.md),
 > written 2026-09-24. It starts after that plan's phases 1 and 2 land.
-> Nothing is implemented.
+> The migration is implemented and undergoing publication checks.
 
 ## Goal
 

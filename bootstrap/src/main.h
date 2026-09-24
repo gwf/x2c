@@ -13,7 +13,6 @@
 #include "editor.h"
 #include "install.h"
 #include "script.h"
-#include "repl.h"
 #include "toolchain.h"
 int main(int argc, char * * argv);
 

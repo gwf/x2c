@@ -314,9 +314,12 @@ void bootstrap_build_commands(Bootstrap b) {
   int linux = !uname(&host) && String.new(host.sysname) == "Linux";
   foreach (String name, names) {
     List sources = Path.glob(%"$prefix/commands/$name/*.x");
+    String build_dir = %"$commands_build/$name";
+    String output = %"$libexec/x2c-$name";
+    String src_dir = %"$prefix/src";
     Array arguments = %($compiler "build" "--plain" "--build-dir"
-      %"$commands_build/$name" "--output" %"$libexec/x2c-$name"
-      "--x-include-dir" $prefix "--x-include-dir" %"$prefix/src"
+      $build_dir "--output" $output
+      "--x-include-dir" $prefix "--x-include-dir" $src_dir
       "--c-include-dir" $headers);
     if (linux) {
       arguments.push("-Xlinker");
