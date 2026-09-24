@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find x2c Overengineering"
+  short_description: "Find live internal machinery worth deletion review"
+  default_prompt: "Use $find-x2c-overengineering to run one bounded, cumulative forensic audit of current src and lib code without editing production source."
