@@ -5072,7 +5072,7 @@ x2c_cleanup_leave(& _x2c_defer_record_5);
 }
 
 static List _empty_collection(Compiler c, Type target){
-  if(Sym_is_var_type(c -> sym, target)) return NULL; {
+  if(Sym_is_var_type(c -> sym, target)) return Compiler_convert_expression(c, _1634, target); {
     List literal;  List _x2c_macro_object_46 = _1643;  List _x2c_macro_cursor_46 = _x2c_macro_object_46;  Var _x2c_macro_cursor_output_46;  while(List_try_next(_x2c_macro_object_46, & _x2c_macro_cursor_46, & _x2c_macro_cursor_output_46)){
       literal = Var_list(_x2c_macro_cursor_output_46); {
         Type source = Var_type(List_cadr(literal));  if(List_equal(Type_list(Sym_resolve_key(c -> sym, target)), Type_list(Sym_resolve_key(c -> sym, source)))) return Compiler_convert_expression(c, literal, target);  List converted = _converter_call(c, literal, source, target);  if(List_truth(converted)) return converted;

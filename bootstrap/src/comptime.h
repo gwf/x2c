@@ -27,7 +27,7 @@ Var Compiler_lower_meta_initializer(Compiler c, Type type, int id, List initiali
 
 Var Compiler_lower_meta_expression(Compiler c, List expression);
 
-List Compiler_meta_value_expression(Compiler c, Type declared, Var value, int mutable_root);
+List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site);
 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
