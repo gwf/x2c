@@ -2133,7 +2133,7 @@ void * Scope_malloc_in(Scope *, size_t);
 FuncArg FuncArg_value(Var);
 Var Func_apply(Func, unsigned, const FuncArg *);
 Var Lisp_apply_values(void * storage, Var callable, const Var * values, int count){
-  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  if(Var_is_row(callable, 9, 7, 3)) return _call_lambda_slots(context -> lisp, Var_lambda(callable), values, count);  if(Var_is_row(callable, 9, 7, 1) && _special_id(context -> lisp, (Func) Var_pointer(callable)) < 0){
+  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  if(Var_is_row(callable, 9, 7, 3)) return _call_lambda_slots(context -> lisp, Var_lambda(callable), values, count);  if(Var_is_row(callable, 9, 7, 1) && _special_id(context -> lisp, Var_pointer(callable)) < 0){
     FuncArg * args = Scope_malloc_in(& context -> lisp -> scope, (count + 1) * sizeof(FuncArg)); {
   _x2c_defer_env_0 _x2c_defer_env_28 = {._x2c_defer_capture_0 =(const void *) & args};
   X2CCleanup _x2c_defer_record_0 = {
@@ -2143,7 +2143,7 @@ Var Lisp_apply_values(void * storage, Var callable, const Var * values, int coun
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
       for(int i = 0;  i < count;  i ++) args[i] = FuncArg_value(values[i]); {
-        Var _x2c_return_value_0 = Func_apply(((Func) Var_pointer(callable)), count, args); {
+        Var _x2c_return_value_0 = Func_apply((Var_pointer(callable)), count, args); {
           x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
         }
 
@@ -2157,7 +2157,7 @@ Var Lisp_apply_values(void * storage, Var callable, const Var * values, int coun
 }
 
 int Lisp_precall(void * storage, Var callable, List raw, Var * value){
-  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  Lisp lisp = context -> lisp;  LispEnv * env = _machine_env(context);  if(Var_is_row(callable, 9, 7, 1) && _special_id(lisp, (Func) Var_pointer(callable)) < 0) return 0;  if(Var_is_row(callable, 9, 7, 3)){
+  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  Lisp lisp = context -> lisp;  LispEnv * env = _machine_env(context);  if(Var_is_row(callable, 9, 7, 1) && _special_id(lisp, Var_pointer(callable)) < 0) return 0;  if(Var_is_row(callable, 9, 7, 3)){
     Lambda lambda = Var_lambda(callable);  if(! lambda -> macro && lambda -> auto_status == MACHINE_PREPARED && lambda -> auto_program) return 0;
   }
   * value = _apply(lisp, callable, raw, env);  return 1;
@@ -3435,7 +3435,7 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable){
 static Func _native_target(String name){
   Var target;
   if(! Map_try_get(lisp_native_targets, String_var(name), & target)) return NULL;
-  return(Func) Var_pointer(target);
+  return Var_pointer(target);
 }
 
 int Map_truth(Map);
@@ -5058,7 +5058,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
   if(! Var_is_row(callable, 9, 7, 1)){
     static const X2CErrorSite _x2c_error_site_56 = {.file = "../../lib/lisp.x",.function = "_apply",.line = 2938};  x2c_error_raise_n(& _x2c_error_site_56, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
-  Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0) return _apply_special(lisp, special, raw, env);  _expansion_native(lisp, function);  int count = List_len(raw);  FuncArg narrow[LISP_NATIVE_ARG_MAX];  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg)); {
+  Func function = Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0) return _apply_special(lisp, special, raw, env);  _expansion_native(lisp, function);  int count = List_len(raw);  FuncArg narrow[LISP_NATIVE_ARG_MAX];  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg)); {
     ExceptionFrame _x2c_exception_frame_1;  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
       unsigned volatile argc = 0; {
         Var volatile arg;  List _x2c_macro_object_27 = raw;  List _x2c_macro_cursor_27 = _x2c_macro_object_27;  Var _x2c_macro_cursor_output_28;  while(List_try_next(_x2c_macro_object_27, & _x2c_macro_cursor_27, & _x2c_macro_cursor_output_28)){
@@ -5105,7 +5105,7 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv * env){
   if(! Var_is_row(callable, 9, 7, 1)){
     static const X2CErrorSite _x2c_error_site_58 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2964};  x2c_error_raise_n(& _x2c_error_site_58, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
-  Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0){
+  Func function = Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0){
     if(special != LISP_APPLY){
       static const X2CErrorSite _x2c_error_site_59 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2968};  x2c_error_raise_n(& _x2c_error_site_59, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
     }

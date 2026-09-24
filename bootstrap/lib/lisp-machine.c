@@ -250,7 +250,7 @@ static void LispMachine__call(LispMachine m, int argc){
   else{
     FuncArg arguments[MACHINE_VALUE_MAX];
     for(int i = 0;  i < argc;  i ++) arguments[i] = FuncArg_value(m -> values[callable_at + 1 + i]);
-    result = Func_apply(((Func) Var_pointer(callable)), argc, arguments);
+    result = Func_apply((Var_pointer(callable)), argc, arguments);
     if(m -> stats) m -> stats -> native_calls ++;
   }
   for(int i = callable_at;  i < m -> value_count;  i ++) m -> values[i] =(Var){

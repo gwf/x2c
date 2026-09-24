@@ -3773,7 +3773,7 @@ void Compiler_add_native_module(String path, Map(* entry)(void)){
   Map targets = entry();  Map_setindex(native_modules, String_var(path), Map_var(targets));  Scope_pop();  String_try_own(path); {
     Var name, target;  Map _x2c_macro_object_21 = targets;  unsigned _x2c_macro_cursor_21 = 0;  Var _x2c_macro_cursor_output_25;  Var _x2c_macro_cursor_output_26;  while(Map_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_25, & _x2c_macro_cursor_output_26)){
       name = _x2c_macro_cursor_output_25;  target = _x2c_macro_cursor_output_26; {
-        String_try_own(Var_string(name));  List_try_own(Func_signature(((Func) Var_pointer(target))));
+        String_try_own(Var_string(name));  List_try_own(Func_signature((Var_pointer(target))));
       }
 
     }
@@ -3800,7 +3800,7 @@ static List _native_module_suppliers(String name){
 
 List List_search_replace(List, Var, Var);
 static int _native_meta_accepts(Var function, List signature){
-  if(! Var_is_row(function, 9, 7, 1)) return 0;  List target = Func_signature(((Func) Var_pointer(function)));
+  if(! Var_is_row(function, 9, 7, 1)) return 0;  List target = Func_signature((Var_pointer(function)));
   {
     List _x2c_match_expr = signature;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
