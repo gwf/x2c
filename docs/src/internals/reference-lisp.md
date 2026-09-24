@@ -170,7 +170,7 @@ its output alongside the existing examples. The optional differential checker
 builds both implementations and compares exit status, stdout, and stderr:
 
 ```sh
-python3 examples/programs/check-reference-lisp.py --build
+x2c script examples/programs/check-reference-lisp --build
 ```
 
 The corpus covers ordinary values, arithmetic, macros, capture, shadowing,

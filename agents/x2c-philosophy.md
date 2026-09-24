@@ -116,7 +116,7 @@ captures a value; by itself it does not establish that value's type.
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
-| Unit interfaces | verified | `interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity.sh` |
+| Unit interfaces | verified | `interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
@@ -619,7 +619,7 @@ file and reports an `emit` diagnostic. `run-header-cache.sh` covers merge
 order across a re-declared type, gensym consumption through anonymous
 aggregates, tampered-row liveness, stale-hash rejection, unreadable-include
 failure, out-of-home includes, and batch-vs-solo output parity;
-`run-artifact-atomicity.sh` covers repeatable and never-partial writes.
+`run-artifact-atomicity` covers repeatable and never-partial writes.
 
 ### Error transfer state
 

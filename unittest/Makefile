@@ -51,10 +51,10 @@ iter-benchmark:
 	./benchmarks/run-iter-hot-paths.sh
 
 scope-probes:
-	./probes/run-scope-shutdown.sh
+	$(X2C) script probes/run-scope-shutdown
 
 error-probes:
-	./probes/run-error-floor.sh
+	$(X2C) script probes/run-error-floor
 
 varops-probes:
 	./probes/run-varops-fatal.sh

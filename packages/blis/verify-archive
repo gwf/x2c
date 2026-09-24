@@ -1,0 +1,49 @@
+#!/usr/bin/env -S x2c script
+/*  verify-archive -- the built BLIS archive matches this platform's profile
+
+      verify-archive PROFILE-<system>-<machine>.json <blis prefix>
+
+    The Makefile calls this rather than spelling the comparisons out in a
+    recipe: a long continued recipe line is where Apple's make 3.81 on x86_64
+    loses bytes. tools/record-blis-profile.sh writes a profile.
+*/
+#include "json.x"
+
+static void _fail(String message) {
+  Stderr.printf("blis profile: %s\n", message);
+  exit(1);
+}
+
+if (args.len() < 2) {
+  Stderr.printf("usage: verify-archive <profile> <prefix>\n");
+  return 1;
+}
+(String profile_path, String prefix) = args;
+Path archive = Path.join(prefix, "lib/libblis.a");
+Path header = Path.join(prefix, "include/blis/blis.h");
+Map profile = Json.read_file(profile_path);
+
+String expected = profile["header_sha256"].str();
+File header_file = $auto(File.open(header, "rb"));
+String actual = header_file.sha256();
+if (actual != expected) _fail(%"blis.h is $actual, not $expected");
+
+Map recorded = profile["archive"];
+long members = %(ar -t $archive).job().lines().len();
+if (members != recorded["members"].integer())
+  _fail(%"$members members, not ${recorded["members"]}");
+
+Array symbols = [];
+foreach (String symbol, recorded["external_undefined_symbols"])
+  symbols.push(symbol);
+String undefined = "";
+foreach (String symbol, symbols.list_free().unique().sort())
+  undefined += symbol + "\n";
+Path script = Path.new(argv[0]).absolute().dirname()
+  .join("external-symbols.sh");
+String report = Diff.unified(undefined, %($script $archive).job().output(),
+                             profile_path, "external-symbols.sh");
+if (report) {
+  printf("%s", report);
+  return 1;
+}

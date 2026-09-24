@@ -159,7 +159,7 @@ its representation and compatibility rules. The optional comparison against
 the production Lisp is available with:
 
 ```sh
-python3 examples/programs/check-reference-lisp.py --build
+x2c script examples/programs/check-reference-lisp --build
 ```
 
 [programs/lisp.x](programs/lisp.x) is an interactive Lisp shell. Run it from

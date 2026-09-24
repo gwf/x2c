@@ -1,0 +1,90 @@
+#!/usr/bin/env -S x2c script
+/*  run-artifact-atomicity -- translation outputs are complete and repeatable
+
+    A translated unit publishes its interface beside its C, a repeated run
+    writes the same bytes, and a failed write replaces no output.
+*/
+#include "probe.x"
+
+static Path build;
+
+static void _fail(String message) =>
+  probe_fail(%"artifact atomicity failure: $message");
+
+static int _has_temporary(String directory) {
+  foreach (String name, build.join(directory).list_dir())
+    if (name.contains("tmp")) return 1;
+  return 0;
+}
+
+Path root = probe_root(argv[0]);
+String x2c = probe_env("X2C", root.join("builds/0/x2c"));
+build = probe_scratch(root, "artifact-atomicity");
+foreach (String directory, %("first" "second" "blocked" "partial"))
+  build.join(directory).make_dirs();
+Path probe = build.join("probe.x");
+probe.write_text("typedef struct ProbeRow { int value; } ProbeRow;\n"
+                 "int probe_value(ProbeRow row) { return row.value; }\n");
+
+/* A translated unit publishes its interface beside its C, and two complete
+   runs write the same bytes. */
+foreach (String directory, %("first" "second")) {
+  Path out = build.join(directory);
+  %($x2c translate --out-dir $out $probe).job().run();
+}
+Path interface = build.join("first/probe.xi");
+String written = interface.exists() ? interface.read_text() : NULL;
+if (!written) _fail("unit interface was not written");
+if (written != build.join("second/probe.xi").read_text())
+  _fail("repeated translations wrote different interfaces");
+if (!Regex.compile("(?m)^\\(interface 4 ").match(written))
+  _fail("interface lacks its version header");
+if (!written.contains("\"ProbeRow\""))
+  _fail("interface omits the unit's declarations");
+if (_has_temporary("first"))
+  _fail("a temporary interface file survived a successful write");
+
+/* A failed write replaces no output. The shell execs the compiler under its
+   own process id, so a dangling link at the C file's process-specific
+   sibling fails that write after the header's sibling was written. */
+Path partial = build.join("partial");
+partial.join("probe.h").write_text("old header\n");
+partial.join("probe.c").write_text("old source\n");
+String exec = "ln -s \"$1\" \"$2.$$\" && exec \"$3\" translate "
+              "--out-dir \"$4\" \"$5\"";
+Path dangling = build.join("missing/probe.c");
+Path sibling = partial.join("probe.c.tmp");
+Job failed = %(sh -c $exec sh $dangling $sibling $x2c $partial $probe).job()
+  .options({stderr: <capture>});
+if (!failed.status()) _fail("failed output write reported success");
+if (!failed.errors().contains("failed to write generated file"))
+  _fail("failed output write did not report its cause");
+if (partial.join("probe.h").read_text() != "old header\n")
+  _fail("a failed C write replaced the header");
+if (partial.join("probe.c").read_text() != "old source\n")
+  _fail("a failed C write replaced the C file");
+if (partial.join("probe.xi").exists())
+  _fail("a failed C write published the interface");
+if (_has_temporary("partial"))
+  _fail("a temporary output file survived a failed write");
+
+/* A failed rename leaves the earlier outputs complete and preserves whatever
+   already occupies its destination. A directory in the interface's place
+   makes the last rename fail after the header and C were replaced. */
+Path blocked = build.join("blocked");
+blocked.join("probe.xi").make_dirs();
+Job renamed = %($x2c translate --out-dir $blocked $probe).job()
+  .options({stderr: <capture>});
+if (!renamed.status()) _fail("blocked interface write reported success");
+if (!renamed.errors().contains("failed to write generated file"))
+  _fail("blocked interface write did not report its cause");
+if (!blocked.join("probe.xi").is_dir())
+  _fail("blocked interface write replaced the occupied path");
+if (build.join("first/probe.c").read_text() !=
+    blocked.join("probe.c").read_text())
+  _fail("generated C was not written before the interface");
+if (_has_temporary("blocked"))
+  _fail("a temporary output file survived a failed rename");
+
+printf("artifact atomicity: outputs are complete, repeatable, and never "
+       "partial\n");

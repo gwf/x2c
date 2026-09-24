@@ -200,10 +200,10 @@ verify-fixtures-update: build				## Rewrite compiler fixture output
 	$(MAKE) -C unittest update-compiler-fixtures
 
 proof-artifact-atomicity:				## Prove artifact updates are atomic
-	./unittest/probes/run-artifact-atomicity.sh
+	$(STAGE0_X2C) script unittest/probes/run-artifact-atomicity
 
 build-recovery: build					## Check incremental build recovery
-	./unittest/probes/run-build-recovery.sh
+	$(STAGE0_X2C) script unittest/probes/run-build-recovery
 
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh
@@ -212,7 +212,7 @@ proof-cold-collection: stage-2				## Check stage 2 against a cold translation
 	./tools/check-cold-collection.sh
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
-	./tools/check-conformance-coherence.sh
+	$(STAGE0_X2C) script tools/check-conformance-coherence
 
 check-native-modules: build				## Build, load, and reject native modules
 	./unittest/probes/run-native-modules.sh
