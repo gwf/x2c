@@ -107,6 +107,12 @@ int Compiler_native_module_loaded(String path);
 
 void Compiler_add_native_module(String path, Map(* entry)(void));
 
+String Compiler_load_native_module(String path);
+
+void Compiler_preload_native_module(String path);
+
+void Compiler_select_package_module(Compiler c, String name, String root, Token token);
+
 void Compiler_select_native_modules(List paths);
 
 int Compiler_supplies_native_meta(String name);

@@ -20,11 +20,11 @@
 
 #include "exception.h"
 
-static List _96, _95, _91, _90, _88, _86;
+static List _102, _101, _97, _96, _94, _92;
 
-static String _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _93, _84, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _63, _62, _60, _58, _56, _54, _52, _50, _48, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _8, _6, _5, _4, _3, _2, _1, _0;
+static String _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _99, _90, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _68, _67, _66, _65, _63, _62, _60, _58, _56, _54, _52, _50, _48, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _8, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _94, _92, _89, _87, _85, _83, _64, _61, _59, _57, _55, _53, _51, _49, _47, _27, _25, _23, _11, _9, _7;
+static Var _100, _98, _95, _93, _91, _89, _69, _64, _61, _59, _57, _55, _53, _51, _49, _47, _27, _25, _23, _11, _9, _7;
 
 #include <stdio.h>
 #include <sys/utsname.h>
@@ -95,14 +95,21 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _96)))
+_x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _102)))
 static Var _x2c_lambda_1(String field);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _96)))
+_x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _102)))
+typedef struct _x2c_lambda_context_0{
+  Var _x2c_lambda_capture_0;
+}
+_x2c_lambda_context_0;
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
@@ -194,61 +201,68 @@ __attribute__((constructor)) static void _file_init_(void){
   _63 = String_new("--build-dir");
   _64 = String_var(_63);
   _65 = String_new("/cc");
-  _66 = String_new(".native.rsp");
-  _67 = String_new("/SOURCE.json");
-  _68 = String_new(".json");
-  _69 = String_new("/.lock");
-  _70 = String_new(" exists and is not an installed package");
-  _71 = String_new(".previous");
-  _72 = String_new("/.install.%ld");
-  _73 = String_new("\'");
-  _74 = String_new("\' is not a package name");
-  _75 = String_new("\n");
-  _76 = String_new("unknown package spec \'");
-  _77 = String_new("the index has ");
-  _78 = String_new(" ");
-  _79 = String_new(", not the pinned ");
-  _80 = String_new("remove: no installed package \'");
-  _81 = String_new("remove: ");
-  _82 = String_new(" is not an installed package; remove it by hand");
-  _83 = Symbol_var(437126);
-  _84 = String_new("String");
-  _85 = String_var(_84);
-  _86 = cons(_85, NULL);
-  _87 = List_var(_86);
-  _88 = cons(_87, NULL);
-  _89 = List_var(_88);
-  _90 = cons(_89, NULL);
-  _91 = cons(_83, _90);
-  _92 = List_var(_91);
-  _93 = String_new("Var");
-  _94 = String_var(_93);
-  _95 = cons(_94, NULL);
-  _96 = cons(_92, _95);
-  _97 = String_new("http://");
-  _98 = String_new("https://");
-  _99 = String_new("file://");
-  _100 = String_new(" ");
-  _101 = String_new("#");
-  _102 = String_new("https://x2c-lang.dev/packages/index.txt");
-  _103 = String_new("index.txt");
-  _104 = String_new("x2c_version");
-  _105 = String_new(".x");
-  _106 = String_new(".xp");
-  _107 = String_new(".json");
-  _108 = String_new("dependency.json");
-  _109 = String_new("dependency-");
-  _110 = String_new(".c");
-  _111 = String_new("dependency_version");
-  _112 = String_new("version");
-  _113 = String_new(".install.");
-  _114 = String_new("package.tar.gz");
-  _115 = String_new("package");
-  _116 = String_new("install");
-  _117 = String_new("remove");
-  _118 = String_new("list");
-  _119 = String_new("sha256");
-  _120 = String_new(".");
+  _66 = String_new("native-meta \"");
+  _67 = String_new("__");
+  _68 = String_new("meta-module");
+  _69 = String_var(_68);
+  _70 = String_new(".module");
+  _71 = String_new("/module");
+  _72 = String_new(".native.rsp");
+  _73 = String_new("/SOURCE.json");
+  _74 = String_new(".json");
+  _75 = String_new("/.lock");
+  _76 = String_new(" exists and is not an installed package");
+  _77 = String_new(".previous");
+  _78 = String_new("/.install.%ld");
+  _79 = String_new("\'");
+  _80 = String_new("\' is not a package name");
+  _81 = String_new("\n");
+  _82 = String_new("unknown package spec \'");
+  _83 = String_new("the index has ");
+  _84 = String_new(" ");
+  _85 = String_new(", not the pinned ");
+  _86 = String_new("remove: no installed package \'");
+  _87 = String_new("remove: ");
+  _88 = String_new(" is not an installed package; remove it by hand");
+  _89 = Symbol_var(437126);
+  _90 = String_new("String");
+  _91 = String_var(_90);
+  _92 = cons(_91, NULL);
+  _93 = List_var(_92);
+  _94 = cons(_93, NULL);
+  _95 = List_var(_94);
+  _96 = cons(_95, NULL);
+  _97 = cons(_89, _96);
+  _98 = List_var(_97);
+  _99 = String_new("Var");
+  _100 = String_var(_99);
+  _101 = cons(_100, NULL);
+  _102 = cons(_98, _101);
+  _103 = String_new("http://");
+  _104 = String_new("https://");
+  _105 = String_new("file://");
+  _106 = String_new(" ");
+  _107 = String_new("#");
+  _108 = String_new("https://x2c-lang.dev/packages/index.txt");
+  _109 = String_new("index.txt");
+  _110 = String_new("x2c_version");
+  _111 = String_new(".x");
+  _112 = String_new(".xp");
+  _113 = String_new(".json");
+  _114 = String_new("dependency.json");
+  _115 = String_new("dependency-");
+  _116 = String_new(".c");
+  _117 = String_new(".xi");
+  _118 = String_new("dependency_version");
+  _119 = String_new("version");
+  _120 = String_new(".install.");
+  _121 = String_new("package.tar.gz");
+  _122 = String_new("package");
+  _123 = String_new("install");
+  _124 = String_new("remove");
+  _125 = String_new("list");
+  _126 = String_new("sha256");
+  _127 = String_new(".");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -382,7 +396,7 @@ static List _files_with(String directory, String suffix){
 int String_startswith(String, String);
 
 static int _remote(String spec){
-  return String_startswith(spec, _97) || String_startswith(spec, _98) || String_startswith(spec, _99);
+  return String_startswith(spec, _103) || String_startswith(spec, _104) || String_startswith(spec, _105);
 }
 
 static String _fetch(String url, String directory, String name){
@@ -433,8 +447,8 @@ List install_rows(String text){
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       line = Var_string(_x2c_macro_cursor_output_1);
       {
-        List fields = List_filter(String_split(line, _100), _x2c_func_handle_1);
-        if(! String_startswith(line, _101) && List_len(fields) == 6) Array_push(rows, List_var(fields));
+        List fields = List_filter(String_split(line, _106), _x2c_func_handle_1);
+        if(! String_startswith(line, _107) && List_len(fields) == 6) Array_push(rows, List_var(fields));
       }
 
     }
@@ -452,8 +466,8 @@ List List_nth_cdr(List, int);
 int List_truth(List);
 
 static List _index_row(CliRequest request, String name, String work){
-  String location = String_truth(request -> index) ? request -> index : _102;
-  String path = _remote(location) ? _fetch(location, work, _103) : location;
+  String location = String_truth(request -> index) ? request -> index : _108;
+  String path = _remote(location) ? _fetch(location, work, _109) : location;
   String platform = _platform();
   String volatile text = NULL;
   List source = NULL;
@@ -581,7 +595,7 @@ String cli_version(void);
 int Path_is_file(Path);
 
 static void _check_bundle(CliRequest request, String package, String name){
-  String built = _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_29), NULL))), _104);
+  String built = _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_29), NULL))), _110);
   String current = cli_version();
   if(! String_truth(built)) _error(String_join(NULL, cons(String_var(_30), cons(String_var(name), cons(String_var(_31), NULL)))));
   if(! String_equal(built, current) && ! request -> force) _error(String_join(NULL, cons(String_var(_30), cons(String_var(name), cons(String_var(_32), cons(String_var(built), cons(String_var(_33), cons(String_var(current), cons(String_var(_34), NULL)))))))));
@@ -598,6 +612,10 @@ String x2c_get_executable(void);
 
 Path Path_dirname(Path);
 
+int List_any(List, Func);
+
+Func Func_new_context(FuncAdapter, List, const void *, size_t);
+
 void Path_write_text(Path, String);
 
 static void _build_source(String package, String name, String spec){
@@ -610,7 +628,7 @@ static void _build_source(String package, String name, String spec){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_1 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_1);
   }
-  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) units = List_append(_files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _105), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _106));
+  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) units = List_append(_files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _111), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _112));
   else {x2c_exception_landed(& _x2c_exception_frame_3);
   {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
@@ -639,12 +657,12 @@ x2c_exception_leave(& _x2c_exception_frame_3);
 if(! List_contains(units, String_var(String_join(NULL, cons(String_var(package), cons(String_var(_39), cons(String_var(name), cons(String_var(_40), NULL))))))) && ! List_contains(units, String_var(String_join(NULL, cons(String_var(package), cons(String_var(_39), cons(String_var(name), cons(String_var(_41), NULL)))))))) _error(String_join(NULL, cons(String_var(spec), cons(String_var(_42), cons(String_var(name), cons(String_var(_43), NULL))))));
 {
   String manifest;
-  List _x2c_macro_object_3 = _files_with(package, _107);
+  List _x2c_macro_object_3 = _files_with(package, _113);
   List _x2c_macro_cursor_3 = _x2c_macro_object_3;
   Var _x2c_macro_cursor_output_3;
   while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
     manifest = Var_string(_x2c_macro_cursor_output_3);
-    if(String_endswith(manifest, _108) || String_startswith(Path_stem(manifest), _109)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_44), NULL))));
+    if(String_endswith(manifest, _114) || String_startswith(Path_stem(manifest), _115)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_44), NULL))));
   }
 
 }
@@ -681,15 +699,23 @@ x2c_exception_leave(& _x2c_exception_frame_4);
 }
 Path_make_dirs(builds);
 _run(List_append(cons(String_var(x2c), cons(_47, cons(_49, cons(String_var(builds), cons(_51, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL)))), cons(_53, cons(String_var(Path_dirname(package)), NULL)))))))), units), "translate");
-List inputs = List_append(_files_with(builds, _110), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _110));
+List inputs = List_append(_files_with(builds, _116), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _116));
 _run(List_append(cons(String_var(x2c), cons(_55, cons(_57, cons(_59, cons(_61, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_62), cons(String_var(name), cons(String_var(_36), NULL)))))), cons(_64, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_65), NULL)))), NULL)))))))), inputs), "build");
-Path_write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_5), cons(String_var(name), cons(String_var(_66), NULL))))), NULL);
+String row = String_join(NULL, cons(String_var(_66), cons(String_var(name), cons(String_var(_67), NULL))));
+if(List_any(_files_with(builds, _117), ({
+  Var _x2c_lambda_capture_value_0 = String_var(row);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    _x2c_lambda_capture_value_0
+  }
+  ;  Func_new_context(_x2c_lambda_2, _102, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+}
+))) _run(List_append(List_append(cons(String_var(x2c), cons(_55, cons(_57, cons(_69, cons(_61, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_5), cons(String_var(name), cons(String_var(_70), NULL)))))), cons(_64, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_71), NULL)))), cons(_51, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL)))), cons(_53, cons(String_var(Path_dirname(package)), NULL)))))))))))), units), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL))), _116)), "module build");
+Path_write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_5), cons(String_var(name), cons(String_var(_72), NULL))))), NULL);
 }
 
 int Path_exists(Path);
 
 static String _installed_kind(String package){
-  return Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_29), NULL)))) ? _16 : Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_67), NULL)))) ? _17 : String_new(NULL);
+  return Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_29), NULL)))) ? _16 : Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_73), NULL)))) ? _17 : String_new(NULL);
 }
 
 String String_upper(String);
@@ -697,13 +723,13 @@ String String_upper(String);
 static String _installed_version(String package){
   String kind = _installed_kind(package);
   if(! String_truth(kind)) return NULL;
-  return _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_5), cons(String_var(String_upper(kind)), cons(String_var(_68), NULL))))), String_equal(kind, _16) ? _111 : _112);
+  return _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_5), cons(String_var(String_upper(kind)), cons(String_var(_74), NULL))))), String_equal(kind, _16) ? _118 : _119);
 }
 
 int file_lock(Path, int);
 
 static String _locked_packages(String command, int quiet){
-  Path packages = _home_packages(command), lock = String_join(NULL, cons(String_var(packages), cons(String_var(_69), NULL)));
+  Path packages = _home_packages(command), lock = String_join(NULL, cons(String_var(packages), cons(String_var(_75), NULL)));
   if(_packages_lock >= 0) return packages;
   {
     ExceptionFrame _x2c_exception_frame_5;
@@ -749,8 +775,8 @@ void Path_move_to(Path, Path);
 static void _publish(String staged, String packages, String name){
   Path target = String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL))));
   if(Path_exists(target)){
-    if(! String_truth(_installed_kind(target))) _error(String_join(NULL, cons(String_var(target), cons(String_var(_70), NULL))));
-    Path_move_to(target, String_join(NULL, cons(String_var(staged), cons(String_var(_71), NULL))));
+    if(! String_truth(_installed_kind(target))) _error(String_join(NULL, cons(String_var(target), cons(String_var(_76), NULL))));
+    Path_move_to(target, String_join(NULL, cons(String_var(staged), cons(String_var(_77), NULL))));
   }
   Path_move_to(staged, target);
 }
@@ -765,11 +791,11 @@ static String _work_directory(String packages){
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
       name = Var_string(_x2c_macro_cursor_output_4);
-      if(String_startswith(name, _113)) Path_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL)))));
+      if(String_startswith(name, _120)) Path_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL)))));
     }
 
   }
-  Path work = String_printf(String_join(NULL, cons(String_var(packages), cons(String_var(_72), NULL))), (long) getpid());
+  Path work = String_printf(String_join(NULL, cons(String_var(packages), cons(String_var(_78), NULL))), (long) getpid());
   Path_make_dirs(work);
   _staging = work;
   return work;
@@ -791,13 +817,13 @@ Var Map_var(Map);
 
 static String _install(CliRequest request, String spec, String source, String url, String sha256, String version, String packages, String work){
   if(String_truth(url)){
-    source = _fetch(url, work, _114);
+    source = _fetch(url, work, _121);
     _verify(source, sha256);
   }
   else if(String_truth(sha256) && ! Path_is_dir(source)) _verify(source, sha256);
   String package = Path_is_dir(source) ? source : _unpack(source, work);
   String name = Path_basename(package);
-  if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_73), cons(String_var(name), cons(String_var(_74), NULL)))));
+  if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_79), cons(String_var(name), cons(String_var(_80), NULL)))));
   String staged = String_join(NULL, cons(String_var(work), cons(String_var(_5), cons(String_var(name), NULL))));
   {
     ExceptionFrame _x2c_exception_frame_6;
@@ -833,10 +859,10 @@ if(Path_exists(String_join(NULL, cons(String_var(staged), cons(String_var(_29), 
 else{
   _build_source(staged, name, spec);
   if(! String_truth(version)) version = _installed_version(String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL)))));
-  Map record = Map_update_n(Map_new(), 3, String_var(_115), String_var(name), String_var(_17), String_truth(url) ? String_var(url) : String_var(Path_absolute(spec)), String_var(_104), String_var(cli_version()));
-  if(String_truth(version)) Map_setindex(record, String_var(_112), String_var(version));
-  if(String_truth(sha256)) Map_setindex(record, String_var(_119), String_var(sha256));
-  Path_write_text(String_join(NULL, cons(String_var(staged), cons(String_var(_67), NULL))), String_join(NULL, cons(String_var(Var_pretty_json(Map_var(record))), cons(String_var(_75), NULL))));
+  Map record = Map_update_n(Map_new(), 3, String_var(_122), String_var(name), String_var(_17), String_truth(url) ? String_var(url) : String_var(Path_absolute(spec)), String_var(_110), String_var(cli_version()));
+  if(String_truth(version)) Map_setindex(record, String_var(_119), String_var(version));
+  if(String_truth(sha256)) Map_setindex(record, String_var(_126), String_var(sha256));
+  Path_write_text(String_join(NULL, cons(String_var(staged), cons(String_var(_73), NULL))), String_join(NULL, cons(String_var(Var_pretty_json(Map_var(record))), cons(String_var(_81), NULL))));
 }
 _publish(staged, packages, name);
 if(! request -> quiet) fprintf(stderr, "x2c: installed %s/%s\n", packages, name);
@@ -846,7 +872,7 @@ return name;
 int install_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   String spec = Var_string(List_car(request -> inputs));
-  String packages = _locked_packages(_116, request -> quiet);
+  String packages = _locked_packages(_123, request -> quiet);
   Path work = _work_directory(packages);
   {
 
@@ -868,7 +894,7 @@ int install_command(CliRequest request){
       url = Var_string(List_car(List_nth_cdr(row, 4)));
       sha256 = Var_string(List_car(List_nth_cdr(row, 5)));
     }
-    else _error(String_join(NULL, cons(String_var(_76), cons(String_var(spec), cons(String_var(_73), NULL)))));
+    else _error(String_join(NULL, cons(String_var(_82), cons(String_var(spec), cons(String_var(_79), NULL)))));
     (void) _install(request, spec, source, url, sha256, version, packages, work);
     {
       int _x2c_return_value_1 = 0;
@@ -887,12 +913,12 @@ int install_command(CliRequest request){
 
 String install_version(String name){
   if(! _init_guard_) _file_init_();
-  return _installed_version(String_join(NULL, cons(String_var(_home_packages(_116)), cons(String_var(_5), cons(String_var(name), NULL)))));
+  return _installed_version(String_join(NULL, cons(String_var(_home_packages(_123)), cons(String_var(_5), cons(String_var(name), NULL)))));
 }
 
 List install_require(CliRequest request, String name, String version, List locked){
   if(! _init_guard_) _file_init_();
-  String packages = _locked_packages(_116, request -> quiet);
+  String packages = _locked_packages(_123, request -> quiet);
   Path work = _work_directory(packages);
   {
 
@@ -904,7 +930,7 @@ List install_require(CliRequest request, String name, String version, List locke
   {
     List row = List_truth(locked) ? locked : _index_row(request, name, work);
     String resolved = Var_string(List_car(List_nth_cdr(row, 1)));
-    if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_77), cons(String_var(name), cons(String_var(_78), cons(String_var(resolved), cons(String_var(_79), cons(String_var(version), NULL))))))));
+    if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_83), cons(String_var(name), cons(String_var(_84), cons(String_var(resolved), cons(String_var(_85), cons(String_var(version), NULL))))))));
     if(! String_equal(_installed_version(String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL))))), version))(void) _install(request, name, NULL, Var_string(List_car(List_nth_cdr(row, 4))), Var_string(List_car(List_nth_cdr(row, 5))), resolved, packages, work);
     {
       List _x2c_return_value_2 = row;
@@ -922,17 +948,17 @@ List install_require(CliRequest request, String name, String version, List locke
 }
 
 static void _check_removable(String target, String name){
-  if(! Path_exists(target)) x2c_driver_error(String_join(NULL, cons(String_var(_80), cons(String_var(name), cons(String_var(_73), NULL)))));
-  if(! String_truth(_installed_kind(target))) x2c_driver_error(String_join(NULL, cons(String_var(_81), cons(String_var(target), cons(String_var(_82), NULL)))));
+  if(! Path_exists(target)) x2c_driver_error(String_join(NULL, cons(String_var(_86), cons(String_var(name), cons(String_var(_79), NULL)))));
+  if(! String_truth(_installed_kind(target))) x2c_driver_error(String_join(NULL, cons(String_var(_87), cons(String_var(target), cons(String_var(_88), NULL)))));
 }
 
 int remove_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   String name = Var_string(List_car(request -> inputs));
-  String target = String_join(NULL, cons(String_var(_home_packages(_117)), cons(String_var(_5), cons(String_var(name), NULL))));
-  if(! String_is_identifier(name)) x2c_driver_error(String_join(NULL, cons(String_var(_80), cons(String_var(name), cons(String_var(_73), NULL)))));
+  String target = String_join(NULL, cons(String_var(_home_packages(_124)), cons(String_var(_5), cons(String_var(name), NULL))));
+  if(! String_is_identifier(name)) x2c_driver_error(String_join(NULL, cons(String_var(_86), cons(String_var(name), cons(String_var(_79), NULL)))));
   _check_removable(target, name);
-  _locked_packages(_117, request -> quiet);
+  _locked_packages(_124, request -> quiet);
   {
 
   X2CCleanup _x2c_defer_record_3 = {
@@ -990,7 +1016,7 @@ x2c_cleanup_leave(& _x2c_defer_record_3);
 
 int list_command(CliRequest request){
   if(! _init_guard_) _file_init_();
-  String packages = _home_packages(_118);
+  String packages = _home_packages(_125);
   {
     String name;
     List _x2c_macro_object_5 = Path_is_dir(packages) ? _entries(packages) : NULL;
@@ -1014,7 +1040,7 @@ int list_command(CliRequest request){
 Var int_var(int);
 
 static Var _x2c_lambda_0(String name){
-  return int_var(! String_startswith(name, _120));
+  return int_var(! String_startswith(name, _127));
   ;
 }
 
@@ -1034,6 +1060,17 @@ static Var _x2c_lambda_1(String field){
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
   return _x2c_lambda_1(a0);
+  ;
+}
+
+const void * Func_context(Func);
+
+int String_contains(String, String);
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  String path = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return int_var(String_contains(Path_read_text(path), Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0)));
   ;
 }
 

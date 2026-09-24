@@ -8,14 +8,12 @@
 
 #include "exception.h"
 
-static List _66, _65, _61, _60, _58, _56, _51, _50, _49, _48, _33, _32, _27, _26, _25, _18;
+static List _57, _56, _52, _51, _49, _47, _43, _42, _41, _40, _25, _24, _19, _18, _17, _10;
 
-static String _75, _74, _73, _72, _71, _70, _69, _68, _67, _63, _54, _52, _46, _44, _42, _40, _39, _38, _37, _35, _34, _30, _28, _23, _21, _19, _16, _15, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _66, _65, _64, _63, _62, _61, _60, _59, _58, _54, _45, _38, _36, _34, _32, _31, _30, _29, _27, _26, _22, _20, _15, _13, _11, _8, _7, _5, _4, _3, _2, _1, _0;
 
-static Var _64, _62, _59, _57, _55, _53, _47, _45, _43, _41, _36, _31, _29, _24, _22, _20, _17, _14;
+static Var _55, _53, _50, _48, _46, _44, _39, _37, _35, _33, _28, _23, _21, _16, _14, _12, _9, _6;
 
-#include <dlfcn.h>
-#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,10 +31,6 @@ __attribute__((constructor)) static void _file_init_(void);
 static int _source_lines(String text);
 
 static Token _first_preprocessor_token(Compiler compiler);
-
-static void _check_module_stamp(String path);
-
-static String _load_native_module(String path);
 
 static String _script_text(String text);
 
@@ -58,7 +52,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _66)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _57)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -78,82 +72,73 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("cannot read the running compiler to check native module \'");
-  _1 = String_new("\'");
-  _2 = String_new("cannot read native module \'");
-  _3 = String_new("\': ");
-  _4 = String_new("not an x2c native module: ");
-  _5 = String_new("native module \'");
-  _6 = String_new("\' was built by another compiler; rebuild it");
-  _7 = String_new("cannot load native module \'");
-  _8 = String_new("#include \"scripting.x\"");
-  _9 = String_new("");
-  _10 = String_new("/");
-  _11 = String_new("/lib");
-  _12 = String_new("/x2c.x");
-  _13 = String_new("stage: driver");
+  _0 = String_new("#include \"scripting.x\"");
+  _1 = String_new("");
+  _2 = String_new("/");
+  _3 = String_new("/lib");
+  _4 = String_new("/x2c.x");
+  _5 = String_new("stage: driver");
+  _6 = String_var(_5);
+  _7 = String_new("file: ");
+  _8 = String_new("reason: cannot open");
+  _9 = String_var(_8);
+  _10 = cons(_9, NULL);
+  _11 = String_new("the host preprocessor does not keep the indentation, so");
+  _12 = String_var(_11);
+  _13 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
   _14 = String_var(_13);
-  _15 = String_new("file: ");
-  _16 = String_new("reason: cannot open");
-  _17 = String_var(_16);
-  _18 = cons(_17, NULL);
-  _19 = String_new("the host preprocessor does not keep the indentation, so");
-  _20 = String_var(_19);
-  _21 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read");
-  _22 = String_var(_21);
-  _23 = String_new("an indented unit");
-  _24 = String_var(_23);
-  _25 = cons(_24, NULL);
-  _26 = cons(_22, _25);
-  _27 = cons(_20, _26);
-  _28 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
-  _29 = String_var(_28);
-  _30 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
-  _31 = String_var(_30);
-  _32 = cons(_31, NULL);
-  _33 = cons(_29, _32);
-  _34 = String_new("/lib/x2c.x");
-  _35 = String_new("stage: preprocess");
-  _36 = String_var(_35);
-  _37 = String_new("status: ");
-  _38 = String_new("<repl>");
-  _39 = String_new("/lib/meta.x");
-  _40 = String_new("x2c_expr_ident");
-  _41 = String_var(_40);
-  _42 = String_new("x2c_expr_index");
-  _43 = String_var(_42);
-  _44 = String_new("x2c_expr_call");
-  _45 = String_var(_44);
-  _46 = String_new("x2c_expr_cast");
-  _47 = String_var(_46);
-  _48 = cons(_47, NULL);
-  _49 = cons(_45, _48);
-  _50 = cons(_43, _49);
-  _51 = cons(_41, _50);
-  _52 = String_new("x2c-module-stamp:");
-  _53 = Symbol_var(437126);
-  _54 = String_new("String");
+  _15 = String_new("an indented unit");
+  _16 = String_var(_15);
+  _17 = cons(_16, NULL);
+  _18 = cons(_14, _17);
+  _19 = cons(_12, _18);
+  _20 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
+  _21 = String_var(_20);
+  _22 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
+  _23 = String_var(_22);
+  _24 = cons(_23, NULL);
+  _25 = cons(_21, _24);
+  _26 = String_new("/lib/x2c.x");
+  _27 = String_new("stage: preprocess");
+  _28 = String_var(_27);
+  _29 = String_new("status: ");
+  _30 = String_new("<repl>");
+  _31 = String_new("/lib/meta.x");
+  _32 = String_new("x2c_expr_ident");
+  _33 = String_var(_32);
+  _34 = String_new("x2c_expr_index");
+  _35 = String_var(_34);
+  _36 = String_new("x2c_expr_call");
+  _37 = String_var(_36);
+  _38 = String_new("x2c_expr_cast");
+  _39 = String_var(_38);
+  _40 = cons(_39, NULL);
+  _41 = cons(_37, _40);
+  _42 = cons(_35, _41);
+  _43 = cons(_33, _42);
+  _44 = Symbol_var(437126);
+  _45 = String_new("String");
+  _46 = String_var(_45);
+  _47 = cons(_46, NULL);
+  _48 = List_var(_47);
+  _49 = cons(_48, NULL);
+  _50 = List_var(_49);
+  _51 = cons(_50, NULL);
+  _52 = cons(_44, _51);
+  _53 = List_var(_52);
+  _54 = String_new("Var");
   _55 = String_var(_54);
   _56 = cons(_55, NULL);
-  _57 = List_var(_56);
-  _58 = cons(_57, NULL);
-  _59 = List_var(_58);
-  _60 = cons(_59, NULL);
-  _61 = cons(_53, _60);
-  _62 = List_var(_61);
-  _63 = String_new("Var");
-  _64 = String_var(_63);
-  _65 = cons(_64, NULL);
-  _66 = cons(_62, _65);
-  _67 = String_new("\n");
-  _68 = String_new("/");
-  _69 = String_new("cannot read input file");
-  _70 = String_new("#!");
-  _71 = String_new("indented units use the default symbol collection");
-  _72 = String_new("script units use the default symbol collection");
-  _73 = String_new("failed to run C preprocessor");
-  _74 = String_new("x2c_");
-  _75 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
+  _57 = cons(_53, _56);
+  _58 = String_new("\n");
+  _59 = String_new("/");
+  _60 = String_new("cannot read input file");
+  _61 = String_new("#!");
+  _62 = String_new("indented units use the default symbol collection");
+  _63 = String_new("script units use the default symbol collection");
+  _64 = String_new("failed to run C preprocessor");
+  _65 = String_new("x2c_");
+  _66 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
   _x2c_static_initialize_0();
 }
 
@@ -173,60 +158,6 @@ static int _source_lines(String text){
 static Token _first_preprocessor_token(Compiler compiler){
   for(Token token = compiler -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;
   return compiler -> token;
-}
-
-String build_module_stamp(void);
-
-void x2c_driver_error(const char *);
-
-String String_new(const char *);
-
-void * Scope_malloc(size_t);
-
-void Scope_free(void *);
-
-static void _check_module_stamp(String path){
-  String expected = build_module_stamp();
-  if(! String_truth(expected)) x2c_driver_error(String_join(NULL, cons(String_var(_0), cons(String_var(path), cons(String_var(_1), NULL)))));
-  File input = fopen(path, "rb");
-  if(! input) x2c_driver_error(String_join(NULL, cons(String_var(_2), cons(String_var(path), cons(String_var(_3), cons(String_var(String_new(strerror(errno))), NULL))))));
-  fseek(input, 0, SEEK_END);
-  long end = ftell(input);
-  rewind(input);
-  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);
-  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
-  File_close(input);
-  String marker = _52;
-  int stamps = 0, current = 0, width = String_len(expected);
-  for(size_t i = 0;  i + String_len(marker) <= size;  i ++) if(! memcmp(data + i, marker, String_len(marker))){
-    stamps ++;
-    current = i + width <= size && ! memcmp(data + i, expected, width);
-  }
-  Scope_free(data);
-  if(stamps == 1 && current) return;
-  if(! stamps) x2c_driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(path), NULL))));
-  x2c_driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(path), cons(String_var(_6), NULL)))));
-}
-
-Path Path_absolute(Path);
-
-int Compiler_native_module_loaded(String);
-
-void Compiler_add_native_module(String, Map(*)(void));
-
-static String _load_native_module(String path){
-#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
-  x2c_driver_error("native modules are not supported on this platform");
-#endif
-  String absolute = Path_absolute(path);
-  if(Compiler_native_module_loaded(absolute)) return absolute;
-  _check_module_stamp(path);
-  void * handle = dlopen(absolute, RTLD_NOW | RTLD_LOCAL);
-  if(! handle) x2c_driver_error(String_join(NULL, cons(String_var(_7), cons(String_var(path), cons(String_var(_3), cons(String_var(String_new(dlerror())), NULL))))));
-  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");
-  if(! entry) x2c_driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(path), NULL))));
-  Compiler_add_native_module(absolute, entry);
-  return absolute;
 }
 
 void interface_configure(String, int);
@@ -262,8 +193,8 @@ Frontend Frontend_new(CliRequest request){
 int String_find(String, String);
 
 static String _script_text(String text){
-  int end = String_find(text, _67);
-  return String_join(NULL, cons(String_var(_8), cons(String_var(end < 0 ? _9 : String_getslice(text, end, -2147483648, 1)), NULL)));
+  int end = String_find(text, _58);
+  return String_join(NULL, cons(String_var(_0), cons(String_var(end < 0 ? _1 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
 int String_startswith(String, String);
@@ -288,28 +219,30 @@ int Compiler_read_source(Compiler, String, volatile String *);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
+String String_new(const char *);
+
 void Compiler_tokenize(Compiler, char *);
 
 int Compiler_defines_main(Compiler);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename){
   Compiler c = unit -> compiler;
-  if(String_startswith(filename, _68)){
-    String canonical = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_dirname(filename))), cons(String_var(_10), cons(String_var(Path_basename(filename)), NULL))));
+  if(String_startswith(filename, _59)){
+    String canonical = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_dirname(filename))), cons(String_var(_2), cons(String_var(Path_basename(filename)), NULL))));
     if(! String_equal(home_portable_path(canonical), canonical)) filename = canonical;
   }
   c -> filename = filename;
   char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
-  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_11), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_12), NULL)));
+  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_3), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_4), NULL)));
   int source_resolved = realpath(filename, source_path) != NULL;
   int lib_resolved = realpath(lib, lib_path) != NULL;
   c -> prelude = !(source_resolved && realpath(runtime, runtime_path) && ! strcmp(source_path, runtime_path));
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = NULL;
-  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _69, NULL, cons(_14, cons(String_var(String_join(NULL, cons(String_var(_15), cons(String_var(filename), NULL)))), _18)));
-  if(String_truth(text) && String_startswith(text, _70)){
-    int end = String_find(text, _67);
+  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _60, NULL, cons(_6, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(filename), NULL)))), _10)));
+  if(String_truth(text) && String_startswith(text, _61)){
+    int end = String_find(text, _58);
     ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
     script -> path = source_resolved ? String_new(source_path) : filename;
     script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
@@ -323,6 +256,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 }
 
 List CliRequest_package_roots(CliRequest);
+
+Path Path_absolute(Path);
 
 String x2c_package_directory(List, String);
 
@@ -374,20 +309,20 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(c -> layout) Compiler_report_error(c, 306819428, _71, _first_preprocessor_token(c), _27);
-  if(c -> script) Compiler_report_error(c, 306819428, _72, _first_preprocessor_token(c), _33);
+  if(c -> layout) Compiler_report_error(c, 306819428, _62, _first_preprocessor_token(c), _19);
+  if(c -> script) Compiler_report_error(c, 306819428, _63, _first_preprocessor_token(c), _25);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_34), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_26), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, runtime, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
-    List notes = cons(_36, cons(String_var(String_join(NULL, cons(String_var(_37), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _73, _first_preprocessor_token(c), notes);
+    List notes = cons(_28, cons(String_var(String_join(NULL, cons(String_var(_29), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _64, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -468,7 +403,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
       _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, unit, filename);
     }
     else{
-      compiler -> filename = _38;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, String_truth(session_source) ? session_source : "$(begin)");
+      compiler -> filename = _30;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, String_truth(session_source) ? session_source : "$(begin)");
     }
 
   }
@@ -537,7 +472,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   session.request = & request;
   frontend = & session;
   ParsedUnit unit;
-  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_39), NULL)));
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_31), NULL)));
   int started = _start(frontend, path, & unit, 1, NULL);
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
@@ -552,7 +487,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   {
     {
       String name;
-      List _x2c_macro_object_1 = _51;
+      List _x2c_macro_object_1 = _43;
       List _x2c_macro_cursor_1 = _x2c_macro_object_1;
       Var _x2c_macro_cursor_output_1;
       while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
@@ -598,7 +533,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
         name = Var_string(_x2c_macro_item_3);
         {
           Var function;
-          if(String_startswith(name, _74) && Lisp_try_get(shared, name, & function)) Compiler_bind_meta_operation(shared, name, function);
+          if(String_startswith(name, _65) && Lisp_try_get(shared, name, & function)) Compiler_bind_meta_operation(shared, name, function);
         }
 
       }
@@ -758,7 +693,7 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
 
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, NULL, unit, 0, _75) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
+  return _start(frontend, NULL, unit, 0, _66) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
 }
 
 void Compiler_free_lisp(Compiler);
@@ -781,8 +716,10 @@ void ParsedUnit_close(ParsedUnit * unit){
   ;
 }
 
+String Compiler_load_native_module(String);
+
 static Var _x2c_lambda_0(String path){
-  return String_var(_load_native_module(path));
+  return String_var(Compiler_load_native_module(path));
   ;
 }
 

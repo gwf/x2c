@@ -54,6 +54,8 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok);
 
 String x2c_compiler_identity(void);
 
+String build_module_stamp(void);
+
 long worker_fork(void);
 
 _Noreturn void worker_exit(int status);
