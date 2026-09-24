@@ -28,7 +28,7 @@
 - every section under "Partial contracts and open decisions" in
   `agents/x2c-philosophy.md` names a ledger row that is not yet verified.
 
-The path-audited entry-point set is declared in `tools/check-docs.py`. Its 19
+The path-audited entry-point set is declared in `tools/check-docs`. Its 19
 entries are README, the root and `agents/` agent guidance, the philosophy,
 quick start, development guide, code-organization guide, debugging guide,
 module catalog, this report, the canonical diagnostics guide, the adapter and
