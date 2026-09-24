@@ -141,7 +141,8 @@ One coherent change:
    Map lookup if it measures no slower.
 3. Fixtures and unit tests:
    - replace `var-custom-tag-registry-full` with a program that declares
-     and boxes 40 records and 40 heap classes, checks `is`, unboxing, `same`, dispatch and
+     and boxes 40 records and 40 heap classes, checks `is`, unboxing,
+     `same`, dispatch and
      `Var.tag` for direct and overflow values;
    - a class declared but never boxed spends no row (count before and
      after);
