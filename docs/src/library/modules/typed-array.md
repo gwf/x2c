@@ -27,7 +27,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.find`](#ArrayChar.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayChar.getindex`](#ArrayChar.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `ArrayChar.find`. |
+| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -62,7 +62,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `ArrayDbl.find`. |
+| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -97,7 +97,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `ArrayFloat.find`. |
+| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -132,7 +132,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.find`](#ArrayInt.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayInt.getindex`](#ArrayInt.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `ArrayInt.find`. |
+| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -167,7 +167,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.find`](#ArrayLong.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayLong.getindex`](#ArrayLong.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `ArrayLong.find`. |
+| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -202,7 +202,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.find`](#ArrayShort.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayShort.getindex`](#ArrayShort.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `ArrayShort.find`. |
+| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -237,7 +237,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.find`](#ArrayString.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayString.getindex`](#ArrayString.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `ArrayString.find`. |
+| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -491,7 +491,7 @@ Source: `lib/typed-array.x:106`
 
 `int ArrayChar.indexof(ArrayChar array, char value)`
 
-Returns the same first-match index as `ArrayChar.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:106`
 
@@ -913,7 +913,7 @@ Source: `lib/typed-array.x:151`
 
 `int ArrayDbl.indexof(ArrayDbl array, double value)`
 
-Returns the same first-match index as `ArrayDbl.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:151`
 
@@ -1333,7 +1333,7 @@ Source: `lib/typed-array.x:142`
 
 `int ArrayFloat.indexof(ArrayFloat array, float value)`
 
-Returns the same first-match index as `ArrayFloat.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:142`
 
@@ -1753,7 +1753,7 @@ Source: `lib/typed-array.x:124`
 
 `int ArrayInt.indexof(ArrayInt array, int value)`
 
-Returns the same first-match index as `ArrayInt.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:124`
 
@@ -2175,7 +2175,7 @@ Source: `lib/typed-array.x:133`
 
 `int ArrayLong.indexof(ArrayLong array, long value)`
 
-Returns the same first-match index as `ArrayLong.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:133`
 
@@ -2597,7 +2597,7 @@ Source: `lib/typed-array.x:115`
 
 `int ArrayShort.indexof(ArrayShort array, short value)`
 
-Returns the same first-match index as `ArrayShort.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:115`
 
@@ -3019,7 +3019,7 @@ Source: `lib/typed-array.x:160`
 
 `int ArrayString.indexof(ArrayString array, String value)`
 
-Returns the same first-match index as `ArrayString.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:160`
 
@@ -3377,515 +3377,6 @@ Returns the packed-array pointer carried by `value`.
 does not validate the tag before reading its pointer payload.
 
 Source: `lib/typed-array.x:165`
-
-## Advanced and interop API
-
-| Function | Summary |
-| --- | --- |
-| [`ArrayChar.capacity`](#ArrayChar.capacity) | Provides the generated protocol operation `ArrayChar.capacity`. |
-| [`ArrayChar.clear`](#ArrayChar.clear) | Provides the generated protocol operation `ArrayChar.clear`. |
-| [`ArrayChar.free`](#ArrayChar.free) | Provides the generated protocol operation `ArrayChar.free`. |
-| [`ArrayChar.len`](#ArrayChar.len) | Provides the generated protocol operation `ArrayChar.len`. |
-| [`ArrayChar.pop`](#ArrayChar.pop) | Provides the generated protocol operation `ArrayChar.pop`. |
-| [`ArrayChar.truncate`](#ArrayChar.truncate) | Provides the generated protocol operation `ArrayChar.truncate`. |
-| [`ArrayChar.truth`](#ArrayChar.truth) | Provides the generated protocol operation `ArrayChar.truth`. |
-| [`ArrayDbl.capacity`](#ArrayDbl.capacity) | Provides the generated protocol operation `ArrayDbl.capacity`. |
-| [`ArrayDbl.clear`](#ArrayDbl.clear) | Provides the generated protocol operation `ArrayDbl.clear`. |
-| [`ArrayDbl.free`](#ArrayDbl.free) | Provides the generated protocol operation `ArrayDbl.free`. |
-| [`ArrayDbl.len`](#ArrayDbl.len) | Provides the generated protocol operation `ArrayDbl.len`. |
-| [`ArrayDbl.pop`](#ArrayDbl.pop) | Provides the generated protocol operation `ArrayDbl.pop`. |
-| [`ArrayDbl.truncate`](#ArrayDbl.truncate) | Provides the generated protocol operation `ArrayDbl.truncate`. |
-| [`ArrayDbl.truth`](#ArrayDbl.truth) | Provides the generated protocol operation `ArrayDbl.truth`. |
-| [`ArrayFloat.capacity`](#ArrayFloat.capacity) | Provides the generated protocol operation `ArrayFloat.capacity`. |
-| [`ArrayFloat.clear`](#ArrayFloat.clear) | Provides the generated protocol operation `ArrayFloat.clear`. |
-| [`ArrayFloat.free`](#ArrayFloat.free) | Provides the generated protocol operation `ArrayFloat.free`. |
-| [`ArrayFloat.len`](#ArrayFloat.len) | Provides the generated protocol operation `ArrayFloat.len`. |
-| [`ArrayFloat.pop`](#ArrayFloat.pop) | Provides the generated protocol operation `ArrayFloat.pop`. |
-| [`ArrayFloat.truncate`](#ArrayFloat.truncate) | Provides the generated protocol operation `ArrayFloat.truncate`. |
-| [`ArrayFloat.truth`](#ArrayFloat.truth) | Provides the generated protocol operation `ArrayFloat.truth`. |
-| [`ArrayInt.capacity`](#ArrayInt.capacity) | Provides the generated protocol operation `ArrayInt.capacity`. |
-| [`ArrayInt.clear`](#ArrayInt.clear) | Provides the generated protocol operation `ArrayInt.clear`. |
-| [`ArrayInt.free`](#ArrayInt.free) | Provides the generated protocol operation `ArrayInt.free`. |
-| [`ArrayInt.len`](#ArrayInt.len) | Provides the generated protocol operation `ArrayInt.len`. |
-| [`ArrayInt.pop`](#ArrayInt.pop) | Provides the generated protocol operation `ArrayInt.pop`. |
-| [`ArrayInt.truncate`](#ArrayInt.truncate) | Provides the generated protocol operation `ArrayInt.truncate`. |
-| [`ArrayInt.truth`](#ArrayInt.truth) | Provides the generated protocol operation `ArrayInt.truth`. |
-| [`ArrayLong.capacity`](#ArrayLong.capacity) | Provides the generated protocol operation `ArrayLong.capacity`. |
-| [`ArrayLong.clear`](#ArrayLong.clear) | Provides the generated protocol operation `ArrayLong.clear`. |
-| [`ArrayLong.free`](#ArrayLong.free) | Provides the generated protocol operation `ArrayLong.free`. |
-| [`ArrayLong.len`](#ArrayLong.len) | Provides the generated protocol operation `ArrayLong.len`. |
-| [`ArrayLong.pop`](#ArrayLong.pop) | Provides the generated protocol operation `ArrayLong.pop`. |
-| [`ArrayLong.truncate`](#ArrayLong.truncate) | Provides the generated protocol operation `ArrayLong.truncate`. |
-| [`ArrayLong.truth`](#ArrayLong.truth) | Provides the generated protocol operation `ArrayLong.truth`. |
-| [`ArrayShort.capacity`](#ArrayShort.capacity) | Provides the generated protocol operation `ArrayShort.capacity`. |
-| [`ArrayShort.clear`](#ArrayShort.clear) | Provides the generated protocol operation `ArrayShort.clear`. |
-| [`ArrayShort.free`](#ArrayShort.free) | Provides the generated protocol operation `ArrayShort.free`. |
-| [`ArrayShort.len`](#ArrayShort.len) | Provides the generated protocol operation `ArrayShort.len`. |
-| [`ArrayShort.pop`](#ArrayShort.pop) | Provides the generated protocol operation `ArrayShort.pop`. |
-| [`ArrayShort.truncate`](#ArrayShort.truncate) | Provides the generated protocol operation `ArrayShort.truncate`. |
-| [`ArrayShort.truth`](#ArrayShort.truth) | Provides the generated protocol operation `ArrayShort.truth`. |
-| [`ArrayString.capacity`](#ArrayString.capacity) | Provides the generated protocol operation `ArrayString.capacity`. |
-| [`ArrayString.clear`](#ArrayString.clear) | Provides the generated protocol operation `ArrayString.clear`. |
-| [`ArrayString.free`](#ArrayString.free) | Provides the generated protocol operation `ArrayString.free`. |
-| [`ArrayString.len`](#ArrayString.len) | Provides the generated protocol operation `ArrayString.len`. |
-| [`ArrayString.pop`](#ArrayString.pop) | Provides the generated protocol operation `ArrayString.pop`. |
-| [`ArrayString.truncate`](#ArrayString.truncate) | Provides the generated protocol operation `ArrayString.truncate`. |
-| [`ArrayString.truth`](#ArrayString.truth) | Provides the generated protocol operation `ArrayString.truth`. |
-
-### `ArrayChar`
-
-<a id="ArrayChar.capacity"></a>
-#### ArrayChar.capacity
-
-`size_t ArrayChar.capacity(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.capacity`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.clear"></a>
-#### ArrayChar.clear
-
-`void ArrayChar.clear(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.clear`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.free"></a>
-#### ArrayChar.free
-
-`void ArrayChar.free(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.free`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.len"></a>
-#### ArrayChar.len
-
-`size_t ArrayChar.len(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.len`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.pop"></a>
-#### ArrayChar.pop
-
-`void ArrayChar.pop(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.pop`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.truncate"></a>
-#### ArrayChar.truncate
-
-`void ArrayChar.truncate(ArrayChar a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayChar.truncate`.
-
-Source: `lib/typed-array.x:32`
-
-<a id="ArrayChar.truth"></a>
-#### ArrayChar.truth
-
-`int ArrayChar.truth(ArrayChar a0)`
-
-Provides the generated protocol operation `ArrayChar.truth`.
-
-Source: `lib/typed-array.x:32`
-
-### `ArrayDbl`
-
-<a id="ArrayDbl.capacity"></a>
-#### ArrayDbl.capacity
-
-`size_t ArrayDbl.capacity(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.capacity`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.clear"></a>
-#### ArrayDbl.clear
-
-`void ArrayDbl.clear(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.clear`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.free"></a>
-#### ArrayDbl.free
-
-`void ArrayDbl.free(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.free`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.len"></a>
-#### ArrayDbl.len
-
-`size_t ArrayDbl.len(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.len`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.pop"></a>
-#### ArrayDbl.pop
-
-`void ArrayDbl.pop(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.pop`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.truncate"></a>
-#### ArrayDbl.truncate
-
-`void ArrayDbl.truncate(ArrayDbl a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayDbl.truncate`.
-
-Source: `lib/typed-array.x:52`
-
-<a id="ArrayDbl.truth"></a>
-#### ArrayDbl.truth
-
-`int ArrayDbl.truth(ArrayDbl a0)`
-
-Provides the generated protocol operation `ArrayDbl.truth`.
-
-Source: `lib/typed-array.x:52`
-
-### `ArrayFloat`
-
-<a id="ArrayFloat.capacity"></a>
-#### ArrayFloat.capacity
-
-`size_t ArrayFloat.capacity(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.capacity`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.clear"></a>
-#### ArrayFloat.clear
-
-`void ArrayFloat.clear(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.clear`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.free"></a>
-#### ArrayFloat.free
-
-`void ArrayFloat.free(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.free`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.len"></a>
-#### ArrayFloat.len
-
-`size_t ArrayFloat.len(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.len`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.pop"></a>
-#### ArrayFloat.pop
-
-`void ArrayFloat.pop(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.pop`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.truncate"></a>
-#### ArrayFloat.truncate
-
-`void ArrayFloat.truncate(ArrayFloat a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayFloat.truncate`.
-
-Source: `lib/typed-array.x:48`
-
-<a id="ArrayFloat.truth"></a>
-#### ArrayFloat.truth
-
-`int ArrayFloat.truth(ArrayFloat a0)`
-
-Provides the generated protocol operation `ArrayFloat.truth`.
-
-Source: `lib/typed-array.x:48`
-
-### `ArrayInt`
-
-<a id="ArrayInt.capacity"></a>
-#### ArrayInt.capacity
-
-`size_t ArrayInt.capacity(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.capacity`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.clear"></a>
-#### ArrayInt.clear
-
-`void ArrayInt.clear(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.clear`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.free"></a>
-#### ArrayInt.free
-
-`void ArrayInt.free(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.free`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.len"></a>
-#### ArrayInt.len
-
-`size_t ArrayInt.len(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.len`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.pop"></a>
-#### ArrayInt.pop
-
-`void ArrayInt.pop(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.pop`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.truncate"></a>
-#### ArrayInt.truncate
-
-`void ArrayInt.truncate(ArrayInt a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayInt.truncate`.
-
-Source: `lib/typed-array.x:40`
-
-<a id="ArrayInt.truth"></a>
-#### ArrayInt.truth
-
-`int ArrayInt.truth(ArrayInt a0)`
-
-Provides the generated protocol operation `ArrayInt.truth`.
-
-Source: `lib/typed-array.x:40`
-
-### `ArrayLong`
-
-<a id="ArrayLong.capacity"></a>
-#### ArrayLong.capacity
-
-`size_t ArrayLong.capacity(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.capacity`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.clear"></a>
-#### ArrayLong.clear
-
-`void ArrayLong.clear(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.clear`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.free"></a>
-#### ArrayLong.free
-
-`void ArrayLong.free(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.free`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.len"></a>
-#### ArrayLong.len
-
-`size_t ArrayLong.len(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.len`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.pop"></a>
-#### ArrayLong.pop
-
-`void ArrayLong.pop(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.pop`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.truncate"></a>
-#### ArrayLong.truncate
-
-`void ArrayLong.truncate(ArrayLong a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayLong.truncate`.
-
-Source: `lib/typed-array.x:44`
-
-<a id="ArrayLong.truth"></a>
-#### ArrayLong.truth
-
-`int ArrayLong.truth(ArrayLong a0)`
-
-Provides the generated protocol operation `ArrayLong.truth`.
-
-Source: `lib/typed-array.x:44`
-
-### `ArrayShort`
-
-<a id="ArrayShort.capacity"></a>
-#### ArrayShort.capacity
-
-`size_t ArrayShort.capacity(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.capacity`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.clear"></a>
-#### ArrayShort.clear
-
-`void ArrayShort.clear(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.clear`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.free"></a>
-#### ArrayShort.free
-
-`void ArrayShort.free(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.free`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.len"></a>
-#### ArrayShort.len
-
-`size_t ArrayShort.len(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.len`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.pop"></a>
-#### ArrayShort.pop
-
-`void ArrayShort.pop(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.pop`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.truncate"></a>
-#### ArrayShort.truncate
-
-`void ArrayShort.truncate(ArrayShort a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayShort.truncate`.
-
-Source: `lib/typed-array.x:36`
-
-<a id="ArrayShort.truth"></a>
-#### ArrayShort.truth
-
-`int ArrayShort.truth(ArrayShort a0)`
-
-Provides the generated protocol operation `ArrayShort.truth`.
-
-Source: `lib/typed-array.x:36`
-
-### `ArrayString`
-
-<a id="ArrayString.capacity"></a>
-#### ArrayString.capacity
-
-`size_t ArrayString.capacity(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.capacity`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.clear"></a>
-#### ArrayString.clear
-
-`void ArrayString.clear(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.clear`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.free"></a>
-#### ArrayString.free
-
-`void ArrayString.free(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.free`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.len"></a>
-#### ArrayString.len
-
-`size_t ArrayString.len(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.len`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.pop"></a>
-#### ArrayString.pop
-
-`void ArrayString.pop(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.pop`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.truncate"></a>
-#### ArrayString.truncate
-
-`void ArrayString.truncate(ArrayString a0, size_t a1)`
-
-Provides the generated protocol operation `ArrayString.truncate`.
-
-Source: `lib/typed-array.x:59`
-
-<a id="ArrayString.truth"></a>
-#### ArrayString.truth
-
-`int ArrayString.truth(ArrayString a0)`
-
-Provides the generated protocol operation `ArrayString.truth`.
-
-Source: `lib/typed-array.x:59`
 
 ## Public types
 

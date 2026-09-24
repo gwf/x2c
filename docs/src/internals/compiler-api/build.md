@@ -61,7 +61,7 @@ Publishes collected native compilation entries as one JSON database.
 The destination's parent must exist. A failed write preserves the
 existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:609`
+Source: `src/build.x:599`
 
 ### `Build`
 
@@ -96,7 +96,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:966`
+Source: `src/build.x:956`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -125,7 +125,7 @@ previous artifact or the whole new one. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:784`
+Source: `src/build.x:774`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -166,7 +166,7 @@ so the executable is never reused for source it was not built from.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1068`
+Source: `src/build.x:1058`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -189,7 +189,7 @@ Source: `src/build.x:369`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:895`
+Source: `src/build.x:885`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -199,7 +199,7 @@ Source: `src/build.x:895`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:951`
+Source: `src/build.x:941`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -211,7 +211,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:1044`
+Source: `src/build.x:1034`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -248,7 +248,7 @@ Source: `src/build.x:222`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1097`
+Source: `src/build.x:1087`
 
 ## Public types
 

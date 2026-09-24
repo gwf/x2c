@@ -1227,30 +1227,13 @@ Var lisp_source_function(Var callable) {
 }
 
 /* Static bytes belong to the consuming session, even when a callable comes
-   from its frozen parent. Evaluation is serialized by the Lisp contract.
-   A threaded slot adds an unrecycled thread identity to its binding key. */
-static unsigned long lisp_static_thread_count;
-static threaded unsigned long lisp_static_thread_id;
+   from its frozen parent. Evaluation is serialized by the Lisp contract. */
 
 static X2CStatic *_lisp_static_slot(List description) {
-  Var (key, layout, ignored_tag, per_thread) = description;
+  Var (key, layout, ignored_tag) = description;
   (void) ignored_tag;
   Map slots = lisp_active.statics;
   Var found;
-  if (per_thread.truth()) {
-    if (!lisp_static_thread_id)
-      lisp_static_thread_id = __atomic_add_fetch(
-        &lisp_static_thread_count, 1, __ATOMIC_RELAXED);
-    if (!slots.try_get(key, &found)) {
-      $scope(&lisp_active.scope) {
-        Map instances = {};
-        found = instances;
-      }
-      slots[key] = found;
-    }
-    slots = found;
-    key = lisp_static_thread_id;
-  }
   if (slots.try_get(key, &found)) return found.pointer();
   X2CStatic *slot = Scope.calloc_in(
     &lisp_active.scope, 1, sizeof(X2CStatic));

@@ -1,8 +1,7 @@
 # Reproducible generated Lisp names
 
-> Status: active - repaired and verified on the local stabilization candidate;
-> delivery to `dev` remains. The original naming drift did not reproduce at
-> reviewed `0bdc8398`.
+> Status: historical observation and resolved bootstrap transition. The
+> original naming drift did not reproduce in the post-merge review.
 
 ## Observed issue
 
@@ -13,7 +12,7 @@ pass is stable. Token comparisons show only bijective name substitutions:
 not been shown to differ. The consequence is noisy artifact diffs and a
 limit on what warm-tree byte-reproducibility checks establish.
 
-Reproduction: archive 231550b0 into a fresh directory, load
+Reproduction: archive the reviewed baseline into a fresh directory, load
 `tools/gen-lisp-init.py` as a Python module, set its ROOT to that directory,
 and call its three generate operations using the original workspace's
 `builds/0/x2c`. Compare each output with the archived artifact, then repeat.
@@ -23,24 +22,18 @@ explanation. The exact influence of available interfaces remains to isolate.
 ## September 23 verification
 
 The post-merge review generated all three artifacts byte-identically twice
-from a fresh source-only home at `0bdc8398`. That result closes the original
+from a fresh source-only home. That result closes the original
 name-drift observation for that tree, not for every later compiler revision.
-On local stabilization candidate `7815096c`, a `git archive` source-only home
+On an earlier stabilization candidate, a `git archive` source-only home
 using its rebuilt stage-0 compiler rewrote `etc/init.xlisp` on the first pass.
 The next `builtin-macros` generation failed reading that init with
 `(malformed ... (line 127) (column 70))`; the generated init contains new
-`C.source-function` and Func-adaptation forms. Generation from local F4
-commit `30c206f2` also rewrote init and failed on the next attempt. This is
-a current generated-artifact/lowering transition, not evidence that
-nondeterministic name allocation returned.
-The refreshed bootstrap at local bridge `88d1bd86` (integrated as `6de15600`)
-includes the C3 native bindings needed by the generated Lisp forms. On that
-bridge, fresh source-only homes generated all three Lisp artifacts with both
-the bootstrap and stage-0 compilers; each second pass was byte-identical. This
-resolves the malformed-form failure on the bridge. The existing
-`unittest/probes/run-lisp-init.py` probe passed twice on the final local
-candidate, with byte-identical second-pass artifacts. Delivery to `dev`
-remains the completion boundary.
+`C.source-function` and Func-adaptation forms. Another candidate showed the
+same failure. This was a generated-artifact/lowering transition, not evidence
+that nondeterministic name allocation returned. The refreshed bootstrap
+included the native bindings needed by those forms. Fresh source-only homes
+then generated all three Lisp artifacts with both the bootstrap and stage-0
+compilers; each second pass was byte-identical.
 
 ## Earlier proposal and current acceptance
 

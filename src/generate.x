@@ -709,9 +709,7 @@ static List _public_parameter_names(Compiler c, List modifiers) {
 
 static List _public_definition_rows(Compiler c, List ast) {
   Array rows = [];
-  Var comptime = c.semantic_binding_facts()[%(api-comptime-definitions)];
-  List selected = comptime is <list> ? ast.append(comptime) : ast;
-  foreach (List node, selected) match (node)
+  foreach (List node, ast) match (node)
     case %(function ?type (bind ?binding ?modifiers) ?): {
       String name = binding_identity_spelling(binding);
       if (!name || type.type().is_static())
@@ -1086,7 +1084,6 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
     %!(unit) => !unit.list().match(%((!or space comment empty) *)));
 
-  List public_definitions = _public_definition_rows(c, ast);
   List (header, source) = _header_and_source(c, ast);
   String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
@@ -1114,7 +1111,7 @@ void generate_code(Compiler c, List ast, String dir) {
     $cfile ${c.code_pretty_string(source, cfile)}
   );
   String interface = c.source_facts
-                   ? NULL : interface_text(c, public_definitions);
+                   ? NULL : interface_text(c, _public_definition_rows(c, ast));
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   List failure = NULL;
   try file_publish(outputs);

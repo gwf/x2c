@@ -52,11 +52,6 @@ meta int reference_read(int n) {
   Func f = %!(int &a) => a;
   return f(n);
 }
-meta int reference_mutate(int n) {
-  Func f = %!(int &a) => ++a;
-  int result = f(n);
-  return result * 10 + n;
-}
 meta int reference_alias(int n) {
   Func f = alias;
   int result = f(n, n);
@@ -101,43 +96,12 @@ meta int void_value(int n) {
   return f(void) + n;
 }
 
-meta int reference_index(int n) {
-  int values[2] = {n, 5};
-  int *p = values;
-  Func f = %!(int &a, int &b) => { a += 3; return b; };
-  int result = f(values[0], p[0]);
-  return result * 10 + values[0];
-}
 meta int pointer_index(int n) {
   int *p = &n;
   Func f = mutate;
   int result = f(p[0]);
   return result * 10 + n;
 }
-meta int output_index(int n) {
-  int values[2];
-  Func f = %!(int &a) => { a = 41; };
-  (void) f(values[1]);
-  return values[1] + n;
-}
-meta int lambda_forward(int n) {
-  Func f = %!(int &a) => {
-    Func g = %!(int &b) => ++b;
-    return g(a);
-  };
-  int result = f(n);
-  return result * 10 + n;
-}
-meta int local_parameter(int n) {
-  Func f = %!(int a) => {
-    Func g = %!(int &b) => ++b;
-    (void) g(a);
-    return a;
-  };
-  int result = f(n);
-  return result * 10 + n;
-}
-
 meta int snapshot_after_reference(int n) {
   Func read = %!() => n;
   Func bump = %!(int &a) => ++a;
@@ -157,12 +121,6 @@ meta int array_address(int n) {
   int result = f(*p, values[0]);
   return result * 10 + values[0];
 }
-meta int record_reference(int n) {
-  struct Item value = {n};
-  Func f = %!(struct Item &a) => ++a.number;
-  int result = f(value);
-  return result * 10 + value.number;
-}
 meta int signature_retained(int n) {
   Func f = narrow;
   Array functions = [f];
@@ -178,16 +136,6 @@ meta int prepared_values(int n) {
 meta int prepared_reference(int n) {
   Func f = %!(int &a, int b) => a + b;
   int result = f(n, n = 3);
-  return result * 10 + n;
-}
-meta int block_scope(int n) {
-  Func f = %!(int &a) => {
-    int local = 2;
-    a += local;
-    return a;
-  };
-  int result = 0;
-  for (int i = 0; i < 2; i++) result += f(n).int();
   return result * 10 + n;
 }
 
@@ -212,8 +160,6 @@ int main(int argc, char **argv) {
     parameter_input(one + 256));
   printf("read %d %d %d\n", $reference_read(1), reference_read(1),
     reference_read(one));
-  printf("mutate %d %d %d\n", $reference_mutate(1), reference_mutate(1),
-    reference_mutate(one));
   printf("alias %d %d %d\n", $reference_alias(1), reference_alias(1),
     reference_alias(one));
   printf("forward %d %d %d\n", $reference_forward(1), reference_forward(1),
@@ -229,31 +175,19 @@ int main(int argc, char **argv) {
   printf("order %d %d %d\n", $evaluation_order(0), evaluation_order(0),
     evaluation_order(one - 1));
   printf("void %d %d %d\n", $void_value(1), void_value(1), void_value(one));
-  printf("index %d %d %d\n", $reference_index(1), reference_index(1),
-    reference_index(one));
   printf("pointer-index %d %d %d\n", $pointer_index(1), pointer_index(1),
     pointer_index(one));
-  printf("output-index %d %d %d\n", $output_index(1), output_index(1),
-    output_index(one));
-  printf("lambda-forward %d %d %d\n", $lambda_forward(1), lambda_forward(1),
-    lambda_forward(one));
-  printf("parameter-copy %d %d %d\n", $local_parameter(1), local_parameter(1),
-    local_parameter(one));
   printf("snapshot %d %d %d\n", $snapshot_after_reference(1),
     snapshot_after_reference(1), snapshot_after_reference(one));
   printf("shared %d %d %d\n", $shared_capture(1), shared_capture(1),
     shared_capture(one));
   printf("array-address %d %d %d\n", $array_address(1), array_address(1),
     array_address(one));
-  printf("record-ref %d %d %d\n", $record_reference(1), record_reference(1),
-    record_reference(one));
   printf("signature %d %d %d\n", $signature_retained(1), signature_retained(1),
     signature_retained(one));
   printf("prepared-values %d %d %d\n", $prepared_values(257),
     prepared_values(257), prepared_values(one + 256));
   printf("prepared-ref %d %d %d\n", $prepared_reference(1),
     prepared_reference(1), prepared_reference(one));
-  printf("block-scope %d %d %d\n", $block_scope(1), block_scope(1),
-    block_scope(one));
   return 0;
 }

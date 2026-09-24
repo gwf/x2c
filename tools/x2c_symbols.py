@@ -336,9 +336,7 @@ class HeaderSymbols:
 def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
                              include_static: bool = False, root=ROOT):
     """Enumerate selected bodies and join source-owned signatures and prose."""
-    from x2c_source import (
-        Definition, definitions, normalize_doc, public_declarations_for_path,
-    )
+    from x2c_source import Definition, definitions, normalize_doc
     text = path.read_text(encoding="utf-8")
     authored = {
         item.name.replace(".", "_"): item
@@ -348,15 +346,14 @@ def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
     relative = path.resolve().relative_to(root).as_posix()
     if relative not in symbols.paths():
         raise KeyError(relative)
-    declared = public_declarations_for_path(path)
-    classes = [item for item in declared if item.kind == "class"]
     table = symbols.functions(relative)
     selected = symbols.selected_definitions(relative)
     found = []
-    defaults: set[str] = set()
     for native, display, type_node, names, line, raw_doc in selected:
         if native in authored:
             found.append(authored[native])
+            continue
+        if line == 1 and display == native and not raw_doc:
             continue
         entry = table[native]
         parameters = ", ".join(
@@ -365,39 +362,8 @@ def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
             if parameter != [Symbol("void")]
         ) or ", ".join(entry.params) or "void"
         doc = normalize_doc(raw_doc) if raw_doc else None
-        generated = False
-        if doc is None and line == 1 and display == native:
-            owner = next((item for item in sorted(classes,
-                         key=lambda item: -len(item.name))
-                         if native.startswith(item.name + "_")), None)
-            if owner is not None:
-                display = owner.name + "." + native[len(owner.name) + 1:]
-                line = owner.line
-                defaults.add(native)
-            else:
-                owner = next((item for item in classes
-                              if native == "Var_" + item.name.lower()), None)
-                if owner is not None:
-                    display = "Var." + owner.name.lower()
-                    line = owner.line
-                    defaults.add(native)
-        if doc is None and native in defaults:
-            doc = (f"Provides the class default for `{display}`.\n\n"
-                   "See [Classes and system macros]"
-                   "(../../guide/system-macros.md) for the default behavior.")
-        elif doc is None and line == 1 and display == native:
-            owner = next((item for item in sorted(
-                declared, key=lambda item: -len(item.name))
-                if native.startswith(item.name + "_")), None)
-            if owner is not None:
-                display = owner.name + "." + native[len(owner.name) + 1:]
-                line = owner.line
-            doc = (f"Provides the generated protocol operation "
-                   f"`{display}`.")
-            generated = True
         found.append(Definition(display,
-            f"{entry.returns} {display}({parameters})", line, doc,
-            generated))
+            f"{entry.returns} {display}({parameters})", line, doc))
     found.sort(key=lambda item: item.line)
     return tuple(found)
 

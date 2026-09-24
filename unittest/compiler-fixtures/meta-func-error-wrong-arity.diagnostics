@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/meta-func-error-wrong-arity.x:9:10: macro: compile-time Lisp evaluation failed
-    (void) $wrong_arity(1);
-           ^
-  note: form: (wrong_arity 1) error: (bad-arity (sig ((func ((int))) "Var")) (expected 1u) (actual 2u))
-

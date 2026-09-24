@@ -314,8 +314,7 @@ a failed initializer retains its address and external effects, retries with
 zeroed storage, and publishes the whole object only after success. Recursive
 initialization raises `bad-state`. Static storage lasts for the evaluator
 session and does not extend the lifetime of referenced values. `static
-threaded` uses a separate object per evaluator thread; a Lisp session still
-requires callers to serialize evaluation. Source `try`/`catch` is not yet
+threaded` has no compile-time lowering. Source `try`/`catch` is not yet
 lowered, but a native caller can catch an initializer's Error and retry.
 
 Functions using local statics, including `const` statics, and their callers
@@ -684,18 +683,19 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- Packing is unsupported. Any `#pragma pack` directive or `packed` attribute,
-  including one in an included header or macro definition, is a compile error.
-  This also applies with `--cpp-symbols` and `--system-headers`. Other layout
-  attributes, including `aligned`, `mode` and `vector_size`, still leave a
-  struct without a provable compile-time layout. A meta function that uses
+- A `packed` attribute on a struct parsed from x2c source is a compile error.
+  `#pragma pack` passes through to C, and an unused packed-attribute macro
+  does not fail translation. Expanded system-header declarations are not
+  rejected for packing. Layout attributes, including `aligned`, `mode` and
+  `vector_size`, still leave a struct without a provable compile-time layout.
+  A meta function that uses
   such a struct reports `a compile-time struct with no host layout`. A field
   whose typedef has a layout attribute is also declined.
 - Structs with field alignment the compiler cannot prove, such as a field
   declared `_Alignas`, have no compile-time layout. Do not pass one to a
   native function from compile-time code.
 - Arrays of structs, which a meta function reports as `an array of
-  structs`, the address of an array element, and pointer arithmetic.
+  structs`, static arrays, and pointer arithmetic.
 - `sizeof`, which is not evaluated at compile time. The parser does not
   accept `_Alignof`.
 
@@ -744,12 +744,12 @@ on a listed type works. The operation inventory below further limits calls.
 | `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
 | `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
-| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls retain the typed signature, convert value parameters and results, and alias reference arguments in place. Storage in collections works. This does not expose arbitrary native function-pointer calls. |
-| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
+| `Func` | Expression-bodied lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls retain the typed signature, convert value parameters and results, and alias reference arguments in place. Storage in collections works. Block-bodied lambdas have no compile-time lowering. This does not expose arbitrary native function-pointer calls. |
+| C-style array declarations | A literal-sized one-dimensional automatic array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. Static arrays have no compile-time lowering. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
-| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Packing is a compile error. Unions and structs with bitfields, array members or anonymous members are not available. |
+| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Packed declarations in expanded system headers are not rejected, but their native layout is not available for compile-time struct operations. Unions and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep
@@ -915,10 +915,10 @@ means feasible in principle, not scheduled or promised support.
 | Currently unsupported | What would be needed; fundamental or gap? |
 | --- | --- |
 | `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
-| Postfix expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. |
-| Computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
+| Postfix increment expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. Prefix increments on locals and reference arguments are supported. |
+| Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
 | Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
-| Unions, pointer arithmetic and addresses of array elements | **Gap:** model overlapping storage and arrays in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
+| Unions and pointer arithmetic | **Gap:** model overlapping storage and pointer offsets in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `defer` | **Gap** for deferred execution in general. Explicitly freeing evaluator-owned objects conflicts with the **current ownership model**; it is not an argument that all deferred actions are impossible. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer and cleanup need compile-time modeling. Evaluation failures can still become compiler diagnostics. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |

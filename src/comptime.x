@@ -38,7 +38,7 @@ typedef struct Lowering {
   Compiler compiler;
   Scope scratch;
   Map env, locals, cells, arrays, records, callees, cursors, statics;
-  Map runtime_statics;
+  Map lambda_signatures;
   Array definitions;
   String own;
   List identity;
@@ -356,9 +356,9 @@ static int _lower_dimension(Lowering l, int id, int *out);
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
   if (type.contains(<static>)) l.globals = 1;
-  List binding = NULL, initial = NULL;
+  List binding = NULL;
   match (declarator) {
-    case %(op = ?bound ?value): { binding = bound; initial = value; }
+    case %(op = ?bound ?): binding = bound;
     default: binding = declarator;
   }
   Type declared = %(declare $type (bindings $binding))
@@ -378,29 +378,22 @@ static void _lower_scan_storage_binding(
         l.records[id] = record;
       }
       if (type.is_static()) {
-        Symbol tag = layout ? _lower_pointer_tag(l, layout) : <p48>;
-        if (declared.is_array()) {
-          _lower_scan_bind(l, binding);
-          int count = 0;
-          List element = l.compiler.meta_type_layout(declared.dereference());
-          if (!element || !_lower_dimension(l, id, &count)) {
-            (void) _lower_decline(l, "a static array with no native layout");
-            return;
-          }
-          tag = _lower_pointer_tag(l, element);
-          long size = element[2].long_long() * count;
-          layout = %(record $declared $size ${element[3]} ());
+        if (type.is_threaded()) {
+          (void) _lower_decline(l, "a threaded local static");
+          return;
         }
+        if (declared.is_array()) {
+          (void) _lower_decline(l, "a static array");
+          return;
+        }
+        Symbol tag = layout ? _lower_pointer_tag(l, layout) : <p48>;
         if (!layout) {
           (void) _lower_decline(l, "a static object with no native layout");
           return;
         }
         List name = binding.cadr();
-        if (initial &&
-            l.compiler.static_value_is_runtime(initial, l.runtime_statics))
-          l.runtime_statics[name] = 1;
-        List key = %(${l.identity} $name);
-        List slot = %($key $layout $tag ${type.is_threaded()});
+        Var key = Atom.intern(%"static:${l.identity.repr()}:${name.repr()}");
+        List slot = %($key $layout $tag);
         l.statics[id] = slot;
         l.locals[id] = l.cells[id] = layout;
         l.env[id] = %(C.saddress (quote $slot));
@@ -842,7 +835,7 @@ static Var _lower_expr(Lowering l, Var form);
 static Var _lower_coerce(Lowering l, List want, Var node, Var value);
 static Var _lower_assign_expr(Lowering l, Var target, Var rhs);
 static Var _lower_update_expr(
-  Lowering l, Var target, Symbol operator, Var right, int postfix);
+  Lowering l, Var target, Symbol operator, Var right);
 static Symbol _lower_compound(Var operator);
 static Var _lower_step_of(Var target);
 static Var _lower_initializer(Lowering l, List type, int id, Var init);
@@ -1008,7 +1001,8 @@ static List _lower_param_type(List params) {
   return param;
 }
 
-static List _lower_args(Lowering l, List params, List args) {
+static List _lower_args(
+  Lowering l, List params, List args, String callee_name) {
   Array values = $auto([]);
   for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
@@ -1025,7 +1019,13 @@ static List _lower_args(Lowering l, List params, List args) {
     else {
       Var value = _lower_expr(l, argument);
       if (_lower_failed(l, value)) return NULL;
-      values.push(_lower_coerce(l, parameter, argument, value));
+      Var signature;
+      /* The bootstrap Lisp binding accepts these callbacks directly. */
+      int direct = callee_name && callee_name.equal("List_map") &&
+        parameter.equal(%("Func")) &&
+        l.lambda_signatures.try_get(value, &signature);
+      values.push(direct ? value
+                         : _lower_coerce(l, parameter, argument, value));
     }
   }
   return values;
@@ -1038,7 +1038,7 @@ static List _lower_args(Lowering l, List params, List args) {
 static Var _lower_call(Lowering l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
-  List values = _lower_args(l, params, args);
+  List values = _lower_args(l, params, args, name);
   if (l.declined) return void;
   return cons(Atom.intern(_lower_callee_name(l, name)), values);
 }
@@ -1109,9 +1109,11 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
     arguments.push(value);
     index++;
   }
-  Var call = cons(callable, arguments);
+  Var saved = _lower_name(l, "callable");
+  Var call = cons(saved, arguments);
   call = _lower_to_type(l, result, call);
-  return %(C.func.new (lambda ($fn $argv) $call) (quote $signature));
+  return %((lambda ($saved)
+    (C.func.new (lambda ($fn $argv) $call) (quote $signature))) $callable);
 }
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the
@@ -1209,20 +1211,18 @@ static Var _lower_block(Lowering l, List items, List k);
 static Map _lower_env_copy(Lowering l);
 
 /* Capture expressions run at construction, including loads from addressed
-   locals. The body has its own locals, control flow and automatic storage. */
+   locals. The expression body has its own parameters and captures. */
 static Var _lower_lambda(Lowering l, List params, List held, Var body) {
-  int automatic = l.automatic, on_loop = l.on_loop;
-  List on_break = l.on_break, on_continue = l.on_continue;
+  if (l.on_loop) return _lower_decline(l, "a lambda in a loop");
+  match (body) case %(block *):
+    return _lower_decline(l, "a block-bodied lambda");
+  int automatic = l.automatic;
   Map previous = l.env;
   l.env = _lower_env_copy(l);
-  l.automatic = l.on_loop = 0;
-  l.on_break = l.on_continue = NULL;
+  l.automatic = 0;
   defer {
     l.env = previous;
     l.automatic = automatic;
-    l.on_loop = on_loop;
-    l.on_break = on_break;
-    l.on_continue = on_continue;
   }
   Array names = $auto([]), types = $auto([]);
   Array boxes = $auto([]), values = $auto([]);
@@ -1271,24 +1271,19 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
     Var (id, value) = pair;
     l.env[id] = value;
   }
-  Var lowered;
-  match (body) {
-    case %(block *items): lowered = _lower_block(l, items, %(end));
-    default: {
-      lowered = _lower_expr(l, body);
-      if (!_lower_failed(l, lowered))
-        lowered = _lower_to_type(l, _lower_type_of(body), lowered);
-    }
-  }
+  Var lowered = _lower_expr(l, body);
+  if (!_lower_failed(l, lowered))
+    lowered = _lower_to_type(l, _lower_type_of(body), lowered);
   if (_lower_failed(l, lowered)) return void;
   if (boxes.len())
     lowered = %((lambda ${boxes.list()} $lowered) @{values.list()});
   Type signature = %((func ${types.list()}) "Var");
   Var callable = %(lambda ${names.list()} $lowered);
   if (l.automatic) callable = %(C.source-function $callable);
-  Var function = _lower_func_adapter(l, signature, callable);
+  Var function = callable;
   if (captures.len())
     function = %((lambda ${captures.list()} $function) @{captured.list()});
+  l.lambda_signatures[function] = signature;
   return function;
 }
 
@@ -1439,7 +1434,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
        the session binds it. */
     case %(ident (binding ?(int id) ?(String name))): {
       if (!l.locals.contains(id) && type.match(%((func *) *)))
-        return _lower_func_adapter(l, type, Atom.intern(name));
+        return Atom.intern(name);
       /* An enumerator's value lives only in the enum declaration it was
          written in: the symbol table records the enum type and that the name
          is an enumerator, never the number. Reading it as file-scope state
@@ -1492,7 +1487,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Symbol applied = _lower_compound(operator);
       if (applied)
         return _lower_update_expr(
-          l, target, applied, _lower_expr(l, rhs), 0);
+          l, target, applied, _lower_expr(l, rhs));
       return _lower_operands(l, type, operator, %($target $rhs));
     }
     /* `*` is a sequence binder in a pattern, so a unary deref is matched by
@@ -1506,14 +1501,14 @@ static Var _lower_content(Lowering l, List type, Var content) {
       if (operator == <++> || operator == <"--">)
         return _lower_update_expr(
           l, operand, operator == <++> ? <+> : <->,
-          _lower_step_of(operand), 0);
+          _lower_step_of(operand));
       return _lower_operands(l, type, operator, %($operand));
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
       return _lower_application(l, content);
     case %(meta-cap ?captured): return %(quote $captured);
     case %(tpl-call ?definition (args *arguments)): {
-      List values = _lower_args(l, NULL, arguments);
+      List values = _lower_args(l, NULL, arguments, NULL);
       return %(_x2c.tpl-call (quote $definition) (list @values));
     }
     case %(meta-call (expr ?callee (ident (binding ? ?(String name))))
@@ -1532,13 +1527,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_getindex(l, receiver, key, 0);
     case %(index ?receiver ?key):
       return _lower_getindex(l, receiver, key, 1);
-    case %(postfix ?operator ?operand): {
-      if (operator == <++> || operator == <"--">)
-        return _lower_update_expr(
-          l, operand, operator == <++> ? <+> : <->,
-          _lower_step_of(operand), 1);
+    case %(postfix ? ?):
       return _lower_decline(l, "unsupported postfix operator");
-    }
     case %(lambda (params *params) (captures *held) ?body):
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
@@ -2158,6 +2148,15 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
    `Array` is not a `List`. Without the argument case an `Array` reached a
    `List` parameter and the native adapter refused it. */
 static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
+  Var signature;
+  if (want.equal(%("Func")) &&
+      l.lambda_signatures.try_get(value, &signature))
+    return _lower_func_adapter(l, signature, value);
+  match (node)
+    case %(expr ?from (ident (binding ?(int id) ?))):
+      if (want.equal(%("Func")) && ((Type) from).match(%((func *) *)) &&
+          !l.locals.contains(id))
+        return _lower_func_adapter(l, from, value);
   match (node)
     case %(expr ?from ?): {
       Type target_record = _lower_record_type(l, want);
@@ -2236,16 +2235,8 @@ static Var _lower_declarator(
       if (l.statics.contains(id)) {
         Var value = _lower_initializer(l, declared, id, init);
         if (_lower_failed(l, value)) return void;
-        Var initializer = %(lambda () $value);
-        if (!l.runtime_statics.contains(bound.list().cadr())) {
-          /* Native constants need no call-frame capture. Share their thunk;
-             runtime initializers capture this first reach's arguments. */
-          Var name = _lower_name(l, "static");
-          l.definitions.push(%(def $name $initializer));
-          initializer = name;
-        }
         return _lower_effect(l,
-          %(C.sinit (quote ${l.statics[id]}) $initializer), rest, k);
+          %(C.sinit (quote ${l.statics[id]}) (lambda () $value)), rest, k);
       }
       /* A record in a loop's storage is initialized where it is. */
       if (l.records.contains(id) && l.env.contains(id)) {
@@ -2399,11 +2390,9 @@ static Var _lower_assign_expr(Lowering l, Var target, Var rhs) {
   return _lower_decline(l, "assignment expression without storage");
 }
 
-/* The place is evaluated once; postfix returns its old value after writing
-   the new one. The store itself returns the new value for prefix and
-   compound updates. */
+/* A compound update evaluates the place once and returns its new value. */
 static Var _lower_update_expr(
-  Lowering l, Var target, Symbol operator, Var right, int postfix) {
+  Lowering l, Var target, Symbol operator, Var right) {
   if (_lower_failed(l, right)) return void;
   int id = _lower_target(target);
   if (id >= 0 && !_lower_writable(l, id)) return void;
@@ -2417,8 +2406,7 @@ static Var _lower_update_expr(
   Var combined = _lower_to_type(
     l, want, %(_binary $old (quote $operator) $right));
   Var store = _lower_poke(l, want, slot, combined);
-  Var answer = postfix ? %(begin $store $old) : store;
-  return %((lambda ($slot) ((lambda ($old) $answer) $loaded)) $place);
+  return %((lambda ($slot) ((lambda ($old) $store) $loaded)) $place);
 }
 
 static Var _lower_store(
@@ -2535,9 +2523,6 @@ static void _lower_scan_nested_writes(
         target = operand;
     }
     case %(op ?operator ?operand): {
-      if (operator == <++> || operator == <"--">) target = operand;
-    }
-    case %(postfix ?operator ?operand): {
       if (operator == <++> || operator == <"--">) target = operand;
     }
   }
@@ -2704,7 +2689,7 @@ static List _lower_function(
     .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
     .records = _lower_scratch_map(scratch),
     .statics = _lower_scratch_map(scratch),
-    .runtime_statics = _lower_scratch_map(scratch),
+    .lambda_signatures = _lower_scratch_map(scratch),
     .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
     .definitions = [],
     .declined = 0,
@@ -2981,7 +2966,7 @@ Var Compiler.lower_meta_initializer(
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
-    .statics = {}, .runtime_statics = {},
+    .statics = {}, .lambda_signatures = {},
     .definitions = []
   };
   lower_declined_reason = NULL;
@@ -3002,7 +2987,7 @@ Var Compiler.lower_meta_expression(Compiler c, List expression) {
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
-    .statics = {}, .runtime_statics = {},
+    .statics = {}, .lambda_signatures = {},
     .definitions = []
   };
   lower_declined_reason = NULL;

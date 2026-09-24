@@ -73,14 +73,10 @@
   (let ((object (C.at (C.bytes size) 0 tag)))
     (begin (C.poke object 0 layout value) object)))
 
-// Current lowering gives C arrays native element storage. The checked-in
-// bootstrap can still supply its former Array representation while rebuilding.
 (defun C.index (p i size layout)
-  (if (eq? (type p) 'array) (Array.getindex p i)
-      (C.peek p (* i size) layout)))
+  (C.peek p (* i size) layout))
 (defun C.index.set (p i size layout value)
-  (if (eq? (type p) 'array) (Array.setindex p i value)
-      (C.poke p (* i size) layout value)))
+  (C.poke p (* i size) layout value))
 
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero. The table

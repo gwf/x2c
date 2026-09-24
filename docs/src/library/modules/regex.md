@@ -11,25 +11,16 @@ Regular expressions over the bytes of a String.
 | --- | --- |
 | [`Regex.capture_count`](#Regex.capture_count) | Returns the number of capturing groups in `regex`. |
 | [`Regex.capture_names`](#Regex.capture_names) | Returns the names of the capturing groups of `regex` in capture order, with NULL for a group without a name. |
-| [`Regex.cleanup`](#Regex.cleanup) | Provides the class default for `Regex.cleanup`. |
 | [`Regex.compile`](#Regex.compile) | Compiles `pattern` and returns the `Regex`, owned by the current scope. |
-| [`Regex.equal`](#Regex.equal) | Provides the class default for `Regex.equal`. |
 | [`Regex.escape`](#Regex.escape) | Returns `literal` with every ASCII byte that is not a letter, digit, or underscore escaped, so that it matches itself inside a pattern. |
 | [`Regex.find_all`](#Regex.find_all) | Returns every non-overlapping match of `r` in `subject`, in order. |
-| [`Regex.free`](#Regex.free) | Provides the class default for `Regex.free`. |
-| [`Regex.hash`](#Regex.hash) | Provides the class default for `Regex.hash`. |
 | [`Regex.match`](#Regex.match) | Returns the first match of `r` in `subject`, or NULL. |
 | [`Regex.match_from`](#Regex.match_from) | Returns the first match of `r` in `subject` at or after the byte `offset`, or NULL. |
 | [`Regex.pattern`](#Regex.pattern) | Returns the text `regex` was compiled from. |
 | [`Regex.replace`](#Regex.replace) | Returns `subject` with the first match of `regex` replaced. |
 | [`Regex.replace_all`](#Regex.replace_all) | Returns `subject` with every match of `regex` replaced, expanding `replacement` as `replace` does. |
 | [`Regex.replace_fn`](#Regex.replace_fn) | Returns `subject` with every match of `regex` replaced by what `fn` returns for its `RegexMatch`, inserted as is. |
-| [`Regex.repr`](#Regex.repr) | Provides the class default for `Regex.repr`. |
 | [`Regex.split`](#Regex.split) | Returns the text of `subject` between the matches of `regex`, keeping an empty field where two matches touch or a match sits at either end. |
-| [`Regex.str`](#Regex.str) | Provides the class default for `Regex.str`. |
-| [`Regex.var`](#Regex.var) | Provides the class default for `Regex.var`. |
-| [`Regex.write_repr`](#Regex.write_repr) | Provides the class default for `Regex.write_repr`. |
-| [`Regex.write_str`](#Regex.write_str) | Provides the class default for `Regex.write_str`. |
 | [`RegexCapture.end`](#RegexCapture.end) | Returns the byte offset just past the capture, or -1. |
 | [`RegexCapture.index`](#RegexCapture.index) | Returns the capture number, with 0 for the whole match. |
 | [`RegexCapture.matched`](#RegexCapture.matched) | Reports whether the capture took part in the match. |
@@ -38,7 +29,6 @@ Regular expressions over the bytes of a String.
 | [`RegexCapture.text`](#RegexCapture.text) | Returns the matched text, or NULL for a capture that did not take part. |
 | [`RegexMatch.capture`](#RegexMatch.capture) | Returns the capture of `found` selected by `key`: a capture number, or a name as a `Symbol` or `String`. |
 | [`RegexMatch.getindex`](#RegexMatch.getindex) | Returns the text of the capture selected by `key`, or NULL when the capture does not exist or did not take part in the match. |
-| [`Var.regex`](#Var.regex) | Provides the class default for `Var.regex`. |
 | [`Var.regexcapture`](#Var.regexcapture) | Reads a `RegexCapture` back out of a `Var`, as `foreach` does. |
 | [`Var.regexmatch`](#Var.regexmatch) | Reads a `RegexMatch` back out of a `Var`, as `foreach` does. |
 
@@ -63,17 +53,6 @@ with NULL for a group without a name.
 
 Source: `lib/regex.x:635`
 
-<a id="Regex.cleanup"></a>
-#### Regex.cleanup
-
-`void Regex.cleanup(Regex value)`
-
-Provides the class default for `Regex.cleanup`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
 <a id="Regex.compile"></a>
 #### Regex.compile
 
@@ -85,17 +64,6 @@ Compiles `pattern` and returns the `Regex`, owned by the current scope.
 of the problem when the pattern does not parse.
 
 Source: `lib/regex.x:624`
-
-<a id="Regex.equal"></a>
-#### Regex.equal
-
-`int Regex.equal(Regex left, Regex right)`
-
-Provides the class default for `Regex.equal`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
 
 <a id="Regex.escape"></a>
 #### Regex.escape
@@ -116,28 +84,6 @@ Returns every non-overlapping match of `r` in `subject`, in order.
 An empty match advances one byte. No match returns an empty `List`.
 
 Source: `lib/regex.x:663`
-
-<a id="Regex.free"></a>
-#### Regex.free
-
-`void Regex.free(Regex value)`
-
-Provides the class default for `Regex.free`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
-<a id="Regex.hash"></a>
-#### Regex.hash
-
-`unsigned Regex.hash(Regex value)`
-
-Provides the class default for `Regex.hash`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
 
 <a id="Regex.match"></a>
 #### Regex.match
@@ -200,17 +146,6 @@ returns for its `RegexMatch`, inserted as is.
 
 Source: `lib/regex.x:702`
 
-<a id="Regex.repr"></a>
-#### Regex.repr
-
-`String Regex.repr(Regex value)`
-
-Provides the class default for `Regex.repr`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
 <a id="Regex.split"></a>
 #### Regex.split
 
@@ -220,50 +155,6 @@ Returns the text of `subject` between the matches of `regex`, keeping
 an empty field where two matches touch or a match sits at either end.
 
 Source: `lib/regex.x:674`
-
-<a id="Regex.str"></a>
-#### Regex.str
-
-`String Regex.str(Regex value)`
-
-Provides the class default for `Regex.str`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
-<a id="Regex.var"></a>
-#### Regex.var
-
-`Var Regex.var(Regex value)`
-
-Provides the class default for `Regex.var`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
-<a id="Regex.write_repr"></a>
-#### Regex.write_repr
-
-`Buffer Regex.write_repr(Regex value, Buffer out)`
-
-Provides the class default for `Regex.write_repr`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
-
-<a id="Regex.write_str"></a>
-#### Regex.write_str
-
-`Buffer Regex.write_str(Regex value, Buffer out)`
-
-Provides the class default for `Regex.write_str`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
 
 ### `RegexCapture`
 
@@ -344,17 +235,6 @@ capture does not exist or did not take part in the match.
 Source: `lib/regex.x:721`
 
 ### `Var`
-
-<a id="Var.regex"></a>
-#### Var.regex
-
-`Regex Var.regex(Var value)`
-
-Provides the class default for `Var.regex`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/regex.x:27`
 
 <a id="Var.regexcapture"></a>
 #### Var.regexcapture

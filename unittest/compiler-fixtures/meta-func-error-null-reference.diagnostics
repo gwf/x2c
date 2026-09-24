@@ -1,6 +1,0 @@
-unittest/compiler-fixtures/meta-func-error-null-reference.x:10:10: macro: compile-time Lisp evaluation failed
-    (void) $null_reference(1);
-           ^
-  note: form: (null_reference 1) error: (bad-types (sig ((func ((& int))) "Var")) 
- (index 0u) (source (int)) (want (int)))
-

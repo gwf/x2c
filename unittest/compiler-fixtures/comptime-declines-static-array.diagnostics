@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-static-array.x:3:1: macro: this function cannot run at compile time
+  meta int array_value(void) {
+  ^^^^
+  note: reason: a static array
+

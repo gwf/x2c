@@ -423,9 +423,9 @@ whose exact native contracts are unsuitable for compile-time execution.
 | bound behavior defect | 6 |
 
 These counts preserve the original inventory, not a fresh count for the
-stabilization branch. At reviewed `0bdc8398`, the fresh probe inventory no
-longer failed `String.lstrip`, `String.rstrip` or `String.strip`. Local C1
-commits `a1779f0a` and `310399be` make composed `String.hash` and
+stabilization branch. In the post-merge review, the fresh probe inventory no
+longer failed `String.lstrip`, `String.rstrip` or `String.strip`. Destination
+conversion fixes make composed `String.hash` and
 `Symbol.first`/`Symbol.last` with `Symbol empty = 0` match runtime; the
 `meta-destination-conversion` fixture checks their explicit, folded and
 native results. The generated API report still records its earlier six

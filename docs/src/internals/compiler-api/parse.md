@@ -59,7 +59,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2301`
+Source: `src/parse.x:2269`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -94,7 +94,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2235`
+Source: `src/parse.x:2203`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -320,7 +320,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2010`
+Source: `src/parse.x:1978`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -334,7 +334,7 @@ state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
 the unit emits where it reaches them.
 
-Source: `src/parse.x:1923`
+Source: `src/parse.x:1895`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name

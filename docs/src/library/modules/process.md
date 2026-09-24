@@ -12,10 +12,7 @@ Run commands and pipelines without a shell.
 | [`Env.get`](#Env.get) | Returns the value of this process's environment variable `name`, or NULL when it is unset. |
 | [`Job.check`](#Job.check) | Returns `job` once its status is zero, starting it and waiting as needed. |
 | [`Job.cleanup`](#Job.cleanup) | Terminates and reaps a job that is still running: `SIGTERM`, then `SIGKILL` to any stage still running a second later. |
-| [`Job.equal`](#Job.equal) | Provides the class default for `Job.equal`. |
 | [`Job.errors`](#Job.errors) | Returns the captured standard error of `job`, starting it and waiting as needed, or NULL when standard error was not captured or was empty. |
-| [`Job.free`](#Job.free) | Provides the class default for `Job.free`. |
-| [`Job.hash`](#Job.hash) | Provides the class default for `Job.hash`. |
 | [`Job.kill`](#Job.kill) | Sends `signal` to every stage of `job` that is still running. |
 | [`Job.lines`](#Job.lines) | Returns the captured standard output of `job` as lines without their endings. |
 | [`Job.live`](#Job.live) | Makes `job` pass standard output through instead of capturing it, the same as `options({stdout: <inherit>})`, and returns it. |
@@ -23,17 +20,11 @@ Run commands and pipelines without a shell.
 | [`Job.output`](#Job.output) | Returns the captured standard output of `job`, starting it and waiting as needed. |
 | [`Job.pipe`](#Job.pipe) | Adds `command` after the last stage of `job`, reading that stage's output, and returns the job. |
 | [`Job.ready`](#Job.ready) | Reports whether every stage of `job` has exited, without blocking. |
-| [`Job.repr`](#Job.repr) | Provides the class default for `Job.repr`. |
 | [`Job.run`](#Job.run) | Passes standard output through, waits for `job`, and raises when its status is not zero: `live()` followed by `check()`. |
 | [`Job.start`](#Job.start) | Starts `job` without waiting and returns it. |
 | [`Job.status`](#Job.status) | Returns the status of `job`, starting it and waiting as needed: the exit status, or 128 plus a signal. |
-| [`Job.str`](#Job.str) | Provides the class default for `Job.str`. |
-| [`Job.var`](#Job.var) | Provides the class default for `Job.var`. |
 | [`Job.wait_any`](#Job.wait_any) | Removes and returns the first job in `jobs` that has finished, waiting until one does. |
-| [`Job.write_repr`](#Job.write_repr) | Provides the class default for `Job.write_repr`. |
-| [`Job.write_str`](#Job.write_str) | Provides the class default for `Job.write_str`. |
 | [`List.job`](#List.job) | Returns a `Job` for `command`, a command or pipeline, without starting it. |
-| [`Var.job`](#Var.job) | Provides the class default for `Var.job`. |
 
 ### `Env`
 
@@ -72,17 +63,6 @@ Terminates and reaps a job that is still running: `SIGTERM`, then
 
 Source: `lib/process.x:517`
 
-<a id="Job.equal"></a>
-#### Job.equal
-
-`int Job.equal(Job left, Job right)`
-
-Provides the class default for `Job.equal`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
 <a id="Job.errors"></a>
 #### Job.errors
 
@@ -95,28 +75,6 @@ needed, or NULL when standard error was not captured or was empty.
 text contains a NUL byte.
 
 Source: `lib/process.x:487`
-
-<a id="Job.free"></a>
-#### Job.free
-
-`void Job.free(Job value)`
-
-Provides the class default for `Job.free`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
-<a id="Job.hash"></a>
-#### Job.hash
-
-`unsigned Job.hash(Job value)`
-
-Provides the class default for `Job.hash`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
 
 <a id="Job.kill"></a>
 #### Job.kill
@@ -212,17 +170,6 @@ that has not started reports 0.
 
 Source: `lib/process.x:495`
 
-<a id="Job.repr"></a>
-#### Job.repr
-
-`String Job.repr(Job value)`
-
-Provides the class default for `Job.repr`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
 <a id="Job.run"></a>
 #### Job.run
 
@@ -262,28 +209,6 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 Source: `lib/process.x:428`
 
-<a id="Job.str"></a>
-#### Job.str
-
-`String Job.str(Job value)`
-
-Provides the class default for `Job.str`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
-<a id="Job.var"></a>
-#### Job.var
-
-`Var Job.var(Job value)`
-
-Provides the class default for `Job.var`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
 <a id="Job.wait_any"></a>
 #### Job.wait_any
 
@@ -295,28 +220,6 @@ until one does. An empty `jobs` returns NULL.
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
 Source: `lib/process.x:529`
-
-<a id="Job.write_repr"></a>
-#### Job.write_repr
-
-`Buffer Job.write_repr(Job value, Buffer out)`
-
-Provides the class default for `Job.write_repr`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
-
-<a id="Job.write_str"></a>
-#### Job.write_str
-
-`Buffer Job.write_str(Job value, Buffer out)`
-
-Provides the class default for `Job.write_str`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
 
 ### `List`
 
@@ -339,19 +242,6 @@ Job job = %(printf "a\nb\n");
 ```
 
 Source: `lib/process.x:338`
-
-### `Var`
-
-<a id="Var.job"></a>
-#### Var.job
-
-`Job Var.job(Var value)`
-
-Provides the class default for `Var.job`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/process.x:28`
 
 ## Public types
 

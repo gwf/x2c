@@ -171,20 +171,19 @@ describes these native boundaries.
 
 ## Retired maintenance notes
 
-- Local stabilization commit `0c747a85` preserves discarded assignments,
+- The compiler preserves discarded assignments,
   selected conditional arms, short-circuit branches and updates. The
   `meta-expression-effects` fixture prints matching explicit, folded and
   native results, including `discarded 3 3 3`.
-- Local C1 commits `a1779f0a` and `310399be` convert `Symbol empty = 0`
+- Destination conversion turns `Symbol empty = 0`
   to the declared tag before native methods. The same destination fixture
   checks composed String hash and pointer conversion. Direct local-address
   `Var.is_pointer`/`Var.is_reference` parity was verified in the post-merge
   review; aggregate and borrowed-pointer work remains open above.
-- Local static-initializer commit `fb1009c8` fixes baseline B01-B03. The
+- Static-initializer classification fixes baseline B01-B03. The
   `static-initializer-classification` fixture builds and prints
   `4 4 0 0 0 12 12`; it covers fixed-size `sizeof`, VLA-dependent local
-  static initialization, and empty Array/Map statics. These local campaign
-  commits have not yet been delivered to `dev`.
+  static initialization, and empty Array/Map statics.
 - Meta numeric comparisons resolve builtin typedefs before choosing C
   arithmetic conversion. The former `Array.len()` versus integer mismatch
   is covered by `meta-collection-operations`. `meta-core-operations` also

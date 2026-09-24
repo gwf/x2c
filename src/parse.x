@@ -512,7 +512,7 @@ static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
   int layout = _layout_attribute_since(compiler, first);
   int packed = _attribute_since(compiler, first, compiler.packed_marks);
-  if (tag == <struct> && packed)
+  if (tag == <struct> && packed && compiler.source_private >= 0)
     compiler.report_error(
       <parse>, "packed attributes are unsupported", first, NULL);
   List type = %($tag $name);
@@ -1877,34 +1877,6 @@ static String _definition_doc(Compiler c, Token start) {
   return String.new_len(token.text + 3, token.len - 5);
 }
 
-/* A template's comment is prose, but its holes still refer to the same
-   captured source arguments as its syntax. Render those captures at the
-   chosen expansion, without treating the comment as compiler syntax. */
-static String _expanded_definition_doc(Compiler c, String doc) {
-  if (!doc || !c.macro_stack) return doc;
-  foreach (List frame, c.macro_stack) {
-    List bindings = frame[2];
-    foreach (List pair, bindings) {
-      Var binder = pair.car();
-      if (!binder.is_binder()) continue;
-      String name = binder.str();
-      if (!name.startswith("?") || name.len() < 2) continue;
-      String spelling = NULL;
-      Var captured = pair.cadr();
-      if (captured is <string>) spelling = captured;
-      else if (captured is <symbol>) spelling = captured.symbol();
-      else match (captured)
-        case %(src (source ?(String path) ?(int first) ?(int last)) ?): {
-          String source = path.equal(c.filename)
-                        ? c.text : Path.read_text(path);
-          spelling = source[first:last];
-        }
-      if (spelling) doc = doc.replace("$" + name[1:], spelling);
-    }
-  }
-  return doc;
-}
-
 static void _definition_source(
   Compiler c, List function, int line, String doc) {
   match (function)
@@ -1982,10 +1954,6 @@ List Compiler.parse_top_level(Compiler c) {
     if (meta && c.meta_is_comptime_only(function)) {
       _definition_source(
         c, function, definition_start.line, definition_doc);
-      Map facts = c.semantic_binding_facts();
-      Var prior = facts[%(api-comptime-definitions)];
-      List rows = prior is <list> ? prior.list() : %();
-      facts[%(api-comptime-definitions)] = rows.append(%($function));
       return NULL;
     }
     if (c.macro_holes)
@@ -2358,8 +2326,7 @@ List Compiler.bind_syntax(
                               ? _definition_doc(_, invocation) : NULL;
         _definition_source(
           _, bound, invocation ? invocation.line : line,
-          invocation_doc ? invocation_doc
-                         : _expanded_definition_doc(_, doc));
+          invocation_doc ? invocation_doc : doc);
         return bound;
       }
       case %(named-type ?(String name) ?type): {

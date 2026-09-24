@@ -9,48 +9,48 @@ Typed cons chains generated from typed methods.
 
 | Function | Summary |
 | --- | --- |
-| [`List.listchar`](#List.listchar) | Validates `xs` as `ListChar` and returns the identical canonical chain. |
-| [`List.listdbl`](#List.listdbl) | Validates `xs` as `ListDbl` and returns the identical canonical chain. |
-| [`List.listfloat`](#List.listfloat) | Validates `xs` as `ListFloat` and returns the identical canonical chain. |
-| [`List.listint`](#List.listint) | Validates `xs` as `ListInt` and returns the identical canonical chain. |
-| [`List.listshort`](#List.listshort) | Validates `xs` as `ListShort` and returns the identical canonical chain. |
-| [`List.liststring`](#List.liststring) | Validates `xs` as `ListString` and returns the identical canonical chain. |
-| [`List.listsymbol`](#List.listsymbol) | Validates `xs` as `ListSymbol` and returns the identical canonical chain. |
-| [`ListChar.car`](#ListChar.car) | Returns the first `char` in `xs`, or `0` when `xs` is `nil`. |
-| [`ListChar.cons`](#ListChar.cons) | Returns the canonical `ListChar` formed by prepending `value` to `tail`. |
+| [`List.listchar`](#List.listchar) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.listdbl`](#List.listdbl) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.listfloat`](#List.listfloat) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.listint`](#List.listint) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.listshort`](#List.listshort) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.liststring`](#List.liststring) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`List.listsymbol`](#List.listsymbol) | Validates `xs` as `$list` and returns the identical canonical chain. |
+| [`ListChar.car`](#ListChar.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListChar.cons`](#ListChar.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListChar.index`](#ListChar.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListChar.last`](#ListChar.last) | Returns the final `char` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
-| [`ListDbl.car`](#ListDbl.car) | Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`. |
-| [`ListDbl.cons`](#ListDbl.cons) | Returns the canonical `ListDbl` formed by prepending `value` to `tail`. |
+| [`ListChar.last`](#ListChar.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListDbl.car`](#ListDbl.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListDbl.cons`](#ListDbl.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListDbl.index`](#ListDbl.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListDbl.last`](#ListDbl.last) | Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`, after an O(n) walk. |
-| [`ListFloat.car`](#ListFloat.car) | Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`. |
-| [`ListFloat.cons`](#ListFloat.cons) | Returns the canonical `ListFloat` formed by prepending `value` to `tail`. |
+| [`ListDbl.last`](#ListDbl.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListFloat.car`](#ListFloat.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListFloat.cons`](#ListFloat.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListFloat.index`](#ListFloat.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListFloat.last`](#ListFloat.last) | Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`, after an O(n) walk. |
-| [`ListInt.car`](#ListInt.car) | Returns the first `int` in `xs`, or `0` when `xs` is `nil`. |
-| [`ListInt.cons`](#ListInt.cons) | Returns the canonical `ListInt` formed by prepending `value` to `tail`. |
+| [`ListFloat.last`](#ListFloat.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListInt.car`](#ListInt.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListInt.cons`](#ListInt.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListInt.index`](#ListInt.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListInt.last`](#ListInt.last) | Returns the final `int` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
-| [`ListShort.car`](#ListShort.car) | Returns the first `short` in `xs`, or `0` when `xs` is `nil`. |
-| [`ListShort.cons`](#ListShort.cons) | Returns the canonical `ListShort` formed by prepending `value` to `tail`. |
+| [`ListInt.last`](#ListInt.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListShort.car`](#ListShort.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListShort.cons`](#ListShort.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListShort.index`](#ListShort.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListShort.last`](#ListShort.last) | Returns the final `short` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
-| [`ListString.car`](#ListString.car) | Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`. |
-| [`ListString.cons`](#ListString.cons) | Returns the canonical `ListString` formed by prepending `value` to `tail`. |
+| [`ListShort.last`](#ListShort.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListString.car`](#ListString.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListString.cons`](#ListString.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListString.index`](#ListString.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListString.last`](#ListString.last) | Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`, after an O(n) walk. |
-| [`ListSymbol.car`](#ListSymbol.car) | Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`. |
-| [`ListSymbol.cons`](#ListSymbol.cons) | Returns the canonical `ListSymbol` formed by prepending `value` to `tail`. |
+| [`ListString.last`](#ListString.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`ListSymbol.car`](#ListSymbol.car) | Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`. |
+| [`ListSymbol.cons`](#ListSymbol.cons) | Returns the canonical `$list` formed by prepending `value` to `tail`. |
 | [`ListSymbol.index`](#ListSymbol.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListSymbol.last`](#ListSymbol.last) | Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
-| [`Var.listchar`](#Var.listchar) | Extracts and validates `value` as `ListChar` without copying its cells. |
-| [`Var.listdbl`](#Var.listdbl) | Extracts and validates `value` as `ListDbl` without copying its cells. |
-| [`Var.listfloat`](#Var.listfloat) | Extracts and validates `value` as `ListFloat` without copying its cells. |
-| [`Var.listint`](#Var.listint) | Extracts and validates `value` as `ListInt` without copying its cells. |
-| [`Var.listshort`](#Var.listshort) | Extracts and validates `value` as `ListShort` without copying its cells. |
-| [`Var.liststring`](#Var.liststring) | Extracts and validates `value` as `ListString` without copying its cells. |
-| [`Var.listsymbol`](#Var.listsymbol) | Extracts and validates `value` as `ListSymbol` without copying its cells. |
+| [`ListSymbol.last`](#ListSymbol.last) | Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`, after an O(n) walk. |
+| [`Var.listchar`](#Var.listchar) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.listdbl`](#Var.listdbl) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.listfloat`](#Var.listfloat) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.listint`](#Var.listint) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.listshort`](#Var.listshort) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.liststring`](#Var.liststring) | Extracts and validates `value` as `$list` without copying its cells. |
+| [`Var.listsymbol`](#Var.listsymbol) | Extracts and validates `value` as `$list` without copying its cells. |
 
 ### `List`
 
@@ -59,8 +59,8 @@ Typed cons chains generated from typed methods.
 
 `ListChar List.listchar(List xs)`
 
-Validates `xs` as `ListChar` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<i8>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -74,8 +74,8 @@ Source: `lib/typed-list.x:97`
 
 `ListDbl List.listdbl(List xs)`
 
-Validates `xs` as `ListDbl` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<f64>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -89,8 +89,8 @@ Source: `lib/typed-list.x:113`
 
 `ListFloat List.listfloat(List xs)`
 
-Validates `xs` as `ListFloat` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<f32>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -104,8 +104,8 @@ Source: `lib/typed-list.x:109`
 
 `ListInt List.listint(List xs)`
 
-Validates `xs` as `ListInt` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<i32>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -119,8 +119,8 @@ Source: `lib/typed-list.x:105`
 
 `ListShort List.listshort(List xs)`
 
-Validates `xs` as `ListShort` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<i16>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -134,8 +134,8 @@ Source: `lib/typed-list.x:101`
 
 `ListString List.liststring(List xs)`
 
-Validates `xs` as `ListString` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<string>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -149,8 +149,8 @@ Source: `lib/typed-list.x:117`
 
 `ListSymbol List.listsymbol(List xs)`
 
-Validates `xs` as `ListSymbol` and returns the identical canonical chain.
-Nil is valid. Every nonempty cell must hold a `<symbol>` element; a foreign
+Validates `xs` as `$list` and returns the identical canonical chain.
+Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
 tag raises `<no-convert>` with its zero-based index. Validation is O(n),
 does not copy or mutate cells, and preserves their existing `List`-pool
 lifetime.
@@ -166,8 +166,8 @@ Source: `lib/typed-list.x:121`
 
 `char ListChar.car(ListChar xs)`
 
-Returns the first `char` in `xs`, or `0` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListChar` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:97`
 
@@ -176,7 +176,7 @@ Source: `lib/typed-list.x:97`
 
 `ListChar ListChar.cons(char value, ListChar tail)`
 
-Returns the canonical `ListChar` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -200,9 +200,9 @@ Source: `lib/typed-list.x:97`
 
 `char ListChar.last(ListChar xs)`
 
-Returns the final `char` in `xs`, or `0` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListChar` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:97`
 
@@ -213,8 +213,8 @@ Source: `lib/typed-list.x:97`
 
 `double ListDbl.car(ListDbl xs)`
 
-Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListDbl` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:113`
 
@@ -223,7 +223,7 @@ Source: `lib/typed-list.x:113`
 
 `ListDbl ListDbl.cons(double value, ListDbl tail)`
 
-Returns the canonical `ListDbl` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -247,9 +247,9 @@ Source: `lib/typed-list.x:113`
 
 `double ListDbl.last(ListDbl xs)`
 
-Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListDbl` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:113`
 
@@ -260,8 +260,8 @@ Source: `lib/typed-list.x:113`
 
 `float ListFloat.car(ListFloat xs)`
 
-Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListFloat` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:109`
 
@@ -270,7 +270,7 @@ Source: `lib/typed-list.x:109`
 
 `ListFloat ListFloat.cons(float value, ListFloat tail)`
 
-Returns the canonical `ListFloat` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -294,9 +294,9 @@ Source: `lib/typed-list.x:109`
 
 `float ListFloat.last(ListFloat xs)`
 
-Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListFloat` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:109`
 
@@ -307,8 +307,8 @@ Source: `lib/typed-list.x:109`
 
 `int ListInt.car(ListInt xs)`
 
-Returns the first `int` in `xs`, or `0` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListInt` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:105`
 
@@ -317,7 +317,7 @@ Source: `lib/typed-list.x:105`
 
 `ListInt ListInt.cons(int value, ListInt tail)`
 
-Returns the canonical `ListInt` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -341,9 +341,9 @@ Source: `lib/typed-list.x:105`
 
 `int ListInt.last(ListInt xs)`
 
-Returns the final `int` in `xs`, or `0` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListInt` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:105`
 
@@ -354,8 +354,8 @@ Source: `lib/typed-list.x:105`
 
 `short ListShort.car(ListShort xs)`
 
-Returns the first `short` in `xs`, or `0` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListShort` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:101`
 
@@ -364,7 +364,7 @@ Source: `lib/typed-list.x:101`
 
 `ListShort ListShort.cons(short value, ListShort tail)`
 
-Returns the canonical `ListShort` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -388,9 +388,9 @@ Source: `lib/typed-list.x:101`
 
 `short ListShort.last(ListShort xs)`
 
-Returns the final `short` in `xs`, or `0` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListShort` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:101`
 
@@ -401,8 +401,8 @@ Source: `lib/typed-list.x:101`
 
 `String ListString.car(ListString xs)`
 
-Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListString` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:117`
 
@@ -411,7 +411,7 @@ Source: `lib/typed-list.x:117`
 
 `ListString ListString.cons(String value, ListString tail)`
 
-Returns the canonical `ListString` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -435,9 +435,9 @@ Source: `lib/typed-list.x:117`
 
 `String ListString.last(ListString xs)`
 
-Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListString` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:117`
 
@@ -448,8 +448,8 @@ Source: `lib/typed-list.x:117`
 
 `Symbol ListSymbol.car(ListSymbol xs)`
 
-Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`.
-A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
+Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:121`
 
@@ -458,7 +458,7 @@ Source: `lib/typed-list.x:121`
 
 `ListSymbol ListSymbol.cons(Symbol value, ListSymbol tail)`
 
-Returns the canonical `ListSymbol` formed by prepending `value` to `tail`.
+Returns the canonical `$list` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
 owning canonical `List` pool, which may be an ancestor of the current
 pool when an existing cell is reused.
@@ -482,9 +482,9 @@ Source: `lib/typed-list.x:121`
 
 `Symbol ListSymbol.last(ListSymbol xs)`
 
-Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`,
+Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
 after an O(n) walk.
-A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
+A nonempty `xs` must retain the `$list` element-tag invariant.
 
 Source: `lib/typed-list.x:121`
 
@@ -495,10 +495,10 @@ Source: `lib/typed-list.x:121`
 
 `ListChar Var.listchar(Var value)`
 
-Extracts and validates `value` as `ListChar` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listchar`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -509,10 +509,10 @@ Source: `lib/typed-list.x:97`
 
 `ListDbl Var.listdbl(Var value)`
 
-Extracts and validates `value` as `ListDbl` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listdbl`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -523,10 +523,10 @@ Source: `lib/typed-list.x:113`
 
 `ListFloat Var.listfloat(Var value)`
 
-Extracts and validates `value` as `ListFloat` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listfloat`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -537,10 +537,10 @@ Source: `lib/typed-list.x:109`
 
 `ListInt Var.listint(Var value)`
 
-Extracts and validates `value` as `ListInt` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listint`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -551,10 +551,10 @@ Source: `lib/typed-list.x:105`
 
 `ListShort Var.listshort(Var value)`
 
-Extracts and validates `value` as `ListShort` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listshort`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -565,10 +565,10 @@ Source: `lib/typed-list.x:101`
 
 `ListString Var.liststring(Var value)`
 
-Extracts and validates `value` as `ListString` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.liststring`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
@@ -579,10 +579,10 @@ Source: `lib/typed-list.x:117`
 
 `ListSymbol Var.listsymbol(Var value)`
 
-Extracts and validates `value` as `ListSymbol` without copying its cells.
+Extracts and validates `value` as `$list` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
 payload follows the
-same element validation, identity, and lifetime rules as `List.listsymbol`.
+same element validation, identity, and lifetime rules as `List.$lower`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 

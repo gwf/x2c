@@ -2150,16 +2150,23 @@ List Compiler.evaluate_macro_rows(Compiler compiler, Var value) {
    paths use their canonical absolute identity. Collection and full parsing
    expand the same invocation to the same spelling. */
 static String _file_scope_name(Compiler c, Token root, String source) {
-  String owner = "";
-  if (c.filename) {
-    String path = c.canonical_path(Path.absolute(c.filename));
-    owner = home_portable_path(path);
-    Var package_root = c.package ? c.package_roots[c.package] : void;
-    if (package_root is <string>) {
-      String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
-      if (path.startswith(prefix))
-        owner = %"package:${c.package}/${path[prefix.len():]}";
+  List owner_key = %(${c.filename} ${c.package});
+  Var cached;
+  String owner;
+  if (c.names.file_scope_owners.try_get(owner_key, &cached)) owner = cached;
+  else {
+    owner = "";
+    if (c.filename) {
+      String path = c.canonical_path(Path.absolute(c.filename));
+      owner = home_portable_path(path);
+      Var package_root = c.package ? c.package_roots[c.package] : void;
+      if (package_root is <string>) {
+        String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
+        if (path.startswith(prefix))
+          owner = %"package:${c.package}/${path[prefix.len():]}";
+      }
     }
+    c.names.file_scope_owners[owner_key] = owner;
   }
   String key = %"macro:$owner:${root.pos}:$source";
   Var stored;

@@ -47,11 +47,6 @@ meta int references(void) {
   increment(value);
   return value;
 }
-meta int arrays(void) {
-  static int values[3] = {1, 2, 3};
-  values[1] += 1;
-  return values[0] + values[1] + values[2];
-}
 struct Pair { int a; int b; };
 meta int record(int n) {
   static struct Pair value = {n, 2};
@@ -70,7 +65,6 @@ int main(void) {
   printf("shadow %d %d %d %d\n", $same(1), $same(0), $same(1), $same(0));
   printf("address %d %d\n", $stable(), $stable());
   printf("references %d %d\n", $references(), $references());
-  printf("array %d %d\n", $arrays(), $arrays());
   printf("record %d %d\n", $record(10), $record(40));
   return 0;
 }

@@ -44,7 +44,7 @@ typedef struct ScriptUnit {
     number identifies a declaration only within that file's rows.
 */
 typedef struct GenNames {
-  Map counters, adapters;
+  Map counters, adapters, file_scope_owners;
   int next_binding;
 } *GenNames;
 
@@ -382,6 +382,7 @@ static Compiler _new(Compiler owner) {
       _.names = Scope.calloc(1, sizeof(struct GenNames));
       _.names.counters = {};
       _.names.adapters = {};
+      _.names.file_scope_owners = {};
     }
     _.sym = Scope.calloc(1, sizeof(struct Sym));
     with _.sym {

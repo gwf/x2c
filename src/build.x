@@ -522,29 +522,19 @@ static uint64_t _action_fingerprint(
    select an archive whose bytes changed. Keep the published file when the
    relink produces the same bytes so consumers can reuse their translations. */
 static int _same_file_bytes(String first, String second) {
-  FILE *left = fopen(first.str(), "rb"), *right = fopen(second.str(), "rb");
-  if (!left || !right) {
-    if (left) fclose(left);
-    if (right) fclose(right);
-    return 0;
-  }
+  FILE *left = fopen(first.str(), "rb");
+  if (!left) return 0;
+  defer fclose(left);
+  FILE *right = fopen(second.str(), "rb");
+  if (!right) return 0;
+  defer fclose(right);
   unsigned char a[16384], b[16384];
-  int same = 1;
   for (;;) {
     size_t na = fread(a, 1, sizeof(a), left);
     size_t nb = fread(b, 1, sizeof(b), right);
-    if (na != nb || memcmp(a, b, na)) {
-      same = 0;
-      break;
-    }
-    if (na < sizeof(a)) {
-      same = !ferror(left) && !ferror(right);
-      break;
-    }
+    if (na != nb || memcmp(a, b, na)) return 0;
+    if (na < sizeof(a)) return !ferror(left) && !ferror(right);
   }
-  fclose(left);
-  fclose(right);
-  return same;
 }
 
 /* The preprocessed text is scratch named for this process, so only what it

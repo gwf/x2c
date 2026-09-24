@@ -889,18 +889,6 @@ static List _interface_entry(
   }
   foreach (Var definition, definitions)
     if (definition is not <string>) return NULL;
-  foreach (Var row, selected) match (row) {
-    case %(?(String name) ?(String display) ?(List type)
-           ?(List parameters) ?(int line) ?(String doc)): {
-      (void) display;
-      (void) doc;
-      if (!name || !type || line < 1) return NULL;
-      foreach (Var parameter, parameters)
-        if (parameter is not <string>) return NULL;
-      continue;
-    }
-    default: return NULL;
-  }
   List part_list = parts.list_free();
   List entry = %($part_list $hash $definitions $dependencies);
   _require_retained(canonical.try_own());

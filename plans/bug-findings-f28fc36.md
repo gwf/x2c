@@ -2,8 +2,8 @@
 
 > Status: reference
 > Eight defects reproduced at `f28fc36`, recorded 2026-09-22. No fixes were
-> made during the audit. The later local campaign dispositions below do not
-> rewrite those baseline observations or claim delivery to `dev`.
+> made during the audit. Later dispositions do not rewrite those baseline
+> observations.
 
 Baseline: `f28fc36fd11116666cf21962c66c5b27dda66d0b`, 2026-09-22.
 All eight findings were open at the reviewed baseline. Source links are
@@ -32,19 +32,17 @@ ordinary applications. Compiler-output findings are translation success followed
 by native compilation failure; lifetime findings are diagnostic defects, not
 executed use-after-free demonstrations.
 
-## Later local disposition
+## Later disposition
 
-At local stabilization commit `30c206f2` on September 23, all eight rows have
-bounded repair commits, while `origin/dev` at `5b1f1354` contains none of this
-campaign. These are local source and focused-test outcomes, not publication
-proof. The baseline probes and recorded failures below remain historical.
+The stabilization candidate addresses all eight rows with focused tests.
+The baseline probes and recorded failures below remain historical.
 
-| Finding | Local repair | Focused evidence |
+| Finding | Repair | Focused evidence |
 | --- | --- | --- |
-| B01-B03 | `fb1009c8` | `static-initializer-classification` builds and prints `4 4 0 0 0 12 12`. |
-| B04-B06 | `858f935a` | `region-pooled-ownership` expects Pool String/helper-return warnings and no same-Pool warning. |
-| B07 | `2971ca48` | Graph test adds direct-allocation and wrapper cases after startup repair `d26c3f1e`. |
-| B08 | `f1228d90` | `run-public-definition-projection.sh` checks zero-hole generated functions, visibility, prose, and cold/warm interfaces. |
+| B01-B03 | Static initializer classification | `static-initializer-classification` builds and prints `4 4 0 0 0 12 12`. |
+| B04-B06 | Pooled ownership summary | `region-pooled-ownership` expects Pool String/helper-return warnings and no same-Pool warning. |
+| B07 | Graph allocation accounting | Graph tests include direct-allocation and wrapper cases. |
+| B08 | Public definition selection | Compiler interfaces and generated API references select public definitions. |
 
 ## B01. File-scope constant sizeof emits conflicting C types
 

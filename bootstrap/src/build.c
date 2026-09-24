@@ -1083,30 +1083,98 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
 String String_str(String);
 
 static int _same_file_bytes(String first, String second){
-  FILE * left = fopen(String_str(first), "rb"), * right = fopen(String_str(second), "rb");
-  if(! left || ! right){
-    if(left) fclose(left);
-    if(right) fclose(right);
-    return 0;
-  }
-  unsigned char a[16384], b[16384];
-  int same = 1;
-  for(; ; ){
-    size_t na = fread(a, 1, sizeof(a), left);
-    size_t nb = fread(b, 1, sizeof(b), right);
-    if(na != nb || memcmp(a, b, na)){
-      same = 0;
-      break;
-    }
-    if(na < sizeof(a)){
-      same = ! ferror(left) && ! ferror(right);
-      break;
+  FILE * left = fopen(String_str(first), "rb");
+  if(! left) return 0;
+  {
+    ExceptionFrame _x2c_exception_frame_5;
+    x2c_exception_push(& _x2c_exception_frame_5);
+    if (!sigsetjmp(_x2c_exception_frame_5.env, 0)){
+      FILE * right = fopen(String_str(second), "rb");
+      if(! right){
+        int _x2c_return_value_3 = 0;
+        {
+          if(x2c_exception_claim(& _x2c_exception_frame_5)){
+            fclose(left);
+          }
+          x2c_exception_leave(& _x2c_exception_frame_5);
+          return _x2c_return_value_3;
+        }
+
+      }
+      {
+        ExceptionFrame _x2c_exception_frame_6;
+        x2c_exception_push(& _x2c_exception_frame_6);
+        if (!sigsetjmp(_x2c_exception_frame_6.env, 0)){
+          unsigned char a[16384], b[16384];
+          for(; ; ){
+            size_t na = fread(a, 1, sizeof(a), left);
+            size_t nb = fread(b, 1, sizeof(b), right);
+            if(na != nb || memcmp(a, b, na)){
+              int _x2c_return_value_4 = 0;
+              {
+                if(x2c_exception_claim(& _x2c_exception_frame_6)){
+                  fclose(right);
+                }
+                x2c_exception_leave(& _x2c_exception_frame_6);
+                if(x2c_exception_claim(& _x2c_exception_frame_5)){
+                  fclose(left);
+                }
+                x2c_exception_leave(& _x2c_exception_frame_5);
+                return _x2c_return_value_4;
+              }
+
+            }
+            if(na < sizeof(a)){
+              int _x2c_return_value_5 = ! ferror(left) && ! ferror(right);
+              {
+                if(x2c_exception_claim(& _x2c_exception_frame_6)){
+                  fclose(right);
+                }
+                x2c_exception_leave(& _x2c_exception_frame_6);
+                if(x2c_exception_claim(& _x2c_exception_frame_5)){
+                  fclose(left);
+                }
+                x2c_exception_leave(& _x2c_exception_frame_5);
+                return _x2c_return_value_5;
+              }
+
+            }
+
+          }
+
+        }
+        else {x2c_exception_landed(& _x2c_exception_frame_6);
+        {
+          if(x2c_exception_claim(& _x2c_exception_frame_6)){
+            fclose(right);
+          }
+          x2c_exception_leave(& _x2c_exception_frame_6);
+          __builtin_unreachable();
+        }
+
+      }
+      if(x2c_exception_claim(& _x2c_exception_frame_6)){
+        fclose(right);
+      }
+      x2c_exception_leave(& _x2c_exception_frame_6);
     }
 
   }
+  else {x2c_exception_landed(& _x2c_exception_frame_5);
+  {
+    if(x2c_exception_claim(& _x2c_exception_frame_5)){
+      fclose(left);
+    }
+    x2c_exception_leave(& _x2c_exception_frame_5);
+    __builtin_unreachable();
+  }
+
+}
+if(x2c_exception_claim(& _x2c_exception_frame_5)){
   fclose(left);
-  fclose(right);
-  return same;
+}
+x2c_exception_leave(& _x2c_exception_frame_5);
+}
 }
 
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok){
@@ -1164,7 +1232,7 @@ int compile_commands_write(String path, Array commands){
   if(! _init_guard_) _file_init_();
   String text = String_join(NULL, cons(String_var(_50), cons(String_var(String_join(_51, Array_list(commands))), cons(String_var(_52), NULL))));
   {
-    ExceptionFrame _x2c_exception_frame_5;
+    ExceptionFrame _x2c_exception_frame_7;
     static MatchCaptureSite _x2c_catch_arms_5[2];
     static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 2, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_5[2];
@@ -1173,26 +1241,26 @@ int compile_commands_write(String path, Array commands){
     List _x2c_catch_pattern_8 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_5[1] = List_var(_x2c_catch_pattern_8);
   }
-  ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)){
+  ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_7, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_7);  if (!sigsetjmp(_x2c_exception_frame_7.env, 0)){
     file_publish(cons(String_var(path), cons(String_var(text), NULL)));  report_line(28680520, String_join(NULL, cons(String_var(_53), cons(String_var(path), NULL))));
     {
-      int _x2c_return_value_3 = 1;
+      int _x2c_return_value_6 = 1;
       {
         x2c_error_catch_close(_x2c_error_handler_5);
         _x2c_error_handler_5 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_5);
-        return _x2c_return_value_3;
+        x2c_exception_leave(& _x2c_exception_frame_7);
+        return _x2c_return_value_6;
       }
 
     }
 
   }
-  else {x2c_exception_landed(& _x2c_exception_frame_5);
+  else {x2c_exception_landed(& _x2c_exception_frame_7);
   {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_5)){
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_7)){
       int _x2c_catch_selected_5 = x2c_error_catch_selected(_x2c_error_handler_5);
       x2c_error_catch_detach(_x2c_error_handler_5);
-      x2c_exception_mark_handled(&_x2c_exception_frame_5);
+      x2c_exception_mark_handled(&_x2c_exception_frame_7);
       if (_x2c_catch_selected_5 == 0) {{
 
       }
@@ -1208,14 +1276,14 @@ int compile_commands_write(String path, Array commands){
 else{
   x2c_error_catch_close(_x2c_error_handler_5);
   _x2c_error_handler_5 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_5);
+  x2c_exception_leave(& _x2c_exception_frame_7);
   __builtin_unreachable();
 }
 }
 }
 x2c_error_catch_close(_x2c_error_handler_5);
 _x2c_error_handler_5 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_5);
+x2c_exception_leave(& _x2c_exception_frame_7);
 }
 fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
 return 0;
@@ -1647,17 +1715,17 @@ void Build_cleanup(Build b, int success){
   if(! _init_guard_) _file_init_();
   if(! success || ! b -> temporary || b -> request -> dry_run) return;
   {
-    ExceptionFrame _x2c_exception_frame_6;
+    ExceptionFrame _x2c_exception_frame_8;
     static MatchCaptureSite _x2c_catch_arms_6[1];
     static ErrorCatchSite _x2c_catch_site_6 = {  _x2c_catch_arms_6, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_6[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_6)) {List _x2c_catch_pattern_9 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_6[0] = List_var(_x2c_catch_pattern_9);
   }
-  ErrorHandler volatile _x2c_error_handler_6 = x2c_error_catch_site_push(&_x2c_exception_frame_6, &_x2c_catch_site_6, _x2c_catch_patterns_6);  x2c_exception_push(& _x2c_exception_frame_6);  if (!sigsetjmp(_x2c_exception_frame_6.env, 0)) Path_remove_tree(b -> work_dir);  else {x2c_exception_landed(& _x2c_exception_frame_6); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_6)){
+  ErrorHandler volatile _x2c_error_handler_6 = x2c_error_catch_site_push(&_x2c_exception_frame_8, &_x2c_catch_site_6, _x2c_catch_patterns_6);  x2c_exception_push(& _x2c_exception_frame_8);  if (!sigsetjmp(_x2c_exception_frame_8.env, 0)) Path_remove_tree(b -> work_dir);  else {x2c_exception_landed(& _x2c_exception_frame_8); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_8)){
       x2c_error_catch_detach(_x2c_error_handler_6);
-      x2c_exception_mark_handled(&_x2c_exception_frame_6);
+      x2c_exception_mark_handled(&_x2c_exception_frame_8);
        {fprintf(stderr, "x2c: warning: cannot remove temporary build directory: %s\n", b -> work_dir);
     }
 
@@ -1665,7 +1733,7 @@ void Build_cleanup(Build b, int success){
   else{
     x2c_error_catch_close(_x2c_error_handler_6);
     _x2c_error_handler_6 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_6);
+    x2c_exception_leave(& _x2c_exception_frame_8);
     __builtin_unreachable();
   }
 
@@ -1673,7 +1741,7 @@ void Build_cleanup(Build b, int success){
 }
 x2c_error_catch_close(_x2c_error_handler_6);
 _x2c_error_handler_6 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_6);
+x2c_exception_leave(& _x2c_exception_frame_8);
 }
 }
 
@@ -1930,24 +1998,24 @@ int CliRequest_script_current(CliRequest c, String directory){
   if(access(String_join(NULL, cons(String_var(directory), cons(String_var(_70), NULL))), X_OK) || access(record, R_OK)) return 0;
   List volatile lines = NULL;
   {
-    ExceptionFrame _x2c_exception_frame_7;
+    ExceptionFrame _x2c_exception_frame_9;
     static MatchCaptureSite _x2c_catch_arms_7[1];
     static ErrorCatchSite _x2c_catch_site_7 = {  _x2c_catch_arms_7, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_7[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_7)) {List _x2c_catch_pattern_10 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_7[0] = List_var(_x2c_catch_pattern_10);
   }
-  ErrorHandler volatile _x2c_error_handler_7 = x2c_error_catch_site_push(&_x2c_exception_frame_7, &_x2c_catch_site_7, _x2c_catch_patterns_7);  x2c_exception_push(& _x2c_exception_frame_7);  if (!sigsetjmp(_x2c_exception_frame_7.env, 0)) lines = String_split_lines(Path_read_text(record), 0);  else {x2c_exception_landed(& _x2c_exception_frame_7); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_7)){
+  ErrorHandler volatile _x2c_error_handler_7 = x2c_error_catch_site_push(&_x2c_exception_frame_9, &_x2c_catch_site_7, _x2c_catch_patterns_7);  x2c_exception_push(& _x2c_exception_frame_9);  if (!sigsetjmp(_x2c_exception_frame_9.env, 0)) lines = String_split_lines(Path_read_text(record), 0);  else {x2c_exception_landed(& _x2c_exception_frame_9); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_9)){
       x2c_error_catch_detach(_x2c_error_handler_7);
-      x2c_exception_mark_handled(&_x2c_exception_frame_7);
+      x2c_exception_mark_handled(&_x2c_exception_frame_9);
        {{
-        int _x2c_return_value_4 = 0;
+        int _x2c_return_value_7 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_7);
           _x2c_error_handler_7 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_7);
-          return _x2c_return_value_4;
+          x2c_exception_leave(& _x2c_exception_frame_9);
+          return _x2c_return_value_7;
         }
 
       }
@@ -1958,7 +2026,7 @@ int CliRequest_script_current(CliRequest c, String directory){
   else{
     x2c_error_catch_close(_x2c_error_handler_7);
     _x2c_error_handler_7 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_7);
+    x2c_exception_leave(& _x2c_exception_frame_9);
     __builtin_unreachable();
   }
 
@@ -1966,7 +2034,7 @@ int CliRequest_script_current(CliRequest c, String directory){
 }
 x2c_error_catch_close(_x2c_error_handler_7);
 _x2c_error_handler_7 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_7);
+x2c_exception_leave(& _x2c_exception_frame_9);
 }
 Toolchain toolchain = toolchain_new(c -> cc, c -> ar, c -> cpp_args, c -> cc_args, c -> ld_args, 0, 0);
 int ok = 1;

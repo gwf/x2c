@@ -20,7 +20,7 @@ typedef struct ScriptUnit{
 * ScriptUnit;
 
 typedef struct GenNames{
-  Map counters, adapters;
+  Map counters, adapters, file_scope_owners;
   int next_binding;
 }
 * GenNames;

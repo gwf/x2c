@@ -16,7 +16,6 @@ prefix.
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
 | `x2c_compiler_identity` | `src/utils.x` | `String x2c_compiler_identity(void)` |
 | `x2c_cpp_include_dirs` | `src/utils.x` | `List x2c_cpp_include_dirs(void)` |
-| [`x2c_decl_make`](meta.md#x2c_decl_make) | `lib/meta.x` | `meta List x2c_decl_make(List type, Var name, List initializer)` |
 | `x2c_default_include_dirs` | `src/utils.x` | `List x2c_default_include_dirs(void)` |
 | [`x2c_descriptor_registration_frozen`](dispatch.md#x2c_descriptor_registration_frozen) | `lib/dispatch.x` | `int x2c_descriptor_registration_frozen(void)` |
 | [`x2c_descriptor_thread_start_begin`](dispatch.md#x2c_descriptor_thread_start_begin) | `lib/dispatch.x` | `void x2c_descriptor_thread_start_begin(void)` |
@@ -39,9 +38,7 @@ prefix.
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
 | [`x2c_expr_call`](meta.md#x2c_expr_call) | `lib/meta.x` | `meta List x2c_expr_call(List callee, List arguments)` |
-| [`x2c_expr_cast`](meta.md#x2c_expr_cast) | `lib/meta.x` | `meta List x2c_expr_cast(List type, List expression)` |
 | [`x2c_expr_composite`](meta.md#x2c_expr_composite) | `lib/meta.x` | `meta List x2c_expr_composite(List items)` |
-| [`x2c_expr_field`](meta.md#x2c_expr_field) | `lib/meta.x` | `meta List x2c_expr_field(List receiver, String name)` |
 | [`x2c_expr_ident`](meta.md#x2c_expr_ident) | `lib/meta.x` | `meta List x2c_expr_ident(List name)` |
 | [`x2c_expr_index`](meta.md#x2c_expr_index) | `lib/meta.x` | `meta List x2c_expr_index(List base, List subscript)` |
 | `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
@@ -86,7 +83,6 @@ prefix.
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
 | `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
 | `x2c_package_source` | `src/utils.x` | `int x2c_package_source(String directory, String path)` |
-| [`x2c_param_make`](meta.md#x2c_param_make) | `lib/meta.x` | `meta List x2c_param_make(List type, Var name)` |
 | [`x2c_parameters_arguments`](meta.md#x2c_parameters_arguments) | `lib/meta.x` | `meta List x2c_parameters_arguments(List value)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
@@ -100,7 +96,6 @@ prefix.
 | [`x2c_stmnt_return`](meta.md#x2c_stmnt_return) | `lib/meta.x` | `meta List x2c_stmnt_return(List expression)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
-| [`x2c_type_members`](meta.md#x2c_type_members) | `lib/meta.x` | `meta List x2c_type_members(List type)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var.x` | `int x2c_var_descriptor_index(Var value)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
 | [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
@@ -118,4 +113,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 106 functions.
+Total: 101 functions.

@@ -9,13 +9,6 @@ Checked dynamic storage for fixed-width elements.
 
 | Function | Summary |
 | --- | --- |
-| [`Bytes_capacity`](#Bytes_capacity) | Provides the generated protocol operation `Bytes_capacity`. |
-| [`Bytes_clear`](#Bytes_clear) | Provides the generated protocol operation `Bytes_clear`. |
-| [`Bytes_free`](#Bytes_free) | Provides the generated protocol operation `Bytes_free`. |
-| [`Bytes_len`](#Bytes_len) | Provides the generated protocol operation `Bytes_len`. |
-| [`Bytes_pop`](#Bytes_pop) | Provides the generated protocol operation `Bytes_pop`. |
-| [`Bytes_truncate`](#Bytes_truncate) | Provides the generated protocol operation `Bytes_truncate`. |
-| [`Bytes_truth`](#Bytes_truth) | Provides the generated protocol operation `Bytes_truth`. |
 | [`Block.append`](#Block.append) | Appends `count` elements copied from `source` to `block`. |
 | [`Block.append_fill`](#Block.append_fill) | Appends repeated fixed-width elements to `block`. |
 | [`Block.capacity`](#Block.capacity) | Returns how many elements `b` can hold without growing. |
@@ -38,71 +31,6 @@ Checked dynamic storage for fixed-width elements.
 | [`Bytes.push`](#Bytes.push) | Appends one element and returns the possibly relocated `Bytes` base. |
 | [`Bytes.reserve`](#Bytes.reserve) | Ensures `bytes` can hold at least `minimum` elements and returns its base. |
 | [`Bytes.try_pop`](#Bytes.try_pop) | Removes the final element through `bytes` as `Block.try_pop` does. |
-
-### Functions
-
-<a id="Bytes_capacity"></a>
-#### Bytes_capacity
-
-`size_t Bytes_capacity(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_capacity`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_clear"></a>
-#### Bytes_clear
-
-`void Bytes_clear(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_clear`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_free"></a>
-#### Bytes_free
-
-`void Bytes_free(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_free`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_len"></a>
-#### Bytes_len
-
-`size_t Bytes_len(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_len`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_pop"></a>
-#### Bytes_pop
-
-`void Bytes_pop(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_pop`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_truncate"></a>
-#### Bytes_truncate
-
-`void Bytes_truncate(Bytes a0, size_t a1)`
-
-Provides the generated protocol operation `Bytes_truncate`.
-
-Source: `lib/block.x:1`
-
-<a id="Bytes_truth"></a>
-#### Bytes_truth
-
-`int Bytes_truth(Bytes a0)`
-
-Provides the generated protocol operation `Bytes_truth`.
-
-Source: `lib/block.x:1`
 
 ### `Block`
 

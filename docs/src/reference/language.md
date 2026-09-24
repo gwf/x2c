@@ -2156,10 +2156,9 @@ same first-use and retry rules in session-owned native bytes. Identity is the
 function and local binding within the consuming translation session; neither
 an automatic call frame nor a cached function lowering owns the object.
 Loops, recursive calls and wrappers share it. Each consuming unit and the
-emitted program have independent storage. `static threaded` separates
-threads within a session, whose evaluator calls must be serialized. A
-function that reaches local static storage, even `const` storage, and its
-transitive callers are not automatically folded.
+emitted program have independent storage. `static threaded` has no
+compile-time lowering. A function that reaches local static storage, even
+`const` storage, and its transitive callers are not automatically folded.
 
 A `goto` or switch dispatch cannot bypass a runtime static declaration and
 enter its remaining block. Put the declaration before the switch, or put it

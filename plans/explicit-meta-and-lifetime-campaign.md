@@ -1,7 +1,6 @@
-> Status: blocked
+> Status: deferred
 > Updated September 23, 2026. This is the planning handoff for the deferred
-> next phase. Stabilization is locally validated but has not been delivered
-> to `dev`. Implementation remains on hold pending that delivery and Gary's
+> next phase. Implementation remains on hold pending stabilization and Gary's
 > resource/scope decision. It must not start automatically.
 
 # Next phase: explicit meta calls, lifetimes, and computed values
@@ -24,7 +23,7 @@ decision. Preserve these files' newer status if another checkout has moved on.
 ## Work already owned by stabilization
 
 The active [post-merge stabilization plan](post-merge-stabilization-2026-09-23.md)
-owns the following repairs. Its orchestrator owns their remaining fixes,
+owns the following repairs. Its owner handles their remaining fixes,
 integration, validation, and delivery to `dev`. These are expected outputs
 of that campaign, not claims that every item is already complete.
 

@@ -37,18 +37,16 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed against local stabilization candidate `30c206f2` on 2026-09-23;
-`origin/dev` was `5b1f1354` and had not received that campaign. A historical
+Reviewed against the stabilization candidate on 2026-09-23. A historical
 plan's original branch, baseline and authorization notes are evidence for
 that work; its opening status and this index distinguish them from current
 execution.
 
 ### Current work
 
-- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): local
-  compiler, runtime, package, and tooling repairs have passed local
-  publication checks but await approval and delivery to `dev`. Fresh-home
-  generated Lisp regeneration passed twice on the final local candidate;
+- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md):
+  compiler, runtime, package, and tooling repairs are under final review.
+  Fresh-home generated Lisp regeneration passed twice;
   the [reproducibility record](generated-lisp-reproducibility.md) retains the
   earlier failure and the repaired result.
 - [Explicit meta calls, lifetimes, and computed values](explicit-meta-and-lifetime-campaign.md):
@@ -104,11 +102,11 @@ Production promotion remains separately authorized under the release workflow.
 - [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
   cleanup candidates with paired source ranges and deletion boundaries.
 - [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,
-  with portable probe sources, historical results and later local repair
+  with portable probe sources, historical results and later repair
   dispositions, separate from cleanup.
 
 Both reports audit `f28fc36` (2026-09-22). The bug report now also links
-local campaign outcomes; the original observations do not describe later
+campaign outcomes; the original observations do not describe later
 `dev` by themselves or approve every proposed design.
 
 ### Decisions and completed records
