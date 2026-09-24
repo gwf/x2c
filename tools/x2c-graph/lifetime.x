@@ -31,40 +31,6 @@ struct Lifetime {
   int origin, transfers, summary_unresolved;
 };
 
-static String _lifetime_callee(Lifetime lifetime, Var value, List *arguments) {
-  *arguments = NULL;
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(expr ? ?inner):
-      return _lifetime_callee(lifetime, inner, arguments);
-    case %(stmnt ?inner):
-      return _lifetime_callee(lifetime, inner, arguments);
-    case %(parens ?inner):
-      return _lifetime_callee(lifetime, inner, arguments);
-    case %(at ? ?inner):
-      return _lifetime_callee(lifetime, inner, arguments);
-    case %(call
-           (expr ?
-             (ident (!set ?binding (binding ? ?spelling))))
-           (!set ?call_arguments (args *))): {
-      *arguments = call_arguments;
-      if (lifetime.compiler.semantic_binding_facts().contains(
-            %(automatic $binding)
-          ))
-        return "computed";
-      String name = lifetime.compiler.emitted_binding_name(binding);
-      if (name && strlen(name)) return name;
-      return spelling.str();
-    }
-    case %(call ? (!set ?call_arguments (args *))): {
-      *arguments = call_arguments;
-      return "computed";
-    }
-  }
-  return NULL;
-}
-
 static List _lifetime_binding(Var value) {
   if (value is not <list>) return NULL;
   List node = value;
@@ -200,7 +166,10 @@ static Symbol _lifetime_region_allocation_kind(
   );
   if (kind) return kind;
   List arguments;
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   if (!name) return 0;
   kind = _lifetime_named_allocation_kind(name);
   if (kind) *operation = name;
@@ -291,14 +260,14 @@ static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
     lifetime, node, &operation
   );
   if (kind) return %(kind $kind);
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  List target = project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   if (!name) return %(other);
   if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
     return _lifetime_summary_fact(lifetime, arguments[1]);
   if (name == "Context_export") return %(other);
-  List target = project_call_target(
-    lifetime.compiler, lifetime.definitions, node, &name
-  );
   return target && !List.equal(target, %(computed))
        ? %(call $target) : %(unresolved);
 }
@@ -344,7 +313,10 @@ static int _lifetime_wrapped_allocation(Lifetime lifetime, Var value) {
     case %(parens ?inner):
       return _lifetime_wrapped_allocation(lifetime, inner);
   }
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   return name && _lifetime_transparent(name) && arguments &&
          arguments.len() > 1
        ? _lifetime_wrapped_allocation(lifetime, arguments[1]) : 0;
@@ -357,7 +329,10 @@ static int _lifetime_export_result(Lifetime lifetime, Var value) {
     case %(expr ? ?inner): return _lifetime_export_result(lifetime, inner);
     case %(parens ?inner): return _lifetime_export_result(lifetime, inner);
   }
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   if (!name) return 0;
   if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
     return _lifetime_export_result(lifetime, arguments[1]);
@@ -416,7 +391,10 @@ static void _lifetime_replace_return_fact(
   }
   if (value is not <list>) return;
   List node = value, arguments;
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   if (name && _lifetime_transparent(name) && arguments &&
       arguments.len() > 1)
     _lifetime_replace_return_fact(
@@ -437,7 +415,10 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
     }
     case %(cast *): return;
   }
-  String name = _lifetime_callee(lifetime, node, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, node, &name, &arguments
+  );
   if (arguments) {
     if (!_lifetime_known_call(name))
       foreach (Var argument, cdr(arguments)) {
@@ -478,14 +459,14 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
     return id;
   }
   List arguments;
-  String name = _lifetime_callee(lifetime, value, &arguments);
+  String name;
+  List target = project_call_target(
+    lifetime.compiler, lifetime.definitions, value, &name, &arguments
+  );
   if (name && _lifetime_transparent(name) && arguments &&
       arguments.len() > 1)
     return _lifetime_expression(lifetime, arguments[1]);
   if (arguments && !_lifetime_known_call(name)) {
-    List target = project_call_target(
-      lifetime.compiler, lifetime.definitions, value, &name
-    );
     Type result_type = _lifetime_expression_type(value);
     int scope_region = _lifetime_region(lifetime, <scoped>);
     int pool_region = _lifetime_region(lifetime, <pooled>);
@@ -509,7 +490,10 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
 static int _lifetime_context_open(
   Lifetime lifetime, Var value, int *isolated) {
   List arguments;
-  String name = _lifetime_callee(lifetime, value, &arguments);
+  String name;
+  project_call_target(
+    lifetime.compiler, lifetime.definitions, value, &name, &arguments
+  );
   if (!name) return 0;
   *isolated = name == "Context_open_isolated" ||
               name == "Context_open_isolated_named";
@@ -715,7 +699,10 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
     }
     case %(defer ?cleanup): {
       List arguments;
-      String name = _lifetime_callee(lifetime, cleanup, &arguments);
+      String name;
+      project_call_target(
+        lifetime.compiler, lifetime.definitions, cleanup, &name, &arguments
+      );
       if (name == "Scope_release")
         _lifetime_end_region(
           lifetime, _lifetime_scope_region(lifetime), 1
@@ -754,7 +741,10 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
     }
     case %(stmnt ?expression): {
       List arguments;
-      String name = _lifetime_callee(lifetime, expression, &arguments);
+      String name;
+      project_call_target(
+        lifetime.compiler, lifetime.definitions, expression, &name, &arguments
+      );
       if (name == "Scope_retain") {
         int id = ++lifetime.next_region;
         lifetime.regions[id] = %(region $id scope 0 1 0 none none);

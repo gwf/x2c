@@ -34,11 +34,6 @@ static List _flow_location(Compiler compiler, String path, int origin) {
   );
 }
 
-static List _flow_target(
-  Compiler compiler, Map definitions, Var value, String *name) {
-  return project_call_target(compiler, definitions, value, name);
-}
-
 static List _flow_summary(
   Compiler compiler, Var value, Map parameters, Map locals) {
   if (value is not <list>) return %(value);
@@ -59,7 +54,7 @@ static List _flow_summary(
     }
     case %(call ?callee (args *)): {
       String name = NULL;
-      _flow_target(compiler, {}, node, &name);
+      project_call_target(compiler, {}, node, &name, NULL);
       return %(call ${name ? name : %"computed"});
     }
     case %(literal ? ?spelling *): return %(literal $spelling);
@@ -132,7 +127,9 @@ static List _flow_source(
     }
     case %(call ? (args *arguments)): {
       String name = NULL;
-      List target = _flow_target(compiler, definitions, node, &name);
+      List target = project_call_target(
+        compiler, definitions, node, &name, NULL
+      );
       if (name && name == "List_var" && arguments && !arguments.cdr())
         return %(
           wrapper $name ${_flow_location(compiler, path, origin)}

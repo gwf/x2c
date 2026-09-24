@@ -159,7 +159,7 @@ static void _loop_collect(
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, &name
+          compiler, definitions, node, &name, NULL
         );
         if (target && !List.equal(target, %(computed)))
           pending.push(%(
