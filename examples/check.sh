@@ -30,6 +30,11 @@ run_count=0
 build_count=0
 artifact_count=0
 
+# An example is a .x source, or a .xp source in the indentation syntax.
+source_of() {
+  if [[ -f "$example_dir/$1.xp" ]]; then echo "$1.xp"; else echo "$1.x"; fi
+}
+
 record_failure() {
   echo "example failure: $1" >&2
   failures=$((failures + 1))
@@ -90,7 +95,7 @@ check_example() {
 
   if ((${#extra_flags[@]})); then
     if ! (cd "$root" && "$x2c" build --output "$program" \
-        --build-dir "$output" "${extra_flags[@]}" "examples/$name.x") \
+        --build-dir "$output" "${extra_flags[@]}" "examples/$(source_of "$name")") \
         >"$case_build/x2c.stdout" 2>"$case_build/x2c.stderr"; then
       cat "$case_build/x2c.stderr" >&2
       record_failure "$name did not build"
@@ -98,7 +103,7 @@ check_example() {
     fi
   else
     if ! (cd "$root" && \
-        "$x2c" translate --out-dir "$output" "examples/$name.x") \
+        "$x2c" translate --out-dir "$output" "examples/$(source_of "$name")") \
         >"$case_build/x2c.stdout" 2>"$case_build/x2c.stderr"; then
       cat "$case_build/x2c.stderr" >&2
       record_failure "$name did not translate"
@@ -176,8 +181,8 @@ while IFS= read -r row || [[ -n "$row" ]]; do
   fi
   seen[$name]=1
 
-  source="$example_dir/$name.x"
-  [[ -f "$source" ]] || record_failure "$name has no .x source"
+  source="$example_dir/$(source_of "$name")"
+  [[ -f "$source" ]] || record_failure "$name has no .x or .xp source"
 
   case "$category" in
     showcase|optional|external-input|probe|legacy|known-failure) ;;
@@ -233,13 +238,14 @@ done
 while IFS= read -r source; do
   name=${source#"$example_dir/"}
   name=${name%.x}
+  name=${name%.xp}
   if [[ -z ${seen[$name]+present} ]]; then
-    record_failure "$name.x is not classified"
+    record_failure "$source is not classified"
   fi
 done < <({
-  find "$example_dir" -maxdepth 1 -type f -name '*.x'
+  find "$example_dir" -maxdepth 1 -type f \( -name '*.x' -o -name '*.xp' \)
   find "$example_dir"/{love,power,magic,programs,scripts,tours} \
-    -type f -name '*.x'
+    -type f \( -name '*.x' -o -name '*.xp' \)
 } | sort)
 
 if ((failures)); then

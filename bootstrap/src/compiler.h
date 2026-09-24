@@ -75,6 +75,7 @@ typedef struct Compiler{
   Map meta_layouts;
   Map native_meta;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int layout;
   int meta_body;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;

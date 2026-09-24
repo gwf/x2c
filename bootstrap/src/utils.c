@@ -28,7 +28,7 @@
 
 #include "exception.h"
 
-static String _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -98,15 +98,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _16 = String_new("X2C_HOME");
   _17 = String_new(".");
   _18 = String_new(".x");
-  _19 = String_new(".c");
-  _20 = String_new(".h");
-  _21 = String_new(".o");
-  _22 = String_new(".a");
-  _23 = String_new(":");
-  _24 = String_new("PATH");
-  _25 = String_new("/proc/self/exe");
-  _26 = String_new("include");
-  _27 = String_new("etc/compiler-sdk.xlisp");
+  _19 = String_new(".xp");
+  _20 = String_new(".c");
+  _21 = String_new(".h");
+  _22 = String_new(".o");
+  _23 = String_new(".a");
+  _24 = String_new(".xpmacro");
+  _25 = String_new(":");
+  _26 = String_new("PATH");
+  _27 = String_new("/proc/self/exe");
+  _28 = String_new("include");
+  _29 = String_new("etc/compiler-sdk.xlisp");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -203,14 +205,19 @@ int String_endswith(String, String);
 
 int x2c_source_file(String path){
   if(! _init_guard_) _file_init_();
-  if(String_endswith(path, _18)) return 1;
-  if(String_endswith(path, _19) || String_endswith(path, _20) || String_endswith(path, _21) || String_endswith(path, _22)) return 0;
+  if(String_endswith(path, _18) || String_endswith(path, _19)) return 1;
+  if(String_endswith(path, _20) || String_endswith(path, _21) || String_endswith(path, _22) || String_endswith(path, _23)) return 0;
   FILE * file = fopen(path, "r");
   if(! file) return 0;
   char head[2];
   int shebang = fread(head, 1, 2, file) == 2 && head[0] == '#' && head[1] == '!';
   fclose(file);
   return shebang;
+}
+
+int x2c_layout_file(String path){
+  if(! _init_guard_) _file_init_();
+  return String_truth(path) &&(String_endswith(path, _19) || String_endswith(path, _24));
 }
 
 int String_rfind(String, String);
@@ -260,7 +267,7 @@ String x2c_find_program(String name){
   if(! _init_guard_) _file_init_();
   {
     String directory;
-    List _x2c_macro_object_1 = String_split(Env_get(_24), _23);
+    List _x2c_macro_object_1 = String_split(Env_get(_26), _25);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
@@ -365,7 +372,7 @@ static String _executable(const char * argv0){
 }
 
 static String _identity(void){
-  String path = Path_exists(_25) ? _9 : x2c_executable_path;
+  String path = Path_exists(_27) ? _9 : x2c_executable_path;
   int ok = path != NULL;
   uint64_t hash = UINT64_C(1469598103934665603);
   if(ok) hash = x2c_fnv_file(hash, path, & ok);
@@ -377,7 +384,7 @@ int Path_is_dir(Path);
 int Path_is_file(Path);
 
 static int _is_home(Path p){
-  return Path_is_dir(Path_join(p, _26)) && Path_is_file(Path_join(p, _27));
+  return Path_is_dir(Path_join(p, _28)) && Path_is_file(Path_join(p, _29));
 }
 
 static String _locate_home(Path p){

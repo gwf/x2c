@@ -233,6 +233,7 @@ static void _parse_segment(
   int unit = x2c_source_file(path);
   if (!unit || !_package_owns(c, path)) shadow.package = NULL;
   shadow.filename = path;
+  shadow.layout = c.layout;
   shadow.source_private = private;
   shadow.open_linkage = *linkage;
   shadow.take_unit_state(c);
@@ -413,7 +414,12 @@ static void _file(
        segment ends before an include or a visibility pragma, and the next
        begins after it. */
     Tokenizer tokenizer = Tokenizer.new(text);
+    tokenizer.layout = x2c_layout_file(path);
     tokenizer.scan();
+    /* Every segment parses in the syntax the whole file selected. */
+    int enclosing_layout = c.layout;
+    c.layout = tokenizer.layout;
+    defer c.layout = enclosing_layout;
     Token first = tokenizer.tokens;
     int segment_line = 1, segment_position = 0;
     for (Token token = first; token.type != <eof>; token++) {

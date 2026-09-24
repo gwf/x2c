@@ -31,7 +31,7 @@ The operand is a local directory, a local `.tar.gz`, a URL with
 verified against this compiler's version unless `--force`; a pure-x2c
 source package is built by this compiler. Failures exit with status 2.
 
-Source: `src/install.x:316`
+Source: `src/install.x:318`
 
 #### install_require
 
@@ -44,7 +44,7 @@ comes from the archive that lockfile recorded; NULL resolves the index
 instead. The row has the `install_rows` shape, and an already satisfied
 dependency reaches no network. Failures exit with status 2.
 
-Source: `src/install.x:352`
+Source: `src/install.x:354`
 
 #### install_rows
 
@@ -65,7 +65,7 @@ Source: `src/install.x:115`
 Returns the version an installed package records, or NULL when no package
 of that name is installed or it records no version. Reaches no network.
 
-Source: `src/install.x:342`
+Source: `src/install.x:344`
 
 #### list_command
 
@@ -73,7 +73,7 @@ Source: `src/install.x:342`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
-Source: `src/install.x:399`
+Source: `src/install.x:401`
 
 #### remove_command
 
@@ -82,7 +82,7 @@ Source: `src/install.x:399`
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
-Source: `src/install.x:380`
+Source: `src/install.x:382`
 
 ## Design notes
 

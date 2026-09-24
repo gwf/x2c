@@ -1,8 +1,7 @@
 # Cleanup lowering out of `src/emit.x`
 
-> Status: reference - open, unscheduled follow-up. Phase 1 done 2026-09-15
-> in 68eea0a. Phase 2 measured and declined 2026-09-24; Phase 3 is optional
-> and unscheduled. Item 2 of
+> Status: done - Phase 1 done 2026-09-15 in 68eea0a. Phases 2 and 3
+> measured and declined 2026-09-24. Item 2 of
 > `plans/archive/architecture-salvage.md`, the last surviving piece of the
 > declined compiler redesign.
 > Notes: Phase 1 landed as `src/cleanup.x`, a pass that decides regions, the
@@ -167,6 +166,16 @@ implemented, and build and translate times were not compared.
   `_cache_reachable_function_ids` analysis that places them. Removing them
   needs evidence that every supported toolchain runs constructors, which this
   plan does not have.
+
+Investigated 2026-09-24 at 86ec93ce and declined. The entry guards are not
+a fallback: seven runtime units (`atom`, `context`, `error_init`, `file`,
+`logger`, `pool`, `scope`) have no constructor, and their guard is their only
+initialization path. The guards also make cross-unit order safe. A macOS
+probe showed a constructor reading another unit's uninitialized state when
+link order was reversed. Removing them would delete about 85 lines of
+`src/generate.x` and `src/cache.x`, but it would need new cross-unit
+ordering machinery. Skipping the macro pair would add 20 to 25 lines of
+`src/emit.x` to save generated C, with nothing deleted.
 
 ## Risks
 

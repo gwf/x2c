@@ -75,7 +75,7 @@ static String _repr(String text) {
 
 static String _stdout(Job job) {
   try return job.output();
-  catch %(cmd-fail *detail): return detail.assoc(<output>);
+  catch %(cmd-fail *detail): return %"${detail.assoc(<output>)}";
 }
 
 static void _launch(Job job, List attempt) {

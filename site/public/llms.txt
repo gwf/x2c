@@ -27,6 +27,7 @@
 - [Wrapping a C Library](https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html)
 - [Commands and Files](https://x2c-lang.dev/docs/guide/scripting.html)
 - [Experimental REPL](https://x2c-lang.dev/docs/guide/repl.html)
+- [Indentation Syntax](https://x2c-lang.dev/docs/guide/indentation.html)
 - [Programming Idioms](https://x2c-lang.dev/docs/guide/idioms.html)
 
 ## Language reference

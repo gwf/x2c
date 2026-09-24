@@ -108,6 +108,72 @@ printf("%s\n", greeting(name));
 if (!args) return 1;
 ```
 
+### Indentation syntax
+
+A file can group statements by indentation and end them at line breaks
+instead of writing braces and semicolons. The file is in the indentation
+syntax when its name ends in `.xp`, a macro file's name ends in `.xpmacro`,
+or `#pragma indent` appears before its first line of code. Only comments,
+blank lines, and other directives may come before the pragma, and it does
+not reach the generated C. A `.xp` unit is otherwise an ordinary unit:
+`#include "shapes.xp"` includes its generated `shapes.h`, and builds,
+packages, and `x2c script` accept `.xp` wherever they accept `.x`.
+
+The indented form is a spelling of the brace form. The tokenizer inserts
+the braces, semicolons, and condition parentheses, and every later stage
+reads the same tokens as it would for the brace form:
+
+```x2c
+#pragma indent
+
+int sum_positive(int *xs, int n):
+  int total = 0
+  for int i = 0; i < n; i++:
+    if xs[i] < 0: continue
+    total += xs[i]
+  return total
+
+int main(void):
+  int xs[] = {3, -1, 4}
+  printf("%d\n", sum_positive(xs, 3))
+  return 0
+```
+
+```text
+7
+```
+
+- **Lines.** A logical line ends at a line break outside brackets. A
+  deeper line continues the previous one unless that line ends in `:`, and
+  a line that starts with `.` continues a method chain.
+- **Blocks.** A line that ends in `:` before a deeper line opens a block,
+  and each return to an outer indentation closes one. `if`, `else if`,
+  `while`, `for`, `foreach`, `switch`, and `match` take their condition with
+  or without parentheses. `case X:` and `default:` open a block of their
+  own. A `struct`, `union`, or `enum` body closes with `};`, unless its
+  header starts with `typedef`, and enumerators keep their commas.
+- **One-line bodies.** `if cond: statement` puts the body after the first
+  colon outside brackets that does not belong to a `?:`.
+- **Statements.** Every other line ends with an implied `;`. Directives,
+  enum bodies, a line that is one whole `$(...)` form, and a statement
+  that is only a macro hole, alone or after a control header, take none.
+- **Bare blocks.** `do:` whose block is not followed by a `while` line at
+  the same indentation is a bare `{ ... }` scope. With that trailer it is a
+  `do`-`while` loop.
+- **Decorators.** A [decorator](#decorators) invocation is written with a
+  leading `@`, as in `@$time("load")`, on the line before the statement it
+  wraps. Without the `@`, the line would end with `;` as a statement macro
+  call does.
+- **Explicit forms.** Braces and semicolons written explicitly keep their
+  meaning, and braces that make values, such as initializers and Map
+  literals, never open blocks.
+
+Indentation uses spaces. A tab in indentation, or a return to an
+indentation that matches no open block, is an `inconsistent indentation`
+error at that line. The host preprocessor does not keep indentation, so the
+`--cpp-symbols`, `--live-symbols`, and `--dump-cpp` modes reject an
+indented unit.
+
 ## Packages and `import`
 
 A package is a directory whose name is a valid C identifier. Its entry unit is

@@ -394,7 +394,7 @@ static void _check_generator(Job job, String what) {
   String detail = job.errors() ? job.errors().strip(NULL) : NULL;
   if (!detail) {
     try detail = job.output();
-    catch %(cmd-fail *failure): detail = failure.assoc(<output>);
+    catch %(cmd-fail *failure): detail = %"${failure.assoc(<output>)}";
     detail = detail ? detail.strip(NULL) : "";
   }
   errors.push(%"$what is stale\n$detail");

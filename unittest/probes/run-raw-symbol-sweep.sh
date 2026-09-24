@@ -104,6 +104,11 @@ for src in "$ROOT"/src/*.x "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
       printf '%s' "script unit: CPP symbol modes read its #! line as C"
     )
   fi
+  if grep -qx '#pragma indent' "$src"; then
+    exclusions["$src"]=$(
+      printf '%s' "indented unit: CPP symbol modes lose its indentation"
+    )
+  fi
   if [[ -n ${exclusions[$src]+classified} ]]; then
     echo "raw symbol exclusion: $relative -- ${exclusions[$src]}"
     excluded=$((excluded + 1))

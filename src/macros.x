@@ -1414,7 +1414,7 @@ static List _import(
       else if (c.collect_protocols) _eval_string(c, text, invocation);
       else c.queue_declaration_effect(text, invocation, invocation);
     }
-    else if (path.endswith(".xmacro")) {
+    else if (path.endswith(".xmacro") || path.endswith(".xpmacro")) {
       imported_aliases = {};
       String text = _read_source(
         c, path, "cannot open macro import", invocation,

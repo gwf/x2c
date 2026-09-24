@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/indent-cpp.x:3:1: driver: indented units use the default symbol collection
+  int f(int x) => x
+  ^^^
+  note: the host preprocessor does not keep the indentation, so --cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read an indented unit
+

@@ -32,7 +32,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:749`
+Source: `src/collect.x:755`
 
 #### interface_prelude
 
@@ -42,7 +42,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:777`
+Source: `src/collect.x:783`
 
 #### interface_text
 
@@ -54,7 +54,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1015`
+Source: `src/collect.x:1021`
 
 ### `Compiler`
 
@@ -72,7 +72,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:692`
+Source: `src/collect.x:698`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -89,7 +89,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:531`
+Source: `src/collect.x:537`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -101,7 +101,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:368`
+Source: `src/collect.x:369`
 
 ## Design notes
 

@@ -1049,7 +1049,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _830 = String_new("\n");
   _831 = String_new("\\\n");
   _832 = String_new("static_enum");
-  _833 = String_new(".x");
+  _833 = String_new(".");
   _834 = String_new("_Thread_local");
   _835 = String_new("Array");
   _836 = String_new("Map");
@@ -2209,10 +2209,10 @@ static List Emitter__initializer_value(Emitter e, List ast){
 }
 
 String preproc_include_target(String, int *);
-int String_endswith(String, String);
-String String_remove_suffix(String, String);
+int x2c_source_file(String);
+int String_rfind(String, String);
 static List Emitter__preproc(Emitter emitter, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), & angle);  if(! String_truth(target) || ! String_endswith(target, _833)) return List_cdr(ast);  String out = String_join(NULL, cons(String_var(_514), cons(String_var(String_remove_suffix(target, _833)), cons(String_var(_515), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), & angle);  if(! String_truth(target) || ! x2c_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _833), 1);  String out = String_join(NULL, cons(String_var(_514), cons(String_var(stem), cons(String_var(_515), NULL))));  return cons(String_var(out), NULL);
 }
 
 int Symbol_is_assignment_op(Symbol);
