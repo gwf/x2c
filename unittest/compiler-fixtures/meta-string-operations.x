@@ -146,6 +146,25 @@ meta int text_rstrip(int unused) {
     && "xaxx".rstrip("x").equal("xa")
     && " ".rstrip(" ").len() == 0;
 }
+meta String text_plain(String text) {
+  String t = "${text}abc";
+  return t;
+}
+meta String text_numbers(int x, int y) {
+  String t = %"${x} and ${y}";
+  return t;
+}
+meta String text_expressions(String who) {
+  return %"hi $who, ${who.upper()} ${who.len() + 1}";
+}
+meta String text_nested(String who) {
+  String e = "";
+  return %"[${e}]${%"<$who>"}$e";
+}
+meta String text_empty(int unused) {
+  (void) unused;
+  return %"";
+}
 int main(int argc, char **argv) {
   (void) argv;
   printf("%d %d\n", $text_contains_digit(0), text_contains_digit(argc - 1));
@@ -176,5 +195,10 @@ int main(int argc, char **argv) {
   printf("%d %d\n", $text_split_n(0), text_split_n(argc - 1));
   printf("%d %d\n", $text_lstrip(0), text_lstrip(argc - 1));
   printf("%d %d\n", $text_rstrip(0), text_rstrip(argc - 1));
+  printf("[%s] [%s]\n", $text_plain("q"), text_plain("q"));
+  printf("[%s] [%s]\n", $text_numbers(1, 2), text_numbers(1, argc + 1));
+  printf("[%s] [%s]\n", $text_expressions("ab"), text_expressions("ab"));
+  printf("[%s] [%s]\n", $text_nested("ab"), text_nested("ab"));
+  printf("%d %d\n", $text_empty(0).len(), text_empty(argc - 1).len());
   return 0;
 }

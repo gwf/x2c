@@ -1389,6 +1389,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(literal ?ltype ?(String text) ?):
       return _lower_number(l, ltype, text);
     case %(segments *parts):              return _lower_segments(l, parts);
+    /* An empty `%""` is the null String, which reads as empty text. */
+    case %(0):                            return "";
     /* A function named where a value is wanted is the Lisp definition this
        pass installed, and its own name names it. The scan established that
        the session binds it. */
