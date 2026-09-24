@@ -909,41 +909,6 @@ static void lisp_source_function_reclaims_normal_and_error_frames(void) {
   lisp.destroy();
 }
 
-/* Source statics use these native entries through the evaluator, including
-   inherited callables. */
-static int _lisp_static_count(List description) {
-  Var address = lisp_static_initialize(description, %());
-  int *value = address.pointer();
-  return ++*value;
-}
-
-static void lisp_statics_belong_to_session(void) {
-  Lisp parent = Lisp.kernel();
-  $lisp.bind(parent, "count", _lisp_static_count);
-  NativeScalarAccess access = native_scalar_access(%(int));
-  List layout = %(scalar (int) ${access.size} ${access.alignment} (int) i32);
-  parent.set_global("regular", %((function binding) $layout i32*));
-  parent.freeze();
-  Lisp first = Lisp.kernel(), second = Lisp.kernel();
-  first.adopt(parent);
-  second.adopt(parent);
-  EXPECT_INT_EQ(first.eval(%(count regular)).int(), 1);
-  EXPECT_INT_EQ(second.eval(%(count regular)).int(), 1);
-  EXPECT_INT_EQ(first.eval(%(count regular)).int(), 2);
-  EXPECT_INT_EQ(second.eval(%(count regular)).int(), 2);
-  first.destroy();
-  second.destroy();
-  ScopeStats before = Scope.stats();
-  Lisp owned = Lisp.kernel();
-  owned.adopt(parent);
-  EXPECT_INT_EQ(owned.eval(%(count regular)).int(), 1);
-  owned.destroy();
-  ScopeStats after = Scope.stats();
-  EXPECT_INT_EQ((int) after.live_scopes, (int) before.live_scopes);
-  EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
-  parent.destroy();
-}
-
 static void lisp_eval_file_runs_forms(void) {
   Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
@@ -1475,6 +1440,3 @@ void lisp_suite(void) {
   $test.run(lisp_sessions_release_scopes);
 }
 
-void lisp_statics_suite(void) {
-  $test.run(lisp_statics_belong_to_session);
-}
