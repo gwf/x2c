@@ -9,9 +9,10 @@
 - A class spends a Var row only when a value of it is first boxed. Linking
   a runtime object costs no row, so native meta modules (sequencing step 2)
   can link the whole runtime.
-- The number of classes a process can box has no fixed limit. The first 31
-  classes boxed get direct rows as today; later classes box through an
-  overflow cell.
+- The number of classes a process can box has no fixed limit. The first 30
+  classes boxed get direct rows as today; later records carry their
+  descriptor in front of the boxed copy, and later heap classes box
+  through a cell.
 - Boxing may happen after `Thread.start`. Declaring descriptors still ends
   at the first `Thread.start`, as the book documents.
 
@@ -63,25 +64,35 @@ pointers; `custom_tags[]` goes away because the descriptor holds the tag.
 when a tag has no row yet: a value of an unassigned class cannot exist, so
 `is` answers false without assigning.
 
-### Overflow cell for classes past the direct rows
+### Overflow rows for classes past the direct rows
 
-Row 31 becomes the overflow row. When the direct rows are full, `Var.new`
-allocates a process-lifetime Scope cell `{VarDescriptor *descriptor; void
-*pointer;}` and encodes the cell's address on row 31. This follows the
-wide-box precedent for `<long>` and `<ullong>` (`_new_wide`), whose values
-also live in a Scope-owned box.
+Rows 30 and 31 become overflow rows, leaving 30 direct rows. The overflow
+row depends on who owns the object's storage.
 
-- Decode: a row-31 value reads the descriptor from its cell; `Var.tag`,
-  dispatch and `encoding_valid` do the same. Direct rows are unchanged, so
-  the hot path for the first 31 classes adds only one compare.
-- Unbox: `Var.pointer` of a row-31 value returns `cell->pointer`.
-- Identity: `Var.same`, the fallback `equal` and the fallback `hash`
-  compare and hash `cell->pointer` for row-31 values, so boxing the same
-  object twice stays the same value. A class's own `equal`/`hash` methods
-  already receive the unboxed pointer.
-- Cost: one Scope allocation per box of an overflow class, and one
-  dependent load per dispatch on it. Classes that get a direct row pay
-  nothing extra.
+- **Records, row 31: a descriptor prefix.** Boxing a record already copies
+  it with `Scope_memdup` (`etc/builtin-macros.x:291`). For an overflow
+  record the copy reserves one `max_align_t`-sized slot in front of the
+  record, stores the descriptor pointer there, and boxes the record's own
+  address. This is how Scope keeps its own metadata in front of each
+  payload (`lib/scope.x:74-88`), so alignment and layout are unchanged.
+  Decode reads the descriptor at a fixed negative offset. `Var.same`,
+  equality and hashing need no change, because the Var holds the record's
+  address.
+- **Heap classes, row 30: a cell.** A heap class's pointer may point at
+  static data (`_json_true`), native memory, or an element inside an array,
+  so nothing may be read in front of it. `Var.new` allocates a
+  process-lifetime Scope cell `{VarDescriptor *descriptor; void *pointer;}`
+  and boxes the cell's address, following the wide-box precedent for
+  `<long>` and `<ullong>` (`_new_wide`). `Var.pointer` returns
+  `cell->pointer`. `Var.same`, the fallback `equal` and the fallback `hash`
+  compare and hash `cell->pointer`, so boxing the same object twice stays
+  the same value.
+
+`Var.tag`, dispatch and `encoding_valid` read the descriptor the same way
+for both rows. Direct rows are unchanged, so the hot path for the first 30
+classes adds only one compare. An overflow record costs one slot per box
+and one dependent load per dispatch; an overflow heap class costs one cell
+allocation per box and one dependent load per dispatch.
 
 No descriptor table grows, so no reader ever sees a reallocation.
 
@@ -112,8 +123,8 @@ No descriptor table grows, so no reader ever sees a reallocation.
 - `etc/runtime-objects.sh` no longer needs to exclude row-reserving
   objects. Whether to link the whole runtime into the compiler is
   sequencing step 2's decision; this step only removes the reason not to.
-- Generated C is unchanged; the registration calls stay. No bootstrap capability is needed first, because the change is inside
-  `lib/`.
+- Generated C keeps its registration calls. The record box copy changes
+  inside the boxing macro; no bootstrap capability is needed first.
 
 ## Implementation
 
@@ -123,13 +134,14 @@ One coherent change:
    registration entry points declare; row assignment under the mutex with
    release publication.
 2. `lib/var.x`: acquire loads in `_decode`; direct slots as descriptor
-   pointers; the `Var.new` miss path; row 31 overflow cells with decode,
-   unbox, `same`, fallback `equal` and `hash`; `known_tag` from the
+   pointers; the `Var.new` miss path; row 30 overflow cells with decode,
+   unbox, `same`, fallback `equal` and `hash`; row 31 prefixed record
+   copies; `known_tag` from the
    declared Map. Replace the linear scan in `Var.new` with the declared
    Map lookup if it measures no slower.
 3. Fixtures and unit tests:
    - replace `var-custom-tag-registry-full` with a program that declares
-     and boxes 40 classes, checks `is`, unboxing, `same`, dispatch and
+     and boxes 40 records and 40 heap classes, checks `is`, unboxing, `same`, dispatch and
      `Var.tag` for direct and overflow values;
    - a class declared but never boxed spends no row (count before and
      after);
@@ -144,7 +156,8 @@ One coherent change:
 
 ## Design review
 
-- Reuse: the overflow cell reuses the wide-box pattern and Scope; the
+- Reuse: the record prefix reuses Scope's metadata-before-payload
+  layout, and the heap-class cell reuses the wide-box pattern; the
   mutex and freeze already exist. No new table type.
 - Deleted: `custom_tags[]`, the exhaustion message and its fixture, the
   row-budget guidance and the row-reserving exclusion in
