@@ -524,6 +524,9 @@ static List _publish_aggregate_type(
   if (tag != <enum>) {
     compiler.sym.declare_field_order(type, members);
     if (layout) compiler.sym.set(%(@type "layout-attribute"), %(unknown));
+    // Meta code lays out only the records x2c units define.
+    if (compiler.source_private >= 0 && x2c_source_file(compiler.filename))
+      compiler.sym.set(%(@type "x2c-record"), %(x2c));
   }
   else if (!layout && _enum_fits_int(type, members))
     compiler.sym.set(%(@type "int-range"), %(int));

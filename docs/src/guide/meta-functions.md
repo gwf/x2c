@@ -395,7 +395,7 @@ no declaration of your own:
   `float` forms. This includes functions that return a second result through
   a pointer, such as `frexp`, `modf` and `remquo`.
 - `lib/clibc.x` declares `abs`, `labs`, `llabs`, `atoi`, `atol`, `atoll`,
-  `atof`, `strcmp`, `strncmp` and `timespec_get`.
+  `atof`, `strcmp` and `strncmp`.
 
 The `<ctype.h>` functions are not included, because a C library may define
 them as macros. A compile-time `String` passes to a `const char *` parameter,
@@ -612,24 +612,9 @@ int main(void) {
 changes its own copy and returns 6, and `a.x` is still 15.
 
 A pointer is a real address. Passing `&value` to a native function lets the
-native code fill the object in place:
-
-<!-- ignore: struct timespec needs the --system-headers translation option -->
-```x2c,ignore
-#include <time.h>
-
-meta static long seconds_now(void) {
-  struct timespec now;
-  timespec_get(&now, 1);
-  return now.tv_sec;
-}
-```
-
-Compile-time code cannot read the `TIME_UTC` macro, so the sample passes its
-value, which is 1 on the supported hosts. A struct from a system header needs
-the `--system-headers` option, so that the compiler sees its declaration.
-Without it, the definition reports that a struct or union has no
-compile-time representation.
+native code fill the object in place. Only a struct defined in an x2c unit has
+a compile-time layout; a struct declared in a C header, such as
+`struct timespec`, is declined in compile-time code.
 
 A compile-time call frees its locals and parameters when it returns. A
 `meta` function whose body lets the address of one outlive the call is
@@ -683,14 +668,15 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- A `packed` attribute on a struct parsed from x2c source is a compile error.
-  `#pragma pack` passes through to C, and an unused packed-attribute macro
-  does not fail translation. Expanded system-header declarations are not
-  rejected for packing. Layout attributes, including `aligned`, `mode` and
-  `vector_size`, still leave a struct without a provable compile-time layout.
-  A meta function that uses
-  such a struct reports `a compile-time struct with no host layout`. A field
-  whose typedef has a layout attribute is also declined.
+- Structs declared in C headers. A meta function that uses one reports
+  `a compile-time struct with no host layout`.
+- A `packed` attribute on a struct x2c parses is a compile error.
+  `#pragma pack` passes through to the C compiler, and an unused
+  packed-attribute macro does not fail translation. Layout attributes,
+  including `aligned`, `mode` and `vector_size`, leave a struct without a
+  provable compile-time layout. A meta function that uses such a struct
+  reports `a compile-time struct with no host layout`. A field whose typedef
+  has a layout attribute is also declined.
 - Structs with field alignment the compiler cannot prove, such as a field
   declared `_Alignas`, have no compile-time layout. Do not pass one to a
   native function from compile-time code.
@@ -749,7 +735,6 @@ on a listed type works. The operation inventory below further limits calls.
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
-| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Packed declarations in expanded system headers are not rejected, but their native layout is not available for compile-time struct operations. Unions and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep

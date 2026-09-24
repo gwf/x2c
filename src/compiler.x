@@ -634,38 +634,23 @@ static int _layout_attribute(Token open, int *packed) {
   return layout;
 }
 
-/* Records a pair of layout marks at the attribute starting at token
-   `index` when it can change a struct's layout. A source attribute is
-   `__attribute__ ((...))`; the preprocessor turns one into
-   `__x2c_attribute__ "(...)"` (see Toolchain.preprocess), whose two tokens
-   become comments, as though the preprocessor had erased them. Returns the
-   index of the attribute's last token. */
+/* Records a pair of layout marks at the `__attribute__ ((...))` starting at
+   token `index` when it can change a struct's layout. Returns the index of
+   the attribute's last token. */
 static size_t _note_attribute(Compiler c, size_t index) {
-  Token base = c.tokenizer.tokens, marker = base + index;
-  Token last = _skip_forward(marker + 1);
-  int layout = 0, packed = 0;
-  if (marker.text == "__attribute__") {
-    if (last.type != <(>) return index;
-    Token inner = _skip_forward(last + 1);
-    last = last.group_close();
-    if (last.type == <eof>) return index;
-    layout = inner.type == <(> && _layout_attribute(inner, &packed);
-  }
-  else {
-    if (last.type != <lit-char*>) return index;
-    marker.type = last.type = <comment>;
-    Tokenizer words = Tokenizer.new(String.parse(last.text));
-    words.scan();
-    Token open = _skip_forward(words.tokens);
-    layout = open.type == <(> && _layout_attribute(open, &packed);
-  }
-  if (packed) {
-    c.packed_marks.push((long) index);
-    c.packed_marks.push((long) index + 1);
-  }
-  if (layout) {
+  Token base = c.tokenizer.tokens;
+  Token open = _skip_forward(base + index + 1);
+  if (open.type != <(>) return index;
+  Token inner = _skip_forward(open + 1), last = open.group_close();
+  if (last.type == <eof>) return index;
+  int packed = 0;
+  if (inner.type == <(> && _layout_attribute(inner, &packed)) {
     c.layout_marks.push((long) index);
     c.layout_marks.push((long) index + 1);
+    if (packed) {
+      c.packed_marks.push((long) index);
+      c.packed_marks.push((long) index + 1);
+    }
   }
   return last - base;
 }
@@ -744,9 +729,7 @@ static void _scan_conditionals(Compiler c) {
          token rather than hiding it. */
       if (hidden && token.type != <space> && token.type != <error>)
         token.type = <comment>;
-      else if (token.type == <ident> &&
-               (token.text == "__attribute__" ||
-                token.text == "__x2c_attribute__"))
+      else if (token.type == <ident> && token.text == "__attribute__")
         i = _note_attribute(c, i);
       else if (token.type == <ident> && layout.contains(token.text)) {
         c.layout_marks.push((long) i);
@@ -3879,8 +3862,9 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
          ? _meta_int_layout(declared, %(int)) : NULL;
   type = sym.resolve_key(declared);
   if (type && type.is_pointer()) return _meta_pointer_layout(declared, tag);
-  // A struct with a layout attribute has a C-owned native layout.
-  if (!type || type.car() != <struct> ||
+  /* Only a struct an x2c unit defines has a layout x2c knows; a C header's
+     struct, or one with a layout attribute, keeps its C-owned layout. */
+  if (!type || type.car() != <struct> || !sym.get(%(@type "x2c-record")) ||
       sym.get(%(@type "layout-attribute")))
     return NULL;
   return _meta_record_layout(sym, type, cache);

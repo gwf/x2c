@@ -69,14 +69,7 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
---system-headers        Collect declarations from expanded system headers
 ```
-
-`--system-headers` expands system headers in the preprocessor and collects
-their declarations, so compile-time code can use a struct such as
-`struct timespec`. Translation is slower, because the compiler reads every
-expanded header. The other modes keep system `#include` lines for the C
-compiler.
 
 `--source-map` adds source locations to generated C for `translate`, `build`,
 and `run`. It is off by default. Combine it with native debug information to

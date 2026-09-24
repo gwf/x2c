@@ -370,10 +370,9 @@ static List _includes(List directories) =>
   directories.map(%!(directory) => %("-I" $directory)).flatten();
 
 /** Runs the configured C preprocessor without a shell.
-    `expand_system_headers` requests declarations from system headers rather
-    than retaining their include directives when the host supports that mode.
-    `fname`, `output`, and `errors` are required; output pointers are cleared
-    before use. Source and include paths remain distinct argv elements, and
+    System headers keep their include directives when the host supports
+    that mode. `fname`, `output`, and `errors` are required; output pointers
+    are cleared before use. Source and include paths remain distinct argv elements, and
     stdout and stderr are captured separately. When `dependencies` is present,
     its temporary depfile is read when possible and removed on returning paths,
     including a handled `<io-fail>` while reading it. A non-returning
@@ -387,14 +386,13 @@ static List _includes(List directories) =>
 */
 int Toolchain.preprocess(
   Toolchain t, const char *fname, List include_dirs, const char *imacros,
-  int expand_system_headers,
   String *output, String *errors, String *dependencies) {
   if (output) *output = NULL;
   if (errors) *errors = NULL;
   if (dependencies) *dependencies = NULL;
   if (!fname || !output || !errors) return -1;
   String source = fname, macros = imacros;
-  if (!expand_system_headers && !t.keep_system_includes) {
+  if (!t.keep_system_includes) {
     String probe_output = NULL, probe_errors = NULL;
     t.keep_system_includes = tool_capture(
       %(${t.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
@@ -402,19 +400,14 @@ int Toolchain.preprocess(
   }
   Path scratch = dependencies ? Path.temp_dir() : NULL;
   String depfile = %"$scratch/cpp.d";
-  /* Headers place attributes where x2c does not parse them, and a packing
-     attribute changes the layout of its struct. Each one becomes a marked
-     string, so tokenizing can erase it and keep that fact. */
   List arguments = %(
     ${t.cc} "-E" "-P" "-x" "c"
-    "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)=__x2c_attribute__ #x"
+    "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)="
     "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
     "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token" "-Wno-pragma-once-outside-header"
-    @{!expand_system_headers && t.keep_system_includes > 0
-      ? %("-fkeep-system-includes") : NULL}
-    @{expand_system_headers ? %("-D_Atomic(T)=T") : NULL}
+    @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
     "-I" "." @{_includes(x2c_cpp_include_dirs())} @{_includes(include_dirs)}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     @{scratch ? %("-MMD" "-MF" $depfile "-MT" "x2c-dependencies") : NULL}

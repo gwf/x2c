@@ -30,7 +30,7 @@ typedef struct CliRequest {
   int repl_dump, repl_stats, repl_verbose_stats;
   // The translation error limit; 0 reports every recoverable error.
   int max_errors;
-  int source_map, source_facts, live_symbols, cpp_symbols, system_headers;
+  int source_map, source_facts, live_symbols, cpp_symbols;
   int force, rebuild, clean;
   // Repository build controls: a warning fails its unit; no .xi is read.
   int fatal_warnings, no_interfaces;
@@ -211,9 +211,6 @@ static CliOption cli_options[] = {
     "Collect symbols through the host preprocessor", 0 },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
-  { <sys-hdrs>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
-    "--system-headers", NULL,
-    "Collect declarations from expanded system headers", 0 },
   { <cc>, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
@@ -931,7 +928,6 @@ static void _apply_option(
     case <no-cpp>: c.no_cpp = 1;
     case <live-syms>: c.live_symbols = 1;
     case <cpp-syms>: c.cpp_symbols = 1;
-    case <sys-hdrs>: c.system_headers = 1;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
     case <dump-cache>: case <conform>: case <source-ast>:

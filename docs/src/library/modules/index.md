@@ -86,7 +86,7 @@ prelude. Include one explicitly to use its declarations.
 
 These modules implement the runtime and are not public APIs.
 
-- `lib/clibc.x` - C library prototypes for integer and string conversions, string comparison, and `timespec_get`, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
+- `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 - `lib/lisp-machine.x` - Private compile-time Lisp wordcode decoder.
