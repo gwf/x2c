@@ -380,8 +380,8 @@ String Type.var_numeric_update_helper(Type type) {
 /** Returns the compact scalar Type used by Func's Var calling convention,
     or `NULL` when `type` is not one of the exact-C scalar families. */
 Type Type.var_signature_type(Type type) {
-  List row = _scalar_row(type);
-  return row ? row[3] : NULL;
+  match (_scalar_row(type)) case %(? ? ? ?signature): return signature;
+  return NULL;
 }
 
 static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')

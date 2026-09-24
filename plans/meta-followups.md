@@ -29,6 +29,12 @@ Gary's review of `db86d4b7`:
 
 No behavior change; the fixtures and unit suites are the check.
 
+Status 2026-09-24: done. The scalar ledger template, the access lookup,
+the per-kind layout helpers, and `match` in `lisp_peek`/`lisp_poke` were
+already on `dev`. The remaining `layout[2]` reads in `src/comptime.x` and
+`lisp_array` now destructure the size, `sizeof` matches the layout, and
+`Type.var_signature_type` matches its scalar row.
+
 ### B. Numeric Func argument cost
 
 `x2c_func_value_argument` (`lib/func.x`) wraps numeric conversion in a

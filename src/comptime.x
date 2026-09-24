@@ -111,9 +111,9 @@ static Symbol _lower_pointer_tag(Lowering l, List layout) {
 
 /* Zeroed automatic storage for one object of `layout`. */
 static Var _lower_new_storage(Lowering l, List layout) {
+  (Var size) = layout.cddr();
   l.automatic = 1;
-  return %(C.at (C.bytes ${layout[2]}) 0
-                (quote ${_lower_pointer_tag(l, layout)}));
+  return %(C.at (C.bytes $size) 0 (quote ${_lower_pointer_tag(l, layout)}));
 }
 
 /* A fresh object of `layout` holding `value`, in the running function's
@@ -835,9 +835,9 @@ static Var _lower_place(Lowering l, Var target) {
       if (!layout) return _lower_decline(l, "an indexed object with no layout");
       Var base = _lower_expr(l, receiver), index = _lower_expr(l, key);
       if (l.declined) return void;
+      (Var size) = layout.cddr();
       Symbol tag = _lower_pointer_tag(l, layout);
-      return %(C.at $base (_binary $index (quote <*>) ${layout[2]})
-                   (quote $tag));
+      return %(C.at $base (_binary $index (quote <*>) $size) (quote $tag));
     }
     /* A struct compound literal is a fresh object, such as the Iter storage
        a `foreach` expansion supplies. */
@@ -1066,7 +1066,8 @@ static Var _lower_pointer_step(
   List layout = _lower_step_layout(l, pointer);
   if (!layout || !_lower_numeric_type(l, _lower_type_of(count)))
     return void;
-  Var offset = %(_binary $right (quote <*>) ${layout[2]});
+  (Var size) = layout.cddr();
+  Var offset = %(_binary $right (quote <*>) $size);
   if (operator == <->) offset = %(_binary 0 (quote <->) $offset);
   return %(C.at $left $offset (quote ${_lower_pointer_tag(l, layout)}));
 }
@@ -1312,9 +1313,9 @@ static Var _lower_sizeof(Lowering l, Type type, List operand) {
         .type_from_ast().declared();
     case %(expr ?operand_type ?): measured = operand_type;
   }
-  List layout = measured ? l.compiler.meta_type_layout(measured) : NULL;
-  if (!layout) return _lower_decline(l, "sizeof a type with no layout");
-  return _lower_to_type(l, type, layout[2]);
+  match (measured ? l.compiler.meta_type_layout(measured) : NULL)
+    case %(? ? ?size *): return _lower_to_type(l, type, size);
+  return _lower_decline(l, "sizeof a type with no layout");
 }
 
 /* One `match` over the expression grammar. The compiler turns it into a

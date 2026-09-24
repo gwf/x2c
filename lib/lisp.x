@@ -1231,7 +1231,8 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
 /** Builds a local C array in live native storage, shared by indexing and
     references to its elements. Initializer values already have element type. */
 Var lisp_array(List layout, List values) {
-  long size = layout[2].long_long(), offset = 0;
+  (long size) = layout.cddr();
+  long offset = 0;
   Var storage = lisp_bytes(size * values.len());
   foreach (Var value, values) {
     lisp_poke(storage, offset, layout, value);
