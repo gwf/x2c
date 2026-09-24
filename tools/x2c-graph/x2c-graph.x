@@ -186,17 +186,6 @@ static int _walk_candidate_type(Var type) {
          List.equal(value, %("Var"));
 }
 
-static List _source_location(Compiler compiler, String path, int origin) {
-  List location = compiler.origin_location(origin);
-  if (!location) return %(location $path 0 0);
-  Var file = location.assoc(<file>);
-  String source = file is <string>
-                ? compiler.display_path(file.str()) : path;
-  int line = location.assoc(<line>).integer();
-  int column = location.assoc(<column>).integer();
-  return %(location $source $line $column);
-}
-
 static void _collect_tail_calls(
   Compiler compiler, Var value, List self, String path, int origin, int tail,
   Map counts, Map blockers, Array sites) {
@@ -254,7 +243,7 @@ static void _collect_tail_calls(
         Symbol kind = tail ? <tail> : <non-tail>;
         _increment(counts, %(kind $kind), 1);
         sites.push(%(
-          site $kind ${_source_location(compiler, path, origin)}
+          site $kind ${project_location(compiler, path, origin)}
         ));
       }
     }
@@ -347,7 +336,7 @@ static void _collect_walk_calls(
                   : %(public ${compiler.emitted_binding_name(callee)});
       calls.push(%(
         call $target ${compiler.emitted_binding_name(callee)}
-        ${_source_location(compiler, path, origin)}
+        ${project_location(compiler, path, origin)}
         (arguments @{direct_arguments.list_free()})
       ));
     }
@@ -357,7 +346,7 @@ static void _collect_walk_calls(
       List root = _walk_argument_root(collection);
       if (root && spelling.str().startswith("_x2c_macro_object_"))
         calls.push(%(
-          foreach ${_source_location(compiler, path, origin)} $root
+          foreach ${project_location(compiler, path, origin)} $root
         ));
     }
   }
@@ -1060,7 +1049,7 @@ static void _collect_field_sites(
       sites,
       %(
         site $path $caller $visibility
-        ${_source_location(compiler, path, origin)}
+        ${project_location(compiler, path, origin)}
         $detail
       ),
       1

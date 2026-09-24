@@ -366,57 +366,55 @@ static List Emitter._local_static(Emitter e, List ast) {
     String cleanup = e.fresh_name("static_cleanup");
     String temporary = e.fresh_name("static_initial");
     int inferred = type.car() == <dim> || type.match(%((dim) *));
+    List prefix, initial_copy = NULL, source;
+    String slot = pointer, object = temporary, formal = NULL;
     if (inferred) {
-      String probe = e.fresh_name("static_incomplete");
-      String formal = e.fresh_name("static_input");
-      List probe_decl = e._semantic_name(type.reference(), probe);
+      slot = e.fresh_name("static_incomplete");
+      formal = e.fresh_name("static_input");
+      List probe_decl = e._semantic_name(type.reference(), slot);
       output.push(%(@probe_decl ";"));
-      e.static_objects[name] = probe;
-      List operand = %(expr $type (cast $type $initial));
-      List captured = %(
-        "typedef __typeof__(" $formal ")" $alias ";"
-        $storage "X2CStatic" $guard "= {0};"
-        $alias "*" $pointer ";"
-        "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
-            "_Alignof(" $alias "),"
-            ${declared_base.is_threaded() ? "1" : "0"} ")) {"
-          $probe "=" $guard ".payload;"
-          "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
-                                   ".env = &" $guard "};"
-          "x2c_cleanup_push(&" $cleanup ");"
-          @{e._static_copy(alias, guard, %("&" $formal), alias)}
-          "x2c_static_commit(&" $guard ");"
-          "x2c_cleanup_leave(&" $cleanup ");"
-        "}"
-        $pointer "=" $guard ".payload;"
-      );
-      output.push(e._initializer_macro(%(input ($formal $operand)), captured));
-      e.static_objects[name] = pointer;
-      continue;
+      e.static_objects[name] = slot;
+      prefix = %("typedef __typeof__(" $formal ")" $alias ";");
+      source = %("&" $formal);
+      object = alias;
     }
-    List alias_decl = e._semantic_name(type, alias);
-    e.static_objects[name] = pointer;
-    List value = e._emit(initial);
-    output.push(%(
-      "typedef" @alias_decl ";"
-      "_Static_assert(__builtin_constant_p(sizeof(" $alias ")),"
-        "\"static object size must be constant\");"
+    else {
+      List alias_decl = e._semantic_name(type, alias);
+      e.static_objects[name] = pointer;
+      List value = e._emit(initial);
+      prefix = %(
+        "typedef" @alias_decl ";"
+        "_Static_assert(__builtin_constant_p(sizeof(" $alias ")),"
+          "\"static object size must be constant\");"
+      );
+      initial_copy = %($alias $temporary "=" @value ";");
+      source = %("&" $temporary);
+    }
+    List acquisition = %(
+      @prefix
       $storage "X2CStatic" $guard "= {0};"
       $alias "*" $pointer ";"
       "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
           "_Alignof(" $alias "),"
           ${declared_base.is_threaded() ? "1" : "0"} ")) {"
-        $pointer "=" $guard ".payload;"
+        $slot "=" $guard ".payload;"
         "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
                                  ".env = &" $guard "};"
         "x2c_cleanup_push(&" $cleanup ");"
-        $alias $temporary "=" @value ";"
-        @{e._static_copy(alias, guard, %("&" $temporary), temporary)}
+        @initial_copy
+        @{e._static_copy(alias, guard, source, object)}
         "x2c_static_commit(&" $guard ");"
         "x2c_cleanup_leave(&" $cleanup ");"
       "}"
       $pointer "=" $guard ".payload;"
-    ));
+    );
+    if (inferred) {
+      List operand = %(expr $type (cast $type $initial));
+      acquisition = e._initializer_macro(%(input ($formal $operand)),
+                                        acquisition);
+    }
+    output.push(acquisition);
+    e.static_objects[name] = pointer;
   }
   output.push(e._emit(body));
   return output.list_free();
@@ -715,10 +713,8 @@ static List _make_catch_binders(List binders, String handle_name) {
    it takes `default:` and ends the labelling. A failed arm still falls into
    everything after it, so arm order is unchanged. */
 
-static List _match_arm_label(
-  Emitter emitter, List pattern_ast, Array heads, int *labelling) {
+static List _match_arm_label(Symbol head, Array heads, int *labelling) {
   if (!*labelling) return NULL;
-  Symbol head = emitter.match_pattern_head_symbol(pattern_ast);
   if (!head) {
     *labelling = 0;
     return %("default: ;");
@@ -775,13 +771,13 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
         body_ast = body;
         implicit_break = NULL;
       }
+    Var value = e.match_pattern_value(pattern_ast);
     List flat_tags = NULL;
-    Symbol flat_head =
-      e.match_pattern_flat_head(pattern_ast, binders, &flat_tags);
-    int static_pattern = e.match_pattern_is_static(pattern_ast);
+    Symbol flat_head = match_value_flat_head(value, binders, &flat_tags);
     List pattern = e._emit(pattern_ast);
     List body = e._emit(body_ast);
-    List label = _match_arm_label(e, pattern_ast, heads, &labelling);
+    List label =
+      _match_arm_label(match_value_head(value), heads, &labelling);
     if (label) values.insert(arms ? opening++ : values.len(), label);
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
@@ -793,6 +789,7 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
         $closing));
     }
     else {
+      int static_pattern = match_value_is_static(value);
       String site_name = static_pattern
                        ? e.fresh_name("match_site")
                        : NULL;

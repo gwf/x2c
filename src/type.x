@@ -527,52 +527,22 @@ List Type.body(Type t) {
    for each translation unit because their canonical Type keys and converter
    names may belong to that unit's pools; end_unit drops the table before
    those pools are released. */
-static Map typetags = %{
-  (* void)           : p48,      (* unsigned char)       : <u8*>,
-  (* signed char)    : <i8*>,      (* unsigned short)      : <u16*>,
-  (* short)          : <i16*>,     (* unsigned)            : <u32*>,
-  (* int)            : <i32*>,     (* float)               : <f32*>,
-  (* unsigned long)  : <ulong*>,     (* long)                : <long*>,
-  (* double)         : <f64*>,     (* unsigned long long)  : <ullong*>,
-  (* long long)      : <llong*>,    (* long double)         : <ldouble*>,
-  (* * void)          : <p48*>,     (* * unsigned char)      : <u8**>,
-  (* * signed char)   : <i8**>,     (* * unsigned short)     : <u16**>,
-  (* * short)         : <i16**>,    (* * unsigned)           : <u32**>,
-  (* * int)           : <i32**>,    (* * float)              : <f32**>,
-  (* * unsigned long) : <ulong**>,    (* * long)               : <long**>,
-  (* * double)        : <f64**>,    (* * unsigned long long) : <ullong**>,
-  (* * long long)     : <llong**>,   (* * long double)        : <ldouble**>,
-  ("Array")          : array,    ("Block")               : block,
-  ("Buffer")         : buffer,   ("Bytes")               : bytes,
-  ("Context")        : context,  ("Error")               : error,
-  ("File")           : file,     ("Func")                : func,
-  ("Iter")           : iter,
-  ("Lambda")         : lambda,   ("List")                : list,
-  ("Logger")         : logger,   ("Map")                 : map,
-  ("Mutex")          : mutex,    ("Pipe")                : pipe,
-  ("Proc")           : proc,
-  ("Regexp")         : regexp,   ("Rope")                : rope,
-  ("Scope")          : scope,    ("Slice")               : slice,
-  ("Socket")         : socket,   ("Stream")              : stream,
-  ("String")         : string,   ("Symbol")              : symbol,
-  ("Tensor")         : tensor,   ("Thread")              : thread,
-  ("Token")          : token,    ("Var")                 : var,
-  (* "Array")        : <array*>,   (* "Block")             : <block*>,
-  (* "Buffer")       : <buffer*>,  (* "Bytes")             : <bytes*>,
-  (* "Context")      : <context*>, (* "Error")             : <error*>,
-  (* "File")         : <file*>,    (* "Func")              : <func*>,
-  (* "Iter")         : <iter*>,
-  (* "Lambda")       : <lambda*>,  (* "List")              : <list*>,
-  (* "Logger")       : <logger*>,  (* "Map")               : <map*>,
-  (* "Mutex")        : <mutex*>,   (* "Pipe")              : <pipe*>,
-  (* "Proc")         : <proc*>,
-  (* "Regexp")       : <regexp*>,  (* "Rope")              : <rope*>,
-  (* "Scope")        : <scope*>,   (* "Slice")             : <slice*>,
-  (* "Socket")       : <socket*>,  (* "Stream")            : <stream*>,
-  (* "String")       : <string*>,  (* "Symbol")            : <symbol*>,
-  (* "Tensor")       : <tensor*>,  (* "Thread")            : <thread*>,
-  (* "Token")        : <token*>,   (* "Var")               : <var*>
-};
+static Map typetags = $(var.tag.types '(
+  ((* void) p48)                   ((* unsigned char) u8*)
+  ((* signed char) i8*)            ((* unsigned short) u16*)
+  ((* short) i16*)                 ((* unsigned) u32*)
+  ((* int) i32*)                   ((* float) f32*)
+  ((* unsigned long) ulong*)       ((* long) long*)
+  ((* double) f64*)                ((* unsigned long long) ullong*)
+  ((* long long) llong*)           ((* long double) ldouble*)
+  ((* * void) p48*)                ((* * unsigned char) u8**)
+  ((* * signed char) i8**)         ((* * unsigned short) u16**)
+  ((* * short) i16**)              ((* * unsigned) u32**)
+  ((* * int) i32**)                ((* * float) f32**)
+  ((* * unsigned long) ulong**)    ((* * long) long**)
+  ((* * double) f64**)             ((* * unsigned long long) ullong**)
+  ((* * long long) llong**)        ((* * long double) ldouble**)
+));
 static Map declared_typetags = NULL;
 
 /* The encoding rows a statically known tag can be tested against without a
