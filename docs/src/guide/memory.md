@@ -407,8 +407,10 @@ parameter, through an unknown pointer, or into an object that outlives the
 function. A `meta` function with such an escape is rejected instead; see
 [Meta Functions](meta-functions.md).
 
-One more warning comes from the same pass. `after-free` reports a local read
-after `Scope.free` or `Array.list_free` consumed it.
+Two more warnings come from the same pass. `after-free` reports a local read
+after `Scope.free`, `Scope.realloc`, or `Array.list_free` consumed it.
+`bad-free` reports `Scope.free` or `Scope.realloc` given a literal, a local's
+address, or other storage no Scope allocator returned.
 
 Code that follows the patterns in this chapter compiles without warnings:
 

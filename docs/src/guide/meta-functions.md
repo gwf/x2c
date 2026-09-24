@@ -609,10 +609,75 @@ These C shapes are not available at compile time:
 - Structs with field alignment the compiler cannot prove, such as a field
   declared `_Alignas`, have no compile-time layout. Do not pass one to a
   native function from compile-time code.
-- Arrays of structs, which a meta function reports as `an array of
-  structs`, static arrays, and pointer arithmetic.
-- `sizeof`, which is not evaluated at compile time. The parser does not
-  accept `_Alignof`.
+- Local arrays of structs, which a meta function reports as `an array of
+  structs`, and static arrays. An array of structs on the heap works; see
+  [Heap objects during compilation](#heap-objects-during-compilation).
+- `sizeof` of an array type, or of a type with no compile-time layout,
+  which a meta function reports as `sizeof a type with no layout`. The
+  parser does not accept `_Alignof`.
+
+## Heap objects during compilation
+
+`Scope.malloc`, `Scope.calloc`, `Scope.memdup`, `Scope.realloc`, and
+`Scope.free` are bound for compile-time calls, and `sizeof` answers from
+the same layout the compiler gives each struct and scalar. A meta function
+can therefore build structs on the heap: a linked list, an array of
+structs, or a buffer that grows. `p->f`, `p.f`, `*p`, and `p[i]` read and
+write the heap bytes, and a pointer plus or minus an integer moves by whole
+elements, as in C.
+
+```x2c
+struct Node { int value; struct Node *next; };
+
+meta static struct Node *push(struct Node *head, int value) {
+  struct Node *node = Scope.malloc(sizeof *node);
+  node->value = value;
+  node.next = head;
+  return node;
+}
+
+meta static long heap_sum(int count) {
+  struct Node *head = NULL;
+  for (int i = 1; i <= count; i++) head = push(head, i);
+  long *squares = Scope.calloc(1, sizeof(long));
+  int size = 0;
+  for (struct Node *at = head; at; at = at->next) {
+    squares = Scope.realloc(squares, (size + 1) * sizeof *squares);
+    squares[size] = at->value * at->value;
+    size += 1;
+  }
+  long total = 0;
+  for (long *at = squares + size - 1; at >= squares; at = at - 1)
+    total += *at;
+  Scope.free(squares);
+  while (head) {
+    struct Node *next = head->next;
+    Scope.free(head);
+    head = next;
+  }
+  return total;
+}
+
+int main(void) {
+  printf("%ld %ld\n", $heap_sum(4), heap_sum(4));
+  return 0;
+}
+```
+
+```text
+30 30
+```
+
+The heap belongs to the compiler while it translates. A heap pointer can
+pass between meta functions, but it is not a value the program can hold:
+inserting one with `$make()` reports `compile-time result is a compiler
+address`. Return a value computed from the heap objects instead.
+
+The [region check](regions.md) treats `Scope.realloc` as the end of the
+pointer it is given, as `Scope.free` is. In a `meta` body, a read through a
+pointer after `Scope.free` or `Scope.realloc` ended it is an error, and so
+is freeing or reallocating a literal, a local's address, or other storage
+no Scope allocator returned.
 
 ## The compile-time subset
 
@@ -638,7 +703,7 @@ on a listed type works. The operation inventory below further limits calls.
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
 | `Func` | Expression-bodied lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls retain the typed signature, convert value parameters and results, and alias reference arguments in place. Storage in collections works. Block-bodied lambdas have no compile-time lowering. This does not expose arbitrary native function-pointer calls. |
 | C-style array declarations | A literal-sized one-dimensional automatic array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. Static arrays have no compile-time lowering. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
+| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work, and a pointer plus or minus an integer moves by whole elements. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. See [Native C functions](#native-c-functions). |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
@@ -801,11 +866,10 @@ means feasible in principle, not scheduled or promised support.
 | Postfix increment expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. Prefix increments on locals and reference arguments are supported. |
 | Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
 | Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
-| Unions and pointer arithmetic | **Gap:** model overlapping storage and pointer offsets in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
+| Unions | **Gap:** model overlapping storage in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
 | Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
-| Native `sizeof` expressions | **Gap:** provide the compile-time value of the queried layout; `sizeof(int)` currently declines as an unsupported expression. |
 | Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
 | Callable result insertion | **Gap:** preserve identity when constructing a runtime value. See the next section. |
@@ -986,8 +1050,8 @@ to embed in the future program.
 Native scalar conversions are applied at typed declarations, assignments,
 casts, arguments between meta functions and returns. Array/List and
 Symbol/String conversions also have explicit support. This does not make
-all casts meaningful: pointer arithmetic and reinterpreting an address are
-not supported.
+all casts meaningful: reinterpreting an address is not supported. A pointer
+plus or minus an integer moves by whole elements.
 
 The `meta-differential` compiler fixture checks selected narrow/unsigned
 arithmetic, wide intermediate values, floating operations and conversions
@@ -995,7 +1059,8 @@ against runtime calls. The `comptime-lowering`, `meta-import` and
 `meta-cursors` fixtures cover collections, callable values, local addresses,
 method chaining and iteration. They do not prove every operation/type
 combination equivalent. The `meta-records` and `meta-record-*` fixtures
-cover struct layout, copies and addresses, and the `meta-native-*` fixtures
+cover struct layout, copies and addresses, `meta-heap-objects` covers
+`sizeof` and heap structs, and the `meta-native-*` fixtures
 cover native calls. The `meta-numeric-lowering` fixture checks numeric
 suffixes and array element conversions against runtime results. Other array
 conversions, extended-precision parity, all callback signatures and resource

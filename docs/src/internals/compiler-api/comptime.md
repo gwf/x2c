@@ -42,7 +42,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:3201`
+Source: `src/comptime.x:3260`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -53,7 +53,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:2864`
+Source: `src/comptime.x:2913`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -65,7 +65,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2942`
+Source: `src/comptime.x:2991`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -78,7 +78,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:2812`
+Source: `src/comptime.x:2861`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -87,7 +87,7 @@ Source: `src/comptime.x:2812`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:2821`
+Source: `src/comptime.x:2870`
 
 <a id="Compiler.lower_meta_expression"></a>
 #### Compiler.lower_meta_expression
@@ -96,7 +96,7 @@ Source: `src/comptime.x:2821`
 
 Lowers a closed expression for explicit compile-time evaluation.
 
-Source: `src/comptime.x:3014`
+Source: `src/comptime.x:3063`
 
 <a id="Compiler.lower_meta_initializer"></a>
 #### Compiler.lower_meta_initializer
@@ -108,7 +108,7 @@ value. Evaluated outside any function, the object's bytes belong to the
 macro session. The declaration parser has already installed its binding
 and checked that its type has a native layout.
 
-Source: `src/comptime.x:2992`
+Source: `src/comptime.x:3041`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -118,7 +118,7 @@ Source: `src/comptime.x:2992`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2973`
+Source: `src/comptime.x:3022`
 
 <a id="Compiler.lower_repl"></a>
 #### Compiler.lower_repl
@@ -128,7 +128,7 @@ Source: `src/comptime.x:2973`
 Lowers a REPL execution wrapper whose unresolved bindings name the
 session's persistent value table rather than program file-scope state.
 
-Source: `src/comptime.x:2817`
+Source: `src/comptime.x:2866`
 
 <a id="Compiler.lowered_meta_regions"></a>
 #### Compiler.lowered_meta_regions
@@ -138,7 +138,7 @@ Source: `src/comptime.x:2817`
 Returns the region summary an earlier install of `fn` from the same file
 recorded with its lowering, or NULL when the process has none.
 
-Source: `src/comptime.x:2921`
+Source: `src/comptime.x:2970`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -148,7 +148,7 @@ Source: `src/comptime.x:2921`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2981`
+Source: `src/comptime.x:3030`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -161,7 +161,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/comptime.x:3128`
+Source: `src/comptime.x:3186`
 
 ## Design notes
 

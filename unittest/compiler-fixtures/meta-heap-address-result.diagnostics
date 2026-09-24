@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-heap-address-result.x:16:23: macro: compile-time result is a compiler address
+    struct Node *node = $make_node(3);
+                        ^
+  note: return data built from the pointed-to values instead
+
