@@ -88,10 +88,15 @@ Status: done on `gwf/meta-c-small-defects`. Pointer indexing, `NULL`,
 C `bool` conversion and `strncmp`'s `size_t` now behave as C does, and
 `lisp_peek` and `lisp_poke` retag by the layout's TAG. The layout accepts a
 TAG that differs from its bytes' row only when the tag is fixed for the type;
-a declared converter's tag may box something other than the bits. Remaining:
-the compile-time view of `size_t` is `unsigned long` on every host, which is
-32 bits too wide on LLP64, and enum constants still have no compile-time
-value.
+a declared converter's tag may box something other than the bits. On
+`meta-c-remaining`, an enum constant of an int-range enum has its C value in
+a meta body: the parser records each enumerator's initializer or predecessor,
+and the lowering evaluates it. The built-in typedef view maps `size_t`,
+`uintptr_t`, `intptr_t`, `ptrdiff_t` and `ssize_t` to `long` only where long
+is pointer width, and `int64_t`, `uint64_t`, `i64` and `u64` only where long
+is 64 bits; otherwise they are `long long`. LP64 output is unchanged, so no
+bootstrap round is needed; the LLP64 branch is unexercised on macOS.
+Remaining: `off_t` and `time_t` stay `long`.
 
 ### D. `--system-headers` cost and packing
 

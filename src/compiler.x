@@ -3553,9 +3553,11 @@ Type Sym.next_typedef(Sym sym, Type type, int *hops) {
 }
 
 /* Angle-included system typedefs have no collected binding. These canonical
-   LP64 forms match Type.scalar and are consulted only after source typedef
-   resolution, so a source declaration wins. int64_t maps to long to retain
-   the native long Var identity.
+   forms match Type.scalar and are consulted only after source typedef
+   resolution, so a source declaration wins. A 64-bit or pointer-width name
+   maps to long where long has that width, retaining the native long Var
+   identity, and to long long on a host such as LLP64 Windows where it does
+   not.
 
    The labels are encoded Symbols, not the C spellings, and the subject is
    `name.symbol()`, the same encoding applied to the source identifier.
@@ -3574,10 +3576,16 @@ static Type _builtin_typedef_scalar(Type key) {
     case <i16>: case <int16_t>: return %(short);
     case <u32>: case <uint32_>: return %(unsigned);
     case <i32>: case <int32_t>: case <wchar-t>: return %(int);
-    case <u64>: case <uint64_>: case <uintptr-t>:
-    case <size-t>: return %(unsigned long);
-    case <i64>: case <int64_t>: case <intptr-t>: case <ptrdiff-t>:
-    case <ssize-t>: case <off-t>: case <time-t>: return %(long);
+    case <u64>: case <uint64_>:
+      return sizeof(long) == 8 ? %(unsigned long) : %(unsigned long long);
+    case <uintptr-t>: case <size-t>:
+      return sizeof(long) == sizeof(void *)
+           ? %(unsigned long) : %(unsigned long long);
+    case <i64>: case <int64_t>:
+      return sizeof(long) == 8 ? %(long) : %(long long);
+    case <intptr-t>: case <ptrdiff-t>: case <ssize-t>:
+      return sizeof(long) == sizeof(void *) ? %(long) : %(long long);
+    case <off-t>: case <time-t>: return %(long);
     case <u128>: return %(unsigned long long);
     case <i128>: return %(long long);
     case <f32>: return %(float);

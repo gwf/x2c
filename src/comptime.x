@@ -1361,13 +1361,23 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(ident (binding ?(int id) ?(String name))): {
       if (!l.locals.contains(id) && type.match(%((func *) *)))
         return Atom.intern(name);
-      /* An enumerator's value lives only in the enum declaration it was
-         written in: the symbol table records the enum type and that the name
-         is an enumerator, never the number. Reading it as file-scope state
-         answered zero, which is a wrong value rather than a refusal. */
+      /* The parser records an int-range enumerator's value as its
+         initializer or its predecessor plus one. Another enumerator has no
+         recorded value, and reading it as file-scope state would answer
+         zero. */
       Type named = type;
-      if (!l.locals.contains(id) && named.is_enum())
+      if (!l.locals.contains(id) && named.is_enum()) {
+        Var rule;
+        l.compiler.semantic_binding_facts().try_get(
+          %(enum-value (binding $id $name)), &rule);
+        match (rule) {
+          case %(first):        return 0;
+          case %(value ?value): return _lower_expr(l, value);
+          case %(next ?previous):
+            return %(+ ${_lower_expr(l, %(expr $type (ident $previous)))} 1);
+        }
         return _lower_decline(l, "an enum constant has no compile-time value");
+      }
       /* A name with no type has no declaration the compiler read: it is a
          preprocessor macro. The null pointer constant and `stdbool.h`'s
          truth values are the ones C code writes as plain names. */

@@ -500,6 +500,22 @@ static int _enum_fits_int(List type, List members) {
   return 1;
 }
 
+/* Records how meta code computes each enumerator's value: its initializer,
+   or the previous enumerator plus one, or zero for the first. */
+static void _record_enum_values(Compiler c, List members) {
+  Map facts = c.semantic_binding_facts();
+  List rule = %(first);
+  foreach (List member, members) {
+    List binding = member;
+    match (member) case %(op = ?target ?value): {
+      binding = target;
+      rule = %(value $value);
+    }
+    facts[%(enum-value $binding)] = rule;
+    rule = %(next $binding);
+  }
+}
+
 /* Reports a layout attribute between `first` and the current token. Tokens
    outside this unit's input, such as a constructed form's, have no marks. */
 static int _attribute_since(Compiler c, Token first, Array marks) {
@@ -543,8 +559,10 @@ static List _publish_aggregate_type(
     if (compiler.source_private >= 0 && !compiler.filename.endswith(".h"))
       compiler.sym.set(%(@type "x2c-record"), %(x2c));
   }
-  else if (!layout && _enum_fits_int(type, members))
+  else if (!layout && _enum_fits_int(type, members)) {
     compiler.sym.set(%(@type "int-range"), %(int));
+    _record_enum_values(compiler, members);
+  }
   return %($tag $name $body);
 }
 

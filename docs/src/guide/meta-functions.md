@@ -530,6 +530,8 @@ every enum value as a signed `int`. Clang and GCC make an enum with no
 negative enumerator an `unsigned int`, so a negative value stored in such an
 enum compares differently: at compile time it stays negative, and at run
 time it is a large unsigned value.
+An enum constant of an enum with that `int` layout has its C value: its
+initializer, or the previous constant plus one.
 A pointer parameter can also receive a local C array,
 which `p[i]` indexes the same way. A pointer compares with `NULL` by address
 and tests false at the null address.
@@ -904,7 +906,7 @@ means feasible in principle, not scheduled or promised support.
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
 | Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
-| Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
+| Enum constants of an enum with no `int` layout | **Gap:** compute values for enums C may make wider or narrower than `int`. |
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
 | Callable result insertion | **Gap:** preserve identity when constructing a runtime value. See the next section. |
 

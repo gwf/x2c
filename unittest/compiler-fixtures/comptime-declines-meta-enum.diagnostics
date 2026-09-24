@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/comptime-declines-meta-enum.x:16:1: macro: this function cannot run at compile time
-  meta static List de_literal(void) => x2c_literal_int(K);
-  ^^^^
-  note: reason: an enum constant has no compile-time value
-
