@@ -1,6 +1,6 @@
 # x2c lint, format, and compiler-backed source tools
 
-> Status: needs author scoping - re-evaluated 2026-09-24 against `dev` at
+> Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
 > `29326dbd`; lint placement measured on `76cead06`; no phase implemented.
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
@@ -283,6 +283,15 @@ remain compiler bugs for `fix-x2c-bug`, not rules.
 7. Editor lint kind and fixes, if decision 6 ships lint to users; then
    `fmt --check`, token-only.
 
+8. Follow-up after the first version, approved by Gary on 2026-09-24:
+   `x2c-lint` gains an option that prints its findings as x2c list
+   literals, which the compiler reads without a JSON step. JSON output for
+   third-party tools can be added beside it later. With that in place,
+   `x2c lint` becomes a thin compiler entry point, as a subcommand or
+   directive, that runs the linter on a source file and reads the result.
+   The compiler can then report findings or raise them to errors during a
+   build. This is a compiler change, so it waits until the linter exists.
+
 Phases 1 and 2 are worth shipping alone: they end C09 and remove about
 2,500 lines of Python. Phase 3 needs its own approval under decision 1.
 
@@ -301,7 +310,9 @@ pretty-printer or CST. No autofix for structural rules or comments. No
 class-conversion autofix. No `not in` syntax. No LSP. No heuristic matcher
 inside the new tools.
 
-## Decisions for Gary
+## Decisions
+
+Gary accepted all six recommendations below on 2026-09-24.
 
 1. **Lint placement.** Recommend a separate `tools/x2c-lint` executable
    linking the compiler objects, as `x2c-graph` does. This replaces the
