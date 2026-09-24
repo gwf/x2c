@@ -12,8 +12,6 @@
 
 (defun lisp.native.call (name . arguments)
   (binding_call name arguments))
-(defun lisp.native.function-signature (type) type)
-(def lisp.native.name-signature binding_name_signature)
 (def lisp.binding.name binding_name)
 (defun lisp.binding.rows-for (group)
   (binding_rows_for group lisp.binding.rows))

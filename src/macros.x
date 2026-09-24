@@ -477,18 +477,6 @@ String x2c_function_name(List function) {
   return x2c_binding_spelling(identity);
 }
 
-static Var _sdk_function_type(List function) {
-  List declaration = function.match_replace(
-    %(function ?rtype ?declarator ?),
-    %(declare ?rtype (bindings ?declarator)));
-  Type type = declaration.type_from_ast();
-  return type.canonicalize();
-}
-
-/* Both native Lisp and ordinary Func adapters store the declared signature. */
-static List _native_meta_signature(Compiler c, Type type) =>
-  c.func_signature(type);
-
 /* The native functions one symbol row makes available to compile-time code,
    as `(name signature)` rows: a bodyless `meta` prototype, or each witness
    of a `meta protocol` adoption, including the forwarding function the
@@ -504,10 +492,10 @@ static List _native_meta_rows(Compiler c, Var row) {
       foreach (List member, conformance.last().list().cdr())
         match (member) {
           case %(? implmntd ?(String name) ?(Type type) *):
-            rows = cons(%($name ${_native_meta_signature(c, type)}), rows);
+            rows = cons(%($name ${c.func_signature(type)}), rows);
           case %(?(String name) base-dflt ? ?(Type type) ordinary ?): {
             String forward = %"${participant.car()}_$name";
-            rows = cons(%($forward ${_native_meta_signature(c, type)}), rows);
+            rows = cons(%($forward ${c.func_signature(type)}), rows);
           }
         }
       return rows;
@@ -585,13 +573,13 @@ static List _sdk_native_meta_declared(List paths) {
 static List _sdk_literal_list(List values) =>
   macro_sdk_compiler.cache_literal_list(values);
 
-static Var _sdk_native_function_type(List syntax) {
-  Var value = void;
-  match (syntax) {
-    case %(function ? ? ?): value = _sdk_function_type(syntax);
-    default: value = x2c_syntax_type(syntax);
-  }
-  return _native_meta_signature(macro_sdk_compiler, value);
+/* A native binding stores the same signature as an ordinary Func adapter. */
+static List _sdk_native_function_type(List syntax) {
+  match (syntax)
+    case %(function ?rtype ?declarator ?):
+      return macro_sdk_compiler.func_signature(
+        %(declare $rtype (bindings $declarator)).type_from_ast());
+  return macro_sdk_compiler.func_signature(x2c_syntax_type(syntax));
 }
 
 /** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
@@ -1613,7 +1601,7 @@ void Compiler.record_native_meta_effect(
   if (declaration.type_from_ast().is_function()) {
     Type type = declaration.type_from_ast().canonicalize();
     String name = _native_meta_name(c, declaration, marker);
-    List signature = _native_meta_signature(c, type);
+    List signature = c.func_signature(type);
     c.sym.set(key, %(native-meta $name $signature));
   }
 }
@@ -1794,15 +1782,36 @@ static List _native_module_suppliers(String name) =>
   native_module_order.filter(
     %!(String path) => ((Map) native_modules[path]).contains(name));
 
+/* The native type a signature names: each parameter, reference target,
+   and result with its aliases resolved. */
+static List _native_signature_type(Compiler c, List signature) {
+  match (signature)
+    case %((func ?(List parameters)) *result): {
+      Array resolved = [];
+      foreach (Type parameter, parameters)
+        resolved.push(parameter.car() == <&>
+          ? cons(<&>, c.sym.normalize_declared_type(parameter.cdr()))
+          : c.sym.normalize_declared_type(parameter));
+      Type native = c.sym.normalize_declared_type(result);
+      return %((func ${resolved.list_free()}) @native);
+    }
+  return signature;
+}
+
 /* A declared `Func` parameter matches a target's `Var` parameter, which
-   takes the compile-time callable and adapts it. */
-static int _native_meta_accepts(Var function, List signature) {
+   takes the compile-time callable and adapts it. Aliases of one native
+   type match each other. */
+static int _native_meta_accepts(
+  Compiler c, Var function, List signature) {
   if (function is not <func>) return 0;
-  List target = ((Func) function.pointer()).signature();
+  List target = _native_signature_type(
+    c, ((Func) function.pointer()).signature());
   match (signature)
     case %((func ?(List parameters)) *result):
-      return target.equal(signature) || target.equal(
-        %((func ${parameters.search_replace(%("Func"), %("Var"))}) @result));
+      return target.equal(_native_signature_type(c, signature)) ||
+             target.equal(_native_signature_type(c, %((func
+               ${parameters.search_replace(%("Func"), %("Var"))})
+               @result)));
   return 0;
 }
 
@@ -1903,7 +1912,7 @@ static void _bind_native_meta(
                     "also defined by: ${", ".join(suppliers.cdr())}"));
     }
   }
-  if (!_native_meta_accepts(function, signature))
+  if (!_native_meta_accepts(c, function, signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
@@ -1964,7 +1973,7 @@ void Compiler.install_native_meta_function(
 
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
-  List signature = _native_meta_signature(c, type);
+  List signature = c.func_signature(type);
   _bind_native_meta(c, name, signature, marker);
 }
 

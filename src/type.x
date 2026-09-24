@@ -377,13 +377,6 @@ String Type.var_numeric_update_helper(Type type) {
   return row ? row.caddr() : NULL;
 }
 
-/** Returns the compact scalar Type used by Func's Var calling convention,
-    or `NULL` when `type` is not one of the exact-C scalar families. */
-Type Type.var_signature_type(Type type) {
-  match (_scalar_row(type)) case %(? ? ? ?signature): return signature;
-  return NULL;
-}
-
 static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')
                    : (unsigned) ((ch | 32) - 'a' + 10);
 
