@@ -212,7 +212,7 @@ proof-cold-collection: stage-2				## Check stage 2 against a cold translation
 	./tools/check-cold-collection.sh
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
-	./tools/check-conformance-coherence.sh
+	$(STAGE0_X2C) script tools/check-conformance-coherence
 
 check-native-modules: build				## Build, load, and reject native modules
 	./unittest/probes/run-native-modules.sh
