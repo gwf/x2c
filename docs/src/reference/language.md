@@ -172,6 +172,38 @@ int main(void):
   meaning, and braces that make values, such as initializers and Map
   literals, never open blocks.
 
+The tokenizer rewrites each indented form into these brace-form tokens.
+A block is the deeper lines that follow its header, and it closes where the
+indentation returns:
+
+| Indented form | Brace form the parser reads |
+| --- | --- |
+| `int f(int x):` and a block | `int f(int x) {` ... `}` |
+| `if x:` and a block | `if (x) {` ... `}` |
+| `if (x):` and a block | `if (x) {` ... `}` |
+| `else if x:` and a block | `else if (x) {` ... `}` |
+| `else:` and a block | `else {` ... `}` |
+| `while x:`, `switch x:`, `match x:` | `while (x) {`, `switch (x) {`, `match (x) {` |
+| `foreach T v in c:` and a block | `foreach (T v in c) {` ... `}` |
+| `for (a; b; c):` and a block | `for (a; b; c) {` ... `}` |
+| `if x: s` | `if (x) s;` |
+| `else: s` | `else s;` |
+| `case X:`, `default:`, `catch P:` and a block | `case X: {` ... `}` |
+| `struct S:` and a block | `struct S {` ... `};` |
+| `typedef struct S:`, a block, then `S` | `typedef struct S {` ... `} S;` |
+| `enum E:` and enumerators | `enum E {` enumerators ... `};`, commas as written |
+| `do:` and a block | `{` ... `}` |
+| `do:`, a block, then `while (c)` | `do {` ... `} while (c);` |
+| `@$m(args)` | `$m(args)`, with no `;` |
+| any other statement line | the line followed by `;` |
+| `#pragma indent` | nothing |
+
+Inserted tokens have no width and take the position of the token beside
+them, so diagnostics and source spans name lines of the indented file. At
+the start of a statement line, `%` and `<` begin a literal, as in
+`%(ls).job().run()` or `<done>`, even when the line before ends in an
+operand; on a deeper continuation line they keep their operator meaning.
+
 Indentation uses spaces. A tab in indentation, or a return to an
 indentation that matches no open block, is an `inconsistent indentation`
 error at that line. The host preprocessor does not keep indentation, so the
