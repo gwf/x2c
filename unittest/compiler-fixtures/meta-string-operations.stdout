@@ -26,3 +26,8 @@
 1 1
 1 1
 1 1
+[${text}abc] [${text}abc]
+[1 and 2] [1 and 2]
+[hi ab, AB 3] [hi ab, AB 3]
+[[]<ab>] [[]<ab>]
+0 0

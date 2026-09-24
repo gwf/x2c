@@ -1389,6 +1389,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(literal ?ltype ?(String text) ?):
       return _lower_number(l, ltype, text);
     case %(segments *parts):              return _lower_segments(l, parts);
+    /* An empty `%""` is the null String, which reads as empty text. */
+    case %(0):                            return "";
     /* A function named where a value is wanted is the Lisp definition this
        pass installed, and its own name names it. The scan established that
        the session binds it. */
@@ -1523,6 +1525,13 @@ static Map _lower_env_copy(Lowering l) {
 
 static void _lower_env_restore(Lowering l, Map saved) {
   l.env = saved;
+}
+
+/* The bound ids a function over the live locals carries, in id order, so
+   its parameters do not follow the hash layout of the environment. */
+static void _lower_live_ids(Lowering l, Map used, Array ids) {
+  foreach (Var (id, form), l.env) if (used.contains(id)) ids.push(id);
+  ids.sort();
 }
 
 static int _lower_depth(Lowering l) => l.pending ? l.pending.depth : 0;
@@ -1817,9 +1826,9 @@ static Var _lower_loop(
   Array ids = $auto([]);
   Array slots = $auto([]);
   Array entry = [];
-  foreach (Var (id, form), l.env) {
-    if (!used.contains(id)) continue;
-    ids.push(id);
+  _lower_live_ids(l, used, ids);
+  foreach (Var id, ids) {
+    Var form = l.env[id];
     if (walking && walk.kind == <map> && id == walk.cursor) {
       Var object = _lower_value(l, walk.object);
       form = %(if (number? $form) (Map.list $object) $form);
@@ -2641,12 +2650,13 @@ static Var _lower_defer(Lowering l, Var cleanup, List rest, List k) {
   Array entry = [];
   Array slots = $auto([]);
   Map inside = _lower_scratch_map(l.scratch);
-  foreach (Var (id, form), l.env) {
-    if (!used.contains(id)) continue;
+  Array ids = $auto([]);
+  _lower_live_ids(l, used, ids);
+  foreach (Var id, ids) {
     Var slot = _lower_name(l, "live");
     slots.push(slot);
     inside[id] = slot;
-    entry.push(form);
+    entry.push(l.env[id]);
   }
   Array exits = $auto([]);
   struct LowerCleanup frame = {

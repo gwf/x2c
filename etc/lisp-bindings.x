@@ -4,17 +4,27 @@
 
 $(import "lisp-bindings.xlisp")
 
-$(def write-file (bind "lisp_write_file" nil))
+meta Var lisp_write_file(String path, String text);
+meta static Array binding_forms = [];
 
-$(def binding.forms (Array.new))
-$(defun binding.emit (fn)
-  (let ((forms (x2c.comptime.lower fn)))
-    (if forms
-        (begin (Array.push binding.forms forms) (list fn))
-        (x2c.diagnostic.fail "cannot lower Lisp binding function" nil))))
-macro Decorator $binding.emit(Unit $fn) {
-  $(binding.emit $fn)...
+meta List binding_emit(List fn) {
+  List forms = x2c_comptime_lower(fn);
+  if (!forms)
+    x2c_diagnostic_fail("cannot lower Lisp binding function", %());
+  binding_forms.push(forms);
+  return %(${fn});
 }
+macro Decorator $binding.emit(Unit $fn) { $binding_emit($fn)... }
+
+meta List binding_write(void) {
+  String text = "";
+  foreach (List forms, binding_forms)
+    foreach (Var form, forms)
+      text = text + form.repr() + "\n";
+  lisp_write_file("bindings-generated.xlisp", text);
+  return %();
+}
+macro Unit $binding.write() { $binding_write()... }
 
 List binding_parameters(List type);
 List binding_return(List type);
@@ -146,7 +156,4 @@ List binding_targets(List rows) {
     ${x2c_literal_int(rows.len())} @{arguments.reverse()}));
 }
 
-$(write-file "bindings-generated.xlisp"
-  (foldl string-append ""
-    (map (lambda (form) (string-append (repr form) "\n"))
-      (foldl append nil (Array.list binding.forms)))))
+$binding.write();

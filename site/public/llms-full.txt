@@ -2814,8 +2814,9 @@ the Lisp one:
 - `x2c_type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
   truth value.
 
-`x2c.comptime.lower` has no x2c wrapper, because it runs the pass that
-translates the calling function.
+`x2c_comptime_lower(List fn)` returns the Lisp forms a function definition
+lowers to, or an empty `List` when it cannot be lowered. The generators
+under `etc/` use it to record their lowered algorithms.
 
 The code builders have `meta` bodies in `lib/meta.x`, shared by the x2c
 and Lisp functions. The literal builders, identifier, index, call and composite

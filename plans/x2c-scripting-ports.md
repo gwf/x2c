@@ -152,21 +152,31 @@ not a routine port.
 
 ## Library work, in the order of ports unblocked
 
-1. **Clock and time.** `Clock.monotonic()` for timing and a `strftime`
-   wrapper for dates. `lib/logger.x` has both privately in `_capture_time`
-   and `_write_absolute_time`; the module lifts them. Consumers: the eight
-   `unittest/benchmarks/run-*.sh` drivers, `tools/harness-metrics.py`,
-   `tools/agent-failure.py`, `tools/performance-snapshot.py`, and the
-   timestamped result directories in
-   `unittest/benchmarks/hash-table/direct/run.sh`. Ship it with the first
-   ordinary consumer; the performance collector also needs host locking,
-   signals and timeout behavior and is not that first port.
-2. **`String.wrap(width)` and a median.** Consumers: `gen-api-reference.py`,
-   `gen-module-catalog.py`, the `make help` Python in `etc/help.mk`, and the
-   benchmark drivers' awk statistics.
-3. **Byte reads on `Path`.** `Path.read_text` refuses binary files.
-   Consumers: `packages/raylib/verify-renders.sh` and the mode bits in
-   `tools/gate-state.py`.
+Rechecked against dev 29326dbd on 2026-09-24. None of the three is worth a
+library addition now; each is added with its first real consumer, if one
+appears.
+
+1. **Clock and time: declined.** A script includes `<time.h>` and calls
+   `clock_gettime` and `strftime` directly, as `src/report.x`,
+   `src/build.x` and `lib/logger.x` do, and `$time` in
+   `lib/system-macros.xmacro` already times a statement. The listed
+   consumers mostly do not need it: the seven `run-*.sh` drivers take
+   timings from the benchmark binaries, `tools/harness-metrics.py` reads
+   timestamps from its records, `tools/agent-failure.py` needs one ISO date,
+   and `hash-table/direct/run.sh` makes one `date -u` stamp. Only
+   `tools/performance-snapshot.py` needs both, and it also needs host
+   locking, signals and timeouts.
+2. **`String.wrap(width)` and a median: deferred.** `wrap` is about 15 lines
+   of `.x`. Its consumers are the 16-line `textwrap` block in `etc/help.mk`
+   and `gen-api-reference.py` and `gen-module-catalog.py`, which wait for
+   the compiler-backed `x2c_source.py` rewrite. A median is about 8 lines;
+   its consumers are the awk `median` functions in
+   `run-lisp-auto-benchmark.sh` and `run-match-cache-benchmark.sh`, about 15
+   lines each. Write either inside the port that uses it.
+3. **Byte reads on `Path`: declined.** The only byte consumer is one `od`
+   line reading a 24-byte PNG header in the 19-line
+   `packages/raylib/verify-renders.sh`; `fopen` and `fread` cover it. The
+   mode bits in `tools/gate-state.py` come from `lstat`, not file bytes.
 
 Not worth building, because every consumer is off the table: an HTTP server,
 sockets, a pty, YAML, zip, statistics beyond a median, plotting.
@@ -223,34 +233,12 @@ probes still copy their prelude by hand.
 ## Rewrite on the compiler instead of translating
 
 These tools contain a second parser for x2c source, written as regular
-expressions, because they live outside the compiler. Translating them keeps
-that parser. The port is a module over the `.xi` interfaces under
-`builds/0` or `x2c translate --dump-ast` that exposes definitions, doc
-comments, and spans, on which the tools' own logic is rewritten, the way
-`tools/x2c-graph` already works.
-
-| Tool | Lines | `re.` sites |
-| --- | --- | --- |
-| `agents/skills/find-redundant-validation/scripts/redundant_validation.py` | 1042 | 57 |
-| `tools/x2c_source.py` (imported by five tools) | 1107 | 31 |
-| `tools/audit-source-bloat.py` | 860 | 30 |
-| `agents/skills/find-comment-slop/scripts/comment_slop.py` | 569 | 19 |
-| `agents/skills/clean-x2c-source/scripts/source_style.py` | 604 | 15 |
-| `tools/x2c_symbols.py` | 566 | 13 |
-| `tools/gen-api-reference.py` | 1247 | 4, plus wrap and difflib |
-
-`x2c_source.py` is the keystone: `gen-api-reference.py`,
-`gen-module-catalog.py`, `repo-metrics.py`, `audit-source-bloat.py`, and
-`redundant_validation.py` import it, so the doc generators and the three
-skill analyzers move together. This is a design, to be planned on its own
-before implementation.
-
-Gary folded catalog item C09 into this rewrite on 2026-09-24
-([consolidation catalog](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation)):
-the generators read the definitions the compiler selected, including those
-produced by Unit macros and foreign aliases, instead of approximating them.
-Plan it after the branch that adds the Pythonic script syntax lands, and
-write the new tools in that syntax.
+expressions. Translating them would keep that parser, so they are not
+ported here. On 2026-09-24 this rewrite, including catalog item C09, moved
+into [x2c lint, format, and compiler-backed source tools](x2c-lint-and-format.md),
+which sequences the doc generators, metrics, and the skill analyzers over
+one shared compiler definition walk. The indentation syntax has landed, so
+the new scripts use it.
 
 ## Off the table
 

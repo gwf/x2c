@@ -73,8 +73,9 @@ execution.
   protocols, lifetime certification and native extensions retain their
   separate design and implementation status.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
-  terminal UX, live statistics, and REPL-only output are implemented;
-  standard-library and host exposure remain undispatched recommendations. The
+  terminal UX, live statistics, and REPL-only output are implemented, and
+  scalar math is already callable; exposing Json, Diff, and Path text
+  operations (about 20 `.x` lines) awaits Gary's decisions. The
   lexical-scope repair to the literate example shipped in `144a833d`.
 
 ### Open backlog and scoped follow-ups
@@ -82,9 +83,9 @@ execution.
 | Record | What remains |
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
+| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Needs author scoping (re-evaluated 2026-09-24); owns C09 and the rewrite of the regex-based Python source tools over one compiler definition walk; five decisions listed. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
-| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release, gate and compiler-backed ports are separately sequenced. |
+| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
