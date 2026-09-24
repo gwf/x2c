@@ -2,7 +2,9 @@
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
 > `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 3
-> are implemented; see [Progress](#progress).
+> are implemented; see [Progress](#progress). The completed linter moved
+> into experimental `commands/lint` in `9b31112e` under the
+> [external commands](archive/external-commands.md) plan.
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
 > instead of translating"), including catalog item
@@ -18,7 +20,7 @@ Every tool that reads x2c source reads what the compiler parsed. No
 regular-expression parser for x2c survives in the repository. Two
 consumers share one compiler surface:
 
-- `x2c-lint`, a separate executable in `tools/x2c-lint/` that links the
+- `x2c lint`, a separate executable in `commands/lint/` that links the
   compiler's objects, for rules that need the bound, typed AST or the
   retained token stream, and later `fmt --check`.
 - x2c scripts in the indentation syntax (`#pragma indent`) for the doc
@@ -427,8 +429,8 @@ Gary accepted all six recommendations below on 2026-09-24.
    linking the compiler objects, as `x2c-graph` does. This replaces the
    2026-09-17 `x2c lint` subcommand decision. It keeps about 1,800 lines out
    of `src/` and keeps rule edits out of bootstrap refresh. The later
-   [external commands](external-commands.md) plan moves the standalone tool
-   to `commands/lint` as an experimental command after dispatch exists;
+   [external commands](archive/external-commands.md) plan moved the
+   standalone tool to `commands/lint` as an experimental command;
    it remains optional and is not installed.
 2. **Projection form.** Recommend a documented `--dump-definitions`
    translate option that replaces the experimental `--dump-source-ast`,
@@ -443,6 +445,6 @@ Gary accepted all six recommendations below on 2026-09-24.
    `clean-x2c-source` skill, and its build and fixtures stay out of gates.
    Drift then shows up when the skill runs, as with `x2c-graph`. Gating
    it would need an equal-cost removal under the process ceiling.
-6. **Distribution.** Recommend lint stays repository tooling and is not
-   installed. Shipping it later means a second 2 MB executable and an
-   `x2c lint` subcommand that runs it.
+6. **Distribution.** Lint remains experimental in the checkout and is not
+   installed. Promotion to shipped would add the separate executable to
+   installed homes.

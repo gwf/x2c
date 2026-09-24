@@ -114,7 +114,7 @@ Gary accepted all four recommendations below on 2026-09-24.
 
 The REPL is now its own program. It moved out of the compiler into
 `commands/repl` in `3eff555c` and runs through `x2c repl`; see
-[external commands](external-commands.md). The Json, Diff, and Path
+[external commands](archive/external-commands.md). The Json, Diff, and Path
 bindings above landed before that move and are served through the
 compiler objects the command links. Later REPL work belongs in
 `commands/repl`.

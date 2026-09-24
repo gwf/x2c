@@ -18,6 +18,7 @@ Commands:
   list        List installed packages
   help        Show help for x2c or one command
   graph       Inspect x2c source graphs
+  lint        Inspect x2c source style and idioms
   repl        Evaluate a supported x2c subset (experimental)
 
 Global options:

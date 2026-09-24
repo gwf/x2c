@@ -1,7 +1,7 @@
 # REPL command
 
 > Status: done. Delivered to `dev` on 2026-09-24 in `572d2f4c`.
-> Detailed phase 3 plan for [external commands](../external-commands.md).
+> Detailed phase 3 plan for [external commands](external-commands.md).
 
 ## Goal
 

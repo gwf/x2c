@@ -1,8 +1,8 @@
 # External commands
 
-> Status: active.
-> Gary approved this design on 2026-09-24. Phases 1-3 are delivered;
-> lint remains.
+> Status: done. Gary approved this design on 2026-09-24. Phases 1-3
+> delivered in `45e0f412`, `8786fdc3`, and `3eff555c`; phase 4 moved the
+> completed standalone linter into `commands/lint` in `9b31112e`.
 > This is the source of truth
 > for how external commands are built, found, run, tested, and shipped.
 
@@ -122,7 +122,7 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    and `x2c bootstrap` builds shipped commands after the compiler, from
    the same objects. Release workflow changes follow
    `agents/releasing.md` and need Gary's release authorization.
-3. **`repl`.** [REPL command](archive/repl-command.md) holds the detailed plan:
+3. **`repl`.** [REPL command](repl-command.md) holds the detailed plan:
    the REPL's three source files move to `commands/repl` as a shipped
    command, the compiler keeps the session services the REPL calls, and
    the compiler loses its REPL command, options, and help.
@@ -135,6 +135,10 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    Ready as of 2026-09-24: `tools/x2c-lint` is complete on `dev` at
    `b9331553` and `9c367869` (lint plan phase 3, with its own
    `make -C tools/x2c-lint test`). Move that version to `commands/lint`.
+   Phase 4 delivered the move in `9b31112e`: `lint` is experimental and
+   `make commands-check` runs its original fixtures through the command
+   smoke test. Installed homes retain only shipped commands. The linter's
+   machine-readable option remains in the lint plan's later phase 8.
 
 Phase 4 can land any time after phase 1.
 

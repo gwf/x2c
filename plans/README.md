@@ -44,10 +44,6 @@ execution.
 
 ### Current work
 
-- [External commands](external-commands.md): active. The single source of
-  truth for `x2c-<name>` programs that `x2c <name>` runs: layout, dispatch,
-  `libx2c-dev`, maturity, gating, and packaging. `graph`, `repl`, and `lint`
-  move in by phase.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
@@ -70,7 +66,7 @@ execution.
 | Record | What remains |
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; decisions accepted 2026-09-24. Separate `tools/x2c-lint` linking the compiler; owns C09 and the rewrite of the regex-based Python source tools over one compiler definition walk. |
+| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-3 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
@@ -93,6 +89,9 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [External commands](archive/external-commands.md): done 2026-09-24;
+  framework, packaging, and `graph`/`repl`/`lint` moves delivered through
+  `9b31112e`.
 - [Meta authoring and coverage](archive/meta-authoring-and-coverage.md):
   done 2026-09-24; nested results came from the explicit meta campaign and
   nine lifetime-sensitive methods were certified.
