@@ -103,10 +103,12 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    `x2c repl` keeps working through dispatch, including
    `unittest/probes/run-native-modules.sh`. `tools/repl-spike` moves with
    it or is retired.
-4. **`lint`.** When the lint session's standalone `x2c-lint` is ready, it
-   moves to `commands/lint` as an experimental command and gains dispatch
-   and help from phase 1 without changes of its own. Its machine-readable
-   output is a command option. Promotion to shipped is a later decision.
+4. **`lint`.** Lint is built first as a standalone `x2c-lint` in
+   `tools/x2c-lint/`, with its own build like `tools/x2c-graph`. When it
+   is ready and phase 1 has landed, it moves to `commands/lint` as an
+   experimental command and gains dispatch and help from phase 1 without
+   changes of its own. Its machine-readable output is a command option.
+   Promotion to shipped is a later decision.
 
 Phase 4 can land any time after phase 1.
 
