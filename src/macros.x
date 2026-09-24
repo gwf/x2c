@@ -1802,7 +1802,7 @@ static void _bind_native_meta(
       function = c.macro_lisp.eval(%(bind $target (quote $signature)));
       if (suppliers)
         c.report_warning(
-          <warning>, "the compiler's own function hides a native module's",
+          <native>, "the compiler's own function hides a native module's",
           marker, %("name: $name"));
     }
     catch %(no-symbol *): {
@@ -1811,7 +1811,7 @@ static void _bind_native_meta(
       function = ((Map) native_modules[first])[target];
       if (suppliers.cdr())
         c.report_warning(
-          <warning>, "more than one native module defines this function",
+          <native>, "more than one native module defines this function",
           marker, %("name: $name" "supplied by: $first"
                     "also defined by: ${", ".join(suppliers.cdr())}"));
     }

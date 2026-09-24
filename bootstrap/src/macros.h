@@ -97,8 +97,6 @@ Map Compiler_shared_definitions(Compiler compiler);
 
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
-List Compiler_parse_source_lisp(Compiler compiler);
-
 void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
 
 void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);

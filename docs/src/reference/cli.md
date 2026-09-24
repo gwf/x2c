@@ -690,9 +690,9 @@ Eight codes are reported as warnings:
 - `conversion` says a cast or explicit converter call spells a conversion
   its destination already performs.
 - `shadow` says a protocol binder shadows a visible type name.
-- `warning` covers the remaining cases: a native `meta` prototype whose
-  name both the compiler and a native module define, and one that more
-  than one native module defines.
+- `native` says a native `meta` prototype names a function that both the
+  compiler and a native module define, or that more than one native module
+  defines.
 
 [The Region Model](../guide/regions.md) explains what the first three cover
 and what they cannot see. [Scopes and Lifetime](../guide/memory.md) shows

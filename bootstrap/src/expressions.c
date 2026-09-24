@@ -3597,13 +3597,12 @@ List Compiler_var_tag_expression(Compiler c, Type target, Token origin){
   if(! _init_guard_) _file_init_();  if(_deferred_type_test(target)) return cons(_0, cons(_117, cons(List_var(cons(_854, cons(List_var(target), NULL))), NULL)));  Symbol tag = Compiler_require_var_tag(c, target, origin);  return cons(_0, cons(_855, cons(List_var(cons(_33, cons(_855, cons(String_var(Symbol_str(tag)), cons(Symbol_var(tag), NULL))))), NULL)));
 }
 
-int Compiler_parsing_source_syntax(Compiler);
 int Symbol_is_assignment_op(Symbol);
 int List_try_search(List, Var, Var *, List *);
 List Compiler_cache(Compiler, List);
 List Compiler_anchor_origin(Compiler, List, Token);
 static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, List rhs, Token origin){
-  if(Compiler_parsing_source_syntax(c)) return cons(_0, cons(_16, cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));  Type lhs_type = Var_type(List_cadr(lhs)), rhs_type = Var_type(List_cadr(rhs));  if(lhs_type == _116 || rhs_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));  if(Symbol_is_assignment_op(operator)){
+  Type lhs_type = Var_type(List_cadr(lhs)), rhs_type = Var_type(List_cadr(rhs));  if(lhs_type == _116 || rhs_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));  if(Symbol_is_assignment_op(operator)){
     Type type = lhs_type;  if(operator == 123 && !(c -> meta_body && Sym_is_named_value_type(c -> sym, type, _1737))) rhs = Compiler_convert_expression(c, rhs, type);  return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));
   }
   if(operator == 15739 || operator == 8571 || operator == 121 || operator == 125 || operator == 15483 || operator == 15995){
@@ -4002,7 +4001,7 @@ Compiler_report_error(compiler, 33658058, _1749, origin, NULL);
 }
 
 List Compiler_resolve_expression(Compiler c, List input, Token origin){
-  if(! _init_guard_) _file_init_();  if(Compiler_parsing_source_syntax(c)) return input;
+  if(! _init_guard_) _file_init_();
   {
     List _x2c_match_expr = input;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -5247,7 +5246,7 @@ Symbol Type_scalar_tag(Type);
 String Type_var_numeric_extractor(Type);
 String Type_var_converter(Type);
 List Compiler_convert_expression(Compiler c, List expr, Type target){
-  if(! _init_guard_) _file_init_();  if(Compiler_parsing_source_syntax(c)) return expr;  if(! List_truth(Type_list(target))) return expr;  Type type = Var_type(List_cadr(expr));  if(Type_is_function(type)){
+  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(target))) return expr;  Type type = Var_type(List_cadr(expr));  if(Type_is_function(type)){
     List lowered = Compiler_lower_lambda_expr(c, expr);  if(! List_equal(lowered, expr)){
       expr = Compiler_adapt_lambda_arg(c, lowered, Type_list(Sym_resolve_key(c -> sym, List_type_from_ast(Type_list(target)))));  type = Var_type(List_cadr(expr));
     }

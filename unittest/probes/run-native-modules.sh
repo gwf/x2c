@@ -134,7 +134,7 @@ EOF
 grep -Fq "return 234;" out/both.c || fail "module with same-named sources"
 [[ ! -e a/util.h && ! -e b/util.h && ! -e c/fa.h ]] ||
   fail "header written beside a source"
-grep -Fq "more than one native module defines" warn.out ||
+grep -Fq "native: more than one native module defines" warn.out ||
   fail "duplicate module warning"
 
 if [[ $(uname -s) == Darwin ]]; then

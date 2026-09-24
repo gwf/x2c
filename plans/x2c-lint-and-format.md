@@ -302,8 +302,8 @@ Phases 1 and 2 are worth shipping alone: they end C09 and remove about
 
 **Phase 0, 2026-09-24.** The unnecessary-cast and unnecessary-converter
 warnings report `conversion`, and the protocol-binder warning reports
-`shadow`. The two native-module `meta` warnings in `src/macros.x` still
-report `warning`; that file was reserved by another session, so they wait.
+`shadow`. The two native-module `meta` warnings in `src/macros.x` report
+`native`, so no compiler warning reports the generic `warning` code.
 
 **Phase 1, 2026-09-24.** `Compiler.definition_rows` in `src/generate.x` is
 the one definition walk. The `.xi` writer filters its rows to public
