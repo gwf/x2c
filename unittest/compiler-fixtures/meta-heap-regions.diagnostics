@@ -1,0 +1,9 @@
+unittest/compiler-fixtures/meta-heap-regions.x:10:3: after-free: 'p' is used after Scope.realloc moved it
+    return p[0];
+    ^^^^^^
+
+unittest/compiler-fixtures/meta-heap-regions.x:15:3: bad-free: Scope.free is given the address of 'x', which no Scope allocator returned
+    Scope.free(&x);
+    ^^^^^
+  note: only Scope.malloc, calloc, memdup, and realloc storage can be freed or reallocated
+

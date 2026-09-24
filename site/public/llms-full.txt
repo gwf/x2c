@@ -4354,14 +4354,15 @@ the caret width.
 
 ### Region warnings
 
-Two codes come from the region check described in
+Three codes come from the region check described in
 [Scopes and Lifetime](https://x2c-lang.dev/docs/guide/memory.html#warnings-when-a-value-outlives-its-region).
 Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
+| `after-free` | A local is read after `Scope.free`, `Scope.realloc`, or `Array.list_free` consumed it. |
+| `bad-free` | `Scope.free` or `Scope.realloc` is given a literal, a local's address, or other storage no Scope allocator returned. |
 
 The check analyzes regions lexically and summarizes each function within its
 own unit, so a unit gets the same warnings whatever else is translated with
@@ -5004,13 +5005,15 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Five codes are reported as warnings:
+Six codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
-- `after-free` says a local was read after `Scope.free` or
-  `Array.list_free` consumed it.
+- `after-free` says a local was read after `Scope.free`, `Scope.realloc`,
+  or `Array.list_free` consumed it.
+- `bad-free` says `Scope.free` or `Scope.realloc` was given a literal, a
+  local's address, or other storage no Scope allocator returned.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
