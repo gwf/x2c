@@ -132,6 +132,9 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    experimental command and gains dispatch and help from phase 1 without
    changes of its own. Its machine-readable output is a command option.
    Promotion to shipped is a later decision.
+   Ready as of 2026-09-24: `tools/x2c-lint` is complete on `dev` at
+   `b9331553` and `9c367869` (lint plan phase 3, with its own
+   `make -C tools/x2c-lint test`). Move that version to `commands/lint`.
 
 Phase 4 can land any time after phase 1.
 
