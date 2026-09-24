@@ -245,6 +245,13 @@ comments, and spans, on which the tools' own logic is rewritten, the way
 skill analyzers move together. This is a design, to be planned on its own
 before implementation.
 
+Gary folded catalog item C09 into this rewrite on 2026-09-24
+([consolidation catalog](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation)):
+the generators read the definitions the compiler selected, including those
+produced by Unit macros and foreign aliases, instead of approximating them.
+Plan it after the branch that adds the Pythonic script syntax lands, and
+write the new tools in that syntax.
+
 ## Off the table
 
 | What | Why |
