@@ -404,6 +404,10 @@ static void _file(
     Map dependencies = {};
     Scope.pop();
     Map definitions = {}, int private = 0, linkage = 0;
+    /* Each open conditional group is 2 while its arm is one C never takes,
+       1 when the arms after its first `#else` will be, and 0 otherwise. An
+       include in such an arm is not read. */
+    Array arms = $auto([]), int hidden = 0;
     String content_hash = "%08x".printf(text.hash());
     /* Scanned tokens place directives outside strings and comments. A
        segment ends before an include or a visibility pragma, and the next
@@ -414,8 +418,22 @@ static void _file(
     int segment_line = 1, segment_position = 0;
     for (Token token = first; token.type != <eof>; token++) {
       if (token.type != <preproc> || !_starts_line(first, token)) continue;
+      Symbol kind = preproc_conditional_kind(token.text);
+      if (kind) {
+        if (kind == <open>) {
+          Symbol never = preproc_never_active_arm(token.text);
+          arms.push(never == <first> ? 2 : never == <rest>);
+        }
+        else if (kind == <branch> && arms.len())
+          arms[-1] = arms[-1].integer() == 1 ? 2 : 0;
+        else if (kind == <close> && arms.len()) arms.take_last();
+        hidden = 0;
+        foreach (int state, arms) if (state == 2) hidden = 1;
+        continue;
+      }
       int angle = 0, visibility = _visibility_pragma(token.text);
-      String target = preproc_include_target(token.text, &angle);
+      String target =
+        hidden ? NULL : preproc_include_target(token.text, &angle);
       if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,

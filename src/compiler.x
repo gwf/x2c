@@ -581,19 +581,29 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
-/* Classifies an opening conditional directive by which of its arms C can
-   never reach: `<first>` when the condition requires a never-defined name
-   or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. x2c output
-   is compiled as C by a GNU-style compiler, so `__cplusplus` and `_MSC_VER`
-   are never defined; each reads as `<never>`, which no C token spells. */
-static Symbol _never_active_arm(String s) {
+/* x2c output is compiled as C by a GNU-style compiler, so `__cplusplus` and
+   `_MSC_VER` are never defined, and a compiler built for a host other than
+   Windows never targets it. */
+static int _never_defined(String name) {
+  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
+#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
+#else
+  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
+#endif
+}
+
+/** Classifies an opening conditional directive by which of its arms C can
+    never reach: `<first>` when the condition requires a never-defined name
+    or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. Each
+    never-defined name reads as `<never>`, which no C token spells. */
+Symbol preproc_never_active_arm(String s) {
   Tokenizer scanned = Tokenizer.new(preproc_directive(s));
   scanned.scan();
   Array words = [];
   for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
        t = _skip_forward(t + 1))
-    words.push(t.text == "__cplusplus" || t.text == "_MSC_VER"
-               ? "<never>" : t.text);
+    words.push(_never_defined(t.text) ? "<never>" : t.text);
   String line = " ".join(words.list_free()).replace(
     "defined ( <never> )", "defined <never>");
   // A `||` gives the condition another way to hold, so the arm can be taken.
@@ -736,7 +746,7 @@ static void _scan_conditionals(Compiler c) {
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
     if (kind == <open>) {
-      Symbol never = _never_active_arm(token.text);
+      Symbol never = preproc_never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
     }
     else if (kind == <branch> && stack.len()) {

@@ -75,7 +75,8 @@ x2c parses the source as written, before preprocessing, so every branch of an
 `#ifdef` that C could compile must parse. x2c output is compiled as C by a
 GNU-style compiler, so x2c skips three branches that never reach C: the
 branch under `#ifdef __cplusplus` or `#if defined(__cplusplus)`, the branch
-under `#ifdef _MSC_VER`, and `#if 0`. The usual guard for C++ callers, a C++
+under `#ifdef _MSC_VER`, and `#if 0`. Off Windows, a branch under
+`#ifdef _WIN32`, `_WIN64`, or `__CYGWIN__` is skipped too. The usual guard for C++ callers, a C++
 `template`, or MSVC inline assembly in its own branch needs no change:
 
 ```x2c

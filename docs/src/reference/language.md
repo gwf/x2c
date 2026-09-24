@@ -3153,10 +3153,12 @@ under `#ifdef __cplusplus`, `#if defined(__cplusplus)` alone or first in a
 `#if defined(_MSC_VER)` likewise,
 the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`,
 and `#if 0` are skipped: their tokens are trivia, and the directives around
-them stay in place and are emitted. A function defined in two arms of one
-conditional is one definition. At file scope, `extern "C" {` opens a
-linkage group and a `}` closes it; the group's declarations belong to file
-scope, and its braces are not emitted. Any string literal is accepted as the
+them stay in place and are emitted. A compiler built for a host other than
+Windows treats `_WIN32`, `_WIN64`, and `__CYGWIN__` the same way. An
+`#include` in a skipped branch is not read. A function defined in two arms
+of one conditional is one definition. At file scope, `extern "C" {` opens a
+linkage group and a `}` closes it, even with an `#include` between them; the
+group's declarations belong to file scope, and its braces are not emitted. Any string literal is accepted as the
 linkage name. `extern "C"` before a single declaration is read as `extern`.
 
 A unit or a collected header may place a macro before or among a
@@ -3173,6 +3175,10 @@ class reads as that storage after the type as well, as in
 conditional branches, a `static` definition takes precedence, then any
 prefix without a qualifier, then a prefix with one, such as zlib's
 `z_const`, which is `const` in one branch and nothing in another. A name defined to any other text is a typedef name.
+In a collected header, a name with no visible definition directly before a
+builtin type word, qualifier, storage class, or `inline`, as in
+`API int f(void);` with `API` defined on the C compile line, contributes
+nothing.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or
