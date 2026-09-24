@@ -601,7 +601,9 @@ A project manifest can pin packages instead of installing them by hand; see
 
 `x2c env` prints the resolved home, executable, include directory, runtime
 archive, prelude interface, package roots, C compiler, archiver, and script
-cache root as `name = value` lines. The prelude is the runtime `x2c.xi`
+cache root as `name = value` lines. It also reports `libexec`, the directory
+for external commands, and `identity`, the compiler executable's identity.
+The prelude is the runtime `x2c.xi`
 interface the compiler replays for the runtime declarations. Only an
 interface the same compiler wrote qualifies; an empty value means the
 compiler reads `lib/x2c.x` from source once per process.
@@ -638,6 +640,19 @@ toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
 installed record, then `ar`. Omitted optimization, debug, define, and undefine
 options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
 implicitly consumed.
+
+## Commands
+
+The built-in commands are listed by `x2c help`. External commands are separate
+programs named `x2c-<name>` in the directory printed by `x2c env libexec`.
+In a source checkout this is `builds/0/libexec`; in an installed home it is
+`<home>/libexec/x2c`. The driver does not search `PATH` for them.
+`x2c help` lists their summaries from that directory's `commands.txt`.
+
+The driver passes arguments after an external command name directly to its
+program, including arguments beginning with `@`. The external command owns
+its options and help, so `x2c help <name>` and `x2c <name> --help` run the
+program's `--help`. Built-in commands retain response-file expansion.
 
 ## Compiler diagnostics
 

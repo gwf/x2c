@@ -25,8 +25,9 @@ Initializes x2c and dispatches one command from `argv`.
 successful translation, build, or bootstrap, one for compiler or tool
 failure, and the executed program's status for `run`. Help and version exit
 with zero, while invalid CLI and preflight input exit with status two.
+An external command replaces this process and returns its own status.
 
-Source: `src/main.x:555`
+Source: `src/main.x:588`
 
 ## Design notes
 

@@ -4,15 +4,16 @@
 
 #include "exception.h"
 
-static List _54, _53, _9, _8, _7, _4, _3;
+static List _58, _57, _9, _8, _7, _4, _3;
 
-static String _62, _61, _60, _59, _58, _57, _56, _55, _50, _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
+static String _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _54, _53, _51, _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
 
-static Var _52, _51, _48, _46, _44, _42, _40, _38, _36, _34, _32, _6, _5, _2, _1, _0;
+static Var _56, _55, _52, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _6, _5, _2, _1, _0;
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include "report.h"
 #include "collect.h"
@@ -62,6 +63,12 @@ static int _run_build(CliRequest request);
 static int _run_env(CliRequest request);
 
 static int _run_bootstrap(CliRequest command);
+
+static int _external_name(const char * name);
+
+static String _external_path(const char * name);
+
+static void _run_external(String path, char * * args);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -126,34 +133,41 @@ __attribute__((constructor)) static void _file_init_(void){
   _32 = String_var(_31);
   _33 = String_new("executable");
   _34 = String_var(_33);
-  _35 = String_new("include_dir");
+  _35 = String_new("libexec");
   _36 = String_var(_35);
-  _37 = String_new("runtime_lib");
+  _37 = String_new("identity");
   _38 = String_var(_37);
-  _39 = String_new("prelude");
+  _39 = String_new("include_dir");
   _40 = String_var(_39);
-  _41 = String_new("package_dirs");
+  _41 = String_new("runtime_lib");
   _42 = String_var(_41);
-  _43 = String_new("cc");
+  _43 = String_new("prelude");
   _44 = String_var(_43);
-  _45 = String_new("ar");
+  _45 = String_new("package_dirs");
   _46 = String_var(_45);
-  _47 = String_new("cache_dir");
+  _47 = String_new("cc");
   _48 = String_var(_47);
-  _49 = String_new("unknown env name \'");
-  _50 = String_new("\'");
-  _51 = Symbol_var(40094681930);
-  _52 = Symbol_var(239277269348);
-  _53 = cons(_52, NULL);
-  _54 = cons(_51, _53);
-  _55 = String_new("cannot open diagnostics file \'");
-  _56 = String_new("could not start a translation worker");
-  _57 = String_new("file");
-  _58 = String_new("files");
-  _59 = String_new("C file");
-  _60 = String_new("C files");
-  _61 = String_new("header");
-  _62 = String_new("headers");
+  _49 = String_new("ar");
+  _50 = String_var(_49);
+  _51 = String_new("cache_dir");
+  _52 = String_var(_51);
+  _53 = String_new("unknown env name \'");
+  _54 = String_new("\'");
+  _55 = Symbol_var(40094681930);
+  _56 = Symbol_var(239277269348);
+  _57 = cons(_56, NULL);
+  _58 = cons(_55, _57);
+  _59 = String_new("/x2c-");
+  _60 = String_new("cannot run external command \'");
+  _61 = String_new("\': ");
+  _62 = String_new("cannot open diagnostics file \'");
+  _63 = String_new("could not start a translation worker");
+  _64 = String_new("file");
+  _65 = String_new("files");
+  _66 = String_new("C file");
+  _67 = String_new("C files");
+  _68 = String_new("header");
+  _69 = String_new("headers");
 }
 
 Logger log_get_global_logger(void);
@@ -538,7 +552,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
         worker_exit(0);
       }
       if(pid < 0){
-        report_line(11703268, _56);
+        report_line(11703268, _63);
         failed ++;
         continue;
       }
@@ -668,11 +682,11 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   }
   if(! build && ! CliRequest_inspects(c)){
     String duration = report_duration(report_now_us() - started_at);
-    String noun = total == 1 ? _57 : _58;
+    String noun = total == 1 ? _64 : _65;
     report_line(42217975014, String_join(NULL, cons(String_var(_20), cons(String_var(int_str(total)), cons(String_var(_21), cons(String_var(noun), cons(String_var(_22), cons(String_var(c -> out_dir), cons(String_var(_23), cons(String_var(duration), NULL))))))))));
     String size = report_size(gen_bytes);
-    String c_noun = total == 1 ? _59 : _60;
-    String h_noun = total == 1 ? _61 : _62;
+    String c_noun = total == 1 ? _66 : _67;
+    String h_noun = total == 1 ? _68 : _69;
     report_line(28680520, String_join(NULL, cons(String_var(_24), cons(String_var(int_str(total)), cons(String_var(_25), cons(String_var(c_noun), cons(String_var(_26), cons(String_var(int_str(total)), cons(String_var(_25), cons(String_var(h_noun), cons(String_var(_27), cons(String_var(size), cons(String_var(_28), NULL)))))))))))));
   }
   return 0;
@@ -911,6 +925,10 @@ String interface_prelude(void);
 
 String x2c_get_root(void);
 
+String x2c_home_libexec(void);
+
+String x2c_compiler_identity(void);
+
 String script_cache_root(void);
 
 Var List_cadr(List);
@@ -925,7 +943,7 @@ static int _run_env(CliRequest request){
   String roots = String_join(_30, CliRequest_package_roots(request));
   interface_configure(request -> out_dir, 0);
   String prelude = interface_prelude();
-  List rows = cons(List_var(cons(_32, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_34, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_36, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_38, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_40, cons(String_var(String_truth(prelude) ? prelude : 0), NULL))), cons(List_var(cons(_42, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_44, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_46, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_48, cons(String_var(script_cache_root()), NULL))), NULL)))))))));
+  List rows = cons(List_var(cons(_32, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_34, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_36, cons(String_var(String_truth(x2c_home_libexec()) ? x2c_home_libexec() : 0), NULL))), cons(List_var(cons(_38, cons(String_var(String_truth(x2c_compiler_identity()) ? x2c_compiler_identity() : 0), NULL))), cons(List_var(cons(_40, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_42, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_44, cons(String_var(String_truth(prelude) ? prelude : 0), NULL))), cons(List_var(cons(_46, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_48, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_50, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_52, cons(String_var(script_cache_root()), NULL))), NULL)))))))))));
   String wanted = NULL;
   if(List_truth(request -> inputs)) wanted = Var_string(List_car(request -> inputs));
   {
@@ -949,7 +967,7 @@ static int _run_env(CliRequest request){
     }
 
   }
-  if(String_truth(wanted)) x2c_driver_error(String_join(NULL, cons(String_var(_49), cons(String_var(wanted), cons(String_var(_50), NULL)))));
+  if(String_truth(wanted)) x2c_driver_error(String_join(NULL, cons(String_var(_53), cons(String_var(wanted), cons(String_var(_54), NULL)))));
   return 0;
 }
 
@@ -983,7 +1001,7 @@ static int _run_bootstrap(CliRequest command){
   CliRequest request = NULL;
   {
     Symbol component;
-    List _x2c_macro_object_12 = _54;
+    List _x2c_macro_object_12 = _58;
     List _x2c_macro_cursor_12 = _x2c_macro_object_12;
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
@@ -1006,6 +1024,39 @@ static int _run_bootstrap(CliRequest command){
   Context_close(build);
   fflush(NULL);
   _Exit(result);
+}
+
+static int _external_name(const char * name){
+  if(! name || !((* name >= 'a' && * name <= 'z') ||(* name >= 'A' && * name <= 'Z'))) return 0;
+  for(const char * p = name + 1;  * p;  p ++) if(!((* p >= 'a' && * p <= 'z') ||(* p >= 'A' && * p <= 'Z') ||(* p >= '0' && * p <= '9') || * p == '-' || * p == '_')) return 0;
+  return 1;
+}
+
+int cli_builtin_command(const char *);
+
+int Path_is_executable(Path);
+
+static String _external_path(const char * name){
+  if(! _external_name(name) || cli_builtin_command(name)) return NULL;
+  String libexec = x2c_home_libexec();
+  if(! String_truth(libexec)) return NULL;
+  String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_59), cons(String_var(String_new(name)), NULL))));
+  return Path_is_executable(path) ? path : NULL;
+}
+
+String x2c_home(void);
+
+String String_new(const char *);
+
+static void _run_external(String path, char * * args){
+  String home = x2c_home(), executable = x2c_get_executable();
+  String identity = x2c_compiler_identity();
+  if(String_truth(home)) setenv("X2C_HOME", home, 1);
+  if(String_truth(executable)) setenv("X2C", executable, 1);
+  if(String_truth(identity)) setenv("X2C_IDENTITY", identity, 1);
+  args[0] = path;
+  execv(path, args);
+  x2c_driver_error(String_join(NULL, cons(String_var(_60), cons(String_var(path), cons(String_var(_61), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
 void x2c_initialize_environment(const char *);
@@ -1042,9 +1093,25 @@ int main(int argc, char * * argv){
     argv[1] = argv[0];
     return editor_request(argc - 1, argv + 1);
   }
+  if(argc > 1){
+    String path = _external_path(argv[1]);
+    if(String_truth(path)) _run_external(path, argv + 1);
+    if(argc == 3 && ! strcmp(argv[1], "help")){
+      path = _external_path(argv[2]);
+      if(String_truth(path)){
+        char * args[] ={
+          NULL, "--help", NULL
+        }
+        ;
+        _run_external(path, args);
+      }
+
+    }
+
+  }
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_55), cons(String_var(diagnostics), cons(String_var(_50), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(diagnostics), cons(String_var(_54), NULL)))));
   if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);

@@ -59,7 +59,7 @@ def stable(report):
 def main():
     directory = Path(__file__).resolve().parent
     tool = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else (
-        directory.parent / "builds" / "x2c-graph"
+        directory.parents[2] / "builds" / "0" / "libexec" / "x2c-graph"
     )
     paths = [directory / "fixtures" / f"clones-{letter}.x"
              for letter in ("a", "b")]

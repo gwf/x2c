@@ -43,7 +43,7 @@ public requirement.
 For AST work, consult
 [the Match guide](../../replacing-manual-ast-walks-with-match.md)
 and trace forms into existing binding, typing, placement, transformation, and
-emission. The optional [source graph commands](../../../tools/x2c-graph/README.md)
+emission. The optional [source graph commands](../../../commands/graph/README.md)
 `flows` and `compare` investigate unclear parsed-source paths; reachability
 differences require source review, and missing paths do not establish safety.
 

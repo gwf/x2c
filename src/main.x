@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "report.x"
@@ -492,6 +493,8 @@ static int _run_env(CliRequest request) {
   List rows = %(
     ("home" ${x2c_get_root()})
     ("executable" ${executable ? executable : %""})
+    ("libexec" ${x2c_home_libexec() ? x2c_home_libexec() : %""})
+    ("identity" ${x2c_compiler_identity() ? x2c_compiler_identity() : %""})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
     ("prelude" ${prelude ? prelude : %""})
@@ -546,17 +549,58 @@ static int _run_bootstrap(CliRequest command) {
   _Exit(result);
 }
 
+static int _external_name(const char *name) {
+  if (!name || !((*name >= 'a' && *name <= 'z') ||
+                 (*name >= 'A' && *name <= 'Z'))) return 0;
+  for (const char *p = name + 1; *p; p++)
+    if (!( (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+           (*p >= '0' && *p <= '9') || *p == '-' || *p == '_')) return 0;
+  return 1;
+}
+
+static String _external_path(const char *name) {
+  if (!_external_name(name) || cli_builtin_command(name)) return NULL;
+  String libexec = x2c_home_libexec();
+  if (!libexec) return NULL;
+  String path = %"$libexec/x2c-$name";
+  return Path.is_executable(path) ? path : NULL;
+}
+
+static void _run_external(String path, char **args) {
+  String home = x2c_home(), executable = x2c_get_executable();
+  String identity = x2c_compiler_identity();
+  if (home) setenv("X2C_HOME", home, 1);
+  if (executable) setenv("X2C", executable, 1);
+  if (identity) setenv("X2C_IDENTITY", identity, 1);
+  args[0] = path;
+  execv(path, args);
+  x2c_driver_error(
+    %"cannot run external command '$path': ${String.new(strerror(errno))}");
+}
+
 /** Initializes x2c and dispatches one command from `argv`.
     `argv[0]` locates the installation. The process status is zero for a
     successful translation, build, or bootstrap, one for compiler or tool
     failure, and the executed program's status for `run`. Help and version exit
     with zero, while invalid CLI and preflight input exit with status two.
+    An external command replaces this process and returns its own status.
 */
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
   if (argc > 1 && !strcmp(argv[1], "editor")) {
     argv[1] = argv[0];
     return editor_request(argc - 1, argv + 1);
+  }
+  if (argc > 1) {
+    String path = _external_path(argv[1]);
+    if (path) _run_external(path, argv + 1);
+    if (argc == 3 && !strcmp(argv[1], "help")) {
+      path = _external_path(argv[2]);
+      if (path) {
+        char *args[] = { NULL, "--help", NULL };
+        _run_external(path, args);
+      }
+    }
   }
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request.diagnostics_file;

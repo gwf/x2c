@@ -57,9 +57,11 @@ prefix.
 | [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
 | [`x2c_hash_word`](common.md#x2c_hash_word) | `lib/common.x` | `inline unsigned x2c_hash_word(unsigned long word)` |
 | `x2c_home` | `src/utils.x` | `String x2c_home(void)` |
+| `x2c_home_libexec` | `src/utils.x` | `String x2c_home_libexec(void)` |
 | `x2c_home_packages` | `src/utils.x` | `String x2c_home_packages(void)` |
 | `x2c_host_error` | `src/utils.x` | `void x2c_host_error(List detail)` |
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
+| `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
 | `x2c_layout_file` | `src/utils.x` | `int x2c_layout_file(String path)` |
@@ -114,4 +116,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 102 functions.
+Total: 104 functions.

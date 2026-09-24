@@ -119,6 +119,8 @@ Direct destructive operations outside the requested change need approval.
 - `bootstrap/` + `bin/` - the bootstrap chain. Never hand-edit `bootstrap/`;
   change `.x` sources and regenerate through the publication command below.
 - `builds/` - staged toolchains (`builds/0` drives local builds).
+- `commands/` - external commands built against the current compiler;
+  `commands/manifest.txt` records maturity and help summaries.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,
   surfaced through `.agents/skills` for Codex and `.claude/skills` for Claude
   Code).

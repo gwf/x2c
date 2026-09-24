@@ -311,6 +311,10 @@ static CliCommand *_command_row(const char *word) {
   return NULL;
 }
 
+/** Reports whether a raw command name belongs to the built-in parser. */
+int cli_builtin_command(const char *word) =>
+  !strcmp(word, "help") || _command_row(word) != NULL;
+
 static const char *_group_title(Symbol command, Symbol group) {
   switch (group) {
     case <target>:     return "Target options:";
@@ -386,6 +390,24 @@ static void _print_top_help(void) {
     "));
   for (CliCommand *command = cli_commands; command.name; command++)
     printf("  %-12s%s\n", command.name.str(), command.description);
+  String libexec = x2c_home_libexec();
+  File manifest = libexec ? fopen(%"$libexec/commands.txt", "r") : NULL;
+  if (manifest) {
+    char *line = NULL;
+    size_t capacity = 0;
+    while (getline(&line, &capacity, manifest) >= 0) {
+      char *maturity = strchr(line, '|');
+      if (!maturity) continue;
+      *maturity++ = 0;
+      char *summary = strchr(maturity, '|');
+      if (!summary) continue;
+      *summary++ = 0;
+      summary[strcspn(summary, "\r\n")] = 0;
+      printf("  %-12s%s\n", line, summary);
+    }
+    free(line);
+    manifest.close();
+  }
   _print_options(0);
   puts("");
   puts($dedent(%"
@@ -484,9 +506,9 @@ static void _print_env_help(void) {
       Usage:
         x2c env [options] [name]
 
-      Print the home, executable, include directory, runtime archive,
-      package roots, host tools, and script cache this compiler resolved, one
-      'name = value' line each, or only the value of one name."));
+      Print the home, executable, include directory, runtime archive, command
+      directory, identity, package roots, host tools, and script cache this
+      compiler resolved, one 'name = value' line each, or only one value."));
   _print_options(<env>);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
@@ -1034,6 +1056,17 @@ static int _default_build_jobs(void) {
   return count > 0 && count <= INT_MAX ? (int) count : 1;
 }
 
+/** Constructs a request with the command's ordinary CLI defaults. */
+CliRequest cli_request(Symbol command) {
+  int mask = _command_mask(command);
+  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  request.command = command;
+  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  request.max_errors = 20;
+  if (mask & CLI_NATIVE) request.kind = <executable>;
+  return request;
+}
+
 /* translate reports the diagnostic for x2c's single-dash long-option
    spellings. */
 static void _one_dash_removed(String arg) {
@@ -1050,11 +1083,7 @@ static void _one_dash_removed(String arg) {
 
 static CliRequest _parse_command(Array args, CliCommand *command) {
   Symbol name = command.name, int mask = command.mask;
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
-  request.command = name;
-  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
-  request.max_errors = 20;
-  if (mask & CLI_NATIVE) request.kind = <executable>;
+  CliRequest request = cli_request(name);
   Array inputs = [], run_args = [], x_paths = [];
   Array cpp_args = [], cc_args = [], ld_args = [], int operands = 0;
   int expanded_end = 0;

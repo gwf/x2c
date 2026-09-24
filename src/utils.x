@@ -13,6 +13,21 @@ $(import "../lib/private-keywords.xmacro")
 #include "path.x"
 #include "process.x"
 
+/* Initializes ordinary and external command paths with the chosen identity. */
+static void _initialize_environment(
+  const char *argv0, String embedded_identity) {
+  if (x2c_root_path) return;
+  x2c_executable_path = _executable(argv0);
+  x2c_identity = embedded_identity ? embedded_identity : _identity();
+  String home = Env.get("X2C_HOME");
+  if (home && !home[0]) home = NULL;
+  String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
+  if (!root) root = _locate_home(Path.absolute("."));
+  x2c_root_found = root != NULL;
+  x2c_root_path = Path.absolute(root ? root : ".");
+  _prepare_repo_defaults();
+}
+
 /** Initializes compiler paths and default include `List`s once.
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
     `X2C_HOME` when it is set and not empty; otherwise discovery walks from
@@ -26,16 +41,19 @@ $(import "../lib/private-keywords.xmacro")
     state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
-  if (x2c_root_path) return;
-  x2c_executable_path = _executable(argv0);
-  x2c_identity = _identity();
-  String home = Env.get("X2C_HOME");
-  if (home && !home[0]) home = NULL;
-  String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
-  if (!root) root = _locate_home(Path.absolute("."));
-  x2c_root_found = root != NULL;
-  x2c_root_path = Path.absolute(root ? root : ".");
-  _prepare_repo_defaults();
+  _initialize_environment(argv0, NULL);
+}
+
+/** Initializes an external command with the compiler identity embedded when
+    it was built. A driver-supplied identity must match that compiler. */
+void x2c_initialize_command_environment(
+  const char *argv0, String embedded_identity) {
+  String supplied = Env.get("X2C_IDENTITY");
+  if (supplied && supplied != embedded_identity) {
+    String detail = %"command $embedded_identity, driver $supplied";
+    x2c_driver_error(%"compiler identity mismatch: $detail");
+  }
+  _initialize_environment(argv0, embedded_identity);
 }
 
 /** Overrides the repository root and rebuilds its default include `List`s.
@@ -123,6 +141,14 @@ String x2c_home(void) => x2c_root_found ? x2c_root_path : NULL;
 String x2c_home_packages(void) {
   String home = x2c_home();
   return home ? %"$home/packages" : NULL;
+}
+
+/** Returns the command directory for this checkout or installed home. */
+String x2c_home_libexec(void) {
+  String stage = x2c_stage_dir();
+  if (stage) return %"$stage/libexec";
+  String home = x2c_home();
+  return home ? %"$home/libexec/x2c" : NULL;
 }
 
 /** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
@@ -301,10 +327,10 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok) {
   return hash;
 }
 
-/** Returns the running compiler's identity, the FNV-1a digest of its
-    executable's contents in 16 hexadecimal digits, or NULL when the
-    executable is unknown or unreadable. Only byte-identical compilers share
-    an identity. Environment setup reads the executable once.
+/** Returns the active compiler's identity in 16 hexadecimal digits.
+    Ordinary compiler startup hashes its executable with FNV-1a; an external
+    command uses the identity embedded from the compiler that built it.
+    Returns NULL if ordinary startup could not read its executable.
 */
 String x2c_compiler_identity(void) => x2c_identity;
 

@@ -1,9 +1,9 @@
 Usage:
   x2c env [options] [name]
 
-Print the home, executable, include directory, runtime archive,
-package roots, host tools, and script cache this compiler resolved, one
-'name = value' line each, or only the value of one name.
+Print the home, executable, include directory, runtime archive, command
+directory, identity, package roots, host tools, and script cache this
+compiler resolved, one 'name = value' line each, or only one value.
 
 Translation options:
       --package-dir <dir>     Add a directory of x2c packages

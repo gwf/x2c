@@ -10,8 +10,8 @@ include etc/build-config.mk
 .SUFFIXES:
 .DELETE_ON_ERROR:
 
-CORE_TARGETS = build build-safe verify examples check precommit \
-	agent-pr-check sanity-check clean help stats
+CORE_TARGETS = build build-safe commands commands-check verify examples \
+	check precommit agent-pr-check sanity-check clean help stats
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
@@ -47,6 +47,9 @@ COMPAT_TARGETS = unittest docs bootstrap debug
 BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
 STAGE0_X2C ?= ./builds/0/x2c
 STATS_COLOR ?= auto
+COMMAND_NAMES = $(shell cut -d'|' -f1 commands/manifest.txt)
+COMMAND_LINK_FLAGS = $(if $(filter Linux,$(shell uname -s)),\
+	-Xlinker -export-dynamic,)
 
 bootstrap-ready: configure
 	@if [ ! -f $(BOOTSTRAP_SENTINEL) ]; then \
@@ -74,6 +77,44 @@ build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
 	$(PARALLEL_MAKE) -C builds x2c
+
+commands: build					## Build checkout external commands
+	@$(MAKE) --no-print-directory command-artifacts
+
+.PHONY: command-artifacts
+command-artifacts:
+	@mkdir -p builds/0/libexec builds/0/commands
+	@set --; \
+	  for object in builds/0/src/*.o; do \
+	    [ "$$object" = builds/0/src/main.o ] || \
+	      set -- "$$@" "$$object"; \
+	  done; \
+	  $(STAGE0_X2C) build --plain --kind static-library \
+	    --output builds/0/libx2c-dev.a "$$@"
+	@set -e; identity=`$(STAGE0_X2C) env identity`; \
+	  printf 'String x2c_embedded_identity(void) => "%s";\n' \
+	    "$$identity" > builds/0/commands/identity.x.tmp; \
+	  if ! cmp -s builds/0/commands/identity.x.tmp \
+	      builds/0/commands/identity.x; then \
+	    mv builds/0/commands/identity.x.tmp builds/0/commands/identity.x; \
+	  else rm builds/0/commands/identity.x.tmp; fi
+	@cp commands/manifest.txt builds/0/libexec/commands.txt
+	@for name in $(COMMAND_NAMES); do \
+	  $(STAGE0_X2C) build --plain \
+	    --build-dir "builds/0/commands/$$name-cc" \
+	    --output "builds/0/libexec/x2c-$$name" \
+	    --x-include-dir . --x-include-dir src \
+	    --c-include-dir builds/0/src \
+	    $(COMMAND_LINK_FLAGS) \
+	    commands/$$name/*.x builds/0/commands/identity.x \
+	    builds/0/libx2c-dev.a || exit; \
+	 done
+
+commands-check: commands				## Run external command smoke tests
+	@for name in $(COMMAND_NAMES); do \
+	  test -f "commands/$$name/tests/run.sh" || exit 1; \
+	  sh "commands/$$name/tests/run.sh" || exit; \
+	 done
 
 verify: build						## Build and run unit test suites
 	$(STAGE0_X2C) script unittest/probes/run-suite-coverage

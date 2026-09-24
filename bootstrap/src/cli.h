@@ -30,11 +30,15 @@ typedef struct CliRequest{
 }
 * CliRequest;
 
+int cli_builtin_command(const char * word);
+
 List cli_response_arguments(String path);
 
 int cli_dependency_pass_through(String s);
 
 CliRequest cli_package_options(String path, String package);
+
+CliRequest cli_request(Symbol command);
 
 CliRequest cli_parse(int argc, char * * argv);
 

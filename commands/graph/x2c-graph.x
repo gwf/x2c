@@ -2520,7 +2520,15 @@ static void _usage(String program) {
   );
 }
 
+String x2c_embedded_identity(void);
+
 int main(int argc, char **argv) {
+  x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
+  if (argc == 2 && (!strcmp(argv[1], "--help") ||
+                    !strcmp(argv[1], "-h"))) {
+    _usage(argv[0]);
+    return 0;
+  }
   int clones = argc > 1 && !strcmp(argv[1], "clones");
   int clone_minimum = 24;
   int datasets = argc > 1 && !strcmp(argv[1], "datasets");
@@ -2572,7 +2580,6 @@ int main(int argc, char **argv) {
     _usage(argv[0]);
     return 2;
   }
-  x2c_initialize_environment(argv[0]);
   Array inputs = [], include_dirs = [], compare_operations = [];
   Array src_inputs = [], lib_inputs = [];
   Map seen = {}, subtrees = {};

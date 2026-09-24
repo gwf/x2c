@@ -45,7 +45,7 @@ is not a defect.
 For parser, macro, Lisp, Match, transform, generator, or emitter work, consult
 [the Match guide](../../replacing-manual-ast-walks-with-match.md). Trace
 canonical forms into their ordinary semantic operations. The optional
-[source graph commands](../../../tools/x2c-graph/README.md) `flows` and
+[source graph commands](../../../commands/graph/README.md) `flows` and
 `compare` expose parsed-source paths worth inspecting; shared paths do not
 establish semantic equivalence, and missing paths do not establish safety.
 

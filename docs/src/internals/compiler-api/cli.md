@@ -12,15 +12,25 @@ X2c command-line parsing and presentation.
 
 | Function | Summary |
 | --- | --- |
+| [`cli_builtin_command`](#cli_builtin_command) | Reports whether a raw command name belongs to the built-in parser. |
 | [`cli_dependency_pass_through`](#cli_dependency_pass_through) | Returns whether `argument` contains a driver-owned dependency option. |
 | [`cli_package_options`](#cli_package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
 | [`cli_parse`](#cli_parse) | Expands response files and parses `argv[1..]` into one validated request. |
+| [`cli_request`](#cli_request) | Constructs a request with the command's ordinary CLI defaults. |
 | [`cli_response_arguments`](#cli_response_arguments) | Reads response-file tokens with ordinary quoting and UTF-8 checks. |
 | [`cli_version`](#cli_version) | Returns the version line `--version` prints, without a newline. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
 | [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
 
 ### Functions
+
+#### cli_builtin_command
+
+`int cli_builtin_command(const char *word)`
+
+Reports whether a raw command name belongs to the built-in parser.
+
+Source: `src/cli.x:315`
 
 #### cli_dependency_pass_through
 
@@ -30,7 +40,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:863`
+Source: `src/cli.x:885`
 
 #### cli_package_options
 
@@ -43,7 +53,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:992`
+Source: `src/cli.x:1014`
 
 #### cli_parse
 
@@ -58,7 +68,15 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1152`
+Source: `src/cli.x:1181`
+
+#### cli_request
+
+`CliRequest cli_request(Symbol command)`
+
+Constructs a request with the command's ordinary CLI defaults.
+
+Source: `src/cli.x:1060`
 
 #### cli_response_arguments
 
@@ -68,7 +86,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:765`
+Source: `src/cli.x:787`
 
 #### cli_version
 
@@ -76,7 +94,7 @@ Source: `src/cli.x:765`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1207`
+Source: `src/cli.x:1236`
 
 ### `CliRequest`
 
@@ -87,7 +105,7 @@ Source: `src/cli.x:1207`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1210`
+Source: `src/cli.x:1239`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -100,7 +118,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1218`
+Source: `src/cli.x:1247`
 
 ## Public types
 

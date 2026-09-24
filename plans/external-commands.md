@@ -1,11 +1,9 @@
 # External commands
 
 > Status: active.
-> Gary approved this design on 2026-09-24. It is the only source of truth
+> Gary approved this design on 2026-09-24. Phase 1 is implemented; packaging,
+> REPL migration, and lint migration remain. This is the source of truth
 > for how external commands are built, found, run, tested, and shipped.
-> Work on any command follows it; nothing is implemented yet. Until phase 1
-> lands, a command under development is a standalone program with no
-> compiler dispatch.
 
 ## Goal
 

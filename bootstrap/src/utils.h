@@ -10,6 +10,8 @@
 #include "process.h"
 void x2c_initialize_environment(const char * argv0);
 
+void x2c_initialize_command_environment(const char * argv0, String embedded_identity);
+
 void x2c_set_root(String root);
 
 String x2c_get_root(void);
@@ -31,6 +33,8 @@ List x2c_cpp_include_dirs(void);
 String x2c_home(void);
 
 String x2c_home_packages(void);
+
+String x2c_home_libexec(void);
 
 String x2c_stage_dir(void);
 

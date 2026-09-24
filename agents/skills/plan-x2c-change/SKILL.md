@@ -43,7 +43,7 @@ For AST work, use
 [the Match guide](../../replacing-manual-ast-walks-with-match.md)
 to identify the canonical input, structural pattern or template, and ordinary
 operation that binds, types, places, or emits it. The optional
-[source graph commands](../../../tools/x2c-graph/README.md) `flows` and
+[source graph commands](../../../commands/graph/README.md) `flows` and
 `compare` can establish parsed-source paths; they do not establish semantic
 equivalence or the absence of runtime paths.
 

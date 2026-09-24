@@ -1,37 +1,27 @@
 # x2c source graph
 
-This tool uses the current stage-0 x2c compiler as a library. Its local build
-archives the compiler objects except `main.o` as `builds/libx2c-dev.a`; it does
-not install or expose a supported compiler library. It is optional: `make`
-first builds the current compiler, so reuse the executable for repeated
-queries until its inputs change.
-
-From this directory, build the tool:
-
-```sh
-make
-```
-
-The optional `make run` target builds the tool and runs the Makefile's example
-queries over the compiler and runtime sources.
+This experimental command uses the current stage-0 x2c compiler as a
+library. From the repository root, run `make commands` to build it at
+`builds/0/libexec/x2c-graph`. The compiler archive is provisional and
+stays in the checkout. Run `make commands-check` for its smoke tests.
 
 ## Investigate a change
 
-From `tools/x2c-graph`, after `make`:
+From the repository root, after `make commands`:
 
 ```sh
 # Find parsed callers and callees before changing syntax binding.
-builds/x2c-graph focus Compiler_bind_syntax x2c/src/*.x
-grep -n 'bind_syntax' x2c/src/*.x
+builds/0/libexec/x2c-graph focus Compiler_bind_syntax src/*.x
+grep -n 'bind_syntax' src/*.x
 
 # Inspect returned allocation before removing an apparent copy.
-builds/x2c-graph allocation-returns String_split_n x2c/lib/split.x
+builds/0/libexec/x2c-graph allocation-returns String_split_n lib/split.x
 
 # Find repeated full walks that may merit source inspection.
-builds/x2c-graph walks x2c/src/*.x
+builds/0/libexec/x2c-graph walks src/*.x
 ```
 
-The local `x2c` symlink points to the repository root. Commands use emitted
+Commands use emitted
 names (`String_split_n` for `String.split_n`); supply the relevant source
 files to resolve calls across units. Rerun commands for current counts;
 archived reports describe older trees. Inspect reported sites before removing
@@ -44,11 +34,11 @@ units, this shell example excludes the generated `lib/x2c.x` prelude and keeps
 one filename per argument (including in zsh):
 
 ```sh
-set -- x2c/src/*.x
-for unit in x2c/lib/*.x; do
-  [ "$unit" = x2c/lib/x2c.x ] || set -- "$@" "$unit"
+set -- src/*.x
+for unit in lib/*.x; do
+  [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
-builds/x2c-graph flows String_split_n List_iter "$@"
+builds/0/libexec/x2c-graph flows String_split_n List_iter "$@"
 ```
 
 ## Commands and results
@@ -56,24 +46,24 @@ builds/x2c-graph flows String_split_n List_iter "$@"
 The executable accepts explicit x2c source files and optional include paths:
 
 ```sh
-builds/x2c-graph graph [-I DIR] FILE...
-builds/x2c-graph digest [-I DIR] FILE...
-builds/x2c-graph clones [--min-size N] [-I DIR] FILE...
-builds/x2c-graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...
-builds/x2c-graph architecture [-I DIR] FILE...
-builds/x2c-graph structure UNIT [-I DIR] FILE...
-builds/x2c-graph between LEFT RIGHT [-I DIR] FILE...
-builds/x2c-graph focus NAME [-I DIR] FILE...
-builds/x2c-graph field TYPE FIELD [-I DIR] FILE...
-builds/x2c-graph field-sites TYPE FIELD [-I DIR] FILE...
-builds/x2c-graph sites NAME [-I DIR] FILE...
-builds/x2c-graph walks [-I DIR] FILE...
-builds/x2c-graph tail-calls [-I DIR] FILE...
-builds/x2c-graph loop-allocations [--all] [-I DIR] FILE...
-builds/x2c-graph lifetime-escapes [-I DIR] FILE...
-builds/x2c-graph allocation-returns NAME [-I DIR] FILE...
-builds/x2c-graph flows PRODUCER CONSUMER [-I DIR] FILE...
-builds/x2c-graph compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
+builds/0/libexec/x2c-graph graph [-I DIR] FILE...
+builds/0/libexec/x2c-graph digest [-I DIR] FILE...
+builds/0/libexec/x2c-graph clones [--min-size N] [-I DIR] FILE...
+builds/0/libexec/x2c-graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...
+builds/0/libexec/x2c-graph architecture [-I DIR] FILE...
+builds/0/libexec/x2c-graph structure UNIT [-I DIR] FILE...
+builds/0/libexec/x2c-graph between LEFT RIGHT [-I DIR] FILE...
+builds/0/libexec/x2c-graph focus NAME [-I DIR] FILE...
+builds/0/libexec/x2c-graph field TYPE FIELD [-I DIR] FILE...
+builds/0/libexec/x2c-graph field-sites TYPE FIELD [-I DIR] FILE...
+builds/0/libexec/x2c-graph sites NAME [-I DIR] FILE...
+builds/0/libexec/x2c-graph walks [-I DIR] FILE...
+builds/0/libexec/x2c-graph tail-calls [-I DIR] FILE...
+builds/0/libexec/x2c-graph loop-allocations [--all] [-I DIR] FILE...
+builds/0/libexec/x2c-graph lifetime-escapes [-I DIR] FILE...
+builds/0/libexec/x2c-graph allocation-returns NAME [-I DIR] FILE...
+builds/0/libexec/x2c-graph flows PRODUCER CONSUMER [-I DIR] FILE...
+builds/0/libexec/x2c-graph compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
 ```
 
 `graph` emits a deterministic function call graph. Direct calls resolve first
@@ -119,11 +109,11 @@ selected syntax roots, so its totals differ from the all-cell distribution.
 For example, run over the compiler and runtime, omitting the generated prelude:
 
 ```sh
-set -- x2c/src/*.x
-for unit in x2c/lib/*.x; do
-  [ "$unit" = x2c/lib/x2c.x ] || set -- "$@" "$unit"
+set -- src/*.x
+for unit in lib/*.x; do
+  [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
-builds/x2c-graph clones --min-size 100 "$@"
+builds/0/libexec/x2c-graph clones --min-size 100 "$@"
 python3 tests/test-clones.py  # optional focused experiment checks
 ```
 
@@ -211,7 +201,7 @@ make datasets
 make datasets DATASET_DIR=/tmp/x2c-datasets
 ```
 
-The default directory is `builds/datasets` under this tool.
+The output directory is supplied explicitly to `datasets`.
 
 ### Reading and analyzing the datasets
 

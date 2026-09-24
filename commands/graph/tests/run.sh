@@ -1,9 +1,15 @@
 #!/bin/sh
 set -eu
 
-cd "$(dirname "$0")/.."
-tool=builds/x2c-graph
-fixtures=tests/fixtures
+cd "$(dirname "$0")/../../.."
+tool=builds/0/libexec/x2c-graph
+fixtures=commands/graph/tests/fixtures
+builds/0/x2c build --plain \
+  --build-dir builds/0/commands/ast-parity-cc \
+  --output builds/0/commands/ast-parity \
+  --x-include-dir . --x-include-dir src \
+  --c-include-dir builds/0/src \
+  commands/graph/tests/ast-parity.x builds/0/libx2c-dev.a
 tmp=${TMPDIR:-/tmp}/x2c-graph-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
@@ -14,8 +20,8 @@ ast_shape() {
   perl -pe 's/\(binding (-?\d+)/"(binding " . ($id{$1} \/\/= ++$n)/ge' |
     tr '\n' ' ' | sed 's/  */ /g'
 }
-builds/ast-parity "$fixtures/calls.x" | ast_shape >"$tmp/embedded.ast"
-x2c/builds/0/x2c translate --plain --dump-ast "$fixtures/calls.x" |
+builds/0/commands/ast-parity "$fixtures/calls.x" | ast_shape >"$tmp/embedded.ast"
+builds/0/x2c translate --plain --dump-ast "$fixtures/calls.x" |
   ast_shape >"$tmp/cli.ast"
 cmp "$tmp/embedded.ast" "$tmp/cli.ast"
 
@@ -393,9 +399,9 @@ tr '\n' ' ' <"$tmp/sites-empty" | sed 's/  */ /g' \
 grep -q '^(sites "unknown_function" (calls))' \
   "$tmp/sites-empty-line"
 
-$tool walks "$fixtures/walks.x" "$fixtures/calls.x" x2c/lib/list.x \
+$tool walks "$fixtures/walks.x" "$fixtures/calls.x" lib/list.x \
   >"$tmp/walks"
-$tool walks x2c/lib/list.x "$fixtures/calls.x" "$fixtures/walks.x" \
+$tool walks lib/list.x "$fixtures/calls.x" "$fixtures/walks.x" \
   >"$tmp/walks-reversed"
 cmp "$tmp/walks" "$tmp/walks-reversed"
 tr '\n' ' ' <"$tmp/walks" | sed 's/  */ /g' >"$tmp/walks-line"

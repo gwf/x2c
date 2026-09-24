@@ -21,7 +21,7 @@ PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib \
 	-Wl,-rpath,$(PACKAGE_DEPS)/lib -lstdc++ -lm \
 	$(addprefix -Xlinker ,$(CSTAR_PROOF_OBJECTS) $(CSTAR_HELPERS))
 
-# cstar-verify links the compiler as a library, exactly as tools/x2c-graph
+# cstar-verify links the compiler as a library, exactly as commands/graph
 # does, and is rebuilt with the x2c revision that parses the verified unit.
 DEV_ARCHIVE := builds/libx2c-dev.a
 COMPILER_OBJECTS = $(filter-out $(ROOT)/builds/0/src/main.o,\
