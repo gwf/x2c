@@ -239,6 +239,42 @@ context decide.
   memory of the affected units.
 - Book: the phase rule, the lifetime contract, and working examples.
 
+Result (September 23):
+
+- `native_scalar_types()` in `lib/native-scalar-types.xmacro` is the one
+  table, a `meta` function returning a Map from each exact C scalar Type to
+  `(TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)`. `src/type.x` inserts it with
+  `$native_scalar_types()`. The Lisp helpers that build the `lib/lisp.x`
+  access records call it by name; record names now derive from the type
+  spelling, so the NAME column is gone. The 14 `$native.scalar.access`
+  invocations in `lib/lisp.x` stay: a Lisp form inside a template built by
+  a meta function sees the hole's placeholder, not its value, so a meta
+  function cannot generate them.
+- 21 of the 23 `lib/autodiff.xmacro` scratch Arrays use `$auto([])`; none
+  escapes, because each return converts the Array to a new List. The two in
+  `ad_rev_checkpoint` stay plain: destructuring in a function that holds a
+  cleanup declines ("a destructured local that needs a cell").
+- Fixed: a `.xmacro` meta body could not call a bodyless `meta` prototype
+  such as `Array.cleanup`, because the import lowers it in the collection
+  pass before the advertisements are installed. `Compiler.bind_native_meta`
+  now installs the visible advertisements on its first lookup there.
+- Authored source: +70/-95 lines (xmacro -34, `src/macros.x` +9).
+- Translation, median of 5 interleaved runs, each tree's own stage-0
+  compiler with warm interfaces (before: `a9e9ba5d`; after: this change):
+
+  | Unit | Time before/after (s) | Peak RSS before/after (MiB) |
+  | --- | --- | --- |
+  | `src/type.x` | 0.17 / 0.17 | 34.8 / 37.6 |
+  | `lib/lisp.x` | 0.93 / 0.97 | 176.2 / 175.3 |
+  | `autodiff-reverse.x` | 0.28 / 0.28 | 43.5 / 47.0 |
+  | `autodiff-control-flow.x` | 0.32 / 0.32 | 47.8 / 47.9 |
+  | `unittest/test-autodiff.x` | 0.78 / 0.75 | 71.6 / 70.8 |
+
+  A stage-0 compiler whose bytes differ from `bin/x2c` finds no interface
+  with its identity in `builds/0/lib` and collects the prelude from source,
+  which adds about 0.25 s and 50 MiB per process. Compare compilers only
+  after warming their interfaces.
+
 ## Sequence and delivery
 
 Piece 0, then 1, then 2 and 3 (sequenced edits to `src/comptime.x`), then

@@ -338,7 +338,7 @@ Type Type.scalar(Type type) {
    produces, so the lookup needs no separate discriminator; each row carries
    the Var tag, the reader that follows Var.convert, and the helper that
    performs an atomic native update, plus the Func signature spelling. */
-static Map scalartypes = %{ ${$native.scalar.type.rows()} };
+static Map scalartypes = $native_scalar_types();
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
   Var row = scalartypes[type];

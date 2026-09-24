@@ -847,7 +847,8 @@ compiler's evaluation limits.
 
 Some combinations still decline: `switch` with a subject needing a temporary
 binding on a loop path; destructuring a source needing such a binding on a
-loop path; and taking the address of a destructured local. Match patterns
+loop path; taking the address of a destructured local; and destructuring
+in a function that holds a cleanup. Match patterns
 must fold at lowering time, so a pattern interpolating a local value is not
 generally supported. These are binding/lowering gaps, not fundamental
 restrictions on loops, destructuring or pattern matching.
@@ -952,6 +953,28 @@ int main(void) {
 loop at the `break` after four cleanups. Its `return` computes 2,000 before
 the block's cleanup adds 1 to `total`. A loop with a cleanup on its
 iteration path still runs each turn in constant space.
+
+A scratch collection that only builds the result takes `$auto`. The
+return converts the Array to a new List first, then the cleanup frees the
+Array:
+
+```x2c
+meta static List evens(int n) {
+  Array out = $auto([]);
+  for (int i = 0; i < n; i++) out.push(2 * i);
+  return out;
+}
+
+int main(void) {
+  List values = $evens(4);
+  printf("%s\n", values.repr().str());
+  return 0;
+}
+```
+
+```text
+(0 2 4 6)
+```
 
 Meta code manages lifetimes with the same operations as native code.
 `$auto` works on an `Array`, a `Map`, or a `Scope`, and `Array.free`,
@@ -1405,6 +1428,34 @@ are generated output: `etc/builtin-macros.xlisp` comes from
 `tools/gen-lisp-init.py`. Seeing Lisp in that generated file does not mean the
 algorithms still need a separate handwritten Lisp implementation. The support
 layer and the generated functions have different source owners.
+
+### One table for compiled code and Lisp
+
+Compile-time Lisp calls a `meta` function by its name. A table kept as a
+`meta` function therefore serves both an inserted value and a Lisp helper
+that reads it during expansion, without a second copy of its rows:
+
+```x2c
+meta static Map widths(void) => { %(char): 1, %(short): 2, %(int): 4 };
+
+macro Expression $width(Type $type) =>
+  $(x2c.literal.int (Map.getindex (widths) $type));
+
+static Map table = $widths();
+
+int main(void) {
+  printf("%d %d\n", $width(short), table[%(int)].int());
+  return 0;
+}
+```
+
+```text
+2 4
+```
+
+`lib/native-scalar-types.xmacro` keeps the compiler's exact C scalar table
+this way: `src/type.x` inserts it, and the `lib/lisp.x` access records read
+their tags from it.
 
 ### Names the compile-time library already defines
 
