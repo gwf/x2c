@@ -208,11 +208,11 @@ Public functions:
 `Compiler.resolve_expression`, `Compiler.parse_variable`,
 `Compiler.parse_conditional`, `Compiler.parse_assignment`,
 `Compiler.parse_primary`, `Compiler.parse_expression`,
-`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
-`Compiler.initializer_slot`, `Compiler.initializer_field_path`,
-`Compiler.initializer_rows`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.parse_parenthesized_statement`, `Compiler.converter_call`,
+`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
+`Compiler.initializer_field_path`, `Compiler.initializer_rows`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
