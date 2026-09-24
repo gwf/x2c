@@ -202,12 +202,12 @@ static Var _address_of(Var value) {
 }
 
 /* The C name a call names directly, or NULL for a call through a value.
-   `*arguments` omits the marker an empty argument list parses to. */
-static String _callee_of(Var value, List *arguments) {
+   `arguments` omits the marker an empty argument list parses to. */
+static String _callee_of(Var value, List &arguments) {
   match (_unwrap(value)) case %(call ?function (args *rows)): {
     List name = _binding_of(function);
     match (rows) case %((expr ? ())): rows = NULL;
-    *arguments = rows;
+    arguments = rows;
     return binding_identity_spelling(name);
   }
   return NULL;
@@ -343,7 +343,7 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
     }
   }
   List arguments = NULL;
-  String callee = _callee_of(inner, &arguments);
+  String callee = _callee_of(inner, arguments);
   if (!callee || runtime[callee] != %(wrap)) return NULL;
   return _fact_of(w, arguments.car(), named);
 }
@@ -369,7 +369,7 @@ static Fact _slot(Walk w, Var argument) {
    parameter or region-born, so the result keeps its identity. */
 static Fact _returned_argument(Walk w, Var value, List *named) {
   List arguments = NULL;
-  String callee = _callee_of(value, &arguments);
+  String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
@@ -396,7 +396,7 @@ static Region _pooled(Walk w, int *born) {
 static Region _birth(Walk w, Var value, Type type, int *born,
                      Region *other) {
   List arguments = NULL;
-  String callee = _callee_of(value, &arguments);
+  String callee = _callee_of(value, arguments);
   *born = 1;
   *other = NULL;
   match (callee ? runtime[callee] : void) {
@@ -564,7 +564,7 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
   Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
-  if (_callee_of(value, &arguments)) return %"an address from $name";
+  if (_callee_of(value, arguments)) return %"an address from $name";
   match (fact ? fact.place : NULL) case %(ident *):
     return %"the address of $name";
   return %"an address inside $name";
@@ -746,7 +746,7 @@ static void _scan(Walk w, Var value, int deferred) {
       }
       case %(call ? ?args): {
         List arguments = NULL;
-        String callee = _callee_of(node, &arguments);
+        String callee = _callee_of(node, arguments);
         match (callee ? runtime[callee] : void) {
           case %((!or exit wrap)): break;
           case %(free): _end(w, arguments.car(), NULL, <freed>);
@@ -921,7 +921,7 @@ static void _walk_defer(Walk w, Var body) {
   List arguments = NULL;
   String callee = NULL;
   match (body) case %(stmnt ?expression):
-    callee = _callee_of(expression, &arguments);
+    callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? runtime[callee] : void) {
     case %(close ?): return;
@@ -1008,7 +1008,7 @@ static void _walk(Walk w, Var node) {
     case %((!or goto label) *): _revive(w);
     case %(stmnt ?expression): {
       List arguments = NULL;
-      String callee = _callee_of(expression, &arguments);
+      String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;
       match (_unwrap(expression)) {
         case %(op (!quote =) ?target ?value): _store(w, target, value);

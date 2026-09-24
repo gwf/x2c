@@ -611,19 +611,19 @@ int compile_commands_write(String path, Array commands) {
    and captures. The short idle delay bounds polling without a global child
    signal handler or consuming another owner's child status. */
 static int _finish_compiles(
-  Build state, CcJob *running, int *count, int wait) {
+  Build state, CcJob *running, int &count, int wait) {
   int failed = 0;
   for (;;) {
-    for (int i = 0; i < *count;) {
-      if ((wait && *count == 1) || running[i].execution.ready()) {
+    for (int i = 0; i < count;) {
+      if ((wait && count == 1) || running[i].execution.ready()) {
         int status = _finish_compile(state, running + i);
         if (status < 0) {
           i++;
           continue;
         }
         if (status) failed = 1;
-        (*count)--;
-        memmove(running + i, running + i + 1, (*count - i) * sizeof(CcJob));
+        count--;
+        memmove(running + i, running + i + 1, (count - i) * sizeof(CcJob));
         wait = 0;
       }
       else i++;
@@ -658,7 +658,7 @@ static int _compile_sources(Build b) {
       b.compile_commands.push(_compile_command(b, action, source, object));
     String state_path =
       b.state_root ? %"${b.state_root}/c-${_key(source)}" : NULL;
-    if (_finish_compiles(b, running, &running_count, 0)) {
+    if (_finish_compiles(b, running, running_count, 0)) {
       failed = 1;
       break;
     }
@@ -675,13 +675,13 @@ static int _compile_sources(Build b) {
     else pending.execution = action.start();
     running[running_count++] = pending;
     if (running_count >= b.request.jobs &&
-        _finish_compiles(b, running, &running_count, 1)) {
+        _finish_compiles(b, running, running_count, 1)) {
       failed = 1;
       break;
     }
   }
   while (running_count)
-    if (_finish_compiles(b, running, &running_count, 1)) failed = 1;
+    if (_finish_compiles(b, running, running_count, 1)) failed = 1;
   Scope.free(running);
   if (!failed && b.cc_n) {
     unsigned long elapsed = report_now_us() - b.cc_start;
