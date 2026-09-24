@@ -73,6 +73,7 @@ static const Rule rules[] = {
   {"deferred-initialization", <style>, <violation>, "declarations"},
   {"repeated-accessor", <style>, <candidate>, "declarations"},
   {"subject-parameter-name", <style>, <violation>, "names-expose-ownership"},
+  {"reference-parameter", <style>, <candidate>, "required-aliases"},
   {"narration", <style>, <candidate>, "local-comments-explain-decisions"},
   {"prohibited-prose", <style>, <candidate>, "prose"},
   {"constant-output-run", <style>, <candidate>,
