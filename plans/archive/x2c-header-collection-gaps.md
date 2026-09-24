@@ -41,6 +41,9 @@ header's inline functions say `unsigned char`. Closing this needs a rule for
 object-like definitions in arms collection cannot evaluate; that is a new
 decision, so this step stayed out.
 
+Declined by Gary on 2026-09-24. The rule would begin a preprocessor to change
+five correct `->` sites in one package, so yyjson keeps `->`.
+
 ## Not in scope (decision 3)
 
 - libuv (192 `->` sites) declares handle members through member-list macros
