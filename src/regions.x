@@ -48,13 +48,15 @@ typedef struct Region {
 
 /* What the walk knows about one local or parameter: the block depth that
    declares it, its parameter index or -1, whether it holds storage born in
-   this function, whether a free ended it, the region its value belongs to
+   this function, whether a free or a realloc ended it (`ending` while the
+   expression that ends it is walked), the region its value belongs to
    (and the Pool alternative of a mixed result), the region a Scope local's
    own storage forms, and for a pointer taken
    with `&`, the local and place it names. `born` records a scoped or pooled
    result, including when the allocation has no local region. */
 typedef struct Fact {
-  int depth, origin, param, born, dead;
+  int depth, origin, param, born;
+  Symbol dead, ending;
   struct Region *region, *other, *owner;
   struct Fact *points;
   List place;
@@ -82,13 +84,15 @@ typedef struct Walk {
    born in the active region and (alloc slot) in the Scope its first
    argument names; (pool) conses both arguments into pool cells; (store)
    puts its later arguments into its receiver; (wrap) boxes its argument
-   unchanged; (free) ends its argument, or owns it from a `defer`; (destroy)
-   ends a Scope local's storage; (open KIND) and (close KIND) bracket a
-   region; (move) and (exit) hand their argument to another owner. */
+   unchanged; (free) ends its argument, or owns it from a `defer`, and
+   (free scope) also requires Scope storage; (alloc moved) is a Scope
+   allocation that ends its first argument; (destroy) ends a Scope local's
+   storage; (open KIND) and (close KIND) bracket a region; (move) and
+   (exit) hand their argument to another owner. */
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
-  "Scope_realloc": (alloc),          "String_malloc": (alloc pool),
+  "Scope_realloc": (alloc moved),    "String_malloc": (alloc pool),
   "String_new": (alloc pool),        "String_new_len": (alloc pool),
   "String_new_fill": (alloc pool),
   "Block_new": (alloc),              "Bytes_new": (alloc),
@@ -113,7 +117,7 @@ static Map runtime = %{
   "Block_free": (free),              "Block_cleanup": (free),
   "Bytes_cleanup": (free),           "Buffer_free": (free),
   "Buffer_cleanup": (free),          "Context_close": (free),
-  "Context_cleanup": (free),         "Scope_free": (free),
+  "Context_cleanup": (free),         "Scope_free": (free scope),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_retain": (open scope),      "Scope_release": (close scope),
   "Pool_open": (open pool),          "Pool_close": (close pool),
@@ -352,7 +356,7 @@ static Region _birth(Walk w, Var value, Type type, int *born,
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
     case %(alloc pool): return _pooled(w, born);
-    case %(alloc): return _active(w);
+    case %(alloc *): return _active(w);
     case %(pool): return _pooled(w, born);
   }
   match (_unwrap(value)) {
@@ -640,6 +644,30 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
 
 // the walk
 
+/* An argument that ends its storage. `op` names a Scope operation, which
+   reports storage no Scope allocator returned: a literal, the function's
+   own storage, or a pooled value. The local it names is dead after the
+   expression, `how` recording whether it was freed or moved. */
+static void _end(Walk w, Var argument, String op, Symbol how) {
+  List named = NULL;
+  Fact storage = _value_fact(w, argument, &named);
+  int literal = 0;
+  match (_unwrap(argument)) case %(literal *): literal = 1;
+  if (op && (literal || (storage &&
+      (storage.region == w.frame || storage.born == 2)))) {
+    String subject = literal ? "a literal"
+                             : _subject(w, argument, named, storage);
+    _warn(w, <bad-free>, w.origin,
+          %"$op is given $subject, which no Scope allocator returned",
+          %("only Scope.malloc, calloc, memdup, and realloc storage can be"
+            "freed or reallocated"));
+  }
+  Fact fact = _fact_of(w, argument, NULL);
+  if (!fact || fact.depth != w.depth) return;
+  fact.ending = how;
+  w.freed.push(fact);
+}
+
 /* Visit every read, call, and nested store in one expression, left to
    right and without recursion, so a long operator chain fits the stack. A
    free ends its local after the whole expression, and a deferred
@@ -659,8 +687,10 @@ static void _scan(Walk w, Var value, int deferred) {
         Fact fact = found;
         if (!fact.dead) break;
         String name = binding_identity_spelling(binding);
+        String ended = fact.dead == <moved> ? "Scope.realloc moved it"
+                                            : "it was freed";
         _warn(w, <after-free>, w.origin,
-              %"'$name' is used after it was freed", NULL);
+              %"'$name' is used after $ended", NULL);
         fact.dead = 0;
       }
       case %(op (!quote =) ?target ?stored) if (node != root): {
@@ -672,10 +702,11 @@ static void _scan(Walk w, Var value, int deferred) {
         String callee = _callee_of(node, &arguments);
         match (callee ? runtime[callee] : void) {
           case %((!or exit wrap)): break;
-          case %(free): {
-            Fact fact = _fact_of(w, arguments.car(), NULL);
-            if (fact && fact.depth == w.depth) w.freed.push(fact);
-          }
+          case %(free): _end(w, arguments.car(), NULL, <freed>);
+          case %(free scope):
+            _end(w, arguments.car(), "Scope.free", <freed>);
+          case %(alloc moved):
+            _end(w, arguments.car(), "Scope.realloc", <moved>);
           default: if (callee) _scan_call(w, node, callee, arguments);
         }
         w.pending.push(args);
@@ -701,7 +732,7 @@ static void _scan(Walk w, Var value, int deferred) {
   }
   while ((int) w.freed.len() > mark) {
     Fact fact = w.freed.take_last();
-    if (!deferred) fact.dead = 1;
+    if (!deferred) fact.dead = fact.ending;
   }
 }
 
@@ -762,6 +793,8 @@ static Var _target_place(Walk w, Var target) {
 }
 
 static void _store(Walk w, Var target, Var value) {
+  /* A store through a pointer reads the pointer. */
+  if (!_binding_of(target)) _scan(w, target, 0);
   if (_target_place(w, target) in w.restored) {
     _scan(w, value, 0);
     return;
@@ -845,7 +878,7 @@ static void _walk_defer(Walk w, Var body) {
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? runtime[callee] : void) {
     case %(close ?): return;
-    case %(free) if (fact && fact.param < 0): {
+    case %(free *) if (fact && fact.param < 0): {
       fact.region = _open(w, <auto>, NULL);
       return;
     }

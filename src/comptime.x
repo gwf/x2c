@@ -1081,6 +1081,33 @@ static int _lower_object_pointer_operands(Lowering l, List operands) {
          (b && _lower_null_constant(left));
 }
 
+static List _lower_pointee_layout(Lowering l, Var receiver);
+
+/* The element layout of an object pointer or C array operand, or NULL. A
+   semantic handle such as String keeps its own operators. */
+static List _lower_step_layout(Lowering l, Var operand) {
+  Type type = _lower_type_of(operand);
+  Type resolved = type ? l.compiler.sym.resolve_key(type) : NULL;
+  if (!resolved || (!resolved.is_array() &&
+                    !_lower_object_pointer_type(l, type))) return NULL;
+  return _lower_pointee_layout(l, operand);
+}
+
+/* A pointer plus or minus an integer is the address that many elements
+   away, as C computes it; nothing when neither side is such a pointer. */
+static Var _lower_pointer_step(
+  Lowering l, Var operator, List operands, Var left, Var right) {
+  Var pointer = operands.car(), count = operands.cadr();
+  if (operator == <+> && !_lower_step_layout(l, pointer))
+    (pointer, count, left, right) = %($count $pointer $right $left);
+  List layout = _lower_step_layout(l, pointer);
+  if (!layout || !_lower_numeric_type(l, _lower_type_of(count)))
+    return void;
+  Var offset = %(_binary $right (quote <*>) ${layout[2]});
+  if (operator == <->) offset = %(_binary 0 (quote <->) $offset);
+  return %(C.at $left $offset (quote ${_lower_pointer_tag(l, layout)}));
+}
+
 static Var _lower_operands(
   Lowering l, Type result, Var operator, List operands) {
   Array values = $auto([]);
@@ -1109,6 +1136,10 @@ static Var _lower_operands(
                       (quote $operator) (C.address $right (quote <p48>)));
     if (_lower_relation(operator) && _lower_mixed_scalars(l, operands))
       return %(C.compare $left (quote $operator) $right);
+    if (operator == <+> || operator == <->) {
+      Var moved = _lower_pointer_step(l, operator, operands, left, right);
+      if (moved is not void) return moved;
+    }
     return %(_binary $left (quote $operator) $right);
   }
   if (values.len() == 3) {
@@ -1308,6 +1339,21 @@ static Var _lower_getindex(
   return %(${Atom.intern(container + "_getindex")} $target $index);
 }
 
+/* `sizeof` reads the size from the native layout of its operand's type; the
+   operand is never evaluated, as in C. */
+static Var _lower_sizeof(Lowering l, Type type, List operand) {
+  Type measured = NULL;
+  match (operand) {
+    case %(parens (decl ?base (bindings ?binding))):
+      measured = %(declare $base (bindings $binding))
+        .type_from_ast().declared();
+    case %(expr ?operand_type ?): measured = operand_type;
+  }
+  List layout = measured ? l.compiler.meta_type_layout(measured) : NULL;
+  if (!layout) return _lower_decline(l, "sizeof a type with no layout");
+  return _lower_to_type(l, type, layout[2]);
+}
+
 /* One `match` over the expression grammar. The compiler turns it into a
    decision tree, so reading the productions costs nothing extra. */
 static Var _lower_expr(Lowering l, Var form) {
@@ -1442,6 +1488,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_operands(l, type, operator, operands);
     case %(array *items):                 return _lower_array(l, items);
     case %(map *entries):                 return _lower_map(l, entries);
+    case %(sizeof ?operand): return _lower_sizeof(l, type, operand);
     case %(getindex ?receiver ?key):
       return _lower_getindex(l, receiver, key, 0);
     case %(index ?receiver ?key):
@@ -2145,10 +2192,12 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
       if (want_tag && want_tag == from_tag) return value;
       Type want_pointer = l.compiler.sym.resolve_key(want);
       Type from_pointer = l.compiler.sym.resolve_key(from);
+      /* A C array decays to its storage, which `void *` receives. */
+      int from_object = from_pointer &&
+        ((from_pointer.is_pointer() && _lower_object_pointer_type(l, from)) ||
+         (from_pointer.is_array() && want_tag == <p48>));
       if (want_tag && want_pointer && want_pointer.is_pointer() &&
-          from_pointer && from_pointer.is_pointer() &&
-          _lower_object_pointer_type(l, from) &&
-          want_tag != from_tag)
+          from_object && want_tag != from_tag)
         return %(C.address $value (quote $want_tag));
       if (l.compiler.sym.is_named_value_type(want, "Symbol") &&
           _lower_numeric_type(l, from))
@@ -3064,12 +3113,21 @@ static int _meta_immutable(Var value) {
     value.is_integer() || value.is_floating();
 }
 
+/* A pointer the evaluator holds names compiler memory, which the running
+   program does not have, so it never becomes a constant in code. */
+static void _meta_refuse_address(Compiler c, Var value, Token site) {
+  if (value.is_pointer() && value.u64)
+    c.report_error(<macro>, "compile-time result is a compiler address",
+      site, %("return data built from the pointed-to values instead"));
+}
+
 /* Builds the parser's form of one data value. Immutable values come from
    the literal cache; each Array or Map becomes a literal that builds a fresh
    collection every time it runs. `marks` holds 1 for a collection being
    built and 2 for one already built, so a cycle or a shared collection is
    reported at `site`. */
 static List _meta_data(Compiler c, Var value, Map marks, Token site) {
+  _meta_refuse_address(c, value, site);
   if (_meta_immutable(value)) {
     if (value is <list>) return c.cache_literal_list(value);
     return %(expr ("Var") ${c.cache_literal_var(value)});
@@ -3127,6 +3185,7 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
 */
 List Compiler.meta_value_expression(
   Compiler c, Type declared, Var value, Token site) {
+  _meta_refuse_address(c, value, site);
   Type type = declared ? declared : _meta_value_type(value);
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, &type);
