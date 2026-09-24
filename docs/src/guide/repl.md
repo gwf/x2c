@@ -148,6 +148,9 @@ newline. Use String interpolation for formatting, such as
 in the session, and report `ok` rather than a synthetic value. They are not
 varargs aliases.
 
+A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
+`Diff.unified` and `Path.basename` evaluate without an include.
+
 Redefinition is disabled; assign to an existing variable to change its value.
 Function replacement and mutually recursive forward declarations are not
 supported. Names beginning `__repl_` are reserved.

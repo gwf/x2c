@@ -1,0 +1,10 @@
+{ "a": [ 1, 2.5, "x" ] }
+usr/lib /usr/lib notes.tar.gz .gz notes.tar
+((same "a") (delete "b") (insert "c"))
+--- old
++++ new
+@@ -1,2 +1,2 @@
+ a
+-b
++c
+same

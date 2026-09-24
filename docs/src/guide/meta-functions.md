@@ -339,6 +339,12 @@ The `<ctype.h>` functions are not included, because a C library may define
 them as macros. A compile-time `String` passes to a `const char *` parameter,
 so `$atoi("42")` answers 42.
 
+The compiler also links the pure text operations of three optional modules:
+`Json.parse`, `Diff.lines`, `Diff.unified`, and `Path.join`, `dirname`,
+`basename`, `extension` and `stem`. Include `json.x`, `diff.x` or `path.x`
+to call them from a `meta` body. They give the same results as at run time.
+The Path operations that read the filesystem are not available.
+
 A pointer argument can be the address of a compile-time local. The native
 function writes through it, and the caller reads the result afterward:
 
@@ -733,7 +739,7 @@ on a listed type works. The operation inventory below further limits calls.
 | C-style array declarations | A literal-sized one-dimensional automatic array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. Static arrays have no compile-time lowering. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work, and a pointer plus or minus an integer moves by whole elements. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
-| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. See [Native C functions](#native-c-functions). |
+| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the pure Json, Diff and Path operations, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. See [Native C functions](#native-c-functions). |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep

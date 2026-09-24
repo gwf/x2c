@@ -18,6 +18,10 @@ typedef enum Diff {
   DIFF_NAMESPACE
 } Diff;
 
+meta List Diff.lines(String old, String new);
+meta String Diff.unified(String old, String new, String old_name,
+                         String new_name);
+
 #pragma private
 
 static const int _LIMIT = 2000;

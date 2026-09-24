@@ -24,6 +24,12 @@
 */
 class Path String;
 
+meta Self Path.join(Self base, Path name);
+meta Self Path.dirname(Self path);
+meta Self Path.basename(Self path);
+meta String Path.extension(Path path);
+meta String Path.stem(Path path);
+
 #pragma private
 
 #include <dirent.h>

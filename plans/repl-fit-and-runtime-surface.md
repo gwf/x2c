@@ -1,9 +1,9 @@
 # REPL fit, status, and runtime surface
 
-> Status: implemented through delivery 7
-> Deliveries 1-7 were implemented and validated on 2026-09-21.
-> Scalar math is available through `lib/cmath.x`. Gary accepted the four
-> decisions below on 2026-09-24; the pure-module step is ready.
+> Status: implemented through delivery 8
+> Deliveries 1-7 were implemented and validated on 2026-09-21. Delivery 8,
+> the pure-module step, was implemented on 2026-09-24 through `meta`
+> prototypes in json.x, diff.x and path.x that `lib/lisp.x` includes.
 
 ## Delivered
 
@@ -21,6 +21,8 @@ meta-functions guides own their behavior.
 6. Exact live Scope bytes, with current and peak counts.
 7. `String.format(String fmt, List values)` as a fixed-signature runtime
    and meta operation.
+8. `Json.parse`, `Diff.lines`/`unified` and the Path text operations in
+   `meta` code and the REPL, with the `meta-native-pure-modules` fixture.
 
 ## Standard-library and host candidates
 

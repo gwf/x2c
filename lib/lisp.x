@@ -304,6 +304,11 @@ protocol Cleanup(Lisp);
 
 #pragma private
 
+// Their `meta` prototypes join the target table; a public include would
+// make x2c.h include path.h before path.h defines `Path`.
+#include "json.x"
+#include "diff.x"
+
 /* Optional modules stay outside the implicit prelude.  The compiler links
    their runtime units, so private checked aliases can install their pure
    value operations in the evaluator without importing their source APIs into

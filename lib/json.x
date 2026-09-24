@@ -24,6 +24,8 @@ typedef enum Json {
   JSON_NAMESPACE
 } Json;
 
+meta Var Json.parse(String source);
+
 /** A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
     The two values are process-lifetime singletons made by `Json.bool`.
 */
