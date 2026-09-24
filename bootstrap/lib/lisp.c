@@ -236,7 +236,7 @@
 
 static List _274, _272, _271, _269, _267, _265, _264, _263, _261, _260, _256, _255, _251, _250, _248, _246, _245, _244, _243, _241, _240, _236, _235, _231, _230, _226, _225, _223, _222, _217, _215, _214, _212, _211, _209, _208, _206, _204, _199, _198, _197, _196, _195, _194, _193, _192, _191, _189, _188, _187, _186, _185, _182, _181, _180, _179, _178, _174, _172, _171;
 
-static String _820, _819, _818, _817, _816, _815, _814, _813, _812, _811, _810, _809, _808, _807, _806, _805, _804, _803, _802, _801, _800, _799, _798, _797, _796, _795, _794, _793, _792, _791, _790, _789, _788, _787, _786, _785, _784, _783, _782, _781, _780, _779, _778, _777, _776, _775, _774, _773, _772, _771, _770, _769, _768, _767, _766, _765, _764, _763, _762, _761, _760, _759, _758, _757, _756, _755, _754, _753, _752, _751, _750, _749, _748, _747, _746, _745, _744, _743, _742, _741, _740, _739, _738, _737, _736, _735, _734, _733, _732, _731, _730, _729, _728, _727, _726, _725, _724, _723, _722, _721, _720, _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, _708, _707, _706, _705, _704, _703, _702, _701, _700, _699, _698, _697, _696, _695, _694, _693, _692, _691, _690, _689, _688, _687, _686, _685, _684, _683, _682, _681, _680, _679, _678, _677, _676, _675, _674, _673, _672, _671, _670, _669, _668, _667, _666, _665, _664, _663, _662, _661, _660, _659, _658, _657, _656, _655, _654, _653, _652, _651, _650, _649, _648, _647, _646, _645, _644, _643, _642, _641, _640, _639, _638, _637, _636, _635, _634, _633, _632, _631, _630, _629, _628, _627, _626, _625, _624, _623, _622, _621, _620, _619, _618, _617, _616, _615, _614, _613, _612, _611, _610, _609, _608, _607, _606, _605, _604, _603, _602, _601, _600, _599, _598, _597, _596, _595, _594, _593, _592, _591, _590, _589, _588, _587, _586, _585, _584, _583, _582, _581, _580, _579, _578, _577, _576, _575, _574, _573, _572, _571, _570, _569, _568, _567, _566, _565, _564, _563, _562, _561, _560, _559, _558, _557, _556, _555, _554, _553, _552, _551, _550, _549, _548, _547, _546, _545, _544, _543, _542, _541, _540, _539, _538, _537, _536, _535, _534, _533, _532, _531, _530, _529, _528, _527, _526, _525, _524, _523, _522, _521, _520, _519, _518, _517, _516, _515, _514, _513, _512, _511, _510, _509, _508, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _490, _489, _488, _487, _486, _485, _484, _483, _482, _481, _480, _479, _478, _477, _476, _475, _474, _473, _472, _471, _470, _469, _468, _467, _466, _465, _464, _463, _462, _461, _460, _459, _458, _457, _456, _455, _454, _453, _452, _451, _450, _449, _448, _447, _446, _445, _444, _443, _442, _441, _440, _439, _438, _437, _436, _435, _434, _433, _432, _431, _430, _429, _428, _427, _426, _425, _424, _423, _422, _421, _420, _419, _418, _417, _416, _415, _414, _413, _412, _411, _410, _409, _408, _407, _406, _405, _404, _403, _402, _401, _400, _399, _398, _397, _396, _395, _394, _393, _392, _391, _390, _389, _388, _387, _386, _385, _384, _383, _382, _381, _380, _379, _378, _377, _376, _375, _374, _373, _372, _371, _370, _369, _368, _367, _366, _365, _364, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _347, _346, _345, _344, _343, _342, _341, _340, _339, _338, _337, _336, _335, _334, _333, _332, _331, _330, _329, _328, _327, _326, _325, _324, _323, _322, _321, _320, _319, _318, _317, _316, _315, _314, _313, _312, _311, _310, _309, _308, _307, _306, _305, _304, _303, _302, _301, _300, _299, _298, _297, _296, _295, _294, _293, _292, _291, _290, _289, _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _278, _277, _276, _275, _218, _202, _160, _149, _137, _124, _112, _100, _89, _76, _65, _51, _40, _26, _3;
+static String _825, _824, _823, _822, _821, _820, _819, _818, _817, _816, _815, _814, _813, _812, _811, _810, _809, _808, _807, _806, _805, _804, _803, _802, _801, _800, _799, _798, _797, _796, _795, _794, _793, _792, _791, _790, _789, _788, _787, _786, _785, _784, _783, _782, _781, _780, _779, _778, _777, _776, _775, _774, _773, _772, _771, _770, _769, _768, _767, _766, _765, _764, _763, _762, _761, _760, _759, _758, _757, _756, _755, _754, _753, _752, _751, _750, _749, _748, _747, _746, _745, _744, _743, _742, _741, _740, _739, _738, _737, _736, _735, _734, _733, _732, _731, _730, _729, _728, _727, _726, _725, _724, _723, _722, _721, _720, _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, _708, _707, _706, _705, _704, _703, _702, _701, _700, _699, _698, _697, _696, _695, _694, _693, _692, _691, _690, _689, _688, _687, _686, _685, _684, _683, _682, _681, _680, _679, _678, _677, _676, _675, _674, _673, _672, _671, _670, _669, _668, _667, _666, _665, _664, _663, _662, _661, _660, _659, _658, _657, _656, _655, _654, _653, _652, _651, _650, _649, _648, _647, _646, _645, _644, _643, _642, _641, _640, _639, _638, _637, _636, _635, _634, _633, _632, _631, _630, _629, _628, _627, _626, _625, _624, _623, _622, _621, _620, _619, _618, _617, _616, _615, _614, _613, _612, _611, _610, _609, _608, _607, _606, _605, _604, _603, _602, _601, _600, _599, _598, _597, _596, _595, _594, _593, _592, _591, _590, _589, _588, _587, _586, _585, _584, _583, _582, _581, _580, _579, _578, _577, _576, _575, _574, _573, _572, _571, _570, _569, _568, _567, _566, _565, _564, _563, _562, _561, _560, _559, _558, _557, _556, _555, _554, _553, _552, _551, _550, _549, _548, _547, _546, _545, _544, _543, _542, _541, _540, _539, _538, _537, _536, _535, _534, _533, _532, _531, _530, _529, _528, _527, _526, _525, _524, _523, _522, _521, _520, _519, _518, _517, _516, _515, _514, _513, _512, _511, _510, _509, _508, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _490, _489, _488, _487, _486, _485, _484, _483, _482, _481, _480, _479, _478, _477, _476, _475, _474, _473, _472, _471, _470, _469, _468, _467, _466, _465, _464, _463, _462, _461, _460, _459, _458, _457, _456, _455, _454, _453, _452, _451, _450, _449, _448, _447, _446, _445, _444, _443, _442, _441, _440, _439, _438, _437, _436, _435, _434, _433, _432, _431, _430, _429, _428, _427, _426, _425, _424, _423, _422, _421, _420, _419, _418, _417, _416, _415, _414, _413, _412, _411, _410, _409, _408, _407, _406, _405, _404, _403, _402, _401, _400, _399, _398, _397, _396, _395, _394, _393, _392, _391, _390, _389, _388, _387, _386, _385, _384, _383, _382, _381, _380, _379, _378, _377, _376, _375, _374, _373, _372, _371, _370, _369, _368, _367, _366, _365, _364, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _347, _346, _345, _344, _343, _342, _341, _340, _339, _338, _337, _336, _335, _334, _333, _332, _331, _330, _329, _328, _327, _326, _325, _324, _323, _322, _321, _320, _319, _318, _317, _316, _315, _314, _313, _312, _311, _310, _309, _308, _307, _306, _305, _304, _303, _302, _301, _300, _299, _298, _297, _296, _295, _294, _293, _292, _291, _290, _289, _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _278, _277, _276, _275, _218, _202, _160, _149, _137, _124, _112, _100, _89, _76, _65, _51, _40, _26, _3;
 
 static Var _273, _270, _268, _266, _262, _259, _258, _257, _254, _253, _252, _249, _247, _242, _239, _238, _237, _234, _233, _232, _229, _228, _227, _224, _221, _220, _219, _216, _213, _210, _207, _205, _203, _201, _200, _190, _184, _183, _177, _176, _175, _173, _170, _169;
 
@@ -663,6 +663,8 @@ static Iter _lisp_Lisp_Iter_filter(Iter iter, Var callable);
 static int _lisp_Lisp_Iter_any(Iter iter, Var callable);
 static int _lisp_Lisp_Iter_all(Iter iter, Var callable);
 static Var _lisp_Lisp_Iter_find(Iter iter, Var callable);
+static Job _lisp_List_job(List command);
+static Job _lisp_Job_start(Job job);
 static Map lisp_native_targets;
 Map Map_update_n(Map, unsigned, ...);
 Map Map_new(void);
@@ -1206,7 +1208,13 @@ static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_
 static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532);
 static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533);
 static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534);
-_x2c_initializer_choice_D09CF48E_17((lisp_native_targets = Map_update_n(Map_new(), 535, String_var(_281), Func_var(Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_282), Func_var(Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_283), Func_var(Func_new(_x2c_func_adapt_2, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_284), Func_var(Func_new(_x2c_func_adapt_3, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_285), Func_var(Func_new(_x2c_func_adapt_4, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_286), Func_var(Func_new(_x2c_func_adapt_5, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_288), Func_var(Func_new(_x2c_func_adapt_6, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_289), (List) 0)))), String_var(_290), Func_var(Func_new(_x2c_func_adapt_7, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_291), Func_var(Func_new(_x2c_func_adapt_8, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_293), Func_var(Func_new(_x2c_func_adapt_9, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_294), Func_var(Func_new(_x2c_func_adapt_10, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_295), Func_var(Func_new(_x2c_func_adapt_11, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_296), Func_var(Func_new(_x2c_func_adapt_12, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_297), Func_var(Func_new(_x2c_func_adapt_13, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_299), Func_var(Func_new(_x2c_func_adapt_14, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_300), Func_var(Func_new(_x2c_func_adapt_15, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_301), Func_var(Func_new(_x2c_func_adapt_16, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_302), Func_var(Func_new(_x2c_func_adapt_17, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_303), Func_var(Func_new(_x2c_func_adapt_18, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_304), Func_var(Func_new(_x2c_func_adapt_19, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_305), Func_var(Func_new(_x2c_func_adapt_20, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_306), Func_var(Func_new(_x2c_func_adapt_21, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_307), Func_var(Func_new(_x2c_func_adapt_22, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_308), Func_var(Func_new(_x2c_func_adapt_23, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_309), Func_var(Func_new(_x2c_func_adapt_24, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_310), Func_var(Func_new(_x2c_func_adapt_25, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_311), Func_var(Func_new(_x2c_func_adapt_26, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_312), Func_var(Func_new(_x2c_func_adapt_27, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_313), Func_var(Func_new(_x2c_func_adapt_28, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_314), Func_var(Func_new(_x2c_func_adapt_29, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_315), Func_var(Func_new(_x2c_func_adapt_30, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_317), Func_var(Func_new(_x2c_func_adapt_31, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_318), Func_var(Func_new(_x2c_func_adapt_32, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_319), Func_var(Func_new(_x2c_func_adapt_33, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_320), Func_var(Func_new(_x2c_func_adapt_34, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_316), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_322), Func_var(Func_new(_x2c_func_adapt_35, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_323), Func_var(Func_new(_x2c_func_adapt_36, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_325), Func_var(Func_new(_x2c_func_adapt_37, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1474468213064), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_327), Func_var(Func_new(_x2c_func_adapt_38, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_328), Func_var(Func_new(_x2c_func_adapt_39, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_329), Func_var(Func_new(_x2c_func_adapt_40, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_330), Func_var(Func_new(_x2c_func_adapt_41, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_331), Func_var(Func_new(_x2c_func_adapt_42, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_332), Func_var(Func_new(_x2c_func_adapt_43, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_333), Func_var(Func_new(_x2c_func_adapt_44, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_334), Func_var(Func_new(_x2c_func_adapt_45, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_335), Func_var(Func_new(_x2c_func_adapt_46, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_336), Func_var(Func_new(_x2c_func_adapt_47, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_337), Func_var(Func_new(_x2c_func_adapt_48, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_338), Func_var(Func_new(_x2c_func_adapt_49, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_339), Func_var(Func_new(_x2c_func_adapt_50, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_340), Func_var(Func_new(_x2c_func_adapt_51, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_341), Func_var(Func_new(_x2c_func_adapt_52, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_342), Func_var(Func_new(_x2c_func_adapt_53, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_343), Func_var(Func_new(_x2c_func_adapt_54, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_344), Func_var(Func_new(_x2c_func_adapt_55, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_345), Func_var(Func_new(_x2c_func_adapt_56, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_346), Func_var(Func_new(_x2c_func_adapt_57, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_347), Func_var(Func_new(_x2c_func_adapt_58, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_348), Func_var(Func_new(_x2c_func_adapt_59, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_349), Func_var(Func_new(_x2c_func_adapt_60, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_350), Func_var(Func_new(_x2c_func_adapt_61, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_351), Func_var(Func_new(_x2c_func_adapt_62, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_352), Func_var(Func_new(_x2c_func_adapt_63, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_353), Func_var(Func_new(_x2c_func_adapt_64, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_354), Func_var(Func_new(_x2c_func_adapt_65, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_355), Func_var(Func_new(_x2c_func_adapt_66, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_356), Func_var(Func_new(_x2c_func_adapt_67, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_357), Func_var(Func_new(_x2c_func_adapt_68, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_358), Func_var(Func_new(_x2c_func_adapt_69, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_359), Func_var(Func_new_rest(_x2c_func_adapt_70, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_360), Func_var(Func_new_rest(_x2c_func_adapt_71, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_361), Func_var(Func_new_rest(_x2c_func_adapt_72, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_362), Func_var(Func_new_rest(_x2c_func_adapt_73, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_363), Func_var(Func_new_rest(_x2c_func_adapt_74, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_364), Func_var(Func_new_rest(_x2c_func_adapt_75, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_365), Func_var(Func_new_rest(_x2c_func_adapt_76, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_366), Func_var(Func_new_rest(_x2c_func_adapt_77, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_367), Func_var(Func_new_rest(_x2c_func_adapt_78, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_368), Func_var(Func_new(_x2c_func_adapt_79, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_369), Func_var(Func_new(_x2c_func_adapt_80, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_370), Func_var(Func_new(_x2c_func_adapt_81, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_371), Func_var(Func_new(_x2c_func_adapt_82, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_372), Func_var(Func_new(_x2c_func_adapt_83, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_373), Func_var(Func_new(_x2c_func_adapt_84, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_374), Func_var(Func_new(_x2c_func_adapt_85, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_375), Func_var(Func_new(_x2c_func_adapt_86, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_376), Func_var(Func_new(_x2c_func_adapt_87, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_377), Func_var(Func_new(_x2c_func_adapt_88, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_378), Func_var(Func_new(_x2c_func_adapt_89, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_379), Func_var(Func_new(_x2c_func_adapt_90, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_380), Func_var(Func_new(_x2c_func_adapt_91, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_381), Func_var(Func_new(_x2c_func_adapt_92, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_382), Func_var(Func_new(_x2c_func_adapt_93, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_383), Func_var(Func_new(_x2c_func_adapt_94, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_384), Func_var(Func_new(_x2c_func_adapt_95, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_385), Func_var(Func_new(_x2c_func_adapt_96, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_386), Func_var(Func_new(_x2c_func_adapt_97, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_387), Func_var(Func_new(_x2c_func_adapt_98, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_388), Func_var(Func_new(_x2c_func_adapt_99, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_389), Func_var(Func_new(_x2c_func_adapt_100, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_390), Func_var(Func_new(_x2c_func_adapt_101, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_391), Func_var(Func_new(_x2c_func_adapt_102, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_392), Func_var(Func_new(_x2c_func_adapt_103, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_393), Func_var(Func_new(_x2c_func_adapt_104, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_394), Func_var(Func_new(_x2c_func_adapt_105, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_395), Func_var(Func_new(_x2c_func_adapt_106, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_397), Func_var(Func_new(_x2c_func_adapt_107, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_398), Func_var(Func_new(_x2c_func_adapt_108, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_399), Func_var(Func_new(_x2c_func_adapt_109, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_400), Func_var(Func_new(_x2c_func_adapt_110, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_401), Func_var(Func_new(_x2c_func_adapt_111, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_402), Func_var(Func_new(_x2c_func_adapt_112, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_403), Func_var(Func_new(_x2c_func_adapt_113, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_404), Func_var(Func_new(_x2c_func_adapt_114, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_405), Func_var(Func_new(_x2c_func_adapt_115, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_406), Func_var(Func_new(_x2c_func_adapt_116, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_407), Func_var(Func_new(_x2c_func_adapt_117, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_408), Func_var(Func_new(_x2c_func_adapt_118, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_409), Func_var(Func_new(_x2c_func_adapt_119, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_410), Func_var(Func_new(_x2c_func_adapt_120, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_411), Func_var(Func_new(_x2c_func_adapt_121, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_412), Func_var(Func_new(_x2c_func_adapt_122, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_413), Func_var(Func_new(_x2c_func_adapt_123, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_414), Func_var(Func_new(_x2c_func_adapt_124, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_415), Func_var(Func_new(_x2c_func_adapt_125, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_416), Func_var(Func_new(_x2c_func_adapt_126, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_417), Func_var(Func_new(_x2c_func_adapt_127, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_418), Func_var(Func_new(_x2c_func_adapt_128, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_419), Func_var(Func_new(_x2c_func_adapt_129, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_420), Func_var(Func_new(_x2c_func_adapt_130, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_421), Func_var(Func_new(_x2c_func_adapt_131, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_422), Func_var(Func_new(_x2c_func_adapt_132, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_423), Func_var(Func_new(_x2c_func_adapt_133, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_424), Func_var(Func_new(_x2c_func_adapt_134, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_425), Func_var(Func_new(_x2c_func_adapt_135, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_426), Func_var(Func_new(_x2c_func_adapt_136, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_65), Func_var(Func_new(_x2c_func_adapt_137, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_427), Func_var(Func_new(_x2c_func_adapt_138, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_428), Func_var(Func_new(_x2c_func_adapt_139, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_429), Func_var(Func_new(_x2c_func_adapt_140, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_430), Func_var(Func_new(_x2c_func_adapt_141, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_431), Func_var(Func_new(_x2c_func_adapt_142, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_432), Func_var(Func_new(_x2c_func_adapt_143, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_433), Func_var(Func_new(_x2c_func_adapt_144, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_434), Func_var(Func_new(_x2c_func_adapt_145, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_435), Func_var(Func_new(_x2c_func_adapt_146, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_436), Func_var(Func_new(_x2c_func_adapt_147, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_437), Func_var(Func_new(_x2c_func_adapt_148, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_438), Func_var(Func_new(_x2c_func_adapt_149, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_439), Func_var(Func_new(_x2c_func_adapt_150, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_440), Func_var(Func_new(_x2c_func_adapt_151, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_441), Func_var(Func_new(_x2c_func_adapt_152, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_442), Func_var(Func_new(_x2c_func_adapt_153, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_443), Func_var(Func_new(_x2c_func_adapt_154, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_444), Func_var(Func_new(_x2c_func_adapt_155, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_445), Func_var(Func_new(_x2c_func_adapt_156, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_446), Func_var(Func_new(_x2c_func_adapt_157, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_447), Func_var(Func_new(_x2c_func_adapt_158, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_448), Func_var(Func_new(_x2c_func_adapt_159, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_449), Func_var(Func_new(_x2c_func_adapt_160, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_450), Func_var(Func_new(_x2c_func_adapt_161, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_451), Func_var(Func_new(_x2c_func_adapt_162, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_452), Func_var(Func_new(_x2c_func_adapt_163, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_453), Func_var(Func_new(_x2c_func_adapt_164, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_454), Func_var(Func_new(_x2c_func_adapt_165, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_455), Func_var(Func_new(_x2c_func_adapt_166, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_456), Func_var(Func_new(_x2c_func_adapt_167, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_457), Func_var(Func_new(_x2c_func_adapt_168, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_458), Func_var(Func_new(_x2c_func_adapt_169, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_459), Func_var(Func_new(_x2c_func_adapt_170, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_460), Func_var(Func_new(_x2c_func_adapt_171, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_461), Func_var(Func_new(_x2c_func_adapt_172, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_462), Func_var(Func_new(_x2c_func_adapt_173, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_463), Func_var(Func_new(_x2c_func_adapt_174, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_464), Func_var(Func_new(_x2c_func_adapt_175, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_465), Func_var(Func_new(_x2c_func_adapt_176, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_466), Func_var(Func_new(_x2c_func_adapt_177, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_467), Func_var(Func_new(_x2c_func_adapt_178, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_468), Func_var(Func_new(_x2c_func_adapt_179, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_469), Func_var(Func_new(_x2c_func_adapt_180, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_470), Func_var(Func_new(_x2c_func_adapt_181, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_471), Func_var(Func_new(_x2c_func_adapt_182, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_472), Func_var(Func_new(_x2c_func_adapt_183, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_473), Func_var(Func_new(_x2c_func_adapt_184, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_474), Func_var(Func_new(_x2c_func_adapt_185, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_475), Func_var(Func_new(_x2c_func_adapt_186, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_476), Func_var(Func_new(_x2c_func_adapt_187, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_477), Func_var(Func_new(_x2c_func_adapt_188, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_478), Func_var(Func_new(_x2c_func_adapt_189, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_479), Func_var(Func_new(_x2c_func_adapt_190, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_480), Func_var(Func_new(_x2c_func_adapt_191, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_481), Func_var(Func_new(_x2c_func_adapt_192, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_482), Func_var(Func_new(_x2c_func_adapt_193, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_483), Func_var(Func_new(_x2c_func_adapt_194, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_484), (List) 0)))), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_485), Func_var(Func_new(_x2c_func_adapt_195, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_486), Func_var(Func_new(_x2c_func_adapt_196, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_487), Func_var(Func_new(_x2c_func_adapt_197, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_488), Func_var(Func_new(_x2c_func_adapt_198, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_489), Func_var(Func_new(_x2c_func_adapt_199, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_490), Func_var(Func_new(_x2c_func_adapt_200, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_491), Func_var(Func_new(_x2c_func_adapt_201, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_492), Func_var(Func_new(_x2c_func_adapt_202, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_493), Func_var(Func_new(_x2c_func_adapt_203, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_494), Func_var(Func_new(_x2c_func_adapt_204, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_495), Func_var(Func_new(_x2c_func_adapt_205, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_496), Func_var(Func_new(_x2c_func_adapt_206, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_497), Func_var(Func_new(_x2c_func_adapt_207, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_498), Func_var(Func_new(_x2c_func_adapt_208, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_499), Func_var(Func_new(_x2c_func_adapt_209, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_500), Func_var(Func_new(_x2c_func_adapt_210, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_501), Func_var(Func_new(_x2c_func_adapt_211, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_502), Func_var(Func_new(_x2c_func_adapt_212, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_503), Func_var(Func_new(_x2c_func_adapt_213, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_504), Func_var(Func_new(_x2c_func_adapt_214, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_505), Func_var(Func_new(_x2c_func_adapt_215, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_506), Func_var(Func_new(_x2c_func_adapt_216, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_507), Func_var(Func_new(_x2c_func_adapt_217, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_508), Func_var(Func_new(_x2c_func_adapt_218, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_509), Func_var(Func_new(_x2c_func_adapt_219, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_510), Func_var(Func_new(_x2c_func_adapt_220, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_512), Func_var(Func_new(_x2c_func_adapt_221, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_513), Func_var(Func_new(_x2c_func_adapt_222, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))))), String_var(_514), Func_var(Func_new(_x2c_func_adapt_223, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_515), Func_var(Func_new(_x2c_func_adapt_224, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))))), String_var(_516), Func_var(Func_new(_x2c_func_adapt_225, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_517), Func_var(Func_new(_x2c_func_adapt_226, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_518), Func_var(Func_new(_x2c_func_adapt_227, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_519), Func_var(Func_new(_x2c_func_adapt_228, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_520), Func_var(Func_new(_x2c_func_adapt_229, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_521), Func_var(Func_new(_x2c_func_adapt_230, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_522), Func_var(Func_new(_x2c_func_adapt_231, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_523), Func_var(Func_new(_x2c_func_adapt_232, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_524), Func_var(Func_new(_x2c_func_adapt_233, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_525), Func_var(Func_new(_x2c_func_adapt_234, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_526), Func_var(Func_new(_x2c_func_adapt_235, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_527), Func_var(Func_new(_x2c_func_adapt_236, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_528), Func_var(Func_new(_x2c_func_adapt_237, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_529), Func_var(Func_new(_x2c_func_adapt_238, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_530), Func_var(Func_new(_x2c_func_adapt_239, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_531), Func_var(Func_new(_x2c_func_adapt_240, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_532), Func_var(Func_new(_x2c_func_adapt_241, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_533), Func_var(Func_new(_x2c_func_adapt_242, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_534), Func_var(Func_new(_x2c_func_adapt_243, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_535), Func_var(Func_new(_x2c_func_adapt_244, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_536), Func_var(Func_new(_x2c_func_adapt_245, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_537), Func_var(Func_new(_x2c_func_adapt_246, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_538), Func_var(Func_new(_x2c_func_adapt_247, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_539), Func_var(Func_new(_x2c_func_adapt_248, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_540), Func_var(Func_new(_x2c_func_adapt_249, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_541), Func_var(Func_new(_x2c_func_adapt_250, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_542), Func_var(Func_new(_x2c_func_adapt_251, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_543), Func_var(Func_new(_x2c_func_adapt_252, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_544), Func_var(Func_new(_x2c_func_adapt_253, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_545), Func_var(Func_new(_x2c_func_adapt_254, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_546), Func_var(Func_new(_x2c_func_adapt_255, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_547), Func_var(Func_new(_x2c_func_adapt_256, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_548), Func_var(Func_new(_x2c_func_adapt_257, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_549), Func_var(Func_new(_x2c_func_adapt_258, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_550), Func_var(Func_new(_x2c_func_adapt_259, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_551), Func_var(Func_new(_x2c_func_adapt_260, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_552), Func_var(Func_new(_x2c_func_adapt_261, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_553), Func_var(Func_new(_x2c_func_adapt_262, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_554), Func_var(Func_new(_x2c_func_adapt_263, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_555), Func_var(Func_new(_x2c_func_adapt_264, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_556), Func_var(Func_new(_x2c_func_adapt_265, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_557), Func_var(Func_new(_x2c_func_adapt_266, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_558), Func_var(Func_new(_x2c_func_adapt_267, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_559), Func_var(Func_new(_x2c_func_adapt_268, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_560), Func_var(Func_new(_x2c_func_adapt_269, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_561), Func_var(Func_new(_x2c_func_adapt_270, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_562), Func_var(Func_new(_x2c_func_adapt_271, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_563), Func_var(Func_new(_x2c_func_adapt_272, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_564), Func_var(Func_new(_x2c_func_adapt_273, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_565), Func_var(Func_new(_x2c_func_adapt_274, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_566), Func_var(Func_new(_x2c_func_adapt_275, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_567), Func_var(Func_new(_x2c_func_adapt_276, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44858254), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_568), Func_var(Func_new(_x2c_func_adapt_277, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_569), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_570), Func_var(Func_new(_x2c_func_adapt_278, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_569), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_571), Func_var(Func_new(_x2c_func_adapt_279, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_572), Func_var(Func_new(_x2c_func_adapt_280, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_573), Func_var(Func_new(_x2c_func_adapt_281, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_574), Func_var(Func_new(_x2c_func_adapt_282, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_569), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_575), Func_var(Func_new(_x2c_func_adapt_283, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_569), (List) 0)))))), String_var(_576), Func_var(Func_new(_x2c_func_adapt_284, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_569), (List) 0)))))), String_var(_577), Func_var(Func_new(_x2c_func_adapt_285, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_578), Func_var(Func_new(_x2c_func_adapt_286, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_569), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_579), Func_var(Func_new(_x2c_func_adapt_287, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_580), Func_var(Func_new(_x2c_func_adapt_288, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_581), Func_var(Func_new(_x2c_func_adapt_289, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_582), Func_var(Func_new(_x2c_func_adapt_290, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_583), Func_var(Func_new(_x2c_func_adapt_291, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_584), Func_var(Func_new(_x2c_func_adapt_292, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_585), Func_var(Func_new(_x2c_func_adapt_293, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_586), Func_var(Func_new(_x2c_func_adapt_294, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_587), Func_var(Func_new(_x2c_func_adapt_295, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_588), Func_var(Func_new(_x2c_func_adapt_296, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_589), Func_var(Func_new(_x2c_func_adapt_297, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_590), Func_var(Func_new(_x2c_func_adapt_298, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_591), Func_var(Func_new(_x2c_func_adapt_299, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_592), Func_var(Func_new(_x2c_func_adapt_300, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_593), Func_var(Func_new(_x2c_func_adapt_301, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_594), Func_var(Func_new(_x2c_func_adapt_302, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_595), Func_var(Func_new(_x2c_func_adapt_303, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_596), Func_var(Func_new(_x2c_func_adapt_304, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_597), Func_var(Func_new(_x2c_func_adapt_305, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_598), Func_var(Func_new(_x2c_func_adapt_306, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_599), Func_var(Func_new(_x2c_func_adapt_307, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_600), Func_var(Func_new(_x2c_func_adapt_308, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_601), Func_var(Func_new(_x2c_func_adapt_309, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_602), Func_var(Func_new(_x2c_func_adapt_310, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_603), Func_var(Func_new(_x2c_func_adapt_311, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_604), Func_var(Func_new(_x2c_func_adapt_312, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_605), Func_var(Func_new(_x2c_func_adapt_313, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_606), Func_var(Func_new(_x2c_func_adapt_314, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_607), Func_var(Func_new(_x2c_func_adapt_315, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_608), Func_var(Func_new(_x2c_func_adapt_316, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_609), Func_var(Func_new(_x2c_func_adapt_317, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_610), Func_var(Func_new(_x2c_func_adapt_318, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_611), Func_var(Func_new(_x2c_func_adapt_319, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_612), Func_var(Func_new(_x2c_func_adapt_320, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_613), Func_var(Func_new(_x2c_func_adapt_321, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_614), Func_var(Func_new(_x2c_func_adapt_322, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(213092), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_615), Func_var(Func_new(_x2c_func_adapt_323, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_616), Func_var(Func_new(_x2c_func_adapt_324, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_617), Func_var(Func_new(_x2c_func_adapt_325, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_618), Func_var(Func_new(_x2c_func_adapt_326, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_619), Func_var(Func_new(_x2c_func_adapt_327, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_620), Func_var(Func_new(_x2c_func_adapt_328, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_621), Func_var(Func_new(_x2c_func_adapt_329, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_622), Func_var(Func_new(_x2c_func_adapt_330, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_623), Func_var(Func_new(_x2c_func_adapt_331, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_624), Func_var(Func_new(_x2c_func_adapt_332, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_625), Func_var(Func_new(_x2c_func_adapt_333, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_626), Func_var(Func_new(_x2c_func_adapt_334, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_627), Func_var(Func_new(_x2c_func_adapt_335, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_628), Func_var(Func_new(_x2c_func_adapt_336, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_629), Func_var(Func_new(_x2c_func_adapt_337, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_630), Func_var(Func_new(_x2c_func_adapt_338, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_631), Func_var(Func_new(_x2c_func_adapt_339, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_632), Func_var(Func_new(_x2c_func_adapt_340, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_633), Func_var(Func_new(_x2c_func_adapt_341, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_634), Func_var(Func_new(_x2c_func_adapt_342, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_635), Func_var(Func_new(_x2c_func_adapt_343, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_636), Func_var(Func_new(_x2c_func_adapt_344, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_637), Func_var(Func_new(_x2c_func_adapt_345, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(818062), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_638), Func_var(Func_new(_x2c_func_adapt_346, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_639), Func_var(Func_new(_x2c_func_adapt_347, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_640), Func_var(Func_new(_x2c_func_adapt_348, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_641), Func_var(Func_new(_x2c_func_adapt_349, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_642), Func_var(Func_new(_x2c_func_adapt_350, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_643), Func_var(Func_new(_x2c_func_adapt_351, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_644), Func_var(Func_new(_x2c_func_adapt_352, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_645), Func_var(Func_new(_x2c_func_adapt_353, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_646), Func_var(Func_new(_x2c_func_adapt_354, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_298), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_647), Func_var(Func_new(_x2c_func_adapt_355, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_648), Func_var(Func_new(_x2c_func_adapt_356, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_484), (List) 0)))))), String_var(_649), Func_var(Func_new(_x2c_func_adapt_357, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_3), Func_var(Func_new(_x2c_func_adapt_358, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_650), Func_var(Func_new(_x2c_func_adapt_359, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_651), Func_var(Func_new(_x2c_func_adapt_360, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_652), Func_var(Func_new(_x2c_func_adapt_361, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_653), Func_var(Func_new(_x2c_func_adapt_362, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_654), Func_var(Func_new(_x2c_func_adapt_363, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_655), Func_var(Func_new(_x2c_func_adapt_364, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_656), Func_var(Func_new(_x2c_func_adapt_365, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_657), Func_var(Func_new(_x2c_func_adapt_366, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_658), (List) 0)))), String_var(_137), Func_var(Func_new(_x2c_func_adapt_367, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_149), Func_var(Func_new(_x2c_func_adapt_368, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_659), Func_var(Func_new(_x2c_func_adapt_369, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_660), Func_var(Func_new(_x2c_func_adapt_370, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_661), Func_var(Func_new(_x2c_func_adapt_371, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_662), Func_var(Func_new(_x2c_func_adapt_372, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_663), Func_var(Func_new(_x2c_func_adapt_373, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_664), Func_var(Func_new(_x2c_func_adapt_374, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_665), Func_var(Func_new(_x2c_func_adapt_375, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_666), Func_var(Func_new(_x2c_func_adapt_376, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_667), Func_var(Func_new(_x2c_func_adapt_377, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_668), Func_var(Func_new(_x2c_func_adapt_378, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_669), Func_var(Func_new(_x2c_func_adapt_379, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_670), Func_var(Func_new(_x2c_func_adapt_380, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_671), Func_var(Func_new(_x2c_func_adapt_381, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_672), Func_var(Func_new(_x2c_func_adapt_382, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_673), Func_var(Func_new(_x2c_func_adapt_383, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_89), Func_var(Func_new(_x2c_func_adapt_384, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_160), Func_var(Func_new(_x2c_func_adapt_385, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))))), String_var(_674), Func_var(Func_new(_x2c_func_adapt_386, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))))), String_var(_112), Func_var(Func_new(_x2c_func_adapt_387, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_675), Func_var(Func_new(_x2c_func_adapt_388, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_676), Func_var(Func_new(_x2c_func_adapt_389, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_677), Func_var(Func_new(_x2c_func_adapt_390, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_678), Func_var(Func_new(_x2c_func_adapt_391, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_679), Func_var(Func_new(_x2c_func_adapt_392, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_680), Func_var(Func_new(_x2c_func_adapt_393, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_681), Func_var(Func_new(_x2c_func_adapt_394, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_682), Func_var(Func_new(_x2c_func_adapt_395, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_683), Func_var(Func_new(_x2c_func_adapt_396, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_684), Func_var(Func_new(_x2c_func_adapt_397, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_40), Func_var(Func_new(_x2c_func_adapt_398, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(40402088), (List) 0)))), String_var(_685), Func_var(Func_new(_x2c_func_adapt_399, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_686), Func_var(Func_new(_x2c_func_adapt_400, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_687), Func_var(Func_new(_x2c_func_adapt_401, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_26), Func_var(Func_new(_x2c_func_adapt_402, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44253284), (List) 0)))), String_var(_76), Func_var(Func_new(_x2c_func_adapt_403, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_100), Func_var(Func_new(_x2c_func_adapt_404, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_124), Func_var(Func_new(_x2c_func_adapt_405, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1435270030), (List) 0)))), String_var(_688), Func_var(Func_new(_x2c_func_adapt_406, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1435270030), (List) 0)))), String_var(_689), Func_var(Func_new(_x2c_func_adapt_407, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_690), Func_var(Func_new(_x2c_func_adapt_408, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_691), Func_var(Func_new(_x2c_func_adapt_409, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_51), Func_var(Func_new(_x2c_func_adapt_410, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1449688232), (List) 0)))), String_var(_692), Func_var(Func_new(_x2c_func_adapt_411, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_693), Func_var(Func_new(_x2c_func_adapt_412, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_694), Func_var(Func_new(_x2c_func_adapt_413, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_695), Func_var(Func_new(_x2c_func_adapt_414, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_696), Func_var(Func_new(_x2c_func_adapt_415, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_697), Func_var(Func_new(_x2c_func_adapt_416, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_698), Func_var(Func_new(_x2c_func_adapt_417, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_699), Func_var(Func_new(_x2c_func_adapt_418, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_700), Func_var(Func_new(_x2c_func_adapt_419, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_701), Func_var(Func_new(_x2c_func_adapt_420, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_702), Func_var(Func_new(_x2c_func_adapt_421, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_703), Func_var(Func_new(_x2c_func_adapt_422, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_704), Func_var(Func_new(_x2c_func_adapt_423, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_705), Func_var(Func_new(_x2c_func_adapt_424, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_706), Func_var(Func_new(_x2c_func_adapt_425, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_707), Func_var(Func_new(_x2c_func_adapt_426, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_708), Func_var(Func_new(_x2c_func_adapt_427, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_709), Func_var(Func_new(_x2c_func_adapt_428, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_710), Func_var(Func_new(_x2c_func_adapt_429, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_711), Func_var(Func_new(_x2c_func_adapt_430, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_712), Func_var(Func_new(_x2c_func_adapt_431, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_713), Func_var(Func_new(_x2c_func_adapt_432, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_714), Func_var(Func_new(_x2c_func_adapt_433, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_715), Func_var(Func_new(_x2c_func_adapt_434, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_716), Func_var(Func_new(_x2c_func_adapt_435, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_717), Func_var(Func_new(_x2c_func_adapt_436, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_718), Func_var(Func_new(_x2c_func_adapt_437, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_719), Func_var(Func_new(_x2c_func_adapt_438, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_720), Func_var(Func_new(_x2c_func_adapt_439, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_721), Func_var(Func_new(_x2c_func_adapt_440, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_722), Func_var(Func_new(_x2c_func_adapt_441, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_723), Func_var(Func_new(_x2c_func_adapt_442, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_724), Func_var(Func_new(_x2c_func_adapt_443, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_725), Func_var(Func_new(_x2c_func_adapt_444, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_726), Func_var(Func_new(_x2c_func_adapt_445, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_727), Func_var(Func_new(_x2c_func_adapt_446, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_728), Func_var(Func_new(_x2c_func_adapt_447, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_729), Func_var(Func_new(_x2c_func_adapt_448, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_730), Func_var(Func_new(_x2c_func_adapt_449, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_731), Func_var(Func_new(_x2c_func_adapt_450, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_732), Func_var(Func_new(_x2c_func_adapt_451, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_733), Func_var(Func_new(_x2c_func_adapt_452, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_734), Func_var(Func_new(_x2c_func_adapt_453, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_735), Func_var(Func_new(_x2c_func_adapt_454, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_736), Func_var(Func_new(_x2c_func_adapt_455, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_737), Func_var(Func_new(_x2c_func_adapt_456, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_738), Func_var(Func_new(_x2c_func_adapt_457, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_739), Func_var(Func_new(_x2c_func_adapt_458, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_740), Func_var(Func_new(_x2c_func_adapt_459, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_741), Func_var(Func_new(_x2c_func_adapt_460, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_742), Func_var(Func_new(_x2c_func_adapt_461, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_743), Func_var(Func_new(_x2c_func_adapt_462, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_744), Func_var(Func_new(_x2c_func_adapt_463, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_745), Func_var(Func_new(_x2c_func_adapt_464, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_746), Func_var(Func_new(_x2c_func_adapt_465, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_747), Func_var(Func_new(_x2c_func_adapt_466, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_748), Func_var(Func_new(_x2c_func_adapt_467, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_749), Func_var(Func_new(_x2c_func_adapt_468, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_750), Func_var(Func_new(_x2c_func_adapt_469, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_751), Func_var(Func_new(_x2c_func_adapt_470, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_752), Func_var(Func_new(_x2c_func_adapt_471, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_753), Func_var(Func_new(_x2c_func_adapt_472, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_754), Func_var(Func_new(_x2c_func_adapt_473, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_755), Func_var(Func_new(_x2c_func_adapt_474, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_756), Func_var(Func_new(_x2c_func_adapt_475, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(25983886), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_757), Func_var(Func_new(_x2c_func_adapt_476, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_758), Func_var(Func_new(_x2c_func_adapt_477, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_759), Func_var(Func_new(_x2c_func_adapt_478, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_760), Func_var(Func_new(_x2c_func_adapt_479, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_761), Func_var(Func_new(_x2c_func_adapt_480, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_762), Func_var(Func_new(_x2c_func_adapt_481, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_763), Func_var(Func_new(_x2c_func_adapt_482, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_764), Func_var(Func_new(_x2c_func_adapt_483, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_765), Func_var(Func_new(_x2c_func_adapt_484, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_766), Func_var(Func_new(_x2c_func_adapt_485, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_767), Func_var(Func_new(_x2c_func_adapt_486, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_768), Func_var(Func_new(_x2c_func_adapt_487, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_769), Func_var(Func_new(_x2c_func_adapt_488, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_770), Func_var(Func_new(_x2c_func_adapt_489, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_771), Func_var(Func_new(_x2c_func_adapt_490, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_772), Func_var(Func_new(_x2c_func_adapt_491, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_773), Func_var(Func_new(_x2c_func_adapt_492, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_774), Func_var(Func_new(_x2c_func_adapt_493, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_775), Func_var(Func_new(_x2c_func_adapt_494, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_776), Func_var(Func_new(_x2c_func_adapt_495, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(13400168), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_777), Func_var(Func_new(_x2c_func_adapt_496, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_778), Func_var(Func_new(_x2c_func_adapt_497, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_779), Func_var(Func_new(_x2c_func_adapt_498, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_780), Func_var(Func_new(_x2c_func_adapt_499, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_781), Func_var(Func_new(_x2c_func_adapt_500, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_782), Func_var(Func_new(_x2c_func_adapt_501, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_783), Func_var(Func_new(_x2c_func_adapt_502, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_784), Func_var(Func_new(_x2c_func_adapt_503, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_785), Func_var(Func_new(_x2c_func_adapt_504, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_786), Func_var(Func_new(_x2c_func_adapt_505, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_787), Func_var(Func_new(_x2c_func_adapt_506, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_788), Func_var(Func_new(_x2c_func_adapt_507, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_789), Func_var(Func_new(_x2c_func_adapt_508, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_790), Func_var(Func_new(_x2c_func_adapt_509, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_791), Func_var(Func_new(_x2c_func_adapt_510, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_792), Func_var(Func_new(_x2c_func_adapt_511, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_793), Func_var(Func_new(_x2c_func_adapt_512, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_794), Func_var(Func_new(_x2c_func_adapt_513, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_795), Func_var(Func_new(_x2c_func_adapt_514, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_796), Func_var(Func_new(_x2c_func_adapt_515, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_797), Func_var(Func_new(_x2c_func_adapt_516, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_798), Func_var(Func_new(_x2c_func_adapt_517, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_799), Func_var(Func_new(_x2c_func_adapt_518, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_800), Func_var(Func_new(_x2c_func_adapt_519, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_801), Func_var(Func_new(_x2c_func_adapt_520, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_802), Func_var(Func_new(_x2c_func_adapt_521, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_803), Func_var(Func_new(_x2c_func_adapt_522, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_804), Func_var(Func_new(_x2c_func_adapt_523, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_805), Func_var(Func_new(_x2c_func_adapt_524, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_806), Func_var(Func_new(_x2c_func_adapt_525, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_807), Func_var(Func_new(_x2c_func_adapt_526, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_808), Func_var(Func_new(_x2c_func_adapt_527, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_809), Func_var(Func_new(_x2c_func_adapt_528, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_810), Func_var(Func_new(_x2c_func_adapt_529, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_811), Func_var(Func_new(_x2c_func_adapt_530, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_812), Func_var(Func_new(_x2c_func_adapt_531, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_813), Func_var(Func_new(_x2c_func_adapt_532, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_814), Func_var(Func_new(_x2c_func_adapt_533, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_815), Func_var(Func_new(_x2c_func_adapt_534, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))))))
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535);
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536);
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537);
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538);
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539);
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540);
+_x2c_initializer_choice_D09CF48E_17((lisp_native_targets = Map_update_n(Map_new(), 541, String_var(_281), Func_var(Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_282), Func_var(Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_283), Func_var(Func_new(_x2c_func_adapt_2, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_284), Func_var(Func_new(_x2c_func_adapt_3, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_285), Func_var(Func_new(_x2c_func_adapt_4, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_286), Func_var(Func_new(_x2c_func_adapt_5, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_288), Func_var(Func_new(_x2c_func_adapt_6, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_289), (List) 0)))), String_var(_290), Func_var(Func_new(_x2c_func_adapt_7, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_291), Func_var(Func_new(_x2c_func_adapt_8, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_293), Func_var(Func_new(_x2c_func_adapt_9, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_294), Func_var(Func_new(_x2c_func_adapt_10, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_295), Func_var(Func_new(_x2c_func_adapt_11, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_296), Func_var(Func_new(_x2c_func_adapt_12, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_297), Func_var(Func_new(_x2c_func_adapt_13, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_299), Func_var(Func_new(_x2c_func_adapt_14, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_300), Func_var(Func_new(_x2c_func_adapt_15, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_292), (List) 0))), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_301), Func_var(Func_new(_x2c_func_adapt_16, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_289), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_302), Func_var(Func_new(_x2c_func_adapt_17, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_303), Func_var(Func_new(_x2c_func_adapt_18, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_304), Func_var(Func_new(_x2c_func_adapt_19, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_305), Func_var(Func_new(_x2c_func_adapt_20, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_306), Func_var(Func_new(_x2c_func_adapt_21, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_307), Func_var(Func_new(_x2c_func_adapt_22, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_308), Func_var(Func_new(_x2c_func_adapt_23, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_309), Func_var(Func_new(_x2c_func_adapt_24, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_310), Func_var(Func_new(_x2c_func_adapt_25, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_311), Func_var(Func_new(_x2c_func_adapt_26, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_312), Func_var(Func_new(_x2c_func_adapt_27, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_313), Func_var(Func_new(_x2c_func_adapt_28, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_314), Func_var(Func_new(_x2c_func_adapt_29, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_315), Func_var(Func_new(_x2c_func_adapt_30, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_317), Func_var(Func_new(_x2c_func_adapt_31, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_318), Func_var(Func_new(_x2c_func_adapt_32, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_319), Func_var(Func_new(_x2c_func_adapt_33, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_320), Func_var(Func_new(_x2c_func_adapt_34, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_316), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_322), Func_var(Func_new(_x2c_func_adapt_35, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_323), Func_var(Func_new(_x2c_func_adapt_36, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_325), Func_var(Func_new(_x2c_func_adapt_37, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1474468213064), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_327), Func_var(Func_new(_x2c_func_adapt_38, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_328), Func_var(Func_new(_x2c_func_adapt_39, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_329), Func_var(Func_new(_x2c_func_adapt_40, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_330), Func_var(Func_new(_x2c_func_adapt_41, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_331), Func_var(Func_new(_x2c_func_adapt_42, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_332), Func_var(Func_new(_x2c_func_adapt_43, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_287), (List) 0))), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_333), Func_var(Func_new(_x2c_func_adapt_44, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_334), Func_var(Func_new(_x2c_func_adapt_45, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_335), Func_var(Func_new(_x2c_func_adapt_46, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_336), Func_var(Func_new(_x2c_func_adapt_47, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_337), Func_var(Func_new(_x2c_func_adapt_48, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_338), Func_var(Func_new(_x2c_func_adapt_49, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_339), Func_var(Func_new(_x2c_func_adapt_50, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_340), Func_var(Func_new(_x2c_func_adapt_51, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_341), Func_var(Func_new(_x2c_func_adapt_52, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_342), Func_var(Func_new(_x2c_func_adapt_53, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_343), Func_var(Func_new(_x2c_func_adapt_54, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_344), Func_var(Func_new(_x2c_func_adapt_55, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_345), Func_var(Func_new(_x2c_func_adapt_56, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_346), Func_var(Func_new(_x2c_func_adapt_57, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_347), Func_var(Func_new(_x2c_func_adapt_58, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_348), Func_var(Func_new(_x2c_func_adapt_59, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_349), Func_var(Func_new(_x2c_func_adapt_60, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_350), Func_var(Func_new(_x2c_func_adapt_61, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_351), Func_var(Func_new(_x2c_func_adapt_62, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_352), Func_var(Func_new(_x2c_func_adapt_63, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_353), Func_var(Func_new(_x2c_func_adapt_64, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_354), Func_var(Func_new(_x2c_func_adapt_65, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_355), Func_var(Func_new(_x2c_func_adapt_66, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_356), Func_var(Func_new(_x2c_func_adapt_67, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_357), Func_var(Func_new(_x2c_func_adapt_68, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_358), Func_var(Func_new(_x2c_func_adapt_69, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_359), Func_var(Func_new_rest(_x2c_func_adapt_70, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_360), Func_var(Func_new_rest(_x2c_func_adapt_71, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_361), Func_var(Func_new_rest(_x2c_func_adapt_72, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_362), Func_var(Func_new_rest(_x2c_func_adapt_73, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_363), Func_var(Func_new_rest(_x2c_func_adapt_74, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_364), Func_var(Func_new_rest(_x2c_func_adapt_75, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_365), Func_var(Func_new_rest(_x2c_func_adapt_76, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_366), Func_var(Func_new_rest(_x2c_func_adapt_77, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_367), Func_var(Func_new_rest(_x2c_func_adapt_78, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_368), Func_var(Func_new(_x2c_func_adapt_79, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_369), Func_var(Func_new(_x2c_func_adapt_80, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_370), Func_var(Func_new(_x2c_func_adapt_81, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_371), Func_var(Func_new(_x2c_func_adapt_82, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_372), Func_var(Func_new(_x2c_func_adapt_83, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_373), Func_var(Func_new(_x2c_func_adapt_84, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_374), Func_var(Func_new(_x2c_func_adapt_85, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_375), Func_var(Func_new(_x2c_func_adapt_86, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_376), Func_var(Func_new(_x2c_func_adapt_87, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_377), Func_var(Func_new(_x2c_func_adapt_88, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_378), Func_var(Func_new(_x2c_func_adapt_89, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_379), Func_var(Func_new(_x2c_func_adapt_90, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_380), Func_var(Func_new(_x2c_func_adapt_91, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_381), Func_var(Func_new(_x2c_func_adapt_92, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_382), Func_var(Func_new(_x2c_func_adapt_93, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_383), Func_var(Func_new(_x2c_func_adapt_94, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_384), Func_var(Func_new(_x2c_func_adapt_95, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_385), Func_var(Func_new(_x2c_func_adapt_96, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_386), Func_var(Func_new(_x2c_func_adapt_97, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_387), Func_var(Func_new(_x2c_func_adapt_98, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_388), Func_var(Func_new(_x2c_func_adapt_99, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_389), Func_var(Func_new(_x2c_func_adapt_100, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_390), Func_var(Func_new(_x2c_func_adapt_101, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_391), Func_var(Func_new(_x2c_func_adapt_102, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_392), Func_var(Func_new(_x2c_func_adapt_103, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_393), Func_var(Func_new(_x2c_func_adapt_104, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_394), Func_var(Func_new(_x2c_func_adapt_105, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_395), Func_var(Func_new(_x2c_func_adapt_106, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_397), Func_var(Func_new(_x2c_func_adapt_107, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_398), Func_var(Func_new(_x2c_func_adapt_108, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_399), Func_var(Func_new(_x2c_func_adapt_109, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_400), Func_var(Func_new(_x2c_func_adapt_110, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_401), Func_var(Func_new(_x2c_func_adapt_111, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_402), Func_var(Func_new(_x2c_func_adapt_112, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_403), Func_var(Func_new(_x2c_func_adapt_113, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_404), Func_var(Func_new(_x2c_func_adapt_114, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_405), Func_var(Func_new(_x2c_func_adapt_115, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_406), Func_var(Func_new(_x2c_func_adapt_116, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_202), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_407), Func_var(Func_new(_x2c_func_adapt_117, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_408), Func_var(Func_new(_x2c_func_adapt_118, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_409), Func_var(Func_new(_x2c_func_adapt_119, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_410), Func_var(Func_new(_x2c_func_adapt_120, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_411), Func_var(Func_new(_x2c_func_adapt_121, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_412), Func_var(Func_new(_x2c_func_adapt_122, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_413), Func_var(Func_new(_x2c_func_adapt_123, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_414), Func_var(Func_new(_x2c_func_adapt_124, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_415), Func_var(Func_new(_x2c_func_adapt_125, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_416), Func_var(Func_new(_x2c_func_adapt_126, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_417), Func_var(Func_new(_x2c_func_adapt_127, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_418), Func_var(Func_new(_x2c_func_adapt_128, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_419), Func_var(Func_new(_x2c_func_adapt_129, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_420), Func_var(Func_new(_x2c_func_adapt_130, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_421), Func_var(Func_new(_x2c_func_adapt_131, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_422), Func_var(Func_new(_x2c_func_adapt_132, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_423), Func_var(Func_new(_x2c_func_adapt_133, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_424), Func_var(Func_new(_x2c_func_adapt_134, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_425), Func_var(Func_new(_x2c_func_adapt_135, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_426), Func_var(Func_new(_x2c_func_adapt_136, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_65), Func_var(Func_new(_x2c_func_adapt_137, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_427), Func_var(Func_new(_x2c_func_adapt_138, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_428), Func_var(Func_new(_x2c_func_adapt_139, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_429), Func_var(Func_new(_x2c_func_adapt_140, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_430), Func_var(Func_new(_x2c_func_adapt_141, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_431), Func_var(Func_new(_x2c_func_adapt_142, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_432), Func_var(Func_new(_x2c_func_adapt_143, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_433), Func_var(Func_new(_x2c_func_adapt_144, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_434), Func_var(Func_new(_x2c_func_adapt_145, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_435), Func_var(Func_new(_x2c_func_adapt_146, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_436), Func_var(Func_new(_x2c_func_adapt_147, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_437), Func_var(Func_new(_x2c_func_adapt_148, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_438), Func_var(Func_new(_x2c_func_adapt_149, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_439), Func_var(Func_new(_x2c_func_adapt_150, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_440), Func_var(Func_new(_x2c_func_adapt_151, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_441), Func_var(Func_new(_x2c_func_adapt_152, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_442), Func_var(Func_new(_x2c_func_adapt_153, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_443), Func_var(Func_new(_x2c_func_adapt_154, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_444), Func_var(Func_new(_x2c_func_adapt_155, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_445), Func_var(Func_new(_x2c_func_adapt_156, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_446), Func_var(Func_new(_x2c_func_adapt_157, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_447), Func_var(Func_new(_x2c_func_adapt_158, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_448), Func_var(Func_new(_x2c_func_adapt_159, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_449), Func_var(Func_new(_x2c_func_adapt_160, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_450), Func_var(Func_new(_x2c_func_adapt_161, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_451), Func_var(Func_new(_x2c_func_adapt_162, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_452), Func_var(Func_new(_x2c_func_adapt_163, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_453), Func_var(Func_new(_x2c_func_adapt_164, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_454), Func_var(Func_new(_x2c_func_adapt_165, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_455), Func_var(Func_new(_x2c_func_adapt_166, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_456), Func_var(Func_new(_x2c_func_adapt_167, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_457), Func_var(Func_new(_x2c_func_adapt_168, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_458), Func_var(Func_new(_x2c_func_adapt_169, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_459), Func_var(Func_new(_x2c_func_adapt_170, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_460), Func_var(Func_new(_x2c_func_adapt_171, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_461), Func_var(Func_new(_x2c_func_adapt_172, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_462), Func_var(Func_new(_x2c_func_adapt_173, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_463), Func_var(Func_new(_x2c_func_adapt_174, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_464), Func_var(Func_new(_x2c_func_adapt_175, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_465), Func_var(Func_new(_x2c_func_adapt_176, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_466), Func_var(Func_new(_x2c_func_adapt_177, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_467), Func_var(Func_new(_x2c_func_adapt_178, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_468), Func_var(Func_new(_x2c_func_adapt_179, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_469), Func_var(Func_new(_x2c_func_adapt_180, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_470), Func_var(Func_new(_x2c_func_adapt_181, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_471), Func_var(Func_new(_x2c_func_adapt_182, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_472), Func_var(Func_new(_x2c_func_adapt_183, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_473), Func_var(Func_new(_x2c_func_adapt_184, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_474), Func_var(Func_new(_x2c_func_adapt_185, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_475), Func_var(Func_new(_x2c_func_adapt_186, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_476), Func_var(Func_new(_x2c_func_adapt_187, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_477), Func_var(Func_new(_x2c_func_adapt_188, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_478), Func_var(Func_new(_x2c_func_adapt_189, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_479), Func_var(Func_new(_x2c_func_adapt_190, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_480), Func_var(Func_new(_x2c_func_adapt_191, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_481), Func_var(Func_new(_x2c_func_adapt_192, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_482), Func_var(Func_new(_x2c_func_adapt_193, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_483), Func_var(Func_new(_x2c_func_adapt_194, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_484), (List) 0)))), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_485), Func_var(Func_new(_x2c_func_adapt_195, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_486), Func_var(Func_new(_x2c_func_adapt_196, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_487), Func_var(Func_new(_x2c_func_adapt_197, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_488), Func_var(Func_new(_x2c_func_adapt_198, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_489), Func_var(Func_new(_x2c_func_adapt_199, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_490), Func_var(Func_new(_x2c_func_adapt_200, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_491), Func_var(Func_new(_x2c_func_adapt_201, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_492), Func_var(Func_new(_x2c_func_adapt_202, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_493), Func_var(Func_new(_x2c_func_adapt_203, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_494), Func_var(Func_new(_x2c_func_adapt_204, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_495), Func_var(Func_new(_x2c_func_adapt_205, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_496), Func_var(Func_new(_x2c_func_adapt_206, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_497), Func_var(Func_new(_x2c_func_adapt_207, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_498), Func_var(Func_new(_x2c_func_adapt_208, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_499), Func_var(Func_new(_x2c_func_adapt_209, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_500), Func_var(Func_new(_x2c_func_adapt_210, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_501), Func_var(Func_new(_x2c_func_adapt_211, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_502), Func_var(Func_new(_x2c_func_adapt_212, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_503), Func_var(Func_new(_x2c_func_adapt_213, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_504), Func_var(Func_new(_x2c_func_adapt_214, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_505), Func_var(Func_new(_x2c_func_adapt_215, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_506), Func_var(Func_new(_x2c_func_adapt_216, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_507), Func_var(Func_new(_x2c_func_adapt_217, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_324), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_508), Func_var(Func_new(_x2c_func_adapt_218, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_509), Func_var(Func_new(_x2c_func_adapt_219, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_324), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_510), Func_var(Func_new(_x2c_func_adapt_220, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_512), Func_var(Func_new(_x2c_func_adapt_221, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_513), Func_var(Func_new(_x2c_func_adapt_222, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))))), String_var(_514), Func_var(Func_new(_x2c_func_adapt_223, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_515), Func_var(Func_new(_x2c_func_adapt_224, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_511), (List) 0)))))), String_var(_516), Func_var(Func_new(_x2c_func_adapt_225, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_517), Func_var(Func_new(_x2c_func_adapt_226, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_324), (List) 0)))), String_var(_518), Func_var(Func_new(_x2c_func_adapt_227, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_519), Func_var(Func_new(_x2c_func_adapt_228, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_520), Func_var(Func_new(_x2c_func_adapt_229, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_521), Func_var(Func_new(_x2c_func_adapt_230, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_522), Func_var(Func_new(_x2c_func_adapt_231, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_523), Func_var(Func_new(_x2c_func_adapt_232, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_524), Func_var(Func_new(_x2c_func_adapt_233, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_525), Func_var(Func_new(_x2c_func_adapt_234, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_526), Func_var(Func_new(_x2c_func_adapt_235, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_527), Func_var(Func_new(_x2c_func_adapt_236, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_528), Func_var(Func_new(_x2c_func_adapt_237, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_529), Func_var(Func_new(_x2c_func_adapt_238, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_530), Func_var(Func_new(_x2c_func_adapt_239, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_531), Func_var(Func_new(_x2c_func_adapt_240, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_532), Func_var(Func_new(_x2c_func_adapt_241, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))))), String_var(_534), Func_var(Func_new(_x2c_func_adapt_242, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_535), Func_var(Func_new(_x2c_func_adapt_243, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_536), Func_var(Func_new(_x2c_func_adapt_244, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_537), Func_var(Func_new(_x2c_func_adapt_245, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_538), Func_var(Func_new(_x2c_func_adapt_246, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_539), Func_var(Func_new(_x2c_func_adapt_247, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_540), Func_var(Func_new(_x2c_func_adapt_248, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_541), Func_var(Func_new(_x2c_func_adapt_249, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_542), Func_var(Func_new(_x2c_func_adapt_250, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_543), Func_var(Func_new(_x2c_func_adapt_251, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))))), String_var(_544), Func_var(Func_new(_x2c_func_adapt_252, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_545), Func_var(Func_new(_x2c_func_adapt_253, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_546), Func_var(Func_new(_x2c_func_adapt_254, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_547), Func_var(Func_new(_x2c_func_adapt_255, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_548), Func_var(Func_new(_x2c_func_adapt_256, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_549), Func_var(Func_new(_x2c_func_adapt_257, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_550), Func_var(Func_new(_x2c_func_adapt_258, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_551), Func_var(Func_new(_x2c_func_adapt_259, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_552), Func_var(Func_new(_x2c_func_adapt_260, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_553), Func_var(Func_new(_x2c_func_adapt_261, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_554), Func_var(Func_new(_x2c_func_adapt_262, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_555), Func_var(Func_new(_x2c_func_adapt_263, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_556), Func_var(Func_new(_x2c_func_adapt_264, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_557), Func_var(Func_new(_x2c_func_adapt_265, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_558), Func_var(Func_new(_x2c_func_adapt_266, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_559), Func_var(Func_new(_x2c_func_adapt_267, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_560), Func_var(Func_new(_x2c_func_adapt_268, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_561), Func_var(Func_new(_x2c_func_adapt_269, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_562), Func_var(Func_new(_x2c_func_adapt_270, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_563), Func_var(Func_new(_x2c_func_adapt_271, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_564), Func_var(Func_new(_x2c_func_adapt_272, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_326), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_565), Func_var(Func_new(_x2c_func_adapt_273, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1395624), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_326), (List) 0)))), String_var(_566), Func_var(Func_new(_x2c_func_adapt_274, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_567), Func_var(Func_new(_x2c_func_adapt_275, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_568), Func_var(Func_new(_x2c_func_adapt_276, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_569), Func_var(Func_new(_x2c_func_adapt_277, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_570), Func_var(Func_new(_x2c_func_adapt_278, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_326), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_571), Func_var(Func_new(_x2c_func_adapt_279, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44858254), (List) 0)), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_572), Func_var(Func_new(_x2c_func_adapt_280, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_573), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_574), Func_var(Func_new(_x2c_func_adapt_281, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_573), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_575), Func_var(Func_new(_x2c_func_adapt_282, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_576), Func_var(Func_new(_x2c_func_adapt_283, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_577), Func_var(Func_new(_x2c_func_adapt_284, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_578), Func_var(Func_new(_x2c_func_adapt_285, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(String_var(_573), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_579), Func_var(Func_new(_x2c_func_adapt_286, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_573), (List) 0)))))), String_var(_580), Func_var(Func_new(_x2c_func_adapt_287, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_573), (List) 0)))))), String_var(_581), Func_var(Func_new(_x2c_func_adapt_288, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_582), Func_var(Func_new(_x2c_func_adapt_289, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(String_var(_573), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_583), Func_var(Func_new(_x2c_func_adapt_290, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1473096), (List) 0))))), String_var(_584), Func_var(Func_new(_x2c_func_adapt_291, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_585), Func_var(Func_new(_x2c_func_adapt_292, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_586), Func_var(Func_new(_x2c_func_adapt_293, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_587), Func_var(Func_new(_x2c_func_adapt_294, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_588), Func_var(Func_new(_x2c_func_adapt_295, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_589), Func_var(Func_new(_x2c_func_adapt_296, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_590), Func_var(Func_new(_x2c_func_adapt_297, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_591), Func_var(Func_new(_x2c_func_adapt_298, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_592), Func_var(Func_new(_x2c_func_adapt_299, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_593), Func_var(Func_new(_x2c_func_adapt_300, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_594), Func_var(Func_new(_x2c_func_adapt_301, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_595), Func_var(Func_new(_x2c_func_adapt_302, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_596), Func_var(Func_new(_x2c_func_adapt_303, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_597), Func_var(Func_new(_x2c_func_adapt_304, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_598), Func_var(Func_new(_x2c_func_adapt_305, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)))), String_var(_599), Func_var(Func_new(_x2c_func_adapt_306, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_600), Func_var(Func_new(_x2c_func_adapt_307, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_601), Func_var(Func_new(_x2c_func_adapt_308, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_602), Func_var(Func_new(_x2c_func_adapt_309, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_603), Func_var(Func_new(_x2c_func_adapt_310, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_604), Func_var(Func_new(_x2c_func_adapt_311, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_605), Func_var(Func_new(_x2c_func_adapt_312, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_606), Func_var(Func_new(_x2c_func_adapt_313, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_607), Func_var(Func_new(_x2c_func_adapt_314, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_608), Func_var(Func_new(_x2c_func_adapt_315, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_609), Func_var(Func_new(_x2c_func_adapt_316, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_610), Func_var(Func_new(_x2c_func_adapt_317, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_611), Func_var(Func_new(_x2c_func_adapt_318, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_612), Func_var(Func_new(_x2c_func_adapt_319, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_613), Func_var(Func_new(_x2c_func_adapt_320, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_614), Func_var(Func_new(_x2c_func_adapt_321, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_287), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_615), Func_var(Func_new(_x2c_func_adapt_322, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_616), Func_var(Func_new(_x2c_func_adapt_323, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_617), Func_var(Func_new(_x2c_func_adapt_324, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_618), Func_var(Func_new(_x2c_func_adapt_325, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(213092), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_619), Func_var(Func_new(_x2c_func_adapt_326, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_620), Func_var(Func_new(_x2c_func_adapt_327, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_621), Func_var(Func_new(_x2c_func_adapt_328, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_622), Func_var(Func_new(_x2c_func_adapt_329, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_623), Func_var(Func_new(_x2c_func_adapt_330, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_624), Func_var(Func_new(_x2c_func_adapt_331, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_625), Func_var(Func_new(_x2c_func_adapt_332, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_626), Func_var(Func_new(_x2c_func_adapt_333, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_627), Func_var(Func_new(_x2c_func_adapt_334, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_628), Func_var(Func_new(_x2c_func_adapt_335, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_629), Func_var(Func_new(_x2c_func_adapt_336, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_630), Func_var(Func_new(_x2c_func_adapt_337, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_631), Func_var(Func_new(_x2c_func_adapt_338, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_632), Func_var(Func_new(_x2c_func_adapt_339, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_633), Func_var(Func_new(_x2c_func_adapt_340, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_634), Func_var(Func_new(_x2c_func_adapt_341, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_635), Func_var(Func_new(_x2c_func_adapt_342, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_287), (List) 0)))), String_var(_636), Func_var(Func_new(_x2c_func_adapt_343, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_637), Func_var(Func_new(_x2c_func_adapt_344, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_638), Func_var(Func_new(_x2c_func_adapt_345, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_316), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_639), Func_var(Func_new(_x2c_func_adapt_346, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_640), Func_var(Func_new(_x2c_func_adapt_347, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_641), Func_var(Func_new(_x2c_func_adapt_348, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(818062), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_642), Func_var(Func_new(_x2c_func_adapt_349, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_643), Func_var(Func_new(_x2c_func_adapt_350, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_644), Func_var(Func_new(_x2c_func_adapt_351, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(213092), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_316), (List) 0)))), String_var(_645), Func_var(Func_new(_x2c_func_adapt_352, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_321), (List) 0)))))), String_var(_646), Func_var(Func_new(_x2c_func_adapt_353, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_647), Func_var(Func_new(_x2c_func_adapt_354, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_648), Func_var(Func_new(_x2c_func_adapt_355, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_649), Func_var(Func_new(_x2c_func_adapt_356, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_650), Func_var(Func_new(_x2c_func_adapt_357, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(String_var(_298), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_651), Func_var(Func_new(_x2c_func_adapt_358, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_652), Func_var(Func_new(_x2c_func_adapt_359, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_484), (List) 0)))))), String_var(_653), Func_var(Func_new(_x2c_func_adapt_360, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_3), Func_var(Func_new(_x2c_func_adapt_361, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(213092), (List) 0)))), String_var(_654), Func_var(Func_new(_x2c_func_adapt_362, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_655), Func_var(Func_new(_x2c_func_adapt_363, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_656), Func_var(Func_new(_x2c_func_adapt_364, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_657), Func_var(Func_new(_x2c_func_adapt_365, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_658), Func_var(Func_new(_x2c_func_adapt_366, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_659), Func_var(Func_new(_x2c_func_adapt_367, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_660), Func_var(Func_new(_x2c_func_adapt_368, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_661), Func_var(Func_new(_x2c_func_adapt_369, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_662), (List) 0)))), String_var(_137), Func_var(Func_new(_x2c_func_adapt_370, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_149), Func_var(Func_new(_x2c_func_adapt_371, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_663), Func_var(Func_new(_x2c_func_adapt_372, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_664), Func_var(Func_new(_x2c_func_adapt_373, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_665), Func_var(Func_new(_x2c_func_adapt_374, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_666), Func_var(Func_new(_x2c_func_adapt_375, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_667), Func_var(Func_new(_x2c_func_adapt_376, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_668), Func_var(Func_new(_x2c_func_adapt_377, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_669), Func_var(Func_new(_x2c_func_adapt_378, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_670), Func_var(Func_new(_x2c_func_adapt_379, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_671), Func_var(Func_new(_x2c_func_adapt_380, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_672), Func_var(Func_new(_x2c_func_adapt_381, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_673), Func_var(Func_new(_x2c_func_adapt_382, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_674), Func_var(Func_new(_x2c_func_adapt_383, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_675), Func_var(Func_new(_x2c_func_adapt_384, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_676), Func_var(Func_new(_x2c_func_adapt_385, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_677), Func_var(Func_new(_x2c_func_adapt_386, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))))), String_var(_678), Func_var(Func_new(_x2c_func_adapt_387, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_89), Func_var(Func_new(_x2c_func_adapt_388, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_160), Func_var(Func_new(_x2c_func_adapt_389, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))))), String_var(_679), Func_var(Func_new(_x2c_func_adapt_390, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))))), String_var(_112), Func_var(Func_new(_x2c_func_adapt_391, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_680), Func_var(Func_new(_x2c_func_adapt_392, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_681), Func_var(Func_new(_x2c_func_adapt_393, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_682), Func_var(Func_new(_x2c_func_adapt_394, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_683), Func_var(Func_new(_x2c_func_adapt_395, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_684), Func_var(Func_new(_x2c_func_adapt_396, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_685), Func_var(Func_new(_x2c_func_adapt_397, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(1473096), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_686), Func_var(Func_new(_x2c_func_adapt_398, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_316), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_687), Func_var(Func_new(_x2c_func_adapt_399, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_688), Func_var(Func_new(_x2c_func_adapt_400, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_689), Func_var(Func_new(_x2c_func_adapt_401, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_40), Func_var(Func_new(_x2c_func_adapt_402, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(40402088), (List) 0)))), String_var(_690), Func_var(Func_new(_x2c_func_adapt_403, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_691), Func_var(Func_new(_x2c_func_adapt_404, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_298), (List) 0)))), String_var(_692), Func_var(Func_new(_x2c_func_adapt_405, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_26), Func_var(Func_new(_x2c_func_adapt_406, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44253284), (List) 0)))), String_var(_76), Func_var(Func_new(_x2c_func_adapt_407, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_100), Func_var(Func_new(_x2c_func_adapt_408, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_124), Func_var(Func_new(_x2c_func_adapt_409, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1435270030), (List) 0)))), String_var(_693), Func_var(Func_new(_x2c_func_adapt_410, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1435270030), (List) 0)))), String_var(_694), Func_var(Func_new(_x2c_func_adapt_411, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44858254), (List) 0)))), String_var(_695), Func_var(Func_new(_x2c_func_adapt_412, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1395624), (List) 0)))), String_var(_696), Func_var(Func_new(_x2c_func_adapt_413, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), cons(List_var(cons(String_var(_298), (List) 0)), cons(List_var(cons(String_var(_202), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_202), (List) 0)))), String_var(_51), Func_var(Func_new(_x2c_func_adapt_414, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_202), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1449688232), (List) 0)))), String_var(_697), Func_var(Func_new(_x2c_func_adapt_415, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_698), Func_var(Func_new(_x2c_func_adapt_416, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_699), Func_var(Func_new(_x2c_func_adapt_417, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_700), Func_var(Func_new(_x2c_func_adapt_418, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_701), Func_var(Func_new(_x2c_func_adapt_419, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_702), Func_var(Func_new(_x2c_func_adapt_420, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_703), Func_var(Func_new(_x2c_func_adapt_421, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_704), Func_var(Func_new(_x2c_func_adapt_422, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_705), Func_var(Func_new(_x2c_func_adapt_423, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_706), Func_var(Func_new(_x2c_func_adapt_424, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_707), Func_var(Func_new(_x2c_func_adapt_425, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_708), Func_var(Func_new(_x2c_func_adapt_426, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_709), Func_var(Func_new(_x2c_func_adapt_427, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_710), Func_var(Func_new(_x2c_func_adapt_428, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_711), Func_var(Func_new(_x2c_func_adapt_429, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_712), Func_var(Func_new(_x2c_func_adapt_430, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_713), Func_var(Func_new(_x2c_func_adapt_431, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_714), Func_var(Func_new(_x2c_func_adapt_432, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_715), Func_var(Func_new(_x2c_func_adapt_433, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_716), Func_var(Func_new(_x2c_func_adapt_434, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_717), Func_var(Func_new(_x2c_func_adapt_435, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_718), Func_var(Func_new(_x2c_func_adapt_436, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_719), Func_var(Func_new(_x2c_func_adapt_437, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_720), Func_var(Func_new(_x2c_func_adapt_438, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_721), Func_var(Func_new(_x2c_func_adapt_439, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_722), Func_var(Func_new(_x2c_func_adapt_440, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_723), Func_var(Func_new(_x2c_func_adapt_441, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_724), Func_var(Func_new(_x2c_func_adapt_442, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_725), Func_var(Func_new(_x2c_func_adapt_443, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_726), Func_var(Func_new(_x2c_func_adapt_444, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_727), Func_var(Func_new(_x2c_func_adapt_445, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_728), Func_var(Func_new(_x2c_func_adapt_446, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_729), Func_var(Func_new(_x2c_func_adapt_447, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_730), Func_var(Func_new(_x2c_func_adapt_448, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_731), Func_var(Func_new(_x2c_func_adapt_449, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_732), Func_var(Func_new(_x2c_func_adapt_450, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_733), Func_var(Func_new(_x2c_func_adapt_451, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_734), Func_var(Func_new(_x2c_func_adapt_452, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_735), Func_var(Func_new(_x2c_func_adapt_453, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_736), Func_var(Func_new(_x2c_func_adapt_454, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_737), Func_var(Func_new(_x2c_func_adapt_455, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_738), Func_var(Func_new(_x2c_func_adapt_456, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_739), Func_var(Func_new(_x2c_func_adapt_457, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_740), Func_var(Func_new(_x2c_func_adapt_458, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_741), Func_var(Func_new(_x2c_func_adapt_459, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_742), Func_var(Func_new(_x2c_func_adapt_460, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_743), Func_var(Func_new(_x2c_func_adapt_461, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_744), Func_var(Func_new(_x2c_func_adapt_462, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_745), Func_var(Func_new(_x2c_func_adapt_463, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_746), Func_var(Func_new(_x2c_func_adapt_464, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_747), Func_var(Func_new(_x2c_func_adapt_465, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_748), Func_var(Func_new(_x2c_func_adapt_466, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_749), Func_var(Func_new(_x2c_func_adapt_467, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_750), Func_var(Func_new(_x2c_func_adapt_468, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_751), Func_var(Func_new(_x2c_func_adapt_469, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_752), Func_var(Func_new(_x2c_func_adapt_470, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_753), Func_var(Func_new(_x2c_func_adapt_471, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_754), Func_var(Func_new(_x2c_func_adapt_472, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_755), Func_var(Func_new(_x2c_func_adapt_473, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_756), Func_var(Func_new(_x2c_func_adapt_474, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_757), Func_var(Func_new(_x2c_func_adapt_475, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_758), Func_var(Func_new(_x2c_func_adapt_476, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_759), Func_var(Func_new(_x2c_func_adapt_477, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_760), Func_var(Func_new(_x2c_func_adapt_478, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_761), Func_var(Func_new(_x2c_func_adapt_479, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(25983886), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_762), Func_var(Func_new(_x2c_func_adapt_480, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_763), Func_var(Func_new(_x2c_func_adapt_481, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_764), Func_var(Func_new(_x2c_func_adapt_482, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_765), Func_var(Func_new(_x2c_func_adapt_483, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(25983886), (List) 0)))), String_var(_766), Func_var(Func_new(_x2c_func_adapt_484, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_767), Func_var(Func_new(_x2c_func_adapt_485, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_768), Func_var(Func_new(_x2c_func_adapt_486, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_769), Func_var(Func_new(_x2c_func_adapt_487, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_770), Func_var(Func_new(_x2c_func_adapt_488, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_771), Func_var(Func_new(_x2c_func_adapt_489, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_772), Func_var(Func_new(_x2c_func_adapt_490, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_773), Func_var(Func_new(_x2c_func_adapt_491, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_774), Func_var(Func_new(_x2c_func_adapt_492, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_775), Func_var(Func_new(_x2c_func_adapt_493, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_776), Func_var(Func_new(_x2c_func_adapt_494, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_777), Func_var(Func_new(_x2c_func_adapt_495, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_778), Func_var(Func_new(_x2c_func_adapt_496, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_779), Func_var(Func_new(_x2c_func_adapt_497, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(818062), (List) 0)))), String_var(_780), Func_var(Func_new(_x2c_func_adapt_498, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_781), Func_var(Func_new(_x2c_func_adapt_499, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(13400168), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_782), Func_var(Func_new(_x2c_func_adapt_500, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_783), Func_var(Func_new(_x2c_func_adapt_501, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_784), Func_var(Func_new(_x2c_func_adapt_502, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_785), Func_var(Func_new(_x2c_func_adapt_503, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_786), Func_var(Func_new(_x2c_func_adapt_504, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_787), Func_var(Func_new(_x2c_func_adapt_505, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_788), Func_var(Func_new(_x2c_func_adapt_506, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_789), Func_var(Func_new(_x2c_func_adapt_507, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_790), Func_var(Func_new(_x2c_func_adapt_508, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_791), Func_var(Func_new(_x2c_func_adapt_509, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_792), Func_var(Func_new(_x2c_func_adapt_510, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(String_var(_396), (List) 0)), (List) 0))))), (List) 0))), cons(String_var(_396), (List) 0)))), String_var(_793), Func_var(Func_new(_x2c_func_adapt_511, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_794), Func_var(Func_new(_x2c_func_adapt_512, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_795), Func_var(Func_new(_x2c_func_adapt_513, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_796), Func_var(Func_new(_x2c_func_adapt_514, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(19368), (List) 0))), (List) 0)))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_797), Func_var(Func_new(_x2c_func_adapt_515, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_798), Func_var(Func_new(_x2c_func_adapt_516, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_799), Func_var(Func_new(_x2c_func_adapt_517, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_800), Func_var(Func_new(_x2c_func_adapt_518, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_801), Func_var(Func_new(_x2c_func_adapt_519, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_802), Func_var(Func_new(_x2c_func_adapt_520, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(818062), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_803), Func_var(Func_new(_x2c_func_adapt_521, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_804), Func_var(Func_new(_x2c_func_adapt_522, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0))), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_805), Func_var(Func_new(_x2c_func_adapt_523, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_806), Func_var(Func_new(_x2c_func_adapt_524, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_807), Func_var(Func_new(_x2c_func_adapt_525, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_808), Func_var(Func_new(_x2c_func_adapt_526, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_809), Func_var(Func_new(_x2c_func_adapt_527, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_810), Func_var(Func_new(_x2c_func_adapt_528, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_811), Func_var(Func_new(_x2c_func_adapt_529, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), (List) 0))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_812), Func_var(Func_new(_x2c_func_adapt_530, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(54), cons(Symbol_var(213092), (List) 0))), cons(List_var(cons(Symbol_var(44858254), (List) 0)), (List) 0)))), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_813), Func_var(Func_new(_x2c_func_adapt_531, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_814), Func_var(Func_new(_x2c_func_adapt_532, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_815), Func_var(Func_new(_x2c_func_adapt_533, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_816), Func_var(Func_new(_x2c_func_adapt_534, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_817), Func_var(Func_new(_x2c_func_adapt_535, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_818), Func_var(Func_new(_x2c_func_adapt_536, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_819), Func_var(Func_new(_x2c_func_adapt_537, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(301273866), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(301273866), (List) 0)))), String_var(_820), Func_var(Func_new(_x2c_func_adapt_538, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(13400168), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(13400168), (List) 0)))), String_var(_543), Func_var(Func_new(_x2c_func_adapt_539, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_287), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))))), String_var(_532), Func_var(Func_new(_x2c_func_adapt_540, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))), (List) 0)), (List) 0))), cons(Symbol_var(54), cons(Symbol_var(1318234344), cons(String_var(_533), (List) 0)))))))))
 static Func _native_target(String name);
 static int _binding_get(Map bindings, Var name, Var * out);
 static void _binding_set(Lisp lisp, Map bindings, Var name, Var value);
@@ -1302,6 +1310,8 @@ typedef struct _x2c_defer_env_3{
 }
 _x2c_defer_env_3;
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
@@ -1837,139 +1847,145 @@ static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_
 static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532);
 static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533);
 static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534);
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535);
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536);
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537);
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538);
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539);
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540);
 typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_7;  const void * _x2c_defer_capture_8;
 }
 _x2c_defer_env_4;
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
+static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
+static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 typedef struct _x2c_defer_env_5{
   const void * _x2c_defer_capture_9;  const void * _x2c_defer_capture_10;  const void * _x2c_defer_capture_11;  const void * _x2c_defer_capture_12;
 }
 _x2c_defer_env_5;
-static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_13;
 }
 _x2c_defer_env_6;
-static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 typedef struct _x2c_defer_env_7{
   const void * _x2c_defer_capture_14;
 }
 _x2c_defer_env_7;
-static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
-static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_15;
 }
 _x2c_defer_env_8;
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 typedef struct _x2c_defer_env_9{
   const void * _x2c_defer_capture_16;
 }
 _x2c_defer_env_9;
-static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
+static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_17;  const void * _x2c_defer_capture_18;
 }
 _x2c_defer_env_10;
-static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
+static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
 typedef struct _x2c_defer_env_11{
   const void * _x2c_defer_capture_19;  const void * _x2c_defer_capture_20;
 }
 _x2c_defer_env_11;
-static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
+static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
 typedef struct _x2c_defer_env_12{
   const void * _x2c_defer_capture_21;  const void * _x2c_defer_capture_22;
 }
 _x2c_defer_env_12;
-static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
-static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
+static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
+static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
 typedef struct _x2c_defer_env_13{
   const void * _x2c_defer_capture_23;
 }
 _x2c_defer_env_13;
-static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
+static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
 typedef struct _x2c_defer_env_14{
   const void * _x2c_defer_capture_24;  const void * _x2c_defer_capture_25;
 }
 _x2c_defer_env_14;
-static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
-static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535);
+static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
+static Var _x2c_func_adapt_541(Func _x2c_func_binding_541, const FuncArg * _x2c_func_argv_541);
 typedef struct _x2c_defer_env_15{
   const void * _x2c_defer_capture_27;  const void * _x2c_defer_capture_28;
 }
 _x2c_defer_env_15;
-static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
+static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
 typedef struct _x2c_defer_env_16{
   const void * _x2c_defer_capture_29;
 }
 _x2c_defer_env_16;
-static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
-static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
+static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
+static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26);
 typedef struct _x2c_defer_env_17{
   const void * _x2c_defer_capture_30;  const void * _x2c_defer_capture_31;
 }
 _x2c_defer_env_17;
-static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
+static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
 typedef struct _x2c_defer_env_18{
   const void * _x2c_defer_capture_32;
 }
 _x2c_defer_env_18;
-static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26);
-static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
+static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
+static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29);
 typedef struct _x2c_defer_env_19{
   const void * _x2c_defer_capture_33;  const void * _x2c_defer_capture_34;
 }
 _x2c_defer_env_19;
-static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
+static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30);
 typedef struct _x2c_defer_env_20{
   const void * _x2c_defer_capture_35;
 }
 _x2c_defer_env_20;
-static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29);
-static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30);
 static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31);
+static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32);
+static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33);
 typedef struct _x2c_defer_env_21{
   const void * _x2c_defer_capture_36;
 }
 _x2c_defer_env_21;
-static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32);
+static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34);
 typedef struct _x2c_defer_env_22{
   const void * _x2c_defer_capture_37;
 }
 _x2c_defer_env_22;
-static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33);
+static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35);
 typedef struct _x2c_defer_env_23{
   const void * _x2c_defer_capture_38;
 }
 _x2c_defer_env_23;
-static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34);
+static void _x2c_defer_cleanup_36(void * _x2c_defer_opaque_36);
 typedef struct _x2c_defer_env_24{
   const void * _x2c_defer_capture_39;
 }
 _x2c_defer_env_24;
-static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35);
+static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37);
 typedef struct _x2c_defer_env_25{
   const void * _x2c_defer_capture_40;
 }
 _x2c_defer_env_25;
-static void _x2c_defer_cleanup_36(void * _x2c_defer_opaque_36);
+static void _x2c_defer_cleanup_38(void * _x2c_defer_opaque_38);
 typedef struct _x2c_defer_env_26{
   const void * _x2c_defer_capture_41;
 }
 _x2c_defer_env_26;
-static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37);
+static void _x2c_defer_cleanup_39(void * _x2c_defer_opaque_39);
 typedef struct _x2c_defer_env_27{
   const void * _x2c_defer_capture_42;
 }
 _x2c_defer_env_27;
-static void _x2c_defer_cleanup_38(void * _x2c_defer_opaque_38);
+static void _x2c_defer_cleanup_40(void * _x2c_defer_opaque_40);
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  if(! x2c_register_builtin_descriptor(808259842, _x2c__x2c_protocol_methods_0)){
     x2c_register_descriptor(String_new("lambda"), _x2c__x2c_protocol_methods_0);
   }
-  _3 = String_new("Var_char");  _26 = String_new("Var_uchar");  _40 = String_new("Var_short");  _51 = String_new("Var_ushort");  _65 = String_new("Var_int");  _76 = String_new("Var_uint");  _89 = String_new("Var_long");  _100 = String_new("Var_ulong");  _112 = String_new("Var_long_long");  _124 = String_new("Var_ulong_long");  _137 = String_new("Var_float");  _149 = String_new("Var_floating");  _160 = String_new("Var_long_double");  _169 = Symbol_var(1218673800);  _170 = Symbol_var(54);  _171 = cons(_170, NULL);  _172 = cons(_169, _171);  _173 = Symbol_var(45156);  _174 = cons(_173, _171);  _175 = Symbol_var(35386204516);  _176 = Symbol_var(58);  _177 = Symbol_var(1941582);  _178 = cons(_177, NULL);  _179 = cons(_176, _178);  _180 = cons(_176, _179);  _181 = cons(_176, _180);  _182 = cons(_175, _181);  _183 = Symbol_var(1281450084);  _184 = Symbol_var(1958217960);  _185 = cons(_184, _178);  _186 = cons(_176, _185);  _187 = cons(_176, _186);  _188 = cons(_176, _187);  _189 = cons(_183, _188);  _190 = Symbol_var(62082698);  _191 = cons(_190, _171);  _192 = cons(_176, _191);  _193 = cons(_169, _192);  _194 = cons(_175, _171);  _195 = cons(_184, _171);  _196 = cons(_176, _195);  _197 = cons(_176, _196);  _198 = cons(_176, _197);  _199 = cons(_183, _198);  _200 = Symbol_var(37059850);  _201 = Symbol_var(437126);  _202 = String_new("Var");  _203 = String_var(_202);  _204 = cons(_203, NULL);  _205 = List_var(_204);  _206 = cons(_205, NULL);  _207 = List_var(_206);  _208 = cons(_207, NULL);  _209 = cons(_201, _208);  _210 = List_var(_209);  _211 = cons(_210, _204);  _212 = cons(_205, _206);  _213 = List_var(_212);  _214 = cons(_213, NULL);  _215 = cons(_201, _214);  _216 = List_var(_215);  _217 = cons(_216, _204);  _218 = String_new(".");  _219 = Symbol_var(46041901960);  _220 = Symbol_var(920394);  _221 = Symbol_var(61737802);  _222 = cons(_221, NULL);  _223 = cons(_220, _222);  _224 = List_var(_223);  _225 = cons(_224, NULL);  _226 = cons(_219, _225);  _227 = Symbol_var(4477439593778);  _228 = Symbol_var(396221456712);  _229 = Symbol_var(64167895867720);  _230 = cons(_229, NULL);  _231 = cons(_228, _230);  _232 = List_var(_231);  _233 = Symbol_var(74754136);  _234 = Symbol_var(62351779928);  _235 = cons(_234, NULL);  _236 = cons(_233, _235);  _237 = List_var(_236);  _238 = Symbol_var(46228810);  _239 = Symbol_var(1992385866);  _240 = cons(_239, NULL);  _241 = cons(_238, _240);  _242 = List_var(_241);  _243 = cons(_242, NULL);  _244 = cons(_237, _243);  _245 = cons(_232, _244);  _246 = cons(_227, _245);  _247 = Symbol_var(995692317464);  _248 = cons(_247, _243);  _249 = Symbol_var(4477479911782);  _250 = cons(_237, NULL);  _251 = cons(_249, _250);  _252 = Symbol_var(214157780846806);  _253 = Symbol_var(34096809266140);  _254 = Symbol_var(2074790390418396);  _255 = cons(_254, NULL);  _256 = cons(_253, _255);  _257 = List_var(_256);  _258 = Symbol_var(47666);  _259 = Symbol_var(1948210);  _260 = cons(_259, NULL);  _261 = cons(_258, _260);  _262 = List_var(_261);  _263 = cons(_262, NULL);  _264 = cons(_257, _263);  _265 = cons(_252, _264);  _266 = Symbol_var(1473096);  _267 = cons(_266, NULL);  _268 = List_var(_267);  _269 = cons(_268, NULL);  _270 = List_var(_269);  _271 = cons(_270, NULL);  _272 = cons(_201, _271);  _273 = List_var(_272);  _274 = cons(_273, _204);  _275 = String_new("// Generated by tools/gen-lisp-init.py; edit init-core.xlisp and init.x.\n\n(def nil ())\n(def true \'true)\n(def false nil)\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n(defun list (. values) values)\n(def equal? eq?)\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n(defun begin (. values) (_last values))\n(defun append (. lists) (_append_lists lists))\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n(defun string-append (. strings) (foldl _string-append \"\" strings))\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n(def add _add)\n(def len length)\n(def lower string-downcase)\n(def Var_cons cons)\n(def List_car car)\n(def List_cdr cdr)\n(def Var_car car)\n(def Var_cdr cdr)\n(def Var_binary _binary)\n(def lisp_pair pair?)\n(def init_match_native _match)\n(def lisp_list list?)\n(def lisp_symbol symbol?)\n(def lisp_eq eq?)\n(def init_type type)\n(def init_longer >)\n(def lisp_match_replace match-replace)\n(def lisp_substring substring)\n(def List_search_replace _search-replace)\n(def String_len string-length)\n(def Var_str str)\n(defun List_var (v) v)\n(defun filter (keep values)\n  (if (equal? values nil) values\n      ((lambda (value)\n         (if (equal? (keep value) nil)\n             (filter keep (List_cdr values))\n             (Var_cons value (filter keep (List_cdr values)))))\n       (List_car values))))\n(defun map (procedure values)\n  (if (equal? values nil) values\n      (Var_cons (procedure (List_car values))\n                (map procedure (List_cdr values)))))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n\n// Generated x2c algorithms.\n\n(def _last\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) (quote ()))\n   (true (cond ((eq? (List_cdr arg-1) (quote ())) (List_car arg-1))\n          (true (_last (List_cdr arg-1))))))))\n(def member\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) arg-2)\n   (true (cond ((eq? arg-1 (List_car arg-2)) arg-2)\n          (true (member arg-1 (List_cdr arg-2))))))))\n(def assoc\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) (quote ()))\n   (true ((lambda (hold-3)\n           (cond ((eq? (lisp_pair hold-3) (quote ()))\n                  (assoc arg-1 (List_cdr arg-2)))\n            (true (cond ((eq? arg-1 (Var_car hold-3)) hold-3)\n                   (true (assoc arg-1 (List_cdr arg-2)))))))\n          (List_car arg-2))))))\n(def _append2\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-1 (quote ())) arg-2)\n   (true (Var_cons (List_car arg-1) (_append2 (List_cdr arg-1) arg-2))))))\n(def _append_lists\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) (quote ()))\n   (true (cond ((eq? (List_cdr arg-1) (quote ())) (List_car arg-1))\n          (true (_append2 (List_car arg-1) (_append_lists (List_cdr arg-1)))))))))\n(def init_not\n (lambda (arg-1) (cond ((eq? arg-1 (quote ())) (quote true)) (true (quote ())))))\n(def init_null (lambda (arg-1) (init_not arg-1)))\n(def sub (lambda (arg-1 arg-2) (Var_binary arg-1 (quote -) arg-2)))\n(def mul (lambda (arg-1 arg-2) (Var_binary arg-1 (quote *) arg-2)))\n(def init_div (lambda (arg-1 arg-2) (Var_binary arg-1 (quote /) arg-2)))\n(def mod (lambda (arg-1 arg-2) (Var_binary arg-1 (quote %) arg-2)))\n(def caar (lambda (arg-1) (Var_car (Var_car arg-1))))\n(def cadr (lambda (arg-1) (List_car (Var_cdr arg-1))))\n(def cdar (lambda (arg-1) (Var_cdr (Var_car arg-1))))\n(def cddr (lambda (arg-1) (List_cdr (Var_cdr arg-1))))\n(def caaar (lambda (arg-1) (Var_car (Var_car (Var_car arg-1)))))\n(def caadr (lambda (arg-1) (Var_car (List_car (Var_cdr arg-1)))))\n(def cadar (lambda (arg-1) (List_car (Var_cdr (Var_car arg-1)))))\n(def caddr (lambda (arg-1) (List_car (List_cdr (Var_cdr arg-1)))))\n(def cdaar (lambda (arg-1) (Var_cdr (Var_car (Var_car arg-1)))))\n(def cdadr (lambda (arg-1) (Var_cdr (List_car (Var_cdr arg-1)))))\n(def cddar (lambda (arg-1) (List_cdr (Var_cdr (Var_car arg-1)))))\n(def cdddr (lambda (arg-1) (List_cdr (List_cdr (Var_cdr arg-1)))))\n(def init_match\n (lambda (arg-1 arg-2)\n  (cond ((eq? (lisp_list arg-1) (quote ())) (quote ()))\n   (true (init_match_native arg-1 arg-2)))))\n(def bound (lambda (arg-1 arg-2) (List_car (Var_cdr (assoc arg-2 arg-1)))))\n(def init_search_replace\n (lambda (arg-1 arg-2 arg-3)\n  (cond ((eq? (init_match arg-1 arg-2) (quote ()))\n         (List_search_replace arg-1 arg-2 arg-3))\n   (true (lisp_match_replace arg-1 arg-2 arg-3)))))\n(def init_binder\n (lambda (arg-1)\n  (cond ((eq? (lisp_symbol arg-1) (quote ()))\n         (cond ((eq? (lisp_eq (init_type arg-1) (quote lsym)) (quote ()))\n                (quote ()))\n          (true ((lambda (hold-2)\n                  ((lambda (hold-3)\n                    (cond ((eq? (member hold-3 (quote (\"?\" \"*\"))) (quote ()))\n                           (quote ()))\n                     (true (init_longer (String_len hold-2) 1))))\n                   (lisp_substring hold-2 0 1))) (Var_str arg-1)))))\n   (true ((lambda (hold-4)\n           ((lambda (hold-5)\n             (cond ((eq? (member hold-5 (quote (\"?\" \"*\"))) (quote ()))\n                    (quote ())) (true (init_longer (String_len hold-4) 1))))\n            (lisp_substring hold-4 0 1))) (Var_str arg-1))))))\n(def init_binder_parts\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) arg-1)\n   (true (_append2 (init_binders (Var_car arg-1))\n          (init_binder_parts (Var_cdr arg-1)))))))\n(def init_binders\n (lambda (arg-1)\n  (cond ((eq? (lisp_list arg-1) (quote ()))\n         (cond ((eq? (init_binder arg-1) (quote ())) (quote ()))\n          (true (Var_cons arg-1 (quote ()))))) (true (init_binder_parts arg-1)))))\n(def init_binder_lets\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) arg-2)\n   (true ((lambda (hold-3)\n           ((lambda (hold-4)\n             (Var_cons hold-4 (init_binder_lets arg-1 (List_cdr arg-2))))\n            (cons hold-3\n             (cons (List_var\n                    (cons (quote bound)\n                     (cons arg-1\n                      (cons (List_var\n                             (cons (quote quote) (cons hold-3 (quote ()))))\n                       (quote ()))))) (quote ()))))) (List_car arg-2))))))\n\n(def not init_not)\n(def null? init_null)\n(def div init_div)\n(def % mod)\n(def last _last)\n(def reduce foldl)\n(def match init_match)\n(def search-replace init_search_replace)\n(def binder? init_binder)\n(def _binders init_binders)\n(def _binder-lets init_binder_lets)\n");  _276 = String_new("=");  _277 = String_new("<");  _278 = String_new("<=");  _279 = String_new(">");  _280 = String_new(">=");  _281 = String_new("lisp_void");  _282 = String_new("lisp_truth");  _283 = String_new("Var_is_void");  _284 = String_new("lisp_cell");  _285 = String_new("lisp_source_function");  _286 = String_new("lisp_unwind");  _287 = String_new("List");  _288 = String_new("lisp_func_new");  _289 = String_new("Func");  _290 = String_new("lisp_func_arguments");  _291 = String_new("lisp_func_value");  _292 = String_new("FuncArg");  _293 = String_new("lisp_func_reference");  _294 = String_new("lisp_func_invalid");  _295 = String_new("x2c_func_reference_type");  _296 = String_new("x2c_func_reference_argument");  _297 = String_new("x2c_func_value_argument");  _298 = String_new("Symbol");  _299 = String_new("x2c_func_pointer_argument");  _300 = String_new("Func_apply");  _301 = String_new("Func_signature");  _302 = String_new("lisp_address");  _303 = String_new("lisp_box");  _304 = String_new("lisp_load");  _305 = String_new("lisp_store");  _306 = String_new("lisp_bytes");  _307 = String_new("lisp_array");  _308 = String_new("lisp_at");  _309 = String_new("lisp_copy");  _310 = String_new("lisp_zero");  _311 = String_new("lisp_record_result");  _312 = String_new("lisp_session_copy");  _313 = String_new("lisp_peek");  _314 = String_new("lisp_poke");  _315 = String_new("String_try_long_cell");  _316 = String_new("String");  _317 = String_new("String_try_double_cell");  _318 = String_new("String_try_next_cell");  _319 = String_new("String_try_next");  _320 = String_new("Split_try_next");  _321 = String_new("Split");  _322 = String_new("List_try_next");  _323 = String_new("Array_try_next");  _324 = String_new("Array");  _325 = String_new("Map_try_next");  _326 = String_new("Map");  _327 = String_new("List_try_match_cell");  _328 = String_new("List_try_match");  _329 = String_new("List_try_match_replace_cell");  _330 = String_new("List_try_match_replace");  _331 = String_new("List_try_search_cell");  _332 = String_new("List_try_search");  _333 = String_new("Map_try_get_cell");  _334 = String_new("Map_try_get");  _335 = String_new("Map_try_del_cell");  _336 = String_new("Map_try_del");  _337 = String_new("Symbol_try_new_cell");  _338 = String_new("Var_car");  _339 = String_new("Var_cdr");  _340 = String_new("Var_cons");  _341 = String_new("lisp_atom");  _342 = String_new("lisp_pair");  _343 = String_new("lisp_list");  _344 = String_new("lisp_eq");  _345 = String_new("lisp_type");  _346 = String_new("lisp_number");  _347 = String_new("lisp_string");  _348 = String_new("lisp_symbol");  _349 = String_new("lisp_procedure");  _350 = String_new("List_reverse");  _351 = String_new("List_len");  _352 = String_new("List_match");  _353 = String_new("lisp_match_replace");  _354 = String_new("List_search");  _355 = String_new("List_search_replace");  _356 = String_new("lisp_add");  _357 = String_new("Var_binary");  _358 = String_new("lisp_compare");  _359 = String_new("lisp_plus");  _360 = String_new("lisp_minus");  _361 = String_new("lisp_times");  _362 = String_new("lisp_divide");  _363 = String_new("lisp_eq_chain");  _364 = String_new("lisp_lt_chain");  _365 = String_new("lisp_le_chain");  _366 = String_new("lisp_gt_chain");  _367 = String_new("lisp_ge_chain");  _368 = String_new("lisp_str");  _369 = String_new("lisp_repr");  _370 = String_new("String_len");  _371 = String_new("String_format");  _372 = String_new("lisp_string_append");  _373 = String_new("lisp_substring");  _374 = String_new("lisp_string_downcase");  _375 = String_new("lisp_read_file");  _376 = String_new("lisp_write_file");  _377 = String_new("List_sort");  _378 = String_new("List_map");  _379 = String_new("List_filter");  _380 = String_new("List_any");  _381 = String_new("List_all");  _382 = String_new("List_map2");  _383 = String_new("List_sort_by");  _384 = String_new("List_sort_with");  _385 = String_new("List_zip_with");  _386 = String_new("List_foldl");  _387 = String_new("List_find");  _388 = String_new("Array_map");  _389 = String_new("Array_map2");  _390 = String_new("Array_sort_by");  _391 = String_new("Array_sort_with");  _392 = String_new("Array_foldl");  _393 = String_new("String_map");  _394 = String_new("String_filter");  _395 = String_new("Iter_init");  _396 = String_new("Iter");  _397 = String_new("Iter_map_into");  _398 = String_new("Iter_filter_into");  _399 = String_new("Iter_zip_with_into");  _400 = String_new("Iter_map2_into");  _401 = String_new("Iter_scan_into");  _402 = String_new("Iter_any");  _403 = String_new("Iter_all");  _404 = String_new("Iter_foldl");  _405 = String_new("Iter_find");  _406 = String_new("Iter_try_next");  _407 = String_new("Lisp_List_filter");  _408 = String_new("Lisp_List_any");  _409 = String_new("Lisp_List_all");  _410 = String_new("Lisp_List_find");  _411 = String_new("Lisp_String_filter");  _412 = String_new("Lisp_Iter_filter");  _413 = String_new("Lisp_Iter_any");  _414 = String_new("Lisp_Iter_all");  _415 = String_new("Lisp_Iter_find");  _416 = String_new("Array_truth");  _417 = String_new("String_truth");  _418 = String_new("Array_capacity");  _419 = String_new("Array_clear");  _420 = String_new("Array_pop");  _421 = String_new("Array_truncate");  _422 = String_new("Var_list");  _423 = String_new("Var_array");  _424 = String_new("Var_map");  _425 = String_new("Var_string");  _426 = String_new("Var_symbol");  _427 = String_new("Var_hash");  _428 = String_new("Var_is_integer");  _429 = String_new("Var_is_wide");  _430 = String_new("List_truth");  _431 = String_new("List_listchar");  _432 = String_new("List_listshort");  _433 = String_new("List_listint");  _434 = String_new("List_listfloat");  _435 = String_new("List_listdbl");  _436 = String_new("List_liststring");  _437 = String_new("List_listsymbol");  _438 = String_new("List_cdddr");  _439 = String_new("List_cddddr");  _440 = String_new("Var_listchar");  _441 = String_new("Var_listshort");  _442 = String_new("Var_listint");  _443 = String_new("Var_listfloat");  _444 = String_new("Var_listdbl");  _445 = String_new("Var_liststring");  _446 = String_new("Var_listsymbol");  _447 = String_new("Var_cdddr");  _448 = String_new("Var_cddddr");  _449 = String_new("Var_json");  _450 = String_new("Var_pretty_json");  _451 = String_new("String_sha256");  _452 = String_new("_lisp_string_new_len");  _453 = String_new("_lisp_symbol_new_len");  _454 = String_new("_lisp_symbol_parse");  _455 = String_new("List_getindex");  _456 = String_new("List_last");  _457 = String_new("List_contains");  _458 = String_new("List_get");  _459 = String_new("List_assoc");  _460 = String_new("List_array");  _461 = String_new("Array_new");  _462 = String_new("Array_len");  _463 = String_new("Array_push");  _464 = String_new("Array_getindex");  _465 = String_new("Array_setindex");  _466 = String_new("Array_take_last");  _467 = String_new("Array_shift");  _468 = String_new("Array_insert");  _469 = String_new("Array_remove");  _470 = String_new("Array_list");  _471 = String_new("Map_new");  _472 = String_new("Map_get");  _473 = String_new("Map_getindex");  _474 = String_new("Map_setindex");  _475 = String_new("Map_del");  _476 = String_new("lisp_string_lstrip");  _477 = String_new("lisp_string_rstrip");  _478 = String_new("String_getindex");  _479 = String_new("String_add");  _480 = String_new("lisp_string_strip");  _481 = String_new("Var_is");  _482 = String_new("Symbol_str");  _483 = String_new("AdNode_var");  _484 = String_new("AdNode");  _485 = String_new("Array_cleanup");  _486 = String_new("Array_compare");  _487 = String_new("Array_concat");  _488 = String_new("Array_contains");  _489 = String_new("Array_copy");  _490 = String_new("Array_count");  _491 = String_new("Array_equal");  _492 = String_new("Array_find");  _493 = String_new("Array_free");  _494 = String_new("Array_getslice");  _495 = String_new("Array_heap_pop");  _496 = String_new("Array_heap_push");  _497 = String_new("Array_heapify");  _498 = String_new("Array_indexof");  _499 = String_new("Array_iter_into");  _500 = String_new("Array_join");  _501 = String_new("Array_postfixindex");  _502 = String_new("Array_remslice");  _503 = String_new("Array_resize");  _504 = String_new("Array_reverse");  _505 = String_new("Array_setslice");  _506 = String_new("Array_sort");  _507 = String_new("Array_splice");  _508 = String_new("Array_unshift");  _509 = String_new("Array_updateindex");  _510 = String_new("Context_cleanup");  _511 = String_new("Context");  _512 = String_new("Context_close");  _513 = String_new("Context_current");  _514 = String_new("Context_export");  _515 = String_new("Context_open");  _516 = String_new("Iter_accumulate_into");  _517 = String_new("Iter_array");  _518 = String_new("Iter_chain_into");  _519 = String_new("Iter_count");  _520 = String_new("Iter_enumerate_into");  _521 = String_new("Iter_head_into");  _522 = String_new("Iter_list");  _523 = String_new("Iter_max");  _524 = String_new("Iter_min");  _525 = String_new("Iter_new");  _526 = String_new("Iter_next");  _527 = String_new("Iter_product");  _528 = String_new("Iter_repeat_into");  _529 = String_new("Iter_sum");  _530 = String_new("Iter_unique_into");  _531 = String_new("Iter_zip_into");  _532 = String_new("List_compare");  _533 = String_new("List_flatten");  _534 = String_new("List_flatten_all");  _535 = String_new("List_getslice");  _536 = String_new("List_hash");  _537 = String_new("List_head");  _538 = String_new("List_index");  _539 = String_new("List_iter_into");  _540 = String_new("List_match_replace");  _541 = String_new("List_nth_cdr");  _542 = String_new("List_promote");  _543 = String_new("List_replace");  _544 = String_new("List_sublis");  _545 = String_new("List_subseq");  _546 = String_new("List_tail");  _547 = String_new("List_unique");  _548 = String_new("Map_cleanup");  _549 = String_new("Map_compare");  _550 = String_new("Map_contains");  _551 = String_new("Map_copy");  _552 = String_new("Map_enumerate_into");  _553 = String_new("Map_equal");  _554 = String_new("Map_get_hashed");  _555 = String_new("Map_getdefault");  _556 = String_new("Map_iter_into");  _557 = String_new("Map_keys_into");  _558 = String_new("Map_len");  _559 = String_new("Map_list");  _560 = String_new("Map_merge");  _561 = String_new("Map_new_capacity");  _562 = String_new("Map_postfixindex");  _563 = String_new("Map_set");  _564 = String_new("Map_setdefault");  _565 = String_new("Map_truth");  _566 = String_new("Map_updateindex");  _567 = String_new("Scope_calloc");  _568 = String_new("Scope_cleanup");  _569 = String_new("Scope");  _570 = String_new("Scope_destroy");  _571 = String_new("Scope_free");  _572 = String_new("Scope_malloc");  _573 = String_new("Scope_memdup");  _574 = String_new("Scope_move");  _575 = String_new("Scope_new");  _576 = String_new("Scope_new_named");  _577 = String_new("Scope_pop");  _578 = String_new("Scope_push");  _579 = String_new("Scope_realloc");  _580 = String_new("Scope_release");  _581 = String_new("Scope_retain");  _582 = String_new("Split_iter_into");  _583 = String_new("String_capitalize");  _584 = String_new("String_compare");  _585 = String_new("String_contains");  _586 = String_new("String_contains_digit");  _587 = String_new("String_count");  _588 = String_new("String_dedent");  _589 = String_new("String_endswith");  _590 = String_new("String_escape");  _591 = String_new("String_find");  _592 = String_new("String_find_all");  _593 = String_new("String_find_within");  _594 = String_new("String_free");  _595 = String_new("String_getslice");  _596 = String_new("String_hash");  _597 = String_new("String_intern");  _598 = String_new("String_is_alnum");  _599 = String_new("String_is_alnum_under");  _600 = String_new("String_is_alpha");  _601 = String_new("String_is_alpha_under");  _602 = String_new("String_is_digit");  _603 = String_new("String_is_identifier");  _604 = String_new("String_is_lower");  _605 = String_new("String_is_lower_under");  _606 = String_new("String_is_space");  _607 = String_new("String_is_upper");  _608 = String_new("String_is_upper_under");  _609 = String_new("String_iter_into");  _610 = String_new("String_join");  _611 = String_new("String_keep");  _612 = String_new("String_lines");  _613 = String_new("String_lower");  _614 = String_new("String_new_fill");  _615 = String_new("String_pad_center");  _616 = String_new("String_pad_left");  _617 = String_new("String_pad_right");  _618 = String_new("String_parse");  _619 = String_new("String_parse_char");  _620 = String_new("String_partition");  _621 = String_new("String_reject");  _622 = String_new("String_remove_prefix");  _623 = String_new("String_remove_suffix");  _624 = String_new("String_repeat");  _625 = String_new("String_replace");  _626 = String_new("String_replace_n");  _627 = String_new("String_rfind");  _628 = String_new("String_rpartition");  _629 = String_new("String_split");  _630 = String_new("String_split_lines");  _631 = String_new("String_split_n");  _632 = String_new("String_splits");  _633 = String_new("String_squeeze");  _634 = String_new("String_startswith");  _635 = String_new("String_symbol");  _636 = String_new("String_try_double");  _637 = String_new("String_try_long");  _638 = String_new("String_unescape");  _639 = String_new("String_upper");  _640 = String_new("String_withindex");  _641 = String_new("String_words");  _642 = String_new("Symbol_compare");  _643 = String_new("Symbol_first");  _644 = String_new("Symbol_last");  _645 = String_new("Symbol_len");  _646 = String_new("Symbol_try_new");  _647 = String_new("Var_add");  _648 = String_new("Var_adnode");  _649 = String_new("Var_as_iter");  _650 = String_new("Var_clone_wide");  _651 = String_new("Var_compare");  _652 = String_new("Var_contains");  _653 = String_new("Var_convert");  _654 = String_new("Var_div");  _655 = String_new("Var_double");  _656 = String_new("Var_fallback_iter_into");  _657 = String_new("Var_file");  _658 = String_new("File");  _659 = String_new("Var_getindex");  _660 = String_new("Var_integer");  _661 = String_new("Var_is_atom");  _662 = String_new("Var_is_atom_binder");  _663 = String_new("Var_is_binder");  _664 = String_new("Var_is_floating");  _665 = String_new("Var_is_list_binder");  _666 = String_new("Var_is_match_op");  _667 = String_new("Var_is_nil");  _668 = String_new("Var_is_null");  _669 = String_new("Var_is_object");  _670 = String_new("Var_is_pointer");  _671 = String_new("Var_is_reference");  _672 = String_new("Var_iter_into");  _673 = String_new("Var_kind");  _674 = String_new("Var_long_double_value");  _675 = String_new("Var_long_long_value");  _676 = String_new("Var_long_value");  _677 = String_new("Var_mod");  _678 = String_new("Var_mul");  _679 = String_new("Var_neg");  _680 = String_new("Var_null");  _681 = String_new("Var_parse");  _682 = String_new("Var_postfixindex");  _683 = String_new("Var_same");  _684 = String_new("Var_setindex");  _685 = String_new("Var_sub");  _686 = String_new("Var_tag");  _687 = String_new("Var_truth");  _688 = String_new("Var_ulong_long_value");  _689 = String_new("Var_ulong_value");  _690 = String_new("Var_unsigned");  _691 = String_new("Var_updateindex");  _692 = String_new("abs");  _693 = String_new("acos");  _694 = String_new("acosf");  _695 = String_new("acosh");  _696 = String_new("acoshf");  _697 = String_new("asin");  _698 = String_new("asinf");  _699 = String_new("asinh");  _700 = String_new("asinhf");  _701 = String_new("atan");  _702 = String_new("atan2");  _703 = String_new("atan2f");  _704 = String_new("atanf");  _705 = String_new("atanh");  _706 = String_new("atanhf");  _707 = String_new("atof");  _708 = String_new("atoi");  _709 = String_new("atol");  _710 = String_new("atoll");  _711 = String_new("cbrt");  _712 = String_new("cbrtf");  _713 = String_new("ceil");  _714 = String_new("ceilf");  _715 = String_new("copysign");  _716 = String_new("copysignf");  _717 = String_new("cos");  _718 = String_new("cosf");  _719 = String_new("cosh");  _720 = String_new("coshf");  _721 = String_new("erf");  _722 = String_new("erfc");  _723 = String_new("erfcf");  _724 = String_new("erff");  _725 = String_new("exp");  _726 = String_new("exp2");  _727 = String_new("exp2f");  _728 = String_new("expf");  _729 = String_new("expm1");  _730 = String_new("expm1f");  _731 = String_new("fabs");  _732 = String_new("fabsf");  _733 = String_new("fdim");  _734 = String_new("fdimf");  _735 = String_new("floor");  _736 = String_new("floorf");  _737 = String_new("fma");  _738 = String_new("fmaf");  _739 = String_new("fmax");  _740 = String_new("fmaxf");  _741 = String_new("fmin");  _742 = String_new("fminf");  _743 = String_new("fmod");  _744 = String_new("fmodf");  _745 = String_new("frexp");  _746 = String_new("frexpf");  _747 = String_new("hypot");  _748 = String_new("hypotf");  _749 = String_new("ilogb");  _750 = String_new("ilogbf");  _751 = String_new("labs");  _752 = String_new("ldexp");  _753 = String_new("ldexpf");  _754 = String_new("lgamma");  _755 = String_new("lgammaf");  _756 = String_new("llabs");  _757 = String_new("llrint");  _758 = String_new("llrintf");  _759 = String_new("llround");  _760 = String_new("llroundf");  _761 = String_new("log");  _762 = String_new("log10");  _763 = String_new("log10f");  _764 = String_new("log1p");  _765 = String_new("log1pf");  _766 = String_new("log2");  _767 = String_new("log2f");  _768 = String_new("logb");  _769 = String_new("logbf");  _770 = String_new("logf");  _771 = String_new("lrint");  _772 = String_new("lrintf");  _773 = String_new("lround");  _774 = String_new("lroundf");  _775 = String_new("modf");  _776 = String_new("modff");  _777 = String_new("nan");  _778 = String_new("nanf");  _779 = String_new("nearbyint");  _780 = String_new("nearbyintf");  _781 = String_new("nextafter");  _782 = String_new("nextafterf");  _783 = String_new("nexttoward");  _784 = String_new("nexttowardf");  _785 = String_new("pow");  _786 = String_new("powf");  _787 = String_new("range_into");  _788 = String_new("remainder");  _789 = String_new("remainderf");  _790 = String_new("remquo");  _791 = String_new("remquof");  _792 = String_new("rint");  _793 = String_new("rintf");  _794 = String_new("round");  _795 = String_new("roundf");  _796 = String_new("scalbln");  _797 = String_new("scalblnf");  _798 = String_new("scalbn");  _799 = String_new("scalbnf");  _800 = String_new("sin");  _801 = String_new("sinf");  _802 = String_new("sinh");  _803 = String_new("sinhf");  _804 = String_new("sqrt");  _805 = String_new("sqrtf");  _806 = String_new("strcmp");  _807 = String_new("strncmp");  _808 = String_new("tan");  _809 = String_new("tanf");  _810 = String_new("tanh");  _811 = String_new("tanhf");  _812 = String_new("tgamma");  _813 = String_new("tgammaf");  _814 = String_new("trunc");  _815 = String_new("truncf");  _816 = String_new("x2c.");  _817 = String_new("_x2c.import-hook");  _818 = String_new("Lisp.eval");  _819 = String_new("Lisp.apply");  _820 = String_new("Lisp.eval_string");  _x2c_static_initialize_0();  _x2c_static_initialize_1();  _x2c_static_initialize_2();  _x2c_static_initialize_3();  _x2c_static_initialize_4();  _x2c_static_initialize_5();  _x2c_static_initialize_6();  _x2c_static_initialize_7();  _x2c_static_initialize_8();  _x2c_static_initialize_9();  _x2c_static_initialize_10();  _x2c_static_initialize_11();  _x2c_static_initialize_12();  _x2c_static_initialize_13();  _x2c_static_initialize_14();  _x2c_static_initialize_15();  _x2c_static_initialize_16();  _x2c_static_initialize_17();
+  _3 = String_new("Var_char");  _26 = String_new("Var_uchar");  _40 = String_new("Var_short");  _51 = String_new("Var_ushort");  _65 = String_new("Var_int");  _76 = String_new("Var_uint");  _89 = String_new("Var_long");  _100 = String_new("Var_ulong");  _112 = String_new("Var_long_long");  _124 = String_new("Var_ulong_long");  _137 = String_new("Var_float");  _149 = String_new("Var_floating");  _160 = String_new("Var_long_double");  _169 = Symbol_var(1218673800);  _170 = Symbol_var(54);  _171 = cons(_170, NULL);  _172 = cons(_169, _171);  _173 = Symbol_var(45156);  _174 = cons(_173, _171);  _175 = Symbol_var(35386204516);  _176 = Symbol_var(58);  _177 = Symbol_var(1941582);  _178 = cons(_177, NULL);  _179 = cons(_176, _178);  _180 = cons(_176, _179);  _181 = cons(_176, _180);  _182 = cons(_175, _181);  _183 = Symbol_var(1281450084);  _184 = Symbol_var(1958217960);  _185 = cons(_184, _178);  _186 = cons(_176, _185);  _187 = cons(_176, _186);  _188 = cons(_176, _187);  _189 = cons(_183, _188);  _190 = Symbol_var(62082698);  _191 = cons(_190, _171);  _192 = cons(_176, _191);  _193 = cons(_169, _192);  _194 = cons(_175, _171);  _195 = cons(_184, _171);  _196 = cons(_176, _195);  _197 = cons(_176, _196);  _198 = cons(_176, _197);  _199 = cons(_183, _198);  _200 = Symbol_var(37059850);  _201 = Symbol_var(437126);  _202 = String_new("Var");  _203 = String_var(_202);  _204 = cons(_203, NULL);  _205 = List_var(_204);  _206 = cons(_205, NULL);  _207 = List_var(_206);  _208 = cons(_207, NULL);  _209 = cons(_201, _208);  _210 = List_var(_209);  _211 = cons(_210, _204);  _212 = cons(_205, _206);  _213 = List_var(_212);  _214 = cons(_213, NULL);  _215 = cons(_201, _214);  _216 = List_var(_215);  _217 = cons(_216, _204);  _218 = String_new(".");  _219 = Symbol_var(46041901960);  _220 = Symbol_var(920394);  _221 = Symbol_var(61737802);  _222 = cons(_221, NULL);  _223 = cons(_220, _222);  _224 = List_var(_223);  _225 = cons(_224, NULL);  _226 = cons(_219, _225);  _227 = Symbol_var(4477439593778);  _228 = Symbol_var(396221456712);  _229 = Symbol_var(64167895867720);  _230 = cons(_229, NULL);  _231 = cons(_228, _230);  _232 = List_var(_231);  _233 = Symbol_var(74754136);  _234 = Symbol_var(62351779928);  _235 = cons(_234, NULL);  _236 = cons(_233, _235);  _237 = List_var(_236);  _238 = Symbol_var(46228810);  _239 = Symbol_var(1992385866);  _240 = cons(_239, NULL);  _241 = cons(_238, _240);  _242 = List_var(_241);  _243 = cons(_242, NULL);  _244 = cons(_237, _243);  _245 = cons(_232, _244);  _246 = cons(_227, _245);  _247 = Symbol_var(995692317464);  _248 = cons(_247, _243);  _249 = Symbol_var(4477479911782);  _250 = cons(_237, NULL);  _251 = cons(_249, _250);  _252 = Symbol_var(214157780846806);  _253 = Symbol_var(34096809266140);  _254 = Symbol_var(2074790390418396);  _255 = cons(_254, NULL);  _256 = cons(_253, _255);  _257 = List_var(_256);  _258 = Symbol_var(47666);  _259 = Symbol_var(1948210);  _260 = cons(_259, NULL);  _261 = cons(_258, _260);  _262 = List_var(_261);  _263 = cons(_262, NULL);  _264 = cons(_257, _263);  _265 = cons(_252, _264);  _266 = Symbol_var(1473096);  _267 = cons(_266, NULL);  _268 = List_var(_267);  _269 = cons(_268, NULL);  _270 = List_var(_269);  _271 = cons(_270, NULL);  _272 = cons(_201, _271);  _273 = List_var(_272);  _274 = cons(_273, _204);  _275 = String_new("// Generated by tools/gen-lisp-init.py; edit init-core.xlisp and init.x.\n\n(def nil ())\n(def true \'true)\n(def false nil)\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n(defun list (. values) values)\n(def equal? eq?)\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n(defun begin (. values) (_last values))\n(defun append (. lists) (_append_lists lists))\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n(defun string-append (. strings) (foldl _string-append \"\" strings))\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n(def add _add)\n(def len length)\n(def lower string-downcase)\n(def Var_cons cons)\n(def List_car car)\n(def List_cdr cdr)\n(def Var_car car)\n(def Var_cdr cdr)\n(def Var_binary _binary)\n(def lisp_pair pair?)\n(def init_match_native _match)\n(def lisp_list list?)\n(def lisp_symbol symbol?)\n(def lisp_eq eq?)\n(def init_type type)\n(def init_longer >)\n(def lisp_match_replace match-replace)\n(def lisp_substring substring)\n(def List_search_replace _search-replace)\n(def String_len string-length)\n(def Var_str str)\n(defun List_var (v) v)\n(defun filter (keep values)\n  (if (equal? values nil) values\n      ((lambda (value)\n         (if (equal? (keep value) nil)\n             (filter keep (List_cdr values))\n             (Var_cons value (filter keep (List_cdr values)))))\n       (List_car values))))\n(defun map (procedure values)\n  (if (equal? values nil) values\n      (Var_cons (procedure (List_car values))\n                (map procedure (List_cdr values)))))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n\n// Generated x2c algorithms.\n\n(def _last\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) (quote ()))\n   (true (cond ((eq? (List_cdr arg-1) (quote ())) (List_car arg-1))\n          (true (_last (List_cdr arg-1))))))))\n(def member\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) arg-2)\n   (true (cond ((eq? arg-1 (List_car arg-2)) arg-2)\n          (true (member arg-1 (List_cdr arg-2))))))))\n(def assoc\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) (quote ()))\n   (true ((lambda (hold-3)\n           (cond ((eq? (lisp_pair hold-3) (quote ()))\n                  (assoc arg-1 (List_cdr arg-2)))\n            (true (cond ((eq? arg-1 (Var_car hold-3)) hold-3)\n                   (true (assoc arg-1 (List_cdr arg-2)))))))\n          (List_car arg-2))))))\n(def _append2\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-1 (quote ())) arg-2)\n   (true (Var_cons (List_car arg-1) (_append2 (List_cdr arg-1) arg-2))))))\n(def _append_lists\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) (quote ()))\n   (true (cond ((eq? (List_cdr arg-1) (quote ())) (List_car arg-1))\n          (true (_append2 (List_car arg-1) (_append_lists (List_cdr arg-1)))))))))\n(def init_not\n (lambda (arg-1) (cond ((eq? arg-1 (quote ())) (quote true)) (true (quote ())))))\n(def init_null (lambda (arg-1) (init_not arg-1)))\n(def sub (lambda (arg-1 arg-2) (Var_binary arg-1 (quote -) arg-2)))\n(def mul (lambda (arg-1 arg-2) (Var_binary arg-1 (quote *) arg-2)))\n(def init_div (lambda (arg-1 arg-2) (Var_binary arg-1 (quote /) arg-2)))\n(def mod (lambda (arg-1 arg-2) (Var_binary arg-1 (quote %) arg-2)))\n(def caar (lambda (arg-1) (Var_car (Var_car arg-1))))\n(def cadr (lambda (arg-1) (List_car (Var_cdr arg-1))))\n(def cdar (lambda (arg-1) (Var_cdr (Var_car arg-1))))\n(def cddr (lambda (arg-1) (List_cdr (Var_cdr arg-1))))\n(def caaar (lambda (arg-1) (Var_car (Var_car (Var_car arg-1)))))\n(def caadr (lambda (arg-1) (Var_car (List_car (Var_cdr arg-1)))))\n(def cadar (lambda (arg-1) (List_car (Var_cdr (Var_car arg-1)))))\n(def caddr (lambda (arg-1) (List_car (List_cdr (Var_cdr arg-1)))))\n(def cdaar (lambda (arg-1) (Var_cdr (Var_car (Var_car arg-1)))))\n(def cdadr (lambda (arg-1) (Var_cdr (List_car (Var_cdr arg-1)))))\n(def cddar (lambda (arg-1) (List_cdr (Var_cdr (Var_car arg-1)))))\n(def cdddr (lambda (arg-1) (List_cdr (List_cdr (Var_cdr arg-1)))))\n(def init_match\n (lambda (arg-1 arg-2)\n  (cond ((eq? (lisp_list arg-1) (quote ())) (quote ()))\n   (true (init_match_native arg-1 arg-2)))))\n(def bound (lambda (arg-1 arg-2) (List_car (Var_cdr (assoc arg-2 arg-1)))))\n(def init_search_replace\n (lambda (arg-1 arg-2 arg-3)\n  (cond ((eq? (init_match arg-1 arg-2) (quote ()))\n         (List_search_replace arg-1 arg-2 arg-3))\n   (true (lisp_match_replace arg-1 arg-2 arg-3)))))\n(def init_binder\n (lambda (arg-1)\n  (cond ((eq? (lisp_symbol arg-1) (quote ()))\n         (cond ((eq? (lisp_eq (init_type arg-1) (quote lsym)) (quote ()))\n                (quote ()))\n          (true ((lambda (hold-2)\n                  ((lambda (hold-3)\n                    (cond ((eq? (member hold-3 (quote (\"?\" \"*\"))) (quote ()))\n                           (quote ()))\n                     (true (init_longer (String_len hold-2) 1))))\n                   (lisp_substring hold-2 0 1))) (Var_str arg-1)))))\n   (true ((lambda (hold-4)\n           ((lambda (hold-5)\n             (cond ((eq? (member hold-5 (quote (\"?\" \"*\"))) (quote ()))\n                    (quote ())) (true (init_longer (String_len hold-4) 1))))\n            (lisp_substring hold-4 0 1))) (Var_str arg-1))))))\n(def init_binder_parts\n (lambda (arg-1)\n  (cond ((eq? arg-1 (quote ())) arg-1)\n   (true (_append2 (init_binders (Var_car arg-1))\n          (init_binder_parts (Var_cdr arg-1)))))))\n(def init_binders\n (lambda (arg-1)\n  (cond ((eq? (lisp_list arg-1) (quote ()))\n         (cond ((eq? (init_binder arg-1) (quote ())) (quote ()))\n          (true (Var_cons arg-1 (quote ()))))) (true (init_binder_parts arg-1)))))\n(def init_binder_lets\n (lambda (arg-1 arg-2)\n  (cond ((eq? arg-2 (quote ())) arg-2)\n   (true ((lambda (hold-3)\n           ((lambda (hold-4)\n             (Var_cons hold-4 (init_binder_lets arg-1 (List_cdr arg-2))))\n            (cons hold-3\n             (cons (List_var\n                    (cons (quote bound)\n                     (cons arg-1\n                      (cons (List_var\n                             (cons (quote quote) (cons hold-3 (quote ()))))\n                       (quote ()))))) (quote ()))))) (List_car arg-2))))))\n\n(def not init_not)\n(def null? init_null)\n(def div init_div)\n(def % mod)\n(def last _last)\n(def reduce foldl)\n(def match init_match)\n(def search-replace init_search_replace)\n(def binder? init_binder)\n(def _binders init_binders)\n(def _binder-lets init_binder_lets)\n");  _276 = String_new("=");  _277 = String_new("<");  _278 = String_new("<=");  _279 = String_new(">");  _280 = String_new(">=");  _281 = String_new("lisp_void");  _282 = String_new("lisp_truth");  _283 = String_new("Var_is_void");  _284 = String_new("lisp_cell");  _285 = String_new("lisp_source_function");  _286 = String_new("lisp_unwind");  _287 = String_new("List");  _288 = String_new("lisp_func_new");  _289 = String_new("Func");  _290 = String_new("lisp_func_arguments");  _291 = String_new("lisp_func_value");  _292 = String_new("FuncArg");  _293 = String_new("lisp_func_reference");  _294 = String_new("lisp_func_invalid");  _295 = String_new("x2c_func_reference_type");  _296 = String_new("x2c_func_reference_argument");  _297 = String_new("x2c_func_value_argument");  _298 = String_new("Symbol");  _299 = String_new("x2c_func_pointer_argument");  _300 = String_new("Func_apply");  _301 = String_new("Func_signature");  _302 = String_new("lisp_address");  _303 = String_new("lisp_box");  _304 = String_new("lisp_load");  _305 = String_new("lisp_store");  _306 = String_new("lisp_bytes");  _307 = String_new("lisp_array");  _308 = String_new("lisp_at");  _309 = String_new("lisp_copy");  _310 = String_new("lisp_zero");  _311 = String_new("lisp_record_result");  _312 = String_new("lisp_session_copy");  _313 = String_new("lisp_peek");  _314 = String_new("lisp_poke");  _315 = String_new("String_try_long_cell");  _316 = String_new("String");  _317 = String_new("String_try_double_cell");  _318 = String_new("String_try_next_cell");  _319 = String_new("String_try_next");  _320 = String_new("Split_try_next");  _321 = String_new("Split");  _322 = String_new("List_try_next");  _323 = String_new("Array_try_next");  _324 = String_new("Array");  _325 = String_new("Map_try_next");  _326 = String_new("Map");  _327 = String_new("List_try_match_cell");  _328 = String_new("List_try_match");  _329 = String_new("List_try_match_replace_cell");  _330 = String_new("List_try_match_replace");  _331 = String_new("List_try_search_cell");  _332 = String_new("List_try_search");  _333 = String_new("Map_try_get_cell");  _334 = String_new("Map_try_get");  _335 = String_new("Map_try_del_cell");  _336 = String_new("Map_try_del");  _337 = String_new("Symbol_try_new_cell");  _338 = String_new("Var_car");  _339 = String_new("Var_cdr");  _340 = String_new("Var_cons");  _341 = String_new("lisp_atom");  _342 = String_new("lisp_pair");  _343 = String_new("lisp_list");  _344 = String_new("lisp_eq");  _345 = String_new("lisp_type");  _346 = String_new("lisp_number");  _347 = String_new("lisp_string");  _348 = String_new("lisp_symbol");  _349 = String_new("lisp_procedure");  _350 = String_new("List_reverse");  _351 = String_new("List_len");  _352 = String_new("List_match");  _353 = String_new("lisp_match_replace");  _354 = String_new("List_search");  _355 = String_new("List_search_replace");  _356 = String_new("lisp_add");  _357 = String_new("Var_binary");  _358 = String_new("lisp_compare");  _359 = String_new("lisp_plus");  _360 = String_new("lisp_minus");  _361 = String_new("lisp_times");  _362 = String_new("lisp_divide");  _363 = String_new("lisp_eq_chain");  _364 = String_new("lisp_lt_chain");  _365 = String_new("lisp_le_chain");  _366 = String_new("lisp_gt_chain");  _367 = String_new("lisp_ge_chain");  _368 = String_new("lisp_str");  _369 = String_new("lisp_repr");  _370 = String_new("String_len");  _371 = String_new("String_format");  _372 = String_new("lisp_string_append");  _373 = String_new("lisp_substring");  _374 = String_new("lisp_string_downcase");  _375 = String_new("lisp_read_file");  _376 = String_new("lisp_write_file");  _377 = String_new("List_sort");  _378 = String_new("List_map");  _379 = String_new("List_filter");  _380 = String_new("List_any");  _381 = String_new("List_all");  _382 = String_new("List_map2");  _383 = String_new("List_sort_by");  _384 = String_new("List_sort_with");  _385 = String_new("List_zip_with");  _386 = String_new("List_foldl");  _387 = String_new("List_find");  _388 = String_new("Array_map");  _389 = String_new("Array_map2");  _390 = String_new("Array_sort_by");  _391 = String_new("Array_sort_with");  _392 = String_new("Array_foldl");  _393 = String_new("String_map");  _394 = String_new("String_filter");  _395 = String_new("Iter_init");  _396 = String_new("Iter");  _397 = String_new("Iter_map_into");  _398 = String_new("Iter_filter_into");  _399 = String_new("Iter_zip_with_into");  _400 = String_new("Iter_map2_into");  _401 = String_new("Iter_scan_into");  _402 = String_new("Iter_any");  _403 = String_new("Iter_all");  _404 = String_new("Iter_foldl");  _405 = String_new("Iter_find");  _406 = String_new("Iter_try_next");  _407 = String_new("Lisp_List_filter");  _408 = String_new("Lisp_List_any");  _409 = String_new("Lisp_List_all");  _410 = String_new("Lisp_List_find");  _411 = String_new("Lisp_String_filter");  _412 = String_new("Lisp_Iter_filter");  _413 = String_new("Lisp_Iter_any");  _414 = String_new("Lisp_Iter_all");  _415 = String_new("Lisp_Iter_find");  _416 = String_new("Array_truth");  _417 = String_new("String_truth");  _418 = String_new("Array_capacity");  _419 = String_new("Array_clear");  _420 = String_new("Array_pop");  _421 = String_new("Array_truncate");  _422 = String_new("Var_list");  _423 = String_new("Var_array");  _424 = String_new("Var_map");  _425 = String_new("Var_string");  _426 = String_new("Var_symbol");  _427 = String_new("Var_hash");  _428 = String_new("Var_is_integer");  _429 = String_new("Var_is_wide");  _430 = String_new("List_truth");  _431 = String_new("List_listchar");  _432 = String_new("List_listshort");  _433 = String_new("List_listint");  _434 = String_new("List_listfloat");  _435 = String_new("List_listdbl");  _436 = String_new("List_liststring");  _437 = String_new("List_listsymbol");  _438 = String_new("List_cdddr");  _439 = String_new("List_cddddr");  _440 = String_new("Var_listchar");  _441 = String_new("Var_listshort");  _442 = String_new("Var_listint");  _443 = String_new("Var_listfloat");  _444 = String_new("Var_listdbl");  _445 = String_new("Var_liststring");  _446 = String_new("Var_listsymbol");  _447 = String_new("Var_cdddr");  _448 = String_new("Var_cddddr");  _449 = String_new("Var_json");  _450 = String_new("Var_pretty_json");  _451 = String_new("String_sha256");  _452 = String_new("_lisp_string_new_len");  _453 = String_new("_lisp_symbol_new_len");  _454 = String_new("_lisp_symbol_parse");  _455 = String_new("List_getindex");  _456 = String_new("List_last");  _457 = String_new("List_contains");  _458 = String_new("List_get");  _459 = String_new("List_assoc");  _460 = String_new("List_array");  _461 = String_new("Array_new");  _462 = String_new("Array_len");  _463 = String_new("Array_push");  _464 = String_new("Array_getindex");  _465 = String_new("Array_setindex");  _466 = String_new("Array_take_last");  _467 = String_new("Array_shift");  _468 = String_new("Array_insert");  _469 = String_new("Array_remove");  _470 = String_new("Array_list");  _471 = String_new("Map_new");  _472 = String_new("Map_get");  _473 = String_new("Map_getindex");  _474 = String_new("Map_setindex");  _475 = String_new("Map_del");  _476 = String_new("lisp_string_lstrip");  _477 = String_new("lisp_string_rstrip");  _478 = String_new("String_getindex");  _479 = String_new("String_add");  _480 = String_new("lisp_string_strip");  _481 = String_new("Var_is");  _482 = String_new("Symbol_str");  _483 = String_new("AdNode_var");  _484 = String_new("AdNode");  _485 = String_new("Array_cleanup");  _486 = String_new("Array_compare");  _487 = String_new("Array_concat");  _488 = String_new("Array_contains");  _489 = String_new("Array_copy");  _490 = String_new("Array_count");  _491 = String_new("Array_equal");  _492 = String_new("Array_find");  _493 = String_new("Array_free");  _494 = String_new("Array_getslice");  _495 = String_new("Array_heap_pop");  _496 = String_new("Array_heap_push");  _497 = String_new("Array_heapify");  _498 = String_new("Array_indexof");  _499 = String_new("Array_iter_into");  _500 = String_new("Array_join");  _501 = String_new("Array_postfixindex");  _502 = String_new("Array_remslice");  _503 = String_new("Array_resize");  _504 = String_new("Array_reverse");  _505 = String_new("Array_setslice");  _506 = String_new("Array_sort");  _507 = String_new("Array_splice");  _508 = String_new("Array_unshift");  _509 = String_new("Array_updateindex");  _510 = String_new("Context_cleanup");  _511 = String_new("Context");  _512 = String_new("Context_close");  _513 = String_new("Context_current");  _514 = String_new("Context_export");  _515 = String_new("Context_open");  _516 = String_new("Iter_accumulate_into");  _517 = String_new("Iter_array");  _518 = String_new("Iter_chain_into");  _519 = String_new("Iter_count");  _520 = String_new("Iter_enumerate_into");  _521 = String_new("Iter_head_into");  _522 = String_new("Iter_list");  _523 = String_new("Iter_max");  _524 = String_new("Iter_min");  _525 = String_new("Iter_new");  _526 = String_new("Iter_next");  _527 = String_new("Iter_product");  _528 = String_new("Iter_repeat_into");  _529 = String_new("Iter_sum");  _530 = String_new("Iter_unique_into");  _531 = String_new("Iter_zip_into");  _532 = String_new("Job_start");  _533 = String_new("Job");  _534 = String_new("Job_var");  _535 = String_new("List_compare");  _536 = String_new("List_flatten");  _537 = String_new("List_flatten_all");  _538 = String_new("List_getslice");  _539 = String_new("List_hash");  _540 = String_new("List_head");  _541 = String_new("List_index");  _542 = String_new("List_iter_into");  _543 = String_new("List_job");  _544 = String_new("List_match_replace");  _545 = String_new("List_nth_cdr");  _546 = String_new("List_promote");  _547 = String_new("List_replace");  _548 = String_new("List_sublis");  _549 = String_new("List_subseq");  _550 = String_new("List_tail");  _551 = String_new("List_unique");  _552 = String_new("Map_cleanup");  _553 = String_new("Map_compare");  _554 = String_new("Map_contains");  _555 = String_new("Map_copy");  _556 = String_new("Map_enumerate_into");  _557 = String_new("Map_equal");  _558 = String_new("Map_get_hashed");  _559 = String_new("Map_getdefault");  _560 = String_new("Map_iter_into");  _561 = String_new("Map_keys_into");  _562 = String_new("Map_len");  _563 = String_new("Map_list");  _564 = String_new("Map_merge");  _565 = String_new("Map_new_capacity");  _566 = String_new("Map_postfixindex");  _567 = String_new("Map_set");  _568 = String_new("Map_setdefault");  _569 = String_new("Map_truth");  _570 = String_new("Map_updateindex");  _571 = String_new("Scope_calloc");  _572 = String_new("Scope_cleanup");  _573 = String_new("Scope");  _574 = String_new("Scope_destroy");  _575 = String_new("Scope_free");  _576 = String_new("Scope_malloc");  _577 = String_new("Scope_memdup");  _578 = String_new("Scope_move");  _579 = String_new("Scope_new");  _580 = String_new("Scope_new_named");  _581 = String_new("Scope_pop");  _582 = String_new("Scope_push");  _583 = String_new("Scope_realloc");  _584 = String_new("Scope_release");  _585 = String_new("Scope_retain");  _586 = String_new("Split_iter_into");  _587 = String_new("String_capitalize");  _588 = String_new("String_compare");  _589 = String_new("String_contains");  _590 = String_new("String_contains_digit");  _591 = String_new("String_count");  _592 = String_new("String_dedent");  _593 = String_new("String_endswith");  _594 = String_new("String_escape");  _595 = String_new("String_find");  _596 = String_new("String_find_all");  _597 = String_new("String_find_within");  _598 = String_new("String_free");  _599 = String_new("String_getslice");  _600 = String_new("String_hash");  _601 = String_new("String_intern");  _602 = String_new("String_is_alnum");  _603 = String_new("String_is_alnum_under");  _604 = String_new("String_is_alpha");  _605 = String_new("String_is_alpha_under");  _606 = String_new("String_is_digit");  _607 = String_new("String_is_identifier");  _608 = String_new("String_is_lower");  _609 = String_new("String_is_lower_under");  _610 = String_new("String_is_space");  _611 = String_new("String_is_upper");  _612 = String_new("String_is_upper_under");  _613 = String_new("String_iter_into");  _614 = String_new("String_join");  _615 = String_new("String_keep");  _616 = String_new("String_lines");  _617 = String_new("String_lower");  _618 = String_new("String_new_fill");  _619 = String_new("String_pad_center");  _620 = String_new("String_pad_left");  _621 = String_new("String_pad_right");  _622 = String_new("String_parse");  _623 = String_new("String_parse_char");  _624 = String_new("String_partition");  _625 = String_new("String_reject");  _626 = String_new("String_remove_prefix");  _627 = String_new("String_remove_suffix");  _628 = String_new("String_repeat");  _629 = String_new("String_replace");  _630 = String_new("String_replace_n");  _631 = String_new("String_rfind");  _632 = String_new("String_rpartition");  _633 = String_new("String_split");  _634 = String_new("String_split_lines");  _635 = String_new("String_split_n");  _636 = String_new("String_splits");  _637 = String_new("String_squeeze");  _638 = String_new("String_startswith");  _639 = String_new("String_symbol");  _640 = String_new("String_try_double");  _641 = String_new("String_try_long");  _642 = String_new("String_unescape");  _643 = String_new("String_upper");  _644 = String_new("String_withindex");  _645 = String_new("String_words");  _646 = String_new("Symbol_compare");  _647 = String_new("Symbol_first");  _648 = String_new("Symbol_last");  _649 = String_new("Symbol_len");  _650 = String_new("Symbol_try_new");  _651 = String_new("Var_add");  _652 = String_new("Var_adnode");  _653 = String_new("Var_as_iter");  _654 = String_new("Var_clone_wide");  _655 = String_new("Var_compare");  _656 = String_new("Var_contains");  _657 = String_new("Var_convert");  _658 = String_new("Var_div");  _659 = String_new("Var_double");  _660 = String_new("Var_fallback_iter_into");  _661 = String_new("Var_file");  _662 = String_new("File");  _663 = String_new("Var_getindex");  _664 = String_new("Var_integer");  _665 = String_new("Var_is_atom");  _666 = String_new("Var_is_atom_binder");  _667 = String_new("Var_is_binder");  _668 = String_new("Var_is_floating");  _669 = String_new("Var_is_list_binder");  _670 = String_new("Var_is_match_op");  _671 = String_new("Var_is_nil");  _672 = String_new("Var_is_null");  _673 = String_new("Var_is_object");  _674 = String_new("Var_is_pointer");  _675 = String_new("Var_is_reference");  _676 = String_new("Var_iter_into");  _677 = String_new("Var_job");  _678 = String_new("Var_kind");  _679 = String_new("Var_long_double_value");  _680 = String_new("Var_long_long_value");  _681 = String_new("Var_long_value");  _682 = String_new("Var_mod");  _683 = String_new("Var_mul");  _684 = String_new("Var_neg");  _685 = String_new("Var_null");  _686 = String_new("Var_parse");  _687 = String_new("Var_postfixindex");  _688 = String_new("Var_same");  _689 = String_new("Var_setindex");  _690 = String_new("Var_sub");  _691 = String_new("Var_tag");  _692 = String_new("Var_truth");  _693 = String_new("Var_ulong_long_value");  _694 = String_new("Var_ulong_value");  _695 = String_new("Var_unsigned");  _696 = String_new("Var_updateindex");  _697 = String_new("abs");  _698 = String_new("acos");  _699 = String_new("acosf");  _700 = String_new("acosh");  _701 = String_new("acoshf");  _702 = String_new("asin");  _703 = String_new("asinf");  _704 = String_new("asinh");  _705 = String_new("asinhf");  _706 = String_new("atan");  _707 = String_new("atan2");  _708 = String_new("atan2f");  _709 = String_new("atanf");  _710 = String_new("atanh");  _711 = String_new("atanhf");  _712 = String_new("atof");  _713 = String_new("atoi");  _714 = String_new("atol");  _715 = String_new("atoll");  _716 = String_new("cbrt");  _717 = String_new("cbrtf");  _718 = String_new("ceil");  _719 = String_new("ceilf");  _720 = String_new("copysign");  _721 = String_new("copysignf");  _722 = String_new("cos");  _723 = String_new("cosf");  _724 = String_new("cosh");  _725 = String_new("coshf");  _726 = String_new("erf");  _727 = String_new("erfc");  _728 = String_new("erfcf");  _729 = String_new("erff");  _730 = String_new("exp");  _731 = String_new("exp2");  _732 = String_new("exp2f");  _733 = String_new("expf");  _734 = String_new("expm1");  _735 = String_new("expm1f");  _736 = String_new("fabs");  _737 = String_new("fabsf");  _738 = String_new("fdim");  _739 = String_new("fdimf");  _740 = String_new("floor");  _741 = String_new("floorf");  _742 = String_new("fma");  _743 = String_new("fmaf");  _744 = String_new("fmax");  _745 = String_new("fmaxf");  _746 = String_new("fmin");  _747 = String_new("fminf");  _748 = String_new("fmod");  _749 = String_new("fmodf");  _750 = String_new("frexp");  _751 = String_new("frexpf");  _752 = String_new("hypot");  _753 = String_new("hypotf");  _754 = String_new("ilogb");  _755 = String_new("ilogbf");  _756 = String_new("labs");  _757 = String_new("ldexp");  _758 = String_new("ldexpf");  _759 = String_new("lgamma");  _760 = String_new("lgammaf");  _761 = String_new("llabs");  _762 = String_new("llrint");  _763 = String_new("llrintf");  _764 = String_new("llround");  _765 = String_new("llroundf");  _766 = String_new("log");  _767 = String_new("log10");  _768 = String_new("log10f");  _769 = String_new("log1p");  _770 = String_new("log1pf");  _771 = String_new("log2");  _772 = String_new("log2f");  _773 = String_new("logb");  _774 = String_new("logbf");  _775 = String_new("logf");  _776 = String_new("lrint");  _777 = String_new("lrintf");  _778 = String_new("lround");  _779 = String_new("lroundf");  _780 = String_new("modf");  _781 = String_new("modff");  _782 = String_new("nan");  _783 = String_new("nanf");  _784 = String_new("nearbyint");  _785 = String_new("nearbyintf");  _786 = String_new("nextafter");  _787 = String_new("nextafterf");  _788 = String_new("nexttoward");  _789 = String_new("nexttowardf");  _790 = String_new("pow");  _791 = String_new("powf");  _792 = String_new("range_into");  _793 = String_new("remainder");  _794 = String_new("remainderf");  _795 = String_new("remquo");  _796 = String_new("remquof");  _797 = String_new("rint");  _798 = String_new("rintf");  _799 = String_new("round");  _800 = String_new("roundf");  _801 = String_new("scalbln");  _802 = String_new("scalblnf");  _803 = String_new("scalbn");  _804 = String_new("scalbnf");  _805 = String_new("sin");  _806 = String_new("sinf");  _807 = String_new("sinh");  _808 = String_new("sinhf");  _809 = String_new("sqrt");  _810 = String_new("sqrtf");  _811 = String_new("strcmp");  _812 = String_new("strncmp");  _813 = String_new("tan");  _814 = String_new("tanf");  _815 = String_new("tanh");  _816 = String_new("tanhf");  _817 = String_new("tgamma");  _818 = String_new("tgammaf");  _819 = String_new("trunc");  _820 = String_new("truncf");  _821 = String_new("x2c.");  _822 = String_new("_x2c.import-hook");  _823 = String_new("Lisp.eval");  _824 = String_new("Lisp.apply");  _825 = String_new("Lisp.eval_string");  _x2c_static_initialize_0();  _x2c_static_initialize_1();  _x2c_static_initialize_2();  _x2c_static_initialize_3();  _x2c_static_initialize_4();  _x2c_static_initialize_5();  _x2c_static_initialize_6();  _x2c_static_initialize_7();  _x2c_static_initialize_8();  _x2c_static_initialize_9();  _x2c_static_initialize_10();  _x2c_static_initialize_11();  _x2c_static_initialize_12();  _x2c_static_initialize_13();  _x2c_static_initialize_14();  _x2c_static_initialize_15();  _x2c_static_initialize_16();  _x2c_static_initialize_17();
 }
 
 Var char_var(char);
@@ -2230,7 +2246,7 @@ static int Lisp__initialize(Lisp lisp){
 void scan_next_line_col(char *, int, int *, int *);
 _Noreturn static Symbol _malformed(String source, unsigned at){
   int line = 1, column = 1;  scan_next_line_col(source, (int) at, & line, & column); {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 546};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 547};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));  __builtin_unreachable();
   }
 
 }
@@ -2240,7 +2256,7 @@ Var Array_push(Array, Var);
 List Array_list(Array);
 static Symbol _read_token_list(Tokenizer tokenizer, char * source, unsigned base, unsigned * end, Var * out, int depth){
   if(depth >= LISP_READ_DEPTH_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "_read_token_list",.line = 557};  x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL))), Symbol_var(8750352), int_var(depth));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "_read_token_list",.line = 558};  x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL))), Symbol_var(8750352), int_var(depth));  __builtin_unreachable();
   }
   Array elements = Array_new();  Symbol status = 46228810;  while(1){
     Token token = Tokenizer_next(tokenizer);  if(! token || token -> type == 11212){
@@ -2299,7 +2315,7 @@ static Symbol _read_tokenizer(Tokenizer tokenizer, String source, unsigned base,
   }
   else if(status == 664344300629258){
     int line = 1, column = 1;  scan_next_line_col(source, (int) start, & line, & column); {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "_read_tokenizer",.line = 669};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "_read_tokenizer",.line = 670};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));  __builtin_unreachable();
     }
 
   }
@@ -2335,7 +2351,7 @@ static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
 
 _Noreturn static Var _bad_session(String operation){
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 684};  x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 685};  x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));  __builtin_unreachable();
   }
 
 }
@@ -2462,7 +2478,7 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
     Scope tokens_scope = Scope_new_named("Lisp tokens"); {
   _x2c_defer_env_21 _x2c_defer_env_31 = {._x2c_defer_capture_36 =(const void *) & tokens_scope};
   X2CCleanup _x2c_defer_record_7 = {
-    .fn = _x2c_defer_cleanup_32,
+    .fn = _x2c_defer_cleanup_34,
     .env = & _x2c_defer_env_31
   };
   x2c_cleanup_push(&_x2c_defer_record_7);
@@ -2492,7 +2508,7 @@ Symbol Var_kind(Var);
 Var Var_car(Var);
 Var lisp_car(Var value){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 844};  x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("car")), NULL))), Symbol_var(740232), Symbol_var(Var_kind(value)));
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 845};  x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("car")), NULL))), Symbol_var(740232), Symbol_var(Var_kind(value)));
     __builtin_unreachable();
   }
   return Var_car(value);
@@ -2501,7 +2517,7 @@ Var lisp_car(Var value){
 Var lisp_cdr(Var value){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 853};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 854};
     x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cdr")), NULL))), Symbol_var(740232), Symbol_var(Var_kind(value)));
     __builtin_unreachable();
   }
@@ -2584,7 +2600,7 @@ static int _number_compare(Var a, Var b){
 Var lisp_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(! _is_lisp_number(a) || ! _is_lisp_number(b)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 918};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 919};
     x2c_error_raise_n(& _x2c_error_site_6, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_compare")), NULL))), Symbol_var(26746169281416), Symbol_var(Var_kind(a)), Symbol_var(1286928228633480), Symbol_var(Var_kind(b)));
     __builtin_unreachable();
   }
@@ -2631,7 +2647,7 @@ Var lisp_plus(List values){
 Var lisp_minus(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 951};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 952};
     x2c_error_raise_n(& _x2c_error_site_7, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("-")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -2674,7 +2690,7 @@ Var lisp_times(List values){
 Var lisp_divide(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 972};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 973};
     x2c_error_raise_n(& _x2c_error_site_8, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("/")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -2700,7 +2716,7 @@ Var lisp_divide(List values){
 static Var _chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 987};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 988};
     x2c_error_raise_n(& _x2c_error_site_9, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -3020,7 +3036,7 @@ Var lisp_array(List layout, List values){
 
 Var lisp_source_function(Var callable){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(callable, 9, 7, 3)){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1239};  x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1240};  x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
   (Var_lambda(callable)) -> source_function = 1;  return callable;
 }
@@ -3111,7 +3127,7 @@ static Func _lisp_session_func(FuncAdapter adapter, List signature, LispCallback
 const void * Func_context(Func);
 static Var _lisp_func_adapter(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_lisp_func_adapter",.line = 1354};  x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_lisp_func_adapter",.line = 1355};  x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
   Var argv = Var_new(3683441, arguments);  return _apply_values(context -> lisp, context -> callable, cons(Func_var(function), cons(argv, NULL)), NULL);
 }
@@ -3144,28 +3160,28 @@ Var lisp_func_invalid(Func fn, unsigned index, List source){
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 static Var _lisp_callback_one(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_one",.line = 1395};  x2c_error_raise_n(& _x2c_error_site_12, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_one",.line = 1396};  x2c_error_raise_n(& _x2c_error_site_12, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
   Var value = x2c_func_value_argument(function, arguments, 0, 45156);  return _apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL);
 }
 
 static Var _lisp_callback_two(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_two",.line = 1403};  x2c_error_raise_n(& _x2c_error_site_13, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_two",.line = 1404};  x2c_error_raise_n(& _x2c_error_site_13, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
   Var left = x2c_func_value_argument(function, arguments, 0, 45156);  Var right = x2c_func_value_argument(function, arguments, 1, 45156);  return _apply_values(context -> lisp, context -> callable, cons(left, cons(right, NULL)), NULL);
 }
 
 static Var _lisp_predicate_one(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate_one",.line = 1413};  x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate_one",.line = 1414};  x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
   Var value = x2c_func_value_argument(function, arguments, 0, 45156);  return lisp_truth(_apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL));
 }
 
 static Func _lisp_callback(Var callable, int arity){
   if(Var_is_nil(callable)) return NULL;  if(! lisp_active){
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "_lisp_callback",.line = 1422};  x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
+    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "_lisp_callback",.line = 1423};  x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
     __builtin_unreachable();
   }
   LispCallbackContext context ={
@@ -3179,7 +3195,7 @@ static Func _lisp_callback(Var callable, int arity){
 static Func _lisp_predicate(Var callable){
   if(Var_is_nil(callable)) return NULL;
   if(! lisp_active){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate",.line = 1436};
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate",.line = 1437};
     x2c_error_raise_n(& _x2c_error_site_16, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
     __builtin_unreachable();
   }
@@ -3193,7 +3209,7 @@ static Func _lisp_predicate(Var callable){
 static Var _lisp_iter_next_callback(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);
   if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "_lisp_iter_next_callback",.line = 1451};
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "_lisp_iter_next_callback",.line = 1452};
     x2c_error_raise_n(& _x2c_error_site_17, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp iterator callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
     __builtin_unreachable();
   }
@@ -3205,7 +3221,7 @@ static Var _lisp_iter_next_callback(Func function, const FuncArg * arguments){
 static Func _lisp_iter_callback(Var callable){
   if(Var_is_nil(callable)) return NULL;
   if(! lisp_active){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_lisp_iter_callback",.line = 1461};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_lisp_iter_callback",.line = 1462};
     x2c_error_raise_n(& _x2c_error_site_18, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp iterator callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
     __builtin_unreachable();
   }
@@ -3432,6 +3448,63 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable){
   return Iter_find(iter, _lisp_predicate(callable));
 }
 
+Job List_job(List);
+
+static Job _lisp_List_job(List command){
+  Job job;
+  {
+    Scope_push(_lowered_owner());
+    {
+      {
+
+  X2CCleanup _x2c_defer_record_9 = {
+    .fn = _x2c_defer_cleanup_8,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_9);
+  {
+        {
+          job = List_job(command);
+        }
+
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_9);
+
+}
+    }
+
+  }
+  return job;
+}
+
+Job Job_start(Job);
+
+static Job _lisp_Job_start(Job job){
+  {
+    Scope_push(_lowered_owner());
+    {
+      {
+
+  X2CCleanup _x2c_defer_record_10 = {
+    .fn = _x2c_defer_cleanup_9,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_10);
+  {
+        {
+          Job_start(job);
+        }
+
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_10);
+
+}
+    }
+
+  }
+  return job;
+}
+
 static Func _native_target(String name){
   Var target;
   if(! Map_try_get(lisp_native_targets, String_var(name), & target)) return NULL;
@@ -3466,7 +3539,7 @@ static int _local_lookup(LispEnv * env, Var name, Var * out){
 
 _Noreturn static void _expansion_decline(void){
   {
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_expansion_decline",.line = 1831};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_expansion_decline",.line = 1849};
     x2c_error_raise_n(& _x2c_error_site_19, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp AUTO expansion")), NULL))));
     __builtin_unreachable();
   }
@@ -3648,11 +3721,11 @@ static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captur
   {
   _x2c_defer_env_22 _x2c_defer_env_33 = {._x2c_defer_capture_37 =(const void *) & names};
 
-  X2CCleanup _x2c_defer_record_9 = {
-    .fn = _x2c_defer_cleanup_33,
+  X2CCleanup _x2c_defer_record_11 = {
+    .fn = _x2c_defer_cleanup_35,
     .env = & _x2c_defer_env_33
   };
-  x2c_cleanup_push(&_x2c_defer_record_9);
+  x2c_cleanup_push(&_x2c_defer_record_11);
   {
     _free_names(lisp, body, params, 0, names);
     {
@@ -3673,7 +3746,7 @@ static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captur
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_9);
+  x2c_cleanup_leave(& _x2c_defer_record_11);
 
 }
 }
@@ -3696,7 +3769,7 @@ static Var _qq(Lisp lisp, Var expr, LispEnv * env, int list, int depth){
     }
     if(Var_equal(head, lsym_unquote) || Var_equal(head, lsym_splicing)){
       if(List_len(form) != 2){
-        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2006};
+        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2024};
         x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(46228810), expr);
         __builtin_unreachable();
       }
@@ -3707,13 +3780,13 @@ static Var _qq(Lisp lisp, Var expr, LispEnv * env, int list, int depth){
       }
       Var value = _eval(lisp, argument, env);
       if(! list && Var_equal(head, lsym_splicing)){
-        static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2014};
+        static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2032};
         x2c_error_raise_n(& _x2c_error_site_21, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(expr)));
         __builtin_unreachable();
       }
       if(list && Var_equal(head, lsym_unquote)) return List_var(cons(value, NULL));
       if(list && ! Var_is_row(value, 9, 7, 4)){
-        static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2018};
+        static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 2036};
         x2c_error_raise_n(& _x2c_error_site_22, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(value)));
         __builtin_unreachable();
       }
@@ -3731,7 +3804,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   if(List_len(args) != 2 || ! Var_is_row(List_car(args), 9, 7, 4)){
     Symbol operation = macro ? 27335838 : 808259842;
     {
-      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "_make_lambda",.line = 2034};
+      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "_make_lambda",.line = 2052};
       x2c_error_raise_n(& _x2c_error_site_23, 4372535886, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(46228810), List_var(args));
       __builtin_unreachable();
     }
@@ -3743,11 +3816,11 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   {
   _x2c_defer_env_4 _x2c_defer_env_34 = {._x2c_defer_capture_7 =(const void *) & result, ._x2c_defer_capture_8 =(const void *) & lambda};
 
-  X2CCleanup _x2c_defer_record_10 = {
-    .fn = _x2c_defer_cleanup_8,
+  X2CCleanup _x2c_defer_record_12 = {
+    .fn = _x2c_defer_cleanup_10,
     .env = & _x2c_defer_env_34
   };
-  x2c_cleanup_push(&_x2c_defer_record_10);
+  x2c_cleanup_push(&_x2c_defer_record_12);
   {
     lambda -> owner = lisp;
     List _x2c_destructure_3 = args;
@@ -3760,15 +3833,15 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
       {
         {
 
-  X2CCleanup _x2c_defer_record_11 = {
-    .fn = _x2c_defer_cleanup_9,
+  X2CCleanup _x2c_defer_record_13 = {
+    .fn = _x2c_defer_cleanup_11,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_11);
+  x2c_cleanup_push(&_x2c_defer_record_13);
   {
           lambda -> captures = Map_new();
         }
-        x2c_cleanup_leave(& _x2c_defer_record_11);
+        x2c_cleanup_leave(& _x2c_defer_record_13);
 
 }
       }
@@ -3783,14 +3856,14 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
     {
       Var _x2c_return_value_4 = result = Lambda_var(lambda);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_10);
+        x2c_cleanup_leave(& _x2c_defer_record_12);
         return _x2c_return_value_4;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_10);
+  x2c_cleanup_leave(& _x2c_defer_record_12);
 
 }
 }
@@ -3805,7 +3878,7 @@ static void _bind_params(Lambda lambda, List args, Map bindings){
     rest_name = List_getindex(_x2c_destructure_4, 1);
     if(Var_is_atom(name) && String_equal(Var_str(name), _218)){
       if(! List_truth(List_cdr(p))){
-        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2058};
+        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2076};
         x2c_error_raise_n(& _x2c_error_site_24, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
         __builtin_unreachable();
       }
@@ -3814,7 +3887,7 @@ static void _bind_params(Lambda lambda, List args, Map bindings){
       return;
     }
     if(! List_truth(args)){
-      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2064};
+      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2082};
       x2c_error_raise_n(& _x2c_error_site_25, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
@@ -3822,7 +3895,7 @@ static void _bind_params(Lambda lambda, List args, Map bindings){
     args = List_cdr(args);
   }
   if(List_truth(args)){
-    static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2068};
+    static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 2086};
     x2c_error_raise_n(& _x2c_error_site_26, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
     __builtin_unreachable();
   }
@@ -3835,7 +3908,7 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
   if(lisp -> call_exhausted || ++ lisp -> call_steps > lisp -> call_step_max){
     lisp -> call_exhausted = 1;
     {
-      static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2075};
+      static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2093};
       x2c_error_raise_n(& _x2c_error_site_27, 214157780846806, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("steps")), NULL))));
     }
 
@@ -3843,7 +3916,7 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
   if(++ lisp -> call_depth > LISP_CALL_DEPTH_MAX){
     lisp -> call_depth --;
     {
-      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2079};
+      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2097};
       x2c_error_raise_n(& _x2c_error_site_28, 214157780846806, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
     }
 
@@ -3851,32 +3924,32 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
   {
   _x2c_defer_env_7 _x2c_defer_env_35 = {._x2c_defer_capture_14 =(const void *) & lisp};
 
-  X2CCleanup _x2c_defer_record_12 = {
-    .fn = _x2c_defer_cleanup_12,
+  X2CCleanup _x2c_defer_record_14 = {
+    .fn = _x2c_defer_cleanup_14,
     .env = & _x2c_defer_env_35
   };
-  x2c_cleanup_push(&_x2c_defer_record_12);
+  x2c_cleanup_push(&_x2c_defer_record_14);
   {
     LispExpansion * trace = lisp -> expansion;
     if(trace && ++ trace -> calls >= MACHINE_FRAME_MAX) _expansion_decline();
     {
   _x2c_defer_env_6 _x2c_defer_env_36 = {._x2c_defer_capture_13 =(const void *) & trace};
 
-  X2CCleanup _x2c_defer_record_13 = {
-    .fn = _x2c_defer_cleanup_11,
+  X2CCleanup _x2c_defer_record_15 = {
+    .fn = _x2c_defer_cleanup_13,
     .env = & _x2c_defer_env_36
   };
-  x2c_cleanup_push(&_x2c_defer_record_13);
+  x2c_cleanup_push(&_x2c_defer_record_15);
   {
       Scope frame = Scope_new_named("Lisp frame");
       {
   _x2c_defer_env_23 _x2c_defer_env_37 = {._x2c_defer_capture_38 =(const void *) & frame};
 
-  X2CCleanup _x2c_defer_record_14 = {
-    .fn = _x2c_defer_cleanup_34,
+  X2CCleanup _x2c_defer_record_16 = {
+    .fn = _x2c_defer_cleanup_36,
     .env = & _x2c_defer_env_37
   };
-  x2c_cleanup_push(&_x2c_defer_record_14);
+  x2c_cleanup_push(&_x2c_defer_record_16);
   {
         Map bindings = NULL;
         {
@@ -3884,18 +3957,18 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
           {
             {
 
-  X2CCleanup _x2c_defer_record_15 = {
-    .fn = _x2c_defer_cleanup_13,
+  X2CCleanup _x2c_defer_record_17 = {
+    .fn = _x2c_defer_cleanup_15,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_15);
+  x2c_cleanup_push(&_x2c_defer_record_17);
   {
               {
                 bindings = Map_new();
               }
 
             }
-            x2c_cleanup_leave(& _x2c_defer_record_15);
+            x2c_cleanup_leave(& _x2c_defer_record_17);
 
 }
           }
@@ -3906,11 +3979,11 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
         {
   _x2c_defer_env_5 _x2c_defer_env_38 = {._x2c_defer_capture_9 =(const void *) & lambda, ._x2c_defer_capture_10 =(const void *) & lisp, ._x2c_defer_capture_11 =(const void *) & caller_owner, ._x2c_defer_capture_12 =(const void *) & caller_result_owner};
 
-  X2CCleanup _x2c_defer_record_16 = {
-    .fn = _x2c_defer_cleanup_10,
+  X2CCleanup _x2c_defer_record_18 = {
+    .fn = _x2c_defer_cleanup_12,
     .env = & _x2c_defer_env_38
   };
-  x2c_cleanup_push(&_x2c_defer_record_16);
+  x2c_cleanup_push(&_x2c_defer_record_18);
   {
           if(lambda -> source_function){
             lisp -> result_owner = caller_owner;
@@ -3928,7 +4001,7 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
             List args = NULL;
             for(int i = count - 1;  i >= 0;  i --){
               if(Var_is_void(values[i])){
-                static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2114};
+                static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2132};
                 x2c_error_raise_n(& _x2c_error_site_29, 48270474208, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(19800432), int_var(i));
                 __builtin_unreachable();
               }
@@ -3938,7 +4011,7 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
           }
           else{
             if(count != List_len(lambda -> params)){
-              static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2121};
+              static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "_call_lambda_slots",.line = 2139};
               x2c_error_raise_n(& _x2c_error_site_30, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
               __builtin_unreachable();
             }
@@ -3949,29 +4022,29 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
           {
             Var _x2c_return_value_5 = _eval(lisp, lambda -> body, & local);
             {
+              x2c_cleanup_leave(& _x2c_defer_record_18);
               x2c_cleanup_leave(& _x2c_defer_record_16);
+              x2c_cleanup_leave(& _x2c_defer_record_15);
               x2c_cleanup_leave(& _x2c_defer_record_14);
-              x2c_cleanup_leave(& _x2c_defer_record_13);
-              x2c_cleanup_leave(& _x2c_defer_record_12);
               return _x2c_return_value_5;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_16);
+        x2c_cleanup_leave(& _x2c_defer_record_18);
 
 }
       }
-      x2c_cleanup_leave(& _x2c_defer_record_14);
+      x2c_cleanup_leave(& _x2c_defer_record_16);
 
 }
     }
-    x2c_cleanup_leave(& _x2c_defer_record_13);
+    x2c_cleanup_leave(& _x2c_defer_record_15);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_12);
+  x2c_cleanup_leave(& _x2c_defer_record_14);
 
 }
 }
@@ -3982,11 +4055,11 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args){
   {
   _x2c_defer_env_8 _x2c_defer_env_39 = {._x2c_defer_capture_15 =(const void *) & values};
 
-  X2CCleanup _x2c_defer_record_17 = {
-    .fn = _x2c_defer_cleanup_14,
+  X2CCleanup _x2c_defer_record_19 = {
+    .fn = _x2c_defer_cleanup_16,
     .env = & _x2c_defer_env_39
   };
-  x2c_cleanup_push(&_x2c_defer_record_17);
+  x2c_cleanup_push(&_x2c_defer_record_19);
   {
     {
       Var value;
@@ -4002,14 +4075,14 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args){
     {
       Var _x2c_return_value_6 = _call_lambda_slots(lisp, lambda, values, count);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_17);
+        x2c_cleanup_leave(& _x2c_defer_record_19);
         return _x2c_return_value_6;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_17);
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
 }
 }
@@ -4020,11 +4093,11 @@ static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv * env){
   {
   _x2c_defer_env_9 _x2c_defer_env_40 = {._x2c_defer_capture_16 =(const void *) & values};
 
-  X2CCleanup _x2c_defer_record_18 = {
-    .fn = _x2c_defer_cleanup_15,
+  X2CCleanup _x2c_defer_record_20 = {
+    .fn = _x2c_defer_cleanup_17,
     .env = & _x2c_defer_env_40
   };
-  x2c_cleanup_push(&_x2c_defer_record_18);
+  x2c_cleanup_push(&_x2c_defer_record_20);
   {
     {
       Var form;
@@ -4041,14 +4114,14 @@ static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv * env){
     {
       Var _x2c_return_value_7 = lambda -> macro ? _eval(lisp, result, env) : result;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_18);
+        x2c_cleanup_leave(& _x2c_defer_record_20);
         return _x2c_return_value_7;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_18);
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
 }
 }
@@ -4071,7 +4144,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2163};
+          static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2181};
           x2c_error_raise_n(& _x2c_error_site_31, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
@@ -4087,24 +4160,24 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 2 || ! Var_is_atom(name)){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2171};
+          static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2189};
           x2c_error_raise_n(& _x2c_error_site_32, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
           __builtin_unreachable();
         }
 
       }
-      if(lisp -> protect_x2c && String_startswith(Var_str(name), _816)){
-        static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2174};
+      if(lisp -> protect_x2c && String_startswith(Var_str(name), _821)){
+        static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2192};
         x2c_error_raise_n(& _x2c_error_site_33, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(920394), name);
         __builtin_unreachable();
       }
       if(_inherited(lisp, name)){
-        static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2176};
+        static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2194};
         x2c_error_raise_n(& _x2c_error_site_34, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL))), Symbol_var(920394), name);
         __builtin_unreachable();
       }
       if(lisp -> frozen){
-        static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2181};
+        static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2199};
         x2c_error_raise_n(& _x2c_error_site_35, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL))), Symbol_var(920394), name);
         __builtin_unreachable();
       }
@@ -4114,7 +4187,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
     }
     case LISP_COND :{
       if(! List_truth(args)){
-        static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2188};
+        static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2206};
         x2c_error_raise_n(& _x2c_error_site_36, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
         __builtin_unreachable();
       }
@@ -4127,7 +4200,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
           clause = _x2c_macro_cursor_output_16;
           {
             if(! Var_is_row(clause, 9, 7, 4)){
-              static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2190};
+              static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2208};
               x2c_error_raise_n(& _x2c_error_site_37, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(46228810), clause, Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
               __builtin_unreachable();
             }
@@ -4135,7 +4208,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
             if(List_len(pair) != 2){
               int actual = List_len(pair);
               {
-                static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2195};
+                static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2213};
                 x2c_error_raise_n(& _x2c_error_site_38, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
                 __builtin_unreachable();
               }
@@ -4159,7 +4232,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2210};
+          static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2228};
           x2c_error_raise_n(& _x2c_error_site_39, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
@@ -4171,7 +4244,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2218};
+          static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2236};
           x2c_error_raise_n(& _x2c_error_site_40, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
@@ -4184,7 +4257,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 2){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2226};
+          static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2244};
           x2c_error_raise_n(& _x2c_error_site_41, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
@@ -4197,12 +4270,12 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       Var name = _eval(lisp, name_form, env);
       Var signature = _eval(lisp, signature_form, env);
       if(! Var_is_row(name, 11, 7, 1)){
-        static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2231};
+        static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2249};
         x2c_error_raise_n(& _x2c_error_site_42, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(name)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
         __builtin_unreachable();
       }
       if(! Var_is_row(signature, 9, 7, 4)){
-        static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2234};
+        static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2252};
         x2c_error_raise_n(& _x2c_error_site_43, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(46228810), signature);
         __builtin_unreachable();
       }
@@ -4210,7 +4283,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       List native_signature = Var_list(signature);
       Func function = _native_target(native_name);
       if(! function){
-        static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2238};
+        static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2256};
         x2c_error_raise_n(& _x2c_error_site_44, 31885018076120, 2, Symbol_var(920394), String_var(native_name), Symbol_var(39502), List_var(native_signature));
         __builtin_unreachable();
       }
@@ -4220,7 +4293,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 2){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2245};
+          static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2263};
           x2c_error_raise_n(& _x2c_error_site_45, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
@@ -4233,7 +4306,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       Var callable = _eval(lisp, callable_form, env);
       Var values = _eval(lisp, values_form, env);
       if(! Var_is_row(values, 9, 7, 4)){
-        static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2250};
+        static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2268};
         x2c_error_raise_n(& _x2c_error_site_46, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(values)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
         __builtin_unreachable();
       }
@@ -4244,7 +4317,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   if(List_len(args) != 1){
     int actual = List_len(args);
     {
-      static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2259};
+      static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2277};
       x2c_error_raise_n(& _x2c_error_site_47, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
       __builtin_unreachable();
     }
@@ -4252,27 +4325,27 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   }
   Var path = _eval(lisp, List_car(args), env);
   if(! Var_is_row(path, 11, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2262};
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 2280};
     x2c_error_raise_n(& _x2c_error_site_48, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(path)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
     __builtin_unreachable();
   }
   Var hook;
-  if(_global_lookup(lisp, Atom_intern(_817), & hook)) return Lisp_apply(lisp, hook, cons(path, NULL));
+  if(_global_lookup(lisp, Atom_intern(_822), & hook)) return Lisp_apply(lisp, hook, cons(path, NULL));
   Var result;
   {
     File source = File_open(Var_pointer(path), "r");
     {
   _x2c_defer_env_24 _x2c_defer_env_41 = {._x2c_defer_capture_39 =(const void *) & source};
 
-  X2CCleanup _x2c_defer_record_19 = {
-    .fn = _x2c_defer_cleanup_35,
+  X2CCleanup _x2c_defer_record_21 = {
+    .fn = _x2c_defer_cleanup_37,
     .env = & _x2c_defer_env_41
   };
-  x2c_cleanup_push(&_x2c_defer_record_19);
+  x2c_cleanup_push(&_x2c_defer_record_21);
   {
       result = Lisp_eval_file(lisp, source);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_19);
+    x2c_cleanup_leave(& _x2c_defer_record_21);
 
 }
   }
@@ -4462,16 +4535,16 @@ static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expans
     LispExpansion * * _x2c_macro_address_0 = & l -> lisp -> expansion;  LispExpansion * _x2c_macro_previous_0 = * _x2c_macro_address_0; {
   _x2c_defer_env_10 _x2c_defer_env_42 = {._x2c_defer_capture_17 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_18 =(const void *) & _x2c_macro_previous_0};
 
-  X2CCleanup _x2c_defer_record_20 = {
-    .fn = _x2c_defer_cleanup_16,
+  X2CCleanup _x2c_defer_record_22 = {
+    .fn = _x2c_defer_cleanup_18,
     .env = & _x2c_defer_env_42
   };
-  x2c_cleanup_push(&_x2c_defer_record_20);
+  x2c_cleanup_push(&_x2c_defer_record_22);
   {
       * _x2c_macro_address_0 = & trace;
       * expansion = _call_lambda(l -> lisp, macro, args);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_20);
+    x2c_cleanup_leave(& _x2c_defer_record_22);
 
 }
   }
@@ -4594,16 +4667,16 @@ static int LispLower__auto_compile_inline(LispLower l, List form, int tail){
     {
   _x2c_defer_env_11 _x2c_defer_env_43 = {._x2c_defer_capture_19 =(const void *) & _x2c_macro_address_1, ._x2c_defer_capture_20 =(const void *) & _x2c_macro_previous_1};
 
-  X2CCleanup _x2c_defer_record_21 = {
-    .fn = _x2c_defer_cleanup_17,
+  X2CCleanup _x2c_defer_record_23 = {
+    .fn = _x2c_defer_cleanup_19,
     .env = & _x2c_defer_env_43
   };
-  x2c_cleanup_push(&_x2c_defer_record_21);
+  x2c_cleanup_push(&_x2c_defer_record_23);
   {
       * _x2c_macro_address_1 = scope;
       ok = LispLower__auto_compile(l, List_caddr(literal), tail);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_21);
+    x2c_cleanup_leave(& _x2c_defer_record_23);
 
 }
   }
@@ -4642,11 +4715,11 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
     {
   _x2c_defer_env_12 _x2c_defer_env_44 = {._x2c_defer_capture_21 =(const void *) & _x2c_macro_address_2, ._x2c_defer_capture_22 =(const void *) & _x2c_macro_previous_2};
 
-  X2CCleanup _x2c_defer_record_22 = {
-    .fn = _x2c_defer_cleanup_18,
+  X2CCleanup _x2c_defer_record_24 = {
+    .fn = _x2c_defer_cleanup_20,
     .env = & _x2c_defer_env_44
   };
-  x2c_cleanup_push(&_x2c_defer_record_22);
+  x2c_cleanup_push(&_x2c_defer_record_24);
   {
       * _x2c_macro_address_2 = l -> depth + 1;
       {
@@ -4655,7 +4728,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
         if(guard < 0 || ! LispLower__auto_compile(l, expansion, tail)){
           int _x2c_return_value_9 = 0;
           {
-            x2c_cleanup_leave(& _x2c_defer_record_22);
+            x2c_cleanup_leave(& _x2c_defer_record_24);
             return _x2c_return_value_9;
           }
 
@@ -4663,7 +4736,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
         if(! List_truth(live)){
           int _x2c_return_value_10 = 1;
           {
-            x2c_cleanup_leave(& _x2c_defer_record_22);
+            x2c_cleanup_leave(& _x2c_defer_record_24);
             return _x2c_return_value_10;
           }
 
@@ -4672,7 +4745,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
         if(site < 0){
           int _x2c_return_value_11 = 0;
           {
-            x2c_cleanup_leave(& _x2c_defer_record_22);
+            x2c_cleanup_leave(& _x2c_defer_record_24);
             return _x2c_return_value_11;
           }
 
@@ -4682,7 +4755,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
         {
           int _x2c_return_value_12 = 1;
           {
-            x2c_cleanup_leave(& _x2c_defer_record_22);
+            x2c_cleanup_leave(& _x2c_defer_record_24);
             return _x2c_return_value_12;
           }
 
@@ -4691,7 +4764,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_22);
+    x2c_cleanup_leave(& _x2c_defer_record_24);
 
 }
   }
@@ -4817,22 +4890,22 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env, int depth){
     {
       {
 
-  X2CCleanup _x2c_defer_record_23 = {
-    .fn = _x2c_defer_cleanup_19,
+  X2CCleanup _x2c_defer_record_25 = {
+    .fn = _x2c_defer_cleanup_21,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_23);
+  x2c_cleanup_push(&_x2c_defer_record_25);
   {
         {
           MachineBuilder b = MachineBuilder_new();
           {
   _x2c_defer_env_25 _x2c_defer_env_45 = {._x2c_defer_capture_40 =(const void *) & b};
 
-  X2CCleanup _x2c_defer_record_24 = {
-    .fn = _x2c_defer_cleanup_36,
+  X2CCleanup _x2c_defer_record_26 = {
+    .fn = _x2c_defer_cleanup_38,
     .env = & _x2c_defer_env_45
   };
-  x2c_cleanup_push(&_x2c_defer_record_24);
+  x2c_cleanup_push(&_x2c_defer_record_26);
   {
             struct LispLower storage ={
               _x2c_initializer_choice_D09CF48E_18((lisp)), _x2c_initializer_choice_D09CF48E_19((env)), _x2c_initializer_choice_D09CF48E_20((lambda)), _x2c_initializer_choice_D09CF48E_21((b)), _x2c_initializer_choice_D09CF48E_22((depth)), _x2c_initializer_choice_D09CF48E_23((lambda -> params))
@@ -4857,21 +4930,21 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env, int depth){
             {
               int _x2c_return_value_13 = lambda -> auto_status;
               {
-                x2c_cleanup_leave(& _x2c_defer_record_24);
-                x2c_cleanup_leave(& _x2c_defer_record_23);
+                x2c_cleanup_leave(& _x2c_defer_record_26);
+                x2c_cleanup_leave(& _x2c_defer_record_25);
                 return _x2c_return_value_13;
               }
 
             }
 
           }
-          x2c_cleanup_leave(& _x2c_defer_record_24);
+          x2c_cleanup_leave(& _x2c_defer_record_26);
 
 }
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_23);
+      x2c_cleanup_leave(& _x2c_defer_record_25);
 
 }
     }
@@ -4905,7 +4978,7 @@ static int _auto_bindings_ok(Lisp lisp, LispEnv * env, List bindings){
 
 _Noreturn static void _raise_machine_error(Var error){
   if(Var_is(error, 1328354264)){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2752};
+    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2770};
     x2c_error_raise_n(& _x2c_error_site_49, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(47666), error);
     __builtin_unreachable();
   }
@@ -4919,27 +4992,27 @@ _Noreturn static void _raise_machine_error(Var error){
       case 46041901960: ;
   static MatchCaptureSite _x2c_match_site_8;
   if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_226), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-    static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2754};  x2c_error_raise_n(& _x2c_error_site_50, 46041901960, 1, Symbol_var(920394), name);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2772};  x2c_error_raise_n(& _x2c_error_site_50, 46041901960, 1, Symbol_var(920394), name);  __builtin_unreachable();
   }
   break;
 }
 case 4477439593778: ;  static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_246), &_x2c_match_capture)) {Var expected = _x2c_match_values[0];  Var actual = _x2c_match_values[1];  Var value = _x2c_match_values[2]; {
-  static const X2CErrorSite _x2c_error_site_51 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2754};  x2c_error_raise_n(& _x2c_error_site_51, 4477439593778, 3, Symbol_var(396221456712), expected, Symbol_var(74754136), actual, Symbol_var(1551181527337864), Symbol_var(Var_kind(value)));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_51 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2772};  x2c_error_raise_n(& _x2c_error_site_51, 4477439593778, 3, Symbol_var(396221456712), expected, Symbol_var(74754136), actual, Symbol_var(1551181527337864), Symbol_var(Var_kind(value)));  __builtin_unreachable();
 }
 break;
 }
 case 995692317464: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_248), &_x2c_match_capture)) {Var value = _x2c_match_values[0]; {
-  static const X2CErrorSite _x2c_error_site_52 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2754};  x2c_error_raise_n(& _x2c_error_site_52, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(value)));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_52 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2772};  x2c_error_raise_n(& _x2c_error_site_52, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(value)));  __builtin_unreachable();
 }
 break;
 }
 case 4477479911782: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_251), &_x2c_match_capture)) {Var actual = _x2c_match_values[0]; {
-  static const X2CErrorSite _x2c_error_site_53 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2754};  x2c_error_raise_n(& _x2c_error_site_53, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), actual);  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_53 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2772};  x2c_error_raise_n(& _x2c_error_site_53, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), actual);  __builtin_unreachable();
 }
 break;
 }
 case 214157780846806: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_265), &_x2c_match_capture)) {Var operation = _x2c_match_values[0];  Var why = _x2c_match_values[1]; {
-  static const X2CErrorSite _x2c_error_site_54 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2754};  x2c_error_raise_n(& _x2c_error_site_54, 214157780846806, 2, Symbol_var(34096809266140), operation, Symbol_var(47666), why);
+  static const X2CErrorSite _x2c_error_site_54 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2772};  x2c_error_raise_n(& _x2c_error_site_54, 214157780846806, 2, Symbol_var(34096809266140), operation, Symbol_var(47666), why);
 }
 break;
 }
@@ -4947,7 +5020,7 @@ default: break;
     }
   }
 {
-  static const X2CErrorSite _x2c_error_site_55 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2769};  x2c_error_raise_n(& _x2c_error_site_55, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(6401226), error);  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_55 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 2787};  x2c_error_raise_n(& _x2c_error_site_55, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(6401226), error);  __builtin_unreachable();
 }
 }
 
@@ -4989,24 +5062,24 @@ static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * 
   }
   LispMachineSlot slot = _machine_slot_acquire(lisp); {
   _x2c_defer_env_14 _x2c_defer_env_46 = {._x2c_defer_capture_24 =(const void *) & lisp, ._x2c_defer_capture_25 =(const void *) & slot};
-  X2CCleanup _x2c_defer_record_25 = {
-    .fn = _x2c_defer_cleanup_21,
+  X2CCleanup _x2c_defer_record_27 = {
+    .fn = _x2c_defer_cleanup_23,
     .env = & _x2c_defer_env_46
   };
-  x2c_cleanup_push(&_x2c_defer_record_25);
+  x2c_cleanup_push(&_x2c_defer_record_27);
   {
     LispMachine m = & slot -> machine;  LispMachineContext context = & slot -> context;  bzero(context, sizeof(struct LispMachineContext));  context -> lisp = lisp;  LispMachine_open(m); {
   _x2c_defer_env_13 _x2c_defer_env_47 = {._x2c_defer_capture_23 =(const void *) & m};
-  X2CCleanup _x2c_defer_record_26 = {
-    .fn = _x2c_defer_cleanup_20,
+  X2CCleanup _x2c_defer_record_28 = {
+    .fn = _x2c_defer_cleanup_22,
     .env = & _x2c_defer_env_47
   };
-  x2c_cleanup_push(&_x2c_defer_record_26);
+  x2c_cleanup_push(&_x2c_defer_record_28);
   {
       m -> stats = lisp -> auto_machine_stats;  LispMachine_begin(m, MachineProgram_view(lambda -> auto_program), context, argv, argc);  _machine_env_set(context -> frames, lambda, m -> locals, argc, NULL);  lisp -> auto_stats.machine_entries ++;  LispMachine_run(m);  if(m -> status == 982){
         Var result = m -> value;  * out = lambda -> macro ? _eval(lisp, result, env) : result; {
           int _x2c_return_value_14 = 1; {
-            x2c_cleanup_leave(& _x2c_defer_record_26);  x2c_cleanup_leave(& _x2c_defer_record_25);  return _x2c_return_value_14;
+            x2c_cleanup_leave(& _x2c_defer_record_28);  x2c_cleanup_leave(& _x2c_defer_record_27);  return _x2c_return_value_14;
           }
 
         }
@@ -5014,10 +5087,10 @@ static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * 
       }
       Var error = m -> error;  lisp -> auto_stats.machine_errors ++;  _raise_machine_error(error);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_26);
+    x2c_cleanup_leave(& _x2c_defer_record_28);
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_25);
+  x2c_cleanup_leave(& _x2c_defer_record_27);
 }
 }
 
@@ -5056,7 +5129,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
     Lambda lambda = Var_lambda(callable);  Var prepared;  if(_auto_apply(lisp, lambda, raw, env, & prepared)) return prepared;  return _apply_lambda(lisp, lambda, raw, env);
   }
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_56 = {.file = "../../lib/lisp.x",.function = "_apply",.line = 2939};  x2c_error_raise_n(& _x2c_error_site_56, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_56 = {.file = "../../lib/lisp.x",.function = "_apply",.line = 2957};  x2c_error_raise_n(& _x2c_error_site_56, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
   Func function = Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0) return _apply_special(lisp, special, raw, env);  _expansion_native(lisp, function);  int count = List_len(raw);  FuncArg narrow[LISP_NATIVE_ARG_MAX];  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg)); {
     ExceptionFrame _x2c_exception_frame_1;  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
@@ -5098,25 +5171,25 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
 static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv * env){
   if(Var_is_row(callable, 9, 7, 3)){
     Lambda lambda = Var_lambda(callable);  if(lambda -> macro){
-      static const X2CErrorSite _x2c_error_site_57 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2961};  x2c_error_raise_n(& _x2c_error_site_57, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_57 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2979};  x2c_error_raise_n(& _x2c_error_site_57, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
     }
     return _call_lambda(lisp, lambda, values);
   }
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_58 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2965};  x2c_error_raise_n(& _x2c_error_site_58, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_58 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2983};  x2c_error_raise_n(& _x2c_error_site_58, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
   Func function = Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0){
     if(special != LISP_APPLY){
-      static const X2CErrorSite _x2c_error_site_59 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2969};  x2c_error_raise_n(& _x2c_error_site_59, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_59 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2987};  x2c_error_raise_n(& _x2c_error_site_59, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
     }
     if(List_len(values) != 2){
       int actual = List_len(values); {
-        static const X2CErrorSite _x2c_error_site_60 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2973};  x2c_error_raise_n(& _x2c_error_site_60, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));  __builtin_unreachable();
+        static const X2CErrorSite _x2c_error_site_60 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2991};  x2c_error_raise_n(& _x2c_error_site_60, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));  __builtin_unreachable();
       }
 
     }
     Var rest = List_cadr(values);  if(! Var_is_row(rest, 9, 7, 4)){
-      static const X2CErrorSite _x2c_error_site_61 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2976};  x2c_error_raise_n(& _x2c_error_site_61, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(rest)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
+      static const X2CErrorSite _x2c_error_site_61 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 2994};  x2c_error_raise_n(& _x2c_error_site_61, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(rest)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
       __builtin_unreachable();
     }
     return _apply_values(lisp, List_car(values), Var_list(rest), env);
@@ -5147,14 +5220,14 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv * env){
 static Var _eval(Lisp lisp, Var expression, LispEnv * env){
   if(lisp -> expansion && ++ lisp -> expansion -> steps > MACHINE_CODE_MAX * 4) _expansion_decline();
   if(Var_is_void(expression)){
-    static const X2CErrorSite _x2c_error_site_62 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 2998};
+    static const X2CErrorSite _x2c_error_site_62 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 3016};
     x2c_error_raise_n(& _x2c_error_site_62, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_atom(expression)){
     Var value;
     if(! _lookup(lisp, env, expression, & value)){
-      static const X2CErrorSite _x2c_error_site_63 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 3001};
+      static const X2CErrorSite _x2c_error_site_63 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 3019};
       x2c_error_raise_n(& _x2c_error_site_63, 46041901960, 1, Symbol_var(920394), expression);
       __builtin_unreachable();
     }
@@ -5175,7 +5248,7 @@ static Var _special_stub(void){
 static void _install_specials(Lisp lisp){
   for(int i = 0;  i < LISP_SPECIAL_COUNT;  i ++){
     const LispCanonicalName * info = _special_name(i);
-    lisp -> specials[i] = Func_new(_x2c_func_adapt_535, _274);
+    lisp -> specials[i] = Func_new(_x2c_func_adapt_541, _274);
     Atom name = Atom_intern(String_new(info -> spelling));
     Map_setindex(lisp -> reserved, name, Func_var(lisp -> specials[i]));
   }
@@ -5189,26 +5262,26 @@ static void _open_call_budget(Lisp lisp){
 
 Var Lisp_eval(Lisp lisp, Var expression){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_818);
+  if(! lisp) return _bad_session(_823);
   Scope_push(& lisp -> user);
   {
 
-  X2CCleanup _x2c_defer_record_27 = {
-    .fn = _x2c_defer_cleanup_24,
+  X2CCleanup _x2c_defer_record_29 = {
+    .fn = _x2c_defer_cleanup_26,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_27);
+  x2c_cleanup_push(&_x2c_defer_record_29);
   {
     Lisp _x2c_macro_prior_lisp_0 = lisp_active;
     lisp_active = lisp;
     {
   _x2c_defer_env_16 _x2c_defer_env_48 = {._x2c_defer_capture_29 =(const void *) & _x2c_macro_prior_lisp_0};
 
-  X2CCleanup _x2c_defer_record_28 = {
-    .fn = _x2c_defer_cleanup_23,
+  X2CCleanup _x2c_defer_record_30 = {
+    .fn = _x2c_defer_cleanup_25,
     .env = & _x2c_defer_env_48
   };
-  x2c_cleanup_push(&_x2c_defer_record_28);
+  x2c_cleanup_push(&_x2c_defer_record_30);
   {
       Scope * _x2c_macro_prior_automatic_owner_0 = lisp_active -> automatic_owner;
       Scope * _x2c_macro_prior_result_owner_0 = lisp_active -> result_owner;
@@ -5216,60 +5289,60 @@ Var Lisp_eval(Lisp lisp, Var expression){
       {
   _x2c_defer_env_15 _x2c_defer_env_49 = {._x2c_defer_capture_27 =(const void *) & _x2c_macro_prior_automatic_owner_0, ._x2c_defer_capture_28 =(const void *) & _x2c_macro_prior_result_owner_0};
 
-  X2CCleanup _x2c_defer_record_29 = {
-    .fn = _x2c_defer_cleanup_22,
+  X2CCleanup _x2c_defer_record_31 = {
+    .fn = _x2c_defer_cleanup_24,
     .env = & _x2c_defer_env_49
   };
-  x2c_cleanup_push(&_x2c_defer_record_29);
+  x2c_cleanup_push(&_x2c_defer_record_31);
   {
         _open_call_budget(lisp);
         {
           Var _x2c_return_value_16 = _eval(lisp, expression, NULL);
           {
+            x2c_cleanup_leave(& _x2c_defer_record_31);
+            x2c_cleanup_leave(& _x2c_defer_record_30);
             x2c_cleanup_leave(& _x2c_defer_record_29);
-            x2c_cleanup_leave(& _x2c_defer_record_28);
-            x2c_cleanup_leave(& _x2c_defer_record_27);
             return _x2c_return_value_16;
           }
 
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_29);
+      x2c_cleanup_leave(& _x2c_defer_record_31);
 
 }
     }
-    x2c_cleanup_leave(& _x2c_defer_record_28);
+    x2c_cleanup_leave(& _x2c_defer_record_30);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_27);
+  x2c_cleanup_leave(& _x2c_defer_record_29);
 
 }
 }
 
 Var Lisp_apply(Lisp lisp, Var callable, List values){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_819);
+  if(! lisp) return _bad_session(_824);
   Scope_push(& lisp -> user);
   {
 
-  X2CCleanup _x2c_defer_record_30 = {
-    .fn = _x2c_defer_cleanup_27,
+  X2CCleanup _x2c_defer_record_32 = {
+    .fn = _x2c_defer_cleanup_29,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_30);
+  x2c_cleanup_push(&_x2c_defer_record_32);
   {
     Lisp _x2c_macro_prior_lisp_1 = lisp_active;
     lisp_active = lisp;
     {
   _x2c_defer_env_18 _x2c_defer_env_50 = {._x2c_defer_capture_32 =(const void *) & _x2c_macro_prior_lisp_1};
 
-  X2CCleanup _x2c_defer_record_31 = {
-    .fn = _x2c_defer_cleanup_26,
+  X2CCleanup _x2c_defer_record_33 = {
+    .fn = _x2c_defer_cleanup_28,
     .env = & _x2c_defer_env_50
   };
-  x2c_cleanup_push(&_x2c_defer_record_31);
+  x2c_cleanup_push(&_x2c_defer_record_33);
   {
       Scope * _x2c_macro_prior_automatic_owner_1 = lisp_active -> automatic_owner;
       Scope * _x2c_macro_prior_result_owner_1 = lisp_active -> result_owner;
@@ -5277,60 +5350,60 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
       {
   _x2c_defer_env_17 _x2c_defer_env_51 = {._x2c_defer_capture_30 =(const void *) & _x2c_macro_prior_automatic_owner_1, ._x2c_defer_capture_31 =(const void *) & _x2c_macro_prior_result_owner_1};
 
-  X2CCleanup _x2c_defer_record_32 = {
-    .fn = _x2c_defer_cleanup_25,
+  X2CCleanup _x2c_defer_record_34 = {
+    .fn = _x2c_defer_cleanup_27,
     .env = & _x2c_defer_env_51
   };
-  x2c_cleanup_push(&_x2c_defer_record_32);
+  x2c_cleanup_push(&_x2c_defer_record_34);
   {
         _open_call_budget(lisp);
         {
           Var _x2c_return_value_17 = _apply_values(lisp, callable, values, NULL);
           {
+            x2c_cleanup_leave(& _x2c_defer_record_34);
+            x2c_cleanup_leave(& _x2c_defer_record_33);
             x2c_cleanup_leave(& _x2c_defer_record_32);
-            x2c_cleanup_leave(& _x2c_defer_record_31);
-            x2c_cleanup_leave(& _x2c_defer_record_30);
             return _x2c_return_value_17;
           }
 
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_32);
+      x2c_cleanup_leave(& _x2c_defer_record_34);
 
 }
     }
-    x2c_cleanup_leave(& _x2c_defer_record_31);
+    x2c_cleanup_leave(& _x2c_defer_record_33);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_30);
+  x2c_cleanup_leave(& _x2c_defer_record_32);
 
 }
 }
 
 Var Lisp_eval_string(Lisp lisp, String source){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_820);
+  if(! lisp) return _bad_session(_825);
   Scope_push(& lisp -> user);
   {
 
-  X2CCleanup _x2c_defer_record_33 = {
-    .fn = _x2c_defer_cleanup_30,
+  X2CCleanup _x2c_defer_record_35 = {
+    .fn = _x2c_defer_cleanup_32,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_33);
+  x2c_cleanup_push(&_x2c_defer_record_35);
   {
     Lisp _x2c_macro_prior_lisp_2 = lisp_active;
     lisp_active = lisp;
     {
   _x2c_defer_env_20 _x2c_defer_env_52 = {._x2c_defer_capture_35 =(const void *) & _x2c_macro_prior_lisp_2};
 
-  X2CCleanup _x2c_defer_record_34 = {
-    .fn = _x2c_defer_cleanup_29,
+  X2CCleanup _x2c_defer_record_36 = {
+    .fn = _x2c_defer_cleanup_31,
     .env = & _x2c_defer_env_52
   };
-  x2c_cleanup_push(&_x2c_defer_record_34);
+  x2c_cleanup_push(&_x2c_defer_record_36);
   {
       Scope * _x2c_macro_prior_automatic_owner_2 = lisp_active -> automatic_owner;
       Scope * _x2c_macro_prior_result_owner_2 = lisp_active -> result_owner;
@@ -5338,18 +5411,18 @@ Var Lisp_eval_string(Lisp lisp, String source){
       {
   _x2c_defer_env_19 _x2c_defer_env_53 = {._x2c_defer_capture_33 =(const void *) & _x2c_macro_prior_automatic_owner_2, ._x2c_defer_capture_34 =(const void *) & _x2c_macro_prior_result_owner_2};
 
-  X2CCleanup _x2c_defer_record_35 = {
-    .fn = _x2c_defer_cleanup_28,
+  X2CCleanup _x2c_defer_record_37 = {
+    .fn = _x2c_defer_cleanup_30,
     .env = & _x2c_defer_env_53
   };
-  x2c_cleanup_push(&_x2c_defer_record_35);
+  x2c_cleanup_push(&_x2c_defer_record_37);
   {
         if(! String_truth(source)){
           Var _x2c_return_value_18 = List_var(NULL);
           {
+            x2c_cleanup_leave(& _x2c_defer_record_37);
+            x2c_cleanup_leave(& _x2c_defer_record_36);
             x2c_cleanup_leave(& _x2c_defer_record_35);
-            x2c_cleanup_leave(& _x2c_defer_record_34);
-            x2c_cleanup_leave(& _x2c_defer_record_33);
             return _x2c_return_value_18;
           }
 
@@ -5359,11 +5432,11 @@ Var Lisp_eval_string(Lisp lisp, String source){
         {
   _x2c_defer_env_26 _x2c_defer_env_54 = {._x2c_defer_capture_41 =(const void *) & tokens_scope};
 
-  X2CCleanup _x2c_defer_record_36 = {
-    .fn = _x2c_defer_cleanup_37,
+  X2CCleanup _x2c_defer_record_38 = {
+    .fn = _x2c_defer_cleanup_39,
     .env = & _x2c_defer_env_54
   };
-  x2c_cleanup_push(&_x2c_defer_record_36);
+  x2c_cleanup_push(&_x2c_defer_record_38);
   {
           Tokenizer tokenizer = _scan_lisp_tokens(source, & tokens_scope);
           unsigned cursor = 0;
@@ -5377,29 +5450,29 @@ Var Lisp_eval_string(Lisp lisp, String source){
           {
             Var _x2c_return_value_19 = result;
             {
+              x2c_cleanup_leave(& _x2c_defer_record_38);
+              x2c_cleanup_leave(& _x2c_defer_record_37);
               x2c_cleanup_leave(& _x2c_defer_record_36);
               x2c_cleanup_leave(& _x2c_defer_record_35);
-              x2c_cleanup_leave(& _x2c_defer_record_34);
-              x2c_cleanup_leave(& _x2c_defer_record_33);
               return _x2c_return_value_19;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_36);
+        x2c_cleanup_leave(& _x2c_defer_record_38);
 
 }
       }
-      x2c_cleanup_leave(& _x2c_defer_record_35);
+      x2c_cleanup_leave(& _x2c_defer_record_37);
 
 }
     }
-    x2c_cleanup_leave(& _x2c_defer_record_34);
+    x2c_cleanup_leave(& _x2c_defer_record_36);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_33);
+  x2c_cleanup_leave(& _x2c_defer_record_35);
 
 }
 }
@@ -5411,7 +5484,7 @@ FileReadStatus File_read_into(File, Block);
 Var Lisp_eval_file(Lisp lisp, File source){
   if(! _init_guard_) _file_init_();
   if(! source){
-    static const X2CErrorSite _x2c_error_site_64 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3097};
+    static const X2CErrorSite _x2c_error_site_64 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3115};
     x2c_error_raise_n(& _x2c_error_site_64, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
     __builtin_unreachable();
   }
@@ -5419,16 +5492,16 @@ Var Lisp_eval_file(Lisp lisp, File source){
   {
   _x2c_defer_env_27 _x2c_defer_env_55 = {._x2c_defer_capture_42 =(const void *) & content};
 
-  X2CCleanup _x2c_defer_record_37 = {
-    .fn = _x2c_defer_cleanup_38,
+  X2CCleanup _x2c_defer_record_39 = {
+    .fn = _x2c_defer_cleanup_40,
     .env = & _x2c_defer_env_55
   };
-  x2c_cleanup_push(&_x2c_defer_record_37);
+  x2c_cleanup_push(&_x2c_defer_record_39);
   {
     if(File_read_into(source, content) == FILE_READ_EOF){
       Var _x2c_return_value_20 = Lisp_eval_string(lisp, NULL);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_37);
+        x2c_cleanup_leave(& _x2c_defer_record_39);
         return _x2c_return_value_20;
       }
 
@@ -5437,14 +5510,14 @@ Var Lisp_eval_file(Lisp lisp, File source){
       size_t size = content -> length;
       int limit = INT_MAX;
       {
-        static const X2CErrorSite _x2c_error_site_65 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3103};
+        static const X2CErrorSite _x2c_error_site_65 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3121};
         x2c_error_raise_n(& _x2c_error_site_65, 1358596898646632, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(1265290), Var_box_ulong(size), Symbol_var(25782888), int_var(limit));
         __builtin_unreachable();
       }
 
     }
     if(memchr(content -> bytes, '\0', content -> length)){
-      static const X2CErrorSite _x2c_error_site_66 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3106};
+      static const X2CErrorSite _x2c_error_site_66 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 3124};
       x2c_error_raise_n(& _x2c_error_site_66, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
       __builtin_unreachable();
     }
@@ -5452,14 +5525,14 @@ Var Lisp_eval_file(Lisp lisp, File source){
     {
       Var _x2c_return_value_21 = Lisp_eval_string(lisp, text);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_37);
+        x2c_cleanup_leave(& _x2c_defer_record_39);
         return _x2c_return_value_21;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_37);
+  x2c_cleanup_leave(& _x2c_defer_record_39);
 
 }
 }
@@ -5472,12 +5545,12 @@ int Lisp_try_get(Lisp lisp, String name, Var * out){
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_error_site_67 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3132};
+    static const X2CErrorSite _x2c_error_site_67 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3150};
     x2c_error_raise_n(& _x2c_error_site_67, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
   if(lisp -> frozen){
-    static const X2CErrorSite _x2c_error_site_68 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3134};
+    static const X2CErrorSite _x2c_error_site_68 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3152};
     x2c_error_raise_n(& _x2c_error_site_68, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL))));
     __builtin_unreachable();
   }
@@ -5486,25 +5559,25 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     {
       {
 
-  X2CCleanup _x2c_defer_record_38 = {
-    .fn = _x2c_defer_cleanup_31,
+  X2CCleanup _x2c_defer_record_40 = {
+    .fn = _x2c_defer_cleanup_33,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_38);
+  x2c_cleanup_push(&_x2c_defer_record_40);
   {
         {
           Var interned = Atom_intern(name);
           if(_inherited(lisp, interned)){
-            static const X2CErrorSite _x2c_error_site_69 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3139};
+            static const X2CErrorSite _x2c_error_site_69 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 3157};
             x2c_error_raise_n(& _x2c_error_site_69, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL))), Symbol_var(920394), interned);
             __builtin_unreachable();
           }
           _binding_set(lisp, lisp -> globals, interned, value);
-          if(String_startswith(name, _816)) lisp -> protect_x2c = 1;
+          if(String_startswith(name, _821)) lisp -> protect_x2c = 1;
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_38);
+      x2c_cleanup_leave(& _x2c_defer_record_40);
 
 }
     }
@@ -5516,7 +5589,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_error_site_70 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 3157};
+    static const X2CErrorSite _x2c_error_site_70 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 3175};
     x2c_error_raise_n(& _x2c_error_site_70, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
@@ -5565,6 +5638,14 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_7;
   _apply(lisp_active, (*(Var *) _x2c_defer_data_3->_x2c_defer_capture_5), (*(List *) _x2c_defer_data_3->_x2c_defer_capture_6), NULL);
+}
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
+  Scope_pop();
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
@@ -7382,664 +7463,686 @@ static Var _x2c_func_adapt_240(Func _x2c_func_binding_240, const FuncArg * _x2c_
   ;
 }
 
-int List_compare(List, List);
+Job Var_job(Var);
+
+Var Job_var(Job);
 
 static Var _x2c_func_adapt_241(Func _x2c_func_binding_241, const FuncArg * _x2c_func_argv_241){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_241, _x2c_func_argv_241, 0, 806120));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_241, _x2c_func_argv_241, 1, 806120));
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_241, _x2c_func_argv_241, 0, 244620705480));
+  return Job_var(Job_start(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_242(Func _x2c_func_binding_242, const FuncArg * _x2c_func_argv_242){
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_242, _x2c_func_argv_242, 0, 244620705480));
+  return Job_var(a0);
+  ;
+}
+
+int List_compare(List, List);
+
+static Var _x2c_func_adapt_243(Func _x2c_func_binding_243, const FuncArg * _x2c_func_argv_243){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_243, _x2c_func_argv_243, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_243, _x2c_func_argv_243, 1, 806120));
   return int_var(List_compare(a0, a1));
   ;
 }
 
 List List_flatten(List);
 
-static Var _x2c_func_adapt_242(Func _x2c_func_binding_242, const FuncArg * _x2c_func_argv_242){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_242, _x2c_func_argv_242, 0, 806120));
+static Var _x2c_func_adapt_244(Func _x2c_func_binding_244, const FuncArg * _x2c_func_argv_244){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 0, 806120));
   return List_var(List_flatten(a0));
   ;
 }
 
 List List_flatten_all(List);
 
-static Var _x2c_func_adapt_243(Func _x2c_func_binding_243, const FuncArg * _x2c_func_argv_243){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_243, _x2c_func_argv_243, 0, 806120));
+static Var _x2c_func_adapt_245(Func _x2c_func_binding_245, const FuncArg * _x2c_func_argv_245){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_245, _x2c_func_argv_245, 0, 806120));
   return List_var(List_flatten_all(a0));
   ;
 }
 
 List List_getslice(List, int, int, int);
 
-static Var _x2c_func_adapt_244(Func _x2c_func_binding_244, const FuncArg * _x2c_func_argv_244){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_246(Func _x2c_func_binding_246, const FuncArg * _x2c_func_argv_246){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 3, 3453797), 3453797));
   return List_var(List_getslice(a0, a1, a2, a3));
   ;
 }
 
 unsigned List_hash(List);
 
-static Var _x2c_func_adapt_245(Func _x2c_func_binding_245, const FuncArg * _x2c_func_argv_245){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_245, _x2c_func_argv_245, 0, 806120));
+static Var _x2c_func_adapt_247(Func _x2c_func_binding_247, const FuncArg * _x2c_func_argv_247){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_247, _x2c_func_argv_247, 0, 806120));
   return unsigned_var(List_hash(a0));
   ;
 }
 
 List List_head(List, unsigned);
 
-static Var _x2c_func_adapt_246(Func _x2c_func_binding_246, const FuncArg * _x2c_func_argv_246){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 1, 3847013), 3847013));
+static Var _x2c_func_adapt_248(Func _x2c_func_binding_248, const FuncArg * _x2c_func_argv_248){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_248, _x2c_func_argv_248, 0, 806120));
+  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_248, _x2c_func_argv_248, 1, 3847013), 3847013));
   return List_var(List_head(a0, a1));
   ;
 }
 
 int List_index(List, Var);
 
-static Var _x2c_func_adapt_247(Func _x2c_func_binding_247, const FuncArg * _x2c_func_argv_247){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_247, _x2c_func_argv_247, 0, 806120));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_247, _x2c_func_argv_247, 1, 45156);
+static Var _x2c_func_adapt_249(Func _x2c_func_binding_249, const FuncArg * _x2c_func_argv_249){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 1, 45156);
   return int_var(List_index(a0, a1));
   ;
 }
 
 Iter List_iter(List, Iter);
 
-static Var _x2c_func_adapt_248(Func _x2c_func_binding_248, const FuncArg * _x2c_func_argv_248){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_248, _x2c_func_argv_248, 0, 806120));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_248, _x2c_func_argv_248, 1, 631140));
+static Var _x2c_func_adapt_250(Func _x2c_func_binding_250, const FuncArg * _x2c_func_argv_250){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 0, 806120));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 1, 631140));
   return Iter_var(List_iter(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_251(Func _x2c_func_binding_251, const FuncArg * _x2c_func_argv_251){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 0, 806120));
+  return Job_var(List_job(a0));
   ;
 }
 
 List List_match_replace(List, Var, Var);
 
-static Var _x2c_func_adapt_249(Func _x2c_func_binding_249, const FuncArg * _x2c_func_argv_249){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 0, 806120));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 2, 45156);
+static Var _x2c_func_adapt_252(Func _x2c_func_binding_252, const FuncArg * _x2c_func_argv_252){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 2, 45156);
   return List_var(List_match_replace(a0, a1, a2));
   ;
 }
 
 List List_nth_cdr(List, int);
 
-static Var _x2c_func_adapt_250(Func _x2c_func_binding_250, const FuncArg * _x2c_func_argv_250){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_253(Func _x2c_func_binding_253, const FuncArg * _x2c_func_argv_253){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_253, _x2c_func_argv_253, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_253, _x2c_func_argv_253, 1, 3453797), 3453797));
   return List_var(List_nth_cdr(a0, a1));
   ;
 }
 
 List List_promote(List);
 
-static Var _x2c_func_adapt_251(Func _x2c_func_binding_251, const FuncArg * _x2c_func_argv_251){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 0, 806120));
+static Var _x2c_func_adapt_254(Func _x2c_func_binding_254, const FuncArg * _x2c_func_argv_254){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 0, 806120));
   return List_var(List_promote(a0));
   ;
 }
 
 List List_replace(List, List);
 
-static Var _x2c_func_adapt_252(Func _x2c_func_binding_252, const FuncArg * _x2c_func_argv_252){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 0, 806120));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 1, 806120));
+static Var _x2c_func_adapt_255(Func _x2c_func_binding_255, const FuncArg * _x2c_func_argv_255){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_255, _x2c_func_argv_255, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_255, _x2c_func_argv_255, 1, 806120));
   return List_var(List_replace(a0, a1));
   ;
 }
 
 List List_sublis(List, List);
 
-static Var _x2c_func_adapt_253(Func _x2c_func_binding_253, const FuncArg * _x2c_func_argv_253){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_253, _x2c_func_argv_253, 0, 806120));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_253, _x2c_func_argv_253, 1, 806120));
+static Var _x2c_func_adapt_256(Func _x2c_func_binding_256, const FuncArg * _x2c_func_argv_256){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_256, _x2c_func_argv_256, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_256, _x2c_func_argv_256, 1, 806120));
   return List_var(List_sublis(a0, a1));
   ;
 }
 
 List List_subseq(List, int, int, int);
 
-static Var _x2c_func_adapt_254(Func _x2c_func_binding_254, const FuncArg * _x2c_func_argv_254){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 0, 806120));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_257(Func _x2c_func_binding_257, const FuncArg * _x2c_func_argv_257){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 3, 3453797), 3453797));
   return List_var(List_subseq(a0, a1, a2, a3));
   ;
 }
 
 List List_tail(List, unsigned);
 
-static Var _x2c_func_adapt_255(Func _x2c_func_binding_255, const FuncArg * _x2c_func_argv_255){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_255, _x2c_func_argv_255, 0, 806120));
-  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_255, _x2c_func_argv_255, 1, 3847013), 3847013));
+static Var _x2c_func_adapt_258(Func _x2c_func_binding_258, const FuncArg * _x2c_func_argv_258){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_258, _x2c_func_argv_258, 0, 806120));
+  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_258, _x2c_func_argv_258, 1, 3847013), 3847013));
   return List_var(List_tail(a0, a1));
   ;
 }
 
 List List_unique(List);
 
-static Var _x2c_func_adapt_256(Func _x2c_func_binding_256, const FuncArg * _x2c_func_argv_256){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_256, _x2c_func_argv_256, 0, 806120));
+static Var _x2c_func_adapt_259(Func _x2c_func_binding_259, const FuncArg * _x2c_func_argv_259){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_259, _x2c_func_argv_259, 0, 806120));
   return List_var(List_unique(a0));
   ;
 }
 
-static Var _x2c_func_adapt_257(Func _x2c_func_binding_257, const FuncArg * _x2c_func_argv_257){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 0, 26720));
+static Var _x2c_func_adapt_260(Func _x2c_func_binding_260, const FuncArg * _x2c_func_argv_260){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_260, _x2c_func_argv_260, 0, 26720));
   Map_cleanup(a0);
   return((void) 0, Void);
 }
 
 int Map_compare(Map, Map);
 
-static Var _x2c_func_adapt_258(Func _x2c_func_binding_258, const FuncArg * _x2c_func_argv_258){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_258, _x2c_func_argv_258, 0, 26720));
-  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_258, _x2c_func_argv_258, 1, 26720));
+static Var _x2c_func_adapt_261(Func _x2c_func_binding_261, const FuncArg * _x2c_func_argv_261){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_261, _x2c_func_argv_261, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_261, _x2c_func_argv_261, 1, 26720));
   return int_var(Map_compare(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_259(Func _x2c_func_binding_259, const FuncArg * _x2c_func_argv_259){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_259, _x2c_func_argv_259, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_259, _x2c_func_argv_259, 1, 45156);
+static Var _x2c_func_adapt_262(Func _x2c_func_binding_262, const FuncArg * _x2c_func_argv_262){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 1, 45156);
   return int_var(Map_contains(a0, a1));
   ;
 }
 
 Map Map_copy(Map);
 
-static Var _x2c_func_adapt_260(Func _x2c_func_binding_260, const FuncArg * _x2c_func_argv_260){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_260, _x2c_func_argv_260, 0, 26720));
+static Var _x2c_func_adapt_263(Func _x2c_func_binding_263, const FuncArg * _x2c_func_argv_263){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 0, 26720));
   return Map_var(Map_copy(a0));
   ;
 }
 
 Iter Map_enumerate(Map, Iter);
 
-static Var _x2c_func_adapt_261(Func _x2c_func_binding_261, const FuncArg * _x2c_func_argv_261){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_261, _x2c_func_argv_261, 0, 26720));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_261, _x2c_func_argv_261, 1, 631140));
+static Var _x2c_func_adapt_264(Func _x2c_func_binding_264, const FuncArg * _x2c_func_argv_264){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 1, 631140));
   return Iter_var(Map_enumerate(a0, a1));
   ;
 }
 
 int Map_equal(Map, Map);
 
-static Var _x2c_func_adapt_262(Func _x2c_func_binding_262, const FuncArg * _x2c_func_argv_262){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 0, 26720));
-  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 1, 26720));
+static Var _x2c_func_adapt_265(Func _x2c_func_binding_265, const FuncArg * _x2c_func_argv_265){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 1, 26720));
   return int_var(Map_equal(a0, a1));
   ;
 }
 
 Var Map_get_hashed(Map, Var, unsigned);
 
-static Var _x2c_func_adapt_263(Func _x2c_func_binding_263, const FuncArg * _x2c_func_argv_263){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 1, 45156);
-  unsigned a2 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 2, 3847013), 3847013));
+static Var _x2c_func_adapt_266(Func _x2c_func_binding_266, const FuncArg * _x2c_func_argv_266){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 1, 45156);
+  unsigned a2 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 2, 3847013), 3847013));
   return Map_get_hashed(a0, a1, a2);
   ;
 }
 
-static Var _x2c_func_adapt_264(Func _x2c_func_binding_264, const FuncArg * _x2c_func_argv_264){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 2, 45156);
+static Var _x2c_func_adapt_267(Func _x2c_func_binding_267, const FuncArg * _x2c_func_argv_267){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 2, 45156);
   return Map_getdefault(a0, a1, a2);
   ;
 }
 
 Iter Map_iter(Map, Iter);
 
-static Var _x2c_func_adapt_265(Func _x2c_func_binding_265, const FuncArg * _x2c_func_argv_265){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 0, 26720));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 1, 631140));
+static Var _x2c_func_adapt_268(Func _x2c_func_binding_268, const FuncArg * _x2c_func_argv_268){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_268, _x2c_func_argv_268, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_268, _x2c_func_argv_268, 1, 631140));
   return Iter_var(Map_iter(a0, a1));
   ;
 }
 
 Iter Map_keys(Map, Iter);
 
-static Var _x2c_func_adapt_266(Func _x2c_func_binding_266, const FuncArg * _x2c_func_argv_266){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 0, 26720));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 1, 631140));
+static Var _x2c_func_adapt_269(Func _x2c_func_binding_269, const FuncArg * _x2c_func_argv_269){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_269, _x2c_func_argv_269, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_269, _x2c_func_argv_269, 1, 631140));
   return Iter_var(Map_keys(a0, a1));
   ;
 }
 
 unsigned Map_len(Map);
 
-static Var _x2c_func_adapt_267(Func _x2c_func_binding_267, const FuncArg * _x2c_func_argv_267){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 0, 26720));
+static Var _x2c_func_adapt_270(Func _x2c_func_binding_270, const FuncArg * _x2c_func_argv_270){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_270, _x2c_func_argv_270, 0, 26720));
   return unsigned_var(Map_len(a0));
   ;
 }
 
 List Map_list(Map);
 
-static Var _x2c_func_adapt_268(Func _x2c_func_binding_268, const FuncArg * _x2c_func_argv_268){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_268, _x2c_func_argv_268, 0, 26720));
+static Var _x2c_func_adapt_271(Func _x2c_func_binding_271, const FuncArg * _x2c_func_argv_271){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_271, _x2c_func_argv_271, 0, 26720));
   return List_var(Map_list(a0));
   ;
 }
 
 Map Map_merge(Map, Map);
 
-static Var _x2c_func_adapt_269(Func _x2c_func_binding_269, const FuncArg * _x2c_func_argv_269){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_269, _x2c_func_argv_269, 0, 26720));
-  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_269, _x2c_func_argv_269, 1, 26720));
+static Var _x2c_func_adapt_272(Func _x2c_func_binding_272, const FuncArg * _x2c_func_argv_272){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 1, 26720));
   return Map_var(Map_merge(a0, a1));
   ;
 }
 
 Map Map_new_capacity(unsigned);
 
-static Var _x2c_func_adapt_270(Func _x2c_func_binding_270, const FuncArg * _x2c_func_argv_270){
-  unsigned a0 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_270, _x2c_func_argv_270, 0, 3847013), 3847013));
+static Var _x2c_func_adapt_273(Func _x2c_func_binding_273, const FuncArg * _x2c_func_argv_273){
+  unsigned a0 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_273, _x2c_func_argv_273, 0, 3847013), 3847013));
   return Map_var(Map_new_capacity(a0));
   ;
 }
 
 Var Map_postfixindex(Map, Var, Symbol);
 
-static Var _x2c_func_adapt_271(Func _x2c_func_binding_271, const FuncArg * _x2c_func_argv_271){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_271, _x2c_func_argv_271, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_271, _x2c_func_argv_271, 1, 45156);
-  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_271, _x2c_func_argv_271, 2, 1328354264));
+static Var _x2c_func_adapt_274(Func _x2c_func_binding_274, const FuncArg * _x2c_func_argv_274){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_274, _x2c_func_argv_274, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_274, _x2c_func_argv_274, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_274, _x2c_func_argv_274, 2, 1328354264));
   return Map_postfixindex(a0, a1, a2);
   ;
 }
 
 void Map_set(Map, Var, Var);
 
-static Var _x2c_func_adapt_272(Func _x2c_func_binding_272, const FuncArg * _x2c_func_argv_272){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 2, 45156);
+static Var _x2c_func_adapt_275(Func _x2c_func_binding_275, const FuncArg * _x2c_func_argv_275){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 2, 45156);
   Map_set(a0, a1, a2);
   return((void) 0, Void);
 }
 
 Var Map_setdefault(Map, Var, Var);
 
-static Var _x2c_func_adapt_273(Func _x2c_func_binding_273, const FuncArg * _x2c_func_argv_273){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_273, _x2c_func_argv_273, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_273, _x2c_func_argv_273, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_273, _x2c_func_argv_273, 2, 45156);
+static Var _x2c_func_adapt_276(Func _x2c_func_binding_276, const FuncArg * _x2c_func_argv_276){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 2, 45156);
   return Map_setdefault(a0, a1, a2);
   ;
 }
 
-static Var _x2c_func_adapt_274(Func _x2c_func_binding_274, const FuncArg * _x2c_func_argv_274){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_274, _x2c_func_argv_274, 0, 26720));
+static Var _x2c_func_adapt_277(Func _x2c_func_binding_277, const FuncArg * _x2c_func_argv_277){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_277, _x2c_func_argv_277, 0, 26720));
   return int_var(Map_truth(a0));
   ;
 }
 
 Var Map_updateindex(Map, Var, Symbol, Var);
 
-static Var _x2c_func_adapt_275(Func _x2c_func_binding_275, const FuncArg * _x2c_func_argv_275){
-  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 0, 26720));
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 1, 45156);
-  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 2, 1328354264));
-  Var a3 = x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 3, 45156);
+static Var _x2c_func_adapt_278(Func _x2c_func_binding_278, const FuncArg * _x2c_func_argv_278){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 2, 1328354264));
+  Var a3 = x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 3, 45156);
   return Map_updateindex(a0, a1, a2, a3);
   ;
 }
 
-static Var _x2c_func_adapt_276(Func _x2c_func_binding_276, const FuncArg * _x2c_func_argv_276){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 0, 44858254), 44858254));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 1, 44858254), 44858254));
+static Var _x2c_func_adapt_279(Func _x2c_func_binding_279, const FuncArg * _x2c_func_argv_279){
+  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 0, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 1, 44858254), 44858254));
   return Var_new(3683441, Scope_calloc(a0, a1));
   ;
 }
 
 void Scope_cleanup(Scope);
 
-static Var _x2c_func_adapt_277(Func _x2c_func_binding_277, const FuncArg * _x2c_func_argv_277){
-  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_277, _x2c_func_argv_277, 0, 40074250));
+static Var _x2c_func_adapt_280(Func _x2c_func_binding_280, const FuncArg * _x2c_func_argv_280){
+  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_280, _x2c_func_argv_280, 0, 40074250));
   Scope_cleanup(a0);
   return((void) 0, Void);
 }
 
-static Var _x2c_func_adapt_278(Func _x2c_func_binding_278, const FuncArg * _x2c_func_argv_278){
-  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 0, 40074250));
+static Var _x2c_func_adapt_281(Func _x2c_func_binding_281, const FuncArg * _x2c_func_argv_281){
+  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 0, 40074250));
   Scope_destroy(a0);
   return((void) 0, Void);
 }
 
-static Var _x2c_func_adapt_279(Func _x2c_func_binding_279, const FuncArg * _x2c_func_argv_279){
-  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 0, 3683441));
+static Var _x2c_func_adapt_282(Func _x2c_func_binding_282, const FuncArg * _x2c_func_argv_282){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_282, _x2c_func_argv_282, 0, 3683441));
   Scope_free(a0);
   return((void) 0, Void);
 }
 
 void * Scope_malloc(size_t);
 
-static Var _x2c_func_adapt_280(Func _x2c_func_binding_280, const FuncArg * _x2c_func_argv_280){
-  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_280, _x2c_func_argv_280, 0, 44858254), 44858254));
+static Var _x2c_func_adapt_283(Func _x2c_func_binding_283, const FuncArg * _x2c_func_argv_283){
+  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_283, _x2c_func_argv_283, 0, 44858254), 44858254));
   return Var_new(3683441, Scope_malloc(a0));
   ;
 }
 
 void * Scope_memdup(const void *, size_t);
 
-static Var _x2c_func_adapt_281(Func _x2c_func_binding_281, const FuncArg * _x2c_func_argv_281){
-  const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 1, 44858254), 44858254));
+static Var _x2c_func_adapt_284(Func _x2c_func_binding_284, const FuncArg * _x2c_func_argv_284){
+  const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 0, 3683441));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 1, 44858254), 44858254));
   return Var_new(3683441, Scope_memdup(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_282(Func _x2c_func_binding_282, const FuncArg * _x2c_func_argv_282){
-  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_282, _x2c_func_argv_282, 0, 3683441));
-  Scope * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_282, _x2c_func_argv_282, 1, 1282376054));
+static Var _x2c_func_adapt_285(Func _x2c_func_binding_285, const FuncArg * _x2c_func_argv_285){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_285, _x2c_func_argv_285, 0, 3683441));
+  Scope * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_285, _x2c_func_argv_285, 1, 1282376054));
   Scope_move(a0, a1);
   return((void) 0, Void);
 }
 
 Scope Scope_new(void);
 
-static Var _x2c_func_adapt_283(Func _x2c_func_binding_283, const FuncArg * _x2c_func_argv_283){
+static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_func_argv_286){
   return Var_new(40074250, Scope_new());
   ;
 }
 
-static Var _x2c_func_adapt_284(Func _x2c_func_binding_284, const FuncArg * _x2c_func_argv_284){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_284, _x2c_func_argv_284, 0);
+static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_287, _x2c_func_argv_287, 0);
   return Var_new(40074250, Scope_new_named(a0));
   ;
 }
 
-static Var _x2c_func_adapt_285(Func _x2c_func_binding_285, const FuncArg * _x2c_func_argv_285){
+static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288){
   Scope_pop();
   return((void) 0, Void);
 }
 
-static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_func_argv_286){
-  Scope * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_286, _x2c_func_argv_286, 0, 1282376054));
+static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289){
+  Scope * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_289, _x2c_func_argv_289, 0, 1282376054));
   Scope_push(a0);
   return((void) 0, Void);
 }
 
 void * Scope_realloc(void *, size_t);
 
-static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287){
-  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_287, _x2c_func_argv_287, 0, 3683441));
-  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_287, _x2c_func_argv_287, 1, 44858254), 44858254));
+static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 0, 3683441));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 1, 44858254), 44858254));
   return Var_new(3683441, Scope_realloc(a0, a1));
   ;
 }
 
 void Scope_release(void);
 
-static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288){
+static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291){
   Scope_release();
   return((void) 0, Void);
 }
 
 void Scope_retain(void);
 
-static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289){
+static Var _x2c_func_adapt_292(Func _x2c_func_binding_292, const FuncArg * _x2c_func_argv_292){
   Scope_retain();
   return((void) 0, Void);
 }
 
 Iter Split_iter(Split, Iter);
 
-static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290){
-  Split a0 = Var_split(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 0, 40919656));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 1, 631140));
+static Var _x2c_func_adapt_293(Func _x2c_func_binding_293, const FuncArg * _x2c_func_argv_293){
+  Split a0 = Var_split(x2c_func_value_argument(_x2c_func_binding_293, _x2c_func_argv_293, 0, 40919656));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_293, _x2c_func_argv_293, 1, 631140));
   return Iter_var(Split_iter(a0, a1));
   ;
 }
 
 String String_capitalize(String);
 
-static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_291, _x2c_func_argv_291, 0, 1318210446));
+static Var _x2c_func_adapt_294(Func _x2c_func_binding_294, const FuncArg * _x2c_func_argv_294){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_294, _x2c_func_argv_294, 0, 1318210446));
   return String_var(String_capitalize(a0));
   ;
 }
 
 int String_compare(String, String);
 
-static Var _x2c_func_adapt_292(Func _x2c_func_binding_292, const FuncArg * _x2c_func_argv_292){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_292, _x2c_func_argv_292, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_292, _x2c_func_argv_292, 1, 1318210446));
+static Var _x2c_func_adapt_295(Func _x2c_func_binding_295, const FuncArg * _x2c_func_argv_295){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_295, _x2c_func_argv_295, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_295, _x2c_func_argv_295, 1, 1318210446));
   return int_var(String_compare(a0, a1));
   ;
 }
 
 int String_contains(String, String);
 
-static Var _x2c_func_adapt_293(Func _x2c_func_binding_293, const FuncArg * _x2c_func_argv_293){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_293, _x2c_func_argv_293, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_293, _x2c_func_argv_293, 1, 1318210446));
+static Var _x2c_func_adapt_296(Func _x2c_func_binding_296, const FuncArg * _x2c_func_argv_296){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_296, _x2c_func_argv_296, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_296, _x2c_func_argv_296, 1, 1318210446));
   return int_var(String_contains(a0, a1));
   ;
 }
 
 int String_contains_digit(String);
 
-static Var _x2c_func_adapt_294(Func _x2c_func_binding_294, const FuncArg * _x2c_func_argv_294){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_294, _x2c_func_argv_294, 0, 1318210446));
+static Var _x2c_func_adapt_297(Func _x2c_func_binding_297, const FuncArg * _x2c_func_argv_297){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_297, _x2c_func_argv_297, 0, 1318210446));
   return int_var(String_contains_digit(a0));
   ;
 }
 
 int String_count(String, String);
 
-static Var _x2c_func_adapt_295(Func _x2c_func_binding_295, const FuncArg * _x2c_func_argv_295){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_295, _x2c_func_argv_295, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_295, _x2c_func_argv_295, 1, 1318210446));
+static Var _x2c_func_adapt_298(Func _x2c_func_binding_298, const FuncArg * _x2c_func_argv_298){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_298, _x2c_func_argv_298, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_298, _x2c_func_argv_298, 1, 1318210446));
   return int_var(String_count(a0, a1));
   ;
 }
 
 String String_dedent(String);
 
-static Var _x2c_func_adapt_296(Func _x2c_func_binding_296, const FuncArg * _x2c_func_argv_296){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_296, _x2c_func_argv_296, 0, 1318210446));
+static Var _x2c_func_adapt_299(Func _x2c_func_binding_299, const FuncArg * _x2c_func_argv_299){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_299, _x2c_func_argv_299, 0, 1318210446));
   return String_var(String_dedent(a0));
   ;
 }
 
 int String_endswith(String, String);
 
-static Var _x2c_func_adapt_297(Func _x2c_func_binding_297, const FuncArg * _x2c_func_argv_297){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_297, _x2c_func_argv_297, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_297, _x2c_func_argv_297, 1, 1318210446));
+static Var _x2c_func_adapt_300(Func _x2c_func_binding_300, const FuncArg * _x2c_func_argv_300){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 1, 1318210446));
   return int_var(String_endswith(a0, a1));
   ;
 }
 
 String String_escape(String);
 
-static Var _x2c_func_adapt_298(Func _x2c_func_binding_298, const FuncArg * _x2c_func_argv_298){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_298, _x2c_func_argv_298, 0, 1318210446));
+static Var _x2c_func_adapt_301(Func _x2c_func_binding_301, const FuncArg * _x2c_func_argv_301){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_301, _x2c_func_argv_301, 0, 1318210446));
   return String_var(String_escape(a0));
   ;
 }
 
 int String_find(String, String);
 
-static Var _x2c_func_adapt_299(Func _x2c_func_binding_299, const FuncArg * _x2c_func_argv_299){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_299, _x2c_func_argv_299, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_299, _x2c_func_argv_299, 1, 1318210446));
+static Var _x2c_func_adapt_302(Func _x2c_func_binding_302, const FuncArg * _x2c_func_argv_302){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_302, _x2c_func_argv_302, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_302, _x2c_func_argv_302, 1, 1318210446));
   return int_var(String_find(a0, a1));
   ;
 }
 
 List String_find_all(String, String, int, int);
 
-static Var _x2c_func_adapt_300(Func _x2c_func_binding_300, const FuncArg * _x2c_func_argv_300){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_300, _x2c_func_argv_300, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_303(Func _x2c_func_binding_303, const FuncArg * _x2c_func_argv_303){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 3, 3453797), 3453797));
   return List_var(String_find_all(a0, a1, a2, a3));
   ;
 }
 
 int String_find_within(String, String, int, int);
 
-static Var _x2c_func_adapt_301(Func _x2c_func_binding_301, const FuncArg * _x2c_func_argv_301){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_301, _x2c_func_argv_301, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_301, _x2c_func_argv_301, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_301, _x2c_func_argv_301, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_301, _x2c_func_argv_301, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_304(Func _x2c_func_binding_304, const FuncArg * _x2c_func_argv_304){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_304, _x2c_func_argv_304, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_304, _x2c_func_argv_304, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_304, _x2c_func_argv_304, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_304, _x2c_func_argv_304, 3, 3453797), 3453797));
   return int_var(String_find_within(a0, a1, a2, a3));
   ;
 }
 
 void String_free(String);
 
-static Var _x2c_func_adapt_302(Func _x2c_func_binding_302, const FuncArg * _x2c_func_argv_302){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_302, _x2c_func_argv_302, 0, 1318210446));
+static Var _x2c_func_adapt_305(Func _x2c_func_binding_305, const FuncArg * _x2c_func_argv_305){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_305, _x2c_func_argv_305, 0, 1318210446));
   String_free(a0);
   return((void) 0, Void);
 }
 
-static Var _x2c_func_adapt_303(Func _x2c_func_binding_303, const FuncArg * _x2c_func_argv_303){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 2, 3453797), 3453797));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_func_argv_306){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 3, 3453797), 3453797));
   return String_var(String_getslice(a0, a1, a2, a3));
   ;
 }
 
 unsigned String_hash(String);
 
-static Var _x2c_func_adapt_304(Func _x2c_func_binding_304, const FuncArg * _x2c_func_argv_304){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_304, _x2c_func_argv_304, 0, 1318210446));
+static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_307, _x2c_func_argv_307, 0, 1318210446));
   return unsigned_var(String_hash(a0));
   ;
 }
 
 String String_intern(String);
 
-static Var _x2c_func_adapt_305(Func _x2c_func_binding_305, const FuncArg * _x2c_func_argv_305){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_305, _x2c_func_argv_305, 0, 1318210446));
+static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 0, 1318210446));
   return String_var(String_intern(a0));
   ;
 }
 
 int String_is_alnum(String);
 
-static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_func_argv_306){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 0, 1318210446));
+static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 0, 1318210446));
   return int_var(String_is_alnum(a0));
   ;
 }
 
 int String_is_alnum_under(String);
 
-static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_307, _x2c_func_argv_307, 0, 1318210446));
+static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_310, _x2c_func_argv_310, 0, 1318210446));
   return int_var(String_is_alnum_under(a0));
   ;
 }
 
 int String_is_alpha(String);
 
-static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 0, 1318210446));
+static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 0, 1318210446));
   return int_var(String_is_alpha(a0));
   ;
 }
 
 int String_is_alpha_under(String);
 
-static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 0, 1318210446));
+static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_312, _x2c_func_argv_312, 0, 1318210446));
   return int_var(String_is_alpha_under(a0));
   ;
 }
 
 int String_is_digit(String);
 
-static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_310, _x2c_func_argv_310, 0, 1318210446));
+static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 0, 1318210446));
   return int_var(String_is_digit(a0));
   ;
 }
 
 int String_is_identifier(String);
 
-static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 0, 1318210446));
+static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_314, _x2c_func_argv_314, 0, 1318210446));
   return int_var(String_is_identifier(a0));
   ;
 }
 
 int String_is_lower(String);
 
-static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_312, _x2c_func_argv_312, 0, 1318210446));
+static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 0, 1318210446));
   return int_var(String_is_lower(a0));
   ;
 }
 
 int String_is_lower_under(String);
 
-static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 0, 1318210446));
+static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 0, 1318210446));
   return int_var(String_is_lower_under(a0));
   ;
 }
 
 int String_is_space(String);
 
-static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_314, _x2c_func_argv_314, 0, 1318210446));
+static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 0, 1318210446));
   return int_var(String_is_space(a0));
   ;
 }
 
 int String_is_upper(String);
 
-static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 0, 1318210446));
+static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 0, 1318210446));
   return int_var(String_is_upper(a0));
   ;
 }
 
 int String_is_upper_under(String);
 
-static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 0, 1318210446));
+static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 0, 1318210446));
   return int_var(String_is_upper_under(a0));
   ;
 }
 
 Iter String_iter(String, Iter);
 
-static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 0, 1318210446));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 1, 631140));
+static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 0, 1318210446));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 1, 631140));
   return Iter_var(String_iter(a0, a1));
   ;
 }
 
 String String_join(String, List);
 
-static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 0, 1318210446));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 1, 806120));
+static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 0, 1318210446));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 1, 806120));
   return String_var(String_join(a0, a1));
   ;
 }
 
 String String_keep(String, String);
 
-static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 1, 1318210446));
+static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 1, 1318210446));
   return String_var(String_keep(a0, a1));
   ;
 }
@@ -8048,388 +8151,388 @@ Var Split_var(Split);
 
 Split String_lines(String);
 
-static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 0, 1318210446));
+static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 0, 1318210446));
   return Split_var(String_lines(a0));
   ;
 }
 
-static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 0, 1318210446));
+static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 0, 1318210446));
   return String_var(String_lower(a0));
   ;
 }
 
 String String_new_fill(char, int);
 
-static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322){
-  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 0, 26993), 26993));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325){
+  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 0, 26993), 26993));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 1, 3453797), 3453797));
   return String_var(String_new_fill(a0, a1));
   ;
 }
 
 String String_pad_center(String, int, char);
 
-static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 2, 26993), 26993));
+static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 2, 26993), 26993));
   return String_var(String_pad_center(a0, a1, a2));
   ;
 }
 
 String String_pad_left(String, int, char);
 
-static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 2, 26993), 26993));
+static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 2, 26993), 26993));
   return String_var(String_pad_left(a0, a1, a2));
   ;
 }
 
 String String_pad_right(String, int, char);
 
-static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 2, 26993), 26993));
+static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 2, 26993), 26993));
   return String_var(String_pad_right(a0, a1, a2));
   ;
 }
 
 String String_parse(String);
 
-static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 0, 1318210446));
+static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 0, 1318210446));
   return String_var(String_parse(a0));
   ;
 }
 
 int String_parse_char(String);
 
-static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 0, 1318210446));
+static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 0, 1318210446));
   return int_var(String_parse_char(a0));
   ;
 }
 
 List String_partition(String, String);
 
-static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 1, 1318210446));
+static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 1, 1318210446));
   return List_var(String_partition(a0, a1));
   ;
 }
 
 String String_reject(String, String);
 
-static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 1, 1318210446));
+static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 1, 1318210446));
   return String_var(String_reject(a0, a1));
   ;
 }
 
 String String_remove_prefix(String, String);
 
-static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 1, 1318210446));
+static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 1, 1318210446));
   return String_var(String_remove_prefix(a0, a1));
   ;
 }
 
 String String_remove_suffix(String, String);
 
-static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 1, 1318210446));
+static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 1, 1318210446));
   return String_var(String_remove_suffix(a0, a1));
   ;
 }
 
 String String_repeat(String, int);
 
-static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 1, 3453797), 3453797));
   return String_var(String_repeat(a0, a1));
   ;
 }
 
 String String_replace(String, String, String);
 
-static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 2, 1318210446));
+static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 1, 1318210446));
+  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 2, 1318210446));
   return String_var(String_replace(a0, a1, a2));
   ;
 }
 
 String String_replace_n(String, String, String, int);
 
-static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 2, 1318210446));
-  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 3, 3453797), 3453797));
+static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 1, 1318210446));
+  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 2, 1318210446));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 3, 3453797), 3453797));
   return String_var(String_replace_n(a0, a1, a2, a3));
   ;
 }
 
 int String_rfind(String, String);
 
-static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 1, 1318210446));
+static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_func_argv_338){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 1, 1318210446));
   return int_var(String_rfind(a0, a1));
   ;
 }
 
 List String_rpartition(String, String);
 
-static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 1, 1318210446));
+static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 1, 1318210446));
   return List_var(String_rpartition(a0, a1));
   ;
 }
 
 List String_split(String, String);
 
-static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 1, 1318210446));
+static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 1, 1318210446));
   return List_var(String_split(a0, a1));
   ;
 }
 
 List String_split_lines(String, int);
 
-static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_func_argv_338){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 1, 3453797), 3453797));
   return List_var(String_split_lines(a0, a1));
   ;
 }
 
 List String_split_n(String, String, int);
 
-static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 2, 3453797), 3453797));
+static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 2, 3453797), 3453797));
   return List_var(String_split_n(a0, a1, a2));
   ;
 }
 
 Split String_splits(String, String);
 
-static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 1, 1318210446));
+static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 1, 1318210446));
   return Split_var(String_splits(a0, a1));
   ;
 }
 
 String String_squeeze(String, String);
 
-static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 1, 1318210446));
+static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 1, 1318210446));
   return String_var(String_squeeze(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 1, 1318210446));
+static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 1, 1318210446));
   return int_var(String_startswith(a0, a1));
   ;
 }
 
 Symbol String_symbol(String);
 
-static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 0, 1318210446));
+static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 0, 1318210446));
   return Symbol_var(String_symbol(a0));
   ;
 }
 
-static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 0, 1318210446));
-  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 1, 429601877));
+static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 0, 1318210446));
+  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 1, 429601877));
   return int_var(String_try_double(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 0, 1318210446));
-  long * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 1, 26178038));
+static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 0, 1318210446));
+  long * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 1, 26178038));
   return int_var(String_try_long(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 0, 1318210446));
+static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 0, 1318210446));
   return String_var(String_unescape(a0));
   ;
 }
 
 String String_upper(String);
 
-static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 0, 1318210446));
+static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 0, 1318210446));
   return String_var(String_upper(a0));
   ;
 }
 
 String String_withindex(String, int, char);
 
-static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 0, 1318210446));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 1, 3453797), 3453797));
-  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 2, 26993), 26993));
+static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 2, 26993), 26993));
   return String_var(String_withindex(a0, a1, a2));
   ;
 }
 
 Split String_words(String);
 
-static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 0, 1318210446));
+static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 0, 1318210446));
   return Split_var(String_words(a0));
   ;
 }
 
 int Symbol_compare(Symbol, Symbol);
 
-static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 0, 1328354264));
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 1, 1328354264));
+static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 0, 1328354264));
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 1, 1328354264));
   return int_var(Symbol_compare(a0, a1));
   ;
 }
 
 char Symbol_first(Symbol);
 
-static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 0, 1328354264));
+static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 0, 1328354264));
   return char_var(Symbol_first(a0));
   ;
 }
 
 char Symbol_last(Symbol);
 
-static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 0, 1328354264));
+static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 0, 1328354264));
   return char_var(Symbol_last(a0));
   ;
 }
 
 int Symbol_len(Symbol);
 
-static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 0, 1328354264));
+static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 0, 1328354264));
   return int_var(Symbol_len(a0));
   ;
 }
 
-static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 0, 1318210446));
-  Symbol * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 1, 42507336502));
+static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 0, 1318210446));
+  Symbol * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 1, 42507336502));
   return int_var(Symbol_try_new(a0, a1));
   ;
 }
 
 Var Var_add(Var, Var);
 
-static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 1, 45156);
+static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 1, 45156);
   return Var_add(a0, a1);
   ;
 }
 
-static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 0, 45156);
+static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_359, _x2c_func_argv_359, 0, 45156);
   return AdNode_var(Var_adnode(a0));
   ;
 }
 
 Iter Var_as_iter(Var);
 
-static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 0, 45156);
+static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 0, 45156);
   return Iter_var(Var_as_iter(a0));
   ;
 }
 
 char Var_char(Var);
 
-static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 0, 45156);
+static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 0, 45156);
   return char_var(Var_char(a0));
   ;
 }
 
-static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_359, _x2c_func_argv_359, 0, 45156);
+static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 0, 45156);
   return Var_clone_wide(a0);
   ;
 }
 
 int Var_compare(Var, Var);
 
-static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 1, 45156);
+static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 1, 45156);
   return int_var(Var_compare(a0, a1));
   ;
 }
 
 int Var_contains(Var, Var);
 
-static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 1, 45156);
+static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 1, 45156);
   return int_var(Var_contains(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 0, 45156);
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 1, 1328354264));
+static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 1, 1328354264));
   return Var_convert(a0, a1);
   ;
 }
 
 Var Var_div(Var, Var);
 
-static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 1, 45156);
+static Var _x2c_func_adapt_366(Func _x2c_func_binding_366, const FuncArg * _x2c_func_argv_366){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_366, _x2c_func_argv_366, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_366, _x2c_func_argv_366, 1, 45156);
   return Var_div(a0, a1);
   ;
 }
 
 double Var_double(Var);
 
-static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 0, 45156);
+static Var _x2c_func_adapt_367(Func _x2c_func_binding_367, const FuncArg * _x2c_func_argv_367){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_367, _x2c_func_argv_367, 0, 45156);
   return double_var(Var_double(a0));
   ;
 }
 
 Iter Var_fallback_iter(Var, Iter);
 
-static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 0, 45156);
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 1, 631140));
+static Var _x2c_func_adapt_368(Func _x2c_func_binding_368, const FuncArg * _x2c_func_argv_368){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_368, _x2c_func_argv_368, 0, 45156);
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_368, _x2c_func_argv_368, 1, 631140));
   return Iter_var(Var_fallback_iter(a0, a1));
   ;
 }
@@ -8438,280 +8541,286 @@ Var File_var(File);
 
 File Var_file(Var);
 
-static Var _x2c_func_adapt_366(Func _x2c_func_binding_366, const FuncArg * _x2c_func_argv_366){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_366, _x2c_func_argv_366, 0, 45156);
+static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_func_argv_369){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_369, _x2c_func_argv_369, 0, 45156);
   return File_var(Var_file(a0));
   ;
 }
 
 float Var_float(Var);
 
-static Var _x2c_func_adapt_367(Func _x2c_func_binding_367, const FuncArg * _x2c_func_argv_367){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_367, _x2c_func_argv_367, 0, 45156);
+static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 0, 45156);
   return float_var(Var_float(a0));
   ;
 }
 
 double Var_floating(Var);
 
-static Var _x2c_func_adapt_368(Func _x2c_func_binding_368, const FuncArg * _x2c_func_argv_368){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_368, _x2c_func_argv_368, 0, 45156);
+static Var _x2c_func_adapt_371(Func _x2c_func_binding_371, const FuncArg * _x2c_func_argv_371){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_371, _x2c_func_argv_371, 0, 45156);
   return double_var(Var_floating(a0));
   ;
 }
 
 Var Var_getindex(Var, Var);
 
-static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_func_argv_369){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_369, _x2c_func_argv_369, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_369, _x2c_func_argv_369, 1, 45156);
+static Var _x2c_func_adapt_372(Func _x2c_func_binding_372, const FuncArg * _x2c_func_argv_372){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_372, _x2c_func_argv_372, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_372, _x2c_func_argv_372, 1, 45156);
   return Var_getindex(a0, a1);
   ;
 }
 
-static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 0, 45156);
+static Var _x2c_func_adapt_373(Func _x2c_func_binding_373, const FuncArg * _x2c_func_argv_373){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_373, _x2c_func_argv_373, 0, 45156);
   return long_var(Var_integer(a0));
   ;
 }
 
-static Var _x2c_func_adapt_371(Func _x2c_func_binding_371, const FuncArg * _x2c_func_argv_371){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_371, _x2c_func_argv_371, 0, 45156);
+static Var _x2c_func_adapt_374(Func _x2c_func_binding_374, const FuncArg * _x2c_func_argv_374){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_374, _x2c_func_argv_374, 0, 45156);
   return int_var(Var_is_atom(a0));
   ;
 }
 
 int Var_is_atom_binder(Var);
 
-static Var _x2c_func_adapt_372(Func _x2c_func_binding_372, const FuncArg * _x2c_func_argv_372){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_372, _x2c_func_argv_372, 0, 45156);
+static Var _x2c_func_adapt_375(Func _x2c_func_binding_375, const FuncArg * _x2c_func_argv_375){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_375, _x2c_func_argv_375, 0, 45156);
   return int_var(Var_is_atom_binder(a0));
   ;
 }
 
 int Var_is_binder(Var);
 
-static Var _x2c_func_adapt_373(Func _x2c_func_binding_373, const FuncArg * _x2c_func_argv_373){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_373, _x2c_func_argv_373, 0, 45156);
+static Var _x2c_func_adapt_376(Func _x2c_func_binding_376, const FuncArg * _x2c_func_argv_376){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_376, _x2c_func_argv_376, 0, 45156);
   return int_var(Var_is_binder(a0));
   ;
 }
 
 int Var_is_floating(Var);
 
-static Var _x2c_func_adapt_374(Func _x2c_func_binding_374, const FuncArg * _x2c_func_argv_374){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_374, _x2c_func_argv_374, 0, 45156);
+static Var _x2c_func_adapt_377(Func _x2c_func_binding_377, const FuncArg * _x2c_func_argv_377){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_377, _x2c_func_argv_377, 0, 45156);
   return int_var(Var_is_floating(a0));
   ;
 }
 
 int Var_is_list_binder(Var);
 
-static Var _x2c_func_adapt_375(Func _x2c_func_binding_375, const FuncArg * _x2c_func_argv_375){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_375, _x2c_func_argv_375, 0, 45156);
+static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_func_argv_378){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_378, _x2c_func_argv_378, 0, 45156);
   return int_var(Var_is_list_binder(a0));
   ;
 }
 
 int Var_is_match_op(Var);
 
-static Var _x2c_func_adapt_376(Func _x2c_func_binding_376, const FuncArg * _x2c_func_argv_376){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_376, _x2c_func_argv_376, 0, 45156);
+static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_379, _x2c_func_argv_379, 0, 45156);
   return int_var(Var_is_match_op(a0));
   ;
 }
 
-static Var _x2c_func_adapt_377(Func _x2c_func_binding_377, const FuncArg * _x2c_func_argv_377){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_377, _x2c_func_argv_377, 0, 45156);
+static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_380, _x2c_func_argv_380, 0, 45156);
   return int_var(Var_is_nil(a0));
   ;
 }
 
 int Var_is_null(Var);
 
-static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_func_argv_378){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_378, _x2c_func_argv_378, 0, 45156);
+static Var _x2c_func_adapt_381(Func _x2c_func_binding_381, const FuncArg * _x2c_func_argv_381){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_381, _x2c_func_argv_381, 0, 45156);
   return int_var(Var_is_null(a0));
   ;
 }
 
 int Var_is_object(Var);
 
-static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_379, _x2c_func_argv_379, 0, 45156);
+static Var _x2c_func_adapt_382(Func _x2c_func_binding_382, const FuncArg * _x2c_func_argv_382){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_382, _x2c_func_argv_382, 0, 45156);
   return int_var(Var_is_object(a0));
   ;
 }
 
 int Var_is_pointer(Var);
 
-static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_380, _x2c_func_argv_380, 0, 45156);
+static Var _x2c_func_adapt_383(Func _x2c_func_binding_383, const FuncArg * _x2c_func_argv_383){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_383, _x2c_func_argv_383, 0, 45156);
   return int_var(Var_is_pointer(a0));
   ;
 }
 
 int Var_is_reference(Var);
 
-static Var _x2c_func_adapt_381(Func _x2c_func_binding_381, const FuncArg * _x2c_func_argv_381){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_381, _x2c_func_argv_381, 0, 45156);
+static Var _x2c_func_adapt_384(Func _x2c_func_binding_384, const FuncArg * _x2c_func_argv_384){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_384, _x2c_func_argv_384, 0, 45156);
   return int_var(Var_is_reference(a0));
   ;
 }
 
 Iter Var_iter(Var, Iter);
 
-static Var _x2c_func_adapt_382(Func _x2c_func_binding_382, const FuncArg * _x2c_func_argv_382){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_382, _x2c_func_argv_382, 0, 45156);
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_382, _x2c_func_argv_382, 1, 631140));
+static Var _x2c_func_adapt_385(Func _x2c_func_binding_385, const FuncArg * _x2c_func_argv_385){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_385, _x2c_func_argv_385, 0, 45156);
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_385, _x2c_func_argv_385, 1, 631140));
   return Iter_var(Var_iter(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_383(Func _x2c_func_binding_383, const FuncArg * _x2c_func_argv_383){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_383, _x2c_func_argv_383, 0, 45156);
+static Var _x2c_func_adapt_386(Func _x2c_func_binding_386, const FuncArg * _x2c_func_argv_386){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_386, _x2c_func_argv_386, 0, 45156);
+  return Job_var(Var_job(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_387(Func _x2c_func_binding_387, const FuncArg * _x2c_func_argv_387){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_387, _x2c_func_argv_387, 0, 45156);
   return Symbol_var(Var_kind(a0));
   ;
 }
 
 long Var_long(Var);
 
-static Var _x2c_func_adapt_384(Func _x2c_func_binding_384, const FuncArg * _x2c_func_argv_384){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_384, _x2c_func_argv_384, 0, 45156);
+static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_func_argv_388){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_388, _x2c_func_argv_388, 0, 45156);
   return long_var(Var_long(a0));
   ;
 }
 
-static Var _x2c_func_adapt_385(Func _x2c_func_binding_385, const FuncArg * _x2c_func_argv_385){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_385, _x2c_func_argv_385, 0, 45156);
+static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_389, _x2c_func_argv_389, 0, 45156);
   return Var_box_long_double(Var_long_double(a0));
   ;
 }
 
 long double Var_long_double_value(Var);
 
-static Var _x2c_func_adapt_386(Func _x2c_func_binding_386, const FuncArg * _x2c_func_argv_386){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_386, _x2c_func_argv_386, 0, 45156);
+static Var _x2c_func_adapt_390(Func _x2c_func_binding_390, const FuncArg * _x2c_func_argv_390){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_390, _x2c_func_argv_390, 0, 45156);
   return Var_box_long_double(Var_long_double_value(a0));
   ;
 }
 
-static Var _x2c_func_adapt_387(Func _x2c_func_binding_387, const FuncArg * _x2c_func_argv_387){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_387, _x2c_func_argv_387, 0, 45156);
+static Var _x2c_func_adapt_391(Func _x2c_func_binding_391, const FuncArg * _x2c_func_argv_391){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_391, _x2c_func_argv_391, 0, 45156);
   return Var_box_long_long(Var_long_long(a0));
   ;
 }
 
 long long Var_long_long_value(Var);
 
-static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_func_argv_388){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_388, _x2c_func_argv_388, 0, 45156);
+static Var _x2c_func_adapt_392(Func _x2c_func_binding_392, const FuncArg * _x2c_func_argv_392){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_392, _x2c_func_argv_392, 0, 45156);
   return Var_box_long_long(Var_long_long_value(a0));
   ;
 }
 
 long Var_long_value(Var);
 
-static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_389, _x2c_func_argv_389, 0, 45156);
+static Var _x2c_func_adapt_393(Func _x2c_func_binding_393, const FuncArg * _x2c_func_argv_393){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_393, _x2c_func_argv_393, 0, 45156);
   return long_var(Var_long_value(a0));
   ;
 }
 
 Var Var_mod(Var, Var);
 
-static Var _x2c_func_adapt_390(Func _x2c_func_binding_390, const FuncArg * _x2c_func_argv_390){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_390, _x2c_func_argv_390, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_390, _x2c_func_argv_390, 1, 45156);
+static Var _x2c_func_adapt_394(Func _x2c_func_binding_394, const FuncArg * _x2c_func_argv_394){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_394, _x2c_func_argv_394, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_394, _x2c_func_argv_394, 1, 45156);
   return Var_mod(a0, a1);
   ;
 }
 
 Var Var_mul(Var, Var);
 
-static Var _x2c_func_adapt_391(Func _x2c_func_binding_391, const FuncArg * _x2c_func_argv_391){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_391, _x2c_func_argv_391, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_391, _x2c_func_argv_391, 1, 45156);
+static Var _x2c_func_adapt_395(Func _x2c_func_binding_395, const FuncArg * _x2c_func_argv_395){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 1, 45156);
   return Var_mul(a0, a1);
   ;
 }
 
 Var Var_neg(Var);
 
-static Var _x2c_func_adapt_392(Func _x2c_func_binding_392, const FuncArg * _x2c_func_argv_392){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_392, _x2c_func_argv_392, 0, 45156);
+static Var _x2c_func_adapt_396(Func _x2c_func_binding_396, const FuncArg * _x2c_func_argv_396){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_396, _x2c_func_argv_396, 0, 45156);
   return Var_neg(a0);
   ;
 }
 
-static Var _x2c_func_adapt_393(Func _x2c_func_binding_393, const FuncArg * _x2c_func_argv_393){
+static Var _x2c_func_adapt_397(Func _x2c_func_binding_397, const FuncArg * _x2c_func_argv_397){
   return Var_null();
   ;
 }
 
 Var Var_parse(String, Symbol);
 
-static Var _x2c_func_adapt_394(Func _x2c_func_binding_394, const FuncArg * _x2c_func_argv_394){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_394, _x2c_func_argv_394, 0, 1318210446));
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_394, _x2c_func_argv_394, 1, 1328354264));
+static Var _x2c_func_adapt_398(Func _x2c_func_binding_398, const FuncArg * _x2c_func_argv_398){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_398, _x2c_func_argv_398, 0, 1318210446));
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_398, _x2c_func_argv_398, 1, 1328354264));
   return Var_parse(a0, a1);
   ;
 }
 
 Var Var_postfixindex(Var, Var, Symbol);
 
-static Var _x2c_func_adapt_395(Func _x2c_func_binding_395, const FuncArg * _x2c_func_argv_395){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 1, 45156);
-  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 2, 1328354264));
+static Var _x2c_func_adapt_399(Func _x2c_func_binding_399, const FuncArg * _x2c_func_argv_399){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 2, 1328354264));
   return Var_postfixindex(a0, a1, a2);
   ;
 }
 
 int Var_same(Var, Var);
 
-static Var _x2c_func_adapt_396(Func _x2c_func_binding_396, const FuncArg * _x2c_func_argv_396){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_396, _x2c_func_argv_396, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_396, _x2c_func_argv_396, 1, 45156);
+static Var _x2c_func_adapt_400(Func _x2c_func_binding_400, const FuncArg * _x2c_func_argv_400){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_400, _x2c_func_argv_400, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_400, _x2c_func_argv_400, 1, 45156);
   return int_var(Var_same(a0, a1));
   ;
 }
 
 Var Var_setindex(Var, Var, Var);
 
-static Var _x2c_func_adapt_397(Func _x2c_func_binding_397, const FuncArg * _x2c_func_argv_397){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_397, _x2c_func_argv_397, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_397, _x2c_func_argv_397, 1, 45156);
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_397, _x2c_func_argv_397, 2, 45156);
+static Var _x2c_func_adapt_401(Func _x2c_func_binding_401, const FuncArg * _x2c_func_argv_401){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_401, _x2c_func_argv_401, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_401, _x2c_func_argv_401, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_401, _x2c_func_argv_401, 2, 45156);
   return Var_setindex(a0, a1, a2);
   ;
 }
 
 short Var_short(Var);
 
-static Var _x2c_func_adapt_398(Func _x2c_func_binding_398, const FuncArg * _x2c_func_argv_398){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_398, _x2c_func_argv_398, 0, 45156);
+static Var _x2c_func_adapt_402(Func _x2c_func_binding_402, const FuncArg * _x2c_func_argv_402){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_402, _x2c_func_argv_402, 0, 45156);
   return short_var(Var_short(a0));
   ;
 }
 
 Var Var_sub(Var, Var);
 
-static Var _x2c_func_adapt_399(Func _x2c_func_binding_399, const FuncArg * _x2c_func_argv_399){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 1, 45156);
+static Var _x2c_func_adapt_403(Func _x2c_func_binding_403, const FuncArg * _x2c_func_argv_403){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_403, _x2c_func_argv_403, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_403, _x2c_func_argv_403, 1, 45156);
   return Var_sub(a0, a1);
   ;
 }
 
-static Var _x2c_func_adapt_400(Func _x2c_func_binding_400, const FuncArg * _x2c_func_argv_400){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_400, _x2c_func_argv_400, 0, 45156);
+static Var _x2c_func_adapt_404(Func _x2c_func_binding_404, const FuncArg * _x2c_func_argv_404){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_404, _x2c_func_argv_404, 0, 45156);
   return Symbol_var(Var_tag(a0));
   ;
 }
 
-static Var _x2c_func_adapt_401(Func _x2c_func_binding_401, const FuncArg * _x2c_func_argv_401){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_401, _x2c_func_argv_401, 0, 45156);
+static Var _x2c_func_adapt_405(Func _x2c_func_binding_405, const FuncArg * _x2c_func_argv_405){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_405, _x2c_func_argv_405, 0, 45156);
   return int_var(Var_truth(a0));
   ;
 }
@@ -8720,8 +8829,8 @@ Var uchar_var(uchar);
 
 uchar Var_uchar(Var);
 
-static Var _x2c_func_adapt_402(Func _x2c_func_binding_402, const FuncArg * _x2c_func_argv_402){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_402, _x2c_func_argv_402, 0, 45156);
+static Var _x2c_func_adapt_406(Func _x2c_func_binding_406, const FuncArg * _x2c_func_argv_406){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_406, _x2c_func_argv_406, 0, 45156);
   return uchar_var(Var_uchar(a0));
   ;
 }
@@ -8730,59 +8839,59 @@ Var uint_var(uint);
 
 uint Var_uint(Var);
 
-static Var _x2c_func_adapt_403(Func _x2c_func_binding_403, const FuncArg * _x2c_func_argv_403){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_403, _x2c_func_argv_403, 0, 45156);
+static Var _x2c_func_adapt_407(Func _x2c_func_binding_407, const FuncArg * _x2c_func_argv_407){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_407, _x2c_func_argv_407, 0, 45156);
   return uint_var(Var_uint(a0));
   ;
 }
 
 Var ulong_var(ulong);
 
-static Var _x2c_func_adapt_404(Func _x2c_func_binding_404, const FuncArg * _x2c_func_argv_404){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_404, _x2c_func_argv_404, 0, 45156);
+static Var _x2c_func_adapt_408(Func _x2c_func_binding_408, const FuncArg * _x2c_func_argv_408){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_408, _x2c_func_argv_408, 0, 45156);
   return ulong_var(Var_ulong(a0));
   ;
 }
 
 unsigned long long Var_ulong_long(Var);
 
-static Var _x2c_func_adapt_405(Func _x2c_func_binding_405, const FuncArg * _x2c_func_argv_405){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_405, _x2c_func_argv_405, 0, 45156);
+static Var _x2c_func_adapt_409(Func _x2c_func_binding_409, const FuncArg * _x2c_func_argv_409){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 0, 45156);
   return Var_box_ulong_long(Var_ulong_long(a0));
   ;
 }
 
 unsigned long long Var_ulong_long_value(Var);
 
-static Var _x2c_func_adapt_406(Func _x2c_func_binding_406, const FuncArg * _x2c_func_argv_406){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_406, _x2c_func_argv_406, 0, 45156);
+static Var _x2c_func_adapt_410(Func _x2c_func_binding_410, const FuncArg * _x2c_func_argv_410){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_410, _x2c_func_argv_410, 0, 45156);
   return Var_box_ulong_long(Var_ulong_long_value(a0));
   ;
 }
 
 unsigned long Var_ulong_value(Var);
 
-static Var _x2c_func_adapt_407(Func _x2c_func_binding_407, const FuncArg * _x2c_func_argv_407){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_407, _x2c_func_argv_407, 0, 45156);
+static Var _x2c_func_adapt_411(Func _x2c_func_binding_411, const FuncArg * _x2c_func_argv_411){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_411, _x2c_func_argv_411, 0, 45156);
   return Var_box_ulong(Var_ulong_value(a0));
   ;
 }
 
 unsigned Var_unsigned(Var);
 
-static Var _x2c_func_adapt_408(Func _x2c_func_binding_408, const FuncArg * _x2c_func_argv_408){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_408, _x2c_func_argv_408, 0, 45156);
+static Var _x2c_func_adapt_412(Func _x2c_func_binding_412, const FuncArg * _x2c_func_argv_412){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_412, _x2c_func_argv_412, 0, 45156);
   return unsigned_var(Var_unsigned(a0));
   ;
 }
 
 Var Var_updateindex(Var, Var, Symbol, Var);
 
-static Var _x2c_func_adapt_409(Func _x2c_func_binding_409, const FuncArg * _x2c_func_argv_409){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 0, 45156);
-  Var a1 = x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 1, 45156);
-  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 2, 1328354264));
-  Var a3 = x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 3, 45156);
+static Var _x2c_func_adapt_413(Func _x2c_func_binding_413, const FuncArg * _x2c_func_argv_413){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 2, 1328354264));
+  Var a3 = x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 3, 45156);
   return Var_updateindex(a0, a1, a2, a3);
   ;
 }
@@ -8791,1061 +8900,1073 @@ Var ushort_var(ushort);
 
 ushort Var_ushort(Var);
 
-static Var _x2c_func_adapt_410(Func _x2c_func_binding_410, const FuncArg * _x2c_func_argv_410){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_410, _x2c_func_argv_410, 0, 45156);
+static Var _x2c_func_adapt_414(Func _x2c_func_binding_414, const FuncArg * _x2c_func_argv_414){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_414, _x2c_func_argv_414, 0, 45156);
   return ushort_var(Var_ushort(a0));
   ;
 }
 
 int abs(int);
 
-static Var _x2c_func_adapt_411(Func _x2c_func_binding_411, const FuncArg * _x2c_func_argv_411){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_411, _x2c_func_argv_411, 0, 3453797), 3453797));
+static Var _x2c_func_adapt_415(Func _x2c_func_binding_415, const FuncArg * _x2c_func_argv_415){
+  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_415, _x2c_func_argv_415, 0, 3453797), 3453797));
   return int_var(abs(a0));
   ;
 }
 
 double acos(double);
 
-static Var _x2c_func_adapt_412(Func _x2c_func_binding_412, const FuncArg * _x2c_func_argv_412){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_412, _x2c_func_argv_412, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_416(Func _x2c_func_binding_416, const FuncArg * _x2c_func_argv_416){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_416, _x2c_func_argv_416, 0, 3356265), 3356265));
   return double_var(acos(a0));
   ;
 }
 
 float acosf(float);
 
-static Var _x2c_func_adapt_413(Func _x2c_func_binding_413, const FuncArg * _x2c_func_argv_413){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_417(Func _x2c_func_binding_417, const FuncArg * _x2c_func_argv_417){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_417, _x2c_func_argv_417, 0, 3355493), 3355493));
   return float_var(acosf(a0));
   ;
 }
 
 double acosh(double);
 
-static Var _x2c_func_adapt_414(Func _x2c_func_binding_414, const FuncArg * _x2c_func_argv_414){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_414, _x2c_func_argv_414, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_418(Func _x2c_func_binding_418, const FuncArg * _x2c_func_argv_418){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_418, _x2c_func_argv_418, 0, 3356265), 3356265));
   return double_var(acosh(a0));
   ;
 }
 
 float acoshf(float);
 
-static Var _x2c_func_adapt_415(Func _x2c_func_binding_415, const FuncArg * _x2c_func_argv_415){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_415, _x2c_func_argv_415, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_419(Func _x2c_func_binding_419, const FuncArg * _x2c_func_argv_419){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_419, _x2c_func_argv_419, 0, 3355493), 3355493));
   return float_var(acoshf(a0));
   ;
 }
 
 double asin(double);
 
-static Var _x2c_func_adapt_416(Func _x2c_func_binding_416, const FuncArg * _x2c_func_argv_416){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_416, _x2c_func_argv_416, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_420(Func _x2c_func_binding_420, const FuncArg * _x2c_func_argv_420){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_420, _x2c_func_argv_420, 0, 3356265), 3356265));
   return double_var(asin(a0));
   ;
 }
 
 float asinf(float);
 
-static Var _x2c_func_adapt_417(Func _x2c_func_binding_417, const FuncArg * _x2c_func_argv_417){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_417, _x2c_func_argv_417, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_421(Func _x2c_func_binding_421, const FuncArg * _x2c_func_argv_421){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_421, _x2c_func_argv_421, 0, 3355493), 3355493));
   return float_var(asinf(a0));
   ;
 }
 
 double asinh(double);
 
-static Var _x2c_func_adapt_418(Func _x2c_func_binding_418, const FuncArg * _x2c_func_argv_418){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_418, _x2c_func_argv_418, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_func_argv_422){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_422, _x2c_func_argv_422, 0, 3356265), 3356265));
   return double_var(asinh(a0));
   ;
 }
 
 float asinhf(float);
 
-static Var _x2c_func_adapt_419(Func _x2c_func_binding_419, const FuncArg * _x2c_func_argv_419){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_419, _x2c_func_argv_419, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 0, 3355493), 3355493));
   return float_var(asinhf(a0));
   ;
 }
 
 double atan(double);
 
-static Var _x2c_func_adapt_420(Func _x2c_func_binding_420, const FuncArg * _x2c_func_argv_420){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_420, _x2c_func_argv_420, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_424(Func _x2c_func_binding_424, const FuncArg * _x2c_func_argv_424){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_424, _x2c_func_argv_424, 0, 3356265), 3356265));
   return double_var(atan(a0));
   ;
 }
 
 double atan2(double, double);
 
-static Var _x2c_func_adapt_421(Func _x2c_func_binding_421, const FuncArg * _x2c_func_argv_421){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_421, _x2c_func_argv_421, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_421, _x2c_func_argv_421, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_425(Func _x2c_func_binding_425, const FuncArg * _x2c_func_argv_425){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_425, _x2c_func_argv_425, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_425, _x2c_func_argv_425, 1, 3356265), 3356265));
   return double_var(atan2(a0, a1));
   ;
 }
 
 float atan2f(float, float);
 
-static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_func_argv_422){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_422, _x2c_func_argv_422, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_422, _x2c_func_argv_422, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_426(Func _x2c_func_binding_426, const FuncArg * _x2c_func_argv_426){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_426, _x2c_func_argv_426, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_426, _x2c_func_argv_426, 1, 3355493), 3355493));
   return float_var(atan2f(a0, a1));
   ;
 }
 
 float atanf(float);
 
-static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_427(Func _x2c_func_binding_427, const FuncArg * _x2c_func_argv_427){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_427, _x2c_func_argv_427, 0, 3355493), 3355493));
   return float_var(atanf(a0));
   ;
 }
 
 double atanh(double);
 
-static Var _x2c_func_adapt_424(Func _x2c_func_binding_424, const FuncArg * _x2c_func_argv_424){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_424, _x2c_func_argv_424, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_428(Func _x2c_func_binding_428, const FuncArg * _x2c_func_argv_428){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_428, _x2c_func_argv_428, 0, 3356265), 3356265));
   return double_var(atanh(a0));
   ;
 }
 
 float atanhf(float);
 
-static Var _x2c_func_adapt_425(Func _x2c_func_binding_425, const FuncArg * _x2c_func_argv_425){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_425, _x2c_func_argv_425, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_429(Func _x2c_func_binding_429, const FuncArg * _x2c_func_argv_429){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_429, _x2c_func_argv_429, 0, 3355493), 3355493));
   return float_var(atanhf(a0));
   ;
 }
 
 double atof(const char *);
 
-static Var _x2c_func_adapt_426(Func _x2c_func_binding_426, const FuncArg * _x2c_func_argv_426){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_426, _x2c_func_argv_426, 0);
+static Var _x2c_func_adapt_430(Func _x2c_func_binding_430, const FuncArg * _x2c_func_argv_430){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_430, _x2c_func_argv_430, 0);
   return double_var(atof(a0));
   ;
 }
 
 int atoi(const char *);
 
-static Var _x2c_func_adapt_427(Func _x2c_func_binding_427, const FuncArg * _x2c_func_argv_427){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_427, _x2c_func_argv_427, 0);
+static Var _x2c_func_adapt_431(Func _x2c_func_binding_431, const FuncArg * _x2c_func_argv_431){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_431, _x2c_func_argv_431, 0);
   return int_var(atoi(a0));
   ;
 }
 
 long atol(const char *);
 
-static Var _x2c_func_adapt_428(Func _x2c_func_binding_428, const FuncArg * _x2c_func_argv_428){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_428, _x2c_func_argv_428, 0);
+static Var _x2c_func_adapt_432(Func _x2c_func_binding_432, const FuncArg * _x2c_func_argv_432){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_432, _x2c_func_argv_432, 0);
   return long_var(atol(a0));
   ;
 }
 
 long long atoll(const char *);
 
-static Var _x2c_func_adapt_429(Func _x2c_func_binding_429, const FuncArg * _x2c_func_argv_429){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_429, _x2c_func_argv_429, 0);
+static Var _x2c_func_adapt_433(Func _x2c_func_binding_433, const FuncArg * _x2c_func_argv_433){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_433, _x2c_func_argv_433, 0);
   return Var_box_long_long(atoll(a0));
   ;
 }
 
 double cbrt(double);
 
-static Var _x2c_func_adapt_430(Func _x2c_func_binding_430, const FuncArg * _x2c_func_argv_430){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_430, _x2c_func_argv_430, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_434(Func _x2c_func_binding_434, const FuncArg * _x2c_func_argv_434){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_434, _x2c_func_argv_434, 0, 3356265), 3356265));
   return double_var(cbrt(a0));
   ;
 }
 
 float cbrtf(float);
 
-static Var _x2c_func_adapt_431(Func _x2c_func_binding_431, const FuncArg * _x2c_func_argv_431){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_431, _x2c_func_argv_431, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_435(Func _x2c_func_binding_435, const FuncArg * _x2c_func_argv_435){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_435, _x2c_func_argv_435, 0, 3355493), 3355493));
   return float_var(cbrtf(a0));
   ;
 }
 
 double ceil(double);
 
-static Var _x2c_func_adapt_432(Func _x2c_func_binding_432, const FuncArg * _x2c_func_argv_432){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_432, _x2c_func_argv_432, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_436(Func _x2c_func_binding_436, const FuncArg * _x2c_func_argv_436){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_436, _x2c_func_argv_436, 0, 3356265), 3356265));
   return double_var(ceil(a0));
   ;
 }
 
 float ceilf(float);
 
-static Var _x2c_func_adapt_433(Func _x2c_func_binding_433, const FuncArg * _x2c_func_argv_433){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_433, _x2c_func_argv_433, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_437(Func _x2c_func_binding_437, const FuncArg * _x2c_func_argv_437){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_437, _x2c_func_argv_437, 0, 3355493), 3355493));
   return float_var(ceilf(a0));
   ;
 }
 
 double copysign(double, double);
 
-static Var _x2c_func_adapt_434(Func _x2c_func_binding_434, const FuncArg * _x2c_func_argv_434){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_434, _x2c_func_argv_434, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_434, _x2c_func_argv_434, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_438(Func _x2c_func_binding_438, const FuncArg * _x2c_func_argv_438){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_438, _x2c_func_argv_438, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_438, _x2c_func_argv_438, 1, 3356265), 3356265));
   return double_var(copysign(a0, a1));
   ;
 }
 
 float copysignf(float, float);
 
-static Var _x2c_func_adapt_435(Func _x2c_func_binding_435, const FuncArg * _x2c_func_argv_435){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_435, _x2c_func_argv_435, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_435, _x2c_func_argv_435, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_439(Func _x2c_func_binding_439, const FuncArg * _x2c_func_argv_439){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_439, _x2c_func_argv_439, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_439, _x2c_func_argv_439, 1, 3355493), 3355493));
   return float_var(copysignf(a0, a1));
   ;
 }
 
 double cos(double);
 
-static Var _x2c_func_adapt_436(Func _x2c_func_binding_436, const FuncArg * _x2c_func_argv_436){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_436, _x2c_func_argv_436, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_440(Func _x2c_func_binding_440, const FuncArg * _x2c_func_argv_440){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_440, _x2c_func_argv_440, 0, 3356265), 3356265));
   return double_var(cos(a0));
   ;
 }
 
 float cosf(float);
 
-static Var _x2c_func_adapt_437(Func _x2c_func_binding_437, const FuncArg * _x2c_func_argv_437){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_437, _x2c_func_argv_437, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_441(Func _x2c_func_binding_441, const FuncArg * _x2c_func_argv_441){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_441, _x2c_func_argv_441, 0, 3355493), 3355493));
   return float_var(cosf(a0));
   ;
 }
 
 double cosh(double);
 
-static Var _x2c_func_adapt_438(Func _x2c_func_binding_438, const FuncArg * _x2c_func_argv_438){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_438, _x2c_func_argv_438, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_442(Func _x2c_func_binding_442, const FuncArg * _x2c_func_argv_442){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_442, _x2c_func_argv_442, 0, 3356265), 3356265));
   return double_var(cosh(a0));
   ;
 }
 
 float coshf(float);
 
-static Var _x2c_func_adapt_439(Func _x2c_func_binding_439, const FuncArg * _x2c_func_argv_439){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_439, _x2c_func_argv_439, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_443(Func _x2c_func_binding_443, const FuncArg * _x2c_func_argv_443){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 0, 3355493), 3355493));
   return float_var(coshf(a0));
   ;
 }
 
 double erf(double);
 
-static Var _x2c_func_adapt_440(Func _x2c_func_binding_440, const FuncArg * _x2c_func_argv_440){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_440, _x2c_func_argv_440, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_444(Func _x2c_func_binding_444, const FuncArg * _x2c_func_argv_444){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_444, _x2c_func_argv_444, 0, 3356265), 3356265));
   return double_var(erf(a0));
   ;
 }
 
 double erfc(double);
 
-static Var _x2c_func_adapt_441(Func _x2c_func_binding_441, const FuncArg * _x2c_func_argv_441){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_441, _x2c_func_argv_441, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_445(Func _x2c_func_binding_445, const FuncArg * _x2c_func_argv_445){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_445, _x2c_func_argv_445, 0, 3356265), 3356265));
   return double_var(erfc(a0));
   ;
 }
 
 float erfcf(float);
 
-static Var _x2c_func_adapt_442(Func _x2c_func_binding_442, const FuncArg * _x2c_func_argv_442){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_442, _x2c_func_argv_442, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_446(Func _x2c_func_binding_446, const FuncArg * _x2c_func_argv_446){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_446, _x2c_func_argv_446, 0, 3355493), 3355493));
   return float_var(erfcf(a0));
   ;
 }
 
 float erff(float);
 
-static Var _x2c_func_adapt_443(Func _x2c_func_binding_443, const FuncArg * _x2c_func_argv_443){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_447(Func _x2c_func_binding_447, const FuncArg * _x2c_func_argv_447){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_447, _x2c_func_argv_447, 0, 3355493), 3355493));
   return float_var(erff(a0));
   ;
 }
 
 double exp(double);
 
-static Var _x2c_func_adapt_444(Func _x2c_func_binding_444, const FuncArg * _x2c_func_argv_444){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_444, _x2c_func_argv_444, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_448(Func _x2c_func_binding_448, const FuncArg * _x2c_func_argv_448){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_448, _x2c_func_argv_448, 0, 3356265), 3356265));
   return double_var(exp(a0));
   ;
 }
 
 double exp2(double);
 
-static Var _x2c_func_adapt_445(Func _x2c_func_binding_445, const FuncArg * _x2c_func_argv_445){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_445, _x2c_func_argv_445, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_449(Func _x2c_func_binding_449, const FuncArg * _x2c_func_argv_449){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_449, _x2c_func_argv_449, 0, 3356265), 3356265));
   return double_var(exp2(a0));
   ;
 }
 
 float exp2f(float);
 
-static Var _x2c_func_adapt_446(Func _x2c_func_binding_446, const FuncArg * _x2c_func_argv_446){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_446, _x2c_func_argv_446, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_450(Func _x2c_func_binding_450, const FuncArg * _x2c_func_argv_450){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_450, _x2c_func_argv_450, 0, 3355493), 3355493));
   return float_var(exp2f(a0));
   ;
 }
 
 float expf(float);
 
-static Var _x2c_func_adapt_447(Func _x2c_func_binding_447, const FuncArg * _x2c_func_argv_447){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_447, _x2c_func_argv_447, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_451(Func _x2c_func_binding_451, const FuncArg * _x2c_func_argv_451){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_451, _x2c_func_argv_451, 0, 3355493), 3355493));
   return float_var(expf(a0));
   ;
 }
 
 double expm1(double);
 
-static Var _x2c_func_adapt_448(Func _x2c_func_binding_448, const FuncArg * _x2c_func_argv_448){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_448, _x2c_func_argv_448, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_452(Func _x2c_func_binding_452, const FuncArg * _x2c_func_argv_452){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_452, _x2c_func_argv_452, 0, 3356265), 3356265));
   return double_var(expm1(a0));
   ;
 }
 
 float expm1f(float);
 
-static Var _x2c_func_adapt_449(Func _x2c_func_binding_449, const FuncArg * _x2c_func_argv_449){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_449, _x2c_func_argv_449, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_453(Func _x2c_func_binding_453, const FuncArg * _x2c_func_argv_453){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_453, _x2c_func_argv_453, 0, 3355493), 3355493));
   return float_var(expm1f(a0));
   ;
 }
 
 double fabs(double);
 
-static Var _x2c_func_adapt_450(Func _x2c_func_binding_450, const FuncArg * _x2c_func_argv_450){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_450, _x2c_func_argv_450, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_454(Func _x2c_func_binding_454, const FuncArg * _x2c_func_argv_454){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_454, _x2c_func_argv_454, 0, 3356265), 3356265));
   return double_var(fabs(a0));
   ;
 }
 
 float fabsf(float);
 
-static Var _x2c_func_adapt_451(Func _x2c_func_binding_451, const FuncArg * _x2c_func_argv_451){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_451, _x2c_func_argv_451, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_455(Func _x2c_func_binding_455, const FuncArg * _x2c_func_argv_455){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_455, _x2c_func_argv_455, 0, 3355493), 3355493));
   return float_var(fabsf(a0));
   ;
 }
 
 double fdim(double, double);
 
-static Var _x2c_func_adapt_452(Func _x2c_func_binding_452, const FuncArg * _x2c_func_argv_452){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_452, _x2c_func_argv_452, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_452, _x2c_func_argv_452, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_456(Func _x2c_func_binding_456, const FuncArg * _x2c_func_argv_456){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 1, 3356265), 3356265));
   return double_var(fdim(a0, a1));
   ;
 }
 
 float fdimf(float, float);
 
-static Var _x2c_func_adapt_453(Func _x2c_func_binding_453, const FuncArg * _x2c_func_argv_453){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_453, _x2c_func_argv_453, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_453, _x2c_func_argv_453, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_457(Func _x2c_func_binding_457, const FuncArg * _x2c_func_argv_457){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 1, 3355493), 3355493));
   return float_var(fdimf(a0, a1));
   ;
 }
 
 double floor(double);
 
-static Var _x2c_func_adapt_454(Func _x2c_func_binding_454, const FuncArg * _x2c_func_argv_454){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_454, _x2c_func_argv_454, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_458(Func _x2c_func_binding_458, const FuncArg * _x2c_func_argv_458){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_458, _x2c_func_argv_458, 0, 3356265), 3356265));
   return double_var(floor(a0));
   ;
 }
 
 float floorf(float);
 
-static Var _x2c_func_adapt_455(Func _x2c_func_binding_455, const FuncArg * _x2c_func_argv_455){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_455, _x2c_func_argv_455, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_459(Func _x2c_func_binding_459, const FuncArg * _x2c_func_argv_459){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_459, _x2c_func_argv_459, 0, 3355493), 3355493));
   return float_var(floorf(a0));
   ;
 }
 
 double fma(double, double, double);
 
-static Var _x2c_func_adapt_456(Func _x2c_func_binding_456, const FuncArg * _x2c_func_argv_456){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 1, 3356265), 3356265));
-  double a2 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 2, 3356265), 3356265));
+static Var _x2c_func_adapt_460(Func _x2c_func_binding_460, const FuncArg * _x2c_func_argv_460){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_460, _x2c_func_argv_460, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_460, _x2c_func_argv_460, 1, 3356265), 3356265));
+  double a2 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_460, _x2c_func_argv_460, 2, 3356265), 3356265));
   return double_var(fma(a0, a1, a2));
   ;
 }
 
 float fmaf(float, float, float);
 
-static Var _x2c_func_adapt_457(Func _x2c_func_binding_457, const FuncArg * _x2c_func_argv_457){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 1, 3355493), 3355493));
-  float a2 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 2, 3355493), 3355493));
+static Var _x2c_func_adapt_461(Func _x2c_func_binding_461, const FuncArg * _x2c_func_argv_461){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_461, _x2c_func_argv_461, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_461, _x2c_func_argv_461, 1, 3355493), 3355493));
+  float a2 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_461, _x2c_func_argv_461, 2, 3355493), 3355493));
   return float_var(fmaf(a0, a1, a2));
   ;
 }
 
 double fmax(double, double);
 
-static Var _x2c_func_adapt_458(Func _x2c_func_binding_458, const FuncArg * _x2c_func_argv_458){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_458, _x2c_func_argv_458, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_458, _x2c_func_argv_458, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_462(Func _x2c_func_binding_462, const FuncArg * _x2c_func_argv_462){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_462, _x2c_func_argv_462, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_462, _x2c_func_argv_462, 1, 3356265), 3356265));
   return double_var(fmax(a0, a1));
   ;
 }
 
 float fmaxf(float, float);
 
-static Var _x2c_func_adapt_459(Func _x2c_func_binding_459, const FuncArg * _x2c_func_argv_459){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_459, _x2c_func_argv_459, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_459, _x2c_func_argv_459, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_463(Func _x2c_func_binding_463, const FuncArg * _x2c_func_argv_463){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_463, _x2c_func_argv_463, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_463, _x2c_func_argv_463, 1, 3355493), 3355493));
   return float_var(fmaxf(a0, a1));
   ;
 }
 
 double fmin(double, double);
 
-static Var _x2c_func_adapt_460(Func _x2c_func_binding_460, const FuncArg * _x2c_func_argv_460){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_460, _x2c_func_argv_460, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_460, _x2c_func_argv_460, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_464(Func _x2c_func_binding_464, const FuncArg * _x2c_func_argv_464){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_464, _x2c_func_argv_464, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_464, _x2c_func_argv_464, 1, 3356265), 3356265));
   return double_var(fmin(a0, a1));
   ;
 }
 
 float fminf(float, float);
 
-static Var _x2c_func_adapt_461(Func _x2c_func_binding_461, const FuncArg * _x2c_func_argv_461){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_461, _x2c_func_argv_461, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_461, _x2c_func_argv_461, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_465(Func _x2c_func_binding_465, const FuncArg * _x2c_func_argv_465){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_465, _x2c_func_argv_465, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_465, _x2c_func_argv_465, 1, 3355493), 3355493));
   return float_var(fminf(a0, a1));
   ;
 }
 
 double fmod(double, double);
 
-static Var _x2c_func_adapt_462(Func _x2c_func_binding_462, const FuncArg * _x2c_func_argv_462){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_462, _x2c_func_argv_462, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_462, _x2c_func_argv_462, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_466(Func _x2c_func_binding_466, const FuncArg * _x2c_func_argv_466){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_466, _x2c_func_argv_466, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_466, _x2c_func_argv_466, 1, 3356265), 3356265));
   return double_var(fmod(a0, a1));
   ;
 }
 
 float fmodf(float, float);
 
-static Var _x2c_func_adapt_463(Func _x2c_func_binding_463, const FuncArg * _x2c_func_argv_463){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_463, _x2c_func_argv_463, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_463, _x2c_func_argv_463, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_467(Func _x2c_func_binding_467, const FuncArg * _x2c_func_argv_467){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_467, _x2c_func_argv_467, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_467, _x2c_func_argv_467, 1, 3355493), 3355493));
   return float_var(fmodf(a0, a1));
   ;
 }
 
 double frexp(double, int *);
 
-static Var _x2c_func_adapt_464(Func _x2c_func_binding_464, const FuncArg * _x2c_func_argv_464){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_464, _x2c_func_argv_464, 0, 3356265), 3356265));
-  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_464, _x2c_func_argv_464, 1, 442085973));
+static Var _x2c_func_adapt_468(Func _x2c_func_binding_468, const FuncArg * _x2c_func_argv_468){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_468, _x2c_func_argv_468, 0, 3356265), 3356265));
+  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_468, _x2c_func_argv_468, 1, 442085973));
   return double_var(frexp(a0, a1));
   ;
 }
 
 float frexpf(float, int *);
 
-static Var _x2c_func_adapt_465(Func _x2c_func_binding_465, const FuncArg * _x2c_func_argv_465){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_465, _x2c_func_argv_465, 0, 3355493), 3355493));
-  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_465, _x2c_func_argv_465, 1, 442085973));
+static Var _x2c_func_adapt_469(Func _x2c_func_binding_469, const FuncArg * _x2c_func_argv_469){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_469, _x2c_func_argv_469, 0, 3355493), 3355493));
+  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_469, _x2c_func_argv_469, 1, 442085973));
   return float_var(frexpf(a0, a1));
   ;
 }
 
 double hypot(double, double);
 
-static Var _x2c_func_adapt_466(Func _x2c_func_binding_466, const FuncArg * _x2c_func_argv_466){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_466, _x2c_func_argv_466, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_466, _x2c_func_argv_466, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_470(Func _x2c_func_binding_470, const FuncArg * _x2c_func_argv_470){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_470, _x2c_func_argv_470, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_470, _x2c_func_argv_470, 1, 3356265), 3356265));
   return double_var(hypot(a0, a1));
   ;
 }
 
 float hypotf(float, float);
 
-static Var _x2c_func_adapt_467(Func _x2c_func_binding_467, const FuncArg * _x2c_func_argv_467){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_467, _x2c_func_argv_467, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_467, _x2c_func_argv_467, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_471(Func _x2c_func_binding_471, const FuncArg * _x2c_func_argv_471){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_471, _x2c_func_argv_471, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_471, _x2c_func_argv_471, 1, 3355493), 3355493));
   return float_var(hypotf(a0, a1));
   ;
 }
 
 int ilogb(double);
 
-static Var _x2c_func_adapt_468(Func _x2c_func_binding_468, const FuncArg * _x2c_func_argv_468){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_468, _x2c_func_argv_468, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_472(Func _x2c_func_binding_472, const FuncArg * _x2c_func_argv_472){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_472, _x2c_func_argv_472, 0, 3356265), 3356265));
   return int_var(ilogb(a0));
   ;
 }
 
 int ilogbf(float);
 
-static Var _x2c_func_adapt_469(Func _x2c_func_binding_469, const FuncArg * _x2c_func_argv_469){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_469, _x2c_func_argv_469, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_473(Func _x2c_func_binding_473, const FuncArg * _x2c_func_argv_473){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_473, _x2c_func_argv_473, 0, 3355493), 3355493));
   return int_var(ilogbf(a0));
   ;
 }
 
 long labs(long);
 
-static Var _x2c_func_adapt_470(Func _x2c_func_binding_470, const FuncArg * _x2c_func_argv_470){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_470, _x2c_func_argv_470, 0, 818062), 818062));
+static Var _x2c_func_adapt_474(Func _x2c_func_binding_474, const FuncArg * _x2c_func_argv_474){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_474, _x2c_func_argv_474, 0, 818062), 818062));
   return long_var(labs(a0));
   ;
 }
 
 double ldexp(double, int);
 
-static Var _x2c_func_adapt_471(Func _x2c_func_binding_471, const FuncArg * _x2c_func_argv_471){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_471, _x2c_func_argv_471, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_471, _x2c_func_argv_471, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_475(Func _x2c_func_binding_475, const FuncArg * _x2c_func_argv_475){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_475, _x2c_func_argv_475, 0, 3356265), 3356265));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_475, _x2c_func_argv_475, 1, 3453797), 3453797));
   return double_var(ldexp(a0, a1));
   ;
 }
 
 float ldexpf(float, int);
 
-static Var _x2c_func_adapt_472(Func _x2c_func_binding_472, const FuncArg * _x2c_func_argv_472){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_472, _x2c_func_argv_472, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_472, _x2c_func_argv_472, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_476(Func _x2c_func_binding_476, const FuncArg * _x2c_func_argv_476){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_476, _x2c_func_argv_476, 0, 3355493), 3355493));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_476, _x2c_func_argv_476, 1, 3453797), 3453797));
   return float_var(ldexpf(a0, a1));
   ;
 }
 
 double lgamma(double);
 
-static Var _x2c_func_adapt_473(Func _x2c_func_binding_473, const FuncArg * _x2c_func_argv_473){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_473, _x2c_func_argv_473, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_477(Func _x2c_func_binding_477, const FuncArg * _x2c_func_argv_477){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_477, _x2c_func_argv_477, 0, 3356265), 3356265));
   return double_var(lgamma(a0));
   ;
 }
 
 float lgammaf(float);
 
-static Var _x2c_func_adapt_474(Func _x2c_func_binding_474, const FuncArg * _x2c_func_argv_474){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_474, _x2c_func_argv_474, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_478(Func _x2c_func_binding_478, const FuncArg * _x2c_func_argv_478){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_478, _x2c_func_argv_478, 0, 3355493), 3355493));
   return float_var(lgammaf(a0));
   ;
 }
 
 long long llabs(long long);
 
-static Var _x2c_func_adapt_475(Func _x2c_func_binding_475, const FuncArg * _x2c_func_argv_475){
-  long long a0 = Var_long_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_475, _x2c_func_argv_475, 0, 25983886), 25983886));
+static Var _x2c_func_adapt_479(Func _x2c_func_binding_479, const FuncArg * _x2c_func_argv_479){
+  long long a0 = Var_long_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_479, _x2c_func_argv_479, 0, 25983886), 25983886));
   return Var_box_long_long(llabs(a0));
   ;
 }
 
 long long llrint(double);
 
-static Var _x2c_func_adapt_476(Func _x2c_func_binding_476, const FuncArg * _x2c_func_argv_476){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_476, _x2c_func_argv_476, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_480(Func _x2c_func_binding_480, const FuncArg * _x2c_func_argv_480){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_480, _x2c_func_argv_480, 0, 3356265), 3356265));
   return Var_box_long_long(llrint(a0));
   ;
 }
 
 long long llrintf(float);
 
-static Var _x2c_func_adapt_477(Func _x2c_func_binding_477, const FuncArg * _x2c_func_argv_477){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_477, _x2c_func_argv_477, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_481(Func _x2c_func_binding_481, const FuncArg * _x2c_func_argv_481){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_481, _x2c_func_argv_481, 0, 3355493), 3355493));
   return Var_box_long_long(llrintf(a0));
   ;
 }
 
 long long llround(double);
 
-static Var _x2c_func_adapt_478(Func _x2c_func_binding_478, const FuncArg * _x2c_func_argv_478){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_478, _x2c_func_argv_478, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_482(Func _x2c_func_binding_482, const FuncArg * _x2c_func_argv_482){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_482, _x2c_func_argv_482, 0, 3356265), 3356265));
   return Var_box_long_long(llround(a0));
   ;
 }
 
 long long llroundf(float);
 
-static Var _x2c_func_adapt_479(Func _x2c_func_binding_479, const FuncArg * _x2c_func_argv_479){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_479, _x2c_func_argv_479, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_483(Func _x2c_func_binding_483, const FuncArg * _x2c_func_argv_483){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_483, _x2c_func_argv_483, 0, 3355493), 3355493));
   return Var_box_long_long(llroundf(a0));
   ;
 }
 
 double log(double);
 
-static Var _x2c_func_adapt_480(Func _x2c_func_binding_480, const FuncArg * _x2c_func_argv_480){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_480, _x2c_func_argv_480, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_484(Func _x2c_func_binding_484, const FuncArg * _x2c_func_argv_484){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_484, _x2c_func_argv_484, 0, 3356265), 3356265));
   return double_var(log(a0));
   ;
 }
 
 double log10(double);
 
-static Var _x2c_func_adapt_481(Func _x2c_func_binding_481, const FuncArg * _x2c_func_argv_481){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_481, _x2c_func_argv_481, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_485(Func _x2c_func_binding_485, const FuncArg * _x2c_func_argv_485){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_485, _x2c_func_argv_485, 0, 3356265), 3356265));
   return double_var(log10(a0));
   ;
 }
 
 float log10f(float);
 
-static Var _x2c_func_adapt_482(Func _x2c_func_binding_482, const FuncArg * _x2c_func_argv_482){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_482, _x2c_func_argv_482, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_486(Func _x2c_func_binding_486, const FuncArg * _x2c_func_argv_486){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_486, _x2c_func_argv_486, 0, 3355493), 3355493));
   return float_var(log10f(a0));
   ;
 }
 
 double log1p(double);
 
-static Var _x2c_func_adapt_483(Func _x2c_func_binding_483, const FuncArg * _x2c_func_argv_483){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_483, _x2c_func_argv_483, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_487(Func _x2c_func_binding_487, const FuncArg * _x2c_func_argv_487){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_487, _x2c_func_argv_487, 0, 3356265), 3356265));
   return double_var(log1p(a0));
   ;
 }
 
 float log1pf(float);
 
-static Var _x2c_func_adapt_484(Func _x2c_func_binding_484, const FuncArg * _x2c_func_argv_484){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_484, _x2c_func_argv_484, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_488(Func _x2c_func_binding_488, const FuncArg * _x2c_func_argv_488){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_488, _x2c_func_argv_488, 0, 3355493), 3355493));
   return float_var(log1pf(a0));
   ;
 }
 
 double log2(double);
 
-static Var _x2c_func_adapt_485(Func _x2c_func_binding_485, const FuncArg * _x2c_func_argv_485){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_485, _x2c_func_argv_485, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_489(Func _x2c_func_binding_489, const FuncArg * _x2c_func_argv_489){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_489, _x2c_func_argv_489, 0, 3356265), 3356265));
   return double_var(log2(a0));
   ;
 }
 
 float log2f(float);
 
-static Var _x2c_func_adapt_486(Func _x2c_func_binding_486, const FuncArg * _x2c_func_argv_486){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_486, _x2c_func_argv_486, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_490(Func _x2c_func_binding_490, const FuncArg * _x2c_func_argv_490){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_490, _x2c_func_argv_490, 0, 3355493), 3355493));
   return float_var(log2f(a0));
   ;
 }
 
 double logb(double);
 
-static Var _x2c_func_adapt_487(Func _x2c_func_binding_487, const FuncArg * _x2c_func_argv_487){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_487, _x2c_func_argv_487, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_491(Func _x2c_func_binding_491, const FuncArg * _x2c_func_argv_491){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_491, _x2c_func_argv_491, 0, 3356265), 3356265));
   return double_var(logb(a0));
   ;
 }
 
 float logbf(float);
 
-static Var _x2c_func_adapt_488(Func _x2c_func_binding_488, const FuncArg * _x2c_func_argv_488){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_488, _x2c_func_argv_488, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_492(Func _x2c_func_binding_492, const FuncArg * _x2c_func_argv_492){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_492, _x2c_func_argv_492, 0, 3355493), 3355493));
   return float_var(logbf(a0));
   ;
 }
 
 float logf(float);
 
-static Var _x2c_func_adapt_489(Func _x2c_func_binding_489, const FuncArg * _x2c_func_argv_489){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_489, _x2c_func_argv_489, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_493(Func _x2c_func_binding_493, const FuncArg * _x2c_func_argv_493){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_493, _x2c_func_argv_493, 0, 3355493), 3355493));
   return float_var(logf(a0));
   ;
 }
 
 long lrint(double);
 
-static Var _x2c_func_adapt_490(Func _x2c_func_binding_490, const FuncArg * _x2c_func_argv_490){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_490, _x2c_func_argv_490, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_494(Func _x2c_func_binding_494, const FuncArg * _x2c_func_argv_494){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_494, _x2c_func_argv_494, 0, 3356265), 3356265));
   return long_var(lrint(a0));
   ;
 }
 
 long lrintf(float);
 
-static Var _x2c_func_adapt_491(Func _x2c_func_binding_491, const FuncArg * _x2c_func_argv_491){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_491, _x2c_func_argv_491, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_495(Func _x2c_func_binding_495, const FuncArg * _x2c_func_argv_495){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_495, _x2c_func_argv_495, 0, 3355493), 3355493));
   return long_var(lrintf(a0));
   ;
 }
 
 long lround(double);
 
-static Var _x2c_func_adapt_492(Func _x2c_func_binding_492, const FuncArg * _x2c_func_argv_492){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_492, _x2c_func_argv_492, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_496(Func _x2c_func_binding_496, const FuncArg * _x2c_func_argv_496){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_496, _x2c_func_argv_496, 0, 3356265), 3356265));
   return long_var(lround(a0));
   ;
 }
 
 long lroundf(float);
 
-static Var _x2c_func_adapt_493(Func _x2c_func_binding_493, const FuncArg * _x2c_func_argv_493){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_493, _x2c_func_argv_493, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_497(Func _x2c_func_binding_497, const FuncArg * _x2c_func_argv_497){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_497, _x2c_func_argv_497, 0, 3355493), 3355493));
   return long_var(lroundf(a0));
   ;
 }
 
 double modf(double, double *);
 
-static Var _x2c_func_adapt_494(Func _x2c_func_binding_494, const FuncArg * _x2c_func_argv_494){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_494, _x2c_func_argv_494, 0, 3356265), 3356265));
-  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_494, _x2c_func_argv_494, 1, 429601877));
+static Var _x2c_func_adapt_498(Func _x2c_func_binding_498, const FuncArg * _x2c_func_argv_498){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_498, _x2c_func_argv_498, 0, 3356265), 3356265));
+  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_498, _x2c_func_argv_498, 1, 429601877));
   return double_var(modf(a0, a1));
   ;
 }
 
 float modff(float, float *);
 
-static Var _x2c_func_adapt_495(Func _x2c_func_binding_495, const FuncArg * _x2c_func_argv_495){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_495, _x2c_func_argv_495, 0, 3355493), 3355493));
-  float * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_495, _x2c_func_argv_495, 1, 429503061));
+static Var _x2c_func_adapt_499(Func _x2c_func_binding_499, const FuncArg * _x2c_func_argv_499){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_499, _x2c_func_argv_499, 0, 3355493), 3355493));
+  float * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_499, _x2c_func_argv_499, 1, 429503061));
   return float_var(modff(a0, a1));
   ;
 }
 
 double nan(const char *);
 
-static Var _x2c_func_adapt_496(Func _x2c_func_binding_496, const FuncArg * _x2c_func_argv_496){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_496, _x2c_func_argv_496, 0);
+static Var _x2c_func_adapt_500(Func _x2c_func_binding_500, const FuncArg * _x2c_func_argv_500){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_500, _x2c_func_argv_500, 0);
   return double_var(nan(a0));
   ;
 }
 
 float nanf(const char *);
 
-static Var _x2c_func_adapt_497(Func _x2c_func_binding_497, const FuncArg * _x2c_func_argv_497){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_497, _x2c_func_argv_497, 0);
+static Var _x2c_func_adapt_501(Func _x2c_func_binding_501, const FuncArg * _x2c_func_argv_501){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_501, _x2c_func_argv_501, 0);
   return float_var(nanf(a0));
   ;
 }
 
 double nearbyint(double);
 
-static Var _x2c_func_adapt_498(Func _x2c_func_binding_498, const FuncArg * _x2c_func_argv_498){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_498, _x2c_func_argv_498, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_502(Func _x2c_func_binding_502, const FuncArg * _x2c_func_argv_502){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_502, _x2c_func_argv_502, 0, 3356265), 3356265));
   return double_var(nearbyint(a0));
   ;
 }
 
 float nearbyintf(float);
 
-static Var _x2c_func_adapt_499(Func _x2c_func_binding_499, const FuncArg * _x2c_func_argv_499){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_499, _x2c_func_argv_499, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_503(Func _x2c_func_binding_503, const FuncArg * _x2c_func_argv_503){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_503, _x2c_func_argv_503, 0, 3355493), 3355493));
   return float_var(nearbyintf(a0));
   ;
 }
 
 double nextafter(double, double);
 
-static Var _x2c_func_adapt_500(Func _x2c_func_binding_500, const FuncArg * _x2c_func_argv_500){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_500, _x2c_func_argv_500, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_500, _x2c_func_argv_500, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_504(Func _x2c_func_binding_504, const FuncArg * _x2c_func_argv_504){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_504, _x2c_func_argv_504, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_504, _x2c_func_argv_504, 1, 3356265), 3356265));
   return double_var(nextafter(a0, a1));
   ;
 }
 
 float nextafterf(float, float);
 
-static Var _x2c_func_adapt_501(Func _x2c_func_binding_501, const FuncArg * _x2c_func_argv_501){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_501, _x2c_func_argv_501, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_501, _x2c_func_argv_501, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_505(Func _x2c_func_binding_505, const FuncArg * _x2c_func_argv_505){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 1, 3355493), 3355493));
   return float_var(nextafterf(a0, a1));
   ;
 }
 
 double nexttoward(double, long double);
 
-static Var _x2c_func_adapt_502(Func _x2c_func_binding_502, const FuncArg * _x2c_func_argv_502){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_502, _x2c_func_argv_502, 0, 3356265), 3356265));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_502, _x2c_func_argv_502, 1, 26071077642), 26071077642));
+static Var _x2c_func_adapt_506(Func _x2c_func_binding_506, const FuncArg * _x2c_func_argv_506){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 0, 3356265), 3356265));
+  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 1, 26071077642), 26071077642));
   return double_var(nexttoward(a0, a1));
   ;
 }
 
 float nexttowardf(float, long double);
 
-static Var _x2c_func_adapt_503(Func _x2c_func_binding_503, const FuncArg * _x2c_func_argv_503){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_503, _x2c_func_argv_503, 0, 3355493), 3355493));
-  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_503, _x2c_func_argv_503, 1, 26071077642), 26071077642));
+static Var _x2c_func_adapt_507(Func _x2c_func_binding_507, const FuncArg * _x2c_func_argv_507){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_507, _x2c_func_argv_507, 0, 3355493), 3355493));
+  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_507, _x2c_func_argv_507, 1, 26071077642), 26071077642));
   return float_var(nexttowardf(a0, a1));
   ;
 }
 
 double pow(double, double);
 
-static Var _x2c_func_adapt_504(Func _x2c_func_binding_504, const FuncArg * _x2c_func_argv_504){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_504, _x2c_func_argv_504, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_504, _x2c_func_argv_504, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_508(Func _x2c_func_binding_508, const FuncArg * _x2c_func_argv_508){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_508, _x2c_func_argv_508, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_508, _x2c_func_argv_508, 1, 3356265), 3356265));
   return double_var(pow(a0, a1));
   ;
 }
 
 float powf(float, float);
 
-static Var _x2c_func_adapt_505(Func _x2c_func_binding_505, const FuncArg * _x2c_func_argv_505){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_509(Func _x2c_func_binding_509, const FuncArg * _x2c_func_argv_509){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 1, 3355493), 3355493));
   return float_var(powf(a0, a1));
   ;
 }
 
 Iter range(int, int, int, Iter);
 
-static Var _x2c_func_adapt_506(Func _x2c_func_binding_506, const FuncArg * _x2c_func_argv_506){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 0, 3453797), 3453797));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 1, 3453797), 3453797));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 2, 3453797), 3453797));
-  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 3, 631140));
+static Var _x2c_func_adapt_510(Func _x2c_func_binding_510, const FuncArg * _x2c_func_argv_510){
+  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 0, 3453797), 3453797));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 2, 3453797), 3453797));
+  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 3, 631140));
   return Iter_var(range(a0, a1, a2, a3));
   ;
 }
 
 double remainder(double, double);
 
-static Var _x2c_func_adapt_507(Func _x2c_func_binding_507, const FuncArg * _x2c_func_argv_507){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_507, _x2c_func_argv_507, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_507, _x2c_func_argv_507, 1, 3356265), 3356265));
+static Var _x2c_func_adapt_511(Func _x2c_func_binding_511, const FuncArg * _x2c_func_argv_511){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_511, _x2c_func_argv_511, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_511, _x2c_func_argv_511, 1, 3356265), 3356265));
   return double_var(remainder(a0, a1));
   ;
 }
 
 float remainderf(float, float);
 
-static Var _x2c_func_adapt_508(Func _x2c_func_binding_508, const FuncArg * _x2c_func_argv_508){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_508, _x2c_func_argv_508, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_508, _x2c_func_argv_508, 1, 3355493), 3355493));
+static Var _x2c_func_adapt_512(Func _x2c_func_binding_512, const FuncArg * _x2c_func_argv_512){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_512, _x2c_func_argv_512, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_512, _x2c_func_argv_512, 1, 3355493), 3355493));
   return float_var(remainderf(a0, a1));
   ;
 }
 
 double remquo(double, double, int *);
 
-static Var _x2c_func_adapt_509(Func _x2c_func_binding_509, const FuncArg * _x2c_func_argv_509){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 0, 3356265), 3356265));
-  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 1, 3356265), 3356265));
-  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 2, 442085973));
+static Var _x2c_func_adapt_513(Func _x2c_func_binding_513, const FuncArg * _x2c_func_argv_513){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_513, _x2c_func_argv_513, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_513, _x2c_func_argv_513, 1, 3356265), 3356265));
+  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_513, _x2c_func_argv_513, 2, 442085973));
   return double_var(remquo(a0, a1, a2));
   ;
 }
 
 float remquof(float, float, int *);
 
-static Var _x2c_func_adapt_510(Func _x2c_func_binding_510, const FuncArg * _x2c_func_argv_510){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 0, 3355493), 3355493));
-  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 1, 3355493), 3355493));
-  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 2, 442085973));
+static Var _x2c_func_adapt_514(Func _x2c_func_binding_514, const FuncArg * _x2c_func_argv_514){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_514, _x2c_func_argv_514, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_514, _x2c_func_argv_514, 1, 3355493), 3355493));
+  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_514, _x2c_func_argv_514, 2, 442085973));
   return float_var(remquof(a0, a1, a2));
   ;
 }
 
 double rint(double);
 
-static Var _x2c_func_adapt_511(Func _x2c_func_binding_511, const FuncArg * _x2c_func_argv_511){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_511, _x2c_func_argv_511, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_515(Func _x2c_func_binding_515, const FuncArg * _x2c_func_argv_515){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_515, _x2c_func_argv_515, 0, 3356265), 3356265));
   return double_var(rint(a0));
   ;
 }
 
 float rintf(float);
 
-static Var _x2c_func_adapt_512(Func _x2c_func_binding_512, const FuncArg * _x2c_func_argv_512){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_512, _x2c_func_argv_512, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_516(Func _x2c_func_binding_516, const FuncArg * _x2c_func_argv_516){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_516, _x2c_func_argv_516, 0, 3355493), 3355493));
   return float_var(rintf(a0));
   ;
 }
 
 double round(double);
 
-static Var _x2c_func_adapt_513(Func _x2c_func_binding_513, const FuncArg * _x2c_func_argv_513){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_513, _x2c_func_argv_513, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_517(Func _x2c_func_binding_517, const FuncArg * _x2c_func_argv_517){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_517, _x2c_func_argv_517, 0, 3356265), 3356265));
   return double_var(round(a0));
   ;
 }
 
 float roundf(float);
 
-static Var _x2c_func_adapt_514(Func _x2c_func_binding_514, const FuncArg * _x2c_func_argv_514){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_514, _x2c_func_argv_514, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_518(Func _x2c_func_binding_518, const FuncArg * _x2c_func_argv_518){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_518, _x2c_func_argv_518, 0, 3355493), 3355493));
   return float_var(roundf(a0));
   ;
 }
 
 double scalbln(double, long);
 
-static Var _x2c_func_adapt_515(Func _x2c_func_binding_515, const FuncArg * _x2c_func_argv_515){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_515, _x2c_func_argv_515, 0, 3356265), 3356265));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_515, _x2c_func_argv_515, 1, 818062), 818062));
+static Var _x2c_func_adapt_519(Func _x2c_func_binding_519, const FuncArg * _x2c_func_argv_519){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_519, _x2c_func_argv_519, 0, 3356265), 3356265));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_519, _x2c_func_argv_519, 1, 818062), 818062));
   return double_var(scalbln(a0, a1));
   ;
 }
 
 float scalblnf(float, long);
 
-static Var _x2c_func_adapt_516(Func _x2c_func_binding_516, const FuncArg * _x2c_func_argv_516){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_516, _x2c_func_argv_516, 0, 3355493), 3355493));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_516, _x2c_func_argv_516, 1, 818062), 818062));
+static Var _x2c_func_adapt_520(Func _x2c_func_binding_520, const FuncArg * _x2c_func_argv_520){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_520, _x2c_func_argv_520, 0, 3355493), 3355493));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_520, _x2c_func_argv_520, 1, 818062), 818062));
   return float_var(scalblnf(a0, a1));
   ;
 }
 
 double scalbn(double, int);
 
-static Var _x2c_func_adapt_517(Func _x2c_func_binding_517, const FuncArg * _x2c_func_argv_517){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_517, _x2c_func_argv_517, 0, 3356265), 3356265));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_517, _x2c_func_argv_517, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_521(Func _x2c_func_binding_521, const FuncArg * _x2c_func_argv_521){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_521, _x2c_func_argv_521, 0, 3356265), 3356265));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_521, _x2c_func_argv_521, 1, 3453797), 3453797));
   return double_var(scalbn(a0, a1));
   ;
 }
 
 float scalbnf(float, int);
 
-static Var _x2c_func_adapt_518(Func _x2c_func_binding_518, const FuncArg * _x2c_func_argv_518){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_518, _x2c_func_argv_518, 0, 3355493), 3355493));
-  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_518, _x2c_func_argv_518, 1, 3453797), 3453797));
+static Var _x2c_func_adapt_522(Func _x2c_func_binding_522, const FuncArg * _x2c_func_argv_522){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_522, _x2c_func_argv_522, 0, 3355493), 3355493));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_522, _x2c_func_argv_522, 1, 3453797), 3453797));
   return float_var(scalbnf(a0, a1));
   ;
 }
 
 double sin(double);
 
-static Var _x2c_func_adapt_519(Func _x2c_func_binding_519, const FuncArg * _x2c_func_argv_519){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_519, _x2c_func_argv_519, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_523(Func _x2c_func_binding_523, const FuncArg * _x2c_func_argv_523){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_523, _x2c_func_argv_523, 0, 3356265), 3356265));
   return double_var(sin(a0));
   ;
 }
 
 float sinf(float);
 
-static Var _x2c_func_adapt_520(Func _x2c_func_binding_520, const FuncArg * _x2c_func_argv_520){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_520, _x2c_func_argv_520, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_524(Func _x2c_func_binding_524, const FuncArg * _x2c_func_argv_524){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_524, _x2c_func_argv_524, 0, 3355493), 3355493));
   return float_var(sinf(a0));
   ;
 }
 
 double sinh(double);
 
-static Var _x2c_func_adapt_521(Func _x2c_func_binding_521, const FuncArg * _x2c_func_argv_521){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_521, _x2c_func_argv_521, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_525(Func _x2c_func_binding_525, const FuncArg * _x2c_func_argv_525){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_525, _x2c_func_argv_525, 0, 3356265), 3356265));
   return double_var(sinh(a0));
   ;
 }
 
 float sinhf(float);
 
-static Var _x2c_func_adapt_522(Func _x2c_func_binding_522, const FuncArg * _x2c_func_argv_522){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_522, _x2c_func_argv_522, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_526(Func _x2c_func_binding_526, const FuncArg * _x2c_func_argv_526){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_526, _x2c_func_argv_526, 0, 3355493), 3355493));
   return float_var(sinhf(a0));
   ;
 }
 
 double sqrt(double);
 
-static Var _x2c_func_adapt_523(Func _x2c_func_binding_523, const FuncArg * _x2c_func_argv_523){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_523, _x2c_func_argv_523, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_527(Func _x2c_func_binding_527, const FuncArg * _x2c_func_argv_527){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_527, _x2c_func_argv_527, 0, 3356265), 3356265));
   return double_var(sqrt(a0));
   ;
 }
 
 float sqrtf(float);
 
-static Var _x2c_func_adapt_524(Func _x2c_func_binding_524, const FuncArg * _x2c_func_argv_524){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_524, _x2c_func_argv_524, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_528(Func _x2c_func_binding_528, const FuncArg * _x2c_func_argv_528){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_528, _x2c_func_argv_528, 0, 3355493), 3355493));
   return float_var(sqrtf(a0));
   ;
 }
 
 int strcmp(const char *, const char *);
 
-static Var _x2c_func_adapt_525(Func _x2c_func_binding_525, const FuncArg * _x2c_func_argv_525){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_525, _x2c_func_argv_525, 0);
-  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_525, _x2c_func_argv_525, 1);
+static Var _x2c_func_adapt_529(Func _x2c_func_binding_529, const FuncArg * _x2c_func_argv_529){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_529, _x2c_func_argv_529, 0);
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_529, _x2c_func_argv_529, 1);
   return int_var(strcmp(a0, a1));
   ;
 }
 
 int strncmp(const char *, const char *, size_t);
 
-static Var _x2c_func_adapt_526(Func _x2c_func_binding_526, const FuncArg * _x2c_func_argv_526){
-  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_526, _x2c_func_argv_526, 0);
-  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_526, _x2c_func_argv_526, 1);
-  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_526, _x2c_func_argv_526, 2, 44858254), 44858254));
+static Var _x2c_func_adapt_530(Func _x2c_func_binding_530, const FuncArg * _x2c_func_argv_530){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_530, _x2c_func_argv_530, 0);
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_530, _x2c_func_argv_530, 1);
+  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_530, _x2c_func_argv_530, 2, 44858254), 44858254));
   return int_var(strncmp(a0, a1, a2));
   ;
 }
 
 double tan(double);
 
-static Var _x2c_func_adapt_527(Func _x2c_func_binding_527, const FuncArg * _x2c_func_argv_527){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_527, _x2c_func_argv_527, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_func_argv_531){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_531, _x2c_func_argv_531, 0, 3356265), 3356265));
   return double_var(tan(a0));
   ;
 }
 
 float tanf(float);
 
-static Var _x2c_func_adapt_528(Func _x2c_func_binding_528, const FuncArg * _x2c_func_argv_528){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_528, _x2c_func_argv_528, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_532, _x2c_func_argv_532, 0, 3355493), 3355493));
   return float_var(tanf(a0));
   ;
 }
 
 double tanh(double);
 
-static Var _x2c_func_adapt_529(Func _x2c_func_binding_529, const FuncArg * _x2c_func_argv_529){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_529, _x2c_func_argv_529, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_533, _x2c_func_argv_533, 0, 3356265), 3356265));
   return double_var(tanh(a0));
   ;
 }
 
 float tanhf(float);
 
-static Var _x2c_func_adapt_530(Func _x2c_func_binding_530, const FuncArg * _x2c_func_argv_530){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_530, _x2c_func_argv_530, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_534, _x2c_func_argv_534, 0, 3355493), 3355493));
   return float_var(tanhf(a0));
   ;
 }
 
 double tgamma(double);
 
-static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_func_argv_531){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_531, _x2c_func_argv_531, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_535, _x2c_func_argv_535, 0, 3356265), 3356265));
   return double_var(tgamma(a0));
   ;
 }
 
 float tgammaf(float);
 
-static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_532, _x2c_func_argv_532, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_536, _x2c_func_argv_536, 0, 3355493), 3355493));
   return float_var(tgammaf(a0));
   ;
 }
 
 double trunc(double);
 
-static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533){
-  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_533, _x2c_func_argv_533, 0, 3356265), 3356265));
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_537, _x2c_func_argv_537, 0, 3356265), 3356265));
   return double_var(trunc(a0));
   ;
 }
 
 float truncf(float);
 
-static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534){
-  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_534, _x2c_func_argv_534, 0, 3355493), 3355493));
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_538, _x2c_func_argv_538, 0, 3355493), 3355493));
   return float_var(truncf(a0));
   ;
 }
 
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_8;
-  if(Var_is_void((*(Var *) _x2c_defer_data_4->_x2c_defer_capture_7))) Scope_free((*(Lambda *) _x2c_defer_data_4->_x2c_defer_capture_8));
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_539, _x2c_func_argv_539, 0, 806120));
+  return Job_var(_lisp_List_job(a0));
+  ;
 }
 
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
-  Scope_pop();
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540){
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_540, _x2c_func_argv_540, 0, 244620705480));
+  return Job_var(_lisp_Job_start(a0));
+  ;
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_10;
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_10;
+  if(Var_is_void((*(Var *) _x2c_defer_data_4->_x2c_defer_capture_7))) Scope_free((*(Lambda *) _x2c_defer_data_4->_x2c_defer_capture_8));
+}
+
+static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_12;
   if((*(Lambda *) _x2c_defer_data_5->_x2c_defer_capture_9) -> source_function){
     (*(Lisp *) _x2c_defer_data_5->_x2c_defer_capture_10) -> automatic_owner =(*(Scope * *) _x2c_defer_data_5->_x2c_defer_capture_11);
     (*(Lisp *) _x2c_defer_data_5->_x2c_defer_capture_10) -> result_owner =(*(Scope * *) _x2c_defer_data_5->_x2c_defer_capture_12);
@@ -9853,66 +9974,66 @@ static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
 
 }
 
-static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
-  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_11;
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_13;
   if((*(LispExpansion * *) _x2c_defer_data_6->_x2c_defer_capture_13))(*(LispExpansion * *) _x2c_defer_data_6->_x2c_defer_capture_13) -> calls --;
 }
 
-static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_12;
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_14;
   (*(Lisp *) _x2c_defer_data_7->_x2c_defer_capture_14) -> call_depth --;
 }
 
-static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
-  Scope_pop();
-}
-
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
-  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_14;
-  Scope_free((*(Var * *) _x2c_defer_data_8->_x2c_defer_capture_15));
-}
-
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
-  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_15;
-  Scope_free((*(Var * *) _x2c_defer_data_9->_x2c_defer_capture_16));
+  Scope_pop();
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
-  _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_16;
-  *(*(LispExpansion * * *) _x2c_defer_data_10->_x2c_defer_capture_17) =(*(LispExpansion * *) _x2c_defer_data_10->_x2c_defer_capture_18);
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_16;
+  Scope_free((*(Var * *) _x2c_defer_data_8->_x2c_defer_capture_15));
 }
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
-  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_17;
-  *(*(List * *) _x2c_defer_data_11->_x2c_defer_capture_19) =(*(List *) _x2c_defer_data_11->_x2c_defer_capture_20);
+  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_17;
+  Scope_free((*(Var * *) _x2c_defer_data_9->_x2c_defer_capture_16));
 }
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
-  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_18;
-  *(*(int * *) _x2c_defer_data_12->_x2c_defer_capture_21) =(*(int *) _x2c_defer_data_12->_x2c_defer_capture_22);
+  _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_18;
+  *(*(LispExpansion * * *) _x2c_defer_data_10->_x2c_defer_capture_17) =(*(LispExpansion * *) _x2c_defer_data_10->_x2c_defer_capture_18);
 }
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
-  Scope_pop();
+  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_19;
+  *(*(List * *) _x2c_defer_data_11->_x2c_defer_capture_19) =(*(List *) _x2c_defer_data_11->_x2c_defer_capture_20);
 }
 
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
-  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_20;
-  (*(LispMachine *) _x2c_defer_data_13->_x2c_defer_capture_23) -> running = 0;
+  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_20;
+  *(*(int * *) _x2c_defer_data_12->_x2c_defer_capture_21) =(*(int *) _x2c_defer_data_12->_x2c_defer_capture_22);
 }
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
-  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_21;
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_22;
+  (*(LispMachine *) _x2c_defer_data_13->_x2c_defer_capture_23) -> running = 0;
+}
+
+static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
+  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_23;
   _machine_slot_release((*(Lisp *) _x2c_defer_data_14->_x2c_defer_capture_24), (*(LispMachineSlot *) _x2c_defer_data_14->_x2c_defer_capture_25));
 }
 
-static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535){
+static Var _x2c_func_adapt_541(Func _x2c_func_binding_541, const FuncArg * _x2c_func_argv_541){
   return _special_stub();
   ;
 }
 
-static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
-  _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_22;
+static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){
+  _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_24;
   {
     lisp_active -> automatic_owner =(*(Scope * *) _x2c_defer_data_15->_x2c_defer_capture_27);
     lisp_active -> result_owner =(*(Scope * *) _x2c_defer_data_15->_x2c_defer_capture_28);
@@ -9920,17 +10041,17 @@ static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
 
 }
 
-static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
-  _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_23;
+static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25){
+  _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_25;
   lisp_active =(*(Lisp *) _x2c_defer_data_16->_x2c_defer_capture_29);
 }
 
-static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){
+static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26){
   Scope_pop();
 }
 
-static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25){
-  _x2c_defer_env_17 * _x2c_defer_data_17 =(_x2c_defer_env_17 *) _x2c_defer_opaque_25;
+static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27){
+  _x2c_defer_env_17 * _x2c_defer_data_17 =(_x2c_defer_env_17 *) _x2c_defer_opaque_27;
   {
     lisp_active -> automatic_owner =(*(Scope * *) _x2c_defer_data_17->_x2c_defer_capture_30);
     lisp_active -> result_owner =(*(Scope * *) _x2c_defer_data_17->_x2c_defer_capture_31);
@@ -9938,17 +10059,17 @@ static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25){
 
 }
 
-static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26){
-  _x2c_defer_env_18 * _x2c_defer_data_18 =(_x2c_defer_env_18 *) _x2c_defer_opaque_26;
+static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
+  _x2c_defer_env_18 * _x2c_defer_data_18 =(_x2c_defer_env_18 *) _x2c_defer_opaque_28;
   lisp_active =(*(Lisp *) _x2c_defer_data_18->_x2c_defer_capture_32);
 }
 
-static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27){
+static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29){
   Scope_pop();
 }
 
-static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
-  _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_28;
+static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30){
+  _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_30;
   {
     lisp_active -> automatic_owner =(*(Scope * *) _x2c_defer_data_19->_x2c_defer_capture_33);
     lisp_active -> result_owner =(*(Scope * *) _x2c_defer_data_19->_x2c_defer_capture_34);
@@ -9956,57 +10077,57 @@ static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
 
 }
 
-static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29){
-  _x2c_defer_env_20 * _x2c_defer_data_20 =(_x2c_defer_env_20 *) _x2c_defer_opaque_29;
+static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31){
+  _x2c_defer_env_20 * _x2c_defer_data_20 =(_x2c_defer_env_20 *) _x2c_defer_opaque_31;
   lisp_active =(*(Lisp *) _x2c_defer_data_20->_x2c_defer_capture_35);
 }
 
-static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30){
-  Scope_pop();
-}
-
-static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31){
-  Scope_pop();
-}
-
 static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32){
-  _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_32;
-  Scope_cleanup((*(Scope *) _x2c_defer_data_21->_x2c_defer_capture_36));
+  Scope_pop();
 }
 
 static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33){
-  _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_33;
-  Array_cleanup((*(Array *) _x2c_defer_data_22->_x2c_defer_capture_37));
+  Scope_pop();
 }
 
 static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34){
-  _x2c_defer_env_23 * _x2c_defer_data_23 =(_x2c_defer_env_23 *) _x2c_defer_opaque_34;
+  _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_34;
+  Scope_cleanup((*(Scope *) _x2c_defer_data_21->_x2c_defer_capture_36));
+}
+
+static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35){
+  _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_35;
+  Array_cleanup((*(Array *) _x2c_defer_data_22->_x2c_defer_capture_37));
+}
+
+static void _x2c_defer_cleanup_36(void * _x2c_defer_opaque_36){
+  _x2c_defer_env_23 * _x2c_defer_data_23 =(_x2c_defer_env_23 *) _x2c_defer_opaque_36;
   Scope_cleanup((*(Scope *) _x2c_defer_data_23->_x2c_defer_capture_38));
 }
 
 void File_cleanup(File);
 
-static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35){
-  _x2c_defer_env_24 * _x2c_defer_data_24 =(_x2c_defer_env_24 *) _x2c_defer_opaque_35;
+static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37){
+  _x2c_defer_env_24 * _x2c_defer_data_24 =(_x2c_defer_env_24 *) _x2c_defer_opaque_37;
   File_cleanup((*(File *) _x2c_defer_data_24->_x2c_defer_capture_39));
 }
 
 void MachineBuilder_cleanup(MachineBuilder);
 
-static void _x2c_defer_cleanup_36(void * _x2c_defer_opaque_36){
-  _x2c_defer_env_25 * _x2c_defer_data_25 =(_x2c_defer_env_25 *) _x2c_defer_opaque_36;
+static void _x2c_defer_cleanup_38(void * _x2c_defer_opaque_38){
+  _x2c_defer_env_25 * _x2c_defer_data_25 =(_x2c_defer_env_25 *) _x2c_defer_opaque_38;
   MachineBuilder_cleanup((*(MachineBuilder *) _x2c_defer_data_25->_x2c_defer_capture_40));
 }
 
-static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37){
-  _x2c_defer_env_26 * _x2c_defer_data_26 =(_x2c_defer_env_26 *) _x2c_defer_opaque_37;
+static void _x2c_defer_cleanup_39(void * _x2c_defer_opaque_39){
+  _x2c_defer_env_26 * _x2c_defer_data_26 =(_x2c_defer_env_26 *) _x2c_defer_opaque_39;
   Scope_cleanup((*(Scope *) _x2c_defer_data_26->_x2c_defer_capture_41));
 }
 
 void Block_cleanup(Block);
 
-static void _x2c_defer_cleanup_38(void * _x2c_defer_opaque_38){
-  _x2c_defer_env_27 * _x2c_defer_data_27 =(_x2c_defer_env_27 *) _x2c_defer_opaque_38;
+static void _x2c_defer_cleanup_40(void * _x2c_defer_opaque_40){
+  _x2c_defer_env_27 * _x2c_defer_data_27 =(_x2c_defer_env_27 *) _x2c_defer_opaque_40;
   Block_cleanup((*(Block *) _x2c_defer_data_27->_x2c_defer_capture_42));
 }
 
