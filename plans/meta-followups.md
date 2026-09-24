@@ -46,6 +46,27 @@ creates an ErrorHandler and exception frame in `func.x`/`error.x`.
 Profile that remaining cost with the 200,000-iteration `$` loop before
 changing conversion or returning the `lib/lisp.x` byte offsets to `long`.
 
+Status: measured 2026-09-24; no code change. A `meta` function ran a
+200,000-iteration loop calling `String.find_within(s, "h", i & 3, 8)`, so
+each iteration passes two `int` arguments through the `try` path (400,000
+frames); `x2c translate` of that file was timed. A trial fast path returned
+a valid argument that already has the wanted tag before entering `try`
+(`value.tag() == want && value.encoding_valid()`, identical error
+behavior). Interleaved medians of the two compilers:
+
+| Run | Base | Fast path | Change |
+| --- | --- | --- | --- |
+| Numeric loop, 21 pairs | 1.320 s | 1.297 s | -1.8% |
+| Numeric loop, 41 pairs | 1.301 s | 1.280 s | -1.6% |
+| Control loop (`String.rfind`, no numeric args), 21 pairs | 1.894 s | 1.951 s | +3.0% |
+
+The control, which the change cannot affect, moved more than the numeric
+loop, so the saving (about 50 ns per argument) is within noise. A `sample`
+profile of the base run agrees: `x2c_func_value_argument` has 20 of 797
+self samples and `Var_convert` 14; `LispMachine_step`, `_decode`, and
+`Map_try_get` dominate. The `try` frame is not a meaningful share, so the
+fast path was dropped and the `lib/lisp.x` byte offsets stay `Var`.
+
 ### C. Smaller defects from the final review
 
 Each should decline with a plain reason or work as C does:
