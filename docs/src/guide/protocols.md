@@ -37,8 +37,8 @@ protocol Var(T) {
 
 Associated types must be declared before methods. Their names and the
 participant name are local to the protocol body. The compiler warns if the
-participant name shadows a visible type: that may be an adoption written as
-a declaration by mistake.
+participant name shadows a visible type, with code `shadow`: that may be an
+adoption written as a declaration by mistake.
 
 Participation is a separate, bodyless declaration:
 

@@ -899,7 +899,7 @@ static void _warn_unnecessary_cast(
   if (!_c_type_known(c, operand) || source.declared() != target.declared())
     return;
   c.report_warning(
-    <warning>,
+    <conversion>,
     %"unnecessary conversion: the operand already has type ${target.repr()}",
     origin, %("remove the cast"));
 }
@@ -1772,7 +1772,7 @@ static void _check_noted_converter(
     : context == 2 ? "remove the call; the format converts the value"
     : "remove the call; the destination converts the value";
   c.report_warning_at(
-    <warning>,
+    <conversion>,
     %"unnecessary conversion: .$method() where ${target.repr()} is expected",
     location, %($hint));
 }

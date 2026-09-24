@@ -630,7 +630,7 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Six codes are reported as warnings:
+Eight codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
@@ -643,10 +643,12 @@ Six codes are reported as warnings:
   probably meant, and names the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
   invocation, with the notes the macro supplied.
-- `warning` covers the remaining cases: an unnecessary conversion, a
-  protocol binder that shadows a visible type name, a native `meta`
-  prototype whose name both the compiler and a native module define, and
-  one that more than one native module defines.
+- `conversion` says a cast or explicit converter call spells a conversion
+  its destination already performs.
+- `shadow` says a protocol binder shadows a visible type name.
+- `warning` covers the remaining cases: a native `meta` prototype whose
+  name both the compiler and a native module define, and one that more
+  than one native module defines.
 
 [The Region Model](../guide/regions.md) explains what the first three cover
 and what they cannot see. [Scopes and Lifetime](../guide/memory.md) shows

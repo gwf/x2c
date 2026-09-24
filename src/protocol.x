@@ -2514,7 +2514,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
       String hint = %"hint: a bodyless `protocol BASE($participant);` " +
         "declares an adoption; a body introduces a fresh type variable";
       c.report_warning(
-        <warning>,
+        <shadow>,
         %"protocol binder '$participant' shadows a visible type name",
         participant_token, %($hint));
     }

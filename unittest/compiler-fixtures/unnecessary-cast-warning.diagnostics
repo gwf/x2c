@@ -1,9 +1,9 @@
-unittest/compiler-fixtures/unnecessary-cast-warning.x:7:17: warning: unnecessary conversion: the operand already has type ("String")
+unittest/compiler-fixtures/unnecessary-cast-warning.x:7:17: conversion: unnecessary conversion: the operand already has type ("String")
     String same = (String)s;
                   ^
   note: remove the cast
 
-unittest/compiler-fixtures/unnecessary-cast-warning.x:8:11: warning: unnecessary conversion: the operand already has type (int)
+unittest/compiler-fixtures/unnecessary-cast-warning.x:8:11: conversion: unnecessary conversion: the operand already has type (int)
     int n = (int)3;
             ^
   note: remove the cast

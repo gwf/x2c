@@ -3140,7 +3140,7 @@ names the required converter. Declaring that converter, as `lib/typed-array.x`
 does for `Array.arrayint`, permits the conversion; a cast still permits
 reinterpretation.
 
-The compiler warns with `unnecessary conversion` when source spells a
+The compiler warns with code `conversion` when source spells a
 conversion that its destination already performs. Translation continues.
 
 A cast is reported when its operand already has the cast type, qualifiers
