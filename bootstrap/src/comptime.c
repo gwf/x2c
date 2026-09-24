@@ -990,7 +990,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _396 = cons(_13, _395);
   _397 = cons(_393, _396);
   _398 = String_new("x2c_expr_call");
-  _399 = String_new("x2c_type_value");
+  _399 = String_new("x2c_type_is_value");
   _400 = String_new("x2c_type_tag_name");
   _401 = String_new("x2c_type_reverse_name");
   _402 = Symbol_var(437126);
@@ -2571,6 +2571,7 @@ static String _lower_callee_name(Lowering l, String name){
   Var value;  if(String_truth(l -> own) && String_equal(l -> own, name)) return name;  if(Lisp_try_get(l -> compiler -> macro_lisp, name, & value)) return name;  if(_lower_compiler_operation(l, name)) return _lower_operation_name(name);  return name;
 }
 
+int Compiler_supplies_native_meta(String);
 static void _lower_scan_callee(Lowering l, String name){
   if(! _lower_known(l, name)){
     if(_lower_compiler_operation(l, name)){
@@ -2578,7 +2579,7 @@ static void _lower_scan_callee(Lowering l, String name){
     }
     l -> uncallable = 1;  lower_missing_callee = name;  return;
   }
-  if(Map_contains(l -> compiler -> meta_comptime, String_var(name))) l -> meta_only = 1;
+  if(Map_contains(l -> compiler -> meta_comptime, String_var(name)) || Compiler_supplies_native_meta(name)) l -> meta_only = 1;
 }
 
 static void _lower_scan_function_value(Lowering l, List form){
