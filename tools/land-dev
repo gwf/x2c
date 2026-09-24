@@ -1,0 +1,44 @@
+#!/bin/sh
+# land-dev -- validate the current branch against current dev and push it.
+#
+# Usage: tools/land-dev "commit message for a bootstrap refresh"
+#
+# Each attempt merges origin/dev, rebuilds and regenerates the docs, runs
+# the agent-pr-check gate (retrying once for a two-round bootstrap refresh),
+# commits any refreshed bootstrap/ and etc/ output, confirms the gate, and
+# pushes to dev only when the tree is clean. A rejected push retries from the
+# merge. A failed gate restores bootstrap/ and etc/ and stops. Logs go to
+# debug/.
+set -u
+message=${1:?usage: tools/land-dev "bootstrap refresh commit message"}
+mkdir -p debug
+for attempt in 1 2 3 4; do
+  git fetch -q origin && git merge -q --no-edit origin/dev ||
+    { echo "land-dev: merge with origin/dev failed"; exit 1; }
+  make build >debug/build.log 2>&1 && make doc-generate >debug/docgen.log 2>&1 ||
+    { echo "land-dev: build or doc-generate failed; see debug/"; exit 1; }
+  if [ -n "$(git status --short)" ]; then
+    git add -A docs agents site && git commit -qm "refresh generated docs"
+  fi
+  if ! tools/gate-state.py ensure agent-pr-check >debug/gate.log 2>&1 &&
+     ! tools/gate-state.py ensure agent-pr-check >debug/gate.log 2>&1; then
+    git checkout -q HEAD -- bootstrap etc
+    echo "land-dev: gate failed; see debug/gate.log"
+    exit 1
+  fi
+  if [ -n "$(git status --short)" ]; then
+    git add bootstrap etc && git commit -qm "$message" &&
+      tools/gate-state.py ensure agent-pr-check >>debug/gate.log 2>&1 ||
+      { echo "land-dev: gate failed after the refresh commit"; exit 1; }
+  fi
+  if [ -n "$(git status --short)" ]; then
+    echo "land-dev: the gate left changes:"; git status --short; exit 1
+  fi
+  if git push origin HEAD:refs/heads/dev >debug/push.log 2>&1; then
+    tail -1 debug/push.log
+    exit 0
+  fi
+  echo "land-dev: push rejected (attempt $attempt); merging dev again"
+done
+echo "land-dev: gave up after four rejected pushes"
+exit 1

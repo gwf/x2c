@@ -29,6 +29,8 @@ are needed rather than maintaining another copy.
   deliver an already-decided change.
 - [fix-x2c-bug](skills/fix-x2c-bug/SKILL.md) - reproduce a defect, repair its
   cause, and verify the observable behavior.
+- [orchestrate-x2c-work](skills/orchestrate-x2c-work/SKILL.md) - run
+  independent changes in parallel worktrees and integrate them in batches.
 - [integrate-x2c-package](skills/integrate-x2c-package/SKILL.md) - integrate a
   C library or judge whether its x2c package is complete.
 - [review-x2c-repo](skills/review-x2c-repo/SKILL.md) - investigate the requested

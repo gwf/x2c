@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrate x2c Work"
+  short_description: "Run parallel workers and integrate them in batches"
+  default_prompt: "Use $orchestrate-x2c-work to split this work into independent changes, run workers in isolated worktrees, and integrate their patches in batches with one gate run per batch."
