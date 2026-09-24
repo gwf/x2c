@@ -583,10 +583,10 @@ _x2c_initializer_choice_29BB659F_0((0 < sizeof(cli_options) / sizeof(cli_options
   320883068136, CLI_TRANSLATE, 665445396138972, _174, NULL, "Print the parsed AST and stop", 0
 }
 ), (65ULL < sizeof(cli_options) / sizeof(cli_options[65ULL])), (cli_options[65ULL] =(CliOption){
-  1371473465773288, CLI_TRANSLATE, 665445396138972, _175, NULL, "Print experimental source syntax with macro calls retained and stop", 0
+  1447057375073126, CLI_TRANSLATE, 665445396138972, _175, NULL, "Print the transformed AST and stop", 0
 }
 ), (66ULL < sizeof(cli_options) / sizeof(cli_options[66ULL])), (cli_options[66ULL] =(CliOption){
-  1447057375073126, CLI_TRANSLATE, 665445396138972, _176, NULL, "Print the transformed AST and stop", 0
+  10268258347430, CLI_TRANSLATE, 665445396138972, _176, NULL, "Print each definition's location and documentation and stop", 0
 }
 ), (67ULL < sizeof(cli_options) / sizeof(cli_options[67ULL])), (cli_options[67ULL] =(CliOption){
   10268258302218, CLI_TRANSLATE, 665445396138972, _177, NULL, "Print unformatted generated code and stop", 0
@@ -800,8 +800,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _172 = String_new("--dump-cpp-text");
   _173 = String_new("--dump-cpp-tokens");
   _174 = String_new("--dump-ast");
-  _175 = String_new("--dump-source-ast");
-  _176 = String_new("--dump-transforms");
+  _175 = String_new("--dump-transforms");
+  _176 = String_new("--dump-definitions");
   _177 = String_new("--dump-code");
   _178 = String_new("--dump-symbols");
   _179 = String_new("--dump-cpp-symbols");
@@ -1484,7 +1484,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
       c -> cpp_symbols = 1;
       break;
     }
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1371473465773288 :{
+    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 :{
       c -> dump = option -> id;
       break;
     }

@@ -162,9 +162,7 @@ static int _script_declaration_stays(Compiler c);
 
 static void _track_conditional_arms(Compiler c);
 
-static String _definition_doc(Compiler c, Token start);
-
-static void _definition_source(Compiler c, List function, int line, String doc);
+static void _definition_source(Compiler c, List function, int line, String doc, List declarator);
 
 static Var _finish_tag_name(Compiler c, Var name);
 
@@ -2787,7 +2785,7 @@ List Compiler_parse_declaration_argument(Compiler c){
 }
 
 List Compiler_parse_function_definition(Compiler compiler){
-  if(! _init_guard_) _file_init_();  List declaration = Compiler_parse_simple_declaration(compiler);  if(Compiler_peek(compiler, 0) != 247 && ! Compiler__at_function_arrow(compiler)) Compiler_report_error(compiler, 33658058, _856, compiler -> token, NULL);  return _finish_function_definition(compiler, declaration);
+  if(! _init_guard_) _file_init_();  Token tokens = compiler -> tokenizer -> tokens, start = compiler -> token;  List declaration = Compiler_parse_simple_declaration(compiler);  if(Compiler_peek(compiler, 0) != 247 && ! Compiler__at_function_arrow(compiler)) Compiler_report_error(compiler, 33658058, _856, compiler -> token, NULL);  int first = start - tokens, body = compiler -> token - tokens;  List function = _finish_function_definition(compiler, declaration);  if(! Map_truth(compiler -> macro_holes)) _definition_source(compiler, function, start -> line, NULL, cons(int_var(first), cons(int_var(body), NULL)));  return function;
 }
 
 List Compiler_parse_function_target(Compiler compiler){
@@ -2883,19 +2881,19 @@ static void _track_conditional_arms(Compiler c){
 
 int String_startswith(String, String);
 int String_getindex(String, int);
-static String _definition_doc(Compiler c, Token start){
-  Token first = c -> tokenizer -> tokens;  if(start <= first) return NULL;  Token token = start - 1;  while(token > first && token -> type == 40896714) token --;  if(token -> type != 7477210024 || token -> len < 5 || ! String_startswith(token -> text, _863)) return NULL;  int lines = 0;  for(int position = token -> pos + token -> len;  position < start -> pos;  position ++) if(String_getindex(c -> text, position) == '\n' && ++ lines > 1) return NULL;  return String_new_len(token -> text + 3, token -> len - 5);
+String Compiler_definition_doc(Compiler c, Token start){
+  if(! _init_guard_) _file_init_();  Token first = c -> tokenizer -> tokens;  if(start <= first) return NULL;  Token token = start - 1;  while(token > first && token -> type == 40896714) token --;  if(token -> type != 7477210024 || token -> len < 5 || ! String_startswith(token -> text, _863)) return NULL;  int lines = 0;  for(int position = token -> pos + token -> len;  position < start -> pos;  position ++) if(String_getindex(c -> text, position) == '\n' && ++ lines > 1) return NULL;  return String_new_len(token -> text + 3, token -> len - 5);
 }
 
-static void _definition_source(Compiler c, List function, int line, String doc){
+static void _definition_source(Compiler c, List function, int line, String doc, List declarator){
 
   {
     List _x2c_match_expr = function;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_29;  if (x2c_match_site_try_capture(& _x2c_match_site_29, _x2c_match_expr, List_var(_336), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_337, cons(binding, NULL))), List_var(cons(int_var(line), cons(String_var(doc), NULL))));  break;
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_29;  if (x2c_match_site_try_capture(& _x2c_match_site_29, _x2c_match_expr, List_var(_336), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_337, cons(binding, NULL))), List_var(cons(int_var(line), cons(String_var(doc), cons(List_var(declarator), NULL)))));  break;
 }
-case 8932560010: ;  static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_342), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  if(String_truth(doc) && Type_is_function(List_type_from_ast(function))) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_337, cons(binding, NULL))), List_var(cons(int_var(line), cons(String_var(doc), NULL))));  break;
+case 8932560010: ;  static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_342), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  if(String_truth(doc) && Type_is_function(List_type_from_ast(function))) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_337, cons(binding, NULL))), List_var(cons(int_var(line), cons(String_var(doc), cons(List_var(declarator), NULL)))));  break;
 }
 default: break;
     }
@@ -2936,8 +2934,8 @@ List Compiler_parse_top_level(Compiler c){
   if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  Token meta = NULL;  if(Compiler_meta_form_is_declaration(c)){
     meta = c -> token;  Compiler_next(c);
   }
-  Token definition_start = c -> token;  String definition_doc = _definition_doc(c, definition_start);  List decl = Compiler_parse_declaration_row(c);  if(Compiler_test(c, 119)){
-    if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta) Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, _definition_doc(c, meta));  return decl;
+  Token definition_start = c -> token;  List decl = Compiler_parse_declaration_row(c);  if(Compiler_test(c, 119)){
+    if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta) Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  return decl;
   }
   if(Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c)){
 
@@ -2950,7 +2948,7 @@ List Compiler_parse_top_level(Compiler c){
   default: break;
     }
   }
-List function; {
+List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? meta : definition_start) - tokens;  int body = c -> token - tokens; {
     int * _x2c_macro_address_2 = & c -> meta_body;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
   _x2c_defer_env_10 _x2c_defer_env_40 = {._x2c_defer_capture_20 =(const void *) & _x2c_macro_address_2, ._x2c_defer_capture_21 =(const void *) & _x2c_macro_previous_2};
   X2CCleanup _x2c_defer_record_14 = {
@@ -2967,10 +2965,7 @@ List function; {
     x2c_cleanup_leave(& _x2c_defer_record_14);
 }
   }
-  if(meta) Compiler_install_meta_function(c, function, meta);  Compiler_record_declaration_visibility(c, function);  if(meta && Compiler_meta_is_comptime_only(c, function)){
-    _definition_source(c, function, definition_start -> line, definition_doc);  return NULL;
-  }
-  if(Map_truth(c -> macro_holes)) return cons(_347, cons(int_var(definition_start -> line), cons(String_var(definition_doc), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, definition_doc);  return function;
+  if(meta) Compiler_install_meta_function(c, function, meta);  Compiler_record_declaration_visibility(c, function);  if(meta && Compiler_meta_is_comptime_only(c, function)) return NULL;  if(Map_truth(c -> macro_holes)) return cons(_347, cons(int_var(definition_start -> line), cons(String_var(Compiler_definition_doc(c, definition_start)), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, NULL, cons(int_var(start), cons(int_var(body), NULL)));  return function;
 }
 Compiler_require_input(c);  Symbol unexpected = Compiler_peek(c, 0);  Compiler_report_error(c, 33658058, _866, c -> token, cons(_8, cons(String_var(c -> token -> text), cons(_181, cons(String_var(Symbol_str(unexpected)), NULL)))));
 }
@@ -3416,7 +3411,7 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
   break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224604176233107658ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var line = _x2c_match_values[0];  Var doc = _x2c_match_values[1];  Var syntax = _x2c_match_values[2]; {
-  if(context != AST_UNIT) goto construction_error;  List bound = Compiler_bind_syntax((c), syntax, context, List_type((c) -> return_type));  Token invocation = List_truth((c) -> macro_stack) ? Var_token(List_getindex(Var_list(List_last((c) -> macro_stack)), 3)) : NULL;  String invocation_doc = invocation ? _definition_doc((c), invocation) : NULL;  _definition_source((c), bound, Var_int(Var_convert(invocation ? int_var(invocation -> line) : line, 3453797)), Var_string(String_truth(invocation_doc) ? String_var(invocation_doc) : doc)); {
+  if(context != AST_UNIT) goto construction_error;  List bound = Compiler_bind_syntax((c), syntax, context, List_type((c) -> return_type));  Token invocation = List_truth((c) -> macro_stack) ? Var_token(List_getindex(Var_list(List_last((c) -> macro_stack)), 3)) : NULL;  String invocation_doc = invocation ? Compiler_definition_doc((c), invocation) : NULL;  _definition_source((c), bound, Var_int(Var_convert(invocation ? int_var(invocation -> line) : line, 3453797)), Var_string(String_truth(invocation_doc) ? String_var(invocation_doc) : doc), NULL); {
     List _x2c_return_value_13 = bound; {
       x2c_cleanup_leave(& _x2c_defer_record_18);  return _x2c_return_value_13;
     }

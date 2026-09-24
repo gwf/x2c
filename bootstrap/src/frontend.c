@@ -438,7 +438,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
     0
   }
   ;
-  unit -> generated_symbols = ! frontend -> request -> no_cpp && ! frontend -> request -> dump;
+  unit -> generated_symbols = ! frontend -> request -> no_cpp &&(! frontend -> request -> dump || frontend -> request -> dump == 10268258347430);
   unit -> context = shared_values ? Context_open_named("shared translation unit") : Context_open_isolated_named("translation unit");
   Type_begin_unit();
   unit -> compiler = Compiler_new();
@@ -447,7 +447,6 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
   compiler -> source_map = frontend -> request -> source_map;
   compiler -> sources = frontend -> request -> sources;
   compiler -> source_facts = frontend -> request -> source_facts;
-  compiler -> source_syntax = frontend -> request -> dump == 1371473465773288;
   compiler -> source_primary = 1;
   if(compiler -> source_facts){
     compiler -> source_occurrences = Array_new();

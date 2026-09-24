@@ -7,6 +7,10 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List Compiler_definition_rows(Compiler c, List ast);
+
+void Compiler_dump_definitions(Compiler c, List ast);
+
 void generate_code(Compiler c, List ast, String dir);
 
 List Compiler_init_statements(Compiler compiler, Symbol phase);

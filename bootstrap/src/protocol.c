@@ -3220,7 +3220,7 @@ List Compiler_parse_protocol_declaration(Compiler c){
   }
   if(meta) Compiler_report_error(c, 1139215899608, _1004, meta, _942);  if(List_truth(Type_list(representation)) || List_truth(tag)) Compiler_report_error(c, 1139215899608, List_truth(Type_list(representation)) ? _1005 : _1006, start, NULL);  if(! String_truth(participant)) Compiler_report_error(c, 1139215899608, _1007, participant_token, NULL);  if(storage == 1317118534) Compiler_report_error(c, 1139215899608, _1008, start, _945);  Compiler_expect(c, 247);  if(! c -> shallow){
     List shadowed = Sym_get(c -> sym, cons(String_var(participant), NULL));  if(List_truth(shadowed) && Type_is_typedef(List_type(shadowed))){
-      String hint = String_add(String_join(NULL, cons(String_var(_946), cons(String_var(participant), cons(String_var(_947), NULL)))), _948);  Compiler_report_warning(c, 49497918350, String_join(NULL, cons(String_var(_949), cons(String_var(participant), cons(String_var(_950), NULL)))), participant_token, cons(String_var(hint), NULL));
+      String hint = String_add(String_join(NULL, cons(String_var(_946), cons(String_var(participant), cons(String_var(_947), NULL)))), _948);  Compiler_report_warning(c, 1291920366, String_join(NULL, cons(String_var(_949), cons(String_var(participant), cons(String_var(_950), NULL)))), participant_token, cons(String_var(hint), NULL));
     }
 
   }
