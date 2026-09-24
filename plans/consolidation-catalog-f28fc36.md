@@ -125,10 +125,18 @@ Callers: ordinary handles at lambda.x:610 and 701; private callback registration
 at macros.x:931-933; direct macro at lisp-bindings.xmacro:6-8; grouped reflection
 at lisp-bindings.xlisp:59-79; builtin reflection at 41-43.
 
-**Decision:** ordinary signatures retain non-reference aliases; Lisp resolves
-most aliases and abbreviates scalars. Choose the shared owner's observable
-signature-spelling policy. The nine-name whitelist preserves boxed names; it
-is not a meaningless check to delete without preserving that role.
+**Direction (Gary, 2026-09-24):** retain declared aliases in stored signatures
+on both paths, so the underlying native type can be derived when needed without
+losing the alias. Ordinary signatures already retain non-reference aliases;
+Lisp currently resolves most aliases and abbreviates scalars. Preserve the
+boxed-name role of the nine-name whitelist when consolidating these paths.
+
+**Later spike:** explore making type information available at runtime through
+a global map from names or keys to type signatures. Determine what the map
+would contain, how aliases would resolve for native calls and comparisons, and
+whether existing compiler type information can supply it. Assess other useful
+runtime consumers before choosing a representation. This is an exploration,
+not a requirement to build a runtime registry as part of C03.
 
 **Connected edit after that decision:** extract a pure typed-function-to-signature
 operation from the ordinary path. Both callers use it; remove the private alias
