@@ -1106,14 +1106,14 @@ static Symbol _lisp_symbol_new_len(String text, int length) =>
 /** Returns the `void` sentinel to the evaluator. */
 Var lisp_void(void) => void;
 
-static Var _cell(Lisp lisp, Var value) {
-  Var *slot = Scope.malloc_in(&lisp.scope, sizeof(Var));
+static Var _cell(Scope *owner, Var value) {
+  Var *slot = Scope.malloc_in(owner, sizeof(Var));
   *slot = value;
   return Var.new(<var*>, slot);
 }
 
 /** Allocates one evaluator-owned raw `Var` slot initialized to `value`. */
-Var lisp_cell(Var value) => _cell(lisp_active, value);
+Var lisp_cell(Var value) => _cell(&lisp_active.scope, value);
 /** Retags an evaluator value at a declared pointer or Symbol crossing. */
 Var lisp_address(Var cell, Symbol tag) {
   if (tag == <symbol>) return (Symbol) cell.ulong();
@@ -1832,10 +1832,10 @@ static int _binding_get(Map bindings, Var name, Var *out) {
   return 1;
 }
 
-static void _binding_set(Lisp lisp, Map bindings, Var name, Var value) {
+static void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
   Var slot;
   if (bindings.try_get(name, &slot)) lisp_store(slot, value);
-  else bindings[name] = _cell(lisp, value);
+  else bindings[name] = _cell(owner, value);
 }
 
 static int _local_lookup(LispEnv *env, Var name, Var *out) {
@@ -2012,7 +2012,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
     Var value;
     if (name in captures) continue;
     if (_env_lookup(env, name, &value))
-      _binding_set(lisp, captures, name, value);
+      _binding_set(&lisp.scope, captures, name, value);
   }
 }
 
@@ -2074,18 +2074,18 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   return result = lambda;
 }
 
-static void _bind_params(Lambda lambda, List args, Map bindings) {
+static void _bind_params(Scope *frame, Lambda lambda, List args, Map bindings) {
   for (List p = lambda.params; p; p = p.cdr()) {
     Var (name, rest_name) = p;
     if (name.is_atom() && name.str() == ".") {
       if (!p.cdr())
         raise %(bad-sig (operation "apply") (value ${lambda.body}));
       Var rest = args;
-      _binding_set(lambda.owner, bindings, rest_name, rest);
+      _binding_set(frame, bindings, rest_name, rest);
       return;
     }
     if (!args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
-    _binding_set(lambda.owner, bindings, name, args.car());
+    _binding_set(frame, bindings, name, args.car());
     args = args.cdr();
   }
   if (args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
@@ -2138,7 +2138,7 @@ static Var _call_lambda_slots(
         raise %(void-op (operation "apply") (index $i));
       args = cons(values[i], args);
     }
-    _bind_params(lambda, args, bindings);
+    _bind_params(&frame, lambda, args, bindings);
   }
   else {
     if (count != lambda.params.len())
@@ -2204,7 +2204,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       if (lisp.frozen)
         raise %(bad-state (operation "def") (why "frozen") (name $name));
       Var value = _eval(lisp, expression, env);
-      _binding_set(lisp, lisp.globals, name, value);
+      _binding_set(&lisp.scope, lisp.globals, name, value);
       return value;
     }
     case LISP_COND: {
@@ -3162,7 +3162,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     if (_inherited(lisp, interned))
       raise %(bad-state (operation "Lisp.set_global") (why "inherited")
                         (name $interned));
-    _binding_set(lisp, lisp.globals, interned, value);
+    _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
 }

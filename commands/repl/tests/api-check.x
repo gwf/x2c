@@ -257,6 +257,7 @@ int main(int argc, char **argv) {
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
+  size_t baseline = 0, growth = 0;
   size_t scopes = Scope.stats().live_scopes;
   for (int phase = 0; phase < 2; phase++) {
     for (int run = 0; run < 3; run++) {
@@ -272,13 +273,25 @@ int main(int argc, char **argv) {
       }
       unit.close();
       ScopeStats stats = Scope.stats();
+      size_t live = stats.live_allocations;
       if (stats.live_scopes != scopes) {
         fprintf(stderr, "session left allocation scopes open\n");
         failures++;
       }
+      if (run) {
+        if (!phase && run == 1) growth = live - baseline;
+        else if (live - baseline != growth) {
+          fprintf(stderr,
+            "session teardown exceeds frontend baseline: %zu vs %zu\n",
+            live - baseline, growth);
+          failures++;
+        }
+      }
+      baseline = live;
     }
   }
   if (!failures)
-    puts("direct submission checks passed; allocation scopes closed");
+    printf("direct submission checks passed; teardown matches empty "
+           "frontend baseline (+%zu allocations/round)\n", growth);
   return failures != 0;
 }
