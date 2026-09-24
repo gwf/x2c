@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
   }
   Map parsed = NULL;
   try parsed = Args.parse(args, spec);
-  catch %(bad-arg *): {
-    Stderr.printf("x2c repl: invalid arguments\n");
+  catch %(bad-arg (operation "Args.parse") (why ?why) *): {
+    Stderr.printf("x2c repl: %s\n", why.str());
     return 2;
   }
   CliRequest request = cli_request(<repl>);

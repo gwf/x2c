@@ -38,4 +38,12 @@ printf '1+2;\n' | builds/0/x2c repl >"$tmp/dispatch"
 printf '=> 3\n' >"$tmp/dispatch-expected"
 cmp "$tmp/dispatch-expected" "$tmp/dispatch"
 
+set +e
+builds/0/x2c repl extra </dev/null >"$tmp/bad-out" \
+  2>"$tmp/bad-err"
+result=$?
+set -e
+test "$result" -eq 2
+grep -qx 'x2c repl: unexpected operand' "$tmp/bad-err"
+
 echo "REPL command checks passed"
