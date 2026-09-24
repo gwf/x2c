@@ -1094,9 +1094,9 @@ return converted;
 }
 
 static int _format_decimal(String fmt, int length, int * cursor, String label){
-  int value = 0, start = * cursor;
-  while(* cursor < length && String_getindex(fmt, * cursor) >= '0' && String_getindex(fmt, * cursor) <= '9'){
-    int digit = String_getindex(fmt, * cursor) - '0';
+  int value = 0, start =(* cursor);
+  while((* cursor) < length && String_getindex(fmt, (* cursor)) >= '0' && String_getindex(fmt, (* cursor)) <= '9'){
+    int digit = String_getindex(fmt, (* cursor)) - '0';
     if(value >(INT_MAX - digit) / 10) _format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_1), NULL))));
     value = value * 10 + digit;
     (* cursor) ++;
@@ -1107,9 +1107,9 @@ static int _format_decimal(String fmt, int length, int * cursor, String label){
 long Var_integer(Var);
 
 static int _format_star(List * values, int offset){
-  if(! List_truth(* values)) _format_error(offset, _5);
+  if(! List_truth((* values))) _format_error(offset, _5);
   Var value = List_car((* values));
-  * values = List_cdr((* values));
+  (* values) = List_cdr((* values));
   return(int) Var_integer(_format_convert(value, 3453797, offset));
 }
 
@@ -1293,7 +1293,7 @@ String String_format(String fmt, List values){
         if(++ cursor == length) _format_error(offset, _10);
       }
       flags_done : if(String_getindex(fmt, cursor) == '*'){
-        int width = _format_star(& values, offset);
+        int width = _format_star(&(values), offset);
         if(width == INT_MIN) _format_error(offset, _11);
         if(width < 0){
           parsed.flags |= STRING_FORMAT_LEFT;
@@ -1305,19 +1305,19 @@ String String_format(String fmt, List values){
       }
       else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9'){
         parsed.has_width = 1;
-        parsed.width = _format_decimal(fmt, length, & cursor, _12);
+        parsed.width = _format_decimal(fmt, length, &(cursor), _12);
       }
       if(cursor < length && String_getindex(fmt, cursor) == '.'){
         parsed.has_precision = 1;
         cursor ++;
         if(cursor == length) _format_error(offset, _10);
         if(String_getindex(fmt, cursor) == '*'){
-          int precision = _format_star(& values, offset);
+          int precision = _format_star(&(values), offset);
           if(precision < 0) parsed.has_precision = 0;
           else parsed.precision = precision;
           cursor ++;
         }
-        else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9') parsed.precision = _format_decimal(fmt, length, & cursor, _13);
+        else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9') parsed.precision = _format_decimal(fmt, length, &(cursor), _13);
       }
       if(cursor == length) _format_error(offset, _10);
       if(String_getindex(fmt, cursor) == 'h'){

@@ -706,9 +706,9 @@ Type Type.declared(Type type) => _canonical(type, 1);
 /* Consume the qualifiers at the front of one type and report them as a set.
    The cursor advances past them so a caller can walk a pointer chain one
    level at a time. */
-static unsigned _qualifiers(Type *cursor) {
+static unsigned _qualifiers(Type &cursor) {
   unsigned found = 0;
-  Type type = *cursor;
+  Type type = cursor;
   while (type && type.car() is <symbol>) {
     Symbol head = type.car();
     if (!head.is_type_qualifier()) break;
@@ -719,7 +719,7 @@ static unsigned _qualifiers(Type *cursor) {
     }
     type = type.cdr();
   }
-  *cursor = type;
+  cursor = type;
   return found;
 }
 
@@ -731,12 +731,12 @@ static unsigned _qualifiers(Type *cursor) {
     function copies instead of aliasing.
 */
 int Type.discards_qualifiers(Type source, Type target) {
-  _qualifiers(&source);
-  _qualifiers(&target);
+  _qualifiers(source);
+  _qualifiers(target);
   while (source && target) {
     source = source.cdr();
     target = target.cdr();
-    unsigned wanted = _qualifiers(&source), offered = _qualifiers(&target);
+    unsigned wanted = _qualifiers(source), offered = _qualifiers(target);
     if (wanted & ~offered) return 1;
   }
   return 0;
@@ -784,7 +784,7 @@ static int Type._is_tagged(Type type) {
 
 /** Removes one outer pointer-like or array modifier, or returns `NULL`. */
 Type Type.dereference(Type type) {
-  _qualifiers(&type);
+  _qualifiers(type);
   if (type.is_pointer() || type.is_array()) return cdr(type);
   return NULL;
 }

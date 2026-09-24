@@ -1251,18 +1251,18 @@ Type Type_declared(Type type){
 }
 
 static unsigned _qualifiers(Type * cursor){
-  unsigned found = 0;  Type type = * cursor;  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264)){
+  unsigned found = 0;  Type type =(* cursor);  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264)){
     Symbol head = Var_symbol(List_car(Type_list(type)));  if(! Symbol_is_type_qualifier(head)) break;  switch(head){
       case 7304424 : found |= 1;  break;  case 1544849476362 : found |= 2;  break;  case 1249006209256 : found |= 4;  break;
     }
     type = List_cdr(type);
   }
-  * cursor = type;  return found;
+  (* cursor) = type;  return found;
 }
 
 int Type_discards_qualifiers(Type source, Type target){
-  if(! _init_guard_) _file_init_();  _qualifiers(& source);  _qualifiers(& target);  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
-    source = List_cdr(source);  target = List_cdr(target);  unsigned wanted = _qualifiers(& source), offered = _qualifiers(& target);  if(wanted & ~ offered) return 1;
+  if(! _init_guard_) _file_init_();  _qualifiers(&(source));  _qualifiers(&(target));  while(List_truth(Type_list(source)) && List_truth(Type_list(target))){
+    source = List_cdr(source);  target = List_cdr(target);  unsigned wanted = _qualifiers(&(source)), offered = _qualifiers(&(target));  if(wanted & ~ offered) return 1;
   }
   return 0;
 }
@@ -1297,7 +1297,7 @@ static int Type__is_tagged(Type type){
 }
 
 Type Type_dereference(Type type){
-  if(! _init_guard_) _file_init_();  _qualifiers(& type);  if(Type_is_pointer(type) || Type_is_array(type)) return List_type(cdr(Type_list(type)));  return NULL;
+  if(! _init_guard_) _file_init_();  _qualifiers(&(type));  if(Type_is_pointer(type) || Type_is_array(type)) return List_type(cdr(Type_list(type)));  return NULL;
 }
 
 Type Type_reference(Type type){

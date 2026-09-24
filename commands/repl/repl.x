@@ -282,15 +282,15 @@ static void _help(void) {
   _help_row("--verbose-stats", "Print detailed statistics at exit.", width);
 }
 
-static int _stats_mode(String command, int *verbose) {
+static int _stats_mode(String command, int &verbose) {
   Array words = $auto([]);
   foreach (String word, command.words()) words.push(word);
   if (words.len() == 1) {
-    *verbose = 0;
+    verbose = 0;
     return 1;
   }
   if (words.len() == 2 && words[1] == "verbose") {
-    *verbose = 1;
+    verbose = 1;
     return 1;
   }
   return 0;
@@ -394,7 +394,7 @@ int repl_run(CliRequest request, ReplOptions options) {
       else if (descriptor->dispatch == <help>) _help();
       else if (descriptor->dispatch == <stats>) {
         int verbose;
-        if (!_stats_mode(command, &verbose)) {
+        if (!_stats_mode(command, verbose)) {
           fprintf(stderr, "usage: %s\n", descriptor->synopsis);
           failed = 1;
         }

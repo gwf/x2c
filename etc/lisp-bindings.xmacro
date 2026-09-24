@@ -3,7 +3,7 @@ macro Statement $lisp.bind(
 ) {
   Func callable = Func.new(
     $function,
-    $(lisp.native.signature (_x2c.function.native-type $function))
+    $(_x2c.literal.list (_x2c.function.native-type $function))
   );
   Lisp.bind($lisp, $name, callable);
 }

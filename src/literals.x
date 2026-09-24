@@ -851,7 +851,7 @@ static void _lambda_expect_arrow(Compiler compiler) {
   compiler.expect(<">">);
 }
 
-static List _lambda_parse_typed_params(Compiler compiler, List *out_names) {
+static List _lambda_parse_typed_params(Compiler compiler, List &out_names) {
   Array names = [], List typed_params = compiler.parse_parameter_list();
   foreach (List param, typed_params)
     match (param) {
@@ -861,7 +861,7 @@ static List _lambda_parse_typed_params(Compiler compiler, List *out_names) {
       }
     }
   List result = names.list_free();
-  if (out_names) *out_names = result;
+  out_names = result;
   return typed_params;
 }
 
@@ -1107,7 +1107,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   if (c.peek(0) != <)>) {
     if (_lambda_looks_typed(c)) {
       used_typed = 1;
-      typed_params = _lambda_parse_typed_params(c, &names);
+      typed_params = _lambda_parse_typed_params(c, names);
     }
     else names = _lambda_parse_bare_params(c);
   }

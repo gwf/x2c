@@ -620,6 +620,10 @@ static List _sdk_native_meta_declared(List paths) {
   return rows;
 }
 
+/* Lisp-built signatures become cached literals of the expanding unit. */
+static List _sdk_literal_list(List values) =>
+  macro_sdk_compiler.cache_literal_list(values);
+
 static Var _sdk_native_function_type(List syntax) {
   Var value = void;
   match (syntax) {
@@ -1165,6 +1169,7 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.function.native-type",
       _sdk_native_function_type);
+    $lisp.bind(_.macro_lisp, "_x2c.literal.list", _sdk_literal_list);
     $lisp.bind(
       _.macro_lisp, "_x2c.native-meta.targets", _sdk_native_meta_targets);
     $lisp.bind(

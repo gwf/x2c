@@ -127,17 +127,17 @@ List x2c_func_reference_type(
   return parameter && parameter.car() == <&> ? parameter.cdr() : NULL;
 }
 
-static unsigned _type_qualifiers(List *cursor) {
+static unsigned _type_qualifiers(List &cursor) {
   unsigned qualifiers = 0;
-  while (*cursor && (*cursor).car() is <symbol>) {
-    Symbol head = (*cursor).car();
+  while (cursor && cursor.car() is <symbol>) {
+    Symbol head = cursor.car();
     switch (head) {
       case <const>:    qualifiers |= 1; break;
       case <volatile>: qualifiers |= 2; break;
       case <restrict>: qualifiers |= 4; break;
       default: return qualifiers;
     }
-    *cursor = (*cursor).cdr();
+    cursor = cursor.cdr();
   }
   return qualifiers;
 }
@@ -146,8 +146,8 @@ static unsigned _type_qualifiers(List *cursor) {
    qualifiers may be strengthened. The remaining declarator must be exact:
    accepting int * as const int * would expose int ** as const int **. */
 static int _reference_type_accepts(List target, List source) {
-  unsigned target_qualifiers = _type_qualifiers(&target);
-  unsigned source_qualifiers = _type_qualifiers(&source);
+  unsigned target_qualifiers = _type_qualifiers(target);
+  unsigned source_qualifiers = _type_qualifiers(source);
   return !(source_qualifiers & ~target_qualifiers) &&
          target.equal(source);
 }

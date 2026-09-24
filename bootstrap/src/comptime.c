@@ -2979,7 +2979,7 @@ static long _lower_field_offset(Lowering l, List path, List * field_layout){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 1218673800: ;  if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(_10, cons(_14, cons(_14, cons(_14, cons(_3, cons(List_var(cons(_645, cons(name, _652))), _4))))))), &_x2c_match_capture)) {Var at = _x2c_match_values[0];  Var layout = _x2c_match_values[1]; {
-        offset += Var_long_long(at);  * field_layout = Var_list(layout);  continue;
+        offset += Var_long_long(at); (* field_layout) = Var_list(layout);  continue;
       }
       break;
     }
@@ -3003,7 +3003,7 @@ static Var _lower_field_place(Lowering l, Symbol access, Var receiver, List fiel
   Type owner = _lower_type_of(receiver);  if(access == 11645){
     Type pointer = Sym_resolve_key(l -> compiler -> sym, owner);  if(! List_truth(Type_list(pointer)) || ! Type_is_pointer(pointer)) return _lower_decline(l, _1614);  owner = Type_dereference(pointer);
   }
-  Type record = _lower_record_type(l, owner);  if(! List_truth(Type_list(record))) return _lower_decline(l, _1615);  List path = Compiler_initializer_field_path(l -> compiler, record, field);  if(! List_truth(path)) return _lower_decline(l, _1616);  List layout = NULL;  long offset = _lower_field_offset(l, path, & layout);  if(offset < 0) return((void) 0, Void);  Symbol tag = _lower_pointer_tag(l, layout);  Var object = _lower_expr(l, receiver);  if(_lower_failed(l, object)) return((void) 0, Void);  return List_var(cons(_27, cons(object, cons(long_var(offset), cons(List_var(cons(_30, cons(Symbol_var(tag), NULL))), NULL)))));
+  Type record = _lower_record_type(l, owner);  if(! List_truth(Type_list(record))) return _lower_decline(l, _1615);  List path = Compiler_initializer_field_path(l -> compiler, record, field);  if(! List_truth(path)) return _lower_decline(l, _1616);  List layout = NULL;  long offset = _lower_field_offset(l, path, &(layout));  if(offset < 0) return((void) 0, Void);  Symbol tag = _lower_pointer_tag(l, layout);  Var object = _lower_expr(l, receiver);  if(_lower_failed(l, object)) return((void) 0, Void);  return List_var(cons(_27, cons(object, cons(long_var(offset), cons(List_var(cons(_30, cons(Symbol_var(tag), NULL))), NULL)))));
 }
 
 static Var _lower_place(Lowering l, Var target){
@@ -4579,7 +4579,7 @@ static Var _lower_record_braced(Lowering l, Type type, List items, Var into){
             }
 
           }
-          List layout = NULL;  long offset = _lower_field_offset(l, path, & layout);  if(offset < 0){
+          List layout = NULL;  long offset = _lower_field_offset(l, path, &(layout));  if(offset < 0){
             Var _x2c_return_value_39 =((void) 0, Void); {
               x2c_cleanup_leave(& _x2c_defer_record_25);  return _x2c_return_value_39;
             }
