@@ -255,6 +255,8 @@ static Var _convert_to_float(X2CVarNumeric *source, Symbol target) {
   }
 }
 
+meta Var Var.convert(Var value, Symbol target);
+
 /** Converts `value` to a numeric `target`, or returns exact-tag identity.
     All fifteen numeric families cross through the rules in this module.
     Integer narrowing keeps low bits, floating-to-integer truncates toward

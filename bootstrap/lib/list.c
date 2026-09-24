@@ -1247,7 +1247,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 
 List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 729};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 749};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1257,7 +1257,7 @@ List List_subseq(List list, int start, int stop, int step){
 
 List List_getslice(List list, int start, int stop, int step){
   if(! step){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 743};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 765};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1308,7 +1308,7 @@ List List_getslice(List list, int start, int stop, int step){
 
 static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
   if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 758};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 780};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
     __builtin_unreachable();
   }

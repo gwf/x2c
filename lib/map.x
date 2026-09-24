@@ -104,6 +104,8 @@ $map.core.family(
   _record_key, _record_value,
   _reinsert_error, _insert_error);
 
+meta Map Map.new_capacity(unsigned capacity);
+
 /** Returns a fresh empty `Map` with exactly `capacity` slots.
     `Pool` uses this internal constructor to reuse a previous child's proven
     power-of-two table size. `capacity` must be a power of two of at least
@@ -137,6 +139,8 @@ Map Map.new_capacity(unsigned capacity) {
     Raises: `<alloc-fail>` or `<size-limit>` when initial
     storage cannot be allocated. */
 Map Map.new(void) => Map.new_capacity(2);
+
+meta unsigned Map.len(Map map);
 
 /** Returns the number of key/value pairs in `map`.
     O(1), and the emptiness test for a `Map`, because an empty `Map` is a
@@ -222,6 +226,8 @@ Var Map.get(Map map, Var key) {
 */
 Var Map.getindex(Map map, Var key) => map.get(key);
 
+meta Var Map.get_hashed(Map map, Var key, unsigned key_hash);
+
 /** Returns the value stored under `key`, or `void` when absent, probing with
     the caller's precomputed `key_hash`.
     `key_hash` must be `Var.hash` of `key`; another value reports the key as
@@ -237,6 +243,8 @@ Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
   return index < 0 ? void : *_record_value(map, (unsigned) index);
 }
 
+meta Var Map.getdefault(Map map, Var key, Var defval);
+
 /** Returns the value stored under `key`, or `defval` when it is absent.
     Nothing is inserted and `Map.len` does not change, unlike `Map.setdefault`.
     For counting, numeric `map[k] += amount` initializes an absent key from
@@ -248,6 +256,8 @@ Var Map.getdefault(Map map, Var key, Var defval) {
   Var val;
   return map.try_get(key, &val) ? val : defval;
 }
+
+meta Var Map.setdefault(Map map, Var key, Var defval);
 
 /** Returns the value stored under `key`, inserting `defval` first when the
     key is absent.
@@ -273,6 +283,8 @@ Var Map.setdefault(Map map, Var key, Var defval) {
   return stored[0];
 }
 
+meta int Map.contains(Map m, Var key);
+
 /** Returns nonzero when `key` is present in `m`, whatever its value.
     A null `m` reports absence rather than failing. Key comparison follows
     `Map.get`:
@@ -288,6 +300,8 @@ static void _set(Map map, Var key, Var val) {
   if (key is void || val is void) raise %(void-op);
   map._core_set(&key, &val);
 }
+
+meta void Map.set(Map map, Var key, Var val);
 
 /** Stores `val` under `key`, replacing any value already there.
     A `void` key or value raises. That refusal is what makes `void` usable
@@ -330,6 +344,8 @@ Var Map.setindex(Map map, Var key, Var val) {
   return val;
 }
 
+meta Var Map.updateindex(Map map, Var key, Symbol op, Var rhs);
+
 /** Updates one `Map` value in place.
     The key is looked up once and an existing record-value slot is delegated
     to `Var.update`. Numeric `+` inserts a missing key with `rhs` as its
@@ -364,6 +380,8 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
   struct MapRecord *recs = map.entries;
   return Var.update(&recs[index].val, op, rhs);
 }
+
+meta Var Map.postfixindex(Map map, Var key, Symbol op);
 
 /** Applies postfix increment or decrement to one existing `Map` value.
     The key is looked up once and the original value is returned. A missing
@@ -426,6 +444,8 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
   va_end(ap);
   return map;
 }
+
+meta Self Map.copy(Self map);
 
 /** Returns a new `Map` holding shallow copies of `map`'s key/value pairs.
     The copy is shallow and independent: inserting into one does not affect
@@ -498,6 +518,8 @@ void Map.export_to(
   map.scope = *scope;
 }
 
+meta Self Map.merge(Self map, Self other);
+
 /** Copies every entry of `other` into `map` and returns `map`.
     This mutates `map` in place, which is the difference from `Map.copy`. Keys
     already present are overwritten, so `other` wins every conflict. A null
@@ -544,6 +566,8 @@ Self Map.merge(Self map, Self other) => map._core_merge(other);
 int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val) =>
   map._core_try_next(cursor, key, val);
 
+meta int Map.truth(Map map);
+
 /** Returns nonzero when `map` contains at least one entry.
     A null or empty `Map` returns zero.
 */
@@ -553,6 +577,8 @@ static Var _box_var(Var value) => value;
 static int _compare_var(Var a, Var b) => a.compare(b);
 $map.core.observe(Map, Var, Var, struct MapRecord,
   _box_var, _box_var, _compare_var, _compare_var);
+
+meta int Map.compare(Map a, Map b);
 
 /** Compares `Map`s by size and then by sorted key/value contents.
     Identical handles compare equal; NULL sorts before a nonnull `Map`.
@@ -653,6 +679,8 @@ Iter Map.enumerate(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _enumerate_next, 0u);
 }
+
+meta int Map.equal(Map map1, Map map2);
 
 /** Returns nonzero when `map1` and `map2` hold the same key/value pairs.
     A structural comparison, independent of insertion order and of table

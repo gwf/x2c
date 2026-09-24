@@ -52,6 +52,8 @@ static String _attribute(Compiler c);
 
 static void _skip_aggregate_attributes(Compiler c);
 
+static int _unseen_prefix(Compiler c);
+
 static int _prefix_macro_words(Compiler c, int rank, Array words);
 
 static List _storage_class(Compiler c);
@@ -1194,10 +1196,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _816 = Symbol_var(15891808);
   _817 = cons(_816, _814);
   _818 = String_new("expected method name after dot");
-  _819 = String_new("expected scalar type");
-  _820 = String_new("delegate field requires a name");
-  _821 = String_new("packed attributes are unsupported");
-  _822 = String_new(".h");
+  _819 = String_new(".h");
+  _820 = String_new("expected scalar type");
+  _821 = String_new("delegate field requires a name");
+  _822 = String_new("packed attributes are unsupported");
   _823 = String_new("syntax cannot be constructed at this position");
   _824 = String_new("expected enumerator identifier");
   _825 = String_new("expected ']'");
@@ -1593,10 +1595,18 @@ static void _skip_aggregate_attributes(Compiler c){
 
 }
 
-Iter Var_iter(Var, Iter);
+int String_endswith(String, String);
 int Symbol_is_type_qualifier(Symbol);
+static int _unseen_prefix(Compiler c){
+  Symbol next = Compiler_peek(c, 1);  return c -> shallow && String_endswith(c -> filename, _819) &&(Symbol_is_builtin_type(next) || Symbol_is_type_modifier(next) || Symbol_is_type_qualifier(next) || Symbol_is_storage_class(next) || Symbol_is_inline(next));
+}
+
+Iter Var_iter(Var, Iter);
 static int _prefix_macro_words(Compiler c, int rank, Array words){
-  Var definition;  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition)) return 0;  if(Var_equal(definition, Symbol_var(50603262308)) && Compiler_peek(c, 1) == 81){
+  Var definition;  if(Compiler_peek(c, 0) != 19147688) return 0;  if(! Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition)){
+    if(rank || ! _unseen_prefix(c)) return 0;  Compiler_next(c);  return 1;
+  }
+  if(Var_equal(definition, Symbol_var(50603262308)) && Compiler_peek(c, 1) == 81){
     Token close = Token_group_close(Compiler_skip_trivia_from(c, c -> token + 1));  if(close -> type != 11212) close -> type = 7477210024;  Compiler_next(c);  Compiler_next(c);  return 1;
   }
   if(! Var_is_row(definition, 9, 7, 4)) return 0; {
@@ -1722,7 +1732,7 @@ static List _primitive_type(Compiler compiler){
   Type source = List_type(Array_list_free(specs)), scalar = Type_scalar(source);
   if(List_truth(Type_list(scalar))) return Type_list(scalar);
   if(compiler -> shallow) return Type_list(source);
-  Compiler_report_error(compiler, 1362954, List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_91), cons(String_var(List_str(source)), NULL))) : _819, start, NULL);
+  Compiler_report_error(compiler, 1362954, List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_91), cons(String_var(List_str(source)), NULL))) : _820, start, NULL);
 }
 
 String Compiler_package_spelling(Compiler, String);
@@ -1790,7 +1800,7 @@ static List _field(Compiler compiler, List context, int delegated){
       case 8932560010: ;
         static MatchCaptureSite _x2c_match_site_6;
         if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_101), &_x2c_match_capture)) {List declarators = Var_list(_x2c_match_values[0]); {
-          if(! List_truth(declarators)) Compiler_report_error(compiler, 33658058, _820, compiler -> token, NULL); {
+          if(! List_truth(declarators)) Compiler_report_error(compiler, 33658058, _821, compiler -> token, NULL); {
             List declarator;  List _x2c_macro_object_6 = declarators;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_3)){
               declarator = Var_list(_x2c_macro_cursor_output_3);
   {
@@ -1798,7 +1808,7 @@ static List _field(Compiler compiler, List context, int delegated){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_104), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-                String name = binding_identity_spelling(Var_list(binding));  if(! String_truth(name)) Compiler_report_error(compiler, 33658058, _820, compiler -> token, NULL);  if(! Map_truth(compiler -> macro_holes)) Sym_declare_delegate_field(compiler -> sym, List_type(context), name);
+                String name = binding_identity_spelling(Var_list(binding));  if(! String_truth(name)) Compiler_report_error(compiler, 33658058, _821, compiler -> token, NULL);  if(! Map_truth(compiler -> macro_holes)) Sym_declare_delegate_field(compiler -> sym, List_type(context), name);
               }
               break;
             }
@@ -1884,10 +1894,9 @@ Var Var_car(Var);
 List Sym_bind_identity(Sym, List, List, List);
 List Sym_declare(Sym, List, List, List);
 void Sym_declare_field_order(Sym, Type, List);
-int String_endswith(String, String);
 static List _publish_aggregate_type(Compiler compiler, Symbol tag, Var name, List members, Token first){
-  int layout = _layout_attribute_since(compiler, first);  int packed = _attribute_since(compiler, first, compiler -> packed_marks);  if(tag == 1318234344 && packed && compiler -> source_private >= 0) Compiler_report_error(compiler, 33658058, _821, first, NULL);  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
-    Sym_declare_field_order(compiler -> sym, List_type(type), members);  if(layout) Sym_set(compiler -> sym, List_append(type, _140), _142);  if(compiler -> source_private >= 0 && ! String_endswith(compiler -> filename, _822)) Sym_set(compiler -> sym, List_append(type, _145), _147);
+  int layout = _layout_attribute_since(compiler, first);  int packed = _attribute_since(compiler, first, compiler -> packed_marks);  if(tag == 1318234344 && packed && compiler -> source_private >= 0) Compiler_report_error(compiler, 33658058, _822, first, NULL);  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
+    Sym_declare_field_order(compiler -> sym, List_type(type), members);  if(layout) Sym_set(compiler -> sym, List_append(type, _140), _142);  if(compiler -> source_private >= 0 && ! String_endswith(compiler -> filename, _819)) Sym_set(compiler -> sym, List_append(type, _145), _147);
   }
   else if(! layout && _enum_fits_int(type, members)) Sym_set(compiler -> sym, List_append(type, _150), _152);  return cons(Symbol_var(tag), cons(name, cons(List_var(body), NULL)));
 }
@@ -2856,7 +2865,10 @@ int Compiler_skip_linkage_brace(Compiler c){
   if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) == 387198108 && Compiler_peek(c, 1) == 27051791223990 && Compiler_peek(c, 2) == 247){
     Compiler_next(c);  Compiler_next(c);
   }
-  else if(Compiler_peek(c, 0) != 251 || ! Array_len(c -> braces)) return 0;  Compiler_next(c);  return 1;
+  else if(Compiler_peek(c, 0) != 251) return 0;  else if(! Array_len(c -> braces)){
+    if(! c -> open_linkage) return 0;  c -> open_linkage --;  c -> token = Compiler_skip_trivia_from(c, c -> token + 1);  return 1;
+  }
+  Compiler_next(c);  return 1;
 }
 
 Var long_var(long);

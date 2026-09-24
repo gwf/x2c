@@ -24,7 +24,7 @@ Immediate encoded names.
 
 Returns the final decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:248`
+Source: `lib/symbol.x:256`
 
 <a id="Symbol.len"></a>
 #### Symbol.len
@@ -33,7 +33,7 @@ Source: `lib/symbol.x:248`
 
 Returns the number of decoded bytes in `symbol`.
 
-Source: `lib/symbol.x:123`
+Source: `lib/symbol.x:125`
 
 <a id="Symbol.new"></a>
 #### Symbol.new
@@ -70,7 +70,7 @@ appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:207`
+Source: `lib/symbol.x:211`
 
 ## Advanced and interop API
 
@@ -97,7 +97,7 @@ Zero sorts before nonzero values. Equal decoded lengths and bytes are
 ordered by the encoded value, so distinct encodings still have a total
 order. The result is -1, 0, or 1.
 
-Source: `lib/symbol.x:176`
+Source: `lib/symbol.x:180`
 
 <a id="Symbol.decode"></a>
 #### Symbol.decode
@@ -110,7 +110,7 @@ is
 NUL-terminated there. A null destination or zero `Symbol` leaves storage
 unchanged.
 
-Source: `lib/symbol.x:135`
+Source: `lib/symbol.x:137`
 
 <a id="Symbol.first"></a>
 #### Symbol.first
@@ -119,7 +119,7 @@ Source: `lib/symbol.x:135`
 
 Returns the first decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:237`
+Source: `lib/symbol.x:243`
 
 <a id="Symbol.new_len"></a>
 #### Symbol.new_len
@@ -149,7 +149,7 @@ malformed input returns zero. Zero is also the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while unescaping a quoted literal.
 
-Source: `lib/symbol.x:262`
+Source: `lib/symbol.x:270`
 
 <a id="Symbol.repr"></a>
 #### Symbol.repr
@@ -163,7 +163,7 @@ described by `Symbol.str`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/symbol.x:196`
+Source: `lib/symbol.x:200`
 
 <a id="Symbol.str"></a>
 #### Symbol.str
@@ -179,7 +179,7 @@ returns NULL, the empty `String`.
 
 **Raises:** `<alloc-fail>` while canonicalizing the spelling.
 
-Source: `lib/symbol.x:164`
+Source: `lib/symbol.x:166`
 
 <a id="Symbol.write_repr"></a>
 #### Symbol.write_repr
@@ -192,7 +192,7 @@ values use a quoted angled spelling, escaping backslash and double quote.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:219`
+Source: `lib/symbol.x:223`
 
 ## Design notes
 

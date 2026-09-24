@@ -405,6 +405,26 @@ static void process_cleanup_kills_a_job_ignoring_term(void) {
   EXPECT_TRUE(pid > 0 && kill((pid_t) pid, 0) != 0);
 }
 
+/* A job's Scope terminates and reaps it only while it is still running. */
+static void process_scope_end_reaps_an_abandoned_job(void) {
+  $test.scoped();
+  long pid = 0;
+  time_t start = time(NULL);
+  Scope.retain();
+  Job abandoned = %(sleep 30).job().start();
+  pid = abandoned.pids[0];
+  Job done = %(true).job().start();
+  EXPECT_INT_EQ(done.status(), 0);
+  Job cleaned = %(sleep 30).job().start();
+  cleaned.cleanup();
+  EXPECT_INT_EQ(cleaned.status(), 128 + SIGTERM);
+  cleaned.cleanup();
+  %(sleep 30).job();
+  Scope.release();
+  EXPECT_TRUE(time(NULL) - start < 5);
+  EXPECT_TRUE(pid > 0 && kill((pid_t) pid, 0) == -1 && errno == ESRCH);
+}
+
 static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
   Array jobs = [];
@@ -488,4 +508,5 @@ void process_suite(void) {
   $test.run(process_failed_pipeline_closes_both_pipe_ends);
   $test.run(process_child_stdio_without_parent_stdio);
   $test.run(process_cleanup_kills_a_job_ignoring_term);
+  $test.run(process_scope_end_reaps_an_abandoned_job);
 }

@@ -251,10 +251,10 @@ Result (September 23):
   invocations in `lib/lisp.x` stay: a Lisp form inside a template built by
   a meta function sees the hole's placeholder, not its value, so a meta
   function cannot generate them.
-- 21 of the 23 `lib/autodiff.xmacro` scratch Arrays use `$auto([])`; none
+- The 23 `lib/autodiff.xmacro` scratch Arrays use `$auto([])`; none
   escapes, because each return converts the Array to a new List. The two in
-  `ad_rev_checkpoint` stay plain: destructuring in a function that holds a
-  cleanup declines ("a destructured local that needs a cell").
+  `ad_rev_checkpoint` followed once a destructured local could hold a cell
+  in a function that holds a cleanup.
 - Fixed: a `.xmacro` meta body could not call a bodyless `meta` prototype
   such as `Array.cleanup`, because the import lowers it in the collection
   pass before the advertisements are installed. `Compiler.bind_native_meta`
@@ -296,21 +296,12 @@ protocols for unit-defined classes, and wider effect inference. Separate
 read-only audits of the macro implementations, experimental tools, and the
 REPL follow delivery of piece 0.
 
-A meta body that assigns a function name or a `%!` lambda directly, such as
-`f = twice;`, declines as "file-scope state not declared meta". The Func
-conversion in `src/lambda.x` replaces the right-hand side with the hidden
-global `_x2c_func_handle_N` before lowering sees it. Binding a local first,
-as in `Func f = twice; chosen = f;`, works.
-
 Also open after delivery:
 
 - Piece 0 item 3, the compound selector owner, is parked with its findings
   above.
 - `C.gwrite` copies wide scalar globals into session storage; only a REPL
   probe shows it, because no gated REPL test exists.
-- A destructured local in a function that holds a cleanup declines ("a
-  destructured local that needs a cell"); `ad_rev_checkpoint` in
-  `lib/autodiff.xmacro` keeps two plain Arrays for this reason.
 - `defer Scope.free(...)` of storage no Scope allocator returned is not
   checked for `bad-free`; local arrays of structs decline in meta code; a
   string literal passed to a `void *` parameter in meta code is not

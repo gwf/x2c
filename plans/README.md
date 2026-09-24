@@ -44,18 +44,18 @@ execution.
 
 ### Current work
 
+- [Meta lifetime certification](meta-lifetime-certification.md): active.
+  Replaces adoption phase 8; certifies ten methods for meta code through
+  the region table, decided September 24, 2026.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
   delivered as `9b71607f`. The
   [reproducibility record](generated-lisp-reproducibility.md) retains the
   earlier Lisp regeneration failure and the repaired result.
 
-- [Internal adoption campaign](internal-adoption-campaign.md): ready-now
-  macro, managed-lifetime and extensionless-script dogfooding, followed by
-  dependency-gated generalized-meta and lifetime-certified adoption. Phases
-  1-4, system-macro Lisp deletion, command-help `$dedent`, managed lifetimes,
-  extensionless tool names, CLI `$switch` dispatches and temporary-state
-  `$let` regions are complete and validated. Generalized-meta and
-  lifetime-certified adoption remain dependency-gated.
+- [Internal adoption campaign](internal-adoption-campaign.md): phases 1-6
+  are complete, and phase 7 moved the value operations to `meta`
+  prototypes. Its compiler-binding half needs a design; phase 8 continues as
+  meta lifetime certification.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
@@ -84,9 +84,9 @@ execution.
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
-| [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; scope proposed 2026-09-24 from probes at `1aaf9479`: yyjson header wiring, unseen prefix names, unguarded linkage across includes, optional false-arm includes. |
+| [yyjson header wiring](archive/x2c-header-collection-gaps.md#yyjson-follow-up) | Needs author scoping; reading the pinned `yyjson.h` records `#define bool unsigned char` from an `#elif` arm C never takes, so emitted prototypes conflict. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
-| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator port and the documentation sample checks are delivered; `check-docs.py` is next, followed by separately sequenced release, gate and compiler-backed ports. |
+| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release, gate and compiler-backed ports are separately sequenced. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |

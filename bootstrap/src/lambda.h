@@ -21,6 +21,8 @@ void Compiler_check_lambda_captures(Compiler c, List ast);
 
 List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
 
+List Compiler_lambda_param_types(Compiler compiler, List entries);
+
 List Compiler_lower_lambda_expr(Compiler compiler, List expression);
 
 

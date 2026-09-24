@@ -243,7 +243,7 @@ doc-generate:						## Regenerate derived documentation
 	$(STAGE0_X2C) script tools/gen-llms-txt --write
 
 doc-check:						## Check documentation for drift
-	python3 tools/check-docs.py
+	$(STAGE0_X2C) script tools/check-docs
 	$(STAGE0_X2C) script tools/gen-llms-txt --check
 
 doc-examples: build					## Compile every example in the book

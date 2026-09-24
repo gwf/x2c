@@ -263,6 +263,8 @@ int Var.register_object_tag(Symbol tag) {
   return custom_tag_count++;
 }
 
+meta Symbol Var.tag(Var v);
+
 /** Returns the `Symbol` naming the exact family of `v`'s payload.
     The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
     registered custom object tag. Built-in families have one row in the
@@ -295,6 +297,8 @@ Symbol Var.tag(Var v) {
 */
 int Var.is(Var var, Symbol tag) => var.tag() == tag;
 
+meta Symbol Var.kind(Var v);
+
 /** Returns the `Symbol` naming the coarse category of `v`'s payload.
     The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
     `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
@@ -312,6 +316,8 @@ Symbol Var.kind(Var v) {
   return taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
 
+meta int Var.is_floating(Var v);
+
 /** Reports whether `v` belongs to the floating runtime family.
     True for `<f32>`, `<f64>`, and `<ldouble>`, and for the discrete `<nan>`,
     `<+inf>`, and `<-inf>` values. Read the payload with `Var.floating`, or
@@ -328,10 +334,17 @@ int Var.is_floating(Var v)  => v.kind() == <floating>;
 */
 int Var.is_integer(Var v)   => v.kind() == <integer>;
 
+meta int Var.is_pointer(Var v);
+
 /** Reports whether `v` holds a native pointer. */
 int Var.is_pointer(Var v)   => v.kind() == <pointer>;
+
+meta int Var.is_reference(Var v);
+
 /** Reports whether `v` holds a pointer to a boxed handle. */
 int Var.is_reference(Var v) => v.kind() == <reference>;
+
+meta int Var.is_object(Var v);
 
 /** Reports whether `v` holds a registered boxed object.
     True for the builtin classes such as `String`, `List`, `Array`, `Map`,
@@ -364,6 +377,8 @@ int Var.is_object(Var v)    => v.kind() == <object>;
 */
 int Var.is_void(Var v)      => v.u64 == VAR_VOID_BITS;
 
+meta int Var.is_null(Var v);
+
 /** Reports whether `v` is the all-zero `Null` value.
     `Null` is a value: the null pointer and the external `nil`. It is legal
     collection data, iterating a `List` can return it, and it is false in a
@@ -375,6 +390,8 @@ int Var.is_void(Var v)      => v.u64 == VAR_VOID_BITS;
 */
 int Var.is_null(Var v)      => v.u64 == VAR_NULL_BITS;
 
+meta Var Var.null(void);
+
 /** Returns `Null`, the all-zero `Var` that stands for external `nil`.
     Generated call adapters return it for a `void` target.
 */
@@ -383,6 +400,8 @@ Var Var.null(void) {
   v.u64 = VAR_NULL_BITS;
   return v;
 }
+
+meta int Var.is_nil(Var v);
 
 /** Reports whether `v` is the typed empty `List`.
     The empty `List` is a native null pointer carrying the `<list>` tag.
@@ -532,6 +551,8 @@ Var Var.box_long_double(long double value) {
   wide.long_double_value = value;
   return _new_wide(_ldouble_, wide);
 }
+
+meta Var Var.clone_wide(Var value);
 
 /** Clones the wide numeric `value` into a new box in the active `Scope`.
     The clone compares equal but not identical to `value`. Returns `void` when
@@ -697,6 +718,8 @@ Var Var.new(Symbol tag, ...) {
   return v;
 }
 
+meta double Var.floating(Var v);
+
 /** Returns `v`'s payload as a `double` when its tag is floating, or 0.0.
     Handles `<f32>`, `<f64>`, and `<ldouble>`, and reconstructs NaN,
     `+Inf`, and `-Inf` from their discrete tags. An `<ldouble>` payload is
@@ -733,6 +756,8 @@ double Var.floating(Var v) {
   }
   return 0.0;
 }
+
+meta long Var.integer(Var v);
 
 /** Returns `v`'s payload as a `long` when its tag is integral, or 0.
     This reads the payload; it does not convert. It decodes every integer
@@ -792,6 +817,8 @@ long Var.integer(Var v) {
   return 0;
 }
 
+meta long Var.long_value(Var v);
+
 /** Returns the payload of a `<long>` box, or 0 if `v` has a different tag.
     The test is on the tag, so a `<ulong>`, `<llong>`, or `<i32>` value
     reads as 0 with no complaint. `Var.integer` accepts any integer family;
@@ -800,6 +827,8 @@ long Var.integer(Var v) {
     A tag mismatch yields 0.
 */
 long Var.long_value(Var v) => v is <long> ? _wide_box(v).value.long_value : 0;
+
+meta unsigned long Var.ulong_value(Var v);
 
 /** Returns the payload of a `<ulong>` box, or 0 if `v` has a different tag.
     Prefer this to `Var.integer` for a `<ulong>`: the general reader casts the
@@ -813,13 +842,19 @@ long Var.long_value(Var v) => v is <long> ? _wide_box(v).value.long_value : 0;
 unsigned long Var.ulong_value(Var v) =>
   v is <ulong> ? _wide_box(v).value.ulong_value : 0;
 
+meta long long Var.long_long_value(Var v);
+
 /** Returns an `<llong>` box's signed payload, or 0 for another tag. */
 long long Var.long_long_value(Var v) =>
   v is <llong> ? _wide_box(v).value.long_long_value : 0;
 
+meta unsigned long long Var.ulong_long_value(Var v);
+
 /** Returns a `<ullong>` box's unsigned payload, or 0 for another tag. */
 unsigned long long Var.ulong_long_value(Var v) =>
   v is <ullong> ? _wide_box(v).value.ulong_long_value : 0;
+
+meta long double Var.long_double_value(Var v);
 
 /** Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag.
     This is the only reader that preserves a `long double`. Every other
@@ -1036,6 +1071,8 @@ void *Var.pointer(Var v) {
     return (void *) (v.u64 & (_bitmask(48) - 0x7));
   return NULL;
 }
+
+meta Var Var.parse(String str, Symbol kind);
 
 /** Parses `str` as source text of kind `kind` and returns the boxed value.
     The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,

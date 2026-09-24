@@ -755,7 +755,7 @@ def render_doc(module: Module, item: Item) -> list[str]:
 def see_link(module: Module, item: Item, target: str) -> str:
     """Resolve one See: entry, or fail.
 
-    check_links() in tools/check-docs.py strips a fragment before resolving, so
+    The link check in tools/check-docs strips a fragment before resolving, so
     a wrong method name inside a page would pass unnoticed. This is the only
     place that can catch it.
     """

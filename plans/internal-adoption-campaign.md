@@ -1,10 +1,10 @@
 # Internal adoption campaign
 
-> Status: ready tranche, system-macro follow-up and phase 5 complete and
-> validated; phases 6-7 and the lifetime-certified tranche remain.
-> Refreshed against dev at `2d188c42` on 2026-09-22. The generalized-meta
-> dependency landed as `db86d4b7`; lifetime-sensitive adoption still depends
-> on the certification work described below.
+> Status: active
+> Updated September 24, 2026. Phases 1-6 are complete. Phase 7's value
+> operations moved to `meta` prototypes in `4084c865`; its compiler-binding
+> half needs a design. Phase 8 is replaced by
+> [meta-lifetime-certification.md](meta-lifetime-certification.md).
 
 ## The result
 
@@ -126,8 +126,9 @@ In the same delivery, replace the four exact compiler-source push/pop pairs
 with `$scope`. Do not turn nearby policy-dependent or conditional pushes into
 decorators merely because their spelling is similar.
 
-A second, separately reviewed delivery may adopt the three production
-push/pop sites in `src/macros.x` and `lib/lisp.x`; the Lisp decorator should
+Closed September 24, 2026: `$scope` would only re-indent those sites,
+deleting nothing, so they stay direct. The original follow-up was: a second,
+separately reviewed delivery may adopt the three production push/pop sites in `src/macros.x` and `lib/lisp.x`; the Lisp decorator should
 use `$let` as well as `$scope` only if the resulting ownership remains direct.
 Two `tools/repl-spike` sites are optional examples, not acceptance criteria.
 
@@ -219,7 +220,12 @@ byte-identical for all eleven Autodiff units, examples and the benchmark, and
 translation time is unchanged within noise (`test-autodiff` 0.709 s before
 and 0.698 s after, best of seven).
 
-### 6. Give native meta targets one owner
+### 6. Give native meta targets one owner (complete)
+
+Delivered by the explicit meta campaign: a bodyless `meta` prototype
+generates its target row (`_native_meta_targets` in `src/macros.x`) and binds
+on first use, and `93aae68c` moved the Scope, Context and cleanup rows to
+prototypes. `lib/cmath.x` has no hand rows. The original text follows.
 
 Before marking more native prototypes, make the marked declaration or its
 protocol witness generate the descriptor, callable adapter, name, signature
@@ -240,7 +246,19 @@ size, alignment and mutation for the curated native-record bridge. These
 checks protect unsafe native crossings and current phase behavior, not a new
 origin-authentication rule.
 
-### 7. Generate meta surfaces from existing conformance
+### 7. Generate meta surfaces from existing conformance (partly complete)
+
+`4084c865` moved 158 value operations on String, Symbol, Var, List, Map and
+Array to bodyless `meta` prototypes and deleted their rows in `lib/lisp.x`
+and `etc/comptime.xlisp`. Hand rows remain for names that compile-time Lisp
+or the lowering calls directly, for inline and generated methods, and for
+`Func` adapters.
+
+The 44 operations listed below work on a native handle or packed storage
+that meta values cannot hold. Gary parked them on September 24 until a
+caller exists; exposing them deletes no rows. Moving the compiler's own
+operation bindings and name exceptions to prototypes still needs a design
+for `meta` prototypes of compiler functions. The original text follows.
 
 Design meta-capable protocols as composition with existing protocol witnesses:
 `meta` continues to mark translation-time availability, while `Var(T)`,
@@ -261,7 +279,13 @@ settled public decision.
 
 ## Lifetime-certified tranche
 
-### 8. Expand only from proved effects
+### 8. Expand only from proved effects (replaced)
+
+Gary chose a redesign on September 24, 2026. The whole-project
+`region-escapes` pass this phase relied on was deleted in the explicit meta
+campaign; [meta-lifetime-certification.md](meta-lifetime-certification.md)
+certifies the same ten methods with the per-definition meta region walk. The
+original text follows.
 
 Implement the lifetime research in its recorded order:
 

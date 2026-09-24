@@ -2153,8 +2153,11 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
    `Array` is not a `List`. Without the argument case an `Array` reached a
    `List` parameter and the native adapter refused it. */
 static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
+  /* A lambda typed `Func`, as constructed syntax may be, is one wherever
+     it goes, a `Var` included. */
+  Type type = _lower_type_of(node);
   Var signature;
-  if (want.equal(%("Func")) &&
+  if ((want.equal(%("Func")) || (type && type.equal(%("Func")))) &&
       l.lambda_signatures.try_get(value, &signature))
     return _lower_func_adapter(l, signature, value);
   match (node)
@@ -2314,18 +2317,36 @@ static Var _lower_destructure(
   if (hold && l.on_loop)
     return _lower_decline(l, "a value needing a binding is on a loop path");
   Var held = hold ? _lower_name(l, "hold") : source;
+  List wraps = %();
   int index = 0;
   foreach (List target, targets) {
     int id;
     if (!_lower_destructure_id(target, &id))
       return _lower_decline(l, "unsupported destructuring target");
-    if (l.cells.contains(id))
-      return _lower_decline(l, "a destructured local that needs a cell");
-    l.env[id] = %(List_getindex $held $index);
+    Var element = %(List_getindex $held $index);
     index++;
+    if (!l.cells.contains(id)) {
+      l.env[id] = element;
+      continue;
+    }
+    /* A cell is filled when the enclosing loop allocated it, and bound
+       fresh otherwise, as a declarator does. */
+    Var slot;
+    if (l.env.try_get(id, &slot)) {
+      Var discarded = _lower_name(l, "discard");
+      wraps = cons(%($discarded (C.store $slot $element)), wraps);
+      continue;
+    }
+    slot = _lower_name(l, "hold");
+    l.env[id] = slot;
+    Var boxed = _lower_boxed(l, id, element, 0);
+    wraps = cons(%($slot $boxed), wraps);
   }
   Var after = _lower_block(l, rest, k);
   if (_lower_failed(l, after)) return void;
+  foreach (List wrap, wraps)
+    match (wrap)
+      case %(?slot ?value): after = %((lambda ($slot) $after) $value);
   if (!hold) return after;
   return %((lambda ($held) $after) $source);
 }

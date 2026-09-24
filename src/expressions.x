@@ -1896,7 +1896,11 @@ static List Compiler._binary_expression(
     return %(expr (<macro-expr>) (op $operator $lhs $rhs));
   if (operator.is_assignment_op()) {
     Type type = lhs_type;
-    if (operator == <=>) rhs = c.convert_expression(rhs, type);
+    /* Meta lowering adapts a callable stored to a Func itself; converting
+       here would lift a function name to a hidden global first. */
+    if (operator == <=> &&
+        !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
+      rhs = c.convert_expression(rhs, type);
     return %(expr $type (op $operator $lhs $rhs));
   }
   if (operator == <==> || operator == <!=> || operator == <"<"> ||

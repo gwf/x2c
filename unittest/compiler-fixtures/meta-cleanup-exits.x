@@ -194,6 +194,29 @@ meta long wide_store(long n) {
 
 meta long wide_read(int n) => wide + chosen(n);
 
+/* Destructured locals that a cleanup names hold cells, as declared ones do,
+   inside a loop body as well as in straight-line code. */
+meta int destructured(int n) {
+  int total = 0;
+  {
+    Var (a, b) = [n, n + 1];
+    defer total += a.int() * 10 + b.int();
+    total += 1000;
+  }
+  return total;
+}
+
+meta int destructured_loop(int n) {
+  int total = 0;
+  List pair = %(3 4);
+  for (int i = 0; i < n; i++) {
+    Var (a, b) = pair;
+    defer total += a.int() * 10 + b.int() + i;
+    if (i == 2) continue;
+  }
+  return total;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   int offset = argc - 1;
@@ -219,5 +242,7 @@ int main(int argc, char **argv) {
   printf("%d %d\n", $string_free(4), string_free(4 + offset));
   printf("%ld %ld\n", $wide_store(3), wide_store(3 + offset));
   printf("%ld %ld\n", $wide_read(5), wide_read(5 + offset));
+  printf("%d %d\n", $destructured(4), destructured(4 + offset));
+  printf("%d %d\n", $destructured_loop(5), destructured_loop(5 + offset));
   return 0;
 }

@@ -280,6 +280,18 @@ static void _skip_aggregate_attributes(Compiler c) {
   }
 }
 
+/* A collected C header may prefix a declaration with a macro defined only
+   where collection cannot see it, such as on the C compile line. A name
+   before a declaration keyword cannot be a type, so it expands to storage,
+   visibility, or attributes and contributes nothing to the collected type. */
+static int _unseen_prefix(Compiler c) {
+  Symbol next = c.peek(1);
+  return c.shallow && c.filename.endswith(".h") &&
+         (next.is_builtin_type() || next.is_type_modifier() ||
+          next.is_type_qualifier() || next.is_storage_class() ||
+          next.is_inline());
+}
+
 /* Source is read before preprocessing, so a macro whose body is declaration
    specifiers and attributes, such as an export annotation, still sits in a
    declaration. A specifier position of `rank`, 0 for storage classes and
@@ -289,9 +301,12 @@ static void _skip_aggregate_attributes(Compiler c) {
    `static` of `#define LOCAL static`. */
 static int _prefix_macro_words(Compiler c, int rank, Array words) {
   Var definition;
-  if (c.peek(0) != <ident> ||
-      !c.object_macros.try_get(c.token.text, &definition))
-    return 0;
+  if (c.peek(0) != <ident>) return 0;
+  if (!c.object_macros.try_get(c.token.text, &definition)) {
+    if (rank || !_unseen_prefix(c)) return 0;
+    c.next();
+    return 1;
+  }
   if (definition.equal(<wrapper>) && c.peek(1) == <(>) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
@@ -1844,7 +1859,14 @@ int Compiler.skip_linkage_brace(Compiler c) {
     c.next();
     c.next();
   }
-  else if (c.peek(0) != <"}"> || !c.braces.len()) return 0;
+  else if (c.peek(0) != <"}">) return 0;
+  else if (!c.braces.len()) {
+    // The group opened before an include, in an earlier segment.
+    if (!c.open_linkage) return 0;
+    c.open_linkage--;
+    c.token = c.skip_trivia_from(c.token + 1);
+    return 1;
+  }
   c.next();
   return 1;
 }

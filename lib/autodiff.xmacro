@@ -1289,7 +1289,7 @@ meta static List ad_rev_checkpoint(
   (Var n, List iteration, List dispatch, List through, List condition) =
     ad_loop_parts(c, body, step, names);
   List inner = ad_declared_names(%($body $step), %());
-  Array changed = [];
+  Array changed = $auto([]);
   foreach (Var name, ad_assigned(%($body $step), %()))
     if (!(name in inner)) changed.push(name);
   Var total = ad_fresh("_ad_total", %(int));
@@ -1297,7 +1297,7 @@ meta static List ad_rev_checkpoint(
   Var remaining = ad_fresh("_ad_remaining", %(int));
   Var replay = ad_fresh("_ad_replay", %(int));
   List size = ad_state.checkpoint;
-  Array snapshot = [];
+  Array snapshot = $auto([]);
   List recover = %();
   foreach (Var name, changed) {
     snapshot.push(ad_push(ad_id(name)));
