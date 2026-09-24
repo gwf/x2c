@@ -1,14 +1,15 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: needs author scoping - re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; no phase implemented. This plan now also owns the
-> compiler-backed rewrite from [x2c-scripting-ports](x2c-scripting-ports.md)
-> ("Rewrite on the compiler instead of translating"), including catalog
-> item [C09](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation).
-> The 2026-09-17 design decided three things that still stand: lint ships
-> as an `x2c lint` subcommand, it stays optional until it replaces the
-> Python analyzers, and the class ceiling gets a diagnostic rather than a
-> runtime change. The decisions below are open.
+> `29326dbd`; lint placement measured on `76cead06`; no phase implemented.
+> This plan now also owns the compiler-backed rewrite from
+> [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
+> instead of translating"), including catalog item
+> [C09](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation).
+> The 2026-09-17 design decided that lint stays optional until it replaces
+> the Python analyzers and that the class ceiling gets a diagnostic rather
+> than a runtime change. Its third decision, lint as an `x2c lint`
+> subcommand, is reopened by decision 1 below.
 
 ## The result
 
@@ -16,8 +17,9 @@ Every tool that reads x2c source reads what the compiler parsed. No
 regular-expression parser for x2c survives in the repository. Two
 consumers share one compiler surface:
 
-- `x2c lint`, in the compiler, for rules that need the bound, typed AST
-  or the retained token stream, and later `x2c fmt --check`.
+- `x2c-lint`, a separate executable in `tools/x2c-lint/` that links the
+  compiler's objects, for rules that need the bound, typed AST or the
+  retained token stream, and later `fmt --check`.
 - x2c scripts in the indentation syntax (`#pragma indent`) for the doc
   generators, the module catalog, repository metrics, and the bloat and
   overengineering reports. They read a compiler projection and never
@@ -90,22 +92,126 @@ Checked on `29326dbd`:
 
 Nothing here needs a second parser, a CST, or a pretty-printer.
 
+## Lint placement: in the compiler or linked beside it
+
+Measured on `76cead06` (M4 Max host, load average 16-35 from other agents).
+The stand-in for 1,800 lines of lint was the four `tools/x2c-graph`
+analysis modules (`lifetime.x`, `loop-allocations.x`, `clones.x`,
+`targets.x`, 1,881 lines of match-heavy AST walks) copied into `src/` and
+included from `main.x`, on a local throwaway branch that was deleted.
+
+### Hand-authored `.x` in the compiler
+
+| Option | `src/` lines | Change |
+| --- | --- | --- |
+| Today | 43,590 | - |
+| Lint inside (walk 200 + lint 1,800) | about 45,590 | +4.6% |
+| Separate tool (walk 200 only) | about 43,790 | +0.5% |
+
+The separate tool puts its 1,800 lines in `tools/x2c-lint/`, as
+`tools/x2c-graph` does with its 5,682.
+
+### Cost of lint inside the compiler
+
+| Measure | Base | With 1,881 lines | Kind |
+| --- | --- | --- | --- |
+| Binary size | 2,534,256 B | 2,625,920 B (+3.6%) | measured |
+| `bootstrap/src` C added | - | 171 KB in 4 files | measured |
+| `--version` instructions | 51.3 M | 52.7 M (+1.35 M, +2.6%) | measured |
+| `--version` time | 10 ms | 9-10 ms; +0.15 ms from cycles | measured |
+| Trivial translate | 56-61 ms | 56 ms | measured, within noise |
+| Trivial translate instructions | 768 M | +1.35 M (+0.2%) | inferred from `--version` |
+| `lib/string.x` translate | 184 ms | 183 ms | measured, within noise |
+| `src/expressions.x` translate | 510 ms | 493 ms | measured, within noise |
+| One stage, cycles (median of 3) | 41.6 G, 40.6 G | 43.3 G, 39.6 G | measured, within 4-5% noise |
+| One stage, cycles | - | +2.4% | inferred, proportional to lines |
+| One stage wall, `-j16` | 6.5 s | 6.9 s | measured, one sample each |
+| `make bootstrap-refresh` | - | 21 s | measured |
+| `make build` after editing the module | - | 5.5 s | measured |
+
+Startup work that grows with the compiler: every run hashes the whole
+executable for `x2c_compiler_identity` (`src/utils.x`), and each module's
+`_file_init_` constructor builds its literal and pattern constants.
+`bootstrap/src` has 13,818 such assignments for 43,590 lines, 0.32 per line;
+match-heavy modules reach 0.5-0.6, so lint adds about 1,000. Registered Lisp
+is unchanged. Both costs appear in the `--version` delta above and are
+under 0.2 ms.
+
+Lint is off during translation in both options, so per-file compile time
+does not change.
+
+The larger cost is the edit loop. A lint rule edit is a compiler edit:
+
+- The stage-0 compiler's identity changes, so the `.xi` interfaces the
+  previous compiler wrote no longer validate. Until bootstrap refresh, every
+  stage-0 translate collects `lib/meta.x` cold. Measured: trivial translate
+  46 ms at the fixpoint, 360 ms after one module edit; `src/expressions.x`
+  510 ms to 1,030 ms.
+- Publication needs the full `agent-pr-check` path: bootstrap refresh, safe
+  rebuild, stages, and the self-host comparison, plus a 171 KB
+  `bootstrap/` delta whenever the rules change.
+
+### Cost of a separate tool
+
+A compiler library already exists in practice. `tools/x2c-graph/Makefile`
+archives `builds/0/src/*.o` without `main.o` into `libx2c-dev.a` and links
+it with its own `.x` files, which include `src/frontend.x` directly. No
+installed library or stable API exists; `docs/src/internals/compiler-api/`
+marks the API provisional.
+
+Proof: `unittest/build/lintproof/lintproof.x` (45 lines, not committed)
+calls `Frontend.new`, `preload_macro_libraries`, and `Frontend.open`,
+matches `%(function *)` over `parsed.ast`, and reads the token array through
+`parsed.compiler.tokenizer`. Over `src/*.x` it reported 2,067 functions,
+5,296 typed `->` nodes, and 28 written `->` tokens. It worked on the first
+build after one pattern fix.
+
+| Measure | Value | Kind |
+| --- | --- | --- |
+| Archive of 36 compiler objects | 2.8-2.9 MB, 20-40 ms | measured |
+| Proof binary | 2.0 MB | measured |
+| Proof build (translate, compile, link) | 0.3-0.8 s | measured |
+| `x2c-graph` cold build (5,682 lines) | 1.9 s | measured |
+| `x2c-graph` rebuild after touching a module | 0.5 s | measured |
+| Compiler size, startup, stage builds | unchanged | measured by construction |
+
+The tool relinks whenever `make build` rebuilds the compiler, because its
+archive target depends on the compiler build, and it translates against the
+current `src/` headers, so type and struct changes fail its build. AST
+shape changes do not: a stale `match` pattern stops matching silently. The
+guard is a small fixture set per rule run by the tool's own test target, as
+`tools/x2c-graph/tests/ast-parity.x` does. Nothing in a gate builds
+`x2c-graph` today; an ungated lint would drift the same way.
+
+Packaging: installs ship neither compiler objects nor `src/`. A repository
+tool needs no packaging. Shipping lint to users would add a second
+executable of about 2 MB, or the archive and headers, and an `x2c lint`
+subcommand that runs it.
+
+### Rule access
+
+| Rule family | Needs | Linked tool |
+| --- | --- | --- |
+| `.` for `->` | written tokens and receiver types; the typed AST rewrites `.` through pointers to `->` (5,296 typed vs 28 written in `src/`) | same |
+| `x in c`, `$auto`, `Type.method(x)`, `=>`, literals, grouped declarations, initialization | bound, typed AST | same |
+| Percent vs bare literal | typed AST plus tokens | same |
+| Brace, comment, blank-line, whitespace | tokens with trivia | same |
+| Validation and bloat families | typed AST, non-returning facts, spans | same |
+
+A linked tool runs the same `Frontend` in the same process, so it sees
+every fact a subcommand would. What it cannot do is add a hook inside a
+compiler pass; no listed rule needs one.
+
 ## Architecture recommendation
 
-**Both, split by what a rule needs.** Rules that read types, bindings, or
-the retained token stream run in the compiler as `x2c lint`, because an
-external script over a text dump would need a typed dump that does not
-exist and would duplicate the frontend. Everything that needs only
-definitions, spans, and docs becomes a script over `--dump-definitions`.
-`src/lint.x` and the projection share one definition walk, which is the
-single module; the `.xi` writer, `--dump-definitions`, and lint all call
-it.
-
-A lint that is only a script (the alternative) is smaller in the compiler
-but can implement only the token and comment families: the idiom rules
-(`in`, `.` for `->`, `$auto`, bare literals) need receiver types. A lint
-that is only a subcommand would move the doc generators into the compiler
-binary, which is house tooling on the public surface.
+**A separate `x2c-lint` executable in `tools/x2c-lint/`, built like
+`x2c-graph` from the compiler objects, plus the shared definition walk and
+`--dump-definitions` projection in the compiler for the scripts.** The
+runtime costs of lint in the compiler are small, under 0.2 ms at startup and
+about 2.4% per stage build. The deciding costs are the 4.6% growth of
+hand-authored compiler source for house tooling, and an edit loop where
+every rule change is a compiler change with bootstrap refresh, cold stage-0
+translation, and the full publication gate. The tool loses no rule access.
 
 ## Tiers and rules
 
@@ -134,7 +240,7 @@ disposition (`SAFE`, `CHANGES-FAILURE-PATH`, `NEEDS-MORE`, `KEEP`,
 `PREVIOUSLY-DEFERRED`). Suppression is a path-glob list in
 `etc/lint.xlisp` and `// lint: allow <code> - reason`. `--fix` applies
 textual edits and refuses to write when the generated C changes. Rules
-are one static table; `x2c lint --rules` prints it. Four survey findings
+are one static table; `x2c-lint --rules` prints it. Four survey findings
 remain compiler bugs for `fix-x2c-bug`, not rules.
 
 ## Changes on dev since 2026-09-17
@@ -164,8 +270,9 @@ remain compiler bugs for `fix-x2c-bug`, not rules.
    scripts over the projection. Generated docs must be byte-identical.
    Delete `x2c_source.py`'s doc paths and `x2c_symbols.py`. This completes
    C09.
-3. `x2c lint` engine and token rules; parity with `source_style.py` and
-   `audit-source.sh`; delete them; measure the binary-size delta.
+3. `tools/x2c-lint` engine and token rules, built from the compiler
+   archive with a `test` target over its fixtures; parity with
+   `source_style.py` and `audit-source.sh`; delete them.
 4. Identical-translation idiom rules with `--fix`, one cleanup delivery per
    family.
 5. Comment rules; parity; delete `comment_slop.py`; fold the skill into
@@ -173,7 +280,8 @@ remain compiler bugs for `fix-x2c-bug`, not rules.
 6. Structural and validation rules; parity with `audit-source-bloat.py` and
    `redundant_validation.py`; port the overengineering report to a script;
    delete the rest of `x2c_source.py`.
-7. Editor lint kind and fixes; then `fmt --check`, token-only.
+7. Editor lint kind and fixes, if decision 6 ships lint to users; then
+   `fmt --check`, token-only.
 
 Phases 1 and 2 are worth shipping alone: they end C09 and remove about
 2,500 lines of Python. Phase 3 needs its own approval under decision 1.
@@ -183,7 +291,8 @@ Phases 1 and 2 are worth shipping alone: they end C09 and remove about
 No gate is added. `precommit`, `sanity-check`, and `agent-pr-check` are
 unchanged. `make doc-generate` switches from Python to scripts at Phase 2,
 at no added cost. Lint fixtures live with the tool, not in
-`unittest/compiler-fixtures/`.
+`unittest/compiler-fixtures/`. Building and testing `tools/x2c-lint` in
+`check` would be a new recurring cost; see decision 5.
 
 ## What this does not build
 
@@ -194,18 +303,23 @@ inside the new tools.
 
 ## Decisions for Gary
 
-1. **Architecture.** Recommend both: `x2c lint` in the compiler for typed
-   and token rules, scripts over a compiler projection for docs and
-   metrics, one shared definition walk. This reaffirms the 2026-09-17
-   subcommand decision.
+1. **Lint placement.** Recommend a separate `tools/x2c-lint` executable
+   linking the compiler objects, as `x2c-graph` does. This replaces the
+   2026-09-17 `x2c lint` subcommand decision. It keeps about 1,800 lines out
+   of `src/` and keeps rule edits out of bootstrap refresh.
 2. **Projection form.** Recommend a documented `--dump-definitions`
    translate option that replaces the experimental `--dump-source-ast`,
-   rather than enlarging `.xi` files, which every build writes.
+   rather than enlarging `.xi` files, which every build writes. It stays in
+   the compiler because the `.xi` writer shares its walk.
 3. **Order.** Recommend Phases 1 and 2 (C09 and the doc generators)
    before any lint phase, because they build the shared walk and delete
    the keystone importers first.
 4. **Rule families by default.** Recommend language-level rules on by
    default and repository-policy rules selected explicitly, as designed.
 5. **Run policy.** Recommend lint stays optional, invoked by the
-   `clean-x2c-source` skill. A gate would need an equal-cost removal under
-   the process ceiling, and this plan does not propose one.
+   `clean-x2c-source` skill, and its build and fixtures stay out of gates.
+   Drift then shows up when the skill runs, as with `x2c-graph`. Gating
+   it would need an equal-cost removal under the process ceiling.
+6. **Distribution.** Recommend lint stays repository tooling and is not
+   installed. Shipping it later means a second 2 MB executable and an
+   `x2c lint` subcommand that runs it.
