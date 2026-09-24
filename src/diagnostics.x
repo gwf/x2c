@@ -144,7 +144,7 @@ static List _build_entry(
 /* Some producers derive one failure twice, so an entry equal to a stored
    one is not repeated. Reports whether the entry was published. */
 static int Diagnostics._publish(Diagnostics diag, List entry) {
-  if (diag.entries.contains(entry)) return 0;
+  if (entry in diag.entries) return 0;
   diag.entries.push(entry);
   _emit_entry(diag, entry);
   return 1;

@@ -226,7 +226,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   String root = x2c_get_root(), int use_prelude = !request.live_symbols;
   Map globs = NULL;
   int use_cpp = request.cpp_symbols || request.live_symbols ||
-                cpp_dumps.contains(request.dump);
+                request.dump in cpp_dumps;
   if (use_prelude && !use_cpp) return c.collect_symbols(NULL);
   if (c.layout)
     c.report_error(

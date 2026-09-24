@@ -684,7 +684,7 @@ static Type _declared(Compiler compiler, String name) {
    implementing the member. */
 static int _default_completes(
   Compiler compiler, String name, Type declared, String forward) =>
-  forward && declared.is_function() && compiler.fn_defs.contains(forward) &&
+  forward && declared.is_function() && forward in compiler.fn_defs &&
   !compiler.fn_defs.contains(name) &&
   !compiler.sym.file_statics().contains(%(function $name));
 

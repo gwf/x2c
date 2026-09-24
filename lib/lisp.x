@@ -2132,7 +2132,7 @@ static Var _call_lambda_slots(
     .bindings = bindings,
     .parent = &captured
   };
-  if (lambda.params.contains(Atom.intern("."))) {
+  if (Atom.intern(".") in lambda.params) {
     List args = NULL;
     for (int i = count - 1; i >= 0; i--) {
       if (values[i] is void)

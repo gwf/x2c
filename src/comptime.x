@@ -279,7 +279,7 @@ static void _lower_scan_op(Lowering l, List form) {
     case %(op & (expr ? (parens ?inner))):
       _lower_scan_op(l, %(op & $inner));
     case %(op & (expr ? (ident (binding ?(int id) ?)))): {
-      if (l.compiler.meta_values.contains(id)) return;
+      if (id in l.compiler.meta_values) return;
       if (!l.cursors.contains(id)) {
         Var layout;
         l.cells[id] = l.locals.try_get(id, &layout) ? layout : 1;
@@ -373,7 +373,7 @@ static void _lower_scan_callee(Lowering l, String name) {
     lower_missing_callee = name;
     return;
   }
-  if (l.compiler.meta_comptime.contains(name) ||
+  if (name in l.compiler.meta_comptime ||
       Compiler.supplies_native_meta(name)) l.meta_only = 1;
 }
 
@@ -516,7 +516,7 @@ static int _lower_meta_global(Lowering l, int id, int write) {
 
 /* Whether an assignment may write local or file-scope `id`. */
 static int _lower_writable(Lowering l, int id) {
-  if (l.locals.contains(id)) return 1;
+  if (id in l.locals) return 1;
   return _lower_meta_global(l, id, 1) >= 0;
 }
 
@@ -547,7 +547,7 @@ static Var _lower_value(Lowering l, int id) {
   List layout = _lower_storage_layout(l, id);
   if (layout && layout.car() == <record>) return slot;
   if (layout) return %(C.peek $slot 0 (quote $layout));
-  if (l.cells.contains(id)) return %(C.load $slot);
+  if (id in l.cells) return %(C.load $slot);
   return slot;
 }
 
@@ -648,7 +648,7 @@ static Var _lower_constant(Lowering l, Var node) {
 
 /* The slot holding a local's storage, or a meta value's session bytes. */
 static Var _lower_address(Lowering l, int id) {
-  if (l.compiler.meta_values.contains(id)) return %(C.mgaddress $id);
+  if (id in l.compiler.meta_values) return %(C.mgaddress $id);
   Var slot;
   if (!l.env.try_get(id, &slot))
     return _lower_decline(l, "address of an unknown local");
@@ -662,8 +662,8 @@ static Var _lower_typed_address(Lowering l, List type, int id) {
   Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
   Var slot = void;
   List layout = NULL;
-  if (l.compiler.meta_values.contains(id)) layout = _lower_meta_layout(l, id);
-  else if (l.locals.contains(id)) layout = _lower_storage_layout(l, id);
+  if (id in l.compiler.meta_values) layout = _lower_meta_layout(l, id);
+  else if (id in l.locals) layout = _lower_storage_layout(l, id);
   else {
     /* A REPL-persistent record is its session bytes; other file-scope
        state has no address at compile time. */
@@ -675,7 +675,7 @@ static Var _lower_typed_address(Lowering l, List type, int id) {
     slot = %(C.gread $id);
     layout = l.compiler.meta_type_layout(record);
   }
-  if (l.arrays.contains(id)) return _lower_value(l, id);
+  if (id in l.arrays) return _lower_value(l, id);
   if (slot is void) slot = _lower_address(l, id);
   if (_lower_failed(l, slot)) return void;
   if (layout && (layout.car() != <record> || !tag)) return slot;
@@ -825,8 +825,8 @@ static Var _lower_place(Lowering l, Var target) {
     case %(parens ?inner): return _lower_place(l, inner);
     case %(expr ? (parens ?inner)): return _lower_place(l, inner);
     case %(expr ? (ident (binding ?(int id) ?))):
-      if (l.compiler.meta_values.contains(id) ||
-          (l.locals.contains(id) && l.cells.contains(id)))
+      if (id in l.compiler.meta_values ||
+          (id in l.locals && id in l.cells))
         return _lower_address(l, id);
     case %(expr ? (op ?operator ?operand)):
       if (operator == <"*">) return _lower_expr(l, operand);
@@ -1168,7 +1168,7 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
     Type type = parameter.car() == <param>
       ? parameter.type_from_ast().declared() : %("Var");
     types.push(type);
-    if (l.cells.contains(id)) {
+    if (id in l.cells) {
       Var box = _lower_name(l, "box");
       boxes.push(box);
       values.push(_lower_boxed(l, id, slot, 0));
@@ -1504,7 +1504,7 @@ static void _lower_env_restore(Lowering l, Map saved) {
 /* The bound ids a function over the live locals carries, in id order, so
    its parameters do not follow the hash layout of the environment. */
 static void _lower_live_ids(Lowering l, Map used, Array ids) {
-  foreach (Var (id, form), l.env) if (used.contains(id)) ids.push(id);
+  foreach (Var (id, form), l.env) if (id in used) ids.push(id);
   ids.sort();
 }
 
@@ -1737,7 +1737,7 @@ static void _lower_loop_cells(Lowering l, Var form, Array out) {
   if (!items) return;
   match (items)
     case %(bind (binding ?(int id) ?) *): {
-      if (l.cells.contains(id) && !l.env.contains(id)) {
+      if (id in l.cells && !l.env.contains(id)) {
         l.env[id] = _lower_name(l, "box");
         out.push(id);
       }
@@ -1792,7 +1792,7 @@ static Var _lower_loop(
   _lower_referenced(k, used);
   /* The element is read where it is used, so the loop does not carry it. */
   struct LowerCursor walk;
-  int walking = _lower_cursor(test, &walk) && l.cursors.contains(walk.cursor);
+  int walking = _lower_cursor(test, &walk) && walk.cursor in l.cursors;
   if (walking) {
     used.del(walk.item);
     if (walk.value) used.del(walk.value);
@@ -1821,7 +1821,7 @@ static Var _lower_loop(
      observes its current length each turn, just as its cursor operation
      does. Outputs read the current element before advancing the cursor. */
   Var guard;
-  if (walking && inside.contains(walk.cursor)) {
+  if (walking && walk.cursor in inside) {
     Var cursor = inside[walk.cursor];
     if (walk.kind == <array>) {
       Var object = _lower_value(l, walk.object);
@@ -2019,7 +2019,7 @@ static Var _lower_boxed(Lowering l, int id, Var value, int fresh) {
   if (_lower_failed(l, value)) return void;
   List layout = _lower_storage_layout(l, id);
   if (layout) return _lower_new_object(l, layout, value, fresh);
-  if (l.cells.contains(id)) return %(C.cell $value);
+  if (id in l.cells) return %(C.cell $value);
   return value;
 }
 
@@ -2090,7 +2090,7 @@ static Var _lower_record_braced(
 static Var _lower_braced(Lowering l, List type, int id, List items) {
   if (_lower_record_type(l, type))
     return _lower_record_braced(l, type, items, void);
-  if (l.arrays.contains(id)) {
+  if (id in l.arrays) {
     Type declared = type;
     Type element = declared.is_array() ? declared.dereference() : declared;
     int size = 0;
@@ -2241,7 +2241,7 @@ static Var _lower_declarator(
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
       /* A record in a loop's storage is initialized where it is. */
-      if (l.records.contains(id) && l.env.contains(id)) {
+      if (id in l.records && id in l.env) {
         Var into = _lower_address(l, id);
         match (init) {
           case %(expr ? (composite (commas *items))):
@@ -2253,7 +2253,7 @@ static Var _lower_declarator(
         }
       }
       Var value = _lower_initializer(l, declared, id, init);
-      if (l.cells.contains(id) && l.env.contains(id)) {
+      if (id in l.cells && id in l.env) {
         if (_lower_failed(l, value)) return void;
         return _lower_effect(
           l, _lower_poke(l, declared, _lower_address(l, id), value), rest, k);
@@ -2265,14 +2265,14 @@ static Var _lower_declarator(
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
       Var initial;
-      int filled = l.cells.contains(id) && l.env.contains(id);
-      if (l.arrays.contains(id)) initial = _lower_braced(l, declared, id, %());
-      else if (l.records.contains(id))
+      int filled = id in l.cells && id in l.env;
+      if (id in l.arrays) initial = _lower_braced(l, declared, id, %());
+      else if (id in l.records)
         initial = _lower_record_zero(
           l, declared, filled ? _lower_address(l, id) : void);
       else initial = _lower_zero(declared);
       if (_lower_failed(l, initial)) return void;
-      if (filled && l.records.contains(id))
+      if (filled && id in l.records)
         return _lower_effect(l, initial, rest, k);
       /* A box the enclosing loop already allocated is filled, not rebound.
          A `foreach` inside a `foreach` declares its output cell with no
@@ -2545,7 +2545,7 @@ static void _lower_scan_nested_writes(
   }
   if (target is not void && !direct_statement) {
     int id = _lower_target(target);
-    if (id >= 0 && l.locals.contains(id) && !l.cells.contains(id))
+    if (id >= 0 && id in l.locals && !l.cells.contains(id))
       l.cells[id] = l.locals[id];
   }
   foreach (Var child, items)
@@ -2580,7 +2580,7 @@ static void _lower_scan_cleanups(Lowering l, Var form) {
       _lower_scan_names(item, named, declared);
       _lower_scan_names(rest.cdr(), named, declared);
       foreach (Var id, named.keys())
-        if (l.locals.contains(id) && !declared.contains(id) &&
+        if (id in l.locals && !declared.contains(id) &&
             !l.cursors.contains(id) && !l.cells.contains(id))
           l.cells[id] = l.locals[id];
       return;
@@ -3050,7 +3050,7 @@ int Compiler.lower_reached_meta(Compiler compiler) {
 int Compiler.meta_is_comptime_only(Compiler c, List fn) {
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) *) ?):
-      return c.meta_comptime.contains(name);
+      return name in c.meta_comptime;
   return 0;
 }
 
@@ -3163,7 +3163,7 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
   }
   if (value is not <array> && value is not <map>) return NULL;
   ulong address = (ulong) value.u64;
-  if (marks.contains(address))
+  if (address in marks)
     c.report_error(<macro>, marks[address] == 1
         ? "compile-time result contains itself"
         : "compile-time result holds one collection twice",
@@ -3281,7 +3281,7 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
   match (callee)
     case %(expr ? (ident (binding ? ?(String name)))):
-      if (c.meta_comptime.contains(name))
+      if (name in c.meta_comptime)
         c.report_error(
           <macro>, %"'$name' can only be called at compile time", origin,
           %("reason: it reaches a compiler operation, so no unit emits a"

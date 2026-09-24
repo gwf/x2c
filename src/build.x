@@ -1036,7 +1036,7 @@ List Build.script_helpers(Build b) {
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   Array helpers = [];
   foreach (String path, _state_dep_inputs(translation)) {
-    if (!x2c_source_file(path) || path == script || helpers.contains(path))
+    if (!x2c_source_file(path) || path == script || path in helpers)
       continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     helpers.push(path);

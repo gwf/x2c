@@ -550,7 +550,7 @@ static List _aggregate_typedef_forwards(List items, List earlier) {
       case %(typedef ?base ?):
         foreach (List candidate, candidates) {
           (String name, List forward) = candidate;
-          if (available.contains(name) || !_mentions_type(base, name))
+          if (name in available || !_mentions_type(base, name))
             continue;
           output.push(forward);
           foreach (String declared, _typedef_names(forward))
@@ -591,7 +591,7 @@ static List _place_conditionals(
     match (item)
       case %(conditional ?group ? ?node): {
         int placed = opened[group].int() != header;
-        if (filled.contains(group) || (!other.contains(group) && placed))
+        if (group in filled || (!other.contains(group) && placed))
           output.push(node);
         continue;
       }

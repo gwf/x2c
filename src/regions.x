@@ -1149,4 +1149,4 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
 
 /** Reports whether the runtime table proves the lifetime effects of the
     native function `name`. */
-int Compiler.has_region_row(String name) => runtime.contains(name);
+int Compiler.has_region_row(String name) => name in runtime;

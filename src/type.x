@@ -227,7 +227,7 @@ int Symbol.is_type_modifier(Symbol sym) => sym in type_modifiers;
 
 static int Symbol._is_number_type(Symbol sym) => sym in number_types;
 
-static int Symbol._is_tagged(Symbol sym) => tagged_types.contains(sym);
+static int Symbol._is_tagged(Symbol sym) => sym in tagged_types;
 
 /** Returns whether `sym` can begin a builtin C type specifier. */
 int Symbol.is_builtin_type(Symbol sym) =>

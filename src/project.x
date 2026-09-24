@@ -592,7 +592,7 @@ static CliRequest _target_request(
   if (profile) {
     List cc_args = command.cc_args;
     int optimized = cc_args.any(%!(String flag) => flag.startswith("-O"));
-    int debug = profile.seen.contains("debug") && profile.debug &&
+    int debug = "debug" in profile.seen && profile.debug &&
                 !cc_args.contains("-g");
     defines = defines.append(_defines(profile.defines));
     compile = %(

@@ -1006,7 +1006,7 @@ static int _cell_parts(
 
 static void _record_region_binding(
   Compiler compiler, List binding, Map owned, Array order) {
-  if (!binding || owned.contains(binding)) return;
+  if (!binding || binding in owned) return;
   Var automatic, stored_type;
   Map facts = compiler.semantic_binding_facts();
   if (!facts.try_get(%(automatic $binding), &automatic) ||
