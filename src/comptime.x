@@ -973,7 +973,9 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
     Var value;
     if (parameter.car() == <&>) {
       Type target = parameter.cdr();
-      value = %(C.func.reference-argument $fn $argv $index (quote $target));
+      Type resolved = l.compiler.sym.normalize_declared_type(target);
+      value = %(C.func.declared-reference-argument $fn $argv $index
+                (quote $target) (quote $resolved));
     }
     else {
       Symbol tag = l.compiler.sym.var_tag_for_type(parameter, NULL);

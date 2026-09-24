@@ -1607,6 +1607,7 @@ $(def lisp.native.target.rows (append '(
   (lisp_func_invalid)
   (x2c_func_reference_type)
   (x2c_func_reference_argument)
+  (x2c_func_declared_reference_argument)
   (x2c_func_value_argument)
   (x2c_func_pointer_argument)
   (Func_apply)

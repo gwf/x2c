@@ -1,0 +1,5 @@
+((func (("Count"))) "Count")
+((func (("Total") ("Total"))) "Total")
+((func ((& "Count"))) "Count")
+5 5 5
+5
