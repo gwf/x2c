@@ -75,8 +75,10 @@ cover:
   out is not followed;
 - callbacks and function pointers, including entry points a Lisp binding
   calls;
-- `Scope.free` and `Scope.realloc`, whose effect on other aliases of the
-  same allocation the pass does not track;
+- other aliases of storage that `Scope.free` or `Scope.realloc` ended; the
+  pass ends only the local passed to the call, and it reports a free only
+  of storage it can see is not from a Scope allocator: a literal, the
+  function's own storage, or a pooled value;
 - `Context` regions, which are not modeled;
 - `$auto` and `defer` cleanups other than the runtime's own `Array`, `Map`,
   `Block`, `Bytes`, `Buffer`, `Context`, and `Scope` cleanups;

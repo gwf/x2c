@@ -139,8 +139,6 @@ static List _cache_literal_list(Compiler compiler, List values);
 
 static String _match_pattern_converter_name(Var node);
 
-static int _match_pattern_value_is_static(Var value);
-
 static Symbol _flat_capture_tag(Var element, Var binder);
 
 static SymScope * _semantic_scope(Sym sym, int index);
@@ -3481,10 +3479,10 @@ if(Var_equal(head, Symbol_var(26416091224))) return List_last(ast);  if(Var_equa
   return Symbol_var(1059020478773725);
 }
 
-static int _match_pattern_value_is_static(Var value){
+int match_value_is_static(Var value){
   if(Var_equal(value, Symbol_var(1059020478773725))) return 0;  if(! Var_is_row(value, 9, 7, 4)) return 1; {
     Var part;  List _x2c_macro_object_38 = Var_list(value);  List _x2c_macro_cursor_38 = _x2c_macro_object_38;  Var _x2c_macro_cursor_output_36;  while(List_try_next(_x2c_macro_object_38, & _x2c_macro_cursor_38, & _x2c_macro_cursor_output_36)){
-      part = _x2c_macro_cursor_output_36;  if(! _match_pattern_value_is_static(part)) return 0;
+      part = _x2c_macro_cursor_output_36;  if(! match_value_is_static(part)) return 0;
     }
 
   }
@@ -3492,14 +3490,14 @@ static int _match_pattern_value_is_static(Var value){
 }
 
 int Compiler_match_pattern_is_static(Compiler compiler, List pattern){
-  if(! _init_guard_) _file_init_();  return _match_pattern_value_is_static(Compiler_match_pattern_value(compiler, List_var(pattern)));
+  if(! _init_guard_) _file_init_();  return match_value_is_static(Compiler_match_pattern_value(compiler, List_var(pattern)));
 }
 
 Var car(List);
 int Var_is_binder(Var);
 int Var_is_match_op(Var);
-Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern){
-  if(! _init_guard_) _file_init_();  Var value = Compiler_match_pattern_value(compiler, List_var(pattern));  if(! Var_is_row(value, 9, 7, 4)) return 0;  Var head = car(Var_list(value));  if(! Var_is(head, 1328354264) || Var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;  return Var_symbol(head);
+Symbol match_value_head(Var value){
+  if(! Var_is_row(value, 9, 7, 4)) return 0;  Var head = car(Var_list(value));  if(! Var_is(head, 1328354264) || Var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;  return Var_symbol(head);
 }
 
 int List_len(List);
@@ -3508,8 +3506,8 @@ static Symbol _flat_capture_tag(Var element, Var binder){
 }
 
 int Var_is_atom_binder(Var);
-Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags){
-  if(! _init_guard_) _file_init_();  Symbol head = Compiler_match_pattern_head_symbol(compiler, pattern);  if(! head) return 0;  List elements = List_cdr(Var_list(Compiler_match_pattern_value(compiler, List_var(pattern))));  Array typed = Array_new();  for(List cursor = binders;  List_truth(cursor) && List_truth(elements);  cursor = List_cdr(cursor), elements = List_cdr(elements)){
+Symbol match_value_flat_head(Var value, List binders, List * tags){
+  Symbol head = match_value_head(value);  if(! head) return 0;  List elements = List_cdr(Var_list(value));  Array typed = Array_new();  for(List cursor = binders;  List_truth(cursor) && List_truth(elements);  cursor = List_cdr(cursor), elements = List_cdr(elements)){
     Var binder = List_car(cursor), element = List_car(elements);  Symbol tag = 0;  if(! Var_is_atom_binder(binder) || Var_equal(binder, Symbol_var(58))) return 0;  if(! Var_equal(element, binder) && !(tag = _flat_capture_tag(element, binder))) return 0;  Array_push(typed, tag ? Symbol_var(tag) : int_var(0));
   }
   if(List_len(binders) != Array_len(typed) || List_truth(elements)) return 0;  if(tags) * tags = Array_list_free(typed);  else Array_free(typed);  return head;

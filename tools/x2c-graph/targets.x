@@ -6,8 +6,10 @@
 
 Map project_function_targets(Compiler compiler, List ast, String path);
 List project_call_target(
-  Compiler compiler, Map definitions, Var value, String *name);
+  Compiler compiler, Map definitions, Var value, String *name,
+  List *arguments);
 List resolve_project_target(List target, Map publics);
+List project_location(Compiler compiler, String path, int origin);
 
 #pragma private
 
@@ -27,21 +29,26 @@ Map project_function_targets(Compiler compiler, List ast, String path) {
 }
 
 List project_call_target(
-  Compiler compiler, Map definitions, Var value, String *name) {
+  Compiler compiler, Map definitions, Var value, String *name,
+  List *arguments) {
   *name = NULL;
+  if (arguments) *arguments = NULL;
   if (value is not <list>) return NULL;
   List node = value;
   match (node) {
-    case %(expr ? ?inner):
-      return project_call_target(compiler, definitions, inner, name);
-    case %(parens ?inner):
-      return project_call_target(compiler, definitions, inner, name);
-    case %(at ? ?inner):
-      return project_call_target(compiler, definitions, inner, name);
+    case %((!or expr at) ? ?inner):
+      return project_call_target(
+        compiler, definitions, inner, name, arguments
+      );
+    case %((!or stmnt parens) ?inner):
+      return project_call_target(
+        compiler, definitions, inner, name, arguments
+      );
     case %(call
            (expr ?
              (ident (!set ?binding (binding ? ?spelling))))
-           (args *)): {
+           (!set ?call_arguments (args *))): {
+      if (arguments) *arguments = call_arguments;
       if (compiler.semantic_binding_facts().contains(
             %(automatic $binding)
           )) {
@@ -54,7 +61,8 @@ List project_call_target(
       return definitions.contains(binding)
            ? definitions[binding].list() : %(public $emitted);
     }
-    case %(call ? (args *)): {
+    case %(call ? (!set ?call_arguments (args *))): {
+      if (arguments) *arguments = call_arguments;
       *name = "computed";
       return %(computed);
     }
@@ -72,4 +80,15 @@ List resolve_project_target(List target, Map publics) {
     }
   }
   return NULL;
+}
+
+List project_location(Compiler compiler, String path, int origin) {
+  List location = compiler.origin_location(origin);
+  if (!location) return %(location $path 0 0);
+  Var file = location.assoc(<file>);
+  String source = file is <string>
+                ? compiler.display_path(file.str()) : path;
+  int line = location.assoc(<line>).integer();
+  int column = location.assoc(<column>).integer();
+  return %(location $source $line $column);
 }

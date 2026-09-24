@@ -44,9 +44,6 @@ execution.
 
 ### Current work
 
-- [Explicit meta calls, lifetimes, and computed values](explicit-meta-and-lifetime-campaign.md):
-  active. Piece 0 deletes unrequested machinery, then explicit `$` calls,
-  meta lifetimes, computed collections, heap objects, and adoption.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
   delivered as `9b71607f`. The
   [reproducibility record](generated-lisp-reproducibility.md) retains the
@@ -87,10 +84,11 @@ execution.
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
-| [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; retained unresolved cases were last reproduced September 17. This cleanup does not claim a new compiler probe. |
+| [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; scope proposed 2026-09-24 from probes at `1aaf9479`: yyjson header wiring, unseen prefix names, unguarded linkage across includes, optional false-arm includes. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator port and the documentation sample checks are delivered; `check-docs.py` is next, followed by separately sequenced release, gate and compiler-backed ports. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
+| [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
@@ -110,6 +108,8 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Explicit meta calls, lifetimes, and computed values](archive/explicit-meta-and-lifetime-campaign.md):
+  done; pieces 0-5 delivered through `49a239ec`.
 - [Meta values, types, and native records](archive/meta-values-types.md):
   rejected local implementation; session-owned records and a hardcoded native
   bridge failed the requested storage and lifetime contract.

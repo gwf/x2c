@@ -7,83 +7,50 @@
     keeps C objects in bytes.  Var's i48/u48 numeric payload families are
     deliberately absent: neither is an exact C type.
 
-    A row is:
+    `native_scalar_types` is the one table. Each key is Type.scalar's
+    canonical spelling, and each value is:
 
-      (TYPE NAME TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)
+      (TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)
 
-    TYPE is Type.scalar's canonical spelling. NAME only names the generated
-    access record. C-EXTRACTOR and C-UPDATE retain the existing compiler
-    emission spellings. SIGNATURE-TYPE is the compact Type spelling used by
-    Func's Var calling convention.
+    C-EXTRACTOR and C-UPDATE retain the existing compiler emission
+    spellings. SIGNATURE-TYPE is the compact Type spelling used by Func's
+    Var calling convention. `src/type.x` inserts the table with
+    `$native_scalar_types()`, and the Lisp helpers below call it during
+    expansion.
 */
 
-$(def native.scalar.rows '(
-  ((char)               char    i8      "Var_char"
-    "x2c_var_update_i8" (char))
-  ((signed char)        schar   i8      "Var_char"
-    "x2c_var_update_schar" (schar))
-  ((unsigned char)      uchar   u8      "Var_uchar"
-    "x2c_var_update_u8" (uchar))
-  ((short)              short   i16     "Var_short"
-    "x2c_var_update_i16" (short))
-  ((unsigned short)     ushort  u16     "Var_ushort"
-    "x2c_var_update_u16" (ushort))
-  ((int)                int     i32     "Var_int"
-    "x2c_var_update_i32" (int))
-  ((unsigned)           uint    u32     "Var_uint"
-    "x2c_var_update_u32" (uint))
-  ((long)               long    long    "Var_long"
-    "x2c_var_update_long" (long))
-  ((unsigned long)      ulong   ulong   "Var_ulong"
-    "x2c_var_update_ulong" (ulong))
-  ((long long)          llong   llong   "Var_long_long"
-    "x2c_var_update_long_long" (llong))
-  ((unsigned long long) ullong  ullong  "Var_ulong_long"
-    "x2c_var_update_ulong_long" (ullong))
-  ((float)              f32     f32     "Var_float"
-    "x2c_var_update_f32" (float))
-  ((double)             f64     f64     "Var_floating"
-    "x2c_var_update_f64" (double))
-  ((long double)        ldouble ldouble "Var_long_double"
-    "x2c_var_update_long_double" (long double))
-))
-
-$(defun native.scalar.type (row) (car row))
-$(defun native.scalar.name (row) (cadr row))
-$(defun native.scalar.tag (row) (caddr row))
-$(defun native.scalar.c-extractor (row) (car (cdddr row)))
-$(defun native.scalar.c-update (row) (cadr (cdddr row)))
-$(defun native.scalar.signature-type (row) (caddr (cdddr row)))
+meta static Map native_scalar_types(void) => {
+  %(char): %(i8 "Var_char" "x2c_var_update_i8" (char)),
+  %(signed char): %(i8 "Var_char" "x2c_var_update_schar" (schar)),
+  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8" (uchar)),
+  %(short): %(i16 "Var_short" "x2c_var_update_i16" (short)),
+  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16" (ushort)),
+  %(int): %(i32 "Var_int" "x2c_var_update_i32" (int)),
+  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32" (uint)),
+  %(long): %(long "Var_long" "x2c_var_update_long" (long)),
+  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong" (ulong)),
+  %(long long):
+    %(llong "Var_long_long" "x2c_var_update_long_long" (llong)),
+  %(unsigned long long):
+    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long" (ullong)),
+  %(float): %(f32 "Var_float" "x2c_var_update_f32" (float)),
+  %(double): %(f64 "Var_floating" "x2c_var_update_f64" (double)),
+  %(long double):
+    %(ldouble "Var_long_double" "x2c_var_update_long_double"
+      (long double)),
+};
 
 $(defun native.scalar.list (items)
   (if (null? items) '(expr ("List") (nil))
       `(expr ("List")
         (cons ,(car items) ,(native.scalar.list (cdr items))))))
 
-$(defun native.scalar.type-value (row)
-  (native.scalar.list (map x2c.literal.symbol (native.scalar.type row))))
-
-$(defun native.scalar.signature-value (row)
-  (native.scalar.list
-    (map x2c.literal.symbol (native.scalar.signature-type row))))
-
-$(defun native.scalar.type-entry (row)
-  `(map-entry ,(native.scalar.type-value row)
-    ,(native.scalar.list (list
-      (x2c.literal.symbol (native.scalar.tag row))
-      (x2c.literal.string (native.scalar.c-extractor row))
-      (x2c.literal.string (native.scalar.c-update row))
-      (native.scalar.signature-value row)))))
-
-/* Type's exact-C lookup projection. */
-macro Entry $native.scalar.type.rows() {
-  $(map native.scalar.type-entry native.scalar.rows)...
-}
-
-/* The access record for TYPE's row is `_native_scalar_access_NAME`. */
+/* The access record for TYPE is `_native_scalar_access` followed by each
+   word of TYPE, so `(unsigned long)` names
+   `_native_scalar_access_unsigned_long`. */
 $(defun native.scalar.access-name (type)
-  (string-append "_native_scalar_access_"
-    (str (native.scalar.name (assoc type native.scalar.rows)))))
+  (apply string-append (cons "_native_scalar_access"
+    (map (lambda (word) (string-append "_" (str word))) type))))
 
 /* x2c has no `_Alignof(type-name)` syntax, so a Type hole cannot be its
    argument. */
@@ -108,20 +75,21 @@ macro Unit $native.scalar.access(Type $type) {
 
   static struct NativeScalarAccess
     $(x2c.ident (native.scalar.access-name $type)) = {
-      $(x2c.literal.symbol
-        (native.scalar.tag (assoc $type native.scalar.rows))),
+      $(x2c.literal.symbol (car (Map.getindex (native_scalar_types) $type))),
       sizeof($type), $(native.scalar.alignment $type), load, store
     };
 }
 
-$(defun native.scalar.access-entry (row)
-  `(map-entry ,(native.scalar.type-value row)
+$(defun native.scalar.access-entry (entry)
+  `(map-entry ,(native.scalar.list (map x2c.literal.symbol (car entry)))
     ,(x2c.expr.cast '(* void) `(expr () (op &
       ,(x2c.expr.ident
-        (x2c.ident (native.scalar.access-name (native.scalar.type row)))))))))
+        (x2c.ident (native.scalar.access-name (car entry)))))))))
 
-/* `native_scalar_access`'s lookup: each row's type to its access record,
+/* `native_scalar_access`'s lookup, in sorted order so emission does not
+   depend on hash layout: each row's type to its access record,
    which the row's `$native.scalar.access` invocation defines first. */
 macro Entry $native.scalar.access.entries() {
-  $(map native.scalar.access-entry native.scalar.rows)...
+  $(map native.scalar.access-entry
+        (List.sort (Map.list (native_scalar_types))))...
 }

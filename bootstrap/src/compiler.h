@@ -227,11 +227,13 @@ List Compiler_cache_literal_list(Compiler compiler, List values);
 
 Var Compiler_match_pattern_value(Compiler c, Var node);
 
+int match_value_is_static(Var value);
+
 int Compiler_match_pattern_is_static(Compiler compiler, List pattern);
 
-Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern);
+Symbol match_value_head(Var value);
 
-Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags);
+Symbol match_value_flat_head(Var value, List binders, List * tags);
 
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 

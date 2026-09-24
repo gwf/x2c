@@ -29,17 +29,17 @@ remains. "Design" means a missing representation prevents immediate deletion.
 
 | ID | Independent cleanup objective | Status | Definition of done |
 | --- | --- | --- | --- |
-| C01 | One builtin type/tag inventory | Bounded | 56 handwritten entries replaced by a projection of the existing ledger |
+| C01 | One builtin type/tag inventory | Done (02fa85d6) | 56 handwritten entries replaced by a projection of the existing ledger |
 | C02 | One static signature-graph serializer | Bounded | Two Lisp serializer functions removed; all three consumer families use compiler literal caching |
 | C03 | One native function-signature projection | Decision | Independent alias traversal/spelling/projection removed after compatibility policy is explicit |
 | C04 | One runtime allocation/wrapper fact owner | Bounded design | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
-| C05 | One graph direct/computed call recognizer | Bounded | Lifetime recognizer and flow forwarding wrapper removed |
-| C06 | One graph source-location formatter | Bounded | Five implementations reduced to one owner and calls |
-| C07 | One static-storage acquisition template | Bounded | Inferred and known-size branches emit the common protocol only once |
+| C05 | One graph direct/computed call recognizer | Done (70b23d6d) | Lifetime recognizer and flow forwarding wrapper removed |
+| C06 | One graph source-location formatter | Done (c6ac7841 + flows follow-up) | Five implementations reduced to one owner and calls |
+| C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |
 | C08 | One initializer evaluation policy, without recomputation | Shared policy bounded; metadata follow-up | File/local callers share expression classification; separately assess carrying per-binding decisions to emission |
 | C09 | Docs consume compiler-selected definitions | Design | Docs no longer re-expand source macros or independently recognize declaration families |
 | C10 | One primitive display-format policy | Cost/contract decision | One of the two tag-to-format switches removed without an unaccepted cost/behavior change |
-| C11 | Recover each Match arm's pattern value once | Bounded | The arm pipeline stops recovering the same graph up to four times |
+| C11 | Recover each Match arm's pattern value once | Done (8fd9c740) | The arm pipeline stops recovering the same graph up to four times |
 | C12 | One owner for typed Match guard interpretation | Design | Compiler consumes normalized predicate facts instead of decoding guard sugar independently |
 | C13 | Shared lifetime summary/flow production | Design/measurement | Any larger rewrite demonstrably removes duplicate analysis or discarded production while retaining distinct outputs |
 
@@ -204,6 +204,9 @@ which calls the graph can resolve.
 **Completion:** one operation decides direct/computed targets; callers obtain
 name, target and arguments from that decision rather than parsing twice.
 
+**Status:** done in 70b23d6d. `project_call_target` now unwraps `stmnt` and
+optionally returns the call's `(args ...)`; graph outputs are unchanged.
+
 ## C06. Collapse five graph source-location formatters
 
 | Function | File | Lines | Representative callers |
@@ -226,6 +229,11 @@ roughly ten-line body plus caller adjustments, not five compatibility wrappers.
 **Completion:** a formatting/fallback rule has one implementation. Preserve
 exact report rows for real and absent origins across all five consumer families.
 No compiler analysis changes or runtime framework are required.
+
+**Status:** done. c6ac7841 replaced the x2c-graph, lifetime,
+loop-allocation and clone formatters with `project_location` in targets.x.
+A follow-up commit then removed `_flow_location`. As a result, `flows` prints
+locations as `22 3` instead of `22l 3l`, which Gary accepted.
 
 ## C07. Emit the static acquisition/cleanup protocol once
 

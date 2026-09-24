@@ -1750,9 +1750,18 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
 }
 
 /** Binds an included native `meta` function the first time lowered code
-    calls `name`. Returns whether the macro session now binds it. */
+    calls `name`. Returns whether the macro session now binds it. A macro
+    import lowers its `meta` bodies during the caller's collection pass,
+    before the parse installs the advertisements, so the first lookup there
+    installs the ones visible so far. */
 int Compiler.bind_native_meta(Compiler c, String name) {
   Var signature, bound;
+  if (!c.native_meta.len()) {
+    Map symbols = c.sym.base_symbols();
+    Map current = c.sym.current_symbols();
+    if (current) symbols.merge(current);
+    c.install_native_meta_effects(symbols);
+  }
   if (!c.native_meta.try_get(name, &signature)) return 0;
   _bind_native_meta(c, name, signature, NULL);
   return c.macro_lisp.try_get(name, &bound);
