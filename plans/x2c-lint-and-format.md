@@ -1,7 +1,7 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 3
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 4
 > are implemented; see [Progress](#progress). The completed linter moved
 > into experimental `commands/lint` in `9b31112e` under the
 > [external commands](archive/external-commands.md) plan.
@@ -412,6 +412,36 @@ fixtures, the old scripts and the tool agree on every category except the
 same two false-positive kinds. The tool takes 5.4 s over the corpus,
 parsing every unit, against 10.6 s for the scripts; a cold build takes
 1.9 s after `make commands`.
+
+**Phase 4, 2026-09-24.** `commands/lint/idioms.x` adds four candidate rules
+that each propose a respelling, and `commands/lint/fix.x` adds `--fix`: it
+translates the file with the command's own compiler before and after the
+edits and writes only edits whose generated C and header are
+byte-identical, all together or else one at a time. Lint grew by 356
+lines, fixtures included; no compiler change. Census on `src/` and `lib/`
+(94 units), and what the proof kept on the 88 units outside the files
+another session had reserved (`compiler`, `expressions`, `statements`,
+`parse`, `literals`, `macros`):
+
+| Rule | Found | Proposed | Proven | Rejected because |
+| --- | --- | --- | --- | --- |
+| `contains-in` | 87 | 58 | 43 | a C string literal as a `String` needle converts differently (13); a `position++` argument and an interpolated key (2) |
+| `expression-body` | 5 | 4 | 1 | two compound-literal constructors in `lib/func.x` and `lisp_truth` emit different C |
+| `member-arrow` | 7 | 7 | 0 | `struct dirent` from a system header (6); `iter->next`, a function-pointer field that is also a method (1) |
+| `plain-string` | 7 | 7 | 0 | `%""` in quoted forms and a ternary branch, where the destination does not promote |
+
+The cleanup commits are `write membership tests with in` (43 sites in 11
+units) and `write a one-value body with =>` (1). Four rules from the
+inventory produce no identical translation and were not added: a negated
+membership test, because `!(x in c)` emits parentheses `!c.contains(x)`
+does not; `negated-is` as a fix, for the same reason; grouped declarations
+of one type, because the C keeps the source's grouping (a type-restarting
+row is identical, which would group only unlike types); and `$auto`, which
+emits `T_cleanup` where the hand-written `defer` named `free` or `close`.
+`Type.method(x)` needs the callee's signature, which the token stream does
+not carry, and was left for a rule over the parse. Over the 94 units the
+report takes 6.9 s for all rules; `--fix` for one rule takes 20-31 s,
+mostly the one-at-a-time retries in files with a rejected edit.
 
 ## Process ceiling
 
