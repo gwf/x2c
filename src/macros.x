@@ -1688,12 +1688,72 @@ static int _native_meta_accepts(Var function, List signature) {
   return 0;
 }
 
+/* Whether a signature type is a native handle: storage the evaluator
+   cannot hold as a value, so its lifetime is unknown without a region row.
+   Scalars and the value types are not; a parameter pointing at one is an
+   input or an output the call finishes with before it returns. */
+static int _native_handle(List type, int parameter) {
+  match (type) {
+    case %((!quote *) *pointee) if (parameter):
+      return pointee.equal(%(void)) || _native_handle(pointee, 0);
+    case %((!or "Var" "Symbol" "String" "List" "Array" "Map" "Func")):
+      return 0;
+  }
+  foreach (Var part, type) if (part is not Symbol || part == <*>) return 1;
+  return 0;
+}
+
+/* Whether a handle's own cleanup owns it: a runtime class, or a type that
+   adopts `Var` or `Cleanup`. A signature spells a `typedef struct X *X`
+   handle as its pointer, so the adoption is read from the typedef `X`. */
+static int _native_owned(Compiler c, List type) {
+  match (type) case %((!quote *) struct ?(String tag)): type = %($tag);
+  return c.sym.var_tag_for_type(type, NULL) ||
+         c.protocol_members_for(type, %("Var")) ||
+         c.protocol_members_for(type, %("Cleanup"));
+}
+
+/* The region summary of a native function without a runtime row, from its
+   signature: a returned handle is a fresh allocation in the active Scope,
+   and a handle argument is borrowed for the call. A function that takes a
+   handle and returns one, neither owned by its cleanup, might return or
+   keep its argument, so it has none. */
+static List _native_meta_summary(Compiler c, List signature) {
+  match (signature) case %((func ?(List parameters)) *result): {
+    int takes = 0, gives = _native_handle(result, 0);
+    foreach (List parameter, parameters)
+      takes = takes ||
+              (_native_handle(parameter, 1) && !_native_owned(c, parameter));
+    if (takes && gives && !_native_owned(c, result)) return NULL;
+    return gives ? %(1 ()) : %(0 ());
+  }
+  return %(0 ());
+}
+
+/* A native function without a runtime row takes the summary its signature
+   implies, so a `meta` body's walk knows what its result owns. */
+static void _certify_native_meta(
+  Compiler c, String name, List signature, Token marker) {
+  if (Compiler.has_region_row(name)) return;
+  List summary = _native_meta_summary(c, signature);
+  if (summary) {
+    c.meta_regions[name] = summary;
+    return;
+  }
+  if (marker)
+    c.report_error(
+      <type>, "unproved native meta lifetime", marker,
+      %("name: $name" "signature: ${signature.repr()}"
+        "it might return or keep its argument; ownership cannot be inferred"));
+}
+
 /* Binds a declared native function to the compiler's own linked target of
    the same name, or an iterator operation to its `_into` target, or else to
    a selected native module's target. A declaration with neither binds
    nothing, and a meta body that calls it reports the missing binding. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
+  _certify_native_meta(c, name, signature, marker);
   int iterator = _iterator_operation(signature);
   Var bound, function;
   int present = c.macro_lisp.try_get(name, &bound);
@@ -1744,8 +1804,11 @@ static int _native_meta_effect_is_local(Compiler c, Var key) {
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   foreach (Var (key, value), globs) {
     if (_native_meta_effect_is_local(c, key)) continue;
-    foreach (List row, _native_meta_rows(c, value))
-      c.native_meta[row.car()] = row.cadr();
+    foreach (List row, _native_meta_rows(c, value)) {
+      (String name, List signature) = row;
+      c.native_meta[name] = signature;
+      _certify_native_meta(c, name, signature, NULL);
+    }
   }
 }
 

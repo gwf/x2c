@@ -317,6 +317,14 @@ callable and adapts it.
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
 witness of that conformance the way a bodyless prototype would.
 
+The compiler checks a `meta` body's storage against what each native callee
+allocates and keeps; see [Regions](regions.md). The runtime's own functions
+state this in a table. For any other native function, the compiler infers
+it from the signature, where a handle is any type other than a scalar,
+`Var`, `Symbol`, `String`, `List`, `Array`, `Map` or `Func`. A parameter
+that points at one of those, such as a `const char *` or an `int *` result,
+is not a handle.
+
 The compiler links every function declared in `lib/cmath.x` and
 `lib/clibc.x`. Both are part of the implicit prelude, so their functions need
 no declaration of your own:
@@ -418,6 +426,26 @@ x2c run --native-module helpers.so helpers.x main.x
 one of the program's sources. `--native-module` works with `translate`,
 `build`, `run`, and `repl`, and the REPL accepts the same bodyless
 prototype.
+
+A module function may take or return a handle:
+
+- A returned handle is a fresh allocation in the active `Scope`. Allocate it
+  with `Scope.malloc`, so that compile-time code can release it with
+  `Scope.free` or hold it in an `$auto` local.
+- A handle argument is borrowed for the call. Keeping it after the call
+  returns is not supported.
+- A handle whose type is a runtime class, or adopts `Var` or `Cleanup`, is
+  owned by its cleanup wherever it appears.
+- A function that takes a handle and returns one, when neither is owned by
+  its cleanup, might return or keep its argument. Its ownership cannot be
+  inferred, so its prototype is rejected:
+
+```text
+helpers.x:3:1: type: unproved native meta lifetime
+  meta Widget widget_wrap(Widget inner);
+  ^^^^
+  note: name: widget_wrap signature: ((func ((* struct "Widget"))) * struct "Widget") it might return or keep its argument; ownership cannot be inferred
+```
 
 The compiler loads a module only when an option or a manifest names it.
 Without `--native-module`, `nine` reports `no binding for triple`. In a

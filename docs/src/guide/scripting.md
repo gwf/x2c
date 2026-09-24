@@ -214,7 +214,9 @@ while (running.len()) Job.wait_any(running).check();
 `kill` sends a signal to every stage still running. A job held with `$auto`
 is terminated and reaped if it is still running when its block exits,
 including when an error leaves the block. Each stage receives `SIGTERM`,
-and a stage still running a second later receives `SIGKILL`:
+and a stage still running a second later receives `SIGKILL`. A job
+abandoned without `$auto` is terminated and reaped the same way when the
+Scope that owns it ends:
 
 ```x2c
 ~#include "process.x"
