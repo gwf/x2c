@@ -71,8 +71,7 @@ void * Scope_calloc(size_t, size_t);
 
 SourceView SourceView_new(){
   SourceView value = Scope_calloc(1, sizeof(* value));
-  void(* initialize)(SourceView) = SourceView_init;
-  initialize(value);
+  SourceView_init(value);
   return value;
 }
 
