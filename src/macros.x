@@ -483,50 +483,9 @@ static Var _sdk_function_type(List function) {
   return type.canonicalize();
 }
 
-static int _lisp_value_type(Type type) {
-  match (type)
-    case %((!or "Var" "Symbol" "String" "List" "Array" "Map"
-                "File" "Iter" "Func")): return 1;
-  return 0;
-}
-
-static Type _lisp_resolve_type(Compiler compiler, Type type) {
-  type = type.canonicalize();
-  for (int hops = 0; hops < 128; hops++) {
-    if (_lisp_value_type(type)) return type;
-    if (!type.is_bare_typedef_name() && !type.is_typedef()) return type;
-    Type next = NULL;
-    compiler.sym.resolve_global(type, &next);
-    /* A system typedef such as `size_t` has no collected declaration and
-       reaches its scalar the way the compiler's numeric conversions do. */
-    if (!next || next == type) {
-      Type numeric = compiler.sym.resolve_numeric_type(type);
-      return numeric ? numeric : type;
-    }
-    type = next.canonicalize();
-  }
-  return type;
-}
-
-/* Keep declaration-derived signatures identical to the generated Func
-   inventory, whose compact scalar tags are the Lisp calling convention. */
-static Type _lisp_signature_type(Compiler compiler, Type type) {
-  type = _lisp_resolve_type(compiler, type);
-  Type signature = type.var_signature_type();
-  return signature ? signature : type;
-}
-
-/* Builds the canonical signature stored by `Func` for one declared native
-   function. The native Lisp binding macros generate this same shape. */
-static List _native_meta_signature(Compiler c, Type type) {
-  type = type.canonicalize();
-  List source_parameters = _sdk_function_type_parameters(type);
-  Type source_result = type.apply(), Array parameters = [];
-  foreach (Var parameter, source_parameters)
-    parameters.push(_lisp_signature_type(c, parameter));
-  Type result = _lisp_signature_type(c, source_result);
-  return %((func ${parameters.list_free()}) @result);
-}
+/* Both native Lisp and ordinary Func adapters store the declared signature. */
+static List _native_meta_signature(Compiler c, Type type) =>
+  c.func_signature(type);
 
 /* The native functions one symbol row makes available to compile-time code,
    as `(name signature)` rows: a bodyless `meta` prototype, or each witness
@@ -1740,13 +1699,18 @@ static int _native_meta_accepts(Var function, List signature) {
    cannot hold as a value, so its lifetime is unknown without a region row.
    Scalars and the value types are not; a parameter pointing at one is an
    input or an output the call finishes with before it returns. */
-static int _native_handle(List type, int parameter) {
+static int _native_handle(Compiler c, List type, int parameter) {
   match (type) {
     case %((!quote *) *pointee) if (parameter):
-      return pointee.equal(%(void)) || _native_handle(pointee, 0);
+      return pointee.equal(%(void)) || _native_handle(c, pointee, 0);
     case %((!or "Var" "Symbol" "String" "List" "Array" "Map" "Func")):
       return 0;
   }
+  Symbol tag = c.sym.var_tag_for_type(type, NULL);
+  if (tag == <var> || tag == <symbol> || tag == <string> ||
+      tag == <list> || tag == <array> || tag == <map> || tag == <func>)
+    return 0;
+  type = c.sym.normalize_declared_type(type);
   foreach (Var part, type) if (part is not Symbol || part == <*>) return 1;
   return 0;
 }
@@ -1768,10 +1732,11 @@ static int _native_owned(Compiler c, List type) {
    keep its argument, so it has none. */
 static List _native_meta_summary(Compiler c, List signature) {
   match (signature) case %((func ?(List parameters)) *result): {
-    int takes = 0, gives = _native_handle(result, 0);
+    int takes = 0, gives = _native_handle(c, result, 0);
     foreach (List parameter, parameters)
       takes = takes ||
-              (_native_handle(parameter, 1) && !_native_owned(c, parameter));
+              (_native_handle(c, parameter, 1) &&
+               !_native_owned(c, parameter));
     if (takes && gives && !_native_owned(c, result)) return NULL;
     return gives ? %(1 ()) : %(0 ());
   }

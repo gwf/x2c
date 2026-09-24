@@ -315,15 +315,11 @@ List Compiler.func_signature(Compiler compiler, Type type) {
   List params = NULL;
   Type result = NULL;
   _typed_function_parts(type, &params, &result);
-  Array normalized = [];
+  Array declared = [];
   foreach (List parameter, params) {
-    Type ptype = parameter.type().declared();
-    if (ptype.car() == <&>)
-      ptype = cons(
-        <&>, compiler.sym.normalize_declared_type(ptype.cdr()));
-    normalized.push(ptype);
+    declared.push(parameter.type().declared());
   }
-  List parameter_types = params ? normalized.list_free() : %((void));
+  List parameter_types = params ? declared.list_free() : %((void));
   Type declared_result = result.declared();
   List signature = %((func $parameter_types) @declared_result);
   return signature;
@@ -345,6 +341,7 @@ static List _checked_func_argument(
               (args (expr ("Func") (ident $fn_binding))
                     (expr (* const "FuncArg") (ident $argv_binding))
                     ${_adapter_index_literal(index)}
+                    ${compiler.cache_literal_list(target)}
                     ${_type_literal(compiler, target)}))
     );
     if (storage_type) *storage_type = pointer;
@@ -401,7 +398,7 @@ static List _func_argument_locals(
   List value_helper = _adapter_helper(
     compiler, "x2c_func_value_argument", &value_type);
   List reference_helper = _adapter_helper(
-    compiler, "x2c_func_reference_argument", &reference_type);
+    compiler, "x2c_func_declared_reference_argument", &reference_type);
   Array locals = [];
   int index = 0;
   foreach (Type type, types) {
@@ -449,7 +446,8 @@ static List _build_func_adapter(
   return_type = return_type.canonicalize();
 
   foreach (String helper_name,
-           %("x2c_func_value_argument" "x2c_func_reference_argument")) {
+           %("x2c_func_value_argument"
+             "x2c_func_declared_reference_argument")) {
     List helper_type = NULL;
     List helper = _adapter_helper(c, helper_name, &helper_type);
     if (!helper || !helper_type)

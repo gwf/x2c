@@ -45,6 +45,7 @@ prefix.
 | `x2c_find_program` | `src/utils.x` | `String x2c_find_program(String name)` |
 | `x2c_fnv_bytes` | `src/utils.x` | `uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)` |
 | `x2c_fnv_file` | `src/utils.x` | `uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok)` |
+| [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
@@ -118,4 +119,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 106 functions.
+Total: 107 functions.

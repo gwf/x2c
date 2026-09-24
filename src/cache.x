@@ -289,13 +289,13 @@ static List _defer_one_binding(
       List declaration = %(declare $decltype (bindings (bind $name $mods)));
       Type object = declaration.type_from_ast().declared();
       if (object.car() == <const>) {
-        if (!_needs_runtime_initializer(value)) return bound;
+        if (!compiler.static_value_is_runtime(value, NULL)) return bound;
         mods = _unqualify_const(mods);
       }
       Type declared = object.canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
-        if (!_needs_runtime_initializer(value) &&
+        if (!compiler.static_value_is_runtime(value, NULL) &&
             !ast_contains_head(value, <initval>)) return bound;
         match (value)
           case %(composite (commas *items)): {
@@ -336,7 +336,7 @@ static List _rewrite_file_scope_decl(
     case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
                    (bindings *bound_list)):
       return _defer_bindings(compiler, decltype, bound_list, initializers);
-  if (!_needs_runtime_initializer(decl)) return decl;
+  if (!compiler.static_value_is_runtime(decl, NULL)) return decl;
   match (decl)
     case %(declare (!set ?decltype (!not (* const *)))
                    (bindings *bound_list)):
@@ -538,21 +538,6 @@ static Array _cache_ids_in(Compiler compiler, List code) {
     return NULL;
   }
   return ids;
-}
-
-/* Emission turns each of these into a call, and a call is not a C constant
-   expression, so a file-scope initializer holding one runs as an assignment
-   the unit initializer makes instead. */
-static int _needs_runtime_initializer(Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(sizeof *): return 0;
-    case %((!or cache call varray vmap cons append) *): return 1;
-  }
-  foreach (Var child, node)
-    if (_needs_runtime_initializer(child)) return 1;
-  return 0;
 }
 
 // Replace cache nodes with the TU-local identifiers used by a header region.

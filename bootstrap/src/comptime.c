@@ -1290,7 +1290,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _729 = Symbol_var(60622703325512);
   _730 = cons(_729, NULL);
   _731 = cons(_728, _730);
-  _732 = Atom_intern(String_new("C.func.reference-argument"));
+  _732 = Atom_intern(String_new("C.func.declared-reference-argument"));
   _733 = Atom_intern(String_new("C.func.value-argument"));
   _734 = Atom_intern(String_new("C.func.pointer-argument"));
   _735 = Atom_intern(String_new("C.func.new"));
@@ -3176,6 +3176,7 @@ static Var _lower_application(Lowering l, Var content){
 }
 
 List Compiler_func_signature(Compiler, Type);
+Type Sym_normalize_declared_type(Sym, Type);
 static Var _lower_func_adapter(Lowering l, Type type, Var callable){
   List signature = Compiler_func_signature(l -> compiler, type), params = NULL;  Type result = NULL;
   {
@@ -3202,7 +3203,7 @@ Var fn = _lower_name(l, _1621), argv = _lower_name(l, _1622);  Array arguments =
     Type parameter;  List _x2c_macro_object_9 = params;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
       parameter = Var_type(_x2c_macro_cursor_output_9); {
         if(List_equal(Type_list(parameter), _697)) continue;  Var value;  if(Var_equal(List_car(Type_list(parameter)), Symbol_var(77))){
-          Type target = List_cdr(parameter);  value = List_var(cons(_732, cons(fn, cons(argv, cons(int_var(index), cons(List_var(cons(_30, cons(List_var(target), NULL))), NULL))))));
+          Type target = List_cdr(parameter);  Type resolved = Sym_normalize_declared_type(l -> compiler -> sym, target);  value = List_var(cons(_732, cons(fn, cons(argv, cons(int_var(index), cons(List_var(cons(_30, cons(List_var(target), NULL))), cons(List_var(cons(_30, cons(List_var(resolved), NULL))), NULL)))))));
         }
         else{
           Symbol tag = Sym_var_tag_for_type(l -> compiler -> sym, parameter, NULL);  if(tag){
@@ -6040,7 +6041,6 @@ int Type_is_typedef_name(Type);
 int Type_is_typedef(Type);
 List Sym_get(Sym, List);
 Type Sym_next_typedef(Sym, Type, int *);
-Type Sym_normalize_declared_type(Sym, Type);
 static List _meta_type_layout(Sym sym, Type type, Map cache){
   Type declared = Type_declared(type);  Type alias = Type_base_type(declared);  int hops = 0;  while(List_truth(Type_list(alias)) &&(Type_is_typedef_name(alias) || Type_is_typedef(alias))){
     if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, & hops));

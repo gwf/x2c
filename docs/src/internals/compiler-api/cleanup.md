@@ -13,7 +13,7 @@ What a cleanup region runs, and which exits run it.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.mark_cleanup_regions`](#Compiler.mark_cleanup_regions) | Names each cleanup region, records the statements that leave it, and runs them on every exit that leaves it. |
-| [`Compiler.static_value_is_runtime`](#Compiler.static_value_is_runtime) | Reports whether the static local initializer `value` has to run at runtime, because it reads an automatic object or another static this function initializes. |
+| [`Compiler.static_value_is_runtime`](#Compiler.static_value_is_runtime) | Reports whether an initializer expression has to run at runtime. |
 
 ### `Compiler`
 
@@ -28,19 +28,18 @@ top-level unit whose `defer` and `try` forms are final; the pass rewrites
 transfers, so it runs once, after the transform driver reaches its fixed
 point.
 
-Source: `src/cleanup.x:777`
+Source: `src/cleanup.x:783`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
 
 `int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime)`
 
-Reports whether the static local initializer `value` has to run at
-runtime, because it reads an automatic object or another static this
-function initializes. `runtime` holds the statics already known to run
-that way, and gains this one's bindings.
+Reports whether an initializer expression has to run at runtime. File
+scope passes no `runtime` map; local statics also account for automatic
+objects and statics already known to run at runtime.
 
-Source: `src/cleanup.x:288`
+Source: `src/cleanup.x:287`
 
 ## Design notes
 

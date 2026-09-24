@@ -216,21 +216,22 @@ Var x2c_func_value_argument(
 }
 
 /** Returns reference argument `i` after checking its declared source type.
-    The generated adapter supplies the target pointee type it will cast to.
+    The adapter supplies the pointee type it will cast to.
     `argv` must address the prepared argument array and `i` must be in bounds;
-    compiler-generated adapters establish both facts.
+    generated adapters establish both facts.
     Raises: `<bad-types>` when the carrier is a value, its address is null, the
     `Func` signature and adapter disagree, its type differs, or conversion
     would
     discard a qualifier. It does not return on failure.
 */
-void *x2c_func_reference_argument(
-  Func fn, const FuncArg *argv, unsigned i, List want) {
+static void *_reference_argument(
+  Func fn, const FuncArg *argv, unsigned i, List declared_target,
+  List want) {
   List declared = _parameter(fn, i), source = argv[i].reference_type;
   int signature_reference = declared && declared.car() == <&>;
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source || !argv[i].data.reference || !signature_reference || !want ||
-      !target.equal(want) ||
+      !target.equal(declared_target) ||
       !_reference_type_accepts(want, source)) {
     List sig = fn ? fn.sig : NULL;
     raise %(bad-types (sig $sig) (index $i)
@@ -238,6 +239,20 @@ void *x2c_func_reference_argument(
   }
   return (void *) argv[i].data.reference;
 }
+
+/** Checks a reference argument whose stored pointee matches `want` exactly.
+    Raises: `<bad-types>` on the same mismatches as the shared checker. */
+void *x2c_func_reference_argument(
+  Func fn, const FuncArg *argv, unsigned i, List want) =>
+  _reference_argument(fn, argv, i, want, want);
+
+/** Checks a generated adapter's declared pointee against the stored signature
+    and its resolved `want` against the source address before casting.
+    Raises: `<bad-types>` on either mismatch. */
+void *x2c_func_declared_reference_argument(
+  Func fn, const FuncArg *argv, unsigned i, List declared_target,
+  List want) =>
+  _reference_argument(fn, argv, i, declared_target, want);
 
 /** Returns the address value argument `i` carries. Generated adapters use it
     for a pointer parameter with no `Var` tag of its own, such as

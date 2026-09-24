@@ -43,6 +43,8 @@ static unsigned _type_qualifiers(List * cursor);
 
 static int _reference_type_accepts(List target, List source);
 
+static void * _reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
+
 static size_t _context_offset(void);
 
 static void * _context(Func function);
@@ -315,20 +317,28 @@ if(! Var_is(value, want) && !(want == 806120 && Var_is_null(value))){
 return value;
 }
 
-void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want){
+static void * _reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
   List declared = _parameter(fn, i), source = argv[i].reference_type;
   int signature_reference = List_truth(declared) && Var_equal(List_car(declared), Symbol_var(77));
   List target = signature_reference ? List_cdr(declared) : NULL;
-  if(! List_truth(source) || ! argv[i].data.reference || ! signature_reference || ! List_truth(want) || ! List_equal(target, want) || ! _reference_type_accepts(want, source)){
+  if(! List_truth(source) || ! argv[i].data.reference || ! signature_reference || ! List_truth(want) || ! List_equal(target, declared_target) || ! _reference_type_accepts(want, source)){
     List sig = fn ? fn -> sig : NULL;
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/func.x",.function = "x2c_func_reference_argument",.line = 236};
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/func.x",.function = "_reference_argument",.line = 237};
       x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1307939018), List_var(source), Symbol_var(1510312), List_var(want));
       __builtin_unreachable();
     }
 
   }
   return(void *) argv[i].data.reference;
+}
+
+void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want){
+  return _reference_argument(fn, argv, i, want, want);
+}
+
+void * x2c_func_declared_reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
+  return _reference_argument(fn, argv, i, declared_target, want);
 }
 
 Symbol Var_kind(Var);
@@ -341,7 +351,7 @@ void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i){
   if(List_truth(argv[i].reference_type) ||(kind != 35386204516 && kind != 39939274535114 && ! Var_is_row(value, 11, 7, 1))){
     List sig = fn ? fn -> sig : NULL;
     {
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/func.x",.function = "x2c_func_pointer_argument",.line = 255};
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/func.x",.function = "x2c_func_pointer_argument",.line = 270};
       x2c_error_raise_n(& _x2c_error_site_11, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(35386204516));
       __builtin_unreachable();
     }
@@ -361,7 +371,7 @@ Var x2c_func_record_result(const void * bytes, size_t size){
 FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source){
   List sig = fn ? fn -> sig : NULL;
   {
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "x2c_func_unrepresentable_argument",.line = 273};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "x2c_func_unrepresentable_argument",.line = 288};
     x2c_error_raise_n(& _x2c_error_site_12, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1307939018), List_var(source), Symbol_var(1510312), Symbol_var(46228810));
     __builtin_unreachable();
   }
@@ -386,12 +396,12 @@ void * Scope_calloc(size_t, size_t);
 
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(rest && ! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, signature, List_var(_14)); }))){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/func.x",.function = "_new",.line = 294};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/func.x",.function = "_new",.line = 309};
     x2c_error_raise_n(& _x2c_error_site_13, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
   if(! adapter){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/func.x",.function = "_new",.line = 296};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/func.x",.function = "_new",.line = 311};
     x2c_error_raise_n(& _x2c_error_site_14, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();
   }
@@ -409,13 +419,13 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
     }
   }
 if(! List_truth(params)){
-  static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/func.x",.function = "_new",.line = 301};  x2c_error_raise_n(& _x2c_error_site_15, 4372535886, 1, Symbol_var(39502), List_var(signature));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/func.x",.function = "_new",.line = 316};  x2c_error_raise_n(& _x2c_error_site_15, 4372535886, 1, Symbol_var(39502), List_var(signature));  __builtin_unreachable();
 }
 if(context_size && ! context){
-  static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 302};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 317};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));  __builtin_unreachable();
 }
 size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context_offset){
-  static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 305};  x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 320};  x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
 }
 int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));  size_t bytes = context_offset + context_size;  Func fn = Scope_calloc(1, bytes), result = NULL; {
   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & fn};
@@ -466,7 +476,7 @@ Func Func_new_context(FuncAdapter adapter, List signature, const void * context,
 
 List Func_signature(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 370};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 385};
     x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));
     __builtin_unreachable();
   }
@@ -475,7 +485,7 @@ List Func_signature(Func function){
 
 const void * Func_context(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/func.x",.function = "Func_context",.line = 381};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/func.x",.function = "Func_context",.line = 396};
     x2c_error_raise_n(& _x2c_error_site_19, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.context")), NULL))));
     __builtin_unreachable();
   }
@@ -484,7 +494,7 @@ const void * Func_context(Func function){
 
 Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
   if(! f ||(argc && ! argv)){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 400};
+    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 415};
     x2c_error_raise_n(& _x2c_error_site_20, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.apply")), NULL))));
     __builtin_unreachable();
   }
@@ -497,7 +507,7 @@ Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
         List sig = f -> sig;
         unsigned index = i - 1;
         {
-          static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 409};
+          static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 424};
           x2c_error_raise_n(& _x2c_error_site_21, 4477479911782, 3, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(index), Symbol_var(1510312), Symbol_var(46228810));
           __builtin_unreachable();
         }
@@ -508,7 +518,7 @@ Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
         List sig = f -> sig;
         unsigned index = i - 1;
         {
-          static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 415};
+          static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 430};
           x2c_error_raise_n(& _x2c_error_site_22, 48270474208, 2, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(index));
           __builtin_unreachable();
         }
@@ -524,7 +534,7 @@ Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
     unsigned expected = f -> nparams;
     List sig = f -> sig;
     {
-      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 426};
+      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/func.x",.function = "Func_apply",.line = 441};
       x2c_error_raise_n(& _x2c_error_site_23, 4477439593778, 3, Symbol_var(39502), List_var(sig), Symbol_var(396221456712), unsigned_var(expected), Symbol_var(74754136), unsigned_var(argc));
       __builtin_unreachable();
     }
@@ -539,7 +549,7 @@ Var Func_var(Func function){
 
 Func Var_func(Var value){
   if(! Var_is_row(value, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/func.x",.function = "Var_func",.line = 440};
+    static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/func.x",.function = "Var_func",.line = 455};
     x2c_error_raise_n(& _x2c_error_site_24, 4477479911782, 2, Symbol_var(1510312), Symbol_var(437126), Symbol_var(74754136), Symbol_var(Var_tag(value)));
     __builtin_unreachable();
   }
