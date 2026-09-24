@@ -268,12 +268,10 @@
 // Preserve printed syntax in meta diagnostics.
 (def Var_repr repr)
 
-// The compiler surface `lib/meta.x` declares needs no forwarding: an
-// `x2c_<path>` call lowers to the `x2c.<path>` operation the compiler binds,
-// each `_` becoming a `.`. Two operations cannot be reached that way, and
-// these are the adapters for them. Each is a `defun` rather than a `def`
-// because the natives are bound into the session after this file is read, so
-// a `def` would capture an unbound name.
+// The compiler binds each operation `lib/meta.x` declares under its x2c name
+// and under the Lisp name derived from it. A definition here wins over the
+// derived one. It is a `defun` rather than a `def` because the operations
+// are bound into the session after this file is read.
 //
 // None of the compiler operations answers `void` for an absent result. Where
 // there is no answer they answer nil, and where the request is wrong they
@@ -283,11 +281,6 @@
 // The Lisp spelling keeps its rest parameter around the shared meta body.
 (defun x2c.expr.call (callee . arguments)
   (x2c_expr_call callee arguments))
-
-// `x2c.type.value?` answers a Lisp truth value and the x2c surface returns
-// `int`, whose test the lowering inlines as a comparison against zero. Nil
-// compares unequal to zero, so the answer is normalized here.
-(defun _x2c.type.value-int (value) (if (x2c.type.value? value) 1 0))
 
 (def List_try_match (bind "List_try_match" nil))
 (def List_try_match_replace (bind "List_try_match_replace" nil))

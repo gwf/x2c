@@ -21,7 +21,6 @@ macro Expression $builder.aliases() =>$(x2c.literal.int (if (and
     (eq? x2c_expr_ident x2c.expr.ident)
     (eq? x2c_expr_index x2c.expr.index)
     (eq? x2c_expr_field x2c.expr.field)
-    (eq? x2c_expr_call _x2c.expr.call-list)
     (eq? x2c_expr_composite x2c.expr.composite)
     (eq? x2c_expr_cast x2c.expr.cast)
     (eq? x2c_function_body x2c.function.body)

@@ -39,9 +39,17 @@ List x2c_type_fields(List value);
 
 String x2c_binding_spelling(Var syntax);
 
+String x2c_source_text(Var syntax);
+
 void x2c_diagnostic_fail(String message, List notes);
 
 List x2c_ident(String spelling);
+
+String x2c_invocation_file(void);
+
+int x2c_invocation_line(void);
+
+int x2c_invocation_column(void);
 
 List x2c_method_resolve(List type_value, String name);
 
@@ -61,6 +69,8 @@ int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
+String x2c_embed_text(Var path);
+
 Var x2c_literal_value(Var syntax);
 
 List x2c_comptime_lower(List fn);
@@ -68,6 +78,8 @@ List x2c_comptime_lower(List fn);
 void x2c_diagnostic_warn(String message, List notes);
 
 void macro_library_reset(void);
+
+void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
 Lisp Compiler_open_macro_library(Compiler compiler);
 

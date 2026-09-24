@@ -1,10 +1,8 @@
 # Internal adoption campaign
 
 > Status: active
-> Updated September 24, 2026. Phases 1-6 are complete. Phase 7's value
-> operations moved to `meta` prototypes in `4084c865`; its compiler-binding
-> half needs a design. Phase 8 is replaced by
-> [meta-lifetime-certification.md](meta-lifetime-certification.md).
+> Updated September 24, 2026. Phases 1-7 are complete. Phase 8 is replaced
+> by [meta-lifetime-certification.md](meta-lifetime-certification.md).
 
 ## The result
 
@@ -246,7 +244,7 @@ size, alignment and mutation for the curated native-record bridge. These
 checks protect unsafe native crossings and current phase behavior, not a new
 origin-authentication rule.
 
-### 7. Generate meta surfaces from existing conformance (partly complete)
+### 7. Generate meta surfaces from existing conformance (complete)
 
 `4084c865` moved 158 value operations on String, Symbol, Var, List, Map and
 Array to bodyless `meta` prototypes and deleted their rows in `lib/lisp.x`
@@ -256,9 +254,17 @@ or the lowering calls directly, for inline and generated methods, and for
 
 The 44 operations listed below work on a native handle or packed storage
 that meta values cannot hold. Gary parked them on September 24 until a
-caller exists; exposing them deletes no rows. Moving the compiler's own
-operation bindings and name exceptions to prototypes still needs a design
-for `meta` prototypes of compiler functions. The original text follows.
+caller exists; exposing them deletes no rows.
+
+The compiler half landed in two rounds. The first gave the compiler
+operations their x2c names and registered them as the `<compiler>` native
+module. The second marked their `lib/meta.x` prototypes `meta`, generated
+that module's targets from those declarations, and deleted the public bind
+rows, the predicate wrappers, the builder alias list, the lowering's name
+map and the `_x2c.type.value-int` and `_x2c.expr.call-list` adapters. Each
+public Lisp name is now derived from its x2c name in one place,
+`Compiler.bind_meta_operation`; only `x2c.type.tag-name` and
+`x2c.type.reverse-name` are listed. The original text follows.
 
 Design meta-capable protocols as composition with existing protocol witnesses:
 `meta` continues to mark translation-time availability, while `Var(T)`,

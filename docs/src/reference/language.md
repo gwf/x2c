@@ -1681,15 +1681,22 @@ Every public operation above is also declared in x2c, in the optional module
 directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 
-The name is mechanical: each `.` becomes `_`. `x2c.type.fields` is
-`x2c_type_fields`, `x2c.invocation.line` is `x2c_invocation_line`, `x2c.ident`
-is `x2c_ident`. A predicate `x2c.type.X?` is `x2c_type_is_X`, so
-`x2c.type.value?` is `x2c_type_is_value`, and it returns `int`, 1 or 0,
-rather than a Lisp truth value. A hyphen becomes `_` too:
-`x2c.type.tag-name` is `x2c_type_tag_name`. One answer differs in shape
-because x2c has no spelling for the Lisp one:
+The compiler binds each operation under its x2c name and derives the Lisp
+name from it: each `_` becomes `.`. `x2c_type_fields` is `x2c.type.fields`,
+`x2c_invocation_line` is `x2c.invocation.line`, `x2c_ident` is `x2c.ident`.
+A predicate `x2c_type_is_X` is `x2c.type.X?`, so `x2c_type_is_value` is
+`x2c.type.value?`; the x2c function returns `int`, 1 or 0, and the Lisp one
+a Lisp truth value. Two Lisp names carry a hyphen and are the only listed
+exceptions: `x2c_type_tag_name` is `x2c.type.tag-name`, and
+`x2c_type_reverse_name` is `x2c.type.reverse-name`. Where the Lisp library
+defines the derived name itself, that definition stands. One answer differs
+in shape for that reason, because x2c has no spelling for the Lisp one:
 `x2c_expr_call(List callee, List arguments)` takes its arguments as one
-`List` rather than as a rest parameter.
+`List`, and `x2c.expr.call` takes them as a rest parameter.
+
+The operations declared with a bodyless `meta` prototype are supplied by
+the compiler itself, which generates its table of them from those
+declarations.
 
 `x2c_comptime_lower(List fn)` returns the Lisp forms a function definition
 lowers to, or an empty `List` when it cannot be lowered. The generators
