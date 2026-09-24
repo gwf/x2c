@@ -13,6 +13,7 @@ Generate C headers and source files.
 | Function | Summary |
 | --- | --- |
 | [`generate_code`](#generate_code) | Writes the generated C header and source for one lowered translation unit. |
+| [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
 
 ### Functions
 
@@ -32,6 +33,17 @@ work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
 Source: `src/generate.x:1083`
+
+### `Compiler`
+
+<a id="Compiler.init_statements"></a>
+#### Compiler.init_statements
+
+`List Compiler.init_statements(Compiler compiler, Symbol phase)`
+
+Returns the statements queued for `phase`, in the order they were added.
+
+Source: `src/generate.x:1129`
 
 ## Design notes
 

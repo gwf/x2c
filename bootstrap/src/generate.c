@@ -913,8 +913,6 @@ static List _patch_func_with_init(List type, List bind, List statements, String 
   return cons(_17, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_34, cons(List_var(_make_init_call(initializer, guard)), List_append(statements, NULL)))), NULL))));
 }
 
-List Compiler_init_statements(Compiler, Symbol);
-
 static List _wrap_initializer_function(Compiler compiler, List type, List bind, List statements, List guard, List shutdown){
   return cons(_17, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_34, cons(List_var(cons(_0, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _82))), cons(List_var(cons(_8, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_5, cons(_83, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _95)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 10588978), List_append(Compiler_init_statements(compiler, 27208), List_append(statements, List_append(Compiler_init_statements(compiler, 789770), List_append(shutdown, NULL))))))))), NULL))));
 }
@@ -2103,6 +2101,16 @@ x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_
 if(List_truth(failure)){
   String reason = String_new(strerror(Var_int(Var_convert(List_assoc(failure, Symbol_var(11703198)), 3453797))));  Compiler_report_error(c, 354920, _639, c -> token, cons(String_var(String_join(NULL, cons(String_var(_609), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_610), cons(String_var(reason), NULL)))), NULL)));
 }
+}
+
+List Compiler_init_statements(Compiler compiler, Symbol phase){
+  if(! _init_guard_) _file_init_();  Array selected = Array_new(); {
+    List entry;  Array _x2c_macro_object_40 = compiler -> inits;  int _x2c_macro_cursor_40 = 0;  Var _x2c_macro_cursor_output_40;  while(Array_try_next(_x2c_macro_object_40, & _x2c_macro_cursor_40, & _x2c_macro_cursor_output_40)){
+      entry = Var_list(_x2c_macro_cursor_output_40);  if(Var_equal(List_car(entry), Symbol_var(phase))) Array_push(selected, List_cadr(entry));
+    }
+
+  }
+  return Array_list_free(selected);
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

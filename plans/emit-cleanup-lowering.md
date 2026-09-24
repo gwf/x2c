@@ -1,7 +1,8 @@
 # Cleanup lowering out of `src/emit.x`
 
-> Status: reference - open, unscheduled follow-up. Phase 1 done 2026-09-15 in 68eea0a; Phases 2 and 3 are
-> optional and unscheduled. Item 2 of
+> Status: reference - open, unscheduled follow-up. Phase 1 done 2026-09-15
+> in 68eea0a. Phase 2 measured and declined 2026-09-24; Phase 3 is optional
+> and unscheduled. Item 2 of
 > `plans/archive/architecture-salvage.md`, the last surviving piece of the
 > declined compiler redesign.
 > Notes: Phase 1 landed as `src/cleanup.x`, a pass that decides regions, the
@@ -143,6 +144,18 @@ the AST, a shared exit block reached by label becomes expressible. The
 measurement that decides it is generated C size and native compile time
 against the duplication it removes; the labels the current design avoids are
 the risk to weigh.
+
+Measured 2026-09-24 on `bootstrap/` at 06c14139 and declined. The generated
+C for `src/` and `lib/` is 5,582,147 bytes. It has 302 exits that run
+cleanup before a transfer; 242 of them run one statement. Their cleanup text
+totals 22,082 bytes, 0.40% of the output. Replacing every copy with a
+`goto` to a shared block would save at most 13,622 bytes (0.24%), before the
+labels and the exit-selector variable that a shared block needs to resume a
+`return`, `break`, `continue`, or `goto`. That variable is written after
+`sigsetjmp`, so it must be `volatile`. Labels in a shared block also break
+the rule that lets an enclosing finalizer copy a block into several exits.
+The saving is below the noise of native compile time, so nothing was
+implemented, and build and translate times were not compared.
 
 **Phase 3: the two initializer-side candidates** that moved here from item 1.
 

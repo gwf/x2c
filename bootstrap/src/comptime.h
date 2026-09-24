@@ -31,5 +31,9 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
+int Sym_is_bool_type(Sym sym, Type type);
+
+List Compiler_meta_type_layout(Compiler c, Type type);
+
 
 #endif /* __GUARD_0x1AC2DC11__ */

@@ -9,5 +9,7 @@
 #include "compiler.h"
 void generate_code(Compiler c, List ast, String dir);
 
+List Compiler_init_statements(Compiler compiler, Symbol phase);
+
 
 #endif /* __GUARD_0x3F61ACEA__ */

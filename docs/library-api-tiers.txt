@@ -111,6 +111,7 @@ lib/match.x|internal|MatchCache.try_search
 lib/match.x|internal|MatchCaptureBuffer.has,MatchCaptureLayout.analyze
 lib/match.x|internal|MatchCaptureLayout.definite_list,MatchCaptureLayout.free
 lib/match.x|internal|MatchCaptureLayout.index,MatchCaptureLayout.possible_list
+lib/match.x|internal|MatchMachine.dispose,MatchMachine.open
 lib/match.x|internal|MatchLease.release,MatchPlan.execute
 lib/match.x|internal|MatchPlan.execute_capture,MatchPlan.free,MatchPlan.prepare
 lib/match.x|internal|MatchPlan.search,MatchPlan.search_replace

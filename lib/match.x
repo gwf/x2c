@@ -289,6 +289,7 @@ List x2c_match_site_search_replace(
 #include "symbol.x"
 #include "scope.x"
 #include "block.x"
+#include "match-machine.x"
 
 macro Statement $match.machine(Name $instance, Expr $stats) {
   struct MatchMachine storage;
@@ -2659,4 +2660,32 @@ static MatchPlan _capture_site_publish(
   defer _site_unlock();
   if (!site.plan) _capture_site_prepare(site, pattern);
   return site.plan;
+}
+
+/** Initializes fresh caller-owned storage without touching unused fixed
+    arrays. The caller must eventually dispose any materialization scratch.
+*/
+void MatchMachine.open(MatchMachine m) {
+  memset(&m.program, 0, sizeof(MachineView));
+  m.pc = 0;
+  m.status = <idle>;
+  m.running = 0;
+  m.value = void;
+  m.error = void;
+  m.fp = 0;
+  m.current_entry_undo = 0;
+  m.undo_count = 0;
+  m.slot_count = 0;
+  m.stats = NULL;
+  m.scratch = NULL;
+  m.scratch_capacity = 0;
+}
+
+/** Frees reusable materialization scratch. Finish active execution first;
+    this does not clear invocation state.
+*/
+void MatchMachine.dispose(MatchMachine m) {
+  if (m.scratch) Scope.free(m.scratch);
+  m.scratch = NULL;
+  m.scratch_capacity = 0;
 }

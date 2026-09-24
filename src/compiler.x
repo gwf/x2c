@@ -2402,14 +2402,6 @@ void Compiler.add_init(Compiler compiler, Symbol phase, List stmt) {
   compiler.inits.push(%($phase $stmt));
 }
 
-/** Returns the statements queued for `phase`, in the order they were added. */
-List Compiler.init_statements(Compiler compiler, Symbol phase) {
-  Array selected = [];
-  foreach (List entry, compiler.inits)
-    if (entry.car() == phase) selected.push(entry.cadr());
-  return selected.list_free();
-}
-
 // symbol table
 
 /*  Symbol table implemented as stack of maps (scopes). Each map represents
@@ -3710,11 +3702,6 @@ int Sym.is_array_type(Sym sym, Type type) =>
 /** Reports whether `type` reaches the named `Map` value type. */
 int Sym.is_map_type(Sym s, Type type) => s.is_named_value_type(type, "Map");
 
-/** Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. */
-int Sym.is_bool_type(Sym sym, Type type) =>
-  sym.is_named_value_type(type, "bool") ||
-  sym.is_named_value_type(type, "_Bool");
-
 /** Reports whether `type` reaches a named value type before its definition. */
 int Sym.is_named_value_type(Sym sym, Type type, String name) {
   // Stop at the named type instead of resolving through its typedef.
@@ -3769,117 +3756,6 @@ void Sym.declare_field_order(Sym sym, Type type, List fields) {
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym sym, Type type) => sym.get(%(@type "field-order"));
 
-static size_t _meta_align_up(size_t offset, size_t alignment) =>
-  (offset + alignment - 1) / alignment * alignment;
-
-static List _meta_type_layout(Sym sym, Type type, Map cache);
-
-static List _meta_var_layout(Type declared) {
-  size_t size = sizeof(Var), alignment = _Alignof(Var);
-  return %(var $declared $size $alignment);
-}
-
-/* A scalar's Var tag may differ from its bytes' row only where the tag is
-   fixed for the type, as Symbol's is for its unsigned-long code. A tag a
-   unit's declared converter supplies may box something other than those
-   bits. */
-static List _meta_scalar_layout(
-  Type declared, Type exact, NativeScalarAccess scalar, Symbol tag,
-  Type tagged) {
-  if (tag != scalar.tag && (!tag || tag != tagged.fixed_var_tag()))
-    return NULL;
-  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact $tag);
-}
-
-/* C's bool is one byte holding 0 or 1, and an enum whose enumerators fit in
-   int is an int. Neither has a Var tag of its own; each value is the int C
-   promotes it to. The parser records which enums fit, and an enum without
-   that record has no layout. */
-static List _meta_int_layout(Type declared, Type exact) {
-  NativeScalarAccess scalar = native_scalar_access(exact);
-  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact i32);
-}
-
-/* POSIX gives function and object pointers one representation, whose
-   alignment is its size on every supported host. */
-static List _meta_pointer_layout(Type declared, Symbol tag) {
-  size_t size = sizeof(void *);
-  if (!tag) tag = <p48>;
-  return %(pointer $declared $size $size $tag);
-}
-
-static List _meta_record_layout(Sym sym, Type record, Map cache) {
-  Var cached;
-  if (cache.try_get(record, &cached)) return cached;
-  List order = sym.field_order(record);
-  if (!order) return NULL;
-  Array fields = [];
-  defer fields.free();
-  size_t offset = 0, record_alignment = 1;
-  foreach (List row, order.cdr()) {
-    (String name, Type member) = row;
-    List layout = name ? _meta_type_layout(sym, member, cache) : NULL;
-    if (!layout) return NULL;
-    (size_t size, size_t alignment) = layout.cddr();
-    offset = _meta_align_up(offset, alignment);
-    fields.push(%(field $name $member $offset $layout));
-    offset += size;
-    if (alignment > record_alignment) record_alignment = alignment;
-  }
-  size_t record_size = _meta_align_up(offset, record_alignment);
-  List result = %(
-    record $record $record_size $record_alignment @{fields.list()});
-  cache[record] = result;
-  return result;
-}
-
-/* Derives one immutable native layout from canonical Sym declarations. Every
-   layout starts `(KIND TYPE SIZE ALIGN ...)`:
-
-     (var TYPE SIZE ALIGN)                  a raw Var
-     (scalar TYPE SIZE ALIGN EXACT TAG)     an exact C scalar row
-     (pointer TYPE SIZE ALIGN TAG)          a data or function pointer
-     (record TYPE SIZE ALIGN (field NAME TYPE OFFSET LAYOUT) ...)
-
-   TYPE is the declared type, so a pointer to the object has the Var tag
-   native code gives it. A scalar's EXACT row owns its bytes and TAG its Var
-   value. A pointer with no Var tag of its own is carried as `<p48>`. */
-static List _meta_type_layout(Sym sym, Type type, Map cache) {
-  Type declared = type.declared();
-  Type alias = declared.base_type();
-  int hops = 0;
-  while (alias && (alias.is_typedef_name() || alias.is_typedef())) {
-    if (sym.get(%(@alias "layout-attribute"))) return NULL;
-    alias = sym.next_typedef(alias, &hops).base_type();
-  }
-  if (sym.is_var_type(declared)) return _meta_var_layout(declared);
-  Type tagged = NULL;
-  Symbol tag = sym.var_tag_for_type(declared, &tagged);
-  Type native = sym.normalize_declared_type(declared);
-  Type exact = native.scalar();
-  NativeScalarAccess scalar = exact ? native_scalar_access(exact) : NULL;
-  if (scalar)
-    return _meta_scalar_layout(declared, exact, scalar, tag, tagged);
-  if (!tag && sym.is_bool_type(declared))
-    return _meta_int_layout(declared, %(unsigned char));
-  if (!tag && native.is_enum())
-    return sym.get(%(@native "int-range"))
-         ? _meta_int_layout(declared, %(int)) : NULL;
-  type = sym.resolve_key(declared);
-  if (type && type.is_pointer()) return _meta_pointer_layout(declared, tag);
-  /* Only a struct an x2c unit defines has a layout x2c knows; a C header's
-     struct, or one with a layout attribute, keeps its C-owned layout. */
-  if (!type || type.car() != <struct> || !sym.get(%(@type "x2c-record")) ||
-      sym.get(%(@type "layout-attribute")))
-    return NULL;
-  return _meta_record_layout(sym, type, cache);
-}
-
-/** Returns the evaluator's native byte layout for `type`, derived from its
-    canonical Type identity and Sym-owned member order. Meta adoption remains
-    a separate compiler decision and cache presence does not advertise it. */
-List Compiler.meta_type_layout(Compiler c, Type type) =>
-  _meta_type_layout(c.sym, type, c.meta_layouts);
 
 /** Marks one named aggregate field as a delegate. */
 void Sym.declare_delegate_field(Sym sym, Type aggregate, String name) {
