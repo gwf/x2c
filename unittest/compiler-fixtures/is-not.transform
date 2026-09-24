@@ -11,7 +11,8 @@
  (bind (binding 3 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 1 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
+         (expr (int) 
+          (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
   (at 11 
    (return 
     (expr ("Var") 

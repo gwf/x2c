@@ -283,8 +283,6 @@ Var Map.setdefault(Map map, Var key, Var defval) {
   return stored[0];
 }
 
-meta int Map.contains(Map m, Var key);
-
 /** Returns nonzero when `key` is present in `m`, whatever its value.
     A null `m` reports absence rather than failing. Key comparison follows
     `Map.get`:
@@ -344,8 +342,6 @@ Var Map.setindex(Map map, Var key, Var val) {
   return val;
 }
 
-meta Var Map.updateindex(Map map, Var key, Symbol op, Var rhs);
-
 /** Updates one `Map` value in place.
     The key is looked up once and an existing record-value slot is delegated
     to `Var.update`. Numeric `+` inserts a missing key with `rhs` as its
@@ -380,8 +376,6 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
   struct MapRecord *recs = map.entries;
   return Var.update(&recs[index].val, op, rhs);
 }
-
-meta Var Map.postfixindex(Map map, Var key, Symbol op);
 
 /** Applies postfix increment or decrement to one existing `Map` value.
     The key is looked up once and the original value is returned. A missing
@@ -566,8 +560,6 @@ Self Map.merge(Self map, Self other) => map._core_merge(other);
 int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val) =>
   map._core_try_next(cursor, key, val);
 
-meta int Map.truth(Map map);
-
 /** Returns nonzero when `map` contains at least one entry.
     A null or empty `Map` returns zero.
 */
@@ -577,8 +569,6 @@ static Var _box_var(Var value) => value;
 static int _compare_var(Var a, Var b) => a.compare(b);
 $map.core.observe(Map, Var, Var, struct MapRecord,
   _box_var, _box_var, _compare_var, _compare_var);
-
-meta int Map.compare(Map a, Map b);
 
 /** Compares `Map`s by size and then by sorted key/value contents.
     Identical handles compare equal; NULL sorts before a nonnull `Map`.
@@ -679,8 +669,6 @@ Iter Map.enumerate(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _enumerate_next, 0u);
 }
-
-meta int Map.equal(Map map1, Map map2);
 
 /** Returns nonzero when `map1` and `map2` hold the same key/value pairs.
     A structural comparison, independent of insertion order and of table

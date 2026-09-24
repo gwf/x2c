@@ -42,15 +42,15 @@ protocol Contains(T) {
    Block storage-view converters below are declared in common.x and resolve
    within this unit. Adoptions whose converters are defined elsewhere remain
    beside those converters in tokenizer.x, file.x, and string.x. A `meta`
-   Iter adoption also lets compile-time code iterate the type. */
+   adoption also lets compile-time code call the members it implements. */
 
 protocol Block(Array);  protocol Block(Bytes);
 meta protocol Iter(Array);  protocol Iter(File);  meta protocol Iter(List);
 meta protocol Iter(Map);    meta protocol Iter(String);
 
-protocol Var(Array);   protocol Var(Block);  protocol Var(Buffer);
+meta protocol Var(Array);  protocol Var(Block);  protocol Var(Buffer);
 protocol Var(Bytes);   protocol Var(File);   protocol Var(Iter);
-protocol Var(List);    protocol Var(Map);    protocol Var(String);
+protocol Var(List);    meta protocol Var(Map);  protocol Var(String);
 protocol Var(Symbol);  protocol Var(ulong);
 protocol Var(uchar) tag <u8>;
 protocol Var(ushort) tag <u16>;
