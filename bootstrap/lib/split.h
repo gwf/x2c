@@ -8,6 +8,10 @@
 #include "string.h"
 typedef struct Split * Split;
 
+Var Split_var(Split split);
+
+Split Var_split(Var value);
+
 List String_split_n(String str, String sep, int max_splits);
 
 List String_split(String str, String sep);

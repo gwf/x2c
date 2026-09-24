@@ -2,6 +2,10 @@
 
 #include "split.h"
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
 #include <ctype.h>
 #include <string.h>
 #include "var.h"
@@ -28,6 +32,36 @@ static int _lines_next(Split split, int * cursor, String * out);
 static int _splits_next(Split split, int * cursor, String * out);
 
 static int _iter_next(Iter iter, Var * out);
+
+static inline Iter _x2c_proto_split_iter_0(Var a0, Iter a1);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c__x2c_protocol_methods_0 =(VarMethods){
+    .iter = _x2c_proto_split_iter_0
+  }
+  ;
+  if(! x2c_register_builtin_descriptor(40919656, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("split"), _x2c__x2c_protocol_methods_0);
+  }
+
+}
+
+Var Var_new(Symbol, ...);
+
+Var Split_var(Split split){
+  return Var_new(40919656, split);
+}
+
+void * Var_pointer(Var);
+
+Split Var_split(Var value){
+  return(Split) Var_pointer(value);
+}
 
 int String_len(String);
 
@@ -168,7 +202,7 @@ int Split_try_next(Split split, int * cursor, String * out){
 Var int_var(int);
 
 static int _iter_next(Iter iter, Var * out){
-  Split split = Var_pointer(iter -> obj);
+  Split split = Var_split(iter -> obj);
   int cursor = Var_int(Var_convert(iter -> state, 3453797));
   String value;
   if(! Split_try_next(split, & cursor, & value)) return 0;
@@ -184,5 +218,9 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter Split_iter(Split split, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) split), split ? _iter_next : NULL, int_var(0));
+}
+
+static inline Iter _x2c_proto_split_iter_0(Var a0, Iter a1){
+  return Split_iter(Var_split(a0), a1);
 }
 
