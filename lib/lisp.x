@@ -34,6 +34,7 @@ $(import "private-keywords.xmacro")
 #include "x2c.x"
 #include "machine.x"
 #include "autodiff.x"
+#include "process.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
     `owner`. */
@@ -1569,6 +1570,19 @@ static int _lisp_Lisp_Iter_all(Iter iter, Var callable) =>
 static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
   iter.find(_lisp_predicate(callable));
 
+/* A Job started in meta code, with its finalizer and capture files,
+   belongs to the lowered frame that started it and ends with that frame. */
+static Job _lisp_List_job(List command) {
+  Job job;
+  $scope(_lowered_owner()) { job = command; }
+  return job;
+}
+
+static Job _lisp_Job_start(Job job) {
+  $scope(_lowered_owner()) { job.start(); }
+  return job;
+}
+
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype. The `x2c_` operations
 // `meta.x` declares exist only inside a compiler, which supplies them.
@@ -1778,7 +1792,11 @@ $(def lisp.native.target.rows (append '(
   (Var_is)
   (Symbol_str)
 ) (filter (lambda (row) (not (C.true? (String.startswith (car row) "x2c_"))))
-     (_x2c.native-meta.targets))))
+     (_x2c.native-meta.targets)) '(
+  // Adapters that replace generated direct targets come last to win.
+  (_lisp_List_job (as List_job))
+  (_lisp_Job_start (as Job_start))
+)))
 
 macro Expression $lisp.native.target.map() =>
   $(lisp.native.targets lisp.native.target.rows);

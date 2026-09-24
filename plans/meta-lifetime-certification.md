@@ -146,9 +146,15 @@ its authored diff before the gate.
      (decision 8), and refreshes `bootstrap/`;
    - round two adds meta fixtures that call each method.
 4. **`List.job` in meta.** This also takes two rounds.
-   - Add one adapter row in `lib/lisp.x` that pushes `_lowered_owner()`
-     around `Job.new`, and add the `meta` marks on `List.job` and the
-     generated `Var.job`.
+   - Round one adds bodyless `meta` prototypes for `List.job`,
+     `Job.start`, and the generated `Var.job` and `Job.var` in
+     `lib/process.x`, and adapters `_lisp_List_job` and `_lisp_Job_start` in
+     `lib/lisp.x` that run the call under `$scope(_lowered_owner())`. Their
+     target rows follow the generated targets, so they replace the direct
+     rows. `Job.start` gets the row `(summary 0 ((0 return)))`. Round one
+     refreshes `bootstrap/`.
+   - Round two adds the fixtures below and drops the local `meta` mark from
+     `meta-final-regions`.
    - Add a fixture: a meta function starts a long job and returns without
      waiting, and the process is gone when the call returns. Repeat with a
      raise.

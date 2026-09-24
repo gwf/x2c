@@ -353,7 +353,9 @@ def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
         if native in authored:
             found.append(authored[native])
             continue
-        if line == 1 and display == native and not raw_doc:
+        # A class default has no source line; a bodyless prototype in the
+        # class's file may give it a dotted display name.
+        if line == 1 and not raw_doc:
             continue
         entry = table[native]
         parameters = ", ".join(

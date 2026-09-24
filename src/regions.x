@@ -135,6 +135,7 @@ static Map runtime = %{
   "Var_file": (wrap),                "File_var": (wrap),
   "Var_job": (wrap),                 "Job_var": (wrap),
   "List_job": (alloc final),
+  "Job_start": (summary 0 ((0 return))),
   "String_lines": (summary 1 ((0 result))),
   "String_words": (summary 1 ((0 result))),
   "String_splits": (summary 1 ((0 result) (1 result))),

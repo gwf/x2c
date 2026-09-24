@@ -37,6 +37,11 @@ class Job struct {
 
 protocol Cleanup(Job);
 
+meta Job List.job(List command);
+meta Job Job.start(Job job);
+meta Job Var.job(Var value);
+meta Var Job.var(Job job);
+
 /** The receiverless owner of `Env.get`. */
 typedef enum Env {
   ENV_NAMESPACE

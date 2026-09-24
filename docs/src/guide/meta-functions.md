@@ -1019,6 +1019,10 @@ locals and address-taken locals are released when their function returns,
 as described in [C objects during compilation](#c-objects-during-compilation).
 A local address is useful within the calculation, not a portable constant
 address to embed in C.
+A `Job` that meta code starts with `List.job` or `Job.start` belongs to
+the function that started it, even inside an inner `$scope` block. It ends
+when that function returns or raises: a job still running is terminated and
+reaped, so a meta function cannot return its `Job`.
 As in C, a value built inside a region must not be kept, in a meta global
 or a Lisp definition, after that region is released.
 
