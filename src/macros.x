@@ -1561,12 +1561,6 @@ List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   return NULL;
 }
 
-/** Retains one source Lisp form as text without evaluating it again. */
-List Compiler.parse_source_lisp(Compiler compiler) {
-  String form = _lisp_form(compiler);
-  return %(source-lisp $form);
-}
-
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
 void Compiler.evaluate_declaration_effect(
   Compiler compiler, String form, Token invocation) {
@@ -2371,7 +2365,6 @@ static List _definition_local(Compiler c, String spelling, int tag) {
 /** Returns the current declaration's definition-local identity. An active
     macro-definition locals map is required. */
 List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
-  if (compiler.parsing_source_syntax()) return %($spelling);
   Map locals = compiler.macro_definition_locals();
   List current = compiler.sym.current_binding(%($spelling));
   if (current && current in locals) return current;
@@ -3145,7 +3138,7 @@ List Compiler.parse_macro_definition(Compiler c) {
     target_hole, parameters, NULL, NULL,
     NULL, NULL, origin, source_file, imported, builtin, local);
   if (local) c.sym.define_macro(name, definition);
-  else if (!old_holes || (c.source_syntax && old_holes.contains(%(source-ast))))
+  else if (!old_holes)
     c.macros[name] = definition;
 
   Map old_local_macro_captures = c.local_macro_captures;
@@ -3273,8 +3266,7 @@ List Compiler.parse_macro_definition(Compiler c) {
     fresh_rows, captures,
     pattern, replacement, origin, source_file, imported, builtin, local);
   if (local) c.sym.define_macro(name, definition);
-  else if (!old_holes ||
-           (c.source_syntax && old_holes.contains(%(source-ast))))
+  else if (!old_holes)
     c.publish_macro_definition_node(definition);
   return definition;
 }
@@ -3542,9 +3534,6 @@ List Compiler.try_parse_macro_member(Compiler c) {
 
 static List _invocation_node(
   Compiler compiler, List definition, List input, Token invocation) {
-  if (compiler.parsing_source_syntax())
-    return %(macro-invoke ${definition.assoc(<name>)} $input
-      ${compiler.token_location(invocation)});
   Var stored = definition;
   Var site = invocation;
   if (compiler.macro_holes) {

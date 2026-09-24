@@ -1888,8 +1888,6 @@ List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
 /* Operands have been resolved in the caller's current semantic scope. */
 static List Compiler._binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
-  if (c.parsing_source_syntax())
-    return %(expr () (op $operator $lhs $rhs));
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
@@ -2398,7 +2396,6 @@ List Compiler.resolve_map_entry(Compiler compiler, List input, Token origin) {
     retain source position.
 */
 List Compiler.resolve_expression(Compiler c, List input, Token origin) {
-  if (c.parsing_source_syntax()) return input;
   match (input) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
@@ -3994,7 +3991,6 @@ static List _compound_literal(Compiler c, List composite, Type target) {
     bindings or immutable literal entries to compiler state.
 */
 List Compiler.convert_expression(Compiler c, List expr, Type target) {
-  if (c.parsing_source_syntax()) return expr;
   if (!target) return expr;
   Type type = expr.cadr();
   // Captured Func lambdas wait for reference-cell rewriting.

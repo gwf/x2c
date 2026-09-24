@@ -450,10 +450,6 @@ static List _field_declaration_row(Compiler compiler, List context) {
 
 static List _field(Compiler compiler, List context, int delegated) {
   List rows = _field_declaration_row(compiler, context);
-  if (delegated && compiler.parsing_source_syntax()) {
-    compiler.expect(<;>);
-    return %(delegate @rows);
-  }
   if (delegated) {
     foreach (List declaration, rows) match (declaration) {
       case %(declare ? (bindings *declarators)): {
@@ -1014,8 +1010,7 @@ static List _direct_declarator(
       (owner_token == <ident> &&
        (owner_type.is_typedef() || c.peek(1) == <.>));
     if (literal_owner && c.peek(1) == <.> &&
-        (c.parsing_source_syntax() ||
-         c.peek(2) == <$> || c.peek(2) == <ident>)) {
+        (c.peek(2) == <$> || c.peek(2) == <ident>)) {
       c.next();
       c.expect(<.>);
       Var member;
@@ -1128,15 +1123,6 @@ List Compiler.parse_named_type(Compiler c) {
 */
 void Compiler.bind_template_local(
   Compiler c, List key, List type, List context) {
-  if (c.parsing_source_syntax()) {
-    match (key) case %(?(String name)):
-      if (!context) c.sym.set(key, %(<macro-expr>));
-      else if (context === %(typedef)) {
-        c.sym.set(key, %(typedef $name));
-        c.sym.set(%(typedef $name), type.type_from_ast().declared());
-      }
-    return;
-  }
   Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
   if (c.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
@@ -1256,7 +1242,7 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
   // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
   int attribute = _attribute_starts(c);
   c.token = head;
-  if (c.macro_holes && !c.parsing_source_syntax() && is_operator) return 0;
+  if (c.macro_holes && is_operator) return 0;
   if (lookup.is_typedef() && !require_declarator) return next != <.>;
   return next == <*> || next == <&> || (next == <ident> && !attribute) ||
          (!require_declarator && next == <)>) ||
@@ -1598,22 +1584,6 @@ static List _finish_function_parts(
     c.params.bindings = NULL;
     c.params.enumerators = NULL;
     c.params.macros = NULL;
-  }
-  if (c.parsing_source_syntax()) {
-    c.sym.push_scope(c.params);
-    defer c.sym.pop_scope();
-    List body;
-    if (c._at_function_arrow()) {
-      c.expect(<=>);
-      c.expect(<">">);
-      body = %(arrow ${c.parse_expression()});
-      c.expect(<;>);
-    }
-    else {
-      c.expect(<"{">);
-      body = c.parse_compound_statement();
-    }
-    return %(function $rtype $declarator $body);
   }
   /* Validate lifecycle ownership before the body, but publish `init_fn` and
      `fini_fn` only after the parameter scope and body finish successfully.
@@ -1968,7 +1938,6 @@ List Compiler.parse_top_level(Compiler c) {
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
     case <"$(">: {
-      if (c.parsing_source_syntax()) return c.parse_source_lisp();
       List imported = c.parse_macro_lisp_top_level();
       if (imported) foreach (Var definition, imported.cdr())
         c.meta_defs.push(definition);
