@@ -81,7 +81,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:346`
+Source: `src/bootstrap.x:349`
 
 #### bootstrap_write_interfaces
 

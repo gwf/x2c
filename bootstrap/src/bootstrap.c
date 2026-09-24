@@ -810,8 +810,7 @@ void bootstrap_build_commands(Bootstrap b){
             }
 
           }
-          List argv = Array_list_free(arguments);
-          Job command = Job_options(List_job(argv), Map_update_n(Map_new(), 3, Symbol_var(11180), Map_var(Map_update_n(Map_new(), 1, String_var(_98), String_var(prefix))), Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
+          Job command = Job_options(List_job(Array_list_free(arguments)), Map_update_n(Map_new(), 3, Symbol_var(11180), Map_var(Map_update_n(Map_new(), 1, String_var(_98), String_var(prefix))), Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
           if(Job_status(command)) _error(String_join(NULL, cons(String_var(_72), cons(String_var(name), cons(String_var(_1), cons(String_var(command -> errors_text), NULL))))));
         }
 
