@@ -354,11 +354,6 @@ int Buffer.truth(Buffer b) => (void *) b != NULL && b.content.length != 0;
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Buffer.cleanup(Buffer value) { value.free(); }
 
-/** Writes up to `nitems` elements and returns the number written. */
-inline size_t File.write(
-  File file, const void *ptr, size_t size, size_t nitems) =>
-    fwrite(ptr, size, nitems, file);
-
 /** Appends the readable pointer representation of `file` to `out`. */
 Buffer File.write_repr(File file, Buffer out) {
   if (!file) return Var.write_pointer_repr(file, out);

@@ -332,6 +332,11 @@ inline int File.ungetc(File file, int c) => ungetc(c, file);
 inline size_t File.read(File file, void *ptr, size_t size, size_t nitems) =>
   fread(ptr, size, nitems, file);
 
+/** Writes up to `nitems` elements and returns the number written. */
+inline size_t File.write(
+  File file, const void *ptr, size_t size, size_t nitems) =>
+    fwrite(ptr, size, nitems, file);
+
 /** Installs caller-supplied buffering, or disables buffering for a null `buf`.
     A nonnull buffer is borrowed until the stream closes or buffering changes.
 */
