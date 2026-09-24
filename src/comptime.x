@@ -169,61 +169,6 @@ static Var _lower_name(Lowering l, String stem) {
 
 static Var _lower_decline(Lowering l, String why);
 
-/* Recover both branches of native argument preparation. The signature query
-   selects value boxing or the caller's live address before either is read.
-   Keep the canonical source type emitted by the native call owner. */
-static Var _lower_func_value(Var boxed) {
-  match (boxed)
-    case %(expr ("FuncArg")
-           (call (expr ? (ident (binding ? "FuncArg_value"))) (args ?value))):
-      return value;
-  return void;
-}
-
-static List _lower_func_block(List body) {
-  Array parts = $auto([]);
-  if (!body) return NULL;
-  match (body.car())
-    case %(declare ("Func") (bindings (op = (bind ? ()) ?callee))):
-      parts.push(callee);
-  if (!parts.len()) return NULL;
-  List rest = body.cdr();
-  for (; rest && rest.cdr(); rest = rest.cdr())
-    match (rest.car())
-      case %(if ?
-        (stmnt (expr ("FuncArg") (op = ?
-          (expr ("FuncArg")
-            (call (expr ? (ident (binding ? "FuncArg_reference")))
-                  (args ?address ?source))))))
-        (stmnt (expr ("FuncArg") (op = ? ?boxed)))):
-        parts.push(%(func-arg $boxed $address $source));
-
-  if (!rest) return NULL;
-  match (rest.car())
-    case %(stmnt (expr ?
-                  (call (expr ? (ident (binding ? "Func_apply")))
-                        (args ? (expr ? (literal ? ?(String count))) ?)))): {
-      long arity;
-      if (!count.try_long(&arity) || arity != parts.len() - 1) return NULL;
-      return parts;
-    }
-  return NULL;
-}
-
-/* The callee and each argument's two carrier branches, or nothing outside a
-   dynamic `Func` call. A call with no arguments needs no locals, so
-   `_resolve_func_call` returns the bare `Func_apply` for it. */
-static List _lower_func_parts(Var content) {
-  match (content) {
-    case %(parens (block *body)): return _lower_func_block(body);
-    case %(call (expr ? (ident (binding ? "Func_apply")))
-                (args ?callee (expr ? (literal ? "0"))
-                      (expr ? (ident (binding ? "NULL"))))):
-      return %($callee);
-  }
-  return NULL;
-}
-
 /* --- the single scan --------------------------------------------------- */
 
 static void _lower_scan(Lowering l, Var form);
@@ -542,12 +487,12 @@ static void _lower_scan(Lowering l, Var form) {
   if (!items) return;
   /* A dynamic `Func` call is scanned as the application it stands for, so
      the machinery its expansion names is never read. */
-  List application = _lower_func_parts(items);
+  List application = l.compiler.func_call_parts(items);
   if (application) {
     _lower_scan(l, application.car());
     foreach (List argument, application.cdr())
-      match (argument) case %(func-arg ?boxed ?address ?): {
-        _lower_scan(l, _lower_func_value(boxed));
+      match (argument) case %(func-arg ?value ?address ?): {
+        _lower_scan(l, value);
         _lower_scan(l, address);
       }
     return;
@@ -1046,7 +991,7 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
 /* Prepare native carriers in source order, then dispatch through Func.apply.
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering l, Var content) {
-  List parts = _lower_func_parts(content);
+  List parts = l.compiler.func_call_parts(content);
   if (!parts) return _lower_decline(l, "not a dynamic Func call");
   Var callee = _lower_expr(l, parts.car());
   if (_lower_failed(l, callee)) return void;
@@ -1054,8 +999,7 @@ static Var _lower_application(Lowering l, Var content) {
   int count = parts.len() - 1, index = 0;
   Array prepare = $auto([]);
   foreach (List part, parts.cdr())
-    match (part) case %(func-arg ?boxed ?address ?source): {
-      Var value = _lower_func_value(boxed);
+    match (part) case %(func-arg ?value ?address ?source): {
       Var type = _lower_expr(l, source);
       Var pointer = _lower_expr(l, address);
       if (l.declined) return void;
