@@ -187,10 +187,6 @@
 (def Map_str str)
 (def Map_repr repr)
 
-// `Array.free` is generated from the `Block` protocol, which leaves no
-// declaration for a `meta` prototype to join.
-(defun Array_free (array) ((bind "Array_free" nil) array))
-
 (def String_map (bind "String_map" nil))
 (def String_filter (bind "String_filter" nil))
 
