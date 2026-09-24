@@ -1698,10 +1698,10 @@ static List _func_call_arguments(List body) {
   return NULL;
 }
 
-/* The callee, then `(func-arg value address source)` for each argument of a
-   `_resolve_func_call` expansion, or NULL for any other expression. The value
-   is the argument boxed as a Var, or void when it has no Var form; the
-   address is the argument's address or NULL; the source is its type. */
+/** Returns the callee and arguments of a typed `Func` call, or NULL for any
+    other expression. Each argument is `(func-arg value address source)`: the
+    argument boxed as a Var, or void when it has no Var form; its address or
+    NULL; and its type. */
 List Compiler.func_call_parts(Compiler compiler, Var content) {
   match (content) {
     case %(parens (block *body)): return _func_call_arguments(body);

@@ -204,16 +204,17 @@ Public functions:
 `Compiler.complete_iter_chain`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
 `Compiler.postfix_completions`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
-`Compiler.parse_variable`, `Compiler.parse_conditional`,
-`Compiler.parse_assignment`, `Compiler.parse_primary`,
-`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_field_path`, `Compiler.initializer_rows`,
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
+`Compiler.promote_string_literal`, `Compiler.func_call_parts`,
+`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.resolve_expression`, `Compiler.parse_variable`,
+`Compiler.parse_conditional`, `Compiler.parse_assignment`,
+`Compiler.parse_primary`, `Compiler.parse_expression`,
+`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_field_path`,
+`Compiler.initializer_rows`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
