@@ -35,7 +35,7 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | C04 | One runtime allocation/wrapper fact owner | Bounded design | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
 | C05 | One graph direct/computed call recognizer | Bounded | Lifetime recognizer and flow forwarding wrapper removed |
 | C06 | One graph source-location formatter | Bounded | Five implementations reduced to one owner and calls |
-| C07 | One static-storage acquisition template | Bounded | Inferred and known-size branches emit the common protocol only once |
+| C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |
 | C08 | One initializer evaluation policy, without recomputation | Shared policy bounded; metadata follow-up | File/local callers share expression classification; separately assess carrying per-binding decisions to emission |
 | C09 | Docs consume compiler-selected definitions | Design | Docs no longer re-expand source macros or independently recognize declaration families |
 | C10 | One primitive display-format policy | Cost/contract decision | One of the two tag-to-format switches removed without an unaccepted cost/behavior change |
