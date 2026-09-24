@@ -1,16 +1,28 @@
 /* Standard Lisp algorithms; generate with tools/gen-lisp-init.py. */
 #include "x2c.x"
+#include "meta.x"
 
-$(def write-file (bind "lisp_write_file" nil))
-$(def init.forms (Array.new))
-$(defun init.emit (fn)
-  (let ((forms (x2c.comptime.lower fn)))
-    (if forms
-        (begin (Array.push init.forms forms) (list fn))
-        (x2c.diagnostic.fail "cannot lower initial-environment function" nil))))
-macro Decorator $init.emit(Unit $fn) {
-  $(init.emit $fn)...
+meta Var lisp_write_file(String path, String text);
+meta static Array init_forms = [];
+
+meta List init_emit(List fn) {
+  List forms = x2c_comptime_lower(fn);
+  if (!forms)
+    x2c_diagnostic_fail("cannot lower initial-environment function", %());
+  init_forms.push(forms);
+  return %(${fn});
 }
+macro Decorator $init.emit(Unit $fn) { $init_emit($fn)... }
+
+meta List init_write(void) {
+  String text = "";
+  foreach (List forms, init_forms)
+    foreach (Var form, forms)
+      text = text + form.repr() + "\n";
+  lisp_write_file("init-generated.xlisp", text);
+  return %();
+}
+macro Unit $init.write() { $init_write()... }
 
 $init.emit()
 Var _last(List values) {
@@ -151,7 +163,4 @@ List init_binder_lets(Var source, List binders) {
   return binding.cons(init_binder_lets(source, binders.cdr()));
 }
 
-$(write-file "init-generated.xlisp"
-  (foldl string-append ""
-    (map (lambda (form) (string-append (repr form) "\n"))
-      (foldl append nil (Array.list init.forms)))))
+$init.write();

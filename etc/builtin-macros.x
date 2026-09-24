@@ -2,16 +2,27 @@
 #include "x2c.x"
 #include "meta.x"
 
-$(def write-file (bind "lisp_write_file" nil))
-$(def builtin.forms (Array.new))
-$(defun builtin.emit (fn)
-  (let ((forms (x2c.comptime.lower fn)))
-    (if forms
-        (begin (Array.push builtin.forms forms) (list fn))
-        (x2c.diagnostic.fail "cannot lower built-in macro function" nil))))
-macro Decorator $builtin.emit(Unit $fn) {
-  $(builtin.emit $fn)...
+meta Var lisp_write_file(String path, String text);
+meta static Array builtin_forms = [];
+
+meta List builtin_emit(List fn) {
+  List forms = x2c_comptime_lower(fn);
+  if (!forms)
+    x2c_diagnostic_fail("cannot lower built-in macro function", %());
+  builtin_forms.push(forms);
+  return %(${fn});
 }
+macro Decorator $builtin.emit(Unit $fn) { $builtin_emit($fn)... }
+
+meta List builtin_write(void) {
+  String text = "";
+  foreach (List forms, builtin_forms)
+    foreach (Var form, forms)
+      text = text + form.repr() + "\n";
+  lisp_write_file("builtins-generated.xlisp", text);
+  return %();
+}
+macro Unit $builtin.write() { $builtin_write()... }
 
 
 $builtin.emit()
@@ -629,7 +640,4 @@ List builtin_class_defaults(String owner, List type, List location) {
   return %(seq @body);
 }
 
-$(write-file "builtins-generated.xlisp"
-  (foldl string-append ""
-    (map (lambda (form) (string-append (repr form) "\n"))
-      (foldl append nil (Array.list builtin.forms)))))
+$builtin.write();

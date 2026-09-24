@@ -279,3 +279,10 @@ String x2c_embed_text(String path);
 /** Reports `message` with `notes` at the macro invocation and fails the
     expansion. This does not return. */
 void x2c_diagnostic_fail(String message, List notes);
+
+/* --- lowering -----------------------------------------------------------
+   The generators under `etc/` record the Lisp a function lowers to. */
+
+/** Returns the compile-time Lisp forms the function definition `fn` lowers
+    to, or an empty `List` when it cannot be lowered. */
+List x2c_comptime_lower(List fn);
