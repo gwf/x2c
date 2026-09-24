@@ -808,7 +808,7 @@ means feasible in principle, not scheduled or promised support.
 | Native `sizeof` expressions | **Gap:** provide the compile-time value of the queried layout; `sizeof(int)` currently declines as an unsupported expression. |
 | Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
-| Mutable container and callable result insertion | **Gap:** preserve ownership, mutability and identity when constructing a runtime value. See the next section. |
+| Callable result insertion | **Gap:** preserve identity when constructing a runtime value. See the next section. |
 
 For example, these are rejected definitions:
 
@@ -932,21 +932,27 @@ requirement: the compiler must construct code representing that value.
 | `Symbol` | Inserts a Symbol literal. |
 | Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
 | Boxed `Var` | Insertion follows the contained value. |
-| `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. |
+| Null `Var` | Inserts Null. In a meta body, `{}` with a `Var` destination is Null, as in compiled code. |
+| `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
 | Struct value | Diagnosed; the compiler cannot write a struct value as code. |
-| Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. |
+| `Func` or arbitrary native address | No direct materialization of the evaluator object. |
 
-An inserted Array or Map is a snapshot of the compile-time result. Each runtime
-execution of that expression allocates a fresh root in the current Scope, just
-like `[]` or `{}`; assigning it to another variable still aliases that root.
-Array order and element types are preserved. Map keys use their ordinary runtime
-key semantics, but reconstruction does not promise the same traversal order.
-A boxed Var may contain the resulting root.
+An inserted Array or Map is a snapshot of the compile-time result. It becomes
+an ordinary `[...]` or `{...}` literal, so each runtime execution of the
+expression allocates fresh collections in the current Scope, at every depth;
+assigning the result to another variable still aliases it. Array order and
+element types are preserved. Map keys use their ordinary runtime key
+semantics, but reconstruction does not promise the same traversal order.
+A boxed Var may contain the result.
 
-Elements, keys and values may contain scalars, Strings, Symbols, or immutable
-Lists of those values. Nested mutable objects, including mutable objects hidden
-inside Lists, remain unsupported. That restriction prevents silently copying
-shared objects or cyclic graphs.
+Scalars, Strings, Symbols, and Lists that hold no Array or Map are immutable
+and are emitted once as constants, as the same values written in source
+would be. A List inside a result is data. A List that holds an Array or Map
+is built at runtime like one written in source.
+
+Each Array and Map in a result must appear once. A result that contains
+itself, or holds the same collection in two places, is diagnosed rather than
+copied, because the inserted code would build separate collections.
 
 The same functions can be called during compilation or with ordinary C-style
 calls at runtime:

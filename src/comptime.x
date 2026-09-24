@@ -1368,6 +1368,11 @@ static Var _lower_content(Lowering l, List type, Var content) {
     }
     case %(parens (block *)):             return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
+    /* A braced value takes its type from the destination, as in C. */
+    case %(cast ? (expr ? (composite (commas *items)))):
+      return _lower_braced(l, type, -1, items);
+    case %(cast ? (expr ? (composite))):
+      return _lower_braced(l, type, -1, %());
     /* A cast is a conversion the author wrote, and the type it names is the
        one the surrounding `expr` node already carries. */
     case %(cast ? ?inner): {
@@ -2089,6 +2094,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
     if (items) return _lower_decline(l, "a braced Map initializer needs keys");
     return %(Map_new);
   }
+  if (!items && l.compiler.sym.is_var_type(type)) return %(Var.null);
   if (type.equal(%("Array"))) return _lower_array(l, items);
   if (type.equal(%("List")))  return _lower_sequence(l, items);
   return _lower_decline(l, "a braced initializer for this type");
@@ -3051,13 +3057,82 @@ static Type _meta_value_type(Var value) {
   return NULL;
 }
 
-/** Returns literal code preserving `declared` when supplied.
-    `mutable_root` permits a fresh Array or Map at an explicit code boundary;
-    its descendants must be immutable representable values. Returns NULL for
-    code Lists or values without the requested literal representation.
+/* Whether a value and everything it holds is immutable data. */
+static int _meta_immutable(Var value) {
+  if (value is <list>) {
+    foreach (Var item, value.list())
+      if (!_meta_immutable(item)) return 0;
+    return 1;
+  }
+  return value is <string> || value is <symbol> ||
+    value.is_integer() || value.is_floating();
+}
+
+/* Builds the parser's form of one data value. Immutable values come from
+   the literal cache; each Array or Map becomes a literal that builds a fresh
+   collection every time it runs. `marks` holds 1 for a collection being
+   built and 2 for one already built, so a cycle or a shared collection is
+   reported at `site`. */
+static List _meta_data(Compiler c, Var value, Map marks, Token site) {
+  if (_meta_immutable(value)) {
+    if (value is <list>) return c.cache_literal_list(value);
+    return %(expr ("Var") ${c.cache_literal_var(value)});
+  }
+  if (value is <list>) {
+    List result = %(nil);
+    foreach (Var item, value.list().reverse()) {
+      List head = _meta_data(c, item, marks, site);
+      if (!head) return NULL;
+      result = %(expr ("List") (cons $head $result));
+    }
+    return result;
+  }
+  if (value.is_null())
+    return %(expr ("Var") (cast ("Var") (expr ("Var") (composite (commas)))));
+  if (value is not <array> && value is not <map>) return NULL;
+  ulong address = (ulong) value.u64;
+  if (marks.contains(address))
+    c.report_error(<macro>, marks[address] == 1
+        ? "compile-time result contains itself"
+        : "compile-time result holds one collection twice",
+      site, %("each Array and Map in a result is built separately"));
+  marks[address] = 1;
+  List result = NULL;
+  if (value is <array>) {
+    Array items = $auto([]);
+    foreach (Var item, value.array()) {
+      List code = _meta_data(c, item, marks, site);
+      if (!code) return NULL;
+      items.push(code);
+    }
+    result = %(expr ("Array") (array @{items.list()}));
+  }
+  else {
+    Map map = value;
+    Array keys = $auto([]), entries = $auto([]);
+    foreach (Var (key, item), map) keys.push(key);
+    // Cache ids and emission must not depend on bucket layout.
+    foreach (Var key, keys.sort()) {
+      List key_code = _meta_data(c, key, marks, site);
+      List value_code =
+        key_code ? _meta_data(c, map[key], marks, site) : NULL;
+      if (!value_code) return NULL;
+      entries.push(%(map-entry $key_code $value_code));
+    }
+    result = %(expr ("Map") (map @{entries.sort().list()}));
+  }
+  marks[address] = 2;
+  return result;
+}
+
+/** Returns literal code for a compile-time `value`, preserving `declared`
+    when supplied. An Array or Map, at any depth, becomes a literal that
+    builds a fresh collection on every execution; other data comes from the
+    literal cache. A cycle or a collection held twice is reported at `site`.
+    Returns NULL for code Lists or values without a literal representation.
 */
 List Compiler.meta_value_expression(
-  Compiler c, Type declared, Var value, int mutable_root) {
+  Compiler c, Type declared, Var value, Token site) {
   Type type = declared ? declared : _meta_value_type(value);
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, &type);
@@ -3095,52 +3170,23 @@ List Compiler.meta_value_expression(
     Type result = declared ? declared : type;
     return %(expr $result (parens (expr $result (cast $type $literal))));
   }
-  if (declared && type === %("Var")) {
-    Type inner = value is <string> ? %("String")
-      : value is <symbol> ? %("Symbol")
-      : value is <list> ? %("List")
-      : value is <array> ? %("Array")
-      : value is <map> ? %("Map") : _meta_value_type(value);
-    if (!inner) return NULL;
-    List expression = c.meta_value_expression(inner, value, mutable_root);
-    return expression ? c.convert_expression(expression, declared) : NULL;
-  }
-  if (declared && type === %("List") && value is <list>) {
-    List result = %(expr ("List") (nil));
-    foreach (Var item, value.list().reverse()) {
-      List head = c.meta_value_expression(%("Var"), item, 0);
-      if (!head) return NULL;
-      result = %(expr ("List") (cons $head $result));
-    }
-    return result;
-  }
-  if (mutable_root && value is <array> &&
-      (!declared || type === %("Array"))) {
-    Array items = [];
-    foreach (Var item, value.array()) {
-      List expression = c.meta_value_expression(%("Var"), item, 0);
-      if (!expression) { items.free(); return NULL; }
-      items.push(expression);
-    }
-    return %(expr ("Array") (array @{items.list_free()}));
-  }
-  if (mutable_root && value is <map> &&
-      (!declared || type === %("Map"))) {
-    Array entries = [];
-    foreach (Var (key, item), value.map()) {
-      List key_code = c.meta_value_expression(%("Var"), key, 0);
-      List value_code = c.meta_value_expression(%("Var"), item, 0);
-      if (!key_code || !value_code) { entries.free(); return NULL; }
-      entries.push(%(map-entry $key_code $value_code));
-    }
-    // Bucket layout must not change the emitted code.
-    return %(expr ("Map") (map @{entries.sort().list_free()}));
+  Type kind = value is <array> ? %("Array") : value is <map> ? %("Map")
+    : value is <list> ? %("List") : NULL;
+  // Without a declared type, a List result is code rather than data.
+  if (declared ? type === %("Var") || type === kind
+      : kind && kind !== %("List")) {
+    Map marks = $auto({});
+    List expression = _meta_data(c, value, marks, site);
+    return expression && declared
+      ? c.convert_expression(expression, declared) : expression;
   }
   if (value is <string>) {
     if (!declared || type === %(* char))
       return %(expr (* char) (literal (* char) ${value.repr()}));
-    if (type === %("String"))
-      return %(expr $declared (literal ("String") $value));
+    if (type === %("String")) {
+      List literal = %(expr ("String") (literal ("String") $value));
+      return %(expr $declared ${c.cache(%(string $literal))});
+    }
   }
   if (value is <symbol> && (!declared || type === %("Symbol")))
     return %(expr ("Symbol") (literal ("Symbol")

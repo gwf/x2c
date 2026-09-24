@@ -6,4 +6,8 @@ map-mutation 8 -7
 empty 1 1 0 0
 boxed array 9
 lisp 0
+nested [ [ 1, 2 ], [ '\x03', 2.5 ] ] [ 0, 2 ] 2
+fresh [ 1, 2 ] [ 1 ] {  } [ 1, 2, 3 ]
+scalar-tags f32 i16 u8 f64
+null { "k": <0x000000000000> } { "k": <0x000000000000> }
 aliases 2 ready 5 key
