@@ -11,8 +11,7 @@ There are three separate questions:
 2. **Can each operation execute?** Every resolved call needs a compile-time
    binding. Having a supported receiver type does not expose its entire API.
 3. **Can the answer become program code?** Returning a value to another
-   meta function, inserting it with `$helper(...)`, and folding an ordinary call
-   have different limits.
+   meta function and inserting it with `$helper(...)` have different limits.
 
 `meta` is not a purity annotation. A body can mutate locals, arrays, maps
 and structs, and pass local addresses to other meta functions. Its
@@ -171,41 +170,11 @@ the remaining source type must match exactly. An invalid lvalue, null address,
 different underlying type or discarded qualifier raises `bad-types`. A
 concrete typed value parameter refuses `void`; a `Var` parameter transports it.
 
-## Constant calls are folded
+## Ordinary calls run in the program
 
-An ordinary call with literal arguments can also be calculated during
-translation. You do not have to prefix the name with `$` to benefit from it:
-
-```x2c
-meta int poly(int n) {
-  return n * n + 3 * n + 1;
-}
-
-int main(void) {
-  int n = 7;
-  printf("constant %d\n", poly(7));
-  printf("local    %d\n", poly(n));
-  return 0;
-}
-```
-
-```text
-constant 71
-local    71
-```
-
-The generated C shows the difference:
-
-```text
-printf("constant %d\n", 71);
-printf("local    %d\n", poly(n));
-```
-
-Here `poly(7)` becomes 71, while `poly(n)` remains a call. This automatic
-substitution is called folding. It is an optimization intended to preserve
-the runtime answer; the capability catalog below records current differences.
-`$poly(7)` requires compile-time evaluation; `poly(7)` leaves folding to the
-compiler.
+A call without `$` always calls the compiled function, even when every
+argument is a literal. `poly(7)` stays a call in the generated C; write
+`$poly(7)` to have the compiler calculate it.
 
 ## Use x2c conveniences
 
@@ -274,9 +243,8 @@ meta static int compile_counter = 0;
 The emitted program keeps the ordinary C declarations and initializers.
 Compile-time code gets separate per-translation-unit values built from the
 same source initializers, so compile-time mutation never changes the
-eventual program's object. A function that reaches either a const or mutable
-meta value is conservatively not folded; an explicit dollar call can still
-run it during translation. Each value lives in bytes the compile-time session
+eventual program's object. An explicit dollar call reads and writes the
+compile-time values; an ordinary call reads the program's. Each value lives in bytes the compile-time session
 owns, so taking its address and reading or writing through a correctly typed
 pointer has the same aliasing effect as in C. `const` prevents compile-time
 writes.
@@ -397,9 +365,8 @@ Your own native functions come from a
 [native module](#native-modules).
 
 A native function binds into the compile-time session the first time
-compile-time code calls it. An ordinary call to a native meta function is
-never folded: `sin(1.0)` stays a call in the generated C. Write `$sin(1.0)`
-to compute the value during translation.
+compile-time code calls it. `sin(1.0)` stays a call in the generated C;
+write `$sin(1.0)` to compute the value during translation.
 
 ## Native modules
 
@@ -647,29 +614,6 @@ These C shapes are not available at compile time:
 - `sizeof`, which is not evaluated at compile time. The parser does not
   accept `_Alignof`.
 
-## When folding applies
-
-Where both forms agree, the compiler may answer a call from the
-compile-time form and put the answer in the call's place. A call is answered
-this way only when all of the following hold.
-
-- The callee is a `meta` function this unit defines. An imported one keeps
-  the run-time call to the unit that emits it.
-- Every argument has a value available to the constant reader: a literal,
-  literal template, previously cached constant, or supported conversion of
-  one. This optional path does not evaluate every resolvable expression;
-  use an explicit dollar call when compile-time execution is required.
-- Every argument already has its parameter's declared type.
-- The result can be represented as typed program code: a scalar, String,
-  Symbol, immutable List of representable elements, or boxed value.
-
-This is an optimization, so you do not need to arrange for it. Its
-equivalence depends on staying within the supported operation semantics;
-see the missing-value differences below. Mutable Array and Map results,
-callable values and arbitrary native addresses keep their calls. Immutable Lists are rebuilt through ordinary cons expressions;
-String and boxed results use ordinary expression conversion and ownership.
-This restriction on folding does not restrict internal meta return types.
-
 ## The compile-time subset
 
 The following tables separate supported values, available operations and
@@ -696,7 +640,7 @@ on a listed type works. The operation inventory below further limits calls.
 | C-style array declarations | A literal-sized one-dimensional automatic array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. Static arrays have no compile-time lowering. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
-| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
+| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. See [Native C functions](#native-c-functions). |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep
@@ -916,22 +860,22 @@ evaluator instance uses a separate per-unit table and does not expose future
 runtime state. Compiler-only functions that reach compiler operations use the
 same isolated table.
 
-## Results: compute, insert, or fold
+## Results: compute or insert
 
 A meta function can pass and return numeric, collection and callable values
 inside the evaluator. Inserting a result into the program adds a separate
 requirement: the compiler must construct code representing that value.
 
-| Result | Explicit `$helper(...)` insertion | Automatic ordinary-call folding |
-| --- | --- | --- |
-| Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. | Uses the declared result type. |
-| Computed string | Inserts a quoted C string literal. | Constructs a String expression when the declared result is String. |
-| `Symbol` | Inserts a Symbol literal. | Constructs a Symbol expression. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. | A declared List result is reconstructed as data through ordinary cons expressions if every element is representable. |
-| Boxed `Var` | Insertion follows the contained value. | Converts a representable contained value to Var. |
-| `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. | Keeps the call. |
-| Struct value | Diagnosed; the compiler cannot write a struct value as code. | Keeps the call. |
-| Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. | Keeps the call. |
+| Result | Explicit `$helper(...)` insertion |
+| --- | --- |
+| Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
+| Computed string | Inserts a quoted C string literal. |
+| `Symbol` | Inserts a Symbol literal. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
+| Boxed `Var` | Insertion follows the contained value. |
+| `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. |
+| Struct value | Diagnosed; the compiler cannot write a struct value as code. |
+| Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. |
 
 An inserted Array or Map is a snapshot of the compile-time result. Each runtime
 execution of that expression allocates a fresh root in the current Scope, just
@@ -943,8 +887,7 @@ A boxed Var may contain the resulting root.
 Elements, keys and values may contain scalars, Strings, Symbols, or immutable
 Lists of those values. Nested mutable objects, including mutable objects hidden
 inside Lists, remain unsupported. That restriction prevents silently copying
-shared objects or cyclic graphs. Ordinary calls returning mutable containers
-remain runtime calls; explicit insertion does not authorize that optimization.
+shared objects or cyclic graphs.
 
 The same functions can be called during compilation or with ordinary C-style
 calls at runtime:
@@ -967,7 +910,6 @@ int main(void) {
 4 READY!
 ```
 
-Scalar conversion is shared by explicit evaluation and eligible folding.
 Floating constants retain their binary value using hexadecimal literals;
 nonfinite values use the native compiler's infinity/NaN expressions.
 The remaining container work must account for identity, shared references,

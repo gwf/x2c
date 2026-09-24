@@ -1537,9 +1537,6 @@ static List _finish_call(
     }
   if (!result_type) result_type = applied;
   compiler.check_meta_call(callee, origin);
-  List folded = compiler.fold_meta_call(
-    callee, callee_type, result_type, arguments);
-  if (folded) return folded;
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
            (call $callee (args @arguments)));

@@ -622,15 +622,6 @@ meta int mt_poly(int n) => n * n + 3 * n + 1;
    still says what it always said about the emitted function. */
 meta static String mt_label(String stem, int n) => %"$stem:$n";
 
-/* --- constant-argument folding ------------------------------------------- */
-
-/* A call to a `meta` function whose arguments are all compile-time constants
-   is answered here from the compile-time form. The answer is the same either
-   way, which is the point, so this file cannot show which form produced it;
-   `meta-folding.x` pins the generated C that does. `mt_fold` is `static` and
-   its non-constant call keeps the emitted definition live. */
-meta static int mt_fold(int n) => n * 2 + 1;
-
 /* Everywhere else `meta` is an ordinary identifier. This is the fixture's
    claim that the word stays contextual: a file-scope name, an assignment
    target, and a struct field. */
@@ -878,10 +869,6 @@ int main(void) {
   printf("meta-poly    %d %d\n", $(mt_poly 7), mt_poly(7));
   printf("meta-static  %s %s\n",
          $(mt_label "slot" 4), mt_label("slot", 4));
-  int nine = 9;
-  printf("meta-fold    %d %d\n", mt_fold(9), mt_fold(nine));
-  /* Each run-time call takes a local, so a constant argument cannot fold it
-     back into the compile-time answer the same line already prints. */
   int one = 1;
   String left = "x", right = "y", csv = "ab,cde";
   printf("join-array   %s %s\n",

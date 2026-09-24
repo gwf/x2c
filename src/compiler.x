@@ -134,18 +134,11 @@ typedef struct Compiler {
      kept until the unit is parsed and only then emitted where it reaches
      them. */
   Array meta_defs;
-  /* Which `meta` functions a constant-argument call may answer from the
-     compile-time form. `meta_folds` holds the binding ids this compiler
-     declared, so a macro import's own compiler keeps its entries and no unit
-     folds a call another unit's emission designates. `meta_impure` names the
-     functions that reach file-scope or static state, opaque native effects,
-     or enum representation the evaluator cannot prove equal to C; it is
-     shared with an import's compiler, which installs into the same session.
-     `meta_comptime` names the ones that reach a `Meta` operation and so have
-     no runtime form at all: no unit emits one and no call to one folds.
+  /* `meta_comptime` names the `meta` functions that reach a `Meta`
+     operation and so have no runtime form at all: no unit emits one.
      `meta_regions` maps each installed one to its region summary, which
      the lifetime check of a later `meta` function reads at its calls. */
-  Map meta_folds, meta_impure, meta_comptime, meta_regions;
+  Map meta_comptime, meta_regions;
   /* File-scope values and types explicitly advertised to the compile-time
      evaluator. `meta_values` is keyed by binding id and stores
      `(MUTABLE LAYOUT)` for the object. */
@@ -299,7 +292,6 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.conforms = owner.conforms;
   compiler.protocol_helpers = owner.protocol_helpers;
   compiler.proto_cache = owner.proto_cache;
-  compiler.meta_impure = owner.meta_impure;
   compiler.meta_comptime = owner.meta_comptime;
   compiler.meta_regions = owner.meta_regions;
   compiler.meta_values = owner.meta_values;
@@ -345,8 +337,6 @@ static Compiler _new(Compiler owner) {
     _.init_tokens = {};
     _.static_init_deps = {};
     _.fn_defs = {};
-    _.meta_folds = {};
-    _.meta_impure = {};
     _.meta_comptime = {};
     _.meta_regions = {};
     _.meta_values = {};
@@ -1908,10 +1898,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.origins.clear();
   c.meta_defs.clear();
-  /* Binding ids are reissued by the reset below, so a fold recorded against
-     the previous pass's numbering would name a different binding. */
-  c.meta_folds = {};
-  c.meta_impure = {};
   c.meta_comptime = {};
   c.meta_regions = {};
   c.meta_values = {};

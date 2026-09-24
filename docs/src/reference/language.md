@@ -1548,13 +1548,8 @@ Marking a function `meta` has three consequences.
   time, unless it reaches a compiler query, an explicit dollar-prefixed meta
   call or a source-template constructor, directly or through another meta
   function. Such a function has no runtime form and none is emitted for it.
-- An ordinary call may be folded only for a locally installed eligible
-  definition, available constant arguments matching the parameter types, and
-  a representable scalar, String, Symbol, immutable List or boxed result.
-  Mutable container, callable and native-address results remain calls.
-  This optimization is separate from explicit evaluation and result insertion.
-  Calls that reach native functions, local static storage, or an enum with
-  target-dependent representation also remain calls.
+- A call without `$` always calls the emitted function, even with constant
+  arguments.
 
 A dollar-prefixed function call requires compile-time evaluation. Arguments
 may compute values from other resolvable values and meta calls; unresolved
@@ -1590,7 +1585,7 @@ string literals, Symbols, identifiers
 and nonempty expression-code Lists. It does not directly materialize mutable
 collections, callable values or evaluator addresses. This boundary does not limit internal
 returns to `int`; see
-[results](../guide/meta-functions.md#results-compute-insert-or-fold).
+[results](../guide/meta-functions.md#results-compute-or-insert).
 
 Compile-time objects belong to the evaluator. Ordinary dual-form meta
 functions reject file-scope state because the program's initializers and

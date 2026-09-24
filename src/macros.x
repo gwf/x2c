@@ -1723,9 +1723,6 @@ static void _bind_native_meta(
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
-  /* A native target may read or change state the lowering cannot inspect.
-     Its callers remain executable through `$`, but may not be folded. */
-  c.meta_impure[name] = 1;
   if (present) return;
   if (iterator) {
     int arity = signature.car().list().cadr().list().len() - 1;
@@ -1762,8 +1759,7 @@ int Compiler.bind_native_meta(Compiler c, String name) {
 }
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
-    native target registry. The declaration keeps its ordinary runtime form;
-    unlike a lowered definition, this opaque native target is never foldable.
+    native target registry. The declaration keeps its ordinary runtime form.
 */
 void Compiler.install_native_meta_function(
   Compiler c, List declaration, Token marker) {
@@ -1777,8 +1773,8 @@ void Compiler.install_native_meta_function(
 }
 
 /** Installs a `meta` function in the macro session under its own name.
-    A function whose two forms agree is foldable. One that reaches a compiler
-    operation has no runtime form, and neither do its callers. Only
+    A function that reaches a compiler operation has no runtime form, and
+    neither do its callers. Only
     explicitly advertised file-scope state can be lowered. A body that lets
     its own storage outlive a call is rejected where the storage leaves;
     lowering failures are reported at the marker.
@@ -1802,9 +1798,8 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   }
   if (installed) {
     match (fn)
-      case %(function ? (bind (binding ?(int id) ?(String name)) *) ?):
+      case %(function ? (bind (binding ? ?(String name)) *) ?):
         if (c.lower_reached_meta()) c.meta_comptime[name] = 1;
-        else if (!c.lower_reached_globals()) c.meta_folds[id] = 1;
     return;
   }
   c.report_error(
@@ -1914,6 +1909,12 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
     try value = c.macro_lisp.eval(form);
     catch %(malformed (category ?category)):
       raise %(malformed (category $category));
+    catch %(call-stack * (why "steps") *):
+      c.report_error(<macro>, "explicit meta call was stopped", site,
+        %("reason: its compile-time form made too many calls"));
+    catch %(call-stack *):
+      c.report_error(<macro>, "explicit meta call was stopped", site,
+        %("reason: its compile-time form nested too deep"));
     catch %(?code *detail):
       _report_lisp_failure(c, site, cons(code, detail), form.repr());
   }

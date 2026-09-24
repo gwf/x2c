@@ -8,6 +8,6 @@
 meta static int md_deep(int n) { return n <= 0 ? 0 : 1 + md_deep(n - 1); }
 
 int main(void) {
-  printf("%d\n", md_deep(4000));
+  printf("%d\n", $md_deep(4000));
   return 0;
 }
