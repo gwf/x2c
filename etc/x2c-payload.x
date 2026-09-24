@@ -131,6 +131,39 @@ static void copy_examples(Path destination) {
   }
 }
 
+/* Install only the commands promoted in the checkout manifest. An empty
+   manifest is still useful: help can read it in a native installation. */
+static void copy_shipped_commands(Path destination) {
+  Path libexec = destination.join("libexec/x2c");
+  libexec.make_dirs();
+  Buffer shipped = $auto(Buffer.new(0));
+  foreach (String row,
+           root.join("commands/manifest.txt").read_text().split_lines(0)) {
+    if (!row) continue;
+    List fields = row.split("|");
+    if (fields.cadr().str() != "shipped") continue;
+    String name = fields.car();
+    copy(root.join("builds/0/libexec").join(%"x2c-$name"),
+         libexec.join(%"x2c-$name"));
+    shipped.printf("%s\n", row.str());
+  }
+  libexec.join("commands.txt").write_text(shipped);
+}
+
+/* The APE carries command source as well as compiler source. Bootstrap builds
+   shipped commands from this verified tree after it builds the compiler. */
+static void copy_command_sources(Path destination) {
+  Path commands = root.join("commands");
+  copy(commands.join("manifest.txt"),
+       destination.join("commands/manifest.txt"));
+  foreach (Path source, commands.walk()) {
+    String relative = source.remove_prefix(%"$commands/");
+    if (source.is_file() && !relative.split("/").contains("tests") &&
+        (source.endswith(".x") || source.endswith(".xmacro")))
+      copy(source, destination.join("commands").join(relative));
+  }
+}
+
 static String write_manifest(Path destination, String name, String kind) {
   Buffer rows = $auto(Buffer.new(0));
   foreach (Path path, destination.walk()) {
@@ -204,6 +237,7 @@ static void install(Path prefix, Path destdir) {
     defer stage.remove_tree();
     copy_support(stage, 0);
     copy_examples(stage);
+    copy_shipped_commands(stage);
     stage.join("packages").make_dirs();
     stage.join("packages/.keep").write_text(NULL);
     stage.join("bin").make_dirs();
@@ -276,6 +310,7 @@ static void write_runtime_objects(Path destination) {
 
 static void support(Path destination, Path licenses) {
   copy_support(destination, 1);
+  copy_command_sources(destination);
   write_runtime_objects(destination);
   if (licenses)
     foreach (Path source, licenses.join("LICENSE.*").glob())

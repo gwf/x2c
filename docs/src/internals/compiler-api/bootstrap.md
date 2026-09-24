@@ -12,12 +12,25 @@ Source-bearing APE to native x2c transition.
 
 | Function | Summary |
 | --- | --- |
+| [`bootstrap_build_commands`](#bootstrap_build_commands) | Builds shipped commands from the verified APE source after the native compiler and runtime interfaces exist. |
 | [`bootstrap_build_request`](#bootstrap_build_request) | Builds an ordinary native request for one materialized bootstrap component. |
 | [`bootstrap_materialize`](#bootstrap_materialize) | Verifies and materializes the APE source payload at `request.prefix`. |
 | [`bootstrap_record_install`](#bootstrap_record_install) | Records the resolved host tools and then publishes bootstrap completion. |
 | [`bootstrap_write_interfaces`](#bootstrap_write_interfaces) | Writes the prefix's runtime interfaces with its installed compiler. |
 
 ### Functions
+
+#### bootstrap_build_commands
+
+`void bootstrap_build_commands(Bootstrap b)`
+
+Builds shipped commands from the verified APE source after the native
+compiler and runtime interfaces exist. The compiler object archive omits
+`main`, as the checkout command build does. An empty shipped manifest
+still creates the command directory and its empty installed manifest.
+Failure exits before the bootstrap completion marker is written.
+
+Source: `src/bootstrap.x:266`
 
 #### bootstrap_build_request
 
@@ -68,7 +81,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:268`
+Source: `src/bootstrap.x:346`
 
 #### bootstrap_write_interfaces
 

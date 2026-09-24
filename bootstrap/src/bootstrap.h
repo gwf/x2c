@@ -20,6 +20,8 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
 
 void bootstrap_write_interfaces(Bootstrap b);
 
+void bootstrap_build_commands(Bootstrap b);
+
 void bootstrap_record_install(Bootstrap b, String cc, String ar);
 
 

@@ -1,8 +1,8 @@
 # External commands
 
 > Status: active.
-> Gary approved this design on 2026-09-24. Phase 1 is implemented; packaging,
-> REPL migration, and lint migration remain. This is the source of truth
+> Gary approved this design on 2026-09-24. Phases 1 and 2 are implemented;
+> REPL migration and lint migration remain. This is the source of truth
 > for how external commands are built, found, run, tested, and shipped.
 
 ## Goal

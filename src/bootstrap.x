@@ -257,6 +257,84 @@ void bootstrap_write_interfaces(Bootstrap b) {
   Path.remove_tree(%"$prefix/$out");
 }
 
+/** Builds shipped commands from the verified APE source after the native
+    compiler and runtime interfaces exist. The compiler object archive omits
+    `main`, as the checkout command build does. An empty shipped manifest
+    still creates the command directory and its empty installed manifest.
+    Failure exits before the bootstrap completion marker is written.
+*/
+void bootstrap_build_commands(Bootstrap b) {
+  String prefix = b.prefix;
+  Path libexec = %"$prefix/libexec/x2c";
+  libexec.make_dirs();
+  Buffer shipped = $auto(Buffer.new(0));
+  Array names = [];
+  foreach (String row,
+           Path.read_text(%"$prefix/commands/manifest.txt").split_lines(0)) {
+    if (!row) continue;
+    List fields = row.split("|");
+    if (fields.cadr().str() != "shipped") continue;
+    shipped.printf("%s\n", row.str());
+    names.push(fields.car());
+  }
+  Path.write_text(%"$libexec/commands.txt", shipped);
+  if (!names.len()) return;
+
+  String compiler = %"$prefix/bin/x2c";
+  Job identity_job = %($compiler "env" "identity").job()
+    .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
+              stderr: <capture>});
+  String identity = identity_job.output().strip("\n");
+  Path commands_build = %"$prefix/.x2c-build/commands";
+  commands_build.make_dirs();
+  Path identity_source = %"$commands_build/identity.x";
+  Path.write_text(identity_source,
+                  %"String x2c_embedded_identity(void) => \"$identity\";\n");
+
+  Array objects = [];
+  foreach (Path object, Path.glob(%"$prefix/.x2c-build/compiler/obj/*.o"))
+    if (!object.basename().startswith("main-")) objects.push(object);
+  if (!objects.len()) _error("native compiler has no reusable objects");
+  Path archive = %"$commands_build/libx2c-dev.a";
+  Job library = %($compiler "build" "--plain" "--kind" "static-library"
+    "--output" $archive @{objects.list()}).job()
+    .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
+              stderr: <capture>});
+  if (library.status())
+    _error(%"cannot archive compiler objects: ${library.errors_text}");
+
+  /* Bootstrap's per-unit generated C directories are not a flat stage
+     directory. Gather their public headers for command C compilation. */
+  Path headers = %"$commands_build/include";
+  headers.make_dirs();
+  foreach (Path source,
+           Path.glob(%"$prefix/.x2c-build/compiler/gen/*/*.h"))
+    Path.copy_file(source, headers.join(source.basename()));
+  struct utsname host;
+  int linux = !uname(&host) && String.new(host.sysname) == "Linux";
+  foreach (String name, names) {
+    List sources = Path.glob(%"$prefix/commands/$name/*.x");
+    Array arguments = %($compiler "build" "--plain" "--build-dir"
+      %"$commands_build/$name" "--output" %"$libexec/x2c-$name"
+      "--x-include-dir" $prefix "--x-include-dir" %"$prefix/src"
+      "--c-include-dir" $headers);
+    if (linux) {
+      arguments.push("-Xlinker");
+      arguments.push("-export-dynamic");
+    }
+    foreach (Path source, sources) arguments.push(source);
+    arguments.push(identity_source);
+    arguments.push(archive);
+    foreach (String object, _runtime_objects(prefix))
+      arguments.push(object);
+    Job command = arguments.list_free().job()
+      .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
+                stderr: <capture>});
+    if (command.status())
+      _error(%"cannot build command $name: ${command.errors_text}");
+  }
+}
+
 /** Records the resolved host tools and then publishes bootstrap completion.
     The completion marker is written only after the toolchain record succeeds.
     The call does not update `payload.complete`. A directory, record, or marker
