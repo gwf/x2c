@@ -93,9 +93,8 @@ static uint64_t _state_list(uint64_t hash, List values) {
   return x2c_fnv_bytes(hash, "\xfe", 1);
 }
 
-static uint64_t _state_file(uint64_t hash, String path, int *ok) {
-  return x2c_fnv_file(_state_text(hash, path), path, ok);
-}
+static uint64_t _state_file(uint64_t hash, String path, int *ok) =>
+  x2c_fnv_file(_state_text(hash, path), path, ok);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   if (!tool) {
