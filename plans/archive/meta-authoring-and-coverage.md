@@ -1,21 +1,13 @@
 # Meta authoring, literal results, and API coverage
 
-> Status: active. The API coverage inventory (report, tool, and disposition
-> table) was retired and deleted on 2026-09-23.
-> Gary approved execution and all five recommended decisions on 2026-09-20.
-> The initial implementation shipped in 8ebb323d. Value aliases and further
-> AD source templates shipped through 8c2a8054; x2c-first examples followed in
-> 95e73d18. Capture-call repairs and remaining API/representation work extend
-> that baseline. The exhaustive value-operation continuation accounted for
-> all 483 signatures at that time, with 385 bound rows and behavioral evidence
-> for every bound row. Implemented behavior and open follow-ons are
-> recorded below. The 2026-09-21 addendum separates excluded native contracts,
-> adapter work and defects from work delegated to generalized `meta`
-> declarations and lifetime certification.
-> The ten lifetime-sensitive methods were reclassified on 2026-09-24:
-> nine are certified and meta-callable, and `Var.token` stays private.
-> September 23 local stabilization repairs composed String hash and
-> zero-valued Symbol parity; those commits are not yet on `dev`.
+> Status: done
+> Closed September 24, 2026. The API coverage inventory was retired on
+> September 23. Nested mutable results, sharing and cycles were delivered by
+> piece 3 of the [explicit meta campaign](explicit-meta-and-lifetime-campaign.md)
+> (`ba2521da`); lifetime certification made nine of the ten lifetime-sensitive
+> methods meta-callable ([certification](meta-lifetime-certification.md)), and
+> `Var.token` stays private. The 44 native-handle operations stay parked until a
+> caller exists ([adoption campaign](internal-adoption-campaign.md)).
 
 
 ## Outcome and priorities
@@ -24,7 +16,7 @@ Campaign sequencing update (2026-09-22): user-provided native extension build
 and dynamic loading belong to the final campaign stage, not the current
 record/type/lifetime recovery. Compiler-linked bindings with compiler rebuilds
 are sufficient for current internal use. The workflow and deferred decisions
-are recorded in [meta recovery](archive/meta-recovery.md#campaign-sequencing-decision-native-extensions-last).
+are recorded in [meta recovery](meta-recovery.md#campaign-sequencing-decision-native-extensions-last).
 
 Make ordinary macro and meta programming possible using readable x2c source.
 Meta functions compute values; macros emit code and turn values into code.
@@ -42,8 +34,8 @@ must be able to call a meta helper with captured arguments without writing a
 Lisp wrapper. API coverage, lowering correctness, and documentation complete
 this round rather than remaining a list of unexplained exceptions.
 
-This plan builds on [meta-functions.md](archive/meta-functions.md) and
-[comptime-x2c-generalization.md](archive/comptime-x2c-generalization.md). Their historical
+This plan builds on [meta-functions.md](meta-functions.md) and
+[comptime-x2c-generalization.md](comptime-x2c-generalization.md). Their historical
 implementation limits are evidence, not permanent restrictions. Do not redo
 the generated built-in Lisp migration that has already landed. The separate
 [generated Lisp reproducibility plan](generated-lisp-reproducibility.md) is
@@ -458,7 +450,7 @@ owners remain authoritative; generated metadata must replace manual binding
 rows rather than create a second inventory.
 
 The ten callback, allocation and handle methods are classified by the
-[meta lifetime certification](archive/meta-lifetime-certification.md), done
+[meta lifetime certification](meta-lifetime-certification.md), done
 on September 24, 2026. Nine are certified and meta-callable:
 `String.lines`, `String.splits`, `String.words`, `Var.as_iter`,
 `Var.fallback_iter`, `Var.adnode`, `Var.file`, `List.job` and `Var.job`.
@@ -552,7 +544,7 @@ completed represented-value campaign.
 This campaign therefore stops at the represented-value boundary it delivered.
 The local generalized declaration and record implementation was rejected before
 publication; its repair is tracked by the
-[meta recovery plan](archive/meta-recovery.md). Meta-capable protocol
+[meta recovery plan](meta-recovery.md). Meta-capable protocol
 witnesses and lifetime certification remain coordinated compiler, runtime and
 analysis work; do not maintain temporary manual rows that work is intended to
 delete.

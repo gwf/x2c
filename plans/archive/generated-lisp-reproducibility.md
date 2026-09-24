@@ -1,7 +1,9 @@
 # Reproducible generated Lisp names
 
-> Status: historical observation and resolved bootstrap transition. The
-> original naming drift did not reproduce in the post-merge review.
+> Status: done
+> Resolved. The loop-variable order in generated compile-time Lisp is fixed by
+> binding order since `29326dbd`, so shifted binding numbers no longer reorder
+> the generated files.
 
 ## Observed issue
 

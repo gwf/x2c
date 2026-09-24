@@ -48,22 +48,9 @@ execution.
   truth for `x2c-<name>` programs that `x2c <name>` runs: layout, dispatch,
   `libx2c-dev`, maturity, gating, and packaging. `graph`, `repl`, and `lint`
   move in by phase.
-- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
-  delivered as `9b71607f`. The
-  [reproducibility record](generated-lisp-reproducibility.md) retains the
-  earlier Lisp regeneration failure and the repaired result.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
-- [Meta authoring and coverage](meta-authoring-and-coverage.md): source-code
-  template calls, representable literal results, and the API inventory are
-  implemented. The represented-operation campaign is complete; the remaining
-  methods are classified as excluded contracts, explicit adapters, defects, or
-  parked native-handle operations; nine lifetime-sensitive methods are
-  certified and `Var.token` stays private. Generalized `meta` declarations
-  landed as `db86d4b7` through the
-  [meta recovery](archive/meta-recovery.md). The older
-  [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and measurement
   of numeric Func's remaining per-call frame cost are open; the small-defect
   and system-header investigations record their outcomes. Meta-capable
@@ -81,7 +68,6 @@ execution.
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; decisions accepted 2026-09-24. Separate `tools/x2c-lint` linking the compiler; owns C09 and the rewrite of the regex-based Python source tools over one compiler definition walk. |
-| [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
@@ -104,6 +90,15 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Meta authoring and coverage](archive/meta-authoring-and-coverage.md):
+  done 2026-09-24; nested results came from the explicit meta campaign and
+  nine lifetime-sensitive methods were certified.
+- [Meta heap objects](archive/meta-heap-objects.md): obsolete; the explicit
+  meta campaign delivered meta heap objects (`d0476fe1`, `a9e9ba5d`).
+- [Post-merge stabilization](archive/post-merge-stabilization-2026-09-23.md):
+  done; delivered as `9b71607f`. The
+  [reproducibility record](archive/generated-lisp-reproducibility.md) is
+  resolved by binding-ordered loop parameters (`29326dbd`).
 - [Internal adoption campaign](archive/internal-adoption-campaign.md): done
   2026-09-24; phases 1-7 delivered, phase 8 closed by the lifetime
   certification. The 44 native-handle operations stay parked until a caller

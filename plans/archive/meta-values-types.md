@@ -92,7 +92,7 @@ evaluator lifetime, non-folding, protocol agreement, and unsafe ABI crossing.
 
 ## Follow-up architecture
 
-The canonical [meta-capable protocol opportunity](../meta-authoring-and-coverage.md#meta-capable-protocol-opportunity)
+The canonical [meta-capable protocol opportunity](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity)
 records how protocol witnesses can unify representation, lifetime, selected
 operations, associated-type adapters, and REPL discovery. The trusted native
 registry and compiler-owned `timespec` carrier implemented here are bootstrap

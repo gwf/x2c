@@ -124,4 +124,4 @@ struct in its body takes 2.0 s.
 
 1. Native extension build and load (above).
 2. Meta-capable protocol witnesses, recorded in
-   [meta authoring and coverage](../meta-authoring-and-coverage.md).
+   [meta authoring and coverage](meta-authoring-and-coverage.md).

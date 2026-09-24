@@ -14,14 +14,14 @@ established, so the new capabilities build on a smaller evaluator.
 ## Baseline
 
 Start from `9b71607f`, the `dev` commit that delivered the
-[stabilization plan](../post-merge-stabilization-2026-09-23.md) and its scope
+[stabilization plan](post-merge-stabilization-2026-09-23.md) and its scope
 strip. Line references below were read at `3962fb35`, before the strip;
 recheck each against the current tree. Survey notes
 with more detail are in the handoff session's
 `.context/next-phase-survey-2026-09-23.md`; copy that file into the new
 worktree's `.context/`.
 
-The earlier [heap-object investigation](../meta-heap-objects.md) is background.
+The earlier [heap-object investigation](meta-heap-objects.md) is background.
 Its speculative folding rules and blanket deferral of Scope cleanup are
 superseded by this plan.
 

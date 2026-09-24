@@ -1,9 +1,10 @@
 # Heap allocation and heap objects in meta functions
 
-> Status: needs author scoping. Written 2026-09-23 against dev `0bdc8398`
-> and revised after an independent review. Gary asked for this follow-up
-> after `Scope.malloc` was found unbound at compile time. Four choices at
-> the end need his decision before implementation.
+> Status: obsolete
+> Superseded on September 24, 2026 by piece 4 of the
+> [explicit meta campaign](explicit-meta-and-lifetime-campaign.md), which
+> delivered meta heap allocation, `sizeof`, typed heap objects and heap region
+> facts (`d0476fe1`, `a9e9ba5d`). The scoping choices below were not taken.
 
 ## Result
 

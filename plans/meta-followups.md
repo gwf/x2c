@@ -141,7 +141,7 @@ prove. The `_Atomic` limit above remains separate.
 Make protocol conformances the source of compile-time bindings, replacing
 hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 `C.iterator` table in `etc/comptime.xlisp`. See
-[meta authoring and coverage](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
+[meta authoring and coverage](archive/meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
 
 Gary decided on 2026-09-22:
 
