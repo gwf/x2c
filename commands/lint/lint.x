@@ -81,6 +81,20 @@ static const Rule rules[] = {
   {"contains-in", <style>, <candidate>, "let-x2c-carry-the-syntax"},
   {"expression-body", <style>, <candidate>, "let-x2c-carry-the-syntax"},
   {"plain-string", <style>, <candidate>, "trust-supported-conversions"},
+  {"comment-history", <style>, <violation>, "comments-describe-the-present"},
+  {"comment-null-guard", <style>, <violation>,
+   "local-comments-explain-decisions"},
+  {"section-label", <style>, <violation>, "vertical-space"},
+  {"catalog-label", <style>, <candidate>, "vertical-space"},
+  {"restates-name", <style>, <violation>, "internal-functions-and-contracts"},
+  {"restates-code", <style>, <violation>, "local-comments-explain-decisions"},
+  {"module-header-inventory", <style>, <candidate>, "module-headers"},
+  {"doc-comment-tier", <style>, <violation>, "public-api-documentation"},
+  {"doc-boilerplate", <style>, <violation>, "public-api-documentation"},
+  {"doc-on-static", <style>, <violation>, "internal-functions-and-contracts"},
+  {"detached-doc", <style>, <violation>, "public-api-documentation"},
+  {"stacked-doc", <style>, <violation>, "public-api-documentation"},
+  {"repeated-prose", <style>, <candidate>, "comments-earn-their-space"},
 }
 
 static const int rule_count = sizeof(rules) / sizeof(rules[0])
@@ -102,6 +116,19 @@ void Rule.print_table(void):
     Rule rule = rules[at]
     printf("%-31s %-9s %-10s %s\n", rule.code, rule.family.str(),
            rule.kind.str(), rule.section)
+
+/** Whether `ch` continues a word: a letter, digit, or `_`. */
+int lint_word_char(int ch) => isalnum(ch) || ch == '_'
+
+/** Whether lower-case `text` contains `phrase` as whole words. */
+int lint_phrase(String text, String phrase):
+  for (int at = text.find(phrase); at >= 0;
+       at = text.find_within(phrase, at + 1, -1)):
+    int end = at + phrase.len()
+    if (!at || !lint_word_char((unsigned char) text[at - 1])) &&
+       !lint_word_char((unsigned char) text[end]):
+      return 1
+  return 0
 
 /** Whether `t` is written string text: a literal, a segment, or a quote. */
 int lint_string(Token t) =>

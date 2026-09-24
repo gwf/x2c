@@ -1,7 +1,7 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 4
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 5
 > are implemented; see [Progress](#progress). The completed linter moved
 > into experimental `commands/lint` in `9b31112e` under the
 > [external commands](archive/external-commands.md) plan.
@@ -442,6 +442,26 @@ emits `T_cleanup` where the hand-written `defer` named `free` or `close`.
 not carry, and was left for a rule over the parse. Over the 94 units the
 report takes 6.9 s for all rules; `--fix` for one rule takes 20-31 s,
 mostly the one-at-a-time retries in files with a rejected edit.
+
+**Phase 5, 2026-09-24.** `commands/lint/comments.x` (283 lines) adds 13
+comment rules, and `comment_slop.py` with its test and the
+`find-comment-slop` skill are deleted (767 lines of Python); its ranking and
+judging guidance moved into `clean-x2c-source`, which ranks files by counting
+findings. A comment is a comment token, or a run of `//` tokens on
+consecutive lines. The old tool's "vague or persuasive prose" became two
+more `prohibited-prose` phrases, `important` and `obvious`. Parity on `src/`
+and `lib/`, as file, first line, and category: all 112 old findings are
+reported, and nothing else: history 6, `/**` on a static helper 1, module
+header inventory 32, repeated prose 33, restated statement 2, restated name
+27, section label 1, and the 10 vague-prose comments inside `prohibited-prose`
+findings. One difference is deliberate: the old tool flagged every `/**` in
+`src/` as a misplaced generated-reference delimiter (595 findings), which
+`docs/AGENTS.md` now requires on public compiler callables, so the rule was
+not carried over. The fixtures agree with the old tool too. Over the 94
+units the old tool took 0.6 s and `x2c lint --all` takes 5.5 s, because it
+also parses every unit. Phase 4's `--fix` read the include directories after
+they were freed, which crashed about one run in thirty; it now reads the
+request's copy.
 
 ## Process ceiling
 

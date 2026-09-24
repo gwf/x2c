@@ -31,6 +31,8 @@ run() {
   run --all "$tests/broken.x"
   echo "# non-ASCII text"
   (cd "$work" && run --rule non-ascii ascii.x)
+  echo "# comment rules"
+  run --all "$tests/src/comments.x"
   echo "# idiom fixes proven by the generated C"
   cp "$tests/src/idioms.x" "$work/idioms.x"
   (cd "$work" && run --all --fix idioms.x)

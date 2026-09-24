@@ -24,6 +24,7 @@
 #include "tokens.x"
 #include "declarations.x"
 #include "idioms.x"
+#include "comments.x"
 #include "fix.x"
 #include <stdio.h>
 #include <string.h>
@@ -93,7 +94,7 @@ int main(int argc, char **argv):
   if !frontend.preload_macro_libraries(): return 1
   Path x2c = Path.dirname(Path.dirname(x2c_get_executable())).join("x2c")
   Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
-  foreach String dir in include_dirs:
+  foreach String dir in request.include_dirs:
     translate.push("-I")
     translate.push(dir)
   Path work = fix ? Path.temp_dir() : NULL
@@ -103,6 +104,7 @@ int main(int argc, char **argv):
     Lint l = Lint.new(path, file.read_text(), selected)
     l.token_rules()
     l.idiom_rules()
+    l.comment_rules()
     if !_parse(l, frontend, path): status = 1
     l.print()
     if !fix || !l.edits.len(): continue

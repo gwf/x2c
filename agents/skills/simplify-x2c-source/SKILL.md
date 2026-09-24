@@ -27,7 +27,7 @@ Optional tools can extend a source-backed investigation:
 - `find-redundant-validation --frameworks` groups validator families; ordinary
   mode finds local checks, and `--producer-consumers` traces repeated guards.
 - `tools/audit-source-bloat.py` finds related source patterns.
-- `find-comment-slop` identifies comment cleanup opportunities.
+- `x2c lint --all` reports comment cleanup candidates.
 
 The finder skills document their runnable commands. Scores measure detector
 signals; choose work by the code and runtime operations that can disappear.

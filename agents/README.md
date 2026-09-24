@@ -38,9 +38,7 @@ are needed rather than maintaining another copy.
 - [simplify-x2c-source](skills/simplify-x2c-source/SKILL.md) - remove connected
   architectural redundancy while preserving behavior.
 - [clean-x2c-source](skills/clean-x2c-source/SKILL.md) - improve local source
-  style after structural choices are settled.
-- [find-comment-slop](skills/find-comment-slop/SKILL.md) - discover and rank
-  comment cleanup candidates without editing.
+  style after structural choices are settled, or audit comments.
 - [find-redundant-validation](skills/find-redundant-validation/SKILL.md) -
   discover and rank redundant checks without editing.
 - [find-x2c-overengineering](skills/find-x2c-overengineering/SKILL.md) - run

@@ -100,18 +100,6 @@ static int _ruler(String text):
   for (; *ch == '-' || *ch == '='; ch++): run++
   return run >= 8
 
-static inline int _word_char(int ch) => isalnum(ch) || ch == '_'
-
-/* Whether lower-case `text` contains `phrase` as whole words. */
-static int _phrase(String text, String phrase):
-  for (int at = text.find(phrase); at >= 0;
-       at = text.find_within(phrase, at + 1, -1)):
-    int end = at + phrase.len()
-    if (!at || !_word_char((unsigned char) text[at - 1])) &&
-       !_word_char((unsigned char) text[end]):
-      return 1
-  return 0
-
 static const List narration_words = %(
   "function to" "convert" "check if" "return" "get" "set" "create" "handle"
   "skip" "remove" "extract" "add" "initialize" "free" "parse" "write" "copy"
@@ -122,14 +110,14 @@ static const List prose_phrases = %(
   "load bearing" "load-bearing" "it is important to note" "note that"
   "keep in mind" "in order to" "serves to" "leverage" "utilize" "robust"
   "powerful" "seamless" "comprehensive" "elegant" "clearly" "simply"
-  "obviously" "just" "deliberately" "honest" "honestly" "on purpose"
+  "obviously" "obvious" "important" "just" "deliberately" "honest" "honestly" "on purpose"
   "rather than" "this ensures" "as mentioned above" "we can see"
 )
 
 static int _prose(String text):
   String lower = text.lower()
   foreach String phrase in prose_phrases:
-    if _phrase(lower, phrase): return 1
+    if lint_phrase(lower, phrase): return 1
   int only = lower.find("not only")
   return only >= 0 && lower.find_within("but also", only, -1) >= 0
 
@@ -138,7 +126,7 @@ static int _narrates(String body):
   String lower = body.strip(NULL).lower()
   foreach String word in narration_words:
     if lower.startswith(word) &&
-       !_word_char((unsigned char) lower[word.len()]):
+       !lint_word_char((unsigned char) lower[word.len()]):
       return 1
   return 0
 

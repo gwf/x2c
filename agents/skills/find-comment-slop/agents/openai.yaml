@@ -1,4 +1,0 @@
-interface:
-  display_name: "Find Comment Slop"
-  short_description: "Find source-checked comment cleanup candidates"
-  default_prompt: "Use $find-comment-slop to find and review comment cleanup candidates in these x2c files without editing source."

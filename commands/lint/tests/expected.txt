@@ -11,6 +11,7 @@ commands/lint/tests/src/style.x:7: violation forward-declaration: the unit defin
 commands/lint/tests/src/style.x:8: violation src-forward-declaration: user-space src code must rely on complete-unit collection
 commands/lint/tests/src/style.x:15: candidate over-width-table-row: verify that indivisible literal fields require this stable row
 commands/lint/tests/src/style.x:18: candidate decorated-ruler: decorated ruler
+commands/lint/tests/src/style.x:18: violation section-label: decorative or all-capitals label
 commands/lint/tests/src/style.x:19: candidate narration: narrates the code; state a decision
 commands/lint/tests/src/style.x:20: violation operator-spacing: doubled operator spacing
 commands/lint/tests/src/style.x:27: violation subject-parameter-name: name the Compiler subject c to save 1 line (found compiler)
@@ -31,6 +32,7 @@ commands/lint/tests/src/style.x:56: violation blank-line-stack: consecutive blan
 commands/lint/tests/src/style.x:57: candidate constant-output-run: 2 adjacent static output calls; preserve emitted bytes
 commands/lint/tests/src/style.x:59: violation over-width: 80 columns
 commands/lint/tests/src/style.x:60: candidate over-width-literal: verify that preserving observable literal text requires this width
+commands/lint/tests/src/clean.x:10: violation restates-code: translates the next statement
 commands/lint/tests/src/indent.x:5: violation forward-declaration: the unit defines this function and x2c collects the whole unit
 commands/lint/tests/src/indent.x:11: violation negated-is: spell the test `is not`
 commands/lint/tests/src/indent.x:19: violation over-width: 80 columns
@@ -46,6 +48,23 @@ commands/lint/tests/broken.x:3: violation negated-is: spell the test `is not`
 exit 1
 # non-ASCII text
 ascii.x:1: violation non-ascii: non-ASCII character
+exit 0
+# comment rules
+commands/lint/tests/src/comments.x:1: candidate module-header-inventory: the module header inventories the implementation
+commands/lint/tests/src/comments.x:5: violation comment-history: history or unfinished work
+commands/lint/tests/src/comments.x:8: violation section-label: decorative or all-capitals label
+commands/lint/tests/src/comments.x:11: candidate catalog-label: catalog-style section label
+commands/lint/tests/src/comments.x:14: candidate narration: narrates the code; state a decision
+commands/lint/tests/src/comments.x:14: violation restates-name: restates the name _parse_value
+commands/lint/tests/src/comments.x:17: candidate narration: narrates the code; state a decision
+commands/lint/tests/src/comments.x:21: violation comment-null-guard: narrates an obvious null guard
+commands/lint/tests/src/comments.x:23: violation restates-code: translates the next statement
+commands/lint/tests/src/comments.x:28: violation doc-boilerplate: parameter or return boilerplate
+commands/lint/tests/src/comments.x:34: violation detached-doc: doc comment detached from its declaration
+commands/lint/tests/src/comments.x:38: violation stacked-doc: stacked doc comments
+commands/lint/tests/src/comments.x:42: violation doc-on-static: doc comment on a private static helper
+commands/lint/tests/src/comments.x:45: candidate repeated-prose: repeats prose elsewhere in the file
+commands/lint/tests/src/comments.x:48: candidate repeated-prose: repeats prose elsewhere in the file
 exit 0
 # idiom fixes proven by the generated C
 idioms.x:10: candidate member-arrow: reach the member with `.`
