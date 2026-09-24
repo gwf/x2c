@@ -339,10 +339,9 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
   _start(frontend, filename, unit, 0, NULL);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
-   session. Its values belong to the build target's shared library scope
-   because they outlive every unit that calls them. Builder aliases name the
-   same lowered bodies; the literal spellings retain their checked Lisp
-   adapters. */
+   session, each also under its Lisp name. Its values belong to the build
+   target's shared library scope because they outlive every unit that calls
+   them. */
 static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
@@ -356,34 +355,24 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   unit.compiler.macro_lisp = shared;
   unit.compiler.borrowed_lisp = 1;
   defer unit.close();
-  List builders = %(
-    (x2c_expr_ident x2c.expr.ident)
-    (x2c_expr_index x2c.expr.index)
-    (x2c_expr_field x2c.expr.field)
-    (x2c_expr_call _x2c.expr.call-list)
-    (x2c_expr_composite x2c.expr.composite)
-    (x2c_expr_cast x2c.expr.cast)
-    (x2c_function_body x2c.function.body)
-    (x2c_parameters_arguments x2c.parameters.arguments)
-    (x2c_stmnt_make x2c.stmnt.make)
-    (x2c_stmnt_return x2c.stmnt.return)
-    (x2c_block_make x2c.block.make)
-    (x2c_decl_make x2c.decl.make)
-    (x2c_param_make x2c.param.make)
-    (x2c_type_members x2c.type.members));
-  /* Imported helpers can lower calls before the builders are parsed. */
-  foreach (Var (name, alias), builders) {
-    Var initial;
-    if (!shared.try_get(name.str(), &initial)) initial = %();
-    shared.set_global(alias.str(), initial);
+  /* `lib/meta.x` includes `lib/varops.x`, whose imported helpers lower calls
+     to these builders before they are parsed. Until the parse installs them,
+     each is a compile-time-only name. */
+  foreach (String name, %("x2c_expr_ident" "x2c_expr_index" "x2c_expr_call"
+                          "x2c_expr_cast")) {
+    shared.set_global(name, %());
+    unit.compiler.meta_comptime[name] = 1;
   }
   if (!started || !unit.collect(frontend) || !unit.parse()) {
     foreach (List diagnostic, unit.compiler.diagnostics())
       unit.compiler.print_diagnostic(diagnostic);
     return 0;
   }
-  foreach (Var (name, alias), builders)
-    shared.set_global(alias.str(), shared.eval(name));
+  foreach (String name, unit.compiler.meta_regions.keys()) {
+    Var function;
+    if (name.startswith("x2c_") && shared.try_get(name, &function))
+      Compiler.bind_meta_operation(shared, name, function);
+  }
   return 1;
 }
 

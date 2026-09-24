@@ -20,12 +20,17 @@ Compile-time macro definitions and expression expansion.
 | [`x2c_comptime_lower`](#x2c_comptime_lower) | The forms a compile-time function lowers to, for inspection. |
 | [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_warn`](#x2c_diagnostic_warn) | A warning reports where it is raised and returns, so a macro can keep expanding. |
+| [`x2c_embed_text`](#x2c_embed_text) | Answers `x2c.embed.text`, declared in `lib/meta.x`. |
 | [`x2c_function_name`](#x2c_function_name) | Answers `x2c.function.name`, declared in `lib/meta.x`. |
 | [`x2c_function_parameter`](#x2c_function_parameter) | Answers `x2c.function.parameter`, declared in `lib/meta.x`. |
 | [`x2c_ident`](#x2c_ident) | Answers `x2c.ident`, declared in `lib/meta.x`. |
+| [`x2c_invocation_column`](#x2c_invocation_column) | Answers `x2c.invocation.column`, declared in `lib/meta.x`. |
+| [`x2c_invocation_file`](#x2c_invocation_file) | Answers `x2c.invocation.file`, declared in `lib/meta.x`. |
+| [`x2c_invocation_line`](#x2c_invocation_line) | Answers `x2c.invocation.line`, declared in `lib/meta.x`. |
 | [`x2c_literal_value`](#x2c_literal_value) | Answers `x2c.literal.value`, declared in `lib/meta.x`. |
 | [`x2c_method_resolve`](#x2c_method_resolve) | Answers `x2c.method.resolve`, declared in `lib/meta.x`. |
 | [`x2c_protocol_member`](#x2c_protocol_member) | Answers `x2c.protocol.member`, declared in `lib/meta.x`. |
+| [`x2c_source_text`](#x2c_source_text) | Answers `x2c.source.text`, declared in `lib/meta.x`. |
 | [`x2c_syntax_type`](#x2c_syntax_type) | Answers `x2c.syntax.type`, declared in `lib/meta.x`. |
 | [`x2c_type_element`](#x2c_type_element) | Answers `x2c.type.element`, declared in `lib/meta.x`. |
 | [`x2c_type_fields`](#x2c_type_fields) | Answers `x2c.type.fields`, declared in `lib/meta.x`. |
@@ -40,6 +45,7 @@ Compile-time macro definitions and expression expansion.
 | [`x2c_type_reverse_name`](#x2c_type_reverse_name) | Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. |
 | [`x2c_type_tag_name`](#x2c_type_tag_name) | Answers `x2c.type.tag-name`, declared in `lib/meta.x`. |
 | [`Compiler.add_native_module`](#Compiler.add_native_module) | Records the name-to-`Func` Map that the entry of the native module loaded from absolute `path` returns. |
+| [`Compiler.bind_meta_operation`](#Compiler.bind_meta_operation) | Binds `function`, the operation `lib/meta.x` declares as `name`, under its Lisp name in `lisp`. |
 | [`Compiler.bind_native_meta`](#Compiler.bind_native_meta) | Binds an included native `meta` function the first time lowered code calls `name`. |
 | [`Compiler.evaluate_declaration_effect`](#Compiler.evaluate_declaration_effect) | Evaluates a queued source Lisp form with its original diagnostic site. |
 | [`Compiler.evaluate_declaration_recipe`](#Compiler.evaluate_declaration_recipe) | Evaluates a declaration recipe after its owning source is collected. |
@@ -98,7 +104,7 @@ while the parent is still pending raises `<lisp-late>`; its driver must
 catch that, call `Frontend.preload_macro_libraries`, and translate the
 same unit again.
 
-Source: `src/macros.x:1255`
+Source: `src/macros.x:1273`
 
 #### macro_library_filling
 
@@ -107,7 +113,7 @@ Source: `src/macros.x:1255`
 Answers whether the shared compile-time session is still being filled,
 before `lib/meta.x` has defined the syntax builders.
 
-Source: `src/macros.x:1247`
+Source: `src/macros.x:1265`
 
 #### macro_library_pending
 
@@ -115,7 +121,7 @@ Source: `src/macros.x:1247`
 
 Answers whether a unit started now may still raise `<lisp-late>`.
 
-Source: `src/macros.x:1260`
+Source: `src/macros.x:1278`
 
 #### macro_library_reset
 
@@ -124,7 +130,7 @@ Source: `src/macros.x:1260`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:1065`
+Source: `src/macros.x:1083`
 
 #### x2c_binding_spelling
 
@@ -140,7 +146,7 @@ Source: `src/macros.x:337`
 
 The forms a compile-time function lowers to, for inspection.
 
-Source: `src/macros.x:983`
+Source: `src/macros.x:1001`
 
 #### x2c_diagnostic_fail
 
@@ -148,7 +154,7 @@ Source: `src/macros.x:983`
 
 Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:395`
+Source: `src/macros.x:398`
 
 #### x2c_diagnostic_warn
 
@@ -157,7 +163,15 @@ Source: `src/macros.x:395`
 A warning reports where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
 
-Source: `src/macros.x:992`
+Source: `src/macros.x:1010`
+
+#### x2c_embed_text
+
+`String x2c_embed_text(Var path)`
+
+Answers `x2c.embed.text`, declared in `lib/meta.x`.
+
+Source: `src/macros.x:980`
 
 #### x2c_function_name
 
@@ -165,7 +179,7 @@ Source: `src/macros.x:992`
 
 Answers `x2c.function.name`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:457`
+Source: `src/macros.x:472`
 
 #### x2c_function_parameter
 
@@ -173,7 +187,7 @@ Source: `src/macros.x:457`
 
 Answers `x2c.function.parameter`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:612`
+Source: `src/macros.x:627`
 
 #### x2c_ident
 
@@ -181,7 +195,31 @@ Source: `src/macros.x:612`
 
 Answers `x2c.ident`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:406`
+Source: `src/macros.x:409`
+
+#### x2c_invocation_column
+
+`int x2c_invocation_column(void)`
+
+Answers `x2c.invocation.column`, declared in `lib/meta.x`.
+
+Source: `src/macros.x:442`
+
+#### x2c_invocation_file
+
+`String x2c_invocation_file(void)`
+
+Answers `x2c.invocation.file`, declared in `lib/meta.x`.
+
+Source: `src/macros.x:434`
+
+#### x2c_invocation_line
+
+`int x2c_invocation_line(void)`
+
+Answers `x2c.invocation.line`, declared in `lib/meta.x`.
+
+Source: `src/macros.x:438`
 
 #### x2c_literal_value
 
@@ -189,7 +227,7 @@ Source: `src/macros.x:406`
 
 Answers `x2c.literal.value`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:965`
+Source: `src/macros.x:983`
 
 #### x2c_method_resolve
 
@@ -197,7 +235,7 @@ Source: `src/macros.x:965`
 
 Answers `x2c.method.resolve`, declared in `lib/meta.x`.
 
-Source: `src/macros.x:431`
+Source: `src/macros.x:446`
 
 #### x2c_protocol_member
 
@@ -206,6 +244,14 @@ Source: `src/macros.x:431`
 Answers `x2c.protocol.member`, declared in `lib/meta.x`.
 
 Source: `src/macros.x:215`
+
+#### x2c_source_text
+
+`String x2c_source_text(Var syntax)`
+
+Answers `x2c.source.text`, declared in `lib/meta.x`.
+
+Source: `src/macros.x:395`
 
 #### x2c_syntax_type
 
@@ -324,6 +370,18 @@ for the process.
 
 Source: `src/macros.x:1678`
 
+<a id="Compiler.bind_meta_operation"></a>
+#### Compiler.bind_meta_operation
+
+`void Compiler.bind_meta_operation(Lisp lisp, String name, Var function)`
+
+Binds `function`, the operation `lib/meta.x` declares as `name`, under
+its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
+x2c spelling answers `int`. A definition the compile-time libraries
+already give that name wins, because it adapts the arguments.
+
+Source: `src/macros.x:1135`
+
 <a id="Compiler.bind_native_meta"></a>
 #### Compiler.bind_native_meta
 
@@ -344,7 +402,7 @@ Source: `src/macros.x:1863`
 
 Evaluates a queued source Lisp form with its original diagnostic site.
 
-Source: `src/macros.x:1553`
+Source: `src/macros.x:1571`
 
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
@@ -417,7 +475,7 @@ Source: `src/macros.x:116`
 Applies a contextual `meta` marker to one initialized file-static value,
 which is evaluated into the unit-local compile-time globals table.
 
-Source: `src/macros.x:1563`
+Source: `src/macros.x:1581`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -461,7 +519,7 @@ Source: `src/macros.x:1879`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros.x:683`
+Source: `src/macros.x:698`
 
 <a id="Compiler.lift_macro_lisp_expression"></a>
 #### Compiler.lift_macro_lisp_expression
@@ -483,7 +541,7 @@ Source: `src/macros.x:1967`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros.x:675`
+Source: `src/macros.x:690`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -493,7 +551,7 @@ Source: `src/macros.x:675`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros.x:663`
+Source: `src/macros.x:678`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -515,7 +573,7 @@ expansion. Every imported `Unit` macro qualifies. A local `Unit` macro
 qualifies only when its template contains protocol or adoption rows that
 collection must retain.
 
-Source: `src/macros.x:774`
+Source: `src/macros.x:789`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -548,7 +606,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros.x:833`
+Source: `src/macros.x:848`
 
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
@@ -596,7 +654,7 @@ reports against the unit that needed it.
 The session is not published until `Compiler.publish_macro_library`, so a
 unit opened in between still builds its own.
 
-Source: `src/macros.x:1181`
+Source: `src/macros.x:1199`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -656,7 +714,7 @@ The consuming unit retains them and emits the ones it reaches. An import
 whose `meta` functions are all compile-time only answers an empty `seq`,
 because the next pass still has to read it to install them.
 
-Source: `src/macros.x:1531`
+Source: `src/macros.x:1549`
 
 <a id="Compiler.parse_source_lisp"></a>
 #### Compiler.parse_source_lisp
@@ -665,7 +723,7 @@ Source: `src/macros.x:1531`
 
 Retains one source Lisp form as text without evaluating it again.
 
-Source: `src/macros.x:1547`
+Source: `src/macros.x:1565`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -695,7 +753,7 @@ Source: `src/macros.x:3285`
 Prepares and freezes the shared session and makes it every unit's parent.
 `shared` must be the session `Compiler.open_macro_library` returned.
 
-Source: `src/macros.x:1211`
+Source: `src/macros.x:1229`
 
 <a id="Compiler.record_native_meta_effect"></a>
 #### Compiler.record_native_meta_effect
@@ -706,7 +764,7 @@ The shallow interface retains the advertisement separately from the C
 declaration. That lets a client install the trusted evaluator binding
 without repeating the marker in every translation unit.
 
-Source: `src/macros.x:1625`
+Source: `src/macros.x:1643`
 
 <a id="Compiler.select_native_modules"></a>
 #### Compiler.select_native_modules
@@ -731,7 +789,7 @@ well. A reader that reads the same file again therefore installs nothing,
 whether it is a later unit or the filling itself reaching the file twice:
 the definition it would install is the one it already has.
 
-Source: `src/macros.x:1236`
+Source: `src/macros.x:1254`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
@@ -741,7 +799,7 @@ Source: `src/macros.x:1236`
 Returns the published definition keys, or null before publication.
 The borrowed map is the shared session's source identity table.
 
-Source: `src/macros.x:1265`
+Source: `src/macros.x:1283`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -751,7 +809,7 @@ Source: `src/macros.x:1265`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros.x:749`
+Source: `src/macros.x:764`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration

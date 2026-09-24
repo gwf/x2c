@@ -54,7 +54,7 @@ Source: `src/frontend.x:140`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:444`
+Source: `src/frontend.x:433`
 
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
@@ -65,7 +65,7 @@ Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
-Source: `src/frontend.x:450`
+Source: `src/frontend.x:439`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -77,7 +77,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:395`
+Source: `src/frontend.x:384`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -99,7 +99,7 @@ Source: `src/frontend.x:338`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:459`
+Source: `src/frontend.x:448`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -109,7 +109,7 @@ Source: `src/frontend.x:459`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:412`
+Source: `src/frontend.x:401`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -119,7 +119,7 @@ Source: `src/frontend.x:412`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:433`
+Source: `src/frontend.x:422`
 
 ## Public types
 

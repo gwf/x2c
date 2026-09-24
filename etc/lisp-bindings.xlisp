@@ -10,7 +10,7 @@
 // Generated x2c algorithms.
 
 (def binding_call
- (lambda (arg-1 arg-2) (x2c_expr_call (x2c_expr_ident (x2c.ident arg-1)) arg-2)))
+ (lambda (arg-1 arg-2) (x2c_expr_call (x2c_expr_ident (x2c_ident arg-1)) arg-2)))
 (def binding_list_item
  (lambda (arg-1)
   (cond ((C.true? (C.not (Var_equal (lisp_string arg-1) (quote ()))))
@@ -74,7 +74,7 @@
                   ((lambda (discard-33)
                     (loop23-binding_record live-24 live-25 live-26
                      live-27 live-28 hold-32 live-30 (cdr live-31)))
-                   (x2c.diagnostic.fail
+                   (x2c_diagnostic_fail
                     (C.address "duplicate native Lisp binding name"
                      (quote string))
                     (cons (String_var (string-append (quote "group: ") live-25))
@@ -99,7 +99,7 @@
                   ((lambda (discard-22)
                     (loop11-binding_record live-12 live-13 live-14
                      live-15 live-16 live-17 hold-21 live-19 (cdr live-20)))
-                   (x2c.diagnostic.fail
+                   (x2c_diagnostic_fail
                     (C.address
                      "native Lisp binding appears after its group was installed"
                      (quote string))
@@ -120,8 +120,8 @@
             (loop11-binding_record arg-4 hold-6 hold-7
              hold-8 hold-9 hold-10 0 arg-5 arg-5))
            (binding_rows_for hold-6 arg-4))) (binding_native_type arg-3)))
-       (x2c.function.name arg-3))) (binding_name arg-2)))
-   (x2c.binding.spelling arg-1))))
+       (x2c_function_name arg-3))) (binding_name arg-2)))
+   (x2c_binding_spelling arg-1))))
 (def binding_statement
  (lambda (arg-1 arg-2)
   (cond ((match arg-2 (quote (?group ?name ?function ?type)))
@@ -138,7 +138,7 @@
                            (binding_call (C.address "Func_new" (quote string))
                             (cons (List_var
                                    (x2c_expr_ident
-                                    (x2c.ident
+                                    (x2c_ident
                                      (bound
                                       (match arg-2
                                        (quote (?group ?name ?function ?type)))
@@ -155,7 +155,7 @@
   ((lambda (hold-3)
     (cond ((C.true? (C.not hold-3))
            ((lambda (discard-4) hold-3)
-            (x2c.diagnostic.fail
+            (x2c_diagnostic_fail
              (C.address "unknown native Lisp binding group"
               (quote string))
              (cons (String_var (string-append (quote "group: ") arg-1))
@@ -181,7 +181,7 @@
           (binding_call (C.address "Func_var" (quote string))
            (cons (List_var
                   (binding_call arg-3
-                   (cons (List_var (x2c_expr_ident (x2c.ident arg-2)))
+                   (cons (List_var (x2c_expr_ident (x2c_ident arg-2)))
                     (cons (List_var
                            (binding_signature (binding_name_signature arg-2)))
                      (quote ()))))) (quote ())))) (quote ())))))

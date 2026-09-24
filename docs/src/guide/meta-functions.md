@@ -1316,9 +1316,12 @@ sample.x:15:23: macro: this argument must be one word
                       ^
 ```
 
-Two signatures differ from the corresponding Lisp functions.
-`x2c_expr_call` takes its arguments as one `List`, and `x2c_type_is_value`
-returns `int`.
+The compiler binds each of these under its x2c name and derives the Lisp
+name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes
+`x2c.type.X?`. Only `x2c.type.tag-name` and `x2c.type.reverse-name`, which
+carry a hyphen, are listed by hand. Two signatures differ from the
+corresponding Lisp functions. `x2c_expr_call` takes its arguments as one
+`List`, and `x2c_type_is_value` returns `int`.
 
 ## Functions that need the compiler
 

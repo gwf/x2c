@@ -1570,7 +1570,8 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
   iter.find(_lisp_predicate(callable));
 
 // The direct targets let the compiler generate their call adapters and
-// read each signature from the declared prototype.
+// read each signature from the declared prototype. The `x2c_` operations
+// `meta.x` declares exist only inside a compiler, which supplies them.
 $(import "../etc/lisp-bindings.xlisp")
 $(def lisp.native.target.rows (append '(
   (lisp_void)
@@ -1776,7 +1777,8 @@ $(def lisp.native.target.rows (append '(
   (lisp_string_strip)
   (Var_is)
   (Symbol_str)
-) (_x2c.native-meta.targets)))
+) (filter (lambda (row) (not (C.true? (String.startswith (car row) "x2c_"))))
+     (_x2c.native-meta.targets))))
 
 macro Expression $lisp.native.target.map() =>
   $(lisp.native.targets lisp.native.target.rows);

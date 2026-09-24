@@ -391,6 +391,9 @@ static Var _sdk_source_text(Var value) {
   return String.new_len(macro_sdk_compiler.text + begin, end - begin);
 }
 
+/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
+String x2c_source_text(Var syntax) => _sdk_source_text(syntax);
+
 /** Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
   _sdk_guard("x2c.diagnostic.fail");
@@ -426,6 +429,18 @@ static Var _sdk_invocation_location(void) {
       "x2c invocation location used outside macro expansion", NULL);
   return macro_sdk_compiler.token_location(macro_import_invocation);
 }
+
+/** Answers `x2c.invocation.file`, declared in `lib/meta.x`. */
+String x2c_invocation_file(void) =>
+  ((List) _sdk_invocation_location()).assoc(<file>);
+
+/** Answers `x2c.invocation.line`, declared in `lib/meta.x`. */
+int x2c_invocation_line(void) =>
+  ((List) _sdk_invocation_location()).assoc(<line>);
+
+/** Answers `x2c.invocation.column`, declared in `lib/meta.x`. */
+int x2c_invocation_column(void) =>
+  ((List) _sdk_invocation_location()).assoc(<column>);
 
 /** Answers `x2c.method.resolve`, declared in `lib/meta.x`. */
 List x2c_method_resolve(List type_value, String name) {
@@ -961,6 +976,9 @@ static Var _sdk_embed_text(Var requested) {
   return result;
 }
 
+/** Answers `x2c.embed.text`, declared in `lib/meta.x`. */
+String x2c_embed_text(Var path) => _sdk_embed_text(path);
+
 /** Answers `x2c.literal.value`, declared in `lib/meta.x`. */
 Var x2c_literal_value(Var syntax) {
   _sdk_guard("x2c.literal.value");
@@ -1086,21 +1104,43 @@ static List _library_files(void) => %(
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-macros.xlisp" "cannot open the built-in macro support"));
 
-/* A Lisp predicate answers a truth value, where the x2c spelling answers
-   `int` and Lisp reads 0 as true. */
-static Var _truth(int answer) {
-  if (answer) return <true>;
-  return %();
+/* The compiler supplies the operations `lib/meta.x` declares with a bodyless
+   `meta` prototype, the `x2c_` targets, as the native module
+   `compiler_supplier`, which every request selects first. */
+$(import "../etc/lisp-bindings.xlisp")
+macro Expression $compiler.targets() => $(lisp.native.targets
+  (filter (lambda (row) (C.true? (String.startswith (car row) "x2c_")))
+    (_x2c.native-meta.targets)));
+
+static String compiler_supplier = "<compiler>";
+
+static Map _compiler_targets(void) => $compiler.targets();
+
+/* The Lisp name of the operation `lib/meta.x` declares as `name`: each `_`
+   becomes `.`, a predicate `x2c_type_is_X` is `x2c.type.X?`, and two names
+   keep the hyphen of their Lisp spelling. */
+static String _meta_lisp_name(String name) {
+  if (name == "x2c_type_tag_name") return "x2c.type.tag-name";
+  if (name == "x2c_type_reverse_name") return "x2c.type.reverse-name";
+  if (name.startswith("x2c_type_is_"))
+    return %"x2c.type.${name[12:]}?";
+  return name.replace("_", ".");
 }
 
-static Var _type_value_truth(List value) =>
-  _truth(x2c_type_is_value(value));
-
-static Var _type_integral_truth(List value) =>
-  _truth(x2c_type_is_integral(value));
-
-static Var _type_pointer_truth(List value) =>
-  _truth(x2c_type_is_pointer(value));
+/** Binds `function`, the operation `lib/meta.x` declares as `name`, under
+    its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
+    x2c spelling answers `int`. A definition the compile-time libraries
+    already give that name wins, because it adapts the arguments.
+*/
+void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
+  String dotted = _meta_lisp_name(name);
+  Var bound;
+  if (lisp.try_get(dotted, &bound)) return;
+  if (name.startswith("x2c_type_is_"))
+    function = lisp.eval(%(lambda (value)
+      (if (C.true? ((quote $function) value)) true nil)));
+  lisp.set_global(dotted, function);
+}
 
 /* Native operations use the active expansion context, not the session
    that owns their callable. The shared parent therefore owns them once. */
@@ -1108,19 +1148,12 @@ static void _install_native_operations(Compiler compiler) {
   with compiler {
     /* Cold declaration collection needs literals before the meta surface is
        parsed. These native forms have the same authored bodies; preload
-       replaces their aliases with the lowered forms. */
+       replaces them with the lowered forms. */
     $lisp.bind(_.macro_lisp, "x2c_literal_string", x2c_literal_string);
     $lisp.bind(_.macro_lisp, "x2c_literal_int", x2c_literal_int);
     $lisp.bind(_.macro_lisp, "x2c_literal_symbol", x2c_literal_symbol);
+    /* Internal primitives carry the `_x2c.` prefix. */
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
-    $lisp.bind(_.macro_lisp, "x2c.syntax.type", x2c_syntax_type);
-    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", x2c_binding_spelling);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", x2c_diagnostic_fail);
-    $lisp.bind(_.macro_lisp, "x2c.ident", x2c_ident);
-    $lisp.bind(_.macro_lisp, "x2c.method.resolve", x2c_method_resolve);
-    $lisp.bind(
-      _.macro_lisp, "x2c.comptime.lower", x2c_comptime_lower);
-    $lisp.bind(_.macro_lisp, "x2c.function.name", x2c_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
     $lisp.bind(
@@ -1132,24 +1165,11 @@ static void _install_native_operations(Compiler compiler) {
       _.macro_lisp, "_x2c.native-meta.declared",
       _sdk_native_meta_declared);
     $lisp.bind(
-      _.macro_lisp, "x2c.function.parameter",
-      x2c_function_parameter);
-    $lisp.bind(
       _.macro_lisp, "_x2c.foreach.complete-iter-chain",
       _sdk_complete_iter_chain);
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.string-collection",
       _sdk_string_collection);
-    $lisp.bind(_.macro_lisp, "x2c.type.fields", x2c_type_fields);
-    $lisp.bind(_.macro_lisp, "x2c.type.parts", x2c_type_parts);
-    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", x2c_type_reverse_name);
-    $lisp.bind(_.macro_lisp, "x2c.type.resolve", x2c_type_resolve);
-    $lisp.bind(_.macro_lisp, "x2c.type.layout", x2c_type_layout);
-    $lisp.bind(_.macro_lisp, "x2c.type.value?", _type_value_truth);
-    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", x2c_type_tag_name);
-    /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
-       internal primitive carries the `_x2c.` prefix instead of an infix
-       underscore. */
     $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
     $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
     $lisp.bind(
@@ -1159,14 +1179,12 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
-    $lisp.bind(_.macro_lisp, "x2c.literal.value", x2c_literal_value);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", x2c_diagnostic_warn);
-    $lisp.bind(_.macro_lisp, "x2c.protocol.member", x2c_protocol_member);
-    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _type_integral_truth);
-    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _type_pointer_truth);
-    $lisp.bind(_.macro_lisp, "x2c.type.element", x2c_type_element);
-    $lisp.bind(_.macro_lisp, "x2c.type.parameters", x2c_type_parameters);
-    $lisp.bind(_.macro_lisp, "x2c.type.return", x2c_type_return);
+    if (!Compiler.native_module_loaded(compiler_supplier))
+      Compiler.add_native_module(compiler_supplier, _compiler_targets);
+    foreach (Var (name, function), _compiler_targets()) {
+      _.macro_lisp.set_global(name, function);
+      Compiler.bind_meta_operation(_.macro_lisp, name, function);
+    }
   }
 }
 
@@ -1648,24 +1666,6 @@ static void _native_module_shutdown(void) {
   native_modules = NULL;
   native_module_order = NULL;
 }
-
-/* The compiler supplies the operations `lib/meta.x` declares without a body
-   as the native module `compiler_supplier`, which every request selects
-   first. */
-$(import "../etc/lisp-bindings.xlisp")
-macro Expression $compiler.targets() => $(lisp.native.targets '(
-  ("x2c_binding_spelling") ("x2c_comptime_lower") ("x2c_diagnostic_fail")
-  ("x2c_diagnostic_warn") ("x2c_function_name") ("x2c_function_parameter")
-  ("x2c_ident") ("x2c_literal_value") ("x2c_method_resolve")
-  ("x2c_protocol_member") ("x2c_syntax_type") ("x2c_type_element")
-  ("x2c_type_fields") ("x2c_type_is_integral") ("x2c_type_is_pointer")
-  ("x2c_type_is_value") ("x2c_type_layout") ("x2c_type_parameters")
-  ("x2c_type_parts") ("x2c_type_resolve") ("x2c_type_return")
-  ("x2c_type_reverse_name") ("x2c_type_tag_name")));
-
-static String compiler_supplier = "<compiler>";
-
-static Map _compiler_targets(void) => $compiler.targets();
 
 /** Reports whether the native module at absolute `path` is loaded. */
 int Compiler.native_module_loaded(String path) =>
