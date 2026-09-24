@@ -52,6 +52,8 @@ String x2c_embed_text(String path);
 
 void x2c_diagnostic_fail(String message, List notes);
 
+List x2c_comptime_lower(List fn);
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
