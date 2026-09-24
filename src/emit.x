@@ -715,10 +715,8 @@ static List _make_catch_binders(List binders, String handle_name) {
    it takes `default:` and ends the labelling. A failed arm still falls into
    everything after it, so arm order is unchanged. */
 
-static List _match_arm_label(
-  Emitter emitter, List pattern_ast, Array heads, int *labelling) {
+static List _match_arm_label(Symbol head, Array heads, int *labelling) {
   if (!*labelling) return NULL;
-  Symbol head = emitter.match_pattern_head_symbol(pattern_ast);
   if (!head) {
     *labelling = 0;
     return %("default: ;");
@@ -775,13 +773,13 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
         body_ast = body;
         implicit_break = NULL;
       }
+    Var value = e.match_pattern_value(pattern_ast);
     List flat_tags = NULL;
-    Symbol flat_head =
-      e.match_pattern_flat_head(pattern_ast, binders, &flat_tags);
-    int static_pattern = e.match_pattern_is_static(pattern_ast);
+    Symbol flat_head = match_value_flat_head(value, binders, &flat_tags);
     List pattern = e._emit(pattern_ast);
     List body = e._emit(body_ast);
-    List label = _match_arm_label(e, pattern_ast, heads, &labelling);
+    List label =
+      _match_arm_label(match_value_head(value), heads, &labelling);
     if (label) values.insert(arms ? opening++ : values.len(), label);
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
@@ -793,6 +791,7 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
         $closing));
     }
     else {
+      int static_pattern = match_value_is_static(value);
       String site_name = static_pattern
                        ? e.fresh_name("match_site")
                        : NULL;

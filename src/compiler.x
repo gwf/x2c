@@ -2284,26 +2284,26 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   return <x2c-dyn>;
 }
 
-static int _match_pattern_value_is_static(Var value) {
+/** Reports whether a recovered pattern value graph is fully static. */
+int match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
   foreach (Var part, value.list())
-    if (!_match_pattern_value_is_static(part)) return 0;
+    if (!match_value_is_static(part)) return 0;
   return 1;
 }
 
 /** Reports whether a typed `Match` pattern has a fully static value graph. */
 int Compiler.match_pattern_is_static(Compiler compiler, List pattern) =>
-  _match_pattern_value_is_static(compiler.match_pattern_value(pattern));
+  match_value_is_static(compiler.match_pattern_value(pattern));
 
-/** Returns a typed `Match` pattern's fixed literal head symbol, or zero.
+/** Returns a recovered pattern value's fixed literal head symbol, or zero.
 
     A binder, guard, non-list value, or computed head has no fixed symbol.
     Other pattern elements may remain dynamic because a literal head alone
     constrains the first input element.
 */
-Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) {
-  Var value = compiler.match_pattern_value(pattern);
+Symbol match_value_head(Var value) {
   if (value is not <list>) return 0;
   Var head = car(value);
   if (head is not <symbol> || head == <x2c-dyn> ||
@@ -2311,6 +2311,10 @@ Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) {
     return 0;
   return head;
 }
+
+/** Returns a typed `Match` pattern's fixed literal head symbol, or zero. */
+Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) =>
+  match_value_head(compiler.match_pattern_value(pattern));
 
 /* A typed capture element is `(!is ?name type <tag>)` with a literal tag.
    The runtime matcher canonicalizes `varray` and `vmap`; those spellings
@@ -2327,17 +2331,16 @@ static Symbol _flat_capture_tag(Var element, Var binder) {
   return tag;
 }
 
-/** Returns the head of a flat Symbol-and-captures pattern, or zero.
+/** Returns the head of a flat Symbol-and-captures pattern value, or zero.
 
     Each element after the head is a unique named `?` binder or a typed
     capture of one. When `tags` is non-null, stores one entry per binder
     in order: the capture's tag Symbol, or integer zero when untyped.
 */
-Symbol Compiler.match_pattern_flat_head(
-  Compiler compiler, List pattern, List binders, List *tags) {
-  Symbol head = compiler.match_pattern_head_symbol(pattern);
+Symbol match_value_flat_head(Var value, List binders, List *tags) {
+  Symbol head = match_value_head(value);
   if (!head) return 0;
-  List elements = compiler.match_pattern_value(pattern).list().cdr();
+  List elements = value.list().cdr();
   Array typed = [];
   for (List cursor = binders; cursor && elements;
        cursor = cursor.cdr(), elements = elements.cdr()) {
@@ -2353,6 +2356,11 @@ Symbol Compiler.match_pattern_flat_head(
   else typed.free();
   return head;
 }
+
+/** Returns the head of a flat Symbol-and-captures pattern, or zero. */
+Symbol Compiler.match_pattern_flat_head(
+  Compiler compiler, List pattern, List binders, List *tags) =>
+  match_value_flat_head(compiler.match_pattern_value(pattern), binders, tags);
 
 /** Returns definite binders from a typed `Match` pattern AST.
 
