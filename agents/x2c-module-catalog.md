@@ -742,8 +742,8 @@ disjoint sets with union-find.
 
 Public functions:
 
-`DisjointSet.new`, `DisjointSet.free`, `DisjointSet.find`, `DisjointSet.union`,
-`DisjointSet.sizes`, `DisjointSet.num_components`
+`DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
+`DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
 
 ### [lib/lisp-machine.x](../lib/lisp-machine.x)
 
