@@ -1155,8 +1155,9 @@ static void _shallow_finish_declaration(Compiler c) {
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
     match (declaration)
-      case %(declare ?type (bindings (bind ?binding ?))):
-        _shallow_record_function_definition(c, type, binding);
+      case %(declare ? (bindings (bind ?binding ?))):
+        _shallow_record_function_definition(
+          c, declaration.type_from_ast(), binding);
     if (c._at_function_arrow()) {
       c.next();
       c.next();
@@ -1370,7 +1371,25 @@ static void _produce_declaration_rows(
   }
 }
 
-static List _select_declaration_rows(Compiler compiler, List rows) {
+/* A default yields to any declaration of its name except a bodyless,
+   non-static function prototype in the default's own file, which the
+   default then completes. */
+static int _declaration_default_taken(
+  Compiler compiler, String spelling, Array parts, Map definitions) {
+  List key = %($spelling);
+  Type declared = compiler.sym.get(key);
+  if (!declared) return 0;
+  if (!declared.is_function() || definitions.contains(spelling) ||
+      compiler.fn_defs.contains(spelling) ||
+      compiler.sym.file_statics().contains(%(function $spelling)))
+    return 1;
+  foreach (Var part, parts)
+    if (part is <map> && part.map().contains(key)) return 0;
+  return 1;
+}
+
+static List _select_declaration_rows(
+  Compiler compiler, List rows, Array parts, Map definitions) {
   Array selected = [];
   foreach (List row, rows) {
     match (row) {
@@ -1387,7 +1406,9 @@ static List _select_declaration_rows(Compiler compiler, List rows) {
                 case %(?(String literal)): spelling = literal;
                 case %("x2c.ident" ?(String literal)): spelling = literal;
               }
-              if (spelling && compiler.sym.get(%($spelling))) continue;
+              if (spelling && _declaration_default_taken(
+                    compiler, spelling, parts, definitions))
+                continue;
               syntax = %(function $return_type (bind $name $modifiers) $body);
             }
           selected.push(_bind_declaration_default(compiler, syntax));
@@ -1517,7 +1538,8 @@ Map Compiler.select_declaration_defaults(
   }
   for (size_t index = 0; index < sources.len(); index++) {
     (Map declarations, Var key, Var end, List rows) = sources[index];
-    List selected = _select_declaration_rows(shadow, rows);
+    List selected = _select_declaration_rows(
+      shadow, rows, parts, definitions);
     foreach (List row, selected)
       match (row)
         case %(declaration-forward ?child *): pending[child] = 1;
