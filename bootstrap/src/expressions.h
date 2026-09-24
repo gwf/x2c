@@ -28,6 +28,8 @@ List Compiler_parse_macro_expression_target(Compiler c);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 
+List Compiler_func_call_parts(Compiler compiler, Var content);
+
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
 
 Symbol Compiler_require_var_tag(Compiler compiler, Type target, Token origin);

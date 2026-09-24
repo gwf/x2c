@@ -253,7 +253,7 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
 
   }
   request -> sources = sources;
-  if(SourceView_is_changed(sources, source) &&(request -> live_symbols || request -> cpp_symbols || request -> system_headers)){
+  if(SourceView_is_changed(sources, source) &&(request -> live_symbols || request -> cpp_symbols)){
     fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
     exit(2);
   }
@@ -342,7 +342,7 @@ int editor_request(int argc, char * * argv){
   Context command = Context_open_isolated_named("editor request");
   ParsedUnit unit;
   int parsed = Frontend_open(frontend, source, & unit);
-  if((request -> live_symbols || request -> cpp_symbols || request -> system_headers) && _changed_dependency(unit.compiler, sources)){
+  if((request -> live_symbols || request -> cpp_symbols) && _changed_dependency(unit.compiler, sources)){
     fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
     ParsedUnit_close(&(unit));
     Context_close(command);

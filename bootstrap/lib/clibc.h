@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 int abs(int);
 
 long labs(long);
@@ -25,10 +24,6 @@ double atof(const char *);
 int strcmp(const char *, const char *);
 
 int strncmp(const char *, const char *, size_t);
-
-struct timespec;
-
-int timespec_get(struct timespec *, int);
 
 
 #endif /* __GUARD_0x6B758801__ */

@@ -407,7 +407,7 @@ Map Compiler_collect_symbols(Compiler, Map);
 
 Compiler Compiler_new_shared(Compiler);
 
-int Toolchain_preprocess(Toolchain, const char *, List, const char *, int, String *, String *, String *);
+int Toolchain_preprocess(Toolchain, const char *, List, const char *, String *, String *, String *);
 
 String int_str(int);
 
@@ -433,7 +433,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   String root = x2c_get_root();
   int use_prelude = ! request -> live_symbols;
   Map globs = NULL;
-  int use_cpp = request -> cpp_symbols || request -> live_symbols || request -> system_headers || SymbolSet_contains(cpp_dumps, request -> dump);
+  int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
   if(c -> script) Compiler_report_error(c, 306819428, _134, _first_preprocessor_token(c), _24);
   Compiler cppcompiler = Compiler_new_shared(c);
@@ -441,8 +441,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_25), NULL))) : NULL;
-  String imacros = request -> system_headers ? NULL : runtime;
-  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, request -> system_headers, & text, & errors, & dependency_text);
+  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, runtime, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
@@ -599,7 +598,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   struct CliRequest request = * frontend -> request;
   request.dump = 0;
   request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
-  request.system_headers = 0;
   struct Frontend session = * frontend;
   session.request = & request;
   frontend = & session;
