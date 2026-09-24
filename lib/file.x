@@ -572,6 +572,12 @@ String File.repr(File file) {
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
 
+/** Appends the readable pointer representation of `file` to `out`. */
+Buffer File.write_repr(File file, Buffer out) {
+  if (!file) return Var.write_pointer_repr(file, out);
+  return out.printf("<File:%p, fd:%d>", file, file.fileno());
+}
+
 /** Publishes the process's borrowed standard streams as `File` globals.
     The globals do not take ownership or arrange cleanup of the native streams.
 */

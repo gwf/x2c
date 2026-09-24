@@ -23,7 +23,9 @@ Translating a compile-time x2c function into Lisp.
 | [`Compiler.lower_repl`](#Compiler.lower_repl) | Lowers a REPL execution wrapper whose unresolved bindings name the session's persistent value table rather than program file-scope state. |
 | [`Compiler.lowered_meta_regions`](#Compiler.lowered_meta_regions) | Returns the region summary an earlier install of `fn` from the same file recorded with its lowering, or NULL when the process has none. |
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
+| [`Compiler.meta_type_layout`](#Compiler.meta_type_layout) | Returns the evaluator's native byte layout for `type`, derived from its canonical Type identity and Sym-owned member order. |
 | [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns literal code for a compile-time `value`, preserving `declared` when supplied. |
+| [`Sym.is_bool_type`](#Sym.is_bool_type) | Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. |
 
 ### `Compiler`
 
@@ -150,6 +152,17 @@ compile-time only, whose runtime form the unit does not emit.
 
 Source: `src/comptime.x:3051`
 
+<a id="Compiler.meta_type_layout"></a>
+#### Compiler.meta_type_layout
+
+`List Compiler.meta_type_layout(Compiler c, Type type)`
+
+Returns the evaluator's native byte layout for `type`, derived from its
+canonical Type identity and Sym-owned member order. Meta adoption remains
+a separate compiler decision and cache presence does not advertise it.
+
+Source: `src/comptime.x:3405`
+
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
 
@@ -162,6 +175,17 @@ literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
 Source: `src/comptime.x:3207`
+
+### `Sym`
+
+<a id="Sym.is_bool_type"></a>
+#### Sym.is_bool_type
+
+`int Sym.is_bool_type(Sym sym, Type type)`
+
+Reports whether `type` reaches C's boolean type, `bool` or `_Bool`.
+
+Source: `src/comptime.x:3294`
 
 ## Design notes
 

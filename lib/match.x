@@ -2662,8 +2662,9 @@ static MatchPlan _capture_site_publish(
   return site.plan;
 }
 
-/* Initialize fresh caller-owned storage without touching unused fixed arrays.
-   The caller must eventually dispose any materialization scratch. */
+/** Initializes fresh caller-owned storage without touching unused fixed
+    arrays. The caller must eventually dispose any materialization scratch.
+*/
 void MatchMachine.open(MatchMachine m) {
   memset(&m.program, 0, sizeof(MachineView));
   m.pc = 0;
@@ -2680,8 +2681,9 @@ void MatchMachine.open(MatchMachine m) {
   m.scratch_capacity = 0;
 }
 
-/* Free reusable materialization scratch. Finish active execution first;
-   this does not clear invocation state. */
+/** Frees reusable materialization scratch. Finish active execution first;
+    this does not clear invocation state.
+*/
 void MatchMachine.dispose(MatchMachine m) {
   if (m.scratch) Scope.free(m.scratch);
   m.scratch = NULL;

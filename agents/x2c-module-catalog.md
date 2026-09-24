@@ -121,28 +121,26 @@ Public functions:
 `match_value_is_static`, `Compiler.match_pattern_is_static`,
 `match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
-`Compiler.init_statements`, `Compiler.begin_semantic_transaction`,
-`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.local_macros_changed`,
-`SymTxn.rollback`, `Sym.reset`, `Sym.global_symbols`, `Sym.base_symbols`,
-`Sym.file_statics`, `Sym.mark_static`, `Sym.current_symbols`,
-`Sym.visible_symbols`, `Sym.current_binding`, `Sym.enumerator_owner`,
-`Sym.declare_enumerator`, `Sym.define_macro`, `Sym.has_local_macros`,
-`Sym.scope_count`, `Sym.at_file_scope`, `Sym.lookup_macro`, `Sym.set`,
-`Sym.seed_var_tags`, `Sym.define`, `Sym.define_global`, `Sym.get_exact`,
-`Sym.get`, `Sym.lookup`, `Sym.reference`, `Sym.resolve_global`,
-`Sym.reference_global`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
-`Sym.introduce`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_providers`,
-`Compiler.imported_spelling`, `Sym.declare`, `Sym.bind_identity`,
-`Sym.resolve_key`, `Sym.next_typedef`, `Sym.resolve_numeric_type`,
-`Sym.local_type`, `Compiler.aggregate_name`, `Sym.normalize_declared_type`,
-`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
-`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_bool_type`,
+`Compiler.begin_semantic_transaction`, `SymTxn.commit`,
+`SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
+`Sym.reset`, `Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
+`Sym.mark_static`, `Sym.current_symbols`, `Sym.visible_symbols`,
+`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.declare_enumerator`,
+`Sym.define_macro`, `Sym.has_local_macros`, `Sym.scope_count`,
+`Sym.at_file_scope`, `Sym.lookup_macro`, `Sym.set`, `Sym.seed_var_tags`,
+`Sym.define`, `Sym.define_global`, `Sym.get_exact`, `Sym.get`, `Sym.lookup`,
+`Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`,
+`Sym.binding_is_local`, `Sym.binding_is_local_before`, `Sym.introduce`,
+`Compiler.package_spelling`, `Compiler.register_package_alias`,
+`Compiler.register_package_member`, `Compiler.package_member_spelling`,
+`Compiler.imported_providers`, `Compiler.imported_spelling`, `Sym.declare`,
+`Sym.bind_identity`, `Sym.resolve_key`, `Sym.next_typedef`,
+`Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
+`Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
 `Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Compiler.meta_type_layout`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`
+`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
+`Compiler.gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/comptime.x](../src/comptime.x)
 
@@ -155,7 +153,7 @@ Public functions:
 `Compiler.install_comptime`, `Compiler.lower_reached_meta`,
 `Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
 `Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
-`Compiler.check_meta_call`
+`Compiler.check_meta_call`, `Sym.is_bool_type`, `Compiler.meta_type_layout`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -240,7 +238,7 @@ generate C headers and source files.
 
 Public functions:
 
-`generate_code`
+`generate_code`, `Compiler.init_statements`
 
 ### [src/install.x](../src/install.x)
 
@@ -880,9 +878,8 @@ Public functions:
 
 Public functions:
 
-`MatchMachine.open`, `MatchMachine.begin`, `MatchMachine.step`,
-`MatchMachine.run`, `MatchMachine.materialize_span`, `MatchMachine.finish`,
-`MatchMachine.clean`, `MatchMachine.dispose`
+`MatchMachine.begin`, `MatchMachine.step`, `MatchMachine.run`,
+`MatchMachine.materialize_span`, `MatchMachine.finish`, `MatchMachine.clean`
 
 ### [lib/match-recursive.x](../lib/match-recursive.x)
 
@@ -921,7 +918,8 @@ Public functions:
 `MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
 `MatchCache.search_replace`, `x2c_match_thread_release`,
 `MatchCache.context_open`, `MatchCache.context_close`,
-`MatchCache.flush_default`, `x2c_match_initialize`
+`MatchCache.flush_default`, `x2c_match_initialize`, `MatchMachine.open`,
+`MatchMachine.dispose`
 
 ### [lib/meta.x](../lib/meta.x)
 
