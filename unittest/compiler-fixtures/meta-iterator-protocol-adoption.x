@@ -12,9 +12,28 @@ meta int protocol_adoption_probe(int offset) {
   return first.int() + second.int() + third.int() + offset;
 }
 
+/* A boxed <iter> unboxes to the same iterator. */
+meta int iter_round_trip(int offset) {
+  struct Iter storage;
+  Var boxed = Var.iter(%(1 2 3), &storage);
+  Iter again = boxed.as_iter();
+  return again.sum().int() + offset;
+}
+
+/* The fallback iterator is empty, whether the caller or the compiler
+   supplies its storage. */
+meta int fallback_counts(int offset) {
+  struct Iter storage;
+  Var boxed = %(4 5);
+  Iter given = Var.fallback_iter(boxed, &storage);
+  return given.count() * 10 + boxed.fallback_iter().count() + offset;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   printf("%d %d\n", $protocol_adoption_probe(0),
          protocol_adoption_probe(argc - 1));
+  printf("%d %d\n", $iter_round_trip(0), iter_round_trip(argc - 1));
+  printf("%d %d\n", $fallback_counts(0), fallback_counts(argc - 1));
   return 0;
 }

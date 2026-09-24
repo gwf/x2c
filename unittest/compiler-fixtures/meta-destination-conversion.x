@@ -1,4 +1,5 @@
 #include "x2c.x"
+#include "autodiff.x"
 
 typedef unsigned char Byte;
 
@@ -39,6 +40,20 @@ meta int composed_hash(String value) => value.hash() != 0;
 meta int constant_string_hash(void) =>
   "abc".hash() == ("a" + "bc").hash();
 
+/* No meta producer makes a File yet, so only the run-time call exercises
+   the round trip; the body still installs as a meta function. */
+meta int file_round_trip(Var boxed) {
+  Var again = boxed.file();
+  return again == boxed;
+}
+
+/* A boxed <adnode> unboxes to the same node. */
+meta int adnode_round_trip(int n) {
+  struct AdNode node = {.value = 2.5};
+  Var boxed = AdNode.var(&node);
+  return (int) (boxed.adnode().value * 2) + n;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   int one = argc;
@@ -63,5 +78,8 @@ int main(int argc, char **argv) {
   printf("hash-constant-string %d %d %d\n",
     $constant_string_hash(), constant_string_hash(),
     "abc".hash() == ("a" + "bc").hash());
+  printf("file %d\n", file_round_trip(File.var(stdout)));
+  printf("adnode %d %d %d\n",
+    $adnode_round_trip(0), adnode_round_trip(0), adnode_round_trip(one - 1));
   return 0;
 }

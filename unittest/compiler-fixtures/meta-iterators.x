@@ -81,10 +81,20 @@ meta int sequences(int bias) {
     values.iter().sum() + boxed.iter().sum() + total + bias;
 }
 
+/* Split cursors from String.lines, words, and splits walk in meta code. */
+meta int split_walks(int bias) {
+  int total = 0;
+  foreach (String line, "a\nbc".lines()) total += line.len();
+  foreach (String word, " x  yz ".words()) total += 10 * word.len();
+  foreach (String field, "p,,q".splits(",")) total += 100;
+  return total + bias;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   printf("%s\n%d %d %d %d %d\n%d %d %d\n%d %d\n", mapped(10).str(),
     keys_valid(), independent(), lazy(), live_map(), x2c_truth(), folds(),
     void_consumers(), found(), $sequences(0), sequences(argc - 1));
+  printf("%d %d\n", $split_walks(0), split_walks(argc - 1));
   return 0;
 }
