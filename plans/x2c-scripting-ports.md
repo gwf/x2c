@@ -213,7 +213,6 @@ by hand today; the module is the first thing the larger probes will need.
 | `tools/release-candidate.py` | A real x2c candidate with no known library gap. Plan it as a release-safety delivery with its offline fake-`gh` tests and immutable-byte checks, not as routine cleanup. |
 | `tools/gen-lisp-init.py` | Keep in Python for now. It is a small bootstrap generator invoked during bootstrap refresh; moving it behind script compilation adds bootstrap coupling without meaningful source deletion. |
 | `tools/performance-snapshot.py` | Keep in Python until clock/date, host locking, process-group timeout and streamed-output behavior have ordinary x2c owners. |
-| `tools/meta-api-coverage.py`, `meta_api_disposition.py` | Join the compiler-backed source-analysis rewrite; do not translate their regular-expression parser. |
 | `tools/repl-spike/check.py`, `retention.py` | Keep as host-side PTY and measurement drivers. The x2c programs they exercise are already x2c source. |
 
 ## Rewrite on the compiler instead of translating

@@ -1,6 +1,7 @@
 # Meta authoring, literal results, and API coverage
 
-> Status: active
+> Status: active. The API coverage inventory (report, tool, and disposition
+> table) was retired and deleted on 2026-09-23.
 > Gary approved execution and all five recommended decisions on 2026-09-20.
 > The initial implementation shipped in 8ebb323d. Value aliases and further
 > AD source templates shipped through 8c2a8054; x2c-first examples followed in
@@ -48,7 +49,6 @@ not an additional gate for this effort.
 
 ## Planning evidence (historical)
 
-For current operation coverage, use the [API report](../docs/src/guide/meta-api-coverage.md).
 The counts and defects below record the pre-implementation baseline.
 
 Baseline: development commit `f3aa43a5`, with a fresh safe bootstrap rebuild.

@@ -805,16 +805,8 @@ A method uses its ordinary resolved call, so `text.len()` and
 `String.len(text)` reach the same operation. Chaining adds no separate
 restriction: every call in the chain must be available.
 
-The [complete API coverage report](meta-api-coverage.md) lists every exported
-operation on String, List, Array, Map, Symbol and Var, including generated
-methods and advanced internals. It records signatures, binding locations,
-verified examples, reproduced failures and untested operations separately.
-The optional inventory tool reads every standard compiler session layer;
-searching only one binding file misses operations such as `List.car`,
-`List.cdr` and `Var.cons`.
-
-A recent batch added 19 bindings; it did not complete the API surface.
-The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
+The rest of this section lists the library operations meta functions can
+call. The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
 reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 `str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
 `Var.kind` reports a value's kind. These calls use the existing value
