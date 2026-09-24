@@ -4,6 +4,8 @@
 > Deliveries 1-7 were implemented and validated on 2026-09-21. Delivery 8,
 > the pure-module step, was implemented on 2026-09-24 through `meta`
 > prototypes in json.x, diff.x and path.x that `lib/lisp.x` includes.
+> Gary accepted that Json, Diff and Path become visible to x2c code that
+> includes `x2c.x`.
 
 ## Delivered
 

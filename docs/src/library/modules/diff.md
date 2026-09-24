@@ -25,7 +25,7 @@ each line's ending removed. Two equal texts give only `same` forms.
 Past 2,000 edits the differing middle is one run of deletions followed
 by one run of insertions.
 
-Source: `lib/diff.x:117`
+Source: `lib/diff.x:121`
 
 <a id="Diff.unified"></a>
 #### Diff.unified
@@ -36,7 +36,7 @@ Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:137`
+Source: `lib/diff.x:141`
 
 ## Public types
 
