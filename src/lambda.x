@@ -398,7 +398,7 @@ static List _func_argument_locals(
   List value_helper = _adapter_helper(
     compiler, "x2c_func_value_argument", &value_type);
   List reference_helper = _adapter_helper(
-      compiler, "x2c_func_declared_reference_argument", &reference_type);
+    compiler, "x2c_func_declared_reference_argument", &reference_type);
   Array locals = [];
   int index = 0;
   foreach (Type type, types) {
