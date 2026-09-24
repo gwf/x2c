@@ -21,7 +21,18 @@
 */
 typedef struct Split *Split;
 
-protocol Iter(Split);
+meta protocol Iter(Split);
+
+/** Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
+    into compile-time code or a `Var` container. The box does not own the
+    descriptor, which stays live only as long as its `Scope`.
+*/
+Var Split.var(Split split) => Var.new(<split>, split);
+
+/** Unboxes a descriptor from a `Var` produced by `Split.var`. */
+Split Var.split(Var value) => (Split) value.pointer();
+
+protocol Var(Split);
 
 #pragma private
 
@@ -115,6 +126,9 @@ meta List String.split(String str, String sep);
 List String.split(String str, String sep) => str.split_n(sep, -1);
 
 meta List String.split_lines(String str, int keep_ends);
+meta Split String.words(String str);
+meta Split String.lines(String str);
+meta Split String.splits(String str, String sep);
 
 /** Splits `str` into a `List` of lines.
     LF, CR, and CRLF all end a line, and CRLF counts as one ending. A

@@ -1045,8 +1045,9 @@ None. This module has no non-static function definitions.
 
 Public functions:
 
-`String.split_n`, `String.split`, `String.split_lines`, `String.words`,
-`String.lines`, `String.splits`, `Split.try_next`, `Split.iter`
+`Split.var`, `Var.split`, `String.split_n`, `String.split`,
+`String.split_lines`, `String.words`, `String.lines`, `String.splits`,
+`Split.try_next`, `Split.iter`
 
 ### [lib/static-init.x](../lib/static-init.x)
 

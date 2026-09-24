@@ -376,7 +376,7 @@ int Var.fallback_compare(Var a, Var b);
 Var Var.convert(Var value, Symbol target);
 int Var.truth(Var value);
 int Var.fallback_truth(Var value);
-Iter Var.fallback_iter(Var value, Iter dest);
+meta Iter Var.fallback_iter(Var value, Iter dest);
 int Var.contains(Var value, Var needle);
 Var Var.add(Var lhs, Var rhs);
 Var Var.sub(Var lhs, Var rhs);
@@ -622,6 +622,9 @@ $var.tag.unbox(Iter, as_iter, <iter>);
 $var.tag.unbox(List, list, <list>);
 $var.tag.unbox(Map, map, <map>);
 $var.tag.unbox(String, string, <string>);
+
+meta Iter Var.as_iter(Var value);
+meta File Var.file(Var value);
 
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.

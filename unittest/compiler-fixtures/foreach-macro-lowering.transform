@@ -1515,7 +1515,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                37 
+                                                                                39 
                                                                                 
                                                                                 "value_total"))) 
                                                                              (
@@ -1547,7 +1547,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                49 
+                                                                                51 
                                                                                 
                                                                                 "typed_total"))) 
                                                                              (
@@ -1572,7 +1572,7 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              68 
+                                                                              70 
                                                                               
                                                                               "key_bytes"))) 
                                                                            (expr 
@@ -1590,7 +1590,7 @@
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            69 
+                                                                            71 
                                                                             
                                                                             "destructured_total"))) 
                                                                          (expr 
@@ -1606,7 +1606,7 @@
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          82 
+                                                                          84 
                                                                           "converted_total"))) 
                                                                        (expr (
                                                                               int) 
@@ -1618,7 +1618,7 @@
                                                                      (expr (int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        101 
+                                                                        103 
                                                                         "skipped"))) 
                                                                      (expr (int) 
                                                                       (literal 
@@ -1628,7 +1628,7 @@
                                                                    (expr (int) 
                                                                     (ident 
                                                                      (binding 
-                                                                      102 
+                                                                      104 
                                                                       "stopped"))) 
                                                                    (expr (int) 
                                                                     (literal 
