@@ -59,8 +59,8 @@ Give agency only to actors: a type, table, or check does not "name", "know",
 or "refuse" anything. Avoid negative-then-reversal constructions, "rather
 than" and ", not X" closers, and the words "deliberately", "honest", and "on
 purpose".
-[`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) reports
-common stock phrases in a source file as prohibited prose candidates.
+[`x2c-lint`](../tools/x2c-lint/x2c-lint.x) reports common stock phrases in
+comments and literals as `prohibited-prose` candidates.
 
 Write the language name `x2c`: lowercase `x`, digit `2`, lowercase `c`.
 Speech-to-text may replace it with the word it sounds like; correct that
@@ -1325,10 +1325,10 @@ native handle whose lifetime belongs to its library. See
 
 ## Review checklist
 
-Run [`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) for
-width, whitespace, wrapping, braces, deferred initialization, forward
-declarations, negated `is` tests, narration, stock prose, and receiver
-subject names whose length wraps lines. Then check what it cannot:
+Run [`x2c-lint --all`](../tools/x2c-lint/x2c-lint.x) for width,
+whitespace, wrapping, braces, deferred initialization, forward declarations,
+negated `is` tests, narration, stock prose, and receiver subject names whose
+length wraps lines. Then check what it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?

@@ -26,19 +26,24 @@ unclear. Structural redesign belongs in `simplify-x2c-source` when authorized.
 Optional discovery commands, from the repository root:
 
 ```sh
-agents/skills/clean-x2c-source/scripts/audit-source.sh path/to/file.x
+make -C tools/x2c-lint
+builds/0/lint/x2c-lint --all path/to/file.x
 python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
   --static-match-captures --details path/to/file.x
 ```
 
-The survey masks comments and literals and balances delimiters; it does not
-parse or compile. Mechanical violations include whitespace, ordinary forward
-declarations, reliable wrapping errors, immediate declaration/assignment
-pairs, one-statement braces, and receiver methods where renaming the subject
-parameter to the first letter of its type would save wrapped lines. Width
-exceptions, runtime declarations, horizontal compaction, repeated accessors, and adjacent
-static output require source review. Method-match bindings read through `assoc` are candidates for
-source `match`; keep method matching when bindings escape the local branch.
+`x2c-lint` reads the compiler's tokens and its parse of the unit; `--rules`
+lists each rule's code, family, kind, and style-guide section. Language rules
+run by default; `--all` adds the repository style rules, and `--rule CODE`
+selects one. Violations include whitespace, width, forward declarations,
+reliable wrapping errors, immediate declaration/assignment pairs,
+one-statement braces, negated `is` tests, and receiver methods where renaming
+the subject parameter to the first letter of its type would save wrapped
+lines. Candidates need source review: width exceptions, runtime
+declarations, horizontal compaction, short control flow, repeated accessors,
+adjacent static output, narration, rulers, and stock prose. Method-match
+bindings read through `assoc` are candidates for source `match`; keep method
+matching when bindings escape the local branch.
 
 ## Revise and review
 
@@ -67,11 +72,7 @@ when the edits can affect behavior, then follow root publication validation
 and delivery instructions. Refresh affected generated files only through
 repository targets and inspect their changes.
 
-If changing the audit helper itself, run:
-
-```sh
-python3 agents/skills/clean-x2c-source/scripts/test_source_style.py
-```
+If changing the linter itself, run `make -C tools/x2c-lint test`.
 
 The result is clearer source with preserved behavior and technical knowledge.
 Report meaningful changes and verification; scanner counts are supporting

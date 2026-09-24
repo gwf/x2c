@@ -3457,14 +3457,15 @@ static void _record_object_definitions(Compiler c, List bindings) {
 
 /* A definition remembers the token range of the top-level form that
    produced it, and whether that form is private, for the definition walk.
-   A typedef may repeat its name, so each statement keys its own range. */
+   A typedef or declaration may repeat its name, so each statement keys its
+   own range. */
 static void _record_definition_span(
   Compiler c, List node, int start, int end) {
   List key = NULL;
   match (node) {
     case %(function ? (bind ?binding ?) ?): key = binding;
     case %(falias (declare ? (bindings (bind ?binding ?))) ?): key = binding;
-    case %(typedef *): key = node;
+    case %((!or typedef declare) *): key = node;
   }
   if (key)
     c.semantic_binding_facts()[%(definition-span $key)] =

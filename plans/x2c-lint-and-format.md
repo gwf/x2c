@@ -1,7 +1,7 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0, 1, and 2
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 3
 > are implemented; see [Progress](#progress).
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
@@ -353,6 +353,56 @@ are gone, because pages and compiler now read the same walk. Each
 generator's check went from about 3.1-3.6 s on one core to about 2 s, using
 about 15 s of processor time across cores. The Pages workflow builds the
 compiler, because the landing page runs `tools/repo-metrics`.
+
+**Phase 3, 2026-09-24.** `tools/x2c-lint` is an indentation-syntax tool of
+1,017 lines that links `builds/0/libx2c-dev.a` and the embedded identity
+from `make commands`; `make -C tools/x2c-lint test` checks 49 expected lines
+over its fixtures. It has 26 rules in one table, printed by `--rules`: the
+language rules (`forward-declaration`, `same-file-forward-declaration`,
+`negated-is`) run by default, and `--all` or `--rule CODE` selects the
+style rules. Token rules read a fresh `Tokenizer.scan` of the file with the
+indentation syntax's zero-width tokens dropped; the prototype and subject
+rules read the parsed unit and `Compiler.definition_rows`. The compiler
+change is one line: `_record_definition_span` also keys each top-level
+`declare` node, so a prototype has a span. `source_style.py`, its test, and
+`audit-source.sh` are deleted (907 lines). Not carried over: the file
+metrics `audit-source.sh` printed (lines, bytes, includes, comment-start
+and line-comment counts, maximum width), which `wc` and the per-line rules
+replace.
+
+Parity on `src/` and `lib/` (94 units), as file, line, and category sets
+with the old names:
+
+| Category | Old | New | Old only | New only |
+| --- | --- | --- | --- | --- |
+| forward (src) | 26 | 26 | 0 | 0 |
+| same-file forward | 6 | 103 | 0 | 97 |
+| runtime forward | 271 | 157 | 114 | 0 |
+| wrapped opening line | 164 | 161 | 18 | 15 |
+| continuation indent | 11 | 22 | 0 | 11 |
+| standalone closer | 9 | 16 | 0 | 7 |
+| horizontal form | 145 | 159 | 0 | 14 |
+| short control flow | 124 | 151 | 0 | 27 |
+| subject parameter name | 11 | 12 | 0 | 1 |
+| negated `is` | 5 | 3 | 2 | 0 |
+| decorated ruler | 7 (count) | 7 | 0 | 0 |
+| all other categories | 209 | 209 | 0 | 0 |
+
+Every difference is explained. Of the 114 runtime prototypes, 97 declare
+functions the unit defines through a Unit macro, which the regex could not
+see, and 17 are `$x2c.foreign.alias` declarations, which are not
+prototypes. The 18 wrapped lines were `c.expect(<(>)`, where the regex read
+the Symbol as a parenthesis. The new wrapping findings are calls on
+receiver chains such as `a.b.c(` and `x().y(`, which the old name scan
+skipped, code inside `${...}` in quoted forms, and signatures after a
+`<(>` that misaligned the old parenthesis pairs. The 27 short control
+flows are `foreach` headers. The subject finding is `Lisp.eval_file`, also
+behind a misaligned pair. The 2 negated `is` findings were `%!(x) => x is`
+lambdas. Rulers were only counted before and are now listed. On the
+fixtures, the old scripts and the tool agree on every category except the
+same two false-positive kinds. The tool takes 5.4 s over the corpus,
+parsing every unit, against 10.6 s for the scripts; a cold build takes
+1.9 s after `make commands`.
 
 ## Process ceiling
 
