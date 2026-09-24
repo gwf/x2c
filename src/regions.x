@@ -176,6 +176,33 @@ static Map runtime = %{
     (summary 0 ((0 (param 3)) (1 (param 3)) (2 (param 3)) (3 return)))
 };
 
+/* Runtime operations with a pooled result that the pass does not read:
+   the table has no row for most, and the row for Array_list_free is its
+   argument effect. A copy such as String_concat keeps none of its
+   arguments, and Atom_intern may return a value that already exists. */
+static Map pooled_results = %{
+  "Array_list_free": 1, "Atom_intern": 1, "List_append": 1,
+  "String_concat": 1,   "String_join": 1
+};
+
+/** The owner of the storage the runtime operation `name` returns: `<scope>`
+    for the active Scope, `<slot>` for the Scope its first argument names,
+    `<pool>` for the canonical-value pool, or 0 when nothing is known. What
+    the operation does to its arguments is a separate fact. */
+Symbol Compiler.region_result(String name) {
+  match (runtime[name]) {
+    case %(alloc slot): return <slot>;
+    case %(alloc pool): return <pool>;
+    case %(alloc *): return <scope>;
+    case %(pool): return <pool>;
+  }
+  return name in pooled_results ? <pool> : 0;
+}
+
+/** Reports whether the runtime operation `name` returns its argument's
+    storage unchanged, as a `Var` box or its unboxing does. */
+int Compiler.region_wrapper(String name) => runtime[name] == %(wrap);
+
 // canonical forms the pass reads
 
 /* The storage an expression names, without the wrappers that keep it. */
@@ -348,7 +375,7 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
   }
   List arguments = NULL;
   String callee = _callee_of(inner, arguments);
-  if (!callee || runtime[callee] != %(wrap)) return NULL;
+  if (!callee || !Compiler.region_wrapper(callee)) return NULL;
   return _fact_of(w, arguments.car(), named);
 }
 

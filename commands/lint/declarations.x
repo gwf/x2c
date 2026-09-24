@@ -260,11 +260,77 @@ static void _subject(Lint l, int start, int body, int end):
         %"name the $owner subject $name to save $saved line$plural " +
         %"(found $old)")
 
+/* The bindings the functions of `ast` declare as plain values: locals and
+   parameters without pointer or array modifiers, which callers own. */
+static Map _plain_locals(List ast):
+  Map locals = {}
+  foreach List node in ast:
+    match node:
+      case %(function *):
+        foreach List hit in node.search(%(bind (binding ?id ?) ())):
+          locals[hit.assoc(<?id>)] = 1
+  return locals
+
+/* Whether the body uses the pointer parameter `p` only through `*p` and
+   `p->field`, so it never tests, stores, indexes, or passes the address. */
+static int _alias_uses(List body, Var p):
+  int uses = body.search(%(ident (binding $p ?))).len()
+  int through =
+    body.search(%(op (!quote *) (expr ? (ident (binding $p ?))))).len() +
+    body.search(%(op -> (expr ? (ident (binding $p ?))) ?)).len()
+  return uses && uses == through
+
+/* Whether argument `index` of every call is `&v` for a caller's plain
+   variable `v`. */
+static int _alias_arguments(List calls, int index, Map locals):
+  foreach List call in calls:
+    List args = call.assoc(<*args>)
+    Var argument = args[index]
+    match argument:
+      case %(expr ? (op & (expr ? (ident (binding ?v ?))))):
+        if !(v in locals): return 0
+      default:
+        return 0
+  return 1
+
+/* Reports a `T *p` parameter of a static function that `&` of one caller
+   variable always supplies and that the body only dereferences. Buffers
+   (`char` and `void` pointees), functions used other than by a direct call,
+   and functions other units can call keep their pointer spelling. */
+static void _reference_parameters(Lint l, Compiler c, List ast):
+  Map locals = _plain_locals(ast), lines = {}
+  foreach List row in c.definition_rows(ast):
+    match row:
+      case %(function ?name ? ? ? ?line *): lines[name] = line
+  foreach List node in ast:
+    match node:
+      case %(function ?modifiers
+             (bind (binding ?fn ?function) ((fnmod (params *params))))
+             ?body):
+        if !(<static> in modifiers) || !(function in lines): continue
+        List calls = ast.search(%(call (expr ? (ident (binding $fn ?)))
+                                        (args *args)))
+        if !calls || ast.search(%(ident (binding $fn ?))).len() != calls.len():
+          continue
+        int index = 0
+        foreach List param in params:
+          match param:
+            case %(param ?type (bind (binding ?p ?name) (*))):
+              if !(<char> in type) && !(<void> in type) &&
+                 _alias_uses(body, p) &&
+                 _alias_arguments(calls, index, locals):
+                l.add("reference-parameter", lines[function].int(),
+                      %"`$name` aliases one caller variable; declare it " +
+                      %"as a `&` reference parameter")
+          index++
+
 /** Runs the rules that read the compiler's parse of the unit: `ast` and
     the facts `c` recorded while parsing it.
 */
 void Lint.declaration_rules(Lint l, Compiler c, List ast):
   _prototypes(l, c, ast)
+  if l.selected.contains("reference-parameter"):
+    _reference_parameters(l, c, ast)
   if l.layout || !l.selected.contains("subject-parameter-name"): return
   foreach List row in c.definition_rows(ast):
     match row:

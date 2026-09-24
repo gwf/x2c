@@ -1159,6 +1159,24 @@ data](../docs/src/guide/idioms.md#separate-absence-from-data). See the root
 [AGENTS.md](../AGENTS.md) for the Error causes that never return and the
 checks that stay.
 
+### Required aliases
+
+Declare a parameter `T &name` when every caller passes one of its own `T`
+variables and the function only reads and writes through it for the call:
+
+```x2c
+static void _advance(int &count) {
+  count++;
+}
+```
+
+Keep `T *` for a nullable or optional output, an address the function
+retains, indexed storage, a buffer, a callback or C API signature, and a
+published signature whose callers would have to change. `x2c lint` reports
+static functions whose pointer parameters qualify as `reference-parameter`
+candidates. See
+[Reference parameters](../docs/src/reference/language.md#reference-parameters).
+
 ### Closed identities
 
 Use Symbol literals such as `<abort>` for closed control vocabularies. Keep a

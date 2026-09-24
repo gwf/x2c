@@ -33,6 +33,8 @@ run() {
   (cd "$work" && run --rule non-ascii ascii.x)
   echo "# comment rules"
   run --all "$tests/src/comments.x"
+  echo "# reference parameters"
+  run --rule reference-parameter "$tests/src/references.x"
   echo "# idiom fixes proven by the generated C"
   cp "$tests/src/idioms.x" "$work/idioms.x"
   (cd "$work" && run --all --fix idioms.x)

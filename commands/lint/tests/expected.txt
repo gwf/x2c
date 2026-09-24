@@ -66,6 +66,10 @@ commands/lint/tests/src/comments.x:42: violation doc-on-static: doc comment on a
 commands/lint/tests/src/comments.x:45: candidate repeated-prose: repeats prose elsewhere in the file
 commands/lint/tests/src/comments.x:48: candidate repeated-prose: repeats prose elsewhere in the file
 exit 0
+# reference parameters
+commands/lint/tests/src/references.x:10: candidate reference-parameter: `count` aliases one caller variable; declare it as a `&` reference parameter
+commands/lint/tests/src/references.x:10: candidate reference-parameter: `pair` aliases one caller variable; declare it as a `&` reference parameter
+exit 0
 # idiom fixes proven by the generated C
 idioms.x:10: candidate member-arrow: reach the member with `.`
 idioms.x:14: candidate contains-in: write the membership test with `in`
