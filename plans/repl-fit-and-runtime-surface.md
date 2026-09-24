@@ -112,12 +112,12 @@ Gary accepted all four recommendations below on 2026-09-24.
 
 ### Direction
 
-The REPL is intended to become its own program, built the way
-`tools/x2c-lint` is being built: a separate executable that links the
-compiler objects, invoked through the `x2c` command line (`x2c repl`).
-Not every piece is in place yet, so current work keeps the REPL inside the
-compiler and integrates cleanly there; nothing here should make that
-separation harder.
+The REPL is now its own program. It moved out of the compiler into
+`commands/repl` in `3eff555c` and runs through `x2c repl`; see
+[external commands](external-commands.md). The Json, Diff, and Path
+bindings above landed before that move and are served through the
+compiler objects the command links. Later REPL work belongs in
+`commands/repl`.
 
 ## Validation
 
