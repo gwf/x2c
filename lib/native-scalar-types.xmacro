@@ -86,8 +86,10 @@ $(defun native.scalar.access-entry (entry)
       ,(x2c.expr.ident
         (x2c.ident (native.scalar.access-name (car entry)))))))))
 
-/* `native_scalar_access`'s lookup: each row's type to its access record,
+/* `native_scalar_access`'s lookup, in sorted order so emission does not
+   depend on hash layout: each row's type to its access record,
    which the row's `$native.scalar.access` invocation defines first. */
 macro Entry $native.scalar.access.entries() {
-  $(map native.scalar.access-entry (Map.list (native_scalar_types)))...
+  $(map native.scalar.access-entry
+        (List.sort (Map.list (native_scalar_types))))...
 }
