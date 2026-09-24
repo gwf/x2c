@@ -1124,3 +1124,11 @@ void generate_code(Compiler c, List ast, String dir) {
       %("file: ${failure.assoc(<path>)}" "reason: $reason"));
   }
 }
+
+/** Returns the statements queued for `phase`, in the order they were added. */
+List Compiler.init_statements(Compiler compiler, Symbol phase) {
+  Array selected = [];
+  foreach (List entry, compiler.inits)
+    if (entry.car() == phase) selected.push(entry.cadr());
+  return selected.list_free();
+}

@@ -332,11 +332,6 @@ inline int File.ungetc(File file, int c) => ungetc(c, file);
 inline size_t File.read(File file, void *ptr, size_t size, size_t nitems) =>
   fread(ptr, size, nitems, file);
 
-/** Writes up to `nitems` elements and returns the number written. */
-inline size_t File.write(
-  File file, const void *ptr, size_t size, size_t nitems) =>
-    fwrite(ptr, size, nitems, file);
-
 /** Installs caller-supplied buffering, or disables buffering for a null `buf`.
     A nonnull buffer is borrowed until the stream closes or buffering changes.
 */
@@ -571,12 +566,6 @@ String File.repr(File file) {
     pointer representation without reading.
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
-
-/** Appends the readable pointer representation of `file` to `out`. */
-Buffer File.write_repr(File file, Buffer out) {
-  if (!file) return Var.write_pointer_repr(file, out);
-  return out.printf("<File:%p, fd:%d>", file, file.fileno());
-}
 
 /** Publishes the process's borrowed standard streams as `File` globals.
     The globals do not take ownership or arrange cleanup of the native streams.

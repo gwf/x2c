@@ -39,6 +39,7 @@ protocol Cleanup(Buffer);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "file.x"
 
 static void _recompute_line_state(Buffer buf) {
   size_t length = buf.content.length;
@@ -352,3 +353,14 @@ int Buffer.truth(Buffer b) => (void *) b != NULL && b.content.length != 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Buffer.cleanup(Buffer value) { value.free(); }
+
+/** Writes up to `nitems` elements and returns the number written. */
+inline size_t File.write(
+  File file, const void *ptr, size_t size, size_t nitems) =>
+    fwrite(ptr, size, nitems, file);
+
+/** Appends the readable pointer representation of `file` to `out`. */
+Buffer File.write_repr(File file, Buffer out) {
+  if (!file) return Var.write_pointer_repr(file, out);
+  return out.printf("<File:%p, fd:%d>", file, file.fileno());
+}
