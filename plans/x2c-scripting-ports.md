@@ -1,9 +1,9 @@
 # Porting the repository's tooling to x2c scripts
 
-> Status: active - refreshed against dev at `28c5336c` on 2026-09-22.
-> The extensionless tool rename, the llms.txt generator port and the
-> documentation sample check ports are delivered; `tools/check-docs.py` is
-> next, and later release, gate and compiler-backed ports remain separately
+> Status: active - refreshed against dev at `1aaf9479` on 2026-09-24.
+> The extensionless tool rename, the llms.txt generator port, the
+> documentation sample check ports and the `tools/check-docs` port are
+> delivered; later release, gate and compiler-backed ports remain separately
 > sequenced.
 > Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
 > scripting primitives; this plan decides where the remaining effort goes.
@@ -120,11 +120,15 @@ Neither version enforces a per-sample run time now; the Python version's
 30-second limit ended the whole check with a traceback, and `Job` has no
 timeout.
 
-`tools/check-docs.py` follows this tranche rather than joining it. Its runtime
-needs are now available, but it owns part of `doc-check`, invokes the catalog
-and API generators, and audits repository-wide paths. Porting it separately
-keeps a failed gate migration distinguishable from sample-runner or generated
-output differences.
+### 3. Port the documentation audit - delivered
+
+`tools/check-docs` replaces `tools/check-docs.py` in the same place in
+`make doc-check`, with the same checks, messages and exit status. It still
+invokes the Python catalog and API generators in `--check` mode, now
+concurrently. On the current tree, on a missing `builds/0`, and on broken
+copies covering every check, both versions matched in status, stdout and
+stderr; only the error order of the flag and workflow checks differed,
+because Python iterated sets there.
 
 ## Ruling on gate tooling
 
@@ -195,7 +199,6 @@ by hand today; the module is the first thing the larger probes will need.
 | Tool | Lines | Needs |
 | --- | --- | --- |
 | `tools/gen-module-catalog.py` | 134 | wrap and the compiler-backed source rewrite |
-| `tools/check-docs.py` | 455 | no library gap; sequence after the documentation-tooling tranche |
 | `tools/gate-state.py` | 390 | mode bits, uuid; see the ruling |
 | `tools/repo-metrics.py` | 373 | column formatting |
 | `unittest/compiler-fixtures/run.sh`, `examples/check.sh` | 314, 257 | `Diff.unified`; the awk manifest parsing is `String.split` |
