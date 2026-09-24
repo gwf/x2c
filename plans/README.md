@@ -75,7 +75,7 @@ execution.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented, and
   scalar math is already callable; exposing Json, Diff, and Path text
-  operations (about 20 `.x` lines) awaits Gary's decisions. The
+  operations (about 20 `.x` lines) is approved and next. The
   lexical-scope repair to the literate example shipped in `144a833d`.
 
 ### Open backlog and scoped follow-ups
@@ -83,7 +83,7 @@ execution.
 | Record | What remains |
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Needs author scoping (re-evaluated 2026-09-24); owns C09 and the rewrite of the regex-based Python source tools over one compiler definition walk; five decisions listed. |
+| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; decisions accepted 2026-09-24. Separate `tools/x2c-lint` linking the compiler; owns C09 and the rewrite of the regex-based Python source tools over one compiler definition walk. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
