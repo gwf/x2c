@@ -233,34 +233,12 @@ probes still copy their prelude by hand.
 ## Rewrite on the compiler instead of translating
 
 These tools contain a second parser for x2c source, written as regular
-expressions, because they live outside the compiler. Translating them keeps
-that parser. The port is a module over the `.xi` interfaces under
-`builds/0` or `x2c translate --dump-ast` that exposes definitions, doc
-comments, and spans, on which the tools' own logic is rewritten, the way
-`tools/x2c-graph` already works.
-
-| Tool | Lines | `re.` sites |
-| --- | --- | --- |
-| `agents/skills/find-redundant-validation/scripts/redundant_validation.py` | 1042 | 57 |
-| `tools/x2c_source.py` (imported by five tools) | 1107 | 31 |
-| `tools/audit-source-bloat.py` | 860 | 30 |
-| `agents/skills/find-comment-slop/scripts/comment_slop.py` | 569 | 19 |
-| `agents/skills/clean-x2c-source/scripts/source_style.py` | 604 | 15 |
-| `tools/x2c_symbols.py` | 566 | 13 |
-| `tools/gen-api-reference.py` | 1247 | 4, plus wrap and difflib |
-
-`x2c_source.py` is the keystone: `gen-api-reference.py`,
-`gen-module-catalog.py`, `repo-metrics.py`, `audit-source-bloat.py`, and
-`redundant_validation.py` import it, so the doc generators and the three
-skill analyzers move together. This is a design, to be planned on its own
-before implementation.
-
-Gary folded catalog item C09 into this rewrite on 2026-09-24
-([consolidation catalog](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation)):
-the generators read the definitions the compiler selected, including those
-produced by Unit macros and foreign aliases, instead of approximating them.
-Plan it after the branch that adds the Pythonic script syntax lands, and
-write the new tools in that syntax.
+expressions. Translating them would keep that parser, so they are not
+ported here. On 2026-09-24 this rewrite, including catalog item C09, moved
+into [x2c lint, format, and compiler-backed source tools](x2c-lint-and-format.md),
+which sequences the doc generators, metrics, and the skill analyzers over
+one shared compiler definition walk. The indentation syntax has landed, so
+the new scripts use it.
 
 ## Off the table
 
