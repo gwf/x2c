@@ -1902,12 +1902,19 @@ static String _definition_doc(Compiler c, Token start) {
   return String.new_len(token.text + 3, token.len - 5);
 }
 
+/* A generated default that completes a documented `meta` prototype
+   publishes the prototype's prose. */
 static void _definition_source(
   Compiler c, List function, int line, String doc) {
-  match (function)
+  match (function) {
     case %(function ? (bind ?binding ?) ?):
       c.semantic_binding_facts()[%(api-definition $binding)] =
         %($line $doc);
+    case %(declare ? (bindings (bind ?binding ?))):
+      if (doc && function.type_from_ast().is_function())
+        c.semantic_binding_facts()[%(api-definition $binding)] =
+          %($line $doc);
+  }
 }
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
@@ -1961,6 +1968,8 @@ List Compiler.parse_top_level(Compiler c) {
       c.install_native_meta_function(decl, meta);
     else if (meta) c.install_meta_declaration(decl, meta);
     c.record_declaration_visibility(decl);
+    if (meta)
+      _definition_source(c, decl, meta.line, _definition_doc(c, meta));
     return decl;
   }
   if (c.peek(0) == <"{"> || c._at_function_arrow()) {

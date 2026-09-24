@@ -679,6 +679,15 @@ static Type _declared(Compiler compiler, String name) {
   return compiler.sym.get(%($name));
 }
 
+/* A bodyless, non-static prototype of a member whose base default the
+   visible forward converter generates declares that default rather than
+   implementing the member. */
+static int _default_completes(
+  Compiler compiler, String name, Type declared, String forward) =>
+  forward && declared.is_function() && compiler.fn_defs.contains(forward) &&
+  !compiler.fn_defs.contains(name) &&
+  !compiler.sym.file_statics().contains(%(function $name));
+
 static List _inherited_parameters(
   List parameters, Type owner, Type participant) {
   if (!parameters) return NULL;
@@ -895,6 +904,8 @@ static List _resolve_members(
     ? _adoption_representation(
       _visible_adoption_row(compiler, base, participant))
     : NULL;
+  String forward = base !== %("Var")
+    ? _forward_binding(compiler, base, participant) : NULL;
   Map variables = {}, defaults = {}, bindings = {};
   variables[binder] = 1;
   bindings[binder] = participant;
@@ -912,6 +923,8 @@ static List _resolve_members(
         Symbol status = <no-member>, String selected = NULL;
         String binding = _member_spelling(participant, member_name);
         actual = _declared(compiler, binding);
+        if (actual && _default_completes(compiler, binding, actual, forward))
+          actual = NULL;
         if (!actual) {
           String imported = compiler.imported_spelling(binding);
           if (imported) {
