@@ -60,14 +60,20 @@ declarations first.
 
 ### Loading on import
 
-`Compiler.collect_package` loads `builds/<name>.module` when it exists,
-on both the cold walk and the `.xi` replay path, through the same
-`_load_native_module` the command line uses: the stamp check, `dlopen`,
-and `Compiler.add_native_module`. The package's module joins the unit's
-selection after the command-line modules, so an explicit
-`--native-module` still wins. A module is loaded once per process; a
-forked translation worker that imports the package loads it in that
-worker.
+The parent process loads package modules once, before it forks
+translation workers, so each worker inherits them. It finds the packages a
+build imports from two sources: a token scan of each unit's top-level
+`import "name"` statements, and the depfiles of the previous build, which
+also name packages imported through included headers. Loading goes through
+the same `_load_native_module` the command line uses: the stamp check,
+`dlopen`, and `Compiler.add_native_module`.
+
+`Compiler.collect_package` then selects the package's module for the unit,
+on both the cold walk and the `.xi` replay path, after the command-line
+modules, so an explicit `--native-module` still wins. If the parent missed
+a package (a first build that reaches it only through a header), the
+worker loads the module itself; the result is the same, only slower, and
+the next build's depfiles let the parent preload it.
 
 A stale module (its stamp names another compiler) is an error at the
 import that tells the user to rebuild the package, exactly as a missing
@@ -101,6 +107,7 @@ refused (`src/frontend.x:110`).
 
 ## Decisions taken
 
+- The parent loads modules before forking workers (Gary, 2026-09-24).
 - The import loads and never builds. Building inside a forked worker would
   race its siblings, and a package's archive already follows the same
   rule.
@@ -134,8 +141,10 @@ Delivery 1:
    Measure and record.
 2. `packages/package.mk` and `src/install.x` build `builds/<name>.module`
    when the package declares `meta` functions.
-3. `Compiler.collect_package` (cold and replay) loads the module; depfile
-   entry; REPL import hook.
+3. Parent preload before forking (import scan plus previous depfiles);
+   `Compiler.collect_package` (cold and replay) selects the module and
+   loads it only when the parent missed it; depfile entry; REPL import
+   hook.
 4. A test package under `unittest/` with one `meta` function and one
    record class: a consumer calls it at compile time through `import`
    alone; a rebuilt module retranslates the consumer; a stale stamp
@@ -156,6 +165,6 @@ without `dlopen`.
 - Deleted: the runtime-object selection script, its payload file and its
   per-link `nm` pass.
 - No new validator: the stamp check and "not built" error already exist.
-- Risk: a module loaded in each forked worker repeats `dlopen` per worker.
-  Measure it with a multi-unit build; if it matters, load package modules
-  in the parent from the depfiles of the previous build.
+- Risk: the parent's scan can miss a package imported only through a
+  header on a first build. The worker fallback keeps that correct; the
+  test package covers it.
