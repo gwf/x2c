@@ -48,6 +48,9 @@ execution.
   truth for `x2c-<name>` programs that `x2c <name>` runs: layout, dispatch,
   `libx2c-dev`, maturity, gating, and packaging. `graph`, `repl`, and `lint`
   move in by phase.
+- [REPL command](repl-command.md): active after external commands phases 1
+  and 2. Moves the REPL to `commands/repl` and removes its command plumbing
+  from the compiler.
 - [Meta lifetime certification](meta-lifetime-certification.md): active.
   Replaces adoption phase 8; certifies ten methods for meta code through
   the region table, decided September 24, 2026.

@@ -43,7 +43,9 @@ These are decided; a change to one needs Gary.
    manifest change.
 3. **Static linking.** Each command links statically against
    `libx2c-dev.a`, the compiler's objects without `main.o`, and the
-   runtime. Release size is not a constraint.
+   runtime, the way the compiler itself links: the whole runtime, with
+   `-rdynamic` on Linux, so a native module loaded by a command resolves
+   runtime calls as it does in `x2c`. Release size is not a constraint.
 4. **The compiler library.** `make commands` builds
    `builds/0/libx2c-dev.a` once for all commands. Commands include
    `src/*.x` for declarations, as `tools/x2c-graph` does today. The
@@ -60,10 +62,16 @@ These are decided; a change to one needs Gary.
    terminal, signals, and exit status. The driver sets `X2C_HOME`, `X2C`
    (its own executable), and `X2C_IDENTITY` (its compiler identity). An
    unknown name keeps today's error.
-7. **Lockstep.** When `X2C_IDENTITY` is set and differs from the identity
-   linked into the command, the command exits with an error that names
-   both. Run directly, without the driver, a command runs normally, so
-   standalone use and development need no driver.
+7. **One identity.** `x2c_compiler_identity()` hashes the running
+   executable, so a command would otherwise have an identity of its own.
+   `make commands` embeds the identity of the `x2c` built with it, read
+   with `x2c env identity`, and each command installs it at startup before
+   `x2c_initialize_environment`. Every command then reports the compiler's
+   identity, which keeps interface caches and native module stamps shared
+   with `x2c`. When `X2C_IDENTITY` is set and differs from the embedded
+   identity, the command exits with an error that names both. Run
+   directly, without the driver, a command runs normally, so standalone use
+   and development need no driver.
 8. **Help.** `x2c help` lists external commands after the built-in ones,
    with summaries from the installed manifest (`<libexec>/commands.txt`).
    `x2c help <name>` and `x2c <name> --help` run `x2c-<name> --help`.
@@ -84,7 +92,8 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
 1. **Mechanism, with `graph` as its first command.** Add `commands/`, the
    manifest, `make commands` with the `libx2c-dev.a` target,
    `make commands-check`, the libexec layout and `x2c env libexec`,
-   dispatch, help, and the identity check. Move `tools/x2c-graph` to
+   `x2c env identity`, the embedded identity and its check, dispatch, and
+   help. Move `tools/x2c-graph` to
    `commands/graph` as an experimental command; its private archive rule
    goes, and its `ast-parity` test becomes its smoke test. Add the
    category to the repo map in `AGENTS.md` and a "Commands" section to the
@@ -95,14 +104,10 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    `x2c bootstrap` builds the shipped commands after the compiler, from
    the same objects. Release workflow changes follow
    `agents/releasing.md` and need Gary's release authorization.
-3. **`repl`.** Move `src/repl.x`, `src/repl-session.x`, and
-   `src/repl-input.x` to `commands/repl` as a shipped command, with its
-   options moved from `src/cli.x`. The compiler services the REPL uses
-   stay in the compiler: `Frontend.open_session`, REPL lowering in
-   `src/comptime.x`, and the completion marker in `src/compiler.x`.
-   `x2c repl` keeps working through dispatch, including
-   `unittest/probes/run-native-modules.sh`. `tools/repl-spike` moves with
-   it or is retired.
+3. **`repl`.** [REPL command](repl-command.md) holds the detailed plan:
+   the REPL's three source files move to `commands/repl` as a shipped
+   command, the compiler keeps the session services the REPL calls, and
+   the compiler loses its REPL command, options, and help.
 4. **`lint`.** Lint is built first as a standalone `x2c-lint` in
    `tools/x2c-lint/`, with its own build like `tools/x2c-graph`. When it
    is ready and phase 1 has landed, it moves to `commands/lint` as an
@@ -140,7 +145,8 @@ Phase 4 can land any time after phase 1.
   compiler objects already exist and are produced by the current build.
   Commands reuse them; the only new check is the identity comparison,
   which protects against a command linked to a different compiler reading
-  its data wrongly.
+  its data wrongly. Embedding the compiler's identity replaces nothing; it
+  corrects a command's identity, which would otherwise hash the command.
 - **Reuse and new machinery.** The library archive already exists inside
   `tools/x2c-graph/Makefile`; phase 1 moves it to one shared target. New
   mechanisms are dispatch, the libexec directory, the manifest, and the
