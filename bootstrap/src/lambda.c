@@ -432,7 +432,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _155 = List_var(_154);
   _156 = String_new("x2c_func_value_argument");
   _157 = String_var(_156);
-  _158 = String_new("x2c_func_reference_argument");
+  _158 = String_new("x2c_func_declared_reference_argument");
   _159 = String_var(_158);
   _160 = cons(_159, NULL);
   _161 = cons(_157, _160);
@@ -790,7 +790,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _513 = String_new("x2c_func_pointer_argument");
   _514 = String_new("native binding parameter type has no Var representation");
   _515 = String_new("x2c_func_value_argument");
-  _516 = String_new("x2c_func_reference_argument");
+  _516 = String_new("x2c_func_declared_reference_argument");
   _517 = String_new("function conversion to Func cannot be variadic");
   _518 = String_new("native binding target cannot be variadic");
   _519 = String_new("native binding needs Func argument readers from lib/func.x");
@@ -1161,16 +1161,16 @@ static List _type_literal(Compiler compiler, Type type){
 
 Type Type_declared(Type);
 List Compiler_func_signature(Compiler compiler, Type type){
-  if(! _init_guard_) _file_init_();  List params = NULL;  Type result = NULL;  _typed_function_parts(type, & params, & result);  Array normalized = Array_new(); {
+  if(! _init_guard_) _file_init_();  List params = NULL;  Type result = NULL;  _typed_function_parts(type, & params, & result);  Array declared = Array_new(); {
     List parameter;  List _x2c_macro_object_3 = params;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       parameter = Var_list(_x2c_macro_cursor_output_3); {
-        Type ptype = Type_declared(List_type(parameter));  if(Var_equal(List_car(Type_list(ptype)), Symbol_var(77))) ptype = List_type(cons(Symbol_var(77), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(ptype)))));  Array_push(normalized, List_var(ptype));
+        Array_push(declared, List_var(Type_declared(List_type(parameter))));
       }
 
     }
 
   }
-  List parameter_types = List_truth(params) ? Array_list_free(normalized) : _133;  Type declared_result = Type_declared(result);  List signature = cons(List_var(cons(_34, cons(List_var(parameter_types), NULL))), List_append(Type_list(declared_result), NULL));  return signature;
+  List parameter_types = List_truth(params) ? Array_list_free(declared) : _133;  Type declared_result = Type_declared(result);  List signature = cons(List_var(cons(_34, cons(List_var(parameter_types), NULL))), List_append(Type_list(declared_result), NULL));  return signature;
 }
 
 static List _func_signature_literal(Compiler compiler, Type type){
@@ -1181,7 +1181,7 @@ Type Type_reference(Type);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 static List _checked_func_argument(Compiler compiler, List adapter_type, Type parameter_type, List value_helper, Type value_helper_type, List reference_helper, Type reference_helper_type, List fn_binding, List argv_binding, int index, Type * storage_type){
   if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77))){
-    Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(reference_helper_type), cons(List_var(cons(_63, cons(List_var(reference_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(_type_literal(compiler, target)), NULL)))))), NULL)))), NULL)));  if(storage_type) * storage_type = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
+    Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(reference_helper_type), cons(List_var(cons(_63, cons(List_var(reference_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))))))), NULL)))), NULL)));  if(storage_type) * storage_type = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
   }
   Symbol tag = Sym_var_tag_for_type(compiler -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key(compiler -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))){
     List pointer_type = NULL;  List pointer_helper = _adapter_helper(compiler, _513, & pointer_type);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_63, cons(List_var(pointer_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), NULL))))), NULL)))), NULL)));  if(storage_type) * storage_type = parameter_type;  if(Type_is_pointer(resolved)) return Compiler_convert_expression(compiler, picked, parameter_type);  Symbol star = 54;  Type record_pointer = Type_reference(parameter_type);  return cons(_62, cons(List_var(parameter_type), cons(List_var(cons(_118, cons(Symbol_var(star), cons(List_var(cons(_62, cons(List_var(record_pointer), cons(List_var(cons(_106, cons(List_var(record_pointer), cons(List_var(picked), NULL)))), NULL)))), NULL)))), NULL)));

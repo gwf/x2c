@@ -43,6 +43,8 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
 
 void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want);
 
+void * x2c_func_declared_reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
+
 void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i);
 
 Var x2c_func_record_result(const void * bytes, size_t size);

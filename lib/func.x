@@ -216,9 +216,9 @@ Var x2c_func_value_argument(
 }
 
 /** Returns reference argument `i` after checking its declared source type.
-    The generated adapter supplies the resolved pointee type it will cast to.
+    The adapter supplies the pointee type it will cast to.
     `argv` must address the prepared argument array and `i` must be in bounds;
-    compiler-generated adapters establish both facts.
+    generated adapters establish both facts.
     Raises: `<bad-types>` when the carrier is a value, its address is null, the
     `Func` signature and adapter disagree, its type differs, or conversion
     would
@@ -240,12 +240,15 @@ static void *_reference_argument(
   return (void *) argv[i].data.reference;
 }
 
+/** Checks a reference argument whose stored pointee matches `want` exactly.
+    Raises: `<bad-types>` on the same mismatches as the shared checker. */
 void *x2c_func_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List want) =>
   _reference_argument(fn, argv, i, want, want);
 
-/* Generated adapters retain a declared alias in the signature while casting
-   the source address only after comparing its resolved native type. */
+/** Checks a generated adapter's declared pointee against the stored signature
+    and its resolved `want` against the source address before casting.
+    Raises: `<bad-types>` on either mismatch. */
 void *x2c_func_declared_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target,
   List want) =>
