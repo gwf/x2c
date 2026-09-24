@@ -140,6 +140,10 @@ static Map runtime = %{
   "String_words": (summary 1 ((0 result))),
   "String_splits": (summary 1 ((0 result) (1 result))),
   "Var_fallback_iter": (summary 0 ((1 return))),
+  "Array_write_str": (summary 0 ((1 return))),
+  "Array_write_repr": (summary 0 ((1 return))),
+  "Map_write_str": (summary 0 ((1 return))),
+  "Map_write_repr": (summary 0 ((1 return))),
   "Scope_new": (summary 0 ()),       "Scope_new_named": (summary 0 ()),
   "Context_open": (summary 0 ()),    "Context_current": (summary 0 ()),
   "Iter_new": (alloc),               "Iter_array": (alloc),
@@ -172,6 +176,33 @@ static Map runtime = %{
     (summary 0 ((0 (param 3)) (1 (param 3)) (2 (param 3)) (3 return)))
 };
 
+/* Runtime operations with a pooled result that the pass does not read:
+   the table has no row for most, and the row for Array_list_free is its
+   argument effect. A copy such as String_concat keeps none of its
+   arguments, and Atom_intern may return a value that already exists. */
+static Map pooled_results = %{
+  "Array_list_free": 1, "Atom_intern": 1, "List_append": 1,
+  "String_concat": 1,   "String_join": 1
+};
+
+/** The owner of the storage the runtime operation `name` returns: `<scope>`
+    for the active Scope, `<slot>` for the Scope its first argument names,
+    `<pool>` for the canonical-value pool, or 0 when nothing is known. What
+    the operation does to its arguments is a separate fact. */
+Symbol Compiler.region_result(String name) {
+  match (runtime[name]) {
+    case %(alloc slot): return <slot>;
+    case %(alloc pool): return <pool>;
+    case %(alloc *): return <scope>;
+    case %(pool): return <pool>;
+  }
+  return name in pooled_results ? <pool> : 0;
+}
+
+/** Reports whether the runtime operation `name` returns its argument's
+    storage unchanged, as a `Var` box or its unboxing does. */
+int Compiler.region_wrapper(String name) => runtime[name] == %(wrap);
+
 // canonical forms the pass reads
 
 /* The storage an expression names, without the wrappers that keep it. */
@@ -202,12 +233,12 @@ static Var _address_of(Var value) {
 }
 
 /* The C name a call names directly, or NULL for a call through a value.
-   `*arguments` omits the marker an empty argument list parses to. */
-static String _callee_of(Var value, List *arguments) {
+   `arguments` omits the marker an empty argument list parses to. */
+static String _callee_of(Var value, List &arguments) {
   match (_unwrap(value)) case %(call ?function (args *rows)): {
     List name = _binding_of(function);
     match (rows) case %((expr ? ())): rows = NULL;
-    *arguments = rows;
+    arguments = rows;
     return binding_identity_spelling(name);
   }
   return NULL;
@@ -343,8 +374,8 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
     }
   }
   List arguments = NULL;
-  String callee = _callee_of(inner, &arguments);
-  if (!callee || runtime[callee] != %(wrap)) return NULL;
+  String callee = _callee_of(inner, arguments);
+  if (!callee || !Compiler.region_wrapper(callee)) return NULL;
   return _fact_of(w, arguments.car(), named);
 }
 
@@ -369,7 +400,7 @@ static Fact _slot(Walk w, Var argument) {
    parameter or region-born, so the result keeps its identity. */
 static Fact _returned_argument(Walk w, Var value, List *named) {
   List arguments = NULL;
-  String callee = _callee_of(value, &arguments);
+  String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
@@ -396,7 +427,7 @@ static Region _pooled(Walk w, int *born) {
 static Region _birth(Walk w, Var value, Type type, int *born,
                      Region *other) {
   List arguments = NULL;
-  String callee = _callee_of(value, &arguments);
+  String callee = _callee_of(value, arguments);
   *born = 1;
   *other = NULL;
   match (callee ? runtime[callee] : void) {
@@ -564,7 +595,7 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
   Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
-  if (_callee_of(value, &arguments)) return %"an address from $name";
+  if (_callee_of(value, arguments)) return %"an address from $name";
   match (fact ? fact.place : NULL) case %(ident *):
     return %"the address of $name";
   return %"an address inside $name";
@@ -746,7 +777,7 @@ static void _scan(Walk w, Var value, int deferred) {
       }
       case %(call ? ?args): {
         List arguments = NULL;
-        String callee = _callee_of(node, &arguments);
+        String callee = _callee_of(node, arguments);
         match (callee ? runtime[callee] : void) {
           case %((!or exit wrap)): break;
           case %(free): _end(w, arguments.car(), NULL, <freed>);
@@ -921,7 +952,7 @@ static void _walk_defer(Walk w, Var body) {
   List arguments = NULL;
   String callee = NULL;
   match (body) case %(stmnt ?expression):
-    callee = _callee_of(expression, &arguments);
+    callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? runtime[callee] : void) {
     case %(close ?): return;
@@ -1008,7 +1039,7 @@ static void _walk(Walk w, Var node) {
     case %((!or goto label) *): _revive(w);
     case %(stmnt ?expression): {
       List arguments = NULL;
-      String callee = _callee_of(expression, &arguments);
+      String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;
       match (_unwrap(expression)) {
         case %(op (!quote =) ?target ?value): _store(w, target, value);

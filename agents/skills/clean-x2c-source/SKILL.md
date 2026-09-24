@@ -42,7 +42,8 @@ one-statement braces, negated `is` tests, and receiver methods where renaming
 the subject parameter to the first letter of its type would save wrapped
 lines. Candidates need source review: width exceptions, runtime
 declarations, horizontal compaction, short control flow, repeated accessors,
-adjacent static output, narration, rulers, and stock prose. The idiom
+adjacent static output, narration, rulers, stock prose, and pointer
+parameters that could be `&` reference parameters. The idiom
 candidates, `member-arrow`, `contains-in`, `plain-string`, and
 `expression-body`, each propose a respelling; `--fix` writes the ones that
 leave the file's generated C and header byte-identical. The comment rules

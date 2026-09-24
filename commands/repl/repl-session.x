@@ -311,7 +311,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
   return NULL;
 }
 
-static List _result_body(List fn, int *prints) {
+static List _result_body(List fn, int &prints) {
   match (fn) {
     case %(function ? ? (block *body)): {
       Array items = $auto(body);
@@ -329,7 +329,7 @@ static List _result_body(List fn, int *prints) {
             }
             if (!effect) {
               items[items.len() - 1] = %(return $spec (expr $spec $value));
-              *prints = 1;
+              prints = 1;
             }
           }
         }
@@ -452,7 +452,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     if (!declaration) {
-      fn = _result_body(node, &prints);
+      fn = _result_body(node, prints);
       execute = 1;
     }
     else {

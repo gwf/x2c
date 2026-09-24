@@ -77,8 +77,7 @@
                                                (ident (binding 8 "int_var"))) 
                                          (args (expr (int) 
                                                 (op + (expr (int) 
-                                                       (ident 
-                                                        (binding 5 "base"))) 
+                                                       (ident (binding 5 "base"))) 
                                                  (expr (int) (literal (int) "2"))))))) 
                                   (nil))))))))) (nil)))))))))) 
   (at 10 

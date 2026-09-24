@@ -15,6 +15,8 @@ Values that can outlive the region that allocated them.
 | [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 | [`Compiler.has_region_row`](#Compiler.has_region_row) | Reports whether the runtime table proves the lifetime effects of the native function `name`. |
+| [`Compiler.region_result`](#Compiler.region_result) | The owner of the storage the runtime operation `name` returns: `<scope>` for the active Scope, `<slot>` for the Scope its first argument names, `<pool>` for the canonical-value pool, or 0 when nothing is known. |
+| [`Compiler.region_wrapper`](#Compiler.region_wrapper) | Reports whether the runtime operation `name` returns its argument's storage unchanged, as a `Var` box or its unboxing does. |
 
 ### `Compiler`
 
@@ -33,7 +35,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1129`
+Source: `src/regions.x:1160`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -45,7 +47,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1104`
+Source: `src/regions.x:1135`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -55,7 +57,29 @@ Source: `src/regions.x:1104`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1152`
+Source: `src/regions.x:1183`
+
+<a id="Compiler.region_result"></a>
+#### Compiler.region_result
+
+`Symbol Compiler.region_result(String name)`
+
+The owner of the storage the runtime operation `name` returns: `<scope>`
+for the active Scope, `<slot>` for the Scope its first argument names,
+`<pool>` for the canonical-value pool, or 0 when nothing is known. What
+the operation does to its arguments is a separate fact.
+
+Source: `src/regions.x:192`
+
+<a id="Compiler.region_wrapper"></a>
+#### Compiler.region_wrapper
+
+`int Compiler.region_wrapper(String name)`
+
+Reports whether the runtime operation `name` returns its argument's
+storage unchanged, as a `Var` box or its unboxing does.
+
+Source: `src/regions.x:204`
 
 ## Design notes
 

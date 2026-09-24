@@ -803,6 +803,12 @@ reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 `str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
 `Var.kind` reports a value's kind. These calls use the existing value
 implementations rather than a separate formatting or comparison algorithm.
+`lib/protocols.x` marks the `Array` and `Map` Var adoptions `meta protocol`,
+so every `Var` member they implement is available: `str`, `repr`,
+`write_str`, `write_repr`, `equal`, `compare`, `contains`, `getindex`,
+`setindex`, `updateindex` and `postfixindex`, and `truth` for a Map.
+`write_str` and `write_repr` return the Buffer they were given, so their
+result belongs to that Buffer.
 
 Iterator producers and functional collection operations are also available in
 x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`

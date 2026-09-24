@@ -769,7 +769,7 @@ static int _lower_object_pointer_type(Lowering l, Type type) {
 
 /* The byte offset of a resolved field path from its outermost record, and
    the selected field's layout. */
-static long _lower_field_offset(Lowering l, List path, List *field_layout) {
+static long _lower_field_offset(Lowering l, List path, List &field_layout) {
   long offset = 0;
   foreach (List frame, path.reverse()) {
     match (frame) {
@@ -781,7 +781,7 @@ static long _lower_field_offset(Lowering l, List path, List *field_layout) {
         match (l.compiler.meta_type_layout(owner))
           case %(record ? ? ? * (field $name ? ?at ?layout) *): {
             offset += at.long_long();
-            *field_layout = layout;
+            field_layout = layout;
             continue;
           }
     }
@@ -808,7 +808,7 @@ static Var _lower_field_place(
   List path = l.compiler.initializer_field_path(record, field);
   if (!path) return _lower_decline(l, "an unknown compile-time struct field");
   List layout = NULL;
-  long offset = _lower_field_offset(l, path, &layout);
+  long offset = _lower_field_offset(l, path, layout);
   if (offset < 0) return void;
   Symbol tag = _lower_pointer_tag(l, layout);
   Var object = _lower_expr(l, receiver);
@@ -973,7 +973,9 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
     Var value;
     if (parameter.car() == <&>) {
       Type target = parameter.cdr();
-      value = %(C.func.reference-argument $fn $argv $index (quote $target));
+      Type resolved = l.compiler.sym.normalize_declared_type(target);
+      value = %(C.func.declared-reference-argument $fn $argv $index
+                (quote $target) (quote $resolved));
     }
     else {
       Symbol tag = l.compiler.sym.var_tag_for_type(parameter, NULL);
@@ -2076,7 +2078,7 @@ static Var _lower_record_braced(
       return _lower_decline(
         l, "an unsupported compile-time struct initializer");
     List layout = NULL;
-    long offset = _lower_field_offset(l, path, &layout);
+    long offset = _lower_field_offset(l, path, layout);
     if (offset < 0) return void;
     Var value = _lower_initializer(l, destination, 0, input);
     if (_lower_failed(l, value)) return void;

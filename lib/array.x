@@ -162,8 +162,6 @@ Var Array.setindex(Array array, int index, Var elem) {
   return elem;
 }
 
-meta Var Array.updateindex(Array array, int index, Symbol op, Var rhs);
-
 /** Updates one `Array` element in place.
     The index is normalized once, including negative indexing, and the
     element slot is delegated to `Var.update`. The stored `Var` tag is
@@ -185,8 +183,6 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
   Var *arr = (Var *) array.bytes;
   return Var.update(arr + index, op, rhs);
 }
-
-meta Var Array.postfixindex(Array array, int index, Symbol op);
 
 /** Applies postfix `Array` element increment or decrement.
     The returned value is the original element. The slot remains unchanged if
@@ -432,8 +428,6 @@ int Array.find(Array array, Var value) {
   return array._core_find(value);
 }
 
-meta int Array.contains(Array array, Var value);
-
 /** Returns nonzero when some element of `array` equals `value`.
     Uses the same linear search and structural `Var` equality as `Array.find`.
     Use a `Map` for frequent membership tests.
@@ -548,8 +542,6 @@ Var Array.foldl(Array array, Var seed, Func fn) {
 
 static int _compare_var(Var a, Var b) => a.compare(b);
 $array.core.observe(Array, Var, _compare_var);
-
-meta int Array.compare(Array a, Array b);
 
 /** Compares `Array`s lexicographically with `Var.compare`. */
 int Array.compare(Array a, Array b) => a._core_compare(b);
@@ -775,8 +767,6 @@ String Array.join(Array array, String separator) {
   }
   return buf.str_free();
 }
-
-meta int Array.equal(Array a, Array b);
 
 /** Returns nonzero when two `Array`s have structurally equal elements. */
 int Array.equal(Array a, Array b) => a._core_equal(b);

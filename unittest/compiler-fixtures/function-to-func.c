@@ -537,11 +537,11 @@ static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func
   ;
 }
 
-void * x2c_func_reference_argument(Func, const FuncArg *, unsigned, List);
+void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
   const _x2c_func_pointer_context_14 * _x2c_func_pointer_context_15 =(const _x2c_func_pointer_context_14 *) Func_context(_x2c_func_binding_6);
-  int * a0 = x2c_func_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, _12);
+  int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, _12, _12);
   return _x2c_func_pointer_context_15 -> _x2c_func_pointer_1(a0);
   ;
 }

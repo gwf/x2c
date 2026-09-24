@@ -1239,22 +1239,22 @@ static String _format_string(Var value, int offset) {
 }
 
 static int _format_decimal(
-  String fmt, int length, int *cursor, String label) {
-  int value = 0, start = *cursor;
-  while (*cursor < length && fmt[*cursor] >= '0' && fmt[*cursor] <= '9') {
-    int digit = fmt[*cursor] - '0';
+  String fmt, int length, int &cursor, String label) {
+  int value = 0, start = cursor;
+  while (cursor < length && fmt[cursor] >= '0' && fmt[cursor] <= '9') {
+    int digit = fmt[cursor] - '0';
     if (value > (INT_MAX - digit) / 10)
       _format_error(start, %"$label exceeds int range");
     value = value * 10 + digit;
-    (*cursor)++;
+    cursor++;
   }
   return value;
 }
 
-static int _format_star(List *values, int offset) {
-  if (!*values) _format_error(offset, "missing star value");
-  Var value = (*values).car();
-  *values = (*values).cdr();
+static int _format_star(List &values, int offset) {
+  if (!values) _format_error(offset, "missing star value");
+  Var value = values.car();
+  values = values.cdr();
   return (int) _format_convert(value, <i32>, offset).integer();
 }
 
@@ -1432,7 +1432,7 @@ String String.format(String fmt, List values) {
     }
 flags_done:
     if (fmt[cursor] == '*') {
-      int width = _format_star(&values, offset);
+      int width = _format_star(values, offset);
       if (width == INT_MIN) _format_error(offset, "width exceeds int range");
       if (width < 0) {
         parsed.flags |= STRING_FORMAT_LEFT;
@@ -1444,21 +1444,21 @@ flags_done:
     }
     else if (fmt[cursor] >= '0' && fmt[cursor] <= '9') {
       parsed.has_width = 1;
-      parsed.width = _format_decimal(fmt, length, &cursor, "width");
+      parsed.width = _format_decimal(fmt, length, cursor, "width");
     }
     if (cursor < length && fmt[cursor] == '.') {
       parsed.has_precision = 1;
       cursor++;
       if (cursor == length) _format_error(offset, "incomplete conversion");
       if (fmt[cursor] == '*') {
-        int precision = _format_star(&values, offset);
+        int precision = _format_star(values, offset);
         if (precision < 0) parsed.has_precision = 0;
         else parsed.precision = precision;
         cursor++;
       }
       else if (fmt[cursor] >= '0' && fmt[cursor] <= '9')
         parsed.precision = _format_decimal(
-          fmt, length, &cursor, "precision");
+          fmt, length, cursor, "precision");
     }
     if (cursor == length) _format_error(offset, "incomplete conversion");
     if (fmt[cursor] == 'h') {

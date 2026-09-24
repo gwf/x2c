@@ -1290,7 +1290,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _729 = Symbol_var(60622703325512);
   _730 = cons(_729, NULL);
   _731 = cons(_728, _730);
-  _732 = Atom_intern(String_new("C.func.reference-argument"));
+  _732 = Atom_intern(String_new("C.func.declared-reference-argument"));
   _733 = Atom_intern(String_new("C.func.value-argument"));
   _734 = Atom_intern(String_new("C.func.pointer-argument"));
   _735 = Atom_intern(String_new("C.func.new"));
@@ -2979,7 +2979,7 @@ static long _lower_field_offset(Lowering l, List path, List * field_layout){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 1218673800: ;  if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(_10, cons(_14, cons(_14, cons(_14, cons(_3, cons(List_var(cons(_645, cons(name, _652))), _4))))))), &_x2c_match_capture)) {Var at = _x2c_match_values[0];  Var layout = _x2c_match_values[1]; {
-        offset += Var_long_long(at);  * field_layout = Var_list(layout);  continue;
+        offset += Var_long_long(at); (* field_layout) = Var_list(layout);  continue;
       }
       break;
     }
@@ -3003,7 +3003,7 @@ static Var _lower_field_place(Lowering l, Symbol access, Var receiver, List fiel
   Type owner = _lower_type_of(receiver);  if(access == 11645){
     Type pointer = Sym_resolve_key(l -> compiler -> sym, owner);  if(! List_truth(Type_list(pointer)) || ! Type_is_pointer(pointer)) return _lower_decline(l, _1614);  owner = Type_dereference(pointer);
   }
-  Type record = _lower_record_type(l, owner);  if(! List_truth(Type_list(record))) return _lower_decline(l, _1615);  List path = Compiler_initializer_field_path(l -> compiler, record, field);  if(! List_truth(path)) return _lower_decline(l, _1616);  List layout = NULL;  long offset = _lower_field_offset(l, path, & layout);  if(offset < 0) return((void) 0, Void);  Symbol tag = _lower_pointer_tag(l, layout);  Var object = _lower_expr(l, receiver);  if(_lower_failed(l, object)) return((void) 0, Void);  return List_var(cons(_27, cons(object, cons(long_var(offset), cons(List_var(cons(_30, cons(Symbol_var(tag), NULL))), NULL)))));
+  Type record = _lower_record_type(l, owner);  if(! List_truth(Type_list(record))) return _lower_decline(l, _1615);  List path = Compiler_initializer_field_path(l -> compiler, record, field);  if(! List_truth(path)) return _lower_decline(l, _1616);  List layout = NULL;  long offset = _lower_field_offset(l, path, &(layout));  if(offset < 0) return((void) 0, Void);  Symbol tag = _lower_pointer_tag(l, layout);  Var object = _lower_expr(l, receiver);  if(_lower_failed(l, object)) return((void) 0, Void);  return List_var(cons(_27, cons(object, cons(long_var(offset), cons(List_var(cons(_30, cons(Symbol_var(tag), NULL))), NULL)))));
 }
 
 static Var _lower_place(Lowering l, Var target){
@@ -3176,6 +3176,7 @@ static Var _lower_application(Lowering l, Var content){
 }
 
 List Compiler_func_signature(Compiler, Type);
+Type Sym_normalize_declared_type(Sym, Type);
 static Var _lower_func_adapter(Lowering l, Type type, Var callable){
   List signature = Compiler_func_signature(l -> compiler, type), params = NULL;  Type result = NULL;
   {
@@ -3202,7 +3203,7 @@ Var fn = _lower_name(l, _1621), argv = _lower_name(l, _1622);  Array arguments =
     Type parameter;  List _x2c_macro_object_9 = params;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
       parameter = Var_type(_x2c_macro_cursor_output_9); {
         if(List_equal(Type_list(parameter), _697)) continue;  Var value;  if(Var_equal(List_car(Type_list(parameter)), Symbol_var(77))){
-          Type target = List_cdr(parameter);  value = List_var(cons(_732, cons(fn, cons(argv, cons(int_var(index), cons(List_var(cons(_30, cons(List_var(target), NULL))), NULL))))));
+          Type target = List_cdr(parameter);  Type resolved = Sym_normalize_declared_type(l -> compiler -> sym, target);  value = List_var(cons(_732, cons(fn, cons(argv, cons(int_var(index), cons(List_var(cons(_30, cons(List_var(target), NULL))), cons(List_var(cons(_30, cons(List_var(resolved), NULL))), NULL)))))));
         }
         else{
           Symbol tag = Sym_var_tag_for_type(l -> compiler -> sym, parameter, NULL);  if(tag){
@@ -4579,7 +4580,7 @@ static Var _lower_record_braced(Lowering l, Type type, List items, Var into){
             }
 
           }
-          List layout = NULL;  long offset = _lower_field_offset(l, path, & layout);  if(offset < 0){
+          List layout = NULL;  long offset = _lower_field_offset(l, path, &(layout));  if(offset < 0){
             Var _x2c_return_value_39 =((void) 0, Void); {
               x2c_cleanup_leave(& _x2c_defer_record_25);  return _x2c_return_value_39;
             }
@@ -6040,7 +6041,6 @@ int Type_is_typedef_name(Type);
 int Type_is_typedef(Type);
 List Sym_get(Sym, List);
 Type Sym_next_typedef(Sym, Type, int *);
-Type Sym_normalize_declared_type(Sym, Type);
 static List _meta_type_layout(Sym sym, Type type, Map cache){
   Type declared = Type_declared(type);  Type alias = Type_base_type(declared);  int hops = 0;  while(List_truth(Type_list(alias)) &&(Type_is_typedef_name(alias) || Type_is_typedef(alias))){
     if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, & hops));

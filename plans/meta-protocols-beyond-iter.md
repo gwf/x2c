@@ -1,7 +1,8 @@
 # Meta-capable protocols beyond Iter
 
 > Status: active - designed 2026-09-24 as step 3 of
-> [meta sequencing](meta-sequencing.md). Not started. Deliveries 1-3 do not
+> [meta sequencing](meta-sequencing.md). Delivery 1 landed 2026-09-24;
+> delivery 2's compiler rule landed as `7fd8c5dd`. Deliveries 1-3 do not
 > depend on steps 1 and 2; delivery 4 follows
 > [class registration](class-registration.md).
 
@@ -51,7 +52,7 @@ Facts from source on `dev` at `5023c07c`, with probes run by
 
 - `lib/protocols.x` marks `meta protocol Var(Array);` and
   `meta protocol Var(Map);`.
-- `src/regions.x` gains `(summary 1 ((1 return)))`-style rows for
+- `src/regions.x` gains `(summary 0 ((1 return)))` rows for
   `Array_write_str`, `Array_write_repr`, `Map_write_str` and
   `Map_write_repr`, which return their Buffer argument. These rows
   already exist for other returning-argument functions; the region
