@@ -111,10 +111,16 @@ and after. `tools/gen-package-index`, run on a temporary one-package
 directory, wrote the same index row and archive members; the archive hash
 differs, as expected. `tools/check-release` relies on the proof alone.
 
-A statement body written without braces keeps its C form after
-conversion, as in `foreach (String line, lines)` followed by an indented
-`if (line) count++`. Rewriting it to the colon form would add a block, so
-the token proof would not hold.
+Follow-up, same day: Gary asked for bodies without braces in colon form
+too. The converter now gives each such header a colon, which adds a
+one-statement block, so the token proof became an AST proof: the
+compiler's `--dump-ast` output for the result must equal the original's
+after dropping statement numbers, reading a one-statement block as its
+statement, and splicing a block that follows a `case` label. It rejects a
+dangling `else` or an unbraced body whose indentation misstates its
+extent. All eight files reconverted from their brace form and passed; no
+C-style header remains. The tools keep their extensionless names, so they
+run by name from a shell when executable.
 
 ## Validation
 

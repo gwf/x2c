@@ -36,14 +36,14 @@ List Sample.fences(String text):
     offset += line.len() + 1
   for int at = 0; at + 1 < lines.len(); at++:
     RegexMatch found = opening.match(lines[at])
-    if (!found) continue
+    if !found: continue
     String indent = found["indent"], close = %"$indent```"
     for int end = at + 1; end < lines.len(); end++:
       String line = lines[end]
-      if (!line.startswith(close) || line[close.len():].strip(" \t"))
+      if !line.startswith(close) || line[close.len():].strip(" \t"):
         continue
       Array body = []
-      for (int inner = at + 1; inner < end; inner++) body.push(lines[inner])
+      for int inner = at + 1; inner < end; inner++: body.push(lines[inner])
       String text_body = body.len() ?
         String.join("\n", body.list_free()) + "\n" : NULL
       int stop = offsets[end].integer() + line.len()
@@ -58,9 +58,9 @@ String Sample.language(String info) =>
   info ? Regex.compile("^[^\\s,]*").match(info)[0] : NULL
 
 static String _dedent(String body, String indent):
-  if (!indent) return body
+  if !indent: return body
   Array lines = []
-  foreach (String line, body.split_lines(0))
+  foreach String line, body.split_lines(0):
     lines.push(line.startswith(indent) ? line[indent.len():] : line)
   return String.join("\n", lines.list_free()) + "\n"
 
@@ -69,9 +69,9 @@ static String _reveal_hidden(String code):
   Array lines = []
   foreach String line, code.split_lines(0):
     String stripped = line.lstrip(NULL)
-    if (stripped.startswith("~"))
+    if stripped.startswith("~"):
       lines.push(line[:line.len() - stripped.len()] + stripped[1:])
-    else lines.push(line)
+    else: lines.push(line)
   return String.join("\n", lines.list_free()) + "\n"
 
 /** Returns the samples of the page at `path`, adding each malformed fence
@@ -88,7 +88,7 @@ List Sample.collect(Path root, Path path, Array errors):
     (String indent, String raw, String body, int line, int start, int stop) =
       fences[at].list()
     String info = raw.strip(NULL)
-    if (Sample.language(info) != "x2c") continue
+    if Sample.language(info) != "x2c": continue
     String where = %"$relative:$line"
     RegexMatch sample = sample_info.match(info)
     if !sample:
@@ -98,11 +98,11 @@ List Sample.collect(Path root, Path path, Array errors):
     String code = _reveal_hidden(_dedent(body, indent))
     if sample[1]:
       String prior = text[start > 400 ? start - 400 : 0:start]
-      if (!prior || !reason.match(prior))
+      if !prior || !reason.match(prior):
         errors.push(%"$where: `x2c,ignore` needs an " +
                     "<!-- ignore: reason --> comment above the fence")
       continue
-    if (!code.strip(NULL)) continue
+    if !code.strip(NULL): continue
     String expected = NULL
     int runs = 0, status = 0
     if at + 1 < fences.len():

@@ -27,7 +27,7 @@ static Path source_archive(Path package, Path output):
   foreach String path, package.walk():
     String relative = path[package.len() + 1:]
     List parts = relative.split("/")
-    if (!parts.contains("builds") && !parts.contains("deps"))
+    if !parts.contains("builds") && !parts.contains("deps"):
       members.push(%"$name/$relative")
   // COPYFILE_DISABLE keeps macOS tar from adding AppleDouble members.
   %(tar -czf $archive -C ${package.dirname()} --no-recursion
@@ -39,8 +39,8 @@ static void source_rows(
   Path directory, Path output, String base, Array rows):
   foreach String name, directory.list_dir():
     Path package = directory.join(name)
-    if (!package.is_dir() || package.join("dependency*.json").glob() ||
-        !package.join(%"src/$name.x").is_file())
+    if !package.is_dir() || package.join("dependency*.json").glob() ||
+        !package.join(%"src/$name.x").is_file():
       continue
     Path archive = source_archive(package, output)
     String url = %"$base/${archive.basename()}"
@@ -48,15 +48,15 @@ static void source_rows(
 
 static String field(Map identity, String name):
   Var value
-  if (!identity.try_get(name, &value))
+  if !identity.try_get(name, &value):
     raise %(bad-arg (why "BUNDLE.json has no $name"))
   return value.str()
 
 static String bundle_row(Path tarball, Path output, String base):
   String member = NULL
-  foreach (String entry, %(tar -tzf $tarball).job().lines())
-    if (!member && entry.endswith("/BUNDLE.json")) member = entry
-  if (!member) raise %(bad-arg (why "$tarball has no BUNDLE.json"))
+  foreach String entry, %(tar -tzf $tarball).job().lines():
+    if !member && entry.endswith("/BUNDLE.json"): member = entry
+  if !member: raise %(bad-arg (why "$tarball has no BUNDLE.json"))
   Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output())
   String package = field(identity, "package")
   String platform =
@@ -66,7 +66,7 @@ static String bundle_row(Path tarball, Path output, String base):
   // Every platform's bundle is named <name>-native.tar.gz by its producer,
   // so the published copy carries the platform to keep them apart.
   Path published = output.join(%"$package-$platform-native.tar.gz")
-  if (tarball.absolute() != published.absolute())
+  if tarball.absolute() != published.absolute():
     tarball.copy_file(published)
   String url = %"$base/${published.basename()}"
   return %"$package $version bundle $platform $url ${digest(published)}"
@@ -101,23 +101,23 @@ try:
   output.make_dirs()
   Array rows = []
   List directories = options["package-dir"]
-  if (!directories) directories = %(${root.join("packages")})
-  foreach (Var directory, directories)
+  if !directories: directories = %(${root.join("packages")})
+  foreach Var directory, directories:
     source_rows(directory, output, base, rows)
-  foreach (Var tarball, options["bundles"])
+  foreach Var tarball, options["bundles"]:
     rows.push(bundle_row(tarball, output, base))
   String version = options["x2c-version"]
-  if (!version)
+  if !version:
     version = %(${root.join("builds/0/x2c")} --version).job().output()
                 .strip(NULL)
   Array lines = [%"# x2c package index for $version",
                   "# name version kind platform url sha256"]
-  foreach (Var row, rows.sort()) lines.push(row)
+  foreach Var row, rows.sort(): lines.push(row)
   Path index = output.join("index.txt")
   index.write_text(%"${lines.join("\n")}\n")
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len())
 catch %(?code *detail):
   Var why = detail.assoc(<why>)
-  if (why is void) Stderr.printf("x2c: %s %s\n", code.str(), detail.repr())
-  else Stderr.printf("x2c: %s\n", why.str())
+  if why is void: Stderr.printf("x2c: %s %s\n", code.str(), detail.repr())
+  else: Stderr.printf("x2c: %s\n", why.str())
   return 1

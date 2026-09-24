@@ -90,8 +90,8 @@ static int _start(RegexMatch found) => found.capture(0).start()
 /* Fetched, installed, or rendered trees grow inside the link-checked
    directories and carry Markdown that is not ours to repair. */
 static int _untracked(String relative):
-  foreach (String part, relative.split("/"))
-    if (%("build" "builds" "deps" "dist" "node_modules").contains(part))
+  foreach String part, relative.split("/"):
+    if %("build" "builds" "deps" "dist" "node_modules").contains(part):
       return 1
   return 0
 
@@ -99,20 +99,20 @@ static int _untracked(String relative):
 static void _markdown_below(String directory, int tracked, Array into):
   foreach Path path, root.join(directory).walk():
     String relative = _relative(path)
-    if (relative.endswith(".md") && !(tracked && _untracked(relative)))
+    if relative.endswith(".md") && !(tracked && _untracked(relative)):
       into.push(relative)
 
 static void _markdown_in(String directory, Array into):
-  foreach (String name, root.join(directory).list_dir())
-    if (name.endswith(".md")) into.push(%"$directory/$name")
+  foreach String name, root.join(directory).list_dir():
+    if name.endswith(".md"): into.push(%"$directory/$name")
 
 /* Collapses `.` and `..` the way resolving the path would. */
 static String _normalized(String path):
   Array parts = []
   foreach String part, path.split("/"):
-    if (!part || part == ".") continue
-    if (part == ".." && parts.len()) parts.pop()
-    else parts.push(part)
+    if !part || part == ".": continue
+    if part == ".." && parts.len(): parts.pop()
+    else: parts.push(part)
   return String.join("/", parts.list_free())
 
 static int _line_count(Path path) => path.read_text().split_lines(0).len()
@@ -125,23 +125,23 @@ static void _check_links(void):
     foreach RegexMatch found, link.find_all(text):
       RegexMatch first = word.match(found[1].strip(NULL).strip("<>"))
       String target = first ? first[0] : ""
-      if (target.startswith("#") || target.startswith("http://") ||
-          target.startswith("https://"))
+      if target.startswith("#") || target.startswith("http://") ||
+          target.startswith("https://"):
         continue
       target = target.partition("#").car()
       String joined = directory ? %"$directory/$target" : target
-      if (!target || !root.join(_normalized(joined)).exists())
+      if !target || !root.join(_normalized(joined)).exists():
         errors.push(%"${_where(relative, text, _start(found))}: " +
                     %"missing link $target")
 
 /* Paths below generated trees may be cited before they exist. */
 static int _generated(String path):
   Array parts = []
-  foreach (String part, path.split("/"))
-    if (part && part != ".") parts.push(part)
+  foreach String part, path.split("/"):
+    if part && part != ".": parts.push(part)
   String clean = String.join("/", parts.list_free())
-  foreach (String tree, %("unittest/build" "docs/book" "site/dist"))
-    if (clean == tree || clean.startswith(tree + "/")) return 1
+  foreach String tree, %("unittest/build" "docs/book" "site/dist"):
+    if clean == tree || clean.startswith(tree + "/"): return 1
   return 0
 
 static void _check_paths(void):
@@ -158,19 +158,19 @@ static void _check_paths(void):
       int cited = 0
       RegexMatch lines = cited_lines.match(raw)
       if lines:
-        foreach (RegexMatch number, digits.find_all(lines[1]))
+        foreach RegexMatch number, digits.find_all(lines[1]):
           cited = atoi(number[0])
         raw = raw[:_start(lines)]
-      if (strpbrk(raw, "*?[<")) continue
+      if strpbrk(raw, "*?[<"): continue
       Path resolved = root.join(raw)
       String where = _where(relative, text, _start(found))
       if !resolved.exists():
-        if (!_generated(raw)) errors.push(%"$where: missing path $raw")
+        if !_generated(raw): errors.push(%"$where: missing path $raw")
         continue
-      if (!cited || !resolved.is_file()) continue
-      if (!counts.contains(raw)) counts[raw] = _line_count(resolved)
+      if !cited || !resolved.is_file(): continue
+      if !counts.contains(raw): counts[raw] = _line_count(resolved)
       int count = counts[raw]
-      if (cited > count)
+      if cited > count:
         errors.push(%"$where: $raw has $count lines, so line $cited does " +
                     "not exist")
 
@@ -180,8 +180,8 @@ static List _flags(String text):
   foreach RegexMatch found, flag.find_all(text):
     int start = _start(found)
     int before = start ? text[start - 1] : 0
-    if (!scan_ascii_alpha(before) && !scan_ascii_digit(before) &&
-        before != '-')
+    if !scan_ascii_alpha(before) && !scan_ascii_digit(before) &&
+        before != '-':
       flags.push(found)
   return flags.list_free()
 
@@ -191,7 +191,7 @@ static void _check_flags(void):
                    .caddr()
   table = table.partition("\n};").car()
   Map valid = {}
-  foreach (RegexMatch found, _flags(table)) valid[found[0]] = 1
+  foreach RegexMatch found, _flags(table): valid[found[0]] = 1
   List pages = _flag_audit().append(_line_flag_audit())
   foreach String relative, pages:
     String text = _read(relative)
@@ -199,9 +199,9 @@ static void _check_flags(void):
     foreach String line, text.split_lines(1):
       /* Words after a lone `--` belong to the program being run. */
       String options = line.partition(" -- ").car()
-      if (every_line || options.contains("x2c"))
-        foreach (RegexMatch found, _flags(options))
-          if (!valid.contains(found[0]))
+      if every_line || options.contains("x2c"):
+        foreach RegexMatch found, _flags(options):
+          if !valid.contains(found[0]):
             errors.push(%"${_where(relative, text, offset + _start(found))}" +
                         %": unknown flag ${found[0]}")
       offset += line.len()
@@ -212,33 +212,33 @@ static void _check_workflows(void):
   foreach String relative, _workflow_audit():
     String text = _read(relative)
     int offset = text.find("OVERVIEW.md")
-    if (offset >= 0)
+    if offset >= 0:
       errors.push(%"${_where(relative, text, offset)}: missing OVERVIEW.md " +
                   "entry page")
     RegexMatch found = verbose.match(text)
-    if (found)
+    if found:
       errors.push(%"${_where(relative, text, _start(found))}: unsupported " +
                   "V=1 workflow")
     found = include.match(text)
-    if (found)
+    if found:
       errors.push(%"${_where(relative, text, _start(found))}: use -iquote " +
                   "include so runtime headers do not shadow system headers")
     Array lines = text.split_lines(0)
     for int index = 0; index < lines.len(); index++:
       String line = lines[index]
-      if (!line.contains("make build-safe") || !line.contains("debug/") ||
-          !line.contains(">") || line.contains("mkdir -p debug"))
+      if !line.contains("make build-safe") || !line.contains("debug/") ||
+          !line.contains(">") || line.contains("mkdir -p debug"):
         continue
       int prior = 0
-      for (int at = index < 3 ? 0 : index - 3; at < index; at++)
-        if (lines[at].str().contains("mkdir -p debug")) prior = 1
-      if (!prior)
+      for int at = index < 3 ? 0 : index - 3; at < index; at++:
+        if lines[at].str().contains("mkdir -p debug"): prior = 1
+      if !prior:
         errors.push(%"$relative:${index + 1}: create debug/ before " +
                     "redirecting bootstrap output")
 
 static void _check_example_claims(void):
   Map manifest = {}
-  foreach (String line, _read("examples/manifest.txt").split_lines(0))
+  foreach String line, _read("examples/manifest.txt").split_lines(0):
     if line && !line.startswith("#"):
       List fields = line.split("|")
       manifest[fields.car()] = fields.cdr()
@@ -251,27 +251,27 @@ static void _check_example_claims(void):
         errors.push(%"$where: unclassified example $raw")
         continue
       (String category, String action) = manifest[found[2]].list()
-      if (action == "run" || action == "build") continue
+      if action == "run" || action == "build": continue
       String marker = %"(${category.replace("-", " ")})"
       int end = found.capture(0).end(), stop = end + marker.len() + 1
       String after = text[end:stop < text.len() ? stop : text.len()]
-      if (!after.lstrip(NULL).startswith(marker))
+      if !after.lstrip(NULL).startswith(marker):
         errors.push(%"$where: $raw is $category, not checked; " +
                     %"label it $marker")
 
 /* Python's spelling of a list of names, as the old checker printed it. */
 static String _name_list(Array names):
   Array quoted = []
-  foreach (String name, names.sort()) quoted.push(%"'$name'")
+  foreach String name, names.sort(): quoted.push(%"'$name'")
   return "[" + String.join(", ", quoted.list_free()) + "]"
 
 static void _check_module_counts(void):
   Array sources = []
-  foreach (String name, root.join("src").list_dir())
-    if (name.endswith(".x")) sources.push(name.remove_suffix(".x"))
+  foreach String name, root.join("src").list_dir():
+    if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
   int src_count = sources.len(), lib_count = 0
-  foreach (String name, root.join("lib").list_dir())
-    if (name.endswith(".x") && name != "x2c.x") lib_count++
+  foreach String name, root.join("lib").list_dir():
+    if name.endswith(".x") && name != "x2c.x": lib_count++
   Regex counted = Regex.compile(
     "\\b(\\d+|sixteen|eighteen|twenty)([ -]\\w+)*[ -]modules\\b")
   foreach String relative, docs:
@@ -283,7 +283,7 @@ static void _check_module_counts(void):
                   word == "twenty" ? 20 : atoi(word)
       String context = text[start < 40 ? 0 : start - 40:start].lower()
       int expected = context.contains("runtime") ? lib_count : src_count
-      if (count != expected)
+      if count != expected:
         errors.push(%"${_where(relative, text, start)}: '${found[0]}' says " +
                     %"$count but expected $expected")
   Regex quoted = Regex.compile("`([^`]+)`")
@@ -299,13 +299,13 @@ static void _check_module_counts(void):
     Map listed = {}
     foreach RegexMatch found, quoted.find_all(text[start:end]):
       RegexMatch name = module.match(found[1])
-      if (name) listed[name[1]] = 1
+      if name: listed[name[1]] = 1
     Array missing = [], extra = []
-    foreach (String name, sources)
-      if (!listed.contains(name)) missing.push(name)
-    foreach (String name, listed.keys())
-      if (name != "src" && !sources.contains(name)) extra.push(name)
-    if (missing.len() || extra.len())
+    foreach String name, sources:
+      if !listed.contains(name): missing.push(name)
+    foreach String name, listed.keys():
+      if name != "src" && !sources.contains(name): extra.push(name)
+    if missing.len() || extra.len():
       errors.push(%"${_where(relative, text, start)}: src module list " +
                   %"differs from src/*.x; missing=${_name_list(missing)}, " +
                   %"extra=${_name_list(extra)}")
@@ -322,7 +322,7 @@ static List _ledger_rows(String text):
   Array rows = []
   foreach RegexMatch found, row.find_all(text[start:stop]):
     String name = found[1]
-    if (name == "Contract" || name == "---") continue
+    if name == "Contract" || name == "---": continue
     rows.push(%(${_collapsed(name.replace("`", ""))} ${found[2]}))
   return rows.list_free()
 
@@ -339,8 +339,8 @@ static void _check_ledger_placement(void):
     int open = 0
     foreach List entry, rows:
       (String name, String status) = entry
-      if (full.contains(name) && status != "verified") open = 1
-    if (!open)
+      if full.contains(name) && status != "verified": open = 1
+    if !open:
       errors.push(%"$relative:section '$heading': no non-verified ledger " +
                   "row found for this 'Partial contracts' section; move it " +
                   "under 'Verified contracts' or name its open ledger row")
@@ -350,7 +350,7 @@ static Job _generator(String script) =>
     .options({dir: root, stderr: <capture>}).start()
 
 static void _check_generator(Job job, String what):
-  if (!job.status()) return
+  if !job.status(): return
   String detail = job.errors() ? job.errors().strip(NULL) : NULL
   if !detail:
     try detail = job.output()
@@ -365,7 +365,7 @@ static void _check_banned_name(void):
   Regex banned = Regex.compile("(?i)\\becstas(?:y|ies)\\b")
   foreach String relative, docs:
     String text = _read(relative)
-    foreach (RegexMatch found, banned.find_all(text))
+    foreach RegexMatch found, banned.find_all(text):
       errors.push(%"${_where(relative, text, _start(found))}: the project " +
                   "is named x2c; do not spell out the word it is pronounced " +
                   "like")
@@ -376,18 +376,18 @@ static void _check_summary(void):
   Map listed = {}
   foreach RegexMatch found, link.find_all(text):
     String target = found[1].strip(NULL).partition("#").car()
-    if (!target || target.startswith("http://") ||
-        target.startswith("https://"))
+    if !target || target.startswith("http://") ||
+        target.startswith("https://"):
       continue
     String page = _normalized(%"docs/src/$target")
     listed[page] = 1
-    if (!root.join(page).exists())
+    if !root.join(page).exists():
       errors.push(%"${_where(relative, text, _start(found))}: SUMMARY.md " +
                   %"entry has no file $target")
   Array pages = []
   _markdown_below("docs/src", 0, pages)
-  foreach (String page, pages)
-    if (page != relative && !listed.contains(page))
+  foreach String page, pages:
+    if page != relative && !listed.contains(page):
       errors.push(%"$page: page is not reachable from docs/src/SUMMARY.md")
 
 root = Path.new(argv[0]).absolute().dirname().dirname()
@@ -404,8 +404,8 @@ _markdown_in("agents", docs)
 _markdown_in("docs", docs)
 _markdown_below("docs/src", 0, docs)
 link_docs = []
-foreach (String relative, docs) link_docs.push(relative)
-foreach (String directory, %("agents/skills" "packages" "plans"))
+foreach String relative, docs: link_docs.push(relative)
+foreach String directory, %("agents/skills" "packages" "plans"):
   _markdown_below(directory, 1, link_docs)
 errors = []
 
@@ -424,7 +424,7 @@ _check_module_counts()
 _check_ledger_placement()
 if errors.len():
   Stderr.printf("documentation audit failed:\n")
-  foreach (String error, errors) Stderr.printf("- %s\n", error)
+  foreach String error, errors: Stderr.printf("- %s\n", error)
   return 1
 printf("documentation audit passed: %d files, %d link-checked files, "
        "%d path-audited entry points\n", (int) docs.len(),

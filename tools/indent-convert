@@ -5,14 +5,15 @@
 
     Adds `#pragma indent`, turns each block `{` that ends its line into `:`,
     removes the matching `}` and the parentheses around a control condition,
-    and drops each `;` that ends a logical line. A block brace in the middle
-    of a line stays as written. The file's own indentation groups the result,
-    so it must agree with the braces.
+    and drops each `;` that ends a logical line. A control header whose body
+    has no braces gets a colon too, which gives its body a block. A block
+    brace in the middle of a line stays as written. The file's own
+    indentation groups the result, so it must agree with the braces.
 
-    Each conversion is proved: scanning the output in the indentation syntax
-    must give back the original tokens, apart from empty statements and the
-    block an indented `case` body opens. A file that fails is reported and
-    left unchanged. `--check` reports without writing.
+    Each conversion is proved: the compiler's AST for the output must equal
+    the original's, apart from statement numbers and the blocks an indented
+    body adds around one statement or after a `case` label. A file that
+    fails is reported and left unchanged. `--check` reports without writing.
 */
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,7 @@
 /* One replacement of source bytes [start, end); a NULL text deletes. */
 typedef struct Edit { int start, end; String text; } Edit;
 
+static String x2c;
 static struct Token *tokens;
 static int count, *partner;
 static Edit *edits;
@@ -85,39 +87,57 @@ static int _block_brace(int i) {
 static inline int _same_line(int a, int b) =>
   b >= 0 && b < count && tokens[a].line == tokens[b].line;
 
-/* Scans `text` and returns its significant tokens as `type text` lines,
-   without empty statements or the braces of a `case` body. */
-static String _normal(String text, int layout) {
-  Tokenizer t = Tokenizer.new(text);
-  t.layout = layout;
-  t.scan();
-  if (t.status() != <ok>) return %"scan failed: ${t.status()}";
-  struct Token *all = (struct Token *) t.tokens;
-  int n = t.tokens.len() - 1;
-  Array lines = [], labels = [];
-  String previous = NULL;
-  for (int i = 0; i < n; i++) {
-    Token tok = &all[i];
-    if (_trivia(tok)) continue;
-    if (tok.type == <"{">) {
-      int j = i, label = 0;
-      while (--j >= 0 && _trivia(&all[j])) { }
-      for (int k = j; j >= 0 && all[j].type == <:> && k >= 0 &&
-                      all[k].line == all[j].line; k--)
-        label |= all[k].text == "case" || all[k].text == "default";
-      labels.push(label);
-      if (label) continue;
+/* Drops statement numbers, reads a one-statement block as that statement,
+   and splices a block that follows a `case` or `default` label: the
+   differences an indented body may add to an AST. */
+static Var _plain(Var form) {
+  if (form is not <list>) return form;
+  match (form) case %(at ? ?inner): return _plain(inner);
+  Array items = [];
+  int label = 0;
+  foreach (Var item, (List) form) {
+    Var plain = _plain(item);
+    int block = 0, next_label = 0;
+    match (plain) {
+      case %(block *): block = 1;
+      case %(case *): next_label = 1;
+      case %(default): next_label = 1;
     }
-    if (tok.type == <"}"> && labels.len() && (int) labels.take_last())
-      continue;
-    String line = %"${tok.type} ${tok.text}";
-    if (tok.type == <;> && previous &&
-        (previous == "; ;" || previous == "{ {" || previous == "} }"))
-      continue;
-    lines.push(line);
-    previous = line;
+    if (label && block)
+      foreach (Var inner, ((List) plain).cdr()) items.push(inner);
+    else
+      items.push(plain);
+    label = next_label;
   }
-  return String.join("\n", lines.list_free());
+  List result = items.list_free();
+  match (result) case %(block ?only): return only;
+  return result;
+}
+
+/* Returns the normalized AST of the unit at `path`, or NULL when it does
+   not translate. */
+static List _ast(String path) {
+  String dump = NULL;
+  Job job = %($x2c translate --dump-ast $path).job();
+  try dump = job.options({stderr: <capture>}).output();
+  catch %(cmd-fail *): return NULL;
+  Lisp lisp = Lisp.new();
+  defer Lisp.destroy(lisp);
+  Array forms = [];
+  unsigned cursor = 0;
+  Var form = void;
+  while (Lisp.read(lisp, dump, &cursor, &form) == <value>)
+    forms.push(_plain(form));
+  return forms.list_free();
+}
+
+/* True when the body starting at `i` can follow its header's colon on the
+   same line: a plain statement with no later `else` on that line. */
+static int _plain_body(int i) {
+  if (_control(&tokens[i]) || tokens[i].text == "else") return 0;
+  for (int k = i; _same_line(i, k); k = _after(k))
+    if (tokens[k].text == "else") return 0;
+  return 1;
 }
 
 /* Marks brace and parenthesis edits for the block `{` at `i`. */
@@ -172,7 +192,7 @@ static int _close_block(String source, int i) {
 }
 
 /* Returns the converted text of `source`, or NULL with `*why` set. */
-static String _convert(String source, String *why) {
+static String _convert(String path, String source, String *why) {
   Tokenizer t = Tokenizer.new(source);
   t.scan();
   if (t.status() != <ok>) {
@@ -184,8 +204,9 @@ static String _convert(String source, String *why) {
   partner = calloc(count + 1, sizeof(int));
   edits = calloc(4 * count + 8, sizeof(Edit));
   char *block = calloc(count + 1, 1), *removed = calloc(count + 1, 1);
+  char *opener = calloc(count + 1, 1);
   defer {
-    free(partner); free(edits); free(block); free(removed);
+    free(partner); free(edits); free(block); free(removed); free(opener);
   }
   nedits = 0;
 
@@ -214,6 +235,35 @@ static String _convert(String source, String *why) {
     }
   }
 
+  /* A control header whose body has no braces trades its condition's
+     parentheses for a colon, and a lone `else` gains one. A body on the
+     header's line converts only when it is a plain statement. */
+  for (int i = 0; i < count; i++) {
+    Token tok = &tokens[i];
+    if (_trivia(tok)) continue;
+    if (_control(tok) && tok.text != "switch" && tok.text != "match") {
+      int o = _after(i);
+      if (o >= count || tokens[o].type != <"("> || removed[o]) continue;
+      int c = partner[o], body = _after(c);
+      if (body >= count || tokens[body].type == <"{"> ||
+          tokens[body].type == <;> ||
+          _same_line(c, body) && !_plain_body(body))
+        continue;
+      _edit(tokens[o].pos, _end(o), NULL);
+      _edit(tokens[c].pos, _end(c), ":");
+      removed[o] = opener[c] = 1;
+    }
+    else if (tok.text == "else") {
+      int body = _after(i);
+      if (body >= count || tokens[body].type == <"{"> ||
+          tokens[body].text == "if" ||
+          _same_line(i, body) && !_plain_body(body))
+        continue;
+      _edit(_end(i), _end(i), ":");
+      opener[i] = 1;
+    }
+  }
+
   /* A `;` that ends a logical line of the output goes. Lines group as the
      layout pass groups them: a deeper line continues its statement unless
      the line before it opens a block. A colon that closes a `?` opens
@@ -233,8 +283,8 @@ static String _convert(String source, String *why) {
       indent = tok.col;
       pending = 0;
     }
-    if (!block[i] && _closes(tok)) depth--;
-    colon = block[i];
+    if (!block[i] && !opener[i] && _closes(tok)) depth--;
+    colon = block[i] || opener[i];
     if (!depth && tok.text == "?") pending++;
     else if (!depth && tok.type == <:>) {
       colon = !pending;
@@ -263,24 +313,26 @@ static String _convert(String source, String *why) {
   pieces.push(source[from:]);
   String output = String.join("", pieces.list_free());
 
-  String expected = _normal(source, 0), actual = _normal(output, 1);
-  if (expected != actual) {
-    List want = expected.split("\n"), got = actual.split("\n");
-    int index = 0;
-    while (want && got && want.car().str() == got.car().str()) {
-      want = want.cdr();
-      got = got.cdr();
-      index++;
-    }
-    String wanted = want ? want.car().str() : "end";
-    String found = got ? got.car().str() : "end";
-    *why = %"token $index differs after conversion: expected $wanted, " +
-           %"got $found";
+  /* The proof translates a copy beside the original, so its includes
+     resolve the same way. */
+  Path copy = Path.new(path).dirname().join(
+    %".indent-convert-${Path.new(path).basename()}");
+  copy.write_text(output);
+  List expected = _ast(path), actual = NULL;
+  try actual = _ast(copy);
+  finally copy.remove_file();
+  if (!expected || !actual || expected != actual) {
+    *why = !expected ? "the original does not translate" :
+           !actual ? "the output does not translate" :
+           "the output's AST differs from the original's";
     return NULL;
   }
   return output;
 }
 
+x2c = Env.get("X2C");
+if (!x2c)
+  x2c = Path.new(argv[0]).absolute().dirname().dirname().join("builds/0/x2c");
 int check = 0, failed = 0;
 foreach (String arg, args) {
   if (arg == "--check") {
@@ -293,7 +345,7 @@ foreach (String arg, args) {
     printf("%s: already indented\n", arg);
     continue;
   }
-  String output = _convert(source, &why);
+  String output = _convert(arg, source, &why);
   if (!output) {
     Stderr.printf("%s: %s\n", arg, why);
     failed = 1;

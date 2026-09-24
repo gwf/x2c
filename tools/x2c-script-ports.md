@@ -29,9 +29,9 @@ is optional for these scripts; do not reconstruct one later from unlike trees.
 
 On 2026-09-24 `tools/indent-convert` rewrote every tool in the inventory,
 and the shared `tools/doc-samples.x`, in the indentation syntax with
-`#pragma indent`. Each conversion was proved token for token, so the
-current line counts below measure the indented form; the drop comes from
-removed closing braces.
+`#pragma indent`. Each conversion was proved equal to its original's AST,
+so the current line counts below measure the indented form; the drop comes
+from removed closing braces.
 
 ## Inventory
 

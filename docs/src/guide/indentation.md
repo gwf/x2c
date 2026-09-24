@@ -118,11 +118,13 @@ int main(void):
 ## Converting a file
 
 `tools/indent-convert FILE...` rewrites brace-form files in place, adding
-`#pragma indent` so each keeps its name. It proves every conversion by
-scanning the result in the indentation syntax and comparing the tokens with
-the original's, and it leaves a file unchanged when they differ.
-`--check` reports without writing. A statement body written without braces
-keeps its form, so it still reads as C.
+`#pragma indent` so each keeps its name; an executable script stays
+runnable by name. Every block header, including one whose body had no
+braces, ends with a colon. The converter proves each conversion by
+comparing the compiler's AST for the result with the original's, and it
+leaves a file unchanged when they differ, as they do when indentation
+misrepresents which statement an `else` or a body belongs to. `--check`
+reports without writing.
 
 A `.xpmacro` file writes macros the same way. The
 [language reference](../reference/language.md#indentation-syntax) lists

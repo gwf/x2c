@@ -19,17 +19,17 @@ static List _shell_blocks(String text):
   Array blocks = []
   foreach List fence, Sample.fences(text):
     (String indent, String info, String body) = fence
-    if (info == "sh") blocks.push(body)
+    if info == "sh": blocks.push(body)
   return blocks.list_free()
 
 static void _check_slide(Map entry, Path slide, int update, Array errors):
   String name = entry["slide"]
   if entry.contains("source"):
     String source = entry["source"]
-    if (!root.join(source).is_file())
+    if !root.join(source).is_file():
       errors.push(%"$name: missing source $source")
     String link = "https://github.com/gwf/x2c/blob/main/" + source
-    if (!slide.read_text().contains(link))
+    if !slide.read_text().contains(link):
       errors.push(%"$name: missing source link to $source")
     Sample.collect(root, slide, errors)
     return
@@ -38,7 +38,7 @@ static void _check_slide(Map entry, Path slide, int update, Array errors):
     Path target = root.join("examples").join(example)
     List blocks = _shell_blocks(slide.read_text())
     List actual = _shell_blocks(target.exists() ? target.read_text() : NULL)
-    if (!blocks.len() || blocks != actual)
+    if !blocks.len() || blocks != actual:
       errors.push(%"examples/$example: shell recipe differs from $name")
     return
   List samples = Sample.collect(root, slide, errors)
@@ -50,7 +50,7 @@ static void _check_slide(Map entry, Path slide, int update, Array errors):
   if update:
     target.dirname().make_dirs()
     target.write_text(expected)
-  else if (!target.exists() || target.read_text() != expected)
+  else if !target.exists() || target.read_text() != expected:
     errors.push(%"examples/$example.x: missing or differs from $name; " +
                 "run tools/check-gallery-examples --update")
 
@@ -58,24 +58,24 @@ static void _check_slide(Map entry, Path slide, int update, Array errors):
    `none` when the example is optional. */
 static void _check_manifest(Array entries, Array errors):
   Map rows = {}
-  foreach (String line, root.join("examples/manifest.txt").read_text()
-                          .split_lines(0))
-    if (line && !line.startswith("#")) rows[line.partition("|").car()] =
+  foreach String line, root.join("examples/manifest.txt").read_text()
+                          .split_lines(0):
+    if line && !line.startswith("#"): rows[line.partition("|").car()] =
       line.split("|")
   foreach Map entry, entries:
-    if (entry.contains("language") && entry["language"].str() == "sh")
+    if entry.contains("language") && entry["language"].str() == "sh":
       continue
     String example = entry["example"]
     if entry.contains("source"):
       String source = entry["source"]
-      if (!source.startswith("examples/")) continue
+      if !source.startswith("examples/"): continue
       example = source["examples/".len():]
       String extension = Path.extension(example)
-      if (extension) example = example[:example.len() - extension.len()]
+      if extension: example = example[:example.len() - extension.len()]
     String wanted = entry.contains("optional") && entry["optional"] ?
       "none" : "run"
     List row = rows.contains(example) ? rows[example] : NULL
-    if (!row || row.caddr().str() != wanted)
+    if !row || row.caddr().str() != wanted:
       errors.push(%"$example: missing $wanted manifest coverage")
 
 Path self = String.new(argv[0])
@@ -99,18 +99,18 @@ Array errors = []
 Map seen = {}, owners = {}
 foreach Map entry, entries:
   String name = entry["slide"]
-  if (seen.contains(name)) errors.push(%"$name: duplicate gallery entry")
+  if seen.contains(name): errors.push(%"$name: duplicate gallery entry")
   seen[name] = 1
   String owner = entry.contains("source") && entry["source"] ?
     entry["source"] : entry["example"]
-  if (owners.contains(owner))
+  if owners.contains(owner):
     errors.push(%"$name: duplicate standalone example")
   owners[owner] = 1
   Path slide = slides.join(name)
-  if (!slide.is_file()) errors.push(%"$name: gallery source is missing")
-  else _check_slide(entry, slide, options["update"].integer(), errors)
-foreach (String name, slides.list_dir())
-  if (name.endswith(".md") && !seen.contains(name))
+  if !slide.is_file(): errors.push(%"$name: gallery source is missing")
+  else: _check_slide(entry, slide, options["update"].integer(), errors)
+foreach String name, slides.list_dir():
+  if name.endswith(".md") && !seen.contains(name):
     errors.push(%"$name: no standalone example declared")
 _check_manifest(entries, errors)
 

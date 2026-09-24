@@ -25,13 +25,13 @@ static String _dump(List mode):
 static String _owned(String dump):
   Regex owned = Regex.compile("^\\((unit|conformance owned)")
   Array rows = []
-  foreach (String line, dump.split_lines(0))
-    if (owned.match(line)) rows.push(line + "\n")
+  foreach String line, dump.split_lines(0):
+    if owned.match(line): rows.push(line + "\n")
   return String.join("", rows.list_free())
 
 Path root = Path.new(argv[0]).absolute().dirname().dirname()
 x2c = Env.get("X2C")
-if (!x2c) x2c = root.join("builds/0/x2c")
+if !x2c: x2c = root.join("builds/0/x2c")
 if !Path.is_executable(x2c):
   Stderr.printf("check-conformance-coherence: missing compiler: %s\n", x2c)
   return 2
@@ -39,8 +39,8 @@ chdir(root)
 
 String snap = _dump(NULL), live = _dump(%("--live-symbols"))
 int units = 0
-foreach (String line, snap.split_lines(0))
-  if (line.startswith("(unit ")) units++
+foreach String line, snap.split_lines(0):
+  if line.startswith("(unit "): units++
 if !units:
   Stderr.printf("conformance coherence failure: %s dumped no units\n", x2c)
   return 1
