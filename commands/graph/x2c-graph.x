@@ -1252,8 +1252,8 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
-  int ok = frontend.start(filename, unit);
+static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
+  int ok = frontend.start(filename, &unit);
   if (ok) {
     unit.compiler.own_diagnostics();
     ok = unit.collect(frontend) && unit.parse();
@@ -1270,7 +1270,7 @@ static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
   Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List functions = _analyze_unit(parsed.compiler, parsed.ast);
     Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
@@ -1291,7 +1291,7 @@ static List _parse_field_units(
   Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List sites = _analyze_field_sites_unit(
       parsed.compiler, parsed.ast, path, receiver_name, field_name
@@ -1315,7 +1315,7 @@ static List _parse_field_sites(
   Array sites = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_field_sites_unit(
       parsed.compiler, parsed.ast, path, receiver_name, field_name
@@ -1335,7 +1335,7 @@ static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
   Array sites = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_sites_unit(
       parsed.compiler, parsed.ast, path, wanted
@@ -1352,7 +1352,7 @@ static List _parse_walk_units(Frontend frontend, Array inputs) {
   Array functions = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_walk_unit(
       parsed.compiler, parsed.ast, path
@@ -1370,7 +1370,7 @@ static List _parse_flow_units(
   Array functions = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = Flow_analyze_unit(
       parsed.compiler, parsed.ast, path
@@ -1387,7 +1387,7 @@ static List _parse_tail_units(Frontend frontend, Array inputs) {
   Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List functions = _analyze_tail_unit(
       parsed.compiler, parsed.ast, path
@@ -1408,7 +1408,7 @@ static List _parse_loop_allocation_units(
   Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List record = LoopAllocations.analyze_unit(
       parsed.compiler, parsed.ast, path
@@ -1426,7 +1426,7 @@ static List _parse_lifetime_units(
   Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     Map definitions = project_function_targets(
       parsed.compiler, parsed.ast, path
