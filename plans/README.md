@@ -56,6 +56,9 @@ execution.
   and system-header investigations record their outcomes. Meta-capable
   protocols and native extensions retain their separate design and
   implementation status.
+- [Meta sequencing](meta-sequencing.md): active. The order of class
+  registration and capacity, native extensions and packages, protocols
+  beyond Iter, and whole-project lifetime certification.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented, and
   scalar math is already callable; exposing Json, Diff, and Path text

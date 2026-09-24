@@ -168,6 +168,9 @@ prove. The `_Atomic` limit above remains separate.
 
 ## Design tracks (decide with Gary first)
 
+The remaining E, F and G work follows the order in
+[meta sequencing](meta-sequencing.md).
+
 ### E. Meta-capable protocols
 
 Make protocol conformances the source of compile-time bindings, replacing
