@@ -24,7 +24,7 @@ Immediate encoded names.
 
 Returns the final decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:246`
+Source: `lib/symbol.x:248`
 
 <a id="Symbol.len"></a>
 #### Symbol.len
@@ -33,7 +33,7 @@ Source: `lib/symbol.x:246`
 
 Returns the number of decoded bytes in `symbol`.
 
-Source: `lib/symbol.x:121`
+Source: `lib/symbol.x:123`
 
 <a id="Symbol.new"></a>
 #### Symbol.new
@@ -57,7 +57,7 @@ the spelling. The null `String` is the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while checking the decoded spelling.
 
-Source: `lib/symbol.x:112`
+Source: `lib/symbol.x:114`
 
 <a id="Symbol.write_str"></a>
 #### Symbol.write_str
@@ -70,7 +70,7 @@ appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:205`
+Source: `lib/symbol.x:207`
 
 ## Advanced and interop API
 
@@ -97,7 +97,7 @@ Zero sorts before nonzero values. Equal decoded lengths and bytes are
 ordered by the encoded value, so distinct encodings still have a total
 order. The result is -1, 0, or 1.
 
-Source: `lib/symbol.x:174`
+Source: `lib/symbol.x:176`
 
 <a id="Symbol.decode"></a>
 #### Symbol.decode
@@ -110,7 +110,7 @@ is
 NUL-terminated there. A null destination or zero `Symbol` leaves storage
 unchanged.
 
-Source: `lib/symbol.x:133`
+Source: `lib/symbol.x:135`
 
 <a id="Symbol.first"></a>
 #### Symbol.first
@@ -119,7 +119,7 @@ Source: `lib/symbol.x:133`
 
 Returns the first decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:235`
+Source: `lib/symbol.x:237`
 
 <a id="Symbol.new_len"></a>
 #### Symbol.new_len
@@ -149,7 +149,7 @@ malformed input returns zero. Zero is also the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while unescaping a quoted literal.
 
-Source: `lib/symbol.x:260`
+Source: `lib/symbol.x:262`
 
 <a id="Symbol.repr"></a>
 #### Symbol.repr
@@ -163,7 +163,7 @@ described by `Symbol.str`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/symbol.x:194`
+Source: `lib/symbol.x:196`
 
 <a id="Symbol.str"></a>
 #### Symbol.str
@@ -179,7 +179,7 @@ returns NULL, the empty `String`.
 
 **Raises:** `<alloc-fail>` while canonicalizing the spelling.
 
-Source: `lib/symbol.x:162`
+Source: `lib/symbol.x:164`
 
 <a id="Symbol.write_repr"></a>
 #### Symbol.write_repr
@@ -192,7 +192,7 @@ values use a quoted angled spelling, escaping backslash and double quote.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:217`
+Source: `lib/symbol.x:219`
 
 ## Design notes
 

@@ -40,7 +40,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:726`
+Source: `lib/map.x:728`
 
 <a id="Map.contains"></a>
 #### Map.contains

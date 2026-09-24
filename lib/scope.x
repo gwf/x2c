@@ -754,6 +754,8 @@ void Scope.release(void) {
   }
 }
 
+meta void *Scope.malloc(size_t size);
+
 /** Allocates `size` uninitialized bytes in the active scope.
     The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
     ends its life early, `Scope.move` reassigns its owner, and
@@ -825,6 +827,8 @@ void *Scope.malloc_finalized_in(
   return _malloc_in(slot, size, drop);
 }
 
+meta void *Scope.calloc(size_t count, size_t size);
+
 /** Allocates `count` objects of `size` bytes each, zeroed, in the active
     scope.
     The product is checked for overflow before anything is allocated, and the
@@ -852,6 +856,8 @@ void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
   _require_running();
   return _calloc_in(slot, count, size);
 }
+
+meta void *Scope.memdup(const void *ptr, size_t size);
 
 /** Copies `size` bytes from `ptr` into a new allocation in the active scope.
     The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
@@ -883,6 +889,8 @@ void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
   _require_running();
   return _memdup_in(slot, ptr, size);
 }
+
+meta void Scope.free(void *ptr);
 
 /** Frees one scope-owned allocation before its scope ends.
     `ptr` must be a pointer returned by `Scope.malloc`, `Scope.calloc`,
@@ -965,6 +973,8 @@ void Scope.move(void *ptr, Scope *slot) {
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
 }
+
+meta void *Scope.realloc(void *ptr, size_t size);
 
 /** Resizes one scope-owned allocation and returns the new pointer.
     Ownership does not change: the allocation stays with the scope that

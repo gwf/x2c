@@ -613,7 +613,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:816`
+Source: `lib/array.x:818`
 
 ## Advanced and interop API
 
@@ -640,7 +640,7 @@ Source: `lib/array.x:816`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:824`
+Source: `lib/array.x:828`
 
 <a id="Array.compare"></a>
 #### Array.compare
