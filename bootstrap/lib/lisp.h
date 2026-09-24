@@ -169,6 +169,8 @@ Var lisp_array(List layout, List values);
 
 Var lisp_source_function(Var callable);
 
+Var lisp_unwind(Var body, Var cleanup, List arguments);
+
 Func lisp_func_new(Var adapter, List signature);
 
 void * lisp_func_arguments(unsigned count);
