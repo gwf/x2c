@@ -212,11 +212,11 @@ context decide.
 2. **One declaration per operation.** The bodyless `meta` prototype is the
    operation's only declaration: its target row is generated and it binds on
    first use, with no row in `etc/comptime.xlisp` or `lib/lisp.x`. Existing
-   pure rows moved to prototypes. Three kinds keep hand rows: operations
-   taking a `Func` (their adapter), the `try_next` functions `foreach`
-   expands to (they must bind in units that do not include the prototype),
-   and `Array_free` (a prototype suppresses the protocol-generated
-   definition).
+   pure rows moved to prototypes. Two kinds keep hand rows: operations
+   taking a `Func` (their adapter) and the `try_next` functions `foreach`
+   expands to (they must bind in units that do not include the prototype).
+   `Array_free` kept one until a prototype in the generating file stopped
+   suppressing its protocol-generated definition.
 3. **`sizeof`.** Add a `_lower_content` case that answers from the existing
    scalar and record layout facts.
 4. **Typed heap objects.** Construct and use structs defined in x2c units

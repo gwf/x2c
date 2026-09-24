@@ -63,6 +63,11 @@ inline Array Block.array(Block x)         => (Array) x;
 */
 Array Array.new(void) => Block.new(sizeof(Var));
 
+/** Releases the `Array` and its backing storage, invalidating every alias.
+    The `Block` protocol generates the definition.
+*/
+meta void Array.free(Array array);
+
 meta void Array.resize(Array arr, size_t size);
 
 /** Resizes `arr`, truncating or appending `Null` elements as needed.

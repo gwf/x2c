@@ -1601,7 +1601,6 @@ $(def lisp.native.target.rows (append '(
   (lisp_zero)
   (lisp_record_result)
   (lisp_session_copy)
-  (Array_free)
   (lisp_peek)
   (lisp_poke)
   (_lisp_String_try_long (as String_try_long_cell))

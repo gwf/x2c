@@ -520,12 +520,12 @@ dynamic contiguous arrays of `Var` elements.
 
 Public functions:
 
-`Array.block`, `Block.array`, `Array.new`, `Array.resize`, `Array.update_n`,
-`Array.getindex`, `Array.setindex`, `Array.updateindex`, `Array.postfixindex`,
-`Array.push`, `Array.take_last`, `Array.shift`, `Array.unshift`,
-`Array.insert`, `Array.remove`, `Array.copy`, `Array.getslice`,
-`Array.setslice`, `Array.remslice`, `Array.splice`, `Array.find`,
-`Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
+`Array.block`, `Block.array`, `Array.new`, `Array.free`, `Array.resize`,
+`Array.update_n`, `Array.getindex`, `Array.setindex`, `Array.updateindex`,
+`Array.postfixindex`, `Array.push`, `Array.take_last`, `Array.shift`,
+`Array.unshift`, `Array.insert`, `Array.remove`, `Array.copy`,
+`Array.getslice`, `Array.setslice`, `Array.remslice`, `Array.splice`,
+`Array.find`, `Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
 `Array.reverse`, `Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`,
 `Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
 `Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
