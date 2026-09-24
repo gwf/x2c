@@ -1,9 +1,7 @@
 # REPL command
 
-> Status: active.
-> The detailed plan for phase 3 of [external commands](external-commands.md),
-> written 2026-09-24. It starts after that plan's phases 1 and 2 land.
-> The migration is implemented and undergoing publication checks.
+> Status: done. Delivered to `dev` on 2026-09-24 in `572d2f4c`.
+> Detailed phase 3 plan for [external commands](../external-commands.md).
 
 ## Goal
 

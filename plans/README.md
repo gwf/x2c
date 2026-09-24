@@ -48,9 +48,6 @@ execution.
   truth for `x2c-<name>` programs that `x2c <name>` runs: layout, dispatch,
   `libx2c-dev`, maturity, gating, and packaging. `graph`, `repl`, and `lint`
   move in by phase.
-- [REPL command](repl-command.md): active after external commands phases 1
-  and 2. Moves the REPL to `commands/repl` and removes its command plumbing
-  from the compiler.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
   delivered as `9b71607f`. The
   [reproducibility record](generated-lisp-reproducibility.md) retains the

@@ -1,8 +1,8 @@
 # External commands
 
 > Status: active.
-> Gary approved this design on 2026-09-24. Phases 1 and 2 are delivered;
-> phase 3 is implemented and undergoing publication checks. Lint remains.
+> Gary approved this design on 2026-09-24. Phases 1-3 are delivered;
+> lint remains.
 > This is the source of truth
 > for how external commands are built, found, run, tested, and shipped.
 
@@ -26,9 +26,8 @@ compiler. The first three are `lint`, `repl`, and `graph`.
 - A **command** is anything `x2c <name>` runs.
 - A **built-in command** is compiled into the `x2c` binary: `translate`,
   `build`, `run`, `new`, `script`, `bootstrap`, `env`, `install`,
-  `remove`, `list`, and `help`. The current `repl` is also built in until
-  phase 3. These are the core pipeline and whatever must work with no
-  other file present.
+  `remove`, `list`, and `help`. These are the core pipeline and whatever must
+  work with no other file present.
 - An **external command** is a separate program named `x2c-<name>` that
   the driver runs for `x2c <name>`. Interactive, analytical, and
   experimental commands are external.
@@ -123,7 +122,7 @@ REPL moves, because today's releases ship the REPL inside `x2c`.
    and `x2c bootstrap` builds shipped commands after the compiler, from
    the same objects. Release workflow changes follow
    `agents/releasing.md` and need Gary's release authorization.
-3. **`repl`.** [REPL command](repl-command.md) holds the detailed plan:
+3. **`repl`.** [REPL command](archive/repl-command.md) holds the detailed plan:
    the REPL's three source files move to `commands/repl` as a shipped
    command, the compiler keeps the session services the REPL calls, and
    the compiler loses its REPL command, options, and help.
