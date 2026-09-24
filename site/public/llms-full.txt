@@ -1252,7 +1252,7 @@ reads the same tokens as it would for the brace form:
 
 int sum_positive(int *xs, int n):
   int total = 0
-  for int i = 0; i < n; i++:
+  for (int i = 0; i < n; i++):
     if xs[i] < 0: continue
     total += xs[i]
   return total
@@ -1273,8 +1273,9 @@ int main(void):
   chain. The `:` of a `?:` expression never opens a block.
 - **Blocks.** A line that ends in `:` before a deeper line opens a block,
   and each return to an outer indentation closes one. `if`, `else if`,
-  `while`, `for`, `foreach`, `switch`, and `match` take their condition with
-  or without parentheses; the condition belongs to the last of them on the
+  `while`, `foreach`, `switch`, and `match` take their condition with or
+  without parentheses, and `for` keeps the parentheses around its three
+  clauses. The condition belongs to the last of these keywords on the
   line, so an unbraced `foreach (...)` can continue into an `if x:` block.
   A `case`, `default`, or `catch` label keeps its colon and opens a block
   of its own. A `struct`, `union`, or `enum` body closes with `};`, unless its
@@ -4008,20 +4009,22 @@ A statement that calls a function named `with` uses the spelling
 
 ### Foreach
 
-`foreach(declaration, expression) statement` evaluates the expression once
-and visits its elements. The declaration has no trailing semicolon and may
-bind one name or destructure a key and value:
+`foreach (declaration in expression) statement` evaluates the expression
+once and visits its elements. A comma may take the place of `in`. The
+declaration has no trailing semicolon and may bind one name or destructure a
+key and value:
 
 ```x2c
 int main(void) {
   List values = %(1 2 3);
   Map map = {1: 10, 2: 20};
   int total = 0;
-foreach(int value, values) total += value;
-foreach(int key, map.keys()) printf("%d\n", key);
-foreach(Var (key, value), map)
+foreach (int value in values) total += value;
+foreach (int key in map.keys()) printf("%d\n", key);
+foreach (Var (key, value) in map)
   printf("%ld=%ld\n", key.integer(), value.integer());
-  return total == 6 ? 0 : 1;
+foreach (int value, values) total -= value;
+  return total == 0 ? 0 : 1;
 }
 ```
 
