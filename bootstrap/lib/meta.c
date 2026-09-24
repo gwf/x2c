@@ -18,7 +18,7 @@ String x2c_binding_spelling(Var syntax);
 
 List x2c_syntax_type(List value);
 
-Var x2c_cache_value(List node);
+Var x2c_literal_value(Var syntax);
 
 String x2c_function_name(List function);
 
@@ -34,13 +34,25 @@ List x2c_type_resolve(List value);
 
 static Var _meta_initializer(List node);
 
-int x2c_type_value(List value);
+int x2c_type_is_value(List value);
+
+int x2c_type_is_integral(List value);
+
+int x2c_type_is_pointer(List value);
+
+List x2c_type_element(List value);
+
+List x2c_type_parameters(List value);
+
+List x2c_type_return(List value);
 
 Symbol x2c_type_tag_name(String name);
 
 String x2c_type_reverse_name(String base, String participant);
 
 List x2c_method_resolve(List type, String name);
+
+List x2c_protocol_member(List participant, List base, String member);
 
 String x2c_invocation_file(void);
 
@@ -51,6 +63,8 @@ int x2c_invocation_column(void);
 String x2c_embed_text(String path);
 
 void x2c_diagnostic_fail(String message, List notes);
+
+void x2c_diagnostic_warn(String message, List notes);
 
 List x2c_comptime_lower(List fn);
 

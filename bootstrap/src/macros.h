@@ -9,6 +9,46 @@
 #include "compiler.h"
 void Compiler_install_builtin_macros(Compiler compiler);
 
+List x2c_syntax_type(List value);
+
+List x2c_protocol_member(List participant, List base, String member);
+
+int x2c_type_is_integral(List value);
+
+int x2c_type_is_pointer(List value);
+
+List x2c_type_element(List value);
+
+List x2c_type_parameters(List value);
+
+List x2c_type_return(List value);
+
+List x2c_type_parts(List value);
+
+String x2c_type_reverse_name(String base, String participant);
+
+List x2c_type_resolve(List value);
+
+List x2c_type_layout(List value);
+
+int x2c_type_is_value(List value);
+
+Symbol x2c_type_tag_name(String name);
+
+List x2c_type_fields(List value);
+
+String x2c_binding_spelling(Var syntax);
+
+void x2c_diagnostic_fail(String message, List notes);
+
+List x2c_ident(String spelling);
+
+List x2c_method_resolve(List type_value, String name);
+
+String x2c_function_name(List function);
+
+List x2c_function_parameter(List function, String wanted);
+
 int Compiler_macro_form_is_definition(Compiler compiler);
 
 int Compiler_local_macro_form_is_definition(Compiler c);
@@ -20,6 +60,12 @@ void Compiler_skip_macro_invocation(Compiler c);
 int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
+
+Var x2c_literal_value(Var syntax);
+
+List x2c_comptime_lower(List fn);
+
+void x2c_diagnostic_warn(String message, List notes);
 
 void macro_library_reset(void);
 
@@ -50,6 +96,8 @@ int Compiler_native_module_loaded(String path);
 void Compiler_add_native_module(String path, Map(* entry)(void));
 
 void Compiler_select_native_modules(List paths);
+
+int Compiler_supplies_native_meta(String name);
 
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
 

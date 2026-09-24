@@ -30,7 +30,7 @@ The compiler surface a `meta` function calls.
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:110`
+Source: `lib/meta.x:111`
 
 #### x2c_expr_call
 
@@ -39,7 +39,7 @@ Source: `lib/meta.x:110`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:84`
+Source: `lib/meta.x:85`
 
 #### x2c_expr_composite
 
@@ -48,7 +48,7 @@ Source: `lib/meta.x:84`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:89`
+Source: `lib/meta.x:90`
 
 #### x2c_expr_ident
 
@@ -57,7 +57,7 @@ Source: `lib/meta.x:89`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:70`
+Source: `lib/meta.x:71`
 
 #### x2c_expr_index
 
@@ -65,7 +65,7 @@ Source: `lib/meta.x:70`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:73`
+Source: `lib/meta.x:74`
 
 #### x2c_function_body
 
@@ -73,7 +73,7 @@ Source: `lib/meta.x:73`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:165`
+Source: `lib/meta.x:164`
 
 #### x2c_literal_int
 
@@ -81,7 +81,7 @@ Source: `lib/meta.x:165`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:55`
+Source: `lib/meta.x:56`
 
 #### x2c_literal_string
 
@@ -89,7 +89,7 @@ Source: `lib/meta.x:55`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:50`
+Source: `lib/meta.x:51`
 
 #### x2c_literal_symbol
 
@@ -97,7 +97,7 @@ Source: `lib/meta.x:50`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:59`
+Source: `lib/meta.x:60`
 
 #### x2c_parameters_arguments
 
@@ -107,7 +107,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:173`
+Source: `lib/meta.x:172`
 
 #### x2c_stmnt_make
 
@@ -115,7 +115,7 @@ Source: `lib/meta.x:173`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:104`
+Source: `lib/meta.x:105`
 
 #### x2c_stmnt_return
 
@@ -123,7 +123,7 @@ Source: `lib/meta.x:104`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:107`
+Source: `lib/meta.x:108`
 
 ## Design notes
 
@@ -133,7 +133,8 @@ reachable only from compile-time Lisp, under names like `x2c.ident` and
 `x2c.type.fields`, which made Lisp the authoring language for any macro
 whose implementation needed them. The declarations below name the same
 operations from x2c, so a macro's implementation is x2c. Each x2c name is
-its Lisp name with `_` for `.`, and the lowering maps one to the other.
+its Lisp name with `_` for `.` and `-`, and a predicate `x2c.type.X?` is
+`x2c_type_is_X`.
 
 Syntax builders have `meta` bodies shared by compile time and runtime.
 A declaration with no body names a compiler operation. A `meta` function
@@ -148,7 +149,7 @@ symbol table, so the unit that imports it includes this file.
 The declarations below are the signatures. Each operation's semantics are
 those of the compile-time Lisp operation of the same name, specified under
 "Compile-time Lisp and imports" in the language reference, which also gives
-the naming rule and the two answers whose shape differs.
+the naming rule and the answers whose shape differs.
 See `plans/archive/meta-functions.md`.
 
 ## Tests and examples

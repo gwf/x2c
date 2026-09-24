@@ -1263,7 +1263,7 @@ twice 42
 `Type` of an expression or binding. `x2c_type_fields` answers the named
 fields of a struct or union `Type`, each as a metadata row whose first
 element is the field name. `x2c_type_layout`, `x2c_type_parts`,
-`x2c_type_resolve` and `x2c_type_value` answer the remaining
+`x2c_type_resolve` and `x2c_type_is_value` answer the remaining
 generated-code questions. `x2c_method_resolve` answers which operation a
 member call selects. These answers live in the compiler's symbol table, so
 a macro body cannot derive them from the code it captured.
@@ -1317,7 +1317,7 @@ sample.x:15:23: macro: this argument must be one word
 ```
 
 Two signatures differ from the corresponding Lisp functions.
-`x2c_expr_call` takes its arguments as one `List`, and `x2c_type_value`
+`x2c_expr_call` takes its arguments as one `List`, and `x2c_type_is_value`
 returns `int`.
 
 ## Functions that need the compiler
