@@ -875,8 +875,7 @@ compiler's evaluation limits.
 
 Some combinations still decline: `switch` with a subject needing a temporary
 binding on a loop path; destructuring a source needing such a binding on a
-loop path; taking the address of a destructured local; and destructuring
-in a function that holds a cleanup. Match patterns
+loop path; and taking the address of a destructured local. Match patterns
 must fold at lowering time, so a pattern interpolating a local value is not
 generally supported. These are binding/lowering gaps, not fundamental
 restrictions on loops, destructuring or pattern matching.
