@@ -7,6 +7,10 @@
 
 #include "x2c.h"
 #include "compiler.h"
+Symbol Compiler_region_result(String name);
+
+int Compiler_region_wrapper(String name);
+
 void Compiler_check_regions(Compiler c, List ast);
 
 void Compiler_check_meta_regions(Compiler c, List fn);

@@ -32,7 +32,7 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | C01 | One builtin type/tag inventory | Done (02fa85d6) | 56 handwritten entries replaced by a projection of the existing ledger |
 | C02 | One static signature-graph serializer | Done 2026-09-24: `$lisp.bind`, grouped installs, and native targets call `_x2c.literal.list` | Two Lisp serializer functions removed; all three consumer families use compiler literal caching |
 | C03 | One native function-signature projection | Decision | Independent alias traversal/spelling/projection removed after compatibility policy is explicit |
-| C04 | One runtime allocation/wrapper fact owner | Bounded design | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
+| C04 | One runtime allocation/wrapper fact owner | Done 2026-09-24: graph reads `Compiler.region_result` and `Compiler.region_wrapper`; `loop-allocations` now also counts `List_job` and reports `List_cons` directly | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
 | C05 | One graph direct/computed call recognizer | Done (70b23d6d) | Lifetime recognizer and flow forwarding wrapper removed |
 | C06 | One graph source-location formatter | Done (c6ac7841 + flows follow-up) | Five implementations reduced to one owner and calls |
 | C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |

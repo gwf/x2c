@@ -81,7 +81,12 @@ static int _lifetime_candidate_type(Type type) {
   return type.is_pointer() || type.is_bare_typedef_name();
 }
 
-static Symbol _lifetime_named_allocation_kind(String name);
+/* The results this analysis follows: the caller's active Scope and the
+   pool. A Scope an argument names is another owner. */
+static Symbol _lifetime_result_kind(String name) {
+  Symbol owner = Compiler.region_result(name);
+  return owner == <scope> ? <scoped> : owner == <pool> ? <pooled> : 0;
+}
 
 Symbol Lifetime.loop_allocation_kind(
   Compiler compiler, List node, String *operation) {
@@ -107,29 +112,13 @@ Symbol Lifetime.loop_allocation_kind(
              (ident (!set ?callee (binding ? ?))))
            (args *)): {
       String name = compiler.emitted_binding_name(callee);
-      Symbol kind = _lifetime_named_allocation_kind(name);
+      Symbol kind = _lifetime_result_kind(name);
       if (kind) {
         *operation = name;
         return kind;
       }
     }
   }
-  return 0;
-}
-
-static Symbol _lifetime_named_allocation_kind(String name) {
-  if (name == "Scope_malloc" || name == "Scope_calloc" ||
-      name == "Scope_memdup" || name == "Array_new" ||
-      name == "Map_new" || name == "Block_new" ||
-      name == "Buffer_new")
-    return <scoped>;
-  if (name == "cons" || name == "List_append" ||
-      name == "String_concat" || name == "String_join" ||
-      name == "String_new" || name == "String_new_len" ||
-      name == "String_malloc" ||
-      name == "String_new_fill" || name == "Atom_intern" ||
-      name == "Array_list_free")
-    return <pooled>;
   return 0;
 }
 
@@ -159,7 +148,7 @@ static Symbol _lifetime_region_allocation_kind(
     lifetime.compiler, lifetime.definitions, node, &name, &arguments
   );
   if (!name) return 0;
-  kind = _lifetime_named_allocation_kind(name);
+  kind = _lifetime_result_kind(name);
   if (kind) *operation = name;
   return kind;
 }
@@ -222,13 +211,6 @@ static int _lifetime_allocation_id(Lifetime lifetime, Var value) {
   return lifetime.bindings[binding].integer();
 }
 
-static int _lifetime_transparent(String name) {
-  return name == "Var_map" || name == "Var_array" ||
-         name == "Var_list" || name == "Var_string" ||
-         name == "Map_var" || name == "Array_var" ||
-         name == "List_var" || name == "String_var";
-}
-
 static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
   List binding = _lifetime_binding(value);
   if (binding)
@@ -255,7 +237,7 @@ static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
     lifetime.compiler, lifetime.definitions, node, &name, &arguments
   );
   if (!name) return %(other);
-  if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
+  if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
     return _lifetime_summary_fact(lifetime, arguments[1]);
   if (name == "Context_export") return %(other);
   return target && !List.equal(target, %(computed))
@@ -307,7 +289,7 @@ static int _lifetime_wrapped_allocation(Lifetime lifetime, Var value) {
   project_call_target(
     lifetime.compiler, lifetime.definitions, node, &name, &arguments
   );
-  return name && _lifetime_transparent(name) && arguments &&
+  return name && Compiler.region_wrapper(name) && arguments &&
          arguments.len() > 1
        ? _lifetime_wrapped_allocation(lifetime, arguments[1]) : 0;
 }
@@ -324,7 +306,7 @@ static int _lifetime_export_result(Lifetime lifetime, Var value) {
     lifetime.compiler, lifetime.definitions, node, &name, &arguments
   );
   if (!name) return 0;
-  if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
+  if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
     return _lifetime_export_result(lifetime, arguments[1]);
   if (name != "Context_export") return 0;
   lifetime.transfers++;
@@ -339,7 +321,7 @@ static int _lifetime_known_call(String name) {
     name == "Context_open_isolated" ||
     name == "Context_open_isolated_named" ||
     name == "Context_close" || name == "Context_export" ||
-    _lifetime_named_allocation_kind(name) || _lifetime_transparent(name)
+    _lifetime_result_kind(name) || Compiler.region_wrapper(name)
   );
 }
 
@@ -385,7 +367,7 @@ static void _lifetime_replace_return_fact(
   project_call_target(
     lifetime.compiler, lifetime.definitions, node, &name, &arguments
   );
-  if (name && _lifetime_transparent(name) && arguments &&
+  if (name && Compiler.region_wrapper(name) && arguments &&
       arguments.len() > 1)
     _lifetime_replace_return_fact(
       lifetime, arguments[1], replacement
@@ -455,7 +437,7 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
   List target = project_call_target(
     lifetime.compiler, lifetime.definitions, value, &name, &arguments
   );
-  if (name && _lifetime_transparent(name) && arguments &&
+  if (name && Compiler.region_wrapper(name) && arguments &&
       arguments.len() > 1)
     return _lifetime_expression(lifetime, arguments[1]);
   if (arguments && !_lifetime_known_call(name)) {

@@ -383,8 +383,8 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`, `Compiler.check_meta_regions`,
-`Compiler.has_region_row`
+`Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.check_regions`,
+`Compiler.check_meta_regions`, `Compiler.has_region_row`
 
 ### [src/report.x](../src/report.x)
 
