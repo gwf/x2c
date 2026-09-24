@@ -83,6 +83,10 @@ typedef struct VarMethods{
   VarStrFn str, repr;  VarHashFn hash;  VarEqualFn equal;  VarCompareFn compare;  VarTruthFn truth;  VarIterIntoFn iter;  VarWriteFn write_str, write_repr;  VarContainsFn contains;  VarBinaryFn add, sub, mul, div, mod, matmul;  VarUnaryFn neg;  VarGetIndexFn getindex;  VarSetIndexFn setindex;  VarUpdateIndexFn updateindex;  VarPostfixIndexFn postfixindex;  VarExportContextFn export_context;
 }
 VarMethods;
+typedef struct VarDescriptor{
+  Symbol tag;  int row, value_dispatch;  VarMethods methods;  String name;
+}
+VarDescriptor;
 #include "protocols.h"
 typedef struct X2CErrorSite{
   const char * file, * function;  int line;

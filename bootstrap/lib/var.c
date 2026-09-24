@@ -361,6 +361,11 @@ static inline unsigned _bottom_bits(Var v);
 
 #define VAR_CUSTOM_TAG_TOP     0x800C
 #define VAR_CUSTOM_TAG_COUNT   32
+#define VAR_DIRECT_ROWS        30
+#define VAR_CELL_ROW           30
+#define VAR_RECORD_ROW         31
+#define VAR_CELL_MASK          0xFFFF000000000007ul
+#define VAR_CELL_BITS          0x800F000000000006ul
 typedef union VarWideValue{
   long long_value;
   unsigned long ulong_value;
@@ -376,19 +381,47 @@ typedef struct VarWideBox{
 }
 * VarWideBox;
 
-static Symbol custom_tags[32];
+static Scope class_scope;
 
-static unsigned custom_tag_count;
+static Map declared;
 
+static VarDescriptor * rows[VAR_DIRECT_ROWS];
+
+static unsigned row_count;
+
+typedef struct VarCell{
+  VarDescriptor * descriptor;
+  void * pointer;
+  struct VarCell * next;
+}
+VarCell;
+
+static Map cells;
+
+#define RECORD_PREFIX sizeof(max_align_t)
 static VarWideBox _wide_box(Var v);
 
-static int _custom_tag_id(Symbol tag);
+static VarDescriptor * _declared(Symbol tag);
+
+static unsigned _row_count(void);
+
+static void * _address(Var value);
+
+static VarDescriptor * _row_descriptor(int id, Var value);
 
 static int _wide_encoding_valid(Var value, Symbol tag);
 
 static VarDecoded _decode_builtin(TagId id, Var value);
 
 static VarDecoded _decode(Var value);
+
+static void _classes_shutdown(void);
+
+static int _assign_row(VarDescriptor * descriptor);
+
+static VarCell * _cell(VarDescriptor * descriptor, void * pointer);
+
+static int _custom_row(Symbol tag, VarDescriptor * * descriptor);
 
 static Var _new_floating(TagId id, double d);
 
@@ -418,8 +451,16 @@ static int _magnitude_floating_compare(unsigned long long integer, long double f
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
 int Var_known_tag(Symbol tag){
-  return _tag2id(tag) != _invalid_ || _custom_tag_id(tag) >= 0;
+  return _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
 }
 
 int SymbolSet_index(SymbolSet, Symbol);
@@ -452,9 +493,28 @@ static VarWideBox _wide_box(Var v){
   return(VarWideBox) raw;
 }
 
-static int _custom_tag_id(Symbol tag){
-  for(unsigned i = 0;  i < custom_tag_count;  i ++) if(custom_tags[i] == tag) return i;
-  return - 1;
+Var Map_getindex(Map, Var);
+
+Var Symbol_var(Symbol);
+
+static VarDescriptor * _declared(Symbol tag){
+  if((void *) declared == NULL) return NULL;
+  Var found = Map_getindex(declared, Symbol_var(tag));
+  return Var_is_void(found) ? NULL : Var_pointer(found);
+}
+
+static unsigned _row_count(void){
+  return __atomic_load_n(& row_count, __ATOMIC_ACQUIRE);
+}
+
+static void * _address(Var value){
+  return(void *)(value.u64 &(_bitmask(48) - 0x7));
+}
+
+static VarDescriptor * _row_descriptor(int id, Var value){
+  if(id == VAR_CELL_ROW) return((VarCell *) _address(value)) -> descriptor;
+  if(id == VAR_RECORD_ROW) return *(VarDescriptor * *)((char *) _address(value) - RECORD_PREFIX);
+  return rows[id];
 }
 
 static int _wide_encoding_valid(Var value, Symbol tag){
@@ -648,8 +708,9 @@ static VarDecoded _decode(Var value){
   ;
   if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8){
     int id =(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + btm);
+    int valid = id < VAR_DIRECT_ROWS ? id <(int) _row_count() : _address(value) != NULL;
     return(VarDecoded){
-      _invalid_, id, id <(int) custom_tag_count
+      _invalid_, id, valid
     }
     ;
   }
@@ -674,6 +735,69 @@ int Var_custom_descriptor_index(Var value){
   return decoded.valid ? decoded.custom_id : - 1;
 }
 
+VarDescriptor * x2c_var_custom_descriptor(Var value){
+  unsigned top = _top_bits(value);
+  if(top < VAR_CUSTOM_TAG_TOP || top >= VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) return NULL;
+  int id =(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + _bottom_bits(value));
+  if(id < VAR_DIRECT_ROWS) return id <(int) _row_count() ? rows[id] : NULL;
+  return _address(value) ? _row_descriptor(id, value) : NULL;
+}
+
+void Scope_destroy(Scope);
+
+static void _classes_shutdown(void){
+  Scope_destroy(class_scope);
+  class_scope = NULL;
+  declared = cells = NULL;
+  row_count = 0;
+}
+
+Scope Scope_new_named(const char *);
+
+void Scope_shutdown_hook(void(*)(void));
+
+void Scope_push(Scope *);
+
+void * Scope_calloc(size_t, size_t);
+
+Var Map_setindex(Map, Var, Var);
+
+VarDescriptor * x2c_var_declare(Symbol tag){
+  VarDescriptor * descriptor = _declared(tag);
+  if(descriptor) return descriptor;
+  if(! class_scope){
+    class_scope = Scope_new_named("Var classes");
+    Scope_shutdown_hook(_classes_shutdown);
+  }
+  {
+    Scope_push(& class_scope);
+    {
+      {
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+        {
+          if((void *) declared == NULL) declared = Map_new();
+          descriptor = Scope_calloc(1, sizeof(VarDescriptor));
+          descriptor -> tag = tag;
+          descriptor -> row = - 1;
+          Map_setindex(declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+        }
+
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+    }
+
+  }
+  return descriptor;
+}
+
 int x2c_var_tag_descriptor_index(Symbol tag){
   TagId id = _tag2id(tag);
   return id >= _array_ && id <= _var_ ? id - _array_ : - 1;
@@ -687,31 +811,27 @@ void x2c_descriptor_thread_start_begin(void);
 
 int x2c_descriptor_registration_frozen(void);
 
-Var Symbol_var(Symbol);
-
 Var String_var(String);
-
-void Symbol_decode(Symbol, char *);
 
 int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_0);
+  x2c_cleanup_push(&_x2c_defer_record_1);
   {
     if(x2c_descriptor_registration_frozen()){
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 243};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 328};
       x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
       __builtin_unreachable();
     }
     if(! tag){
       int _x2c_return_value_0 = - 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_0;
       }
 
@@ -719,60 +839,146 @@ int Var_register_object_tag(Symbol tag){
     if(_tag2id(tag) != _invalid_){
       int _x2c_return_value_1 = - 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_1;
       }
 
     }
-    int id = _custom_tag_id(tag);
-    if(id >= 0){
-      int _x2c_return_value_2 = id;
+    x2c_var_declare(tag);
+    {
+      int _x2c_return_value_2 = 0;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_2;
       }
 
     }
-    if(custom_tag_count == VAR_CUSTOM_TAG_COUNT){
-      char spelling[SYMBOL_MAX_5BIT + 1] ={
-        __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
-          0
-        }
-        )
-      }
-      ;
-      Symbol_decode(tag, spelling);
-      fprintf(stderr, "Var registry: all %d custom object tag rows are in use; " "<%s> was not registered\n", VAR_CUSTOM_TAG_COUNT, spelling);
-      fflush(stderr);
-      {
-        int _x2c_return_value_3 = - 1;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_3;
-        }
 
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+}
+}
+
+static int _assign_row(VarDescriptor * descriptor){
+  int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
+  if(row >= 0) return row;
+  x2c_descriptor_thread_start_begin();
+  {
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    row = descriptor -> row;
+    if(row >= 0){
+      int _x2c_return_value_3 = row;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_3;
       }
 
     }
-    custom_tags[custom_tag_count] = tag;
+    unsigned count = row_count;
+    row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
+    if(count < VAR_DIRECT_ROWS){
+      rows[count] = descriptor;
+      __atomic_store_n(& row_count, count + 1, __ATOMIC_RELEASE);
+    }
+    __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
     {
-      int _x2c_return_value_4 = custom_tag_count ++;
+      int _x2c_return_value_4 = row;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
         return _x2c_return_value_4;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
 }
+}
+
+void * Scope_malloc(size_t);
+
+static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
+  x2c_descriptor_thread_start_begin();
+  {
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+    Var key ={
+      .p64 = pointer
+    }
+    ;
+    VarCell * cell = NULL;
+    {
+      Scope_push(& class_scope);
+      {
+        {
+
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_4);
+  {
+          {
+            if((void *) cells == NULL) cells = Map_new();
+            Var head = Map_getindex(cells, key);
+            cell = Var_is_void(head) ? NULL : Var_pointer(head);
+            while(cell && cell -> descriptor != descriptor) cell = cell -> next;
+            if(! cell){
+              cell = Scope_malloc(sizeof(VarCell));
+              * cell =(VarCell){
+                descriptor, pointer, Var_is_void(head) ? NULL : Var_pointer(head)
+              }
+              ;
+              Map_setindex(cells, key, Var_new(3683441, (void *) cell));
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+
+}
+      }
+
+    }
+    {
+      VarCell * _x2c_return_value_5 = cell;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_5;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
+
+}
+}
+
+static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
+  unsigned count = _row_count();
+  for(unsigned i = 0;  i < count;  i ++) if(rows[i] -> tag == tag) return(int) i;
+  * descriptor = _declared(tag);
+  return * descriptor ? _assign_row(* descriptor) : - 1;
 }
 
 Symbol Var_tag(Var v){
   VarDecoded decoded = _decode(v);
-  if(decoded.valid && decoded.custom_id >= 0) return custom_tags[decoded.custom_id];
+  if(decoded.valid && decoded.custom_id >= 0) return _row_descriptor(decoded.custom_id, v) -> tag;
   return taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
 
@@ -868,8 +1074,6 @@ static Var _new_pointer(TagId id, void * ptr){
   return v;
 }
 
-void * Scope_malloc(size_t);
-
 void Scope_free(void *);
 
 static Var _new_wide(TagId id, VarWideValue value){
@@ -880,7 +1084,7 @@ static Var _new_wide(TagId id, VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 468};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 589};
       x2c_error_raise_n(& _x2c_error_site_1, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
@@ -951,7 +1155,7 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 571};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 692};
       x2c_error_raise_n(& _x2c_error_site_2, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
@@ -979,15 +1183,6 @@ Scope Var_wide_owner(Var v){
 
 static Var _new_custom_pointer(int id, void * ptr){
   uintptr_t raw =(uintptr_t) ptr;
-  if(raw & 0x7){
-    Symbol target = custom_tags[id];
-    {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_custom_pointer",.line = 601};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
-      __builtin_unreachable();
-    }
-
-  }
   Var v ={
     .u64 = raw & _bitmask(48)
   }
@@ -1010,8 +1205,8 @@ static Var _new_integer(TagId id, long value){
     case _u48_ : case _i48_ : bits = 48;
     break;
     default:{
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 617};
-      x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 734};
+      x2c_error_raise_n(& _x2c_error_site_3, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1023,8 +1218,8 @@ static Var _new_integer(TagId id, long value){
     if((long long) value < min ||(long long) value > max){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 625};
-        x2c_error_raise_n(& _x2c_error_site_5, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 742};
+        x2c_error_raise_n(& _x2c_error_site_4, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1035,8 +1230,8 @@ static Var _new_integer(TagId id, long value){
     if(value < 0 ||(unsigned long long) value > mask){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 631};
-        x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 748};
+        x2c_error_raise_n(& _x2c_error_site_5, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1056,8 +1251,8 @@ static Var _new_integer(TagId id, long value){
 static Var _new_symbol(TagId id, unsigned long u){
   static unsigned long const offset = taginfo[_symbol_].top << 48;
   if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 643};
-    x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 760};
+    x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
   Var v ={
@@ -1070,17 +1265,24 @@ static Var _new_symbol(TagId id, unsigned long u){
 Var Var_new(Symbol tag, ...){
   va_list ap;
   TagId id = _tag2id(tag);
-  int custom_id = id == _invalid_ ? _custom_tag_id(tag) : - 1;
-  if(id == _invalid_ && custom_id < 0){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "Var_new",.line = 673};
-    x2c_error_raise_n(& _x2c_error_site_8, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+  VarDescriptor * descriptor = NULL;
+  int row = id == _invalid_ ? _custom_row(tag, & descriptor) : - 1;
+  if(id == _invalid_ && row < 0){
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "Var_new",.line = 793};
+    x2c_error_raise_n(& _x2c_error_site_7, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
   va_start(ap, tag);
-  if(custom_id >= 0){
-    Var custom = _new_custom_pointer(custom_id, va_arg(ap, void *));
+  if(row >= 0){
+    void * pointer = va_arg(ap, void *);
     va_end(ap);
-    return custom;
+    if((uintptr_t) pointer & 0x7){
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "Var_new",.line = 799};
+      x2c_error_raise_n(& _x2c_error_site_8, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+    if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
+    return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
   Var v;
   switch(taginfo[id].kind){
@@ -1089,7 +1291,7 @@ Var Var_new(Symbol tag, ...){
       if((id == _array_ || id == _map_) && ! pointer){
         va_end(ap);
         {
-          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 687};
+          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 810};
           x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
           __builtin_unreachable();
         }
@@ -1126,7 +1328,7 @@ Var Var_new(Symbol tag, ...){
     break;
     default: va_end(ap);
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 715};
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 838};
       x2c_error_raise_n(& _x2c_error_site_10, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -1134,6 +1336,23 @@ Var Var_new(Symbol tag, ...){
   }
   va_end(ap);
   return v;
+}
+
+void * Scope_memdup(const void *, size_t);
+
+Var Var_box_record(Symbol tag, const void * record, size_t size){
+  VarDescriptor * descriptor = NULL;
+  int row = _custom_row(tag, & descriptor);
+  if(row < 0){
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 853};
+    x2c_error_raise_n(& _x2c_error_site_11, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, Scope_memdup(record, size));
+  char * copy = Scope_malloc(RECORD_PREFIX + size);
+  *(VarDescriptor * *) copy = descriptor;
+  memcpy(copy + RECORD_PREFIX, record, size);
+  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
 }
 
 double Var_floating(Var v){
@@ -1341,7 +1560,8 @@ void * Var_pointer(Var v){
   if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
   if(top == 0x000F && btm > 0x6) return NULL;
   if(top >= 0x0005 && top <= 0x000F) return(void *)(v.u64 &(_bitmask(48) - 0x7));
-  if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) return(void *)(v.u64 &(_bitmask(48) - 0x7));
+  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
+  if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) return _address(v);
   return NULL;
 }
 
@@ -1379,9 +1599,27 @@ Var Var_parse(String str, Symbol kind){
 
 }
 
-void x2c_descriptor_thread_start_end(int);
+void Scope_pop(void);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  Scope_pop();
+}
+
+void x2c_descriptor_thread_start_end(int);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   x2c_descriptor_thread_start_end(0);
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  x2c_descriptor_thread_start_end(0);
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  x2c_descriptor_thread_start_end(0);
+}
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  Scope_pop();
 }
 

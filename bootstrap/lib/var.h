@@ -19,6 +19,10 @@ int x2c_var_descriptor_index(Var value);
 
 int Var_custom_descriptor_index(Var value);
 
+VarDescriptor * x2c_var_custom_descriptor(Var value);
+
+VarDescriptor * x2c_var_declare(Symbol tag);
+
 int x2c_var_tag_descriptor_index(Symbol tag);
 
 int Var_encoding_valid(Var value);
@@ -66,6 +70,8 @@ Var Var_move_wide_to(Var value, Scope * scope);
 Scope Var_wide_owner(Var v);
 
 Var Var_new(Symbol tag, ...);
+
+Var Var_box_record(Symbol tag, const void * record, size_t size);
 
 double Var_floating(Var v);
 
