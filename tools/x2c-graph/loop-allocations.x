@@ -25,17 +25,6 @@ static int _loop_count(Map counts, List key) {
   return counts.try_get(key, &value) ? value.int() : 0;
 }
 
-static List _loop_location(Compiler compiler, String path, int origin) {
-  List location = compiler.origin_location(origin);
-  if (!location) return %(location $path 0 0);
-  Var file = location.assoc(<file>);
-  String source = file is <string>
-                ? compiler.display_path(file.str()) : path;
-  int line = location.assoc(<line>).integer();
-  int column = location.assoc(<column>).integer();
-  return %(location $source $line $column);
-}
-
 static void _loop_collect(
   Compiler compiler, Map definitions, Var value, String path, String function,
   Symbol visibility, int origin, int loop_depth, Symbol use, Array direct,
@@ -52,7 +41,7 @@ static void _loop_collect(
       direct.push(%(
         direct-allocation $path $function $visibility
         $direct_kind $operation $use
-        ${_loop_location(compiler, path, origin)} $loop_depth
+        ${project_location(compiler, path, origin)} $loop_depth
       ));
   }
   match (node) {
@@ -159,12 +148,12 @@ static void _loop_collect(
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, &name
+          compiler, definitions, node, &name, NULL
         );
         if (target && !List.equal(target, %(computed)))
           pending.push(%(
             allocation-return $target $path $function $visibility
-            $name $use ${_loop_location(compiler, path, origin)}
+            $name $use ${project_location(compiler, path, origin)}
             $loop_depth
           ));
       }
