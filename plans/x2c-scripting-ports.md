@@ -3,8 +3,9 @@
 > Status: active - refreshed against dev at `1aaf9479` on 2026-09-24.
 > The extensionless tool rename, the llms.txt generator port, the
 > documentation sample check ports and the `tools/check-docs` port are
-> delivered; later release, gate and compiler-backed ports remain separately
-> sequenced.
+> delivered, and on 2026-09-24 every row of the ready table except the
+> release.yml step; later release, gate and compiler-backed ports remain
+> separately sequenced.
 > Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
 > scripting primitives; this plan decides where the remaining effort goes.
 
@@ -139,7 +140,8 @@ compiler's scripting feature. Gary accepted the first gate probe in x2c on
 2026-09-16 (`unittest/probes/run-suite-coverage`) on this reasoning: a probe
 that is itself an x2c script fails loud when the compiler regresses, since
 its build stops the gate, so it cannot hide the regression it exists to
-catch. That covers probes that run the compiler and compare text.
+catch. That covers probes that run the compiler and compare text, and
+`tools/check-conformance-coherence` moved to x2c under it on 2026-09-24.
 
 Two things stay outside that ruling. The fake toolchain shims under
 `unittest/probes/fake-*.sh` are executed by the compiler under test as its
@@ -171,7 +173,8 @@ sockets, a pty, YAML, zip, statistics beyond a median, plotting.
 
 ## Ports that need nothing more from the library
 
-Each is a translation of what the tool does today. Port each with the same
+Delivered on 2026-09-24 except the release.yml step; each port's parity
+evidence is its row in `tools/x2c-script-ports.md`. Each is a translation of what the tool does today. Port each with the same
 proof the earlier conversions used: run both versions on the same inputs and
 compare status and output.
 
@@ -187,12 +190,11 @@ compare status and output.
 | `packages/libcurl/verify-profile.sh` | 39 | file checks |
 | `packages/blis/verify-archive.sh` | 46 | `nm` through a job, `json.x` |
 
-Do the four gate probes together behind one shared
-`unittest/probes/probe.x` module: repository root, `X2C`, `CC`, and `AR`
-defaults from the environment, a `fail` that prints and returns 1, the
-build-mode flags read from `etc/build-mode`, a scratch directory reset, and
-`Diff.unified` for expected output. Every shell probe copies that prelude
-by hand today; the module is the first thing the larger probes will need.
+The four gate probes share `unittest/probes/probe.x`: the repository root,
+environment defaults, a `probe_fail` that prints and exits 1, the build-mode
+flags read from `etc/build-mode`, and a scratch directory reset. None of the
+four compares expected output, so it has no diff helper yet; the larger
+probes still copy their prelude by hand.
 
 ## Ports after the library items
 

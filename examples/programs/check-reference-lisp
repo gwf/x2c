@@ -1,0 +1,279 @@
+#!/usr/bin/env -S x2c script
+/*  check-reference-lisp -- differential check of the recursive showcase
+    against x2c Lisp
+
+    Optional. Build both executables first, or pass --build. Each case gets
+    fresh sessions; exit status, stdout and stderr must agree byte for byte.
+    Callable addresses are deliberately absent from the corpus, so no output
+    normalization is used. A run that exceeds 15 seconds fails its case.
+*/
+#include <signal.h>
+#include <time.h>
+#include <unistd.h>
+
+static Array corpus;
+
+static void _case(String name, String source) => corpus.push(%($name $source));
+
+static void _cases(void) {
+  _case("callable-repr-kind", "(substring (repr (lambda () 1)) 0 8)");
+  _case("callable-mixed-sort",
+        "(def sort (bind \"List_sort\" nil)) (map type (sort (list (lambda "
+        "() 1) + 1 nil true \"x\")))");
+  _case("callable-binary-error", "(_binary 0 '+ (lambda () 1))");
+  _case("empty", "// no forms\n");
+  _case("values", "(list nil false true 0 \"\" 42 -42 2.5 2147483648)");
+  _case("names",
+        "(let ((CaseSensitiveLongName 7) (casesensitivelongname 9)) (+ "
+        "CaseSensitiveLongName casesensitivelongname))");
+  _case("types",
+        "(map type (list nil true 1 2147483648 1.5 \"a\" + (lambda () 1)))");
+  _case("predicates",
+        "(map (lambda (x) (list (atom? x) (pair? x) (list? x) (number? x) "
+        "(symbol? x) (string? x) (procedure? x))) (list nil true 1 \"a\" "
+        "'(a) + quote (lambda () 1) (macro () 1)))");
+  _case("truth",
+        "(list (if 0 1 2) (if \"\" 1 2) (if nil 1 2) (and) (or) (and 1 2) "
+        "(or nil 3))");
+  _case("lists",
+        "(list (car nil) (cdr nil) (cons 1 nil) (reverse '(1 2 3)) (append "
+        "'(1 2) nil '(3)) (length '(a b)))");
+  _case("higher-order",
+        "(list (map (lambda (x) (* x x)) '(1 2 3)) (filter (lambda (x) (> x "
+        "2)) '(1 2 3 4)) (foldl + 0 '(1 2 3 4)))");
+  _case("rest",
+        "(list ((lambda (. xs) xs)) ((lambda (x . xs) xs) 1 2 3) ((lambda "
+        "(x x) x) 1 2))");
+  _case("capture",
+        "(def mk (lambda (n) (lambda (x) (+ x n)))) (list ((mk 5) 3) ((mk "
+        "9) 3))");
+  _case("scalar-capture",
+        "(def n 100) (def f ((lambda (n) (lambda () n)) 5)) (list (f) "
+        "((lambda (n) (f)) 7))");
+  _case("dynamic-caller",
+        "(def f (lambda () (+ absent 1))) ((lambda (absent) (f)) 41)");
+  _case("deep-capture-warm",
+        "(def n 100) (def f ((lambda (n) (lambda () (list (list (+ n 1))))) "
+        "5)) (list (f) ((lambda (n) (f)) 7) (f))");
+  _case("nested-parameter-capture",
+        "(def make ((lambda (x) (lambda (x) (lambda () x))) 5)) (def f "
+        "(make 9)) (list (f) ((lambda (x) (f)) 7))");
+  _case("quoted-local", "(def f ((lambda (x) (lambda () (list 'x))) 5)) (f)");
+  _case("quasiquote-capture",
+        "(def f ((lambda (x) (lambda () `(data x ,(+ x 1) ,@(list x)))) 5)) "
+        "(f)");
+  _case("macro-introduced-name",
+        "(def x 100) (defmacro read-x () 'x) (def f ((lambda (x) (lambda () "
+        "(read-x))) 5)) (f)");
+  _case("macro-definition-capture",
+        "(def m ((lambda (x) (macro () (list 'quote x))) 5)) ((lambda (x) "
+        "(m)) 7)");
+  _case("macro-scalar-capture",
+        "(def m ((lambda (form) (macro () form)) '(+ 20 22))) (m)");
+  _case("global-rebind",
+        "(def x 1) (def f (lambda () (+ x 1))) (def x 9) (f)");
+  _case("capture-quote",
+        "(def f ((lambda (x) (lambda () (eval 'x))) 8)) (def x 3) (f)");
+  _case("special-alias",
+        "(def q quote) (def quote (lambda (x) (+ x 1))) (list (q hello) "
+        "(quote 4))");
+  _case("special-local", "((lambda (cond) (cond 4)) (lambda (x) (+ x 1)))");
+  _case("eval-global", "(def x 10) ((lambda (x) (eval 'x)) 5)");
+  _case("order", "(def x 0) (list (def x (+ x 1)) (def x (+ x 1)) x)");
+  _case("macro-once",
+        "(def x 0) (defmacro once (e) `(list ,e)) (list (once (def x (+ x "
+        "1))) x)");
+  _case("macro-caller", "(defmacro read-x () 'x) ((lambda (x) (read-x)) 42)");
+  _case("macro-recursion",
+        "(defmacro twice (e) `(+ ,e ,e)) (twice (twice 3))");
+  _case("quasiquote",
+        "(list `(1 ,(+ 1 1) ,@'(3 4)) ``(a ,(b ,(+ 1 2))) `,(+ 1 2))");
+  _case("apply",
+        "(list (apply + '(10 20 12)) (apply (lambda (. x) x) '(a b)) (apply "
+        "apply (list + '(1 2 3))))");
+  _case("native-identity",
+        "(eq? (bind \"Var_car\" '()) (bind \"Var_car\" '((func ((\"Var\"))) "
+        "\"Var\")))");
+  _case("strings",
+        "(list (+ \"a\" 1 \"b\") (+ 1 \"a\") (string-append \"a\" \"b\") "
+        "(substring \"abcd\" 1 3) (lower \"AbC\") (repr '(a \"b\")))");
+  _case("matching",
+        "(list (match '(a 2) '(a ?x)) (match-replace '(a 2) '(a ?x) '?x) "
+        "(search-replace '(a (a 2)) '(a ?x) '?x) (match-case '(a 2) ((a ?x) "
+        "(+ ?x 1)) (else 0)))");
+  _case("let",
+        "(def a 9) (list (let ((a 1) (b a)) b) (let* ((a 1) (b a)) b))");
+  _case("recursion",
+        "(defun fact (n) (if (= n 0) 1 (* n (fact (- n 1))))) (map fact '(0 "
+        "1 2 3 4 5 6))");
+  foreach (String op, %("+" "-" "*" "/" "=" "<" "<=" ">" ">="))
+    foreach (String arguments, %("" "2" "2 3" "2 3 4" "2 2 2" "2 \"x\""))
+      _case(%"numeric-$op-$arguments", %"($op $arguments)");
+  /* Native signatures are visible in errors, including their return
+     types. */
+  _case("native-signature-str", "(str)");
+  _case("native-signature-repr", "(repr 1 2)");
+  _case("native-signature-downcase", "(string-downcase 1)");
+  _case("native-signature-string-append", "(_string-append \"a\" 1)");
+  foreach (String native,
+           %("Var_car" "Var_cdr" "Var_cons" "lisp_atom" "lisp_pair"
+             "lisp_list" "lisp_eq" "lisp_type" "lisp_number" "lisp_string"
+             "lisp_symbol" "lisp_procedure" "List_reverse" "List_len"
+             "List_match" "lisp_match_replace" "List_search"
+             "List_search_replace" "lisp_add" "Var_binary" "lisp_compare"
+             "lisp_str" "lisp_repr" "String_len" "lisp_string_append"
+             "lisp_substring" "lisp_string_downcase" "lisp_read_file"
+             "lisp_write_file" "List_sort"))
+    _case(%"native-arity-$native", %"((bind \"$native\" nil))");
+  foreach (List types,
+           %(("reverse" "1") ("length" "1") ("_match" "1 nil")
+             ("match-replace" "1 nil nil") ("search" "1 nil")
+             ("_search-replace" "1 nil nil") ("string-length" "1")
+             ("substring" "\"abc\" \"x\" 1")))
+    _case(%"native-types-${types.car()}",
+          %"(${types.car()} ${types.cdr().car()})");
+  int index = 0;
+  foreach (String source,
+           %("missing" "(1 2)" "(quote)" "(quote a b)" "(def)" "(def 1 2)"
+             "(cond)" "(cond 1)" "(cond (true))" "(lambda x x)"
+             "(lambda (x))" "((lambda (x) x))" "((lambda () 1) 2)"
+             "((lambda (a .) a) 1)" "(eval)" "(apply + 7)"
+             "(apply quote '(x))" "(apply (macro () 1) nil)"
+             "(apply apply '(1))" "(apply apply '(+ 1))" "(quasiquote)"
+             "`,@'(1)" "`(a ,@1)" "`(unquote 1 2)" "(import 1)"
+             "(bind 1 nil)" "(bind \"Var_car\" 1)" "(bind \"unknown\" nil)"
+             "(car 1)" "(cons 1 2)" "(substring 1 0 1)" "(" ")" "'"
+             "\"unterminated" "\"\\z\"" "(def x 1) )" "(def x 1) ("
+             "(unquote 1)"))
+    _case(%"error-${index++}", source);
+}
+
+/* Python's repr of a bytes value, which shows the output of a failed case. */
+static String _repr_bytes(String text) {
+  char quote = text.contains("'") && !text.contains("\"") ? '"' : '\'';
+  Array parts = [String.printf("b%c", quote)];
+  for (int i = 0; i < text.len(); i++) {
+    unsigned char byte = text[i];
+    if (byte == '\\' || byte == quote) parts.push(String.printf("\\%c", byte));
+    else if (byte == '\n') parts.push("\\n");
+    else if (byte == '\t') parts.push("\\t");
+    else if (byte == '\r') parts.push("\\r");
+    else if (byte < 32 || byte > 126)
+      parts.push(String.printf("\\x%02x", byte));
+    else parts.push(String.printf("%c", byte));
+  }
+  parts.push(String.printf("%c", quote));
+  return String.join("", parts.list_free());
+}
+
+/* Runs `command`, giving it `input` as standard input when set, and returns
+   `(status stdout stderr)`, or NULL when it exceeds 15 seconds. */
+static List _run(List command, String input) {
+  Job job = command.job().options({stderr: <capture>});
+  if (input) job.options({input: input});
+  job.start();
+  time_t deadline = time(NULL) + 15;
+  while (!job.ready()) {
+    if (time(NULL) > deadline) {
+      job.kill(SIGKILL);
+      return NULL;
+    }
+    usleep(1000);
+  }
+  String output = NULL;
+  try output = job.output();
+  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
+  String errors = job.errors();
+  return %(${job.status()} $output $errors);
+}
+
+static String _repr(List result) {
+  (int status, String output, String errors) = result;
+  return %"($status, ${_repr_bytes(output)}, ${_repr_bytes(errors)})";
+}
+
+/* Runs a case against both programs and reports whether they agree. */
+static int _agrees(List oracle, List reference, String name, String source,
+                   String shown, String input) {
+  List expected = _run(oracle, input);
+  List actual = expected ? _run(reference, input) : NULL;
+  if (!actual) {
+    printf("FAIL %s: execution exceeded 15 seconds\n", name);
+    return 0;
+  }
+  if (actual == expected) return 1;
+  printf("FAIL %s: %s\n  oracle: %s\n  reference: %s\n", name, shown,
+         _repr(expected), _repr(actual));
+  return 0;
+}
+
+List spec = %(
+  (--reference (value path) (default "/tmp/reference-lisp"))
+  (--oracle (value path) (default "/tmp/x2c-lisp-oracle"))
+  (--build));
+Map options = NULL;
+try options = Args.parse(args, spec);
+catch %(bad-arg *detail): {
+  Stderr.printf("%s", Args.usage("check-reference-lisp", spec));
+  return 2;
+}
+String reference = options["reference"].str();
+String oracle = options["oracle"].str();
+Path root = Path.new(argv[0]).absolute().dirname().dirname().dirname();
+if (options["build"]) {
+  Path x2c = root.join("builds/0/x2c");
+  foreach (List build, %(("literate-lisp.x" $reference) ("lisp.x" $oracle))) {
+    (String source, String output) = build;
+    Path program = root.join("examples/programs").join(source);
+    %($x2c build --output $output $program).job()
+      .options({dir: root, stdout: <inherit>}).check();
+  }
+}
+Path init = root.join("etc/init.xlisp");
+List oracle_command = %($oracle --init $init);
+List reference_command = %($reference);
+
+corpus = [];
+_cases();
+_case("showcase",
+      root.join("examples/data/reference-lisp/showcase.xlisp").read_text());
+Path extras = root.join("etc/lisp-extras.xlisp");
+_case("extras", %"(import \"$extras\") (list (range 2 6) (sort '(3 1 2)) " +
+                "(fib 8) (subst 'x 'a '(a (b a))))");
+Path temp = Path.temp_dir();
+Path imported = temp.join("module.xlisp");
+imported.write_text("(def imported 40) (+ imported 2)\n");
+_case("import", %"(list (import \"$imported\") imported)");
+_case("missing-import", %"(import \"$temp/missing\")");
+Path nul_path = temp.join("nul.xlisp");
+File nul = File.open(nul_path, "wb");
+fwrite("(def x 1)\0(+ x 1)", 1, 17, nul);
+nul.close();
+_case("nul-import", %"(import \"$nul_path\")");
+Path io = root.join("etc/lisp-io.xlisp"), data = temp.join("data.txt");
+_case("io", %"(import \"$io\") (list (write-file \"$data\" \"hello\") " +
+            %"(read-file \"$data\"))");
+
+int failures = 0;
+foreach (List entry, corpus) {
+  (String name, String source) = entry;
+  List flag = %("-e" $source);
+  if (!_agrees(oracle_command.append(flag), reference_command.append(flag),
+               name, source, source, NULL))
+    failures++;
+}
+temp.remove_tree();
+
+List repl_cases = %(("repl-multiline" "(+ 1\n 2)\n")
+                    ("repl-recovery" "(def x 1) missing (def x 2)\nx\n")
+                    ("repl-reader-recovery" "(def x 1) )\nx\n")
+                    ("repl-incomplete" "(+ 1\n"));
+foreach (List entry, repl_cases) {
+  (String name, String source) = entry;
+  String shown = String.new(_repr_bytes(source).str() + 1);
+  if (!_agrees(oracle_command, reference_command, name, source, shown, source))
+    failures++;
+}
+int total = corpus.len() + repl_cases.len();
+printf("%d/%d cases agree\n", total - failures, total);
+return failures ? 1 : 0;

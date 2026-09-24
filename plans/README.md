@@ -82,7 +82,6 @@ execution.
 | Record | What remains |
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
 | [yyjson header wiring](archive/x2c-header-collection-gaps.md#yyjson-follow-up) | Needs author scoping; reading the pinned `yyjson.h` records `#define bool unsigned char` from an `#elif` arm C never takes, so emitted prototypes conflict. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
@@ -110,6 +109,8 @@ campaign outcomes; the original observations do not describe later
 
 - [Indentation syntax](archive/indentation-syntax.md): done; `.xp`,
   `.xpmacro`, and `#pragma indent` select a tokenizer layout pass.
+- [Cleanup lowering](archive/emit-cleanup-lowering.md): done; phase 1
+  shipped as `68eea0a`, phases 2 and 3 measured and declined 2026-09-24.
 - [Explicit meta calls, lifetimes, and computed values](archive/explicit-meta-and-lifetime-campaign.md):
   done; pieces 0-5 delivered through `49a239ec`.
 - [Meta values, types, and native records](archive/meta-values-types.md):

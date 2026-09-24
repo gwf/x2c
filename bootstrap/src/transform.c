@@ -2405,6 +2405,7 @@ return NULL;
 List List_append(List, List);
 List Compiler_convert_compound_literal(Compiler, List, Type, Type);
 int Var_truth(Var);
+Type Sym_resolve_key(Sym, Type);
 static List _cast(Compiler compiler, List ast){
 
   {
@@ -2435,7 +2436,7 @@ return Compiler_convert_compound_literal(compiler, operand, type, native);
 default: break;
     }
   }
-if(type != _597 &&(source_var ||(target_var &&(Var_truth(source_type) || unresolved)))) return Compiler_convert_expression(compiler, Var_list(expression), type);  return cons(_601, cons(List_var(type), cons(expression, NULL)));
+int target_func = Var_truth(source_type) && Sym_resolve_key(compiler -> sym, type) == Sym_resolve_key(compiler -> sym, List_type(_180));  if(type != _597 &&(source_var || target_func ||(target_var &&(Var_truth(source_type) || unresolved)))) return Compiler_convert_expression(compiler, Var_list(expression), type);  return cons(_601, cons(List_var(type), cons(expression, NULL)));
 }
 break;
 }

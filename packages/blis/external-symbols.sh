@@ -3,7 +3,7 @@
 #
 #   ./external-symbols.sh <libblis.a>
 #
-# verify-archive.sh compares this list with a profile, and
+# verify-archive compares this list with a profile, and
 # tools/record-blis-profile.sh records it. Sorting uses LC_ALL=C: other
 # collations ignore leading underscores and reorder the list. macOS prefixes
 # each C symbol with an underscore, which the list omits.

@@ -42,7 +42,7 @@ run-lisp: builds/inline-lisp
 	python3 tools/run-fixture.py builds/inline-lisp
 
 verify-profile: verify-dependency verify-headers verify-pins
-	@./verify-profile.sh "$(CURL_PREFIX)" "$(OPENSSL_PREFIX)" \
+	@"$(X2C)" script verify-profile "$(CURL_PREFIX)" "$(OPENSSL_PREFIX)" \
 	  "$(CURL_CA_BUNDLE)"
 
 verify-headers: $(DEPENDENCY_PREREQUISITE)

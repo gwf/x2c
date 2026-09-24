@@ -33,6 +33,7 @@
 $(import "private-keywords.xmacro")
 #include "x2c.x"
 #include "machine.x"
+#include "autodiff.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
     `owner`. */
@@ -1607,6 +1608,7 @@ $(def lisp.native.target.rows (append '(
   (_lisp_String_try_double (as String_try_double_cell))
   (_lisp_String_try_next (as String_try_next_cell))
   (String_try_next)
+  (Split_try_next)
   (List_try_next)
   (Array_try_next)
   (Map_try_next)

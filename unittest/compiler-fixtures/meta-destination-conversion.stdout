@@ -6,3 +6,5 @@ symbol 1 1 1
 conditional-symbol 1 1 1 0 0 0
 hash 1 1 1
 hash-constant-string 1 1 1
+file 1
+adnode 5 5 5

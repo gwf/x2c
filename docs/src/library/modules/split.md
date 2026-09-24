@@ -11,12 +11,14 @@
 | --- | --- |
 | [`Split.iter`](#Split.iter) | Returns an iterator over a lazy `String` cursor. |
 | [`Split.try_next`](#Split.try_next) | Yields the next field and advances a caller-owned position on success. |
+| [`Split.var`](#Split.var) | Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross into compile-time code or a `Var` container. |
 | [`String.lines`](#String.lines) | Returns a lazy cursor over lines in `str`, with endings removed. |
 | [`String.split`](#String.split) | Splits `str` on every occurrence of `sep` into a `List` of `String`s. |
 | [`String.split_lines`](#String.split_lines) | Splits `str` into a `List` of lines. |
 | [`String.split_n`](#String.split_n) | Splits `str` at no more than `max_splits` separators. |
 | [`String.splits`](#String.splits) | Returns a lazy cursor over fields separated by `sep`. |
 | [`String.words`](#String.words) | Returns a lazy cursor over whitespace-delimited words in `str`. |
+| [`Var.split`](#Var.split) | Unboxes a descriptor from a `Var` produced by `Split.var`. |
 
 ### `Split`
 
@@ -38,7 +40,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/split.x:274`
+Source: `lib/split.x:288`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -67,7 +69,18 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/split.x:248`
+Source: `lib/split.x:262`
+
+<a id="Split.var"></a>
+#### Split.var
+
+`Var Split.var(Split split)`
+
+Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
+into compile-time code or a `Var` container. The box does not own the
+descriptor, which stays live only as long as its `Scope`.
+
+Source: `lib/split.x:30`
 
 ### `String`
 
@@ -90,7 +103,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:211`
+Source: `lib/split.x:225`
 
 <a id="String.split"></a>
 #### String.split
@@ -113,7 +126,7 @@ printf("%s\n", "a::b".split(":").repr());
 
 **Raises:** the same causes as `String.split_n`.
 
-Source: `lib/split.x:115`
+Source: `lib/split.x:126`
 
 <a id="String.split_lines"></a>
 #### String.split_lines
@@ -132,7 +145,7 @@ actual
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
 result.
 
-Source: `lib/split.x:130`
+Source: `lib/split.x:144`
 
 <a id="String.split_n"></a>
 #### String.split_n
@@ -148,7 +161,7 @@ The canonical fields and `List` remain live until their actual `String` and
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/split.x:83`
+Source: `lib/split.x:94`
 
 <a id="String.splits"></a>
 #### String.splits
@@ -168,7 +181,7 @@ temporary. The cursor borrows `str` and
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/split.x:225`
+Source: `lib/split.x:239`
 
 <a id="String.words"></a>
 #### String.words
@@ -189,7 +202,18 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:196`
+Source: `lib/split.x:210`
+
+### `Var`
+
+<a id="Var.split"></a>
+#### Var.split
+
+`Split Var.split(Var value)`
+
+Unboxes a descriptor from a `Var` produced by `Split.var`.
+
+Source: `lib/split.x:33`
 
 ## Public types
 

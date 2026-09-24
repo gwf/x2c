@@ -3794,8 +3794,8 @@ A noncapturing lambda remains a generated C function and can adapt to a
 supported C callback type, including `int (*)(int)`, in an initializer,
 assignment, argument, or return. A local typedef of the callback type has the
 same behavior. Parentheses around the lambda preserve this adaptation.
-Where a `Func` is expected, a fixed nonvariadic function or
-function-pointer value converts implicitly when the `Func` conversion supports
+Where a `Func` is expected, including a `(Func)` cast, a fixed nonvariadic
+function or function-pointer value converts implicitly when the `Func` conversion supports
 its parameters and result. Value parameters and results need a lossless `Var`
 conversion, and reference
 parameters retain their typed lvalue address. A pointer parameter whose type

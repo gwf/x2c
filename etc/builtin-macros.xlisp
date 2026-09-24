@@ -752,23 +752,23 @@
            arg-3 arg-4 arg-5)) (quote ())))))
 (def loop2-builtin_class_value_type
  (lambda (live-3 live-4 live-5 live-6)
-  (cond ((C.true? live-5)
+  (cond ((C.true? live-4)
          ((lambda (hold-7)
            (cond ((C.true?
                    (C.or (C.or (_binary hold-7 (quote ==) (quote const))
                           (_binary hold-7 (quote ==) (quote volatile)))
                     (_binary hold-7 (quote ==) (quote restrict))))
-                  (loop2-builtin_class_value_type live-3 live-4
-                   (cdr live-5) hold-7))
+                  (loop2-builtin_class_value_type live-3 (cdr live-4)
+                   hold-7 live-6))
             (true (cond ((match hold-7 (quote (bitfield *)))
-                         (loop2-builtin_class_value_type live-3 live-4
-                          (cdr live-5) hold-7))
+                         (loop2-builtin_class_value_type live-3 (cdr live-4)
+                          hold-7 live-6))
                    (true ((lambda (hold-8)
-                           (loop2-builtin_class_value_type live-3 hold-8
-                            (cdr live-5) hold-7)) (cons hold-7 live-4)))))))
-          (car live-5))) (true (List_reverse live-4)))))
+                           (loop2-builtin_class_value_type live-3 (cdr live-4)
+                            hold-7 hold-8)) (cons hold-7 live-6)))))))
+          (car live-4))) (true (List_reverse live-6)))))
 (def builtin_class_value_type
- (lambda (arg-1) (loop2-builtin_class_value_type arg-1 (quote ()) arg-1 0)))
+ (lambda (arg-1) (loop2-builtin_class_value_type arg-1 arg-1 0 (quote ()))))
 (def builtin_class_field_on
  (lambda (arg-1 arg-2)
   ((lambda (hold-3)
@@ -834,90 +834,90 @@
   (live-10 live-11 live-12 live-13 live-14
    live-15 live-16 live-17 live-18 live-19 live-20
    live-21 live-22)
-  (cond ((C.true? live-20)
+  (cond ((C.true? live-22)
          ((lambda (hold-23)
            ((lambda (hold-24)
              ((lambda (hold-25)
-               (loop9-builtin_class_new live-10 live-11
-                hold-25 live-13 live-14 hold-23 live-16 hold-24
-                live-18 live-19 (cdr live-20) live-21 live-22))
+               (loop9-builtin_class_new live-10 hold-24
+                live-12 live-13 live-14 hold-25 live-16 live-17
+                live-18 hold-23 live-20 live-21 (cdr live-22)))
               (cons (builtin_class_ref
                      (string-append (quote "field_")
-                      (Var_str (List_getindex hold-23 0)))) live-12)))
+                      (Var_str (List_getindex hold-23 0)))) live-15)))
             (cons (builtin_class_parameter
                    (builtin_class_value_type (List_getindex hold-23 1))
                    (string-append (quote "field_")
-                    (Var_str (List_getindex hold-23 0)))) live-17)))
-          (Var_list (car live-20))))
+                    (Var_str (List_getindex hold-23 0)))) live-11)))
+          (Var_list (car live-22))))
    (true ((lambda (hold-26)
            ((lambda (hold-27)
-             (cond ((C.true? (C.and (C.and live-14 (C.not live-16)) live-19))
+             (cond ((C.true? (C.and (C.and live-16 (C.not live-17)) live-12))
                     ((lambda (hold-28)
                       ((lambda (hold-29)
-                        (cond ((C.true? (C.and live-19 (C.not live-16)))
-                               (cond ((C.true? live-14)
+                        (cond ((C.true? (C.and live-12 (C.not live-17)))
+                               (cond ((C.true? live-16)
                                       ((lambda (hold-30)
                                         ((lambda (hold-31)
                                           ((lambda (hold-32)
-                                            (builtin_class_default live-11
+                                            (builtin_class_default live-13
                                              (C.address "new" (quote string))
-                                             live-18 hold-26
+                                             live-21 hold-26
                                              (List_append hold-31
                                               (cons (List_var
                                                      (x2c_stmnt_return hold-32))
                                                (quote ())))))
                                            (C.ternary
-                                            (C.and live-14
-                                             (C.or live-16 (C.not live-19)))
-                                            (builtin_class_allocate_copy live-22)
-                                            live-22)))
+                                            (C.and live-16
+                                             (C.or live-17 (C.not live-12)))
+                                            (builtin_class_allocate_copy live-18)
+                                            live-18)))
                                          (List_append hold-29
                                           (cons (List_var
                                                  (cons (quote syntax-recipe)
                                                   (cons (quote class.initializer)
                                                    (cons (List_var
                                                           (cons (String_var
-                                                                 live-11)
+                                                                 live-13)
                                                            (cons hold-30
                                                             (quote ()))))
                                                     (quote ()))))) (quote ())))))
                                        (Symbol_var (quote true))))
                                 (true ((lambda (hold-33)
                                         ((lambda (hold-34)
-                                          (builtin_class_default live-11
+                                          (builtin_class_default live-13
                                            (C.address "new" (quote string))
-                                           live-18 hold-26
+                                           live-21 hold-26
                                            (List_append hold-33
                                             (cons (List_var
                                                    (x2c_stmnt_return hold-34))
                                              (quote ())))))
                                          (C.ternary
-                                          (C.and live-14
-                                           (C.or live-16 (C.not live-19)))
-                                          (builtin_class_allocate_copy live-22)
-                                          live-22)))
+                                          (C.and live-16
+                                           (C.or live-17 (C.not live-12)))
+                                          (builtin_class_allocate_copy live-18)
+                                          live-18)))
                                        (List_append hold-29
                                         (cons (List_var
                                                (cons (quote syntax-recipe)
                                                 (cons (quote class.initializer)
                                                  (cons (List_var
                                                         (cons (String_var
-                                                               live-11)
+                                                               live-13)
                                                          (cons (quote ())
                                                           (quote ()))))
                                                   (quote ()))))) (quote ())))))))
                          (true ((lambda (hold-35)
-                                 (builtin_class_default live-11
-                                  (C.address "new" (quote string)) live-18
+                                 (builtin_class_default live-13
+                                  (C.address "new" (quote string)) live-21
                                   hold-26
                                   (List_append hold-29
                                    (cons (List_var (x2c_stmnt_return hold-35))
                                     (quote ())))))
                                 (C.ternary
-                                 (C.and live-14 (C.or live-16 (C.not live-19)))
-                                 (builtin_class_allocate_copy live-22) live-22)))))
+                                 (C.and live-16 (C.or live-17 (C.not live-12)))
+                                 (builtin_class_allocate_copy live-18) live-18)))))
                        (cons (List_var
-                              (builtin_class_declaration live-18 "value"
+                              (builtin_class_declaration live-21 "value"
                                hold-28)) (quote ()))))
                      (builtin_class_call
                       (C.address "Scope_calloc" (quote string))
@@ -925,75 +925,75 @@
                        (cons (List_var
                               (builtin_class_size
                                (builtin_class_op (quote *)
-                                (cons (List_var live-22) (quote ())))))
+                                (cons (List_var live-18) (quote ())))))
                         (quote ()))))))
               (true ((lambda (hold-36)
-                      (cond ((C.true? (C.and live-19 (C.not live-16)))
-                             (cond ((C.true? live-14)
+                      (cond ((C.true? (C.and live-12 (C.not live-17)))
+                             (cond ((C.true? live-16)
                                     ((lambda (hold-37)
                                       ((lambda (hold-38)
                                         ((lambda (hold-39)
-                                          (builtin_class_default live-11
+                                          (builtin_class_default live-13
                                            (C.address "new" (quote string))
-                                           live-18 hold-26
+                                           live-21 hold-26
                                            (List_append hold-38
                                             (cons (List_var
                                                    (x2c_stmnt_return hold-39))
                                              (quote ())))))
                                          (C.ternary
-                                          (C.and live-14
-                                           (C.or live-16 (C.not live-19)))
-                                          (builtin_class_allocate_copy live-22)
-                                          live-22)))
+                                          (C.and live-16
+                                           (C.or live-17 (C.not live-12)))
+                                          (builtin_class_allocate_copy live-18)
+                                          live-18)))
                                        (List_append hold-36
                                         (cons (List_var
                                                (cons (quote syntax-recipe)
                                                 (cons (quote class.initializer)
                                                  (cons (List_var
                                                         (cons (String_var
-                                                               live-11)
+                                                               live-13)
                                                          (cons hold-37
                                                           (quote ()))))
                                                   (quote ()))))) (quote ())))))
                                      (Symbol_var (quote true))))
                               (true ((lambda (hold-40)
                                       ((lambda (hold-41)
-                                        (builtin_class_default live-11
+                                        (builtin_class_default live-13
                                          (C.address "new" (quote string))
-                                         live-18 hold-26
+                                         live-21 hold-26
                                          (List_append hold-40
                                           (cons (List_var
                                                  (x2c_stmnt_return hold-41))
                                            (quote ())))))
                                        (C.ternary
-                                        (C.and live-14
-                                         (C.or live-16 (C.not live-19)))
-                                        (builtin_class_allocate_copy live-22)
-                                        live-22)))
+                                        (C.and live-16
+                                         (C.or live-17 (C.not live-12)))
+                                        (builtin_class_allocate_copy live-18)
+                                        live-18)))
                                      (List_append hold-36
                                       (cons (List_var
                                              (cons (quote syntax-recipe)
                                               (cons (quote class.initializer)
                                                (cons (List_var
-                                                      (cons (String_var live-11)
+                                                      (cons (String_var live-13)
                                                        (cons (quote ())
                                                         (quote ())))) (quote ())))))
                                        (quote ())))))))
                        (true ((lambda (hold-42)
-                               (builtin_class_default live-11
-                                (C.address "new" (quote string)) live-18
+                               (builtin_class_default live-13
+                                (C.address "new" (quote string)) live-21
                                 hold-26
                                 (List_append hold-36
                                  (cons (List_var (x2c_stmnt_return hold-42))
                                   (quote ())))))
                               (C.ternary
-                               (C.and live-14 (C.or live-16 (C.not live-19)))
-                               (builtin_class_allocate_copy live-22) live-22)))))
+                               (C.and live-16 (C.or live-17 (C.not live-12)))
+                               (builtin_class_allocate_copy live-18) live-18)))))
                      (cons (List_var
-                            (builtin_class_declaration live-21 "value"
+                            (builtin_class_declaration live-10 "value"
                              hold-27)) (quote ()))))))
-            (x2c_expr_composite (List_reverse live-12))))
-          (List_reverse live-17))))))
+            (x2c_expr_composite (List_reverse live-15))))
+          (List_reverse live-11))))))
 (def builtin_class_new
  (lambda (arg-1 arg-2 arg-3 arg-4 arg-5)
   ((lambda (hold-6)
@@ -1001,9 +1001,9 @@
       ((lambda (hold-8)
         (cond ((C.true? hold-8)
                (cond ((C.true? arg-5)
-                      (loop9-builtin_class_new arg-4 arg-1 (quote ())
-                       0 arg-3 0 arg-5 (quote ()) hold-6 hold-8
-                       arg-4 arg-2 hold-7))
+                      (loop9-builtin_class_new arg-2 (quote ())
+                       hold-8 arg-1 0 (quote ()) arg-3 arg-5 hold-7
+                       0 arg-4 hold-6 arg-4))
                 (true ((lambda (hold-43)
                         (cond ((C.true?
                                 (C.and (C.and arg-3 (C.not arg-5)) hold-8))
@@ -1453,49 +1453,49 @@
      (List_getindex arg-1 1))) (builtin_class_field_value arg-1))))
 (def loop6-builtin_class_write_fields
  (lambda (live-7 live-8 live-9 live-10 live-11 live-12)
-  (cond ((C.true? live-8)
+  (cond ((C.true? live-11)
          ((lambda (hold-13)
            ((lambda (hold-14)
              ((lambda (hold-15)
-               (cond ((C.true? (C.not (List_equal hold-13 live-10)))
+               (cond ((C.true? (C.not (List_equal hold-13 live-9)))
                       ((lambda (hold-16)
-                        (loop6-builtin_class_write_fields hold-16
-                         (cdr live-8) live-9 live-10 hold-13 live-12))
+                        (loop6-builtin_class_write_fields live-7
+                         live-8 live-9 hold-16 (cdr live-11) hold-13))
                        (cons (x2c_stmnt_make
-                              (builtin_class_method live-9
+                              (builtin_class_method live-8
                                (C.address "write" (quote string))
                                (cons (List_var
                                       (x2c_literal_string
                                        (C.address ", " (quote string))))
                                 (quote ())))) hold-15)))
-                (true (loop6-builtin_class_write_fields hold-15
-                       (cdr live-8) live-9 live-10 hold-13 live-12))))
+                (true (loop6-builtin_class_write_fields live-7
+                       live-8 live-9 hold-15 (cdr live-11) hold-13))))
               (cons (builtin_class_field_write hold-13) hold-14)))
             (cons (x2c_stmnt_make
-                   (builtin_class_method live-9
+                   (builtin_class_method live-8
                     (C.address "write" (quote string))
                     (cons (List_var
                            (x2c_literal_string
                             (string-append (Var_str (List_getindex hold-13 0))
-                             (quote ": ")))) (quote ())))) live-7)))
-          (Var_list (car live-8))))
+                             (quote ": ")))) (quote ())))) live-10)))
+          (Var_list (car live-11))))
    (true ((lambda (hold-17)
            (cons (quote seq)
             (append hold-17
              (cons (List_var
                     (x2c_stmnt_return
-                     (builtin_class_method live-9
+                     (builtin_class_method live-8
                       (C.address "write" (quote string))
                       (cons (List_var
                              (x2c_literal_string (C.address " }" (quote string))))
-                       (quote ()))))) (quote ()))))) (List_reverse live-7))))))
+                       (quote ()))))) (quote ()))))) (List_reverse live-10))))))
 (def builtin_class_write_fields
  (lambda (arg-1 arg-2)
   ((lambda (hold-3)
     ((lambda (hold-4)
       ((lambda (hold-5)
-        (loop6-builtin_class_write_fields hold-4
-         arg-2 hold-3 hold-5 0 arg-2)) (List_last arg-2)))
+        (loop6-builtin_class_write_fields arg-2 hold-3
+         hold-5 hold-4 arg-2 0)) (List_last arg-2)))
      (cons (List_var
             (x2c_stmnt_make
              (builtin_class_method hold-3 (C.address "write" (quote string))
@@ -1673,37 +1673,37 @@
    (builtin_class_ref (C.address "out" (quote string))))))
 (def loop7-builtin_class_equal
  (lambda (live-8 live-9 live-10 live-11 live-12 live-13 live-14)
-  (cond ((C.true? live-11)
+  (cond ((C.true? live-9)
          ((lambda (hold-15)
            ((lambda (hold-16)
              ((lambda (hold-17)
-               (loop7-builtin_class_equal live-8 live-9
-                live-10 (cdr live-11) hold-15 hold-17 live-14))
+               (loop7-builtin_class_equal live-8 (cdr live-9)
+                hold-17 live-11 live-12 hold-15 live-14))
               (cons (cons (quote if)
                      (cons (List_var
                             (builtin_class_op (quote !)
                              (cons (List_var hold-16) (quote ()))))
                       (cons (List_var (x2c_stmnt_return (x2c_literal_int 0)))
-                       (quote ())))) live-13)))
+                       (quote ())))) live-10)))
             (builtin_class_call (C.address "Var_equal" (quote string))
              (cons (List_var
                     (builtin_class_cast (quote ("Var"))
-                     (builtin_class_field_on hold-15 live-9)))
+                     (builtin_class_field_on hold-15 live-14)))
               (cons (List_var
                      (builtin_class_cast (quote ("Var"))
-                      (builtin_class_field_on hold-15 live-10)))
-               (quote ())))))) (Var_list (car live-11))))
+                      (builtin_class_field_on hold-15 live-12)))
+               (quote ())))))) (Var_list (car live-9))))
    (true ((lambda (hold-18)
-           (builtin_class_default live-14 (C.address "equal" (quote string))
+           (builtin_class_default live-8 (C.address "equal" (quote string))
             (quote (int))
             (cons (List_var
                    (builtin_class_parameter
-                    (cons (String_var live-14) (quote ())) "left"))
+                    (cons (String_var live-8) (quote ())) "left"))
              (cons (List_var
                     (builtin_class_parameter
-                     (cons (String_var live-14) (quote ())) "right"))
+                     (cons (String_var live-8) (quote ())) "right"))
               (quote ()))) hold-18))
-          (List_append (List_reverse live-13)
+          (List_append (List_reverse live-10)
            (cons (List_var (x2c_stmnt_return (x2c_literal_int 1)))
             (quote ()))))))))
 (def builtin_class_equal
@@ -1729,42 +1729,42 @@
                         (cons (List_var
                                (builtin_class_cast (quote (* void)) hold-5))
                          (quote ())))))) (quote ()))))
-       (true (loop7-builtin_class_equal arg-3 hold-4
-              hold-5 arg-3 0 (quote ()) arg-1))))
+       (true (loop7-builtin_class_equal arg-1 arg-3
+              (quote ()) arg-3 hold-5 0 hold-4))))
      (builtin_class_ref (C.address "right" (quote string)))))
    (builtin_class_ref (C.address "left" (quote string))))))
 (def loop8-builtin_class_hash
  (lambda (live-9 live-10 live-11 live-12 live-13 live-14)
-  (cond ((C.true? live-11)
+  (cond ((C.true? live-14)
          ((lambda (hold-15)
            ((lambda (hold-16)
              ((lambda (hold-17)
                ((lambda (hold-18)
-                 (loop8-builtin_class_hash live-9 live-10
-                  (cdr live-11) hold-18 live-13 hold-15))
+                 (loop8-builtin_class_hash live-9 hold-15
+                  live-11 live-12 hold-18 (cdr live-14)))
                 (cons (x2c_stmnt_make
                        (builtin_class_op (quote =)
-                        (cons (List_var live-10)
-                         (cons (List_var hold-17) (quote ()))))) live-12)))
+                        (cons (List_var live-12)
+                         (cons (List_var hold-17) (quote ()))))) live-13)))
               (builtin_class_call (C.address "x2c_hash_word" (quote string))
                (cons (List_var
                       (builtin_class_op (quote ^)
-                       (cons (List_var live-10)
+                       (cons (List_var live-12)
                         (cons (List_var hold-16) (quote ()))))) (quote ())))))
             (builtin_class_call (C.address "Var_hash" (quote string))
              (cons (List_var
                     (builtin_class_cast (quote ("Var"))
                      (builtin_class_field_value hold-15))) (quote ())))))
-          (Var_list (car live-11))))
+          (Var_list (car live-14))))
    (true ((lambda (hold-19)
-           (builtin_class_default live-9 (C.address "hash" (quote string))
+           (builtin_class_default live-11 (C.address "hash" (quote string))
             (quote (unsigned))
             (cons (List_var
                    (builtin_class_parameter
-                    (cons (String_var live-9) (quote ())) "value"))
+                    (cons (String_var live-11) (quote ())) "value"))
              (quote ())) hold-19))
-          (List_append (List_reverse live-12)
-           (cons (List_var (x2c_stmnt_return live-10))
+          (List_append (List_reverse live-13)
+           (cons (List_var (x2c_stmnt_return live-12))
             (quote ()))))))))
 (def builtin_class_hash
  (lambda (arg-1 arg-2 arg-3)
@@ -1786,8 +1786,8 @@
                              hold-4)) (quote ()))))) (quote ()))))
      (true ((lambda (hold-6)
              ((lambda (hold-7)
-               (loop8-builtin_class_hash arg-1 hold-6 arg-3
-                hold-7 arg-3 0))
+               (loop8-builtin_class_hash arg-3 0 arg-1 hold-6
+                hold-7 arg-3))
               (cons (List_var
                      (builtin_class_declaration (quote (unsigned))
                       "hash" (x2c_literal_int 0))) (quote ()))))
@@ -1844,7 +1844,7 @@
      (List_getindex arg-1 2))) (List_getindex arg-1 1))))
 (def loop2-builtin_class_named
  (lambda (live-3 live-4 live-5 live-6)
-  (cond ((C.true? live-6)
+  (cond ((C.true? live-3)
          ((lambda (hold-7)
            (cond ((C.true?
                    (C.and
@@ -1854,24 +1854,24 @@
                     (_binary (String_len (Var_str (List_car hold-7)))
                      (quote >) 0)))
                   ((lambda (hold-8)
-                    (loop2-builtin_class_named live-3 hold-7
-                     hold-8 (cdr live-6))) (cons hold-7 live-5)))
-            (true (loop2-builtin_class_named live-3 hold-7 live-5 (cdr live-6)))))
-          (Var_list (car live-6)))) (true (List_reverse live-5)))))
+                    (loop2-builtin_class_named (cdr live-3) live-4
+                     hold-8 hold-7)) (cons hold-7 live-5)))
+            (true (loop2-builtin_class_named (cdr live-3) live-4 live-5 hold-7))))
+          (Var_list (car live-3)))) (true (List_reverse live-5)))))
 (def builtin_class_named
- (lambda (arg-1) (loop2-builtin_class_named arg-1 0 (quote ()) arg-1)))
+ (lambda (arg-1) (loop2-builtin_class_named arg-1 arg-1 (quote ()) 0)))
 (def loop2-builtin_class_positional
  (lambda (live-3 live-4 live-5 live-6)
-  (cond ((C.true? live-4)
+  (cond ((C.true? live-6)
          ((lambda (hold-7)
            (cond ((C.true?
                    (C.not (_x2c.type.value-int (List_getindex hold-7 1))))
-                  (loop2-builtin_class_positional 0 (cdr live-4) live-5 hold-7))
-            (true (loop2-builtin_class_positional live-3
-                   (cdr live-4) live-5 hold-7)))) (Var_list (car live-4))))
-   (true live-3))))
+                  (loop2-builtin_class_positional hold-7 live-4 0 (cdr live-6)))
+            (true (loop2-builtin_class_positional hold-7
+                   live-4 live-5 (cdr live-6))))) (Var_list (car live-6))))
+   (true live-5))))
 (def builtin_class_positional
- (lambda (arg-1) (loop2-builtin_class_positional 1 arg-1 arg-1 0)))
+ (lambda (arg-1) (loop2-builtin_class_positional 0 arg-1 1 arg-1)))
 (def builtin_class_constructor
  (lambda (arg-1 arg-2 arg-3 arg-4 arg-5 arg-6 arg-7 arg-8 arg-9)
   (cond ((C.true?
@@ -1913,7 +1913,7 @@
  (lambda
   (live-22 live-23 live-24 live-25 live-26
    live-27 live-28 live-29 live-30)
-  (cond ((C.true? live-27)
+  (cond ((C.true? live-25)
          ((lambda (hold-31)
            ((lambda (hold-32)
              ((lambda (hold-33)
@@ -1923,53 +1923,53 @@
                           (cond ((C.true? (C.not hold-33))
                                  ((lambda (hold-36)
                                    (loop21-builtin_class_defaults live-22
-                                    live-23 live-24 live-25 live-26
-                                    (cdr live-27) hold-36 live-29 hold-31))
+                                    live-23 live-24 (cdr live-25) hold-31
+                                    live-27 live-28 live-29 hold-36))
                                   (List_append hold-35
                                    (cons (List_var
-                                          (builtin_class_string_method live-23
+                                          (builtin_class_string_method live-24
                                            hold-32)) (quote ())))))
                            (true (loop21-builtin_class_defaults live-22
-                                  live-23 live-24 live-25 live-26 (cdr live-27)
-                                  hold-35 live-29 hold-31))))
-                         (List_append live-28
+                                  live-23 live-24 (cdr live-25) hold-31 live-27
+                                  live-28 live-29 hold-35))))
+                         (List_append live-30
                           (cons (List_var
-                                 (builtin_class_writer live-23 live-29 live-24
+                                 (builtin_class_writer live-24 live-27 live-28
                                   hold-32 hold-33)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-33))
                                ((lambda (hold-37)
                                  (loop21-builtin_class_defaults live-22 live-23
-                                  live-24 live-25 live-26 (cdr live-27) hold-37
-                                  live-29 hold-31))
-                                (List_append live-28
+                                  live-24 (cdr live-25) hold-31 live-27 live-28
+                                  live-29 hold-37))
+                                (List_append live-30
                                  (cons (List_var
-                                        (builtin_class_string_method live-23
+                                        (builtin_class_string_method live-24
                                          hold-32)) (quote ())))))
                          (true (loop21-builtin_class_defaults live-22
-                                live-23 live-24 live-25 live-26 (cdr live-27)
-                                live-28 live-29 hold-31))))))
-                (builtin_class_own_method live-23
+                                live-23 live-24 (cdr live-25) hold-31 live-27
+                                live-28 live-29 live-30))))))
+                (builtin_class_own_method live-24
                  (string-append (quote "write_") hold-32))))
-              (builtin_class_own_method live-23 hold-32)))
-            (Var_str hold-31))) (car live-27)))
+              (builtin_class_own_method live-24 hold-32)))
+            (Var_str hold-31))) (car live-25)))
    (true ((lambda (hold-38) (cons (quote seq) (append hold-38 (quote ()))))
-          (List_append live-28
+          (List_append live-30
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-23) (quote ())))
+                    (cons (List_var (cons (String_var live-24) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-25))
+                              (cons (List_var (x2c_literal_symbol live-22))
                                (quote ()))))
-                       (cons (List_var live-22) (quote ()))))))))
+                       (cons (List_var live-29) (quote ()))))))))
             (quote ()))))))))
 (def loop39-builtin_class_defaults
  (lambda
   (live-40 live-41 live-42 live-43 live-44
    live-45 live-46 live-47 live-48)
-  (cond ((C.true? live-45)
+  (cond ((C.true? live-43)
          ((lambda (hold-49)
            ((lambda (hold-50)
              ((lambda (hold-51)
@@ -1979,53 +1979,53 @@
                           (cond ((C.true? (C.not hold-51))
                                  ((lambda (hold-54)
                                    (loop39-builtin_class_defaults live-40
-                                    live-41 live-42 live-43 live-44
-                                    (cdr live-45) hold-54 live-47 hold-49))
+                                    live-41 live-42 (cdr live-43) hold-49
+                                    live-45 live-46 live-47 hold-54))
                                   (List_append hold-53
                                    (cons (List_var
-                                          (builtin_class_string_method live-41
+                                          (builtin_class_string_method live-42
                                            hold-50)) (quote ())))))
                            (true (loop39-builtin_class_defaults live-40
-                                  live-41 live-42 live-43 live-44 (cdr live-45)
-                                  hold-53 live-47 hold-49))))
-                         (List_append live-46
+                                  live-41 live-42 (cdr live-43) hold-49 live-45
+                                  live-46 live-47 hold-53))))
+                         (List_append live-48
                           (cons (List_var
-                                 (builtin_class_writer live-41 live-47 live-42
+                                 (builtin_class_writer live-42 live-45 live-46
                                   hold-50 hold-51)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-51))
                                ((lambda (hold-55)
                                  (loop39-builtin_class_defaults live-40 live-41
-                                  live-42 live-43 live-44 (cdr live-45) hold-55
-                                  live-47 hold-49))
-                                (List_append live-46
+                                  live-42 (cdr live-43) hold-49 live-45 live-46
+                                  live-47 hold-55))
+                                (List_append live-48
                                  (cons (List_var
-                                        (builtin_class_string_method live-41
+                                        (builtin_class_string_method live-42
                                          hold-50)) (quote ())))))
                          (true (loop39-builtin_class_defaults live-40
-                                live-41 live-42 live-43 live-44 (cdr live-45)
-                                live-46 live-47 hold-49))))))
-                (builtin_class_own_method live-41
+                                live-41 live-42 (cdr live-43) hold-49 live-45
+                                live-46 live-47 live-48))))))
+                (builtin_class_own_method live-42
                  (string-append (quote "write_") hold-50))))
-              (builtin_class_own_method live-41 hold-50)))
-            (Var_str hold-49))) (car live-45)))
+              (builtin_class_own_method live-42 hold-50)))
+            (Var_str hold-49))) (car live-43)))
    (true ((lambda (hold-56) (cons (quote seq) (append hold-56 (quote ()))))
-          (List_append live-46
+          (List_append live-48
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-41) (quote ())))
+                    (cons (List_var (cons (String_var live-42) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-43))
+                              (cons (List_var (x2c_literal_symbol live-40))
                                (quote ()))))
-                       (cons (List_var live-40) (quote ()))))))))
+                       (cons (List_var live-47) (quote ()))))))))
             (quote ()))))))))
 (def loop58-builtin_class_defaults
  (lambda
   (live-59 live-60 live-61 live-62 live-63
    live-64 live-65 live-66 live-67)
-  (cond ((C.true? live-64)
+  (cond ((C.true? live-62)
          ((lambda (hold-68)
            ((lambda (hold-69)
              ((lambda (hold-70)
@@ -2035,53 +2035,53 @@
                           (cond ((C.true? (C.not hold-70))
                                  ((lambda (hold-73)
                                    (loop58-builtin_class_defaults live-59
-                                    live-60 live-61 live-62 live-63
-                                    (cdr live-64) hold-73 live-66 hold-68))
+                                    live-60 live-61 (cdr live-62) hold-68
+                                    live-64 live-65 live-66 hold-73))
                                   (List_append hold-72
                                    (cons (List_var
-                                          (builtin_class_string_method live-60
+                                          (builtin_class_string_method live-61
                                            hold-69)) (quote ())))))
                            (true (loop58-builtin_class_defaults live-59
-                                  live-60 live-61 live-62 live-63 (cdr live-64)
-                                  hold-72 live-66 hold-68))))
-                         (List_append live-65
+                                  live-60 live-61 (cdr live-62) hold-68 live-64
+                                  live-65 live-66 hold-72))))
+                         (List_append live-67
                           (cons (List_var
-                                 (builtin_class_writer live-60 live-66 live-61
+                                 (builtin_class_writer live-61 live-64 live-65
                                   hold-69 hold-70)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-70))
                                ((lambda (hold-74)
                                  (loop58-builtin_class_defaults live-59 live-60
-                                  live-61 live-62 live-63 (cdr live-64) hold-74
-                                  live-66 hold-68))
-                                (List_append live-65
+                                  live-61 (cdr live-62) hold-68 live-64 live-65
+                                  live-66 hold-74))
+                                (List_append live-67
                                  (cons (List_var
-                                        (builtin_class_string_method live-60
+                                        (builtin_class_string_method live-61
                                          hold-69)) (quote ())))))
                          (true (loop58-builtin_class_defaults live-59
-                                live-60 live-61 live-62 live-63 (cdr live-64)
-                                live-65 live-66 hold-68))))))
-                (builtin_class_own_method live-60
+                                live-60 live-61 (cdr live-62) hold-68 live-64
+                                live-65 live-66 live-67))))))
+                (builtin_class_own_method live-61
                  (string-append (quote "write_") hold-69))))
-              (builtin_class_own_method live-60 hold-69)))
-            (Var_str hold-68))) (car live-64)))
+              (builtin_class_own_method live-61 hold-69)))
+            (Var_str hold-68))) (car live-62)))
    (true ((lambda (hold-75) (cons (quote seq) (append hold-75 (quote ()))))
-          (List_append live-65
+          (List_append live-67
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-60) (quote ())))
+                    (cons (List_var (cons (String_var live-61) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-62))
+                              (cons (List_var (x2c_literal_symbol live-59))
                                (quote ()))))
-                       (cons (List_var live-59) (quote ()))))))))
+                       (cons (List_var live-66) (quote ()))))))))
             (quote ()))))))))
 (def loop81-builtin_class_defaults
  (lambda
   (live-82 live-83 live-84 live-85 live-86
    live-87 live-88 live-89 live-90)
-  (cond ((C.true? live-87)
+  (cond ((C.true? live-85)
          ((lambda (hold-91)
            ((lambda (hold-92)
              ((lambda (hold-93)
@@ -2091,53 +2091,53 @@
                           (cond ((C.true? (C.not hold-93))
                                  ((lambda (hold-96)
                                    (loop81-builtin_class_defaults live-82
-                                    live-83 live-84 live-85 live-86
-                                    (cdr live-87) hold-96 live-89 hold-91))
+                                    live-83 live-84 (cdr live-85) hold-91
+                                    live-87 live-88 live-89 hold-96))
                                   (List_append hold-95
                                    (cons (List_var
-                                          (builtin_class_string_method live-83
+                                          (builtin_class_string_method live-84
                                            hold-92)) (quote ())))))
                            (true (loop81-builtin_class_defaults live-82
-                                  live-83 live-84 live-85 live-86 (cdr live-87)
-                                  hold-95 live-89 hold-91))))
-                         (List_append live-88
+                                  live-83 live-84 (cdr live-85) hold-91 live-87
+                                  live-88 live-89 hold-95))))
+                         (List_append live-90
                           (cons (List_var
-                                 (builtin_class_writer live-83 live-89 live-84
+                                 (builtin_class_writer live-84 live-87 live-88
                                   hold-92 hold-93)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-93))
                                ((lambda (hold-97)
                                  (loop81-builtin_class_defaults live-82 live-83
-                                  live-84 live-85 live-86 (cdr live-87) hold-97
-                                  live-89 hold-91))
-                                (List_append live-88
+                                  live-84 (cdr live-85) hold-91 live-87 live-88
+                                  live-89 hold-97))
+                                (List_append live-90
                                  (cons (List_var
-                                        (builtin_class_string_method live-83
+                                        (builtin_class_string_method live-84
                                          hold-92)) (quote ())))))
                          (true (loop81-builtin_class_defaults live-82
-                                live-83 live-84 live-85 live-86 (cdr live-87)
-                                live-88 live-89 hold-91))))))
-                (builtin_class_own_method live-83
+                                live-83 live-84 (cdr live-85) hold-91 live-87
+                                live-88 live-89 live-90))))))
+                (builtin_class_own_method live-84
                  (string-append (quote "write_") hold-92))))
-              (builtin_class_own_method live-83 hold-92)))
-            (Var_str hold-91))) (car live-87)))
+              (builtin_class_own_method live-84 hold-92)))
+            (Var_str hold-91))) (car live-85)))
    (true ((lambda (hold-98) (cons (quote seq) (append hold-98 (quote ()))))
-          (List_append live-88
+          (List_append live-90
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-83) (quote ())))
+                    (cons (List_var (cons (String_var live-84) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-85))
+                              (cons (List_var (x2c_literal_symbol live-82))
                                (quote ()))))
-                       (cons (List_var live-82) (quote ()))))))))
+                       (cons (List_var live-89) (quote ()))))))))
             (quote ()))))))))
 (def loop99-builtin_class_defaults
  (lambda
   (live-100 live-101 live-102 live-103 live-104
    live-105 live-106 live-107 live-108)
-  (cond ((C.true? live-105)
+  (cond ((C.true? live-103)
          ((lambda (hold-109)
            ((lambda (hold-110)
              ((lambda (hold-111)
@@ -2147,53 +2147,53 @@
                           (cond ((C.true? (C.not hold-111))
                                  ((lambda (hold-114)
                                    (loop99-builtin_class_defaults live-100
-                                    live-101 live-102 live-103 live-104
-                                    (cdr live-105) hold-114 live-107 hold-109))
+                                    live-101 live-102 (cdr live-103) hold-109
+                                    live-105 live-106 live-107 hold-114))
                                   (List_append hold-113
                                    (cons (List_var
-                                          (builtin_class_string_method live-101
+                                          (builtin_class_string_method live-102
                                            hold-110)) (quote ())))))
                            (true (loop99-builtin_class_defaults live-100
-                                  live-101 live-102 live-103 live-104
-                                  (cdr live-105) hold-113 live-107 hold-109))))
-                         (List_append live-106
+                                  live-101 live-102 (cdr live-103) hold-109
+                                  live-105 live-106 live-107 hold-113))))
+                         (List_append live-108
                           (cons (List_var
-                                 (builtin_class_writer live-101 live-107
-                                  live-102 hold-110 hold-111)) (quote ())))))
+                                 (builtin_class_writer live-102 live-105
+                                  live-106 hold-110 hold-111)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-111))
                                ((lambda (hold-115)
                                  (loop99-builtin_class_defaults live-100
-                                  live-101 live-102 live-103 live-104
-                                  (cdr live-105) hold-115 live-107 hold-109))
-                                (List_append live-106
+                                  live-101 live-102 (cdr live-103) hold-109
+                                  live-105 live-106 live-107 hold-115))
+                                (List_append live-108
                                  (cons (List_var
-                                        (builtin_class_string_method live-101
+                                        (builtin_class_string_method live-102
                                          hold-110)) (quote ())))))
                          (true (loop99-builtin_class_defaults live-100
-                                live-101 live-102 live-103 live-104
-                                (cdr live-105) live-106 live-107 hold-109))))))
-                (builtin_class_own_method live-101
+                                live-101 live-102 (cdr live-103) hold-109
+                                live-105 live-106 live-107 live-108))))))
+                (builtin_class_own_method live-102
                  (string-append (quote "write_") hold-110))))
-              (builtin_class_own_method live-101 hold-110)))
-            (Var_str hold-109))) (car live-105)))
+              (builtin_class_own_method live-102 hold-110)))
+            (Var_str hold-109))) (car live-103)))
    (true ((lambda (hold-116) (cons (quote seq) (append hold-116 (quote ()))))
-          (List_append live-106
+          (List_append live-108
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-101) (quote ())))
+                    (cons (List_var (cons (String_var live-102) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-103))
+                              (cons (List_var (x2c_literal_symbol live-100))
                                (quote ()))))
-                       (cons (List_var live-100) (quote ()))))))))
+                       (cons (List_var live-107) (quote ()))))))))
             (quote ()))))))))
 (def loop118-builtin_class_defaults
  (lambda
   (live-119 live-120 live-121 live-122 live-123
    live-124 live-125 live-126 live-127)
-  (cond ((C.true? live-124)
+  (cond ((C.true? live-122)
          ((lambda (hold-128)
            ((lambda (hold-129)
              ((lambda (hold-130)
@@ -2203,47 +2203,47 @@
                           (cond ((C.true? (C.not hold-130))
                                  ((lambda (hold-133)
                                    (loop118-builtin_class_defaults live-119
-                                    live-120 live-121 live-122 live-123
-                                    (cdr live-124) hold-133 live-126 hold-128))
+                                    live-120 live-121 (cdr live-122) hold-128
+                                    live-124 live-125 live-126 hold-133))
                                   (List_append hold-132
                                    (cons (List_var
-                                          (builtin_class_string_method live-120
+                                          (builtin_class_string_method live-121
                                            hold-129)) (quote ())))))
                            (true (loop118-builtin_class_defaults live-119
-                                  live-120 live-121 live-122 live-123
-                                  (cdr live-124) hold-132 live-126 hold-128))))
-                         (List_append live-125
+                                  live-120 live-121 (cdr live-122) hold-128
+                                  live-124 live-125 live-126 hold-132))))
+                         (List_append live-127
                           (cons (List_var
-                                 (builtin_class_writer live-120 live-126
-                                  live-121 hold-129 hold-130)) (quote ())))))
+                                 (builtin_class_writer live-121 live-124
+                                  live-125 hold-129 hold-130)) (quote ())))))
                   (true (cond ((C.true? (C.not hold-130))
                                ((lambda (hold-134)
                                  (loop118-builtin_class_defaults live-119
-                                  live-120 live-121 live-122 live-123
-                                  (cdr live-124) hold-134 live-126 hold-128))
-                                (List_append live-125
+                                  live-120 live-121 (cdr live-122) hold-128
+                                  live-124 live-125 live-126 hold-134))
+                                (List_append live-127
                                  (cons (List_var
-                                        (builtin_class_string_method live-120
+                                        (builtin_class_string_method live-121
                                          hold-129)) (quote ())))))
                          (true (loop118-builtin_class_defaults live-119
-                                live-120 live-121 live-122 live-123
-                                (cdr live-124) live-125 live-126 hold-128))))))
-                (builtin_class_own_method live-120
+                                live-120 live-121 (cdr live-122) hold-128
+                                live-124 live-125 live-126 live-127))))))
+                (builtin_class_own_method live-121
                  (string-append (quote "write_") hold-129))))
-              (builtin_class_own_method live-120 hold-129)))
-            (Var_str hold-128))) (car live-124)))
+              (builtin_class_own_method live-121 hold-129)))
+            (Var_str hold-128))) (car live-122)))
    (true ((lambda (hold-135) (cons (quote seq) (append hold-135 (quote ()))))
-          (List_append live-125
+          (List_append live-127
            (cons (List_var
                   (cons (quote adopt)
                    (cons (quote ("Var"))
-                    (cons (List_var (cons (String_var live-120) (quote ())))
+                    (cons (List_var (cons (String_var live-121) (quote ())))
                      (cons (quote external)
                       (cons (List_var
                              (cons (quote tag)
-                              (cons (List_var (x2c_literal_symbol live-122))
+                              (cons (List_var (x2c_literal_symbol live-119))
                                (quote ()))))
-                       (cons (List_var live-119) (quote ()))))))))
+                       (cons (List_var live-126) (quote ()))))))))
             (quote ()))))))))
 (def builtin_class_defaults
  (lambda (arg-1 arg-2 arg-3)
@@ -2273,14 +2273,15 @@
                                                               ((lambda (hold-20)
                                                                 (
                                                                  loop21-builtin_class_defaults
-                                                                 arg-3 arg-1
-                                                                 hold-10 hold-15
+                                                                 hold-15
                                                                  (quote
                                                                   ("str" "repr"))
+                                                                 arg-1
                                                                  (quote
                                                                   ("str" "repr"))
-                                                                 hold-20 hold-4
-                                                                 0))
+                                                                 0 hold-4
+                                                                 hold-10 arg-3
+                                                                 hold-20))
                                                                (List_append
                                                                 hold-19
                                                                 (cons (List_var
@@ -2344,19 +2345,18 @@
                                                                         discard-57)
                                                                        (
                                                                         loop39-builtin_class_defaults
-                                                                        arg-3
-                                                                        arg-1
-                                                                        hold-10
                                                                         hold-15
                                                                         (quote
                                                                          ("str"
                                                                           "repr"))
+                                                                        arg-1
                                                                         (quote
                                                                          ("str"
                                                                           "repr"))
-                                                                        hold-19
-                                                                        hold-4
-                                                                        0))
+                                                                        0 hold-4
+                                                                        hold-10
+                                                                        arg-3
+                                                                        hold-19))
                                                                       (
                                                                        x2c.diagnostic.fail
                                                                        (
@@ -2376,18 +2376,18 @@
                                                                        (quote ()))))
                                                                (true (
                                                                       loop58-builtin_class_defaults
-                                                                      arg-3
-                                                                      arg-1
-                                                                      hold-10
                                                                       hold-15
                                                                       (quote
                                                                        ("str"
                                                                         "repr"))
+                                                                      arg-1
                                                                       (quote
                                                                        ("str"
                                                                         "repr"))
-                                                                      hold-19
-                                                                      hold-4 0))))))
+                                                                      0 hold-4
+                                                                      hold-10
+                                                                      arg-3
+                                                                      hold-19))))))
                                                       (List_append hold-16
                                                        (cons (List_var
                                                               (
@@ -2536,13 +2536,14 @@
                                                             ((lambda (hold-80)
                                                               (
                                                                loop81-builtin_class_defaults
-                                                               arg-3 arg-1
-                                                               hold-10 hold-15
+                                                               hold-15
                                                                (quote
                                                                 ("str" "repr"))
+                                                               arg-1
                                                                (quote
                                                                 ("str" "repr"))
-                                                               hold-80 hold-4 0))
+                                                               0 hold-4 hold-10
+                                                               arg-3 hold-80))
                                                              (List_append
                                                               hold-79
                                                               (cons (List_var
@@ -2598,18 +2599,18 @@
                                                                       discard-117)
                                                                      (
                                                                       loop99-builtin_class_defaults
-                                                                      arg-3
-                                                                      arg-1
-                                                                      hold-10
                                                                       hold-15
                                                                       (quote
                                                                        ("str"
                                                                         "repr"))
+                                                                      arg-1
                                                                       (quote
                                                                        ("str"
                                                                         "repr"))
-                                                                      hold-79
-                                                                      hold-4 0))
+                                                                      0 hold-4
+                                                                      hold-10
+                                                                      arg-3
+                                                                      hold-79))
                                                                     (
                                                                      x2c.diagnostic.fail
                                                                      (String_add
@@ -2625,17 +2626,18 @@
                                                                      (quote ()))))
                                                              (true (
                                                                     loop118-builtin_class_defaults
-                                                                    arg-3 arg-1
-                                                                    hold-10
                                                                     hold-15
                                                                     (quote
                                                                      ("str"
                                                                       "repr"))
+                                                                    arg-1
                                                                     (quote
                                                                      ("str"
                                                                       "repr"))
-                                                                    hold-79
-                                                                    hold-4 0))))))
+                                                                    0 hold-4
+                                                                    hold-10
+                                                                    arg-3
+                                                                    hold-79))))))
                                                     (List_append hold-12
                                                      (cons (List_var
                                                             (

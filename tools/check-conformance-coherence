@@ -1,0 +1,65 @@
+#!/usr/bin/env -S x2c script
+/*  check-conformance-coherence -- owned conformance rows agree by symbol mode
+
+    Compares owned protocol conformance rows between prelude and live symbol
+    modes. A row is owned when its adoption row's file matches the unit being
+    dumped; adapter emission is keyed separately, to the unit defining the
+    forward converter. If the two modes disagree, the collected conformance
+    table depends on which symbol transport built the tree. Each mode runs the
+    same batched invocations the stage build uses, so cross-unit collection
+    state matches a real translation.
+*/
+#include <unistd.h>
+
+static String x2c;
+
+/* Captures whole dumps first, so a compiler failure stops the check. */
+static String _dump(List mode) {
+  String dump = "";
+  foreach (String units, %("lib/*.x" "src/*.x")) {
+    List sources = Path.glob(units);
+    dump += %($x2c translate @mode --dump-conformance @sources).job().output();
+  }
+  return dump;
+}
+
+static String _owned(String dump) {
+  Regex owned = Regex.compile("^\\((unit|conformance owned)");
+  Array rows = [];
+  foreach (String line, dump.split_lines(0))
+    if (owned.match(line)) rows.push(line + "\n");
+  return String.join("", rows.list_free());
+}
+
+Path root = Path.new(argv[0]).absolute().dirname().dirname();
+x2c = Env.get("X2C");
+if (!x2c) x2c = root.join("builds/0/x2c");
+if (!Path.is_executable(x2c)) {
+  Stderr.printf("check-conformance-coherence: missing compiler: %s\n", x2c);
+  return 2;
+}
+chdir(root);
+
+String snap = _dump(NULL), live = _dump(%("--live-symbols"));
+int units = 0;
+foreach (String line, snap.split_lines(0))
+  if (line.startswith("(unit ")) units++;
+if (!units) {
+  Stderr.printf("conformance coherence failure: %s dumped no units\n", x2c);
+  return 1;
+}
+
+String difference = Diff.unified(_owned(snap), _owned(live), "snap", "live");
+if (difference) {
+  Stderr.printf("conformance coherence failure: owned conformance rows "
+                "differ by symbol mode.\n"
+                "--- prelude symbols / +++ live symbols\n");
+  List lines = difference.split_lines(1);
+  Stderr.printf("%s", String.join("", lines.cdr().cdr()));
+  Stderr.printf("Generated adapters would depend on the build mode. "
+                "Investigate before publishing artifacts (a stale stage "
+                "usually means: make build).\n");
+  return 1;
+}
+printf("conformance: owned rows agree between prelude and live symbol modes "
+       "(%d units)\n", units);

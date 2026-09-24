@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-split-regions.x:7:14: region: a fresh allocation can outlive the region it was allocated in when returned
+    $scope() { return text.lines(); }
+               ^^^^^^
+  note: region opened at line 7
+
