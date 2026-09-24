@@ -361,6 +361,8 @@ static VarDescriptor *_required_descriptor(Var value, Symbol member) {
   raise %(no-member (tag $tag) (member $member));
 }
 
+meta int Var.contains(Var value, Var needle);
+
 /** Tests dynamic membership through the receiver's registered protocol row.
     Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
     receiver cannot perform membership.
@@ -375,6 +377,8 @@ int Var.contains(Var value, Var needle) {
   Symbol tag = value.tag();
   raise %(no-member (tag $tag) (member $member));
 }
+
+meta Var Var.getindex(Var value, Var key);
 
 /** Reads a dynamic indexed value through the receiver's protocol row.
     Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
@@ -391,6 +395,8 @@ Var Var.getindex(Var value, Var key) {
   raise %(no-member (tag $tag) (member $member));
 }
 
+meta Var Var.setindex(Var value, Var key, Var replacement);
+
 /** Stores and returns a dynamic indexed value through its protocol row.
     Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
     receiver's indexed assignment.
@@ -406,6 +412,8 @@ Var Var.setindex(Var value, Var key, Var replacement) {
   Symbol tag = value.tag();
   raise %(no-member (tag $tag) (member $member));
 }
+
+meta Var Var.updateindex(Var value, Var key, Symbol op, Var rhs);
 
 /** Applies the registered dynamic compound update at `key` and returns its
     result. Mutation and failure behavior belong to that callback; this
@@ -424,6 +432,8 @@ Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
   Symbol tag = value.tag();
   raise %(no-member (tag $tag) (member $member));
 }
+
+meta Var Var.postfixindex(Var value, Var key, Symbol op);
 
 /** Applies a dynamic postfix update at `key` and returns its prior value.
     Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
@@ -782,6 +792,8 @@ int Var.equal(Var a, Var b) {
   return 0;
 }
 
+meta int Var.same(Var a, Var b);
+
 /** Reports whether `a` and `b` have identical `Var` bits. */
 int Var.same(Var a, Var b) => a.u64 == b.u64;
 
@@ -883,6 +895,8 @@ int Var.fallback_compare(Var a, Var b) {
     return _cmp_ptr(a, b);
   return _compare_default(a, b);
 }
+
+meta int Var.compare(Var a, Var b);
 
 /** Compares `a` and `b` by runtime value group and registered ordering.
     Raises: `<void-op>` when either operand is `void`.

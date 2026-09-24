@@ -347,6 +347,8 @@ int Var.fallback_truth(Var value) {
   return !!truth;
 }
 
+meta int Var.truth(Var value);
+
 /** Returns dynamic truthiness through registered dispatch or built-in rules.
     Numeric and `Symbol` zero and null unhandled pointer-bearing values are
     false; their nonzero or nonnull counterparts are true. A registered truth
@@ -391,6 +393,8 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   return _general_numeric_binary(op, lhs, rhs);
 }
 
+meta Var Var.add(Var lhs, Var rhs);
+
 /** Adds dynamic values through numeric, `String`, or registered `add`
     behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`;
@@ -399,11 +403,15 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
 */
 Var Var.add(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <add>, <+>, rhs);
 
+meta Var Var.sub(Var lhs, Var rhs);
+
 /** Subtracts dynamic values through numeric or registered `sub` behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`; a
     protocol result keeps the ownership chosen by its callback.
 */
 Var Var.sub(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <sub>, <->, rhs);
+
+meta Var Var.mul(Var lhs, Var rhs);
 
 /** Multiplies dynamic values through numeric or registered `mul` behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`; a
@@ -418,6 +426,8 @@ Var Var.mul(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mul>, <*>, rhs);
 Var Var.matmul(Var lhs, Var rhs) =>
   _protocol_arithmetic(lhs, <matmul>, <@>, rhs);
 
+meta Var Var.div(Var lhs, Var rhs);
+
 /** Divides dynamic values through numeric or registered `div` behavior.
     Numeric integer zero divisors raise; floating division uses host infinity
     and NaN behavior. Other promotion, failure, and ownership follow
@@ -425,12 +435,16 @@ Var Var.matmul(Var lhs, Var rhs) =>
 */
 Var Var.div(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <div>, </>, rhs);
 
+meta Var Var.mod(Var lhs, Var rhs);
+
 /** Computes dynamic remainder through integer or registered `mod` behavior.
     Numeric operands use the common promoted integer type and reject a zero
     divisor; floating operands are not accepted. Other failure and ownership
     follow `Var.binary`.
 */
 Var Var.mod(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mod>, <%>, rhs);
+
+meta Var Var.neg(Var value);
 
 /** Negates a dynamic value through registered `neg` or numeric subtraction.
     Without a selected protocol, this computes `0 - value` with ordinary `Var`

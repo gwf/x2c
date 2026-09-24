@@ -70,6 +70,8 @@ static inline int _line_end(String str, int start, int keep_ends, int *next) {
   return keep_ends ? *next : end;
 }
 
+meta List String.split_n(String str, String sep, int max_splits);
+
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
     A null `str` returns `nil`. A null or empty `sep` returns `str` as one
@@ -93,6 +95,8 @@ List String.split_n(String str, String sep, int max_splits) {
   return results.list_free();
 }
 
+meta List String.split(String str, String sep);
+
 /** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
     Separators are not coalesced, so adjacent ones produce empty fields and
     the result holds one more element than the number of separators found.
@@ -109,6 +113,8 @@ List String.split_n(String str, String sep, int max_splits) {
     Raises: the same causes as `String.split_n`.
 */
 List String.split(String str, String sep) => str.split_n(sep, -1);
+
+meta List String.split_lines(String str, int keep_ends);
 
 /** Splits `str` into a `List` of lines.
     LF, CR, and CRLF all end a line, and CRLF counts as one ending. A

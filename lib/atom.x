@@ -88,6 +88,8 @@ Buffer Atom.write_repr(Atom value, Buffer out) {
 
 #include <stdlib.h>
 
+meta int Var.is_atom(Var value);
+
 /** Reports whether `value` is an exact-spelling `Atom`. */
 int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
 

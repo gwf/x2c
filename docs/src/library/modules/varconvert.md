@@ -34,7 +34,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/varconvert.x:273`
+Source: `lib/varconvert.x:275`
 
 ## Advanced and interop API
 
