@@ -53,8 +53,8 @@ every method.
 
 | Method | Default behavior and applicability |
 | --- | --- |
-| `T.new` | Constructs a scalar, value record, or pointer object. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
-| `T.free` | Releases a new pointer class's Scope allocation early. It does not free fields recursively. |
+| `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init` and calls it on zeroed storage. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
+| `T.free` | Releases a new pointer class's Scope allocation early. When the class defines `void T.drop(T)`, `free` first calls it on a non-NULL object. `free` accepts NULL. |
 | `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `$auto`. |
 | `T.var` | Converts a new class to `Var`: a scalar uses its underlying representation, a pointer boxes identity, and a value record boxes a Scope-owned copy. |
 | `Var.t` | Converts a `Var` back to the new class; for example, `Var.point` for `Point`. |
@@ -126,30 +126,38 @@ cleanup does not recursively free fields and is not a Scope finalizer.
 Positional fields include native numeric values and enums, Symbol, Var/Atom,
 String, List, and their aliases. Var slots are shallow copies.
 
-A record containing a mutable handle such as Array, Map, Iter, or another
-heap class instead gets a no-argument constructor that zeroes the object and
-calls its required `init` method. Nested records and arrays also use this
-branch. Heap initialization receives the handle; value initialization receives
-its address:
+A class that defines `init` gets a constructor built from it. The
+constructor zeroes new storage, passes it to `init` with the constructor's
+arguments, and returns it. `init` receives the handle of a heap class, or the
+address of a value record, followed by any parameters it declares; `new`
+takes those parameters in the same order. A record containing a mutable
+handle such as Array, Map, Iter, or another heap class requires `init`, as do
+nested records and arrays. A flat record that defines `init` uses it in place
+of its positional constructor.
+
+A heap class that owns more than its own allocation defines `drop`. The
+generated `free` calls `drop` and then releases the object, so `drop` only
+releases what the fields own:
 
 ```x2c
-class History struct { int count; Array items; } *;
-void History.init(History self) {
+class History struct { int limit; Array items; } *;
+void History.init(History self, int limit) {
+  self.limit = limit;
   self.items = [];
 }
-void History.free(History self) {
+void History.drop(History self) {
   self.items.free();
-  Scope.free(self);
 }
 ~int main(void) {
-History history = $auto(History.new());
+History history = $auto(History.new(8));
 history.items.push(42);
-~  return history.count == 0 ? 0 : 1;
+~  return history.limit == 8 ? 0 : 1;
 ~}
 ```
 
 An explicit `new` replaces the default and may take different arguments. It
-also replaces the default constructor's obligation to call `init`. Explicit
+also replaces the default constructor's obligation to call `init`. An explicit
+`free` replaces the default, and with it the call to `drop`. Explicit
 methods can appear later in the owning source; only the selected default or
 explicit method is emitted. Two ordinary definitions still conflict, and an
 importing consumer cannot replace a provider's defaults.
@@ -523,9 +531,8 @@ void History.init(History self) {
   self.lengths = [];
 }
 
-void History.free(History self) {
+void History.drop(History self) {
   self.lengths.free();
-  Scope.free(self);
 }
 
 int main(int argc, char **argv) {

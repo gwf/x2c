@@ -1,6 +1,6 @@
 #include <assert.h>
 
-static int frees, inits, fail_init;
+static int frees, inits, fail_init, drops;
 class Item struct { Array values; } *;
 Item Item.new(int value) {
   if (value < 0) raise %(make-fail);
@@ -19,6 +19,20 @@ void Initialized.init(Initialized item) {
   assert((void *) item.values == NULL);
   if (fail_init) raise %(init-fail);
   item.values = %[];
+}
+class Sized struct { int limit; Array values; } *;
+void Sized.init(Sized sized, int limit, int first) {
+  sized.limit = limit;
+  sized.values = %[$first];
+}
+void Sized.drop(Sized sized) {
+  drops++;
+  sized.values.free();
+}
+class Scaled { int x; int y; };
+void Scaled.init(Scaled *scaled, int x) {
+  scaled.x = x;
+  scaled.y = x * 2;
 }
 
 /* Both failing constructors run twice: the first round publishes each catch
@@ -58,6 +72,15 @@ int main(void) {
     assert(inits == 1);
     assert(good.values.len() == 0);
   }
+  $scope() {
+    Sized sized = $auto(Sized.new(4, 7));
+    assert(sized.limit == 4 && sized.values[0].int() == 7);
+    Sized none = NULL;
+    none.free();
+  }
+  assert(drops == 1);
+  Scaled scaled = Scaled.new(3);
+  assert(scaled.x == 3 && scaled.y == 6);
   fail_init = 1;
   int caught = _failing_constructors();
   before = Scope.stats().live_allocations;

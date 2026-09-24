@@ -297,15 +297,20 @@ List builtin_class_initializer(String owner, Var heap_value) {
   int heap = !heap_value.equal(%());
   List type = %($owner);
   List receiver = heap ? type : %(* @type);
-  List signature = %((func ($receiver)) void);
   List method = x2c_method_resolve(type, "init");
   List value = builtin_class_ref("value");
-  if (method && x2c_syntax_type(method).equal(signature)) {
-    List declaration = builtin_class_declaration(%(* @signature), "initialize",
-      builtin_class_ref(x2c_binding_spelling(method)));
-    List argument = heap ? value : builtin_class_op(<&>, %($value));
-    return %(seq $declaration
-      ${x2c_stmnt_make(builtin_class_call("initialize", %($argument)))});
+  if (method) {
+    List function = x2c_syntax_type(method).car();
+    List declared = function[1];
+    List parameters = cons(receiver, declared.cdr());
+    if (x2c_syntax_type(method).equal(%((func $parameters) void))) {
+      List arguments = %(${heap ? value : builtin_class_op(<&>, %($value))});
+      foreach (List parameter, parameters.cdr())
+        arguments = cons(builtin_class_ref(
+          %"argument_${arguments.len() - 1}"), arguments);
+      return x2c_stmnt_make(builtin_class_call(
+        x2c_binding_spelling(method), arguments.reverse()));
+    }
   }
   String suffix = heap ? ")" : " *)";
   x2c_diagnostic_fail(
@@ -314,7 +319,7 @@ List builtin_class_initializer(String owner, Var heap_value) {
 
 $builtin.emit()
 List builtin_class_new(String owner, List representation, int heap,
-                       List named, int positional) {
+                       List named, int positional, List extras) {
   List type = %($owner);
   List value = builtin_class_ref("value");
   int aggregate = representation.car() == <struct> ||
@@ -333,7 +338,13 @@ List builtin_class_new(String owner, List representation, int heap,
       parameters = parameters.reverse();
       initializer = x2c_expr_composite(arguments.reverse());
     }
-    else initializer = x2c_expr_composite(%(${x2c_literal_int(0)}));
+    else {
+      foreach (List extra, extras)
+        parameters = cons(builtin_class_parameter(extra,
+          %"argument_${parameters.len()}"), parameters);
+      parameters = parameters.reverse();
+      initializer = x2c_expr_composite(%(${x2c_literal_int(0)}));
+    }
   }
   else {
     parameters = %(${builtin_class_parameter(representation, "initial")});
@@ -566,11 +577,18 @@ List builtin_class_constructor(String owner, List type, List pointee,
   List representation, int heap, int aggregate, int alias, List named,
   int positional) {
   if (builtin_class_own_method(owner, "new")) return %();
+  List extras = %();
+  List initialize = builtin_class_own_method(owner, "init");
+  if (aggregate && !alias && initialize) {
+    List function = x2c_syntax_type(initialize).car();
+    List declared = function[1];
+    extras = declared.cdr();
+  }
   if (heap && !aggregate && !x2c_type_is_value(pointee))
     x2c_diagnostic_fail(%"class ${owner} requires an explicit constructor",
                         %());
   List constructor = builtin_class_new(owner, representation, heap,
-                                       named, positional);
+    named, positional && !initialize, extras);
   if (alias)
     return %((default-forward ($owner) $type "new" ${constructor[1]}));
   return %($constructor);
@@ -595,10 +613,16 @@ List builtin_class_defaults(String owner, List type, List location) {
   List parameter = builtin_class_parameter(%($owner), "value");
   Symbol tag = x2c_type_tag_name(owner);
   if (alias) return %(seq @body);
+  List drop = builtin_class_own_method(owner, "drop");
+  List release = %(${x2c_stmnt_make(builtin_class_call("Scope_free",
+                                                       %($value)))});
+  if (drop)
+    release = cons(%(if $value ${x2c_stmnt_make(builtin_class_call(
+      x2c_binding_spelling(drop), %($value)))}), release);
   if (heap)
     body = body.append(%(
       ${builtin_class_default(owner, "free", %(void), %($parameter),
-        %(${x2c_stmnt_make(builtin_class_call("Scope_free", %($value)))}))}
+                              release)}
       ${builtin_class_default(owner, "cleanup", %(void), %($parameter),
         %(${x2c_stmnt_make(builtin_class_method(value, "free", %()))}))}
       (adopt ("Cleanup") ($owner) external $location)));
