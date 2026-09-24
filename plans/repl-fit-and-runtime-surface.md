@@ -91,12 +91,29 @@ Gary accepted all four recommendations below on 2026-09-24.
 
 - **Compiler `meta` or REPL-only for the pure operations?** Recommend both.
   They are deterministic, and one `meta` mark serves both.
-- **Where the optional target rows live?** Recommend a compiler-owned table
-  in `src/`, so runtime programs stay unchanged in size.
+- **Where the optional target rows live?** Revised the same day: bodyless
+  `meta` prototypes in `lib/json.x`, `lib/diff.x`, and `lib/path.x`,
+  included from `lib/lisp.x`, as `lib/cmath.x`, autodiff, and process
+  already are. The compiler's own target list holds only compiler
+  operations, and a second kind of entry there would be new machinery.
+  Ordinary programs link no `lisp.o`, so only the compiler and programs
+  that embed the runtime Lisp carry Json and Diff. Path waits for the
+  class-unit init-guard fix in the adoption campaign's delivery 4.
+  This inclusion is a stand-in: if the compiler gains dynamic module
+  loading for meta code, these includes are no longer needed.
 - **Read-only host queries?** Recommend REPL-only exposure later, after the
   pure group. Compiler `meta` exposure should wait for a dependency rule.
 - **`Regex.escape`?** Recommend leaving it out. It would require linking
   `Regex` into the compiler and spending a class row.
+
+### Direction
+
+The REPL is intended to become its own program, built the way
+`tools/x2c-lint` is being built: a separate executable that links the
+compiler objects, invoked through the `x2c` command line (`x2c repl`).
+Not every piece is in place yet, so current work keeps the REPL inside the
+compiler and integrates cleanly there; nothing here should make that
+separation harder.
 
 ## Validation
 
