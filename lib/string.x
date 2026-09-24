@@ -215,6 +215,8 @@ String String.malloc(int len) {
   return (String) ((char *) header + sizeof(struct StringHeader));
 }
 
+meta void String.free(String str);
+
 /** Releases a transient `String.malloc` buffer early.
     The pointer is first looked up in the intern table, including the
     enclosing pools, and the call does nothing if it is the canonical `String`

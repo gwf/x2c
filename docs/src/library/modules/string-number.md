@@ -33,7 +33,7 @@ underflows `double` fails. It does not know the `0o` and `0b` prefixes
 that the integer parser adds, so `0b101` fails instead of yielding the
 leading zero.
 
-Source: `lib/string-number.x:89`
+Source: `lib/string-number.x:93`
 
 <a id="String.try_long"></a>
 #### String.try_long
@@ -56,7 +56,7 @@ printf("%d %ld\n", " -0b101 ".try_long(&value), value);
 printf("%d\n", "42junk".try_long(&value));
 ```
 
-Source: `lib/string-number.x:39`
+Source: `lib/string-number.x:41`
 
 ## Design notes
 

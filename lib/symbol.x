@@ -103,6 +103,8 @@ Symbol Symbol.new_len(const char *str, int len) {
 */
 Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
 
+meta int Symbol.try_new(String spelling, Symbol *out);
+
 /** Encodes `spelling` only when the `Symbol` preserves every byte.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched when case folding, `_`/`-` folding, or truncation would change

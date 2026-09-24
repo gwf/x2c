@@ -20,6 +20,8 @@ static int _only_space(const char *rest) {
   return !*rest;
 }
 
+meta int String.try_long(String str, long *out);
+
 /** Parses all of `str` as an integer, writing it through `out`.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched on failure.
@@ -71,6 +73,8 @@ int String.try_long(String str, long *out) {
   *out = value;
   return 1;
 }
+
+meta int String.try_double(String str, double *out);
 
 /** Parses all of `str` as a floating-point number, writing `out`.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`

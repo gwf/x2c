@@ -136,6 +136,8 @@ static Context _open(const char *name, int isolated) {
   }
 }
 
+meta Context Context.open(void);
+
 /** Opens and makes current a `Context` using the active canonical-value pool.
     Close it before its parent; its `Scope` owns subsequent mutable
     allocations.
@@ -170,6 +172,8 @@ Context Context.open_isolated(void) => _open(NULL, 1);
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
     `Match`, and current `Context` state. */
 Context Context.open_isolated_named(const char *name) => _open(name, 1);
+
+meta Context Context.current(void);
 
 /** Returns the `Context` currently active on this thread, or NULL. */
 Context Context.current(void) => _thread().current;
@@ -289,6 +293,8 @@ static Var _export_value(Var v, Context source) {
   raise %(bad-types (owner "Context.export") (tag $tag));
 }
 
+meta Var Context.export(Context context, Var value);
+
 /** Exports `value` into the parent of the current `Context`.
     Values may belong to a retained region of that `Context`; export them
     while live, before releasing their `Scope` or closing the `Context`.
@@ -336,6 +342,8 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
   return _export_value(value, &source);
 }
 
+meta void Context.close(Context c);
+
 /** Closes the current `Context`, reclaims unexported state, and restores
     parent.
     The `Context` must be current; all pointers into its remaining `Scope` or
@@ -365,6 +373,8 @@ void Context.close(Context c) {
   _thread().current = parent;
   Scope.free(c);
 }
+
+meta void Context.cleanup(Context value);
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Context.cleanup(Context value) { value.close(); }

@@ -103,6 +103,8 @@ static void _promote_node(Var node) {
   }
 }
 
+meta Self List.promote(Self lst);
+
 /** Moves `lst` out of the innermost interning pool into its parent.
     Cells, nested `List`s, interned `String` cars, and long `Atom` payloads
     all move together, so a promoted `List` keeps its complete identity graph
@@ -1004,6 +1006,8 @@ Iter List.iter(List lst, Iter dest) {
   if (!dest) return NULL;
   return dest.init(lst, _next, lst);
 }
+
+meta List Iter.list(Iter iter);
 
 /** Drains `iter` into a new `List`.
     The iterator is consumed to exhaustion, so this is meaningful once and

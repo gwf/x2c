@@ -323,27 +323,27 @@ ScopeStats Scope_stats(void){
 
 void Scope_destroy(Scope scope){
   if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == state -> root){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 564};  x2c_error_raise_n(& _x2c_error_site_9, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 570};  x2c_error_raise_n(& _x2c_error_site_9, 4477477457162, 0);  __builtin_unreachable();
   }
   for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 565};  x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 571};  x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 0);  __builtin_unreachable();
   }
   if(scope -> up){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 567};  x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 573};  x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 0);  __builtin_unreachable();
   }
   _forget_chain_retains(scope);  _destroy_chain(scope);
 }
 
 void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 583};  x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 589};  x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);  __builtin_unreachable();
   }
   hooks = _raw_grow(hooks, hook_count, & hook_capacity, sizeof(* hooks));  hooks[hook_count ++] = hook;
 }
 
 void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! scope){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 617};  x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 625};  x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 0);  __builtin_unreachable();
   }
   ScopeThreadState state = _thread();  state -> stack = _raw_grow(state -> stack, state -> stack_size, & state -> stack_capacity, sizeof(* state -> stack));  state -> active = state -> stack[state -> stack_size ++] = scope;
 }
@@ -354,7 +354,7 @@ Scope * Scope_top(void){
 
 void Scope_pop(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread();  if(! state -> stack_size){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 651};  x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 661};  x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 0);  __builtin_unreachable();
   }
   state -> stack_size --;  state -> active = state -> stack_size ? state -> stack[state -> stack_size - 1] : & state -> root;
 }
@@ -369,7 +369,7 @@ void Scope_retain(void){
 void Scope_release(void){
   if(! _init_guard_) Scope_initialize();  _require_running();  ScopeThreadState state = _thread(); {
     if(! *(state -> active) || ! _forget_retain(*(state -> active), (state -> active))){
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 732};  x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 746};  x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 0);  __builtin_unreachable();
     }
     Scope top = *(state -> active);  if((*(state -> active) = top -> down))(*(state -> active)) -> up = NULL;  top -> down = NULL;  _destroy_chain(top);
   }
@@ -382,7 +382,7 @@ void * Scope_malloc(size_t size){
 
 void * Scope_malloc_finalized(size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! drop){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 780};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 796};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 0);  __builtin_unreachable();
   }
   return _malloc_in(_thread() -> active, size, drop);
 }
@@ -393,7 +393,7 @@ void * Scope_malloc_in(Scope * slot, size_t size){
 
 void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! drop){
-    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 810};  x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 826};  x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);  __builtin_unreachable();
   }
   return _malloc_in(slot, size, drop);
 }
@@ -424,7 +424,7 @@ Scope Scope_owner(void * ptr){
 
 void Scope_move(void * ptr, Scope * slot){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  if(! slot){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 937};  x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 961};  x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);  __builtin_unreachable();
   }
   if(! * slot) * slot = _new_scope(NULL);  Scope scope = * slot;  ScopeAlloc alloc = PTR_ALLOC(ptr), next = alloc -> next, prev = alloc -> prev;  if(IS_TAGGED(prev)){
     Scope owner = UNTAG_POINTER(prev);  owner -> first = next;
@@ -437,7 +437,7 @@ void * Scope_realloc(void * ptr, size_t size){
     _free_alloc(PTR_ALLOC(ptr));  return NULL;
   }
   ScopeAlloc old = PTR_ALLOC(ptr), next = old -> next, prev = old -> prev;  ScopeMetadata * old_meta = ALLOC_META(old);  size_t old_size = old_meta -> requested_size;  if(size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 975};  x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 1001};  x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);  __builtin_unreachable();
   }
   ScopeMetadata * meta = _data_realloc(old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  ScopeAlloc replacement =(ScopeAlloc)(meta + 1);  replacement -> next = next;  replacement -> prev = prev;  if(next) next -> prev = replacement;  if(IS_TAGGED(prev)){
     Scope scope = UNTAG_POINTER(prev);  scope -> first = replacement;

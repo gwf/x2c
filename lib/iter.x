@@ -161,6 +161,8 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
   return iter;
 }
 
+meta Iter Iter.new(void);
+
 /** Returns zeroed iterator storage owned by the active `Scope`.
     Use this when an iterator itself must be returned or stored as a value.
     Producers such as `Map.keys` initialize the result through their existing
@@ -241,6 +243,8 @@ int Iter.try_next(Iter iter, Var *out) {
   if (out[0] is void) raise %(void-op (owner "Iter.try_next"));
   return 1;
 }
+
+meta Var Iter.next(Iter iter);
 
 /** Returns the next element, or `void` once `iter` is exhausted.
     An adapter over `Iter.try_next`, unambiguous because no iterator may
@@ -829,6 +833,8 @@ Var Iter.find(Iter iter, Func pred) {
   return void;
 }
 
+meta int Iter.count(Iter iter);
+
 /** Returns the number of remaining elements, consuming `iter`.
     Counting drains the iterator, and an `Iter` cannot be rewound, so if you
     need the elements as well, collect them with `Iter.list` or `Iter.array`
@@ -844,6 +850,8 @@ int Iter.count(Iter iter) {
   return total;
 }
 
+meta Var Iter.sum(Iter iter);
+
 /** Returns the sum of the remaining elements, consuming `iter`.
     Starts from the integer 0 and adds with ordinary `Var` arithmetic, so
     numeric element types promote as they would in an expression and an empty
@@ -856,6 +864,8 @@ Var Iter.sum(Iter iter) {
   foreach (Var item, iter) total = total.binary(<+>, item);
   return total;
 }
+
+meta Var Iter.product(Iter iter);
 
 /** Returns the product of the remaining elements, consuming `iter`.
     Starts from the integer 1 and multiplies with ordinary `Var` arithmetic,
@@ -870,6 +880,8 @@ Var Iter.product(Iter iter) {
   return total;
 }
 
+meta Var Iter.max(Iter iter);
+
 /** Returns the largest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
     across types. Equal values keep the earliest, so the result is the first
@@ -883,6 +895,8 @@ Var Iter.max(Iter iter) {
   foreach (Var item, iter) if (item > best) best = item;
   return best;
 }
+
+meta Var Iter.min(Iter iter);
 
 /** Returns the smallest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
