@@ -58,9 +58,9 @@ execution.
   registration and capacity, native extensions and packages, protocols
   beyond Iter, and whole-project lifetime certification.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
-  terminal UX, live statistics, and REPL-only output are implemented, and
-  scalar math is already callable; exposing Json, Diff, and Path text
-  operations (about 20 `.x` lines) is approved and next. The
+  terminal UX, live statistics, REPL-only output, and the Json, Diff, and
+  Path text operations (delivered in `ab74ef4b`) are implemented, and scalar
+  math is already callable. The REPL now lives in `commands/repl`. The
   lexical-scope repair to the literate example shipped in `144a833d`.
 
 ### Open backlog and scoped follow-ups
