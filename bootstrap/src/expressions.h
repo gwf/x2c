@@ -52,6 +52,8 @@ List Compiler_parse_expression(Compiler compiler);
 
 List Compiler_parse_parenthesized_statement(Compiler c);
 
+List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
+
 List Compiler_initializer_native_types(Compiler c, Type type);
 
 List Compiler_initializer_slot(Compiler c, List target, List path);

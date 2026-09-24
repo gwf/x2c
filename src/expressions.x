@@ -2966,6 +2966,11 @@ static List _converter_call(
   return NULL;
 }
 
+/** The call to the converter `type` declares for `target`, applied to
+    `expr`, or NULL when it declares none. */
+List Compiler.converter_call(Compiler c, List expr, Type type, Type target) =>
+  _converter_call(c, expr, type, target);
+
 /* A built-in payload has an exact tag-checked reader, and a Var(T)
    participant declares its own reverse converter. Either takes the crossing
    ahead of the unchecked pointer payload. An alias with neither reads

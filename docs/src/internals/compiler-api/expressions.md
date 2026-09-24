@@ -18,6 +18,7 @@ X2c expression parsing.
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
 | [`Compiler.convert_initializer`](#Compiler.convert_initializer) | Converts an initializer using its declared native object for array bounds. |
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
+| [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter `type` declares for `target`, applied to `expr`, or NULL when it declares none. |
 | [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
 | [`Compiler.initializer_field_path`](#Compiler.initializer_field_path) | Returns the initializer path selecting one visible aggregate field. |
 | [`Compiler.initializer_native_types`](#Compiler.initializer_native_types) | Returns native definition/reference types for a compound literal. |
@@ -78,7 +79,7 @@ Source: `src/expressions.x:52`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3947`
+Source: `src/expressions.x:3952`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -92,7 +93,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3991`
+Source: `src/expressions.x:3996`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -102,7 +103,7 @@ Source: `src/expressions.x:3991`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:3942`
+Source: `src/expressions.x:3947`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -121,7 +122,17 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4282`
+Source: `src/expressions.x:4287`
+
+<a id="Compiler.converter_call"></a>
+#### Compiler.converter_call
+
+`List Compiler.converter_call(Compiler c, List expr, Type type, Type target)`
+
+The call to the converter `type` declares for `target`, applied to
+`expr`, or NULL when it declares none.
+
+Source: `src/expressions.x:2971`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -144,7 +155,7 @@ Returns the initializer path selecting one visible aggregate field.
 Anonymous aggregate members remain explicit path frames, so consumers
 observe the same member promotion as native initializer conversion.
 
-Source: `src/expressions.x:3321`
+Source: `src/expressions.x:3326`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -155,7 +166,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/expressions.x:3078`
+Source: `src/expressions.x:3083`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
@@ -168,7 +179,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:3533`
+Source: `src/expressions.x:3538`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot
@@ -177,7 +188,7 @@ Source: `src/expressions.x:3533`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/expressions.x:3205`
+Source: `src/expressions.x:3210`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment

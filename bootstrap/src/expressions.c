@@ -4390,6 +4390,10 @@ static List _converter_call(Compiler c, List expr, Type type, Type target){
   return NULL;
 }
 
+List Compiler_converter_call(Compiler c, List expr, Type type, Type target){
+  if(! _init_guard_) _file_init_();  return _converter_call(c, expr, type, target);
+}
+
 static List _var_checked_reader(Compiler compiler, List expr, Type type, Type target){
   List owners = Type_is_bare_typedef_name(target) ? Array_list_free(_typedef_names(compiler, target)) : cons(List_var(target), NULL); {
     Type owner;  List _x2c_macro_object_33 = owners;  List _x2c_macro_cursor_33 = _x2c_macro_object_33;  Var _x2c_macro_cursor_output_33;  while(List_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_33)){

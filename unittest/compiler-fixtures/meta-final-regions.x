@@ -2,10 +2,7 @@
 #include "process.x"
 
 /* A Job that a compile-time call starts is finalized when the call
-   returns, so returning it is an error. The fixture marks `List.job`
-   itself; the region walk rejects the body before anything binds it. */
-
-meta Job List.job(List command);
+   returns, so returning it is an error. */
 
 meta Var start(void) {
   List command = %(sleep 1);

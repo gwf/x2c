@@ -2750,7 +2750,9 @@ assignment, argument, or return. A local typedef of the callback type has the
 same behavior. Parentheses around the lambda preserve this adaptation.
 Where a `Func` is expected, including a `(Func)` cast, a fixed nonvariadic
 function or function-pointer value converts implicitly when the `Func` conversion supports
-its parameters and result. Value parameters and results need a lossless `Var`
+its parameters and result. A lambda after a cast needs its own parentheses,
+as in `(Func) (%!(int a) => a * 13)`, because `%!` after `)` reads as modulo.
+Value parameters and results need a lossless `Var`
 conversion, and reference
 parameters retain their typed lvalue address. A pointer parameter whose type
 has no `Var` tag of its own, such as `const char *` or `struct timespec *`,

@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/meta-final-regions.x:13:3: region: 'job' can outlive the local storage it points into when returned
+unittest/compiler-fixtures/meta-final-regions.x:10:3: region: 'job' can outlive the local storage it points into when returned
     return job;
     ^^^^^^
   note: local storage ends when the function returns
