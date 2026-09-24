@@ -32,33 +32,11 @@ List binding_reference(String name);
 List binding_native_type(List function);
 Var binding_literal_value(List node);
 void binding_fail(String message, List node);
-List binding_signature(List values);
+List binding_literal_list(List values);
 
 $binding.emit()
 List binding_call(String name, List arguments) =>
   x2c_expr_call(x2c_expr_ident(x2c_ident(name)), arguments);
-
-$binding.emit()
-List binding_list_item(Var value) {
-  if (!lisp_string(value).equal(%()))
-    return binding_call("String_var", %(${x2c_literal_string(value.str())}));
-  if (!lisp_symbol(value).equal(%()))
-    return binding_call("Symbol_var", %(${x2c_literal_symbol(value)}));
-  if (value.is_integer())
-    return binding_call("int_var", %(${x2c_literal_int(value.int())}));
-  if (!lisp_list(value).equal(%()))
-    return binding_call("List_var", %(${binding_signature(value)}));
-  return %();
-}
-
-$binding.emit()
-List binding_signature(List values) {
-  if (!values)
-    return %(expr () (cast
-      (decl ("List") (bindings (bind () ()))) ${x2c_literal_int(0)}));
-  return binding_call("cons", %(${binding_list_item(values.car())}
-                                ${binding_signature(values.cdr())}));
-}
 
 $binding.emit()
 List binding_name_signature(String name) =>
@@ -105,7 +83,7 @@ List binding_statement(List lisp, List row) {
     return %(stmnt ${binding_call("Lisp_bind", %($lisp
       ${x2c_literal_string(name)}
       ${binding_call("Func_new", %(${x2c_expr_ident(x2c_ident(function))}
-        ${binding_signature(type)}))}))});
+        ${binding_literal_list(type)}))}))});
   return %();
 }
 
@@ -131,7 +109,7 @@ List binding_target(String bind_name, String name, String maker) =>
   %(${binding_call("String_var", %(${x2c_literal_string(bind_name)}))}
     ${binding_call("Func_var", %(${binding_call(maker,
       %(${x2c_expr_ident(x2c_ident(name))}
-        ${binding_signature(binding_name_signature(name))}))}))});
+        ${binding_literal_list(binding_name_signature(name))}))}))});
 
 $binding.emit()
 List binding_target_row(List row) {

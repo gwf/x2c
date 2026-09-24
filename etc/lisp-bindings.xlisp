@@ -6,42 +6,12 @@
 (defun binding_native_type (function) (_x2c.function.native-type function))
 (defun binding_literal_value (node) (x2c.literal.value node))
 (defun binding_fail (message node) (_x2c.fail message node))
+(defun binding_literal_list (values) (_x2c.literal.list values))
 
 // Generated x2c algorithms.
 
 (def binding_call
  (lambda (arg-1 arg-2) (x2c_expr_call (x2c_expr_ident (x2c_ident arg-1)) arg-2)))
-(def binding_list_item
- (lambda (arg-1)
-  (cond ((C.true? (C.not (Var_equal (lisp_string arg-1) (quote ()))))
-         (binding_call (C.address "String_var" (quote string))
-          (cons (List_var (x2c_literal_string (Var_str arg-1))) (quote ()))))
-   (true (cond ((C.true? (C.not (Var_equal (lisp_symbol arg-1) (quote ()))))
-                (binding_call (C.address "Symbol_var" (quote string))
-                 (cons (List_var (x2c_literal_symbol arg-1)) (quote ()))))
-          (true (cond ((C.true? (Var_is_integer arg-1))
-                       (binding_call (C.address "int_var" (quote string))
-                        (cons (List_var (x2c_literal_int (Var_int arg-1)))
-                         (quote ()))))
-                 (true (cond ((C.true?
-                               (C.not (Var_equal (lisp_list arg-1) (quote ()))))
-                              (binding_call
-                               (C.address "List_var" (quote string))
-                               (cons (List_var (binding_signature arg-1))
-                                (quote ())))) (true (quote ())))))))))))
-(def binding_signature
- (lambda (arg-1)
-  (cond ((C.true? (C.not arg-1))
-         (cons (quote expr)
-          (cons (quote ())
-           (cons (List_var
-                  (cons (quote cast)
-                   (cons (quote (decl ("List") (bindings (bind () ()))))
-                    (cons (List_var (x2c_literal_int 0)) (quote ())))))
-            (quote ())))))
-   (true (binding_call (C.address "cons" (quote string))
-          (cons (List_var (binding_list_item (List_car arg-1)))
-           (cons (List_var (binding_signature (List_cdr arg-1))) (quote ()))))))))
 (def binding_name_signature
  (lambda (arg-1) (binding_native_type (binding_reference arg-1))))
 (def binding_name
@@ -144,7 +114,7 @@
                                        (quote (?group ?name ?function ?type)))
                                       (quote ?function)))))
                              (cons (List_var
-                                    (binding_signature
+                                    (binding_literal_list
                                      (bound
                                       (match arg-2
                                        (quote (?group ?name ?function ?type)))
@@ -183,7 +153,7 @@
                   (binding_call arg-3
                    (cons (List_var (x2c_expr_ident (x2c_ident arg-2)))
                     (cons (List_var
-                           (binding_signature (binding_name_signature arg-2)))
+                           (binding_literal_list (binding_name_signature arg-2)))
                      (quote ()))))) (quote ())))) (quote ())))))
 (def binding_target_row
  (lambda (arg-1)
@@ -238,8 +208,6 @@
 
 (defun lisp.native.call (name . arguments)
   (binding_call name arguments))
-(def lisp.native.list-item binding_list_item)
-(def lisp.native.signature binding_signature)
 (defun lisp.native.function-signature (type) type)
 (def lisp.native.name-signature binding_name_signature)
 (def lisp.binding.name binding_name)

@@ -2,7 +2,11 @@
 
 #include "lisp-bind-inferred.h"
 
-static String _2, _1, _0;
+static List _19, _17, _16, _14, _12, _9, _7, _6, _4, _2;
+
+static String _21, _20, _10;
+
+static Var _18, _15, _13, _11, _8, _5, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -16,13 +20,40 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+Var List_var(List);
+
+Var String_var(String);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("increment");
-  _1 = String_new("echo");
-  _2 = String_new("String");
+  _0 = Symbol_var(437126);
+  _1 = Symbol_var(44253284);
+  _2 = cons(_1, NULL);
+  _3 = List_var(_2);
+  _4 = cons(_3, NULL);
+  _5 = List_var(_4);
+  _6 = cons(_5, NULL);
+  _7 = cons(_0, _6);
+  _8 = List_var(_7);
+  _9 = cons(_8, _2);
+  _10 = String_new("String");
+  _11 = String_var(_10);
+  _12 = cons(_11, NULL);
+  _13 = List_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = List_var(_14);
+  _16 = cons(_15, NULL);
+  _17 = cons(_0, _16);
+  _18 = List_var(_17);
+  _19 = cons(_18, _12);
+  _20 = String_new("increment");
+  _21 = String_new("echo");
 }
 
 static Byte increment(Byte value){
@@ -35,21 +66,13 @@ static Text echo(Text value){
 
 Func Func_new(FuncAdapter, List);
 
-List cons(Var, List);
-
-Var List_var(List);
-
-Var Symbol_var(Symbol);
-
 void Lisp_bind(Lisp, String, Func);
-
-Var String_var(String);
 
 void install_bindings(Lisp lisp){
   if(! _init_guard_) _file_init_();
-  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44253284), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44253284), (List) 0)));
-  Lisp_bind(lisp, _0, _x2c_macro_callable_0);
-  Lisp_bind(lisp, _1, Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_2), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_2), (List) 0))));
+  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _9);
+  Lisp_bind(lisp, _20, _x2c_macro_callable_0);
+  Lisp_bind(lisp, _21, Func_new(_x2c_func_adapt_1, _19));
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

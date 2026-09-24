@@ -30,7 +30,7 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | ID | Independent cleanup objective | Status | Definition of done |
 | --- | --- | --- | --- |
 | C01 | One builtin type/tag inventory | Done (02fa85d6) | 56 handwritten entries replaced by a projection of the existing ledger |
-| C02 | One static signature-graph serializer | Bounded | Two Lisp serializer functions removed; all three consumer families use compiler literal caching |
+| C02 | One static signature-graph serializer | Done 2026-09-24: `$lisp.bind`, grouped installs, and native targets call `_x2c.literal.list` | Two Lisp serializer functions removed; all three consumer families use compiler literal caching |
 | C03 | One native function-signature projection | Decision | Independent alias traversal/spelling/projection removed after compatibility policy is explicit |
 | C04 | One runtime allocation/wrapper fact owner | Bounded design | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
 | C05 | One graph direct/computed call recognizer | Done (70b23d6d) | Lifetime recognizer and flow forwarding wrapper removed |
