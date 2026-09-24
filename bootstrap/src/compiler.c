@@ -3500,10 +3500,6 @@ Symbol match_value_head(Var value){
   if(! Var_is_row(value, 9, 7, 4)) return 0;  Var head = car(Var_list(value));  if(! Var_is(head, 1328354264) || Var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;  return Var_symbol(head);
 }
 
-Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern){
-  if(! _init_guard_) _file_init_();  return match_value_head(Compiler_match_pattern_value(compiler, List_var(pattern)));
-}
-
 int List_len(List);
 static Symbol _flat_capture_tag(Var element, Var binder){
   if(! Var_is_row(element, 9, 7, 4)) return 0;  List predicate = Var_list(element);  if(List_len(predicate) != 4) return 0;  Var op, named, keyword, tag;  List _x2c_destructure_7 = predicate;  op = List_getindex(_x2c_destructure_7, 0);  named = List_getindex(_x2c_destructure_7, 1);  keyword = List_getindex(_x2c_destructure_7, 2);  tag = List_getindex(_x2c_destructure_7, 3);  if(! Var_equal(op, Symbol_var(62054)) || ! Var_equal(named, binder) || ! Var_equal(keyword, Symbol_var(1362954))) return 0;  if(! Var_is(tag, 1328354264) || Var_equal(tag, Symbol_var(1059020478773725)) || Var_equal(tag, Symbol_var(1479708786)) || Var_equal(tag, Symbol_var(1468512))) return 0;  return Var_symbol(tag);
@@ -3515,10 +3511,6 @@ Symbol match_value_flat_head(Var value, List binders, List * tags){
     Var binder = List_car(cursor), element = List_car(elements);  Symbol tag = 0;  if(! Var_is_atom_binder(binder) || Var_equal(binder, Symbol_var(58))) return 0;  if(! Var_equal(element, binder) && !(tag = _flat_capture_tag(element, binder))) return 0;  Array_push(typed, tag ? Symbol_var(tag) : int_var(0));
   }
   if(List_len(binders) != Array_len(typed) || List_truth(elements)) return 0;  if(tags) * tags = Array_list_free(typed);  else Array_free(typed);  return head;
-}
-
-Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags){
-  if(! _init_guard_) _file_init_();  return match_value_flat_head(Compiler_match_pattern_value(compiler, List_var(pattern)), binders, tags);
 }
 
 MatchCaptureLayout MatchCaptureLayout_analyze(Var);

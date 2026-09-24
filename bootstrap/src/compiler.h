@@ -233,11 +233,7 @@ int Compiler_match_pattern_is_static(Compiler compiler, List pattern);
 
 Symbol match_value_head(Var value);
 
-Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern);
-
 Symbol match_value_flat_head(Var value, List binders, List * tags);
-
-Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags);
 
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 

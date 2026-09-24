@@ -2312,10 +2312,6 @@ Symbol match_value_head(Var value) {
   return head;
 }
 
-/** Returns a typed `Match` pattern's fixed literal head symbol, or zero. */
-Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) =>
-  match_value_head(compiler.match_pattern_value(pattern));
-
 /* A typed capture element is `(!is ?name type <tag>)` with a literal tag.
    The runtime matcher canonicalizes `varray` and `vmap`; those spellings
    keep the runtime path rather than repeating that rule here. */
@@ -2356,11 +2352,6 @@ Symbol match_value_flat_head(Var value, List binders, List *tags) {
   else typed.free();
   return head;
 }
-
-/** Returns the head of a flat Symbol-and-captures pattern, or zero. */
-Symbol Compiler.match_pattern_flat_head(
-  Compiler compiler, List pattern, List binders, List *tags) =>
-  match_value_flat_head(compiler.match_pattern_value(pattern), binders, tags);
 
 /** Returns definite binders from a typed `Match` pattern AST.
 
