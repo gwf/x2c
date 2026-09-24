@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/meta-native-unproved.x:6:1: type: unproved native meta lifetime
   meta Widget widget_wrap(Widget inner);
   ^^^^
-  note: name: widget_wrap signature: ((func ((* struct "Widget"))) * struct "Widget") it might return or keep its argument; ownership cannot be inferred
+  note: name: widget_wrap signature: ((func (("Widget"))) "Widget") it might return or keep its argument; ownership cannot be inferred
 

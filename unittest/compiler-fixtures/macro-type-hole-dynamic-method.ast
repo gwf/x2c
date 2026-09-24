@@ -34,8 +34,7 @@
           (call (expr ((func (("Symbol") (...))) "Var") 
                  (ident (binding 4 "Var_new"))) 
            (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") 
-             (ident (binding 6 "_x2c_macro_value_1"))))))))))
+            (expr ("MacroDynamicOwner") (ident (binding 6 "_x2c_macro_value_1"))))))))))
 
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
