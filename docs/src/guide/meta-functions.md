@@ -229,7 +229,8 @@ int main(void) {
 ```
 
 A bodyless `meta` prototype declares a native C function for compile-time
-code. [Native C functions](#native-c-functions) below describes which
+code, and `meta native` before a definition does the same for the function
+it defines. [Native C functions](#native-c-functions) below describes which
 functions the compiler provides.
 
 At file scope, `meta` can also advertise one initialized static value to
@@ -317,6 +318,40 @@ callable and adapts it.
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
 witness of that conformance the way a bodyless prototype would.
 
+### Native definitions
+
+A function that has an x2c body can be declared native where it is defined.
+Write `native` after `meta`:
+
+```x2c
+/** Returns the number of set bits in `value`. */
+meta native int bits(unsigned value) {
+  int count = 0;
+  for (; value; value &= value - 1) count++;
+  return count;
+}
+```
+
+This means the same as a bodyless `meta` prototype followed by the ordinary
+definition. The body is compiled only for the program, never lowered to
+Lisp, so it may use any C. Compile-time code that calls the function runs
+the compiler's native copy, and the signature must match that copy just as a
+prototype's must. `native` applies only to functions; before any other
+declaration it is an error:
+
+```text
+sample.x:1:1: parse: a native meta declaration must be a function
+  meta native static int value = 3;
+  ^^^^
+```
+
+`native` is a marker only directly after `meta` and before a declaration.
+Elsewhere, including as a type name after `meta`, it is an ordinary
+identifier.
+
+Keep the bodyless prototype for a function that has no x2c body, such as
+`sin` from the C library.
+
 The compiler checks a `meta` body's storage against what each native callee
 allocates and keeps; see [Regions](regions.md). The runtime's own functions
 state this in a table. For any other native function, the compiler infers
@@ -385,15 +420,10 @@ write `$sin(1.0)` to compute the value during translation.
 ## Native modules
 
 A native module lets compile-time code call functions from your own
-project. Declare each function with a bodyless `meta` prototype and define
-it as usual:
+project. Define each function with `meta native`:
 
 ```x2c
-meta int triple(int);
-
-#pragma private
-
-int triple(int x) { return 3 * x; }
+meta native int triple(int x) { return 3 * x; }
 ```
 
 Save that as `helpers.x` and build it as a module:
@@ -402,8 +432,8 @@ Save that as `helpers.x` and build it as a module:
 x2c build --kind meta-module --output helpers.so helpers.x
 ```
 
-The module contains every function that a bodyless `meta` prototype in its
-own sources declares. Code that includes the prototype can call the
+The module contains every function that a `meta native` definition or a
+bodyless `meta` prototype in its own sources declares. Code that includes the prototype can call the
 function during translation when the compiler loads the module:
 
 <!-- ignore: the sample needs helpers.x and the module built from it -->
@@ -430,8 +460,8 @@ x2c run --native-module helpers.so helpers.x main.x
 `$nine()` runs the module's `triple` during translation. The ordinary call
 `triple(5)` uses the copy linked into the program, so `helpers.x` is also
 one of the program's sources. `--native-module` works with `translate`,
-`build`, `run`, and `repl`, and the REPL accepts the same bodyless
-prototype.
+`build`, `run`, and `repl`, and the REPL accepts a bodyless prototype for
+the same function.
 
 A module function may take or return a handle:
 
@@ -491,8 +521,9 @@ before it loads any of the module's code:
 x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
 ```
 
-Every function the module exports needs a bodyless `meta` prototype in the
-module's sources, and a module whose sources declare none fails to build.
+Every function the module exports needs a `meta native` definition or a
+bodyless `meta` prototype in the module's sources, and a module whose sources
+declare none fails to build.
 
 A module can call any runtime function, because the compiler links the
 whole runtime. This holds for a compiler built from a checkout and for one

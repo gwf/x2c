@@ -152,18 +152,14 @@ and the methods from `raylib__`.
 
 ## Packages with compile-time parts
 
-A package has a compile-time part when its sources declare a bodyless
-`meta` prototype. Building the package then also builds a
+A package has a compile-time part when its sources declare a native `meta`
+function, with a `meta native` definition or a bodyless `meta` prototype. Building the package then also builds a
 [native module](meta-functions.md#native-modules) from the package's
 sources, `builds/<name>.module`, and importing the package loads it:
 
 <!-- ignore: the sample is the source of a package. -->
 ```x2c,ignore
-meta int tally_sum(int n);
-
-#pragma private
-
-int tally_sum(int n) => n * (n + 1) / 2;
+meta native int tally_sum(int n) => n * (n + 1) / 2;
 ```
 
 <!-- ignore: an import needs a registered --package-dir root. -->
@@ -176,7 +172,7 @@ meta static int ten(void) => tally.tally_sum(4);
 `$ten()` runs the package's `tally_sum` during translation. The import
 alone loads the module; no `--native-module` option or `native-modules`
 entry is needed. A module named by either one is still consulted first. A
-package whose sources declare no bodyless `meta` prototype builds no module
+package whose sources declare no native `meta` function builds no module
 and is only linked. `x2c install` builds the module of a source package, and
 `make bundle` carries it in the bundle.
 

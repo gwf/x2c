@@ -44,6 +44,7 @@ X2c recursive-descent parser core.
 | [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
 | [`Compiler.script_statement_starts`](#Compiler.script_statement_starts) | Reports whether the top-level item at the cursor is one of a script unit's statements, which become `main`'s body. |
 | [`Compiler.skip_linkage_brace`](#Compiler.skip_linkage_brace) | Consumes one brace of a C linkage specification at file scope and reports whether it did. |
+| [`Compiler.take_meta_marker`](#Compiler.take_meta_marker) | Consumes the `meta` marker at the cursor and the contextual `native` marker that may follow it, and returns the `meta` token. |
 | [`Compiler.test_declaration`](#Compiler.test_declaration) | Tests whether the current token can begin a declaration without consuming. |
 | [`Compiler.test_static_assert`](#Compiler.test_static_assert) | Reports whether the current identifier starts a C static assertion. |
 
@@ -60,7 +61,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2297`
+Source: `src/parse.x:2319`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -95,7 +96,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse.x:1886`
+Source: `src/parse.x:1905`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -107,7 +108,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2231`
+Source: `src/parse.x:2253`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -333,7 +334,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2006`
+Source: `src/parse.x:2028`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -347,7 +348,7 @@ state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
 the unit emits where it reaches them.
 
-Source: `src/parse.x:1922`
+Source: `src/parse.x:1941`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -379,7 +380,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1838`
+Source: `src/parse.x:1857`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -393,7 +394,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1819`
+Source: `src/parse.x:1838`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -407,7 +408,19 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1849`
+Source: `src/parse.x:1868`
+
+<a id="Compiler.take_meta_marker"></a>
+#### Compiler.take_meta_marker
+
+`Token Compiler.take_meta_marker(Compiler c, int *native)`
+
+Consumes the `meta` marker at the cursor and the contextual `native`
+marker that may follow it, and returns the `meta` token. `native` binds
+the definition after it the way a bodyless prototype would. `*native`,
+when requested, reports whether that marker was present.
+
+Source: `src/parse.x:1816`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration
