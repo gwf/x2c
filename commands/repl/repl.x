@@ -168,7 +168,8 @@ static void _write_stats(
   size_t frees = now.scope.free_calls - baseline.scope.free_calls;
   size_t reallocations =
     now.scope.reallocation_calls - baseline.scope.reallocation_calls;
-  size_t requested = now.scope.requested_bytes - baseline.scope.requested_bytes;
+  size_t requested =
+    now.scope.requested_bytes - baseline.scope.requested_bytes;
   size_t interned = now.pool.interned - baseline.pool.interned;
   size_t promoted = now.pool.promoted - baseline.pool.promoted;
   size_t block_allocations =
@@ -177,29 +178,37 @@ static void _write_stats(
   size_t slot_reuses = now.pool.slot_reuses - baseline.pool.slot_reuses;
 
   out.printf("session: definitions=%u\n", now.definitions);
-  out.printf("evaluation (since REPL open): calls=%ld "
+  out.printf(
+    "evaluation (since REPL open): calls=%ld "
     "machine-entries=%ld machine-errors=%ld\n", calls, entries, errors);
-  out.printf("evaluation: live-program-bytes=%ld\n",
+  out.printf(
+    "evaluation: live-program-bytes=%ld\n",
     now.evaluation.program_bytes);
-  out.printf("scope (process): live-allocation-objects=%zu "
+  out.printf(
+    "scope (process): live-allocation-objects=%zu "
     "delta-since-open=%c%zu live-requested-bytes=%zu "
     "byte-delta-since-open=%c%zu\n",
     now.scope.live_allocations, live.sign, live.magnitude,
     now.scope.live_requested_bytes, live_bytes.sign, live_bytes.magnitude);
-  out.printf("scope (process, since REPL open): allocation-calls=%zu "
+  out.printf(
+    "scope (process, since REPL open): allocation-calls=%zu "
     "free-calls=%zu reallocation-calls=%zu requested-traffic-bytes=%zu\n",
     allocations, frees, reallocations, requested);
-  out.printf("pool (current level, since REPL open): "
+  out.printf(
+    "pool (current level, since REPL open): "
     "interned-identities=%zu promotions=%zu\n", interned, promoted);
-  out.printf("pool (process): backing-capacity-bytes=%zu active-bytes=%zu "
+  out.printf(
+    "pool (process): backing-capacity-bytes=%zu active-bytes=%zu "
     "active-blocks=%zu depot-bytes=%zu depot-blocks=%zu\n",
     now.pool.backing_bytes, now.pool.active_bytes, now.pool.active_blocks,
     now.pool.depot_bytes, now.pool.depot_blocks);
-  out.printf("pool (process, since REPL open): block-allocations=%zu "
+  out.printf(
+    "pool (process, since REPL open): block-allocations=%zu "
     "block-reuses=%zu slot-reuses=%zu\n",
     block_allocations, block_reuses, slot_reuses);
   if (!verbose) return;
-  out.printf("evaluation (verbose, since REPL open): analyses=%ld "
+  out.printf(
+    "evaluation (verbose, since REPL open): analyses=%ld "
     "published=%ld ineligible=%ld guard-failures=%ld "
     "remembered-fallbacks=%ld inlined-scopes=%ld inline-declines=%ld\n",
     now.evaluation.analyses - baseline.evaluation.analyses,
@@ -210,33 +219,38 @@ static void _write_stats(
       baseline.evaluation.remembered_fallbacks,
     now.evaluation.inlined_scopes - baseline.evaluation.inlined_scopes,
     now.evaluation.inline_declines - baseline.evaluation.inline_declines);
-  out.printf("scope (process, verbose): live-scopes=%zu "
+  out.printf(
+    "scope (process, verbose): live-scopes=%zu "
     "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu "
     "peak-live-requested-bytes=%zu\n",
     now.scope.live_scopes,
     now.scope.scope_creations - baseline.scope.scope_creations,
     now.scope.scope_destructions - baseline.scope.scope_destructions,
     now.scope.largest_request, now.scope.peak_live_requested_bytes);
-  out.printf("pool (verbose): depth=%d allocation-calls=%zu free-calls=%zu "
+  out.printf(
+    "pool (verbose): depth=%d allocation-calls=%zu free-calls=%zu "
     "requested-traffic-bytes=%zu\n", now.pool.depth,
     now.pool.allocation_calls - baseline.pool.allocation_calls,
     now.pool.free_calls - baseline.pool.free_calls,
     now.pool.requested_bytes - baseline.pool.requested_bytes);
-  out.printf("machine (since REPL open): scan-cells=%ld retries=%ld calls=%ld "
+  out.printf(
+    "machine (since REPL open): scan-cells=%ld retries=%ld calls=%ld "
     "returns=%ld max-frames=%d\n",
     now.machine.scan_cells - baseline.machine.scan_cells,
     now.machine.retries - baseline.machine.retries,
     now.machine.calls - baseline.machine.calls,
     now.machine.returns - baseline.machine.returns,
     now.machine.max_frames);
-  out.printf("machine: range-comparisons=%ld final-range-comparisons=%ld "
+  out.printf(
+    "machine: range-comparisons=%ld final-range-comparisons=%ld "
     "span-descriptors=%ld cons-requests=%ld\n",
     now.machine.range_comparisons - baseline.machine.range_comparisons,
     now.machine.final_range_comparisons -
       baseline.machine.final_range_comparisons,
     now.machine.span_descriptors - baseline.machine.span_descriptors,
     now.machine.cons_requests - baseline.machine.cons_requests);
-  out.printf("machine: materialization-requests=%ld completions=%ld "
+  out.printf(
+    "machine: materialization-requests=%ld completions=%ld "
     "avoided=%ld materialized-cells=%ld direct-shares=%ld\n",
     now.machine.materialization_requests -
       baseline.machine.materialization_requests,
@@ -246,14 +260,16 @@ static void _write_stats(
       baseline.machine.materializations_avoided,
     now.machine.materialized_cells - baseline.machine.materialized_cells,
     now.machine.direct_shares - baseline.machine.direct_shares);
-  out.printf("machine: local-loads=%ld capture-loads=%ld global-loads=%ld "
+  out.printf(
+    "machine: local-loads=%ld capture-loads=%ld global-loads=%ld "
     "nil-edges=%ld nil-taken=%ld\n",
     now.machine.local_loads - baseline.machine.local_loads,
     now.machine.capture_loads - baseline.machine.capture_loads,
     now.machine.global_loads - baseline.machine.global_loads,
     now.machine.nil_edges - baseline.machine.nil_edges,
     now.machine.nil_taken - baseline.machine.nil_taken);
-  out.printf("machine: prepared-calls=%ld native-calls=%ld lisp-returns=%ld\n",
+  out.printf(
+    "machine: prepared-calls=%ld native-calls=%ld lisp-returns=%ld\n",
     now.machine.prepared_calls - baseline.machine.prepared_calls,
     now.machine.native_calls - baseline.machine.native_calls,
     now.machine.lisp_returns - baseline.machine.lisp_returns);
@@ -266,7 +282,8 @@ static void _help_row(String synopsis, String description, size_t width) {
 static void _help(void) {
   size_t width = 0;
   for (size_t i = 0; i < sizeof(_commands) / sizeof(*_commands); i++)
-    if (_commands[i].synopsis.len() > width) width = _commands[i].synopsis.len();
+    if (_commands[i].synopsis.len() > width)
+      width = _commands[i].synopsis.len();
   puts("Enter declarations or statements with semicolons.\n\nCommands");
   for (size_t i = 0; i < sizeof(_commands) / sizeof(*_commands); i++)
     _help_row(_commands[i].synopsis, _commands[i].description, width);

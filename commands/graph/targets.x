@@ -31,20 +31,17 @@ List project_call_target(
   match (node) {
     case %((!or expr at) ? ?inner):
       return project_call_target(
-        compiler, definitions, inner, name, arguments
-      );
+        compiler, definitions, inner, name, arguments);
     case %((!or stmnt parens) ?inner):
       return project_call_target(
-        compiler, definitions, inner, name, arguments
-      );
+        compiler, definitions, inner, name, arguments);
     case %(call
            (expr ?
              (ident (!set ?binding (binding ? ?spelling))))
            (!set ?call_arguments (args *))): {
       if (arguments) *arguments = call_arguments;
       if (compiler.semantic_binding_facts().contains(
-            %(automatic $binding)
-          )) {
+        %(automatic $binding))) {
         name = "computed";
         return %(computed);
       }

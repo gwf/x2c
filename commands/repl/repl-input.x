@@ -45,7 +45,7 @@
 #pragma once
 #include "common.x"
 
-/** Owns terminal restoration and the current process's bounded REPL history. */
+/** Owns terminal restoration and this process's bounded REPL history. */
 typedef struct ReplInput *ReplInput;
 
 /** `status` is line, eof, or cancelled. `text` is present for line, including
@@ -165,27 +165,27 @@ static uint32_t _utf8_decode(const char *s, size_t available, size_t &len) {
          ((p[2] & 0x3f) << 6) | (p[3] & 0x3f);
 }
 
-/* Check if codepoint is a variation selector (emoji style modifiers). */
+/* U+FE0E and U+FE0F select text or emoji presentation. */
 static int _is_variation_selector(uint32_t cp) {
   return cp == 0xFE0E || cp == 0xFE0F;  /* Text/emoji style */
 }
 
-/* Check if codepoint is a skin tone modifier. */
+/* The Fitzpatrick modifiers U+1F3FB through U+1F3FF. */
 static int _is_skin_tone_modifier(uint32_t cp) {
   return cp >= 0x1F3FB && cp <= 0x1F3FF;
 }
 
-/* Check if codepoint is Zero Width Joiner. */
+/* U+200D joins emoji into one grapheme. */
 static int _is_joiner(uint32_t cp) {
   return cp == 0x200D;
 }
 
-/* Check if codepoint is a Regional Indicator (for flag emoji). */
+/* A pair of these forms one flag emoji. */
 static int _is_regional_indicator(uint32_t cp) {
   return cp >= 0x1F1E6 && cp <= 0x1F1FF;
 }
 
-/* Check if codepoint is a combining mark or other zero-width character. */
+/* Also covers other zero-width characters. */
 static int _is_combining_mark(uint32_t cp) {
   return (cp >= 0x0300 && cp <= 0x036F) ||   /* Combining Diacriticals */
       (cp >= 0x1AB0 && cp <= 0x1AFF) || /* Diacriticals Extended */
@@ -348,8 +348,8 @@ static int _codepoint_width(uint32_t cp) {
     (cp <= 0x115F ||                      /* Hangul Jamo */
      cp == 0x2329 || cp == 0x232A ||      /* Angle brackets */
      (cp >= 0x231A && cp <= 0x231B) ||    /* Watch, Hourglass */
-     (cp >= 0x23E9 && cp <= 0x23F3) ||    /* Various symbols */
-     (cp >= 0x23F8 && cp <= 0x23FA) ||    /* Various symbols */
+     (cp >= 0x23E9 && cp <= 0x23F3) ||    /* Media controls, clocks */
+     (cp >= 0x23F8 && cp <= 0x23FA) ||    /* Pause, stop, record */
      (cp >= 0x25AA && cp <= 0x25AB) ||    /* Small squares */
      (cp >= 0x25B6 && cp <= 0x25C0) ||    /* Play/reverse buttons */
      (cp >= 0x25FB && cp <= 0x25FE) ||    /* Squares */
@@ -587,7 +587,7 @@ failed:
   return 80;
 }
 
-/* Clear the screen. Used to handle ctrl+l */
+/* Handles ctrl+l. */
 static void _clear_screen(struct EditState *l) {
   _write_bytes(l.input.ofd, "\x1b[H\x1b[2J", 7);
 }
@@ -831,7 +831,7 @@ static size_t _previous_edit_len(struct EditState *l, size_t pos) {
   return _previous_grapheme_len(l.buf,pos);
 }
 
-/* Add a fold range, keeping the array sorted by start offset. */
+/* Keeps the fold array sorted by start offset. */
 static void _fold_add(struct EditState *l, size_t start, size_t end) {
   int j;
 
@@ -847,12 +847,10 @@ static void _fold_add(struct EditState *l, size_t start, size_t end) {
   l.fold_count++;
 }
 
-/* Clear all remembered fold ranges. */
 static void _fold_clear(struct EditState *l) {
   l.fold_count = 0;
 }
 
-/* Remove one remembered fold range. */
 static void _fold_remove(struct EditState *l, int j) {
   memmove(
     l.fold_start+j, l.fold_start+j+1,
@@ -1002,7 +1000,7 @@ static void _refresh_line(struct EditState *l) {
   _refresh_with_flags(l,REFRESH_ALL);
 }
 
-/* Grow the editing buffer up to the configured interactive-input limit. */
+/* Stops at the configured interactive-input limit. */
 static int _grow(struct EditState *l, size_t needed) {
   size_t newlen;
   char *newbuf;
@@ -1081,7 +1079,6 @@ static void _move_home(struct EditState *l) {
   }
 }
 
-/* Move cursor to the end of the line. */
 static void _move_end(struct EditState *l) {
   if (l.pos != l.len) {
     l.pos = l.len;
@@ -1147,7 +1144,7 @@ static void _delete(struct EditState *l) {
   }
 }
 
-/* Backspace implementation. Deletes the UTF-8 character before the cursor. */
+/* Deletes the whole UTF-8 character before the cursor. */
 static void _backspace(struct EditState *l) {
   if (l.pos > 0 && l.len > 0) {
     size_t clen = _previous_edit_len(l, l.pos);
@@ -1511,7 +1508,7 @@ static Symbol _edit_feed(struct EditState *l) {
   case CTRL_N:    /* ctrl-n */
     _recall(l, LINENOISE_HISTORY_NEXT);
     break;
-  case ESC:    /* escape sequence */
+  case ESC:
     /* Read the next two bytes representing the escape sequence.
      * Use two calls to handle slow terminals returning the two
      * chars at different times. */
@@ -1609,7 +1606,7 @@ static Symbol _edit_feed(struct EditState *l) {
     _clear_screen(l);
     _refresh_line(l);
     break;
-  case CTRL_W: /* ctrl+w, delete previous word */
+  case CTRL_W:
     _delete_previous_word(l);
     break;
   }

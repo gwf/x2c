@@ -44,7 +44,7 @@ static String _gap(Lint l, int before, int after, String space):
 static String _compared(Token t) =>
   t.type == <comment> ? _trimmed(t.text) : t.text
 
-/* Whether `a` and `b` scan to the same tokens apart from space. */
+/* Spacing differences between `a` and `b` do not count. */
 static int _same_tokens(Lint a, Lint b):
   int i = a.next(-1), j = b.next(-1)
   for (; i < a.count && j < b.count; i = a.next(i), j = b.next(j)):
