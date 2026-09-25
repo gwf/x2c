@@ -57,10 +57,10 @@ int SourceView.exists(SourceView sources, String path) {
     text belongs to the calling unit; configured snapshots remain borrowed.
 */
 int SourceView.read(
-  SourceView sources, String path, String volatile *text) {
+  SourceView sources, String path, String volatile &text) {
   Var value;
   if (sources && sources.overlays.try_get(Path.absolute(path), &value)) {
-    *text = value;
+    text = value;
     return 1;
   }
   struct stat info;
@@ -70,7 +70,7 @@ int SourceView.read(
     file.close();
     return 0;
   }
-  try *text = file.string_close();
+  try text = file.string_close();
   catch %(io-fail *): return 0;
   return 1;
 }

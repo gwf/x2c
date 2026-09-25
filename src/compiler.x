@@ -446,9 +446,9 @@ void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
 /** Reads a source through the request view and retains exact response
     bytes.
 */
-int Compiler.read_source(Compiler c, String path, String volatile *text) {
+int Compiler.read_source(Compiler c, String path, String volatile &text) {
   if (!c.sources.read(path, text)) return 0;
-  if (c.source_facts) c.source_texts[Path.absolute(path)] = *text;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
   return 1;
 }
 

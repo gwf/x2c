@@ -194,7 +194,7 @@ static void _replay_cached(
 /* Read an include's text, reporting an unreadable target as a driver error. */
 static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
-  if (!c.read_source(path, &text))
+  if (!c.read_source(path, text))
     c.report_error(<driver>, "cannot read include", c.token,
                    %("stage: collect" "include: $target" "path: $path"));
   return text;
@@ -538,7 +538,7 @@ static void _file(
 
 static String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
-  if (!c.read_source(runtime, &text))
+  if (!c.read_source(runtime, text))
     c.report_error(
       <driver>, "cannot read runtime source", c.token,
       %("path: $runtime"));
@@ -758,7 +758,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   if (cached) _replay_cached(package, cached, globs, visited);
   else {
     String text = NULL;
-    if (!package.read_source(entry, &text))
+    if (!package.read_source(entry, text))
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
@@ -865,7 +865,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
   if (hash is void) {
     String text = NULL;
     try {
-      if (!compiler.read_source(path, &text)) return 0;
+      if (!compiler.read_source(path, text)) return 0;
     }
     catch %(io-fail *): return 0;
     catch %(bad-arg *): return 0;

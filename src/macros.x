@@ -891,7 +891,7 @@ static Var _sdk_embed_text(Var requested) {
   String path = _embed_path(compiler, source_file, requested_path);
   if (compiler.sources) {
     String text;
-    if (!compiler.read_source(path, &text))
+    if (!compiler.read_source(path, text))
       _sdk_reject(
         "cannot read embedded text",
         %("path: ${compiler.display_path(path)}"));
@@ -993,7 +993,7 @@ void x2c_diagnostic_warn(String message, List notes) {
 static String _source_text(
   Compiler c, String path, String message, Token token, List notes) {
   String text = NULL;
-  if (!c.read_source(path, &text))
+  if (!c.read_source(path, text))
     c.report_error(<macro>, message, token, notes);
   return text;
 }
@@ -2032,7 +2032,7 @@ static Var _sdk_symbol_set(List values) {
         %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = macro_sdk_compiler.symbol_set_expression(
-    values, &duplicate);
+    values, duplicate);
   if (duplicate >= 0)
     _sdk_reject(
       "_x2c.symbol-set requires distinct Symbols",

@@ -691,7 +691,7 @@ Source: `src/compiler.x:1284`
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
 
-`int Compiler.read_source(Compiler c, String path, String volatile *text)`
+`int Compiler.read_source(Compiler c, String path, String volatile &text)`
 
 Reads a source through the request view and retains exact response
 bytes.

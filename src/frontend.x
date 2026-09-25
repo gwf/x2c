@@ -127,7 +127,7 @@ static void _tokenize_input(
       !strncmp(source_path, lib_path, lib_length) &&
       source_path[lib_length] == '/');
   String text = NULL;
-  if (!c.read_source(filename, &text))
+  if (!c.read_source(filename, text))
     c.report_error(
       <driver>, "cannot read input file", NULL,
       %("stage: driver" "file: $filename" "reason: cannot open"));

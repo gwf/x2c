@@ -168,7 +168,7 @@ int editor_request(int argc, char **argv) {
     int arg = 6 + index * 3;
     String logical = String.new(argv[arg]);
     String snapshot = String.new(argv[arg + 1]), text;
-    if (!SourceView.read(NULL, snapshot, &text)) return 2;
+    if (!SourceView.read(NULL, snapshot, text)) return 2;
     sources.set(logical, text, !strcmp(argv[arg + 2], "1"));
   }
   // Reuse the private metadata delimiter as the compiler's argv[0].
