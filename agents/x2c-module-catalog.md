@@ -557,9 +557,9 @@ Public functions:
 `Buffer.clear`, `Buffer.write_len`, `Buffer.write`, `Buffer.printf`,
 `Buffer.write_char`, `Buffer.write_repeat`, `Buffer.unwrite`, `Buffer.pad`,
 `Buffer.newline`, `Buffer.indent`, `Buffer.newline_indent`, `Buffer.push`,
-`Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`, `Buffer.len`,
-`Buffer.str`, `Buffer.str_free`, `Buffer.repr`, `Buffer.truth`,
-`Buffer.cleanup`
+`Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`,
+`Buffer.getindex`, `Buffer.len`, `Buffer.str`, `Buffer.str_free`,
+`Buffer.repr`, `Buffer.truth`, `Buffer.cleanup`
 
 ### [lib/clibc.x](../lib/clibc.x)
 

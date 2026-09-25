@@ -308,6 +308,9 @@ char Buffer.get(Buffer buf, ptrdiff_t index) {
   return buf.try_get(index, &out) ? out : '\0';
 }
 
+/** Returns `buf.get(index)`, so `buf[index]` reads a byte. */
+int Buffer.getindex(Buffer buf, int index) => buf.get(index);
+
 /** Returns the number of bytes currently stored in `buf`. */
 size_t Buffer.len(Buffer buf) => buf ? buf.content.length : 0;
 
