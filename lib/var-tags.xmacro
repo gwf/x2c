@@ -6,408 +6,410 @@
     the C type whose `sizeof` supplies it. Signedness comes from the tag
     spelling and floating-ness from the kind, so neither is a column.
 
-    lib/var.x projects the ID enumerator, the info table, the tag set, and
-    the decode switch; lib/varconvert.x projects the numeric table and its
-    tag set. Both import this file because compile-time Lisp definitions do
-    not cross an `#include`.
+    The ledger and its projections are `meta` functions. lib/var-ledger.x
+    projects the tag table, the tag sets, the numeric table, the decoder
+    table, and the `TagId` check; src/type-ledger.x projects the type lookup
+    and the constant rows. Only those two units import this file, because
+    an import in an included file runs in every unit that includes it.
 */
 
-$(def var.tag.row-groups '(
+meta static List _tag_groups(void) => %(
   (
-    (u8        _u8_        integer   0x8002 0x0001 0x0 8 1)
-    (i8        _i8_        integer   0x8002 0x0002 0x0 8 1)
-    (u16       _u16_       integer   0x8002 0x0003 0x0 16 2)
-    (i16       _i16_       integer   0x8002 0x0004 0x0 16 2)
-    (u32       _u32_       integer   0x8002 0x0005 0x0 32 3)
-    (i32       _i32_       integer   0x8002 0x0006 0x0 32 3)
-    (f32       _f32_       floating  0x8002 0x0007 0x0 32 7)
+    (<u8>  "_u8_"  <integer>  0x8002 0x0001 0x0 8 1)
+    (<i8>  "_i8_"  <integer>  0x8002 0x0002 0x0 8 1)
+    (<u16> "_u16_" <integer>  0x8002 0x0003 0x0 16 2)
+    (<i16> "_i16_" <integer>  0x8002 0x0004 0x0 16 2)
+    (<u32> "_u32_" <integer>  0x8002 0x0005 0x0 32 3)
+    (<i32> "_i32_" <integer>  0x8002 0x0006 0x0 32 3)
+    (<f32> "_f32_" <floating> 0x8002 0x0007 0x0 32 7)
   )
   (
-    (u48       _u48_       integer   0x8000 0x0000 0x0 48 4)
-    (i48       _i48_       integer   0x8001 0x0000 0x0 48 4)
-    (p48       _p48_       pointer   0x0000 0x0000 0x0)
-    (f64       _f64_       floating  0x0000 0x0000 0x0 64 8)
+    (<u48> "_u48_" <integer>  0x8000 0x0000 0x0 48 4)
+    (<i48> "_i48_" <integer>  0x8001 0x0000 0x0 48 4)
+    (<p48> "_p48_" <pointer>  0x0000 0x0000 0x0)
+    (<f64> "_f64_" <floating> 0x0000 0x0000 0x0 64 8)
   )
   (
-    (long      _long_      integer   0x0005 0x0000 0x5 (long) 5)
-    (ulong     _ulong_     integer   0x0005 0x0000 0x6 (unsigned long) 5)
-    (llong     _llong_     integer   0x0005 0x0000 0x7 (long long) 6)
-    (ullong    _ullong_    integer   0x0007 0x0000 0x6 (unsigned long long) 6)
-    (ldouble   _ldouble_   floating  0x0007 0x0000 0x7 (long double) 9)
+    (<long>    "_long_"    <integer>  0x0005 0x0000 0x5 (long) 5)
+    (<ulong>   "_ulong_"   <integer>  0x0005 0x0000 0x6 (unsigned long) 5)
+    (<llong>   "_llong_"   <integer>  0x0005 0x0000 0x7 (long long) 6)
+    (<ullong>  "_ullong_"  <integer>  0x0007 0x0000 0x6 (unsigned long long) 6)
+    (<ldouble> "_ldouble_" <floating> 0x0007 0x0000 0x7 (long double) 9)
   )
   (
-    (u8*       _u8_p_      pointer   0x0001 0x0000 0x0)
-    (i8*       _i8_p_      pointer   0x0002 0x0000 0x0)
-    (u16*      _u16_p_     pointer   0x0003 0x0000 0x0)
-    (i16*      _i16_p_     pointer   0x0003 0x0000 0x1)
-    (u32*      _u32_p_     pointer   0x0004 0x0000 0x0)
-    (i32*      _i32_p_     pointer   0x0004 0x0000 0x1)
-    (f32*      _f32_p_     pointer   0x0004 0x0000 0x2)
-    (ulong*    _ulong_p_   pointer   0x0004 0x0000 0x3)
-    (long*     _long_p_    pointer   0x0005 0x0000 0x0)
-    (f64*      _f64_p_     pointer   0x0005 0x0000 0x1)
-    (ullong*   _ullong_p_  pointer   0x0005 0x0000 0x2)
-    (llong*    _llong_p_   pointer   0x0005 0x0000 0x3)
-    (ldouble*  _ldouble_p_ pointer   0x0005 0x0000 0x4)
-    (p48*      _p48_p_     pointer   0x0006 0x0000 0x0)
+    (<u8*>      "_u8_p_"      <pointer> 0x0001 0x0000 0x0)
+    (<i8*>      "_i8_p_"      <pointer> 0x0002 0x0000 0x0)
+    (<u16*>     "_u16_p_"     <pointer> 0x0003 0x0000 0x0)
+    (<i16*>     "_i16_p_"     <pointer> 0x0003 0x0000 0x1)
+    (<u32*>     "_u32_p_"     <pointer> 0x0004 0x0000 0x0)
+    (<i32*>     "_i32_p_"     <pointer> 0x0004 0x0000 0x1)
+    (<f32*>     "_f32_p_"     <pointer> 0x0004 0x0000 0x2)
+    (<ulong*>   "_ulong_p_"   <pointer> 0x0004 0x0000 0x3)
+    (<long*>    "_long_p_"    <pointer> 0x0005 0x0000 0x0)
+    (<f64*>     "_f64_p_"     <pointer> 0x0005 0x0000 0x1)
+    (<ullong*>  "_ullong_p_"  <pointer> 0x0005 0x0000 0x2)
+    (<llong*>   "_llong_p_"   <pointer> 0x0005 0x0000 0x3)
+    (<ldouble*> "_ldouble_p_" <pointer> 0x0005 0x0000 0x4)
+    (<p48*>     "_p48_p_"     <pointer> 0x0006 0x0000 0x0)
   )
   (
-    (u8**      _u8_pp_     pointer   0x0006 0x0000 0x1)
-    (i8**      _i8_pp_     pointer   0x0006 0x0000 0x2)
-    (u16**     _u16_pp_    pointer   0x0006 0x0000 0x3)
-    (i16**     _i16_pp_    pointer   0x0006 0x0000 0x4)
-    (u32**     _u32_pp_    pointer   0x0006 0x0000 0x5)
-    (i32**     _i32_pp_    pointer   0x0006 0x0000 0x6)
-    (f32**     _f32_pp_    pointer   0x0006 0x0000 0x7)
-    (ulong**   _ulong_pp_  pointer   0x0007 0x0000 0x0)
-    (long**    _long_pp_   pointer   0x0007 0x0000 0x1)
-    (f64**     _f64_pp_    pointer   0x0007 0x0000 0x2)
-    (ullong**  _ullong_pp_ pointer   0x0007 0x0000 0x3)
-    (llong**   _llong_pp_  pointer   0x0007 0x0000 0x4)
-    (ldouble** _ldouble_pp_ pointer   0x0007 0x0000 0x5)
+    (<u8**>      "_u8_pp_"      <pointer> 0x0006 0x0000 0x1)
+    (<i8**>      "_i8_pp_"      <pointer> 0x0006 0x0000 0x2)
+    (<u16**>     "_u16_pp_"     <pointer> 0x0006 0x0000 0x3)
+    (<i16**>     "_i16_pp_"     <pointer> 0x0006 0x0000 0x4)
+    (<u32**>     "_u32_pp_"     <pointer> 0x0006 0x0000 0x5)
+    (<i32**>     "_i32_pp_"     <pointer> 0x0006 0x0000 0x6)
+    (<f32**>     "_f32_pp_"     <pointer> 0x0006 0x0000 0x7)
+    (<ulong**>   "_ulong_pp_"   <pointer> 0x0007 0x0000 0x0)
+    (<long**>    "_long_pp_"    <pointer> 0x0007 0x0000 0x1)
+    (<f64**>     "_f64_pp_"     <pointer> 0x0007 0x0000 0x2)
+    (<ullong**>  "_ullong_pp_"  <pointer> 0x0007 0x0000 0x3)
+    (<llong**>   "_llong_pp_"   <pointer> 0x0007 0x0000 0x4)
+    (<ldouble**> "_ldouble_pp_" <pointer> 0x0007 0x0000 0x5)
   )
   (
-    (array     _array_     object    0x0008 0x0000 0x0)
-    (block     _block_     object    0x0008 0x0000 0x1)
-    (buffer    _buffer_    object    0x0008 0x0000 0x2)
-    (bytes     _bytes_     object    0x0008 0x0000 0x3)
-    (context   _context_   object    0x0008 0x0000 0x5)
-    (error     _error_     object    0x0008 0x0000 0x7)
-    (file      _file_      object    0x0009 0x0000 0x0)
-    (func      _func_      object    0x0009 0x0000 0x1)
-    (iter      _iter_      object    0x0009 0x0000 0x2)
-    (lambda    _lambda_    object    0x0009 0x0000 0x3)
-    (list      _list_      object    0x0009 0x0000 0x4)
-    (logger    _logger_    object    0x0009 0x0000 0x5)
-    (map       _map_       object    0x0009 0x0000 0x6)
+    (<array>   "_array_"   <object> 0x0008 0x0000 0x0)
+    (<block>   "_block_"   <object> 0x0008 0x0000 0x1)
+    (<buffer>  "_buffer_"  <object> 0x0008 0x0000 0x2)
+    (<bytes>   "_bytes_"   <object> 0x0008 0x0000 0x3)
+    (<context> "_context_" <object> 0x0008 0x0000 0x5)
+    (<error>   "_error_"   <object> 0x0008 0x0000 0x7)
+    (<file>    "_file_"    <object> 0x0009 0x0000 0x0)
+    (<func>    "_func_"    <object> 0x0009 0x0000 0x1)
+    (<iter>    "_iter_"    <object> 0x0009 0x0000 0x2)
+    (<lambda>  "_lambda_"  <object> 0x0009 0x0000 0x3)
+    (<list>    "_list_"    <object> 0x0009 0x0000 0x4)
+    (<logger>  "_logger_"  <object> 0x0009 0x0000 0x5)
+    (<map>     "_map_"     <object> 0x0009 0x0000 0x6)
   )
   (
-    (mutex     _mutex_     object    0x000A 0x0000 0x0)
-    (pipe      _pipe_      object    0x000A 0x0000 0x1)
-    (proc      _proc_      object    0x000A 0x0000 0x2)
-    (regexp    _regexp_    object    0x000A 0x0000 0x3)
-    (rope      _rope_      object    0x000A 0x0000 0x4)
-    (scope     _scope_     object    0x000A 0x0000 0x5)
-    (slice     _slice_     object    0x000A 0x0000 0x6)
-    (socket    _socket_    object    0x000A 0x0000 0x7)
-    (stream    _stream_    object    0x000B 0x0000 0x0)
-    (string    _string_    object    0x000B 0x0000 0x1)
-    (symbol    _symbol_    symbol    0x8004 0x800C 0x0)
-    (tensor    _tensor_    object    0x000B 0x0000 0x3)
-    (thread    _thread_    object    0x000B 0x0000 0x4)
-    (token     _token_     object    0x000B 0x0000 0x5)
-    (var       _var_       object    0x000B 0x0000 0x6)
+    (<mutex>  "_mutex_"  <object> 0x000A 0x0000 0x0)
+    (<pipe>   "_pipe_"   <object> 0x000A 0x0000 0x1)
+    (<proc>   "_proc_"   <object> 0x000A 0x0000 0x2)
+    (<regexp> "_regexp_" <object> 0x000A 0x0000 0x3)
+    (<rope>   "_rope_"   <object> 0x000A 0x0000 0x4)
+    (<scope>  "_scope_"  <object> 0x000A 0x0000 0x5)
+    (<slice>  "_slice_"  <object> 0x000A 0x0000 0x6)
+    (<socket> "_socket_" <object> 0x000A 0x0000 0x7)
+    (<stream> "_stream_" <object> 0x000B 0x0000 0x0)
+    (<string> "_string_" <object> 0x000B 0x0000 0x1)
+    (<symbol> "_symbol_" <symbol> 0x8004 0x800C 0x0)
+    (<tensor> "_tensor_" <object> 0x000B 0x0000 0x3)
+    (<thread> "_thread_" <object> 0x000B 0x0000 0x4)
+    (<token>  "_token_"  <object> 0x000B 0x0000 0x5)
+    (<var>    "_var_"    <object> 0x000B 0x0000 0x6)
   )
   (
-    (array*    _array_p_   reference 0x000C 0x0000 0x0)
-    (block*    _block_p_   reference 0x000C 0x0000 0x1)
-    (buffer*   _buffer_p_  reference 0x000C 0x0000 0x2)
-    (bytes*    _bytes_p_   reference 0x000C 0x0000 0x3)
-    (context*  _context_p_ reference 0x000C 0x0000 0x5)
-    (error*    _error_p_   reference 0x000C 0x0000 0x7)
-    (file*     _file_p_    reference 0x000D 0x0000 0x0)
-    (func*     _func_p_    reference 0x000D 0x0000 0x1)
-    (iter*     _iter_p_    reference 0x000D 0x0000 0x2)
-    (lambda*   _lambda_p_  reference 0x000D 0x0000 0x3)
-    (list*     _list_p_    reference 0x000D 0x0000 0x4)
-    (logger*   _logger_p_  reference 0x000D 0x0000 0x5)
-    (map*      _map_p_     reference 0x000D 0x0000 0x6)
+    (<array*>   "_array_p_"   <reference> 0x000C 0x0000 0x0)
+    (<block*>   "_block_p_"   <reference> 0x000C 0x0000 0x1)
+    (<buffer*>  "_buffer_p_"  <reference> 0x000C 0x0000 0x2)
+    (<bytes*>   "_bytes_p_"   <reference> 0x000C 0x0000 0x3)
+    (<context*> "_context_p_" <reference> 0x000C 0x0000 0x5)
+    (<error*>   "_error_p_"   <reference> 0x000C 0x0000 0x7)
+    (<file*>    "_file_p_"    <reference> 0x000D 0x0000 0x0)
+    (<func*>    "_func_p_"    <reference> 0x000D 0x0000 0x1)
+    (<iter*>    "_iter_p_"    <reference> 0x000D 0x0000 0x2)
+    (<lambda*>  "_lambda_p_"  <reference> 0x000D 0x0000 0x3)
+    (<list*>    "_list_p_"    <reference> 0x000D 0x0000 0x4)
+    (<logger*>  "_logger_p_"  <reference> 0x000D 0x0000 0x5)
+    (<map*>     "_map_p_"     <reference> 0x000D 0x0000 0x6)
   )
   (
-    (mutex*    _mutex_p_   reference 0x000E 0x0000 0x0)
-    (pipe*     _pipe_p_    reference 0x000E 0x0000 0x1)
-    (proc*     _proc_p_    reference 0x000E 0x0000 0x2)
-    (regexp*   _regexp_p_  reference 0x000E 0x0000 0x3)
-    (rope*     _rope_p_    reference 0x000E 0x0000 0x4)
-    (scope*    _scope_p_   reference 0x000E 0x0000 0x5)
-    (slice*    _slice_p_   reference 0x000E 0x0000 0x6)
-    (socket*   _socket_p_  reference 0x000E 0x0000 0x7)
-    (stream*   _stream_p_  reference 0x000F 0x0000 0x0)
-    (string*   _string_p_  reference 0x000F 0x0000 0x1)
-    (symbol*   _symbol_p_  reference 0x000F 0x0000 0x2)
-    (tensor*   _tensor_p_  reference 0x000F 0x0000 0x3)
-    (thread*   _thread_p_  reference 0x000F 0x0000 0x4)
-    (token*    _token_p_   reference 0x000F 0x0000 0x5)
-    (var*      _var_p_     reference 0x000F 0x0000 0x6)
+    (<mutex*>  "_mutex_p_"  <reference> 0x000E 0x0000 0x0)
+    (<pipe*>   "_pipe_p_"   <reference> 0x000E 0x0000 0x1)
+    (<proc*>   "_proc_p_"   <reference> 0x000E 0x0000 0x2)
+    (<regexp*> "_regexp_p_" <reference> 0x000E 0x0000 0x3)
+    (<rope*>   "_rope_p_"   <reference> 0x000E 0x0000 0x4)
+    (<scope*>  "_scope_p_"  <reference> 0x000E 0x0000 0x5)
+    (<slice*>  "_slice_p_"  <reference> 0x000E 0x0000 0x6)
+    (<socket*> "_socket_p_" <reference> 0x000E 0x0000 0x7)
+    (<stream*> "_stream_p_" <reference> 0x000F 0x0000 0x0)
+    (<string*> "_string_p_" <reference> 0x000F 0x0000 0x1)
+    (<symbol*> "_symbol_p_" <reference> 0x000F 0x0000 0x2)
+    (<tensor*> "_tensor_p_" <reference> 0x000F 0x0000 0x3)
+    (<thread*> "_thread_p_" <reference> 0x000F 0x0000 0x4)
+    (<token*>  "_token_p_"  <reference> 0x000F 0x0000 0x5)
+    (<var*>    "_var_p_"    <reference> 0x000F 0x0000 0x6)
   )
   (
-    (nan       _nan_       floating  0x8003 0x0001 0x0)
-    (-inf      _neginf_    floating  0x8003 0x0002 0x0)
-    (+inf      _posinf_    floating  0x8003 0x0003 0x0)
-    (void      _void_      void      0x8003 0xFFFF 0x0)
+    (<nan>  "_nan_"    <floating> 0x8003 0x0001 0x0)
+    (<-inf> "_neginf_" <floating> 0x8003 0x0002 0x0)
+    (<+inf> "_posinf_" <floating> 0x8003 0x0003 0x0)
+    (<void> "_void_"   <void>     0x8003 0xFFFF 0x0)
   )
-))
+);
 
-$(defun var.tag.id (row) (car (cdr row)))
-$(defun var.tag.kind (row) (car (cdr (cdr row))))
-$(defun var.tag.top (row) (car (cdr (cdr (cdr row)))))
-$(defun var.tag.middle (row) (car (cdr (cdr (cdr (cdr row))))))
-$(defun var.tag.bottom (row)
-  (car (cdr (cdr (cdr (cdr (cdr row)))))))
+/* A row is `(tag id kind top middle bottom)`, and a numeric row carries
+   `bits` and `rank` after it. The ledger is grouped only to keep its source
+   readable, so every projection reads one flat sequence. */
+meta static List _tag_rows(void) {
+  Array rows = [];
+  foreach (List group, _tag_groups())
+    foreach (Var row, group) rows.push(row);
+  return rows;
+}
 
-$(defun var.tag.numeric? (row) (not (null? (cddr (cddr (cddr row))))))
-$(defun var.tag.bits (row) (car (cddr (cddr (cddr row)))))
-$(defun var.tag.rank (row) (cadr (cddr (cddr (cddr row)))))
-$(defun var.tag.floating? (row) (eq? (var.tag.kind row) 'floating))
-$(defun var.tag.unsigned? (row)
-  (equal? (substring (str (car row)) 0 1) "u"))
+meta static String _tag_id(List row)    => row[1];
+meta static Symbol _tag_kind(List row)  => row[2];
+meta static int _tag_top(List row)      => row[3];
+meta static int _tag_middle(List row)   => row[4];
+meta static int _tag_bottom(List row)   => row[5];
+meta static int _tag_numeric(List row)  => row.len() > 6;
+meta static Var _tag_bits(List row)     => row[6];
+meta static int _tag_rank(List row)     => row[7];
+meta static int _tag_floating(List row) => _tag_kind(row) == <floating>;
+meta static int _tag_unsigned(List row) => row[0].str().startswith("u");
 
-$(defun var.tag.unique (values seen)
-  (if (null? values) (reverse seen)
-      (var.tag.unique (cdr values)
-        (if (member (car values) seen) seen
-            (cons (car values) seen)))))
+/* The comma-separated composite initializer holding `items`. */
+meta static List _tag_composite(List items) =>
+  %(expr () (composite (commas @items)));
 
-$(defun var.tag.id-row (row)
-  (x2c.ident (str (var.tag.id row))))
+/* --- the tag table and tag sets ----------------------------------------- */
 
-$(defun var.tag.map (procedure groups)
-  (apply append
-    (map (lambda (group) (map procedure group)) groups)))
+meta static List _tag_info_row(List row) =>
+  _tag_composite([
+    x2c_literal_symbol(row[0]),
+    x2c_literal_symbol(_tag_kind(row)),
+    x2c_literal_int(_tag_top(row)),
+    x2c_literal_int(_tag_middle(row)),
+    x2c_literal_int(_tag_bottom(row))]);
 
-$(defun var.tag.filter (predicate groups)
-  (apply append
-    (map (lambda (group) (filter predicate group)) groups)))
+/* The table ends in a void row, so a decoded index past the ledger reads a
+   descriptor rather than past the array. */
+meta static List _tag_info_sentinel(void) =>
+  _tag_composite([
+    x2c_literal_int(0),
+    x2c_literal_symbol(<void>),
+    x2c_literal_int(0x8000),
+    x2c_literal_int(0),
+    x2c_literal_int(0)]);
 
-$(defun var.tag.info-row (row)
-  (x2c.expr.composite (list
-    (x2c.literal.symbol (car row))
-    (x2c.literal.symbol (var.tag.kind row))
-    (x2c.literal.int (var.tag.top row))
-    (x2c.literal.int (var.tag.middle row))
-    (x2c.literal.int (var.tag.bottom row)))))
+meta static List _tag_info(void) {
+  Array cells = [];
+  foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
+  cells.push(_tag_info_sentinel());
+  return _tag_composite(cells);
+}
 
-$(defun var.tag.info-sentinel ()
-  (x2c.expr.composite (list
-    (x2c.literal.int 0)
-    (x2c.literal.symbol 'void)
-    (x2c.literal.int 0x8000)
-    (x2c.literal.int 0)
-    (x2c.literal.int 0))))
+meta static int _tag_descriptor(List row) =>
+  _tag_kind(row) == <object> || _tag_kind(row) == <symbol>;
 
-$(defun var.tag.info (rows)
-  (x2c.expr.composite
-    `(,@(var.tag.map var.tag.info-row rows) ,(var.tag.info-sentinel))))
+meta static List _tag_names(void) {
+  Array names = [];
+  foreach (List row, _tag_rows()) names.push(row[0]);
+  return names;
+}
 
-$(defun var.tag.symbolset (rows)
-  (_x2c.symbol-set
-    (var.tag.map (lambda (row) (car row)) rows)))
+/* --- the numeric table --------------------------------------------------- */
 
-/* The descriptor table is the ledger's boxed rows in ledger order, so a
-   decoded row index selects a descriptor without a second tag search. */
-$(defun var.tag.descriptor? (row)
-  (member (var.tag.kind row) '(object symbol)))
+meta static List _tag_numeric_rows(void) {
+  Array rows = [];
+  foreach (List row, _tag_rows()) if (_tag_numeric(row)) rows.push(row);
+  return rows;
+}
 
-$(defun var.tag.descriptor.count (rows)
-  (x2c.literal.int (length (var.tag.filter var.tag.descriptor? rows))))
-
-$(defun var.tag.numeric-rows (rows)
-  (var.tag.filter var.tag.numeric? rows))
+meta static List _tag_numeric_names(void) {
+  Array names = [];
+  foreach (List row, _tag_numeric_rows()) names.push(row[0]);
+  return names;
+}
 
 /* A literal width stays a literal; a C type becomes sizeof(T) * CHAR_BIT,
-   which is still a constant expression in a static initializer. */
-$(defun var.tag.bits-expr (row)
-  (let ((bits (var.tag.bits row)))
-    (cond
-      ((number? bits) (x2c.literal.int bits))
-      ((list? bits) `(expr () (op *
-        (expr (unsigned)
-          (sizeof (parens (decl ,bits (bindings (bind () ()))))))
-        ,(x2c.expr.ident '("CHAR_BIT")))))
-      (true (x2c.diagnostic.fail
-        "var tag bits must be a width or a parenthesized C type"
-        (list (string-append "tag: " (str (car row)))))))))
-
-$(defun var.tag.numeric-row (row)
-  (x2c.expr.composite (list
-    (x2c.literal.symbol (car row))
-    (x2c.literal.int (if (var.tag.floating? row) 1 0))
-    (x2c.literal.int (if (var.tag.unsigned? row) 1 0))
-    (var.tag.bits-expr row)
-    (x2c.literal.int (var.tag.rank row)))))
-
-$(defun var.tag.numeric (rows)
-  (x2c.expr.composite
-    (map var.tag.numeric-row (var.tag.numeric-rows rows))))
-
-$(defun var.tag.numeric-symbolset (rows)
-  (_x2c.symbol-set
-    (map (lambda (row) (car row)) (var.tag.numeric-rows rows))))
-
-$(defun var.tag.decode-row? (row)
-  (match row '((!not f64 symbol void) *fields)))
-
-$(defun var.tag.decode-return (row)
-  `(return ("VarDecoded")
-    ,(x2c.expr.call
-      (x2c.expr.ident (x2c.ident "_decode_builtin"))
-      (x2c.expr.ident (x2c.ident (str (var.tag.id row))))
-      (x2c.expr.ident (x2c.ident "value")))))
-
-$(defun var.tag.decode-case (row discriminator)
-  (list
-    `(case ,(x2c.literal.int (discriminator row)))
-    (var.tag.decode-return row)))
-
-$(defun var.tag.decode-inner (rows middle bottom)
-  (let* ((top (var.tag.top (car rows)))
-         (immediate (or (= top 0x8002) (= top 0x8003)))
-         (count (length rows))
-         (selector (cond
-           (immediate middle)
-           ((= count 2) `(expr (unsigned)
-             (op & ,bottom ,(x2c.literal.int 1))))
-           ((= count 4) `(expr (unsigned)
-             (op & ,bottom ,(x2c.literal.int 3))))
-           (true bottom)))
-         (discriminator (if immediate var.tag.middle var.tag.bottom)))
-    `(switch ,selector
-      (block ,@(apply append
-        (map
-          (lambda (row) (var.tag.decode-case row discriminator))
-          rows))))))
-
-$(defun var.tag.decode-group (rows middle bottom)
-  (let ((top (var.tag.top (car rows))))
-    (append
-      (list `(case ,(x2c.literal.int top)))
-      (if (= (length rows) 1)
-          (list (var.tag.decode-return (car rows)))
-          (list (var.tag.decode-inner rows middle bottom) '(break))))))
-
-$(defun var.tag.decode-top (top rows middle bottom)
-  (var.tag.decode-group
-    (filter (lambda (row) (= top (var.tag.top row))) rows)
-    middle bottom))
-
-$(defun var.tag.decode (groups middle bottom)
-  (let* ((rows (var.tag.filter var.tag.decode-row? groups))
-         (tops (var.tag.unique (map var.tag.top rows) nil)))
-    (apply append (map
-      (lambda (top) (var.tag.decode-top top rows middle bottom))
-      tops))))
-
-/* A `Literal` tag argument arrives as its resolved Symbol expression; the
-   Symbol itself is the last element of the literal node. */
-$(defun var.tag.hole-symbol (form)
-  (car (cdr (cdr (cdr (car (cdr (cdr form))))))))
-
-$(defun var.tag.row (tag)
-  (let ((found (var.tag.filter
-                 (lambda (row) (eq? (car row) tag)) var.tag.row-groups)))
-    (if (null? found)
-        (x2c.diagnostic.fail "unknown Var tag"
-          (list (string-append "tag: " (str tag))))
-        (car found))))
-
-$(defun var.tag.hole-row (form) (var.tag.row (var.tag.hole-symbol form)))
-
-$(defun var.tag.top-of (form)
-  (x2c.literal.int (var.tag.top (var.tag.hole-row form))))
-
-$(defun var.tag.bottom-of (form)
-  (x2c.literal.int (var.tag.bottom (var.tag.hole-row form))))
-
-macro Enumerator $var.tag.ids() {
-  $(var.tag.map var.tag.id-row var.tag.row-groups)...
+   which is still a constant expression in a static initializer. Any other
+   spelling is refused by `x2c_literal_int`, which takes a number. */
+meta static List _tag_bits_expr(List row) {
+  Var bits = _tag_bits(row);
+  /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
+     no compile-time meaning, so the tag is read directly. */
+  if (bits.tag() == <list>)
+    return %(expr () (op *
+      (expr (unsigned)
+        (sizeof (parens (decl $bits (bindings (bind () ()))))))
+      ${x2c_expr_ident(%("CHAR_BIT"))}));
+  return x2c_literal_int(bits);
 }
 
-macro Expression $var.tag.info() => $(var.tag.info var.tag.row-groups);
+meta static List _tag_numeric_row(List row) =>
+  _tag_composite([
+    x2c_literal_symbol(row[0]),
+    x2c_literal_int(_tag_floating(row)),
+    x2c_literal_int(_tag_unsigned(row)),
+    _tag_bits_expr(row),
+    x2c_literal_int(_tag_rank(row))]);
 
-macro Expression $var.tag.symbolset() =>
-  $(var.tag.symbolset var.tag.row-groups);
-
-macro Expression $var.tag.descriptor.count() =>
-  $(var.tag.descriptor.count var.tag.row-groups);
-
-macro Expression $var.tag.numeric() => $(var.tag.numeric var.tag.row-groups);
-
-macro Expression $var.tag.numeric.symbolset() =>
-  $(var.tag.numeric-symbolset var.tag.row-groups);
-
-macro Statement $var.tag.decode(Expr $middle, Expr $bottom) {
-  $(var.tag.decode var.tag.row-groups $middle $bottom)...
+meta static List _tag_numeric_table(void) {
+  Array cells = [];
+  foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
+  return _tag_composite(cells);
 }
+
+/* --- the built-in decoder ------------------------------------------------ */
+
+/* `f64`, `symbol` and `void` are answered before the switch is reached. */
+meta static int _tag_decode_row(List row) {
+  Var tag = row[0];
+  return !(tag == <f64> || tag == <symbol> || tag == <void>);
+}
+
+meta static List _tag_decode_rows(void) {
+  Array rows = [];
+  foreach (List row, _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
+  return rows;
+}
+
+/* --- the rows a statically known tag is tested with ---------------------- */
 
 /* A group of one is selected by its top alone; the decoder narrows a group
    of two or four to the low bit or two of the bottom field. */
-$(defun var.tag.group-mask (count)
-  (cond ((= count 1) 0) ((= count 2) 1) ((= count 4) 3) (true 7)))
+meta static int _tag_group_mask(int count) {
+  if (count == 1) return 0;
+  if (count == 2) return 1;
+  if (count == 4) return 3;
+  return 7;
+}
 
 /* Rows whose decoded form carries a validity clause in `_decode_builtin`,
    and the immediate rows the decoder discriminates by middle rather than
    bottom. Neither is one mask-and-compare, so neither gets a constant row. */
-$(defun var.tag.validated? (row)
-  (member (var.tag.id row)
-    '(_long_ _ulong_ _llong_ _ullong_ _ldouble_ _array_ _map_
-      _u8_ _i8_ _u16_ _i16_ _nan_ _neginf_ _posinf_)))
+meta static List _tag_validated_ids(void) => %(
+  "_long_" "_ulong_" "_llong_" "_ullong_" "_ldouble_" "_array_" "_map_"
+  "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
 
-$(defun var.tag.constant-row? (row)
-  (not (or (var.tag.validated? row)
-           (or (= (var.tag.top row) 0x8002) (= (var.tag.top row) 0x8003)))))
+meta static int _tag_constant_row(List row) {
+  if (_tag_validated_ids().contains(_tag_id(row))) return 0;
+  return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
+}
 
-$(defun var.tag.list (items)
-  (if (null? items) '(expr ("List") (nil))
-      `(expr ("List") (cons ,(car items) ,(var.tag.list (cdr items))))))
+/* A `List` expression built from its elements, which is the entry's value. */
+meta static List _tag_list(List items) {
+  List built = %(expr ("List") (nil));
+  for (int i = items.len() - 1; i >= 0; i--)
+    built = %(expr ("List") (cons ${items[i]} $built));
+  return built;
+}
 
 /* How many decode rows share each top, counted in one pass. The mask below
    needs the count for a row's own top, so a scan per row would read the
    whole ledger once per row. */
-$(defun var.tag.sibling-counts (rows)
-  (let ((counts (Map.new)))
-    (begin
-      (map (lambda (row)
-             (Map.setindex counts (var.tag.top row)
-               (+ 1 (Map.getdefault counts (var.tag.top row) 0))))
-           rows)
-      counts)))
-
-$(defun var.tag.row-entry (row counts)
-  `(map-entry ,(x2c.literal.symbol (car row))
-     ,(var.tag.list (list
-        (x2c.literal.int (var.tag.top row))
-        (x2c.literal.int
-          (var.tag.group-mask (Map.getindex counts (var.tag.top row))))
-        (x2c.literal.int (var.tag.bottom row))))))
-
-$(defun var.tag.constant-rows (groups)
-  (let* ((rows (var.tag.filter var.tag.decode-row? groups))
-         (counts (var.tag.sibling-counts rows)))
-    (map (lambda (row) (var.tag.row-entry row counts))
-      (filter var.tag.constant-row? rows))))
-
-/* The rows a caller holding a statically known tag can test without
-   decoding, as `tag : (top, mask, bottom)`. */
-macro Entry $var.tag.constant.rows() {
-  $(var.tag.constant-rows var.tag.row-groups)...
+meta static Map _tag_sibling_counts(List rows) {
+  Map counts = {};
+  foreach (List row, rows) {
+    Var top = _tag_top(row);
+    counts[top] = counts.getdefault(top, 0) + 1;
+  }
+  return counts;
 }
+
+meta static List _tag_row_entry(List row, Map counts) =>
+  %(map-entry ${x2c_literal_symbol(row[0])}
+    ${_tag_list([x2c_literal_int(_tag_top(row)),
+                 x2c_literal_int(_tag_group_mask(counts[_tag_top(row)])),
+                 x2c_literal_int(_tag_bottom(row))])});
+
+meta static List _tag_constant_rows(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array entries = [];
+  foreach (List row, rows)
+    if (_tag_constant_row(row)) entries.push(_tag_row_entry(row, counts));
+  return entries;
+}
+
+/* --- the decoder table -------------------------------------------------- */
+
+/* The top a table slot resolves. `var.x` rotates the 16-bit top left one
+   bit, so the even slots are tops 0x0000-0x000F and the odd slots are tops
+   0x8000-0x800F; tops without rows get a slot of `_invalid_`. */
+meta static int _tag_group_top(int slot) =>
+  slot % 2 == 0 ? slot / 2 : 0x8000 + slot / 2;
+
+/* One group's `{mask, by_middle, {ids}}`. An immediate group is selected by
+   its middle field; any other by its bottom field under the group's mask.
+   A selector no row holds decodes to `_invalid_`. */
+meta static List _tag_decode_group(List rows, Map counts, int top) {
+  int immediate = top == 0x8002 || top == 0x8003;
+  int mask = _tag_group_mask(counts.getdefault(top, 0));
+  Array ids = [];
+  for (int i = 0; i < 8; i++)
+    ids.push(x2c_expr_ident(x2c_ident("_invalid_")));
+  foreach (List row, rows) {
+    if (_tag_top(row) != top) continue;
+    int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
+    ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
+  }
+  return _tag_composite(%(${x2c_literal_int(mask)}
+    ${x2c_literal_int(immediate)} ${_tag_composite(ids)}));
+}
+
+meta static List _tag_decode_groups(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array groups = [];
+  for (int group = 0; group < 32; group++)
+    groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
+  return _tag_composite(groups);
+}
+
+/* --- the enum check ----------------------------------------------------- */
+
+/* `TagId` is written out in `lib/var.x`; each row asserts that its ID
+   has the row's ledger position. */
+macro Unit $var.tag.id.check(Name $id, Expr $index) {
+  _Static_assert($id == $index, "TagId matches the var tag ledger");
+}
+
+meta static List _tag_id_checks(void) {
+  Array checks = [];
+  int index = 0;
+  foreach (List row, _tag_rows()) {
+    List check = $var.tag.id.check(_tag_id(row), index);
+    checks.push(check);
+    index++;
+  }
+  return checks;
+}
+
+/* --- the type lookup ----------------------------------------------------- */
 
 /* Type's tag lookup: each `(TYPE TAG)` of `native`, then every boxed row
    as its capitalized source type name and a pointer to it, such as
    `("List") : list` and `(* "List") : <list*>`. */
-$(defun var.tag.types (native)
-  (let ((types (Map.new)))
-    (begin
-      (map (lambda (row) (Map.setindex types (car row) (cadr row))) native)
-      (map (lambda (row)
-             (let ((name (String.capitalize (str (car row)))))
-               (begin
-                 (Map.setindex types (list name) (car row))
-                 (Map.setindex types (list '* name)
-                   (String.symbol (string-append (str (car row)) "*"))))))
-        (var.tag.filter var.tag.descriptor? var.tag.row-groups))
-      types)))
-
-/* Object rows carry their payload pointer in the low 48 bits with the
-   bottom three bits reserved for the row selector, so reading one back is
-   the row's top and bottom columns and a mask. */
-macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
-  $type Var.$method(Var);
-
-  /** Extracts the `$type` payload of `value`, or NULL for another tag. */
-  inline $type Var.$method(Var value) {
-    if (value.u64 >> 48 != $(var.tag.top-of $tag) ||
-        (value.u64 & 0x7) != $(var.tag.bottom-of $tag)) return NULL;
-    return ($type) (value.u64 & 0x0000FFFFFFFFFFF8ul);
+meta static Map _tag_types(List native) {
+  Map types = {};
+  foreach (List row, native) types[row[0]] = row[1];
+  Symbol star = <*>;
+  foreach (List row, _tag_rows()) {
+    if (!_tag_descriptor(row)) continue;
+    String tag = row[0].str();
+    String name = tag.capitalize();
+    types[%($name)] = row[0];
+    Symbol pointer = tag + "*";
+    types[%($star $name)] = pointer;
   }
+  return types;
+}
+
+/* --- what the consuming units write -------------------------------------- */
+
+macro Expression $var.tag.info() => $_tag_info();
+
+// `_x2c.symbol-set` is a private compiler native with no `x2c_` spelling,
+// so the two tag sets are the only Lisp that reads the ledger.
+macro Expression $var.tag.symbolset() => $(_x2c.symbol-set (_tag_names));
+
+macro Expression $var.tag.numeric() => $_tag_numeric_table();
+
+macro Expression $var.tag.numeric.symbolset() =>
+  $(_x2c.symbol-set (_tag_numeric_names));
+
+macro Expression $var.tag.decode.groups() => $_tag_decode_groups();
+
+/* The rows a caller holding a statically known tag can test without
+   decoding, as `tag : (top, mask, bottom)`. */
+macro Entry $var.tag.constant.rows() {
+  $_tag_constant_rows()...
+}
+
+macro Unit $var.tag.id.checks() {
+  $_tag_id_checks()...
 }

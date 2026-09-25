@@ -102,8 +102,8 @@ Direct destructive operations outside the requested change need approval.
   shared runtime `lib/tokenizer.x` ->
   `parse`/`expressions`/`statements`/`macros` (+ `comptime`, which
   translates a compile-time function to Lisp)/
-  `literals` -> `ast` -> `type`/`protocol` -> `transform` (+ `lambda`,
-  `cleanup`, `regions`) ->
+  `literals` -> `ast` -> `type` (+ `type-ledger`)/`protocol` -> `transform`
+  (+ `lambda`, `cleanup`, `regions`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,

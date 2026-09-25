@@ -4259,7 +4259,7 @@ void Compiler_parse_macro_lisp_shallow(Compiler compiler){
   if(! _init_guard_) _file_init_();  if(_import_path(compiler, NULL)){
     Compiler_parse_macro_lisp_top_level(compiler);  return;
   }
-  Token first = compiler -> token;  String form = _lisp_form(compiler);  Compiler_queue_declaration_effect(compiler, form, first, compiler -> token);
+  Token first = compiler -> token;  String form = _lisp_form(compiler);  if(compiler -> inherited_lisp) return;  Compiler_queue_declaration_effect(compiler, form, first, compiler -> token);
 }
 
 static Var _sdk_identifier_result(Var value){
@@ -4394,7 +4394,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2148};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2151};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }

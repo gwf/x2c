@@ -18,7 +18,6 @@ typedef List Type;
 
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
-$(import "../lib/var-tags.xmacro")
 $(import "../lib/native-scalar-types.xmacro")
 #include <limits.h>
 #include <stdarg.h>
@@ -517,32 +516,14 @@ List Type.body(Type t) {
   return NULL;
 }
 
-/* Builtin tag rows have process lifetime. Source-declared rows are rebuilt
-   for each translation unit because their canonical Type keys and converter
-   names may belong to that unit's pools; end_unit drops the table before
-   those pools are released. */
-static Map typetags = $(var.tag.types '(
-  ((* void) p48)                   ((* unsigned char) u8*)
-  ((* signed char) i8*)            ((* unsigned short) u16*)
-  ((* short) i16*)                 ((* unsigned) u32*)
-  ((* int) i32*)                   ((* float) f32*)
-  ((* unsigned long) ulong*)       ((* long) long*)
-  ((* double) f64*)                ((* unsigned long long) ullong*)
-  ((* long long) llong*)           ((* long double) ldouble*)
-  ((* * void) p48*)                ((* * unsigned char) u8**)
-  ((* * signed char) i8**)         ((* * unsigned short) u16**)
-  ((* * short) i16**)              ((* * unsigned) u32**)
-  ((* * int) i32**)                ((* * float) f32**)
-  ((* * unsigned long) ulong**)    ((* * long) long**)
-  ((* * double) f64**)             ((* * unsigned long long) ullong**)
-  ((* * long long) llong**)        ((* * long double) ldouble**)
-));
-static Map declared_typetags = NULL;
+/* `src/type-ledger.x` projects both tables from the Var tag ledger. */
+Map Type.builtin_var_tags(void);
+Map Type.var_tag_rows(void);
 
-/* The encoding rows a statically known tag can be tested against without a
-   runtime decode, projected from the same ledger the runtime decoder uses.
-   Its keys are tag Symbols, so it outlives a translation unit. */
-static Map varrows = %{ ${$var.tag.constant.rows()} };
+/* Source-declared rows are rebuilt for each translation unit because their
+   canonical Type keys and converter names may belong to that unit's pools;
+   end_unit drops the table before those pools are released. */
+static Map declared_typetags = NULL;
 
 /** Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
     reports whether one exists. A tag whose decoded form carries a validity
@@ -551,7 +532,7 @@ static Map varrows = %{ ${$var.tag.constant.rows()} };
 int Type.var_tag_row(
   Symbol tag, unsigned long &top, unsigned long &mask,
   unsigned long &bottom) {
-  Var row = varrows[tag];
+  Var row = Type.var_tag_rows()[tag];
   if (row is void) return 0;
   List fields = row;
   top = fields.car();
@@ -617,7 +598,7 @@ Symbol Type.fixed_var_tag(Type type) {
   if (!type) return 0;
   Symbol scalar = type.scalar_tag();
   if (scalar) return scalar;
-  Var vtag = typetags[type.canonicalize()];
+  Var vtag = Type.builtin_var_tags()[type.canonicalize()];
   return vtag is <symbol> ? vtag : 0;
 }
 

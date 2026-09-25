@@ -59,6 +59,42 @@ $(import "error-macros.xmacro")
 #include <assert.h>
 #include <limits.h>
 
+/** Names the built-in `Var` tags in `var-tags.xmacro` ledger order, which
+    is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
+    agree. */
+typedef enum TagId {
+  _invalid_ = -1,
+  _u8_, _i8_, _u16_, _i16_, _u32_, _i32_, _f32_, _u48_, _i48_, _p48_, _f64_,
+  _long_, _ulong_, _llong_, _ullong_, _ldouble_, _u8_p_, _i8_p_, _u16_p_,
+  _i16_p_, _u32_p_, _i32_p_, _f32_p_, _ulong_p_, _long_p_, _f64_p_,
+  _ullong_p_, _llong_p_, _ldouble_p_, _p48_p_, _u8_pp_, _i8_pp_, _u16_pp_,
+  _i16_pp_, _u32_pp_, _i32_pp_, _f32_pp_, _ulong_pp_, _long_pp_, _f64_pp_,
+  _ullong_pp_, _llong_pp_, _ldouble_pp_, _array_, _block_, _buffer_, _bytes_,
+  _context_, _error_, _file_, _func_, _iter_, _lambda_, _list_, _logger_,
+  _map_, _mutex_, _pipe_, _proc_, _regexp_, _rope_, _scope_, _slice_,
+  _socket_, _stream_, _string_, _symbol_, _tensor_, _thread_, _token_, _var_,
+  _array_p_, _block_p_, _buffer_p_, _bytes_p_, _context_p_, _error_p_,
+  _file_p_, _func_p_, _iter_p_, _lambda_p_, _list_p_, _logger_p_, _map_p_,
+  _mutex_p_, _pipe_p_, _proc_p_, _regexp_p_, _rope_p_, _scope_p_, _slice_p_,
+  _socket_p_, _stream_p_, _string_p_, _symbol_p_, _tensor_p_, _thread_p_,
+  _token_p_, _var_p_, _nan_, _neginf_, _posinf_, _void_,
+  _tag_count_
+} TagId;
+
+/** Describes one built-in `Var` tag's kind and encoding fields. */
+typedef struct VarTagInfo {
+  Symbol tag, kind;
+  unsigned long top, middle, bottom;
+} VarTagInfo;
+
+/** Resolves one encoding top: the selector is the middle field when
+    `by_middle` is set and the bottom field under `mask` otherwise, and
+    `ids` maps it to a `TagId`, or `_invalid_` where no tag has it. */
+typedef struct VarDecodeGroup {
+  unsigned char mask, by_middle;
+  signed char ids[8];
+} VarDecodeGroup;
+
 /** Reports whether `tag` has a built-in encoding or declared custom class. */
 int Var.known_tag(Symbol tag) =>
   _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
@@ -72,37 +108,24 @@ int Var.known_tag(Symbol tag) =>
 #include "string-number.x"
 #include "symbolset.x"
 
-$(import "var-tags.xmacro")
-
-/* Symbol tags are unique but sparse. `var-tags.xmacro` assigns their dense
-   IDs, coarse kinds, encoding fields, and lookups in one compile-time
-   table. */
-typedef enum TagId {
-  _invalid_ = -1,
-  $var.tag.ids(),
-  _tag_count_
-} TagId;
-
-typedef struct VarTagInfo {
-  Symbol tag, kind;
-  unsigned long top, middle, bottom;
-} VarTagInfo;
-
+/* `lib/var-ledger.x` projects the tag tables and the decoder's group table
+   from the ledger in `var-tags.xmacro`. */
 typedef struct VarDecoded {
   TagId id, int custom_id, valid;
 } VarDecoded;
 
-static const VarTagInfo taginfo[] = $var.tag.info();
-static const SymbolSet tags = $var.tag.symbolset();
+extern const VarTagInfo x2c_var_taginfo[];
+extern const SymbolSet x2c_var_tags;
+extern const VarDecodeGroup x2c_var_decode_groups[];
 
-static TagId _tag2id(Symbol tag) => (TagId) tags.index(tag);
+static TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
 
 /** Returns the top encoding field of built-in `tag`. */
 meta native unsigned long Var.tag_top(Symbol tag) {
   TagId id = _tag2id(tag);
   if (id == _invalid_)
     raise %(bad-target (owner "Var.tag_top") (target $tag));
-  return taginfo[id].top;
+  return x2c_var_taginfo[id].top;
 }
 
 /** Returns the bottom encoding field of built-in `tag`. */
@@ -110,7 +133,7 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
   TagId id = _tag2id(tag);
   if (id == _invalid_)
     raise %(bad-target (owner "Var.tag_bottom") (target $tag));
-  return taginfo[id].bottom;
+  return x2c_var_taginfo[id].bottom;
 }
 
 static inline unsigned long _bitmask(unsigned n) => (1ul << n)-1;
@@ -221,7 +244,7 @@ static VarDecoded _decode_builtin(TagId id, Var value) {
   unsigned payload = (unsigned) value.u64;
   switch (id) {
     case _long_: case _ulong_: case _llong_: case _ullong_: case _ldouble_:
-      valid = _wide_encoding_valid(value, taginfo[id].tag);
+      valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
       break;
     case _array_: case _map_:
       valid = (value.u64 & (_bitmask(48) - 0x7)) != 0;
@@ -236,16 +259,23 @@ static VarDecoded _decode_builtin(TagId id, Var value) {
   return (VarDecoded) { id, -1, valid };
 }
 
-/* `var-tags.xmacro` generates the built-in decoder. Reserved encodings report
-   invalid structure and use the f64 tag and kind. */
+/* The ledger's group table resolves the pointer, object, and immediate tops.
+   Reserved encodings report invalid structure and use the f64 tag and kind.
+*/
 static VarDecoded _decode(Var value) {
   unsigned top = _top_bits(value), mid = _middle_bits(value);
   unsigned btm = _bottom_bits(value);
   if (value.u64 == VAR_VOID_BITS) return (VarDecoded) { _void_, -1, 1 };
   if (value.u64 == VAR_F64_NEG_MAX_ESCAPE)
     return (VarDecoded) { _f64_, -1, 1 };
-  switch (top) {
-    $var.tag.decode(mid, btm);
+  // Rotating the top left one bit puts 0x0000-0x000F on the even slots and
+  // 0x8000-0x800F on the odd slots below 32; every other top lands above.
+  unsigned slot = ((top << 1) | (top >> 15)) & 0xFFFF;
+  if (slot < 32) {
+    const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
+    unsigned selector = group.by_middle ? mid : btm & group.mask;
+    int id = selector < 8 ? group.ids[selector] : _invalid_;
+    if (id != _invalid_) return _decode_builtin((TagId) id, value);
   }
   if (top >= 0x8004 && top <= 0x800B) return (VarDecoded) { _symbol_, -1, 1 };
   if (top >= VAR_CUSTOM_TAG_TOP &&
@@ -419,7 +449,7 @@ meta native Symbol Var.tag(Var v) {
   VarDecoded decoded = _decode(v);
   if (decoded.valid && decoded.custom_id >= 0)
     return _row_descriptor(decoded.custom_id, v).tag;
-  return taginfo[decoded.valid ? decoded.id : _f64_].tag;
+  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
 
 /** Reports whether `value` has the requested runtime tag.
@@ -445,7 +475,7 @@ int Var.is(Var var, Symbol tag) => var.tag() == tag;
 meta native Symbol Var.kind(Var v) {
   VarDecoded decoded = _decode(v);
   if (decoded.valid && decoded.custom_id >= 0) return <object>;
-  return taginfo[decoded.valid ? decoded.id : _f64_].kind;
+  return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
 
 /** Reports whether `v` belongs to the floating runtime family.
@@ -536,25 +566,25 @@ static Var _new_floating(TagId id, double d) {
     unsigned u;
     memcpy(&u, &f, sizeof u);
     v.u64 = u;
-    v.u64 |= taginfo[id].top << 48;
-    v.u64 |= taginfo[id].middle << 32;
+    v.u64 |= x2c_var_taginfo[id].top << 48;
+    v.u64 |= x2c_var_taginfo[id].middle << 32;
   }
   // id == _f64_
   else {
     // NaN
     if (d != d) {  // NaN test: NaN != NaN
-      v.u64 = taginfo[_nan_].top << 48;
-      v.u64 |= taginfo[_nan_].middle << 32;
+      v.u64 = x2c_var_taginfo[_nan_].top << 48;
+      v.u64 |= x2c_var_taginfo[_nan_].middle << 32;
     }
     // +Inf
     else if (d > 0 && d == 1.0/0.0) {
-      v.u64 = taginfo[_posinf_].top << 48;
-      v.u64 |= taginfo[_posinf_].middle << 32;
+      v.u64 = x2c_var_taginfo[_posinf_].top << 48;
+      v.u64 |= x2c_var_taginfo[_posinf_].middle << 32;
     }
     // -Inf
     else if (d < 0 && d == -1.0/0.0) {
-      v.u64 = taginfo[_neginf_].top << 48;
-      v.u64 |= taginfo[_neginf_].middle << 32;
+      v.u64 = x2c_var_taginfo[_neginf_].top << 48;
+      v.u64 |= x2c_var_taginfo[_neginf_].middle << 32;
     }
     // normal number
     else {
@@ -571,14 +601,14 @@ static Var _new_pointer(TagId id, void *ptr) {
   /* Pointer families store only the low 48 address bits and reclaim the
      alignment bits implied by their C type for the row subtype. */
   Var v = { .p64 = ptr };
-  v.u64 |= taginfo[id].top << 48;
-  v.u64 |= taginfo[id].bottom;
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
 }
 
 static Var _new_wide(TagId id, VarWideValue value) {
   VarWideBox box = Scope.malloc(sizeof(struct VarWideBox));
-  box.tag = taginfo[id].tag;
+  box.tag = x2c_var_taginfo[id].tag;
   box.value = value;
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
@@ -586,8 +616,8 @@ static Var _new_wide(TagId id, VarWideValue value) {
     raise %(bad-enc (owner "Var.box"));
   }
   Var v = { .u64 = raw };
-  v.u64 |= taginfo[id].top << 48;
-  v.u64 |= taginfo[id].bottom;
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
 }
 
@@ -733,25 +763,25 @@ static Var _new_integer(TagId id, long value) {
   if (is_signed) {
     long long min = -(1ll << (bits - 1)), max = (1ll << (bits - 1)) - 1ll;
     if ((long long) value < min || (long long) value > max) {
-      Symbol target = taginfo[id].tag;
+      Symbol target = x2c_var_taginfo[id].tag;
       raise %(conv-range (owner "Var.new") (target $target));
     }
   }
   else {
     if (value < 0 || (unsigned long long) value > mask) {
-      Symbol target = taginfo[id].tag;
+      Symbol target = x2c_var_taginfo[id].tag;
       raise %(conv-range (owner "Var.new") (target $target));
     }
   }
   unsigned long payload = ((unsigned long) value) & (unsigned long) mask;
   Var v = { .u64 = payload };
-  v.u64 |= taginfo[id].top << 48;
-  if (bits != 48)  v.u64 |= taginfo[id].middle << 32;
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  if (bits != 48)  v.u64 |= x2c_var_taginfo[id].middle << 32;
   return v;
 }
 
 static Var _new_symbol(TagId id, unsigned long u) {
-  static unsigned long const offset = taginfo[_symbol_].top << 48;
+  unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
   if (u >= (1ul << 51)) raise %(conv-range (owner "Var.new") (target symbol));
   Var v = { .u64 = u + offset };
   return v;
@@ -797,7 +827,7 @@ Var Var.new(Symbol tag, ...) {
     return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
   Var v;
-  switch (taginfo[id].kind) {
+  switch (x2c_var_taginfo[id].kind) {
     case <pointer>: case <reference>: case <object>: {
       void *pointer = va_arg(ap, void *);
       if ((id == _array_ || id == _map_) && !pointer) {
@@ -915,13 +945,13 @@ meta native double Var.floating(Var v) {
 */
 meta native long Var.integer(Var v) {
   unsigned top = _top_bits(v);
-  if (top == taginfo[_u48_].top) return v.u64 & _bitmask(48);
-  if (top == taginfo[_i48_].top) {
+  if (top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
+  if (top == x2c_var_taginfo[_i48_].top) {
     unsigned long mask = _bitmask(48), raw = v.u64 & mask;
     if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
     return (long) raw;
   }
-  if (top == taginfo[_u8_].top) {
+  if (top == x2c_var_taginfo[_u8_].top) {
     switch (_middle_bits(v)) {
       case 0x1: return (unsigned char)  (v.u64 & _bitmask(8));
       case 0x2: return (char)           (v.u64 & _bitmask(8));
@@ -943,7 +973,7 @@ meta native long Var.integer(Var v) {
     if (bottom == 0x6) return (long) _wide_box(v).value.ulong_long_value;
   }
   if (top >= 0x8004 && top <= 0x800B) {
-    static unsigned long const offset = taginfo[_symbol_].top << 48;
+    unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
     return (Symbol) (v.u64 - offset);
   }
   return 0;

@@ -1187,13 +1187,13 @@ membership, a dense index, or ordered iteration, declare one `SymbolSet`
 literal instead of a hand-written or generated switch:
 
 ```x2c
-static const SymbolSet tags = $var.tag.symbolset();
-static TagId _tag2id(Symbol tag) => (TagId) tags.index(tag);
+const SymbolSet x2c_var_tags = $var.tag.symbolset();
+static TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
 ```
 
 [Ordered Symbol sets](../docs/src/guide/collections.md#ordered-symbol-sets)
 describes the literal. When another fact belongs to the same identity, add it
-to the row the index already selects, such as `taginfo[id].kind`, and keep
+to the row the index already selects, such as `x2c_var_taginfo[id].kind`, and keep
 one lookup.
 
 ### Literals, strings, and formatting

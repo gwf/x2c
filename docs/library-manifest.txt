@@ -66,6 +66,7 @@ lib/autodiff.x|optional|Runtime reverse-mode differentiation on a tape; explicit
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
+lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.xmacro`, in the one runtime unit that imports the ledger.
 lib/var.x|api|
 lib/varconvert.x|api|
 lib/varops.x|api|

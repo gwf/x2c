@@ -86,7 +86,16 @@ remains a separate decision.
 
 ### Parked
 
-**The var-tags port** stays on branch `report-var-tags` at `b96fc24d`.
+**Delivered 2026-09-25.** The var-tags ledger is `meta` code in
+`lib/var-tags.xmacro`, imported only by the leaf units `lib/var-ledger.x`
+and `src/type-ledger.x`. `lib/var.x` declares the tables `extern`, decodes
+through a projected group table, and reads `Var.tag_top`/`Var.tag_bottom`
+natively for the unbox accessors. A clean `lib/` plus `src/` translation
+measured 10.63 s against 10.59 s for the Lisp ledger, and the decode hot
+paths matched the inline switch within noise. The record below explains why
+the earlier ports were declined.
+
+**The var-tags port** stayed on branch `report-var-tags` at `b96fc24d`.
 The collection-only body-skip prototype did not meet Gary's condition that
 removing repeated parsing cut roughly half the port's translation overhead.
 Neither the port nor that skip machinery is delivered.
@@ -119,7 +128,6 @@ chapter.
 
 ### Open
 
-- Keep the var-tags port parked until a measured approach meets its condition.
 - Promote to production only with separate authorization.
 
 ## The result

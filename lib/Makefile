@@ -6,7 +6,8 @@ SHELL := /bin/sh
 # explicit source include. They are not part of the implicit standard prelude.
 OPTIONAL_SOURCES := args.x autodiff.x diff.x digest.x json.x list-selectors.x \
                     match-recursive.x meta.x path.x process.x regex.x \
-                    scripting.x typed-array.x typed-list.x typed-map.x
+                    scripting.x typed-array.x typed-list.x typed-map.x \
+                    var-ledger.x
 SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(wildcard *.x)))
 
 .PHONY: FORCE

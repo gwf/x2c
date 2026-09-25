@@ -123,6 +123,7 @@
   - [src/statements.x](internals/compiler-api/statements.md)
   - [src/toolchain.x](internals/compiler-api/toolchain.md)
   - [src/transform.x](internals/compiler-api/transform.md)
+  - [src/type-ledger.x](internals/compiler-api/type-ledger.md)
   - [src/type.x](internals/compiler-api/type.md)
   - [src/utils.x](internals/compiler-api/utils.md)
 

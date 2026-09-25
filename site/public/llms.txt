@@ -129,6 +129,7 @@
 - [src/statements.x](https://x2c-lang.dev/docs/internals/compiler-api/statements.html)
 - [src/toolchain.x](https://x2c-lang.dev/docs/internals/compiler-api/toolchain.html)
 - [src/transform.x](https://x2c-lang.dev/docs/internals/compiler-api/transform.html)
+- [src/type-ledger.x](https://x2c-lang.dev/docs/internals/compiler-api/type-ledger.html)
 - [src/type.x](https://x2c-lang.dev/docs/internals/compiler-api/type.html)
 - [src/utils.x](https://x2c-lang.dev/docs/internals/compiler-api/utils.html)
 - [Compiler Architecture](https://x2c-lang.dev/docs/internals/architecture.html)

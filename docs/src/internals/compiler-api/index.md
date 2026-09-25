@@ -42,5 +42,6 @@ Functions and types exposed by each compiler module.
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |
+| [`src/type-ledger.x`](type-ledger.md) | the compiler's Var tag tables, projected from the ledger. |
 | [`src/type.x`](type.md) | x2c semantic types. |
 | [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |
