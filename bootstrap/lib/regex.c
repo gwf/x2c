@@ -579,27 +579,27 @@ static _RegexNode _group(_Parser * p){
 static int _digits(_Parser * p, int * out){
   int start = p -> pos, value = 0;
   while(scan_ascii_digit(_peek(p))) value = value * 10 +(p -> text[p -> pos ++] - '0');
-  * out = value;
+  (* out) = value;
   return p -> pos > start;
 }
 
 static int _braces(_Parser * p, int * min, int * max){
   int start = p -> pos;
-  if(! _digits(p, min)){
+  if(! _digits(p, &((* min)))){
     p -> pos = start;
     return 0;
   }
-  * max = * min;
+  (* max) =(* min);
   if(_peek(p) == ','){
     p -> pos ++;
-    if(! _digits(p, max)) * max = - 1;
+    if(! _digits(p, &((* max))))(* max) = - 1;
   }
   if(_peek(p) != '}'){
     p -> pos = start;
     return 0;
   }
   p -> pos ++;
-  if(* max >= 0 && * max < * min) _fail(p, _26);
+  if((* max) >= 0 &&(* max) <(* min)) _fail(p, _26);
   return 1;
 }
 
@@ -644,7 +644,7 @@ static _RegexNode _quantified(_Parser * p, _RegexNode atom){
     max = 1;
     break;
     case '{' : p -> pos ++;
-    if(_braces(p, & min, & max)){
+    if(_braces(p, &(min), &(max))){
       p -> pos --;
       break;
     }

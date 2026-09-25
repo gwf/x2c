@@ -1281,7 +1281,7 @@ ProjectBuild project_plan(CliRequest request){
   project -> path = project_manifest(request);
   if(! String_truth(project -> path)) _error(NULL, 0, _132);
   project -> path = Path_absolute(project -> path);
-  if(! SourceView_read(project -> sources, project -> path, & project -> text)) _error(project, 0, _133);
+  if(! SourceView_read(project -> sources, project -> path, &(project -> text))) _error(project, 0, _133);
   project -> root = Path_dirname(project -> path);
   _parse_manifest(project);
   for(ProjectTarget target = project -> targets;  target;  target = target -> next) _validate_target(project, target);

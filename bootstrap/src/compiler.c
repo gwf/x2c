@@ -1280,8 +1280,8 @@ int SourceView_read(SourceView, String, volatile String *);
 Path Path_absolute(Path);
 
 int Compiler_read_source(Compiler c, String path, String volatile * text){
-  if(! SourceView_read(c -> sources, path, text)) return 0;
-  if(c -> source_facts) Map_setindex(c -> source_texts, String_var(Path_absolute(path)), String_var(* text));
+  if(! SourceView_read(c -> sources, path, &((* text)))) return 0;
+  if(c -> source_facts) Map_setindex(c -> source_texts, String_var(Path_absolute(path)), String_var((* text)));
   return 1;
 }
 

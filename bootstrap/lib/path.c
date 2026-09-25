@@ -520,7 +520,7 @@ Var Context_export(Context, Var);
 static void _remove_tree(Path path, String * failed, int * failure){
   struct stat info;
   if(lstat(path, & info)){
-    if(errno != ENOENT && ! String_truth(* failed)) * failed = path, * failure = errno;
+    if(errno != ENOENT && ! String_truth((* failed)))(* failed) = path, (* failure) = errno;
     return;
   }
   if(S_ISDIR(info.st_mode)){
@@ -541,10 +541,10 @@ static void _remove_tree(Path path, String * failed, int * failure){
   {
           String child_failed = NULL;
           int child_failure = 0;
-          _remove_tree(Path_join(path, String_new(entry -> d_name)), & child_failed, & child_failure);
-          if(String_truth(child_failed) && ! String_truth(* failed)){
-            * failed = Var_string(Context_export(context, String_var(child_failed)));
-            * failure = child_failure;
+          _remove_tree(Path_join(path, String_new(entry -> d_name)), &(child_failed), &(child_failure));
+          if(String_truth(child_failed) && ! String_truth((* failed))){
+            (* failed) = Var_string(Context_export(context, String_var(child_failed)));
+            (* failure) = child_failure;
           }
 
         }
@@ -554,9 +554,9 @@ static void _remove_tree(Path path, String * failed, int * failure){
       }
       closedir(directory);
     }
-    if(rmdir(path) && ! String_truth(* failed)) * failed = path, * failure = errno;
+    if(rmdir(path) && ! String_truth((* failed)))(* failed) = path, (* failure) = errno;
   }
-  else if(unlink(path) && ! String_truth(* failed)) * failed = path, * failure = errno;
+  else if(unlink(path) && ! String_truth((* failed)))(* failed) = path, (* failure) = errno;
 }
 
 Var Symbol_var(Symbol);
@@ -567,7 +567,7 @@ void Path_remove_tree(Path path){
   if(! _init_guard_) _file_init_();
   String failed = NULL;
   int failure = 0;
-  _remove_tree(path, & failed, & failure);
+  _remove_tree(path, &(failed), &(failure));
   if(String_truth(failed)){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 447};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));

@@ -240,7 +240,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = NULL;
-  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _60, NULL, cons(_6, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(filename), NULL)))), _10)));
+  if(! Compiler_read_source(c, filename, &(text))) Compiler_report_error(c, 306819428, _60, NULL, cons(_6, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(filename), NULL)))), _10)));
   if(String_truth(text) && String_startswith(text, _61)){
     int end = String_find(text, _58);
     ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));

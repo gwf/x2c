@@ -1753,7 +1753,7 @@ static int _function_parts(Type signature, List * parameters, Type * result){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_312), &_x2c_match_capture)) {Var arguments = _x2c_match_values[0];  List return_type = Var_list(_x2c_match_values[1]); {
-    * parameters = Var_list(arguments);  * result = List_type(return_type);  return 1;
+    (* parameters) = Var_list(arguments); (* result) = List_type(return_type);  return 1;
   }
   break;
 }
@@ -1798,7 +1798,7 @@ static int _unify(Var pattern, Var actual, Map variables, Map bindings){
 }
 
 static int _unify_signature(Type pattern, Type actual, Map variables, Map bindings){
-  List pattern_parameters = Var_list(List_cadr(Var_list(List_car(Type_list(pattern)))));  Type pattern_result = List_cdr(pattern);  List actual_parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(actual, & actual_parameters, & actual_result)) return 0;  while(List_truth(pattern_parameters) && List_truth(actual_parameters)){
+  List pattern_parameters = Var_list(List_cadr(Var_list(List_car(Type_list(pattern)))));  Type pattern_result = List_cdr(pattern);  List actual_parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(actual, &(actual_parameters), &(actual_result))) return 0;  while(List_truth(pattern_parameters) && List_truth(actual_parameters)){
     if(! _unify(List_car(pattern_parameters), List_car(actual_parameters), variables, bindings)) return 0;  pattern_parameters = List_cdr(pattern_parameters);  actual_parameters = List_cdr(actual_parameters);
   }
   if(List_truth(pattern_parameters) || List_truth(actual_parameters)) return 0;  return _unify(List_var(pattern_result), List_var(actual_result), variables, bindings);
@@ -1831,7 +1831,7 @@ static Type _substitute_signature(Type signature, Map variables, Map bindings){
 }
 
 static int _exact_conversion(Type signature, Type parameter, Type result){
-  List parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(signature, & parameters, & actual_result)) return 0;  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && Var_equal(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
+  List parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(signature, &(parameters), &(actual_result))) return 0;  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && Var_equal(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
 }
 
 int Type_is_bare_typedef_name(Type);
@@ -1881,7 +1881,7 @@ static Type _method_signature(Compiler compiler, Type owner, Type participant, S
     }
 
   }
-  if(! List_truth(Type_list(signature))) return NULL;  List binding = Sym_reference(compiler -> sym, cons(String_var(source), NULL), NULL);  signature = _receiver_relative_signature(compiler, binding, signature, participant);  List parameters = NULL;  Type result = NULL;  if(_function_parts(signature, & parameters, & result) && List_truth(parameters) && Var_equal(List_car(parameters), List_var(owner))){
+  if(! List_truth(Type_list(signature))) return NULL;  List binding = Sym_reference(compiler -> sym, cons(String_var(source), NULL), NULL);  signature = _receiver_relative_signature(compiler, binding, signature, participant);  List parameters = NULL;  Type result = NULL;  if(_function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && Var_equal(List_car(parameters), List_var(owner))){
     parameters = _inherited_parameters(parameters, owner, participant);  signature = List_type(cons(List_var(cons(_305, cons(List_var(parameters), NULL))), List_append(Type_list(result), NULL)));
   }
   * selected = source;  return signature;

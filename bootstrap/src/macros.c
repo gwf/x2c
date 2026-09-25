@@ -2982,7 +2982,7 @@ static Var _sdk_embed_text(Var requested){
     Var stored =((void) 0, Void);  Var key = ulong_var(((ulong) requested.u64));  if(! Map_truth(macro_sdk_source_captures) || ! Map_try_get(macro_sdk_source_captures, key, & stored) || ! _literal_string(requested, & requested_path)) _sdk_reject(_1121, cons(String_var(String_join(NULL, cons(String_var(_109), cons(String_var(Var_repr(requested)), NULL)))), NULL));  List source = Var_list(stored);  source_file = Var_string(List_cadr(source));
   }
   if(! String_len(requested_path)) _sdk_reject(_1122, NULL);  String path = _embed_path(compiler, source_file, requested_path);  if(compiler -> sources){
-    String text;  if(! Compiler_read_source(compiler, path, & text)) _sdk_reject(_1123, cons(String_var(String_join(NULL, cons(String_var(_329), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  Map_merge_translation_dependency(compiler -> deps, path, String_var(String_printf(_330, String_hash(text))));  return String_var(text);
+    String text;  if(! Compiler_read_source(compiler, path, &(text))) _sdk_reject(_1123, cons(String_var(String_join(NULL, cons(String_var(_329), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  Map_merge_translation_dependency(compiler -> deps, path, String_var(String_printf(_330, String_hash(text))));  return String_var(text);
   }
   struct stat info;  if(! stat(path, & info) && ! S_ISREG(info.st_mode)) _sdk_reject(_1124, cons(String_var(String_join(NULL, cons(String_var(_329), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  File volatile file = NULL;  int volatile open_failed = 0; {
     ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[2];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 2, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[2];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_2 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_2);  List _x2c_catch_pattern_3 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_1[1] = List_var(_x2c_catch_pattern_3);
@@ -3095,7 +3095,7 @@ void x2c_diagnostic_warn(String message, List notes){
 }
 
 static String _source_text(Compiler c, String path, String message, Token token, List notes){
-  String text = NULL;  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 27335838, message, token, notes);  return text;
+  String text = NULL;  if(! Compiler_read_source(c, path, &(text))) Compiler_report_error(c, 27335838, message, token, notes);  return text;
 }
 
 static String _read_source(Compiler compiler, String path, String message, Token token, List notes){
@@ -4243,7 +4243,7 @@ static Var _sdk_symbol_set(List values){
     }
 
   }
-  int duplicate = - 1;  List expression = Compiler_symbol_set_expression(macro_sdk_compiler, values, & duplicate);  if(duplicate >= 0) _sdk_reject(_1214, cons(_729, cons(String_var(Var_repr(List_getindex(values, duplicate))), NULL)));  return List_var(expression);
+  int duplicate = - 1;  List expression = Compiler_symbol_set_expression(macro_sdk_compiler, values, &(duplicate));  if(duplicate >= 0) _sdk_reject(_1214, cons(_729, cons(String_var(Var_repr(List_getindex(values, duplicate))), NULL)));  return List_var(expression);
 }
 
 List Compiler_meta_value_expression(Compiler, Type, Var, Token);

@@ -3841,7 +3841,7 @@ break; } } static MatchCaptureSite _x2c_match_site_82;  if (x2c_match_site_try_c
   inner = List_var(Compiler_resolve_expression(c, Var_list(inner), origin));  Type inner_type = Var_type(Var_cadr(inner));  return cons(_0, cons(List_var(inner_type), cons(List_var(cons(_286, cons(inner, NULL))), NULL)));
 }
 break; } } static MatchCaptureSite _x2c_match_site_83;  if (x2c_match_site_try_capture(& _x2c_match_site_83, _x2c_match_expr, List_var(_1019), &_x2c_match_capture)) {List choices = Var_list(_x2c_match_values[0]); {
-  List header = NULL;  List cases = Ast_initializer_cases(content, & header);  Array resolved = Array_new();  if(List_truth(header)){
+  List header = NULL;  List cases = Ast_initializer_cases(content, &(header));  Array resolved = Array_new();  if(List_truth(header)){
     Array inputs = Array_new(); {
       List argument;  List _x2c_macro_object_28 = List_cdr(header);  List _x2c_macro_cursor_28 = _x2c_macro_object_28;  Var _x2c_macro_cursor_output_28;  while(List_try_next(_x2c_macro_object_28, & _x2c_macro_cursor_28, & _x2c_macro_cursor_output_28)){
         argument = Var_list(_x2c_macro_cursor_output_28); {
@@ -4833,7 +4833,7 @@ List Compiler_initializer_rows(Compiler c, Type root, List items, List target){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_130;  if (x2c_match_site_try_capture(& _x2c_match_site_130, _x2c_match_expr, List_var(_1505), &_x2c_match_capture)) {Var body = _x2c_match_values[0]; {
-          List header = NULL;  List choices = Ast_initializer_cases(Var_list(body), & header);  Array following = Array_new(); {
+          List header = NULL;  List choices = Ast_initializer_cases(Var_list(body), &(header));  Array following = Array_new(); {
             List choice;  List _x2c_macro_object_40 = choices;  List _x2c_macro_cursor_40 = _x2c_macro_object_40;  Var _x2c_macro_cursor_output_40;  while(List_try_next(_x2c_macro_object_40, & _x2c_macro_cursor_40, & _x2c_macro_cursor_output_40)){
               choice = Var_list(_x2c_macro_cursor_output_40); {
                 List _x2c_destructure_20 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_20, 0));  List path = Var_list(List_getindex(_x2c_destructure_20, 1));  Type type = Var_type(List_getindex(_x2c_destructure_20, 2));  List input = Var_list(List_getindex(_x2c_destructure_20, 3));  _initializer_next(c, target, path, condition, following);
@@ -5154,7 +5154,7 @@ static List _convert_composite(Compiler compiler, List expr, Type target, List n
               }
 
             }
-            List header = NULL;  Ast_initializer_cases(Var_list(List_caddr(terminal)), & header);  List choices = Array_list_free(checked);  if(List_truth(header)) choices = cons(List_var(header), choices);  List value = cons(_0, cons(_16, cons(List_var(cons(_1016, List_append(choices, NULL))), NULL)));  Array_push(elements, List_var(_initializer_replace(original, value)));
+            List header = NULL;  Ast_initializer_cases(Var_list(List_caddr(terminal)), &(header));  List choices = Array_list_free(checked);  if(List_truth(header)) choices = cons(List_var(header), choices);  List value = cons(_0, cons(_16, cons(List_var(cons(_1016, List_append(choices, NULL))), NULL)));  Array_push(elements, List_var(_initializer_replace(original, value)));
           }
           continue;
         }

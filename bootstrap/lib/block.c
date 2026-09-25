@@ -10,7 +10,7 @@ static int _allocation_size(size_t width, size_t cap, size_t * out);
 
 static int _allocation_size(size_t width, size_t cap, size_t * out){
   if(! width || cap >(SIZE_MAX - sizeof(Block)) / width) return 0;
-  * out = sizeof(Block) + width * cap;
+  (* out) = sizeof(Block) + width * cap;
   return 1;
 }
 
@@ -30,7 +30,7 @@ Block Block_new(size_t width){
   }
   ;
   size_t size;
-  if(! _allocation_size(width, block -> cap, & size)){
+  if(! _allocation_size(width, block -> cap, &(size))){
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/block.x",.function = "Block_new",.line = 60};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
     __builtin_unreachable();
@@ -63,7 +63,7 @@ void Block_reserve(Block block, size_t minimum){
     cap *= 2;
   }
   size_t size;
-  if(! _allocation_size(block -> width, cap, & size)){
+  if(! _allocation_size(block -> width, cap, &(size))){
     size_t width = block -> width;
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 106};

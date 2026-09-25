@@ -711,12 +711,12 @@ static void _capture_time(long long * wall_time, long long * monotonic_time){
     now.tv_sec = time(NULL);
     now.tv_usec = 0;
   }
-  * wall_time =(long long) now.tv_sec * 1000000LL + now.tv_usec;
+  (* wall_time) =(long long) now.tv_sec * 1000000LL + now.tv_usec;
   if(clock_gettime(CLOCK_MONOTONIC, & monotonic) != 0){
-    * monotonic_time = * wall_time;
+    (* monotonic_time) =(* wall_time);
     return;
   }
-  * monotonic_time =(long long) monotonic.tv_sec * 1000000LL + monotonic.tv_nsec / 1000LL;
+  (* monotonic_time) =(long long) monotonic.tv_sec * 1000000LL + monotonic.tv_nsec / 1000LL;
 }
 
 void Symbol_decode(Symbol, char *);
@@ -1337,7 +1337,7 @@ void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
       return;
     }
     long long wall_time, monotonic;
-    _capture_time(& wall_time, & monotonic);
+    _capture_time(&(wall_time), &(monotonic));
     if(logger -> sequence == 0) logger -> origin_monotonic_us = monotonic;
     LogEvent event ={
       .sequence = logger -> sequence ++, .wall_time_us = wall_time, .elapsed_us = monotonic - logger -> origin_monotonic_us, .level = level, .category = category, .fields = fields

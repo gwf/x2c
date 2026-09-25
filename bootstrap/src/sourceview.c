@@ -258,7 +258,7 @@ Var Symbol_var(Symbol);
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;
   if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), & value)){
-    * text = Var_string(value);
+    (* text) = Var_string(value);
     return 1;
   }
   struct stat info;
@@ -276,7 +276,7 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) * text = File_string_close(file);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0))(* text) = File_string_close(file);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
