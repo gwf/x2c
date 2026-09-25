@@ -8,10 +8,22 @@
 # commits any refreshed bootstrap/ and etc/ output, confirms the gate, and
 # pushes to dev only when the tree is clean. A rejected push retries from the
 # merge. A failed gate restores bootstrap/ and etc/ and stops. Logs go to
-# debug/.
+# debug/. Landings on this machine take turns, so gates never share the CPU.
 set -u
 message=${1:?usage: tools/land-dev "bootstrap refresh commit message"}
 mkdir -p debug
+lock="$(git rev-parse --git-common-dir)/land-dev.lock"
+until mkdir "$lock" 2>/dev/null; do
+  holder=$(cat "$lock/pid" 2>/dev/null)
+  if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
+    rm -rf "$lock"
+    continue
+  fi
+  sleep 10
+done
+echo $$ >"$lock/pid"
+trap 'rm -rf "$lock"' EXIT
+trap 'exit 1' INT TERM
 for attempt in 1 2 3 4; do
   git fetch -q origin && git merge -q --no-edit origin/dev ||
     { echo "land-dev: merge with origin/dev failed"; exit 1; }
