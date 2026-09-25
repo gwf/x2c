@@ -261,8 +261,9 @@ static int Type._is_enum_body(Type type) => !!type.match(%(enum (*)));
 /** Returns whether `type` is a tagged enum definition. */
 int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
 
-/** Returns whether `type` begins with a pointer-like `*`, `&`, or `^`. */
-int Type.is_pointer(Type type) => !!type.match(%((!or (!quote *) & ^) *));
+/** Returns whether `type` begins with a pointer-like modifier. */
+int Type.is_pointer(Type type) =>
+  !!type.match(%((!or (!quote *) & opt-ref ^) *));
 
 static Symbol _declarator_kind(Type type) {
   while (type && type.car() is <list>) type = type.car();
@@ -655,7 +656,7 @@ Type Type.base_type(Type type) {
           return type;
         case <const>: case <restrict>: case <volatile>: case <auto>:
         case <static>: case <extern>: case <inline>:
-        case <*>: case <&>:case <^>:
+        case <*>: case <&>: case <opt-ref>: case <^>:
           break;
       }
     }
@@ -971,7 +972,8 @@ static List _from_ast(List ast, List context) {
     Var modifier = rest.car();
     if (modifier is <symbol>) {
       Symbol prefix = modifier;
-      if (prefix != <*> && prefix != <&> && prefix != <^> &&
+      if (prefix != <*> && prefix != <&> &&
+          prefix != <opt-ref> && prefix != <^> &&
           !prefix.is_type_qualifier() && !prefix.is_storage_class() &&
           !prefix.is_inline()) break;
     }

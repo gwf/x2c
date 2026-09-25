@@ -70,7 +70,7 @@ int main(void) {
   Var out, i32_update = 0;
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
-    out = Var.update(&i32_update, <+>, 1);
+    out = Var.update(i32_update, <+>, 1);
     if (out is void) return 2;
     sink += out.u64;
   }
@@ -79,7 +79,7 @@ int main(void) {
   Var u32_update = Var.new(<u32>, 0u), u32_one = Var.new(<u32>, 1u);
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
-    out = Var.update(&u32_update, <+>, u32_one);
+    out = Var.update(u32_update, <+>, u32_one);
     if (out is void) return 2;
     sink += out.u64;
   }
@@ -88,7 +88,7 @@ int main(void) {
   Var f32_update = Var.new(<f32>, 0.0f), f32_step = Var.new(<f32>, 0.25f);
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
-    out = Var.update(&f32_update, <+>, f32_step);
+    out = Var.update(f32_update, <+>, f32_step);
     if (out is void) return 2;
     sink += out.u64;
   }
@@ -97,7 +97,7 @@ int main(void) {
   Var f64_update = 0.0, f64_step = 0.25;
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
-    out = Var.update(&f64_update, <+>, f64_step);
+    out = Var.update(f64_update, <+>, f64_step);
     if (out is void) return 2;
     sink += out.u64;
   }
@@ -106,7 +106,7 @@ int main(void) {
   Var mixed_update = 0, mixed_step = Var.new(<u16>, 1);
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
-    out = Var.update(&mixed_update, <+>, mixed_step);
+    out = Var.update(mixed_update, <+>, mixed_step);
     if (out is void) return 2;
     sink += out.u64;
   }
@@ -116,7 +116,7 @@ int main(void) {
   Var wide_update = Var.box_long(0), wide_step = Var.box_long(1);
   start = now_ns();
   for (int i = 0; i < wide_count; i++) {
-    out = Var.update(&wide_update, <+>, wide_step);
+    out = Var.update(wide_update, <+>, wide_step);
     if (out is void) return 2;
     sink += out.u64;
   }

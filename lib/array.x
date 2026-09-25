@@ -179,7 +179,7 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
   if (rhs is void)
     raise %(void-op (owner "Array.updateindex") (index $requested));
   Var *arr = (Var *) array.bytes;
-  return Var.update(arr + index, op, rhs);
+  return Var.update(arr[index], op, rhs);
 }
 
 /** Applies postfix `Array` element increment or decrement.
@@ -197,7 +197,7 @@ Var Array.postfixindex(Array array, int index, Symbol op) {
   if (index < 0)
     raise %(bad-arg (owner "Array.postfixindex") (index $requested));
   Var *arr = (Var *) array.bytes;
-  return Var.postfix(arr + index, op);
+  return Var.postfix(arr[index], op);
 }
 
 /** Appends `elem` to the end of `array` and returns it.

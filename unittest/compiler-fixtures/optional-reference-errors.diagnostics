@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-errors.x:2:9: type: check optional reference before assigning its value
+    value = 5;
+          ^
+

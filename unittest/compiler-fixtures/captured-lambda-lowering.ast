@@ -135,7 +135,7 @@
                    (call (expr ((func ((* const void) ("List"))) "FuncArg") 
                           (ident (binding 31 "FuncArg_reference"))) 
                     (args (expr () (ident (binding 32 "NULL"))) 
-                     (expr ("List") (expr ("List") (cache 1))))))))) 
+                     (expr () (ident (binding 32 "NULL"))))))))) 
                (stmnt 
                 (expr ("FuncArg") 
                  (op = (expr ("FuncArg") 
@@ -212,7 +212,7 @@
               (call (expr ((func ((* const void) ("List"))) "FuncArg") 
                      (ident (binding 31 "FuncArg_reference"))) 
                (args (expr () (ident (binding 32 "NULL"))) 
-                (expr ("List") (expr ("List") (cache 1))))))))) 
+                (expr () (ident (binding 32 "NULL"))))))))) 
           (stmnt 
            (expr ("FuncArg") 
             (op = (expr ("FuncArg") (ident (binding 44 "_x2c_func_argument_1"))) 
@@ -295,7 +295,7 @@
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
                               (ident (binding 31 "FuncArg_reference"))) 
                         (args (expr () (ident (binding 32 "NULL"))) 
-                         (expr ("List") (expr ("List") (cache 1))))))))) 
+                         (expr () (ident (binding 32 "NULL"))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
@@ -353,7 +353,7 @@
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
                               (ident (binding 31 "FuncArg_reference"))) 
                         (args (expr () (ident (binding 32 "NULL"))) 
-                         (expr ("List") (expr ("List") (cache 1))))))))) 
+                         (expr () (ident (binding 32 "NULL"))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
@@ -411,7 +411,7 @@
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
                               (ident (binding 31 "FuncArg_reference"))) 
                         (args (expr () (ident (binding 32 "NULL"))) 
-                         (expr ("List") (expr ("List") (cache 1))))))))) 
+                         (expr () (ident (binding 32 "NULL"))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 

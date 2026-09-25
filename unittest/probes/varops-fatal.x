@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "compare")) void.compare(one);
   if (!strcmp(argv[1], "iter")) void.iter(&iter_storage);
   if (!strcmp(argv[1], "binary")) void.binary(<+>, one);
-  if (!strcmp(argv[1], "update")) Var.update(&value, <+>, one);
-  if (!strcmp(argv[1], "postfix")) Var.postfix(&value, <++>);
+  if (!strcmp(argv[1], "update")) Var.update(value, <+>, one);
+  if (!strcmp(argv[1], "postfix")) Var.postfix(value, <++>);
   return 2;
 }

@@ -350,6 +350,10 @@ static List _imported_method(Compiler compiler, String method, Type receiver) {
 List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
   int call_context) {
+  if (receiver_type.car() == <opt-ref>)
+    c.report_error(
+      <type>, "check optional reference before accessing its value",
+      c.token, NULL);
   // The receiver type is a lookup key here. A const or volatile receiver
   // names the same aggregate, fields, and methods.
   Type type = receiver_type.canonicalize();
@@ -1272,6 +1276,18 @@ static List _binary_op_type_fallback(List lhs, List rhs) {
 static List Compiler._binary_op_type(
   Compiler compiler, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
+  if (ltype.car() == <opt-ref> || rtype.car() == <opt-ref>) {
+    int null_test =
+      (_integer_literal_kind(lhs, NULL) == <zero> ||
+       lhs.match(%(expr ? (ident (binding ? "NULL"))))) ||
+      (_integer_literal_kind(rhs, NULL) == <zero> ||
+       rhs.match(%(expr ? (ident (binding ? "NULL")))));
+    if (!((op == <==> || op == <!=>) && null_test) &&
+        op != <&&> && op != <||>)
+      compiler.report_error(
+        <type>, "check optional reference before using its value",
+        compiler.token, NULL);
+  }
   if (op == <in>) return NULL;
   if (compiler.sym.is_var_type(ltype) ||
       compiler.sym.is_var_type(rtype)) {
@@ -1417,6 +1433,9 @@ static List _resolve_identifier(
   }
   if (read_reference &&
       %(reference-param $binding) in binding_facts) {
+    if (%(optional-reference-param $binding) in binding_facts &&
+        !(%(present-reference $binding) in binding_facts))
+      return result;
     Type value_type = cdr(type);
     return %(expr $value_type
              (parens (expr $value_type (op * $result))));
@@ -1595,8 +1614,14 @@ static List _resolve_func_call(
     int index = 0;
     foreach (List argument, arguments) {
       Type source_type = argument.cadr();
+      int null_reference =
+        _integer_literal_kind(argument, NULL) == <zero> ||
+        argument.match(%(expr ? (ident (binding ? "NULL"))));
+      int forwarded_reference = source_type.car() == <opt-ref>;
+      int addressable = _expression_is_addressable(compiler, argument);
       List source_type_literal = compiler.cache_literal_list(
-        compiler.sym.normalize_declared_type(source_type));
+        compiler.sym.normalize_declared_type(
+          forwarded_reference ? source_type.cdr() : source_type));
       List index_expr = %(expr (unsigned) (literal (unsigned) "$index"));
       List reference_name = compiler.sym.define(
         %(${compiler.fresh_name("func_reference_type")}), %("List"));
@@ -1613,14 +1638,23 @@ static List _resolve_func_call(
       locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
 
       List address = %(expr () (ident $null_binding));
-      if (_expression_is_addressable(compiler, argument)) {
+      if (null_reference) address = %(expr () (ident $null_binding));
+      else if (forwarded_reference) address = argument;
+      else if (addressable) {
         Type pointer = source_type.reference();
         address = %(expr $pointer (op & (parens $argument)));
       }
+      /* A non-lvalue carries no reference type, so its null address cannot
+         masquerade as an absent optional reference. */
+      List carrier_type = null_reference
+                        ? %(expr ("List") (ident $reference_name))
+                        : !forwarded_reference && !addressable
+                          ? %(expr () (ident $null_binding))
+                        : source_type_literal;
       List reference_value = %(
         expr ("FuncArg")
           (call (expr $reference_type (ident $reference_constructor))
-                (args $address $source_type_literal))
+                (args $address $carrier_type))
       );
       List value_value = NULL;
       if (compiler.sym.var_tag_for_type(source_type, NULL)) {
@@ -1686,7 +1720,7 @@ static List _func_call_arguments(List body) {
             (call (expr ? (ident (binding ? "FuncArg_reference")))
                   (args ?address ?source))))))
         (stmnt (expr ("FuncArg") (op = ? ?boxed)))): {
-        Var value = void;
+        Var value = %(no-value);
         match (boxed)
           case %(expr ("FuncArg")
                  (call (expr ? (ident (binding ? "FuncArg_value")))
@@ -1708,7 +1742,8 @@ static List _func_call_arguments(List body) {
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
     other expression. Each argument is `(func-arg value address source)`: the
-    argument boxed as a Var, or void when it has no Var form; its address or
+    argument boxed as a Var, or `(no-value)` when it has no Var form; its
+    address or
     NULL; and its type. */
 List Compiler.func_call_parts(Compiler compiler, Var content) {
   match (content) {
@@ -2253,6 +2288,10 @@ static List _resolve_content(
     case %(index ?receiver ?selector): {
       receiver = c.resolve_expression(receiver, origin);
       selector = c.resolve_expression(selector, origin);
+      if (receiver.cadr().car() == <opt-ref>)
+        c.report_error(
+          <type>, "check optional reference before indexing its value",
+          origin, NULL);
       if (_deferred_receiver(receiver) ||
           _deferred_receiver(selector))
         return %(expr (<macro-expr>) (index $receiver $selector));
@@ -2292,6 +2331,10 @@ static List _resolve_content(
     case %(op ?operator ?operand): {
       List lhs = c.resolve_expression(operand, origin);
       Type lhs_type = lhs.cadr();
+      if (lhs_type.car() == <opt-ref> && operator != <!>)
+        c.report_error(
+          <type>, "check optional reference before using its value",
+          origin, NULL);
       if (operator == <*> && operand.cadr().car() == <&> &&
           lhs_type.car() != <&>) return lhs;
       if (lhs_type === %(<macro-expr>))
@@ -2619,6 +2662,10 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
   Symbol op = compiler.peek(0);
   Token origin = compiler.token;
   if (!op.is_assignment_op()) return lhs;
+  if (lhs.cadr().car() == <opt-ref>)
+    compiler.report_error(
+      <type>, "check optional reference before assigning its value",
+      origin, NULL);
   List targets = op == <=> ? _destructure_targets(compiler, lhs) : NULL;
   compiler.next();
   List rhs = compiler.parse_assignment();
@@ -4100,7 +4147,9 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
      silently discarded const, in both directions: `void *`
      took a `const char *` going in, and `char *` took a `const void *`
      coming back out. */
-  int take_reference = target.car() == <&> && type === cdr(target);
+  int take_reference =
+    (target.car() == <&> || target.car() == <opt-ref>) &&
+    type === cdr(target);
   Type qualifier_source = take_reference
                         ? declared_source.reference() : declared_source;
   if ((take_reference || type == target || cdr(type) == cdr(target) ||
@@ -4117,7 +4166,9 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (type == target || (type_is_var && target_is_var)) return expr;
   /* A reference names an object, so its argument is an lvalue of the
      referenced type; a pointer or null is spelled `*p` by the caller. */
-  if (target.car() == <&> && type.car() != <&> && type !== cdr(target)) {
+  if ((target.car() == <&> || target.car() == <opt-ref>) &&
+      type.car() != <&> && type.car() != <opt-ref> &&
+      type !== cdr(target)) {
     c.report_error(
       <type>,
       %"cannot pass ${type.repr()} where ${target.repr()} is expected",
@@ -4129,8 +4180,17 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     return expr;
   // pointers, references, and address-of/dereference conversions
   // T -> &T : pass address of LHS as ref w/ updated type
-  if (type === cdr(target) && target.car() == <&>)
+  if (type === cdr(target) &&
+      (target.car() == <&> || target.car() == <opt-ref>)) {
+    if (!_expression_is_addressable(c, expr))
+      c.report_error(
+        <type>, "reference argument must name an addressable object",
+        NULL, NULL);
     return %(expr $target (op & (parens $expr)));
+  }
+  if (type.car() == <&> && target.car() == <opt-ref> &&
+      cdr(type) === cdr(target))
+    return %(expr $target $expr);
   // &T -> *T : pass ref as pointer w/ updated type
   if (cdr(type) == cdr(target) && type.car() == <&> && target.car() == <*>)
     return %(expr $target $expr);

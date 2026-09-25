@@ -84,8 +84,9 @@ inline FuncArg FuncArg.value(Var value) {
 
 /** Constructs a `Func` argument borrowing a typed lvalue address.
     The address and canonical `type` must remain valid through `Func.apply`;
-    this constructor performs no validation. Compiler-generated adapters use
-    the checked reference reader before calling native code.
+    an optional reference may use a null address. This constructor performs
+    no validation. Compiler-generated adapters use the checked reference
+    reader before calling native code.
 */
 inline FuncArg FuncArg.reference(const void *reference, List type) {
   return (FuncArg) { .data.reference = reference, .reference_type = type };
@@ -124,7 +125,9 @@ List x2c_func_reference_type(
     raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
   }
   List parameter = _parameter(function, index);
-  return parameter && parameter.car() == <&> ? parameter.cdr() : NULL;
+  return parameter &&
+         (parameter.car() == <&> || parameter.car() == <opt-ref>)
+       ? parameter.cdr() : NULL;
 }
 
 static unsigned _type_qualifiers(List &cursor) {
@@ -199,19 +202,24 @@ Var x2c_func_value_argument(
     The adapter supplies the pointee type it will cast to.
     `argv` must address the prepared argument array and `i` must be in bounds;
     generated adapters establish both facts.
-    Raises: `<bad-types>` when the carrier is a value, its address is null, the
-    `Func` signature and adapter disagree, its type differs, or conversion
-    would discard a qualifier. It does not return on failure.
+    Raises: `<bad-types>` when the carrier is a value, its address is null for
+    a required reference, the `Func` signature and adapter disagree, its type
+    differs, or conversion would discard a qualifier. It does not return on
+    failure.
 */
 static void *_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target,
   List want) {
   List declared = _parameter(fn, i), source = argv[i].reference_type;
-  int signature_reference = declared && declared.car() == <&>;
+  int signature_reference = declared &&
+    (declared.car() == <&> || declared.car() == <opt-ref>);
   List target = signature_reference ? declared.cdr() : NULL;
-  if (!source || !argv[i].data.reference || !signature_reference || !want ||
+  if (!source ||
+      (!argv[i].data.reference && declared.car() != <opt-ref>) ||
+      !signature_reference || !want ||
       !target.equal(declared_target) ||
-      !_reference_type_accepts(want, source)) {
+      (!_reference_type_accepts(want, source) &&
+       !_reference_type_accepts(declared_target, source))) {
     List sig = fn ? fn.sig : NULL;
     raise %(bad-types (sig $sig) (index $i)
                       (source $source) (want $want));

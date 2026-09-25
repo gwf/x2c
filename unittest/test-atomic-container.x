@@ -197,12 +197,12 @@ static void string_updates_are_checked_and_canonical(void) {
   Var result = value.binary(<+>, Var.new(<string>, %" world"));
   EXPECT_TRUE(result is <string>);
   EXPECT_TRUE(result.string() == "hello world");
-  result = Var.update(&value, <+>, Var.new(<string>, %" world"));
+  result = Var.update(value, <+>, Var.new(<string>, %" world"));
   EXPECT_TRUE(value is <string>);
   EXPECT_TRUE(value.string() == "hello world");
   Var before = value;
   int caught = 0;
-  try Var.update(&value, <+>, 1);
+  try Var.update(value, <+>, 1);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(value === before);
   EXPECT_TRUE(caught);

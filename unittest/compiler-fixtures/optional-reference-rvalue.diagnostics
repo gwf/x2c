@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-rvalue.x:7:3: type: reference argument must name an addressable object
+    set(5);
+    ^^^
+

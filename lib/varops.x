@@ -529,26 +529,26 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
     `Var.binary` and `Var.convert`. These failures leave the stored value
     unchanged.
 */
-Var Var.update(Var *lhs, Symbol op, Var rhs) {
+Var Var.update(Var &?lhs, Symbol op, Var rhs) {
   if (!lhs) raise %(bad-arg (owner "Var.update"));
-  if (!lhs[0].encoding_valid()) {
-    unsigned long bits = lhs[0].u64;
+  if (!lhs.encoding_valid()) {
+    unsigned long bits = lhs.u64;
     raise %(bad-enc (value $bits) (side "left"));
   }
   if (!rhs.encoding_valid()) {
     unsigned long bits = rhs.u64;
     raise %(bad-enc (value $bits) (side "right"));
   }
-  if (lhs[0] is void || rhs is void) raise %(void-op (op $op));
+  if (lhs is void || rhs is void) raise %(void-op (op $op));
   if (!_update_operator(op)) raise %(bad-op (op $op));
-  Var result = lhs[0].binary(op, rhs);
+  Var result = lhs.binary(op, rhs);
   if (result is void) return void;
-  if (_same_tag_update(lhs[0], rhs)) {
-    lhs[0] = result;
+  if (_same_tag_update(lhs, rhs)) {
+    lhs = result;
     return result;
   }
-  Var converted = result.convert(lhs[0].tag());
-  lhs[0] = converted;
+  Var converted = result.convert(lhs.tag());
+  lhs = converted;
   return converted;
 }
 
@@ -561,19 +561,19 @@ Var Var.update(Var *lhs, Symbol op, Var rhs) {
     `++` or `--`, or any cause from `Var.update`. These failures leave the
     stored value unchanged.
 */
-Var Var.postfix(Var *lhs, Symbol op) {
+Var Var.postfix(Var &?lhs, Symbol op) {
   if (!lhs) raise %(bad-arg (owner "Var.postfix"));
-  if (!lhs[0].encoding_valid()) {
-    unsigned long bits = lhs[0].u64;
+  if (!lhs.encoding_valid()) {
+    unsigned long bits = lhs.u64;
     raise %(bad-enc (value $bits));
   }
-  if (lhs[0] is void) raise %(void-op (op $op));
+  if (lhs is void) raise %(void-op (op $op));
   Symbol binary_op;
   if (op == <++>) binary_op = <+>;
   else if (op == <-->) binary_op = <->;
   else
     raise %(bad-op (op $op));
-  Var old = lhs[0], one = Var.box_i32_bits(1);
+  Var old = lhs, one = Var.box_i32_bits(1);
   if (lhs.update(binary_op, one) is void) return void;
   return old;
 }

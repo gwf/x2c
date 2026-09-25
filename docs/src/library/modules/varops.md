@@ -137,7 +137,7 @@ Source: `lib/varops.x:446`
 <a id="Var.postfix"></a>
 #### Var.postfix
 
-`Var Var.postfix(Var *lhs, Symbol op)`
+`Var Var.postfix(Var &?lhs, Symbol op)`
 
 Applies dynamic postfix `++` or `--` and returns the prior value.
 The update adds or subtracts an `<i32>` one through `Var.update`,
@@ -183,7 +183,7 @@ Source: `lib/varops.x:359`
 <a id="Var.update"></a>
 #### Var.update
 
-`Var Var.update(Var *lhs, Symbol op, Var rhs)`
+`Var Var.update(Var &?lhs, Symbol op, Var rhs)`
 
 Applies a failure-atomic dynamic compound update and returns the new value.
 The operation is limited to arithmetic, remainder, bitwise, and shift

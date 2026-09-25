@@ -103,14 +103,38 @@ static List _continued(Compiler c, List statement) {
   return directives ? %(group $statement @directives) : statement;
 }
 
+static List _parse_reference_arm(Compiler c, List binding, int present) {
+  if (!binding) return c.parse_governed(AST_STATEMENT);
+  Map facts = c.semantic_binding_facts();
+  List key = %(present-reference $binding);
+  int previous = facts.contains(key);
+  if (present) facts[key] = 1;
+  List arm = c.parse_governed(AST_STATEMENT);
+  if (!previous) facts.del(key);
+  return arm;
+}
+
 static List _if_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <if>);
-  List ontrue = compiler.parse_governed(AST_STATEMENT);
+  int true_is_present = 1;
+  List binding = compiler.optional_reference_test(cond, true_is_present);
+  List ontrue = _parse_reference_arm(
+    compiler, binding, true_is_present);
   compiler.__complete_here(<continue>, %("else"));
-  if (compiler.peek(0) != <else>) return %(if $cond $ontrue);
+  if (compiler.peek(0) != <else>) {
+    if (binding && !true_is_present && reference_guard_exits(ontrue))
+      compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+    return %(if $cond $ontrue);
+  }
   ontrue = _continued(compiler, ontrue);
   compiler.next();
-  return %(if $cond $ontrue ${compiler.parse_governed(AST_STATEMENT)});
+  List onfalse = _parse_reference_arm(
+    compiler, binding, !true_is_present);
+  if (binding && reference_guard_exits(ontrue) && !true_is_present)
+    compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+  if (binding && reference_guard_exits(onfalse) && true_is_present)
+    compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+  return %(if $cond $ontrue $onfalse);
 }
 
 static List _while_statement(Compiler compiler) {
@@ -633,6 +657,15 @@ List Compiler.parse_statement(Compiler c) {
 */
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
   Array block = $auto([]), List stmt = NULL;
+  Map facts = c.semantic_binding_facts(), present_before = {};
+  foreach (Var key, facts.keys())
+    match (key) case %(present-reference ?): present_before[key] = 1;
+  defer {
+    Array keys = $auto(facts.keys());
+    foreach (Var key, keys)
+      match (key) case %(present-reference ?):
+        if (!present_before.contains(key)) facts.del(key);
+  }
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   loop {

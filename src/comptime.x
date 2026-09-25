@@ -378,12 +378,15 @@ static void _lower_scan_function_value(Lowering l, List form) {
     }
 }
 
+static int _lower_null_constant(Var operand);
+
 static void _lower_scan_call(Lowering l, List form) {
   match (form)
     case %(call (expr ((func ?params) *) ?) (args *args)):
       for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
         Type type = _lower_param_type(p);
-        if (type.car() == <&>)
+        if ((type.car() == <&> || type.car() == <opt-ref>) &&
+            !_lower_null_constant(a.car()))
           _lower_scan_op(l, %(op & ${a.car()}));
       }
   match (form) {
@@ -872,8 +875,11 @@ static List _lower_args(
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
     Type parameter = _lower_param_type(p);
-    if (parameter.car() == <&>) {
-      Var place = _lower_place(l, argument);
+    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
+      Var place = parameter.car() == <opt-ref> &&
+                  _lower_null_constant(argument)
+                ? 0 : argument.cadr().car() == <opt-ref>
+                    ? _lower_expr(l, argument) : _lower_place(l, argument);
       if (place is void) {
         (void) _lower_decline(l, "a reference argument with no storage");
         return NULL;
@@ -919,11 +925,14 @@ static Var _lower_application(Lowering l, Var content) {
   Array prepare = $auto([]);
   foreach (List part, parts.cdr())
     match (part) case %(func-arg ?value ?address ?source): {
-      Var type = _lower_expr(l, source);
+      Var type = List.match(
+        source, %(expr ("List") (ident ?)))
+        ? %(C.func.reference-type $fn $count $index)
+        : _lower_expr(l, source);
       Var pointer = _lower_expr(l, address);
       if (l.declined) return void;
       Var by_value = %(C.func.invalid $fn $index $type);
-      if (value is not void) {
+      if (!List.match(value, %(no-value))) {
         value = _lower_expr(l, value);
         if (_lower_failed(l, value)) return void;
         by_value = %(C.func.value $argv $index $value);
@@ -958,7 +967,7 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
     Var value;
-    if (parameter.car() == <&>) {
+    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
       Type target = parameter.cdr();
       Type resolved = l.compiler.sym.normalize_declared_type(target);
       value = %(C.func.declared-reference-argument $fn $argv $index

@@ -541,6 +541,59 @@ void Compiler.record_source_reference(
 */
 Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
+static int _optional_reference_null(List expression) {
+  match (expression) {
+    case %(expr ? (parens ?inner)):
+      return _optional_reference_null(inner);
+    case %(expr ? (ident (binding ? "NULL"))): return 1;
+    case %(expr ? (literal ? "0")): return 1;
+  }
+  return 0;
+}
+
+/** Returns the optional-reference parameter tested by `condition`, or NULL.
+    `truth` is set to whether the condition's true arm proves that the caller
+    supplied an object. Only a direct truth or null test proves presence.
+*/
+List Compiler.optional_reference_test(
+  Compiler c, List condition, int &truth) {
+  match (condition) {
+    case %(expr ? (parens ?inner)):
+      return c.optional_reference_test(inner, truth);
+    case %(expr ? (op ! ?operand)): {
+      truth = !truth;
+      return c.optional_reference_test(operand, truth);
+    }
+    case %(expr ? (op (!set ?op (!or == !=)) ?left ?right)): {
+      if (_optional_reference_null(right)) {
+        truth = op == <!=>;
+        return c.optional_reference_test(left, truth);
+      }
+      if (_optional_reference_null(left)) {
+        truth = op == <!=>;
+        return c.optional_reference_test(right, truth);
+      }
+    }
+  }
+  match (condition)
+    case %(expr (opt-ref *) (ident ?binding)):
+      if (%(optional-reference-param $binding) in
+          c.semantic_binding_facts()) return binding;
+  return NULL;
+}
+
+/** Returns whether `arm` ends with a return or non-returning raise. */
+int reference_guard_exits(List arm) {
+  if (Ast.never_returns(arm)) return 1;
+  match (arm) {
+    case %(return *): return 1;
+    case %(at ? ?body): return reference_guard_exits(body);
+    case %(block *items):
+      return items && reference_guard_exits(items.last());
+  }
+  return 0;
+}
+
 /** Returns the active macro definition's borrowed local map, or `NULL`. */
 Map Compiler.macro_definition_locals(Compiler compiler) {
   Var stored = compiler.macro_holes[%(locals)];

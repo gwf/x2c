@@ -412,7 +412,29 @@ The call does not write `&`; x2c takes each argument's address. Passing a
 reference parameter to another reference parameter forwards the same object.
 The argument must be an addressable lvalue of the referenced type whose
 storage remains live for the call. A pointer, `NULL` or `0` is a compile
-error; to pass the object a pointer `p` addresses, write `*p`.
+error for a required reference; to pass the object a pointer `p` addresses,
+write `*p`.
+
+An optional reference parameter is written `T &?name`. It accepts either an
+addressable `T` or `NULL` (or `0`). A null optional reference means that no
+caller object was supplied; it is distinct from a caller's pointer-typed
+object whose value is null. Test the optional reference before reading or
+writing its object:
+
+```x2c
+static int bump_if_present(int &?value) {
+  if (!value) return 0;
+  value++;
+  return value;
+}
+```
+
+In the nonnull arm of a direct test, or after a null arm that returns or
+raises, the parameter is an ordinary `T` lvalue: reads, writes, and reference
+forwarding use the caller's storage transparently. Outside such a proven
+nonnull path it remains a nullable address and can be tested or forwarded to
+another optional reference. Required references still reject null at compile
+time.
 
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership

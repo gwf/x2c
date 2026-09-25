@@ -329,7 +329,8 @@ static List _checked_func_argument(
   List value_helper, Type value_helper_type,
   List reference_helper, Type reference_helper_type,
   List fn_binding, List argv_binding, int index, Type &storage_type) {
-  if (parameter_type.car() == <&>) {
+  if (parameter_type.car() == <&> ||
+      parameter_type.car() == <opt-ref>) {
     Type target = parameter_type.cdr(), pointer = target.reference();
     List picked = %(
       expr (* void)
@@ -956,9 +957,9 @@ static Type _entry_type(Compiler compiler, List entry) {
     case %(binding ? ?): return %("Var");
     case %(param ? ?): {
       Type type = entry.type_from_ast().declared();
-      if (type.car() == <&>)
+      if (type.car() == <&> || type.car() == <opt-ref>)
         return cons(
-          <&>, compiler.sym.normalize_declared_type(type.cdr()));
+          type.car(), compiler.sym.normalize_declared_type(type.cdr()));
       return type;
     }
   }
@@ -1099,7 +1100,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
           for (; parameters && arguments;
                parameters = parameters.cdr(), arguments = arguments.cdr()) {
             Type parameter = parameters.car();
-            if (parameter.car() == <&>)
+            if (parameter.car() == <&> || parameter.car() == <opt-ref>)
               _require_capture_lvalue(c, arguments.car());
           }
       }
@@ -1625,9 +1626,9 @@ List Compiler.lambda_param_types(Compiler compiler, List entries) {
       case %(binding ? ?): types.push(%("Var"));
       case %(param ? ?): {
         Type type = entry.type_from_ast().declared();
-        if (type.car() == <&>)
+        if (type.car() == <&> || type.car() == <opt-ref>)
           type = cons(
-            <&>, compiler.sym.normalize_declared_type(type.cdr()));
+            type.car(), compiler.sym.normalize_declared_type(type.cdr()));
         types.push(type);
       }
     }

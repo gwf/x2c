@@ -37,7 +37,7 @@ argument is accepted, as C converts it to the parameter's pointer type.
 
 **Raises:** `<bad-types>` for any other argument.
 
-Source: `lib/func.x:243`
+Source: `lib/func.x:251`
 
 #### x2c_func_record_result
 
@@ -46,7 +46,7 @@ Source: `lib/func.x:243`
 Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
 active `Scope`.
 
-Source: `lib/func.x:257`
+Source: `lib/func.x:265`
 
 #### x2c_func_reference_argument
 
@@ -56,7 +56,7 @@ Checks a reference argument whose stored pointee matches `want` exactly.
 
 **Raises:** `<bad-types>` on the same mismatches as the shared checker.
 
-Source: `lib/func.x:224`
+Source: `lib/func.x:232`
 
 #### x2c_func_value_argument
 
@@ -77,7 +77,7 @@ A detail names the argument's tag rather than the argument: any tag may
 arrive here, and an identity-bearing detail value terminates at the error
 floor instead of reaching the handler that would report it.
 
-Source: `lib/func.x:169`
+Source: `lib/func.x:172`
 
 ### `Func`
 
@@ -101,7 +101,7 @@ or any cause raised by the adapter or native target. A `void` adapter
 result remains no-value. Other results have the ownership of the value the
 adapter returned.
 
-Source: `lib/func.x:392`
+Source: `lib/func.x:400`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -115,7 +115,7 @@ when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:373`
+Source: `lib/func.x:381`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -132,7 +132,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func.x:326`
+Source: `lib/func.x:334`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -150,7 +150,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func.x:354`
+Source: `lib/func.x:362`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -170,7 +170,7 @@ The result belongs to the current `Scope`.
 signature whose parameters are anything but one `List`, and `<alloc-fail>`
 when binding storage cannot be allocated.
 
-Source: `lib/func.x:341`
+Source: `lib/func.x:349`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -181,7 +181,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:428`
+Source: `lib/func.x:436`
 
 ### `FuncArg`
 
@@ -192,10 +192,11 @@ Source: `lib/func.x:428`
 
 Constructs a `Func` argument borrowing a typed lvalue address.
 The address and canonical `type` must remain valid through `Func.apply`;
-this constructor performs no validation. Compiler-generated adapters use
-the checked reference reader before calling native code.
+an optional reference may use a null address. This constructor performs
+no validation. Compiler-generated adapters use the checked reference
+reader before calling native code.
 
-Source: `lib/func.x:90`
+Source: `lib/func.x:91`
 
 <a id="FuncArg.value"></a>
 #### FuncArg.value
@@ -219,7 +220,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func.x:432`
+Source: `lib/func.x:440`
 
 ## Runtime-internal callables
 
@@ -244,7 +245,7 @@ and its resolved `want` against the source address before casting.
 
 **Raises:** `<bad-types>` on either mismatch.
 
-Source: `lib/func.x:231`
+Source: `lib/func.x:239`
 
 #### x2c_func_reference_type
 
@@ -258,7 +259,7 @@ read.
 **Raises:** `<bad-arg>` for a null `Func` or an index outside `argc`, or
 `<bad-arity>` when `argc` disagrees with a fixed signature.
 
-Source: `lib/func.x:116`
+Source: `lib/func.x:117`
 
 #### x2c_func_unrepresentable_argument
 
@@ -268,7 +269,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func.x:264`
+Source: `lib/func.x:272`
 
 ### `Func`
 
@@ -281,7 +282,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func.x:362`
+Source: `lib/func.x:370`
 
 ## Public types
 

@@ -1170,9 +1170,10 @@ static void _advance(int &count) {
 }
 ```
 
-Keep `T *` for a nullable or optional output, an address the function
-retains, indexed storage, a buffer, a callback or C API signature, and a
-published signature whose callers would have to change. `x2c lint` reports
+Use `T &?` for an optional single-object alias when the callee tests for
+absence before accessing it. Keep `T *` for an address the function retains,
+indexed storage, a buffer, a callback or C API signature, and a published
+signature whose callers would have to change. `x2c lint` reports
 static functions whose pointer parameters qualify as `reference-parameter`
 candidates. See
 [Reference parameters](../docs/src/reference/language.md#reference-parameters).

@@ -1822,8 +1822,9 @@ static List _native_signature_type(Compiler c, List signature) {
       Array resolved = [];
       foreach (Type parameter, parameters)
         resolved.push(
-          parameter.car() == <&>
-            ? cons(<&>, c.sym.normalize_declared_type(parameter.cdr()))
+          (parameter.car() == <&> || parameter.car() == <opt-ref>)
+            ? cons(parameter.car(),
+                   c.sym.normalize_declared_type(parameter.cdr()))
             : c.sym.normalize_declared_type(parameter));
       Type native = c.sym.normalize_declared_type(result);
       return %((func ${resolved.list_free()}) @native);

@@ -357,12 +357,12 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     int inserted;
     Var *stored = map._core_get_or_insert(&key, &rhs, &inserted);
     if (inserted) return rhs;
-    return stored.update(op, rhs);
+    return Var.update(*stored, op, rhs);
   }
   long index = map._core_find_index(&key);
   if (index < 0) raise %(bad-arg (key $key));
   struct MapRecord *recs = map.entries;
-  return Var.update(&recs[index].val, op, rhs);
+  return Var.update(recs[index].val, op, rhs);
 }
 
 /** Applies postfix increment or decrement to one existing `Map` value.
@@ -378,7 +378,7 @@ Var Map.postfixindex(Map map, Var key, Symbol op) {
   long index = map._core_find_index(&key);
   if (index < 0) raise %(bad-arg (key $key));
   struct MapRecord *recs = map.entries;
-  return Var.postfix(&recs[index].val, op);
+  return Var.postfix(recs[index].val, op);
 }
 
 /** Removes `key`, writes the value it held to `out`, and returns nonzero

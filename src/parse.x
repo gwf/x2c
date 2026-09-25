@@ -833,8 +833,12 @@ static List _pointer(Compiler c) {
     Symbol symbol = c.peek(0);
     if (symbol == <*> || symbol == <^> || symbol == <&> ||
         symbol.is_type_qualifier()) {
-      ptr = cons(symbol, ptr);
       c.next();
+      if (symbol == <&> && c.peek(0) == <?>) {
+        ptr = cons(<opt-ref>, ptr);
+        c.next();
+      }
+      else ptr = cons(symbol, ptr);
       continue;
     }
     Array quals = [];
@@ -878,9 +882,15 @@ static List _finish_parameter(
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):
-      if (!compiler.macro_holes && parameter.type_from_ast().car() == <&>)
-        compiler.semantic_binding_facts()[
-          %(reference-param $binding)] = 1;
+      if (!compiler.macro_holes) {
+        Symbol kind = parameter.type_from_ast().car();
+        if (kind == <&> || kind == <opt-ref>)
+          compiler.semantic_binding_facts()[
+            %(reference-param $binding)] = 1;
+        if (kind == <opt-ref>)
+          compiler.semantic_binding_facts()[
+            %(optional-reference-param $binding)] = 1;
+      }
   return parameter;
 }
 
@@ -2312,6 +2322,19 @@ static void _append_declaration_rows(Array output, List syntax) {
   }
 }
 
+static List _bind_optional_reference_arm(
+  Compiler c, Var arm, List binding, int present) {
+  if (!binding)
+    return c.bind_syntax(arm, AST_STATEMENT, c.return_type);
+  Map facts = c.semantic_binding_facts();
+  List key = %(present-reference $binding);
+  int previous = facts.contains(key);
+  if (present) facts[key] = 1;
+  List bound = c.bind_syntax(arm, AST_STATEMENT, c.return_type);
+  if (!previous) facts.del(key);
+  return bound;
+}
+
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
     `AstPos`. Bindings, types, scopes, and expressions are resolved in source
@@ -2668,16 +2691,31 @@ List Compiler.bind_syntax(
             ${_.resolve_expression(expression, _.token)}
             ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
       case %(if ?condition ?ontrue):
-        if (statement_position)
-          return %(if
-            ${_.resolve_expression(condition, _.token)}
-            ${_.bind_syntax(ontrue, AST_STATEMENT, _.return_type)});
+        if (statement_position) {
+          List test = _.resolve_expression(condition, _.token);
+          int true_is_present = 1;
+          List binding = _.optional_reference_test(test, true_is_present);
+          List yes = _bind_optional_reference_arm(
+            _, ontrue, binding, true_is_present);
+          if (binding && !true_is_present && reference_guard_exits(yes))
+            _.semantic_binding_facts()[%(present-reference $binding)] = 1;
+          return %(if $test $yes);
+        }
       case %(if ?condition ?ontrue ?onfalse):
-        if (statement_position)
-          return %(if
-            ${_.resolve_expression(condition, _.token)}
-            ${_.bind_syntax(ontrue, AST_STATEMENT, _.return_type)}
-            ${_.bind_syntax(onfalse, AST_STATEMENT, _.return_type)});
+        if (statement_position) {
+          List test = _.resolve_expression(condition, _.token);
+          int true_is_present = 1;
+          List binding = _.optional_reference_test(test, true_is_present);
+          List yes = _bind_optional_reference_arm(
+            _, ontrue, binding, true_is_present);
+          List no = _bind_optional_reference_arm(
+            _, onfalse, binding, !true_is_present);
+          if (binding &&
+              ((reference_guard_exits(yes) && !true_is_present) ||
+               (reference_guard_exits(no) && true_is_present)))
+            _.semantic_binding_facts()[%(present-reference $binding)] = 1;
+          return %(if $test $yes $no);
+        }
       case %(for ?init ?condition ?increment ?body): {
         if (!statement_position) goto construction_error;
         _.sym.push_new_scope();
@@ -2763,6 +2801,15 @@ List Compiler.bind_syntax(
       case %(block *children): {
         if (!statement_position) goto construction_error;
         Array fields = [];
+        Map facts = _.semantic_binding_facts(), present_before = {};
+        foreach (Var key, facts.keys())
+          match (key) case %(present-reference ?): present_before[key] = 1;
+        defer {
+          Array keys = $auto(facts.keys());
+          foreach (Var key, keys)
+            match (key) case %(present-reference ?):
+              if (!present_before.contains(key)) facts.del(key);
+        }
         _.sym.push_new_scope();
         {
           defer _.sym.pop_scope();

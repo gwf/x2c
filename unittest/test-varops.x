@@ -472,12 +472,12 @@ static void var_invalid_encoding_status_is_atomic(void) {
   catch %(bad-enc *): caught++;
 
   Var lhs = 5, before = lhs;
-  try Var.update(&lhs, <unknown>, malformed_immediate);
+  try Var.update(lhs, <unknown>, malformed_immediate);
   catch %(bad-enc *): caught++;
   EXPECT_TRUE(lhs === before);
   lhs = malformed_special;
   unsigned long before_bits = lhs.u64;
-  try Var.postfix(&lhs, <unknown>);
+  try Var.postfix(lhs, <unknown>);
   catch %(bad-enc *): caught++;
   EXPECT_TRUE(lhs.u64 == before_bits);
   EXPECT_INT_EQ(caught, 7);
@@ -568,34 +568,39 @@ static void var_truth_and_generic_predicates(void) {
 
 static void var_updates_preserve_tags_and_atomicity(void) {
   $test.scoped();
-  Var value = Var.new(<u8>, 255), result = Var.update(&value, <+>, 1);
+  Var value = Var.new(<u8>, 255), result = Var.update(value, <+>, 1);
   EXPECT_TRUE(value is <u8>);
   EXPECT_INT_EQ(value.uchar(), 0);
   EXPECT_TRUE(result === value);
 
-  Var old = Var.postfix(&value, <++>);
+  Var old = Var.postfix(value, <++>);
   EXPECT_INT_EQ(old.uchar(), 0);
   EXPECT_INT_EQ(value.uchar(), 1);
-  old = Var.postfix(&value, <-->);
+  old = Var.postfix(value, <-->);
   EXPECT_INT_EQ(old.uchar(), 1);
   EXPECT_INT_EQ(value.uchar(), 0);
 
   value = Var.new(<i32>, 7);
   Var before = value;
   int caught = 0;
-  try Var.update(&value, <+>, Var.new(<f64>, 0.0 / 0.0));
+  try Var.update(value, <+>, Var.new(<f64>, 0.0 / 0.0));
   catch %(conv-range *): caught++;
   EXPECT_TRUE(value === before);
 
-  try Var.update(&value, <==>, 7);
+  try Var.update(value, <==>, 7);
   catch %(bad-op *): caught++;
   EXPECT_TRUE(value === before);
 
   Var void_value = void;
-  try Var.postfix(&void_value, <unknown>);
+  try Var.postfix(void_value, <unknown>);
   catch %(void-op *): caught++;
   EXPECT_TRUE(void_value is void);
-  EXPECT_INT_EQ(caught, 3);
+
+  try Var.update(NULL, <+>, 1);
+  catch %(bad-arg *): caught++;
+  try Var.postfix(NULL, <++>);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 5);
 
   Symbol tags[] = {
     <i8>, <u8>, <i16>, <u16>, <i32>, <u32>, <i48>, <u48>,
@@ -604,11 +609,11 @@ static void var_updates_preserve_tags_and_atomicity(void) {
   int count = sizeof(tags) / sizeof(tags[0]);
   for (int i = 0; i < count; i++) {
     value = numeric_value_for_tag(tags[i], 12);
-    result = Var.update(&value, <+>, 2);
+    result = Var.update(value, <+>, 2);
     EXPECT_TRUE(value is tags[i]);
     EXPECT_TRUE(result is tags[i]);
     EXPECT_TRUE(converted_test_value(value) == 14.0L);
-    old = Var.postfix(&value, <-->);
+    old = Var.postfix(value, <-->);
     EXPECT_TRUE(old is tags[i]);
     EXPECT_TRUE(converted_test_value(old) == 14.0L);
     EXPECT_TRUE(value is tags[i]);
@@ -619,63 +624,63 @@ static void var_updates_preserve_tags_and_atomicity(void) {
 
 static void var_same_tag_updates_preserve_contract(void) {
   $test.scoped();
-  Var value = Var.new(<i32>, INT_MAX), result = Var.update(&value, <+>, 1);
+  Var value = Var.new(<i32>, INT_MAX), result = Var.update(value, <+>, 1);
   EXPECT_TRUE(value is <i32>);
   EXPECT_INT_EQ(value.int(), INT_MIN);
   EXPECT_TRUE(result === value);
 
   value = Var.new(<u32>, UINT_MAX);
   Var one = Var.new(<u32>, 1u);
-  result = Var.update(&value, <+>, one);
+  result = Var.update(value, <+>, one);
   EXPECT_TRUE(value is <u32>);
   EXPECT_INT_EQ(value.uint(), 0);
   EXPECT_TRUE(result === value);
 
   value = Var.new(<i32>, INT_MIN);
-  result = Var.update(&value, </>, -1);
+  result = Var.update(value, </>, -1);
   EXPECT_INT_EQ(value.int(), INT_MIN);
   Var before = value;
   int caught = 0;
-  try Var.update(&value, </>, 0);
+  try Var.update(value, </>, 0);
   catch %(div-zero *): caught++;
   EXPECT_TRUE(value === before);
 
   value = 1;
-  result = Var.update(&value, <"<<">, 31);
+  result = Var.update(value, <"<<">, 31);
   EXPECT_INT_EQ(value.int(), INT_MIN);
   before = value;
-  try Var.update(&value, <"<<">, 32);
+  try Var.update(value, <"<<">, 32);
   catch %(bad-shift *): caught++;
   EXPECT_TRUE(value === before);
   EXPECT_INT_EQ(caught, 2);
 
   value = Var.new(<f32>, 1.5);
   Var f32_rhs = Var.new(<f32>, 0.5);
-  result = Var.update(&value, <+>, f32_rhs);
+  result = Var.update(value, <+>, f32_rhs);
   EXPECT_TRUE(value is <f32>);
   EXPECT_TRUE(value.float() == 2.0f);
   EXPECT_TRUE(result === value);
 
   value = Var.new(<f64>, 1.5);
   Var f64_rhs = Var.new(<f64>, 0.5);
-  result = Var.update(&value, <+>, f64_rhs);
+  result = Var.update(value, <+>, f64_rhs);
   EXPECT_TRUE(value is <f64>);
   EXPECT_TRUE(value.floating() == 2.0);
   EXPECT_TRUE(result === value);
 
   Var nan = Var.new(<f64>, 0.0 / 0.0);
-  result = Var.update(&value, <+>, nan);
+  result = Var.update(value, <+>, nan);
   EXPECT_TRUE(value.is_floating());
   EXPECT_TRUE(isnan(value.floating()));
   EXPECT_TRUE(result === value);
 
   Var alias = 9;
-  result = Var.update(&alias, <+>, 1);
+  result = Var.update(alias, <+>, 1);
   EXPECT_INT_EQ(alias.int(), 10);
   EXPECT_TRUE(result === alias);
 
   Var mixed = 7, u16_rhs = Var.new(<u16>, 2);
-  result = Var.update(&mixed, <+>, u16_rhs);
+  result = Var.update(mixed, <+>, u16_rhs);
   EXPECT_TRUE(mixed is <i32>);
   EXPECT_INT_EQ(mixed.int(), 9);
   EXPECT_TRUE(result === mixed);

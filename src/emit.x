@@ -71,7 +71,7 @@ static List Emitter._array_declarator(
    may be flat and must not consume one C stack frame per parameter. */
 static List Emitter._pointer_declarator(Emitter e, List decl, List mods) {
   Var first = mods.car();
-  if (first == <&>)
+  if (first == <&> || first == <opt-ref>)
     return e._declarator(cons(<*>, decl), mods.cdr());
   if (first == <*> || Symbol.is_type_qualifier(first))
     return e._declarator(cons(first, decl), mods.cdr());
@@ -93,7 +93,7 @@ static List Emitter._declarator(Emitter e, List decl, List mods) {
   Symbol sym = first;
   switch (sym) {
     case <dim>: return e._array_declarator(decl, NULL, mods.cdr());
-    case <*>: case <&>:
+    case <*>: case <&>: case <opt-ref>:
       return e._pointer_declarator(decl, mods);
     case <bitfield>:   return e._emit(mods.cdr());
     case <typedef>:

@@ -104,6 +104,7 @@ Public functions:
 `home_absolute_path`, `Compiler.copy_source_declaration`,
 `Compiler.merge_source_declarations`, `Compiler.record_source_declaration`,
 `Compiler.record_source_reference`, `Compiler.semantic_binding_facts`,
+`Compiler.optional_reference_test`, `reference_guard_exits`,
 `Compiler.macro_definition_locals`, `Compiler.fresh_name`,
 `Compiler.emitted_binding_name`, `preproc_never_active_arm`,
 `Compiler.tokenize`, `Compiler.mark_completion`, `Compiler.at_completion`,
