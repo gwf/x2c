@@ -1493,6 +1493,30 @@ static List _import(
   return %(seq @forms);
 }
 
+/** Loads the public macro imports recorded by a package entry at this
+    consumer's import position. */
+void Compiler.import_package_macros(
+  Compiler c, String name, Token invocation) {
+  Map symbols = c.sym.base_symbols();
+  Map current = c.sym.current_symbols();
+  if (current) symbols.merge(current);
+  Array exports = [];
+  foreach (Var (key, value), symbols)
+    match (key)
+      case %("source-node" (package-macro ? ?(int position))):
+        match (value)
+          case %(package-macro ?(String package) ?(String path)):
+            if (package == name) exports.push(%($position $path));
+  exports.sort();
+  foreach (List entry, exports) {
+    String path = entry.cadr();
+    if (!path.startswith("/")) path = %"${c.package_roots[name]}/$path";
+    List imported = _import(c, path, invocation);
+    if (imported)
+      foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
+  }
+}
+
 /** Consumes and evaluates one top-level compile-time Lisp form.
     `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
     results are discarded in the translation unit's Lisp session.
@@ -2049,8 +2073,24 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     Declaration projection forces preceding effects exactly once; otherwise
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
-  if (_import_path(compiler, NULL)) {
+  String requested = NULL;
+  if (_import_path(compiler, &requested)) {
+    Token first = compiler.token;
     compiler.parse_macro_lisp_top_level();
+    String name = compiler.package;
+    if (name && !compiler.source_private &&
+        requested.endswith(".xmacro")) {
+      String root = compiler.package_roots[name];
+      String entry = compiler.filename;
+      if (entry == %"$root/src/$name.x" || entry == %"$root/$name.x") {
+        String path = _canonical_path(compiler, requested);
+        String source = home_portable_path(Path.absolute(entry));
+        if (path.startswith(%"$root/")) path = path[root.len() + 1:];
+        compiler.sym.set(
+          %("source-node" (package-macro $source ${first.pos})),
+          %(package-macro $name $path));
+      }
+    }
     return;
   }
   Token first = compiler.token;

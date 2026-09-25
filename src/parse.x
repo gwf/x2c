@@ -1760,6 +1760,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
   if (_test_contextual(c, "with")) _import_members(c, name);
+  c.import_package_macros(name, start);
   c.expect(<;>);
   return %(import $name $alias);
 }

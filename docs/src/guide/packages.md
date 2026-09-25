@@ -201,6 +201,35 @@ and compiles its `src/*.c` with the compiler, so only a package without a
 native dependency links in this way. `x2c build --extension` does the same
 for a compiler built from a checkout's `src/*.x`.
 
+A package can publish macros with its compile-time functions. Put a direct
+`.xmacro` import in the public part of its entry source:
+
+<!-- ignore: these are files in a package named tally. -->
+```x2c,ignore
+// src/tally.x
+meta int tally_sum(int n);
+$(import "tally.xmacro")
+#pragma private
+```
+
+```x2c,ignore
+// src/tally.xmacro
+macro Expression $tally.sum4() => tally__tally_sum(4);
+```
+
+The consumer needs one import:
+
+```x2c,ignore
+import "tally";
+meta static int ten(void) => $tally.sum4();
+```
+
+The import loads the package's declarations, compile-time module or linked
+extension, and public macro pack. A `.xmacro` import below `#pragma private`
+or in another package source stays private. Macros keep their declared names;
+`as` changes the package alias, not macro spellings. A macro pack may still be
+imported explicitly without importing its package.
+
 ## Packages that wrap a C library
 
 `packages/yyjson/` is the worked example. It publishes the vendored

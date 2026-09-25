@@ -1420,8 +1420,9 @@ An import exposes:
 - any header or runtime module the package's public part includes, such as a
   vendored foreign header it publishes.
 
-It does not expose macros, `.xmacro` definitions, private declarations, or the
-package's own imports. Packages have no re-exports or hierarchy. One program
+It also installs direct `.xmacro` imports in the public part of the package
+entry source. Other macros, private declarations, and the package's own
+imports are not exposed. Packages have no re-exports or hierarchy. One program
 uses one version of a package.
 
 A public bodyless `meta` prototype crosses the import like any function

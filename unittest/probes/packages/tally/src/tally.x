@@ -5,6 +5,7 @@
 class Tally { int count; int total; };
 
 meta int tally_sum(int n);
+$(import "tally.xmacro")
 
 #pragma private
 

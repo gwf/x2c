@@ -330,6 +330,12 @@ dependencies, load once, and reject cycles. A normal `.xlisp` import executes
 in the same translation-unit Lisp session but does not contain macro
 definitions.
 
+A package may publish a pack through a direct `$(import "name.xmacro")` in
+the public part of its entry source. Then `import "name";` also installs the
+pack at that point in the consumer. Imports below `#pragma private` and
+imports in other package sources do not publish macros. Explicit `.xmacro`
+imports remain useful when the macros do not need the package.
+
 Prefer a qualified name such as `$test.run` or `$project.logging.trace` in a
 shared import. It identifies the project or library at each call and avoids
 ambiguous short global names.

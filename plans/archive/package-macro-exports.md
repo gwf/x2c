@@ -1,9 +1,8 @@
 # Package macro exports
 
-> Status: needs author scoping. Research spike 2026-09-25; implementation is
-> not authorized. Recommend an explicit public macro import in the package
-> entry as the export, so one consumer `import "name";` supplies declarations,
-> native meta targets, and the selected macro pack.
+> Status: done 2026-09-25 in cc94e05f. A direct public `.xmacro` import
+> in the package entry is the export; one consumer `import "name";` supplies
+> declarations, native meta targets, and the selected macro pack.
 
 ## Result
 

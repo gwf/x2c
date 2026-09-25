@@ -61,7 +61,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2342`
+Source: `src/parse.x:2343`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -84,7 +84,7 @@ scope. A script unit that does is an ordinary program: its declarations
 stay at file scope and it may not have top-level statements. Both parse
 passes read the same tokens, so they agree before either parses.
 
-Source: `src/parse.x:1772`
+Source: `src/parse.x:1773`
 
 <a id="Compiler.definition_doc"></a>
 #### Compiler.definition_doc
@@ -96,7 +96,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse.x:1916`
+Source: `src/parse.x:1917`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -108,7 +108,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2265`
+Source: `src/parse.x:2266`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -128,7 +128,7 @@ Source: `src/parse.x:1502`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse.x:1814`
+Source: `src/parse.x:1815`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -334,7 +334,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2039`
+Source: `src/parse.x:2040`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -348,7 +348,7 @@ state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
 the unit emits where it reaches them.
 
-Source: `src/parse.x:1952`
+Source: `src/parse.x:1953`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -369,7 +369,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse.x:1806`
+Source: `src/parse.x:1807`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -380,7 +380,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1868`
+Source: `src/parse.x:1869`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -394,7 +394,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1849`
+Source: `src/parse.x:1850`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -408,7 +408,7 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1879`
+Source: `src/parse.x:1880`
 
 <a id="Compiler.take_meta_marker"></a>
 #### Compiler.take_meta_marker
@@ -420,7 +420,7 @@ marker that may follow it, and returns the `meta` token. `native` binds
 the definition after it the way a bodyless prototype would. `*native`,
 when requested, reports whether that marker was present.
 
-Source: `src/parse.x:1827`
+Source: `src/parse.x:1828`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration

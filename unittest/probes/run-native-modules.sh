@@ -275,7 +275,7 @@ build_package
 cat >app/main.x <<'EOF'
 #include <stdio.h>
 import "tally";
-meta static int ten(void) => tally.tally_sum(4);
+meta static int ten(void) => $tally.sum4();
 int main(void) { printf("%d\n", $ten()); return 0; }
 EOF
 [[ $("$X2C" run -q --package-dir packages --build-dir app/build \
