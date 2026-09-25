@@ -61,6 +61,7 @@ execution.
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
+| [Package macro exports](package-macro-exports.md) | Research proposal: let a package entry publish a macro pack so one consumer package import provides its syntax and compile-time functions. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
 
