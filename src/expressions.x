@@ -3132,24 +3132,24 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
 
 /* An enum constant captures one native index expansion where the original
    designator occurred. Its ordinary cast shape survives normalization. */
-static List _initializer_index(Compiler c, List index, List *reference) {
+static List _initializer_index(Compiler c, List index, List &reference) {
   match (index)
     case %(expr ? (cast (enum ((op = ?binding ?original)))
                        (!set ?value (expr ? (ident ?binding))))): {
-      *reference = value;
+      reference = value;
       return index;
     }
   unsigned long long at;
   if (_initializer_integer(index, at)) {
-    *reference = index;
+    reference = index;
     return index;
   }
   Type type = index.cadr();
   List binding = c.sym.introduce(c.fresh_name("initializer_index"));
   c.sym.bind_identity(NULL, binding, type.declaration_ast(binding));
   Type native = %(enum ((op = $binding $index)));
-  *reference = %(expr $type (ident $binding));
-  return %(expr $type (cast $native ${*reference}));
+  reference = %(expr $type (ident $binding));
+  return %(expr $type (cast $native $reference));
 }
 
 /* Cursor offsets are literal facts even when their native starting index
@@ -3326,7 +3326,7 @@ List Compiler.initializer_field_path(
 }
 
 static List _initializer_designated(
-  Compiler c, Type root, List node, List *value, List *normalized) {
+  Compiler c, Type root, List node, List &value, List &normalized) {
   List path = NULL, selectors = NULL;
   Type type = root;
   loop {
@@ -3343,7 +3343,7 @@ static List _initializer_designated(
       }
       case %(indexinit ?index ?inner): {
         List reference = NULL;
-        List captured = _initializer_index(c, index, &reference);
+        List captured = _initializer_index(c, index, reference);
         selectors = cons(%(indexinit $captured), selectors);
         type = owner.dereference();
         path = cons(%($owner index $reference $type ()), path);
@@ -3351,9 +3351,9 @@ static List _initializer_designated(
         continue;
       }
     }
-    *value = node;
+    value = node;
     foreach (List selector, selectors) node = selector.append(%($node));
-    *normalized = node;
+    normalized = node;
     return path;
   }
 }
@@ -3380,7 +3380,7 @@ static int _initializer_whole(Compiler c, Type type, List value) {
    boundaries. Count the type tree once instead of retaining cursor histories.
    Children pair ordinary path frames with (type count children) layouts. */
 static List _initializer_layout(
-  Compiler c, Type type, List target, List string, int *symbolic) {
+  Compiler c, Type type, List target, List string, int &symbolic) {
   Type owner = c.sym.resolve_key(type);
   List one = %(expr (unsigned long long)
     (literal (unsigned long long) "1ULL"));
@@ -3392,7 +3392,7 @@ static List _initializer_layout(
     if (!dimension) return NULL;
     if (string && _initializer_string_array(c, type, string)) return NULL;
     unsigned long long size;
-    if (!_initializer_integer(dimension, size)) *symbolic = 1;
+    if (!_initializer_integer(dimension, size)) symbolic = 1;
     List path = _initializer_first(c, type, NULL);
     List element = c.initializer_slot(target, path);
     List child = _initializer_layout(c, owner.cdr(), element,
@@ -3507,7 +3507,7 @@ static List _initializer_scalar_rows(
     }
     if (value.match(%(expr (* char) (literal (* char) ?)))) string = value;
   }
-  List layout = _initializer_layout(c, root, target, string, &symbolic);
+  List layout = _initializer_layout(c, root, target, string, symbolic);
   if (!layout || !symbolic) return NULL;
   int array = c.sym.resolve_key(root).is_array();
   Array rows = [];
@@ -3547,7 +3547,7 @@ List Compiler.initializer_rows(
     List value = original;
     if (original.car() == <dotinit> || original.car() == <indexinit>) {
       List path = _initializer_designated(
-        c, root, original, &value, &original);
+        c, root, original, value, original);
       states = %((() $path 1));
     }
     match (value)

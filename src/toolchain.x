@@ -247,11 +247,11 @@ static String _start_failure(String program, List detail) {
 
 /* A tool that cannot start reports like a child that exited 127, the status
    a shell gives a missing program, so every caller keeps one failure path. */
-static Job _start_tool(Job command, String program, String *failure) {
+static Job _start_tool(Job command, String program, String &failure) {
   Job job = NULL;
   try job = command.start();
-  catch %(not-found *detail): *failure = _start_failure(program, detail);
-  catch %(io-fail *detail): *failure = _start_failure(program, detail);
+  catch %(not-found *detail): failure = _start_failure(program, detail);
+  catch %(io-fail *detail): failure = _start_failure(program, detail);
   return job;
 }
 
@@ -259,14 +259,14 @@ static Job _start_tool(Job command, String program, String *failure) {
     and returns its shell-style status. A tool that cannot start returns 127
     and leaves the reason in `errors`.
 */
-int tool_capture(List arguments, String *output, String *errors) {
+int tool_capture(List arguments, String &output, String &errors) {
   Job command =
     arguments.job().options({stdout: <capture>, stderr: <capture>});
   Job j = _start_tool(command, arguments.car(), errors);
   if (!j) return 127;
   int status = j.status();
-  *output = j.output_text;
-  *errors = j.errors_text;
+  output = j.output_text;
+  errors = j.errors_text;
   return status;
 }
 
@@ -280,7 +280,7 @@ List Toolchain.search_directories(Toolchain t) {
   List flags = t.cc_args;
   String output = NULL, errors = NULL;
   if (!tool_capture(%(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
-                    &output, &errors)) {
+                    output, errors)) {
     int listing = 0;
     foreach (String line, errors.split_lines(0)) {
       if (line.startswith("End of search list")) break;
@@ -297,7 +297,7 @@ List Toolchain.search_directories(Toolchain t) {
         directories.push(Path.dirname(directory).join("lib"));
     }
   }
-  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), &output, &errors))
+  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), output, errors))
     foreach (String line, output.split_lines(0)) {
       if (!line.startswith("libraries: ")) continue;
       String list = line.remove_prefix("libraries: ").remove_prefix("=");
@@ -325,7 +325,7 @@ ToolRun ToolAction.start(ToolAction action) {
   Job command = action.inherit_stdio ? action.arguments.job().live() :
     action.arguments.job().options({stdout: <capture>, stderr: <capture>});
   execution.job = _start_tool(
-    command, action.arguments.car(), &execution.start_error);
+    command, action.arguments.car(), execution.start_error);
   return execution;
 }
 
@@ -396,7 +396,7 @@ int Toolchain.preprocess(
     String probe_output = NULL, probe_errors = NULL;
     t.keep_system_includes = tool_capture(
       %(${t.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
-      &probe_output, &probe_errors) == 0 ? 1 : -1;
+      probe_output, probe_errors) == 0 ? 1 : -1;
   }
   Path scratch = dependencies ? Path.temp_dir() : NULL;
   String depfile = %"$scratch/cpp.d";
@@ -413,7 +413,7 @@ int Toolchain.preprocess(
     @{scratch ? %("-MMD" "-MF" $depfile "-MT" "x2c-dependencies") : NULL}
     $source);
   if (t.verbose) _print_action(<preprocess>, arguments);
-  int result = tool_capture(arguments, output, errors);
+  int result = tool_capture(arguments, *output, *errors);
   /* The dependency file is consumed and removed even after host failure. The
      returned status tells the caller whether stdout is usable. */
   if (scratch) {

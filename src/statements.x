@@ -410,10 +410,10 @@ static List _block_completion_keywords(void) => %(
   "match" "switch" "default" "with"
 );
 
-static List _filtered_catch_arm(Compiler c, int *is_default) {
+static List _filtered_catch_arm(Compiler c, int &is_default) {
   Token start = c.token;
   List pattern = NULL;
-  if (c.test(<:>)) *is_default = 1;
+  if (c.test(<:>)) is_default = 1;
   else {
     if (c.peek(0) != <"%(">)
       c.report_error(
@@ -435,7 +435,7 @@ static List _filtered_catches(Compiler compiler) {
   Array arms = [], int saw_default = 0;
   loop {
     int is_default = 0;
-    List arm = _filtered_catch_arm(compiler, &is_default);
+    List arm = _filtered_catch_arm(compiler, is_default);
     arms.push(arm);
     if (is_default) saw_default = 1;
     if (!compiler.test(<catch>)) break;

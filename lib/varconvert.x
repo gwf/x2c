@@ -189,19 +189,19 @@ static long double _integer_limit(int bits) {
   return (long double) (1ull << bits);
 }
 
-static float _numeric_f32(X2CVarNumeric *value) {
+static float _numeric_f32(X2CVarNumeric &value) {
   if (value.floating) return (float) value.floating_value;
   if (value.unsigned_value) return (float) value.raw;
   return (float) Var.signed_from_bits(value.raw, value.bits);
 }
 
-static double _numeric_f64(X2CVarNumeric *value) {
+static double _numeric_f64(X2CVarNumeric &value) {
   if (value.floating) return (double) value.floating_value;
   if (value.unsigned_value) return (double) value.raw;
   return (double) Var.signed_from_bits(value.raw, value.bits);
 }
 
-static long double _numeric_long_double(X2CVarNumeric *value) {
+static long double _numeric_long_double(X2CVarNumeric &value) {
   if (value.floating) return value.floating_value;
   if (value.unsigned_value) return (long double) value.raw;
   return (long double) Var.signed_from_bits(value.raw, value.bits);
@@ -212,7 +212,7 @@ static long double _numeric_long_double(X2CVarNumeric *value) {
    floating-to-integer is range checked, and only after truncation. Float
    results use host casts, so a wide target gets a new Scope box. */
 static Var _convert_to_integer(
-  X2CVarNumeric *source, Symbol target, int unsigned_target, int bits) {
+  X2CVarNumeric &source, Symbol target, int unsigned_target, int bits) {
   unsigned long long raw;
   if (source.floating) {
     long double truncated = truncl(source.floating_value);
@@ -246,7 +246,7 @@ static Var _convert_to_integer(
   return Var.integer_box(target, raw);
 }
 
-static Var _convert_to_float(X2CVarNumeric *source, Symbol target) {
+static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
   switch (target) {
     case <f32>: return Var.box_f32(_numeric_f32(source));
     case <f64>: return Var.box_f64(_numeric_f64(source));
@@ -296,6 +296,6 @@ Var Var.convert(Var value, Symbol target) {
   if (!Var.numeric_info(target, &info))
     raise %(no-convert (source $source_tag) (target $target));
   return info.floating
-       ? _convert_to_float(&source, target)
-       : _convert_to_integer(&source, target, info.unsigned_value, info.bits);
+       ? _convert_to_float(source, target)
+       : _convert_to_integer(source, target, info.unsigned_value, info.bits);
 }
