@@ -235,9 +235,8 @@ protocol Var(LocalStateRef);
 
 Keep `static inline` in the generated private definition; plain `inline`
 macro output can otherwise escape into the generated header. Repeated
-adoption families may be generated when that makes
-the family easier to read; keep a row direct when the relationship itself is
-useful source documentation.
+adoption families may be generated when that makes the family easier to read;
+keep a row direct when the relationship itself is useful source documentation.
 
 ## Decorators wrap existing code
 
