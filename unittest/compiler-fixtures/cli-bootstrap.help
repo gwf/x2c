@@ -7,6 +7,9 @@ C compiler and archiver to install a native x2c under <dir>.
 Output options:
       --prefix <dir>          Install native x2c and sources under <dir>
 
+Translation options:
+      --extension <dir>       Link a package's compile-time part into a compiler
+
 C compiler options:
       --cc <program>          Use <program> as the host C compiler
       --ar <program>          Use <program> as the static-library archiver

@@ -210,6 +210,13 @@ void build_check_input(String input) {
     diagnostic and exit with status 2.
 */
 Build CliRequest.prepare(CliRequest c) {
+  // A linked package's sources are units, translated in package mode.
+  foreach (String package, c.extensions) {
+    String root = Path.absolute(package);
+    c.package_dirs = c.package_dirs.append(%(${Path.dirname(root)}));
+    c.inputs = c.inputs.append(Path.glob(%"$root/src/*.x"))
+      .append(Path.glob(%"$root/src/*.c"));
+  }
   if (!c.inputs)
     x2c_driver_error("build requires input operands or a project manifest");
   int compilable = 0, input_count = 0;
@@ -434,28 +441,22 @@ void Build.add_generated(Build state, String input, String directory) {
   state._link_packages(input, directory);
 }
 
-/** Writes the entry unit of a native module and returns the request that
-    translates it. The entry defines `x2c_module_targets`, which returns a
-    Map from the name of each native `meta` prototype the module's x2c
-    sources declare to a `Func` that calls it, and `x2c_module_stamp`, which
-    holds the stamp the loading compiler must match. A module whose sources
-    declare no such prototype fails to translate.
-*/
-CliRequest Build.module_entry(Build b) {
-  String stamp = build_module_stamp();
-  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
-  /* Each source is included by its absolute path through a link to the
-     filesystem root beside the entry, so distinct sources with one name stay
-     distinct and each unit's generated header is placed inside the entry's
-     own generated directory. No include directory reaches the root. */
+/* Writes the entry unit `entry`, which includes each of `units`, defines
+   `$module.targets()`, a Map from the name of each native `meta` prototype
+   they declare to a `Func` that calls it, and ends with `exports`. Units
+   that declare no such prototype fail to translate. Each source is included
+   by its absolute path through a link to the filesystem root beside the
+   entry, so distinct sources with one name stay distinct and each unit's
+   generated header is placed inside the entry's own generated directory.
+   No include directory reaches the root. */
+static void _write_entry(Path entry, List units, String exports) {
   String includes = "", Array sources = [];
-  foreach (String unit, b.units) {
+  foreach (String unit, units) {
     String source = Path.absolute(unit);
     includes = %"$includes#include \"x2c-root$source\"\n";
     sources.push(source);
   }
   String declared = sources.list_free().repr(), root = x2c_get_root();
-  Path entry = %"${b.work_dir}/module/x2c_module.x";
   Path link = entry.dirname().join("x2c-root");
   try {
     entry.dirname().make_dirs();
@@ -464,15 +465,57 @@ CliRequest Build.module_entry(Build b) {
       %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
 macro Expression \$module.targets() =>
   \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
-const char x2c_module_stamp[] = \"$stamp\";
-Map x2c_module_targets(void) => \$module.targets();
-");
+$exports");
   }
   catch %(io-fail *detail): x2c_host_error(detail);
+}
+
+/* The request that translates this build's entry units `entries`. */
+static CliRequest Build._entry_request(Build b, List entries) {
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
-  request.inputs = %($entry);
-  b.xlat_n++;
+  request.inputs = entries;
+  b.xlat_n += entries.len();
   return request;
+}
+
+/** Writes the entry unit of a native module and returns the request that
+    translates it. The entry defines `x2c_module_targets`, which returns the
+    targets of the native `meta` prototypes the module's x2c sources
+    declare, and `x2c_module_stamp`, which holds the stamp the loading
+    compiler must match.
+*/
+CliRequest Build.module_entry(Build b) {
+  String stamp = build_module_stamp();
+  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
+  Path entry = %"${b.work_dir}/module/x2c_module.x";
+  _write_entry(entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
+Map x2c_module_targets(void) => \$module.targets();
+");
+  return b._entry_request(%($entry));
+}
+
+/** Writes the registration unit of each package the request links in with
+    `--extension` and returns the request that translates them. A
+    constructor registers the targets of the native `meta` prototypes the
+    package's sources declare under the package's name, so any number of
+    packages link into one compiler, which selects them without loading a
+    module.
+*/
+CliRequest Build.extension_entries(Build b) {
+  Array entries = [];
+  foreach (String package, b.request.extensions) {
+    String root = Path.absolute(package), name = Path.basename(root);
+    Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
+    _write_entry(entry, Path.glob(%"$root/src/*.x"),
+      %"void x2c_register_extension(const char *, Map (*)(void));
+static Map _targets(void) => \$module.targets();
+__attribute__((constructor)) static void _register(void) {
+  x2c_register_extension(\"$name\", _targets);
+}
+");
+    entries.push(entry);
+  }
+  return b._entry_request(entries.list_free());
 }
 
 /** Starts translation reporting for `input` and initializes timing when unset.

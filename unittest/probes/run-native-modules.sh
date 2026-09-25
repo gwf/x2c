@@ -337,4 +337,17 @@ cp stale.so packages/tally/builds/tally.module
 expect_error "package 'tally' was built by another compiler; rebuild it" \
   "$X2C" translate -q --package-dir packages --out-dir out app/main.x
 
+# A compiler that links the package's compile-time part in selects it
+# without a module: it never reads the stale one, nor needs one at all.
+"$X2C" build -q --extension packages/tally --build-dir linked \
+  --output linked/x2c "$ROOT"/src/*.x
+"$X2C" translate -q --package-dir packages --out-dir out app/main.x \
+  2>/dev/null && fail "stale module accepted"
+for pass in stale absent; do
+  linked/x2c translate -q --package-dir packages --out-dir out app/main.x
+  grep -Fq 'printf("%d\n", 20)' out/main.c ||
+    fail "linked extension through import ($pass)"
+  rm -f out/main.c packages/tally/builds/tally.module
+done
+
 echo "native module probes passed"

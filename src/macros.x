@@ -1725,6 +1725,35 @@ void Compiler.preload_native_module(String path) {
     _open_native_module(path);
 }
 
+/* The packages whose compile-time parts are linked into the compiler.
+   Each registers from a constructor, before the
+   runtime starts, so the list is plain C storage that lasts for the
+   process. */
+static struct _Extension {
+  const char *name;
+  Map (*targets)(void);
+  struct _Extension *next;
+} *extensions = NULL;
+
+/** Registers package `name`'s compile-time part, linked into the compiler,
+    whose `targets` returns its name-to-`Func` Map. The registration unit
+    `x2c build --extension` generates calls it from a constructor.
+*/
+void x2c_register_extension(const char *name, Map (*targets)(void)) {
+  struct _Extension *extension = malloc(sizeof *extension);
+  if (!extension) abort();
+  *extension = (struct _Extension) { name, targets, extensions };
+  extensions = extension;
+}
+
+/** Reports whether package `name`'s compile-time part is linked into the
+    compiler, so its import loads no module. */
+int Compiler.links_extension(String name) {
+  for (struct _Extension *e = extensions; e; e = e->next)
+    if (!strcmp(name, e->name)) return 1;
+  return 0;
+}
+
 /** Selects package `name`'s native module, when it has one, after the
     modules already selected, and records it as a prerequisite of the unit.
     The module is `<root>/builds/<name>.module`; a worker loads it itself
@@ -1734,7 +1763,7 @@ void Compiler.preload_native_module(String path) {
 void Compiler.select_package_module(
   Compiler c, String name, String root, Token token) {
   String module = %"$root/builds/$name.module";
-  if (!Path.is_file(module)) return;
+  if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
     c.report_error(
       <driver>, "native modules are not supported on this platform", token,
@@ -1761,7 +1790,14 @@ void Compiler.select_package_module(
 void Compiler.select_native_modules(List paths) {
   if (!Compiler.native_module_loaded(compiler_supplier))
     Compiler.add_native_module(compiler_supplier, _compiler_targets);
-  paths = %($compiler_supplier @paths);
+  Array linked = [];
+  for (struct _Extension *e = extensions; e; e = e->next) {
+    String key = %"<${String.new(e->name)}>";
+    if (!Compiler.native_module_loaded(key))
+      Compiler.add_native_module(key, e->targets);
+    linked.push(key);
+  }
+  paths = %($compiler_supplier @paths @{linked.list_free()});
   paths.try_own();
   native_module_order = paths;
 }

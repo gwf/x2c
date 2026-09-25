@@ -17,7 +17,8 @@
 */
 typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
-  List cc_args, ld_args, native_modules, String out_dir, dep_file, dep_target;
+  List cc_args, ld_args, native_modules, extensions;
+  String out_dir, dep_file, dep_target;
   String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, sha256, index, Symbol kind;
@@ -194,6 +195,9 @@ static CliOption cli_options[] = {
   { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--native-module", "<file>",
     "Load a native module for compile-time calls", 0 },
+  { <extension>, CLI_BUILD | CLI_BOOTSTRAP, <source>,
+    "--extension", "<dir>",
+    "Link a package's compile-time part into a compiler", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
   { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
@@ -920,6 +924,7 @@ static void _apply_option(
     case <pkg-dir>:
       c.package_dirs = cons(value, c.package_dirs);
     case <native>: c.native_modules = cons(value, c.native_modules);
+    case <extension>: c.extensions = cons(value, c.extensions);
     case <no-cpp>: c.no_cpp = 1;
     case <live-syms>: c.live_symbols = 1;
     case <cpp-syms>: c.cpp_symbols = 1;
@@ -1119,6 +1124,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   if (request.package_dirs)
     request.package_dirs = request.package_dirs.reverse();
   request.native_modules = request.native_modules.reverse();
+  request.extensions = request.extensions.reverse();
   if (mask == CLI_TRANSLATE && !request.inputs)
     x2c_driver_error("translate requires at least one input");
   if (request.inputs.cdr() && (request.dep_file || request.dep_target))

@@ -320,7 +320,7 @@ static void _preload_package_modules(CliRequest c, Map unit_dirs) {
     foreach (String package_dir, roots) {
       if (!realpath(package_dir, root)) continue;
       String module = %"$root/$name/builds/$name.module";
-      if (!Path.is_file(module)) continue;
+      if (Compiler.links_extension(name) || !Path.is_file(module)) continue;
       Compiler.preload_native_module(module);
       break;
     }
@@ -477,8 +477,9 @@ static int _run_build_request(CliRequest c, Array commands) {
      objects have no other source. */
   if (!result && c.command == <script> && !c.dry_run)
     result = _translate_units(c, state, state.script_helpers());
-  if (!result && c.kind == <module> && !c.dry_run) {
-    CliRequest entry = state.module_entry();
+  if (!result && !c.dry_run && (c.kind == <module> || c.extensions)) {
+    CliRequest entry =
+      c.kind == <module> ? state.module_entry() : state.extension_entries();
     result = _translate_units(entry, state, entry.inputs);
   }
   if (result) {
