@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/class-handle-index.x:7:16: type: Box has no getindex
+    return box[0].n;
+                 ^
+

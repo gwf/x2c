@@ -151,6 +151,11 @@ static List Compiler._postfix_index_expression(
     }
   }
   Type native = c.sym.resolve_key(type);
+  // A boxable handle to a record has no C array reading.
+  if (native.is_pointer() && native.dereference().is_aggregate() &&
+      type.var_tag())
+    c.report_error(
+      <type>, %"${type.car()} has no getindex", c.token, NULL);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
   if (native.is_array() ||
