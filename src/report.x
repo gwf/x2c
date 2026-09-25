@@ -90,8 +90,7 @@ static int _columns(void) {
 
 /** Resets process reporting for one command.
     Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
-    progress additionally requires terminal stderr, non-plain output, and no
-    parent Make recipe. Plain output disables color; automatic color respects
+    progress additionally requires terminal stderr and non-plain output. Plain output disables color; automatic color respects
     terminal capability and `NO_COLOR`.
 */
 void report_configure(
@@ -101,10 +100,7 @@ void report_configure(
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = !quiet && !diagnostic;
-  // Stable receipts remain useful under Make, but no recipe can hold a
-  // transient line.
-  report.transient =
-    report.receipts && terminal && !plain && !report_make_owned();
+  report.transient = report.receipts && terminal && !plain;
   report.columns = _columns();
   report.start = report_now_us();
   if (plain || color_mode == <never>) report.color = 0;

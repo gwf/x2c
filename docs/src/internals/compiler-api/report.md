@@ -32,11 +32,10 @@ Command progress and completion receipts.
 
 Resets process reporting for one command.
 Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
-progress additionally requires terminal stderr, non-plain output, and no
-parent Make recipe. Plain output disables color; automatic color respects
+progress additionally requires terminal stderr and non-plain output. Plain output disables color; automatic color respects
 terminal capability and `NO_COLOR`.
 
-Source: `src/report.x:97`
+Source: `src/report.x:96`
 
 #### report_duration
 
@@ -63,7 +62,7 @@ Source: `src/report.x:46`
 Writes one newline-terminated receipt to stderr when receipts are enabled.
 Any active transient line is cleared first, and `line` must be non-NULL.
 
-Source: `src/report.x:178`
+Source: `src/report.x:174`
 
 #### report_make_owned
 
@@ -92,7 +91,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:226`
+Source: `src/report.x:222`
 
 #### report_progress
 
@@ -103,7 +102,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:190`
+Source: `src/report.x:186`
 
 #### report_receipts
 
@@ -111,7 +110,7 @@ Source: `src/report.x:190`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:116`
+Source: `src/report.x:112`
 
 #### report_size
 
@@ -128,7 +127,7 @@ Source: `src/report.x:64`
 
 Clears the active transient line from stderr, if one exists.
 
-Source: `src/report.x:169`
+Source: `src/report.x:165`
 
 ## Design notes
 
