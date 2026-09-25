@@ -1501,7 +1501,7 @@ static List _declaration_base(Type t, List * modifiers){
     List _x2c_destructure_0 = Type_declaration_parts(Type_declared(List_type(Array_list(typed))));
     base = Var_list(List_getindex(_x2c_destructure_0, 0));
     mods = Var_list(List_getindex(_x2c_destructure_0, 1));
-    * modifiers = mods;
+    (* modifiers) = mods;
     if(! List_truth(mods)){
       List _x2c_return_value_0 = Type_list(t);
       {
@@ -1565,7 +1565,7 @@ return declarator;
 int List_try_next(List, List *, Var *);
 List Array_list_free(Array);
 static List _finish_declaration(Compiler compiler, Symbol tag, List base, List declarators, int preserved_self){
-  List modifiers = NULL;  base = _declaration_base(List_type(base), & modifiers);  if(List_truth(modifiers)){
+  List modifiers = NULL;  base = _declaration_base(List_type(base), &(modifiers));  if(List_truth(modifiers)){
     Array bound = Array_new(); {
       List declarator;  List _x2c_macro_object_3 = declarators;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_2)){
         declarator = Var_list(_x2c_macro_cursor_output_2);  Array_push(bound, List_var(_append_declarator_modifiers(declarator, modifiers)));
@@ -2150,7 +2150,7 @@ static List _array_suffix(Compiler c){
 
 void Compiler_record_source_declaration(Compiler, List, Token, Token);
 static List _finish_parameter(Compiler compiler, List base, List declarator, List method_identity, Token source_first, Token source_after){
-  base = _finish_type(compiler, base);  int preserved_self = 0;  declarator = _install_declarator_node(compiler, base, NULL, declarator, method_identity, & preserved_self);  Compiler_record_source_declaration(compiler, Var_list(List_cadr(declarator)), source_first, source_after);  List modifiers = NULL;  base = _declaration_base(List_type(base), & modifiers);  declarator = _append_declarator_modifiers(declarator, modifiers);  List parameter = cons(_190, cons(List_var(base), cons(List_var(declarator), NULL)));
+  base = _finish_type(compiler, base);  int preserved_self = 0;  declarator = _install_declarator_node(compiler, base, NULL, declarator, method_identity, &(preserved_self));  Compiler_record_source_declaration(compiler, Var_list(List_cadr(declarator)), source_first, source_after);  List modifiers = NULL;  base = _declaration_base(List_type(base), &(modifiers));  declarator = _append_declarator_modifiers(declarator, modifiers);  List parameter = cons(_190, cons(List_var(base), cons(List_var(declarator), NULL)));
   {
     List _x2c_match_expr = declarator;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2323,7 +2323,7 @@ int Compiler__at_function_arrow(Compiler);
 void Compiler_check_explicit_converter(Compiler, List, Type, int);
 int binding_identity_try_parts(List, int *, String *);
 static List _declarator_init(Compiler c, List type, List context){
-  Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, & method, & first, & after);  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, & preserved_self);  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_92, cons(List_var(type), cons(List_var(cons(_40, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
+  Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, & method, & first, & after);  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, &(preserved_self));  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_92, cons(List_var(type), cons(List_var(cons(_40, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
     if(c -> shallow){
       Compiler__skip_shallow_expression(c, 1);  return bind;
     }
@@ -2684,10 +2684,10 @@ String message = String_equal(role, _300) ? _855 : _856;  Compiler_report_error(
 }
 
 static String _prepare_function_lifecycle(Compiler c, List declaration, List binding, String * initializer_owner, String * shutdown_owner){
-  String name = binding_identity_spelling(binding);  * initializer_owner = String_truth(name) ? _lifecycle_owner(c, binding, _857) : NULL;  * shutdown_owner = String_truth(name) ? _lifecycle_owner(c, binding, _858) : NULL;  if(String_truth(* initializer_owner)){
+  String name = binding_identity_spelling(binding); (* initializer_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _857) : NULL; (* shutdown_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _858) : NULL;  if(String_truth((* initializer_owner))){
     _require_lifecycle_signature(c, declaration, name, _300);  if(String_truth(c -> init_fn) && ! String_equal(c -> init_fn, name)) Compiler_report_error(c, 33658058, _859, c -> token, cons(_303, cons(String_var(name), NULL)));
   }
-  if(String_truth(* shutdown_owner)){
+  if(String_truth((* shutdown_owner))){
     _require_lifecycle_signature(c, declaration, name, _858);  if(String_truth(c -> fini_fn) && ! String_equal(c -> fini_fn, name)) Compiler_report_error(c, 33658058, _860, c -> token, cons(_305, cons(String_var(name), NULL)));
   }
   return name;
@@ -2730,7 +2730,7 @@ static List _finish_function_parts(Compiler c, List declaration, List rtype, Lis
   };
   x2c_cleanup_push(&_x2c_defer_record_11);
   {
-    String initializer_owner = NULL, shutdown_owner = NULL;  String name = _prepare_function_lifecycle(c, declaration, binding, & initializer_owner, & shutdown_owner);  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type), declared_return = NULL;
+    String initializer_owner = NULL, shutdown_owner = NULL;  String name = _prepare_function_lifecycle(c, declaration, binding, &(initializer_owner), &(shutdown_owner));  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type), declared_return = NULL;
   {
     List _x2c_match_expr = Type_list(List_type_from_ast(declaration));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3248,7 +3248,7 @@ List binding = String_truth(exact) ? Sym_declare(compiler -> sym, declaration_co
   String spelling = binding_identity_spelling(binding);  List visible = Sym_lookup(compiler -> sym, cons(String_var(spelling), NULL), NULL);  if(! List_equal(visible, binding)) Sym_bind_identity(compiler -> sym, declaration_context, binding, declaration);
 }
 if(List_truth(binding) && List_truth(method)) Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))), List_var(method));  else if(List_truth(binding)) Map_del(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))));  if(List_truth(binding) && List_truth(self_signature)){
-  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), List_var(self_signature));  * preserved_self = 1;
+  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), List_var(self_signature)); (* preserved_self) = 1;
 }
 List bound = cons(_27, cons(List_var(binding), cons(List_var(mods), NULL)));  if(List_truth(initializer)) initializer = Compiler_resolve_expression(compiler, initializer, compiler -> token);  return List_truth(initializer) ? cons(_33, cons(_34, cons(List_var(bound), cons(List_var(initializer), NULL)))) : bound;
 }
@@ -3703,7 +3703,7 @@ static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x
     default: break;
     }
   }
-Array_push(output, List_var(_install_declarator_node((c), Var_list(base), declaration_context, declarator, NULL, & preserved_self)));
+Array_push(output, List_var(_install_declarator_node((c), Var_list(base), declaration_context, declarator, NULL, &(preserved_self))));
   }
 
 }

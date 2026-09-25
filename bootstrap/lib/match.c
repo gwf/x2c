@@ -566,18 +566,18 @@ static int _named_binder(Var value){
 }
 
 static int _layout_builder_add(MatchLayoutBuilder * builder, Atom binder){
-  for(int i = 0;  i < builder -> count;  i ++) if(builder -> binders[i].u64 == binder.u64) return i;
-  if(builder -> count >= MACHINE_BINDER_MAX) return - 1;
-  builder -> binders[builder -> count] = binder;
-  return builder -> count ++;
+  for(int i = 0;  i <(* builder).count;  i ++) if((* builder).binders[i].u64 == binder.u64) return i;
+  if((* builder).count >= MACHINE_BINDER_MAX) return - 1;
+  (* builder).binders[(* builder).count] = binder;
+  return(* builder).count ++;
 }
 
 int Var_is_nil(Var);
 
 static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
-    if(_malformed_binder_atom(pattern)) builder -> malformed_binder = 1;
-    else if(_named_binder(pattern) && _layout_builder_add(builder, pattern) < 0) builder -> past_capacity = 1;
+    if(_malformed_binder_atom(pattern))(* builder).malformed_binder = 1;
+    else if(_named_binder(pattern) && _layout_builder_add(&((* builder)), pattern) < 0)(* builder).past_capacity = 1;
     return;
   }
   if(Var_is_nil(pattern)) return;
@@ -586,15 +586,15 @@ static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
   if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = List_cdr(list);
-    if(List_truth(args) && Var_is_list_binder(List_car(args))) builder -> leading_list_binder = 1;
+    if(List_truth(args) && Var_is_list_binder(List_car(args)))(* builder).leading_list_binder = 1;
   }
   List parts = Var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
   int predicate_form = Var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
     if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_match_predicate(part)) continue;
-    _layout_collect(builder, part);
-    if(builder -> malformed_binder) return;
+    _layout_collect(&((* builder)), part);
+    if((* builder).malformed_binder) return;
   }
 
 }
@@ -721,7 +721,7 @@ static MatchCaptureLayout _capture_layout_analyze(Var pattern, Var * out_normali
   MachinePrepare status = MACHINE_PREPARED;
   const char * reason = "prepared";
   Var normalized = pattern;
-  _layout_collect(& builder, pattern);
+  _layout_collect(&(builder), pattern);
   if(builder.malformed_binder){
     status = MACHINE_MALFORMED;
     reason = "binder-name";

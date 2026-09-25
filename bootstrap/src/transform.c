@@ -1298,7 +1298,7 @@ static List _lower_printf_vars(Compiler c, List ast){
   if(info -> fmt_arg >= Array_len(values)) _printf_error(c, family, _858);
   List format_arg = Var_list(Array_getindex(values, info -> fmt_arg));
   int raw = 0;
-  String format = Compiler_printf_static_format(c, List_var(format_arg), & raw);
+  String format = Compiler_printf_static_format(c, List_var(format_arg), &(raw));
   if(! String_truth(format)) _printf_error(c, family, _859);
   int cursor = raw ? 1 : 0, end = raw ? String_len(format) - 1 : String_len(format);
   int value_index = info -> first_arg;

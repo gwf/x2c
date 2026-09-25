@@ -362,7 +362,7 @@ static void _walk(Path directory, int depth, int hidden, Array paths){
 }
 
 static int _class_match(const char * * pattern, unsigned char value){
-  const char * ch = * pattern;
+  const char * ch =(* pattern);
   int negate = * ch == '!' || * ch == '^';
   if(negate) ch ++;
   const char * first_member = ch;
@@ -377,7 +377,7 @@ static int _class_match(const char * * pattern, unsigned char value){
     else if(value == first) matched = 1;
   }
   if(* ch != ']') return - 1;
-  * pattern = ch + 1;
+  (* pattern) = ch + 1;
   return negate ? ! matched : matched;
 }
 
@@ -390,7 +390,7 @@ static const char * _glob_step(const char * pattern, const char * text){
   if(* pattern == '?') return pattern + 1;
   if(* pattern == '['){
     const char * rest = pattern + 1;
-    int matched = _class_match(& rest, (unsigned char) * text);
+    int matched = _class_match(&(rest), (unsigned char) * text);
     if(matched >= 0) return matched ? rest : NULL;
   }
   if(* pattern == '\\' && pattern[1]) pattern ++;

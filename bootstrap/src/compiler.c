@@ -4245,7 +4245,7 @@ Type Sym_resolve_key(Sym sym, Type key){
 }
 
 Type Sym_next_typedef(Sym sym, Type type, int * hops){
-  if(! _init_guard_) _file_init_();  if(++ * hops > RESOLVE_KEY_MAX_HOPS){
+  if(! _init_guard_) _file_init_();  if(++(* hops) > RESOLVE_KEY_MAX_HOPS){
     _typedef_budget_error(sym, type);  return NULL;
   }
   return Type_is_typedef_name(type) || Type_is_typedef(type) ? _typedef_target(sym, type) : List_type(Sym_get(sym, Type_list(type)));
@@ -4406,7 +4406,7 @@ Type Sym_delegate_aggregate(Sym sym, Type type){
     if(Type_is_pointer(type)){
       type = Sym_resolve_key(sym, Type_dereference(type));  break;
     }
-    type = Sym_next_typedef(sym, type, & hops);
+    type = Sym_next_typedef(sym, type, &(hops));
   }
   return List_truth(Type_list(type)) && Type_is_aggregate_tag(type) ? type : NULL;
 }

@@ -6043,7 +6043,7 @@ List Sym_get(Sym, List);
 Type Sym_next_typedef(Sym, Type, int *);
 static List _meta_type_layout(Sym sym, Type type, Map cache){
   Type declared = Type_declared(type);  Type alias = Type_base_type(declared);  int hops = 0;  while(List_truth(Type_list(alias)) &&(Type_is_typedef_name(alias) || Type_is_typedef(alias))){
-    if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, & hops));
+    if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, &(hops)));
   }
   if(Sym_is_var_type(sym, declared)) return _meta_var_layout(declared);  Type tagged = NULL;  Symbol tag = Sym_var_tag_for_type(sym, declared, & tagged);  Type native = Sym_normalize_declared_type(sym, declared);  Type exact = Type_scalar(native);  NativeScalarAccess scalar = List_truth(Type_list(exact)) ? native_scalar_access(Type_list(exact)) : NULL;  if(scalar) return _meta_scalar_layout(declared, exact, scalar, tag, tagged);  if(! tag && Sym_is_bool_type(sym, declared)) return _meta_int_layout(declared, List_type(_1555));  if(! tag && Type_is_enum(native)) return List_truth(Sym_get(sym, List_append(Type_list(native), _1596))) ? _meta_int_layout(declared, List_type(_737)) : NULL;  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)) return _meta_pointer_layout(declared, tag);  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344)) || ! List_truth(Sym_get(sym, List_append(Type_list(type), _1599))) || List_truth(Sym_get(sym, List_append(Type_list(type), _1593)))) return NULL;  return _meta_record_layout(sym, type, cache);
 }

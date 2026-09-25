@@ -1126,7 +1126,7 @@ static char * _read_response_file(const char * path, size_t * length){
   text[got] = 0;
   if(memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
   if(! _valid_utf8((unsigned char *) text, got)) _response_error(path, 1, "input is not valid UTF-8");
-  * length = got;
+  (* length) = got;
   return text;
 }
 
@@ -1239,7 +1239,7 @@ List Array_list_free(Array);
 List cli_response_arguments(String path){
   if(! _init_guard_) _file_init_();
   size_t length = 0;
-  char * text = _read_response_file(path, & length);
+  char * text = _read_response_file(path, &(length));
   Array arguments = Array_new();
   _tokenize_response(arguments, path, text, length);
   Scope_free(text);
@@ -1288,7 +1288,7 @@ static void _expand_argument(Array output, String argument, List stack){
 int String_len(String);
 
 static CliOption * _find_option(String spelling, int command_mask, String * attached){
-  * attached = NULL;
+  (* attached) = NULL;
   for(CliOption * option = cli_options;  String_truth(option -> spelling);  option ++){
     if(!(option -> commands & command_mask)) continue;
     String form = option -> spelling;
@@ -1299,7 +1299,7 @@ static CliOption * _find_option(String spelling, int command_mask, String * atta
     }
     if(String_equal(spelling, form) || String_equal(spelling, option -> alias)) return option;
     if(option -> value && String_len(form) == 2 && longer){
-      * attached = String_getslice(spelling, 2, -2147483648, 1);
+      (* attached) = String_getslice(spelling, 2, -2147483648, 1);
       return option;
     }
 
@@ -1312,7 +1312,7 @@ Var Array_getindex(Array, int);
 int String_find(String, String);
 
 static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
-  String arg = Var_string(Array_getindex(args, * index)), written = arg, joined = NULL;
+  String arg = Var_string(Array_getindex(args, (* index))), written = arg, joined = NULL;
   int equals = String_startswith(arg, _93) ? String_find(arg, _201) : - 1;
   if(equals > 2){
     written = String_getslice(arg, -2147483648, equals, 1);
@@ -1320,15 +1320,15 @@ static CliOption * _take_option(Array args, int * index, int mask, String * spel
     if(String_truth(joined) && ! String_getindex(joined, 0)) joined = NULL;
   }
   String suffix = NULL;
-  CliOption * option = _find_option(written, mask, & suffix);
+  CliOption * option = _find_option(written, mask, &(suffix));
   if(! option) return NULL;
   if(equals > 2 && ! option -> value) x2c_driver_error(String_join(NULL, cons(String_var(_76), cons(String_var(arg), cons(String_var(_75), NULL)))));
   if(spelling) * spelling = written;
   if(attached) * attached = suffix != NULL;
-  * value = equals > 2 ? joined : suffix;
-  if(option -> value && ! String_truth(* value) && equals <= 2){
-    if(++ * index == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_77), cons(String_var(arg), cons(String_var(_75), NULL)))));
-    * value = Var_string(Array_getindex(args, * index));
+  (* value) = equals > 2 ? joined : suffix;
+  if(option -> value && ! String_truth((* value)) && equals <= 2){
+    if(++(* index) == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_77), cons(String_var(arg), cons(String_var(_75), NULL)))));
+    (* value) = Var_string(Array_getindex(args, (* index)));
   }
   return option;
 }
@@ -1639,7 +1639,7 @@ CliRequest cli_package_options(String path, String package){
       }
       String spelling = NULL, value = NULL;
       int attached = 0;
-      CliOption * option = _take_option(words, & i, CLI_BUILD, & spelling, & value, & attached);
+      CliOption * option = _take_option(words, &(i), CLI_BUILD, & spelling, &(value), & attached);
       if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_91), cons(String_var(argument), cons(String_var(_75), NULL)))));
       switch(option -> id){
         case 20273998090 : case 8747647543562 : case 274059207002 : case 279333770 : case 1473453116298 : case 26380018276 : case 26379160754 : case 38800656 : case 35719882824 : case 14434122038422 : case 1496 : case 52364728676 : break;
@@ -1687,7 +1687,7 @@ CliRequest cli_request(Symbol command){
 
 static void _one_dash_removed(String arg){
   String attached;
-  if(String_len(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_92), cons(String_var(arg), NULL))), CLI_TRANSLATE, & attached)){
+  if(String_len(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_92), cons(String_var(arg), NULL))), CLI_TRANSLATE, &(attached))){
     fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", arg);
     fprintf(stderr, "note: use '--%s'\n", arg + 1);
     exit(2);
@@ -1744,7 +1744,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
     }
     String spelling = NULL, value = NULL;
     int attached = 0;
-    CliOption * option = _take_option(args, & i, mask, & spelling, & value, & attached);
+    CliOption * option = _take_option(args, &(i), mask, & spelling, &(value), & attached);
     if(! option){
       if(mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(String_join(NULL, cons(String_var(_96), cons(String_var(arg), cons(String_var(_75), NULL)))));
@@ -1827,7 +1827,7 @@ CliRequest cli_parse(int argc, char * * argv){
     }
     if(String_equal(first, _95)) _removed_output();
     String attached;
-    if(String_len(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_92), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
+    if(String_len(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_92), cons(String_var(first), NULL))), CLI_TRANSLATE, &(attached))){
       fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", first);
       fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
       exit(2);
