@@ -300,9 +300,10 @@ Self-translation of `src/` measured 3.97 s user before and 3.99 s after
 Not covered, as the book's meta and region chapters list: an address kept
 in a field of a local struct that is returned by value or assigned to a
 `meta static` struct, pointer arithmetic, and native calls that retain an
-argument. Phase 8 remains: opt-in whole-project certification that treats
-unknown calls as unproved, the effect inventory, and File and Job
-finalizers.
+argument. The remaining project audit is the optional selected-root
+conditional lifetime proof in [meta sequencing](meta-sequencing.md); it
+reports unknown calls as proof obstacles and lists native effect assumptions.
+File and Job finalizers were delivered with the narrower meta lifetime work.
 
 ### G. Native extensions (last stage)
 

@@ -54,9 +54,9 @@ execution.
   implementation status.
 
 
-- [Meta sequencing](meta-sequencing.md): active. The order of class
-  registration and capacity, native extensions and packages, protocols
-  beyond Iter, and whole-project lifetime certification.
+- [Meta sequencing](meta-sequencing.md): active. The ordered class, native
+  extension, and protocol steps landed; the optional selected-root lifetime
+  proof is implemented here.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, REPL-only output, and the Json, Diff, and
   Path text operations (delivered in `ab74ef4b`) are implemented, and scalar
