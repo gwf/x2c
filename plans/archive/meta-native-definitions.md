@@ -1,8 +1,7 @@
 # Native `meta` definitions
 
-> Status: active.
-> Capability and migration implemented on the worktree branch; see the
-> commits that reference this plan. Not yet delivered to `dev`.
+> Status: done 2026-09-25. Capability and library migration delivered to
+> `dev` in `c3ac95fd` and `56b75433`.
 
 ## Requested behavior
 

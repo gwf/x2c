@@ -389,7 +389,7 @@ Public functions:
 
 `Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.check_regions`,
 `Compiler.check_meta_regions`, `Compiler.audit_regions`,
-`Compiler.has_region_row`
+`Compiler.has_region_row`, `Compiler.region_no_lifetime_effect`
 
 ### [src/report.x](../src/report.x)
 

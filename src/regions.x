@@ -112,6 +112,28 @@ static Map runtime = %{
   "Map_setindex": (store),           "Map_set": (store),
   "Map_setdefault": (store),         "Var_setindex": (store),
   "Var_map": (wrap),                 "Map_var": (wrap),
+  "Symbol_var": (summary 0 ()),      "Var_integer": (summary 0 ()),
+  "Var_is_row": (summary 0 ()),       "Var_kind": (summary 0 ()),
+  "Var_int": (summary 0 ()),          "Var_is_void": (summary 0 ()),
+  "Var_is_nil": (summary 0 ()),       "Var_is_atom": (summary 0 ()),
+  "Map_len": (summary 0 ()),
+  "List_len": (summary 0 ()),         "String_equal": (summary 0 ()),
+  "Symbol_str": (alloc pool),
+  "int_var": (summary 0 ()),          "uint_var": (summary 0 ()),
+  "char_var": (summary 0 ()),         "uchar_var": (summary 0 ()),
+  "short_var": (summary 0 ()),        "ushort_var": (summary 0 ()),
+  "float_var": (summary 0 ()),        "double_var": (summary 0 ()),
+  "long_var": (alloc),                "Var_box_long": (alloc),
+  "Func_var": (wrap),
+  "List_car": (summary 0 ((0 return))),
+  "List_cdr": (summary 0 ((0 return))),
+  "String_lower": (summary 2 ((0 return))),
+  "String_upper": (summary 2 ((0 return))),
+  "String_capitalize": (summary 2 ((0 return))),
+  "String_strip": (summary 2 ((0 return))),
+  "String_add": (summary 2 ((0 return) (1 return))),
+  "puts": (summary 0 ()),             "File_puts": (summary 0 ()),
+  "assert": (summary 0 ()),
   "Var_array": (wrap),               "Array_var": (wrap),
   "Var_list": (wrap),                "List_var": (wrap),
   "Var_string": (wrap),              "String_var": (wrap),
@@ -1250,3 +1272,7 @@ Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects,
 /** Reports whether the runtime table proves the lifetime effects of the
     native function `name`. */
 int Compiler.has_region_row(String name) => name in runtime;
+
+/** Reports a built-in call that neither creates nor retains tracked storage. */
+int Compiler.region_no_lifetime_effect(String name) =>
+  runtime[name] in %((summary 0 ()) (wrap));

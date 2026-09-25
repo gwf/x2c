@@ -29,6 +29,36 @@ certify_check() {
 certify_check 0 certify_safe "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_safe-line"
 grep -q '(obstacles)' "$tmp/certify-certify_safe-line"
+certify_check 0 certify_scalar_rows "$fixtures/certify.x"
+grep -q '(status proved)' "$tmp/certify-certify_scalar_rows-line"
+certify_check 0 certify_wide_scoped "$fixtures/certify.x"
+grep -q '(status proved)' "$tmp/certify-certify_wide_scoped-line"
+certify_check 1 certify_wide_dangle "$fixtures/certify.x"
+grep -q 'violation .*certify_wide_dangle.*region' \
+  "$tmp/certify-certify_wide_dangle-line"
+certify_check 0 certify_pure_branch "$fixtures/certify.x"
+grep -q '(status proved)' "$tmp/certify-certify_pure_branch-line"
+certify_check 3 certify_conditional_alloc "$fixtures/certify.x"
+grep -q 'conditional memory effects are outside the proof subset' \
+  "$tmp/certify-certify_conditional_alloc-line"
+certify_check 0 certify_literal_printf "$fixtures/certify.x"
+grep -q '(assumptions (native "printf" (summary 0 ())))' \
+  "$tmp/certify-certify_literal_printf-line"
+certify_check 0 certify_file_printf "$fixtures/certify.x"
+grep -q '(assumptions (native "File_printf" (summary 0 ())))' \
+  "$tmp/certify-certify_file_printf-line"
+certify_check 3 certify_write_printf "$fixtures/certify.x"
+grep -q 'call has no project body or lifetime effect contract' \
+  "$tmp/certify-certify_write_printf-line"
+certify_check 3 certify_escaped_printf "$fixtures/certify.x"
+grep -q 'call has no project body or lifetime effect contract' \
+  "$tmp/certify-certify_escaped_printf-line"
+certify_check 3 certify_dynamic_printf "$fixtures/certify.x"
+grep -q 'call has no project body or lifetime effect contract' \
+  "$tmp/certify-certify_dynamic_printf-line"
+certify_check 1 certify_index_escape "$fixtures/certify.x"
+grep -q 'violation .*certify_index_escape.*region' \
+  "$tmp/certify-certify_index_escape-line"
 certify_check 0 certify_nested "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_nested-line"
 certify_check 1 certify_dangle "$fixtures/certify.x"
