@@ -2120,13 +2120,13 @@ Var Map_getindex(Map, Var);
 int Var_is(Var, Symbol);
 int ast_changes_left_operand(Symbol);
 static void _defer_collect_captures(Compiler compiler, List ast, List * declared, Map captures, Array records, List * written, int * unsupported){
-  if(! List_truth(ast) || * unsupported) return;
+  if(! List_truth(ast) ||(* unsupported)) return;
   {
     List _x2c_match_expr = ast;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ;  static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_571), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
-    List binding = Var_list(bound), known = * declared;  if(! List_contains(known, List_var(binding))) * declared = cons(List_var(binding), known);
+    List binding = Var_list(bound), known =(* declared);  if(! List_contains(known, List_var(binding)))(* declared) = cons(List_var(binding), known);
   }
   break;
 }
@@ -2141,7 +2141,7 @@ default: break;
       case 377892: ;  static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_577), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
   List binding = Var_list(bound);  Var automatic, existing, stored_type;  if(List_truth(binding) && ! List_contains((* declared), List_var(binding)) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_578, cons(List_var(binding), NULL))), & automatic) && ! Map_try_get(captures, List_var(binding), & existing)){
     stored_type = Map_getindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_579, cons(List_var(binding), NULL))));  if(! _defer_type_hoistable(compiler, Var_type(stored_type))){
-      * unsupported = 1;  return;
+      (* unsupported) = 1;  return;
     }
     String field_name = Compiler_fresh_name(compiler, _893);  List field = Sym_introduce(compiler -> sym, field_name);  Map_setindex(captures, List_var(binding), List_var(field));  Array_push(records, List_var(cons(List_var(binding), cons(stored_type, cons(List_var(field), NULL)))));
   }
@@ -2168,11 +2168,11 @@ static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x
   }
 {
   Var child;  List _x2c_macro_object_11 = ast;  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_10)){
-    child = _x2c_macro_cursor_output_10;  if(Var_is_row(child, 9, 7, 4)) _defer_collect_captures(compiler, Var_list(child), declared, captures, records, written, unsupported);
+    child = _x2c_macro_cursor_output_10;  if(Var_is_row(child, 9, 7, 4)) _defer_collect_captures(compiler, Var_list(child), &((* declared)), captures, records, &((* written)), &((* unsupported)));
   }
 
 }
-Var field;  List changed = * written;  if(List_truth(modified) && Map_try_get(captures, List_var(modified), & field) && ! List_contains(changed, List_var(modified))) * written = cons(List_var(modified), changed);
+Var field;  List changed =(* written);  if(List_truth(modified) && Map_try_get(captures, List_var(modified), & field) && ! List_contains(changed, List_var(modified)))(* written) = cons(List_var(modified), changed);
 }
 
 int Var_equal(Var, Var);
@@ -2208,7 +2208,7 @@ return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) 
 Var List_caddr(List);
 void Compiler_add_early(Compiler, List);
 static List _lower_callable_defer(Compiler c, List body, List finalizer){
-  List declared = NULL, written = NULL;  Map captures = Map_new();  Array records = Array_new();  int unsupported = 0;  _defer_collect_captures(c, finalizer, & declared, captures, records, & written, & unsupported);  if(unsupported){
+  List declared = NULL, written = NULL;  Map captures = Map_new();  Array records = Array_new();  int unsupported = 0;  _defer_collect_captures(c, finalizer, &(declared), captures, records, &(written), &(unsupported));  if(unsupported){
     Array_free(records);  return cons(_548, cons(List_var(body), cons(_244, cons(List_var(finalizer), NULL))));
   }
   List env_binding = NULL, env_local = NULL;  String env_name = NULL;  List record_list = Array_list_free(records);  if(List_truth(record_list)){

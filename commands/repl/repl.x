@@ -335,7 +335,7 @@ int repl_run(CliRequest request, ReplOptions options) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
   ParsedUnit unit;
-  int opened = frontend.open_session(&unit);
+  int opened = frontend.open_session(unit);
   defer unit.close();
   if (!opened) {
     foreach (Var entry, unit.compiler.diagnostics())

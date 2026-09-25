@@ -6,7 +6,7 @@
 
 Map project_function_targets(Compiler compiler, List ast, String path);
 List project_call_target(
-  Compiler compiler, Map definitions, Var value, String *name,
+  Compiler compiler, Map definitions, Var value, String &name,
   List *arguments);
 List resolve_project_target(List target, Map publics);
 List project_location(Compiler compiler, String path, int origin);
@@ -29,9 +29,9 @@ Map project_function_targets(Compiler compiler, List ast, String path) {
 }
 
 List project_call_target(
-  Compiler compiler, Map definitions, Var value, String *name,
+  Compiler compiler, Map definitions, Var value, String &name,
   List *arguments) {
-  *name = NULL;
+  name = NULL;
   if (arguments) *arguments = NULL;
   if (value is not <list>) return NULL;
   List node = value;
@@ -52,18 +52,18 @@ List project_call_target(
       if (compiler.semantic_binding_facts().contains(
             %(automatic $binding)
           )) {
-        *name = "computed";
+        name = "computed";
         return %(computed);
       }
       String emitted = compiler.emitted_binding_name(binding);
       if (!emitted || !strlen(emitted)) emitted = spelling.str();
-      *name = emitted;
+      name = emitted;
       return definitions.contains(binding)
            ? definitions[binding].list() : %(public $emitted);
     }
     case %(call ? (!set ?call_arguments (args *))): {
       if (arguments) *arguments = call_arguments;
-      *name = "computed";
+      name = "computed";
       return %(computed);
     }
   }

@@ -1162,25 +1162,25 @@ static List _defer_direct_binding(Var value) {
 }
 
 static void _defer_collect_captures(
-  Compiler compiler, List ast, List *declared, Map captures, Array records,
-  List *written, int *unsupported) {
-  if (!ast || *unsupported) return;
+  Compiler compiler, List ast, List &declared, Map captures, Array records,
+  List &written, int &unsupported) {
+  if (!ast || unsupported) return;
   match (ast)
     case %(bind ?bound *): {
-      List binding = bound, known = *declared;
-      if (!known.contains(binding)) *declared = cons(binding, known);
+      List binding = bound, known = declared;
+      if (!known.contains(binding)) declared = cons(binding, known);
     }
   match (ast)
     case %(expr ? (ident ?bound)): {
       List binding = bound;
       Var automatic, existing, stored_type;
-      if (binding && !(*declared).contains(binding) &&
+      if (binding && !declared.contains(binding) &&
           compiler.semantic_binding_facts().try_get(
             %(automatic $binding), &automatic) &&
           !captures.try_get(binding, &existing)) {
         stored_type = compiler.semantic_binding_facts()[%(type $binding)];
         if (!_defer_type_hoistable(compiler, stored_type)) {
-          *unsupported = 1;
+          unsupported = 1;
           return;
         }
         String field_name = compiler.fresh_name("defer_capture");
@@ -1205,10 +1205,10 @@ static void _defer_collect_captures(
         compiler, child, declared, captures, records, written,
         unsupported);
   Var field;
-  List changed = *written;
+  List changed = written;
   if (modified && captures.try_get(modified, &field) &&
       !changed.contains(modified))
-    *written = cons(modified, changed);
+    written = cons(modified, changed);
 }
 
 // Replace captured object references with pointer dereferences through the
@@ -1245,7 +1245,7 @@ static List _lower_callable_defer(
   List declared = %(), written = %();
   Map captures = {}, Array records = [], int unsupported = 0;
   _defer_collect_captures(
-    c, finalizer, &declared, captures, records, &written, &unsupported);
+    c, finalizer, declared, captures, records, written, unsupported);
   if (unsupported) {
     records.free();
     return %(try $body () $finalizer);

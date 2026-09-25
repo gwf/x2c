@@ -42,7 +42,7 @@ static void _preprocessor_errors(String text) {
 }
 
 static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
-  int ok = frontend.start(filename, unit);
+  int ok = frontend.start(filename, *unit);
   if (ok) {
     unit->compiler.own_diagnostics();
     ok = unit.collect(frontend) && unit.parse();

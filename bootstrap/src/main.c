@@ -279,7 +279,7 @@ void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
 int List_truth(List);
 static void _translate_unit(Frontend frontend, String filename, String output_dir){
-  CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, & unit); {
+  CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, &(unit)); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
 
   X2CCleanup _x2c_defer_record_0 = {

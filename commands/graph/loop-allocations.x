@@ -35,7 +35,7 @@ static void _loop_collect(
   Symbol direct_kind = 0;
   if (loop_depth) {
     direct_kind = Lifetime.loop_allocation_kind(
-      compiler, node, &operation
+      compiler, node, operation
     );
     if (direct_kind)
       direct.push(%(
@@ -148,7 +148,7 @@ static void _loop_collect(
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, &name, NULL
+          compiler, definitions, node, name, NULL
         );
         if (target && !List.equal(target, %(computed)))
           pending.push(%(

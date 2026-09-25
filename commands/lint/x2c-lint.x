@@ -52,7 +52,7 @@ static void _preprocessor_errors(String text):
    compiler's diagnostics when the unit does not parse. */
 static int _parse(Lint l, Frontend frontend, String path):
   ParsedUnit parsed
-  int ok = frontend.start(path, &parsed)
+  int ok = frontend.start(path, parsed)
   if ok:
     parsed.compiler.own_diagnostics()
     ok = parsed.collect(frontend) && parsed.parse()
