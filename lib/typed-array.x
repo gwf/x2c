@@ -166,65 +166,6 @@ $array.typed.publish(
   ArrayString, String, arraystring, <arraystr>,
   _prepare_string_array_export);
 
-/* These declarations stay literal because method metadata is collected
-   before the family macros expand. Keeping them after the expansions also
-   keeps generated diagnostic locations tied to the family invocations. */
-Self ArrayChar.copy(Self);
-Self ArrayChar.getslice(Self, int, int, int);
-Self ArrayChar.setslice(Self, int, int, Self);
-Self ArrayChar.remslice(Self, int, int);
-Self ArrayChar.splice(Self, int, int, Self);
-Self ArrayChar.concat(Self, Self);
-Self ArrayChar.reverse(Self);
-
-Self ArrayShort.copy(Self);
-Self ArrayShort.getslice(Self, int, int, int);
-Self ArrayShort.setslice(Self, int, int, Self);
-Self ArrayShort.remslice(Self, int, int);
-Self ArrayShort.splice(Self, int, int, Self);
-Self ArrayShort.concat(Self, Self);
-Self ArrayShort.reverse(Self);
-
-Self ArrayInt.copy(Self);
-Self ArrayInt.getslice(Self, int, int, int);
-Self ArrayInt.setslice(Self, int, int, Self);
-Self ArrayInt.remslice(Self, int, int);
-Self ArrayInt.splice(Self, int, int, Self);
-Self ArrayInt.concat(Self, Self);
-Self ArrayInt.reverse(Self);
-
-Self ArrayLong.copy(Self);
-Self ArrayLong.getslice(Self, int, int, int);
-Self ArrayLong.setslice(Self, int, int, Self);
-Self ArrayLong.remslice(Self, int, int);
-Self ArrayLong.splice(Self, int, int, Self);
-Self ArrayLong.concat(Self, Self);
-Self ArrayLong.reverse(Self);
-
-Self ArrayFloat.copy(Self);
-Self ArrayFloat.getslice(Self, int, int, int);
-Self ArrayFloat.setslice(Self, int, int, Self);
-Self ArrayFloat.remslice(Self, int, int);
-Self ArrayFloat.splice(Self, int, int, Self);
-Self ArrayFloat.concat(Self, Self);
-Self ArrayFloat.reverse(Self);
-
-Self ArrayDbl.copy(Self);
-Self ArrayDbl.getslice(Self, int, int, int);
-Self ArrayDbl.setslice(Self, int, int, Self);
-Self ArrayDbl.remslice(Self, int, int);
-Self ArrayDbl.splice(Self, int, int, Self);
-Self ArrayDbl.concat(Self, Self);
-Self ArrayDbl.reverse(Self);
-
-Self ArrayString.copy(Self);
-Self ArrayString.getslice(Self, int, int, int);
-Self ArrayString.setslice(Self, int, int, Self);
-Self ArrayString.remslice(Self, int, int);
-Self ArrayString.splice(Self, int, int, Self);
-Self ArrayString.concat(Self, Self);
-Self ArrayString.reverse(Self);
-
 /* Compile-time code reaches the typed-array conversions through these literal
    `meta` prototypes; a family macro cannot emit one. */
 meta Var ArrayChar.var(ArrayChar);

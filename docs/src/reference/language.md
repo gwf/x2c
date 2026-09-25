@@ -950,11 +950,14 @@ retained signature.
 
 Protocol declarations and adoption rows are collection-time compiler
 declarations rather than C declarations. A unit macro may emit them, and
-importing units receive the retained rows. Converters and public methods named
-by an adoption may have prototypes earlier in the same expansion and scope. The
-compiler uses them to resolve the adoption and make the functions visible to
-later code. Private declarations remain literal. Collection discards them with
-the generated bodies.
+importing units receive the retained rows. A `Unit` macro may generate
+converter and method function definitions before the adoption in the same
+expansion. Those functions need no separate prototypes when their definitions
+are already visible. The compiler uses them to resolve the adoption and make
+the functions visible to later code. Collection discards private declarations
+with generated bodies,
+so a private converter needed only within the defining unit can be generated
+before the adoption.
 
 `$name...` is a sequence hole. It captures zero or more arguments of one
 element kind, must be the final argument, and `$name...` in the body is the

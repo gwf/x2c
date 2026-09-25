@@ -77,13 +77,6 @@ struct UnzipShared {
 typedef UnzipColumn *UnzipColumnRef;
 typedef UnzipShared *UnzipSharedRef;
 
-/* Protocol resolution runs before macro expansion, so these converter
-   declarations and the adoption rows below must remain literal. */
-static inline Var UnzipColumnRef.var(UnzipColumnRef);
-static inline UnzipColumnRef Var.unzipcolumnref(Var);
-static inline Var UnzipSharedRef.var(UnzipSharedRef);
-static inline UnzipSharedRef Var.unzipsharedref(Var);
-
 /* Unzip state remains caller-owned. These definitions only name the pointers
    crossing through Iter.obj and preserve their raw <p48> bits. */
 $(import "var-adapters.xmacro")

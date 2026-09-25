@@ -58,10 +58,10 @@ typedef struct Fn {
   int macro;                                                                    // C integer flag in an x2c record.
 } *Fn;                                                                          // C typedef for a struct pointer.
 
-typedef struct Env {                                                            // Stack-local environment frame.
+typedef struct LispEnv {                                                        // Stack-local environment frame.
   Map bindings;                                                                 // Names -> local values.
-  struct Env *parent;                                                           // Outer frame; borrowed pointer.
-} Env;
+  struct LispEnv *parent;                                                       // Outer frame; borrowed pointer.
+} LispEnv;
 
 /* Global bindings persist across top-level evaluations. The native registry
    maps binding names to host functions. Reserved forms have callable
@@ -99,7 +99,7 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {                 
    in the caller's environment. This expansion happens during Lisp program
    evaluation, after all x2c compile-time macros have already expanded.
 */
-static Var Interp.eval(Interp *self, Env *env, Var form) {
+static Var Interp.eval(Interp *self, LispEnv *env, Var form) {
   if (form is void) $fail(<void-op>, "eval");                                  // Macro emits runtime error creation.
   if (form.is_atom()) return self.lookup(env, form);                            // Receiver-style function calls.
   if (form is not <list> || form.is_nil()) return form;                         // is inspects the Var tag.
@@ -122,7 +122,7 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
    files, or raise errors, a later failure leaves earlier effects intact.
    The result is a List of values ready for application.
 */
-static List Interp.eval_args(Interp *self, Env *env, List forms) {
+static List Interp.eval_args(Interp *self, LispEnv *env, List forms) {
   Array values = $auto([]);                                                     // Array literal; cleanup on exit.
   foreach (Var form, forms) values.push(self.eval(env, form));                  // Typed List iteration.
   return values;                                                                // Build List before Array cleanup.
@@ -145,7 +145,7 @@ static List Interp.eval_args(Interp *self, Env *env, List forms) {
    values. apply passes those values to the callable without evaluating
    them again, including any Lists that could also be parsed as calls.
 */
-static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
+static Var Interp.special(Interp *self, LispEnv *env, Symbol op, List args) {
   match (%($op @args)) {                                                        // $ inserts a value; @ splices a List.
     case %(quote ?form): return form;                                           // Pattern binds one value.
     case %(quasiquote ?form): return self.quasiquote(env, form, 0);             // Literal Symbol plus bound form.
@@ -237,7 +237,7 @@ static Var Interp.apply(Interp *self, Var fn, List values) {
    Strings and Lists live in canonical pools.                                                 reserved
 */
 
-static Var Interp.lookup(Interp *self, Env *env, Var name) {
+static Var Interp.lookup(Interp *self, LispEnv *env, Var name) {
   for (; env; env = env.parent)                                                 // C pointer walk with x2c dot access.
     if (name in env.bindings) return env.bindings[name];                        // Map membership and indexing.
   if (name in self.globals) return self.globals[name];                          // Global Map: test key, fetch value.
@@ -250,7 +250,7 @@ static Var Interp.lookup(Interp *self, Env *env, Var name) {
    Globals remain looked up at call time. Caller locals never participate.
 */
 static void Interp.capture(
-  Interp *self, Env *env, Var form, List bound, int depth, Map captures) {
+  Interp *self, LispEnv *env, Var form, List bound, int depth, Map captures) {
   if (form.is_atom()) {
     if (!depth && !(form in self.reserved) && !(form in bound))                // Names in data or introduced by a binder are not free.
       for (; env; env = env.parent)                                            // Only the defining local frames supply snapshots.
@@ -278,7 +278,7 @@ static void Interp.capture(
 }
 
 static Var Interp.closure(
-  Interp *self, Env *env, List params, Var body, int macro) {
+  Interp *self, LispEnv *env, List params, Var body, int macro) {
   Map captures = {};                                                            // Each closure owns its captured bindings.
   self.capture(env, body, params, 0, captures);                                 // Capture before the defining call returns.
   Fn closure = Scope.malloc(sizeof(struct Fn));                                 // Allocate in the current Scope.
@@ -307,8 +307,8 @@ static Var Interp.invoke(Interp *self, Fn closure, List values) {
     values = values.cdr();                                                      // Advance the argument tail too.
   }
   if (values) $fail(<bad-arity>, "apply", <value>, closure.body);              // Macro constructs the error record.
-  Env captured = { closure.captures, NULL };                                    // No link to the caller's environment.
-  Env local = { bindings, &captured };                                          // & takes a stack frame's C address.
+  LispEnv captured = { closure.captures, NULL };                                // No link to the caller's environment.
+  LispEnv local = { bindings, &captured };                                      // & takes a stack frame's C address.
   return self.eval(&local, closure.body);                                       // C stack address passed to eval.
 }
 
@@ -330,7 +330,7 @@ static Var Interp.invoke(Interp *self, Fn closure, List values) {
    evaluated only at depth zero. Otherwise, it remains in the returned
    form.
 */
-static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
+static Var Interp.quasiquote(Interp *self, LispEnv *env, Var form, int depth) {
   if (form is not <list> || form.is_nil()) return form;                         // Runtime tag inspection.
   List expr = form;                                                             // Implicit Var -> List conversion.
   Var (head, argument) = expr;                                                  // Positional List destructuring.
@@ -350,7 +350,7 @@ static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
   return first.append(rest);                                                    // Result List implicitly boxes as Var.
 }
 
-static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
+static List Interp.quoted_item(Interp *self, LispEnv *env, Var form, int depth) {
   match (form) case %(unquote-splicing ?argument) if (!depth): {                // Pattern plus guard.
     Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
     if (value is not <list>)                                                    // Runtime type inspection.
