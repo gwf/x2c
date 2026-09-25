@@ -14,6 +14,11 @@ static int add(int &?value) {
 
 static int forward(int &?value) => add(value);
 
+static int postfix(int &?value) {
+  if (!value) return -1;
+  return value++;
+}
+
 static int forward_func(int &?value) {
   Func function = add;
   return function(value).int();
@@ -33,6 +38,9 @@ int main(void) {
   int value = 3;
   if (forward(value) != 5 || value != 5) return 1;
   if (forward(NULL) != -1) return 2;
+  int post = 4;
+  if (postfix(post) != 4 || post != 5 || postfix(NULL) != -1)
+    return 9;
 
   Node node = NULL;
   if (node_state(node) != 2 || node_state(NULL) != 1) return 3;

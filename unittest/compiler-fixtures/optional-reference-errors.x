@@ -3,6 +3,7 @@ static void set(int &?value) {
 }
 
 int main(void) {
-  set(5);
+  int value = 0;
+  set(value);
   return 0;
 }

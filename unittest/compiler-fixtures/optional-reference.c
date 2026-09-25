@@ -26,6 +26,8 @@ static int add(int * value);
 
 static int forward(int * value);
 
+static int postfix(int * value);
+
 static int forward_func(int * value);
 
 static int node_state(Node * node);
@@ -88,6 +90,11 @@ static int forward(int * value){
   return add(value);
 }
 
+static int postfix(int * value){
+  if(! value) return - 1;
+  return(* value) ++;
+}
+
 int Var_int(Var);
 
 List x2c_func_reference_type(Func, unsigned, unsigned);
@@ -131,6 +138,8 @@ int main(void){
   int value = 3;
   if(forward(&(value)) != 5 || value != 5) return 1;
   if(forward(NULL) != - 1) return 2;
+  int post = 4;
+  if(postfix(&(post)) != 4 || post != 5 || postfix(NULL) != - 1) return 9;
   Node node = NULL;
   if(node_state(&(node)) != 2 || node_state(NULL) != 1) return 3;
   Func function = _x2c_func_handle_0;
