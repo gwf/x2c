@@ -95,6 +95,10 @@ Differences from the plan:
   `if (out && x) out = v` do not prove `out`, so `Buffer.try_get`,
   `$array.try_get`, and two helpers in `regions.x` were restructured to use
   a direct test. Accepting `&&` and `||` would be a language change.
+- A `meta` function that calls a native function with a reference
+  parameter now passes address carriers. `_lower_native_call` in
+  `comptime.x` does this when the call runs and the callee is a native
+  `Func`. Before this change, `meta-output-cells` failed on `try_get`.
 - `tools/definitions.x` now renders `&` and `&?` parameters for the
   generated API pages.
 

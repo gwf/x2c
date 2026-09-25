@@ -913,6 +913,44 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
   return cons(Atom.intern(name), values);
 }
 
+/* A native callee reads a reference parameter from an address carrier, so
+   a call that has one prepares its carriers the way `Func.apply` does. The
+   address comes from `_lower_args`, and a null optional reference is 0. The
+   same name may be a lowered Lisp function in another unit, which takes the
+   addresses directly, so the choice is made when the call runs. */
+static Var _lower_native_call(
+  Lowering l, List callee, String name, List args) {
+  List params = NULL;
+  match (callee) case %((func ?declared) *): params = declared;
+  int references = 0;
+  for (List p = params; p; p = p.cdr()) {
+    Type parameter = _lower_param_type(p);
+    references |= parameter.car() == <&> || parameter.car() == <opt-ref>;
+  }
+  if (!references) return _lower_call(l, callee, name, args);
+  List values = _lower_args(l, params, args, name);
+  if (l.declined) return void;
+  Var argv = _lower_name(l, "argv");
+  Array prepare = $auto([]);
+  int index = 0;
+  List p = params;
+  foreach (Var value, values) {
+    Type parameter = _lower_param_type(p);
+    p = p.cdr();
+    prepare.push(parameter.car() == <&> || parameter.car() == <opt-ref>
+      ? %(C.func.reference $argv $index $value (quote ${parameter.cdr()}))
+      : %(C.func.value $argv $index $value));
+    index++;
+  }
+  l.automatic = 1;
+  Var callable = Atom.intern(name), native = <func>;
+  return %(if (eq? (type $callable) (quote $native))
+             ((lambda ($argv) (begin @{prepare.list()}
+                                     (C.func.apply $callable $index $argv)))
+              (C.func.arguments $index))
+             ($callable @values));
+}
+
 /* Prepare native carriers in source order, then dispatch through Func.apply.
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering l, Var content) {
@@ -1452,7 +1490,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_call(l, callee, name, args);
     case %(call (expr ?callee (ident (binding ? ?(String name))))
                 (args *args)):
-      return _lower_call(l, callee, name, args);
+      return _lower_native_call(l, callee, name, args);
     case %(call ?(String name) (args *args)):
       return _lower_call(l, NULL, name, args);
     case %(op ?operator *operands):
