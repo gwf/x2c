@@ -563,11 +563,21 @@ static Var _lower_number(Lowering l, List type, String text) {
 /* `*` is a sequence binder in a pattern, so the `(* char)` that selects a C
    string also matches a plain `(char)`. The spelling settles it: a string
    carries its double quote and a character literal its single quote, and a
-   character is its code, not its text. */
+   character is its code, not its text. Adjacent string literals share one
+   spelling; each piece is unescaped on its own, as C does, and joined. */
 static Var _lower_text(String spelling) {
   int len = spelling.len();
-  if (len >= 2 && spelling[0] == '"')
-    return String.new_len(spelling + 1, len - 2).unescape();
+  if (len >= 2 && spelling[0] == '"') {
+    String text = "";
+    for (int i = 0; i < len; i++) {
+      if (spelling[i] != '"') continue;
+      int start = ++i;
+      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
+      String piece = String.new_len(spelling + start, i - start).unescape();
+      text = %"$text$piece";
+    }
+    return text;
+  }
   if (len >= 3 && spelling[0] == '\'') {
     String body = String.new_len(spelling + 1, len - 2).unescape();
     return (char) (body.len() ? body[0] : 0);
@@ -1084,7 +1094,7 @@ static Var _lower_operands(
   }
   if (values.len() == 1) {
     Var only = values[0];
-    if (operator == <->) return %(_binary 0 (quote <->) $only);
+    if (operator == <->) return %(C.neg $only);
     if (operator == <+>) return only;
     if (operator == <~>) return %(_binary -1 (quote <^>) $only);
     if (operator == <!>) return %(C.not $only);
@@ -1597,6 +1607,7 @@ static int _lower_pure(Var form) {
   if (name == "quote") return 1;
   if (name != "_binary" && name != "C.conv" && name != "C.compare" &&
       name != "C.nonzero?" && name != "C.true?" && name != "C.not" &&
+      name != "C.neg" &&
       name != "C.and" && name != "C.or" && name != "C.ternary" &&
       name != "not" && name != "eq?")
     return 0;

@@ -45,8 +45,8 @@ builds/0/x2c <name> --help
 make commands-check
 ```
 
-`make commands-check` builds every command and runs its smoke test; it is
-optional and does not become a recurring gate for an experimental command.
+`make commands-check` builds every command and runs its smoke test;
+`agent-pr-check` runs it.
 When installation behavior changes, verify an installed prefix. Follow the root
 [publication instructions](../AGENTS.md#verify-and-deliver) for the final
 tree. Do not change the framework's validation targets or packaging to add

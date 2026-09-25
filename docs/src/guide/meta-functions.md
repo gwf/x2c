@@ -1517,8 +1517,9 @@ their tags from it.
 ### Names the compile-time library already defines
 
 A unit's compile-time session inherits the compiler's own Lisp library and
-cannot replace one of its definitions. A macro file or a `$(...)` form that
-defines an inherited name reports:
+cannot replace one of its definitions. A `meta` function is installed under
+its C name, so `meta int add(int x)` reports that it could not be installed.
+A macro file or a `$(...)` form that defines an inherited name reports:
 
 ```text
 sample.x:2:1: macro: compile-time Lisp evaluation failed

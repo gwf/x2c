@@ -752,7 +752,7 @@ static void Tokenizer._layout(Tokenizer t) {
       else if (last.type != <;> && !enums[top] && !lisp && !hole)
         suffix = ";";
     }
-    while (next < indents[top]) {
+    while (top && next < indents[top]) {
       suffix = %"${suffix}${closers[top--]}";
     }
     if (next != indents[top] && !error_at && j < nlines)

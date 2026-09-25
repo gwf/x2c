@@ -1067,7 +1067,7 @@ static void Tokenizer__layout(Tokenizer t){
         if(first -> type == 129) edits[sig[line.first] - all].type = 40896714;
         else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _34;
       }
-      while(next < indents[top]){
+      while(top && next < indents[top]){
         suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(closers[top --]), NULL)));
       }
       if(next != indents[top] && ! error_at && j < nlines) error_at = sig[lines[j].first];

@@ -197,6 +197,7 @@ agent-pr-check:					## Run complete agent PR proof once
 	$(MAKE) precommit
 	$(MAKE) proof-cold-collection
 	$(MAKE) check-after-precommit
+	$(MAKE) commands-check
 
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting
 	$(MAKE) build-safe
