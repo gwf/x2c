@@ -86,6 +86,7 @@ prefix.
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
 | `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
+| `x2c_package_entry` | `src/utils.x` | `String x2c_package_entry( SourceView sources, List roots, String name, String &directory)` |
 | `x2c_package_source` | `src/utils.x` | `int x2c_package_source(String directory, String path)` |
 | [`x2c_parameters_arguments`](meta.md#x2c_parameters_arguments) | `lib/meta.x` | `meta List x2c_parameters_arguments(List value)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
@@ -119,4 +120,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 107 functions.
+Total: 108 functions.

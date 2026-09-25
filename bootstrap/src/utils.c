@@ -224,6 +224,32 @@ String x2c_package_directory(List roots, String path){
   return NULL;
 }
 
+int SourceView_exists(SourceView, String);
+
+String x2c_package_entry(SourceView sources, List roots, String name, String * directory){
+  if(! _init_guard_) _file_init_();
+  {
+    String package_dir;
+    List _x2c_macro_object_1 = roots;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      package_dir = Var_string(_x2c_macro_cursor_output_1);
+      {
+        String root = String_join(NULL, cons(String_var(Path_absolute(package_dir)), cons(String_var(_3), cons(String_var(name), NULL))));
+        String nested = String_join(NULL, cons(String_var(root), cons(String_var(_4), cons(String_var(name), cons(String_var(_5), NULL)))));
+        String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_3), cons(String_var(name), cons(String_var(_5), NULL)))));
+        if(! SourceView_exists(sources, entry)) continue;
+        (* directory) = root;
+        return Path_absolute(entry);
+      }
+
+    }
+
+  }
+  return NULL;
+}
+
 int String_endswith(String, String);
 
 int x2c_source_file(String path){
@@ -298,11 +324,11 @@ String x2c_find_program(String name){
   if(! _init_guard_) _file_init_();
   {
     String directory;
-    List _x2c_macro_object_1 = String_split(Env_get(_33), _32);
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      directory = Var_string(_x2c_macro_cursor_output_1);
+    List _x2c_macro_object_2 = String_split(Env_get(_33), _32);
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      directory = Var_string(_x2c_macro_cursor_output_2);
       {
         Path candidate = Path_join(directory, name);
         if(Path_is_executable(candidate)) return candidate;
@@ -509,11 +535,11 @@ String x2c_filename_hash(String filename){
   unsigned hash = 0;
   {
     char byte;
-    String _x2c_macro_object_2 = filename;
-    int _x2c_macro_cursor_2 = 0;
-    int _x2c_macro_cursor_output_2;
-    while(String_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-      byte = _x2c_macro_cursor_output_2;
+    String _x2c_macro_object_3 = filename;
+    int _x2c_macro_cursor_3 = 0;
+    int _x2c_macro_cursor_output_3;
+    while(String_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      byte = _x2c_macro_cursor_output_3;
       hash = hash * 31 +(unsigned char) byte;
     }
 

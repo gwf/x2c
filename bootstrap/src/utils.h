@@ -8,6 +8,7 @@
 #include "x2c.h"
 #include "path.h"
 #include "process.h"
+#include "sourceview.h"
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_initialize_command_environment(const char * argv0, String embedded_identity);
@@ -19,6 +20,8 @@ String x2c_get_root(void);
 String x2c_get_executable(void);
 
 String x2c_package_directory(List roots, String path);
+
+String x2c_package_entry(SourceView sources, List roots, String name, String * directory);
 
 int x2c_source_file(String path);
 
