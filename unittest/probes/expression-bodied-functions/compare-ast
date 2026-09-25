@@ -29,7 +29,7 @@ static List _forms(String path):
   defer Lisp.destroy(lisp)
   unsigned cursor = 0
   Var forms = void
-  Lisp.read(lisp, %"($dump)", &cursor, &forms)
+  Lisp.read(lisp, %"($dump)", cursor, forms)
   return forms
 
 origins = 0
