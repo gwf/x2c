@@ -2843,11 +2843,12 @@ static void _import_members(Compiler c, String name){
 String String_unescape(String);
 void Compiler_collect_package(Compiler, String, Token);
 void Compiler_register_package_alias(Compiler, String, String, Token);
+void Compiler_import_package_macros(Compiler, String, Token);
 List Compiler_parse_import_declaration(Compiler c){
   if(! _init_guard_) _file_init_();  Token start = c -> token;  Compiler_expect(c, 632323240);  if(Compiler_peek(c, 0) != 27051791223990) Compiler_report_error(c, 33658058, _871, c -> token, NULL);  Token name_token = c -> token;  String name = String_unescape(String_new_len(c -> token -> text + 1, c -> token -> len - 2));  if(! String_is_identifier(name)) Compiler_report_error(c, 33658058, _872, name_token, NULL);  Compiler_next(c);  String alias = name;  if(_test_contextual(c, _869)){
     if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _873, c -> token, NULL);  alias = c -> token -> text;  Compiler_next(c);
   }
-  Compiler_collect_package(c, name, start);  Compiler_register_package_alias(c, name, alias, start);  if(_test_contextual(c, _336)) _import_members(c, name);  Compiler_expect(c, 119);  return cons(_332, cons(String_var(name), cons(String_var(alias), NULL)));
+  Compiler_collect_package(c, name, start);  Compiler_register_package_alias(c, name, alias, start);  if(_test_contextual(c, _336)) _import_members(c, name);  Compiler_import_package_macros(c, name, start);  Compiler_expect(c, 119);  return cons(_332, cons(String_var(name), cons(String_var(alias), NULL)));
 }
 
 int Compiler_defines_main(Compiler c){

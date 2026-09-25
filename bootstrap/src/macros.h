@@ -95,6 +95,8 @@ int macro_library_pending(void);
 
 Map Compiler_shared_definitions(Compiler compiler);
 
+void Compiler_import_package_macros(Compiler c, String name, Token invocation);
+
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);

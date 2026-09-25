@@ -1,7 +1,7 @@
 # Package macro exports
 
-> Status: implemented 2026-09-25. A direct public `.xmacro` import in the
-> package entry is the export; one consumer `import "name";` supplies
+> Status: done 2026-09-25 in cc94e05f. A direct public `.xmacro` import
+> in the package entry is the export; one consumer `import "name";` supplies
 > declarations, native meta targets, and the selected macro pack.
 
 ## Result
