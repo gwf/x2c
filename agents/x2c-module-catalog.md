@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 34
-- Runtime modules: 57
+- Compiler modules: 35
+- Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -449,6 +449,14 @@ x2c AST transformation pipeline.
 Public functions:
 
 `transform_array_literal`, `transform_map_literal`, `Compiler.transform`
+
+### [src/type-ledger.x](../src/type-ledger.x)
+
+the compiler's Var tag tables, projected from the ledger.
+
+Public functions:
+
+`Type.builtin_var_tags`, `Type.var_tag_rows`
 
 ### [src/type.x](../src/type.x)
 
@@ -1301,6 +1309,14 @@ Public functions:
 `MapStringInt.repr`, `MapStringInt.var`, `Var.mapstringint`,
 `MapStringInt.iter`, `MapStringInt.keys`, `MapStringInt.enumerate`,
 `MapStringInt.cleanup`
+
+### [lib/var-ledger.x](../lib/var-ledger.x)
+
+the runtime tables projected from the Var tag ledger.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/var.x](../lib/var.x)
 

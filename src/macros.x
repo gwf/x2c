@@ -2055,6 +2055,9 @@ void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
   }
   Token first = compiler.token;
   String form = _lisp_form(compiler);
+  /* As in full parsing, the shared session already holds an inherited
+     import's forms, and running one again would rebind an ancestor's name. */
+  if (compiler.inherited_lisp) return;
   compiler.queue_declaration_effect(form, first, compiler.token);
 }
 

@@ -9,7 +9,6 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "var-tags.xmacro")
 #include "common.x"
 
 /** Describes one numeric `Var` family without holding a value.
@@ -134,11 +133,11 @@ Var Var.integer_box(Symbol target, unsigned long long raw) {
 #include <math.h>
 #include <string.h>
 
-/* Both projections walk the tag ledger's numeric rows in the same order, so
-   the SymbolSet index is the metadata-table index. Promotion and conversion
-   read widths and ranks from these rows. */
-static const SymbolSet numeric_tags = $var.tag.numeric.symbolset();
-static const X2CVarNumericInfo numerics[] = $var.tag.numeric();
+/* `lib/var-ledger.x` projects both tables from the tag ledger's numeric rows
+   in the same order, so the SymbolSet index is the metadata-table index.
+   Promotion and conversion read widths and ranks from these rows. */
+extern const SymbolSet x2c_var_numeric_tags;
+extern const X2CVarNumericInfo x2c_var_numerics[];
 
 /** Writes numeric-family metadata for `tag` and returns nonzero.
     The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
@@ -147,9 +146,9 @@ static const X2CVarNumericInfo numerics[] = $var.tag.numeric();
 int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out) {
   if (!out) return 0;
   if (tag == <nan> || tag == <-inf> || tag == <+inf>) tag = <f64>;
-  int row = numeric_tags.index(tag);
+  int row = x2c_var_numeric_tags.index(tag);
   if (row < 0) return 0;
-  *out = numerics[row];
+  *out = x2c_var_numerics[row];
   return 1;
 }
 

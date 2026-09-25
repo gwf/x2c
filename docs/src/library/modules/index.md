@@ -97,3 +97,4 @@ These modules implement the runtime and are not public APIs.
 - `lib/static-init.x` - Compiler-owned first-use static storage and initialization guards.
 - `lib/thread-state.x` - Native pthread-key storage for per-thread runtime state.
 - `lib/tokenizer.x` - Token stream used by the compiler and the Lisp reader.
+- `lib/var-ledger.x` - The `Var` tag tables and decoder table projected from `lib/var-tags.xmacro`, in the one runtime unit that imports the ledger.

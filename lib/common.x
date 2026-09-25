@@ -15,7 +15,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "var-tags.xmacro")
+$(import "var-unbox.xmacro")
 
 #include <float.h>
 #include <limits.h>

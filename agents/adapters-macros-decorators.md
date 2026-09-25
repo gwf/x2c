@@ -144,9 +144,9 @@ Current proven shapes include:
   visible.
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
   mechanical name-to-registration conversion.
-- One ledger in `lib/var.x` with mechanical projections imported from
-  `lib/var-tags.xmacro`. One row supplies the enum, table, and switch
-  projections.
+- One ledger in `lib/var-tags.xmacro` with mechanical projections in
+  `lib/var-ledger.x` and `src/type-ledger.x`. One row supplies the tag
+  tables, the decoder table, the `TagId` check, and the compiler's lookups.
 
 `lib/map-generics.xmacro` also shows how to remove fake adapters without
 discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
@@ -182,9 +182,12 @@ Keep fixed policy in the module whose behavior it defines, as
 `lib/dispatch.x` does with direct switches for primitive rendering. A
 substantial xmacro may keep AST projection mechanics out of the runtime
 source, as `lib/var-tags.xmacro` does. When two modules must read the same rows
-the xmacro holds them instead, because a `$(def)` does not cross an `#include`:
-`lib/var.x` and `lib/varconvert.x` both read the tag ledger, so it is in
-`lib/var-tags.xmacro`. A single three-row table does not justify five one-use
+the xmacro holds them instead, because a compile-time definition does not
+cross an `#include`: `lib/var-ledger.x` and `src/type-ledger.x` both read the
+tag ledger, so it is in `lib/var-tags.xmacro`. Import a large ledger only in a
+unit nothing includes. An import in an included file runs in every unit that
+includes it, so the tag tables live in those two leaf units and `lib/var.x`
+declares them `extern`. A single three-row table does not justify five one-use
 macros: direct aligns,
 offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only xmacro adds a file boundary without sharing an
@@ -568,10 +571,9 @@ inside an expansion.
 Proof: generated `.h` and `.c` byte-identical for `lib/var.x` and
 `lib/varops.x` before and after adoption; `make precommit` and `make check`.
 
-Limits or counterexample: the shapes without a constructor, `switch`, `case`,
-and the `(op & ...)` selector in `var.tag.decode-inner`, are still
-hand-written quasiquotes. Add constructors for those when a second generator
-needs the same one, not before.
+Limits or counterexample: the shapes without a constructor, such as `switch`
+and `case`, are still hand-written quasiquotes. Add constructors for those
+when a second generator needs the same one, not before.
 
 Language gap, if any: none; this is an SDK addition, not a compiler change.
 

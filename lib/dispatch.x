@@ -14,7 +14,6 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "var-tags.xmacro")
 #include "common.x"
 #include "map.x"
 
@@ -244,7 +243,7 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 /* One row per boxed ledger tag, in ledger order, so a decoded value indexes
    the table without another tag search. */
 static VarDescriptor
-  builtin_descriptors[$var.tag.descriptor.count()] = {0};
+  builtin_descriptors[_var_ - _array_ + 1] = {0};
 
 int x2c_var_descriptor_index(Var value);
 VarDescriptor *x2c_var_custom_descriptor(Var value);

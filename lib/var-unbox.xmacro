@@ -1,0 +1,31 @@
+/*  var-unbox.xmacro -- `Var` accessors for the boxed runtime classes
+
+    `lib/common.x` projects one accessor per class. Each reads its tag's
+    encoding fields from the compiled ledger table through `Var.tag_top` and
+    `Var.tag_bottom`, so this file does not carry the ledger.
+*/
+
+/* Object rows carry their payload pointer in the low 48 bits with the
+   bottom three bits reserved for the row selector, so reading one back is
+   the row's top and bottom columns and a mask. */
+meta Var List_last(List lst);
+meta unsigned long Var_tag_top(Symbol tag);
+meta unsigned long Var_tag_bottom(Symbol tag);
+
+/* A `Literal` tag argument arrives as its resolved Symbol expression,
+   `(expr TYPE (literal TYPE TEXT SYMBOL))`; the tables read the Symbol. */
+meta static int var_tag_top(List tag) =>
+  (int) Var_tag_top(List_last((List) List_last(tag)));
+meta static int var_tag_bottom(List tag) =>
+  (int) Var_tag_bottom(List_last((List) List_last(tag)));
+
+macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
+  $type Var.$method(Var);
+
+  /** Extracts the `$type` payload of `value`, or NULL for another tag. */
+  inline $type Var.$method(Var value) {
+    if (value.u64 >> 48 != $var_tag_top($tag) ||
+        (value.u64 & 0x7) != $var_tag_bottom($tag)) return NULL;
+    return ($type) (value.u64 & 0x0000FFFFFFFFFFF8ul);
+  }
+}
