@@ -410,7 +410,7 @@ Var Var_integer_box(Symbol, unsigned long long);
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   Symbol tag = _integer_result_tag(&(lhs), &(rhs));
   X2CVarNumericInfo info;
-  if(! Var_numeric_info(tag, & info)){
+  if(! Var_numeric_info(tag, &(info))){
     static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/varops.x",.function = "_integer_binary",.line = 164};
     x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
@@ -520,8 +520,8 @@ void Var_numeric_decode(Var, X2CVarNumeric *);
 
 static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value){
   X2CVarNumeric lhs, rhs;
-  Var_numeric_decode(lhs_value, & lhs);
-  Var_numeric_decode(rhs_value, & rhs);
+  Var_numeric_decode(lhs_value, &(lhs));
+  Var_numeric_decode(rhs_value, &(rhs));
   switch(op){
     case 15481 : case 15997 : if(lhs.floating || rhs.floating){
       static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 238};
@@ -634,9 +634,9 @@ int Var_fallback_truth(Var value){
   }
   X2CVarNumericInfo info;
   int truth;
-  if(Var_numeric_info(Var_tag(value), & info)){
+  if(Var_numeric_info(Var_tag(value), &(info))){
     X2CVarNumeric numeric;
-    Var_numeric_decode(value, & numeric);
+    Var_numeric_decode(value, &(numeric));
     truth = numeric.floating ? numeric.floating_value != 0.0L : numeric.raw != 0;
   }
   else{
@@ -661,7 +661,7 @@ int Var_dispatch_truth(Var, int *);
 
 int Var_truth(Var value){
   if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
-  int handled = 0, truth = Var_dispatch_truth(value, & handled);
+  int handled = 0, truth = Var_dispatch_truth(value, &(handled));
   return handled ? ! ! truth : Var_fallback_truth(value);
 }
 
@@ -702,7 +702,7 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   }
   if(op == 56 && Var_is_row(lhs, 11, 7, 1) && Var_is_row(rhs, 11, 7, 1)) return String_var(String_add(Var_string(lhs), Var_string(rhs)));
   if(Var_is_row(lhs, 11, 7, 1)) return _general_numeric_binary(op, lhs, rhs);
-  if(Var_try_dispatch_binary(lhs, member, rhs, & result)) return result;
+  if(Var_try_dispatch_binary(lhs, member, rhs, &(result))) return result;
   if(Var_kind(lhs) == 1011493096){
     Symbol tag = Var_tag(lhs);
     {
@@ -757,7 +757,7 @@ Var Var_neg(Var value){
     __builtin_unreachable();
   }
   Var result;
-  if(Var_try_dispatch_unary(value, 29006, & result)) return result;
+  if(Var_try_dispatch_unary(value, 29006, &(result))) return result;
   if(Var_kind(value) == 1011493096){
     Symbol tag = Var_tag(value);
     {

@@ -1870,7 +1870,7 @@ static int _enum_fits_int(List type, List members){
       case 992: ;  static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_133), &_x2c_match_capture)) {Var value = _x2c_match_values[0]; {
         Var _x2c_match_value_2 = value; {
           Type value = Var_type(_x2c_match_value_2); {
-            if(List_equal(Type_list(value), type)) continue;  X2CVarNumericInfo info;  if(Var_numeric_info(Type_scalar_tag(value), & info) && ! info.floating &&(info.bits < 32 ||(info.bits == 32 && ! info.unsigned_value))) continue;
+            if(List_equal(Type_list(value), type)) continue;  X2CVarNumericInfo info;  if(Var_numeric_info(Type_scalar_tag(value), &(info)) && ! info.floating &&(info.bits < 32 ||(info.bits == 32 && ! info.unsigned_value))) continue;
           }
 
         }

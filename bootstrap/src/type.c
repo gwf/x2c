@@ -776,7 +776,7 @@ Type Type_scalar(Type type){
 Var Map_getindex(Map, Var);
 int Var_numeric_info(Symbol, X2CVarNumericInfo *);
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info){
-  Var row = Map_getindex(scalartypes, List_var(type));  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), &(* info));
+  Var row = Map_getindex(scalartypes, List_var(type));  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), &((* info)));
 }
 
 static List _scalar_row(Type type){
@@ -1001,7 +1001,7 @@ int Type_is_number(Type type){
 }
 
 int Type_is_integral(Type type){
-  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return 1;  X2CVarNumericInfo info;  return Var_numeric_info(Type_scalar_tag(type), & info) && ! info.floating;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return 1;  X2CVarNumericInfo info;  return Var_numeric_info(Type_scalar_tag(type), &(info)) && ! info.floating;
 }
 
 static int Type__is_tagged(Type type){

@@ -682,7 +682,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
-  int numeric = Var_encoding_valid(rhs) && Var_numeric_info(Var_tag(rhs), & info);
+  int numeric = Var_encoding_valid(rhs) && Var_numeric_info(Var_tag(rhs), &(info));
   if(op == 56 && numeric){
     int inserted;
     Var * stored = Map__core_get_or_insert(map, & key, & rhs, & inserted);
@@ -728,7 +728,7 @@ int Map_try_del(Map map, Var key, Var * out){
 
 Var Map_del(Map map, Var key){
   Var out;
-  return Map_try_del(map, key, & out) ? out :((void) 0, Void);
+  return Map_try_del(map, key, &(out)) ? out :((void) 0, Void);
 }
 
 Map Map_update_n(Map map, unsigned pair_count, ...){

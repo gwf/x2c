@@ -1182,7 +1182,7 @@ static Symbol _catch_match(ErrorHandler h){
       values, 0, layout ? layout -> binder_count : 0
     }
     ;
-    int matched = is_default ? 1 : plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), & captures, NULL) == 1;
+    int matched = is_default ? 1 : plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1;
     if(! matched){
       if(values) Scope_free(values);
       continue;

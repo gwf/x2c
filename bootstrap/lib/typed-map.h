@@ -72,65 +72,65 @@ MapIntInt MapIntInt_new(void);
 
 MapIntInt Map_mapintint(Map _x2c_macro_entries_4);
 
-unsigned MapIntInt_len(MapIntInt _x2c_macro_map_18);
+unsigned MapIntInt_len(MapIntInt _x2c_macro_map_19);
 
-int MapIntInt_try_get(MapIntInt _x2c_macro_map_19, int _x2c_macro_key_11, int * _x2c_macro_out_3);
+int MapIntInt_try_get(MapIntInt _x2c_macro_map_20, int _x2c_macro_key_12, int * _x2c_macro_out_4);
 
-int MapIntInt_get(MapIntInt _x2c_macro_map_20, int _x2c_macro_key_12);
+int MapIntInt_get(MapIntInt _x2c_macro_map_21, int _x2c_macro_key_13);
 
-int MapIntInt_getindex(MapIntInt _x2c_macro_map_21, int _x2c_macro_key_13);
+int MapIntInt_getindex(MapIntInt _x2c_macro_map_22, int _x2c_macro_key_14);
 
-int MapIntInt_getdefault(MapIntInt _x2c_macro_map_22, int _x2c_macro_key_14, int _x2c_macro_defval_0);
+int MapIntInt_getdefault(MapIntInt _x2c_macro_map_23, int _x2c_macro_key_15, int _x2c_macro_defval_0);
 
-int MapIntInt_setdefault(MapIntInt _x2c_macro_map_23, int _x2c_macro_key_15, int _x2c_macro_defval_1);
+int MapIntInt_setdefault(MapIntInt _x2c_macro_map_24, int _x2c_macro_key_16, int _x2c_macro_defval_1);
 
-int MapIntInt_contains(MapIntInt _x2c_macro_map_24, int _x2c_macro_key_16);
+int MapIntInt_contains(MapIntInt _x2c_macro_map_25, int _x2c_macro_key_17);
 
-void MapIntInt_set(MapIntInt _x2c_macro_map_25, int _x2c_macro_key_17, int _x2c_macro_val_5);
+void MapIntInt_set(MapIntInt _x2c_macro_map_26, int _x2c_macro_key_18, int _x2c_macro_val_5);
 
-int MapIntInt_setindex(MapIntInt _x2c_macro_map_26, int _x2c_macro_key_18, int _x2c_macro_val_6);
+int MapIntInt_setindex(MapIntInt _x2c_macro_map_27, int _x2c_macro_key_19, int _x2c_macro_val_6);
 
-int MapIntInt_updateindex(MapIntInt _x2c_macro_map_27, int _x2c_macro_key_19, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0);
+int MapIntInt_updateindex(MapIntInt _x2c_macro_map_28, int _x2c_macro_key_20, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0);
 
-int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_28, int _x2c_macro_key_20, Symbol _x2c_macro_op_2);
+int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_29, int _x2c_macro_key_21, Symbol _x2c_macro_op_2);
 
-int MapIntInt_try_del(MapIntInt _x2c_macro_map_29, int _x2c_macro_key_21, int * _x2c_macro_out_6);
+int MapIntInt_try_del(MapIntInt _x2c_macro_map_30, int _x2c_macro_key_22, int * _x2c_macro_out_7);
 
-int MapIntInt_del(MapIntInt _x2c_macro_map_30, int _x2c_macro_key_22);
+int MapIntInt_del(MapIntInt _x2c_macro_map_31, int _x2c_macro_key_23);
 
-MapIntInt MapIntInt_copy(MapIntInt _x2c_macro_map_31);
+MapIntInt MapIntInt_copy(MapIntInt _x2c_macro_map_32);
 
-MapIntInt MapIntInt_merge(MapIntInt _x2c_macro_map_32, MapIntInt _x2c_macro_other_2);
+MapIntInt MapIntInt_merge(MapIntInt _x2c_macro_map_33, MapIntInt _x2c_macro_other_2);
 
-int MapIntInt_try_next(MapIntInt _x2c_macro_map_33, unsigned * _x2c_macro_cursor_4, int * _x2c_macro_key_23, int * _x2c_macro_val_7);
+int MapIntInt_try_next(MapIntInt _x2c_macro_map_34, unsigned * _x2c_macro_cursor_4, int * _x2c_macro_key_24, int * _x2c_macro_val_7);
 
-int MapIntInt_truth(MapIntInt _x2c_macro_map_34);
+int MapIntInt_truth(MapIntInt _x2c_macro_map_35);
 
 int MapIntInt_equal(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macro_b_2);
 
-Map MapIntInt_map(MapIntInt _x2c_macro_map_36);
+Map MapIntInt_map(MapIntInt _x2c_macro_map_37);
 
 int MapIntInt_compare(MapIntInt _x2c_macro_a_5, MapIntInt _x2c_macro_b_5);
 
-Buffer MapIntInt_write_repr(MapIntInt _x2c_macro_map_37, Buffer _x2c_macro_out_9);
+Buffer MapIntInt_write_repr(MapIntInt _x2c_macro_map_38, Buffer _x2c_macro_out_10);
 
-Buffer MapIntInt_write_str(MapIntInt _x2c_macro_map_38, Buffer _x2c_macro_out_10);
+Buffer MapIntInt_write_str(MapIntInt _x2c_macro_map_39, Buffer _x2c_macro_out_11);
 
-String MapIntInt_str(MapIntInt _x2c_macro_map_39);
+String MapIntInt_str(MapIntInt _x2c_macro_map_40);
 
-String MapIntInt_repr(MapIntInt _x2c_macro_map_40);
+String MapIntInt_repr(MapIntInt _x2c_macro_map_41);
 
-Var MapIntInt_var(MapIntInt _x2c_macro_map_41);
+Var MapIntInt_var(MapIntInt _x2c_macro_map_42);
 
 MapIntInt Var_mapintint(Var _x2c_macro_value_3);
 
-Iter MapIntInt_iter(MapIntInt _x2c_macro_map_45, Iter _x2c_macro_dest_0);
+Iter MapIntInt_iter(MapIntInt _x2c_macro_map_46, Iter _x2c_macro_dest_0);
 
-Iter MapIntInt_keys(MapIntInt _x2c_macro_map_46, Iter _x2c_macro_dest_1);
+Iter MapIntInt_keys(MapIntInt _x2c_macro_map_47, Iter _x2c_macro_dest_1);
 
-Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_47, Iter _x2c_macro_dest_2);
+Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_48, Iter _x2c_macro_dest_2);
 
-void MapIntInt_cleanup(MapIntInt _x2c_macro_map_49);
+void MapIntInt_cleanup(MapIntInt _x2c_macro_map_50);
 
 MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_macro_capacity_5);
 
@@ -138,65 +138,65 @@ MapLongDouble MapLongDouble_new(void);
 
 MapLongDouble Map_maplongdouble(Map _x2c_macro_entries_9);
 
-unsigned MapLongDouble_len(MapLongDouble _x2c_macro_map_68);
+unsigned MapLongDouble_len(MapLongDouble _x2c_macro_map_70);
 
-int MapLongDouble_try_get(MapLongDouble _x2c_macro_map_69, long _x2c_macro_key_41, double * _x2c_macro_out_19);
+int MapLongDouble_try_get(MapLongDouble _x2c_macro_map_71, long _x2c_macro_key_43, double * _x2c_macro_out_21);
 
-double MapLongDouble_get(MapLongDouble _x2c_macro_map_70, long _x2c_macro_key_42);
+double MapLongDouble_get(MapLongDouble _x2c_macro_map_72, long _x2c_macro_key_44);
 
-double MapLongDouble_getindex(MapLongDouble _x2c_macro_map_71, long _x2c_macro_key_43);
+double MapLongDouble_getindex(MapLongDouble _x2c_macro_map_73, long _x2c_macro_key_45);
 
-double MapLongDouble_getdefault(MapLongDouble _x2c_macro_map_72, long _x2c_macro_key_44, double _x2c_macro_defval_2);
+double MapLongDouble_getdefault(MapLongDouble _x2c_macro_map_74, long _x2c_macro_key_46, double _x2c_macro_defval_2);
 
-double MapLongDouble_setdefault(MapLongDouble _x2c_macro_map_73, long _x2c_macro_key_45, double _x2c_macro_defval_3);
+double MapLongDouble_setdefault(MapLongDouble _x2c_macro_map_75, long _x2c_macro_key_47, double _x2c_macro_defval_3);
 
-int MapLongDouble_contains(MapLongDouble _x2c_macro_map_74, long _x2c_macro_key_46);
+int MapLongDouble_contains(MapLongDouble _x2c_macro_map_76, long _x2c_macro_key_48);
 
-void MapLongDouble_set(MapLongDouble _x2c_macro_map_75, long _x2c_macro_key_47, double _x2c_macro_val_16);
+void MapLongDouble_set(MapLongDouble _x2c_macro_map_77, long _x2c_macro_key_49, double _x2c_macro_val_16);
 
-double MapLongDouble_setindex(MapLongDouble _x2c_macro_map_76, long _x2c_macro_key_48, double _x2c_macro_val_17);
+double MapLongDouble_setindex(MapLongDouble _x2c_macro_map_78, long _x2c_macro_key_50, double _x2c_macro_val_17);
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_77, long _x2c_macro_key_49, Symbol _x2c_macro_op_3, double _x2c_macro_rhs_1);
+double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_79, long _x2c_macro_key_51, Symbol _x2c_macro_op_3, double _x2c_macro_rhs_1);
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_78, long _x2c_macro_key_50, Symbol _x2c_macro_op_4);
+double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_80, long _x2c_macro_key_52, Symbol _x2c_macro_op_4);
 
-int MapLongDouble_try_del(MapLongDouble _x2c_macro_map_79, long _x2c_macro_key_51, double * _x2c_macro_out_22);
+int MapLongDouble_try_del(MapLongDouble _x2c_macro_map_81, long _x2c_macro_key_53, double * _x2c_macro_out_24);
 
-double MapLongDouble_del(MapLongDouble _x2c_macro_map_80, long _x2c_macro_key_52);
+double MapLongDouble_del(MapLongDouble _x2c_macro_map_82, long _x2c_macro_key_54);
 
-MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_macro_map_81);
+MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_macro_map_83);
 
-MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_macro_map_82, MapLongDouble _x2c_macro_other_5);
+MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_macro_map_84, MapLongDouble _x2c_macro_other_5);
 
-int MapLongDouble_try_next(MapLongDouble _x2c_macro_map_83, unsigned * _x2c_macro_cursor_15, long * _x2c_macro_key_53, double * _x2c_macro_val_18);
+int MapLongDouble_try_next(MapLongDouble _x2c_macro_map_85, unsigned * _x2c_macro_cursor_15, long * _x2c_macro_key_55, double * _x2c_macro_val_18);
 
-int MapLongDouble_truth(MapLongDouble _x2c_macro_map_84);
+int MapLongDouble_truth(MapLongDouble _x2c_macro_map_86);
 
 int MapLongDouble_equal(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7);
 
-Map MapLongDouble_map(MapLongDouble _x2c_macro_map_86);
+Map MapLongDouble_map(MapLongDouble _x2c_macro_map_88);
 
 int MapLongDouble_compare(MapLongDouble _x2c_macro_a_10, MapLongDouble _x2c_macro_b_10);
 
-Buffer MapLongDouble_write_repr(MapLongDouble _x2c_macro_map_87, Buffer _x2c_macro_out_25);
+Buffer MapLongDouble_write_repr(MapLongDouble _x2c_macro_map_89, Buffer _x2c_macro_out_27);
 
-Buffer MapLongDouble_write_str(MapLongDouble _x2c_macro_map_88, Buffer _x2c_macro_out_26);
+Buffer MapLongDouble_write_str(MapLongDouble _x2c_macro_map_90, Buffer _x2c_macro_out_28);
 
-String MapLongDouble_str(MapLongDouble _x2c_macro_map_89);
+String MapLongDouble_str(MapLongDouble _x2c_macro_map_91);
 
-String MapLongDouble_repr(MapLongDouble _x2c_macro_map_90);
+String MapLongDouble_repr(MapLongDouble _x2c_macro_map_92);
 
-Var MapLongDouble_var(MapLongDouble _x2c_macro_map_91);
+Var MapLongDouble_var(MapLongDouble _x2c_macro_map_93);
 
 MapLongDouble Var_maplongdouble(Var _x2c_macro_value_7);
 
-Iter MapLongDouble_iter(MapLongDouble _x2c_macro_map_95, Iter _x2c_macro_dest_3);
+Iter MapLongDouble_iter(MapLongDouble _x2c_macro_map_97, Iter _x2c_macro_dest_3);
 
-Iter MapLongDouble_keys(MapLongDouble _x2c_macro_map_96, Iter _x2c_macro_dest_4);
+Iter MapLongDouble_keys(MapLongDouble _x2c_macro_map_98, Iter _x2c_macro_dest_4);
 
-Iter MapLongDouble_enumerate(MapLongDouble _x2c_macro_map_97, Iter _x2c_macro_dest_5);
+Iter MapLongDouble_enumerate(MapLongDouble _x2c_macro_map_99, Iter _x2c_macro_dest_5);
 
-void MapLongDouble_cleanup(MapLongDouble _x2c_macro_map_99);
+void MapLongDouble_cleanup(MapLongDouble _x2c_macro_map_101);
 
 MapStringString MapStringString_new_capacity(unsigned _x2c_macro_capacity_8);
 
@@ -204,65 +204,65 @@ MapStringString MapStringString_new(void);
 
 MapStringString Map_mapstringstring(Map _x2c_macro_entries_14);
 
-unsigned MapStringString_len(MapStringString _x2c_macro_map_118);
+unsigned MapStringString_len(MapStringString _x2c_macro_map_121);
 
-int MapStringString_try_get(MapStringString _x2c_macro_map_119, String _x2c_macro_key_71, String * _x2c_macro_out_35);
+int MapStringString_try_get(MapStringString _x2c_macro_map_122, String _x2c_macro_key_74, String * _x2c_macro_out_38);
 
-String MapStringString_get(MapStringString _x2c_macro_map_120, String _x2c_macro_key_72);
+String MapStringString_get(MapStringString _x2c_macro_map_123, String _x2c_macro_key_75);
 
-String MapStringString_getindex(MapStringString _x2c_macro_map_121, String _x2c_macro_key_73);
+String MapStringString_getindex(MapStringString _x2c_macro_map_124, String _x2c_macro_key_76);
 
-String MapStringString_getdefault(MapStringString _x2c_macro_map_122, String _x2c_macro_key_74, String _x2c_macro_defval_4);
+String MapStringString_getdefault(MapStringString _x2c_macro_map_125, String _x2c_macro_key_77, String _x2c_macro_defval_4);
 
-String MapStringString_setdefault(MapStringString _x2c_macro_map_123, String _x2c_macro_key_75, String _x2c_macro_defval_5);
+String MapStringString_setdefault(MapStringString _x2c_macro_map_126, String _x2c_macro_key_78, String _x2c_macro_defval_5);
 
-int MapStringString_contains(MapStringString _x2c_macro_map_124, String _x2c_macro_key_76);
+int MapStringString_contains(MapStringString _x2c_macro_map_127, String _x2c_macro_key_79);
 
-void MapStringString_set(MapStringString _x2c_macro_map_125, String _x2c_macro_key_77, String _x2c_macro_val_27);
+void MapStringString_set(MapStringString _x2c_macro_map_128, String _x2c_macro_key_80, String _x2c_macro_val_27);
 
-String MapStringString_setindex(MapStringString _x2c_macro_map_126, String _x2c_macro_key_78, String _x2c_macro_val_28);
+String MapStringString_setindex(MapStringString _x2c_macro_map_129, String _x2c_macro_key_81, String _x2c_macro_val_28);
 
-String MapStringString_updateindex(MapStringString _x2c_macro_map_127, String _x2c_macro_key_79, Symbol _x2c_macro_op_5, String _x2c_macro_rhs_2);
+String MapStringString_updateindex(MapStringString _x2c_macro_map_130, String _x2c_macro_key_82, Symbol _x2c_macro_op_5, String _x2c_macro_rhs_2);
 
-String MapStringString_postfixindex(MapStringString _x2c_macro_map_128, String _x2c_macro_key_80, Symbol _x2c_macro_op_6);
+String MapStringString_postfixindex(MapStringString _x2c_macro_map_131, String _x2c_macro_key_83, Symbol _x2c_macro_op_6);
 
-int MapStringString_try_del(MapStringString _x2c_macro_map_129, String _x2c_macro_key_81, String * _x2c_macro_out_38);
+int MapStringString_try_del(MapStringString _x2c_macro_map_132, String _x2c_macro_key_84, String * _x2c_macro_out_41);
 
-String MapStringString_del(MapStringString _x2c_macro_map_130, String _x2c_macro_key_82);
+String MapStringString_del(MapStringString _x2c_macro_map_133, String _x2c_macro_key_85);
 
-MapStringString MapStringString_copy(MapStringString _x2c_macro_map_131);
+MapStringString MapStringString_copy(MapStringString _x2c_macro_map_134);
 
-MapStringString MapStringString_merge(MapStringString _x2c_macro_map_132, MapStringString _x2c_macro_other_8);
+MapStringString MapStringString_merge(MapStringString _x2c_macro_map_135, MapStringString _x2c_macro_other_8);
 
-int MapStringString_try_next(MapStringString _x2c_macro_map_133, unsigned * _x2c_macro_cursor_26, String * _x2c_macro_key_83, String * _x2c_macro_val_29);
+int MapStringString_try_next(MapStringString _x2c_macro_map_136, unsigned * _x2c_macro_cursor_26, String * _x2c_macro_key_86, String * _x2c_macro_val_29);
 
-int MapStringString_truth(MapStringString _x2c_macro_map_134);
+int MapStringString_truth(MapStringString _x2c_macro_map_137);
 
 int MapStringString_equal(MapStringString _x2c_macro_a_12, MapStringString _x2c_macro_b_12);
 
-Map MapStringString_map(MapStringString _x2c_macro_map_136);
+Map MapStringString_map(MapStringString _x2c_macro_map_139);
 
 int MapStringString_compare(MapStringString _x2c_macro_a_15, MapStringString _x2c_macro_b_15);
 
-Buffer MapStringString_write_repr(MapStringString _x2c_macro_map_137, Buffer _x2c_macro_out_41);
+Buffer MapStringString_write_repr(MapStringString _x2c_macro_map_140, Buffer _x2c_macro_out_44);
 
-Buffer MapStringString_write_str(MapStringString _x2c_macro_map_138, Buffer _x2c_macro_out_42);
+Buffer MapStringString_write_str(MapStringString _x2c_macro_map_141, Buffer _x2c_macro_out_45);
 
-String MapStringString_str(MapStringString _x2c_macro_map_139);
+String MapStringString_str(MapStringString _x2c_macro_map_142);
 
-String MapStringString_repr(MapStringString _x2c_macro_map_140);
+String MapStringString_repr(MapStringString _x2c_macro_map_143);
 
-Var MapStringString_var(MapStringString _x2c_macro_map_141);
+Var MapStringString_var(MapStringString _x2c_macro_map_144);
 
 MapStringString Var_mapstringstring(Var _x2c_macro_value_11);
 
-Iter MapStringString_iter(MapStringString _x2c_macro_map_145, Iter _x2c_macro_dest_6);
+Iter MapStringString_iter(MapStringString _x2c_macro_map_148, Iter _x2c_macro_dest_6);
 
-Iter MapStringString_keys(MapStringString _x2c_macro_map_146, Iter _x2c_macro_dest_7);
+Iter MapStringString_keys(MapStringString _x2c_macro_map_149, Iter _x2c_macro_dest_7);
 
-Iter MapStringString_enumerate(MapStringString _x2c_macro_map_147, Iter _x2c_macro_dest_8);
+Iter MapStringString_enumerate(MapStringString _x2c_macro_map_150, Iter _x2c_macro_dest_8);
 
-void MapStringString_cleanup(MapStringString _x2c_macro_map_149);
+void MapStringString_cleanup(MapStringString _x2c_macro_map_152);
 
 MapStringInt MapStringInt_new_capacity(unsigned _x2c_macro_capacity_11);
 
@@ -270,65 +270,65 @@ MapStringInt MapStringInt_new(void);
 
 MapStringInt Map_mapstringint(Map _x2c_macro_entries_19);
 
-unsigned MapStringInt_len(MapStringInt _x2c_macro_map_168);
+unsigned MapStringInt_len(MapStringInt _x2c_macro_map_172);
 
-int MapStringInt_try_get(MapStringInt _x2c_macro_map_169, String _x2c_macro_key_101, int * _x2c_macro_out_51);
+int MapStringInt_try_get(MapStringInt _x2c_macro_map_173, String _x2c_macro_key_105, int * _x2c_macro_out_55);
 
-int MapStringInt_get(MapStringInt _x2c_macro_map_170, String _x2c_macro_key_102);
+int MapStringInt_get(MapStringInt _x2c_macro_map_174, String _x2c_macro_key_106);
 
-int MapStringInt_getindex(MapStringInt _x2c_macro_map_171, String _x2c_macro_key_103);
+int MapStringInt_getindex(MapStringInt _x2c_macro_map_175, String _x2c_macro_key_107);
 
-int MapStringInt_getdefault(MapStringInt _x2c_macro_map_172, String _x2c_macro_key_104, int _x2c_macro_defval_6);
+int MapStringInt_getdefault(MapStringInt _x2c_macro_map_176, String _x2c_macro_key_108, int _x2c_macro_defval_6);
 
-int MapStringInt_setdefault(MapStringInt _x2c_macro_map_173, String _x2c_macro_key_105, int _x2c_macro_defval_7);
+int MapStringInt_setdefault(MapStringInt _x2c_macro_map_177, String _x2c_macro_key_109, int _x2c_macro_defval_7);
 
-int MapStringInt_contains(MapStringInt _x2c_macro_map_174, String _x2c_macro_key_106);
+int MapStringInt_contains(MapStringInt _x2c_macro_map_178, String _x2c_macro_key_110);
 
-void MapStringInt_set(MapStringInt _x2c_macro_map_175, String _x2c_macro_key_107, int _x2c_macro_val_38);
+void MapStringInt_set(MapStringInt _x2c_macro_map_179, String _x2c_macro_key_111, int _x2c_macro_val_38);
 
-int MapStringInt_setindex(MapStringInt _x2c_macro_map_176, String _x2c_macro_key_108, int _x2c_macro_val_39);
+int MapStringInt_setindex(MapStringInt _x2c_macro_map_180, String _x2c_macro_key_112, int _x2c_macro_val_39);
 
-int MapStringInt_updateindex(MapStringInt _x2c_macro_map_177, String _x2c_macro_key_109, Symbol _x2c_macro_op_7, int _x2c_macro_rhs_3);
+int MapStringInt_updateindex(MapStringInt _x2c_macro_map_181, String _x2c_macro_key_113, Symbol _x2c_macro_op_7, int _x2c_macro_rhs_3);
 
-int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_178, String _x2c_macro_key_110, Symbol _x2c_macro_op_8);
+int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_182, String _x2c_macro_key_114, Symbol _x2c_macro_op_8);
 
-int MapStringInt_try_del(MapStringInt _x2c_macro_map_179, String _x2c_macro_key_111, int * _x2c_macro_out_54);
+int MapStringInt_try_del(MapStringInt _x2c_macro_map_183, String _x2c_macro_key_115, int * _x2c_macro_out_58);
 
-int MapStringInt_del(MapStringInt _x2c_macro_map_180, String _x2c_macro_key_112);
+int MapStringInt_del(MapStringInt _x2c_macro_map_184, String _x2c_macro_key_116);
 
-MapStringInt MapStringInt_copy(MapStringInt _x2c_macro_map_181);
+MapStringInt MapStringInt_copy(MapStringInt _x2c_macro_map_185);
 
-MapStringInt MapStringInt_merge(MapStringInt _x2c_macro_map_182, MapStringInt _x2c_macro_other_11);
+MapStringInt MapStringInt_merge(MapStringInt _x2c_macro_map_186, MapStringInt _x2c_macro_other_11);
 
-int MapStringInt_try_next(MapStringInt _x2c_macro_map_183, unsigned * _x2c_macro_cursor_38, String * _x2c_macro_key_113, int * _x2c_macro_val_40);
+int MapStringInt_try_next(MapStringInt _x2c_macro_map_187, unsigned * _x2c_macro_cursor_38, String * _x2c_macro_key_117, int * _x2c_macro_val_40);
 
-int MapStringInt_truth(MapStringInt _x2c_macro_map_184);
+int MapStringInt_truth(MapStringInt _x2c_macro_map_188);
 
 int MapStringInt_equal(MapStringInt _x2c_macro_a_17, MapStringInt _x2c_macro_b_17);
 
-Map MapStringInt_map(MapStringInt _x2c_macro_map_186);
+Map MapStringInt_map(MapStringInt _x2c_macro_map_190);
 
 int MapStringInt_compare(MapStringInt _x2c_macro_a_20, MapStringInt _x2c_macro_b_20);
 
-Buffer MapStringInt_write_repr(MapStringInt _x2c_macro_map_187, Buffer _x2c_macro_out_57);
+Buffer MapStringInt_write_repr(MapStringInt _x2c_macro_map_191, Buffer _x2c_macro_out_61);
 
-Buffer MapStringInt_write_str(MapStringInt _x2c_macro_map_188, Buffer _x2c_macro_out_58);
+Buffer MapStringInt_write_str(MapStringInt _x2c_macro_map_192, Buffer _x2c_macro_out_62);
 
-String MapStringInt_str(MapStringInt _x2c_macro_map_189);
+String MapStringInt_str(MapStringInt _x2c_macro_map_193);
 
-String MapStringInt_repr(MapStringInt _x2c_macro_map_190);
+String MapStringInt_repr(MapStringInt _x2c_macro_map_194);
 
-Var MapStringInt_var(MapStringInt _x2c_macro_map_191);
+Var MapStringInt_var(MapStringInt _x2c_macro_map_195);
 
 MapStringInt Var_mapstringint(Var _x2c_macro_value_15);
 
-Iter MapStringInt_iter(MapStringInt _x2c_macro_map_195, Iter _x2c_macro_dest_9);
+Iter MapStringInt_iter(MapStringInt _x2c_macro_map_199, Iter _x2c_macro_dest_9);
 
-Iter MapStringInt_keys(MapStringInt _x2c_macro_map_196, Iter _x2c_macro_dest_10);
+Iter MapStringInt_keys(MapStringInt _x2c_macro_map_200, Iter _x2c_macro_dest_10);
 
-Iter MapStringInt_enumerate(MapStringInt _x2c_macro_map_197, Iter _x2c_macro_dest_11);
+Iter MapStringInt_enumerate(MapStringInt _x2c_macro_map_201, Iter _x2c_macro_dest_11);
 
-void MapStringInt_cleanup(MapStringInt _x2c_macro_map_199);
+void MapStringInt_cleanup(MapStringInt _x2c_macro_map_203);
 
 
 #endif /* __GUARD_0xE8B0EF19__ */

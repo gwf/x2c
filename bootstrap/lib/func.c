@@ -209,7 +209,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
-  if(Var_numeric_info(want, & info)){
+  if(Var_numeric_info(want, &(info))){
     Var volatile converted =((void) 0, Void);
     {
       ExceptionFrame _x2c_exception_frame_0;

@@ -459,7 +459,7 @@ static Var _export_value(Var v, Context source){
     return v;
   }
   Var custom;
-  if(Var_try_export_context(v, source, & custom)) return custom;
+  if(Var_try_export_context(v, source, &(custom))) return custom;
   Symbol tag = Var_tag(v);
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 289};

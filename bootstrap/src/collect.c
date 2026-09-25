@@ -1524,7 +1524,7 @@ Symbol volatile status = 0;
   if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_3 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL));
   _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_3);
 }
-ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) status = Lisp_read(_interface_lisp(), source, & cursor, & record);  else {x2c_exception_landed(& _x2c_exception_frame_3); {
+ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) status = Lisp_read(_interface_lisp(), source, &(cursor), &(record));  else {x2c_exception_landed(& _x2c_exception_frame_3); {
   if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
     x2c_error_catch_detach(_x2c_error_handler_3);
     x2c_exception_mark_handled(&_x2c_exception_frame_3);

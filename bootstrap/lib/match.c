@@ -368,7 +368,7 @@ __attribute__((constructor)) static void _file_init_(void){
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
   if(! captures) return 0;
-  return MatchCache_try_capture(_plan_cache(), input, pattern, captures, "match");
+  return MatchCache_try_capture(_plan_cache(), input, pattern, &(* captures), "match");
 }
 
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
@@ -403,9 +403,9 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
 int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
   MatchPlan plan = _site_plan(site, pat);
-  if(! plan) return List_try_match(input, pat, out_bindings);
+  if(! plan) return List_try_match(input, pat, &(* out_bindings));
   if(! out_bindings) return 0;
-  return MatchPlan_try_match(plan, input, out_bindings) == 1;
+  return MatchPlan_try_match(plan, input, &(* out_bindings)) == 1;
 }
 
 int List_truth(List);
@@ -420,9 +420,9 @@ List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat){
 int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
   MatchPlan plan = _site_plan(site, pat);
-  if(! plan) return List_try_search(input, pat, out_match, out_bindings);
+  if(! plan) return List_try_search(input, pat, &(* out_match), &(* out_bindings));
   if(! out_match || ! out_bindings) return 0;
-  return MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
+  return MatchPlan_try_search(plan, input, &(* out_match), &(* out_bindings)) == 1;
 }
 
 List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat){
@@ -430,16 +430,16 @@ List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat){
   MatchPlan plan = _site_plan(site, pat);
   if(! plan) return List_search(input, pat);
   List results = NULL;
-  MatchPlan_search(plan, input, & results);
+  MatchPlan_search(plan, input, &(results));
   return results;
 }
 
 int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out){
   if(! _init_guard_) _file_init_();
   MatchPlan plan = _site_plan(site, pat);
-  if(! plan) return List_try_match_replace(input, pat, template, out);
+  if(! plan) return List_try_match_replace(input, pat, template, &(* out));
   if(! out) return 0;
-  return MatchPlan_try_match_replace(plan, input, template, out) == 1;
+  return MatchPlan_try_match_replace(plan, input, template, &(* out)) == 1;
 }
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -458,7 +458,7 @@ List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat,
   MatchPlan plan = _site_plan(site, pat);
   if(! plan) return List_search_replace(input, pat, template);
   List result = input;
-  MatchPlan_search_replace(plan, input, template, & result);
+  MatchPlan_search_replace(plan, input, template, &(result));
   return result;
 }
 
@@ -865,7 +865,7 @@ int List_try_match(List input, Var pat, List * out_bindings){
 List List_match(List input, Var pat){
   if(! _init_guard_) _file_init_();
   List bindings;
-  if(! List_try_match(input, pat, & bindings)) return NULL;
+  if(! List_try_match(input, pat, &(bindings))) return NULL;
   return List_truth(bindings) ? bindings : _1;
 }
 
@@ -939,7 +939,7 @@ int List_try_match_replace(List input, Var pat, Var template, Var * out){
 List List_match_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   Var result;
-  if(! List_try_match_replace(input, pat, template, & result)) return input;
+  if(! List_try_match_replace(input, pat, template, &(result))) return input;
   return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
 }
 
@@ -1068,7 +1068,7 @@ static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int in
 List List_search(List input, Var pat){
   if(! _init_guard_) _file_init_();
   List results;
-  MatchCache_search(_plan_cache(), input, pat, & results, "List.search");
+  MatchCache_search(_plan_cache(), input, pat, &(results), "List.search");
   return results;
 }
 
@@ -1080,7 +1080,7 @@ int List_try_search(List input, Var pat, Var * out_match, List * out_bindings){
 List List_search_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   List result;
-  MatchCache_search_replace(_plan_cache(), input, pat, template, & result, "List.search_replace");
+  MatchCache_search_replace(_plan_cache(), input, pat, template, &(result), "List.search_replace");
   return result;
 }
 
@@ -1826,7 +1826,8 @@ int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captu
 
 int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats){
   if(! _init_guard_) _file_init_();
-  if(! _plan_prepared(plan, "MatchPlan.execute") || ! out_bindings) return - 1;
+  if(! _plan_prepared(plan, "MatchPlan.execute")) return - 1;
+  if(! out_bindings) return - 1;
   struct MatchMachine _x2c_macro_storage_1;
   MatchMachine machine = & _x2c_macro_storage_1;
   MatchMachine_open(machine);
@@ -1834,7 +1835,7 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   List bindings;
   int result = MatchPlan__run(plan, machine, input, &(bindings));
   MatchMachine_dispose(machine);
-  if(result == 1) * out_bindings = bindings;
+  if(result == 1)(* out_bindings) = bindings;
   return result;
 }
 
@@ -1905,7 +1906,7 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
 int MatchPlan_search(MatchPlan plan, List input, List * out_results){
   if(! _init_guard_) _file_init_();
   if(! _plan_prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
-  return MatchPlan__all(plan, input, &(* out_results));
+  return MatchPlan__all(plan, input, out_results);
 }
 
 static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out){
@@ -2054,12 +2055,12 @@ void Scope_pop(void);
 MatchCache MatchCache_new(int capacity){
   if(! _init_guard_) _file_init_();
   if(capacity <= 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2092};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2093};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2094};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2095};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
@@ -2153,7 +2154,7 @@ static void _cache_activate(MatchCache cache, int slot, MatchLease * lease){
 
 int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
   if(! _init_guard_) _file_init_();
-  * lease =(MatchLease){
+  (* lease) =(MatchLease){
     .slot = - 1
   }
   ;
@@ -2164,9 +2165,9 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
       MatchPlan_free(plan);
       _raise_ineligible(reason, owner);
     }
-    lease -> cache = m;
-    lease -> transient_plan = plan;
-    lease -> active = 1;
+    (* lease).cache = m;
+    (* lease).transient_plan = plan;
+    (* lease).active = 1;
     m -> active_leases ++;
     return plan -> status;
   }
@@ -2174,7 +2175,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
   int slot = _cache_find(m, key);
   if(slot >= 0){
     _cache_touch(m, slot);
-    _cache_activate(m, slot, lease);
+    _cache_activate(m, slot, &(* lease));
     return m -> entries[slot].plan -> status;
   }
   slot = m -> size < m -> capacity ? _cache_free_slot(m) : _cache_victim(m);
@@ -2222,7 +2223,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
   m -> buckets[bucket] = slot;
   _cache_link_mru(m, slot);
   m -> size ++;
-  _cache_activate(m, slot, lease);
+  _cache_activate(m, slot, &(* lease));
   return entry -> plan -> status;
 }
 
@@ -2246,14 +2247,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) _file_init_();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2286};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2287};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2290};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2291};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2265,7 +2266,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2300};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2301};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2280,7 +2281,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2316};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2317};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2295,7 +2296,7 @@ int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptu
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_5;
   MatchLease * lease = & _x2c_macro_storage_5;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
   if(status == MACHINE_PREPARED) result = MatchPlan_try_capture(plan, input, captures);
@@ -2307,7 +2308,7 @@ int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_b
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_6;
   MatchLease * lease = & _x2c_macro_storage_6;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
   if(status == MACHINE_PREPARED) result = MatchPlan_try_match(plan, input, out_bindings);
@@ -2319,7 +2320,7 @@ int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_m
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_7;
   MatchLease * lease = & _x2c_macro_storage_7;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
   if(status == MACHINE_PREPARED) result = MatchPlan_try_search(plan, input, out_match, out_bindings);
@@ -2331,12 +2332,12 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_8;
   MatchLease * lease = & _x2c_macro_storage_8;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   List results = NULL;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) MatchPlan_search(plan, input, & results);
+  if(status == MACHINE_PREPARED) MatchPlan_search(plan, input, &(results));
   MatchLease_release(lease);
-  * out_results = results;
+  (* out_results) = results;
   return results != NULL;
 }
 
@@ -2344,7 +2345,7 @@ int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var 
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_9;
   MatchLease * lease = & _x2c_macro_storage_9;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
   if(status == MACHINE_PREPARED) result = MatchPlan_try_match_replace(plan, input, template, out);
@@ -2356,13 +2357,13 @@ int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var tem
   if(! _init_guard_) _file_init_();
   MatchLease _x2c_macro_storage_10;
   MatchLease * lease = & _x2c_macro_storage_10;
-  int status = MatchCache_acquire(cache, pattern, lease, owner);
+  int status = MatchCache_acquire(cache, pattern, &(* lease), owner);
   int answered = status != MACHINE_PREPARED;
   List result = input;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) answered = MatchPlan_search_replace(plan, input, template, & result) >= 0;
+  if(status == MACHINE_PREPARED) answered = MatchPlan_search_replace(plan, input, template, &(result)) >= 0;
   MatchLease_release(lease);
-  * out = result;
+  (* out) = result;
   return status == MACHINE_PREPARED && answered;
 }
 
@@ -2398,7 +2399,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2504};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2505};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }

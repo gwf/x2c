@@ -540,7 +540,7 @@ int File_write_all(File file, const void * ptr, size_t size){
 
 int File_copy_to(File source, File output, size_t * copied){
   if(! _init_guard_) File_initialize();
-  if(copied) * copied = 0;
+  if(copied)(* copied) = 0;
   if(! source || ! output) return 0;
   unsigned char bytes[BUFSIZ];
   size_t count;

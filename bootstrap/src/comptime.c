@@ -5985,7 +5985,7 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
     type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  if(Type_scalar(type) == _749){
       long n = Var_integer(value);  Type result = List_truth(Type_list(declared)) ? declared : type;  List literal = cons(_43, cons(List_var(result), cons(List_var(cons(_505, cons(_1430, cons(String_var(Var_str(value)), NULL)))), NULL)));  if(n == INT_MIN) return cons(_43, cons(List_var(result), cons(List_var(cons(_353, cons(List_var(cons(_43, cons(List_var(result), cons(List_var(cons(_466, cons(_1430, cons(List_var(literal), NULL)))), NULL)))), NULL))), NULL)));  return n < 0 ? cons(_43, cons(List_var(result), cons(List_var(cons(_353, cons(List_var(literal), NULL))), NULL))) : literal;
     }
-    X2CVarNumeric number;  Var_numeric_decode(value, & number);  String text;  Type literal_type;  if(number.floating){
+    X2CVarNumeric number;  Var_numeric_decode(value, &(number));  String text;  Type literal_type;  if(number.floating){
       literal_type = List_type(_1575);  long double n = number.floating_value;  if(isnan(n)) text = _1584;  else if(isinf(n)) text = n < 0 ? _1585 : _1586;  else text = String_printf(_1587, n);
     }
     else{

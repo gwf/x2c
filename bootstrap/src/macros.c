@@ -2907,7 +2907,7 @@ void Compiler_skip_macro_invocation(Compiler c){
 int Var_int(Var);
 int List_try_search(List, Var, Var *, List *);
 static int _definition_needs_shallow_expansion(List definition){
-  if(! List_truth(definition)) return 0;  if(Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1;  if(! Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(Var_int(List_assoc(definition, Symbol_var(647498998088)))) return 1;  List template = Var_list(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  return({ static MatchCaptureSite _x2c_match_site_27;  x2c_match_site_try_search(& _x2c_match_site_27, template, List_var(_298), & matched, & bindings); });
+  if(! List_truth(definition)) return 0;  if(Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1;  if(! Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(Var_int(List_assoc(definition, Symbol_var(647498998088)))) return 1;  List template = Var_list(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  return({ static MatchCaptureSite _x2c_match_site_27;  x2c_match_site_try_search(& _x2c_match_site_27, template, List_var(_298), &(matched), &(bindings)); });
 }
 
 int Compiler_macro_invocation_needs_shallow_expansion(Compiler c){
@@ -5558,7 +5558,7 @@ List Compiler_parse_macro_definition(Compiler c){
     }
   }
   }
-  else if(result_kind == 9147177346020 && target_kind == 377892) replacement = cons(_19, cons(_757, cons(List_var(cons(_1014, cons(List_var(replacement), NULL))), NULL)));  List bindings;  Var expression_slot = List_var(_1020);  if(List_try_match(replacement, expression_slot, & bindings)) replacement =({ static MatchCaptureSite _x2c_match_site_62;  x2c_match_site_search_replace(& _x2c_match_site_62, replacement, List_var(_1016), Symbol_var(62431043940)); });  else replacement =({ static MatchCaptureSite _x2c_match_site_63;  x2c_match_site_search_replace(& _x2c_match_site_63, replacement, List_var(_1023), Symbol_var(62431043940)); });
+  else if(result_kind == 9147177346020 && target_kind == 377892) replacement = cons(_19, cons(_757, cons(List_var(cons(_1014, cons(List_var(replacement), NULL))), NULL)));  List bindings;  Var expression_slot = List_var(_1020);  if(List_try_match(replacement, expression_slot, &(bindings))) replacement =({ static MatchCaptureSite _x2c_match_site_62;  x2c_match_site_search_replace(& _x2c_match_site_62, replacement, List_var(_1016), Symbol_var(62431043940)); });  else replacement =({ static MatchCaptureSite _x2c_match_site_63;  x2c_match_site_search_replace(& _x2c_match_site_63, replacement, List_var(_1023), Symbol_var(62431043940)); });
   Map definition_bindings = Map_new();
   if(List_truth(target_hole) && Var_equal(List_assoc(target_hole, Symbol_var(740232)), Symbol_var(1405544))){
     Var required = _replacement_binder(List_assoc(target_hole, Symbol_var(154018148)), _1245, 1);

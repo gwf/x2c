@@ -155,10 +155,10 @@ void RenderPath_leave(RenderPath * path){
 int Var_dispatch_truth(Var value, int * handled){
   if(! _init_guard_) _file_init_();
   if(! handled) return 0;
-  * handled = 0;
+  (* handled) = 0;
   VarDescriptor * descriptor = _descriptor_for_value(value);
   if(! descriptor || ! descriptor -> methods.truth) return 0;
-  * handled = 1;
+  (* handled) = 1;
   return descriptor -> methods.truth(value);
 }
 
@@ -186,7 +186,7 @@ int Var_try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var * result){
 
   }
   if(! callback) return 0;
-  * result = callback(lhs, rhs);
+  (* result) = callback(lhs, rhs);
   return 1;
 }
 
@@ -195,7 +195,7 @@ int Var_try_dispatch_unary(Var value, Symbol member, Var * result){
   if(! result) return 0;
   VarDescriptor * descriptor = _descriptor_for_value(value);
   if(! descriptor || member != 29006 || ! descriptor -> methods.neg) return 0;
-  * result = descriptor -> methods.neg(value);
+  (* result) = descriptor -> methods.neg(value);
   return 1;
 }
 
@@ -924,7 +924,7 @@ static int _numeric_rank(Symbol tag){
   if(tag == 13400168) tag = 3355493;
   if(tag == 301273866) tag = 3356265;
   X2CVarNumericInfo info;
-  return Var_numeric_info(tag, & info) ? info.rank : 0;
+  return Var_numeric_info(tag, &(info)) ? info.rank : 0;
 }
 
 static int _numeric_class(Symbol tag, long double value){
@@ -1079,7 +1079,7 @@ int Var_try_export_context(Var value, Context source, Var * out){
   if(! out) return 0;
   VarDescriptor * descriptor = _descriptor_for_value(value);
   if(! descriptor || ! descriptor -> methods.export_context) return 0;
-  * out = descriptor -> methods.export_context(value, source);
+  (* out) = descriptor -> methods.export_context(value, source);
   return 1;
 }
 

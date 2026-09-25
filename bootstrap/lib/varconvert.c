@@ -101,12 +101,12 @@ void Var_numeric_decode(Var value, X2CVarNumeric * out){
   }
   X2CVarNumericInfo info;
   Symbol tag = Var_tag(value);
-  if(! Var_numeric_info(tag, & info)){
+  if(! Var_numeric_info(tag, &(info))){
     static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 87};
     x2c_error_raise_n(& _x2c_error_site_3, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
     __builtin_unreachable();
   }
-  _numeric_decode(value, info, &(* out));
+  _numeric_decode(value, info, &((* out)));
 }
 
 Var Var_box_i8(char);
@@ -133,7 +133,7 @@ Var Var_box_ulong_long(unsigned long long);
 
 Var Var_integer_box(Symbol target, unsigned long long raw){
   X2CVarNumericInfo info;
-  if(! Var_numeric_info(target, & info) || info.floating){
+  if(! Var_numeric_info(target, &(info)) || info.floating){
     static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 100};
     x2c_error_raise_n(& _x2c_error_site_4, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
@@ -183,7 +183,7 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   if(tag == 28764 || tag == 2050956 || tag == 1854348) tag = 3356265;
   int row = SymbolSet_index(x2c_var_numeric_tags, tag);
   if(row < 0) return 0;
-  * out = x2c_var_numerics[row];
+  (* out) = x2c_var_numerics[row];
   return 1;
 }
 
@@ -358,7 +358,7 @@ Var Var_convert(Var value, Symbol target){
   if(source_tag == target) return value;
   if((source_tag == 28764 || source_tag == 2050956 || source_tag == 1854348) && target == 3356265) return value;
   X2CVarNumericInfo info;
-  if(! Var_numeric_info(source_tag, & info)){
+  if(! Var_numeric_info(source_tag, &(info))){
     List lower = cons(_0, cons(List_var(cons(_1, cons(Symbol_var(source_tag), NULL))), NULL));
     {
       static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 289};
@@ -369,7 +369,7 @@ Var Var_convert(Var value, Symbol target){
   }
   X2CVarNumeric source;
   _numeric_decode(value, info, &(source));
-  if(! Var_numeric_info(target, & info)){
+  if(! Var_numeric_info(target, &(info))){
     static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 293};
     x2c_error_raise_n(& _x2c_error_site_14, 1020285550996648, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();

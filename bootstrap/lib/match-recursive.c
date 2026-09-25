@@ -463,8 +463,8 @@ int match_recursive_try_match_replace(List input, Var pattern, Var template, Var
   if(! _init_guard_) _file_init_();
   if(! out) return 0;
   List bindings;
-  if(! match_recursive_try_match(input, pattern, & bindings)) return 0;
-  * out = _replace_template(template, bindings);
+  if(! match_recursive_try_match(input, pattern, &(bindings))) return 0;
+  (* out) = _replace_template(template, bindings);
   return 1;
 }
 
