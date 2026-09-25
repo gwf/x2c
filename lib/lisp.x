@@ -308,6 +308,9 @@ protocol Cleanup(Lisp);
 // make x2c.h include path.h before path.h defines `Path`.
 #include "json.x"
 #include "diff.x"
+#include "regex.x"
+#include "typed-array.x"
+#include "typed-map.x"
 
 /* Optional modules stay outside the implicit prelude.  The compiler links
    their runtime units, so private checked aliases can install their pure

@@ -55,6 +55,8 @@ static struct JsonBool _json_false = { 0 }, _json_true = { 1 };
 /** Boxes a JSON boolean. */
 Var JsonBool.var(JsonBool value) => Var.new(<jsonbool>, value);
 
+meta JsonBool Var.jsonbool(Var value);
+
 /** Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. */
 JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 
