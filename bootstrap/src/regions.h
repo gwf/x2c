@@ -19,5 +19,7 @@ Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array fi
 
 int Compiler_has_region_row(String name);
 
+int Compiler_region_no_lifetime_effect(String name);
+
 
 #endif /* __GUARD_0x3FB21E3E__ */

@@ -1,5 +1,46 @@
 void certify_native(int *value);
 
+int certify_scalar_rows(void) {
+  Symbol word = <word>;
+  return word.var().integer();
+}
+
+long certify_wide_scoped(void) {
+  Scope.retain();
+  defer Scope.release();
+  return 42L.var().integer();
+}
+
+int certify_pure_branch(Var value, int choose) {
+  if (choose) return value.integer();
+  return 0;
+}
+
+int certify_conditional_alloc(int choose) {
+  if (choose) Scope.malloc(8);
+  return 0;
+}
+
+int certify_literal_printf(void) {
+  return printf("value=%d\n", 7);
+}
+
+int certify_file_printf(void) {
+  return Stdout.printf("value=%d\n", 7);
+}
+
+int certify_write_printf(short *value) {
+  return printf("%1$hn", value);
+}
+
+int certify_escaped_printf(int *value) {
+  return printf("\x25n", value);
+}
+
+int certify_dynamic_printf(const char *format) {
+  return printf(format, 7);
+}
+
 int certify_safe(int choose) {
   Scope.retain();
   defer Scope.release();

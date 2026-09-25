@@ -386,6 +386,12 @@ attempts to override a built-in or source-defined function are rejected.
 The file affects this audit only. Exit status is 0 for `proved`, 1 for
 `violation`, 3 for `incomplete`, and 2 for invalid input or failed parsing.
 
+The audit recognizes literal `printf` and `File.printf` formats whose
+conversions do not write through an argument. Their no-lifetime-effect
+summary appears in `assumptions`. A dynamic format, `%n`, or a conversion
+outside the supported format subset remains an obstacle unless the project
+supplies an explicit contract.
+
 `allocation-returns` reports return expressions in functions with the exact
 emitted `NAME` that call allocation operations for the caller's current Scope or
 canonical-value pool. Each row names the allocation operation, ownership

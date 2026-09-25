@@ -2645,16 +2645,58 @@ static int _certify_indirect_result(Compiler compiler, Type type) {
   return resolved && (resolved.is_pointer() || resolved.is_aggregate());
 }
 
-static int _certify_memory_path(Compiler compiler, Var value) {
+static int _certify_printf_format(String callee, List arguments) {
+  if (!(callee in %("printf" "File_printf"))) return 0;
+  List values = arguments ? arguments.cdr() : NULL;
+  if (callee == "File_printf") values = values ? values.cdr() : NULL;
+  String spelling = NULL;
+  match (values ? values.car() : void)
+    case %(expr ? (literal (* char) ?(String text))): spelling = text;
+  if (!spelling) return 0;
+  String format = spelling.parse();
+  for (int i = 0; i < format.len(); i++) {
+    if (format[i] != '%') continue;
+    i++;
+    if (i >= format.len()) return 0;
+    if (format[i] == '%') continue;
+    while (i < format.len() && strchr("-+ #0'", format[i])) i++;
+    while (i < format.len() &&
+           (strchr("0123456789", format[i]) || format[i] == '$' ||
+            format[i] == '*')) i++;
+    if (i < format.len() && format[i] == '.') {
+      i++;
+      while (i < format.len() &&
+             (strchr("0123456789", format[i]) || format[i] == '$' ||
+              format[i] == '*')) i++;
+    }
+    while (i < format.len() && strchr("hljztL", format[i])) i++;
+    if (i >= format.len() || !strchr("diouxXfFeEgGaAcsp", format[i]))
+      return 0;
+  }
+  return 1;
+}
+
+static int _certify_memory_path(Compiler compiler, Map definitions,
+                                 Map publics, Map contracts, Var value) {
   if (value is not <list>) return 0;
   List node = value;
   match (node) {
-    case %((!or call cons array map lambda defer) *): return 1;
-    case %(expr ?type ?)
-      if (_certify_indirect_result(compiler, type)): return 1;
+    case %(call ? ?): {
+      String callee = NULL;
+      List arguments = NULL;
+      List target = project_call_target(
+        compiler, definitions, node, callee, &arguments);
+      List resolved = target ? resolve_project_target(target, publics) : NULL;
+      if (!callee || (resolved ||
+          (!Compiler.region_no_lifetime_effect(callee) &&
+           !(contracts[callee] in %((summary 0 ()) (wrap))) &&
+           !_certify_printf_format(callee, arguments)))) return 1;
+    }
+    case %((!or cons array map lambda defer) *): return 1;
   }
   foreach (Var child, node)
-    if (_certify_memory_path(compiler, child)) return 1;
+    if (_certify_memory_path(
+          compiler, definitions, publics, contracts, child)) return 1;
   return 0;
 }
 
@@ -2683,7 +2725,8 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
     }
     case %((!or if while do for switch try with match foreach finally)
            *children): {
-      if (_certify_memory_path(compiler, node))
+      if (_certify_memory_path(
+            compiler, definitions, publics, contracts, node))
         obstacles.push(%(obstacle $caller $location
           "conditional memory effects are outside the proof subset"));
       foreach (Var child, children)
@@ -2710,8 +2753,9 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
     }
     case %(call ? ?): {
       String callee = NULL;
+      List arguments = NULL;
       List target = project_call_target(
-        compiler, definitions, node, callee, NULL
+        compiler, definitions, node, callee, &arguments
       );
       List resolved = target ? resolve_project_target(target, publics) : NULL;
       if (!resolved && callee && contracts.contains(callee)) {
@@ -2721,6 +2765,8 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
             break;
           }
       }
+      else if (!resolved && _certify_printf_format(callee, arguments))
+        assumptions[callee] = %(summary 0 ());
       else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
         obstacles.push(%(obstacle $caller $location
           "call has no project body or lifetime effect contract" $callee));
