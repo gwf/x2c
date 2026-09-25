@@ -241,33 +241,33 @@ static _RegexNode _group(_Parser *p) {
   return node;
 }
 
-static int _digits(_Parser *p, int *out) {
+static int _digits(_Parser *p, int &out) {
   int start = p.pos, value = 0;
   while (scan_ascii_digit(_peek(p)))
     value = value * 10 + (p.text[p.pos++] - '0');
-  *out = value;
+  out = value;
   return p.pos > start;
 }
 
 /* Reads `{m}`, `{m,}`, or `{m,n}` after the brace. Leaves the position
    unchanged and returns 0 when the brace is not a repetition. */
-static int _braces(_Parser *p, int *min, int *max) {
+static int _braces(_Parser *p, int &min, int &max) {
   int start = p.pos;
   if (!_digits(p, min)) {
     p.pos = start;
     return 0;
   }
-  *max = *min;
+  max = min;
   if (_peek(p) == ',') {
     p.pos++;
-    if (!_digits(p, max)) *max = -1;
+    if (!_digits(p, max)) max = -1;
   }
   if (_peek(p) != '}') {
     p.pos = start;
     return 0;
   }
   p.pos++;
-  if (*max >= 0 && *max < *min) _fail(p, "repetition range out of order");
+  if (max >= 0 && max < min) _fail(p, "repetition range out of order");
   return 1;
 }
 
@@ -311,7 +311,7 @@ static _RegexNode _quantified(_Parser *p, _RegexNode atom) {
     case '?': min = 0; max = 1; break;
     case '{':
       p.pos++;
-      if (_braces(p, &min, &max)) {
+      if (_braces(p, min, max)) {
         p.pos--;
         break;
       }

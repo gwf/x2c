@@ -699,11 +699,11 @@ void Pool.insert(Pool inner, Var object) {
 
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */
-static Var _intern_locked(Pool inner, Var object, int *discard) {
+static Var _intern_locked(Pool inner, Var object, int &discard) {
   unsigned before = inner.table.len();
   Var stored = inner.table.setdefault(object, object);
   if (inner.table.len() != before) inner.interned++;
-  else *discard = 1;
+  else discard = 1;
   return stored;
 }
 
@@ -724,7 +724,7 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
   {
     _lock(inner);
     defer _unlock(inner);
-    canonical = _intern_locked(inner, object, &discard);
+    canonical = _intern_locked(inner, object, discard);
   }
   // Pool.free takes storage before the pool. Do not call it while holding
   // the pool mutex or another worker can complete the opposite lock order.
@@ -758,7 +758,7 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
       canonical = existing;
       discard = 1;
     }
-    else canonical = _intern_locked(inner, object, &discard);
+    else canonical = _intern_locked(inner, object, discard);
   }
   // See Pool.intern_new: the losing candidate is freed outside the lock.
   if (discard) inner.free(alloc);

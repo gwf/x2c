@@ -41,9 +41,9 @@ protocol Cleanup(Bytes);
 #include "exception.x"
 #include "scope.x"
 
-static int _allocation_size(size_t width, size_t cap, size_t *out) {
+static int _allocation_size(size_t width, size_t cap, size_t &out) {
   if (!width || cap > (SIZE_MAX - sizeof(Block)) / width) return 0;
-  *out = sizeof(Block) + width * cap;
+  out = sizeof(Block) + width * cap;
   return 1;
 }
 
@@ -57,7 +57,7 @@ Block Block.new(size_t width) {
   Block block = Scope.malloc(sizeof(struct Block));
   *block = (struct Block) {.width = width, .length = 0, .cap = 1};
   size_t size;
-  if (!_allocation_size(width, block.cap, &size))
+  if (!_allocation_size(width, block.cap, size))
     raise %(size-limit (width $width));
   unsigned char *allocation = Scope.malloc(size);
   *((Block *) allocation) = block;
@@ -101,7 +101,7 @@ void Block.reserve(Block block, size_t minimum) {
     cap *= 2;
   }
   size_t size;
-  if (!_allocation_size(block.width, cap, &size)) {
+  if (!_allocation_size(block.width, cap, size)) {
     size_t width = block.width;
     raise %(size-limit (width $width) (cap $cap));
   }

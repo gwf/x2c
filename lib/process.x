@@ -292,12 +292,12 @@ static void Job._reap(Job job, int index, int flags) {
 /* Reads and closes a capture file. Text with a NUL byte cannot be a
    `String`, so it is recorded in `nul` for `output` or `errors` to raise and
    the status stays readable. */
-static String _captured(File file, int *nul) {
+static String _captured(File file, int &nul) {
   if (!file) return NULL;
   file.rewind();
   String text = NULL;
   try text = file.string_close();
-  catch %(bad-arg *): *nul = 1;
+  catch %(bad-arg *): nul = 1;
   return text;
 }
 
@@ -315,8 +315,8 @@ static void Job._finish(Job job) {
   job.finished = 1;
   for (int i = 0; i < job.count; i++)
     if (job.statuses[i]) job.status = job.statuses[i];
-  job.output_text = _captured(job.output_file, &job.nul_output);
-  job.errors_text = _captured(job.errors_file, &job.nul_errors);
+  job.output_text = _captured(job.output_file, job.nul_output);
+  job.errors_text = _captured(job.errors_file, job.nul_errors);
   job.output_file = job.errors_file = NULL;
 }
 
