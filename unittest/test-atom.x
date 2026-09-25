@@ -8,7 +8,7 @@ static Var _atom_read_lisp(String source, Symbol &status) {
   Lisp lisp = Lisp.kernel();
   unsigned cursor = 0;
   Var value = void;
-  status = lisp.read(source, &cursor, &value);
+  status = lisp.read(source, cursor, value);
   lisp.destroy();
   return value;
 }

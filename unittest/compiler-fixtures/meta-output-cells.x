@@ -17,31 +17,31 @@ meta int output_cells(int unused) {
     return 0;
 
   List bindings = %(old);
-  if (!%(tag value).try_match(%(tag ?item), &bindings) ||
+  if (!%(tag value).try_match(%(tag ?item), bindings) ||
       bindings.assoc(<?item>) != <value>)
     return 0;
   List prior = bindings;
-  if (%(tag value).try_match(%(other), &bindings) || bindings !== prior)
+  if (%(tag value).try_match(%(other), bindings) || bindings !== prior)
     return 0;
 
   Var result = <old>;
   if (!%(tag value).try_match_replace(
-        %(tag ?item), <?item>, &result) || result != <value>)
+        %(tag ?item), <?item>, result) || result != <value>)
     return 0;
   result = <old>;
-  if (%(tag value).try_match_replace(%(other), <changed>, &result) ||
+  if (%(tag value).try_match_replace(%(other), <changed>, result) ||
       result != <old>)
     return 0;
 
   Var found = <old>;
   bindings = %(old);
-  if (!%((item 7)).try_search(%(item ?value), &found, &bindings) ||
+  if (!%((item 7)).try_search(%(item ?value), found, bindings) ||
       found != %(item 7).var() || bindings.assoc(<?value>) != 7)
     return 0;
   found = <old>;
   bindings = %(old);
   prior = bindings;
-  if (%((item 7)).try_search(%(missing), &found, &bindings) ||
+  if (%((item 7)).try_search(%(missing), found, bindings) ||
       found != <old> || bindings !== prior)
     return 0;
 
@@ -51,9 +51,9 @@ meta int output_cells(int unused) {
   value = 9;
   if (map.try_get("missing", value) || value != 9) return 0;
   map["remove"] = 7;
-  if (!map.try_del("remove", &value) || value != 7) return 0;
+  if (!map.try_del("remove", value) || value != 7) return 0;
   value = 9;
-  if (map.try_del("remove", &value) || value != 9) return 0;
+  if (map.try_del("remove", value) || value != 9) return 0;
 
   Symbol symbol = <old>;
   if (!Symbol.try_new("valid", &symbol) || symbol != <valid>) return 0;

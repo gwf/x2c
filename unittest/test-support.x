@@ -56,12 +56,12 @@ typedef struct {
 } TestStats;
 
 // The oracle is the optional recursive matcher in lib/match-recursive.x.
-int test_match_oracle_try_match(List input, Var pattern, List *out_bindings) {
+int test_match_oracle_try_match(List input, Var pattern, List &?out_bindings) {
   return match_recursive_try_match(input, pattern, out_bindings);
 }
 
 int test_match_oracle_try_match_replace(
-  List input, Var pattern, Var template, Var *out) {
+  List input, Var pattern, Var template, Var &?out) {
   return match_recursive_try_match_replace(input, pattern, template, out);
 }
 
@@ -70,7 +70,7 @@ List test_match_oracle_search(List input, Var pattern) {
 }
 
 int test_match_oracle_try_search(
-  List input, Var pattern, Var *out_match, List *out_bindings) {
+  List input, Var pattern, Var &?out_match, List &?out_bindings) {
   return match_recursive_try_search(input, pattern, out_match, out_bindings);
 }
 

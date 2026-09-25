@@ -29,7 +29,7 @@ int main(void) {
   unsigned cursor = 0;
   Var read = void;
   Symbol status = Lisp.read(
-    lisp, first.repr(), &cursor, &read
+    lisp, first.repr(), cursor, read
   );
   printf("%d %d %s|%s|%s|%s|%s|%s|%s|%s\n",
          first == second, status == <value> && read.pointer() == first,

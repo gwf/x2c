@@ -12,34 +12,34 @@
 
 /* The cache names the operation that reports a fence; these tests exercise
    the cache itself, so every call names the cache operation. */
-static int _acquire(MatchCache cache, Var pattern, MatchLease *lease) =>
+static int _acquire(MatchCache cache, Var pattern, MatchLease &lease) =>
   cache.acquire(pattern, lease, "MatchCache.acquire");
 
 static int _try_capture(
-  MatchCache cache, List input, Var pattern, MatchCaptureBuffer *captures) =>
+  MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures) =>
   cache.try_capture(input, pattern, captures, "MatchCache.try_capture");
 
 static int _try_match(
-  MatchCache cache, List input, Var pattern, List *out_bindings) =>
+  MatchCache cache, List input, Var pattern, List &?out_bindings) =>
   cache.try_match(input, pattern, out_bindings, "MatchCache.try_match");
 
 static int _try_search(
-  MatchCache cache, List input, Var pattern, Var *out_match,
-  List *out_bindings) =>
+  MatchCache cache, List input, Var pattern, Var &?out_match,
+  List &?out_bindings) =>
   cache.try_search(
     input, pattern, out_match, out_bindings, "MatchCache.try_search");
 
 static int _search(
-  MatchCache cache, List input, Var pattern, List *out_results) =>
+  MatchCache cache, List input, Var pattern, List &out_results) =>
   cache.search(input, pattern, out_results, "MatchCache.search");
 
 static int _try_match_replace(
-  MatchCache cache, List input, Var pattern, Var template, Var *out) =>
+  MatchCache cache, List input, Var pattern, Var template, Var &?out) =>
   cache.try_match_replace(
     input, pattern, template, out, "MatchCache.try_match_replace");
 
 static int _search_replace(
-  MatchCache cache, List input, Var pattern, Var template, List *out) =>
+  MatchCache cache, List input, Var pattern, Var template, List &out) =>
   cache.search_replace(
     input, pattern, template, out, "MatchCache.search_replace");
 
@@ -80,7 +80,7 @@ static void cache_lifecycle_failures_transfer(void) {
   EXPECT_TRUE(stale.active);
 
   MatchLease held;
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &held),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), held),
                 MACHINE_PREPARED);
   try cache.dispose();
   catch %(bad-state *): caught++;
@@ -95,12 +95,12 @@ static void cache_admission_and_bypass(void) {
   MatchLease lease;
 
   // Canonical graphs retain the same cached generation.
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &lease),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), lease),
                 MACHINE_PREPARED);
   unsigned long generation = lease.generation;
   int slot = lease.slot;
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &lease),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
@@ -108,12 +108,12 @@ static void cache_admission_and_bypass(void) {
 
   // Canonical long Atoms are raw-identity values and remain admissible.
   Var long_pattern = %(cache-key ?VeryLongIdentifierValue);
-  EXPECT_INT_EQ(_acquire(cache, long_pattern, &lease),
+  EXPECT_INT_EQ(_acquire(cache, long_pattern, lease),
                 MACHINE_PREPARED);
   generation = lease.generation;
   slot = lease.slot;
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, long_pattern, &lease),
+  EXPECT_INT_EQ(_acquire(cache, long_pattern, lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
@@ -123,12 +123,12 @@ static void cache_admission_and_bypass(void) {
   // holding one is admitted like any other canonical graph.
   Var text_pattern = %(tag "needle" ?v);
   EXPECT_TRUE(String.is_permanent("needle"));
-  EXPECT_INT_EQ(_acquire(cache, text_pattern, &lease),
+  EXPECT_INT_EQ(_acquire(cache, text_pattern, lease),
                 MACHINE_PREPARED);
   generation = lease.generation;
   slot = lease.slot;
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, text_pattern, &lease),
+  EXPECT_INT_EQ(_acquire(cache, text_pattern, lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
@@ -139,7 +139,7 @@ static void cache_admission_and_bypass(void) {
   Pool.open_named("match-cache-nested-values");
   String nested = String.new("match-cache-nested-needle");
   EXPECT_FALSE(nested.is_permanent());
-  EXPECT_INT_EQ(_acquire(cache, %(tag $nested ?v), &lease),
+  EXPECT_INT_EQ(_acquire(cache, %(tag $nested ?v), lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == 0);
   MatchLease.release(&lease);
@@ -150,7 +150,7 @@ static void cache_admission_and_bypass(void) {
   long wide_value = 42;
   Var wide = wide_value;
   EXPECT_INT_EQ(_acquire(cache, %(tag $wide ?v),
-                                   &lease), MACHINE_PREPARED);
+                                   lease), MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == 0);
   MatchLease.release(&lease);
 
@@ -159,18 +159,18 @@ static void cache_admission_and_bypass(void) {
   Var zero = Var.new(<p48>, NULL);
   EXPECT_TRUE(zero.u64 == 0);
   for (int i = 0; i < 2; i++) {
-    EXPECT_INT_EQ(_acquire(cache, zero, &lease), MACHINE_PREPARED);
+    EXPECT_INT_EQ(_acquire(cache, zero, lease), MACHINE_PREPARED);
     EXPECT_TRUE(lease.generation == 0);
     MatchLease.release(&lease);
   }
 
   // Admissible atoms retain their prepared cache entry.
   Var atom = Var.new(<symbol>, <draft>);
-  EXPECT_INT_EQ(_acquire(cache, atom, &lease), MACHINE_PREPARED);
+  EXPECT_INT_EQ(_acquire(cache, atom, lease), MACHINE_PREPARED);
   generation = lease.generation;
   slot = lease.slot;
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, atom, &lease), MACHINE_PREPARED);
+  EXPECT_INT_EQ(_acquire(cache, atom, lease), MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == generation);
   EXPECT_INT_EQ(lease.slot, slot);
   MatchLease.release(&lease);
@@ -183,20 +183,20 @@ static void cache_eviction_is_deterministic(void) {
   MatchLease lease;
   unsigned long generations[2];
   for (int i = 1; i <= 2; i++) {
-    EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(i), &lease),
+    EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(i), lease),
                   MACHINE_PREPARED);
     generations[i - 1] = lease.generation;
     MatchLease.release(&lease);
   }
   // Inserting a third pattern evicts the least recently used first.
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(3), &lease),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(3), lease),
                 MACHINE_PREPARED);
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), &lease),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == generations[1]);
   MatchLease.release(&lease);
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &lease),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation != generations[0]);
   MatchLease.release(&lease);
@@ -207,7 +207,7 @@ static void cache_eviction_is_deterministic(void) {
   for (int round = 0; round < 3; round++)
     for (int i = 10; i < 14; i++) {
       EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(i),
-                                       &lease), MACHINE_PREPARED);
+                                       lease), MACHINE_PREPARED);
       EXPECT_TRUE(lease.generation > last_generation);
       last_generation = lease.generation;
       MatchLease.release(&lease);
@@ -218,13 +218,13 @@ static void cache_eviction_is_deterministic(void) {
 static void cache_pins_protect_active_leases(void) {
   MatchCache cache = MatchCache.new(1);
   MatchLease held;
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &held),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), held),
                 MACHINE_PREPARED);
 
   // The only slot is pinned: a new pattern reports pressure rather
   // than evicting the program under execution.
   MatchLease blocked;
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), &blocked),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), blocked),
                 MATCH_CACHE_PRESSURE);
   MatchLease.release(&blocked);
 
@@ -233,7 +233,7 @@ static void cache_pins_protect_active_leases(void) {
   MatchLease.release(&held);
 
   // Released, the slot recycles and invalidates the old generation.
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), &blocked),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), blocked),
                 MACHINE_PREPARED);
   MatchLease.release(&blocked);
   int caught = 0;
@@ -250,17 +250,17 @@ static void cache_scalar_lease_survives_eviction(void) {
   // Acquire and hold a prepared scalar entry: it must stay pinned.
   Var atom = Var.new(<symbol>, <draft>);
   MatchLease held;
-  EXPECT_INT_EQ(_acquire(cache, atom, &held), MACHINE_PREPARED);
+  EXPECT_INT_EQ(_acquire(cache, atom, held), MACHINE_PREPARED);
 
   // Fill the remaining slot, then force an eviction with a third
   // pattern: the held scalar entry must never be chosen as victim.
   MatchLease l1;
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &l1),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), l1),
                 MACHINE_PREPARED);
   MatchLease.release(&l1);
 
   MatchLease l2;
-  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), &l2),
+  EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(2), l2),
                 MACHINE_PREPARED);
   MatchLease.release(&l2);
 
@@ -292,9 +292,9 @@ static void cache_adapters_match_oracle(void) {
     for (int i = 0; i < 6; i++) {
       List oracle = %(sentinel), candidate = %(sentinel);
       int oracle_status =
-        test_match_oracle_try_match(inputs[i], patterns[i], &oracle);
+        test_match_oracle_try_match(inputs[i], patterns[i], oracle);
       int matched = _try_match(
-        cache, inputs[i], patterns[i], &candidate
+        cache, inputs[i], patterns[i], candidate
       );
       EXPECT_INT_EQ(matched, oracle_status);
       EXPECT_TRUE(candidate == (oracle_status ? oracle : %(sentinel)));
@@ -303,7 +303,7 @@ static void cache_adapters_match_oracle(void) {
   // The approved malformed form never matches and never falls back.
   List bindings = %(sentinel);
   EXPECT_FALSE(_try_match(
-    cache, %(foo), %(!or *whole missing), &bindings
+    cache, %(foo), %(!or *whole missing), bindings
   ));
   EXPECT_TRUE(bindings == %(sentinel));
   cache.dispose();
@@ -330,17 +330,17 @@ static void cache_product_pipeline_matches_oracle(void) {
   // Oracle pipeline.
   List oracle_direct;
   EXPECT_TRUE(test_match_oracle_try_match(document_node, direct_pattern,
-                                         &oracle_direct));
+                                         oracle_direct));
   Var oracle_first_match;
   List oracle_first_bindings;
   EXPECT_TRUE(test_match_oracle_try_search(document, status_pattern,
-                                          &oracle_first_match,
-                                          &oracle_first_bindings));
+                                          oracle_first_match,
+                                          oracle_first_bindings));
   List oracle_full = test_match_oracle_search(document, notes_pattern);
   Var oracle_replacement;
   EXPECT_TRUE(test_match_oracle_try_match_replace(
     oracle_first_match, status_pattern, status_template,
-    &oracle_replacement));
+    oracle_replacement));
   List oracle_rewrite = test_match_oracle_search_replace(
     document, actor_pattern, actor_template);
   List oracle_draft = test_match_oracle_search(document, draft_pattern);
@@ -348,52 +348,52 @@ static void cache_product_pipeline_matches_oracle(void) {
   // Candidate pipeline through the cached adapters.
   List direct;
   EXPECT_TRUE(_try_match(
-    cache, document_node, direct_pattern, &direct
+    cache, document_node, direct_pattern, direct
   ));
   EXPECT_TRUE(direct == oracle_direct);
 
   Var first_match;
   List first_bindings;
   EXPECT_TRUE(_try_search(
-    cache, document, status_pattern, &first_match, &first_bindings
+    cache, document, status_pattern, first_match, first_bindings
   ));
   EXPECT_TRUE(first_match == oracle_first_match);
   EXPECT_TRUE(first_bindings == oracle_first_bindings);
   EXPECT_FALSE(_try_search(
-    cache, document, %(missing), &first_match, &first_bindings));
+    cache, document, %(missing), first_match, first_bindings));
   EXPECT_TRUE(first_match == oracle_first_match);
   EXPECT_TRUE(first_bindings == oracle_first_bindings);
 
   List full;
-  EXPECT_TRUE(_search(cache, document, notes_pattern, &full));
+  EXPECT_TRUE(_search(cache, document, notes_pattern, full));
   EXPECT_TRUE(full == oracle_full);
 
   Var replacement;
   EXPECT_TRUE(_try_match_replace(
-    cache, first_match, status_pattern, status_template, &replacement
+    cache, first_match, status_pattern, status_template, replacement
   ));
   EXPECT_TRUE(replacement == oracle_replacement);
   EXPECT_FALSE(_try_match_replace(
-    cache, first_match, %(missing), status_template, &replacement));
+    cache, first_match, %(missing), status_template, replacement));
   EXPECT_TRUE(replacement == oracle_replacement);
 
   List rewrite;
   EXPECT_TRUE(_search_replace(
-    cache, document, actor_pattern, actor_template, &rewrite
+    cache, document, actor_pattern, actor_template, rewrite
   ));
   EXPECT_TRUE(rewrite == oracle_rewrite);
 
   // Bare atoms compile as ordinary cached plans.
   List draft;
-  EXPECT_TRUE(_search(cache, document, draft_pattern, &draft));
+  EXPECT_TRUE(_search(cache, document, draft_pattern, draft));
   EXPECT_TRUE(draft == oracle_draft);
 
   // Reentrancy: an adapter call while another lease is held.
   MatchLease held;
-  EXPECT_INT_EQ(_acquire(cache, status_pattern, &held),
+  EXPECT_INT_EQ(_acquire(cache, status_pattern, held),
                 MACHINE_PREPARED);
   List nested;
-  EXPECT_TRUE(_search(cache, document, notes_pattern, &nested));
+  EXPECT_TRUE(_search(cache, document, notes_pattern, nested));
   EXPECT_TRUE(nested == oracle_full);
   MatchLease.release(&held);
 
@@ -416,13 +416,13 @@ static void cache_retires_a_nested_pool_pattern_with_its_level(void) {
     Pool.open_named("match-cache-round");
     Var counter = i;
     Var pattern = %(round $counter ?value);
-    EXPECT_INT_EQ(_acquire(cache, pattern, &lease), MACHINE_PREPARED);
+    EXPECT_INT_EQ(_acquire(cache, pattern, lease), MACHINE_PREPARED);
     // no round may answer from the entry the previous round left behind
     if (lease.generation && lease.generation == previous) reused++;
     previous = lease.generation;
     MatchLease.release(&lease);
     List bindings = %(sentinel);
-    if (!_try_match(cache, %(round $counter ok), pattern, &bindings) ||
+    if (!_try_match(cache, %(round $counter ok), pattern, bindings) ||
         bindings.assoc(<?value>) != <ok>)
       misses++;
     Pool.close();
@@ -441,7 +441,7 @@ static void default_cache_answers_inside_a_value_pool_bracket(void) {
     Var counter = i;
     List bindings = %(sentinel);
     if (!%(round $counter ok).try_match(%(round $counter ?value),
-                                        &bindings) ||
+                                        bindings) ||
         bindings.assoc(<?value>) != <ok>)
       misses++;
     Pool.close();
@@ -456,7 +456,7 @@ static void default_cache_recreates_without_new_shutdown_ownership(void) {
   Var pattern = %(cache ?value ok);
   for (int i = 0; i < 4; i++) {
     List bindings = %(sentinel);
-    EXPECT_TRUE(%(cache $i ok).try_match(pattern, &bindings));
+    EXPECT_TRUE(%(cache $i ok).try_match(pattern, bindings));
     EXPECT_INT_EQ(bindings.assoc(<?value>).int(), i);
     MatchCache.flush_default();
   }
@@ -475,7 +475,7 @@ static void *_match_thread_release_probe(void *data) {
   ScopeStats before = Scope.stats();
   List bindings;
   Var pattern = %(thread cache ?value);
-  int matched = %(thread cache 47).try_match(pattern, &bindings);
+  int matched = %(thread cache 47).try_match(pattern, bindings);
   (void) matched;
   /* The default cache owns a named Scope, so its presence is visible in
      Scope.stats without reaching into Match's per-thread state. */

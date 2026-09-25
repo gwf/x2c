@@ -352,7 +352,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
   if (map == NULL) raise %(bad-arg);
   if (key is void || rhs is void) raise %(void-op);
   X2CVarNumericInfo info;
-  int numeric = Var.encoding_valid(rhs) && Var.numeric_info(rhs.tag(), &info);
+  int numeric = Var.encoding_valid(rhs) && Var.numeric_info(rhs.tag(), info);
   if (op == <+> && numeric) {
     int inserted;
     Var *stored = map._core_get_or_insert(&key, &rhs, &inserted);
@@ -392,7 +392,7 @@ Var Map.postfixindex(Map map, Var key, Symbol op) {
     table, so it invalidates any outstanding `Map.try_next` cursor. `Map.len`
     drops but the allocation does not shrink. Raises: `<void-op>` when `key` is
     `void`, or a cause raised by custom key hashing or equality. */
-int Map.try_del(Map map, Var key, Var *out) => map._core_try_del(&key, out);
+int Map.try_del(Map map, Var key, Var &?out) => map._core_try_del(&key, out);
 
 /** Removes `key` and returns its value, or `void` when absent.
     A convenience over `Map.try_del`, useful when the removed value is all
@@ -404,7 +404,7 @@ int Map.try_del(Map map, Var key, Var *out) => map._core_try_del(&key, out);
 */
 Var Map.del(Map map, Var key) {
   Var out;
-  return map.try_del(key, &out) ? out : void;
+  return map.try_del(key, out) ? out : void;
 }
 
 /** Adds exactly `pair_count` key/value pairs to `map` in argument order.

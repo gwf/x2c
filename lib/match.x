@@ -134,7 +134,7 @@ typedef struct MatchLease {
 int x2c_match_try_capture(
   List input, Var pattern, MatchCaptureBuffer *captures) {
   if (!captures) return 0;
-  return _plan_cache().try_capture(input, pattern, captures, "match");
+  return _plan_cache().try_capture(input, pattern, *captures, "match");
 }
 
 /* Matches through one compiler-proven static source-pattern site.
@@ -208,9 +208,9 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) =>
 int x2c_match_site_try_match(
   MatchCaptureSite *site, List input, Var pat, List *out_bindings) {
   MatchPlan plan = _site_plan(site, pat);
-  if (!plan) return input.try_match(pat, out_bindings);
+  if (!plan) return input.try_match(pat, *out_bindings);
   if (!out_bindings) return 0;
-  return plan.try_match(input, out_bindings) == 1;
+  return plan.try_match(input, *out_bindings) == 1;
 }
 
 /** Returns bindings through one compiler-owned site, or `nil` on a miss.
@@ -229,9 +229,9 @@ int x2c_match_site_try_search(
   MatchCaptureSite *site, List input, Var pat, Var *out_match,
   List *out_bindings) {
   MatchPlan plan = _site_plan(site, pat);
-  if (!plan) return input.try_search(pat, out_match, out_bindings);
+  if (!plan) return input.try_search(pat, *out_match, *out_bindings);
   if (!out_match || !out_bindings) return 0;
-  return plan.try_search(input, out_match, out_bindings) == 1;
+  return plan.try_search(input, *out_match, *out_bindings) == 1;
 }
 
 /** Returns every matching subtree through one compiler-owned site.
@@ -241,7 +241,7 @@ List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
   MatchPlan plan = _site_plan(site, pat);
   if (!plan) return input.search(pat);
   List results = NULL;
-  plan.search(input, &results);
+  plan.search(input, results);
   return results;
 }
 
@@ -251,9 +251,9 @@ List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
 int x2c_match_site_try_match_replace(
   MatchCaptureSite *site, List input, Var pat, Var template, Var *out) {
   MatchPlan plan = _site_plan(site, pat);
-  if (!plan) return input.try_match_replace(pat, template, out);
+  if (!plan) return input.try_match_replace(pat, template, *out);
   if (!out) return 0;
-  return plan.try_match_replace(input, template, out) == 1;
+  return plan.try_match_replace(input, template, *out) == 1;
 }
 
 /** Returns the `List` replacement through one compiler-owned site.
@@ -275,7 +275,7 @@ List x2c_match_site_search_replace(
   MatchPlan plan = _site_plan(site, pat);
   if (!plan) return input.search_replace(pat, template);
   List result = input;
-  plan.search_replace(input, template, &result);
+  plan.search_replace(input, template, result);
   return result;
 }
 
@@ -304,7 +304,7 @@ macro Statement $match.lease(
   Expr $owner) {
   $lease_type storage;
   $lease_type *$lease_ptr = &storage;
-  int $acquire_status = $cache.acquire($pattern, $lease_ptr, $owner);
+  int $acquire_status = $cache.acquire($pattern, *$lease_ptr, $owner);
 }
 
 /* Based on Peter Norvig's implementation:
@@ -714,7 +714,7 @@ static List _capture_publish(
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing, materializing captures, or publishing bindings.
 */
-int List.try_match(List input, Var pat, List *out_bindings) => out_bindings &&
+int List.try_match(List input, Var pat, List &?out_bindings) => out_bindings &&
   _plan_cache().try_match(input, pat, out_bindings, "List.try_match");
 
 /** Returns bindings when `input` matches `pat`, or `nil` on a miss.
@@ -723,7 +723,7 @@ int List.try_match(List input, Var pat, List *out_bindings) => out_bindings &&
 */
 List List.match(List input, Var pat) {
   List bindings;
-  if (!input.try_match(pat, &bindings)) return NULL;
+  if (!input.try_match(pat, bindings)) return NULL;
   return bindings ? bindings : %(());
 }
 
@@ -810,7 +810,7 @@ static Var _apply_capture_template(
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing, materializing, or replacing.
 */
-int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
+int List.try_match_replace(List input, Var pat, Var template, Var &?out) =>
   out && _plan_cache().try_match_replace(
     input, pat, template, out, "List.try_match_replace");
 
@@ -822,7 +822,7 @@ int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
 */
 meta native List List.match_replace(List input, Var pat, Var template) {
   Var result;
-  if (!input.try_match_replace(pat, template, &result)) return input;
+  if (!input.try_match_replace(pat, template, result)) return input;
   return result is <list> ? result : NULL;
 }
 
@@ -992,7 +992,7 @@ static Var _walk_replace_prepared(
 */
 List List.search(List input, Var pat) {
   List results;
-  _plan_cache().search(input, pat, &results, "List.search");
+  _plan_cache().search(input, pat, results, "List.search");
   return results;
 }
 
@@ -1003,7 +1003,7 @@ List List.search(List input, Var pat) {
     0 and leaves both outputs unchanged. Either null output returns 0.
     Raises: the same causes as `List.search`.
 */
-int List.try_search(List input, Var pat, Var *out_match, List *out_bindings) =>
+int List.try_search(List input, Var pat, Var &?out_match, List &?out_bindings) =>
   out_match && out_bindings && _plan_cache().try_search(
     input, pat, out_match, out_bindings, "List.try_search");
 
@@ -1018,7 +1018,7 @@ int List.try_search(List input, Var pat, Var *out_match, List *out_bindings) =>
 List List.search_replace(List input, Var pat, Var template) {
   List result;
   _plan_cache().search_replace(
-    input, pat, template, &result, "List.search_replace");
+    input, pat, template, result, "List.search_replace");
   return result;
 }
 
@@ -1801,7 +1801,7 @@ static int MatchPlan._capture(
     materializing captures.
 */
 int MatchPlan.execute_capture(
-  MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
+  MatchPlan m, Var input, MatchCaptureBuffer &?captures, MachineStats &?stats) {
   if (!_plan_prepared(m, "MatchPlan.execute_capture") ||
       !_capture_buffer_valid(m.layout, captures))
     return -1;
@@ -1813,7 +1813,7 @@ int MatchPlan.execute_capture(
     results, atomicity, and failures.
 */
 int MatchPlan.try_capture(
-  MatchPlan plan, List input, MatchCaptureBuffer *captures) =>
+  MatchPlan plan, List input, MatchCaptureBuffer &?captures) =>
     plan.execute_capture(input, captures, NULL);
 
 /** Executes `plan` against `input` and publishes association bindings.
@@ -1826,12 +1826,13 @@ int MatchPlan.try_capture(
     materializing or publishing bindings.
 */
 int MatchPlan.execute(
-  MatchPlan plan, Var input, List *out_bindings, MachineStats *stats) {
-  if (!_plan_prepared(plan, "MatchPlan.execute") || !out_bindings) return -1;
+  MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats) {
+  if (!_plan_prepared(plan, "MatchPlan.execute")) return -1;
+  if (!out_bindings) return -1;
   $match.machine(machine, stats);
   List bindings, int result = plan._run(machine, input, bindings);
   machine.dispose();
-  if (result == 1) *out_bindings = bindings;
+  if (result == 1) out_bindings = bindings;
   return result;
 }
 
@@ -1839,7 +1840,7 @@ int MatchPlan.execute(
     This is `MatchPlan.execute` without statistics and has the same status,
     output atomicity, ordering, and failures.
 */
-int MatchPlan.try_match(MatchPlan plan, List input, List *out_bindings) =>
+int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
   plan.execute(input, out_bindings, NULL);
 
 static int MatchPlan._first(
@@ -1866,7 +1867,7 @@ static int MatchPlan._first(
     materializing or publishing bindings.
 */
 int MatchPlan.try_search(
-  MatchPlan plan, List input, Var *out_match, List *out_bindings) {
+  MatchPlan plan, List input, Var &?out_match, List &?out_bindings) {
   if (!_plan_prepared(plan, "MatchPlan.try_search") || !out_match ||
       !out_bindings)
     return -1;
@@ -1894,9 +1895,9 @@ static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
     Raises: `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
     constructing results.
 */
-int MatchPlan.search(MatchPlan plan, List input, List *out_results) {
+int MatchPlan.search(MatchPlan plan, List input, List &?out_results) {
   if (!_plan_prepared(plan, "MatchPlan.search") || !out_results) return -1;
-  return plan._all(input, *out_results);
+  return plan._all(input, out_results);
 }
 
 static int MatchPlan._replace(
@@ -1917,7 +1918,7 @@ static int MatchPlan._replace(
     materializing captures or replacing.
 */
 int MatchPlan.try_match_replace(
-  MatchPlan plan, List input, Var template, Var *out) {
+  MatchPlan plan, List input, Var template, Var &?out) {
   if (!_plan_prepared(plan, "MatchPlan.try_match_replace") || !out) return -1;
   return plan._replace(input, template, out);
 }
@@ -1944,7 +1945,7 @@ static int MatchPlan._replace_all(
     traversing or replacing.
 */
 int MatchPlan.search_replace(
-  MatchPlan plan, List input, Var template, List *out) {
+  MatchPlan plan, List input, Var template, List &?out) {
   if (!_plan_prepared(plan, "MatchPlan.search_replace") || !out) return -1;
   return plan._replace_all(input, template, out);
 }
@@ -2202,8 +2203,8 @@ static void _cache_activate(MatchCache cache, int slot, MatchLease *lease) {
     `<alloc-fail>` may also be raised while preparing or growing storage.
 */
 int MatchCache.acquire(
-  MatchCache m, Var pattern, MatchLease *lease, const char *owner) {
-  *lease = (MatchLease) {.slot = -1};
+  MatchCache m, Var pattern, MatchLease &lease, const char *owner) {
+  lease = (MatchLease) {.slot = -1};
   if (!_cache_admitted(m, pattern)) {
     MatchPlan plan = MatchPlan.prepare(pattern);
     if (plan.status == MACHINE_INELIGIBLE) {
@@ -2222,7 +2223,7 @@ int MatchCache.acquire(
   int slot = _cache_find(m, key);
   if (slot >= 0) {
     _cache_touch(m, slot);
-    _cache_activate(m, slot, lease);
+    _cache_activate(m, slot, &lease);
     return m.entries[slot].plan.status;
   }
 
@@ -2255,7 +2256,7 @@ int MatchCache.acquire(
   m.buckets[bucket] = slot;
   _cache_link_mru(m, slot);
   m.size++;
-  _cache_activate(m, slot, lease);
+  _cache_activate(m, slot, &lease);
   return entry.plan.status;
 }
 
@@ -2336,7 +2337,7 @@ void MatchCache.dispose(MatchCache cache) {
     preparing or matching.
 */
 int MatchCache.try_capture(
-  MatchCache cache, List input, Var pattern, MatchCaptureBuffer *captures,
+  MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures,
   const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   int result = 0;
@@ -2354,7 +2355,7 @@ int MatchCache.try_capture(
     preparing, materializing, or publishing.
 */
 int MatchCache.try_match(
-  MatchCache cache, List input, Var pattern, List *out_bindings,
+  MatchCache cache, List input, Var pattern, List &?out_bindings,
   const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   int result = 0;
@@ -2373,8 +2374,8 @@ int MatchCache.try_match(
     preparing or constructing bindings.
 */
 int MatchCache.try_search(
-  MatchCache cache, List input, Var pattern, Var *out_match,
-  List *out_bindings, const char *owner) {
+  MatchCache cache, List input, Var pattern, Var &?out_match,
+  List &?out_bindings, const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
@@ -2393,14 +2394,14 @@ int MatchCache.try_search(
     preparing or constructing results.
 */
 int MatchCache.search(
-  MatchCache cache, List input, Var pattern, List *out_results,
+  MatchCache cache, List input, Var pattern, List &out_results,
   const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   List results = NULL;
   MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED) plan.search(input, &results);
+  if (status == MACHINE_PREPARED) plan.search(input, results);
   lease.release();
-  *out_results = results;
+  out_results = results;
   return results != NULL;
 }
 
@@ -2412,7 +2413,7 @@ int MatchCache.search(
     preparing, materializing, or replacing.
 */
 int MatchCache.try_match_replace(
-  MatchCache cache, List input, Var pattern, Var template, Var *out,
+  MatchCache cache, List input, Var pattern, Var template, Var &?out,
   const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   int result = 0;
@@ -2431,15 +2432,15 @@ int MatchCache.try_match_replace(
     preparing, traversing, or replacing.
 */
 int MatchCache.search_replace(
-  MatchCache cache, List input, Var pattern, Var template, List *out,
+  MatchCache cache, List input, Var pattern, Var template, List &out,
   const char *owner) {
   $match.lease(MatchLease, lease, status, cache, pattern, owner);
   int answered = status != MACHINE_PREPARED, List result = input;
   MatchPlan plan = _lease_plan(lease);
   if (status == MACHINE_PREPARED)
-    answered = plan.search_replace(input, template, &result) >= 0;
+    answered = plan.search_replace(input, template, result) >= 0;
   lease.release();
-  *out = result;
+  out = result;
   return status == MACHINE_PREPARED && answered;
 }
 

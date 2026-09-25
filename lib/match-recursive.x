@@ -352,7 +352,7 @@ static Var _replace_all(
     Raises: `<alloc-fail>` or `<size-limit>` while materializing captures.
 */
 int match_recursive_try_capture(
-  MatchCaptureLayout layout, Var input, MatchCaptureBuffer *captures) =>
+  MatchCaptureLayout layout, Var input, MatchCaptureBuffer &?captures) =>
     _try_capture(layout, input, captures);
 
 /** Matches any `input` against `pattern` with the recursive reference engine.
@@ -366,7 +366,7 @@ int match_recursive_try_capture(
 
     Raises: `<alloc-fail>` or `<size-limit>` while analyzing or binding.
 */
-int match_recursive_try_value(Var input, Var pattern, List *out_bindings) =>
+int match_recursive_try_value(Var input, Var pattern, List &?out_bindings) =>
   _try_value(input, pattern, out_bindings);
 
 /** Matches `input` against `pattern` with the recursive reference engine.
@@ -380,7 +380,7 @@ int match_recursive_try_value(Var input, Var pattern, List *out_bindings) =>
 
     Raises: `<alloc-fail>` or `<size-limit>` while analyzing or binding.
 */
-int match_recursive_try_match(List input, Var pattern, List *out_bindings) =>
+int match_recursive_try_match(List input, Var pattern, List &?out_bindings) =>
   match_recursive_try_value(input, pattern, out_bindings);
 
 /** Matches `input` and writes the instantiated `template` on success.
@@ -393,11 +393,11 @@ int match_recursive_try_match(List input, Var pattern, List *out_bindings) =>
     Raises: `<alloc-fail>` or `<size-limit>` while matching or replacing.
 */
 int match_recursive_try_match_replace(
-  List input, Var pattern, Var template, Var *out) {
+  List input, Var pattern, Var template, Var &?out) {
   if (!out) return 0;
   List bindings;
-  if (!match_recursive_try_match(input, pattern, &bindings)) return 0;
-  *out = _replace_template(template, bindings);
+  if (!match_recursive_try_match(input, pattern, bindings)) return 0;
+  out = _replace_template(template, bindings);
   return 1;
 }
 
@@ -429,7 +429,7 @@ List match_recursive_search(List input, Var pattern) =>
     Raises: `<alloc-fail>` or `<size-limit>` while searching or binding.
 */
 int match_recursive_try_search(
-  List input, Var pattern, Var *out_match, List *out_bindings) =>
+  List input, Var pattern, Var &?out_match, List &?out_bindings) =>
     out_match && out_bindings &&
          _first(input, pattern, 1, out_match, out_bindings);
 

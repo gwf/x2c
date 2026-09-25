@@ -53,7 +53,7 @@ Source: `lib/match-recursive.x:444`
 
 #### match_recursive_try_capture
 
-`int match_recursive_try_capture( MatchCaptureLayout layout, Var input, MatchCaptureBuffer *captures)`
+`int match_recursive_try_capture( MatchCaptureLayout layout, Var input, MatchCaptureBuffer &?captures)`
 
 Matches `input` against `layout` with the recursive reference engine.
 Returns 1 and publishes positional captures on success. A null or
@@ -70,7 +70,7 @@ Source: `lib/match-recursive.x:354`
 
 #### match_recursive_try_match
 
-`int match_recursive_try_match(List input, Var pattern, List *out_bindings)`
+`int match_recursive_try_match(List input, Var pattern, List &?out_bindings)`
 
 Matches `input` against `pattern` with the recursive reference engine.
 Returns 1 and writes a canonical association `List` of named bindings on
@@ -87,7 +87,7 @@ Source: `lib/match-recursive.x:383`
 
 #### match_recursive_try_match_replace
 
-`int match_recursive_try_match_replace( List input, Var pattern, Var template, Var *out)`
+`int match_recursive_try_match_replace( List input, Var pattern, Var template, Var &?out)`
 
 Matches `input` and writes the instantiated `template` on success.
 Returns 0 for a malformed pattern, mismatch, or null output pointer and
@@ -102,7 +102,7 @@ Source: `lib/match-recursive.x:395`
 
 #### match_recursive_try_search
 
-`int match_recursive_try_search( List input, Var pattern, Var *out_match, List *out_bindings)`
+`int match_recursive_try_search( List input, Var pattern, Var &?out_match, List &?out_bindings)`
 
 Visits car, then cdr, then the node and writes the first matching node.
 The binding `List` and star-capture `List`s are canonical and follow their
@@ -120,7 +120,7 @@ Source: `lib/match-recursive.x:431`
 
 #### match_recursive_try_value
 
-`int match_recursive_try_value(Var input, Var pattern, List *out_bindings)`
+`int match_recursive_try_value(Var input, Var pattern, List &?out_bindings)`
 
 Matches any `input` against `pattern` with the recursive reference engine.
 Returns 1 and writes a canonical association `List` of named bindings on

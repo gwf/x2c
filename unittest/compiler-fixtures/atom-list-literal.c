@@ -74,7 +74,7 @@ int main(void){
   Lisp lisp = Lisp_new();
   unsigned cursor = 0;
   Var read =((void) 0, Void);
-  Symbol status = Lisp_read(lisp, List_repr(first), & cursor, & read);
+  Symbol status = Lisp_read(lisp, List_repr(first), &(cursor), &(read));
   printf("%d %d %s|%s|%s|%s|%s|%s|%s|%s\n", List_equal(first, second), status == 46228810 && Var_pointer(read) == first, Var_str(List_getindex(first, 0)), Var_str(List_getindex(first, 1)), Var_str(List_getindex(first, 2)), Var_str(List_getindex(first, 3)), Var_str(List_getindex(first, 4)), Var_str(List_getindex(first, 5)), Var_str(List_getindex(first, 6)), Var_str(List_getindex(first, 7)));
   Lisp_destroy(lisp);
   return 0;

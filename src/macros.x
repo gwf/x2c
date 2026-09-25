@@ -735,7 +735,7 @@ static int _definition_needs_shallow_expansion(List definition) {
   List template = definition.assoc(<template>), bindings;
   Var matched;
   return template.try_search(
-    %(!or (protocol *) (adopt *)), &matched, &bindings);
+    %(!or (protocol *) (adopt *)), matched, bindings);
 }
 
 /** Returns whether the macro invocation at the cursor needs shallow
@@ -3377,7 +3377,7 @@ List Compiler.parse_macro_definition(Compiler c) {
   Var expression_slot = %(
     expr (<macro-expr>) (macro-bind ?binder)
   );
-  if (replacement.try_match(expression_slot, &bindings))
+  if (replacement.try_match(expression_slot, bindings))
     replacement = replacement.search_replace(
       %(macro-bind ?binder), <?binder>);
   else replacement = replacement.search_replace(

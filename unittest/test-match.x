@@ -243,7 +243,7 @@ static void match_star_anchor_agrees_with_a_fixed_position(void) {
   EXPECT_NOT_NULL(input.match(%(? ($right) ?)));
   EXPECT_NOT_NULL(input.match(%(*a ($right) *b)));
   List oracle = %(sentinel);
-  EXPECT_TRUE(test_match_oracle_try_match(input, %(*a ($right) *b), &oracle));
+  EXPECT_TRUE(test_match_oracle_try_match(input, %(*a ($right) *b), oracle));
   EXPECT_NULL(input.match(%(*a ($left 9) *b)));
   // a Symbol anchor still decides by bits, which is the fast path
   EXPECT_NOT_NULL(%(a (mark) b).match(%(*pre (mark) *post)));
@@ -260,7 +260,7 @@ static void match_repeated_star_compares_values(void) {
   EXPECT_NULL(%($left b 7 c).match(%(*a b *a c)));
   List oracle = %(sentinel);
   EXPECT_TRUE(
-    test_match_oracle_try_match(%($left b $right), %(*a b *a), &oracle));
+    test_match_oracle_try_match(%($left b $right), %(*a b *a), oracle));
 }
 
 /* The doc says a template retains a binder the match did not bind, and the
@@ -270,11 +270,11 @@ static void replace_retains_an_unbound_sequence_binder(void) {
   EXPECT_TRUE(%(a *m b).replace(NULL) == %(a *m b));
   EXPECT_TRUE(%(a *m b).replace(%((*m (1 2)))) == %(a 1 2 b));
   Var out = <unchanged>;
-  EXPECT_TRUE(%(b).try_match_replace(%(!or (a *x) (b)), %(r *x), &out));
+  EXPECT_TRUE(%(b).try_match_replace(%(!or (a *x) (b)), %(r *x), out));
   EXPECT_TRUE(out == %(r *x).var());
   Var oracle = <unchanged>;
   EXPECT_TRUE(test_match_oracle_try_match_replace(
-    %(b), %(!or (a *x) (b)), %(r *x), &oracle));
+    %(b), %(!or (a *x) (b)), %(r *x), oracle));
   EXPECT_TRUE(out == oracle);
 }
 
@@ -287,7 +287,7 @@ static void search_walks_a_long_list_without_recursing(void) {
   EXPECT_INT_EQ(input.search(%(item 199999)).len(), 1);
   Var node = void;
   List bindings = %(sentinel);
-  EXPECT_TRUE(input.try_search(%(item ?id), &node, &bindings));
+  EXPECT_TRUE(input.try_search(%(item ?id), node, bindings));
   EXPECT_INT_EQ(bindings.assoc(<?id>).int(), 199999);
   List replaced = input.search_replace(%(item 0), %(gone));
   EXPECT_INT_EQ(replaced.len(), input.len());
@@ -296,16 +296,16 @@ static void search_walks_a_long_list_without_recursing(void) {
 
 static void try_match_separates_status_from_bindings(void) {
   List empty = NULL, bindings = %(unchanged);
-  EXPECT_TRUE(empty.try_match(empty, &bindings));
+  EXPECT_TRUE(empty.try_match(empty, bindings));
   EXPECT_NULL(bindings);
 
   List unchanged = %(unchanged);
   bindings = unchanged;
-  EXPECT_FALSE(%(value).try_match(%(other), &bindings));
+  EXPECT_FALSE(%(value).try_match(%(other), bindings));
   EXPECT_TRUE(bindings == unchanged);
   EXPECT_FALSE(%(value).try_match(%(value), NULL));
 
-  EXPECT_TRUE(empty.try_match(<?value>, &bindings));
+  EXPECT_TRUE(empty.try_match(<?value>, bindings));
   Var value = bindings.assoc(<?value>);
   EXPECT_TRUE(value is <list>);
   EXPECT_NULL(value.list());
@@ -315,7 +315,7 @@ static void try_search_returns_first_depth_first_match(void) {
   List input = %((item 1) (wrapper (item 2)) (item 3));
   Var matched = <unchanged>;
   List bindings = %(unchanged);
-  EXPECT_TRUE(input.try_search(%(item ?id), &matched, &bindings));
+  EXPECT_TRUE(input.try_search(%(item ?id), matched, bindings));
   EXPECT_TRUE(matched is <list>);
   EXPECT_TRUE(matched.list() == %(item 1));
   EXPECT_INT_EQ(bindings.assoc(<?id>).integer(), 1);
@@ -324,31 +324,31 @@ static void try_search_returns_first_depth_first_match(void) {
   List old_bindings = %(unchanged);
   matched = old_match;
   bindings = old_bindings;
-  EXPECT_FALSE(input.try_search(%(missing), &matched, &bindings));
+  EXPECT_FALSE(input.try_search(%(missing), matched, bindings));
   EXPECT_TRUE(matched == old_match);
   EXPECT_TRUE(bindings == old_bindings);
-  EXPECT_FALSE(input.try_search(%(item ?id), NULL, &bindings));
-  EXPECT_FALSE(input.try_search(%(item ?id), &matched, NULL));
+  EXPECT_FALSE(input.try_search(%(item ?id), NULL, bindings));
+  EXPECT_FALSE(input.try_search(%(item ?id), matched, NULL));
 }
 
 static void try_match_replace_preserves_var_results(void) {
   List input = %(tag value), pattern = %(tag ?payload);
   Var result = <unchanged>;
 
-  EXPECT_TRUE(input.try_match_replace(pattern, <?payload>, &result));
+  EXPECT_TRUE(input.try_match_replace(pattern, <?payload>, result));
   EXPECT_TRUE(result == <value>);
 
-  EXPECT_TRUE(input.try_match_replace(pattern, %(wrapped ?payload), &result));
+  EXPECT_TRUE(input.try_match_replace(pattern, %(wrapped ?payload), result));
   EXPECT_TRUE(result is <list>);
   EXPECT_TRUE(result.list() == %(wrapped value));
 
   List empty = NULL;
-  EXPECT_TRUE(input.try_match_replace(pattern, empty, &result));
+  EXPECT_TRUE(input.try_match_replace(pattern, empty, result));
   EXPECT_TRUE(result is <list>);
   EXPECT_NULL(result.list());
 
   result = <unchanged>;
-  EXPECT_FALSE(input.try_match_replace(%(missing), <changed>, &result));
+  EXPECT_FALSE(input.try_match_replace(%(missing), <changed>, result));
   EXPECT_TRUE(result == <unchanged>);
   EXPECT_FALSE(input.try_match_replace(pattern, <changed>, NULL));
 
@@ -491,13 +491,13 @@ static void match_long_atom_binders_across_consumers(void) {
     Atom.intern("*RemainingLongValues")).list() == %(tail));
 
   List oracle = %(sentinel);
-  EXPECT_TRUE(test_match_oracle_try_match(input, pattern, &oracle));
+  EXPECT_TRUE(test_match_oracle_try_match(input, pattern, oracle));
   EXPECT_TRUE(oracle == bindings);
 
   List corpus = %(before (item 7 tail) after);
   Var found = void;
   List found_bindings = %(sentinel);
-  EXPECT_TRUE(corpus.try_search(pattern, &found, &found_bindings));
+  EXPECT_TRUE(corpus.try_search(pattern, found, found_bindings));
   EXPECT_TRUE(found.list() == %(item 7 tail));
   EXPECT_INT_EQ(found_bindings.assoc(
     Atom.intern("?VeryLongIdentifierValue")).integer(), 7);
@@ -522,13 +522,13 @@ static void match_rejects_malformed_binder_names(void) {
   List input = %(node value);
   Var malformed = %(node ?bad-name);
   List untouched = %(sentinel);
-  EXPECT_FALSE(test_match_oracle_try_match(input, malformed, &untouched));
+  EXPECT_FALSE(test_match_oracle_try_match(input, malformed, untouched));
   EXPECT_TRUE(untouched == %(sentinel));
   EXPECT_NULL(input.match(malformed));
 
   Var replacement = <sentinel>;
   EXPECT_FALSE(input.try_match_replace(
-    malformed, %(changed), &replacement
+    malformed, %(changed), replacement
   ));
   EXPECT_TRUE(replacement == <sentinel>);
   EXPECT_TRUE(input.match_replace(malformed, %(changed)) == input);
@@ -536,7 +536,7 @@ static void match_rejects_malformed_binder_names(void) {
 
   Var found = <sentinel>;
   List found_bindings = %(sentinel);
-  EXPECT_FALSE(input.try_search(malformed, &found, &found_bindings));
+  EXPECT_FALSE(input.try_search(malformed, found, found_bindings));
   EXPECT_TRUE(found == <sentinel>);
   EXPECT_TRUE(found_bindings == %(sentinel));
   EXPECT_TRUE(input.search_replace(malformed, %(changed)) == input);

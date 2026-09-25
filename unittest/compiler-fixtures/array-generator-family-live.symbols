@@ -46,7 +46,7 @@
 ( ProbeArrayInt_take_last ) ==> (( func (( ProbeArrayInt ))) int )
 ( ProbeArrayInt_try_get ) ==> (( func (( ProbeArrayInt ) ( int ) ( opt-ref int ))) int )
 ( ProbeArrayInt_try_next ) ==> (( func (( ProbeArrayInt ) ( * int ) ( * int ))) int )
-( ProbeArrayInt_try_take_last ) ==> (( func (( ProbeArrayInt ) ( * int ))) int )
+( ProbeArrayInt_try_take_last ) ==> (( func (( ProbeArrayInt ) ( opt-ref int ))) int )
 ( ProbeArrayInt_unshift ) ==> (( func (( ProbeArrayInt ) ( int ))) int )
 ( ProbeArrayInt_updateindex ) ==> (( func (( ProbeArrayInt ) ( int ) ( Symbol ) ( int ))) int )
 ( ProbeArrayInt_var ) ==> (( func (( ProbeArrayInt ))) Var )

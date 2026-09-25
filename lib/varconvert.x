@@ -75,7 +75,7 @@ long long Var.signed_from_bits(unsigned long long raw, int bits) {
     `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
     failures leave `out` unchanged.
 */
-void Var.numeric_decode(Var value, X2CVarNumeric *out) {
+void Var.numeric_decode(Var value, X2CVarNumeric &?out) {
   if (!out) raise %(bad-arg (owner "Var.numeric_decode"));
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
@@ -84,8 +84,8 @@ void Var.numeric_decode(Var value, X2CVarNumeric *out) {
   if (value is void) raise %(void-op (owner "Var.numeric_decode"));
   X2CVarNumericInfo info;
   Symbol tag = value.tag();
-  if (!Var.numeric_info(tag, &info)) raise %(bad-types (source $tag));
-  _numeric_decode(value, info, *out);
+  if (!Var.numeric_info(tag, info)) raise %(bad-types (source $tag));
+  _numeric_decode(value, info, out);
 }
 
 /** Boxes the low target-width bits of `raw` using integer `target`.
@@ -97,7 +97,7 @@ void Var.numeric_decode(Var value, X2CVarNumeric *out) {
 */
 Var Var.integer_box(Symbol target, unsigned long long raw) {
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(target, &info) || info.floating)
+  if (!Var.numeric_info(target, info) || info.floating)
     raise %(bad-target (target $target));
   raw &= Var.width_mask(info.bits);
   long long signed_value = Var.signed_from_bits(raw, info.bits);
@@ -143,12 +143,12 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
     The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
     A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 */
-int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out) {
+int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out) {
   if (!out) return 0;
   if (tag == <nan> || tag == <-inf> || tag == <+inf>) tag = <f64>;
   int row = x2c_var_numeric_tags.index(tag);
   if (row < 0) return 0;
-  *out = x2c_var_numerics[row];
+  out = x2c_var_numerics[row];
   return 1;
 }
 
@@ -284,13 +284,13 @@ meta native Var Var.convert(Var value, Symbol target) {
        source_tag == <+inf>) && target == <f64>)
     return value;
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(source_tag, &info)) {
+  if (!Var.numeric_info(source_tag, info)) {
     List lower = %(bad-types (source $source_tag));
     raise %(no-convert (target $target) (cause $lower));
   }
   X2CVarNumeric source;
   _numeric_decode(value, info, source);
-  if (!Var.numeric_info(target, &info))
+  if (!Var.numeric_info(target, info))
     raise %(no-convert (source $source_tag) (target $target));
   return info.floating
        ? _convert_to_float(source, target)

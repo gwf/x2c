@@ -355,7 +355,7 @@ static void file_write_failures_raise_io_error(void) {
   descriptor = copy_output.fileno();
   if (!EXPECT_INT_EQ(close(descriptor), 0)) return;
   size_t copied = 1;
-  try source.copy_to(copy_output, &copied);
+  try source.copy_to(copy_output, copied);
   catch %(io-fail *detail): {
     caught++;
     _expect_file_io_error(detail, <write>, EBADF);
@@ -374,14 +374,14 @@ static void file_copy_to_reports_progress(void) {
   fwrite(bytes, 1, sizeof(bytes), source);
   rewind(source);
   size_t copied = 0;
-  EXPECT_TRUE(source.copy_to(output, &copied));
+  EXPECT_TRUE(source.copy_to(output, copied));
   EXPECT_INT_EQ(copied, sizeof(bytes));
   rewind(output);
   Block content = Block.new(sizeof(char));
   EXPECT_INT_EQ(output.read_into(content), FILE_READ_DATA);
   EXPECT_INT_EQ(content.length, sizeof(bytes));
   EXPECT_TRUE(memcmp(content.bytes, bytes, sizeof(bytes)) == 0);
-  EXPECT_FALSE(source.copy_to(NULL, &copied));
+  EXPECT_FALSE(source.copy_to(NULL, copied));
   EXPECT_INT_EQ(copied, 0);
   content.free();
   source.close();

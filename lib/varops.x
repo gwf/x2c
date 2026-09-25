@@ -161,7 +161,7 @@ static Symbol _integer_result_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
   Symbol tag = _integer_result_tag(lhs, rhs);
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(tag, &info)) raise %(bad-types (op $op));
+  if (!Var.numeric_info(tag, info)) raise %(bad-types (op $op));
   unsigned long long raw = _integer_raw(
     op, _raw_for_width(lhs, info.bits), _raw_for_width(rhs, info.bits),
     info.bits, info.unsigned_value);
@@ -231,8 +231,8 @@ static Var _floating_binary(
 
 static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value) {
   X2CVarNumeric lhs, rhs;
-  lhs_value.numeric_decode(&lhs);
-  rhs_value.numeric_decode(&rhs);
+  lhs_value.numeric_decode(lhs);
+  rhs_value.numeric_decode(rhs);
   switch (op) {
     case <"<<">: case <">>">:
       if (lhs.floating || rhs.floating) raise %(bad-types (op $op));
@@ -327,9 +327,9 @@ int Var.fallback_truth(Var value) {
   if (value is void) raise %(void-op (owner "Var.truth"));
   X2CVarNumericInfo info;
   int truth;
-  if (Var.numeric_info(value.tag(), &info)) {
+  if (Var.numeric_info(value.tag(), info)) {
     X2CVarNumeric numeric;
-    value.numeric_decode(&numeric);
+    value.numeric_decode(numeric);
     truth = numeric.floating ? numeric.floating_value != 0.0L
           : numeric.raw != 0;
   }
@@ -359,7 +359,7 @@ int Var.fallback_truth(Var value) {
 meta native int Var.truth(Var value) {
   if (!value.encoding_valid() || value is void)
     return value.fallback_truth();
-  int handled = 0, truth = value.dispatch_truth(&handled);
+  int handled = 0, truth = value.dispatch_truth(handled);
   return handled ? !!truth : value.fallback_truth();
 }
 
@@ -382,7 +382,7 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   if (op == <+> && lhs is <string> && rhs is <string>)
     return lhs.string().add(rhs);
   if (lhs is <string>) return _general_numeric_binary(op, lhs, rhs);
-  if (lhs.try_dispatch_binary(member, rhs, &result)) return result;
+  if (lhs.try_dispatch_binary(member, rhs, result)) return result;
   if (lhs.kind() == <object>) {
     Symbol tag = lhs.tag();
     raise %(no-member (tag $tag) (member $member));
@@ -450,7 +450,7 @@ meta native Var Var.neg(Var value) {
   }
   if (value is void) raise %(void-op (owner "Var.neg"));
   Var result;
-  if (value.try_dispatch_unary(<neg>, &result)) return result;
+  if (value.try_dispatch_unary(<neg>, result)) return result;
   if (value.kind() == <object>) {
     Symbol tag = value.tag();
     raise %(no-member (tag $tag) (member neg));

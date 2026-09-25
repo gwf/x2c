@@ -57,7 +57,7 @@ static Lisp _session(void) {
 static Var _read_form(Lisp lisp, const char *text) {
   unsigned cursor = 0;
   Var form = void;
-  _check(Lisp.read(lisp, String.new(text), &cursor, &form) ==
+  _check(Lisp.read(lisp, String.new(text), cursor, form) ==
          <value>, "read-form");
   return form;
 }

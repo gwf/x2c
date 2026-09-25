@@ -506,7 +506,7 @@ Source: `lib/typed-map.x:280`
 <a id="MapIntInt.try_del"></a>
 #### MapIntInt.try_del
 
-`int MapIntInt.try_del(MapIntInt map, int key, int *out)`
+`int MapIntInt.try_del(MapIntInt map, int key, int &?out)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -883,7 +883,7 @@ Source: `lib/typed-map.x:300`
 <a id="MapLongDouble.try_del"></a>
 #### MapLongDouble.try_del
 
-`int MapLongDouble.try_del(MapLongDouble map, long key, double *out)`
+`int MapLongDouble.try_del(MapLongDouble map, long key, double &?out)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -1260,7 +1260,7 @@ Source: `lib/typed-map.x:358`
 <a id="MapStringInt.try_del"></a>
 #### MapStringInt.try_del
 
-`int MapStringInt.try_del(MapStringInt map, String key, int *out)`
+`int MapStringInt.try_del(MapStringInt map, String key, int &?out)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -1637,7 +1637,7 @@ Source: `lib/typed-map.x:321`
 <a id="MapStringString.try_del"></a>
 #### MapStringString.try_del
 
-`int MapStringString.try_del(MapStringString map, String key, String *out)`
+`int MapStringString.try_del(MapStringString map, String key, String &?out)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or

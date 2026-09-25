@@ -233,7 +233,7 @@ static void _statement_bind(Statement statement, int index, Var value) {
   }
   else {
     X2CVarNumeric numeric;
-    Var.numeric_decode(value, &numeric);
+    Var.numeric_decode(value, numeric);
     if (numeric.floating) {
       operation = "sqlite3_bind_double";
       double real = (double)numeric.floating_value;

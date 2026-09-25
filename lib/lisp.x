@@ -814,15 +814,16 @@ void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
     reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
     tokenizing, constructing, interning, or boxing the form.
 */
-Symbol Lisp.read(Lisp lisp, String source, unsigned *cursor, Var *out) {
+Symbol Lisp.read(Lisp lisp, String source, unsigned &?cursor, Var &?out) {
   (void) lisp;
-  if (!source || !cursor) return <eof>;
-  unsigned base = *cursor;
+  if (!source) return <eof>;
+  if (!cursor) return <eof>;
+  unsigned base = cursor;
   Symbol status;
   {
     Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
     Tokenizer tokenizer = _scan_lisp_tokens(source + base, &tokens_scope);
-    status = _read_tokenizer(tokenizer, source, base, cursor, out);
+    status = _read_tokenizer(tokenizer, source, base, &cursor, out);
   }
   return status;
 }
@@ -1069,7 +1070,7 @@ String lisp_string_rstrip(String string, Var chars) =>
 */
 Var lisp_match_replace(List input, Var pat, Var template) {
   Var result;
-  if (!input.try_match_replace(pat, template, &result)) return input;
+  if (!input.try_match_replace(pat, template, result)) return input;
   return result;
 }
 
@@ -1183,8 +1184,8 @@ Var lisp_session_copy(Var source, long size) {
 static Var _lisp_scalar_as(Var value, Symbol tag) {
   X2CVarNumericInfo info;
   if (value.tag() == tag) return value;
-  if (!Var.numeric_info(tag, &info)) return Var.new(tag, value.ulong());
-  if (!Var.numeric_info(value.tag(), &info))
+  if (!Var.numeric_info(tag, info)) return Var.new(tag, value.ulong());
+  if (!Var.numeric_info(value.tag(), info))
     return Var.integer_box(tag, (unsigned long) value.integer());
   return value.convert(tag);
 }
@@ -1193,7 +1194,7 @@ static Var _lisp_scalar_as(Var value, Symbol tag) {
 Var lisp_box(Symbol tag, Var value) {
   if (tag == value.tag()) return value;
   X2CVarNumericInfo info;
-  if (Var.numeric_info(tag, &info)) return value.convert(tag);
+  if (Var.numeric_info(tag, info)) return value.convert(tag);
   return lisp_address(value, tag);
 }
 
@@ -1294,7 +1295,7 @@ static int _lisp_String_try_next(String str, Var cursor, Var out) {
 
 static int _lisp_List_try_match(List input, Var pattern, Var out) {
   List bindings;
-  int status = input.try_match(pattern, &bindings);
+  int status = input.try_match(pattern, bindings);
   if (status) lisp_store(out, bindings);
   return status;
 }
@@ -1302,7 +1303,7 @@ static int _lisp_List_try_match(List input, Var pattern, Var out) {
 static int _lisp_List_try_match_replace(
   List input, Var pattern, Var template, Var out) {
   Var result;
-  int status = input.try_match_replace(pattern, template, &result);
+  int status = input.try_match_replace(pattern, template, result);
   if (status) lisp_store(out, result);
   return status;
 }
@@ -1311,7 +1312,7 @@ static int _lisp_List_try_search(
   List input, Var pattern, Var out_match, Var out_bindings) {
   Var match;
   List bindings;
-  int status = input.try_search(pattern, &match, &bindings);
+  int status = input.try_search(pattern, match, bindings);
   if (status) {
     lisp_store(out_match, match);
     lisp_store(out_bindings, bindings);
@@ -1328,7 +1329,7 @@ static int _lisp_Map_try_get(Map map, Var key, Var out) {
 
 static int _lisp_Map_try_del(Map map, Var key, Var out) {
   Var value;
-  int status = map.try_del(key, &value);
+  int status = map.try_del(key, value);
   if (status) lisp_store(out, value);
   return status;
 }

@@ -34,7 +34,7 @@ Source: `lib/file.x:591`
 <a id="File.copy_to"></a>
 #### File.copy_to
 
-`int File.copy_to(File source, File output, size_t *copied)`
+`int File.copy_to(File source, File output, size_t &?copied)`
 
 Copies the remaining bytes from `source` to `output`.
 A null stream returns zero without raising; every other outcome returns

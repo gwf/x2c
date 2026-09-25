@@ -20,34 +20,34 @@
 
 /* The cache names the operation that reports a fence; these tests exercise
    the cache itself, so every call names the cache operation. */
-static int _acquire(MatchCache cache, Var pattern, MatchLease *lease) =>
+static int _acquire(MatchCache cache, Var pattern, MatchLease &lease) =>
   cache.acquire(pattern, lease, "MatchCache.acquire");
 
 static int _try_capture(
-  MatchCache cache, List input, Var pattern, MatchCaptureBuffer *captures) =>
+  MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures) =>
   cache.try_capture(input, pattern, captures, "MatchCache.try_capture");
 
 static int _try_match(
-  MatchCache cache, List input, Var pattern, List *out_bindings) =>
+  MatchCache cache, List input, Var pattern, List &?out_bindings) =>
   cache.try_match(input, pattern, out_bindings, "MatchCache.try_match");
 
 static int _try_search(
-  MatchCache cache, List input, Var pattern, Var *out_match,
-  List *out_bindings) =>
+  MatchCache cache, List input, Var pattern, Var &?out_match,
+  List &?out_bindings) =>
   cache.try_search(
     input, pattern, out_match, out_bindings, "MatchCache.try_search");
 
 static int _search(
-  MatchCache cache, List input, Var pattern, List *out_results) =>
+  MatchCache cache, List input, Var pattern, List &out_results) =>
   cache.search(input, pattern, out_results, "MatchCache.search");
 
 static int _try_match_replace(
-  MatchCache cache, List input, Var pattern, Var template, Var *out) =>
+  MatchCache cache, List input, Var pattern, Var template, Var &?out) =>
   cache.try_match_replace(
     input, pattern, template, out, "MatchCache.try_match_replace");
 
 static int _search_replace(
-  MatchCache cache, List input, Var pattern, Var template, List *out) =>
+  MatchCache cache, List input, Var pattern, Var template, List &out) =>
   cache.search_replace(
     input, pattern, template, out, "MatchCache.search_replace");
 
@@ -223,18 +223,18 @@ static ProductFixture _product_fixture(void) {
 static void _product_oracle(ProductFixture *fixture, ProductReceipt *receipt) {
   _check(test_match_oracle_try_match(fixture.document_node,
                                     fixture.direct_pattern,
-                                    &receipt.direct_bindings),
+                                    receipt.direct_bindings),
          "product-oracle-direct");
   _check(test_match_oracle_try_search(fixture.document,
                                      fixture.status_pattern,
-                                     &receipt.first_match,
-                                     &receipt.first_bindings),
+                                     receipt.first_match,
+                                     receipt.first_bindings),
          "product-oracle-first");
   receipt.full_search = test_match_oracle_search(fixture.document,
                                                 fixture.notes_pattern);
   _check(test_match_oracle_try_match_replace(
            receipt.first_match, fixture.status_pattern,
-           fixture.status_template, &receipt.match_replacement),
+           fixture.status_template, receipt.match_replacement),
          "product-oracle-match-replace");
   receipt.search_replacement = test_match_oracle_search_replace(
     fixture.document, fixture.actor_pattern, fixture.actor_template);
@@ -246,27 +246,27 @@ static void _product_candidate(
   MatchCache cache, ProductFixture *fixture, ProductReceipt *receipt) {
   _check(_try_match(
            cache, fixture.document_node, fixture.direct_pattern,
-           &receipt.direct_bindings),
+           receipt.direct_bindings),
          "product-candidate-direct");
   _check(_try_search(
            cache, fixture.document, fixture.status_pattern,
-           &receipt.first_match, &receipt.first_bindings),
+           receipt.first_match, receipt.first_bindings),
          "product-candidate-first");
   _check(_search(
            cache, fixture.document, fixture.notes_pattern,
-           &receipt.full_search),
+           receipt.full_search),
          "product-candidate-full");
   _check(_try_match_replace(
            cache, receipt.first_match, fixture.status_pattern,
-           fixture.status_template, &receipt.match_replacement),
+           fixture.status_template, receipt.match_replacement),
          "product-candidate-match-replace");
   _check(_search_replace(
            cache, fixture.document, fixture.actor_pattern,
-           fixture.actor_template, &receipt.search_replacement),
+           fixture.actor_template, receipt.search_replacement),
          "product-candidate-search-replace");
   _check(_search(
            cache, fixture.document, fixture.draft_pattern,
-           &receipt.draft_search),
+           receipt.draft_search),
          "product-candidate-draft-fallback");
 }
 
@@ -312,9 +312,9 @@ static void _check_mode(void) {
   for (int round = 0; round < 2; round++)
     for (int i = 0; i < FAMILY_COUNT; i++) {
       List oracle = %(sentinel), candidate = %(sentinel);
-      int oracle_status = inputs[i].try_match(patterns[i], &oracle);
+      int oracle_status = inputs[i].try_match(patterns[i], oracle);
       int matched = _try_match(
-        cache, inputs[i], patterns[i], &candidate
+        cache, inputs[i], patterns[i], candidate
       );
       _check(matched == oracle_status, "family-status");
       if (oracle_status) _check(candidate == oracle, "family-result");
@@ -326,8 +326,8 @@ static void _check_mode(void) {
   MachineStats miss_stats;
   memset(&miss_stats, 0, sizeof(miss_stats));
   List miss_bindings;
-  _check(MatchPlan.execute(miss_plan, inputs[4], &miss_bindings,
-                           &miss_stats) == 0, "star-miss-status");
+  _check(MatchPlan.execute(miss_plan, inputs[4], miss_bindings,
+                           miss_stats) == 0, "star-miss-status");
   _check(miss_stats.span_descriptors == 0 &&
          miss_stats.materialization_requests == 0 &&
          miss_stats.cons_requests == 0, "star-miss-zero-spans");
@@ -336,7 +336,7 @@ static void _check_mode(void) {
   // The approved malformed probe never matches and never falls back.
   List malformed_bindings = %(sentinel);
   _check(!_try_match(
-           cache, %(foo), %(!or *whole missing), &malformed_bindings),
+           cache, %(foo), %(!or *whole missing), malformed_bindings),
          "malformed-probe-status");
   _check(malformed_bindings == %(sentinel), "malformed-probe-output");
   MatchCache.dispose(cache);
@@ -360,7 +360,7 @@ static void _check_mode(void) {
    `MatchPlan.prepare`, one execution, and one free for every call. The
    receipt folds the binding count rather than the binding identity, because
    this arm allocates fresh bindings on every iteration. */
-static int _percall_try_match(List input, Var pattern, List *out_bindings) {
+static int _percall_try_match(List input, Var pattern, List &?out_bindings) {
   MatchPlan plan = MatchPlan.prepare(pattern);
   int matched = plan.try_match(input, out_bindings);
   plan.free();
@@ -372,7 +372,7 @@ static uint64_t _time_percall_match(
   uint64_t hash = 0x4f4d41ULL, start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     List bindings = NULL;
-    int matched = _percall_try_match(input, pattern, &bindings);
+    int matched = _percall_try_match(input, pattern, bindings);
     hash = _mix(hash, matched ? (uint64_t) bindings.len() + 1 : 0);
   }
   uint64_t elapsed = _now_ns() - start;
@@ -386,7 +386,7 @@ static uint64_t _time_adapter_match(
   uint64_t hash = 0x43414eULL, start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     List bindings = NULL;
-    int matched = _try_match(cache, input, pattern, &bindings);
+    int matched = _try_match(cache, input, pattern, bindings);
     hash = _mix(hash, (uint64_t) matched);
     hash = _mix(hash, bindings.var().u64);
   }
@@ -398,7 +398,7 @@ static uint64_t _time_adapter_match(
 static uint64_t _expected_percall_match(
   List input, Var pattern, int iterations) {
   List bindings = NULL;
-  int matched = _percall_try_match(input, pattern, &bindings);
+  int matched = _percall_try_match(input, pattern, bindings);
   uint64_t hash = 0x4f4d41ULL;
   for (int i = 0; i < iterations; i++)
     hash = _mix(hash, matched ? (uint64_t) bindings.len() + 1 : 0);
@@ -408,7 +408,7 @@ static uint64_t _expected_percall_match(
 static uint64_t _expected_adapter_match(
   List input, Var pattern, int iterations) {
   List oracle_bindings = %(sentinel);
-  int matched = test_match_oracle_try_match(input, pattern, &oracle_bindings);
+  int matched = test_match_oracle_try_match(input, pattern, oracle_bindings);
   List bindings = matched ? oracle_bindings : NULL;
   uint64_t hash = 0x43414eULL;
   for (int i = 0; i < iterations; i++) {
@@ -484,7 +484,7 @@ static void _time_mode(int sample) {
   MatchCache cache = MatchCache.new(64);
   for (int i = 0; i < FAMILY_COUNT; i++) {
     List warm_bindings = NULL;
-    _try_match(cache, inputs[i], patterns[i], &warm_bindings);
+    _try_match(cache, inputs[i], patterns[i], warm_bindings);
   }
   for (int i = 0; i < FAMILY_COUNT; i++)
     _time_family(cache, names[i], inputs[i], patterns[i], iterations,
@@ -498,7 +498,7 @@ static void _time_mode(int sample) {
   uint64_t start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     List bindings = NULL;
-    plan.try_match(status_input, &bindings);
+    plan.try_match(status_input, bindings);
     benchmark_sink ^= bindings.var().u64;
   }
   uint64_t prepared_ns = _now_ns() - start;
@@ -536,7 +536,7 @@ static void _time_mode(int sample) {
   for (int i = 0; i < cold_iterations; i++) {
     List bindings = NULL;
     int matched = _try_match(
-      cold_cache, cold_inputs[i & 1], cold_patterns[i & 1], &bindings
+      cold_cache, cold_inputs[i & 1], cold_patterns[i & 1], bindings
     );
     benchmark_sink ^= (uint64_t) matched ^ bindings.var().u64;
   }
@@ -546,7 +546,7 @@ static void _time_mode(int sample) {
     List bindings = NULL;
     benchmark_sink ^= (uint64_t)
       test_match_oracle_try_match(cold_inputs[i & 1],
-                                 cold_patterns[i & 1], &bindings);
+                                 cold_patterns[i & 1], bindings);
   }
   uint64_t cold_reference_ns = _now_ns() - start;
   MatchCache.dispose(cold_cache);
@@ -562,7 +562,7 @@ static void _time_mode(int sample) {
   for (int i = 0; i < negative_iterations; i++) {
     List results = NULL;
     int matched = _search(
-      negative_cache, fixture.document, fixture.draft_pattern, &results
+      negative_cache, fixture.document, fixture.draft_pattern, results
     );
     benchmark_sink ^= (uint64_t) matched ^ results.var().u64;
   }

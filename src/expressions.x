@@ -1961,8 +1961,8 @@ static List Compiler._binary_expression(
     List bindings;
     /* Bare `%(ident *)` also matches literal data ending in <ident>. */
     constant_string =
-      !lhs.try_search(%(ident (*)), &matched, &bindings) &&
-      !rhs.try_search(%(ident (*)), &matched, &bindings);
+      !lhs.try_search(%(ident (*)), matched, bindings) &&
+      !rhs.try_search(%(ident (*)), matched, bindings);
     lhs = c.convert_expression(lhs, %("String"));
     rhs = c.convert_expression(rhs, %("String"));
   }
@@ -4167,6 +4167,14 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
   }
   if (type == target || (type_is_var && target_is_var)) return expr;
+  /* An optional reference outside a proven path is still an address; it
+     forwards to a reference or pointer and yields no value. */
+  if (type.car() == <opt-ref> && target.car() != <&> &&
+      target.car() != <opt-ref> && !c.sym.resolve_key(target).is_pointer()) {
+    c.report_error(
+      <type>, "check optional reference before using its value", NULL, NULL);
+    return expr;
+  }
   /* A reference names an object, so its argument is an lvalue of the
      referenced type; a pointer or null is spelled `*p` by the caller. */
   if ((target.car() == <&> || target.car() == <opt-ref>) &&

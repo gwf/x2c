@@ -66,7 +66,7 @@ static int _repl(Lisp lisp) {
       Var form = void;
       Symbol status = 0;
       try {
-        status = lisp.read(source, &cursor, &form);
+        status = lisp.read(source, cursor, form);
       }
       catch %(incomplete *): status = <incomplete>;
       catch %(?code *detail): {

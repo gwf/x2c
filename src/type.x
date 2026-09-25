@@ -343,7 +343,7 @@ static Map scalartypes = $native_scalar_types();
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo &info) {
   Var row = scalartypes[type];
   return row is <list> &&
-         Var.numeric_info(row.list().car(), &info);
+         Var.numeric_info(row.list().car(), info);
 }
 
 static List _scalar_row(Type type) {
@@ -748,7 +748,7 @@ int Type.is_number(Type type) => !!type.scalar_tag() || type.is_enum();
 int Type.is_integral(Type type) {
   if (type.is_enum()) return 1;
   X2CVarNumericInfo info;
-  return Var.numeric_info(type.scalar_tag(), &info) && !info.floating;
+  return Var.numeric_info(type.scalar_tag(), info) && !info.floating;
 }
 
 static int Type._is_tagged(Type type) {

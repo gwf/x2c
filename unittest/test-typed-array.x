@@ -61,7 +61,7 @@ static void typed_array_int_uses_packed_storage(void) {
   EXPECT_INT_EQ(values[1], 22);
   EXPECT_TRUE(values.try_get(1, missing));
   EXPECT_INT_EQ(missing, 22);
-  EXPECT_TRUE(values.try_take_last(&missing));
+  EXPECT_TRUE(values.try_take_last(missing));
   EXPECT_INT_EQ(missing, 30);
   EXPECT_INT_EQ(values.take_last(), 22);
   EXPECT_INT_EQ(values.len(), 1);

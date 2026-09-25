@@ -2148,7 +2148,7 @@ static void _check_script_locals(Compiler c, List ast) {
           Var found;
           List bindings;
           int present = statement.list().try_search(
-            %(expr () (ident (binding ? $name))), &found, &bindings);
+            %(expr () (ident (binding ? $name))), found, bindings);
           if (!present) continue;
           c.origin = origin;
           c.report_error(

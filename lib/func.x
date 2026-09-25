@@ -179,7 +179,7 @@ Var x2c_func_value_argument(
   if (want == <var>) return value;
   if (value is void) raise %(void-op (sig $sig) (index $i));
   X2CVarNumericInfo info;
-  if (Var.numeric_info(want, &info)) {
+  if (Var.numeric_info(want, info)) {
     Var converted = void;
     try {
       converted = value.convert(want);

@@ -3256,7 +3256,7 @@ List Compiler.meta_value_expression(
       return n < 0 ? %(expr $result (parens $literal)) : literal;
     }
     X2CVarNumeric number;
-    value.numeric_decode(&number);
+    value.numeric_decode(number);
     String text;
     Type literal_type;
     if (number.floating) {

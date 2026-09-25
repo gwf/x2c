@@ -284,7 +284,7 @@ static Var _export_value(Var v, Context source) {
     return v;
   }
   Var custom;
-  if (v.try_export_context(source, &custom)) return custom;
+  if (v.try_export_context(source, custom)) return custom;
   Symbol tag = v.tag();
   raise %(bad-types (owner "Context.export") (tag $tag));
 }

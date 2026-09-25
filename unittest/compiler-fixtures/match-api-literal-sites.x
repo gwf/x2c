@@ -21,7 +21,7 @@ static List retagged(List form) =>
 
 static int first_call(List form) {
   Var found, List bindings;
-  if (!form.try_search(%(call ?callee ?), &found, &bindings)) return 0;
+  if (!form.try_search(%(call ?callee ?), found, bindings)) return 0;
   return bindings.assoc(<?callee>) == <f>;
 }
 

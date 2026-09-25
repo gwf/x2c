@@ -1218,7 +1218,7 @@ static Symbol _catch_match(ErrorHandler h) {
     };
     int matched = is_default ? 1 :
       plan.status == MACHINE_PREPARED &&
-      plan.execute_capture(projection, &captures, NULL) == 1;
+      plan.execute_capture(projection, captures, NULL) == 1;
     if (!matched) {
       if (values) Scope.free(values);
       continue;

@@ -359,7 +359,7 @@ Source: `lib/dispatch.x:872`
 <a id="Var.dispatch_truth"></a>
 #### Var.dispatch_truth
 
-`int Var.dispatch_truth(Var value, int *handled)`
+`int Var.dispatch_truth(Var value, int &?handled)`
 
 Tries the registered truth callback for `value`.
 A null `handled`, missing descriptor, or missing callback returns zero.
@@ -427,7 +427,7 @@ Source: `lib/dispatch.x:518`
 <a id="Var.try_dispatch_binary"></a>
 #### Var.try_dispatch_binary
 
-`int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result)`
+`int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var &?result)`
 
 Tries one registered binary callback for `lhs`.
 Only `<add>`, `<sub>`, `<mul>`, `<div>`, `<mod>`, and `<matmul>` select
@@ -441,7 +441,7 @@ Source: `lib/dispatch.x:62`
 <a id="Var.try_dispatch_unary"></a>
 #### Var.try_dispatch_unary
 
-`int Var.try_dispatch_unary(Var value, Symbol member, Var *result)`
+`int Var.try_dispatch_unary(Var value, Symbol member, Var &?result)`
 
 Tries the registered `<neg>` callback for `value`.
 Returns one and writes the synchronous callback result when available;
@@ -515,7 +515,7 @@ Source: `lib/dispatch.x:297`
 <a id="Var.try_export_context"></a>
 #### Var.try_export_context
 
-`int Var.try_export_context(Var value, Context source, Var *out)`
+`int Var.try_export_context(Var value, Context source, Var &?out)`
 
 Calls the registered `Context` exporter for `value` when one exists.
 Returns nonzero when the descriptor registers an exporter, and writes its

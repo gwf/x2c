@@ -71,7 +71,7 @@ static uint64_t _time_prepared_list(
   uint64_t hash = 1, start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     List bindings = NULL;
-    uint64_t value = plan.try_match(input, &bindings)
+    uint64_t value = plan.try_match(input, bindings)
                    ? _binding_hash(layout, bindings) : 0xfeedULL;
     hash = _mix(hash, value);
   }
@@ -87,7 +87,7 @@ static uint64_t _time_prepared_capture(
   MatchCaptureBuffer captures = { values, 0, 8 };
   uint64_t hash = 1, start = _now_ns();
   for (int i = 0; i < iterations; i++) {
-    int matched = plan.try_capture(input, &captures);
+    int matched = plan.try_capture(input, captures);
     uint64_t value = matched == 1
                    ? (named_local
                       ? _local_hash(layout, &captures)
@@ -108,7 +108,7 @@ static uint64_t _time_recursive_capture(
   uint64_t hash = 1, start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     int matched = match_recursive_try_capture(
-      layout, input, &captures
+      layout, input, captures
     );
     uint64_t value = matched == 1
                    ? _capture_hash(layout, &captures) : 0xfeedULL;
@@ -244,7 +244,7 @@ static void _check_captures(void) {
   Var values[3] = { <old0>, <old1>, <old2> };
   MatchCaptureBuffer captures = { values, 0x55UL, 3 };
   if (match_recursive_try_capture(
-        repeated, %(same 7 8), &captures) != 0 ||
+        repeated, %(same 7 8), captures) != 0 ||
       values[0] != <old0> || captures.present != 0x55UL)
     exit(5);
   repeated.free();
@@ -252,7 +252,7 @@ static void _check_captures(void) {
   MatchCaptureLayout star =
     MatchCaptureLayout.analyze(%(*prefix pivot ?last));
   if (match_recursive_try_capture(
-        star, %(a b pivot c), &captures) != 1 ||
+        star, %(a b pivot c), captures) != 1 ||
       values[0].list() != %(a b) || values[1] != <c>)
     exit(5);
   star.free();
@@ -261,7 +261,7 @@ static void _check_captures(void) {
     %(!or (left ?left) (right ?right))
   );
   if (match_recursive_try_capture(
-        alternatives, %(right 9), &captures) != 1 ||
+        alternatives, %(right 9), captures) != 1 ||
       MatchCaptureBuffer.has(&captures, 0) ||
       !MatchCaptureBuffer.has(&captures, 1) || values[1] != 9)
     exit(5);

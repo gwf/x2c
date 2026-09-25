@@ -332,7 +332,7 @@ Source: `lib/map.x:550`
 <a id="Map.try_del"></a>
 #### Map.try_del
 
-`int Map.try_del(Map map, Var key, Var *out)`
+`int Map.try_del(Map map, Var key, Var &?out)`
 
 Removes `key`, writes the value it held to `out`, and returns nonzero
 when the key was present.

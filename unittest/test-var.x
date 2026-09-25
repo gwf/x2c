@@ -987,7 +987,7 @@ static void var_repr_reads_back_for_reader_tags(void) {
     unsigned cursor = 0;
     Var parsed = void;
     if (!EXPECT_TRUE(
-          lisp.read(sources[i].repr(), &cursor, &parsed) == <value>))
+          lisp.read(sources[i].repr(), cursor, parsed) == <value>))
       continue;
     EXPECT_VAR_EQ(parsed, sources[i]);
   }

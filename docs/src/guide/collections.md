@@ -1089,7 +1089,7 @@ if (!ages.try_get("nobody", found))
 printf("bracket read of a missing key: %s\n", ages["nobody"].repr());
 
 Var removed;
-if (ages.try_del("alan", &removed))
+if (ages.try_del("alan", removed))
   printf("removed alan=%s remaining=%u\n", removed.repr(), ages.len());
 ```
 

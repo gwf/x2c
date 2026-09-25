@@ -713,7 +713,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.try_take_last"></a>
 #### ArrayChar.try_take_last
 
-`int ArrayChar.try_take_last(ArrayChar array, char *out)`
+`int ArrayChar.try_take_last(ArrayChar array, char &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1135,7 +1135,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.try_take_last"></a>
 #### ArrayDbl.try_take_last
 
-`int ArrayDbl.try_take_last(ArrayDbl array, double *out)`
+`int ArrayDbl.try_take_last(ArrayDbl array, double &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1555,7 +1555,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.try_take_last"></a>
 #### ArrayFloat.try_take_last
 
-`int ArrayFloat.try_take_last(ArrayFloat array, float *out)`
+`int ArrayFloat.try_take_last(ArrayFloat array, float &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1975,7 +1975,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.try_take_last"></a>
 #### ArrayInt.try_take_last
 
-`int ArrayInt.try_take_last(ArrayInt array, int *out)`
+`int ArrayInt.try_take_last(ArrayInt array, int &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -2397,7 +2397,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.try_take_last"></a>
 #### ArrayLong.try_take_last
 
-`int ArrayLong.try_take_last(ArrayLong array, long *out)`
+`int ArrayLong.try_take_last(ArrayLong array, long &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -2819,7 +2819,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.try_take_last"></a>
 #### ArrayShort.try_take_last
 
-`int ArrayShort.try_take_last(ArrayShort array, short *out)`
+`int ArrayShort.try_take_last(ArrayShort array, short &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -3238,7 +3238,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.try_take_last"></a>
 #### ArrayString.try_take_last
 
-`int ArrayString.try_take_last(ArrayString array, String *out)`
+`int ArrayString.try_take_last(ArrayString array, String &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or

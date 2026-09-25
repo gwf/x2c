@@ -140,7 +140,7 @@ int List_try_search(List, Var, Var *, List *);
 static int first_call(List form){
   Var found;
   List bindings;
-  if(!({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_try_search(& _x2c_match_site_4, form, List_var(_21), & found, & bindings); })) return 0;
+  if(!({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_try_search(& _x2c_match_site_4, form, List_var(_21), &(found), &(bindings)); })) return 0;
   return Var_equal(List_assoc(bindings, Symbol_var(62481260874)), Symbol_var(12));
 }
 

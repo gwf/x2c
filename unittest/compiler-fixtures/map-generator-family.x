@@ -143,7 +143,7 @@ int main(void) {
   long updated = map.updateindex(keys[1], <+>, 5L);
   int update_hashes = probe_hash_calls;
   long removed;
-  map.try_del(keys[0], &removed);
+  map.try_del(keys[0], removed);
 
   unsigned cursor = 0;
   short key;

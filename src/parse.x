@@ -486,7 +486,7 @@ static int _enum_fits_int(List type, List members) {
       case %(op = ? (expr ?(Type value) *)): {
         if (value.equal(type)) continue;
         X2CVarNumericInfo info;
-        if (Var.numeric_info(value.scalar_tag(), &info) && !info.floating &&
+        if (Var.numeric_info(value.scalar_tag(), info) && !info.floating &&
             (info.bits < 32 || (info.bits == 32 && !info.unsigned_value)))
           continue;
       }

@@ -43,12 +43,12 @@ void RenderPath.leave(RenderPath *path) {
     Otherwise `handled` is set to one and the synchronous callback result is
     returned; an available `handled` is cleared before lookup.
 */
-int Var.dispatch_truth(Var value, int *handled) {
+int Var.dispatch_truth(Var value, int &?handled) {
   if (!handled) return 0;
-  *handled = 0;
+  handled = 0;
   VarDescriptor *descriptor = _descriptor_for_value(value);
   if (!descriptor || !descriptor.methods.truth) return 0;
-  *handled = 1;
+  handled = 1;
   return descriptor.methods.truth(value);
 }
 
@@ -59,7 +59,7 @@ int Var.dispatch_truth(Var value, int *handled) {
     otherwise returns zero and leaves `result` unchanged. A null `result`
     returns zero.
 */
-int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result) {
+int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var &?result) {
   if (!result) return 0;
   VarDescriptor *descriptor = _descriptor_for_value(lhs);
   if (!descriptor) return 0;
@@ -75,7 +75,7 @@ int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result) {
     }
   }
   if (!callback) return 0;
-  *result = callback(lhs, rhs);
+  result = callback(lhs, rhs);
   return 1;
 }
 
@@ -84,11 +84,11 @@ int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result) {
     otherwise returns zero and leaves `result` unchanged. A null `result`
     returns zero.
 */
-int Var.try_dispatch_unary(Var value, Symbol member, Var *result) {
+int Var.try_dispatch_unary(Var value, Symbol member, Var &?result) {
   if (!result) return 0;
   VarDescriptor *descriptor = _descriptor_for_value(value);
   if (!descriptor || member != <neg> || !descriptor.methods.neg) return 0;
-  *result = descriptor.methods.neg(value);
+  result = descriptor.methods.neg(value);
   return 1;
 }
 
@@ -785,7 +785,7 @@ static int _numeric_rank(Symbol tag) {
   if (tag == <float>) tag = <f32>;
   if (tag == <double>) tag = <f64>;
   X2CVarNumericInfo info;
-  return Var.numeric_info(tag, &info) ? info.rank : 0;
+  return Var.numeric_info(tag, info) ? info.rank : 0;
 }
 
 static int _numeric_class(Symbol tag, long double value) {
@@ -923,10 +923,10 @@ meta native Iter Var.iter(Var x, Iter dest) {
     Returns nonzero when the descriptor registers an exporter, and writes its
     result to `out`. `Context` handles built-in value families directly.
 */
-int Var.try_export_context(Var value, Context source, Var *out) {
+int Var.try_export_context(Var value, Context source, Var &?out) {
   if (!out) return 0;
   VarDescriptor *descriptor = _descriptor_for_value(value);
   if (!descriptor || !descriptor.methods.export_context) return 0;
-  *out = descriptor.methods.export_context(value, source);
+  out = descriptor.methods.export_context(value, source);
   return 1;
 }

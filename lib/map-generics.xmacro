@@ -347,7 +347,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   $value $map.setindex($map, $key, $value);
   $value $map.updateindex($map, $key, Symbol, $value);
   $value $map.postfixindex($map, $key, Symbol);
-  int $map.try_del($map, $key, $value *);
+  int $map.try_del($map map, $key key, $value &?out);
   $value $map.del($map, $key);
   $map $map.copy($map);
   $map $map.merge($map, $map);
@@ -516,7 +516,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
       A null map, null `out`, or absent key returns zero without writing or
       mutation. Successful removal invalidates live cursors and iterators.
   */
-  int $map.try_del($map map, $key key, $value *out) {
+  int $map.try_del($map map, $key key, $value &?out) {
     return map._core_try_del(&key, out);
   }
 
@@ -526,7 +526,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.del($map map, $key key) {
     $value out = $zero;
-    if (map.try_del(key, &out)) return out;
+    if (map.try_del(key, out)) return out;
     (void) $bad_arg($owner);
   }
 

@@ -873,7 +873,7 @@ static List _interface_load(Compiler c, String canonical, String path) {
   unsigned cursor = 0;
   Var record = void;
   Symbol status = 0;
-  try status = Lisp.read(_interface_lisp(), source, &cursor, &record);
+  try status = Lisp.read(_interface_lisp(), source, cursor, record);
   catch %((!or incomplete malformed) *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)

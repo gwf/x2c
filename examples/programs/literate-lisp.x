@@ -625,7 +625,7 @@ static Var _substring(String s, int a, int b) => s.getslice(a, b, 1);           
 
 static Var _match_replace(List input, Var pat, Var template) {
   Var result;                                                                   // Dynamic value for the match result.
-  if (!input.try_match_replace(pat, template, &result)) return input;           // Match/replace with a success result.
+  if (!input.try_match_replace(pat, template, result)) return input;           // Match/replace with a success result.
   return result;
 }
 

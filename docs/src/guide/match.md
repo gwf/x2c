@@ -299,7 +299,7 @@ a template from the bindings:
 ```x2c
 List input = %(define x 10);
 List bindings = NULL;
-if (input.try_match(%(define ?name ?value), &bindings))
+if (input.try_match(%(define ?name ?value), bindings))
   printf("%s = %d\n",
          bindings.assoc(<?name>),
          bindings.assoc(<?value>));
@@ -321,7 +321,7 @@ and `search_replace` rewrites all of them:
 List tree = %(root (item 1) (wrapper (item 2)));
 Var node = void;
 List bindings = NULL;
-if (tree.try_search(%(item ?id), &node, &bindings))
+if (tree.try_search(%(item ?id), node, bindings))
   printf("first id %d\n", bindings.assoc(<?id>));
 printf("%d matches in all\n", tree.search(%(item ?id)).len());
 printf("%s\n", tree.search_replace(%(item ?id),

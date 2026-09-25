@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-initializer.x:2:3: type: check optional reference before using its value
+    unsigned value = count;
+    ^^^^^^^^
+

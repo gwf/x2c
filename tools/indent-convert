@@ -127,7 +127,7 @@ static List _ast(String path) {
   Array forms = [];
   unsigned cursor = 0;
   Var form = void;
-  while (Lisp.read(lisp, dump, &cursor, &form) == <value>)
+  while (Lisp.read(lisp, dump, cursor, form) == <value>)
     forms.push(_plain(form));
   return forms.list_free();
 }

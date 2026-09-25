@@ -140,7 +140,7 @@ static void var_numeric_metadata_is_canonical(void) {
   int count = sizeof(tags) / sizeof(tags[0]);
   for (int i = 0; i < count; i++) {
     X2CVarNumericInfo info;
-    EXPECT_TRUE(Var.numeric_info(tags[i], &info));
+    EXPECT_TRUE(Var.numeric_info(tags[i], info));
     EXPECT_TRUE(info.tag == tags[i]);
     EXPECT_INT_EQ(info.rank, numeric_rank(tags[i]));
     EXPECT_INT_EQ(info.bits, numeric_bits(tags[i]));
@@ -151,7 +151,7 @@ static void var_numeric_metadata_is_canonical(void) {
   Symbol special[] = { <nan>, <-inf>, <+inf> };
   for (int i = 0; i < 3; i++) {
     X2CVarNumericInfo info;
-    EXPECT_TRUE(Var.numeric_info(special[i], &info));
+    EXPECT_TRUE(Var.numeric_info(special[i], info));
     EXPECT_TRUE(info.tag == <f64>);
     EXPECT_TRUE(info.floating);
     EXPECT_FALSE(info.unsigned_value);
@@ -163,7 +163,7 @@ static void var_numeric_metadata_is_canonical(void) {
     .tag = <string>, .floating = 7, .unsigned_value = 8,
     .bits = 9, .rank = 10
   };
-  EXPECT_FALSE(Var.numeric_info(<string>, &untouched));
+  EXPECT_FALSE(Var.numeric_info(<string>, untouched));
   EXPECT_TRUE(untouched.tag == <string>);
   EXPECT_INT_EQ(untouched.floating, 7);
   EXPECT_INT_EQ(untouched.unsigned_value, 8);

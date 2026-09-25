@@ -2475,7 +2475,7 @@ Map certify_contracts(String path, int &valid) {
   unsigned cursor = 0;
   Var form = void;
   Symbol status;
-  while ((status = Lisp.read(reader, source, &cursor, &form)) == <value>) {
+  while ((status = Lisp.read(reader, source, cursor, form)) == <value>) {
     match (form) case %(native ?(String name) ?effect)
       if (_certify_effect(effect) && !contracts.contains(name) &&
           !Compiler.has_region_row(name)): {

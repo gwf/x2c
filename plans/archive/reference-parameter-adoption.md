@@ -123,3 +123,32 @@ and deletes syntax. The risk is a converted callee that still tests the
 value where it meant to test the reference, or the reverse, before the
 nonnull proof. Reviewing each converted callee in step 4 covers it. The
 public signature change in step 2 is the one consequential choice.
+
+## Library out-parameters (group 1)
+
+Delivered 2026-09-25 under Gary's rule: a reference fits when the callee
+reassigns the caller's variable or fills the caller's struct and keeps no
+address. These took `&?`, or `&` where the callee always wrote the result:
+`Map.try_del` and typed `try_del`, typed `try_take_last`, the
+`List`/`MatchPlan`/`MatchCache`/`match_recursive` match results,
+`MatchCache.acquire` (`&lease`), `MatchCache.search` and `search_replace`
+(`&`), `Lisp.read`, `Var.numeric_info` and `numeric_decode`, the
+`try_dispatch_*` functions, `Var.dispatch_truth`, `Var.try_export_context`,
+and `File.copy_to`.
+
+Kept as pointers:
+
+- The `try_next` family. `foreach` expands to these calls, and compile-time
+  Lisp calls them with addresses.
+- `String.try_long`, `String.try_double`, and `Symbol.try_new`. A
+  `meta native` declaration must match its native target.
+- `RenderPath.enter`, which links the caller's path into a chain.
+- The compiler-emitted `x2c_match_*` functions. These now pass `*p` to the
+  converted functions.
+
+The work exposed a compiler defect. An unproven optional reference converted
+to a value, for example as a declaration initializer, emitted the raw
+pointer and was not diagnosed. `convert_expression` now reports "check
+optional reference before using its value"; see fixture
+`optional-reference-initializer`.
+

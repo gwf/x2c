@@ -178,7 +178,7 @@ static void typed_map_growth_collision_backshift_and_reuse(void) {
   EXPECT_INT_EQ(map.capacity, 8);
 
   int out = -1;
-  EXPECT_TRUE(map.try_del(keys[1], &out));
+  EXPECT_TRUE(map.try_del(keys[1], out));
   EXPECT_INT_EQ(out, 11);
   EXPECT_FALSE(map.contains(keys[1]));
   EXPECT_INT_EQ(map.getindex(keys[0]), 10);
@@ -240,11 +240,11 @@ static void typed_map_missing_and_null_status_paths(void) {
 
   EXPECT_FALSE(map.try_get(4, out));
   EXPECT_INT_EQ(out, 73);
-  EXPECT_FALSE(map.try_del(4, &out));
+  EXPECT_FALSE(map.try_del(4, out));
   EXPECT_INT_EQ(out, 73);
   EXPECT_FALSE(map.try_get(4, NULL));
   EXPECT_FALSE(missing.try_get(4, out));
-  EXPECT_FALSE(missing.try_del(4, &out));
+  EXPECT_FALSE(missing.try_del(4, out));
   EXPECT_FALSE(missing.try_next(&cursor, &key, &val));
   EXPECT_FALSE(map.try_next(NULL, &key, &val));
   EXPECT_FALSE(map.try_next(&cursor, NULL, &val));
@@ -297,7 +297,7 @@ static void typed_map_independent_key_value_widths(void) {
   EXPECT_TRUE(map.postfixindex(large, <++>) == 1.75);
   EXPECT_TRUE(map.getindex(large) == 2.75);
   double out = 19.0;
-  EXPECT_TRUE(map.try_del(0, &out));
+  EXPECT_TRUE(map.try_del(0, out));
   EXPECT_TRUE(out == 0.0);
   for (long i = 1; i < 33; i++) map.setindex(i, i * 0.5);
   EXPECT_TRUE(map.capacity >= 64);

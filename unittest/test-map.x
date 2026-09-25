@@ -214,7 +214,7 @@ static void map_growth_preserves_entries(void) {
 
   for (int i = 0; i < 128; i += 3) {
     Var key = i + 1000, out;
-    EXPECT_TRUE(map.try_del(key, &out));
+    EXPECT_TRUE(map.try_del(key, out));
     EXPECT_INT_EQ(out.integer(), i * 7);
   }
 
@@ -250,7 +250,7 @@ static void map_collision_backshift_and_reuse(void) {
     EXPECT_INT_EQ(map.capacity, 8);
 
     Var out;
-    EXPECT_TRUE(map.try_del(keys[removed], &out));
+    EXPECT_TRUE(map.try_del(keys[removed], out));
     EXPECT_INT_EQ(out.integer(), removed + 10);
     EXPECT_FALSE(map.contains(keys[removed]));
     for (int i = 0; i < 3; i++) {
@@ -281,7 +281,7 @@ static void map_reference_model_churn(void) {
     }
     else {
       Var out;
-      int removed = map.try_del(key, &out);
+      int removed = map.try_del(key, out);
       EXPECT_INT_EQ(removed, present[index]);
       if (present[index]) EXPECT_INT_EQ(out.integer(), values[index]);
       present[index] = 0;

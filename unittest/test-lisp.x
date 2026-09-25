@@ -7,7 +7,7 @@
 static Var _read1(Lisp lisp, const char *text, Symbol *status) {
   unsigned cursor = 0;
   Var out = void;
-  Symbol result = lisp.read(String.new(text), &cursor, &out);
+  Symbol result = lisp.read(String.new(text), cursor, out);
   if (status) *status = result;
   return out;
 }
@@ -21,7 +21,7 @@ static void _expect_read_failure(
   Var out = Var.new(<i32>, 777), untouched_out = out;
   Symbol code = 0;
   List detail = NULL;
-  try lisp.read(source, &cursor, &out);
+  try lisp.read(source, cursor, out);
   catch %(incomplete *cause): { code = <incomplete>; detail = cause; }
   catch %(malformed *cause): { code = <malformed>; detail = cause; }
   EXPECT_INT_EQ(code, expected);
@@ -218,13 +218,13 @@ static void lisp_read_advances_cursor_across_forms(void) {
   unsigned cursor = 0;
   Var out = void;
   String source = "1 (a b)\n\"s\"";
-  EXPECT_INT_EQ(lisp.read(source, &cursor, &out), <value>);
+  EXPECT_INT_EQ(lisp.read(source, cursor, out), <value>);
   EXPECT_INT_EQ(out.integer(), 1);
-  EXPECT_INT_EQ(lisp.read(source, &cursor, &out), <value>);
+  EXPECT_INT_EQ(lisp.read(source, cursor, out), <value>);
   EXPECT_TRUE(out is <list>);
-  EXPECT_INT_EQ(lisp.read(source, &cursor, &out), <value>);
+  EXPECT_INT_EQ(lisp.read(source, cursor, out), <value>);
   EXPECT_TRUE(out is <string>);
-  EXPECT_INT_EQ(lisp.read(source, &cursor, &out), <eof>);
+  EXPECT_INT_EQ(lisp.read(source, cursor, out), <eof>);
   lisp.destroy();
 }
 
@@ -744,7 +744,7 @@ static void lisp_read_fences_nesting_depth(void) {
   Symbol code = 0;
   unsigned cursor = 0;
   Var out = void;
-  try lisp.read(deep, &cursor, &out);
+  try lisp.read(deep, cursor, out);
   catch %(size-limit *): code = <size-limit>;
   EXPECT_INT_EQ(code, <size-limit>);
   Symbol status;

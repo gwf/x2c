@@ -80,7 +80,7 @@ Source: `lib/varconvert.x:40`
 <a id="Var.numeric_decode"></a>
 #### Var.numeric_decode
 
-`void Var.numeric_decode(Var value, X2CVarNumeric *out)`
+`void Var.numeric_decode(Var value, X2CVarNumeric &?out)`
 
 Decodes a numeric `value` into caller-owned `out` storage.
 The result retains no pointer into `value`; integer and floating payloads
@@ -95,7 +95,7 @@ Source: `lib/varconvert.x:78`
 <a id="Var.numeric_info"></a>
 #### Var.numeric_info
 
-`int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out)`
+`int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out)`
 
 Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.

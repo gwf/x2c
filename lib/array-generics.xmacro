@@ -351,7 +351,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
   inline $element $array.getindex($array, int);
   inline $element $array.setindex($array, int, $element);
   $element $array.push($array, $element);
-  int $array.try_take_last($array, $element *);
+  int $array.try_take_last($array array, $element &?out);
   $element $array.take_last($array);
   $element $array.shift($array);
   $element $array.unshift($array, $element);
@@ -437,7 +437,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       A null or empty array, or null `out`, returns zero without writing or
       changing the array.
   */
-  int $array.try_take_last($array array, $element *out) {
+  int $array.try_take_last($array array, $element &?out) {
     return array != NULL && out
       ? Block_try_pop((Block) array, out) : 0;
   }
@@ -447,7 +447,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
   */
   $element $array.take_last($array array) {
     $element value = $zero;
-    if (array.try_take_last(&value)) return value;
+    if (array.try_take_last(value)) return value;
     _bad_operation($owner, <take-last>);
   }
 

@@ -461,8 +461,8 @@ int File.write_all(File file, const void *ptr, size_t size) {
     failure.
     Raises: `<io-fail>` on a source read or destination write failure.
 */
-int File.copy_to(File source, File output, size_t *copied) {
-  if (copied) *copied = 0;
+int File.copy_to(File source, File output, size_t &?copied) {
+  if (copied) copied = 0;
   if (!source || !output) return 0;
   unsigned char bytes[BUFSIZ], size_t count;
   while ((count = fread(bytes, 1, sizeof(bytes), source)) > 0)

@@ -24,9 +24,9 @@ static void _exact_case(List input, Var pattern, List expected) {
   List expect_bindings = expected == %(()) ? NULL : expected;
   List oracle = %(sentinel);
   List candidate = %(sentinel);
-  EXPECT_INT_EQ(test_match_oracle_try_match(input, pattern, &oracle),
+  EXPECT_INT_EQ(test_match_oracle_try_match(input, pattern, oracle),
                 expect_hit);
-  EXPECT_INT_EQ(plan.try_match(input, &candidate), expect_hit);
+  EXPECT_INT_EQ(plan.try_match(input, candidate), expect_hit);
   if (expect_hit) {
     EXPECT_TRUE(oracle == expect_bindings);
     EXPECT_TRUE(candidate == expect_bindings);
@@ -42,8 +42,8 @@ static void _parity_case(List input, Var pattern) {
     return;
   }
   List oracle = %(sentinel), candidate = %(sentinel);
-  int oracle_status = test_match_oracle_try_match(input, pattern, &oracle);
-  int candidate_status = plan.try_match(input, &candidate);
+  int oracle_status = test_match_oracle_try_match(input, pattern, oracle);
+  int candidate_status = plan.try_match(input, candidate);
   EXPECT_INT_EQ(candidate_status, oracle_status);
   if (oracle_status && candidate_status == 1) EXPECT_TRUE(candidate == oracle);
   plan.free();
@@ -61,7 +61,7 @@ static MachineStats _stats_case(
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
   List bindings = %(sentinel);
-  int status = plan.execute(input, &bindings, &stats);
+  int status = plan.execute(input, bindings, stats);
   EXPECT_INT_EQ(status, expect_status);
   if (expect_status == 1 && expected)
     EXPECT_TRUE(bindings == (expected == %(()) ? NULL : expected));
@@ -341,7 +341,7 @@ static void plan_star_supplementals(void) {
   MatchPlan general = MatchPlan.prepare(%(*pre $anchor1 end));
   EXPECT_INT_EQ(_count_scan_words(general, MACHINE_COMPARE_EQUAL), 1);
   List general_bindings = %(sentinel);
-  EXPECT_INT_EQ(general.try_match(%(lead $anchor2 end), &general_bindings), 1);
+  EXPECT_INT_EQ(general.try_match(%(lead $anchor2 end), general_bindings), 1);
   EXPECT_TRUE(general_bindings == %((*pre (lead))));
   general.free();
 
@@ -362,7 +362,7 @@ static void plan_star_supplementals(void) {
   MatchPlan text = MatchPlan.prepare(%(*pre $canonical_anchor ?v));
   EXPECT_INT_EQ(_count_scan_words(text, MACHINE_COMPARE_EQUAL), 1);
   List text_bindings = %(sentinel);
-  EXPECT_INT_EQ(text.try_match(%(lead $transient_input v), &text_bindings), 1);
+  EXPECT_INT_EQ(text.try_match(%(lead $transient_input v), text_bindings), 1);
   EXPECT_TRUE(text_bindings == %((?v v) (*pre (lead))));
   text.free();
   transient.free();
@@ -447,20 +447,20 @@ static void plan_fenced_pattern_raises_at_every_entry(void) {
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int caught = 0;
 
-  try plan.try_match(input, &bindings);
+  try plan.try_match(input, bindings);
   catch %(size-limit * (fence ?seen) *): {
     caught++;
     EXPECT_STR_EQ(seen.str(), "frame-depth");
   }
-  try plan.try_capture(input, &captures);
+  try plan.try_capture(input, captures);
   catch %(size-limit *): caught++;
-  try plan.try_search(input, &found, &bindings);
+  try plan.try_search(input, found, bindings);
   catch %(size-limit *): caught++;
-  try plan.search(input, &results);
+  try plan.search(input, results);
   catch %(size-limit *): caught++;
-  try plan.try_match_replace(input, %(changed), &replaced);
+  try plan.try_match_replace(input, %(changed), replaced);
   catch %(size-limit *): caught++;
-  try plan.search_replace(input, %(changed), &results);
+  try plan.search_replace(input, %(changed), results);
   catch %(size-limit *): caught++;
 
   EXPECT_INT_EQ(caught, 6);
@@ -476,7 +476,7 @@ static void fenced_pattern_raises_at_every_consumer(void) {
   List input = %(x), bindings = %(sentinel);
   int caught = 0;
 
-  try input.try_match(cached, &bindings);
+  try input.try_match(cached, bindings);
   catch %(size-limit * (fence ?seen) *): {
     caught++;
     EXPECT_STR_EQ(seen.str(), "segment-width");
@@ -490,7 +490,7 @@ static void fenced_pattern_raises_at_every_consumer(void) {
   String transient = String.malloc(8);
   strcpy(transient, "bypass");
   Var bypassed = _fenced_wide_pattern(cons(transient, NULL));
-  try input.try_match(bypassed, &bindings);
+  try input.try_match(bypassed, bindings);
   catch %(size-limit *): caught++;
   transient.free();
 
@@ -522,15 +522,15 @@ static void plan_search_parity(void) {
   Var plan_match = <unchanged>;
   List plan_bindings = %(unchanged);
   EXPECT_TRUE(test_match_oracle_try_search(input, %(item ?id),
-                                          &oracle_match,
-                                          &oracle_bindings));
-  EXPECT_INT_EQ(plan.try_search(input, &plan_match, &plan_bindings), 1);
+                                          oracle_match,
+                                          oracle_bindings));
+  EXPECT_INT_EQ(plan.try_search(input, plan_match, plan_bindings), 1);
   EXPECT_TRUE(plan_match == oracle_match);
   EXPECT_TRUE(plan_bindings == oracle_bindings);
   plan.free();
 
   MatchPlan missing = MatchPlan.prepare(%(missing));
-  EXPECT_INT_EQ(missing.try_search(input, &plan_match, &plan_bindings), 0);
+  EXPECT_INT_EQ(missing.try_search(input, plan_match, plan_bindings), 0);
   missing.free();
 
   List payload = %(a list with a "string");
@@ -540,7 +540,7 @@ static void plan_search_parity(void) {
   List oracle_results =
     test_match_oracle_search(corpus, %(item ?id ?value));
   List plan_results = %(unchanged);
-  EXPECT_INT_EQ(pairs.search(corpus, &plan_results), 1);
+  EXPECT_INT_EQ(pairs.search(corpus, plan_results), 1);
   EXPECT_TRUE(plan_results == oracle_results);
   pairs.free();
 
@@ -549,10 +549,10 @@ static void plan_search_parity(void) {
   List empty = NULL, holder = %($empty atom);
   MatchPlan nil_plan = MatchPlan.prepare(%());
   List nil_results = %(unchanged);
-  EXPECT_INT_EQ(nil_plan.search(holder, &nil_results), 1);
+  EXPECT_INT_EQ(nil_plan.search(holder, nil_results), 1);
   EXPECT_TRUE(nil_results == test_match_oracle_search(holder, %()));
   List top_results = %(unchanged);
-  EXPECT_INT_EQ(nil_plan.search(empty, &top_results), 1);
+  EXPECT_INT_EQ(nil_plan.search(empty, top_results), 1);
   EXPECT_TRUE(top_results == test_match_oracle_search(empty, %()));
   nil_plan.free();
 
@@ -560,7 +560,7 @@ static void plan_search_parity(void) {
   List guarded = %( keep deprecated other );
   MatchPlan not_plan = MatchPlan.prepare(%(!not ?node deprecated));
   List not_results = %(unchanged);
-  EXPECT_INT_EQ(not_plan.search(guarded, &not_results), 1);
+  EXPECT_INT_EQ(not_plan.search(guarded, not_results), 1);
   EXPECT_TRUE(not_results ==
               test_match_oracle_search(guarded,
                                       %(!not ?node deprecated)));
@@ -569,7 +569,7 @@ static void plan_search_parity(void) {
   List samples = %( ?foo 42 (a) "text" );
   MatchPlan is_plan = MatchPlan.prepare(%(!is ?hit type i32));
   List is_results = %(unchanged);
-  EXPECT_INT_EQ(is_plan.search(samples, &is_results), 1);
+  EXPECT_INT_EQ(is_plan.search(samples, is_results), 1);
   EXPECT_TRUE(is_results ==
               test_match_oracle_search(samples, %(!is ?hit type i32)));
   is_plan.free();
@@ -586,16 +586,16 @@ static void atom_consumers_match_the_reference(void) {
 
   Var found = <unchanged>, oracle_found = <unchanged>;
   List bindings = %(unchanged), oracle_bindings = %(unchanged);
-  EXPECT_INT_EQ(corpus.try_search(pattern, &found, &bindings),
-                test_match_oracle_try_search(corpus, pattern, &oracle_found,
-                                             &oracle_bindings));
+  EXPECT_INT_EQ(corpus.try_search(pattern, found, bindings),
+                test_match_oracle_try_search(corpus, pattern, oracle_found,
+                                             oracle_bindings));
   EXPECT_TRUE(found == oracle_found);
   EXPECT_TRUE(bindings == oracle_bindings);
 
   List direct = %(item);
   List matched = %(unchanged), oracle_matched = %(unchanged);
-  EXPECT_INT_EQ(direct.try_match(pattern, &matched),
-                test_match_oracle_try_match(direct, pattern, &oracle_matched));
+  EXPECT_INT_EQ(direct.try_match(pattern, matched),
+                test_match_oracle_try_match(direct, pattern, oracle_matched));
   EXPECT_TRUE(matched == oracle_matched);
 
   Var template = <replaced>;
@@ -607,9 +607,9 @@ static void atom_consumers_match_the_reference(void) {
 
   Var replaced = <unchanged>, oracle_replaced = <unchanged>;
   EXPECT_INT_EQ(
-    direct.try_match_replace(pattern, template, &replaced),
+    direct.try_match_replace(pattern, template, replaced),
     test_match_oracle_try_match_replace(direct, pattern, template,
-                                        &oracle_replaced));
+                                        oracle_replaced));
   EXPECT_TRUE(replaced == oracle_replaced);
 }
 
@@ -618,25 +618,25 @@ static void plan_replace_parity(void) {
   MatchPlan plan = MatchPlan.prepare(%(tag ?payload));
   Var result = <unchanged>;
   EXPECT_INT_EQ(plan.try_match_replace(input, Var.new(<symbol>, <?payload>),
-                                       &result), 1);
+                                       result), 1);
   EXPECT_TRUE(result == <value>);
   EXPECT_INT_EQ(plan.try_match_replace(input, %(wrapped ?payload),
-                                       &result), 1);
+                                       result), 1);
   EXPECT_TRUE(result is <list> && result.list() == %(wrapped value));
   // an unbound sequence binder is retained, so it stays one element
   EXPECT_INT_EQ(plan.try_match_replace(input, %(*missing tail),
-                                       &result), 1);
+                                       result), 1);
   EXPECT_TRUE(result is <list> && result.list() == %(*missing tail));
   EXPECT_INT_EQ(plan.try_match_replace(input, %(!quote ?payload),
-                                       &result), 1);
+                                       result), 1);
   EXPECT_TRUE(result == <?payload>);
   List empty = NULL;
-  EXPECT_INT_EQ(plan.try_match_replace(input, empty, &result), 1);
+  EXPECT_INT_EQ(plan.try_match_replace(input, empty, result), 1);
   EXPECT_TRUE(result is <list> && result.list() == NULL);
   result = <unchanged>;
   MatchPlan absent = MatchPlan.prepare(%(missing));
   EXPECT_INT_EQ(absent.try_match_replace(input, Var.new(<symbol>, <changed>),
-                                         &result), 0);
+                                         result), 0);
   EXPECT_TRUE(result == <unchanged>);
   absent.free();
   plan.free();
@@ -648,11 +648,11 @@ static void plan_replace_parity(void) {
   Var tail_result = <unchanged>;
   EXPECT_INT_EQ(tail_plan.try_match_replace(chunk,
                                             Var.new(<symbol>, <"*tail">),
-                                            &tail_result), 1);
+                                            tail_result), 1);
   Var tail_oracle = <unchanged>;
   EXPECT_TRUE(test_match_oracle_try_match_replace(
     chunk, %(chunk ?first ?mid *tail),
-    Var.new(<symbol>, <"*tail">), &tail_oracle));
+    Var.new(<symbol>, <"*tail">), tail_oracle));
   EXPECT_TRUE(tail_result == tail_oracle);
   tail_plan.free();
 
@@ -663,7 +663,7 @@ static void plan_replace_parity(void) {
   MatchPlan sr = MatchPlan.prepare(pattern);
   List oracle = test_match_oracle_search_replace(corpus, pattern, template);
   List candidate = %(unchanged);
-  EXPECT_INT_EQ(sr.search_replace(corpus, template, &candidate), 1);
+  EXPECT_INT_EQ(sr.search_replace(corpus, template, candidate), 1);
   EXPECT_TRUE(candidate == oracle);
   sr.free();
 
@@ -674,7 +674,7 @@ static void plan_replace_parity(void) {
   List is_oracle = test_match_oracle_search_replace(is_input, is_pattern,
                                                    is_template);
   List is_candidate = %(unchanged);
-  EXPECT_INT_EQ(isr.search_replace(is_input, is_template, &is_candidate), 1);
+  EXPECT_INT_EQ(isr.search_replace(is_input, is_template, is_candidate), 1);
   EXPECT_TRUE(is_candidate == is_oracle);
   isr.free();
 }
@@ -690,15 +690,15 @@ static void unbound_alternative_binder_template_is_retained(void) {
               test_match_oracle_search_replace(subject, pattern, template));
 
   Var result = <unchanged>, oracle = <unchanged>;
-  EXPECT_TRUE(%(b).try_match_replace(pattern, template, &result));
+  EXPECT_TRUE(%(b).try_match_replace(pattern, template, result));
   EXPECT_TRUE(result == template);
   EXPECT_TRUE(test_match_oracle_try_match_replace(%(b), pattern, template,
-                                                  &oracle));
+                                                  oracle));
   EXPECT_TRUE(result == oracle);
 
   MatchPlan plan = MatchPlan.prepare(pattern);
   Var planned = <unchanged>;
-  EXPECT_INT_EQ(plan.try_match_replace(%(b), template, &planned), 1);
+  EXPECT_INT_EQ(plan.try_match_replace(%(b), template, planned), 1);
   EXPECT_TRUE(planned == template);
   plan.free();
 }
@@ -754,18 +754,18 @@ static void prepared_capture_is_atomic_and_positional(void) {
   };
   MatchCaptureBuffer captures = { values, 0x55UL, 3 };
 
-  EXPECT_INT_EQ(plan.try_capture(%(missing), &captures), 0);
+  EXPECT_INT_EQ(plan.try_capture(%(missing), captures), 0);
   EXPECT_TRUE(values[0] == <old0>);
   EXPECT_TRUE(values[1] == <old1>);
   EXPECT_TRUE(values[2] == <old2>);
   EXPECT_TRUE(captures.present == 0x55UL);
 
   MatchCaptureBuffer short_buffer = { values, 0x55UL, 2 };
-  EXPECT_INT_EQ(plan.try_capture(%(ok 7), &short_buffer), -1);
+  EXPECT_INT_EQ(plan.try_capture(%(ok 7), short_buffer), -1);
   EXPECT_TRUE(values[0] == <old0>);
   EXPECT_TRUE(short_buffer.present == 0x55UL);
 
-  EXPECT_INT_EQ(plan.try_capture(%(err bad a b), &captures), 1);
+  EXPECT_INT_EQ(plan.try_capture(%(err bad a b), captures), 1);
   int value_index = plan.layout.index(Atom.intern("?value"));
   int message_index = plan.layout.index(Atom.intern("?message"));
   int rest_index = plan.layout.index(Atom.intern("*rest"));
@@ -802,7 +802,7 @@ static void capture_layout_refuses_past_the_binder_limit(void) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   EXPECT_INT_EQ(
-    match_recursive_try_capture(layout, input, &captures), 0
+    match_recursive_try_capture(layout, input, captures), 0
   );
   EXPECT_TRUE(input.match(pattern) == NULL);
 
@@ -825,7 +825,7 @@ static void capture_presence_is_separate_from_void(void) {
   if (!EXPECT_NOT_NULL(plan)) return;
   Var value = <old>;
   MatchCaptureBuffer captures = { &value, 0, 1 };
-  EXPECT_INT_EQ(plan.execute_capture(void, &captures, NULL), 1);
+  EXPECT_INT_EQ(plan.execute_capture(void, captures, NULL), 1);
   EXPECT_TRUE(_capture_present(&captures, 0));
   EXPECT_TRUE(value is void);
   plan.free();
@@ -958,9 +958,9 @@ static void plan_programs_stay_immutable(void) {
   if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) return;
   for (int i = 0; i < 4; i++) {
     List bindings = %(sentinel);
-    EXPECT_INT_EQ(plan.try_match(%(ok ok), &bindings), 1);
+    EXPECT_INT_EQ(plan.try_match(%(ok ok), bindings), 1);
     EXPECT_TRUE(bindings == %((?x ok)));
-    EXPECT_INT_EQ(plan.try_match(%(ok other), &bindings), 0);
+    EXPECT_INT_EQ(plan.try_match(%(ok other), bindings), 0);
   }
   plan.free();
 }
