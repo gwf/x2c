@@ -5319,8 +5319,7 @@ inputs take effect.
 
 On a capable terminal, work lasting at least 125 ms may also use one transient
 progress line. x2c does not enter raw mode, switch screens, or read terminal
-input. Commands run from Make use stable receipts, since parallel recipes may
-share the terminal. Redirected standard error also uses stable
+input, and Make recipes show it too. Redirected standard error also uses stable
 newline-delimited receipts and no automatic color.
 
 `--plain` selects stable receipts without terminal rendering or color. `-q`
