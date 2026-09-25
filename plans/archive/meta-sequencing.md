@@ -1,10 +1,10 @@
 # Meta sequencing: classes, extensions, protocols, lifetime proof
 
-> Status: active - steps 1-3 landed on `dev` 2026-09-24 (last commit
-> `7a371fa6`); step 4 is implemented here as an optional selected-root audit.
+> Status: done 2026-09-25. Steps 1-3 landed on `dev` 2026-09-24
+> (last commit `7a371fa6`); step 4 was delivered through `fd9d7d3e`.
 
 The remaining meta work spans four threads from
-[meta follow-ups](meta-followups.md): Var class capacity, native
+[meta follow-ups](../meta-followups.md): Var class capacity, native
 extensions (track G), meta-capable protocols (track E), and an optional
 lifetime proof (track F phase 8). They are not independent. This
 plan fixes the order so that no step builds on machinery a later step
@@ -19,7 +19,7 @@ replaces.
 
 ### 1. Class registration and capacity
 
-Designed in [class registration](archive/class-registration.md).
+Designed in [class registration](class-registration.md).
 
 Two separate problems, designed together:
 
@@ -42,7 +42,7 @@ design should list them.
 
 ### 2. Native extensions and packages
 
-Designed in [package meta modules](archive/package-meta-modules.md).
+Designed in [package meta modules](package-meta-modules.md).
 
 Track G delivered loadable meta modules with a hash stamp and a
 name-to-`Func` target Map. Extend it so a package declares its role:
@@ -60,7 +60,7 @@ which today costs 13 more rows at startup.
 ### 3. Meta-capable protocols beyond Iter
 
 Designed in
-[meta protocols beyond Iter](archive/meta-protocols-beyond-iter.md).
+[meta protocols beyond Iter](meta-protocols-beyond-iter.md).
 Only its fourth delivery, the typed containers, depends on step 1;
 deliveries 1-3 can start earlier.
 
@@ -90,7 +90,7 @@ root-wide proof, no reported violation, no native assumptions, and more than
 
 ## Not in this sequence
 
-The smaller track C items stay in [meta follow-ups](meta-followups.md):
+The smaller track C items stay in [meta follow-ups](../meta-followups.md):
 an MSYS2 run of the LLP64 `size_t` mapping, `off_t` and `time_t` widths,
 and enum values across translation units.
 

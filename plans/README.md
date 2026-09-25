@@ -54,9 +54,6 @@ execution.
   implementation status.
 
 
-- [Meta sequencing](meta-sequencing.md): active. The ordered class, native
-  extension, and protocol steps landed; the optional selected-root lifetime
-  proof is implemented here.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, REPL-only output, and the Json, Diff, and
   Path text operations (delivered in `ab74ef4b`) are implemented, and scalar
@@ -91,6 +88,8 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Meta sequencing](archive/meta-sequencing.md): done 2026-09-25;
+  the optional selected-root lifetime proof completed step 4.
 - [External commands](archive/external-commands.md): done 2026-09-24;
   framework, packaging, and `graph`/`repl`/`lint` moves delivered through
   `9b31112e`.

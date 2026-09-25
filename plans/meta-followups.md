@@ -2,7 +2,7 @@
 
 > Status: A and C done (C on `dev` as `81de06d8`); B measured with no
 > code change; E, F phase 8 and G continue in
-> [meta sequencing](meta-sequencing.md). Open: D, and `off_t` and `time_t`
+> [meta sequencing](archive/meta-sequencing.md). Open: D, and `off_t` and `time_t`
 > stay `long` (track C).
 > Written 2026-09-22 after [meta recovery](archive/meta-recovery.md) landed
 > on `dev` as `db86d4b7`. Tracks A-D are independent implementation work and
@@ -172,7 +172,7 @@ prove. The `_Atomic` limit above remains separate.
 ## Design tracks (decide with Gary first)
 
 The remaining E, F and G work follows the order in
-[meta sequencing](meta-sequencing.md).
+[meta sequencing](archive/meta-sequencing.md).
 
 ### E. Meta-capable protocols
 
@@ -304,7 +304,7 @@ Not covered, as the book's meta and region chapters list: an address kept
 in a field of a local struct that is returned by value or assigned to a
 `meta static` struct, pointer arithmetic, and native calls that retain an
 argument. The remaining project audit is the optional selected-root
-conditional lifetime proof in [meta sequencing](meta-sequencing.md); it
+conditional lifetime proof in [meta sequencing](archive/meta-sequencing.md); it
 reports unknown calls as proof obstacles and lists native effect assumptions.
 File and Job finalizers were delivered with the narrower meta lifetime work.
 
