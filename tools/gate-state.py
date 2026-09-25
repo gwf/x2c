@@ -375,6 +375,12 @@ def main() -> int:
     args = parser.parse_args()
     # Extra makefiles named here would be read by every Make in the gate.
     os.environ.pop("MAKEFILES", None)
+    # Subagent workers get worktrees named agent-*; the orchestrator gates.
+    if args.command == "ensure" and ROOT.name.startswith("agent-"):
+        print("gate-state: worker worktrees do not run the gate; the "
+              "orchestrator integrates and gates once per batch",
+              file=sys.stderr)
+        return 1
     try:
         if args.command == "check":
             return cmd_check(args.gate)

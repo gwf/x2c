@@ -32,10 +32,10 @@ Launch each worker with worktree isolation. Tell it to:
 - run `git fetch origin` and `git checkout -b <branch> origin/dev` first, and
   to report at once if a git command is refused;
 - run `mkdir -p debug && make build-safe` before building;
-- make only its change and run local checks: `make build`, `make build-safe`,
-  `make stage-2`, the fixtures and unit tests it affects, `make doc-check`,
-  and `git diff --check`;
-- not merge `dev`, commit, push, or run `tools/gate-state.py`;
+- make only its change and run `make build`, the fixtures and unit tests it
+  affects, and `git diff --check`;
+- not merge `dev`, commit, push, or run `tools/gate-state.py` or
+  `tools/land-dev`, which refuse to run in `agent-*` worktrees;
 - save its patch against its branch point, never against the current
   `origin/dev`, and only for files it authored:
   `git diff --binary $(git merge-base HEAD origin/dev) -- src lib etc unittest docs/src/guide docs/src/reference plans`;
@@ -47,6 +47,11 @@ landed after the worker branched and silently undoes other sessions' work.
 Generated docs, `site/`, and `bootstrap/` are regenerated at integration.
 
 ## Integrate a batch
+
+A batch is every patch finished since the last landing. While other workers
+are still running, hold finished patches rather than landing each one; land
+early only for a capability step or a patch another worker needs. Tell each
+worker the gate runs once, at integration, so its own checks stay small.
 
 1. Create a branch from current `origin/dev` and apply each patch with
    `git apply --index -3`, one commit per change. Resolve conflicts by
@@ -60,8 +65,9 @@ Generated docs, `site/`, and `bootstrap/` are regenerated at integration.
    commits the refresh, and pushes only when the gate passes and the tree is
    clean. A rejected push retries from the merge.
 5. After a failed gate, read `debug/gate.log`, fix the cause in the batch,
-   and run `tools/land-dev` again. Clear the worktree before switching
-   branches.
+   and run `tools/land-dev` again. Never rerun an unchanged gate in a loop;
+   `tools/land-dev` already retries once for a two-round refresh. Clear the
+   worktree before switching branches.
 
 ## Capabilities
 

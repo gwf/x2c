@@ -40,8 +40,10 @@ When Gary says current work looks wrong, slow, wasteful, or off-scope, stop
 that work and verify the specific concern against a known baseline before
 offering reassurance or continuing.
 
-Use subagents for independent discovery or bounded work; for several
-independent changes, follow `orchestrate-x2c-work`. Verify a reported
+Use subagents for independent discovery or bounded work. A session that
+launches implementation subagents is their orchestrator: load
+`orchestrate-x2c-work` first. Its workers never merge `dev`, gate, or push;
+the orchestrator integrates and gates once per batch. Verify a reported
 finding against current source and reproduce claimed behavior before acting
 on it or presenting it as established.
 
