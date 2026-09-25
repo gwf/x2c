@@ -341,7 +341,7 @@ int editor_request(int argc, char * * argv){
   if(! Frontend_preload_macro_libraries(frontend)) return 2;
   Context command = Context_open_isolated_named("editor request");
   ParsedUnit unit;
-  int parsed = Frontend_open(frontend, source, & unit);
+  int parsed = Frontend_open(frontend, source, &(unit));
   if((request -> live_symbols || request -> cpp_symbols) && _changed_dependency(unit.compiler, sources)){
     fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
     ParsedUnit_close(&(unit));

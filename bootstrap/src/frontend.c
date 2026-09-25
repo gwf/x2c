@@ -226,7 +226,7 @@ void Compiler_tokenize(Compiler, char *);
 int Compiler_defines_main(Compiler);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename){
-  Compiler c = unit -> compiler;
+  Compiler c =(* unit).compiler;
   if(String_startswith(filename, _59)){
     String canonical = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_dirname(filename))), cons(String_var(_2), cons(String_var(Path_basename(filename)), NULL))));
     if(! String_equal(home_portable_path(canonical), canonical)) filename = canonical;
@@ -250,7 +250,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
     text = _script_text(text);
   }
   c -> include_dirs = frontend -> include_dirs;
-  unit -> source_lines = _source_lines(text);
+  (* unit).source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
   if(c -> script) c -> script -> defines_main = Compiler_defines_main(c);
 }
@@ -300,7 +300,7 @@ void Compiler_shallow_parse(Compiler, Map);
 Map Sym_global_symbols(Sym);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
-  Compiler c = unit -> compiler;
+  Compiler c =(* unit).compiler;
   CliRequest request = frontend -> request;
   String filename = c -> filename;
   if(request -> no_cpp) return NULL;
@@ -312,13 +312,13 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(c -> layout) Compiler_report_error(c, 306819428, _62, _first_preprocessor_token(c), _19);
   if(c -> script) Compiler_report_error(c, 306819428, _63, _first_preprocessor_token(c), _25);
   Compiler cppcompiler = Compiler_new_shared(c);
-  unit -> preprocessor = cppcompiler;
+  (* unit).preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_26), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, runtime, & text, & errors, & dependency_text);
-  unit -> preprocessor_output = text;
-  unit -> preprocessor_errors = errors;
+  (* unit).preprocessor_output = text;
+  (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
     List notes = cons(_28, cons(String_var(String_join(NULL, cons(String_var(_29), cons(String_var(int_str(status)), NULL)))), NULL));
@@ -369,15 +369,15 @@ Compiler Compiler_new(void);
 int Compiler_error_count(Compiler);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values, String session_source){
-  * unit =(ParsedUnit){
+  (* unit) =(ParsedUnit){
     0
   }
   ;
-  unit -> generated_symbols = ! frontend -> request -> no_cpp &&(! frontend -> request -> dump || frontend -> request -> dump == 10268258347430);
-  unit -> context = shared_values ? Context_open_named("shared translation unit") : Context_open_isolated_named("translation unit");
+  (* unit).generated_symbols = ! frontend -> request -> no_cpp &&(! frontend -> request -> dump || frontend -> request -> dump == 10268258347430);
+  (* unit).context = shared_values ? Context_open_named("shared translation unit") : Context_open_isolated_named("translation unit");
   Type_begin_unit();
-  unit -> compiler = Compiler_new();
-  Compiler compiler = unit -> compiler;
+  (* unit).compiler = Compiler_new();
+  Compiler compiler =(* unit).compiler;
   compiler -> diagnostics -> limit = frontend -> request -> max_errors;
   compiler -> source_map = frontend -> request -> source_map;
   compiler -> sources = frontend -> request -> sources;
@@ -400,7 +400,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
     if(String_truth(filename)){
-      _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, unit, filename);
+      _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, &((* unit)), filename);
     }
     else{
       compiler -> filename = _30;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, String_truth(session_source) ? session_source : "$(begin)");
@@ -443,7 +443,7 @@ return ! Compiler_error_count(compiler);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, filename, unit, 0, NULL);
+  return _start(frontend, filename, &((* unit)), 0, NULL);
 }
 
 void Lisp_set_global(Lisp, String, Var);
@@ -473,7 +473,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   frontend = & session;
   ParsedUnit unit;
   String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_31), NULL)));
-  int started = _start(frontend, path, & unit, 1, NULL);
+  int started = _start(frontend, path, &(unit), 1, NULL);
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
   {
@@ -585,7 +585,7 @@ void Compiler_close_child(Compiler, Compiler);
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   if(! _init_guard_) _file_init_();
-  Compiler compiler = unit -> compiler;
+  Compiler compiler =(* unit).compiler;
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_catch_arms_1[1];
@@ -595,16 +595,16 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
     _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
   }
   ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  Sym_seed_var_tags(compiler -> sym, unit -> globals);
+    (* unit).globals = _preprocess_input(frontend, &((* unit)));  if((* unit).preprocessor) Compiler_take_diagnostics(compiler, (* unit).preprocessor);  Sym_seed_var_tags(compiler -> sym, (* unit).globals);
   }
   else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
        {{
-        if(unit -> preprocessor){
-          Compiler_close_child(compiler, unit -> preprocessor);
-          unit -> preprocessor = NULL;
+        if((* unit).preprocessor){
+          Compiler_close_child(compiler, (* unit).preprocessor);
+          (* unit).preprocessor = NULL;
         }
         {
           int _x2c_return_value_3 = 0;
@@ -642,7 +642,7 @@ List Compiler_full_parse(Compiler, Map, int);
 
 int ParsedUnit_parse(ParsedUnit * p){
   if(! _init_guard_) _file_init_();
-  Compiler compiler = p -> compiler;
+  Compiler compiler =(* p).compiler;
   if(Compiler_error_count(compiler)) return 0;
   {
     ExceptionFrame _x2c_exception_frame_2;
@@ -652,7 +652,7 @@ int ParsedUnit_parse(ParsedUnit * p){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
   }
-  ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) p -> ast = Compiler_full_parse(compiler, p -> globals, p -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
+  ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0))(* p).ast = Compiler_full_parse(compiler, (* p).globals, (* p).generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
@@ -688,12 +688,12 @@ return ! Compiler_error_count(compiler);
 
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return Frontend_start(f, filename, unit) && ParsedUnit_collect(unit, f) && ParsedUnit_parse(unit);
+  return Frontend_start(f, filename, &((* unit))) && ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)));
 }
 
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, NULL, unit, 0, _66) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
+  return _start(frontend, NULL, &((* unit)), 0, _66) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
 }
 
 void Compiler_free_lisp(Compiler);
@@ -704,13 +704,13 @@ void Context_close(Context);
 
 void ParsedUnit_close(ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  if(! unit -> context) return;
-  Compiler compiler = unit -> compiler;
-  if(unit -> preprocessor) Compiler_close_child(compiler, unit -> preprocessor);
+  if(!(* unit).context) return;
+  Compiler compiler =(* unit).compiler;
+  if((* unit).preprocessor) Compiler_close_child(compiler, (* unit).preprocessor);
   Compiler_free_lisp(compiler);
   Type_end_unit();
-  Context_close(unit -> context);
-  * unit =(ParsedUnit){
+  Context_close((* unit).context);
+  (* unit) =(ParsedUnit){
     0
   }
   ;

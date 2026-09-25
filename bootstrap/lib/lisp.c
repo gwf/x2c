@@ -2160,7 +2160,7 @@ int Lisp_program(Var callable, MachineView * view, int * nparam, Var * body){
 }
 
 int Lisp_resolve(void * storage, Var name, Var * value){
-  if(! _init_guard_) _file_init_();  Lisp lisp =((LispMachineContext) storage) -> lisp;  if(! _global_lookup(lisp, name, value) && ! _reserved_lookup(lisp, name, value)) return 0;  _expansion_note(lisp, name, * value);  return 1;
+  if(! _init_guard_) _file_init_();  Lisp lisp =((LispMachineContext) storage) -> lisp;  if(! _global_lookup(lisp, name, &(* value)) && ! _reserved_lookup(lisp, name, &(* value))) return 0;  _expansion_note(lisp, name, * value);  return 1;
 }
 
 void Lisp_enter(void * storage, Var callable, const Var * values, int count){
@@ -2218,7 +2218,7 @@ int Lisp_precall(void * storage, Var callable, List raw, Var * value){
 }
 
 Var Lisp_immediate(void * storage, Var callable){
-  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  Lisp lisp = context -> lisp;  LispEnv * env = _machine_env(context);  Var constructor;  if(_lookup(lisp, env, lsym_lambda, & constructor) && constructor.u64 == Func_var(lisp -> specials[LISP_LAMBDA]).u64) return callable;  Lambda lambda = Var_lambda(callable);  return _eval(lisp, List_var(cons(lsym_lambda, cons(List_var(lambda -> params), cons(lambda -> body, NULL)))), env);
+  if(! _init_guard_) _file_init_();  LispMachineContext context =(LispMachineContext) storage;  Lisp lisp = context -> lisp;  LispEnv * env = _machine_env(context);  Var constructor;  if(_lookup(lisp, env, lsym_lambda, &(constructor)) && constructor.u64 == Func_var(lisp -> specials[LISP_LAMBDA]).u64) return callable;  Lambda lambda = Var_lambda(callable);  return _eval(lisp, List_var(cons(lsym_lambda, cons(List_var(lambda -> params), cons(lambda -> body, NULL)))), env);
 }
 
 Var Lisp_evaluate(void * storage, Var form){
@@ -3555,7 +3555,7 @@ int Map_truth(Map);
 static int _binding_get(Map bindings, Var name, Var * out){
   Var slot;
   if(! Map_truth(bindings) || ! Map_try_get(bindings, name, & slot)) return 0;
-  * out = lisp_load(slot);
+  (* out) = lisp_load(slot);
   return 1;
 }
 
@@ -3570,10 +3570,10 @@ static void _binding_set(Scope * owner, Map bindings, Var name, Var value){
 static int _local_lookup(LispEnv * env, Var name, Var * out){
   int found = 0, at = 0;
   for(List p = env -> params;  List_truth(p) && at < env -> value_count;  p = List_cdr(p), at ++) if(List_car(p).u64 == name.u64){
-    * out = env -> values[at];
+    (* out) = env -> values[at];
     found = 1;
   }
-  return found || _binding_get(env -> bindings, name, out);
+  return found || _binding_get(env -> bindings, name, &((* out)));
 }
 
 _Noreturn static void _expansion_decline(void){
@@ -3638,7 +3638,7 @@ static void _expansion_argument(Lisp lisp, Var value){
 }
 
 static int _env_lookup(LispEnv * env, Var name, Var * out){
-  for(LispEnv * cur = env;  cur;  cur = cur -> parent) if(_local_lookup(cur, name, out) || _binding_get(cur -> captures, name, out)) return 1;
+  for(LispEnv * cur = env;  cur;  cur = cur -> parent) if(_local_lookup(cur, name, &((* out))) || _binding_get(cur -> captures, name, &((* out)))) return 1;
   return 0;
 }
 
@@ -3650,24 +3650,24 @@ static int _inherited(Lisp lisp, Var name){
 }
 
 static int _frozen_binding(Lisp lisp, Var name, Var * out){
-  for(Lisp s = lisp -> parent;  s;  s = s -> parent) if(_binding_get(s -> globals, name, out) || Map_try_get(s -> reserved, name, out)) return s -> frozen;
+  for(Lisp s = lisp -> parent;  s;  s = s -> parent) if(_binding_get(s -> globals, name, &((* out))) || Map_try_get(s -> reserved, name, &(* out))) return s -> frozen;
   return 0;
 }
 
 static int _global_lookup(Lisp lisp, Var name, Var * out){
-  for(Lisp s = lisp;  s;  s = s -> parent) if(_binding_get(s -> globals, name, out)) return 1;
+  for(Lisp s = lisp;  s;  s = s -> parent) if(_binding_get(s -> globals, name, &((* out)))) return 1;
   return 0;
 }
 
 static int _reserved_lookup(Lisp lisp, Var name, Var * out){
-  for(Lisp s = lisp;  s;  s = s -> parent) if(Map_try_get(s -> reserved, name, out)) return 1;
+  for(Lisp s = lisp;  s;  s = s -> parent) if(Map_try_get(s -> reserved, name, &(* out))) return 1;
   return 0;
 }
 
 static int _lookup(Lisp lisp, LispEnv * env, Var name, Var * out){
-  if(_env_lookup(env, name, out)) return 1;
-  if(! _global_lookup(lisp, name, out) && ! _reserved_lookup(lisp, name, out)) return 0;
-  _expansion_note(lisp, name, * out);
+  if(_env_lookup(env, name, &((* out)))) return 1;
+  if(! _global_lookup(lisp, name, &((* out))) && ! _reserved_lookup(lisp, name, &((* out)))) return 0;
+  _expansion_note(lisp, name, (* out));
   return 1;
 }
 
@@ -3777,7 +3777,7 @@ static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captur
         {
           Var value;
           if(Map_contains(captures, name)) continue;
-          if(_env_lookup(env, name, & value)) _binding_set(& lisp -> scope, captures, name, value);
+          if(_env_lookup(env, name, &(value))) _binding_set(& lisp -> scope, captures, name, value);
         }
 
       }
@@ -4369,7 +4369,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
     __builtin_unreachable();
   }
   Var hook;
-  if(_global_lookup(lisp, Atom_intern(_1928), & hook)) return Lisp_apply(lisp, hook, cons(path, NULL));
+  if(_global_lookup(lisp, Atom_intern(_1928), &(hook))) return Lisp_apply(lisp, hook, cons(path, NULL));
   Var result;
   {
     File source = File_open(Var_pointer(path), "r");
@@ -4411,13 +4411,13 @@ static int LispLower__auto_load_name(LispLower l, Var name){
   if(local < 0) local = _auto_param_index(l -> lambda, name);
   if(local >= 0) return MachineBuilder_emit(l -> b, MW_LLOCAL, local, 0, 0, 0, 0) >= 0;
   Var captured;
-  if(_binding_get(l -> lambda -> captures, name, & captured)){
+  if(_binding_get(l -> lambda -> captures, name, &(captured))){
     if(Var_is_void(captured)) return 0;
     int constant = MachineBuilder_constant(l -> b, captured);
     return constant >= 0 && MachineBuilder_emit(l -> b, MW_LCAPTURE, constant, 0, 0, 0, 0) >= 0;
   }
   Var inherited;
-  if(_frozen_binding(l -> lisp, name, & inherited)) return LispLower__auto_compile_constant(l, inherited);
+  if(_frozen_binding(l -> lisp, name, &(inherited))) return LispLower__auto_compile_constant(l, inherited);
   int constant = MachineBuilder_constant(l -> b, name);
   if(constant < 0) return 0;
   return MachineBuilder_emit(l -> b, MW_LGLOBAL, constant, 0, 0, 0, 0) >= 0;
@@ -4543,7 +4543,7 @@ static List LispLower__auto_live_bindings(LispLower l, List bindings){
         name = List_getindex(_x2c_destructure_12, 0);
         expected = List_getindex(_x2c_destructure_12, 1);
         Var settled;
-        if(_frozen_binding(l -> lisp, name, & settled) && settled.u64 == expected.u64) continue;
+        if(_frozen_binding(l -> lisp, name, &(settled)) && settled.u64 == expected.u64) continue;
         live = cons(List_var(pair), live);
       }
 
@@ -4555,7 +4555,7 @@ static List LispLower__auto_live_bindings(LispLower l, List bindings){
 
 static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expansion, List * dependencies){
   Var value;
-  if(! _lookup(l -> lisp, l -> env, head, & value) || ! Var_is_row(value, 9, 7, 3)) return 0;
+  if(! _lookup(l -> lisp, l -> env, head, &(value)) || ! Var_is_row(value, 9, 7, 3)) return 0;
   Lambda macro = Var_lambda(value);
   if(! macro -> macro) return 0;
   if(l -> depth >= LISP_AUTO_EXPAND_MAX) return 0;
@@ -5006,7 +5006,7 @@ static int _auto_bindings_ok(Lisp lisp, LispEnv * env, List bindings){
         name = List_getindex(_x2c_destructure_15, 0);
         expected = List_getindex(_x2c_destructure_15, 1);
         Var value;
-        if(! _lookup(lisp, env, name, & value) || value.u64 != expected.u64) return 0;
+        if(! _lookup(lisp, env, name, &(value)) || value.u64 != expected.u64) return 0;
       }
 
     }
@@ -5265,7 +5265,7 @@ static Var _eval(Lisp lisp, Var expression, LispEnv * env){
   }
   if(Var_is_atom(expression)){
     Var value;
-    if(! _lookup(lisp, env, expression, & value)){
+    if(! _lookup(lisp, env, expression, &(value))){
       static const X2CErrorSite _x2c_error_site_63 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 3022};
       x2c_error_raise_n(& _x2c_error_site_63, 46041901960, 1, Symbol_var(920394), expression);
       __builtin_unreachable();
@@ -5578,7 +5578,7 @@ Var Lisp_eval_file(Lisp lisp, File source){
 
 int Lisp_try_get(Lisp lisp, String name, Var * out){
   if(! _init_guard_) _file_init_();
-  return lisp && String_truth(name) && out && _global_lookup(lisp, Atom_intern(name), out);
+  return lisp && String_truth(name) && out && _global_lookup(lisp, Atom_intern(name), &(* out));
 }
 
 void Lisp_set_global(Lisp lisp, String name, Var value){
