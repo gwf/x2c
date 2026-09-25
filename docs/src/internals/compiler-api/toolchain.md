@@ -43,7 +43,7 @@ Source: `src/toolchain.x:195`
 
 #### tool_capture
 
-`int tool_capture(List arguments, String *output, String *errors)`
+`int tool_capture(List arguments, String &output, String &errors)`
 
 Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127

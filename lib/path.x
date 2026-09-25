@@ -251,8 +251,8 @@ static void _walk(Path directory, int depth, int hidden, Array paths) {
 }
 
 /* A `]` that opens a class is a member, as in a shell. */
-static int _class_match(const char **pattern, unsigned char value) {
-  const char *ch = *pattern, int negate = *ch == '!' || *ch == '^';
+static int _class_match(const char *&pattern, unsigned char value) {
+  const char *ch = pattern, int negate = *ch == '!' || *ch == '^';
   if (negate) ch++;
   const char *first_member = ch;
   int matched = 0;
@@ -266,7 +266,7 @@ static int _class_match(const char **pattern, unsigned char value) {
     else if (value == first) matched = 1;
   }
   if (*ch != ']') return -1;
-  *pattern = ch + 1;
+  pattern = ch + 1;
   return negate ? !matched : matched;
 }
 
@@ -280,7 +280,7 @@ static const char *_glob_step(const char *pattern, const char *text) {
   if (*pattern == '?') return pattern + 1;
   if (*pattern == '[') {
     const char *rest = pattern + 1;
-    int matched = _class_match(&rest, (unsigned char) *text);
+    int matched = _class_match(rest, (unsigned char) *text);
     if (matched >= 0) return matched ? rest : NULL;
   }
   if (*pattern == '\\' && pattern[1]) pattern++;
@@ -402,10 +402,10 @@ void Path.remove_file(Path path) {
     File.path_error("Path.remove_file", path, errno);
 }
 
-static void _remove_tree(Path path, String *failed, int *failure) {
+static void _remove_tree(Path path, String &failed, int &failure) {
   struct stat info;
   if (lstat(path, &info)) {
-    if (errno != ENOENT && !*failed) *failed = path, *failure = errno;
+    if (errno != ENOENT && !failed) failed = path, failure = errno;
     return;
   }
   if (S_ISDIR(info.st_mode)) {
@@ -421,18 +421,18 @@ static void _remove_tree(Path path, String *failed, int *failure) {
         String child_failed = NULL;
         int child_failure = 0;
         _remove_tree(
-          path.join(String.new(entry->d_name)), &child_failed,
-          &child_failure);
-        if (child_failed && !*failed) {
-          *failed = context.export(child_failed);
-          *failure = child_failure;
+          path.join(String.new(entry->d_name)), child_failed,
+          child_failure);
+        if (child_failed && !failed) {
+          failed = context.export(child_failed);
+          failure = child_failure;
         }
       }
       closedir(directory);
     }
-    if (rmdir(path) && !*failed) *failed = path, *failure = errno;
+    if (rmdir(path) && !failed) failed = path, failure = errno;
   }
-  else if (unlink(path) && !*failed) *failed = path, *failure = errno;
+  else if (unlink(path) && !failed) failed = path, failure = errno;
 }
 
 /** Removes `path` and everything below it when it exists.
@@ -443,7 +443,7 @@ static void _remove_tree(Path path, String *failed, int *failure) {
 void Path.remove_tree(Path path) {
   String failed = NULL;
   int failure = 0;
-  _remove_tree(path, &failed, &failure);
+  _remove_tree(path, failed, failure);
   if (failed) raise %(io-fail (operation "Path.remove_tree")
                       (path $failed) (errno $failure));
 }

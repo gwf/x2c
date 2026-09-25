@@ -1501,7 +1501,7 @@ static List _declaration_base(Type t, List * modifiers){
     List _x2c_destructure_0 = Type_declaration_parts(Type_declared(List_type(Array_list(typed))));
     base = Var_list(List_getindex(_x2c_destructure_0, 0));
     mods = Var_list(List_getindex(_x2c_destructure_0, 1));
-    * modifiers = mods;
+    (* modifiers) = mods;
     if(! List_truth(mods)){
       List _x2c_return_value_0 = Type_list(t);
       {
@@ -1565,7 +1565,7 @@ return declarator;
 int List_try_next(List, List *, Var *);
 List Array_list_free(Array);
 static List _finish_declaration(Compiler compiler, Symbol tag, List base, List declarators, int preserved_self){
-  List modifiers = NULL;  base = _declaration_base(List_type(base), & modifiers);  if(List_truth(modifiers)){
+  List modifiers = NULL;  base = _declaration_base(List_type(base), &(modifiers));  if(List_truth(modifiers)){
     Array bound = Array_new(); {
       List declarator;  List _x2c_macro_object_3 = declarators;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_2)){
         declarator = Var_list(_x2c_macro_cursor_output_2);  Array_push(bound, List_var(_append_declarator_modifiers(declarator, modifiers)));
@@ -2150,7 +2150,7 @@ static List _array_suffix(Compiler c){
 
 void Compiler_record_source_declaration(Compiler, List, Token, Token);
 static List _finish_parameter(Compiler compiler, List base, List declarator, List method_identity, Token source_first, Token source_after){
-  base = _finish_type(compiler, base);  int preserved_self = 0;  declarator = _install_declarator_node(compiler, base, NULL, declarator, method_identity, & preserved_self);  Compiler_record_source_declaration(compiler, Var_list(List_cadr(declarator)), source_first, source_after);  List modifiers = NULL;  base = _declaration_base(List_type(base), & modifiers);  declarator = _append_declarator_modifiers(declarator, modifiers);  List parameter = cons(_190, cons(List_var(base), cons(List_var(declarator), NULL)));
+  base = _finish_type(compiler, base);  int preserved_self = 0;  declarator = _install_declarator_node(compiler, base, NULL, declarator, method_identity, &(preserved_self));  Compiler_record_source_declaration(compiler, Var_list(List_cadr(declarator)), source_first, source_after);  List modifiers = NULL;  base = _declaration_base(List_type(base), &(modifiers));  declarator = _append_declarator_modifiers(declarator, modifiers);  List parameter = cons(_190, cons(List_var(base), cons(List_var(declarator), NULL)));
   {
     List _x2c_match_expr = declarator;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2164,7 +2164,7 @@ return parameter;
 }
 
 List Compiler_parse_parameter(Compiler compiler){
-  if(! _init_guard_) _file_init_();  if(Compiler_test(compiler, 1519197)) return _193;  List qual = _type_qualifiers(compiler);  List spec = _type_specifier(compiler), type = List_append(qual, List_append(spec, NULL));  List method = NULL;  Token first = NULL, after = NULL;  List declarator = _declarator(compiler, type, NULL, & method, & first, & after);  return _finish_parameter(compiler, type, declarator, method, first, after);
+  if(! _init_guard_) _file_init_();  if(Compiler_test(compiler, 1519197)) return _193;  List qual = _type_qualifiers(compiler);  List spec = _type_specifier(compiler), type = List_append(qual, List_append(spec, NULL));  List method = NULL;  Token first = NULL, after = NULL;  List declarator = _declarator(compiler, type, NULL, &(method), &(first), &(after));  return _finish_parameter(compiler, type, declarator, method, first, after);
 }
 
 List Compiler_parse_parameter_list(Compiler c){
@@ -2252,7 +2252,7 @@ List Compiler_with_binding(Compiler);
 List Sym_define(Sym, List, List);
 static List _direct_declarator(Compiler c, Type context, List * method_identity, Token * source_first, Token * source_after){
   int member = Type_is_aggregate(context);  if(Compiler_peek(c, 0) == 81){
-    Compiler_next(c);  Token first = c -> token;  List decl = _declarator(c, NULL, member ? Type_list(context) : NULL, method_identity, source_first, source_after);  if(Compiler_peek(c, 0) != 83){
+    Compiler_next(c);  Token first = c -> token;  List decl = _declarator(c, NULL, member ? Type_list(context) : NULL, &((* method_identity)), &((* source_first)), &((* source_after)));  if(Compiler_peek(c, 0) != 83){
       Compiler_require_input(c);  if(first -> type == 19147688 && Compiler_peek(c, 0) == 19147688) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_199), cons(String_var(first -> text), cons(String_var(_3), NULL)))), first, _202);  else Compiler_report_error(c, 33658058, _837, c -> token, NULL);
     }
     Compiler_next(c);  return decl;
@@ -2281,7 +2281,7 @@ static List _direct_declarator(Compiler c, Type context, List * method_identity,
     }
 
   }
-  if(! String_is_identifier(c -> token -> text)) return _204;  Token first = c -> token;  List ident = _complex_identifier(c, method_identity);  * source_first = first;  * source_after = c -> token;  return cons(_27, cons(List_var(ident), _179));
+  if(! String_is_identifier(c -> token -> text)) return _204;  Token first = c -> token;  List ident = _complex_identifier(c, &(* method_identity)); (* source_first) = first; (* source_after) = c -> token;  return cons(_27, cons(List_var(ident), _179));
 }
 
 Type Type_base_type(Type);
@@ -2291,7 +2291,7 @@ List Compiler_parse_named_type(Compiler c){
   if(! _init_guard_) _file_init_();  List slot = Compiler_try_parse_macro_slot(c, 988265867168778);  if(List_truth(slot)) return slot;  Token start = c -> token;  String name = Compiler_package_spelling(c, c -> token -> text);  Compiler_expect(c, 19147688);  List key = cons(String_var(name), NULL);  if(! List_truth(Sym_get_exact(c -> sym, key))) Sym_define(c -> sym, key, cons(_205, cons(String_var(name), NULL)));  if(Compiler_test(c, 119)) return cons(_206, cons(String_var(name), _179));  List qualifiers = _type_qualifiers(c), base = NULL;  if(Compiler_peek(c, 0) == 247 ||((Compiler_peek(c, 0) == 1318234344 || Compiler_peek(c, 0) == 44977116) && Compiler_peek(c, 1) == 247)){
     Symbol tag = Compiler_peek(c, 0) == 44977116 ? 44977116 : 1318234344;  if(Compiler_peek(c, 0) != 247) Compiler_next(c);  Compiler_expect(c, 247);  List fields = Compiler_peek(c, 0) == 251 ? NULL : Compiler_parse_fields(c, cons(Symbol_var(tag), cons(String_var(name), NULL)));  Compiler_expect(c, 251);  base = Map_truth(c -> macro_holes) ? cons(Symbol_var(tag), cons(String_var(name), cons(List_var(cons(_144, List_append(fields, NULL))), NULL))) : _publish_aggregate_type(c, tag, String_var(name), fields, start);
   }
-  else base = _type_specifier(c);  base = List_append(qualifiers, base);  List method = NULL;  Token first = NULL, after = NULL;  List declarator = _declarator(c, base, NULL, & method, & first, & after);  List modifiers = NULL;
+  else base = _type_specifier(c);  base = List_append(qualifiers, base);  List method = NULL;  Token first = NULL, after = NULL;  List declarator = _declarator(c, base, NULL, &(method), &(first), &(after));  List modifiers = NULL;
   {
     List _x2c_match_expr = declarator;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2316,14 +2316,14 @@ void Compiler_bind_template_local(Compiler c, List key, List type, List context)
 }
 
 static List _declarator(Compiler compiler, List type, List context, List * method_identity_out, Token * source_first, Token * source_after){
-  List ptr = _pointer(compiler), method_identity = NULL;  List key, infix;  List _x2c_destructure_2 = List_cdr(_direct_declarator(compiler, List_type(context), & method_identity, source_first, source_after));  key = Var_list(List_getindex(_x2c_destructure_2, 0));  infix = Var_list(List_getindex(_x2c_destructure_2, 1));  List sfx = _declarator_suffix(compiler);  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  List binding = key;  Compiler_bind_template_local(compiler, key, ast, context);  if(method_identity_out) * method_identity_out = method_identity;  return cons(_27, cons(List_var(binding), cons(List_var(modifiers), NULL)));
+  List ptr = _pointer(compiler), method_identity = NULL;  List key, infix;  List _x2c_destructure_2 = List_cdr(_direct_declarator(compiler, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));  key = Var_list(List_getindex(_x2c_destructure_2, 0));  infix = Var_list(List_getindex(_x2c_destructure_2, 1));  List sfx = _declarator_suffix(compiler);  List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));  List ast = List_append(modifiers, type);  List binding = key;  Compiler_bind_template_local(compiler, key, ast, context); (* method_identity_out) = method_identity;  return cons(_27, cons(List_var(binding), cons(List_var(modifiers), NULL)));
 }
 
 int Compiler__at_function_arrow(Compiler);
 void Compiler_check_explicit_converter(Compiler, List, Type, int);
 int binding_identity_try_parts(List, int *, String *);
 static List _declarator_init(Compiler c, List type, List context){
-  Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, & method, & first, & after);  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, & preserved_self);  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_92, cons(List_var(type), cons(List_var(cons(_40, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
+  Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, &(method), &(first), &(after));  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, &(preserved_self));  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_92, cons(List_var(type), cons(List_var(cons(_40, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
     if(c -> shallow){
       Compiler__skip_shallow_expression(c, 1);  return bind;
     }
@@ -2684,10 +2684,10 @@ String message = String_equal(role, _300) ? _855 : _856;  Compiler_report_error(
 }
 
 static String _prepare_function_lifecycle(Compiler c, List declaration, List binding, String * initializer_owner, String * shutdown_owner){
-  String name = binding_identity_spelling(binding);  * initializer_owner = String_truth(name) ? _lifecycle_owner(c, binding, _857) : NULL;  * shutdown_owner = String_truth(name) ? _lifecycle_owner(c, binding, _858) : NULL;  if(String_truth(* initializer_owner)){
+  String name = binding_identity_spelling(binding); (* initializer_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _857) : NULL; (* shutdown_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _858) : NULL;  if(String_truth((* initializer_owner))){
     _require_lifecycle_signature(c, declaration, name, _300);  if(String_truth(c -> init_fn) && ! String_equal(c -> init_fn, name)) Compiler_report_error(c, 33658058, _859, c -> token, cons(_303, cons(String_var(name), NULL)));
   }
-  if(String_truth(* shutdown_owner)){
+  if(String_truth((* shutdown_owner))){
     _require_lifecycle_signature(c, declaration, name, _858);  if(String_truth(c -> fini_fn) && ! String_equal(c -> fini_fn, name)) Compiler_report_error(c, 33658058, _860, c -> token, cons(_305, cons(String_var(name), NULL)));
   }
   return name;
@@ -2730,7 +2730,7 @@ static List _finish_function_parts(Compiler c, List declaration, List rtype, Lis
   };
   x2c_cleanup_push(&_x2c_defer_record_11);
   {
-    String initializer_owner = NULL, shutdown_owner = NULL;  String name = _prepare_function_lifecycle(c, declaration, binding, & initializer_owner, & shutdown_owner);  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type), declared_return = NULL;
+    String initializer_owner = NULL, shutdown_owner = NULL;  String name = _prepare_function_lifecycle(c, declaration, binding, &(initializer_owner), &(shutdown_owner));  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type), declared_return = NULL;
   {
     List _x2c_match_expr = Type_list(List_type_from_ast(declaration));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3248,7 +3248,7 @@ List binding = String_truth(exact) ? Sym_declare(compiler -> sym, declaration_co
   String spelling = binding_identity_spelling(binding);  List visible = Sym_lookup(compiler -> sym, cons(String_var(spelling), NULL), NULL);  if(! List_equal(visible, binding)) Sym_bind_identity(compiler -> sym, declaration_context, binding, declaration);
 }
 if(List_truth(binding) && List_truth(method)) Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))), List_var(method));  else if(List_truth(binding)) Map_del(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))));  if(List_truth(binding) && List_truth(self_signature)){
-  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), List_var(self_signature));  * preserved_self = 1;
+  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), List_var(self_signature)); (* preserved_self) = 1;
 }
 List bound = cons(_27, cons(List_var(binding), cons(List_var(mods), NULL)));  if(List_truth(initializer)) initializer = Compiler_resolve_expression(compiler, initializer, compiler -> token);  return List_truth(initializer) ? cons(_33, cons(_34, cons(List_var(bound), cons(List_var(initializer), NULL)))) : bound;
 }
@@ -3703,7 +3703,7 @@ static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x
     default: break;
     }
   }
-Array_push(output, List_var(_install_declarator_node((c), Var_list(base), declaration_context, declarator, NULL, & preserved_self)));
+Array_push(output, List_var(_install_declarator_node((c), Var_list(base), declaration_context, declarator, NULL, &(preserved_self))));
   }
 
 }

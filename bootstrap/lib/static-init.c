@@ -149,9 +149,9 @@ void x2c_static_abort(void * data){
 }
 
 static void _release(X2CStatic * * values){
-  while(* values){
-    X2CStatic * guard = * values;
-    * values = guard -> next;
+  while((* values)){
+    X2CStatic * guard =(* values);
+    (* values) = guard -> next;
     free(guard -> payload);
     guard -> payload = NULL;
     guard -> next = NULL;
@@ -162,12 +162,12 @@ static void _release(X2CStatic * * values){
 
 void x2c_static_thread_release(void){
   if(! _init_guard_) _file_init_();
-  _release(& static_thread.values);
+  _release(&(static_thread.values));
 }
 
 void x2c_static_shutdown(void){
   if(! _init_guard_) _file_init_();
-  _release(& static_values);
+  _release(&(static_values));
 }
 
 #undef _x2c_initializer_choice_A509A3AF_0_expanded

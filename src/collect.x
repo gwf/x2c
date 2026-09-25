@@ -77,8 +77,8 @@ static String _canonical_cwd(void) {
 
 static String _resolve_include_dirs(
   SourceView sources, List extra_dirs, String includer_dir, String target,
-  int angle, int *covered) {
-  *covered = 0;
+  int angle, int &covered) {
+  covered = 0;
   if (target.startswith("/"))
     return sources.exists(target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
@@ -97,7 +97,7 @@ static String _resolve_include_dirs(
     String path = %"$dir/$target";
     if (!sources.exists(path)) continue;
     found = path;
-    *covered = dir == lib_dir || dir == include_dir;
+    covered = dir == lib_dir || dir == include_dir;
     break;
   }
   dirs.free();
@@ -106,7 +106,7 @@ static String _resolve_include_dirs(
 
 static String _resolve_include(
   Compiler compiler, String includer_dir, String target, int angle,
-  int *covered) => _resolve_include_dirs(
+  int &covered) => _resolve_include_dirs(
     compiler.sources, compiler.include_dirs, includer_dir, target, angle,
     covered);
 
@@ -194,7 +194,7 @@ static void _replay_cached(
 /* Read an include's text, reporting an unreadable target as a driver error. */
 static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
-  if (!c.read_source(path, &text))
+  if (!c.read_source(path, text))
     c.report_error(<driver>, "cannot read include", c.token,
                    %("stage: collect" "include: $target" "path: $path"));
   return text;
@@ -239,7 +239,7 @@ static int _package_owns(Compiler c, String path) {
 static void _parse_segment(
   Compiler c, String path, String source, String text, int start_line,
   int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
-  int private, int *linkage) {
+  int private, int &linkage) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   int unit = x2c_source_file(path);
@@ -247,7 +247,7 @@ static void _parse_segment(
   shadow.filename = path;
   shadow.layout = c.layout;
   shadow.source_private = private;
-  shadow.open_linkage = *linkage;
+  shadow.open_linkage = linkage;
   shadow.take_unit_state(c);
   shadow.tokenize(text);
   shadow.text = source;
@@ -258,7 +258,7 @@ static void _parse_segment(
     token.pos += start_pos;
   }
   shadow.shallow_parse_overlay(globs, overlay);
-  *linkage = shadow.open_linkage;
+  linkage = shadow.open_linkage;
   shadow.return_unit_state(c);
   if (unit) {
     c.fn_defs.merge(shadow.fn_defs);
@@ -326,7 +326,7 @@ static void _publish_unit_statics(Map statics, Map overlay, String path) {
 static void _flush_segment(
   Compiler compiler, String path, String source, String text, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
-  int private, int *linkage) {
+  int private, int &linkage) {
   if (!text || !*text) return;
   Scope.push(&process_cache_scope);
   Map overlay = {};
@@ -347,7 +347,7 @@ static String _include(
   Compiler c, String target, int angle, String dir, Map globs,
   Map visited, Map dependencies) {
   int covered = 0;
-  String path = _resolve_include(c, dir, target, angle, &covered);
+  String path = _resolve_include(c, dir, target, angle, covered);
   if (!path) return NULL;
   if (covered && !x2c_source_file(path)) return NULL;
   String canonical = _canonical_path(path);
@@ -451,12 +451,12 @@ static void _file(
       }
       int angle = 0, visibility = _visibility_pragma(token.text);
       String target =
-        hidden ? NULL : preproc_include_target(token.text, &angle);
+        hidden ? NULL : preproc_include_target(token.text, angle);
       if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,
         segment_position, globs, parts, definitions, dependencies, private,
-        &linkage);
+        linkage);
       if (target) {
         /* The entry records every include, so it does not depend on what
            the unit that first walked this file had already seen. */
@@ -475,7 +475,7 @@ static void _file(
     }
     _flush_segment(
       c, path, text, text[segment_position:], segment_line, segment_position,
-      globs, parts, definitions, dependencies, private, &linkage);
+      globs, parts, definitions, dependencies, private, linkage);
     /* Declaration producers run the syntax builders, which the shared
        session lacks while `lib/meta.x` is preloading. That walk's entry for a
        producing file is dropped afterwards, so a later unit walks the file
@@ -538,7 +538,7 @@ static void _file(
 
 static String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
-  if (!c.read_source(runtime, &text))
+  if (!c.read_source(runtime, text))
     c.report_error(
       <driver>, "cannot read runtime source", c.token,
       %("path: $runtime"));
@@ -609,13 +609,13 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
    `<root>/<name>/src/<name>.x`, or `<root>/<name>/<name>.x` for the
    single-file layout used by toys and fixtures. */
 static String _package_entry(
-  Compiler compiler, String name, String *directory) {
+  Compiler compiler, String name, String &directory) {
   foreach (String package_dir, compiler.package_dirs) {
     String root = %"${_canonical_path(package_dir)}/$name";
     String nested = %"$root/src/$name.x";
     String entry = compiler.sources.exists(nested) ? nested : %"$root/$name.x";
     if (!compiler.sources.exists(entry)) continue;
-    if (directory) *directory = root;
+    directory = root;
     return _canonical_path(entry);
   }
   return NULL;
@@ -739,7 +739,7 @@ static void _package_contributions(
 */
 void Compiler.collect_package(Compiler c, String name, Token token) {
   if (name in c.package_roots) return;
-  String root = NULL, entry = _package_entry(c, name, &root);
+  String root = NULL, entry = _package_entry(c, name, root);
   if (!entry)
     c.report_error(
       <driver>, %"unknown package '$name'", token,
@@ -758,7 +758,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   if (cached) _replay_cached(package, cached, globs, visited);
   else {
     String text = NULL;
-    if (!package.read_source(entry, &text))
+    if (!package.read_source(entry, text))
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
@@ -865,7 +865,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
   if (hash is void) {
     String text = NULL;
     try {
-      if (!compiler.read_source(path, &text)) return 0;
+      if (!compiler.read_source(path, text)) return 0;
     }
     catch %(io-fail *): return 0;
     catch %(bad-arg *): return 0;

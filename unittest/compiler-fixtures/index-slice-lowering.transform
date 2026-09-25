@@ -144,7 +144,8 @@
                       (ident (binding 29 "Symbol_var"))) 
                 (args (expr ("Symbol") (literal ("Symbol") "seed" seed))))) 
               (expr ("Var") 
-               (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
+               (call (expr ((func ((int))) "Var") 
+                      (ident (binding 20 "int_var"))) 
                 (args (expr (int) (literal (int) "7")))))))))))) 
   (at 21 
    (stmnt 

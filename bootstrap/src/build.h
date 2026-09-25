@@ -41,6 +41,8 @@ void Build_add_generated(Build state, String input, String directory);
 
 CliRequest Build_module_entry(Build b);
 
+CliRequest Build_extension_entries(Build b);
+
 void Build_begin_translation(Build state, String input);
 
 void Build_end_translation(Build state, String input, int cached);

@@ -1118,7 +1118,7 @@ Array List_array(List);
 List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate){
   if(! _init_guard_) _file_init_();
   int repeated = _symbol_set_duplicate(values);
-  * duplicate = repeated;
+  (* duplicate) = repeated;
   if(repeated >= 0) return NULL;
   Array symbols = List_array(values);
   List result = _symbol_set_literal_expression(symbols);
@@ -1151,7 +1151,7 @@ List Compiler_parse_symbol_set_literal(Compiler c){
   }
   Compiler_expect(c, 15997);
   int duplicate = - 1;
-  List result = Compiler_symbol_set_expression(c, Array_list(symbols), & duplicate);
+  List result = Compiler_symbol_set_expression(c, Array_list(symbols), &(duplicate));
   if(duplicate >= 0){
     Token token = Var_token(Array_getindex(tokens, duplicate));
     Symbol symbol = Var_symbol(Array_getindex(symbols, duplicate));

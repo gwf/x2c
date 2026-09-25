@@ -637,6 +637,7 @@ $var.tag.unbox(String, string, <string>);
 
 meta Iter Var.as_iter(Var value);
 meta File Var.file(Var value);
+meta Block Var.block(Var value);
 
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.

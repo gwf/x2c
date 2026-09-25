@@ -1777,9 +1777,9 @@ static List _make_catch_binders(List binders, String handle_name){
 int Array_contains(Array, Var);
 
 static List _match_arm_label(Symbol head, Array heads, int * labelling){
-  if(! * labelling) return NULL;
+  if(!(* labelling)) return NULL;
   if(! head){
-    * labelling = 0;
+    (* labelling) = 0;
     return _334;
   }
   if(Array_contains(heads, Symbol_var(head))) return NULL;
@@ -1876,7 +1876,7 @@ Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
         Symbol flat_head = match_value_flat_head(value, binders, & flat_tags);
         List pattern = Emitter__emit(e, pattern_ast);
         List body = Emitter__emit(e, body_ast);
-        List label = _match_arm_label(match_value_head(value), heads, & labelling);
+        List label = _match_arm_label(match_value_head(value), heads, &(labelling));
         if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));
         if(pattern == _19) Array_push(values, List_var(cons(List_var(body), List_append(implicit_break, NULL))));
         else if(flat_head){
@@ -1900,7 +1900,7 @@ Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
 
   }
   if(labelling) Array_push(values, List_var(_370));
-  * dispatched = Array_len(heads) != 0;
+  (* dispatched) = Array_len(heads) != 0;
   Array_free(heads);
   return Array_list_free(values);
 }
@@ -1935,7 +1935,7 @@ static List Emitter__match_cases(Emitter e, List ast){
   }
   else capture_declarations = _377;
   int dispatched;
-  List arms = Emitter__match_if(e, cases, & dispatched);
+  List arms = Emitter__match_if(e, cases, &(dispatched));
   List selector = dispatched ? _380 : _383;
   return cons(_385, cons(List_var(expr), cons(_387, List_append(capture_declarations, cons(_389, List_append(selector, cons(_391, List_append(arms, _394))))))));
 }
@@ -2193,7 +2193,7 @@ List Ast_initializer_functions(Ast, List *);
 List Ast_initializer_cases(Ast, List *);
 List List_reverse(List);
 static List Emitter__initializer_value(Emitter e, List ast){
-  List source = NULL;  List functions = Ast_initializer_functions(ast, & source);  if(List_truth(functions)) return Emitter__emit(e, cons(_465, cons(List_var(cons(_15, cons(_486, cons(List_var(cons(_431, List_append(functions, NULL))), NULL)))), cons(List_var(cons(_233, cons(List_var(source), NULL))), NULL))));  List input = NULL;  List cases = Ast_initializer_cases(ast, & input);  if(List_truth(input)) return Emitter__initializer_macro(e, input, cons(_431, List_append(cases, NULL)));  List result = NULL; {
+  List source = NULL;  List functions = Ast_initializer_functions(ast, &(source));  if(List_truth(functions)) return Emitter__emit(e, cons(_465, cons(List_var(cons(_15, cons(_486, cons(List_var(cons(_431, List_append(functions, NULL))), NULL)))), cons(List_var(cons(_233, cons(List_var(source), NULL))), NULL))));  List input = NULL;  List cases = Ast_initializer_cases(ast, &(input));  if(List_truth(input)) return Emitter__initializer_macro(e, input, cons(_431, List_append(cases, NULL)));  List result = NULL; {
     List choice;  List _x2c_macro_object_19 = List_reverse(cases);  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_17)){
       choice = Var_list(_x2c_macro_cursor_output_17); {
         List _x2c_destructure_14 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_14, 0));  List path = Var_list(List_getindex(_x2c_destructure_14, 1));  Type type = Var_type(List_getindex(_x2c_destructure_14, 2));  List value = Var_list(List_getindex(_x2c_destructure_14, 3));  if(List_truth(({ static MatchCaptureSite _x2c_match_site_19;  x2c_match_site_match(& _x2c_match_site_19, value, List_var(_501)); }))) value = List_truth(Type_list(type)) ? cons(_15, cons(List_var(type), cons(List_var(cons(_208, cons(List_var(type), cons(List_var(value), NULL)))), NULL))) : _511;  List emitted = Emitter__emit(e, cons(List_var(value), NULL));  if(! List_truth(result) || ! List_truth(condition)) result = emitted;  else{
@@ -2212,7 +2212,7 @@ String preproc_include_target(String, int *);
 int x2c_source_file(String);
 int String_rfind(String, String);
 static List Emitter__preproc(Emitter emitter, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), & angle);  if(! String_truth(target) || ! x2c_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _833), 1);  String out = String_join(NULL, cons(String_var(_514), cons(String_var(stem), cons(String_var(_515), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! x2c_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _833), 1);  String out = String_join(NULL, cons(String_var(_514), cons(String_var(stem), cons(String_var(_515), NULL))));  return cons(String_var(out), NULL);
 }
 
 int Symbol_is_assignment_op(Symbol);

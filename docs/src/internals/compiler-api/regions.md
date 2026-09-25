@@ -35,7 +35,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1160`
+Source: `src/regions.x:1186`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -47,7 +47,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1135`
+Source: `src/regions.x:1161`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -57,7 +57,7 @@ Source: `src/regions.x:1135`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1183`
+Source: `src/regions.x:1209`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
@@ -69,7 +69,7 @@ for the active Scope, `<slot>` for the Scope its first argument names,
 `<pool>` for the canonical-value pool, or 0 when nothing is known. What
 the operation does to its arguments is a separate fact.
 
-Source: `src/regions.x:192`
+Source: `src/regions.x:218`
 
 <a id="Compiler.region_wrapper"></a>
 #### Compiler.region_wrapper
@@ -79,7 +79,7 @@ Source: `src/regions.x:192`
 Reports whether the runtime operation `name` returns its argument's
 storage unchanged, as a `Var` box or its unboxing does.
 
-Source: `src/regions.x:204`
+Source: `src/regions.x:230`
 
 ## Design notes
 

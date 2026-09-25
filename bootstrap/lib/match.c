@@ -566,18 +566,18 @@ static int _named_binder(Var value){
 }
 
 static int _layout_builder_add(MatchLayoutBuilder * builder, Atom binder){
-  for(int i = 0;  i < builder -> count;  i ++) if(builder -> binders[i].u64 == binder.u64) return i;
-  if(builder -> count >= MACHINE_BINDER_MAX) return - 1;
-  builder -> binders[builder -> count] = binder;
-  return builder -> count ++;
+  for(int i = 0;  i <(* builder).count;  i ++) if((* builder).binders[i].u64 == binder.u64) return i;
+  if((* builder).count >= MACHINE_BINDER_MAX) return - 1;
+  (* builder).binders[(* builder).count] = binder;
+  return(* builder).count ++;
 }
 
 int Var_is_nil(Var);
 
 static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
-    if(_malformed_binder_atom(pattern)) builder -> malformed_binder = 1;
-    else if(_named_binder(pattern) && _layout_builder_add(builder, pattern) < 0) builder -> past_capacity = 1;
+    if(_malformed_binder_atom(pattern))(* builder).malformed_binder = 1;
+    else if(_named_binder(pattern) && _layout_builder_add(&((* builder)), pattern) < 0)(* builder).past_capacity = 1;
     return;
   }
   if(Var_is_nil(pattern)) return;
@@ -586,15 +586,15 @@ static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
   if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = List_cdr(list);
-    if(List_truth(args) && Var_is_list_binder(List_car(args))) builder -> leading_list_binder = 1;
+    if(List_truth(args) && Var_is_list_binder(List_car(args)))(* builder).leading_list_binder = 1;
   }
   List parts = Var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
   int predicate_form = Var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
     if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_match_predicate(part)) continue;
-    _layout_collect(builder, part);
-    if(builder -> malformed_binder) return;
+    _layout_collect(&((* builder)), part);
+    if((* builder).malformed_binder) return;
   }
 
 }
@@ -721,7 +721,7 @@ static MatchCaptureLayout _capture_layout_analyze(Var pattern, Var * out_normali
   MachinePrepare status = MACHINE_PREPARED;
   const char * reason = "prepared";
   Var normalized = pattern;
-  _layout_collect(& builder, pattern);
+  _layout_collect(&(builder), pattern);
   if(builder.malformed_binder){
     status = MACHINE_MALFORMED;
     reason = "binder-name";
@@ -800,8 +800,8 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
       {
         if(Var_is_list_binder(part)) return 0;
         if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)) && _bits_unique(part))){
-          * anchor = part;
-          * offset = width;
+          (* anchor) = part;
+          (* offset) = width;
           return 1;
         }
         width ++;
@@ -1627,7 +1627,7 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
     if(List_truth(tail)){
       tail_entry = MatchLower__compile_child_segment(l, tail);
       if(tail_entry < 0) return - 1;
-      anchored = _find_fixed_anchor(tail, & anchor, & anchor_offset);
+      anchored = _find_fixed_anchor(tail, &(anchor), &(anchor_offset));
     }
 
   }
@@ -1800,7 +1800,7 @@ static int MatchPlan__run(MatchPlan mm, MatchMachine m, Var input, List * out){
   }
   ;
   int result = _run_prepared_capture(MachineProgram_view(mm -> program), m, input, & captures);
-  if(result == 1) * out = _capture_publish(mm -> layout, & captures);
+  if(result == 1)(* out) = _capture_publish(mm -> layout, & captures);
   return result;
 }
 
@@ -1833,7 +1833,7 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   MatchMachine_open(machine);
   machine -> stats = stats;
   List bindings;
-  int result = MatchPlan__run(plan, machine, input, & bindings);
+  int result = MatchPlan__run(plan, machine, input, &(bindings));
   MatchMachine_dispose(machine);
   if(result == 1) * out_bindings = bindings;
   return result;
@@ -1899,14 +1899,14 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
   Block_free(walk.spine);
   MatchMachine_dispose(machine);
   if(status < 0) return - 1;
-  * out_results = results;
+  (* out_results) = results;
   return 1;
 }
 
 int MatchPlan_search(MatchPlan plan, List input, List * out_results){
   if(! _init_guard_) _file_init_();
   if(! _plan_prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
-  return MatchPlan__all(plan, input, out_results);
+  return MatchPlan__all(plan, input, &(* out_results));
 }
 
 static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out){

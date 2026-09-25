@@ -1,7 +1,7 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 6
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 7
 > are implemented; see [Progress](#progress). The completed linter moved
 > into experimental `commands/lint` in `9b31112e` under the
 > [external commands](archive/external-commands.md) plan.
@@ -514,6 +514,21 @@ and size signals; 17 regions the regex invented from macro text and one
 same units takes 11-16 s and the overengineering scan 14 s. Findings and
 function rows are promoted out of the parse's pool, and the proven
 `contains-in` fixes were applied to the linter itself.
+
+**Phase 7, 2026-09-24.** The editor lint kind was not built: decision 6
+keeps lint experimental and uninstalled, and the phase makes it conditional
+on shipping lint to users. `x2c lint --fmt-check` (with `--fmt-diff` to
+print the difference) reports files whose spacing would change and never
+writes; `commands/lint/format.x` is 84 lines. Formatting changes only space:
+trailing space (also inside comments), more than one blank line in a row,
+the final newline, space before `,` or `;`, and a missing space after `,` or
+between a control keyword and `(`, outside quoted forms. It keeps
+indentation, and a file whose reformatted text does not scan to the same
+tokens, comments compared without trailing space, is reported and left
+alone. Measured over all 1,361 tracked `.x` units outside `bootstrap/`: 139
+files and 571 lines would change (unittest 380, commands 72, packages 62,
+examples 45, src 8, etc 2, lib 2); one fixture, `indent-tab.x`, is refused
+because its tab indentation is syntax. The check takes 1.4 s for all of them.
 
 ## Process ceiling
 

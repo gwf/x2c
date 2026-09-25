@@ -1,9 +1,7 @@
 # Packages with compile-time parts
 
-> Status: active - designed 2026-09-24 as step 2 of
-> [meta sequencing](meta-sequencing.md). Delivery 1 implemented
-> 2026-09-24 (see [Delivery 1 result](#delivery-1-result)); Delivery 2,
-> static extensions, has not started.
+> Status: done - delivery 1 landed on `dev` 2026-09-24 as `b51c3642`;
+> delivery 2 (extensions linked into the compiler) as `7a371fa6`.
 
 ## Result
 
@@ -203,6 +201,32 @@ times carry more noise than track G's table.
 Delivery 2: static extensions, with `x2c bootstrap` building a compiler
 that links a named package's compile-time part, and a probe that calls it
 without `dlopen`.
+
+## Delivery 2 result
+
+- `--extension <package-dir>` repeats on `x2c build` and `x2c bootstrap`;
+  bootstrap passes it to its compiler request. The option is on `build`
+  too because the APE is the only way to run `bootstrap`, so a checkout
+  on macOS or Linux can build and test a linked compiler only through
+  `build`.
+- `CliRequest.prepare` adds the package's `src/*.x` and `src/*.c` to the
+  inputs and its parent directory to the package roots, so the sources
+  translate in package mode. `Build.extension_entries` writes one
+  registration unit per package through the entry writer
+  `Build.module_entry` now shares: a file constructor calls
+  `x2c_register_extension("<name>", targets)`. No stamp, no shared symbol.
+- `src/macros.x` keeps the registrations in a plain C list, because the
+  constructors run before the runtime starts. `select_native_modules`
+  adds each one as the native module `<name>` after the request's
+  modules, so `--native-module` still comes first.
+  `Compiler.links_extension` makes `select_package_module` and the
+  parent's preload skip a linked package, so its import loads no module.
+- A package with a native dependency cannot be linked this way: its
+  dependency's flags are not passed.
+- `unittest/probes/run-native-modules.sh` builds a compiler from `src/*.x`
+  with `tally` linked in, then translates the consumer with a stale
+  `tally.module` present (the stock compiler rejects it) and with none.
+  The compiler build adds about 20 s to the optional probe.
 
 ## Design review
 

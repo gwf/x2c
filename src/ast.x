@@ -82,14 +82,14 @@ String preproc_directive(String text) =>
     other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after
     the name, such as a comment, is ignored.
 */
-String preproc_include_target(String text, int *angle) {
-  *angle = 0;
+String preproc_include_target(String text, int &angle) {
+  angle = 0;
   String body = preproc_directive(text);
   if (!body.startswith("include")) return NULL;
   body = body.remove_prefix("include").lstrip(" \t");
   if (!body.len() || (body[0] != '"' && body[0] != '<')) return NULL;
-  *angle = body[0] == '<';
-  String rest = body[1:], int close = rest.find(*angle ? ">" : "\"");
+  angle = body[0] == '<';
+  String rest = body[1:], int close = rest.find(angle ? ">" : "\"");
   return close > 0 ? rest[:close] : NULL;
 }
 
@@ -239,11 +239,11 @@ int Ast.never_returns(Ast ast) {
 }
 
 /** Returns initializer alternatives and their optional native macro input. */
-List Ast.initializer_cases(Ast ast, List *input) {
-  *input = NULL;
+List Ast.initializer_cases(Ast ast, List &input) {
+  input = NULL;
   match (ast)
     case %(initval (!set ?header (input *)) *cases): {
-      *input = header;
+      input = header;
       return cases;
     }
   return ast.cdr();
@@ -253,9 +253,9 @@ List Ast.initializer_cases(Ast ast, List *input) {
     input, and stores that input expression in `source`. Other forms return
     NULL.
 */
-List Ast.initializer_functions(Ast ast, List *source) {
+List Ast.initializer_functions(Ast ast, List &source) {
   List header = NULL;
-  List cases = ast.initializer_cases(&header);
+  List cases = ast.initializer_cases(header);
   if (!header || header.cdr().len() != 1) return NULL;
   List input = header.cadr();
   List value = input.cadr();
@@ -272,6 +272,6 @@ List Ast.initializer_functions(Ast ast, List *source) {
       default: return NULL;
     }
   }
-  *source = value;
+  source = value;
   return functions;
 }

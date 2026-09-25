@@ -8,3 +8,8 @@ unittest/compiler-fixtures/comptime-declines-local-address-writer.x:24:3: region
     ^^^^^^
   note: local storage ends when the function returns
 
+unittest/compiler-fixtures/comptime-declines-local-address-writer.x:32:3: region: an address from 'buffer' can outlive the local storage it points into when returned
+    return Buffer.write(&buffer, "a");
+    ^^^^^^
+  note: local storage ends when the function returns
+

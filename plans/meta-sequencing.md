@@ -1,8 +1,7 @@
 # Meta sequencing: classes, extensions, protocols, certification
 
-> Status: active - order decided by Gary on 2026-09-24. No step has
-> started. Each step needs its own design review before implementation;
-> this plan records the order and the dependencies that set it.
+> Status: active - steps 1-3 landed on `dev` 2026-09-24 (last commit
+> `7a371fa6`); step 4 has not started.
 
 The remaining meta work spans four threads from
 [meta follow-ups](meta-followups.md): Var class capacity, native
@@ -20,7 +19,7 @@ replaces.
 
 ### 1. Class registration and capacity
 
-Designed in [class registration](class-registration.md).
+Designed in [class registration](archive/class-registration.md).
 
 Two separate problems, designed together:
 
@@ -43,7 +42,7 @@ design should list them.
 
 ### 2. Native extensions and packages
 
-Designed in [package meta modules](package-meta-modules.md).
+Designed in [package meta modules](archive/package-meta-modules.md).
 
 Track G delivered loadable meta modules with a hash stamp and a
 name-to-`Func` target Map. Extend it so a package declares its role:
@@ -60,7 +59,8 @@ which today costs 13 more rows at startup.
 
 ### 3. Meta-capable protocols beyond Iter
 
-Designed in [meta protocols beyond Iter](meta-protocols-beyond-iter.md).
+Designed in
+[meta protocols beyond Iter](archive/meta-protocols-beyond-iter.md).
 Only its fourth delivery, the typed containers, depends on step 1;
 deliveries 1-3 can start earlier.
 
@@ -81,3 +81,16 @@ module boundaries, which would invalidate an earlier certification.
 The smaller track C items stay in [meta follow-ups](meta-followups.md):
 an MSYS2 run of the LLP64 `size_t` mapping, `off_t` and `time_t` widths,
 and enum values across translation units.
+
+## Follow-ups from steps 1-3
+
+- Boxing an overflow heap class (past the 30 direct rows) costs about
+  46 ns: a global lock plus a Map lookup. Make it lock-free if the
+  compiler's own heap classes pass 30 on hot paths.
+- The region check misses an escape through a chained returning call,
+  such as `return Buffer.write(&local, "a").newline();`. A single call or
+  a named intermediate is caught. The gap predates step 3.
+- The container generators cannot emit `meta` prototypes, because a
+  `meta` prototype inside a `macro Unit` does not parse.
+- A package with a native dependency cannot be linked into the compiler
+  with `--extension`; its native flags do not reach the compiler build.

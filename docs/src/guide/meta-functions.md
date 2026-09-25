@@ -450,7 +450,7 @@ A module function may take or return a handle:
 helpers.x:3:1: type: unproved native meta lifetime
   meta Widget widget_wrap(Widget inner);
   ^^^^
-  note: name: widget_wrap signature: ((func ((* struct "Widget"))) * struct "Widget") it might return or keep its argument; ownership cannot be inferred
+  note: name: widget_wrap signature: ((func (("Widget"))) "Widget") it might return or keep its argument; ownership cannot be inferred
 ```
 
 The compiler loads a module only when an option, a manifest or an import
@@ -499,6 +499,15 @@ whole runtime. This holds for a compiler built from a checkout and for one
 `x2c bootstrap` installs. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.
+
+A package's compile-time part can instead be linked into the compiler
+itself, which is the only route where modules do not load.
+`x2c build --extension <dir>`, given the compiler's sources, and
+`x2c bootstrap --extension <dir>` each translate the package's
+sources into the compiler and register its `meta` functions under the
+package's name. Any number of packages can be linked this way. Importing
+such a package loads no module and needs no `builds/<name>.module`; its
+functions come after the modules an option or a manifest names.
 
 ## C objects during compilation
 
@@ -797,7 +806,18 @@ so every `Var` member they implement is available: `str`, `repr`,
 `write_str`, `write_repr`, `equal`, `compare`, `contains`, `getindex`,
 `setindex`, `updateindex` and `postfixindex`, and `truth` for a Map.
 `write_str` and `write_repr` return the Buffer they were given, so their
-result belongs to that Buffer.
+result belongs to that Buffer. The `Array` Block adoption is marked too, so
+`len`, `capacity`, `truth`, `clear`, `pop`, `truncate` and `free` are
+available.
+
+`Buffer.new` and the `Buffer` writers are `meta` prototypes beside their
+definitions in `lib/buffer.x`: `reserve`, `clear`, `write`, `write_len`,
+`write_char`, `write_repeat`, `unwrite`, `pad`, `newline`, `indent`,
+`newline_indent`, `push` and `pop`. The marked `Buffer` Var adoption adds
+`str`, `repr` and `truth`. A String argument supplies a writer's text. Each
+writer returns the Buffer it was given, so returning a local
+`struct Buffer`'s address through a writer is a region error. `printf` is
+not available.
 
 Iterator producers and functional collection operations are also available in
 x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`

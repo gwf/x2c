@@ -81,7 +81,9 @@ describes their contents and validation.
 Native `Func` bindings use canonical function `Type` `List`s, for example
 `((func (("String"))) "String")`. Structural words are lowercase `Symbol`s,
 identifier names are exact `String`s, and a nullary function uses the single
-parameter `Type` `(void)`.
+parameter `Type` `(void)`. Ordinary adapters and Lisp bindings build the
+same signature: a typedef parameter, reference target, or result keeps its
+declared name, such as `("Byte")` or `(& "Byte")`.
 
 ## Contributor checks
 

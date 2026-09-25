@@ -214,7 +214,7 @@ Source: `src/literals.x:470`
 <a id="Compiler.symbol_set_expression"></a>
 #### Compiler.symbol_set_expression
 
-`List Compiler.symbol_set_expression(Compiler c, List values, int *duplicate)`
+`List Compiler.symbol_set_expression(Compiler c, List values, int &duplicate)`
 
 Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
 Stores the first duplicate index, or -1, through `duplicate`; a duplicate

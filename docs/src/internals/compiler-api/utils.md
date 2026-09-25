@@ -103,7 +103,7 @@ Source: `src/utils.x:354`
 
 #### worker_wait_any
 
-`int worker_wait_any(long *pids, int count, int *status)`
+`int worker_wait_any(long *pids, int count, int &status)`
 
 Waits until one of the `count` workers in `pids` exits and returns its
 index, storing its shell-style status: the exit status, `128 + signal`,
@@ -181,7 +181,7 @@ Source: `src/utils.x:304`
 
 #### x2c_fnv_file
 
-`uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok)`
+`uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok)`
 
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.

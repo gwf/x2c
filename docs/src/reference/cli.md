@@ -219,6 +219,16 @@ code. The compiler loads a module only on request and keeps it loaded until
 it exits, and a translation binds only the modules its request names. When
 two of them define one name, the first supplies it and the declaration
 reports a warning. Modules work on macOS, Linux and WSL.
+
+`--extension <dir>` links a package's compile-time part into the
+executable being built, which must be the compiler, and repeats. The
+package's `src/*.x` and `src/*.c` become inputs, and a generated unit
+registers its `meta` functions under the package's name. The resulting
+compiler imports the package without loading its module:
+
+```sh
+./x2c build --extension packages/tally --output /tmp/x2c src/*.x
+```
 [Native modules](../guide/meta-functions.md#native-modules) explains what a
 module contains.
 
@@ -329,6 +339,11 @@ compilation it runs, x2c selects signed plain `char`. The runtime requires an
 eight-bit signed `char`, even on hosts whose C compiler defaults to unsigned
 plain `char`. Compile-time Lisp bindings keep working in the native result.
 They resolve against compiler-generated targets.
+
+`--extension <dir>` links a package's compile-time part into the
+installed compiler, and repeats. It is the route to a package's `meta`
+functions on the APE seed's hosts that load no native module; see
+[packages with compile-time parts](../guide/packages.md#packages-with-compile-time-parts).
 
 ## Build and run
 

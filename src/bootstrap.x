@@ -206,6 +206,7 @@ CliRequest bootstrap_build_request(
   request.cc_args = command.cc_args;
   String whole = _whole_runtime(prefix);
   if (component == <compiler> && whole) request.ld_args = %($whole);
+  if (component == <compiler>) request.extensions = command.extensions;
   request.cc = command.cc;
   request.ar = command.ar;
   request.jobs = command.jobs;

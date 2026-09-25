@@ -54,6 +54,8 @@ int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out);
 
 char Buffer_get(Buffer buf, ptrdiff_t index);
 
+int Buffer_getindex(Buffer buf, int index);
+
 size_t Buffer_len(Buffer buf);
 
 String Buffer_str(Buffer buf);

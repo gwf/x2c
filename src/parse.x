@@ -199,7 +199,7 @@ static List _lower_self_declaration(Compiler compiler, List declaration) {
 /* An expanded alias may contribute pointer, array, or function modifiers.
    Keep parsed modifiers (and parameter bindings) intact and append only the
    alias's declarators. Storage still belongs on the declaration's base. */
-static List _declaration_base(Type t, List *modifiers) {
+static List _declaration_base(Type t, List &modifiers) {
   // Source specifier text, such as `("_Noreturn")`, follows the storage.
   Array storage = [], text = [], typed = [];
   defer { storage.free(); text.free(); typed.free(); }
@@ -207,7 +207,7 @@ static List _declaration_base(Type t, List *modifiers) {
     if (item is <list> && car(item) is <string>) text.push(item);
     else typed.push(item);
   List (base, mods) = typed.list().type().declared().declaration_parts();
-  *modifiers = mods;
+  modifiers = mods;
   if (!mods) return t;
   foreach (Var item, t)
     if (item is <symbol> &&
@@ -232,7 +232,7 @@ static List _finish_declaration(
   Compiler compiler, Symbol tag, List base, List declarators,
   int preserved_self) {
   List modifiers = NULL;
-  base = _declaration_base(base, &modifiers);
+  base = _declaration_base(base, modifiers);
   if (modifiers) {
     Array bound = [];
     foreach (List declarator, declarators)
@@ -869,11 +869,11 @@ static List _finish_parameter(
   int preserved_self = 0;
   declarator = _install_declarator_node(
     compiler, base, NULL, declarator,
-    method_identity, &preserved_self);
+    method_identity, preserved_self);
   compiler.record_source_declaration(
     declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
-  base = _declaration_base(base, &modifiers);
+  base = _declaration_base(base, modifiers);
   declarator = _append_declarator_modifiers(declarator, modifiers);
   List parameter = %(param $base $declarator);
   match (declarator)
@@ -895,7 +895,7 @@ List Compiler.parse_parameter(Compiler compiler) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(
-    compiler, type, NULL, &method, &first, &after);
+    compiler, type, NULL, method, first, after);
   return _finish_parameter(compiler, type, declarator, method, first, after);
 }
 
@@ -974,8 +974,8 @@ static List _declarator_suffix(Compiler compiler) {
 }
 
 static List _direct_declarator(
-  Compiler c, Type context, List *method_identity, Token *source_first,
-  Token *source_after) {
+  Compiler c, Type context, List &method_identity, Token &source_first,
+  Token &source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
   int member = context.is_aggregate();
   // Parenthesized declarator: ( declarator )
@@ -1062,9 +1062,9 @@ static List _direct_declarator(
   if (!c.token.text.is_identifier()) return %(bind () ());
   // Identifier or typedef name or method-sugar target
   Token first = c.token;
-  List ident = _complex_identifier(c, method_identity);
-  *source_first = first;
-  *source_after = c.token;
+  List ident = _complex_identifier(c, &method_identity);
+  source_first = first;
+  source_after = c.token;
   return %(bind $ident ());
 }
 
@@ -1098,7 +1098,7 @@ List Compiler.parse_named_type(Compiler c) {
   base = qualifiers.append(base);
   List method = NULL;
   Token first = NULL, after = NULL;
-  List declarator = _declarator(c, base, NULL, &method, &first, &after);
+  List declarator = _declarator(c, base, NULL, method, first, after);
   List modifiers = NULL;
   match (declarator) {
     case %(bind () ?captured): modifiers = captured;
@@ -1137,12 +1137,12 @@ void Compiler.bind_template_local(
 }
 
 static List _declarator(
-  Compiler compiler, List type, List context, List *method_identity_out,
-  Token *source_first, Token *source_after) {
+  Compiler compiler, List type, List context, List &method_identity_out,
+  Token &source_first, Token &source_after) {
   List ptr = _pointer(compiler), method_identity = NULL;
   List (key, infix) =
     _direct_declarator(
-      compiler, context, &method_identity, source_first,
+      compiler, context, method_identity, source_first,
       source_after).cdr();
   List sfx = _declarator_suffix(compiler);
   List modifiers = %( @infix @sfx @ptr );
@@ -1151,7 +1151,7 @@ static List _declarator(
   // the outer call has the base type and can establish the binding once.
   List binding = key;
   compiler.bind_template_local(key, ast, context);
-  if (method_identity_out) *method_identity_out = method_identity;
+  method_identity_out = method_identity;
   return %( bind $binding $modifiers );
 }
 
@@ -1164,10 +1164,10 @@ static List _declarator_init(
   Token origin = c.token;
   List method = NULL;
   Token first = NULL, after = NULL;
-  List bind = _declarator(c, type, context, &method, &first, &after);
+  List bind = _declarator(c, type, context, method, first, after);
   int preserved_self = 0;
   bind = _install_declarator_node(
-    c, type, context, bind, method, &preserved_self);
+    c, type, context, bind, method, preserved_self);
   c.record_source_declaration(bind.cadr(), first, after);
   int function_arrow = !c.in_proto && c._at_function_arrow() &&
     %(declare $type (bindings $bind)).type_from_ast().is_function();
@@ -1525,21 +1525,21 @@ static void _require_lifecycle_signature(
 }
 
 static String _prepare_function_lifecycle(
-  Compiler c, List declaration, List binding, String *initializer_owner,
-  String *shutdown_owner) {
+  Compiler c, List declaration, List binding, String &initializer_owner,
+  String &shutdown_owner) {
   String name = binding_identity_spelling(binding);
-  *initializer_owner = name
+  initializer_owner = name
     ? _lifecycle_owner(c, binding, "initialize") : NULL;
-  *shutdown_owner = name
+  shutdown_owner = name
     ? _lifecycle_owner(c, binding, "shutdown") : NULL;
-  if (*initializer_owner) {
+  if (initializer_owner) {
     _require_lifecycle_signature(c, declaration, name, "initializer");
     if (c.init_fn && c.init_fn != name)
       c.report_error(
         <parse>, "translation unit has more than one type initializer",
         c.token, %( "initializer:" $name ));
   }
-  if (*shutdown_owner) {
+  if (shutdown_owner) {
     _require_lifecycle_signature(c, declaration, name, "shutdown");
     if (c.fini_fn && c.fini_fn != name)
       c.report_error(
@@ -1592,7 +1592,7 @@ static List _finish_function_parts(
   String initializer_owner = NULL, shutdown_owner = NULL;
   String name = _prepare_function_lifecycle(
     c, declaration, binding,
-    &initializer_owner, &shutdown_owner);
+    initializer_owner, shutdown_owner);
   int expression_body = !syntax && c._at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
   Type old_return = c.return_type, declared_return = NULL;
@@ -2131,7 +2131,7 @@ static List _finish_declarator_parameters(Compiler compiler, List declarator) {
 
 static List _install_declarator_node(
   Compiler compiler, List base, List declaration_context,
-  List declarator, List method_identity, int *preserved_self) {
+  List declarator, List method_identity, int &preserved_self) {
   if (compiler.macro_holes) return declarator;
   Var name = void;
   List mods = NULL, initializer = NULL;
@@ -2215,7 +2215,7 @@ static List _install_declarator_node(
   else if (binding) compiler.semantic_binding_facts().del(%(method $binding));
   if (binding && self_signature) {
     compiler.semantic_binding_facts()[%(self $binding)] = self_signature;
-    *preserved_self = 1;
+    preserved_self = 1;
   }
   List bound = %(bind $binding $mods);
   if (initializer)
@@ -2495,7 +2495,7 @@ List Compiler.bind_syntax(
               }
             output.push(_install_declarator_node(
               _, base, declaration_context, declarator, NULL,
-              &preserved_self));
+              preserved_self));
           }
           List result = _finish_declaration(
             _, tag, base, output.list_free(), preserved_self);

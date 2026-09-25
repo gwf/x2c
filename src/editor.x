@@ -168,7 +168,7 @@ int editor_request(int argc, char **argv) {
     int arg = 6 + index * 3;
     String logical = String.new(argv[arg]);
     String snapshot = String.new(argv[arg + 1]), text;
-    if (!SourceView.read(NULL, snapshot, &text)) return 2;
+    if (!SourceView.read(NULL, snapshot, text)) return 2;
     sources.set(logical, text, !strcmp(argv[arg + 2], "1"));
   }
   // Reuse the private metadata delimiter as the compiler's argv[0].
@@ -179,7 +179,7 @@ int editor_request(int argc, char **argv) {
   if (!frontend.preload_macro_libraries()) return 2;
   Context command = Context.open_isolated_named("editor request");
   ParsedUnit unit;
-  int parsed = frontend.open(source, &unit);
+  int parsed = frontend.open(source, unit);
   if ((request.live_symbols || request.cpp_symbols) &&
       _changed_dependency(unit.compiler, sources)) {
     fputs("x2c editor: unsaved sources with native CPP symbol modes are "

@@ -332,18 +332,18 @@ void Logger.flush(Logger logger) {
 
 // time and text rendering
 
-static void _capture_time(long long *wall_time, long long *monotonic_time) {
+static void _capture_time(long long &wall_time, long long &monotonic_time) {
   struct timeval now, struct timespec monotonic;
   if (gettimeofday(&now, NULL) != 0) {
     now.tv_sec = time(NULL);
     now.tv_usec = 0;
   }
-  *wall_time = (long long) now.tv_sec * 1000000LL + now.tv_usec;
+  wall_time = (long long) now.tv_sec * 1000000LL + now.tv_usec;
   if (clock_gettime(CLOCK_MONOTONIC, &monotonic) != 0) {
-    *monotonic_time = *wall_time;
+    monotonic_time = wall_time;
     return;
   }
-  *monotonic_time =
+  monotonic_time =
     (long long) monotonic.tv_sec * 1000000LL + monotonic.tv_nsec / 1000LL;
 }
 
@@ -686,7 +686,7 @@ synchronized
 void Logger.log(Logger logger, Symbol level, Symbol category, List fields) {
   if (!_should_log(logger, level, category)) return;
   long long wall_time, monotonic;
-  _capture_time(&wall_time, &monotonic);
+  _capture_time(wall_time, monotonic);
   if (logger.sequence == 0) logger.origin_monotonic_us = monotonic;
   LogEvent event = {
     .sequence = logger.sequence++,

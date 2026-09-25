@@ -1253,7 +1253,7 @@ static void _preprocessor_errors(String text) {
 }
 
 static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
-  int ok = frontend.start(filename, &unit);
+  int ok = frontend.start(filename, unit);
   if (ok) {
     unit.compiler.own_diagnostics();
     ok = unit.collect(frontend) && unit.parse();
@@ -1507,13 +1507,13 @@ static List _resolved_calls(Map calls) {
 }
 
 static void _resolved_unresolved_counts(
-  Map resolved, int *external_calls, int *indirect_calls) {
-  *external_calls = *indirect_calls = 0;
+  Map resolved, int &external_calls, int &indirect_calls) {
+  external_calls = indirect_calls = 0;
   foreach (Var (key, count), resolved) {
     List call = key;
     match (call) {
-      case %(external ?): *external_calls += count.int();
-      case %(indirect ?): *indirect_calls += count.int();
+      case %(external ?): external_calls += count.int();
+      case %(indirect ?): indirect_calls += count.int();
     }
   }
 }
@@ -1544,7 +1544,7 @@ static List _resolve_graph(List units, Map attributes) {
               if ((void *) attributes != NULL) {
                 int external_calls, indirect_calls;
                 _resolved_unresolved_counts(
-                  resolved, &external_calls, &indirect_calls
+                  resolved, external_calls, indirect_calls
                 );
                 attributes[%(target $path $name)] = %(
                   node $subtree $source_lines $source_order $source_name

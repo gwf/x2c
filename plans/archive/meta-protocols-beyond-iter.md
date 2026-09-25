@@ -1,10 +1,9 @@
 # Meta-capable protocols beyond Iter
 
-> Status: active - designed 2026-09-24 as step 3 of
-> [meta sequencing](meta-sequencing.md). Delivery 1 landed 2026-09-24;
-> delivery 2's compiler rule landed as `7fd8c5dd`. Deliveries 1-3 do not
-> depend on steps 1 and 2; delivery 4 follows
-> [class registration](class-registration.md).
+> Status: done - landed on `dev` 2026-09-24: the default-member rule as
+> `7fd8c5dd`, delivery 1 as `186ed550`, deliveries 2-4 as `7a371fa6`.
+> Delivery 4's prototypes are written after the generated families,
+> because a `meta` prototype inside a `macro Unit` does not parse yet.
 
 ## Result
 
@@ -44,7 +43,7 @@ Facts from source on `dev` at `5023c07c`, with probes run by
 - Only the typed containers use custom class rows (11). Array, Map,
   Buffer, Block and Iter are built-in rows. So class registration
   matters only to delivery 4, which narrows the dependency
-  [meta sequencing](meta-sequencing.md) assumed.
+  [meta sequencing](../meta-sequencing.md) assumed.
 
 ## Design
 
@@ -87,6 +86,18 @@ use. `Var.block`, `Var.jsonbool` and the `Var.regex*` converters get
 `meta` prototypes beside their definitions. This follows class
 registration because linking and boxing the typed containers in the
 compiler spends their rows.
+
+Status: implemented 2026-09-24 with two changes. A family macro cannot
+emit a `meta` prototype: a template parse rejects a hole declarator after
+`meta`, and the marker would install on the template rather than on its
+expansion. The 33 prototypes (`.var`, `Var.x`, and the `Array.x` and
+`Map.x` packers that give a meta body a typed value) are literal after the
+expansions in `lib/typed-array.x` and `lib/typed-map.x`, as the slicing
+prototypes already are. `etc/runtime-objects.sh` no longer leaves out
+row-reserving objects; the compiler's row count after startup is unchanged
+(1 for `--version`, 2 after a translate). The typed and Regex targets bind
+only once `lib/lisp.x` includes `regex.x`, `typed-array.x` and
+`typed-map.x` beside `json.x`.
 
 ## Compatibility
 

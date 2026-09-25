@@ -42,7 +42,7 @@ static List _flow_summary(
     }
     case %(call ?callee (args *)): {
       String name = NULL;
-      project_call_target(compiler, {}, node, &name, NULL);
+      project_call_target(compiler, {}, node, name, NULL);
       return %(call ${name ? name : %"computed"});
     }
     case %(literal ? ?spelling *): return %(literal $spelling);
@@ -116,7 +116,7 @@ static List _flow_source(
     case %(call ? (args *arguments)): {
       String name = NULL;
       List target = project_call_target(
-        compiler, definitions, node, &name, NULL
+        compiler, definitions, node, name, NULL
       );
       if (name && name == "List_var" && arguments && !arguments.cdr())
         return %(

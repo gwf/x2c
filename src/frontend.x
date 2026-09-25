@@ -102,7 +102,7 @@ static String _script_text(String text) {
 }
 
 static void _tokenize_input(
-  Frontend frontend, ParsedUnit *unit, String filename) {
+  Frontend frontend, ParsedUnit &unit, String filename) {
   Compiler c = unit.compiler;
   /* An absolute spelling of a home source resolves its directory as
      collection resolves an includer's, so the file shares the home-relative
@@ -127,7 +127,7 @@ static void _tokenize_input(
       !strncmp(source_path, lib_path, lib_length) &&
       source_path[lib_length] == '/');
   String text = NULL;
-  if (!c.read_source(filename, &text))
+  if (!c.read_source(filename, text))
     c.report_error(
       <driver>, "cannot read input file", NULL,
       %("stage: driver" "file: $filename" "reason: cannot open"));
@@ -162,7 +162,7 @@ static void _configure_package(
   c.package_roots[name] = package;
 }
 
-static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
+static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   Compiler c = unit.compiler;
   CliRequest request = frontend.request;
   String filename = c.filename;
@@ -236,9 +236,9 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
     process-global.
 */
 static int _start(
-  Frontend frontend, String filename, ParsedUnit *unit, int shared_values,
+  Frontend frontend, String filename, ParsedUnit &unit, int shared_values,
   String session_source) {
-  *unit = (ParsedUnit) { 0 };
+  unit = (ParsedUnit) { 0 };
   unit.generated_symbols = !frontend.request.no_cpp &&
     (!frontend.request.dump || frontend.request.dump == <dump-defs>);
   unit.context = shared_values
@@ -278,7 +278,7 @@ static int _start(
 /** Tokenizes one input into a fresh unit with its own isolated `Context`.
     The caller must close the unit on either result.
 */
-int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
+int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
   _start(frontend, filename, unit, 0, NULL);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
@@ -294,7 +294,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   frontend = &session;
   ParsedUnit unit;
   String path = %"${x2c_get_root()}/lib/meta.x";
-  int started = _start(frontend, path, &unit, 1, NULL);
+  int started = _start(frontend, path, unit, 1, NULL);
   unit.compiler.macro_lisp = shared;
   unit.compiler.borrowed_lisp = 1;
   defer unit.close();
@@ -341,7 +341,7 @@ int Frontend.preload_macro_libraries(Frontend frontend) {
 /** Collects symbols and retains preprocessor outputs for adapter
     inspection.
 */
-int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
+int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
   Compiler compiler = unit.compiler;
   try {
     unit.globals = _preprocess_input(frontend, unit);
@@ -362,7 +362,7 @@ int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
 /** Parses a collected unit, retaining both its AST and unsuccessful
     reports.
 */
-int ParsedUnit.parse(ParsedUnit *p) {
+int ParsedUnit.parse(ParsedUnit &p) {
   Compiler compiler = p.compiler;
   if (compiler.error_count()) return 0;
   try p.ast = compiler.full_parse(p.globals, p.generated_symbols);
@@ -373,13 +373,13 @@ int ParsedUnit.parse(ParsedUnit *p) {
 /** Runs the source stages. On either result, the caller must close the
     unit.
 */
-int Frontend.open(Frontend f, String filename, ParsedUnit *unit) =>
+int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
   f.start(filename, unit) && unit.collect(f) && unit.parse();
 
 /** Opens an empty submission unit with the ordinary runtime prelude.
     Preload macro libraries first. The caller must close the unit on either
     result; submissions and inspection results borrow its Context. */
-int Frontend.open_session(Frontend frontend, ParsedUnit *unit) =>
+int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
   _start(frontend, NULL, unit, 0, "$(begin)\n"
     "void print(String text);\n"
     "void println(String text);\n") &&
@@ -388,12 +388,12 @@ int Frontend.open_session(Frontend frontend, ParsedUnit *unit) =>
 /** Releases the unit after its caller has inspected or exported its
     results.
 */
-void ParsedUnit.close(ParsedUnit *unit) {
+void ParsedUnit.close(ParsedUnit &unit) {
   if (!unit.context) return;
   Compiler compiler = unit.compiler;
   if (unit.preprocessor) compiler.close_child(unit.preprocessor);
   compiler.free_lisp();
   Type.end_unit();
   unit.context.close();
-  *unit = (ParsedUnit) { 0 };
+  unit = (ParsedUnit) { 0 };
 }

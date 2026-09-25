@@ -47,7 +47,8 @@
          (dotinit ("symbol_compare") 
           (expr ("CompareCallback") (ident (binding 15 "_x2c_callback_adapt_2")))) 
          (dotinit ("file_equal") 
-          (expr ("CompareCallback") (ident (binding 16 "_x2c_callback_adapt_3")))) 
+          (expr ("CompareCallback") 
+           (ident (binding 16 "_x2c_callback_adapt_3")))) 
          (dotinit ("iter") 
           (expr ("IterCallback") (ident (binding 17 "_x2c_callback_adapt_4")))))))))))))
 

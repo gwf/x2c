@@ -55,6 +55,8 @@ static void _recompute_line_state(Buffer buf) {
     buf._indent++;
 }
 
+meta Buffer Buffer.new(size_t padding);
+
 /** Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
     Raises: `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
     backing `Block`s.
@@ -92,6 +94,8 @@ void Buffer.move_to(Buffer buf, Scope *scope) {
   Scope.move(buf, scope);
 }
 
+meta Self Buffer.reserve(Self buf, size_t minimum);
+
 /** Reserves room for at least `minimum` output bytes in `buf`.
     Growth may invalidate a borrowed `content.bytes` pointer but does not
     change the `Buffer` or content `Block` identity.
@@ -103,6 +107,8 @@ Self Buffer.reserve(Self buf, size_t minimum) {
   return buf;
 }
 
+meta Self Buffer.clear(Self buf);
+
 /** Empties `buf` and its indentation stack without releasing capacity. */
 Self Buffer.clear(Self buf) {
   buf.content.clear();
@@ -111,6 +117,8 @@ Self Buffer.clear(Self buf) {
   buf._indent = 0;
   return buf;
 }
+
+meta Self Buffer.write_len(Self buf, const char *text, size_t length);
 
 /** Appends `length` bytes from `text` to `buf`.
     `text` may be a live range inside `buf.content`, including across growth.
@@ -166,6 +174,8 @@ Self Buffer.write_len(Self buf, const char *text, size_t length) {
   return buf;
 }
 
+meta Self Buffer.write(Self buf, const char *text);
+
 /** Appends NUL-terminated `text` to `buf`.
     Raises: the same causes as `Buffer.write_len`.
 */
@@ -197,6 +207,8 @@ Self Buffer.printf(Self buf, const char *format, ...) {
   return buf.write_len(bytes, length);
 }
 
+meta Self Buffer.write_char(Self buf, char value);
+
 /** Appends the non-NUL byte `value` to `buf`.
     Raises: `<bad-arg>` when `value` is NUL, or `<size-limit>` or
     `<alloc-fail>` when the `Buffer` cannot grow. These failures leave text and
@@ -215,6 +227,8 @@ Self Buffer.write_char(Self buf, char value) {
   }
   return buf;
 }
+
+meta Self Buffer.write_repeat(Self buf, char value, size_t count);
 
 /** Appends `count` copies of the non-NUL byte `value` to `buf`.
     A zero count accepts any value. Raises: `<bad-arg>` when a nonzero write
@@ -237,6 +251,8 @@ Self Buffer.write_repeat(Self buf, char value, size_t count) {
   return buf;
 }
 
+meta Self Buffer.unwrite(Self buf, size_t count);
+
 /** Removes the final `count` bytes from `buf`. */
 Self Buffer.unwrite(Self buf, size_t count) {
   if (count > buf.content.length) count = buf.content.length;
@@ -245,17 +261,27 @@ Self Buffer.unwrite(Self buf, size_t count) {
   return buf;
 }
 
+meta Self Buffer.pad(Self buf);
+
 /** Appends the configured number of padding spaces. */
 Self Buffer.pad(Self buf) => buf.write_repeat(' ', buf.padding);
+
+meta Self Buffer.newline(Self buf);
 
 /** Appends a newline to `buf`. */
 Self Buffer.newline(Self buf) => buf.write_char('\n');
 
+meta Self Buffer.indent(Self buf);
+
 /** Appends spaces through `buf`'s current indentation depth. */
 Self Buffer.indent(Self buf) => buf.write_repeat(' ', buf.tabstop());
 
+meta Self Buffer.newline_indent(Self buf);
+
 /** Appends a newline followed by current indentation. */
 Self Buffer.newline_indent(Self buf) => buf.newline().indent();
+
+meta Self Buffer.push(Self buf);
 
 /** Pushes the current column as a later indentation depth.
     Raises: `<size-limit>` or `<alloc-fail>` if the stack cannot grow. Failure
@@ -265,6 +291,8 @@ Self Buffer.push(Self buf) {
   buf.indents.append(&buf.pos, 1);
   return buf;
 }
+
+meta Self Buffer.pop(Self buf);
 
 /** Pops one indentation depth from `buf`'s stack when present. */
 Self Buffer.pop(Self buf) {
@@ -307,6 +335,9 @@ char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;
   return buf.try_get(index, &out) ? out : '\0';
 }
+
+/** Returns `buf.get(index)`, so `buf[index]` reads a byte. */
+int Buffer.getindex(Buffer buf, int index) => buf.get(index);
 
 /** Returns the number of bytes currently stored in `buf`. */
 size_t Buffer.len(Buffer buf) => buf ? buf.content.length : 0;

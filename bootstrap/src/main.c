@@ -571,7 +571,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
       running[running_count ++] = pid;
     }
     if(! running_count) continue;
-    int status, slot = worker_wait_any(running, running_count, & status);
+    int status, slot = worker_wait_any(running, running_count, &(status));
     if(status) failed ++;
     List slice = carried[slot];
     if(build && ! status) Build_end_translation(build, Var_string(List_car(slice)), 0);
@@ -684,6 +684,8 @@ Path Path_basename(Path);
 Iter Map_keys(Map, Iter);
 
 int Iter_try_next(Iter, Var *);
+
+int Compiler_links_extension(String);
 
 int Path_is_file(Path);
 
@@ -800,7 +802,7 @@ char root[PATH_MAX];
         {
           if(! realpath(package_dir, root)) continue;
           String module = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_19), cons(String_var(name), cons(String_var(_21), cons(String_var(name), cons(String_var(_22), NULL)))))));
-          if(! Path_is_file(module)) continue;
+          if(Compiler_links_extension(name) || ! Path_is_file(module)) continue;
           Compiler_preload_native_module(module);
           break;
         }
@@ -1006,6 +1008,8 @@ List Build_script_helpers(Build);
 
 CliRequest Build_module_entry(Build);
 
+CliRequest Build_extension_entries(Build);
+
 void Build_cleanup(Build, int);
 
 int Build_finish(Build);
@@ -1044,8 +1048,8 @@ static int _run_build_request(CliRequest c, Array commands){
       c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
       int result = _translate_units(c, state, c -> inputs);
       if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));
-      if(! result && c -> kind == 904178442 && ! c -> dry_run){
-        CliRequest entry = Build_module_entry(state);
+      if(! result && ! c -> dry_run &&(c -> kind == 904178442 || List_truth(c -> extensions))){
+        CliRequest entry = c -> kind == 904178442 ? Build_module_entry(state) : Build_extension_entries(state);
         result = _translate_units(entry, state, entry -> inputs);
       }
       if(result){

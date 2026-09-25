@@ -2276,7 +2276,7 @@ static int _lower_cursor(Var test, struct LowerCursor * walk){
       case 377892: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_214), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var object = _x2c_match_values[1];  Var cursor = _x2c_match_values[2];  Var item = _x2c_match_values[3]; {
     Var _x2c_match_value_0 = name;  Var _x2c_match_value_1 = object;  Var _x2c_match_value_2 = cursor;  Var _x2c_match_value_3 = item; {
       String name = Var_string(_x2c_match_value_0);  int object = Var_int(Var_convert(_x2c_match_value_1, 3453797));  int cursor = Var_int(Var_convert(_x2c_match_value_2, 3453797));  int item = Var_int(Var_convert(_x2c_match_value_3, 3453797)); {
-        if(! String_equal(name, _215) && ! String_equal(name, _216)) return 0;  walk -> kind = String_equal(name, _215) ? 806120 : 3313778;  walk -> object = object;  walk -> cursor = cursor;  walk -> item = item;  walk -> value = 0;  return 1;
+        if(! String_equal(name, _215) && ! String_equal(name, _216)) return 0; (* walk).kind = String_equal(name, _215) ? 806120 : 3313778; (* walk).object = object; (* walk).cursor = cursor; (* walk).item = item; (* walk).value = 0;  return 1;
       }
 
     }
@@ -2287,7 +2287,7 @@ static int _lower_cursor(Var test, struct LowerCursor * walk){
 static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_296), &_x2c_match_capture)) {Var object = _x2c_match_values[0];  Var cursor = _x2c_match_values[1];  Var item = _x2c_match_values[2];  Var value = _x2c_match_values[3]; {
   Var _x2c_match_value_4 = object;  Var _x2c_match_value_5 = cursor;  Var _x2c_match_value_6 = item;  Var _x2c_match_value_7 = value; {
     int object = Var_int(Var_convert(_x2c_match_value_4, 3453797));  int cursor = Var_int(Var_convert(_x2c_match_value_5, 3453797));  int item = Var_int(Var_convert(_x2c_match_value_6, 3453797));  int value = Var_int(Var_convert(_x2c_match_value_7, 3453797)); {
-      walk -> kind = 26720;  walk -> object = object;  walk -> cursor = cursor;  walk -> item = item;  walk -> value = value;  return 1;
+      (* walk).kind = 26720; (* walk).object = object; (* walk).cursor = cursor; (* walk).item = item; (* walk).value = value;  return 1;
     }
 
   }
@@ -2309,7 +2309,7 @@ static int _lower_cursor_addressed(Var form, struct LowerCursor * walk){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 992: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_327), &_x2c_match_capture)) {Var id = _x2c_match_values[0]; {
     Var _x2c_match_value_8 = id; {
-      int id = Var_int(Var_convert(_x2c_match_value_8, 3453797));  return id == walk -> cursor || id == walk -> item || id == walk -> value;
+      int id = Var_int(Var_convert(_x2c_match_value_8, 3453797));  return id ==(* walk).cursor || id ==(* walk).item || id ==(* walk).value;
     }
 
   }
@@ -2320,7 +2320,7 @@ default: break;
   }
 {
   Var part;  List _x2c_macro_object_1 = items;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-    part = _x2c_macro_cursor_output_1;  if(_lower_cursor_addressed(part, walk)) return 1;
+    part = _x2c_macro_cursor_output_1;  if(_lower_cursor_addressed(part, &((* walk)))) return 1;
   }
 
 }
@@ -2338,7 +2338,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 48777994: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936810396426ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var test = _x2c_match_values[0];  Var body = _x2c_match_values[1]; {
-    if(! _lower_cursor(test, & walk) || _lower_cursor_addressed(body, & walk)) return;  Map declared = Map_new(); {
+    if(! _lower_cursor(test, &(walk)) || _lower_cursor_addressed(body, &(walk))) return;  Map declared = Map_new(); {
   _x2c_defer_env_6 _x2c_defer_env_46 = {._x2c_defer_capture_12 =(const void *) & declared};
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_7,
@@ -2347,7 +2347,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
       for(List rest = parts;  List_truth(List_cdr(rest));  rest = List_cdr(rest)){
-        Var part = _lower_bare(List_car(rest));  if(_lower_cursor_addressed(part, & walk)){
+        Var part = _lower_bare(List_car(rest));  if(_lower_cursor_addressed(part, &(walk))){
           x2c_cleanup_leave(& _x2c_defer_record_1);  return;
         }
 
@@ -4255,7 +4255,7 @@ static Var _lower_loop(Lowering l, Var test, List body, List step, List rest, Li
   };
   x2c_cleanup_push(&_x2c_defer_record_18);
   {
-      _lower_referenced(test, used);  _lower_referenced(List_var(body), used);  _lower_referenced(List_var(step), used);  _lower_referenced(List_var(rest), used);  _lower_referenced(List_var(k), used);  struct LowerCursor walk;  int walking = _lower_cursor(test, & walk) && Map_contains(l -> cursors, int_var(walk.cursor));  if(walking){
+      _lower_referenced(test, used);  _lower_referenced(List_var(body), used);  _lower_referenced(List_var(step), used);  _lower_referenced(List_var(rest), used);  _lower_referenced(List_var(k), used);  struct LowerCursor walk;  int walking = _lower_cursor(test, &(walk)) && Map_contains(l -> cursors, int_var(walk.cursor));  if(walking){
         Map_del(used, int_var(walk.item));  if(walk.value) Map_del(used, int_var(walk.value));
       }
       Array ids = Array_new(); {
@@ -4522,7 +4522,7 @@ static int _lower_dimension(Lowering l, int id, int * out){
     Var _x2c_match_value_48 = type;  Var _x2c_match_value_49 = text; {
       List type = Var_list(_x2c_match_value_48);  String text = Var_string(_x2c_match_value_49); {
         Var count = Type_numeric_literal_value(((Type) type), text);  if(! Var_is_void(count) && Var_compare(count, int_var(0)) >= 0 && Var_compare(count, int_var((int) INT_MAX)) <= 0){
-          * out = Var_int(Var_convert(count, 3453797));  return 1;
+          (* out) = Var_int(Var_convert(count, 3453797));  return 1;
         }
 
       }
@@ -4614,7 +4614,7 @@ Var Array_setindex(Array, int, Var);
 int Sym_is_var_type(Sym, Type);
 static Var _lower_braced(Lowering l, List type, int id, List items){
   if(List_truth(Type_list(_lower_record_type(l, List_type(type))))) return _lower_record_braced(l, List_type(type), items, ((void) 0, Void));  if(Map_contains(l -> arrays, int_var(id))){
-    Type declared = List_type(type);  Type element = Type_is_array(declared) ? Type_dereference(declared) : declared;  int size = 0;  if(! _lower_dimension(l, id, & size)) return _lower_decline(l, _1657);  Array values = _lower_values(l, items);  if(l -> declined) return((void) 0, Void);  if(Array_len(values) > size){
+    Type declared = List_type(type);  Type element = Type_is_array(declared) ? Type_dereference(declared) : declared;  int size = 0;  if(! _lower_dimension(l, id, &(size))) return _lower_decline(l, _1657);  Array values = _lower_values(l, items);  if(l -> declined) return((void) 0, Void);  if(Array_len(values) > size){
       Array_free(values);  return _lower_decline(l, _1658);
     }
     int index = 0; {
@@ -4798,7 +4798,7 @@ static int _lower_destructure_id(Var target, int * out){
       default: ;  static MatchCaptureSite _x2c_match_site_125;  if (x2c_match_site_try_capture(& _x2c_match_site_125, _x2c_match_expr, List_var(_1252), &_x2c_match_capture)) {Var id = _x2c_match_values[0]; {
     Var _x2c_match_value_54 = id; {
       int id = Var_int(Var_convert(_x2c_match_value_54, 3453797)); {
-        * out = id;  return 1;
+        (* out) = id;  return 1;
       }
 
     }
@@ -4816,7 +4816,7 @@ static Var _lower_destructure(Lowering l, List targets, Var init, List rest, Lis
   Var source = _lower_expr(l, init);  if(_lower_failed(l, source)) return((void) 0, Void);  source = _lower_coerce(l, _820, init, source);  int hold = ! _lower_pure(source);  if(hold && l -> on_loop) return _lower_decline(l, _1664);  Var held = hold ? _lower_name(l, _1647) : source;  List wraps = NULL;  int index = 0; {
     List target;  List _x2c_macro_object_36 = targets;  List _x2c_macro_cursor_36 = _x2c_macro_object_36;  Var _x2c_macro_cursor_output_39;  while(List_try_next(_x2c_macro_object_36, & _x2c_macro_cursor_36, & _x2c_macro_cursor_output_39)){
       target = Var_list(_x2c_macro_cursor_output_39); {
-        int id;  if(! _lower_destructure_id(List_var(target), & id)) return _lower_decline(l, _1665);  Var element = List_var(cons(_1253, cons(held, cons(int_var(index), NULL))));  index ++;  if(! Map_contains(l -> cells, int_var(id))){
+        int id;  if(! _lower_destructure_id(List_var(target), &(id))) return _lower_decline(l, _1665);  Var element = List_var(cons(_1253, cons(held, cons(int_var(index), NULL))));  index ++;  if(! Map_contains(l -> cells, int_var(id))){
           Map_setindex(l -> env, int_var(id), element);  continue;
         }
         Var slot;  if(Map_try_get(l -> env, int_var(id), & slot)){
@@ -5648,7 +5648,7 @@ static String _lowering_key(Compiler compiler, List fn, String * name){
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_162;  if (x2c_match_site_try_capture(& _x2c_match_site_162, _x2c_match_expr, List_var(_1501), &_x2c_match_capture)) {Var own = _x2c_match_values[0]; {
     Var _x2c_match_value_63 = own; {
       String own = Var_string(_x2c_match_value_63); {
-        * name = own;  if(String_truth(compiler -> filename)) return String_join(NULL, cons(String_var(Path_absolute(compiler -> filename)), cons(String_var(_1502), cons(String_var(own), NULL))));
+        (* name) = own;  if(String_truth(compiler -> filename)) return String_join(NULL, cons(String_var(Path_absolute(compiler -> filename)), cons(String_var(_1502), cons(String_var(own), NULL))));
       }
 
     }
@@ -5663,7 +5663,7 @@ return NULL;
 }
 
 List Compiler_lowered_meta_regions(Compiler compiler, List fn){
-  if(! _init_guard_) _file_init_();  String name = NULL, key = _lowering_key(compiler, fn, & name);  if(! String_truth(key) ||(void *) lowered_defs == NULL) return NULL;
+  if(! _init_guard_) _file_init_();  String name = NULL, key = _lowering_key(compiler, fn, &(name));  if(! String_truth(key) ||(void *) lowered_defs == NULL) return NULL;
   {
     List _x2c_match_expr = Var_list(Map_getindex(lowered_defs, String_var(key)));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -5695,7 +5695,7 @@ static void _evaluate_lowering(Compiler compiler, String own, List forms){
 
 int Compiler_shared_definition(Compiler, String);
 int Compiler_install_comptime(Compiler compiler, List fn){
-  if(! _init_guard_) _file_init_();  String own = NULL, key = _lowering_key(compiler, fn, & own);  if(String_truth(key) && Compiler_shared_definition(compiler, key))
+  if(! _init_guard_) _file_init_();  String own = NULL, key = _lowering_key(compiler, fn, &(own));  if(String_truth(key) && Compiler_shared_definition(compiler, key))
   {
     List _x2c_match_expr = Var_list(Map_getindex(_lowered_defs(), String_var(key)));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -6043,7 +6043,7 @@ List Sym_get(Sym, List);
 Type Sym_next_typedef(Sym, Type, int *);
 static List _meta_type_layout(Sym sym, Type type, Map cache){
   Type declared = Type_declared(type);  Type alias = Type_base_type(declared);  int hops = 0;  while(List_truth(Type_list(alias)) &&(Type_is_typedef_name(alias) || Type_is_typedef(alias))){
-    if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, & hops));
+    if(List_truth(Sym_get(sym, List_append(Type_list(alias), _1593)))) return NULL;  alias = Type_base_type(Sym_next_typedef(sym, alias, &(hops)));
   }
   if(Sym_is_var_type(sym, declared)) return _meta_var_layout(declared);  Type tagged = NULL;  Symbol tag = Sym_var_tag_for_type(sym, declared, & tagged);  Type native = Sym_normalize_declared_type(sym, declared);  Type exact = Type_scalar(native);  NativeScalarAccess scalar = List_truth(Type_list(exact)) ? native_scalar_access(Type_list(exact)) : NULL;  if(scalar) return _meta_scalar_layout(declared, exact, scalar, tag, tagged);  if(! tag && Sym_is_bool_type(sym, declared)) return _meta_int_layout(declared, List_type(_1555));  if(! tag && Type_is_enum(native)) return List_truth(Sym_get(sym, List_append(Type_list(native), _1596))) ? _meta_int_layout(declared, List_type(_737)) : NULL;  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)) return _meta_pointer_layout(declared, tag);  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344)) || ! List_truth(Sym_get(sym, List_append(Type_list(type), _1599))) || List_truth(Sym_get(sym, List_append(Type_list(type), _1593)))) return NULL;  return _meta_record_layout(sym, type, cache);
 }

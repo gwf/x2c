@@ -784,7 +784,7 @@ static Var _intern_locked(Pool inner, Var object, int * discard){
   unsigned before = Map_len(inner -> table);
   Var stored = Map_setdefault(inner -> table, object, object);
   if(Map_len(inner -> table) != before) inner -> interned ++;
-  else * discard = 1;
+  else(* discard) = 1;
   return stored;
 }
 
@@ -808,7 +808,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
-      canonical = _intern_locked(inner, object, & discard);
+      canonical = _intern_locked(inner, object, &(discard));
     }
     x2c_cleanup_leave(& _x2c_defer_record_5);
 
@@ -843,7 +843,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
         canonical = existing;
         discard = 1;
       }
-      else canonical = _intern_locked(inner, object, & discard);
+      else canonical = _intern_locked(inner, object, &(discard));
     }
     x2c_cleanup_leave(& _x2c_defer_record_6);
 

@@ -30,7 +30,7 @@ X2c command-line parsing and presentation.
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:305`
+Source: `src/cli.x:309`
 
 #### cli_dependency_pass_through
 
@@ -40,7 +40,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:861`
+Source: `src/cli.x:865`
 
 #### cli_package_options
 
@@ -53,7 +53,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:987`
+Source: `src/cli.x:992`
 
 #### cli_parse
 
@@ -68,7 +68,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1154`
+Source: `src/cli.x:1160`
 
 #### cli_request
 
@@ -76,7 +76,7 @@ Source: `src/cli.x:1154`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1033`
+Source: `src/cli.x:1038`
 
 #### cli_response_arguments
 
@@ -86,7 +86,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:763`
+Source: `src/cli.x:767`
 
 #### cli_version
 
@@ -94,7 +94,7 @@ Source: `src/cli.x:763`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1209`
+Source: `src/cli.x:1215`
 
 ### `CliRequest`
 
@@ -105,7 +105,7 @@ Source: `src/cli.x:1209`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1212`
+Source: `src/cli.x:1218`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -118,7 +118,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1220`
+Source: `src/cli.x:1226`
 
 ## Public types
 
@@ -129,7 +129,7 @@ Source: `src/cli.x:1220`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, native_modules, String out_dir, dep_file, dep_target; String manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols; int force, rebuild, clean; int fatal_warnings, no_interfaces; SourceView sources; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, native_modules, extensions; String out_dir, dep_file, dep_target; String manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols; int force, rebuild, clean; int fatal_warnings, no_interfaces; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:

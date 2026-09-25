@@ -235,7 +235,7 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
   foreach (String input, inputs) {
     ParsedUnit parsed;
     clock_t start = clock();
-    int ok = frontend.start(input, &parsed);
+    int ok = frontend.start(input, parsed);
     if (ok) {
       parsed.compiler.own_diagnostics();
       ok = parsed.collect(frontend) && parsed.parse();

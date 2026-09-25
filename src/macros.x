@@ -106,12 +106,12 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
 }
 
 static int _try_definition(
-  Compiler compiler, Atom name, int install_lisp, Var *stored) {
-  int found = compiler.macros.try_get(name, stored);
+  Compiler compiler, Atom name, int install_lisp, Var &stored) {
+  int found = compiler.macros.try_get(name, &stored);
   String spelling = name.str();
   if (!install_lisp || !spelling.startswith("lisp.")) return found;
   _use_lisp_bindings(compiler, !found);
-  return found || compiler.macros.try_get(name, stored);
+  return found || compiler.macros.try_get(name, &stored);
 }
 
 /** Installs the compiler-shipped source macros into `compiler` once. */
@@ -477,18 +477,6 @@ String x2c_function_name(List function) {
   return x2c_binding_spelling(identity);
 }
 
-static Var _sdk_function_type(List function) {
-  List declaration = function.match_replace(
-    %(function ?rtype ?declarator ?),
-    %(declare ?rtype (bindings ?declarator)));
-  Type type = declaration.type_from_ast();
-  return type.canonicalize();
-}
-
-/* Both native Lisp and ordinary Func adapters store the declared signature. */
-static List _native_meta_signature(Compiler c, Type type) =>
-  c.func_signature(type);
-
 /* The native functions one symbol row makes available to compile-time code,
    as `(name signature)` rows: a bodyless `meta` prototype, or each witness
    of a `meta protocol` adoption, including the forwarding function the
@@ -504,10 +492,10 @@ static List _native_meta_rows(Compiler c, Var row) {
       foreach (List member, conformance.last().list().cdr())
         match (member) {
           case %(? implmntd ?(String name) ?(Type type) *):
-            rows = cons(%($name ${_native_meta_signature(c, type)}), rows);
+            rows = cons(%($name ${c.func_signature(type)}), rows);
           case %(?(String name) base-dflt ? ?(Type type) ordinary ?): {
             String forward = %"${participant.car()}_$name";
-            rows = cons(%($forward ${_native_meta_signature(c, type)}), rows);
+            rows = cons(%($forward ${c.func_signature(type)}), rows);
           }
         }
       return rows;
@@ -585,13 +573,13 @@ static List _sdk_native_meta_declared(List paths) {
 static List _sdk_literal_list(List values) =>
   macro_sdk_compiler.cache_literal_list(values);
 
-static Var _sdk_native_function_type(List syntax) {
-  Var value = void;
-  match (syntax) {
-    case %(function ? ? ?): value = _sdk_function_type(syntax);
-    default: value = x2c_syntax_type(syntax);
-  }
-  return _native_meta_signature(macro_sdk_compiler, value);
+/* A native binding stores the same signature as an ordinary Func adapter. */
+static List _sdk_native_function_type(List syntax) {
+  match (syntax)
+    case %(function ?rtype ?declarator ?):
+      return macro_sdk_compiler.func_signature(
+        %(declare $rtype (bindings $declarator)).type_from_ast());
+  return macro_sdk_compiler.func_signature(x2c_syntax_type(syntax));
 }
 
 /** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
@@ -672,7 +660,7 @@ int Compiler.keyword_form_is_definition(Compiler c) =>
 /* Scans the dotted name after the current `$` without consuming tokens.
    Returns the token after the name, or the token where a name component is
    missing with `spelling` set to NULL. */
-static Token _scan_name(Compiler c, String *spelling) {
+static Token _scan_name(Compiler c, String &spelling) {
   Token token = c.token, String name = NULL;
   do {
     token = c.skip_trivia_from(token + 1);
@@ -683,13 +671,13 @@ static Token _scan_name(Compiler c, String *spelling) {
     name = name ? %"$name.${token.text}" : token.text;
     token = c.skip_trivia_from(token + 1);
   } while (token.type == <.>);
-  *spelling = name;
+  spelling = name;
   return token;
 }
 
 static Atom _name(Compiler c) {
   String spelling;
-  Token end = _scan_name(c, &spelling);
+  Token end = _scan_name(c, spelling);
   if (!spelling)
     c.report_error(
       <parse>, c.peek(1) == <ident>
@@ -714,9 +702,9 @@ static List _peek_invocation(Compiler c) {
   Var stored;
   if (c.peek(0) == <$>) {
     String spelling;
-    _scan_name(c, &spelling);
+    _scan_name(c, spelling);
     if (!spelling ||
-        !_try_definition(c, Atom.intern(spelling), !c.shallow, &stored))
+        !_try_definition(c, Atom.intern(spelling), !c.shallow, stored))
       return NULL;
     return stored;
   }
@@ -735,7 +723,7 @@ static List _peek_invocation(Compiler c) {
 void Compiler.skip_macro_invocation(Compiler c) {
   int bare = _bare(c.token, _peek_invocation(c));
   String spelling;
-  if (c.peek(0) == <$>) c.token = _scan_name(c, &spelling);
+  if (c.peek(0) == <$>) c.token = _scan_name(c, spelling);
   else c.next();
   if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
 }
@@ -801,7 +789,7 @@ static int _claims(Compiler c, List definition, AstPos position) {
   if (!definition) {
     if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes)) {
       String name;
-      _scan_name(c, &name);
+      _scan_name(c, name);
       Type type = name ? c.sym.get(%($name)) : NULL;
       if (type.is_function()) return 0;
     }
@@ -851,7 +839,7 @@ static String _canonical_path(Compiler c, String path) {
   return c.canonical_path(use_system ? system : local);
 }
 
-static int _literal_string(Var syntax, String *value) {
+static int _literal_string(Var syntax, String &value) {
   match (syntax)
     case %(expr ? (literal ? ?(String source))): {
       int quoted = source.len() >= 2 && source[0] == '"' &&
@@ -859,7 +847,7 @@ static int _literal_string(Var syntax, String *value) {
       int percent_quoted = source.len() >= 3 && source[0] == '%' &&
         source[1] == '"' && source[source.len() - 1] == '"';
       if (quoted || percent_quoted) {
-        *value = source.parse();
+        value = source.parse();
         return 1;
       }
     }
@@ -878,7 +866,7 @@ static Var _sdk_embed_text(Var requested) {
     Var key = ((ulong) requested.u64);
     if (!macro_sdk_source_captures ||
         !macro_sdk_source_captures.try_get(key, &stored) ||
-        !_literal_string(requested, &requested_path))
+        !_literal_string(requested, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
         %("value: ${requested.repr()}"));
@@ -891,7 +879,7 @@ static Var _sdk_embed_text(Var requested) {
   String path = _embed_path(compiler, source_file, requested_path);
   if (compiler.sources) {
     String text;
-    if (!compiler.read_source(path, &text))
+    if (!compiler.read_source(path, text))
       _sdk_reject(
         "cannot read embedded text",
         %("path: ${compiler.display_path(path)}"));
@@ -954,7 +942,7 @@ String x2c_embed_text(Var path) => _sdk_embed_text(path);
 Var x2c_literal_value(Var syntax) {
   _sdk_guard("x2c.literal.value");
   String value = NULL;
-  if (_literal_string(syntax, &value)) return value;
+  if (_literal_string(syntax, value)) return value;
   match (syntax) case %(expr ? (literal (int) ?(String digits))): {
     long parsed = 0;
     if (digits.try_long(&parsed)) return parsed;
@@ -993,7 +981,7 @@ void x2c_diagnostic_warn(String message, List notes) {
 static String _source_text(
   Compiler c, String path, String message, Token token, List notes) {
   String text = NULL;
-  if (!c.read_source(path, &text))
+  if (!c.read_source(path, text))
     c.report_error(<macro>, message, token, notes);
   return text;
 }
@@ -1613,7 +1601,7 @@ void Compiler.record_native_meta_effect(
   if (declaration.type_from_ast().is_function()) {
     Type type = declaration.type_from_ast().canonicalize();
     String name = _native_meta_name(c, declaration, marker);
-    List signature = _native_meta_signature(c, type);
+    List signature = c.func_signature(type);
     c.sym.set(key, %(native-meta $name $signature));
   }
 }
@@ -1737,6 +1725,35 @@ void Compiler.preload_native_module(String path) {
     _open_native_module(path);
 }
 
+/* The packages whose compile-time parts are linked into the compiler.
+   Each registers from a constructor, before the
+   runtime starts, so the list is plain C storage that lasts for the
+   process. */
+static struct _Extension {
+  const char *name;
+  Map (*targets)(void);
+  struct _Extension *next;
+} *extensions = NULL;
+
+/** Registers package `name`'s compile-time part, linked into the compiler,
+    whose `targets` returns its name-to-`Func` Map. The registration unit
+    `x2c build --extension` generates calls it from a constructor.
+*/
+void x2c_register_extension(const char *name, Map (*targets)(void)) {
+  struct _Extension *extension = malloc(sizeof *extension);
+  if (!extension) abort();
+  *extension = (struct _Extension) { name, targets, extensions };
+  extensions = extension;
+}
+
+/** Reports whether package `name`'s compile-time part is linked into the
+    compiler, so its import loads no module. */
+int Compiler.links_extension(String name) {
+  for (struct _Extension *e = extensions; e; e = e->next)
+    if (!strcmp(name, e->name)) return 1;
+  return 0;
+}
+
 /** Selects package `name`'s native module, when it has one, after the
     modules already selected, and records it as a prerequisite of the unit.
     The module is `<root>/builds/<name>.module`; a worker loads it itself
@@ -1746,7 +1763,7 @@ void Compiler.preload_native_module(String path) {
 void Compiler.select_package_module(
   Compiler c, String name, String root, Token token) {
   String module = %"$root/builds/$name.module";
-  if (!Path.is_file(module)) return;
+  if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
     c.report_error(
       <driver>, "native modules are not supported on this platform", token,
@@ -1773,7 +1790,14 @@ void Compiler.select_package_module(
 void Compiler.select_native_modules(List paths) {
   if (!Compiler.native_module_loaded(compiler_supplier))
     Compiler.add_native_module(compiler_supplier, _compiler_targets);
-  paths = %($compiler_supplier @paths);
+  Array linked = [];
+  for (struct _Extension *e = extensions; e; e = e->next) {
+    String key = %"<${String.new(e->name)}>";
+    if (!Compiler.native_module_loaded(key))
+      Compiler.add_native_module(key, e->targets);
+    linked.push(key);
+  }
+  paths = %($compiler_supplier @paths @{linked.list_free()});
   paths.try_own();
   native_module_order = paths;
 }
@@ -1794,15 +1818,36 @@ static List _native_module_suppliers(String name) =>
   native_module_order.filter(
     %!(String path) => ((Map) native_modules[path]).contains(name));
 
+/* The native type a signature names: each parameter, reference target,
+   and result with its aliases resolved. */
+static List _native_signature_type(Compiler c, List signature) {
+  match (signature)
+    case %((func ?(List parameters)) *result): {
+      Array resolved = [];
+      foreach (Type parameter, parameters)
+        resolved.push(parameter.car() == <&>
+          ? cons(<&>, c.sym.normalize_declared_type(parameter.cdr()))
+          : c.sym.normalize_declared_type(parameter));
+      Type native = c.sym.normalize_declared_type(result);
+      return %((func ${resolved.list_free()}) @native);
+    }
+  return signature;
+}
+
 /* A declared `Func` parameter matches a target's `Var` parameter, which
-   takes the compile-time callable and adapts it. */
-static int _native_meta_accepts(Var function, List signature) {
+   takes the compile-time callable and adapts it. Aliases of one native
+   type match each other. */
+static int _native_meta_accepts(
+  Compiler c, Var function, List signature) {
   if (function is not <func>) return 0;
-  List target = ((Func) function.pointer()).signature();
+  List target = _native_signature_type(
+    c, ((Func) function.pointer()).signature());
   match (signature)
     case %((func ?(List parameters)) *result):
-      return target.equal(signature) || target.equal(
-        %((func ${parameters.search_replace(%("Func"), %("Var"))}) @result));
+      return target.equal(_native_signature_type(c, signature)) ||
+             target.equal(_native_signature_type(c, %((func
+               ${parameters.search_replace(%("Func"), %("Var"))})
+               @result)));
   return 0;
 }
 
@@ -1903,7 +1948,7 @@ static void _bind_native_meta(
                     "also defined by: ${", ".join(suppliers.cdr())}"));
     }
   }
-  if (!_native_meta_accepts(function, signature))
+  if (!_native_meta_accepts(c, function, signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
@@ -1964,7 +2009,7 @@ void Compiler.install_native_meta_function(
 
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
-  List signature = _native_meta_signature(c, type);
+  List signature = c.func_signature(type);
   _bind_native_meta(c, name, signature, marker);
 }
 
@@ -2032,7 +2077,7 @@ static Var _sdk_symbol_set(List values) {
         %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = macro_sdk_compiler.symbol_set_expression(
-    values, &duplicate);
+    values, duplicate);
   if (duplicate >= 0)
     _sdk_reject(
       "_x2c.symbol-set requires distinct Symbols",
@@ -3369,7 +3414,7 @@ List Compiler.publish_macro_definition_node(Compiler compiler, List node) {
 static List _lookup(Compiler compiler, Atom name, Token invocation) {
   Var stored;
   String spelling = name.str();
-  if (!_try_definition(compiler, name, 1, &stored))
+  if (!_try_definition(compiler, name, 1, stored))
     compiler.report_error(
       <parse>, %"unknown or forward-referenced macro '$spelling'",
       invocation, NULL);
@@ -3865,7 +3910,7 @@ static List _take_invocation(Compiler c, AstPos position) {
   Atom name = _name(c);
   Var existing;
   if (c.macro_holes && c.peek(0) != <(> &&
-      !_try_definition(c, name, 1, &existing)) {
+      !_try_definition(c, name, 1, existing)) {
     String spelling = name.str();
     c.report_error(
       <parse>, %"unbound replacement variable '$spelling'",

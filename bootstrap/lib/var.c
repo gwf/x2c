@@ -972,8 +972,8 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
   unsigned count = _row_count();
   for(unsigned i = 0;  i < count;  i ++) if(rows[i] -> tag == tag) return(int) i;
-  * descriptor = _declared(tag);
-  return * descriptor ? _assign_row(* descriptor) : - 1;
+  (* descriptor) = _declared(tag);
+  return(* descriptor) ? _assign_row((* descriptor)) : - 1;
 }
 
 Symbol Var_tag(Var v){
@@ -1266,7 +1266,7 @@ Var Var_new(Symbol tag, ...){
   va_list ap;
   TagId id = _tag2id(tag);
   VarDescriptor * descriptor = NULL;
-  int row = id == _invalid_ ? _custom_row(tag, & descriptor) : - 1;
+  int row = id == _invalid_ ? _custom_row(tag, &(descriptor)) : - 1;
   if(id == _invalid_ && row < 0){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "Var_new",.line = 793};
     x2c_error_raise_n(& _x2c_error_site_7, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
@@ -1342,7 +1342,7 @@ void * Scope_memdup(const void *, size_t);
 
 Var Var_box_record(Symbol tag, const void * record, size_t size){
   VarDescriptor * descriptor = NULL;
-  int row = _custom_row(tag, & descriptor);
+  int row = _custom_row(tag, &(descriptor));
   if(row < 0){
     static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 853};
     x2c_error_raise_n(& _x2c_error_site_11, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));

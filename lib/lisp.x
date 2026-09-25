@@ -129,8 +129,8 @@ int Lisp.program(Var callable, MachineView *view, int *nparam, Var *body) {
 */
 int Lisp.resolve(void *storage, Var name, Var *value) {
   Lisp lisp = ((LispMachineContext) storage).lisp;
-  if (!_global_lookup(lisp, name, value) &&
-      !_reserved_lookup(lisp, name, value))
+  if (!_global_lookup(lisp, name, *value) &&
+      !_reserved_lookup(lisp, name, *value))
     return 0;
   _expansion_note(lisp, name, *value);
   return 1;
@@ -264,7 +264,7 @@ Var Lisp.immediate(void *storage, Var callable) {
   Lisp lisp = context.lisp;
   LispEnv *env = _machine_env(context);
   Var constructor;
-  if (_lookup(lisp, env, lsym_lambda, &constructor) &&
+  if (_lookup(lisp, env, lsym_lambda, constructor) &&
       constructor.u64 == Func.var(lisp.specials[LISP_LAMBDA]).u64)
     return callable;
   Lambda lambda = callable;
@@ -308,6 +308,9 @@ protocol Cleanup(Lisp);
 // make x2c.h include path.h before path.h defines `Path`.
 #include "json.x"
 #include "diff.x"
+#include "regex.x"
+#include "typed-array.x"
+#include "typed-map.x"
 
 /* Optional modules stay outside the implicit prelude.  The compiler links
    their runtime units, so private checked aliases can install their pure
@@ -558,7 +561,7 @@ static Symbol _malformed(String source, unsigned at) {
 #define LISP_READ_DEPTH_MAX 1024
 
 static Symbol _read_token_list(
-  Tokenizer tokenizer, char *source, unsigned base, unsigned *end, Var *out,
+  Tokenizer tokenizer, char *source, unsigned base, unsigned &end, Var &out,
   int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
@@ -570,41 +573,41 @@ static Symbol _read_token_list(
       break;
     }
     if (token.type == <")">) {
-      *end = token.pos + token.len;
+      end = token.pos + token.len;
       break;
     }
     Var element = void;
     status =
-      _read_token_form(tokenizer, token, source, base, end, &element, depth);
+      _read_token_form(tokenizer, token, source, base, end, element, depth);
     if (status != <value>) break;
     elements.push(element);
   }
-  if (status == <value>) *out = elements.list();
+  if (status == <value>) out = elements.list();
   elements.free();
   return status;
 }
 
 static Symbol _read_token_atom(
-  Token token, char *source, unsigned base, Var *out) {
+  Token token, char *source, unsigned base, Var &out) {
   String text = token.text;
   switch (token.type) {
     case <lit-char*>:
-      *out = String.new_len(text + 1, token.len - 2).unescape();
+      out = String.new_len(text + 1, token.len - 2).unescape();
       return <value>;
     case <lit-int>: {
       long value;
       String literal = String.new_len(text, token.len);
       if (!literal.try_long(&value))
         return _malformed(source, base + token.pos);
-      if (value == (int) value) *out = (int) value;
-      else *out = value;
+      if (value == (int) value) out = (int) value;
+      else out = value;
       return <value>;
     }
     case <lit-float>: {
       double value, String literal = String.new_len(text, token.len);
       if (!literal.try_double(&value))
         return _malformed(source, base + token.pos);
-      *out = value;
+      out = value;
       return <value>;
     }
     case <lit-symbol>: {
@@ -613,19 +616,19 @@ static Symbol _read_token_atom(
         ? String.new_len(text + 2, n - 4).unescape()
         : String.new_len(text + 1, n - 2);
       if (!inner) return _malformed(source, base + token.pos);
-      *out = Symbol.new(inner);
+      out = Symbol.new(inner);
       return <value>;
     }
     case <ident>:
-      *out = Atom.intern(text.unescape());
+      out = Atom.intern(text.unescape());
       return <value>;
   }
   return _malformed(source, base + token.pos);
 }
 
 static Symbol _read_token_form(
-  Tokenizer tokenizer, Token token, char *source, unsigned base, unsigned *end,
-  Var *out, int depth) {
+  Tokenizer tokenizer, Token token, char *source, unsigned base, unsigned &end,
+  Var &out, int depth) {
   if (!token || token.type == <eof>) return <incomplete>;
   Var prefix = void;
   switch (token.type) {
@@ -643,11 +646,11 @@ static Symbol _read_token_form(
   if (prefix is not void) {
     Var inner = void;
     Symbol status = _read_token_form(
-      tokenizer, tokenizer.next(), source, base, end, &inner, depth + 1);
-    if (status == <value>) *out = %($prefix $inner);
+      tokenizer, tokenizer.next(), source, base, end, inner, depth + 1);
+    if (status == <value>) out = %($prefix $inner);
     return status;
   }
-  *end = token.pos + token.len;
+  end = token.pos + token.len;
   return _read_token_atom(token, source, base, out);
 }
 
@@ -664,7 +667,7 @@ static Symbol _read_tokenizer(
   unsigned end = 0;
   Var value = void;
   Symbol status = _read_token_form(
-    tokenizer, token, source, base, &end, &value, 0);
+    tokenizer, token, source, base, end, value, 0);
   if (status == <value>) {
     if (out) *out = value;
     *cursor = base + end;
@@ -1589,6 +1592,15 @@ static Job _lisp_Job_start(Job job) {
   return job;
 }
 
+/* Meta text is a NUL-terminated String, so a count past its end would read
+   beyond it. */
+static Buffer _lisp_Buffer_write_len(Buffer buf, const char *text,
+                                     size_t length) {
+  if (text && strnlen(text, length) < length)
+    raise %(bad-arg (operation "Buffer.write_len"));
+  return buf.write_len(text, length);
+}
+
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype. The `x2c_` operations
 // `meta.x` declares exist only inside a compiler, which supplies them.
@@ -1730,12 +1742,7 @@ $(def lisp.native.target.rows (append '(
   // The core value types: their operations are the library's own, so a
   // Lisp session and a compiled program build the same List, String, Map,
   // and Array. `etc/lisp-values.xlisp` names them.
-  (Array_truth)
   (String_truth)
-  (Array_capacity)
-  (Array_clear)
-  (Array_pop)
-  (Array_truncate)
   (Var_list)
   (Var_array)
   (Var_map)
@@ -1777,7 +1784,6 @@ $(def lisp.native.target.rows (append '(
   (List_assoc)
   (List_array)
   (Array_new)
-  (Array_len)
   (Array_push)
   (Array_take_last)
   (Array_shift)
@@ -1799,6 +1805,7 @@ $(def lisp.native.target.rows (append '(
   // Adapters that replace generated direct targets come last to win.
   (_lisp_List_job (as List_job))
   (_lisp_Job_start (as Job_start))
+  (_lisp_Buffer_write_len (as Buffer_write_len))
 )))
 
 macro Expression $lisp.native.target.map() =>
@@ -1823,10 +1830,10 @@ static Func _native_target(String name) {
    without the descriptor lookup and tag decode that the general comparison
    pays on both sides. Verified over a `lib/` and a `src/` translate: 89,898
    matches, no case where the two disagreed. */
-static int _binding_get(Map bindings, Var name, Var *out) {
+static int _binding_get(Map bindings, Var name, Var &out) {
   Var slot;
   if (!bindings || !bindings.try_get(name, &slot)) return 0;
-  *out = lisp_load(slot);
+  out = lisp_load(slot);
   return 1;
 }
 
@@ -1836,11 +1843,11 @@ static void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
   else bindings[name] = _cell(owner, value);
 }
 
-static int _local_lookup(LispEnv *env, Var name, Var *out) {
+static int _local_lookup(LispEnv *env, Var name, Var &out) {
   int found = 0, at = 0;
   for (List p = env.params; p && at < env.value_count; p = p.cdr(), at++)
     if (p.car().u64 == name.u64) {
-      *out = env.values[at];
+      out = env.values[at];
       found = 1;
     }
   return found || _binding_get(env.bindings, name, out);
@@ -1902,7 +1909,7 @@ static void _expansion_argument(Lisp lisp, Var value) {
    change one later. Slots and captures need no record: a call's environment
    chain ends at its Lambda's captures, which are the values the Lambda was
    made with and do not change afterwards. */
-static int _env_lookup(LispEnv *env, Var name, Var *out) {
+static int _env_lookup(LispEnv *env, Var name, Var &out) {
   for (LispEnv *cur = env; cur; cur = cur.parent)
     if (_local_lookup(cur, name, out) ||
         _binding_get(cur.captures, name, out))
@@ -1922,14 +1929,14 @@ static int _inherited(Lisp lisp, Var name) {
 
 /* The binding an ancestor supplies, when that ancestor is frozen and the
    rule above therefore makes it final for this session's whole life. */
-static int _frozen_binding(Lisp lisp, Var name, Var *out) {
+static int _frozen_binding(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp.parent; s; s = s.parent)
-    if (_binding_get(s.globals, name, out) || s.reserved.try_get(name, out))
+    if (_binding_get(s.globals, name, out) || s.reserved.try_get(name, &out))
       return s.frozen;
   return 0;
 }
 
-static int _global_lookup(Lisp lisp, Var name, Var *out) {
+static int _global_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
     if (_binding_get(s.globals, name, out)) return 1;
   return 0;
@@ -1939,17 +1946,17 @@ static int _global_lookup(Lisp lisp, Var name, Var *out) {
    that inherits its parent's specials also inherits their identity, which is
    what `_auto_bindings_ok` compares, so a program the parent compiled still
    guards correctly when a child runs it. */
-static int _reserved_lookup(Lisp lisp, Var name, Var *out) {
+static int _reserved_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
-    if (s.reserved.try_get(name, out)) return 1;
+    if (s.reserved.try_get(name, &out)) return 1;
   return 0;
 }
 
-static int _lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
+static int _lookup(Lisp lisp, LispEnv *env, Var name, Var &out) {
   if (_env_lookup(env, name, out)) return 1;
   if (!_global_lookup(lisp, name, out) && !_reserved_lookup(lisp, name, out))
     return 0;
-  _expansion_note(lisp, name, *out);
+  _expansion_note(lisp, name, out);
   return 1;
 }
 
@@ -2009,7 +2016,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
   foreach (Var name, names) {
     Var value;
     if (name in captures) continue;
-    if (_env_lookup(env, name, &value))
+    if (_env_lookup(env, name, value))
       _binding_set(&lisp.scope, captures, name, value);
   }
 }
@@ -2284,7 +2291,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
     raise %(bad-types (operation "import") (actual ${path.kind()})
                        (want "String"));
   Var hook;
-  if (_global_lookup(lisp, Atom.intern("_x2c.import-hook"), &hook))
+  if (_global_lookup(lisp, Atom.intern("_x2c.import-hook"), hook))
     return lisp.apply(hook, %($path));
   Var result;
   {
@@ -2356,7 +2363,7 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
   if (local < 0) local = _auto_param_index(l.lambda, name);
   if (local >= 0) return l.b.emit(MW_LLOCAL, local, 0, 0, 0, 0) >= 0;
   Var captured;
-  if (_binding_get(l.lambda.captures, name, &captured)) {
+  if (_binding_get(l.lambda.captures, name, captured)) {
     if (captured is void) return 0;
     int constant = l.b.constant(captured);
     return constant >= 0 && l.b.emit(MW_LCAPTURE, constant, 0, 0, 0, 0) >= 0;
@@ -2364,7 +2371,7 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
   /* A frozen ancestor's binding cannot be replaced, so the value stands in
      for the read and no guard has to watch it. */
   Var inherited;
-  if (_frozen_binding(l.lisp, name, &inherited))
+  if (_frozen_binding(l.lisp, name, inherited))
     return l._auto_compile_constant(inherited);
   int constant = l.b.constant(name);
   if (constant < 0) return 0;
@@ -2486,7 +2493,7 @@ static List LispLower._auto_live_bindings(LispLower l, List bindings) {
   foreach (List pair, bindings) {
     Var (name, expected) = pair;
     Var settled;
-    if (_frozen_binding(l.lisp, name, &settled) &&
+    if (_frozen_binding(l.lisp, name, settled) &&
         settled.u64 == expected.u64)
       continue;
     live = cons(pair, live);
@@ -2495,9 +2502,9 @@ static List LispLower._auto_live_bindings(LispLower l, List bindings) {
 }
 
 static int LispLower._auto_expand(LispLower l, Var head, List args,
-                                  Var *expansion, List *dependencies) {
+                                  Var &expansion, List &dependencies) {
   Var value;
-  if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
+  if (!_lookup(l.lisp, l.env, head, value) || value is not <lambda>) return 0;
   Lambda macro = value;
   if (!macro.macro) return 0;
   if (l.depth >= LISP_AUTO_EXPAND_MAX) return 0;
@@ -2506,10 +2513,10 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
      branch; keep its failures local by rejecting rather than raising. */
   LispExpansion trace = { %(( $head $value )), 0, 0 };
   try $let(l.lisp.expansion, &trace)
-    *expansion = _call_lambda(l.lisp, macro, args);
+    expansion = _call_lambda(l.lisp, macro, args);
   catch: return 0;
-  if (!_expansion_value(*expansion, 0)) return 0;
-  *dependencies = trace.dependencies;
+  if (!_expansion_value(expansion, 0)) return 0;
+  dependencies = trace.dependencies;
   return 1;
 }
 
@@ -2618,7 +2625,7 @@ static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
     return l._auto_compile_special(form, tail);
   Var expansion;
   List dependencies;
-  if (l._auto_expand(head, form.cdr(), &expansion, &dependencies))
+  if (l._auto_expand(head, form.cdr(), expansion, dependencies))
     $let(l.depth, l.depth + 1) {
       List live = l._auto_live_bindings(dependencies);
       int guard = live ? b.emit(MW_LEXPAND, 0, 0, 0, 0, -1) : 0;
@@ -2763,7 +2770,7 @@ static int _auto_bindings_ok(Lisp lisp, LispEnv *env, List bindings) {
   foreach (List pair, bindings) {
     Var (name, expected) = pair;
     Var value;
-    if (!_lookup(lisp, env, name, &value) || value.u64 != expected.u64)
+    if (!_lookup(lisp, env, name, value) || value.u64 != expected.u64)
       return 0;
   }
   return 1;
@@ -3019,7 +3026,7 @@ static Var _eval(Lisp lisp, Var expression, LispEnv *env) {
   if (expression is void) raise %(void-op (operation "eval"));
   if (expression.is_atom()) {
     Var value;
-    if (!_lookup(lisp, env, expression, &value))
+    if (!_lookup(lisp, env, expression, value))
       raise %(unbound (name $expression));
     return value;
   }
@@ -3137,7 +3144,7 @@ Var Lisp.eval_file(Lisp lisp, File source) {
     canonicalized.
 */
 int Lisp.try_get(Lisp lisp, String name, Var *out) =>
-  lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
+  lisp && name && out && _global_lookup(lisp, Atom.intern(name), *out);
 
 /** Binds `name` to `value` in the embedded Lisp global environment.
     The session stores the value in a raw slot, so `void` remains distinct

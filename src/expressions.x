@@ -32,8 +32,11 @@ static List _iter_destination(void) => %(expr (* struct "Iter")
         (expr () (composite
           (commas (expr (int) (literal (int) "0")))))))));
 
-static int _iter_parameters_variadic(List parameters) {
-  foreach (Var parameter, parameters) if (parameter == <...>) return 1;
+static int _parameters_variadic(List parameters) {
+  foreach (Var parameter, parameters)
+    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
+        parameter.car() == <...>))
+      return 1;
   return 0;
 }
 
@@ -56,7 +59,7 @@ List Compiler.complete_iter_chain(Compiler compiler, List expression) {
               (ident ?binding))) (args *arguments))): {
       String name = binding_identity_spelling(binding);
       if (!_exact_iter_type(result) || name == "Iter_unzip" ||
-          _iter_parameters_variadic(parameters))
+          _parameters_variadic(parameters))
         return expression;
 
       Array completed = [];
@@ -220,21 +223,21 @@ const PrintfFn *List.printf_family(List l) {
     steps over.
 */
 String Compiler.printf_static_format(
-  Compiler compiler, Var format, int *raw) {
+  Compiler compiler, Var format, int &raw) {
   match (format) {
     case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
         return NULL;
-      *raw = 1;
+      raw = 1;
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
       List key = compiler.id_keys[id];
       match (key)
         case %(string (expr ("String") (literal ("String") ?text))): {
-          *raw = 0;
+          raw = 0;
           return text;
         }
       match (key)
@@ -274,7 +277,7 @@ static void _check_explicit_converter_arguments(
      cannot read leaves those values unlowered, so nothing converts them. */
   const PrintfFn *info = callee.printf_family(), int raw = 0;
   if (!info ||
-      !compiler.printf_static_format(supplied[info.fmt_arg], &raw))
+      !compiler.printf_static_format(supplied[info.fmt_arg], raw))
     return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
@@ -391,7 +394,7 @@ List Compiler.resolve_postfix_member(
       if (field_type) return %(field . $field_type);
       type = NULL;
     }
-    else type = c.sym.next_typedef(type, &hops);
+    else type = c.sym.next_typedef(type, hops);
   }
   return NULL;
 }
@@ -544,7 +547,7 @@ static void _completion_methods(
         _completion_add(seen, names, name);
     }
     if (type.is_pointer() || type.is_aggregate()) type = NULL;
-    else type = compiler.sym.next_typedef(type, &hops);
+    else type = compiler.sym.next_typedef(type, hops);
   }
 }
 
@@ -1096,7 +1099,7 @@ static Array _typedef_names(Compiler compiler, Type type) {
   Array names = [];
   int hops = 0;
   for (; type && (type.is_bare_typedef_name() || type.is_typedef());
-       type = compiler.sym.next_typedef(type, &hops))
+       type = compiler.sym.next_typedef(type, hops))
     if (type.is_bare_typedef_name()) names.push(type);
   return names;
 }
@@ -1125,17 +1128,17 @@ static Type _shared_participant(
    participant is the unqualified type both here and in the operands'
    comparison. */
 static List _resolve_protocol_operator(
-  Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
-  if (derived) *derived = 0;
-  Type lhs_type = (*lhs).cadr();
+  Compiler compiler, Symbol op, List &lhs, List &rhs, Symbol &derived) {
+  derived = 0;
+  Type lhs_type = lhs.cadr();
   lhs_type = lhs_type.canonicalize();
   Type participant = lhs_type, rhs_type = NULL;
-  if (*rhs) {
-    rhs_type = (*rhs).cadr();
+  if (rhs) {
+    rhs_type = rhs.cadr();
     rhs_type = rhs_type.canonicalize();
   }
   Symbol member = 0;
-  if (!*rhs) {
+  if (!rhs) {
     if (op != <->) return NULL;
     member = <neg>;
   }
@@ -1148,7 +1151,7 @@ static List _resolve_protocol_operator(
     member = compiler.operator_member(op);
     Symbol source = compiler.derived_member(op);
     if (!member) member = source;
-    if (derived) *derived = source;
+    derived = source;
     if (!member) return NULL;
     if (participant !== rhs_type) {
       if (compiler.sym.is_var_type(participant) ||
@@ -1163,13 +1166,13 @@ static List _resolve_protocol_operator(
         && _converts_operands(compiler, rhs_type);
       List converted = NULL;
       if (lhs_member && !rhs_member)
-        converted = _converter_call(compiler, *rhs, rhs_type, participant);
-      if (converted) *rhs = converted;
+        converted = _converter_call(compiler, rhs, rhs_type, participant);
+      if (converted) rhs = converted;
       else if (rhs_member && !lhs_member) {
-        converted = _converter_call(compiler, *lhs, lhs_type, rhs_type);
+        converted = _converter_call(compiler, lhs, lhs_type, rhs_type);
         if (!converted) return NULL;
         participant = rhs_type;
-        *lhs = converted;
+        lhs = converted;
       }
       else return NULL;
     }
@@ -1202,7 +1205,7 @@ static int _is_operator_temporary(Compiler c, List expression) {
 static List Compiler._protocol_operator_expression(
   Compiler c, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved = _resolve_protocol_operator(c, op, &lhs, &rhs, &derived);
+  List resolved = _resolve_protocol_operator(c, op, lhs, rhs, derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
@@ -1536,6 +1539,16 @@ static List _finish_call(
         result_type = %(<macro-expr>);
     }
   if (!result_type) result_type = applied;
+  if (receiver && result_type !== %(<macro-expr>))
+    match (callee_type)
+      case %((func (!set ?parameters (*))) *):
+        if (!_parameters_variadic(parameters) &&
+            arguments.len() > List.len(parameters))
+          compiler.report_error(
+            <type>,
+            %"method takes ${List.len(parameters) - 1} arguments, not ${
+              arguments.len() - 1}",
+            origin, NULL);
   compiler.check_meta_call(callee, origin);
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
@@ -1975,7 +1988,7 @@ static List Compiler._binary_expression(
 static List _constant_row_test(
   Compiler c, List lhs, Symbol tag, Token origin) {
   unsigned long top, mask, bottom;
-  if (!Type.var_tag_row(tag, &top, &mask, &bottom)) return NULL;
+  if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
   List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
   return %(expr (int) (call $callee (args $lhs
     (expr (unsigned) (literal (unsigned) "$top"))
@@ -2159,7 +2172,7 @@ static List _resolve_content(
     }
     case %(initval *choices): {
       List header = NULL;
-      List cases = Ast.initializer_cases(content, &header);
+      List cases = Ast.initializer_cases(content, header);
       Array resolved = [];
       if (header) {
         Array inputs = [];
@@ -2905,7 +2918,7 @@ static List _converted_temporary(
 }
 
 static List _converter_owned_call(
-  Compiler compiler, List expr, Type owner, Type target, int *declared) {
+  Compiler compiler, List expr, Type owner, Type target, int &declared) {
   String typename = owner.car().str(), targetedname = target.car().str();
   /* A package type is spelled `pkg__Name`; its converter from an external
      owner is `pkg__owner_name`, the package's own spelling of `owner.name`. */
@@ -2921,7 +2934,7 @@ static List _converter_owned_call(
   List cvrtrtype = NULL;
   List converter_binding = compiler.sym.resolve_global(
     %($convfuncname), &cvrtrtype);
-  if (declared) *declared = !!converter_binding || !!cvrtrtype;
+  declared = !!converter_binding || !!cvrtrtype;
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
     ? expr : %(expr $owner $expr);
@@ -2957,7 +2970,7 @@ static List _converter_call(
     if (owner == target) return NULL;
     int declared = 0;
     List converted = _converter_owned_call(
-      c, expr, owner, target, &declared);
+      c, expr, owner, target, declared);
     if (converted || declared) return converted;
   }
   return NULL;
@@ -3055,7 +3068,7 @@ static List _initializer_first(
 }
 
 // Decode only a literal fact; native expressions are never evaluated here.
-static int _initializer_integer(List expression, unsigned long long *value) {
+static int _initializer_integer(List expression, unsigned long long &value) {
   String text = NULL;
   match (expression) {
     case %(expr ? (literal ? ?spelling)): text = spelling;
@@ -3070,7 +3083,7 @@ static int _initializer_integer(List expression, unsigned long long *value) {
   unsigned long long decoded = strtoull(digits, &end, base);
   while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
   if (*end) return 0;
-  *value = decoded;
+  value = decoded;
   return 1;
 }
 
@@ -3110,7 +3123,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
             reused = %(dim $prior);
             captured = 1;
           }
-        if (bound && !captured && !_initializer_integer(bound, &count)) {
+        if (bound && !captured && !_initializer_integer(bound, count)) {
           String name = c.fresh_name("initializer_bound");
           Type bytes = %((dim $bound) char);
           List field = bytes.declaration_ast(%("bytes"));
@@ -3132,41 +3145,41 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
 
 /* An enum constant captures one native index expansion where the original
    designator occurred. Its ordinary cast shape survives normalization. */
-static List _initializer_index(Compiler c, List index, List *reference) {
+static List _initializer_index(Compiler c, List index, List &reference) {
   match (index)
     case %(expr ? (cast (enum ((op = ?binding ?original)))
                        (!set ?value (expr ? (ident ?binding))))): {
-      *reference = value;
+      reference = value;
       return index;
     }
   unsigned long long at;
-  if (_initializer_integer(index, &at)) {
-    *reference = index;
+  if (_initializer_integer(index, at)) {
+    reference = index;
     return index;
   }
   Type type = index.cadr();
   List binding = c.sym.introduce(c.fresh_name("initializer_index"));
   c.sym.bind_identity(NULL, binding, type.declaration_ast(binding));
   Type native = %(enum ((op = $binding $index)));
-  *reference = %(expr $type (ident $binding));
-  return %(expr $type (cast $native ${*reference}));
+  reference = %(expr $type (ident $binding));
+  return %(expr $type (cast $native $reference));
 }
 
 /* Cursor offsets are literal facts even when their native starting index
    is not. Keep one base-plus-offset expression instead of nested
    increments. */
 static void _initializer_position(
-  List index, List *base, unsigned long long *offset) {
-  *base = NULL;
+  List index, List &base, unsigned long long &offset) {
+  base = NULL;
   if (_initializer_integer(index, offset)) return;
   match (index)
     case %(expr ? (op + (expr ? (parens ?origin)) ?amount)):
       if (_initializer_integer(amount, offset)) {
-        *base = origin;
+        base = origin;
         return;
       }
-  *base = index;
-  *offset = 0;
+  base = index;
+  offset = 0;
 }
 
 static List _initializer_drop_bound(
@@ -3181,7 +3194,7 @@ static List _initializer_drop_bound(
                         (expr ? (parens ?length)))): {
       unsigned long long at;
       List origin;
-      _initializer_position(index, &origin, &at);
+      _initializer_position(index, origin, at);
       if (length === bound && origin === base && at <= minimum) return NULL;
     }
   }
@@ -3196,7 +3209,7 @@ static List _initializer_and(List first, List second) {
                         (expr ? (parens ?bound)))): {
       unsigned long long at;
       List base;
-      _initializer_position(index, &base, &at);
+      _initializer_position(index, base, at);
       first = _initializer_drop_bound(first, bound, base, at);
     }
   return first ? %(expr (int) (op && (expr (int) (parens $first))
@@ -3233,7 +3246,7 @@ static void _initializer_next(
       List index = selector, dimension = owner.car().cadr();
       unsigned long long at, count;
       List base;
-      _initializer_position(index, &base, &at);
+      _initializer_position(index, base, at);
       int known_index = !base;
       String next_index = %"${at + 1}ULL";
       List increment = %(expr (unsigned long long)
@@ -3247,7 +3260,7 @@ static void _initializer_next(
         states.push(%($condition $next 1));
         return;
       }
-      if (known_index && _initializer_integer(dimension, &count)) {
+      if (known_index && _initializer_integer(dimension, count)) {
         if (at + 1 < count) {
           states.push(%($condition $next 1));
           return;
@@ -3326,7 +3339,7 @@ List Compiler.initializer_field_path(
 }
 
 static List _initializer_designated(
-  Compiler c, Type root, List node, List *value, List *normalized) {
+  Compiler c, Type root, List node, List &value, List &normalized) {
   List path = NULL, selectors = NULL;
   Type type = root;
   loop {
@@ -3343,7 +3356,7 @@ static List _initializer_designated(
       }
       case %(indexinit ?index ?inner): {
         List reference = NULL;
-        List captured = _initializer_index(c, index, &reference);
+        List captured = _initializer_index(c, index, reference);
         selectors = cons(%(indexinit $captured), selectors);
         type = owner.dereference();
         path = cons(%($owner index $reference $type ()), path);
@@ -3351,9 +3364,9 @@ static List _initializer_designated(
         continue;
       }
     }
-    *value = node;
+    value = node;
     foreach (List selector, selectors) node = selector.append(%($node));
-    *normalized = node;
+    normalized = node;
     return path;
   }
 }
@@ -3380,7 +3393,7 @@ static int _initializer_whole(Compiler c, Type type, List value) {
    boundaries. Count the type tree once instead of retaining cursor histories.
    Children pair ordinary path frames with (type count children) layouts. */
 static List _initializer_layout(
-  Compiler c, Type type, List target, List string, int *symbolic) {
+  Compiler c, Type type, List target, List string, int &symbolic) {
   Type owner = c.sym.resolve_key(type);
   List one = %(expr (unsigned long long)
     (literal (unsigned long long) "1ULL"));
@@ -3392,7 +3405,7 @@ static List _initializer_layout(
     if (!dimension) return NULL;
     if (string && _initializer_string_array(c, type, string)) return NULL;
     unsigned long long size;
-    if (!_initializer_integer(dimension, &size)) *symbolic = 1;
+    if (!_initializer_integer(dimension, size)) symbolic = 1;
     List path = _initializer_first(c, type, NULL);
     List element = c.initializer_slot(target, path);
     List child = _initializer_layout(c, owner.cdr(), element,
@@ -3507,7 +3520,7 @@ static List _initializer_scalar_rows(
     }
     if (value.match(%(expr (* char) (literal (* char) ?)))) string = value;
   }
-  List layout = _initializer_layout(c, root, target, string, &symbolic);
+  List layout = _initializer_layout(c, root, target, string, symbolic);
   if (!layout || !symbolic) return NULL;
   int array = c.sym.resolve_key(root).is_array();
   Array rows = [];
@@ -3547,13 +3560,13 @@ List Compiler.initializer_rows(
     List value = original;
     if (original.car() == <dotinit> || original.car() == <indexinit>) {
       List path = _initializer_designated(
-        c, root, original, &value, &original);
+        c, root, original, value, original);
       states = %((() $path 1));
     }
     match (value)
       case %(expr ? (!set ?body (initval *))): {
         List header = NULL;
-        List choices = Ast.initializer_cases(body, &header);
+        List choices = Ast.initializer_cases(body, header);
         Array following = [];
         foreach (List choice, choices) {
           (List condition, List path, Type type, List input) = choice;
@@ -3857,7 +3870,7 @@ static List _convert_composite(
           checked.push(%($condition $path $destination $value));
         }
         List header = NULL;
-        Ast.initializer_cases(terminal.caddr(), &header);
+        Ast.initializer_cases(terminal.caddr(), header);
         List choices = checked.list_free();
         if (header) choices = cons(header, choices);
         List value = %(expr () (initval @choices));

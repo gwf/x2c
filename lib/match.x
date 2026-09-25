@@ -425,7 +425,7 @@ static int _named_binder(Var value) =>
   value.is_binder() && value != <?> && value != <*>;
 
 /* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
-static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
+static int _layout_builder_add(MatchLayoutBuilder &builder, Atom binder) {
   for (int i = 0; i < builder.count; i++)
     if (builder.binders[i].u64 == binder.u64) return i;
   if (builder.count >= MACHINE_BINDER_MAX) return -1;
@@ -437,7 +437,7 @@ static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
    is opaque. Compact matcher predicates are control vocabulary only
    as the final operand of !is. The compiler's dynamic-value marker retains
    binders in its literal children without treating the marker as data. */
-static void _layout_collect(MatchLayoutBuilder *builder, Var pattern) {
+static void _layout_collect(MatchLayoutBuilder &builder, Var pattern) {
   if (pattern is not <list>) {
     if (_malformed_binder_atom(pattern)) builder.malformed_binder = 1;
     else if (_named_binder(pattern) &&
@@ -566,7 +566,7 @@ static MatchCaptureLayout _capture_layout_analyze(
   MatchLayoutBuilder builder = {0};
   MachinePrepare status = MACHINE_PREPARED, const char *reason = "prepared";
   Var normalized = pattern;
-  _layout_collect(&builder, pattern);
+  _layout_collect(builder, pattern);
   if (builder.malformed_binder) {
     status = MACHINE_MALFORMED;
     reason = "binder-name";
@@ -663,14 +663,14 @@ int MatchCaptureBuffer.has(MatchCaptureBuffer *m, int index) {
 /* An anchor is compared as one value, so a List qualifies only when its
    bits decide it. Otherwise the scan would reject an input sublist that
    the same pattern matches element by element at a fixed position. */
-static int _find_fixed_anchor(List pat, Var *anchor, int *offset) {
+static int _find_fixed_anchor(List pat, Var &anchor, int &offset) {
   int width = 0;
   foreach (Var part, pat) {
     if (part.is_list_binder()) return 0;
     if ((part is not <list> && !part.is_binder()) ||
         (part is <list> && _is_list_literal(part) && _bits_unique(part))) {
-      *anchor = part;
-      *offset = width;
+      anchor = part;
+      offset = width;
       return 1;
     }
     width++;
@@ -1610,7 +1610,7 @@ static int MatchLower._compile_segment(MatchLower l, List pattern) {
     if (tail) {
       tail_entry = l._compile_child_segment(tail);
       if (tail_entry < 0) return -1;
-      anchored = _find_fixed_anchor(tail, &anchor, &anchor_offset);
+      anchored = _find_fixed_anchor(tail, anchor, anchor_offset);
     }
   }
 
@@ -1788,11 +1788,11 @@ static int _run_prepared_capture(
 
 /* Publication reads committed positional state, never speculative matcher
    state. */
-static int MatchPlan._run(MatchPlan mm, MatchMachine m, Var input, List *out) {
+static int MatchPlan._run(MatchPlan mm, MatchMachine m, Var input, List &out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = _run_prepared_capture(mm.program.view(), m, input, &captures);
-  if (result == 1) *out = _capture_publish(mm.layout, &captures);
+  if (result == 1) out = _capture_publish(mm.layout, &captures);
   return result;
 }
 
@@ -1842,7 +1842,7 @@ int MatchPlan.execute(
   MatchPlan plan, Var input, List *out_bindings, MachineStats *stats) {
   if (!_plan_prepared(plan, "MatchPlan.execute") || !out_bindings) return -1;
   $match.machine(machine, stats);
-  List bindings, int result = plan._run(machine, input, &bindings);
+  List bindings, int result = plan._run(machine, input, bindings);
   machine.dispose();
   if (result == 1) *out_bindings = bindings;
   return result;
@@ -1886,7 +1886,7 @@ int MatchPlan.try_search(
   return plan._first(input, out_match, out_bindings);
 }
 
-static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
+static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
   $match.machine(machine, NULL);
   $match.walk_buffer(plan, machine, walk);
   List results = NULL;
@@ -1894,7 +1894,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
   walk.spine.free();
   machine.dispose();
   if (status < 0) return -1;
-  *out_results = results;
+  out_results = results;
   return 1;
 }
 
@@ -1909,7 +1909,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
 */
 int MatchPlan.search(MatchPlan plan, List input, List *out_results) {
   if (!_plan_prepared(plan, "MatchPlan.search") || !out_results) return -1;
-  return plan._all(input, out_results);
+  return plan._all(input, *out_results);
 }
 
 static int MatchPlan._replace(

@@ -28,10 +28,10 @@ $(import "../lib/native-scalar-types.xmacro")
 // compiler declarations go through here so pointer, array, qualifier, and
 // function-pointer precedence matches parsed source.
 
-static Type _declarator_parts(Type type, List *modifiers) {
+static Type _declarator_parts(Type type, List &modifiers) {
   Type base = type.base_type();
   if (!base) {
-    if (modifiers) *modifiers = NULL;
+    modifiers = NULL;
     return type;
   }
   List reversed = %(), qualifiers = %();
@@ -42,7 +42,7 @@ static Type _declarator_parts(Type type, List *modifiers) {
     qualifiers = cons(reversed.car(), qualifiers);
     reversed = reversed.cdr();
   }
-  if (modifiers) *modifiers = reversed.reverse();
+  modifiers = reversed.reverse();
   return qualifiers.append(base);
 }
 
@@ -61,7 +61,7 @@ static Var _modifier_declaration_ast(Var value) {
 */
 List Type.declaration_parts(Type type) {
   List modifiers = NULL;
-  Type base = _declarator_parts(type, &modifiers), Array syntax = [];
+  Type base = _declarator_parts(type, modifiers), Array syntax = [];
   foreach (Var item, modifiers)
     syntax.push(_modifier_declaration_ast(item));
   return %($base (@{syntax.list_free()}));
@@ -340,10 +340,10 @@ Type Type.scalar(Type type) {
    performs an atomic native update, plus the Func signature spelling. */
 static Map scalartypes = $native_scalar_types();
 
-static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
+static int _scalar_numeric_info(Type type, X2CVarNumericInfo &info) {
   Var row = scalartypes[type];
   return row is <list> &&
-         Var.numeric_info(row.list().car(), info);
+         Var.numeric_info(row.list().car(), &info);
 }
 
 static List _scalar_row(Type type) {
@@ -377,30 +377,23 @@ String Type.var_numeric_update_helper(Type type) {
   return row ? row.caddr() : NULL;
 }
 
-/** Returns the compact scalar Type used by Func's Var calling convention,
-    or `NULL` when `type` is not one of the exact-C scalar families. */
-Type Type.var_signature_type(Type type) {
-  match (_scalar_row(type)) case %(? ? ? ?signature): return signature;
-  return NULL;
-}
-
 static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')
                    : (unsigned) ((ch | 32) - 'a' + 10);
 
 // Read a validated integer token's unsigned magnitude and radix.
 static int _literal_magnitude(
-  String text, int end, unsigned long long *value, int *decimal) {
+  String text, int end, unsigned long long &value, int &decimal) {
   int pos = 0, base = 10;
-  *decimal = 1;
+  decimal = 1;
   if (pos + 1 < end && text[pos] == '0') {
     switch (text[pos + 1]) {
-      case 'x': case 'X': base = 16; pos += 2; *decimal = 0; break;
-      case 'b': case 'B': base = 2;  pos += 2; *decimal = 0; break;
-      case 'o': case 'O': base = 8;  pos += 2; *decimal = 0; break;
+      case 'x': case 'X': base = 16; pos += 2; decimal = 0; break;
+      case 'b': case 'B': base = 2;  pos += 2; decimal = 0; break;
+      case 'o': case 'O': base = 8;  pos += 2; decimal = 0; break;
       default:
         if (text[pos + 1] >= '0' && text[pos + 1] <= '7') {
           base = 8;
-          *decimal = 0;
+          decimal = 0;
         }
     }
   }
@@ -411,7 +404,7 @@ static int _literal_magnitude(
     result = result * (unsigned) base + digit;
     pos++;
   }
-  *value = result;
+  value = result;
   return 1;
 }
 
@@ -473,7 +466,7 @@ Var Type.numeric_literal_value(Type type, String text) {
   unsigned long long magnitude;
   int decimal;
   if (!_literal_magnitude(text, _integer_literal_end(text),
-                          &magnitude, &decimal)) return void;
+                          magnitude, decimal)) return void;
   Var value = negative ? 0ULL - magnitude : magnitude;
   return value.convert(tag);
 }
@@ -499,7 +492,7 @@ Type Type.numeric_literal(String text, int floating) {
   }
   unsigned long long value;
   int decimal;
-  if (!_literal_magnitude(text, suffix, &value, &decimal)) return NULL;
+  if (!_literal_magnitude(text, suffix, value, decimal)) return NULL;
   return _integer_literal_type(value, decimal, is_unsigned, longs);
 }
 
@@ -555,13 +548,14 @@ static Map varrows = %{ ${$var.tag.constant.rows()} };
     clause, an immediate width, or a user registration has no constant row.
 */
 int Type.var_tag_row(
-  Symbol tag, unsigned long *top, unsigned long *mask, unsigned long *bottom) {
+  Symbol tag, unsigned long &top, unsigned long &mask,
+  unsigned long &bottom) {
   Var row = varrows[tag];
   if (row is void) return 0;
   List fields = row;
-  *top = fields.car();
-  *mask = fields.cadr();
-  *bottom = fields.caddr();
+  top = fields.car();
+  mask = fields.cadr();
+  bottom = fields.caddr();
   return 1;
 }
 
@@ -813,7 +807,7 @@ Type Type.promote(Type type) {
   type = type.scalar();
   if (!type) return NULL;
   X2CVarNumericInfo info;
-  if (_scalar_numeric_info(type, &info) &&
+  if (_scalar_numeric_info(type, info) &&
       !info.floating && info.rank < 3)
     return %(int);
   return type;
@@ -839,8 +833,8 @@ Type Type.widest(Type a, Type b) {
   b = b.promote();
   if (!a || !b) return NULL;
   X2CVarNumericInfo ai = { 0 }, bi = { 0 };
-  _scalar_numeric_info(a, &ai);
-  _scalar_numeric_info(b, &bi);
+  _scalar_numeric_info(a, ai);
+  _scalar_numeric_info(b, bi);
   if (ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;
   int ua = ai.unsigned_value, ub = bi.unsigned_value;
   int ra = ai.rank, rb = bi.rank;

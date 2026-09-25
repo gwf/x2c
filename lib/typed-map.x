@@ -384,3 +384,18 @@ $map.typed.publish(
   MapStringInt, String, int, mapstringint, <mapstrint>,
   _box_string, _box_int,
   _prepare_string_int_export);
+
+/* Compile-time code reaches the typed-map conversions through these literal
+   `meta` prototypes; a family macro cannot emit one. */
+meta Var MapIntInt.var(MapIntInt);
+meta MapIntInt Var.mapintint(Var);
+meta MapIntInt Map.mapintint(Map);
+meta Var MapLongDouble.var(MapLongDouble);
+meta MapLongDouble Var.maplongdouble(Var);
+meta MapLongDouble Map.maplongdouble(Map);
+meta Var MapStringString.var(MapStringString);
+meta MapStringString Var.mapstringstring(Var);
+meta MapStringString Map.mapstringstring(Map);
+meta Var MapStringInt.var(MapStringInt);
+meta MapStringInt Var.mapstringint(Var);
+meta MapStringInt Map.mapstringint(Map);

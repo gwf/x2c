@@ -918,7 +918,7 @@ List ptype_list = Var_list(Var_is_row(ptype, 9, 7, 4) ? ptype : List_var(cons(pt
   }
 
 }
-List result = Array_list_free(types);  if(out_types) * out_types = result;  return all_var;
+List result = Array_list_free(types); (* out_types) = result;  return all_var;
 }
 
 List Type_list(Type);
@@ -953,7 +953,7 @@ static int _typed_function_parts(Type type, List * params, Type * return_type){
 
     }
   }
-if(params) * params = values;  if(return_type) * return_type = List_type(cons(return_head, List_append(return_tail, NULL)));  return 1;
+(* params) = values;  if(return_type) * return_type = List_type(cons(return_head, List_append(return_tail, NULL)));  return 1;
 }
 break;
 }
@@ -1068,10 +1068,10 @@ default: ;  return expression;  break;
       Type target_type = Sym_resolve_key(c -> sym, target_spelling);  if(! List_truth(source_binding) || ! List_truth(Type_list(source_type)) || Type_is_pointer(source_type) || ! Type_is_function(source_type)){
         _typed_adapter_error(c, _504, target_type, source_type, _103);
       }
-      List target_params = NULL, source_params = NULL;  Type target_return = NULL, source_return = NULL;  if(! _typed_function_parts(target_type, & target_params, & target_return)){
+      List target_params = NULL, source_params = NULL;  Type target_return = NULL, source_return = NULL;  if(! _typed_function_parts(target_type, &(target_params), & target_return)){
         _typed_adapter_error(c, _505, target_type, source_type, NULL);
       }
-      if(! _typed_function_parts(source_type, & source_params, & source_return)){
+      if(! _typed_function_parts(source_type, &(source_params), & source_return)){
         _typed_adapter_error(c, _506, target_type, source_type, NULL);
       }
       if(_typed_params_variadic(target_params) || _typed_params_variadic(source_params)){
@@ -1120,13 +1120,13 @@ static int _func_adapter_source(Type type, List payload, Type * source_type, Lis
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 19147688: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0]; {
-    if(! List_truth(Type_list(type)) || Type_is_pointer(type) || ! Type_is_function(type)) return 0;  if(source_type) * source_type = type;  if(source_binding) * source_binding = Var_list(binding);  return 1;
+    if(! List_truth(Type_list(type)) || Type_is_pointer(type) || ! Type_is_function(type)) return 0; (* source_type) = type; (* source_binding) = Var_list(binding);  return 1;
   }
-  break; } } case 199912: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_115), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), source_type, source_binding);  break;
+  break; } } case 199912: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_115), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), &((* source_type)), &((* source_binding)));  break;
 }
-case 1077029798: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_117), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), source_type, source_binding);  break;
+case 1077029798: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_117), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), &((* source_type)), &((* source_binding)));  break;
 }
-case 992: ;  static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_121), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), source_type, source_binding);  break;
+case 992: ;  static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_121), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _func_adapter_source(Var_type(inner_type), Var_list(inner_payload), &((* source_type)), &((* source_binding)));  break;
 }
 default: break;
     }
@@ -1152,7 +1152,7 @@ static List _adapter_index_literal(int index){
 
 List Sym_resolve_global(Sym, List, List *);
 static List _adapter_helper(Compiler compiler, String name, List * type){
-  return Sym_resolve_global(compiler -> sym, cons(String_var(name), NULL), type);
+  return Sym_resolve_global(compiler -> sym, cons(String_var(name), NULL), &(* type));
 }
 
 List Compiler_cache_literal_list(Compiler, List);
@@ -1163,7 +1163,7 @@ static List _type_literal(Compiler compiler, Type type){
 
 Type Type_declared(Type);
 List Compiler_func_signature(Compiler compiler, Type type){
-  if(! _init_guard_) _file_init_();  List params = NULL;  Type result = NULL;  _typed_function_parts(type, & params, & result);  Array declared = Array_new(); {
+  if(! _init_guard_) _file_init_();  List params = NULL;  Type result = NULL;  _typed_function_parts(type, &(params), & result);  Array declared = Array_new(); {
     List parameter;  List _x2c_macro_object_3 = params;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       parameter = Var_list(_x2c_macro_cursor_output_3); {
         Array_push(declared, List_var(Type_declared(List_type(parameter))));
@@ -1183,21 +1183,21 @@ Type Type_reference(Type);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 static List _checked_func_argument(Compiler compiler, List adapter_type, Type parameter_type, List value_helper, Type value_helper_type, List reference_helper, Type reference_helper_type, List fn_binding, List argv_binding, int index, Type * storage_type){
   if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77))){
-    Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(reference_helper_type), cons(List_var(cons(_63, cons(List_var(reference_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))))))), NULL)))), NULL)));  if(storage_type) * storage_type = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
+    Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(reference_helper_type), cons(List_var(cons(_63, cons(List_var(reference_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))))))), NULL)))), NULL))); (* storage_type) = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
   }
   Symbol tag = Sym_var_tag_for_type(compiler -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key(compiler -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))){
-    List pointer_type = NULL;  List pointer_helper = _adapter_helper(compiler, _513, & pointer_type);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_63, cons(List_var(pointer_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), NULL))))), NULL)))), NULL)));  if(storage_type) * storage_type = parameter_type;  if(Type_is_pointer(resolved)) return Compiler_convert_expression(compiler, picked, parameter_type);  Symbol star = 54;  Type record_pointer = Type_reference(parameter_type);  return cons(_62, cons(List_var(parameter_type), cons(List_var(cons(_118, cons(Symbol_var(star), cons(List_var(cons(_62, cons(List_var(record_pointer), cons(List_var(cons(_106, cons(List_var(record_pointer), cons(List_var(picked), NULL)))), NULL)))), NULL)))), NULL)));
+    List pointer_type = NULL;  List pointer_helper = _adapter_helper(compiler, _513, &(pointer_type));  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_63, cons(List_var(pointer_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), NULL))))), NULL)))), NULL))); (* storage_type) = parameter_type;  if(Type_is_pointer(resolved)) return Compiler_convert_expression(compiler, picked, parameter_type);  Symbol star = 54;  Type record_pointer = Type_reference(parameter_type);  return cons(_62, cons(List_var(parameter_type), cons(List_var(cons(_118, cons(Symbol_var(star), cons(List_var(cons(_62, cons(List_var(record_pointer), cons(List_var(cons(_106, cons(List_var(record_pointer), cons(List_var(picked), NULL)))), NULL)))), NULL)))), NULL)));
   }
-  if(! tag) _typed_adapter_error(compiler, _514, List_type(adapter_type), parameter_type, NULL);  List picked = cons(_62, cons(_32, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(value_helper_type), cons(List_var(cons(_63, cons(List_var(value_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(_adapter_symbol_literal(tag)), NULL)))))), NULL)))), NULL)));  if(storage_type) * storage_type = parameter_type;  return Compiler_convert_expression(compiler, picked, parameter_type);
+  if(! tag) _typed_adapter_error(compiler, _514, List_type(adapter_type), parameter_type, NULL);  List picked = cons(_62, cons(_32, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(value_helper_type), cons(List_var(cons(_63, cons(List_var(value_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(_adapter_symbol_literal(tag)), NULL)))))), NULL)))), NULL))); (* storage_type) = parameter_type;  return Compiler_convert_expression(compiler, picked, parameter_type);
 }
 
 List Type_declaration_parts(Type);
 Var List_getindex(List, int);
 static List _func_argument_locals(Compiler compiler, Type diagnostic_type, List types, List names, List fn_binding, List argv_binding){
-  List value_type = NULL, reference_type = NULL;  List value_helper = _adapter_helper(compiler, _515, & value_type);  List reference_helper = _adapter_helper(compiler, _516, & reference_type);  Array locals = Array_new();  int index = 0; {
+  List value_type = NULL, reference_type = NULL;  List value_helper = _adapter_helper(compiler, _515, &(value_type));  List reference_helper = _adapter_helper(compiler, _516, &(reference_type));  Array locals = Array_new();  int index = 0; {
     Type type;  List _x2c_macro_object_4 = types;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
       type = Var_type(_x2c_macro_cursor_output_4); {
-        List binding = Var_list(List_car(names));  names = List_cdr(names);  Type storage_type = NULL;  List value = _checked_func_argument(compiler, Type_list(diagnostic_type), type, value_helper, List_type(value_type), reference_helper, List_type(reference_type), fn_binding, argv_binding, index ++, & storage_type);  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  Array_push(locals, List_var(cons(_148, cons(List_var(base), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(binding), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))))), NULL))), NULL)))));
+        List binding = Var_list(List_car(names));  names = List_cdr(names);  Type storage_type = NULL;  List value = _checked_func_argument(compiler, Type_list(diagnostic_type), type, value_helper, List_type(value_type), reference_helper, List_type(reference_type), fn_binding, argv_binding, index ++, &(storage_type));  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  Array_push(locals, List_var(cons(_148, cons(List_var(base), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(binding), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))))), NULL))), NULL)))));
       }
 
     }
@@ -1212,20 +1212,20 @@ static void _publish_func_adapter(Compiler compiler, List binding, List fn_bindi
 
 String Var_string(Var);
 static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix){
-  List params = NULL;  Type return_type = NULL;  _typed_function_parts(source_type, & params, & return_type);  if(_typed_params_variadic(params)){
+  List params = NULL;  Type return_type = NULL;  _typed_function_parts(source_type, &(params), & return_type);  if(_typed_params_variadic(params)){
     Type func_type = Sym_resolve_key(c -> sym, List_type(_139));  String message = List_equal(Type_list(Sym_resolve_key(c -> sym, diagnostic_type)), Type_list(func_type)) ? _517 : _518;  _typed_adapter_error(c, message, diagnostic_type, source_type, NULL);
   }
   source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type); {
     String helper_name;  List _x2c_macro_object_5 = _161;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
       helper_name = Var_string(_x2c_macro_cursor_output_5); {
-        List helper_type = NULL;  List helper = _adapter_helper(c, helper_name, & helper_type);  if(! List_truth(helper) || ! List_truth(helper_type)) _typed_adapter_error(c, _519, diagnostic_type, source_type, NULL);
+        List helper_type = NULL;  List helper = _adapter_helper(c, helper_name, &(helper_type));  if(! List_truth(helper) || ! List_truth(helper_type)) _typed_adapter_error(c, _519, diagnostic_type, source_type, NULL);
       }
 
     }
 
   }
   String name = Compiler_fresh_name(c, _520);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _521));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _522));  List names = _auto_names(c, List_len(params));  List locals = _func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_func_handle_1);  List call = cons(_62, cons(List_var(return_type), cons(List_var(cons(_64, cons(List_var(target), cons(List_var(cons(_65, List_append(arguments, NULL))), NULL)))), NULL)));  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && Var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))){
-    List result_type = NULL;  List result_helper = _adapter_helper(c, _523, & result_type);  List result = Sym_introduce(c -> sym, Compiler_fresh_name(c, _524));  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(return_type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  List address = cons(_62, cons(List_var(Type_reference(return_type)), cons(List_var(cons(_118, cons(_119, cons(List_var(cons(_62, cons(List_var(return_type), cons(List_var(cons(_63, cons(List_var(result), NULL))), NULL)))), NULL)))), NULL)));  call = cons(_70, cons(List_var(cons(_148, cons(List_var(base), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(result), cons(List_var(mods), NULL)))), cons(List_var(call), NULL))))), NULL))), NULL)))), cons(List_var(cons(_71, cons(List_var(cons(_66, cons(List_var(cons(_62, cons(_32, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(result_type), cons(List_var(cons(_63, cons(List_var(result_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(address), cons(List_var(cons(_62, cons(_166, cons(List_var(cons(_167, cons(List_var(cons(_62, cons(List_var(return_type), cons(List_var(cons(_63, cons(List_var(result), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL))), NULL))), NULL)));
+    List result_type = NULL;  List result_helper = _adapter_helper(c, _523, &(result_type));  List result = Sym_introduce(c -> sym, Compiler_fresh_name(c, _524));  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(return_type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  List address = cons(_62, cons(List_var(Type_reference(return_type)), cons(List_var(cons(_118, cons(_119, cons(List_var(cons(_62, cons(List_var(return_type), cons(List_var(cons(_63, cons(List_var(result), NULL))), NULL)))), NULL)))), NULL)));  call = cons(_70, cons(List_var(cons(_148, cons(List_var(base), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(result), cons(List_var(mods), NULL)))), cons(List_var(call), NULL))))), NULL))), NULL)))), cons(List_var(cons(_71, cons(List_var(cons(_66, cons(List_var(cons(_62, cons(_32, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(result_type), cons(List_var(cons(_63, cons(List_var(result_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(address), cons(List_var(cons(_62, cons(_166, cons(List_var(cons(_167, cons(List_var(cons(_62, cons(List_var(return_type), cons(List_var(cons(_63, cons(List_var(result), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL))), NULL))), NULL)));
   }
   _publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
 }
@@ -1241,11 +1241,11 @@ static int _direct_func_source(Type type, List payload, Type * source_type, List
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 19147688: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0]; {
-    if(! List_truth(Type_list(type)) || Type_is_pointer(type) || ! Type_is_function(type)) return 0;  if(source_type) * source_type = type;  if(source_binding) * source_binding = Var_list(binding);  return 1;
+    if(! List_truth(Type_list(type)) || Type_is_pointer(type) || ! Type_is_function(type)) return 0; (* source_type) = type; (* source_binding) = Var_list(binding);  return 1;
   }
-  break; } } case 1077029798: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_117), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _direct_func_source(Var_type(inner_type), Var_list(inner_payload), source_type, source_binding);  break;
+  break; } } case 1077029798: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_117), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _direct_func_source(Var_type(inner_type), Var_list(inner_payload), &((* source_type)), &((* source_binding)));  break;
 }
-case 992: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_121), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _direct_func_source(Var_type(inner_type), Var_list(inner_payload), source_type, source_binding);  break;
+case 992: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_121), &_x2c_match_capture)) {Var inner_type = _x2c_match_values[0];  Var inner_payload = _x2c_match_values[1];  return _direct_func_source(Var_type(inner_type), Var_list(inner_payload), &((* source_type)), &((* source_binding)));  break;
 }
 default: break;
     }
@@ -1265,7 +1265,7 @@ List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type
   break; } } default: ;  return argument;  break;
     }
   }
-if(_is_func_adapter(c, arg_type)) return argument;  Type source_type = NULL;  List source_binding = NULL;  if(! _func_adapter_source(arg_type, payload, & source_type, & source_binding)){
+if(_is_func_adapter(c, arg_type)) return argument;  Type source_type = NULL;  List source_binding = NULL;  if(! _func_adapter_source(arg_type, payload, &(source_type), &(source_binding))){
     _typed_adapter_error(c, _525, List_type(expected_type), arg_type, _103);
   }
   if(_is_func_adapter_target(c, source_type)) return argument;  List adapter = _direct_func_adapter(c, List_type(expected_type), source_binding, source_type);  return cons(_62, cons(List_var(expected_type), cons(List_var(cons(_63, cons(List_var(adapter), NULL))), NULL)));
@@ -1282,16 +1282,16 @@ static Type _func_pointer_value_type(Compiler compiler, Type type){
 String binding_identity_spelling(List);
 static List _indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type, Type * out_context_type, List * out_context_field){
   List key = cons(_174, cons(List_var(pointer_type), NULL));  Var stored;  if(Map_try_get(compiler -> names -> adapters, List_var(key), & stored)){
-    List _x2c_destructure_2 = List_cdr(Var_list(stored));  List adapter = Var_list(List_getindex(_x2c_destructure_2, 0));  Type context = Var_type(List_getindex(_x2c_destructure_2, 1));  List field = Var_list(List_getindex(_x2c_destructure_2, 2));  if(out_context_type) * out_context_type = context;  if(out_context_field) * out_context_field = field;  return adapter;
+    List _x2c_destructure_2 = List_cdr(Var_list(stored));  List adapter = Var_list(List_getindex(_x2c_destructure_2, 0));  Type context = Var_type(List_getindex(_x2c_destructure_2, 1));  List field = Var_list(List_getindex(_x2c_destructure_2, 2)); (* out_context_type) = context; (* out_context_field) = field;  return adapter;
   }
-  String context_name = Compiler_fresh_name(compiler, _526);  List context_binding = Sym_introduce(compiler -> sym, context_name);  List field_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _527));  List field_base, field_mods;  List _x2c_destructure_3 = Type_declaration_parts(pointer_type);  field_base = Var_list(List_getindex(_x2c_destructure_3, 0));  field_mods = Var_list(List_getindex(_x2c_destructure_3, 1));  Compiler_add_early(compiler, cons(_175, cons(List_var(cons(_176, cons(String_var(context_name), cons(List_var(cons(_177, cons(List_var(cons(_148, cons(List_var(field_base), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(field_binding), cons(List_var(field_mods), NULL)))), NULL))), NULL)))), NULL))), NULL)))), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(context_binding), _8))), NULL))), NULL))));  Type context_type = List_type(cons(String_var(context_name), NULL));  Type context_pointer = List_type(cons(_134, cons(_141, cons(String_var(context_name), NULL))));  List context_helper_type = NULL;  List context_helper = _adapter_helper(compiler, _528, & context_helper_type);  if(! List_truth(context_helper) || ! List_truth(context_helper_type)){
+  String context_name = Compiler_fresh_name(compiler, _526);  List context_binding = Sym_introduce(compiler -> sym, context_name);  List field_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _527));  List field_base, field_mods;  List _x2c_destructure_3 = Type_declaration_parts(pointer_type);  field_base = Var_list(List_getindex(_x2c_destructure_3, 0));  field_mods = Var_list(List_getindex(_x2c_destructure_3, 1));  Compiler_add_early(compiler, cons(_175, cons(List_var(cons(_176, cons(String_var(context_name), cons(List_var(cons(_177, cons(List_var(cons(_148, cons(List_var(field_base), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(field_binding), cons(List_var(field_mods), NULL)))), NULL))), NULL)))), NULL))), NULL)))), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(context_binding), _8))), NULL))), NULL))));  Type context_type = List_type(cons(String_var(context_name), NULL));  Type context_pointer = List_type(cons(_134, cons(_141, cons(String_var(context_name), NULL))));  List context_helper_type = NULL;  List context_helper = _adapter_helper(compiler, _528, &(context_helper_type));  if(! List_truth(context_helper) || ! List_truth(context_helper_type)){
     _typed_adapter_error(compiler, _529, diagnostic_type, pointer_type, NULL);
   }
-  List fn_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _521));  String field_name = binding_identity_spelling(field_binding);  List context_value = cons(_62, cons(_180, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(context_helper_type), cons(List_var(cons(_63, cons(List_var(context_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), NULL))), NULL)))), NULL)));  List context_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _526));  List context_declaration = cons(_148, cons(List_var(cons(_141, cons(String_var(context_name), NULL))), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(context_local), _183))), cons(List_var(cons(_62, cons(List_var(context_pointer), cons(List_var(cons(_106, cons(List_var(context_pointer), cons(List_var(context_value), NULL)))), NULL)))), NULL))))), NULL))), NULL)));  List context = cons(_62, cons(List_var(context_pointer), cons(List_var(cons(_63, cons(List_var(context_local), NULL))), NULL)));  List target = cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_118, cons(_184, cons(List_var(context), cons(List_var(cons(String_var(field_name), NULL)), NULL))))), NULL)));  List adapter = _build_func_adapter(compiler, diagnostic_type, pointer_type, target, fn_binding, cons(List_var(context_declaration), NULL));  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(cons(_185, cons(List_var(adapter), cons(List_var(context_type), cons(List_var(field_binding), NULL))))));  if(out_context_type) * out_context_type = context_type;  if(out_context_field) * out_context_field = field_binding;  return adapter;
+  List fn_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _521));  String field_name = binding_identity_spelling(field_binding);  List context_value = cons(_62, cons(_180, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(context_helper_type), cons(List_var(cons(_63, cons(List_var(context_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), NULL))), NULL)))), NULL)));  List context_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _526));  List context_declaration = cons(_148, cons(List_var(cons(_141, cons(String_var(context_name), NULL))), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(context_local), _183))), cons(List_var(cons(_62, cons(List_var(context_pointer), cons(List_var(cons(_106, cons(List_var(context_pointer), cons(List_var(context_value), NULL)))), NULL)))), NULL))))), NULL))), NULL)));  List context = cons(_62, cons(List_var(context_pointer), cons(List_var(cons(_63, cons(List_var(context_local), NULL))), NULL)));  List target = cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_118, cons(_184, cons(List_var(context), cons(List_var(cons(String_var(field_name), NULL)), NULL))))), NULL)));  List adapter = _build_func_adapter(compiler, diagnostic_type, pointer_type, target, fn_binding, cons(List_var(context_declaration), NULL));  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(cons(_185, cons(List_var(adapter), cons(List_var(context_type), cons(List_var(field_binding), NULL)))))); (* out_context_type) = context_type; (* out_context_field) = field_binding;  return adapter;
 }
 
 static List _direct_func_handle(Compiler compiler, List source_binding, Type source_type){
-  Type key_type = Type_canonicalize(source_type);  List key = cons(_186, cons(List_var(source_binding), cons(List_var(key_type), NULL)));  Var stored;  if(Map_try_get(compiler -> names -> adapters, List_var(key), & stored)) return cons(_62, cons(_140, cons(List_var(cons(_63, cons(stored, NULL))), NULL)));  List adapter = _direct_func_adapter(compiler, List_type(_139), source_binding, source_type);  List signature = _func_signature_literal(compiler, source_type);  List constructor_type = NULL;  List constructor = _adapter_helper(compiler, _530, & constructor_type);  if(! List_truth(constructor) || ! List_truth(constructor_type)){
+  Type key_type = Type_canonicalize(source_type);  List key = cons(_186, cons(List_var(source_binding), cons(List_var(key_type), NULL)));  Var stored;  if(Map_try_get(compiler -> names -> adapters, List_var(key), & stored)) return cons(_62, cons(_140, cons(List_var(cons(_63, cons(stored, NULL))), NULL)));  List adapter = _direct_func_adapter(compiler, List_type(_139), source_binding, source_type);  List signature = _func_signature_literal(compiler, source_type);  List constructor_type = NULL;  List constructor = _adapter_helper(compiler, _530, &(constructor_type));  if(! List_truth(constructor) || ! List_truth(constructor_type)){
     _typed_adapter_error(compiler, _531, List_type(_139), source_type, NULL);
   }
   List handle = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _532));  List value = cons(_62, cons(_140, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(constructor_type), cons(List_var(cons(_63, cons(List_var(constructor), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_187, cons(List_var(cons(_63, cons(List_var(adapter), NULL))), NULL)))), cons(List_var(signature), NULL)))), NULL)))), NULL)));  Compiler_add_early(compiler, cons(_148, cons(_189, cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(handle), _8))), cons(List_var(value), NULL))))), NULL))), NULL))));  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(handle));  return cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(handle), NULL))), NULL)));
@@ -1319,7 +1319,7 @@ static List _func_context_call(Type type, List context, List adapter, Type adapt
 
 List Sym_reference(Sym, List, List *);
 static List _indirect_func_value(Compiler compiler, List expression, Type pointer_type){
-  Type context_type = NULL;  List context_field = NULL;  List adapter = _indirect_func_adapter(compiler, List_type(_139), pointer_type, & context_type, & context_field);  List signature = _func_signature_literal(compiler, pointer_type);  List constructor_type = NULL;  List constructor = _adapter_helper(compiler, _534, & constructor_type);  if(! List_truth(constructor) || ! List_truth(constructor_type)){
+  Type context_type = NULL;  List context_field = NULL;  List adapter = _indirect_func_adapter(compiler, List_type(_139), pointer_type, &(context_type), &(context_field));  List signature = _func_signature_literal(compiler, pointer_type);  List constructor_type = NULL;  List constructor = _adapter_helper(compiler, _534, &(constructor_type));  if(! List_truth(constructor) || ! List_truth(constructor_type)){
     _typed_adapter_error(compiler, _535, List_type(_139), pointer_type, NULL);
   }
   List context = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _526));  List context_value = cons(_62, cons(List_var(context_type), cons(List_var(cons(_204, cons(List_var(cons(_205, cons(List_var(expression), NULL))), NULL))), NULL)));  List declaration = cons(_148, cons(List_var(context_type), cons(List_var(cons(_149, cons(List_var(cons(_118, cons(_150, cons(List_var(cons(_6, cons(List_var(context), _8))), cons(List_var(context_value), NULL))))), NULL))), NULL)));  String field_name = binding_identity_spelling(context_field);  List pointer = cons(_62, cons(List_var(pointer_type), cons(List_var(cons(_118, cons(_206, cons(List_var(cons(_62, cons(List_var(context_type), cons(List_var(cons(_63, cons(List_var(context), NULL))), NULL)))), cons(List_var(cons(String_var(field_name), NULL)), NULL))))), NULL)));  List constructed = _func_context_call(context_type, context, adapter, List_type(_124), signature, constructor, List_type(constructor_type));  List null_binding = Sym_reference(compiler -> sym, _209, NULL);  List result = cons(_62, cons(_140, cons(List_var(cons(_118, cons(_21, cons(List_var(pointer), cons(List_var(constructed), cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(null_binding), NULL))), NULL)))), NULL)))))), NULL)));  return cons(_62, cons(_140, cons(List_var(cons(_116, cons(List_var(cons(_70, cons(List_var(declaration), cons(List_var(cons(_71, cons(List_var(result), NULL))), NULL)))), NULL))), NULL)));
@@ -1406,7 +1406,7 @@ if(List_equal(Type_list(Sym_resolve_key(c -> sym, type)), Type_list(func_type)))
 default: break;
     }
   }
-Type source_type = NULL;  List source_binding = NULL;  if(_direct_func_source(type, payload, & source_type, & source_binding)) return _direct_func_value(c, source_binding, source_type);  Type pointer_type = _func_pointer_value_type(c, type);  if(List_truth(Type_list(pointer_type))) return _indirect_func_lift(c, expression, pointer_type);  Type resolved = Sym_resolve_key(c -> sym, type);  if(List_truth(Type_list(resolved)) && Type_is_function(resolved)){
+Type source_type = NULL;  List source_binding = NULL;  if(_direct_func_source(type, payload, &(source_type), &(source_binding))) return _direct_func_value(c, source_binding, source_type);  Type pointer_type = _func_pointer_value_type(c, type);  if(List_truth(Type_list(pointer_type))) return _indirect_func_lift(c, expression, pointer_type);  Type resolved = Sym_resolve_key(c -> sym, type);  if(List_truth(Type_list(resolved)) && Type_is_function(resolved)){
   Type pointer = List_type(cons(Symbol_var(54), Type_list(resolved)));  return _indirect_func_lift(c, cons(_62, cons(List_var(pointer), cons(List_var(payload), NULL))), pointer);
 }
 return _deref_func_lift(c, expression, payload);
@@ -1449,7 +1449,7 @@ break;
 return argument;  break;
     }
   }
-if(_typed_params_variadic(raw_params)) return argument;  List param_types = NULL;  int all_params_var = _collect_param_types(raw_params, & param_types);  List source_params = NULL, source_param_types = NULL;  _typed_function_parts(orig_type, & source_params, NULL);  _collect_param_types(source_params, & source_param_types);  List return_type_list = Var_list(Var_is_row(return_type, 9, 7, 4) ? return_type : List_var(cons(return_type, NULL)));  if(all_params_var && return_type_list == _31) return argument;  String adapter = Compiler_fresh_name(c, _537);  List adapter_binding = Sym_introduce(c -> sym, adapter);  Compiler_add_early(c, _callback_function(c, adapter_binding, param_types, List_type(return_type_list), orig_binding, orig_type, source_param_types));  return cons(_62, cons(List_var(expected_type), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL)));
+if(_typed_params_variadic(raw_params)) return argument;  List param_types = NULL;  int all_params_var = _collect_param_types(raw_params, &(param_types));  List source_params = NULL, source_param_types = NULL;  _typed_function_parts(orig_type, &(source_params), NULL);  _collect_param_types(source_params, &(source_param_types));  List return_type_list = Var_list(Var_is_row(return_type, 9, 7, 4) ? return_type : List_var(cons(return_type, NULL)));  if(all_params_var && return_type_list == _31) return argument;  String adapter = Compiler_fresh_name(c, _537);  List adapter_binding = Sym_introduce(c -> sym, adapter);  Compiler_add_early(c, _callback_function(c, adapter_binding, param_types, List_type(return_type_list), orig_binding, orig_type, source_param_types));  return cons(_62, cons(List_var(expected_type), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL)));
 }
 
 static Type _entry_type(Compiler compiler, List entry){
@@ -1504,7 +1504,7 @@ static int _cell_parts(Map cells, List binding, List * cell, Type * type){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_24;  if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_269), &_x2c_match_capture)) {Var matched_cell = _x2c_match_values[0];  Var matched_type = _x2c_match_values[1]; {
-    if(cell) * cell = Var_list(matched_cell);  if(type) * type = Var_type(matched_type);  return 1;
+    (* cell) = Var_list(matched_cell); (* type) = Var_type(matched_type);  return 1;
   }
   break;
 }
@@ -1627,7 +1627,7 @@ case 317060127196: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match
 break;
 }
 case 199448: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_327), &_x2c_match_capture)) {Var callee_type = _x2c_match_values[0];  List arguments = Var_list(_x2c_match_values[1]); {
-  List parameters = NULL;  if(_typed_function_parts(Var_type(callee_type), & parameters, NULL)) for(;  List_truth(parameters) && List_truth(arguments);  parameters = List_cdr(parameters), arguments = List_cdr(arguments)){
+  List parameters = NULL;  if(_typed_function_parts(Var_type(callee_type), &(parameters), NULL)) for(;  List_truth(parameters) && List_truth(arguments);  parameters = List_cdr(parameters), arguments = List_cdr(arguments)){
     Type parameter = Var_type(List_car(parameters));  if(Var_equal(List_car(Type_list(parameter)), Symbol_var(77))) _require_capture_lvalue(c, Var_list(List_car(arguments)));
   }
 
@@ -1698,7 +1698,7 @@ static List _cell_value(List cell, Type type){
 }
 
 static List _cell_declaration(Compiler compiler, List cell, Type type, List initializer){
-  Type pointer = Type_reference(type);  List allocator_type = NULL;  String allocator_name = List_truth(initializer) ? _539 : _540;  List allocator = _adapter_helper(compiler, allocator_name, & allocator_type);  List value_base, value_mods;  List _x2c_destructure_4 = Type_declaration_parts(type);  value_base = Var_list(List_getindex(_x2c_destructure_4, 0));  value_mods = Var_list(List_getindex(_x2c_destructure_4, 1));  List size = cons(_62, cons(_203, cons(List_var(cons(_167, cons(List_var(cons(_116, cons(List_var(cons(_340, cons(List_var(value_base), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(_7, cons(List_var(value_mods), NULL)))), NULL))), NULL)))), NULL))), NULL))), NULL)));  List arguments = cons(List_var(size), NULL);  if(List_truth(initializer)){
+  Type pointer = Type_reference(type);  List allocator_type = NULL;  String allocator_name = List_truth(initializer) ? _539 : _540;  List allocator = _adapter_helper(compiler, allocator_name, &(allocator_type));  List value_base, value_mods;  List _x2c_destructure_4 = Type_declaration_parts(type);  value_base = Var_list(List_getindex(_x2c_destructure_4, 0));  value_mods = Var_list(List_getindex(_x2c_destructure_4, 1));  List size = cons(_62, cons(_203, cons(List_var(cons(_167, cons(List_var(cons(_116, cons(List_var(cons(_340, cons(List_var(value_base), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(_7, cons(List_var(value_mods), NULL)))), NULL))), NULL)))), NULL))), NULL))), NULL)));  List arguments = cons(List_var(size), NULL);  if(List_truth(initializer)){
     List compound = NULL;
   {
     List _x2c_match_expr = initializer;
@@ -1753,7 +1753,7 @@ if(! has_cell) return NULL;  Array sequence = Array_new(); {
   default: break;
     }
   }
-List cell = NULL;  Type type = NULL;  if(_cell_parts(cells, binding, & cell, & type)){
+List cell = NULL;  Type type = NULL;  if(_cell_parts(cells, binding, &(cell), &(type))){
     Array_push(sequence, List_var(_cell_declaration(compiler, cell, type, initializer)));  continue;
   }
   Array_push(sequence, List_var(cons(_148, cons(List_var(target), cons(List_var(cons(_149, cons(List_var(_rewrite_lambda_cells(compiler, item, cells)), NULL))), NULL)))));
@@ -1780,7 +1780,7 @@ static List _rewrite_lambda_cells(Compiler compiler, List ast, Map cells){
   break;
 }
 case 377892: ;  static MatchCaptureSite _x2c_match_site_45;  if (x2c_match_site_try_capture(& _x2c_match_site_45, _x2c_match_expr, List_var(_368), &_x2c_match_capture)) {Var source_type = _x2c_match_values[0];  Var binding = _x2c_match_values[1]; {
-  List cell = NULL;  Type type = NULL;  if(_cell_parts(cells, Var_list(binding), & cell, & type)){
+  List cell = NULL;  Type type = NULL;  if(_cell_parts(cells, Var_list(binding), &(cell), &(type))){
     if(Var_equal(Var_car(source_type), Symbol_var(77))) return cons(_62, cons(source_type, cons(List_var(cons(_63, cons(List_var(cell), NULL))), NULL)));  return _cell_value(cell, type);
   }
   return ast;
@@ -1831,7 +1831,7 @@ static List _parameter_setup(Compiler compiler, List entries, Map cells){
   Array setup = Array_new(); {
     List entry;  List _x2c_macro_object_12 = entries;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
       entry = Var_list(_x2c_macro_cursor_output_12); {
-        List binding = _entry_binding(entry);  List cell = NULL;  Type type = NULL;  if(! _cell_parts(cells, binding, & cell, & type)) continue;  Array_push(setup, List_var(_cell_declaration(compiler, cell, type, cons(_62, cons(List_var(type), cons(List_var(cons(_63, cons(List_var(binding), NULL))), NULL))))));
+        List binding = _entry_binding(entry);  List cell = NULL;  Type type = NULL;  if(! _cell_parts(cells, binding, &(cell), &(type))) continue;  Array_push(setup, List_var(_cell_declaration(compiler, cell, type, cons(_62, cons(List_var(type), cons(List_var(cons(_63, cons(List_var(binding), NULL))), NULL))))));
       }
 
     }
@@ -2038,7 +2038,7 @@ static List _lower_captured_lambda(Compiler compiler, List entries, List capture
     }
 
   }
-  Compiler_add_early(compiler, cons(_175, cons(List_var(cons(_176, cons(String_var(environment_name), cons(List_var(cons(_177, List_append(Array_list_free(fields), NULL))), NULL)))), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(environment_typedef), _8))), NULL))), NULL))));  List context_type = NULL, constructor_type = NULL;  List context_helper = _adapter_helper(compiler, _528, & context_type);  List constructor = _adapter_helper(compiler, _534, & constructor_type);  Type adapter_type = Sym_resolve_key(compiler -> sym, List_type(_124));  List types = List_map(entries, ({
+  Compiler_add_early(compiler, cons(_175, cons(List_var(cons(_176, cons(String_var(environment_name), cons(List_var(cons(_177, List_append(Array_list_free(fields), NULL))), NULL)))), cons(List_var(cons(_149, cons(List_var(cons(_6, cons(List_var(environment_typedef), _8))), NULL))), NULL))));  List context_type = NULL, constructor_type = NULL;  List context_helper = _adapter_helper(compiler, _528, &(context_type));  List constructor = _adapter_helper(compiler, _534, &(constructor_type));  Type adapter_type = Sym_resolve_key(compiler -> sym, List_type(_124));  List types = List_map(entries, ({
     Var _x2c_lambda_capture_value_12 = Compiler_var(compiler);  _x2c_lambda_context_10 _x2c_lambda_context_11 ={
       _x2c_lambda_capture_value_12
     }

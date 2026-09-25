@@ -45,7 +45,7 @@ static void _compress(_Sha256 * sha, const unsigned char * block){
   uint32_t w[64], s[8];
   for(int i = 0;  i < 16;  i ++) w[i] =(uint32_t) block[4 * i] << 24 |(uint32_t) block[4 * i + 1] << 16 |(uint32_t) block[4 * i + 2] << 8 |(uint32_t) block[4 * i + 3];
   for(int i = 16;  i < 64;  i ++) w[i] = w[i - 16] + w[i - 7] +(_rotate(w[i - 15], 7) ^ _rotate(w[i - 15], 18) ^ w[i - 15] >> 3) +(_rotate(w[i - 2], 17) ^ _rotate(w[i - 2], 19) ^ w[i - 2] >> 10);
-  memcpy(s, sha -> state, sizeof(s));
+  memcpy(s, (* sha).state, sizeof(s));
   for(int i = 0;  i < 64;  i ++){
     uint32_t e = s[4], a = s[0];
     uint32_t t1 = s[7] +(_rotate(e, 6) ^ _rotate(e, 11) ^ _rotate(e, 25)) +((e & s[5]) ^(~ e & s[6])) + _ROUND[i] + w[i];
@@ -54,21 +54,21 @@ static void _compress(_Sha256 * sha, const unsigned char * block){
     s[4] += t1;
     s[0] = t1 + t2;
   }
-  for(int i = 0;  i < 8;  i ++) sha -> state[i] += s[i];
+  for(int i = 0;  i < 8;  i ++)(* sha).state[i] += s[i];
 }
 
 static void _absorb(_Sha256 * sha, const unsigned char * bytes, size_t count){
-  sha -> length += count;
+  (* sha).length += count;
   while(count){
-    size_t take = 64 - sha -> used;
+    size_t take = 64 -(* sha).used;
     if(take > count) take = count;
-    memcpy(sha -> block + sha -> used, bytes, take);
-    sha -> used += take;
+    memcpy((* sha).block +(* sha).used, bytes, take);
+    (* sha).used += take;
     bytes += take;
     count -= take;
-    if(sha -> used == 64){
-      _compress(sha, sha -> block);
-      sha -> used = 0;
+    if((* sha).used == 64){
+      _compress(&((* sha)), (* sha).block);
+      (* sha).used = 0;
     }
 
   }
@@ -78,16 +78,16 @@ static void _absorb(_Sha256 * sha, const unsigned char * bytes, size_t count){
 String String_new(const char *);
 
 static String _finish(_Sha256 * sha){
-  uint64_t bits = sha -> length * 8;
+  uint64_t bits =(* sha).length * 8;
   unsigned char tail[72] ={
     0x80
   }
   ;
-  size_t pad =(sha -> used < 56 ? 56 : 120) - sha -> used;
+  size_t pad =((* sha).used < 56 ? 56 : 120) -(* sha).used;
   for(int i = 0;  i < 8;  i ++) tail[pad + i] =(unsigned char)(bits >>(56 - 8 * i));
-  _absorb(sha, tail, pad + 8);
+  _absorb(&((* sha)), tail, pad + 8);
   char hex[65];
-  for(int i = 0;  i < 64;  i ++) hex[i] = "0123456789abcdef"[sha -> state[i / 8] >>(28 - 4 *(i % 8)) & 15];
+  for(int i = 0;  i < 64;  i ++) hex[i] = "0123456789abcdef"[(* sha).state[i / 8] >>(28 - 4 *(i % 8)) & 15];
   hex[64] = '\0';
   return String_new(hex);
 }
@@ -96,8 +96,8 @@ int String_len(String);
 
 String String_sha256(String text){
   _Sha256 sha = _INITIAL;
-  _absorb(& sha, (const unsigned char *) text, String_len(text));
-  return _finish(& sha);
+  _absorb(&(sha), (const unsigned char *) text, String_len(text));
+  return _finish(&(sha));
 }
 
 Var Symbol_var(Symbol);
@@ -108,7 +108,7 @@ String File_sha256(File file){
   _Sha256 sha = _INITIAL;
   unsigned char bytes[BUFSIZ];
   size_t count;
-  while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _absorb(& sha, bytes, count);
+  while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _absorb(&(sha), bytes, count);
   if(ferror(file)){
     int error = errno;
     {
@@ -118,6 +118,6 @@ String File_sha256(File file){
     }
 
   }
-  return _finish(& sha);
+  return _finish(&(sha));
 }
 

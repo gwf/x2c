@@ -952,7 +952,7 @@ List Compiler_parse_catch_pattern_literal(Compiler);
 static List _filtered_catch_arm(Compiler c, int * is_default){
   Token start = c -> token;
   List pattern = NULL;
-  if(Compiler_test(c, 117)) * is_default = 1;
+  if(Compiler_test(c, 117))(* is_default) = 1;
   else{
     if(Compiler_peek(c, 0) != 9553) Compiler_report_error(c, 33658058, _189, c -> token, _155);
     pattern = Compiler_parse_catch_pattern_literal(c);
@@ -971,7 +971,7 @@ static List _filtered_catches(Compiler compiler){
   int saw_default = 0;
   while(1){
     int is_default = 0;
-    List arm = _filtered_catch_arm(compiler, & is_default);
+    List arm = _filtered_catch_arm(compiler, &(is_default));
     Array_push(arms, List_var(arm));
     if(is_default) saw_default = 1;
     if(! Compiler_test(compiler, 6398160)) break;

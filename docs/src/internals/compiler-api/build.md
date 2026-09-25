@@ -18,6 +18,7 @@ Typed native build request and artifact graph.
 | [`Build.begin_translation`](#Build.begin_translation) | Starts translation reporting for `input` and initializes timing when unset. |
 | [`Build.cleanup`](#Build.cleanup) | Removes the temporary work tree after a successful real build. |
 | [`Build.end_translation`](#Build.end_translation) | Records one completed translation and reports the phase when all finish. |
+| [`Build.extension_entries`](#Build.extension_entries) | Writes the registration unit of each package the request links in with `--extension` and returns the request that translates them. |
 | [`Build.finish`](#Build.finish) | Compiles registered C sources and then archives or links the final output. |
 | [`Build.generated_dir`](#Build.generated_dir) | Returns the generated-file directory for `input`. |
 | [`Build.module_entry`](#Build.module_entry) | Writes the entry unit of a native module and returns the request that translates it. |
@@ -50,7 +51,7 @@ Publishes collected native compilation entries as one JSON database.
 The destination's parent must exist. A failed write preserves the
 existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:597`
+Source: `src/build.x:640`
 
 ### `Build`
 
@@ -65,7 +66,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:426`
+Source: `src/build.x:433`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -74,7 +75,7 @@ Source: `src/build.x:426`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:480`
+Source: `src/build.x:523`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -85,7 +86,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:954`
+Source: `src/build.x:997`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -95,7 +96,21 @@ Source: `src/build.x:954`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:488`
+Source: `src/build.x:531`
+
+<a id="Build.extension_entries"></a>
+#### Build.extension_entries
+
+`CliRequest Build.extension_entries(Build b)`
+
+Writes the registration unit of each package the request links in with
+`--extension` and returns the request that translates them. A
+constructor registers the targets of the native `meta` prototypes the
+package's sources declare under the package's name, so any number of
+packages link into one compiler, which selects them without loading a
+module.
+
+Source: `src/build.x:504`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -114,7 +129,7 @@ previous artifact or the whole new one. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:772`
+Source: `src/build.x:815`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -125,7 +140,7 @@ Returns the generated-file directory for `input`.
 The directory is derived from the input path and created unless this is
 a dry run. Native registration belongs to `Build.add_generated`.
 
-Source: `src/build.x:304`
+Source: `src/build.x:311`
 
 <a id="Build.module_entry"></a>
 #### Build.module_entry
@@ -133,13 +148,12 @@ Source: `src/build.x:304`
 `CliRequest Build.module_entry(Build b)`
 
 Writes the entry unit of a native module and returns the request that
-translates it. The entry defines `x2c_module_targets`, which returns a
-Map from the name of each native `meta` prototype the module's x2c
-sources declare to a `Func` that calls it, and `x2c_module_stamp`, which
-holds the stamp the loading compiler must match. A module whose sources
-declare no such prototype fails to translate.
+translates it. The entry defines `x2c_module_targets`, which returns the
+targets of the native `meta` prototypes the module's x2c sources
+declare, and `x2c_module_stamp`, which holds the stamp the loading
+compiler must match.
 
-Source: `src/build.x:444`
+Source: `src/build.x:487`
 
 <a id="Build.publish_script"></a>
 #### Build.publish_script
@@ -155,7 +169,7 @@ so the executable is never reused for source it was not built from.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1056`
+Source: `src/build.x:1099`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -169,7 +183,7 @@ match. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:357`
+Source: `src/build.x:364`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -178,7 +192,7 @@ Source: `src/build.x:357`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:883`
+Source: `src/build.x:926`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -188,7 +202,7 @@ Source: `src/build.x:883`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:939`
+Source: `src/build.x:982`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -200,7 +214,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:1032`
+Source: `src/build.x:1075`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -212,7 +226,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:336`
+Source: `src/build.x:343`
 
 ### `CliRequest`
 
@@ -237,7 +251,7 @@ Source: `src/build.x:212`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1085`
+Source: `src/build.x:1128`
 
 ## Public types
 

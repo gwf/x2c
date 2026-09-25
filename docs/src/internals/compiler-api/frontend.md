@@ -49,7 +49,7 @@ Source: `src/frontend.x:84`
 <a id="Frontend.open"></a>
 #### Frontend.open
 
-`int Frontend.open(Frontend f, String filename, ParsedUnit *unit)`
+`int Frontend.open(Frontend f, String filename, ParsedUnit &unit)`
 
 Runs the source stages. On either result, the caller must close the
 unit.
@@ -59,7 +59,7 @@ Source: `src/frontend.x:376`
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
 
-`int Frontend.open_session(Frontend frontend, ParsedUnit *unit)`
+`int Frontend.open_session(Frontend frontend, ParsedUnit &unit)`
 
 Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
@@ -82,7 +82,7 @@ Source: `src/frontend.x:327`
 <a id="Frontend.start"></a>
 #### Frontend.start
 
-`int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit)`
+`int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit)`
 
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
@@ -94,7 +94,7 @@ Source: `src/frontend.x:281`
 <a id="ParsedUnit.close"></a>
 #### ParsedUnit.close
 
-`void ParsedUnit.close(ParsedUnit *unit)`
+`void ParsedUnit.close(ParsedUnit &unit)`
 
 Releases the unit after its caller has inspected or exported its
 results.
@@ -104,7 +104,7 @@ Source: `src/frontend.x:391`
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
 
-`int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend)`
+`int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend)`
 
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
@@ -114,7 +114,7 @@ Source: `src/frontend.x:344`
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
 
-`int ParsedUnit.parse(ParsedUnit *p)`
+`int ParsedUnit.parse(ParsedUnit &p)`
 
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.

@@ -795,7 +795,7 @@ static String _captured(File file, int * nul){
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
-       {* nul = 1;
+       {(* nul) = 1;
     }
 
   }
@@ -828,8 +828,8 @@ static void Job__finish(Job job){
   if(job -> finished) return;
   job -> finished = 1;
   for(int i = 0;  i < job -> count;  i ++) if(job -> statuses[i]) job -> status = job -> statuses[i];
-  job -> output_text = _captured(job -> output_file, & job -> nul_output);
-  job -> errors_text = _captured(job -> errors_file, & job -> nul_errors);
+  job -> output_text = _captured(job -> output_file, &(job -> nul_output));
+  job -> errors_text = _captured(job -> errors_file, &(job -> nul_errors));
   job -> output_file = job -> errors_file = NULL;
 }
 

@@ -196,7 +196,7 @@ struct LowerCursor {
   int object, cursor, item, value;
 };
 
-static int _lower_cursor(Var test, struct LowerCursor *walk) {
+static int _lower_cursor(Var test, struct LowerCursor &walk) {
   match (test) {
     case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
           (args (expr ? (ident (binding ?(int object) ?)))
@@ -229,7 +229,7 @@ static int _lower_cursor(Var test, struct LowerCursor *walk) {
 /* A cursor's storage cannot escape its block or be addressed by the body.
    Direct `try_next` loops whose outputs live after the loop keep their
    storage. */
-static int _lower_cursor_addressed(Var form, struct LowerCursor *walk) {
+static int _lower_cursor_addressed(Var form, struct LowerCursor &walk) {
   if (form is not <list>) return 0;
   List items = form;
   match (items)
@@ -244,12 +244,12 @@ static void _lower_scan_cursor_block(Lowering l, List parts) {
   if (!parts) return;
   struct LowerCursor walk;
   match (_lower_bare(parts.last())) case %(while ?test ?body): {
-    if (!_lower_cursor(test, &walk) || _lower_cursor_addressed(body, &walk))
+    if (!_lower_cursor(test, walk) || _lower_cursor_addressed(body, walk))
       return;
     Map declared = $auto({});
     for (List rest = parts; rest.cdr(); rest = rest.cdr()) {
       Var part = _lower_bare(rest.car());
-      if (_lower_cursor_addressed(part, &walk)) return;
+      if (_lower_cursor_addressed(part, walk)) return;
       match (part) case %(declare ? (bindings *bindings)):
         foreach (Var binding, bindings) {
           match (binding) case %(op = ?target ?): binding = target;
@@ -303,7 +303,7 @@ static void _lower_scan_bind(Lowering l, List form) {
   }
 }
 
-static int _lower_dimension(Lowering l, int id, int *out);
+static int _lower_dimension(Lowering l, int id, int &out);
 
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
@@ -1794,7 +1794,7 @@ static Var _lower_loop(
   _lower_referenced(k, used);
   /* The element is read where it is used, so the loop does not carry it. */
   struct LowerCursor walk;
-  int walking = _lower_cursor(test, &walk) && walk.cursor in l.cursors;
+  int walking = _lower_cursor(test, walk) && walk.cursor in l.cursors;
   if (walking) {
     used.del(walk.item);
     if (walk.value) used.del(walk.value);
@@ -2027,14 +2027,14 @@ static Var _lower_boxed(Lowering l, int id, Var value, int fresh) {
 
 /* A C array's dimension, read at lowering time so a partly written one is
    zero-filled the way C fills it. A computed dimension has no such answer. */
-static int _lower_dimension(Lowering l, int id, int *out) {
+static int _lower_dimension(Lowering l, int id, int &out) {
   Var size;
   if (!l.arrays.try_get(id, &size)) return 0;
   match (size)
     case %(expr ? (literal ?(List type) ?(String text))): {
       Var count = ((Type) type).numeric_literal_value(text);
       if (count is not void && count >= 0 && count <= (int) INT_MAX) {
-        *out = (int) count;
+        out = (int) count;
         return 1;
       }
     }
@@ -2096,7 +2096,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
     Type declared = type;
     Type element = declared.is_array() ? declared.dereference() : declared;
     int size = 0;
-    if (!_lower_dimension(l, id, &size))
+    if (!_lower_dimension(l, id, size))
       return _lower_decline(l, "an array dimension that is not a literal");
     Array values = _lower_values(l, items);
     if (l.declined) return void;
@@ -2293,11 +2293,11 @@ static Var _lower_declarator(
 /* A destructuring names its targets bare when one type covers them all and
    through `param` when each carries its own. The type decides nothing
    either way, because a Lisp value already is a `Var`. */
-static int _lower_destructure_id(Var target, int *out) {
+static int _lower_destructure_id(Var target, int &out) {
   match (target) {
     case %(!or (binding ?(int id) ?)
                (param ? (bind (binding ?(int id) ?) *))): {
-      *out = id;
+      out = id;
       return 1;
     }
   }
@@ -2321,7 +2321,7 @@ static Var _lower_destructure(
   int index = 0;
   foreach (List target, targets) {
     int id;
-    if (!_lower_destructure_id(target, &id))
+    if (!_lower_destructure_id(target, id))
       return _lower_decline(l, "unsupported destructuring target");
     Var element = %(List_getindex $held $index);
     index++;
@@ -2976,11 +2976,11 @@ static void _retain_lowering(
 }
 
 /* The process cache key of a definition, "path#name", or NULL for one
-   without a file. `*name` is the definition's name. */
-static String _lowering_key(Compiler compiler, List fn, String *name) {
+   without a file. `name` is the definition's name. */
+static String _lowering_key(Compiler compiler, List fn, String &name) {
   match (fn)
     case %(function ? (bind (binding ? ?(String own)) ?) ?): {
-      *name = own;
+      name = own;
       if (compiler.filename)
         return %"${Path.absolute(compiler.filename)}#$own";
     }
@@ -2990,7 +2990,7 @@ static String _lowering_key(Compiler compiler, List fn, String *name) {
 /** Returns the region summary an earlier install of `fn` from the same file
     recorded with its lowering, or NULL when the process has none. */
 List Compiler.lowered_meta_regions(Compiler compiler, List fn) {
-  String name = NULL, key = _lowering_key(compiler, fn, &name);
+  String name = NULL, key = _lowering_key(compiler, fn, name);
   if (!key || (void *) lowered_defs == NULL) return NULL;
   match (lowered_defs[key]) case %(? ? ? ?(List regions)): return regions;
   return NULL;
@@ -3011,7 +3011,7 @@ static void _evaluate_lowering(Compiler compiler, String own, List forms) {
     session and does not open a semantic transaction.
 */
 int Compiler.install_comptime(Compiler compiler, List fn) {
-  String own = NULL, key = _lowering_key(compiler, fn, &own);
+  String own = NULL, key = _lowering_key(compiler, fn, own);
   /* The shared session installed this definition, from this file, before any
      unit opened. Installing it again would only try to replace a name an
      ancestor binds; the unit reads the shared one. */
@@ -3375,7 +3375,7 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
   int hops = 0;
   while (alias && (alias.is_typedef_name() || alias.is_typedef())) {
     if (sym.get(%(@alias "layout-attribute"))) return NULL;
-    alias = sym.next_typedef(alias, &hops).base_type();
+    alias = sym.next_typedef(alias, hops).base_type();
   }
   if (sym.is_var_type(declared)) return _meta_var_layout(declared);
   Type tagged = NULL;

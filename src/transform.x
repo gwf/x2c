@@ -174,7 +174,7 @@ static List _lower_printf_vars(Compiler c, List ast) {
   if (info.fmt_arg >= values.len())
     _printf_error(c, family, "call has no format argument");
   List format_arg = values[info.fmt_arg], int raw = 0;
-  String format = c.printf_static_format(format_arg, &raw);
+  String format = c.printf_static_format(format_arg, raw);
   if (!format)
     _printf_error(
       c, family,
@@ -637,27 +637,27 @@ static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
 
 // Helper-backed indexes bypass getindex lowering.
 static int _indexed_parts(
-  Compiler compiler, List expr, Symbol *owner, List *base, List *selector) {
+  Compiler compiler, List expr, Symbol &owner, List &base, List &selector) {
   match (expr)
     case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
                             ?matched_selector)): {
-      *owner = _indexed_builtin_helper(compiler, type);
-      *base = matched_base;
-      *selector = matched_selector;
+      owner = _indexed_builtin_helper(compiler, type);
+      base = matched_base;
+      selector = matched_selector;
       return 1;
     }
   return 0;
 }
 
 static void _convert_indexed_parts(
-  Compiler compiler, Symbol owner, List *base, List *selector) {
+  Compiler compiler, Symbol owner, List &base, List &selector) {
   if (owner == <array>) {
-    *base = compiler.convert_expression(*base, %("Array"));
-    *selector = compiler.convert_expression(*selector, %(int));
+    base = compiler.convert_expression(base, %("Array"));
+    selector = compiler.convert_expression(selector, %(int));
   }
   else {
-    *base = compiler.convert_expression(*base, %("Map"));
-    *selector = compiler.convert_expression(*selector, %("Var"));
+    base = compiler.convert_expression(base, %("Map"));
+    selector = compiler.convert_expression(selector, %("Var"));
   }
 }
 
@@ -693,7 +693,7 @@ static List _sequenced_protocol_call(
 static List _indexed_update(
   Compiler c, List lhs, Symbol op, List rhs) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(c, lhs, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(c, lhs, owner, base, selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved = c.resolve_protocol_member(base_type, "updateindex");
@@ -718,7 +718,7 @@ static List _indexed_update(
       c, resolved,
       %($base $selector ${_symbol_expression(op)} $rhs));
 
-  _convert_indexed_parts(c, owner, &base, &selector);
+  _convert_indexed_parts(c, owner, base, selector);
   rhs = c.convert_expression(rhs, %("Var"));
   String helper = owner == <array> ? "Array_updateindex" : "Map_updateindex";
   return %(
@@ -728,7 +728,7 @@ static List _indexed_update(
 static List _indexed_postfix(
   Compiler compiler, List arg, Symbol op) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(compiler, arg, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(compiler, arg, owner, base, selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved =
@@ -743,7 +743,7 @@ static List _indexed_postfix(
     return _sequenced_protocol_call(
       compiler, resolved,
       %($base $selector ${_symbol_expression(op)}));
-  _convert_indexed_parts(compiler, owner, &base, &selector);
+  _convert_indexed_parts(compiler, owner, base, selector);
   String helper = owner == <array> ? "Array_postfixindex" : "Map_postfixindex";
   return %(call $helper (args $base $selector ${_symbol_expression(op)}));
 }
@@ -1162,25 +1162,25 @@ static List _defer_direct_binding(Var value) {
 }
 
 static void _defer_collect_captures(
-  Compiler compiler, List ast, List *declared, Map captures, Array records,
-  List *written, int *unsupported) {
-  if (!ast || *unsupported) return;
+  Compiler compiler, List ast, List &declared, Map captures, Array records,
+  List &written, int &unsupported) {
+  if (!ast || unsupported) return;
   match (ast)
     case %(bind ?bound *): {
-      List binding = bound, known = *declared;
-      if (!known.contains(binding)) *declared = cons(binding, known);
+      List binding = bound, known = declared;
+      if (!known.contains(binding)) declared = cons(binding, known);
     }
   match (ast)
     case %(expr ? (ident ?bound)): {
       List binding = bound;
       Var automatic, existing, stored_type;
-      if (binding && !(*declared).contains(binding) &&
+      if (binding && !declared.contains(binding) &&
           compiler.semantic_binding_facts().try_get(
             %(automatic $binding), &automatic) &&
           !captures.try_get(binding, &existing)) {
         stored_type = compiler.semantic_binding_facts()[%(type $binding)];
         if (!_defer_type_hoistable(compiler, stored_type)) {
-          *unsupported = 1;
+          unsupported = 1;
           return;
         }
         String field_name = compiler.fresh_name("defer_capture");
@@ -1205,10 +1205,10 @@ static void _defer_collect_captures(
         compiler, child, declared, captures, records, written,
         unsupported);
   Var field;
-  List changed = *written;
+  List changed = written;
   if (modified && captures.try_get(modified, &field) &&
       !changed.contains(modified))
-    *written = cons(modified, changed);
+    written = cons(modified, changed);
 }
 
 // Replace captured object references with pointer dereferences through the
@@ -1245,7 +1245,7 @@ static List _lower_callable_defer(
   List declared = %(), written = %();
   Map captures = {}, Array records = [], int unsupported = 0;
   _defer_collect_captures(
-    c, finalizer, &declared, captures, records, &written, &unsupported);
+    c, finalizer, declared, captures, records, written, unsupported);
   if (unsupported) {
     records.free();
     return %(try $body () $finalizer);

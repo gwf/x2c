@@ -446,9 +446,9 @@ void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
 /** Reads a source through the request view and retains exact response
     bytes.
 */
-int Compiler.read_source(Compiler c, String path, String volatile *text) {
+int Compiler.read_source(Compiler c, String path, String volatile &text) {
   if (!c.sources.read(path, text)) return 0;
-  if (c.source_facts) c.source_texts[Path.absolute(path)] = *text;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
   return 1;
 }
 
@@ -617,7 +617,7 @@ Symbol preproc_never_active_arm(String s) {
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
    are not names. */
-static int _layout_attribute(Token open, int *packed) {
+static int _layout_attribute(Token open, int &packed) {
   Token close = open.group_close();
   int depth = 0, layout = 0;
   for (Token t = open; t < close; t++) {
@@ -626,7 +626,7 @@ static int _layout_attribute(Token open, int *packed) {
     String word = t.text.strip("_");
     if (word == "packed") {
       layout = 1;
-      *packed = 1;
+      packed = 1;
     }
     else if (word == "aligned" || word == "mode" ||
              word == "vector_size") layout = 1;
@@ -644,7 +644,7 @@ static size_t _note_attribute(Compiler c, size_t index) {
   Token inner = _skip_forward(open + 1), last = open.group_close();
   if (last.type == <eof>) return index;
   int packed = 0;
-  if (inner.type == <(> && _layout_attribute(inner, &packed)) {
+  if (inner.type == <(> && _layout_attribute(inner, packed)) {
     c.layout_marks.push((long) index);
     c.layout_marks.push((long) index + 1);
     if (packed) {
@@ -658,12 +658,12 @@ static size_t _note_attribute(Compiler c, size_t index) {
 /* Returns the name token of the `#define` or `#undef` directive `content`,
    or NULL for any other directive, and sets `*undefined` for `#undef`. The
    directive is scanned as x2c tokens. */
-static Token _macro_directive(String content, int *undefined) {
+static Token _macro_directive(String content, int &undefined) {
   String directive = preproc_directive(content);
-  *undefined = directive.startswith("undef");
-  if (!*undefined && !directive.startswith("define")) return NULL;
+  undefined = directive.startswith("undef");
+  if (!undefined && !directive.startswith("define")) return NULL;
   Tokenizer scanned = Tokenizer.new(
-    directive.remove_prefix(*undefined ? "undef" : "define"), <x2c>);
+    directive.remove_prefix(undefined ? "undef" : "define"), <x2c>);
   scanned.scan();
   Token token = _skip_forward(scanned.tokens);
   return token.type == <ident> ? token : NULL;
@@ -678,7 +678,7 @@ static Token _macro_directive(String content, int *undefined) {
 static void _note_layout_macro(
   String content, Map layout, int conditional) {
   int undefined;
-  Token name = _macro_directive(content, &undefined);
+  Token name = _macro_directive(content, undefined);
   if (!name) return;
   if (!conditional) layout.del(name.text);
   if (undefined) return;
@@ -691,7 +691,7 @@ static void _note_layout_macro(
       Token open = _skip_forward(token + 1);
       Token inner = open.type == <(> ? _skip_forward(open + 1) : open;
       int packed = 0;
-      if (inner.type == <(> && _layout_attribute(inner, &packed))
+      if (inner.type == <(> && _layout_attribute(inner, packed))
         value = packed ? 2 : value ? value : 1;
     }
     else if (layout.contains(token.text)) {
@@ -1457,7 +1457,7 @@ static List _declaration_forward(
 }
 
 static List _select_declaration_forwards(
-  Compiler compiler, List rows, Map pending, int *remaining) {
+  Compiler compiler, List rows, Map pending, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
@@ -1466,7 +1466,7 @@ static List _select_declaration_forwards(
           List bound = _declaration_forward(
             compiler, child, parent, member, fallback, pending);
           if (!bound) {
-            (*remaining)++;
+            remaining++;
             selected.push(row);
           }
           else {
@@ -1538,7 +1538,7 @@ Map Compiler.select_declaration_defaults(
     remaining = 0;
     for (size_t index = 0; index < sources.len(); index++) {
       (Map declarations, Var key, Var end, List rows) = sources[index];
-      rows = _select_declaration_forwards(shadow, rows, pending, &remaining);
+      rows = _select_declaration_forwards(shadow, rows, pending, remaining);
       sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
@@ -1780,7 +1780,7 @@ static int _prefix_rank(Var v) {
    drops the name, so later source reads it as an ordinary identifier. */
 static void _note_object_macro(Compiler c, String content) {
   int undefined;
-  Token token = _macro_directive(content, &undefined);
+  Token token = _macro_directive(content, undefined);
   if (!token) return;
   String name = token.text;
   if (undefined) {
@@ -3512,8 +3512,8 @@ Type Sym.resolve_key(Sym sym, Type key) {
     Returns `NULL` for an unresolved link. The shared budget turns a cycle
     into the same diagnostic as full-chain resolution.
 */
-Type Sym.next_typedef(Sym sym, Type type, int *hops) {
-  if (++*hops > RESOLVE_KEY_MAX_HOPS) {
+Type Sym.next_typedef(Sym sym, Type type, int &hops) {
+  if (++hops > RESOLVE_KEY_MAX_HOPS) {
     _typedef_budget_error(sym, type);
     return NULL;
   }
@@ -3791,7 +3791,7 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
       type = sym.resolve_key(type.dereference());
       break;
     }
-    type = sym.next_typedef(type, &hops);
+      type = sym.next_typedef(type, hops);
   }
   return type && type.is_aggregate_tag() ? type : NULL;
 }

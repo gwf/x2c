@@ -134,11 +134,11 @@ typedef struct ReplSizeDelta {
 } ReplSizeDelta;
 
 static ReplStatsSnapshot _stats_snapshot(
-  ReplSession session, Pool pool, MachineStats *machine) {
+  ReplSession session, Pool pool, MachineStats &machine) {
   ReplStatsSnapshot stats;
   stats.definitions = session.names.len();
   stats.evaluation = session.compiler.macro_lisp.auto_stats();
-  stats.machine = *machine;
+  stats.machine = machine;
   stats.scope = Scope.stats();
   stats.pool = Pool.stats(pool);
   return stats;
@@ -151,7 +151,7 @@ static ReplSizeDelta _size_delta(size_t now, size_t before) {
 }
 
 static void _write_stats(
-  File out, ReplSession session, Pool pool, MachineStats *machine,
+  File out, ReplSession session, Pool pool, MachineStats &machine,
   ReplStatsSnapshot baseline, int verbose) {
   ReplStatsSnapshot now = _stats_snapshot(session, pool, machine);
   long calls = now.evaluation.invocations - baseline.evaluation.invocations;
@@ -335,7 +335,7 @@ int repl_run(CliRequest request, ReplOptions options) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
   ParsedUnit unit;
-  int opened = frontend.open_session(&unit);
+  int opened = frontend.open_session(unit);
   defer unit.close();
   if (!opened) {
     foreach (Var entry, unit.compiler.diagnostics())
@@ -354,7 +354,7 @@ int repl_run(CliRequest request, ReplOptions options) {
   defer unit.compiler.macro_lisp.auto_instrument(NULL);
   Pool stats_pool = Pool.current();
   ReplStatsSnapshot stats_baseline =
-    _stats_snapshot(session, stats_pool, &machine_stats);
+    _stats_snapshot(session, stats_pool, machine_stats);
   if (interactive) puts("x2c experimental REPL; :help for commands");
   while (1) {
     if (interactive) {
@@ -399,7 +399,7 @@ int repl_run(CliRequest request, ReplOptions options) {
           failed = 1;
         }
         else _write_stats(
-          Stdout, session, stats_pool, &machine_stats,
+          Stdout, session, stats_pool, machine_stats,
           stats_baseline, verbose);
       }
       else if (!_inspect(session, descriptor, command)) failed = 1;
@@ -437,7 +437,7 @@ int repl_run(CliRequest request, ReplOptions options) {
   }
   if (options.stats || options.verbose_stats)
     _write_stats(
-      Stderr, session, stats_pool, &machine_stats, stats_baseline,
+      Stderr, session, stats_pool, machine_stats, stats_baseline,
       options.verbose_stats);
   if (pending.len()) { fputs("incomplete input at EOF\n", stderr); return 1; }
   return !interactive && failed;

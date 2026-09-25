@@ -735,7 +735,7 @@ ProjectBuild project_plan(CliRequest request) {
   if (!project.path)
     _error(NULL, 0, "no explicit inputs and no x2c.toml found");
   project.path = Path.absolute(project.path);
-  if (!project.sources.read(project.path, &project.text))
+  if (!project.sources.read(project.path, project.text))
     _error(project, 0, "cannot read manifest");
   project.root = Path.dirname(project.path);
   _parse_manifest(project);

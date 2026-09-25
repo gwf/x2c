@@ -1298,7 +1298,7 @@ static List _lower_printf_vars(Compiler c, List ast){
   if(info -> fmt_arg >= Array_len(values)) _printf_error(c, family, _858);
   List format_arg = Var_list(Array_getindex(values, info -> fmt_arg));
   int raw = 0;
-  String format = Compiler_printf_static_format(c, List_var(format_arg), & raw);
+  String format = Compiler_printf_static_format(c, List_var(format_arg), &(raw));
   if(! String_truth(format)) _printf_error(c, family, _859);
   int cursor = raw ? 1 : 0, end = raw ? String_len(format) - 1 : String_len(format);
   int value_index = info -> first_arg;
@@ -1767,7 +1767,7 @@ static int _indexed_parts(Compiler compiler, List expr, Symbol * owner, List * b
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x2c_match_site_16, _x2c_match_expr, List_var(_318), &_x2c_match_capture)) {Var matched_base = _x2c_match_values[0];  Var type = _x2c_match_values[1];  Var matched_selector = _x2c_match_values[2]; {
-    * owner = _indexed_builtin_helper(compiler, Var_type(type));  * base = Var_list(matched_base);  * selector = Var_list(matched_selector);  return 1;
+    (* owner) = _indexed_builtin_helper(compiler, Var_type(type)); (* base) = Var_list(matched_base); (* selector) = Var_list(matched_selector);  return 1;
   }
   break;
 }
@@ -1779,10 +1779,10 @@ return 0;
 
 static void _convert_indexed_parts(Compiler compiler, Symbol owner, List * base, List * selector){
   if(owner == 3313778){
-    * base = Compiler_convert_expression(compiler, * base, List_type(_321));  * selector = Compiler_convert_expression(compiler, * selector, List_type(_9));
+    (* base) = Compiler_convert_expression(compiler, (* base), List_type(_321)); (* selector) = Compiler_convert_expression(compiler, (* selector), List_type(_9));
   }
   else{
-    * base = Compiler_convert_expression(compiler, * base, List_type(_324));  * selector = Compiler_convert_expression(compiler, * selector, List_type(_2));
+    (* base) = Compiler_convert_expression(compiler, (* base), List_type(_324)); (* selector) = Compiler_convert_expression(compiler, (* selector), List_type(_2));
   }
 
 }
@@ -1800,20 +1800,20 @@ static List _sequenced_protocol_call(Compiler compiler, List resolved, List argu
 
 String List_repr(List);
 static List _indexed_update(Compiler c, List lhs, Symbol op, List rhs){
-  Symbol owner;  List base, selector;  if(! _indexed_parts(c, lhs, & owner, & base, & selector)) return NULL;  List _x2c_destructure_7 = base;  Var base_tag = List_getindex(_x2c_destructure_7, 0);  Type base_type = Var_type(List_getindex(_x2c_destructure_7, 1)); (void) base_tag;  List resolved = Compiler_resolve_protocol_member(c, base_type, _876);  if(! List_truth(resolved)){
+  Symbol owner;  List base, selector;  if(! _indexed_parts(c, lhs, &(owner), &(base), &(selector))) return NULL;  List _x2c_destructure_7 = base;  Var base_tag = List_getindex(_x2c_destructure_7, 0);  Type base_type = Var_type(List_getindex(_x2c_destructure_7, 1)); (void) base_tag;  List resolved = Compiler_resolve_protocol_member(c, base_type, _876);  if(! List_truth(resolved)){
     String type = List_repr(Type_list(base_type));  Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_138), cons(String_var(type), cons(String_var(_326), NULL)))), NULL, NULL);
   }
   if(owner && ! _indexed_rhs_allowed(c, op, rhs)){
     List _x2c_destructure_8 = rhs;  Var rhs_tag = List_getindex(_x2c_destructure_8, 0);  Type rhs_type = Var_type(List_getindex(_x2c_destructure_8, 1)); (void) rhs_tag;  String details = String_join(NULL, cons(String_var(_327), cons(String_var(List_repr(Type_list(rhs_type))), NULL)));  String message = op == 56 ? _877 : _878;  Compiler_report_error(c, 50756762, message, NULL, cons(String_var(details), NULL));
   }
-  if(! owner) return _sequenced_protocol_call(c, resolved, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), cons(List_var(rhs), NULL)))));  _convert_indexed_parts(c, owner, & base, & selector);  rhs = Compiler_convert_expression(c, rhs, List_type(_2));  String helper = owner == 3313778 ? _879 : _880;  return cons(_11, cons(String_var(helper), cons(List_var(cons(_13, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), cons(List_var(rhs), NULL)))))), NULL)));
+  if(! owner) return _sequenced_protocol_call(c, resolved, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), cons(List_var(rhs), NULL)))));  _convert_indexed_parts(c, owner, &(base), &(selector));  rhs = Compiler_convert_expression(c, rhs, List_type(_2));  String helper = owner == 3313778 ? _879 : _880;  return cons(_11, cons(String_var(helper), cons(List_var(cons(_13, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), cons(List_var(rhs), NULL)))))), NULL)));
 }
 
 static List _indexed_postfix(Compiler compiler, List arg, Symbol op){
-  Symbol owner;  List base, selector;  if(! _indexed_parts(compiler, arg, & owner, & base, & selector)) return NULL;  List _x2c_destructure_9 = base;  Var base_tag = List_getindex(_x2c_destructure_9, 0);  Type base_type = Var_type(List_getindex(_x2c_destructure_9, 1)); (void) base_tag;  List resolved = Compiler_resolve_protocol_member(compiler, base_type, _881);  if(! List_truth(resolved)){
+  Symbol owner;  List base, selector;  if(! _indexed_parts(compiler, arg, &(owner), &(base), &(selector))) return NULL;  List _x2c_destructure_9 = base;  Var base_tag = List_getindex(_x2c_destructure_9, 0);  Type base_type = Var_type(List_getindex(_x2c_destructure_9, 1)); (void) base_tag;  List resolved = Compiler_resolve_protocol_member(compiler, base_type, _881);  if(! List_truth(resolved)){
     String type = List_repr(Type_list(base_type));  Compiler_report_error(compiler, 50756762, String_join(NULL, cons(String_var(_138), cons(String_var(type), cons(String_var(_328), NULL)))), NULL, NULL);
   }
-  if(! owner) return _sequenced_protocol_call(compiler, resolved, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), NULL))));  _convert_indexed_parts(compiler, owner, & base, & selector);  String helper = owner == 3313778 ? _882 : _883;  return cons(_11, cons(String_var(helper), cons(List_var(cons(_13, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), NULL))))), NULL)));
+  if(! owner) return _sequenced_protocol_call(compiler, resolved, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), NULL))));  _convert_indexed_parts(compiler, owner, &(base), &(selector));  String helper = owner == 3313778 ? _882 : _883;  return cons(_11, cons(String_var(helper), cons(List_var(cons(_13, cons(List_var(base), cons(List_var(selector), cons(List_var(_symbol_expression(op)), NULL))))), NULL)));
 }
 
 static List _indexed_prefix(Compiler compiler, List arg, Symbol op){
@@ -2120,13 +2120,13 @@ Var Map_getindex(Map, Var);
 int Var_is(Var, Symbol);
 int ast_changes_left_operand(Symbol);
 static void _defer_collect_captures(Compiler compiler, List ast, List * declared, Map captures, Array records, List * written, int * unsupported){
-  if(! List_truth(ast) || * unsupported) return;
+  if(! List_truth(ast) ||(* unsupported)) return;
   {
     List _x2c_match_expr = ast;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ;  static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_571), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
-    List binding = Var_list(bound), known = * declared;  if(! List_contains(known, List_var(binding))) * declared = cons(List_var(binding), known);
+    List binding = Var_list(bound), known =(* declared);  if(! List_contains(known, List_var(binding)))(* declared) = cons(List_var(binding), known);
   }
   break;
 }
@@ -2141,7 +2141,7 @@ default: break;
       case 377892: ;  static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_577), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
   List binding = Var_list(bound);  Var automatic, existing, stored_type;  if(List_truth(binding) && ! List_contains((* declared), List_var(binding)) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_578, cons(List_var(binding), NULL))), & automatic) && ! Map_try_get(captures, List_var(binding), & existing)){
     stored_type = Map_getindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_579, cons(List_var(binding), NULL))));  if(! _defer_type_hoistable(compiler, Var_type(stored_type))){
-      * unsupported = 1;  return;
+      (* unsupported) = 1;  return;
     }
     String field_name = Compiler_fresh_name(compiler, _893);  List field = Sym_introduce(compiler -> sym, field_name);  Map_setindex(captures, List_var(binding), List_var(field));  Array_push(records, List_var(cons(List_var(binding), cons(stored_type, cons(List_var(field), NULL)))));
   }
@@ -2168,11 +2168,11 @@ static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x
   }
 {
   Var child;  List _x2c_macro_object_11 = ast;  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_10)){
-    child = _x2c_macro_cursor_output_10;  if(Var_is_row(child, 9, 7, 4)) _defer_collect_captures(compiler, Var_list(child), declared, captures, records, written, unsupported);
+    child = _x2c_macro_cursor_output_10;  if(Var_is_row(child, 9, 7, 4)) _defer_collect_captures(compiler, Var_list(child), &((* declared)), captures, records, &((* written)), &((* unsupported)));
   }
 
 }
-Var field;  List changed = * written;  if(List_truth(modified) && Map_try_get(captures, List_var(modified), & field) && ! List_contains(changed, List_var(modified))) * written = cons(List_var(modified), changed);
+Var field;  List changed =(* written);  if(List_truth(modified) && Map_try_get(captures, List_var(modified), & field) && ! List_contains(changed, List_var(modified)))(* written) = cons(List_var(modified), changed);
 }
 
 int Var_equal(Var, Var);
@@ -2208,7 +2208,7 @@ return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) 
 Var List_caddr(List);
 void Compiler_add_early(Compiler, List);
 static List _lower_callable_defer(Compiler c, List body, List finalizer){
-  List declared = NULL, written = NULL;  Map captures = Map_new();  Array records = Array_new();  int unsupported = 0;  _defer_collect_captures(c, finalizer, & declared, captures, records, & written, & unsupported);  if(unsupported){
+  List declared = NULL, written = NULL;  Map captures = Map_new();  Array records = Array_new();  int unsupported = 0;  _defer_collect_captures(c, finalizer, &(declared), captures, records, &(written), &(unsupported));  if(unsupported){
     Array_free(records);  return cons(_548, cons(List_var(body), cons(_244, cons(List_var(finalizer), NULL))));
   }
   List env_binding = NULL, env_local = NULL;  String env_name = NULL;  List record_list = Array_list_free(records);  if(List_truth(record_list)){

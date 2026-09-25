@@ -93,26 +93,26 @@ static uint64_t _state_list(uint64_t hash, List values) {
   return x2c_fnv_bytes(hash, "\xfe", 1);
 }
 
-static uint64_t _state_file(uint64_t hash, String path, int *ok) =>
+static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
   x2c_fnv_file(_state_text(hash, path), path, ok);
 
-static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
+static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
   if (!tool) {
-    *ok = 0;
+    ok = 0;
     return hash;
   }
   String path = tool.contains("/") ? tool : x2c_find_program(tool);
   if (path) return _state_file(hash, path, ok);
-  *ok = 0;
+  ok = 0;
   return _state_text(hash, tool);
 }
 
-static uint64_t _state_base(CliRequest request, String tool, int *ok) {
+static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   String compiler = x2c_compiler_identity();
-  if (!compiler) *ok = 0;
+  if (!compiler) ok = 0;
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
   return hash;
@@ -127,10 +127,10 @@ static List _state_dep_inputs(String depfile) {
   return translation_depfile_parse(text);
 }
 
-static uint64_t _state_dependencies(uint64_t hash, String depfile, int *ok) {
+static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
   List inputs = _state_dep_inputs(depfile);
   if (!inputs) {
-    *ok = 0;
+    ok = 0;
     return hash;
   }
   foreach (String input, inputs) hash = _state_file(hash, input, ok);
@@ -210,6 +210,13 @@ void build_check_input(String input) {
     diagnostic and exit with status 2.
 */
 Build CliRequest.prepare(CliRequest c) {
+  // A linked package's sources are units, translated in package mode.
+  foreach (String package, c.extensions) {
+    String root = Path.absolute(package);
+    c.package_dirs = c.package_dirs.append(%(${Path.dirname(root)}));
+    c.inputs = c.inputs.append(Path.glob(%"$root/src/*.x"))
+      .append(Path.glob(%"$root/src/*.c"));
+  }
   if (!c.inputs)
     x2c_driver_error("build requires input operands or a project manifest");
   int compilable = 0, input_count = 0;
@@ -308,7 +315,7 @@ String Build.generated_dir(Build state, String input) {
 }
 
 static uint64_t _translation_fingerprint(
-  Build state, String input, String directory, int *ok) {
+  Build state, String input, String directory, int &ok) {
   uint64_t hash = _state_base(state.request, state.toolchain.cc, ok);
   hash = _state_text(hash, "translate");
   hash = _state_text(hash, input);
@@ -339,7 +346,7 @@ int Build.translation_current(Build state, String input, String directory) {
   foreach (String suffix, %(".c" ".h" ".xi"))
     if (!Path.is_file(%"$directory/$stem$suffix")) return 0;
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
   String path = %"${state.state_root}/x-${_key(input)}";
   int current = ok && _state_matches(path, hash);
   if (current && state.request.verbose)
@@ -358,7 +365,7 @@ void Build.record_translation(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return;
   String depfile = %"$directory/${Path.stem(input)}.d";
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
   if (ok && _files_unchanged(state, _state_dep_inputs(depfile)))
     _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
@@ -434,28 +441,22 @@ void Build.add_generated(Build state, String input, String directory) {
   state._link_packages(input, directory);
 }
 
-/** Writes the entry unit of a native module and returns the request that
-    translates it. The entry defines `x2c_module_targets`, which returns a
-    Map from the name of each native `meta` prototype the module's x2c
-    sources declare to a `Func` that calls it, and `x2c_module_stamp`, which
-    holds the stamp the loading compiler must match. A module whose sources
-    declare no such prototype fails to translate.
-*/
-CliRequest Build.module_entry(Build b) {
-  String stamp = build_module_stamp();
-  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
-  /* Each source is included by its absolute path through a link to the
-     filesystem root beside the entry, so distinct sources with one name stay
-     distinct and each unit's generated header is placed inside the entry's
-     own generated directory. No include directory reaches the root. */
+/* Writes the entry unit `entry`, which includes each of `units`, defines
+   `$module.targets()`, a Map from the name of each native `meta` prototype
+   they declare to a `Func` that calls it, and ends with `exports`. Units
+   that declare no such prototype fail to translate. Each source is included
+   by its absolute path through a link to the filesystem root beside the
+   entry, so distinct sources with one name stay distinct and each unit's
+   generated header is placed inside the entry's own generated directory.
+   No include directory reaches the root. */
+static void _write_entry(Path entry, List units, String exports) {
   String includes = "", Array sources = [];
-  foreach (String unit, b.units) {
+  foreach (String unit, units) {
     String source = Path.absolute(unit);
     includes = %"$includes#include \"x2c-root$source\"\n";
     sources.push(source);
   }
   String declared = sources.list_free().repr(), root = x2c_get_root();
-  Path entry = %"${b.work_dir}/module/x2c_module.x";
   Path link = entry.dirname().join("x2c-root");
   try {
     entry.dirname().make_dirs();
@@ -464,15 +465,57 @@ CliRequest Build.module_entry(Build b) {
       %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
 macro Expression \$module.targets() =>
   \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
-const char x2c_module_stamp[] = \"$stamp\";
-Map x2c_module_targets(void) => \$module.targets();
-");
+$exports");
   }
   catch %(io-fail *detail): x2c_host_error(detail);
+}
+
+/* The request that translates this build's entry units `entries`. */
+static CliRequest Build._entry_request(Build b, List entries) {
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
-  request.inputs = %($entry);
-  b.xlat_n++;
+  request.inputs = entries;
+  b.xlat_n += entries.len();
   return request;
+}
+
+/** Writes the entry unit of a native module and returns the request that
+    translates it. The entry defines `x2c_module_targets`, which returns the
+    targets of the native `meta` prototypes the module's x2c sources
+    declare, and `x2c_module_stamp`, which holds the stamp the loading
+    compiler must match.
+*/
+CliRequest Build.module_entry(Build b) {
+  String stamp = build_module_stamp();
+  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
+  Path entry = %"${b.work_dir}/module/x2c_module.x";
+  _write_entry(entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
+Map x2c_module_targets(void) => \$module.targets();
+");
+  return b._entry_request(%($entry));
+}
+
+/** Writes the registration unit of each package the request links in with
+    `--extension` and returns the request that translates them. A
+    constructor registers the targets of the native `meta` prototypes the
+    package's sources declare under the package's name, so any number of
+    packages link into one compiler, which selects them without loading a
+    module.
+*/
+CliRequest Build.extension_entries(Build b) {
+  Array entries = [];
+  foreach (String package, b.request.extensions) {
+    String root = Path.absolute(package), name = Path.basename(root);
+    Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
+    _write_entry(entry, Path.glob(%"$root/src/*.x"),
+      %"void x2c_register_extension(const char *, Map (*)(void));
+static Map _targets(void) => \$module.targets();
+__attribute__((constructor)) static void _register(void) {
+  x2c_register_extension(\"$name\", _targets);
+}
+");
+    entries.push(entry);
+  }
+  return b._entry_request(entries.list_free());
 }
 
 /** Starts translation reporting for `input` and initializes timing when unset.
@@ -507,7 +550,7 @@ typedef struct CcJob {
 } CcJob;
 
 static uint64_t _action_fingerprint(
-  Build state, ToolAction action, List inputs, int *ok) {
+  Build state, ToolAction action, List inputs, int &ok) {
   String tool = action.arguments ? action.arguments.car() : NULL;
   uint64_t hash = _state_base(state.request, tool, ok);
   hash = _state_text(hash, action.phase);
@@ -538,7 +581,7 @@ static int _same_file_bytes(String first, String second) {
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
 static uint64_t _compile_fingerprint(
-  Build state, ToolAction action, String preprocessed, int *ok) {
+  Build state, ToolAction action, String preprocessed, int &ok) {
   return x2c_fnv_file(
     _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
 }
@@ -554,7 +597,7 @@ static int _finish_compile(Build state, CcJob *pending) {
     String preprocessed = pending.preprocessed;
     if (!status)
       pending.fingerprint = _compile_fingerprint(
-        state, pending.action, preprocessed, &ok);
+        state, pending.action, preprocessed, ok);
     unlink(pending.preprocessed);
     pending.preprocessed = NULL;
     if (status) return 1;
@@ -797,7 +840,7 @@ int Build.finish(Build b) {
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
   if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, ok);
     if (ok && _state_matches(state_path, hash)) {
       if (b.request.verbose)
         fprintf(
@@ -866,7 +909,7 @@ int Build.finish(Build b) {
     report_now_us() - b.final_at);
   if (state_path) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, ok);
     if (ok) _state_write(state_path, hash);
   }
   return 0;
@@ -967,7 +1010,7 @@ void Build.cleanup(Build b, int success) {
    recorded directory. A directory entry ends in `/`; a header or library
    added where a search would now find it changes that time. */
 static uint64_t _script_fingerprint(
-  CliRequest c, String cc, List prerequisites, int *ok) {
+  CliRequest c, String cc, List prerequisites, int &ok) {
   uint64_t hash = _state_base(c, cc, ok);
   hash = _state_text(hash, "script");
   hash = _state_list(hash, c.inputs);
@@ -1074,7 +1117,7 @@ void Build.publish_script(Build b, String executable) {
   List files = prerequisites.list_free();
   List paths = files.append(b._script_directories(files));
   int ok = 1;
-  uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, &ok);
+  uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
   if (ok && _files_unchanged(b, files))
     _state_write_lines(%"${b.state_root}/script", hash, paths);
 }
@@ -1091,6 +1134,6 @@ int CliRequest.script_current(CliRequest c, String directory) {
   Toolchain toolchain = toolchain_new(
     c.cc, c.ar, c.cpp_args, c.cc_args, c.ld_args, 0, 0);
   int ok = 1;
-  uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), &ok);
+  uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), ok);
   return ok && _state_matches(record, hash);
 }

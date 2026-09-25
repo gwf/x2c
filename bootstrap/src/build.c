@@ -8,11 +8,11 @@
 
 #include "exception.h"
 
-static List _194, _192, _191, _189, _187, _184, _182, _181, _179, _177, _124, _123, _122, _121, _120, _108, _107, _106, _105, _33, _32, _31;
+static List _201, _199, _198, _196, _194, _191, _189, _188, _186, _184, _131, _130, _129, _128, _127, _115, _114, _113, _112, _35, _34, _33;
 
-static String _185, _175, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _129, _128, _127, _126, _125, _118, _116, _114, _112, _110, _109, _103, _101, _99, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _75, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _29, _27, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _192, _182, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _136, _135, _134, _133, _132, _125, _123, _121, _119, _117, _116, _110, _108, _106, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _82, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _31, _29, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _193, _190, _188, _186, _183, _180, _178, _176, _174, _119, _117, _115, _113, _111, _104, _102, _100, _98, _76, _74, _30, _28, _26, _11;
+static Var _200, _197, _195, _193, _190, _187, _185, _183, _181, _126, _124, _122, _120, _118, _111, _109, _107, _105, _83, _81, _32, _30, _28, _13;
 
 #include <errno.h>
 #include <stdio.h>
@@ -63,6 +63,10 @@ static int _package_built_here(Build state, List roots, String package);
 
 static void Build__link_packages(Build state, String input, String directory);
 
+static void _write_entry(Path entry, List units, String exports);
+
+static CliRequest Build__entry_request(Build b, List entries);
+
 typedef struct CcJob{
   ToolRun execution;
   ToolAction action;
@@ -106,7 +110,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _184)))
+_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _191)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -133,191 +137,198 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new("\n");
   _5 = String_new("/");
   _6 = String_new("input is not a regular file: ");
-  _7 = String_new("unsupported build input: ");
-  _8 = String_new("cannot nest an archive in a static library: ");
-  _9 = String_new("direct");
-  _10 = String_new("-fPIC");
-  _11 = String_var(_10);
-  _12 = String_new(".o");
-  _13 = String_new("lib");
-  _14 = String_new(".a");
-  _15 = String_new(".so");
-  _16 = String_new("a.out");
-  _17 = String_new(".x2c-build");
-  _18 = String_new("/tmp/x2c-build-dry-run");
-  _19 = String_new("/gen");
-  _20 = String_new("/obj");
-  _21 = String_new("/dep");
-  _22 = String_new("/.x2c-state");
-  _23 = String_new("matching x2c runtime is unavailable: ");
-  _24 = String_new(".d");
-  _25 = String_new(".c");
-  _26 = String_var(_25);
-  _27 = String_new(".h");
+  _7 = String_new("/src/*.x");
+  _8 = String_new("/src/*.c");
+  _9 = String_new("unsupported build input: ");
+  _10 = String_new("cannot nest an archive in a static library: ");
+  _11 = String_new("direct");
+  _12 = String_new("-fPIC");
+  _13 = String_var(_12);
+  _14 = String_new(".o");
+  _15 = String_new("lib");
+  _16 = String_new(".a");
+  _17 = String_new(".so");
+  _18 = String_new("a.out");
+  _19 = String_new(".x2c-build");
+  _20 = String_new("/tmp/x2c-build-dry-run");
+  _21 = String_new("/gen");
+  _22 = String_new("/obj");
+  _23 = String_new("/dep");
+  _24 = String_new("/.x2c-state");
+  _25 = String_new("matching x2c runtime is unavailable: ");
+  _26 = String_new(".d");
+  _27 = String_new(".c");
   _28 = String_var(_27);
-  _29 = String_new(".xi");
+  _29 = String_new(".h");
   _30 = String_var(_29);
-  _31 = cons(_30, NULL);
-  _32 = cons(_28, _31);
-  _33 = cons(_26, _32);
-  _34 = String_new("/x-");
-  _35 = String_new("/builds");
-  _36 = String_new("/src");
-  _37 = String_new(".native.rsp");
-  _38 = String_new("/lib");
-  _39 = String_new("package \'");
-  _40 = String_new("\' is not built: ");
-  _41 = String_new("#include \"x2c-root");
-  _42 = String_new("\"\n");
-  _43 = String_new("/module/x2c_module.x");
-  _44 = String_new("$(import \"");
-  _45 = String_new("/etc/lisp-bindings.xlisp\")\nmacro Expression $module.targets() =>\n  $(lisp.native.targets (_x2c.native-meta.declared \'");
-  _46 = String_new("));\nconst char x2c_module_stamp[] = \"");
-  _47 = String_new("\";\nMap x2c_module_targets(void) => $module.targets();\n");
-  _48 = String_new("  ");
-  _49 = String_new("[\n");
-  _50 = String_new(",\n");
-  _51 = String_new("\n]\n");
-  _52 = String_new("  Compilation database ");
-  _53 = String_new("/c-");
-  _54 = String_new(".");
-  _55 = String_new(".i");
-  _56 = String_new("-g0");
-  _57 = String_new("-ggdb0");
-  _58 = String_new("-g");
-  _59 = String_new("-g1");
-  _60 = String_new("-g2");
-  _61 = String_new("-g3");
-  _62 = String_new("-ggdb");
-  _63 = String_new("-ggdb1");
-  _64 = String_new("-ggdb2");
-  _65 = String_new("-ggdb3");
-  _66 = String_new("-gline-tables-only");
-  _67 = String_new("-gmlt");
-  _68 = String_new(".x");
-  _69 = String_new("/run");
-  _70 = String_new("/final-");
-  _71 = String_new("/.");
-  _72 = String_new(".dSYM");
-  _73 = String_new("dsymutil");
-  _74 = String_var(_73);
-  _75 = String_new("-o");
-  _76 = String_var(_75);
-  _77 = String_new(" target \'");
-  _78 = String_new("\'");
-  _79 = String_new("Built");
-  _80 = String_new(" object ");
-  _81 = String_new(" in ");
-  _82 = String_new(" ");
-  _83 = String_new(" object files in ");
-  _84 = String_new("  Generated ");
-  _85 = String_new(" and ");
-  _86 = String_new(" (");
-  _87 = String_new(")");
-  _88 = String_new(" jobs");
-  _89 = String_new("  Compiled with ");
-  _90 = String_new(" using ");
-  _91 = String_new("  Archived with ");
-  _92 = String_new("  Linked with ");
-  _93 = String_new("  Intermediates ");
-  _94 = String_new("  Output ");
-  _95 = String_new("  Debug symbols ");
-  _96 = String_new("Running ");
-  _97 = String_new("CPATH");
-  _98 = String_var(_97);
-  _99 = String_new("C_INCLUDE_PATH");
-  _100 = String_var(_99);
-  _101 = String_new("LIBRARY_PATH");
-  _102 = String_var(_101);
-  _103 = String_new("SDKROOT");
-  _104 = String_var(_103);
-  _105 = cons(_104, NULL);
-  _106 = cons(_102, _105);
-  _107 = cons(_100, _106);
-  _108 = cons(_98, _107);
-  _109 = String_new("%.9f");
-  _110 = String_new("-I");
+  _31 = String_new(".xi");
+  _32 = String_var(_31);
+  _33 = cons(_32, NULL);
+  _34 = cons(_30, _33);
+  _35 = cons(_28, _34);
+  _36 = String_new("/x-");
+  _37 = String_new("/builds");
+  _38 = String_new("/src");
+  _39 = String_new(".native.rsp");
+  _40 = String_new("/lib");
+  _41 = String_new("package \'");
+  _42 = String_new("\' is not built: ");
+  _43 = String_new("#include \"x2c-root");
+  _44 = String_new("\"\n");
+  _45 = String_new("$(import \"");
+  _46 = String_new("/etc/lisp-bindings.xlisp\")\nmacro Expression $module.targets() =>\n  $(lisp.native.targets (_x2c.native-meta.declared \'");
+  _47 = String_new("));\n");
+  _48 = String_new("/module/x2c_module.x");
+  _49 = String_new("const char x2c_module_stamp[] = \"");
+  _50 = String_new("\";\nMap x2c_module_targets(void) => $module.targets();\n");
+  _51 = String_new("/extension/");
+  _52 = String_new("/x2c_extension_");
+  _53 = String_new(".x");
+  _54 = String_new("void x2c_register_extension(const char *, Map (*)(void));\nstatic Map _targets(void) => $module.targets();\n__attribute__((constructor)) static void _register(void) {\n  x2c_register_extension(\"");
+  _55 = String_new("\", _targets);\n}\n");
+  _56 = String_new("  ");
+  _57 = String_new("[\n");
+  _58 = String_new(",\n");
+  _59 = String_new("\n]\n");
+  _60 = String_new("  Compilation database ");
+  _61 = String_new("/c-");
+  _62 = String_new(".");
+  _63 = String_new(".i");
+  _64 = String_new("-g0");
+  _65 = String_new("-ggdb0");
+  _66 = String_new("-g");
+  _67 = String_new("-g1");
+  _68 = String_new("-g2");
+  _69 = String_new("-g3");
+  _70 = String_new("-ggdb");
+  _71 = String_new("-ggdb1");
+  _72 = String_new("-ggdb2");
+  _73 = String_new("-ggdb3");
+  _74 = String_new("-gline-tables-only");
+  _75 = String_new("-gmlt");
+  _76 = String_new("/run");
+  _77 = String_new("/final-");
+  _78 = String_new("/.");
+  _79 = String_new(".dSYM");
+  _80 = String_new("dsymutil");
+  _81 = String_var(_80);
+  _82 = String_new("-o");
+  _83 = String_var(_82);
+  _84 = String_new(" target \'");
+  _85 = String_new("\'");
+  _86 = String_new("Built");
+  _87 = String_new(" object ");
+  _88 = String_new(" in ");
+  _89 = String_new(" ");
+  _90 = String_new(" object files in ");
+  _91 = String_new("  Generated ");
+  _92 = String_new(" and ");
+  _93 = String_new(" (");
+  _94 = String_new(")");
+  _95 = String_new(" jobs");
+  _96 = String_new("  Compiled with ");
+  _97 = String_new(" using ");
+  _98 = String_new("  Archived with ");
+  _99 = String_new("  Linked with ");
+  _100 = String_new("  Intermediates ");
+  _101 = String_new("  Output ");
+  _102 = String_new("  Debug symbols ");
+  _103 = String_new("Running ");
+  _104 = String_new("CPATH");
+  _105 = String_var(_104);
+  _106 = String_new("C_INCLUDE_PATH");
+  _107 = String_var(_106);
+  _108 = String_new("LIBRARY_PATH");
+  _109 = String_var(_108);
+  _110 = String_new("SDKROOT");
   _111 = String_var(_110);
-  _112 = String_new("-iquote");
-  _113 = String_var(_112);
-  _114 = String_new("-isystem");
-  _115 = String_var(_114);
-  _116 = String_new("-idirafter");
-  _117 = String_var(_116);
-  _118 = String_new("-L");
-  _119 = String_var(_118);
-  _120 = cons(_119, NULL);
-  _121 = cons(_117, _120);
-  _122 = cons(_115, _121);
-  _123 = cons(_113, _122);
-  _124 = cons(_111, _123);
-  _125 = String_new("/lib/");
-  _126 = String_new("/include/");
-  _127 = String_new("/builds/");
-  _128 = String_new("/script");
-  _129 = String_new("/.x2c-state/script");
-  _133 = String_new("/");
-  _134 = String_new("x2c-state-v1");
-  _135 = String_new(".c");
-  _136 = String_new(".o");
-  _137 = String_new(".a");
-  _138 = String_new("target");
-  _139 = String_new("translate");
-  _140 = String_new("no-cpp");
-  _141 = String_new("cpp");
-  _142 = String_new("live");
-  _143 = String_new("prelude");
-  _144 = String_new("cpp-symbols");
-  _145 = String_new("raw");
-  _146 = String_new("source-map");
-  _147 = String_new("generated-lines");
-  _148 = String_new("x2c-root");
-  _149 = String_new("x2c file");
-  _150 = String_new("x2c files");
-  _151 = String_new(".");
-  _152 = String_new("C file");
-  _153 = String_new("C files");
-  _154 = String_new("-gdwarf");
-  _155 = String_new("#include \"");
-  _156 = String_new(".h\"");
-  _157 = String_new("object");
-  _158 = String_new("objects");
-  _159 = String_new("input");
-  _160 = String_new("inputs");
-  _161 = String_new(" (up to date)");
-  _162 = String_new("");
-  _163 = String_new("static library");
-  _164 = String_new("native module");
-  _165 = String_new("executable");
-  _166 = String_new("header");
-  _167 = String_new("headers");
-  _168 = String_new("1 job");
-  _169 = String_new("retained");
-  _170 = String_new("temporary; removed after run");
-  _171 = String_new("temporary; removed after build");
-  _172 = String_new("script");
-  _173 = String_new("absent");
-  _174 = Symbol_var(437126);
-  _175 = String_new("Var");
-  _176 = String_var(_175);
-  _177 = cons(_176, NULL);
-  _178 = List_var(_177);
-  _179 = cons(_178, NULL);
-  _180 = List_var(_179);
-  _181 = cons(_180, NULL);
-  _182 = cons(_174, _181);
-  _183 = List_var(_182);
-  _184 = cons(_183, _177);
-  _185 = String_new("String");
-  _186 = String_var(_185);
-  _187 = cons(_186, NULL);
-  _188 = List_var(_187);
-  _189 = cons(_188, NULL);
+  _112 = cons(_111, NULL);
+  _113 = cons(_109, _112);
+  _114 = cons(_107, _113);
+  _115 = cons(_105, _114);
+  _116 = String_new("%.9f");
+  _117 = String_new("-I");
+  _118 = String_var(_117);
+  _119 = String_new("-iquote");
+  _120 = String_var(_119);
+  _121 = String_new("-isystem");
+  _122 = String_var(_121);
+  _123 = String_new("-idirafter");
+  _124 = String_var(_123);
+  _125 = String_new("-L");
+  _126 = String_var(_125);
+  _127 = cons(_126, NULL);
+  _128 = cons(_124, _127);
+  _129 = cons(_122, _128);
+  _130 = cons(_120, _129);
+  _131 = cons(_118, _130);
+  _132 = String_new("/lib/");
+  _133 = String_new("/include/");
+  _134 = String_new("/builds/");
+  _135 = String_new("/script");
+  _136 = String_new("/.x2c-state/script");
+  _140 = String_new("/");
+  _141 = String_new("x2c-state-v1");
+  _142 = String_new(".c");
+  _143 = String_new(".o");
+  _144 = String_new(".a");
+  _145 = String_new("target");
+  _146 = String_new("translate");
+  _147 = String_new("no-cpp");
+  _148 = String_new("cpp");
+  _149 = String_new("live");
+  _150 = String_new("prelude");
+  _151 = String_new("cpp-symbols");
+  _152 = String_new("raw");
+  _153 = String_new("source-map");
+  _154 = String_new("generated-lines");
+  _155 = String_new("x2c-root");
+  _156 = String_new("x2c file");
+  _157 = String_new("x2c files");
+  _158 = String_new(".");
+  _159 = String_new("C file");
+  _160 = String_new("C files");
+  _161 = String_new("-gdwarf");
+  _162 = String_new("#include \"");
+  _163 = String_new(".h\"");
+  _164 = String_new("object");
+  _165 = String_new("objects");
+  _166 = String_new("input");
+  _167 = String_new("inputs");
+  _168 = String_new(" (up to date)");
+  _169 = String_new("");
+  _170 = String_new("static library");
+  _171 = String_new("native module");
+  _172 = String_new("executable");
+  _173 = String_new("header");
+  _174 = String_new("headers");
+  _175 = String_new("1 job");
+  _176 = String_new("retained");
+  _177 = String_new("temporary; removed after run");
+  _178 = String_new("temporary; removed after build");
+  _179 = String_new("script");
+  _180 = String_new("absent");
+  _181 = Symbol_var(437126);
+  _182 = String_new("Var");
+  _183 = String_var(_182);
+  _184 = cons(_183, NULL);
+  _185 = List_var(_184);
+  _186 = cons(_185, NULL);
+  _187 = List_var(_186);
+  _188 = cons(_187, NULL);
+  _189 = cons(_181, _188);
   _190 = List_var(_189);
-  _191 = cons(_190, NULL);
-  _192 = cons(_174, _191);
-  _193 = List_var(_192);
-  _194 = cons(_193, _177);
+  _191 = cons(_190, _184);
+  _192 = String_new("String");
+  _193 = String_var(_192);
+  _194 = cons(_193, NULL);
+  _195 = List_var(_194);
+  _196 = cons(_195, NULL);
+  _197 = List_var(_196);
+  _198 = cons(_197, NULL);
+  _199 = cons(_181, _198);
+  _200 = List_var(_199);
+  _201 = cons(_200, _184);
   _x2c_static_initialize_0();
 }
 
@@ -374,7 +385,7 @@ static uint64_t _state_list(uint64_t hash, List values){
 uint64_t x2c_fnv_file(uint64_t, String, int *);
 
 static uint64_t _state_file(uint64_t hash, String path, int * ok){
-  return x2c_fnv_file(_state_text(hash, path), path, ok);
+  return x2c_fnv_file(_state_text(hash, path), path, &((* ok)));
 }
 
 int String_contains(String, String);
@@ -383,12 +394,12 @@ String x2c_find_program(String);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   if(! String_truth(tool)){
-    * ok = 0;
+    (* ok) = 0;
     return hash;
   }
-  String path = String_contains(tool, _133) ? tool : x2c_find_program(tool);
-  if(String_truth(path)) return _state_file(hash, path, ok);
-  * ok = 0;
+  String path = String_contains(tool, _140) ? tool : x2c_find_program(tool);
+  if(String_truth(path)) return _state_file(hash, path, &((* ok)));
+  (* ok) = 0;
   return _state_text(hash, tool);
 }
 
@@ -396,12 +407,12 @@ String x2c_compiler_identity(void);
 
 static uint64_t _state_base(CliRequest request, String tool, int * ok){
   uint64_t hash = UINT64_C(1469598103934665603);
-  hash = _state_text(hash, _134);
+  hash = _state_text(hash, _141);
   hash = _state_text(hash, request -> state_seed);
   String compiler = x2c_compiler_identity();
-  if(! String_truth(compiler)) * ok = 0;
+  if(! String_truth(compiler))(* ok) = 0;
   hash = _state_text(hash, compiler);
-  hash = _state_tool(hash, tool, ok);
+  hash = _state_tool(hash, tool, &((* ok)));
   return hash;
 }
 
@@ -460,7 +471,7 @@ int List_truth(List);
 static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
   List inputs = _state_dep_inputs(depfile);
   if(! List_truth(inputs)){
-    * ok = 0;
+    (* ok) = 0;
     return hash;
   }
   {
@@ -470,7 +481,7 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       input = Var_string(_x2c_macro_cursor_output_1);
-      hash = _state_file(hash, input, ok);
+      hash = _state_file(hash, input, &((* ok)));
     }
 
   }
@@ -659,6 +670,12 @@ void build_check_input(String input){
   exit(2);
 }
 
+List List_append(List, List);
+
+Path Path_dirname(Path);
+
+List Path_glob(Path);
+
 int x2c_source_file(String);
 
 int String_endswith(String, String);
@@ -681,21 +698,37 @@ Var Array_push(Array, Var);
 
 Build CliRequest_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
+  {
+    String package;
+    List _x2c_macro_object_4 = c -> extensions;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      package = Var_string(_x2c_macro_cursor_output_4);
+      {
+        String root = Path_absolute(package);
+        c -> package_dirs = List_append(c -> package_dirs, cons(String_var(Path_dirname(root)), NULL));
+        c -> inputs = List_append(List_append(c -> inputs, Path_glob(String_join(NULL, cons(String_var(root), cons(String_var(_7), NULL))))), Path_glob(String_join(NULL, cons(String_var(root), cons(String_var(_8), NULL)))));
+      }
+
+    }
+
+  }
   if(! List_truth(c -> inputs)) x2c_driver_error("build requires input operands or a project manifest");
   int compilable = 0, input_count = 0;
   {
     String input;
-    List _x2c_macro_object_4 = c -> inputs;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
-      input = Var_string(_x2c_macro_cursor_output_4);
+    List _x2c_macro_object_5 = c -> inputs;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      input = Var_string(_x2c_macro_cursor_output_5);
       {
         input_count ++;
         if(! c -> dry_run) build_check_input(input);
-        if(!(x2c_source_file(input) || String_endswith(input, _135) || String_endswith(input, _136) || String_endswith(input, _137))) x2c_driver_error(String_join(NULL, cons(String_var(_7), cons(String_var(input), NULL))));
-        if(x2c_source_file(input) || String_endswith(input, _135)) compilable ++;
-        if(c -> kind == 1381098885964356 && String_endswith(input, _137)) x2c_driver_error(String_join(NULL, cons(String_var(_8), cons(String_var(input), NULL))));
+        if(!(x2c_source_file(input) || String_endswith(input, _142) || String_endswith(input, _143) || String_endswith(input, _144))) x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(input), NULL))));
+        if(x2c_source_file(input) || String_endswith(input, _142)) compilable ++;
+        if(c -> kind == 1381098885964356 && String_endswith(input, _144)) x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(input), NULL))));
       }
 
     }
@@ -708,11 +741,11 @@ Build CliRequest_prepare(CliRequest c){
   }
   Build state = Scope_calloc(1, sizeof(struct Build));
   state -> request = c;
-  if(! String_truth(c -> state_seed)) c -> state_seed = _9;
+  if(! String_truth(c -> state_seed)) c -> state_seed = _11;
   state -> toolchain = toolchain_new(c -> cc, c -> ar, c -> cpp_args, c -> cc_args, c -> ld_args, c -> verbose, c -> dry_run);
   c -> cc = state -> toolchain -> cc;
   c -> ar = state -> toolchain -> ar;
-  if(c -> kind == 904178442) state -> toolchain -> cc_args = cons(_11, List_append(state -> toolchain -> cc_args, NULL));
+  if(c -> kind == 904178442) state -> toolchain -> cc_args = cons(_13, List_append(state -> toolchain -> cc_args, NULL));
   state -> c_sources = Array_new();
   state -> gen_dirs = Array_new();
   state -> units = Array_new();
@@ -721,20 +754,20 @@ Build CliRequest_prepare(CliRequest c){
   if(String_truth(c -> compile_commands) && ! c -> dry_run) state -> compile_commands = Array_new();
   if(String_truth(c -> output)) state -> output = c -> output;
   else if(c -> command == 38236) state -> output = NULL;
-  else if(c -> compile_only && List_truth(c -> inputs) && ! List_truth(List_cdr(c -> inputs))) state -> output = String_join(NULL, cons(String_var(Path_stem(Var_string(List_car(c -> inputs)))), cons(String_var(_12), NULL)));
+  else if(c -> compile_only && List_truth(c -> inputs) && ! List_truth(List_cdr(c -> inputs))) state -> output = String_join(NULL, cons(String_var(Path_stem(Var_string(List_car(c -> inputs)))), cons(String_var(_14), NULL)));
   else if(c -> kind == 1381098885964356){
-    String stem = List_truth(c -> inputs) ? Path_stem(Var_string(List_car(c -> inputs))) : _138;
-    state -> output = String_join(NULL, cons(String_var(_13), cons(String_var(stem), cons(String_var(_14), NULL))));
+    String stem = List_truth(c -> inputs) ? Path_stem(Var_string(List_car(c -> inputs))) : _145;
+    state -> output = String_join(NULL, cons(String_var(_15), cons(String_var(stem), cons(String_var(_16), NULL))));
   }
-  else if(c -> kind == 904178442) state -> output = String_join(NULL, cons(String_var(Path_stem(Var_string(List_car(c -> inputs)))), cons(String_var(_15), NULL)));
-  else state -> output = _16;
+  else if(c -> kind == 904178442) state -> output = String_join(NULL, cons(String_var(Path_stem(Var_string(List_car(c -> inputs)))), cons(String_var(_17), NULL)));
+  else state -> output = _18;
   state -> started_at = report_now_us();
   state -> started_wall = _wall_seconds();
   if(String_truth(c -> build_dir)) state -> work_dir = c -> build_dir;
   else if(String_truth(c -> temps_dir)) state -> work_dir = c -> temps_dir;
-  else if(c -> save_temps) state -> work_dir = _17;
+  else if(c -> save_temps) state -> work_dir = _19;
   else if(c -> dry_run){
-    state -> work_dir = _18;
+    state -> work_dir = _20;
     state -> temporary = 1;
   }
   else state -> temporary = 1;
@@ -747,17 +780,17 @@ Build CliRequest_prepare(CliRequest c){
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_5);
   }
   ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)){
-    if(! String_truth(state -> work_dir)) state -> work_dir = Path_temp_dir();  state -> gen_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_19), NULL)));
-    state -> obj_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_20), NULL)));
-    state -> dep_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_21), NULL)));
-    if(String_truth(c -> build_dir)) state -> state_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_22), NULL)));
+    if(! String_truth(state -> work_dir)) state -> work_dir = Path_temp_dir();  state -> gen_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_21), NULL)));
+    state -> obj_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_22), NULL)));
+    state -> dep_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_23), NULL)));
+    if(String_truth(c -> build_dir)) state -> state_root = String_join(NULL, cons(String_var(state -> work_dir), cons(String_var(_24), NULL)));
     if(! c -> dry_run){
       Path volatile directory;
-      List _x2c_macro_object_5 = cons(String_var(state -> gen_root), cons(String_var(state -> obj_root), cons(String_var(state -> dep_root), cons(String_var(state -> state_root), NULL))));
-      List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-      Var _x2c_macro_cursor_output_5;
-      while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
-        directory = Var_string(_x2c_macro_cursor_output_5);
+      List _x2c_macro_object_6 = cons(String_var(state -> gen_root), cons(String_var(state -> obj_root), cons(String_var(state -> dep_root), cons(String_var(state -> state_root), NULL))));
+      List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+      Var _x2c_macro_cursor_output_6;
+      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+        directory = Var_string(_x2c_macro_cursor_output_6);
         if(String_truth(directory)) Path_make_dirs(directory);
       }
 
@@ -789,22 +822,22 @@ x2c_exception_leave(& _x2c_exception_frame_3);
 }
 {
   String input;
-  List _x2c_macro_object_6 = c -> inputs;
-  List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-  Var _x2c_macro_cursor_output_6;
-  while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
-    input = Var_string(_x2c_macro_cursor_output_6);
+  List _x2c_macro_object_7 = c -> inputs;
+  List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+  Var _x2c_macro_cursor_output_7;
+  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+    input = Var_string(_x2c_macro_cursor_output_7);
     {
       if(x2c_source_file(input)) state -> xlat_n ++;
-      if(String_endswith(input, _135)) Array_push(state -> c_sources, String_var(input));
-      else if(String_endswith(input, _136) || String_endswith(input, _137)) Array_push(state -> native_inputs, String_var(input));
+      if(String_endswith(input, _142)) Array_push(state -> c_sources, String_var(input));
+      else if(String_endswith(input, _143) || String_endswith(input, _144)) Array_push(state -> native_inputs, String_var(input));
     }
 
   }
 
 }
 String runtime_lib = state -> toolchain -> runtime_lib;
-if(! c -> compile_only && c -> kind == 404971770155786 && access(runtime_lib, R_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_23), cons(String_var(runtime_lib), NULL))));
+if(! c -> compile_only && c -> kind == 404971770155786 && access(runtime_lib, R_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_25), cons(String_var(runtime_lib), NULL))));
 return state;
 }
 
@@ -818,30 +851,30 @@ String Build_generated_dir(Build state, String input){
 List CliRequest_package_roots(CliRequest);
 
 static uint64_t _translation_fingerprint(Build state, String input, String directory, int * ok){
-  uint64_t hash = _state_base(state -> request, state -> toolchain -> cc, ok);
-  hash = _state_text(hash, _139);
+  uint64_t hash = _state_base(state -> request, state -> toolchain -> cc, &((* ok)));
+  hash = _state_text(hash, _146);
   hash = _state_text(hash, input);
   CliRequest request = state -> request;
   hash = _state_list(hash, request -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(request));
   hash = _state_list(hash, request -> cpp_args);
-  hash = _state_text(hash, request -> no_cpp ? _140 : _141);
-  hash = _state_text(hash, request -> live_symbols ? _142 : _143);
-  hash = _state_text(hash, request -> cpp_symbols ? _144 : _145);
-  hash = _state_text(hash, request -> source_map ? _146 : _147);
+  hash = _state_text(hash, request -> no_cpp ? _147 : _148);
+  hash = _state_text(hash, request -> live_symbols ? _149 : _150);
+  hash = _state_text(hash, request -> cpp_symbols ? _151 : _152);
+  hash = _state_text(hash, request -> source_map ? _153 : _154);
   {
     String module;
-    List _x2c_macro_object_7 = request -> native_modules;
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
-      module = Var_string(_x2c_macro_cursor_output_7);
-      hash = _state_file(hash, module, ok);
+    List _x2c_macro_object_8 = request -> native_modules;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+      module = Var_string(_x2c_macro_cursor_output_8);
+      hash = _state_file(hash, module, &((* ok)));
     }
 
   }
-  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))));
-  return _state_dependencies(hash, depfile, ok);
+  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_26), NULL)))));
+  return _state_dependencies(hash, depfile, &((* ok)));
 }
 
 int Build_translation_current(Build state, String input, String directory){
@@ -850,18 +883,18 @@ int Build_translation_current(Build state, String input, String directory){
   String stem = Path_stem(input);
   {
     String suffix;
-    List _x2c_macro_object_8 = _33;
-    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-    Var _x2c_macro_cursor_output_8;
-    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
-      suffix = Var_string(_x2c_macro_cursor_output_8);
+    List _x2c_macro_object_9 = _35;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+      suffix = Var_string(_x2c_macro_cursor_output_9);
       if(! Path_is_file(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(suffix), NULL))))))) return 0;
     }
 
   }
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, & ok);
-  String path = String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_34), cons(String_var(_key(input)), NULL))));
+  uint64_t hash = _translation_fingerprint(state, input, directory, &(ok));
+  String path = String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_36), cons(String_var(_key(input)), NULL))));
   int current = ok && _state_matches(path, hash);
   if(current && state -> request -> verbose) fprintf(stderr, "x2c: up-to-date translate %s\n", input);
   return current;
@@ -870,10 +903,10 @@ int Build_translation_current(Build state, String input, String directory){
 void Build_record_translation(Build state, String input, String directory){
   if(! _init_guard_) _file_init_();
   if(! String_truth(state -> state_root) || state -> request -> dry_run) return;
-  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))));
+  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_26), NULL)))));
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, & ok);
-  if(ok && _files_unchanged(state, _state_dep_inputs(depfile))) _state_write(String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_34), cons(String_var(_key(input)), NULL)))), hash);
+  uint64_t hash = _translation_fingerprint(state, input, directory, &(ok));
+  if(ok && _files_unchanged(state, _state_dep_inputs(depfile))) _state_write(String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_36), cons(String_var(_key(input)), NULL)))), hash);
 }
 
 String x2c_package_directory(List, String);
@@ -883,11 +916,11 @@ int x2c_package_source(String, String);
 static int _package_built_here(Build state, List roots, String package){
   {
     String input;
-    List _x2c_macro_object_9 = state -> request -> inputs;
-    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-    Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
-      input = Var_string(_x2c_macro_cursor_output_9);
+    List _x2c_macro_object_10 = state -> request -> inputs;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
+      input = Var_string(_x2c_macro_cursor_output_10);
       {
         String source = Path_absolute(input);
         if(String_equal(x2c_package_directory(roots, source), package) && x2c_package_source(package, source)) return 1;
@@ -907,39 +940,37 @@ List String_split(String, String);
 
 CliRequest cli_package_options(String, String);
 
-List List_append(List, List);
-
 static void Build__link_packages(Build state, String input, String directory){
   List roots = CliRequest_package_roots(state -> request);
   if(! List_truth(roots)) return;
   String self = Path_absolute(input);
-  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))));
+  String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_26), NULL)))));
   {
     String dependency;
-    List _x2c_macro_object_10 = _state_dep_inputs(depfile);
-    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
-    Var _x2c_macro_cursor_output_10;
-    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
-      dependency = Var_string(_x2c_macro_cursor_output_10);
+    List _x2c_macro_object_11 = _state_dep_inputs(depfile);
+    List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+    Var _x2c_macro_cursor_output_11;
+    while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+      dependency = Var_string(_x2c_macro_cursor_output_11);
       {
         if(String_equal(dependency, self) || String_equal(dependency, input)) continue;
         String package = x2c_package_directory(roots, dependency);
         if(! String_truth(package) || _package_built_here(state, roots, package)) continue;
-        String builds = String_join(NULL, cons(String_var(package), cons(String_var(_35), NULL)));
+        String builds = String_join(NULL, cons(String_var(package), cons(String_var(_37), NULL)));
         if(Array_contains(state -> gen_dirs, String_var(builds))) continue;
         Array_push(state -> gen_dirs, String_var(builds));
-        Array_push(state -> gen_dirs, String_var(String_join(NULL, cons(String_var(package), cons(String_var(_36), NULL)))));
-        String name = Var_string(List_last(String_split(package, _133)));
-        String response = String_join(NULL, cons(String_var(builds), cons(String_var(_5), cons(String_var(name), cons(String_var(_37), NULL)))));
+        Array_push(state -> gen_dirs, String_var(String_join(NULL, cons(String_var(package), cons(String_var(_38), NULL)))));
+        String name = Var_string(List_last(String_split(package, _140)));
+        String response = String_join(NULL, cons(String_var(builds), cons(String_var(_5), cons(String_var(name), cons(String_var(_39), NULL)))));
         CliRequest native = NULL;
         if(! access(response, F_OK)){
           native = cli_package_options(response, package);
           state -> toolchain -> cc_args = List_append(state -> toolchain -> cc_args, native -> cc_args);
         }
         if(state -> request -> kind == 1381098885964356) continue;
-        String archive = String_join(NULL, cons(String_var(builds), cons(String_var(_38), cons(String_var(name), cons(String_var(_14), NULL)))));
-        if(access(archive, R_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_39), cons(String_var(name), cons(String_var(_40), cons(String_var(archive), NULL))))));
-        if(! native) x2c_driver_error(String_join(NULL, cons(String_var(_39), cons(String_var(name), cons(String_var(_40), cons(String_var(response), NULL))))));
+        String archive = String_join(NULL, cons(String_var(builds), cons(String_var(_40), cons(String_var(name), cons(String_var(_16), NULL)))));
+        if(access(archive, R_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_41), cons(String_var(name), cons(String_var(_42), cons(String_var(archive), NULL))))));
+        if(! native) x2c_driver_error(String_join(NULL, cons(String_var(_41), cons(String_var(name), cons(String_var(_42), cons(String_var(response), NULL))))));
         Array_push(state -> native_inputs, String_var(archive));
         state -> toolchain -> ld_args = List_append(state -> toolchain -> ld_args, native -> ld_args);
       }
@@ -954,8 +985,8 @@ unsigned long long report_file_bytes(String);
 
 void Build_add_generated(Build state, String input, String directory){
   if(! _init_guard_) _file_init_();
-  String stem = Path_stem(input), source = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_25), NULL)))));
-  String header = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_27), NULL)))));
+  String stem = Path_stem(input), source = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_27), NULL)))));
+  String header = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_29), NULL)))));
   state -> gen_bytes += report_file_bytes(source);
   state -> gen_bytes += report_file_bytes(header);
   Array_push(state -> c_sources, String_var(source));
@@ -963,10 +994,6 @@ void Build_add_generated(Build state, String input, String directory){
   if(! Array_contains(state -> gen_dirs, String_var(directory))) Array_push(state -> gen_dirs, String_var(directory));
   Build__link_packages(state, input, directory);
 }
-
-String build_module_stamp(void);
-
-int Array_try_next(Array, int *, Var *);
 
 String List_repr(List);
 
@@ -976,30 +1003,23 @@ String x2c_get_root(void);
 
 Path Path_join(Path, Path);
 
-Path Path_dirname(Path);
-
 void Path_symlink_to(Path, Path);
 
 void Path_write_text(Path, String);
 
-void * Scope_memdup(const void *, size_t);
-
-CliRequest Build_module_entry(Build b){
-  if(! _init_guard_) _file_init_();
-  String stamp = build_module_stamp();
-  if(! String_truth(stamp)) x2c_driver_error("cannot read the running compiler to stamp");
-  String includes = _162;
+static void _write_entry(Path entry, List units, String exports){
+  String includes = _169;
   Array sources = Array_new();
   {
     String unit;
-    Array _x2c_macro_object_11 = b -> units;
-    int _x2c_macro_cursor_11 = 0;
-    Var _x2c_macro_cursor_output_11;
-    while(Array_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
-      unit = Var_string(_x2c_macro_cursor_output_11);
+    List _x2c_macro_object_12 = units;
+    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+    Var _x2c_macro_cursor_output_12;
+    while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
+      unit = Var_string(_x2c_macro_cursor_output_12);
       {
         String source = Path_absolute(unit);
-        includes = String_join(NULL, cons(String_var(includes), cons(String_var(_41), cons(String_var(source), cons(String_var(_42), NULL)))));
+        includes = String_join(NULL, cons(String_var(includes), cons(String_var(_43), cons(String_var(source), cons(String_var(_44), NULL)))));
         Array_push(sources, String_var(source));
       }
 
@@ -1007,8 +1027,7 @@ CliRequest Build_module_entry(Build b){
 
   }
   String declared = List_repr(Array_list_free(sources)), root = x2c_get_root();
-  Path entry = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_43), NULL)));
-  Path link = Path_join(Path_dirname(entry), _148);
+  Path link = Path_join(Path_dirname(entry), _155);
   {
     ExceptionFrame _x2c_exception_frame_4;
     static MatchCaptureSite _x2c_catch_arms_4[1];
@@ -1018,7 +1037,7 @@ CliRequest Build_module_entry(Build b){
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_6);
   }
   ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)){
-    Path_make_dirs(Path_dirname(entry));  if(! Path_exists(link)) Path_symlink_to(link, _133);  Path_write_text(entry, String_join(NULL, cons(String_var(includes), cons(String_var(_44), cons(String_var(root), cons(String_var(_45), cons(String_var(declared), cons(String_var(_46), cons(String_var(stamp), cons(String_var(_47), NULL))))))))));
+    Path_make_dirs(Path_dirname(entry));  if(! Path_exists(link)) Path_symlink_to(link, _140);  Path_write_text(entry, String_join(NULL, cons(String_var(includes), cons(String_var(_45), cons(String_var(root), cons(String_var(_46), cons(String_var(declared), cons(String_var(_47), cons(String_var(exports), NULL)))))))));
   }
   else {x2c_exception_landed(& _x2c_exception_frame_4);
   {
@@ -1043,10 +1062,55 @@ x2c_error_catch_close(_x2c_error_handler_4);
 _x2c_error_handler_4 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_4);
 }
-CliRequest request = Scope_memdup(b -> request, sizeof(struct CliRequest));
-request -> inputs = cons(String_var(entry), NULL);
-b -> xlat_n ++;
-return request;
+}
+
+void * Scope_memdup(const void *, size_t);
+
+int List_len(List);
+
+static CliRequest Build__entry_request(Build b, List entries){
+  CliRequest request = Scope_memdup(b -> request, sizeof(struct CliRequest));
+  request -> inputs = entries;
+  b -> xlat_n += List_len(entries);
+  return request;
+}
+
+String build_module_stamp(void);
+
+List Array_list(Array);
+
+CliRequest Build_module_entry(Build b){
+  if(! _init_guard_) _file_init_();
+  String stamp = build_module_stamp();
+  if(! String_truth(stamp)) x2c_driver_error("cannot read the running compiler to stamp");
+  Path entry = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_48), NULL)));
+  _write_entry(entry, Array_list(b -> units), String_join(NULL, cons(String_var(_49), cons(String_var(stamp), cons(String_var(_50), NULL)))));
+  return Build__entry_request(b, cons(String_var(entry), NULL));
+}
+
+Path Path_basename(Path);
+
+CliRequest Build_extension_entries(Build b){
+  if(! _init_guard_) _file_init_();
+  Array entries = Array_new();
+  {
+    String package;
+    List _x2c_macro_object_13 = b -> request -> extensions;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+    Var _x2c_macro_cursor_output_13;
+    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+      package = Var_string(_x2c_macro_cursor_output_13);
+      {
+        String root = Path_absolute(package), name = Path_basename(root);
+        Path entry = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_51), cons(String_var(name), cons(String_var(_52), cons(String_var(name), cons(String_var(_53), NULL)))))));
+        _write_entry(entry, Path_glob(String_join(NULL, cons(String_var(root), cons(String_var(_7), NULL)))), String_join(NULL, cons(String_var(_54), cons(String_var(name), cons(String_var(_55), NULL)))));
+        Array_push(entries, String_var(entry));
+      }
+
+    }
+
+  }
+  return Build__entry_request(b, Array_list_free(entries));
 }
 
 void report_progress(Symbol, int, int, String);
@@ -1066,7 +1130,7 @@ void Build_end_translation(Build state, String input, int cached){
   report_progress(45220543335690, state -> xlat_done, state -> xlat_n, input);
   if(state -> xlat_done == state -> xlat_n){
     unsigned long elapsed = report_now_us() - state -> xlat_start;
-    report_phase(45220543335690, state -> xlat_n, state -> xlat_n == 1 ? _149 : _150, state -> xlat_cached, elapsed);
+    report_phase(45220543335690, state -> xlat_n, state -> xlat_n == 1 ? _156 : _157, state -> xlat_cached, elapsed);
   }
 
 }
@@ -1075,17 +1139,17 @@ String Symbol_str(Symbol);
 
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok){
   String tool = List_truth(action -> arguments) ? Var_string(List_car(action -> arguments)) : NULL;
-  uint64_t hash = _state_base(state -> request, tool, ok);
+  uint64_t hash = _state_base(state -> request, tool, &((* ok)));
   hash = _state_text(hash, Symbol_str(action -> phase));
   hash = _state_list(hash, action -> arguments);
   {
     String input;
-    List _x2c_macro_object_12 = inputs;
-    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
-    Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
-      input = Var_string(_x2c_macro_cursor_output_12);
-      hash = _state_file(hash, input, ok);
+    List _x2c_macro_object_14 = inputs;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    Var _x2c_macro_cursor_output_14;
+    while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_14)){
+      input = Var_string(_x2c_macro_cursor_output_14);
+      hash = _state_file(hash, input, &((* ok)));
     }
 
   }
@@ -1190,7 +1254,7 @@ x2c_exception_leave(& _x2c_exception_frame_5);
 }
 
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok){
-  return x2c_fnv_file(_action_fingerprint(state, action, NULL, ok), preprocessed, ok);
+  return x2c_fnv_file(_action_fingerprint(state, action, NULL, &((* ok))), preprocessed, &((* ok)));
 }
 
 int ToolRun_wait(ToolRun);
@@ -1202,7 +1266,7 @@ static int _finish_compile(Build state, CcJob * pending){
   if(String_truth(pending -> preprocessed)){
     int ok = 1;
     String preprocessed = pending -> preprocessed;
-    if(! status) pending -> fingerprint = _compile_fingerprint(state, pending -> action, preprocessed, & ok);
+    if(! status) pending -> fingerprint = _compile_fingerprint(state, pending -> action, preprocessed, &(ok));
     unlink(pending -> preprocessed);
     pending -> preprocessed = NULL;
     if(status) return 1;
@@ -1231,18 +1295,16 @@ Var Map_var(Map);
 
 static String _compile_command(Build b, ToolAction action, String source, String object){
   Map entry = Map_update_n(Map_new(), 4, Symbol_var(9453566196914), String_var(b -> compile_directory), Symbol_var(412426), String_var(source), Symbol_var(1052018024), String_var(object), Symbol_var(3452443129126), List_var(action -> arguments));
-  return String_join(NULL, cons(String_var(_48), cons(String_var(Var_json(Map_var(entry))), NULL)));
+  return String_join(NULL, cons(String_var(_56), cons(String_var(Var_json(Map_var(entry))), NULL)));
 }
 
 String String_join(String, List);
-
-List Array_list(Array);
 
 void report_line(Symbol, String);
 
 int compile_commands_write(String path, Array commands){
   if(! _init_guard_) _file_init_();
-  String text = String_join(NULL, cons(String_var(_49), cons(String_var(String_join(_50, Array_list(commands))), cons(String_var(_51), NULL))));
+  String text = String_join(NULL, cons(String_var(_57), cons(String_var(String_join(_58, Array_list(commands))), cons(String_var(_59), NULL))));
   {
     ExceptionFrame _x2c_exception_frame_7;
     static MatchCaptureSite _x2c_catch_arms_5[2];
@@ -1254,7 +1316,7 @@ int compile_commands_write(String path, Array commands){
     _x2c_catch_patterns_5[1] = List_var(_x2c_catch_pattern_8);
   }
   ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_7, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_7);  if (!sigsetjmp(_x2c_exception_frame_7.env, 0)){
-    file_publish(cons(String_var(path), cons(String_var(text), NULL)));  report_line(28680520, String_join(NULL, cons(String_var(_52), cons(String_var(path), NULL))));
+    file_publish(cons(String_var(path), cons(String_var(text), NULL)));  report_line(28680520, String_join(NULL, cons(String_var(_60), cons(String_var(path), NULL))));
     {
       int _x2c_return_value_6 = 1;
       {
@@ -1326,6 +1388,8 @@ static int _finish_compiles(Build state, CcJob * running, int * count, int wait)
 
 }
 
+int Array_try_next(Array, int *, Var *);
+
 ToolAction Toolchain_compile_action(Toolchain, String, String, String, List);
 
 ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
@@ -1333,32 +1397,32 @@ ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
 void Scope_free(void *);
 
 static int _compile_sources(Build b){
-  if((void *) b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_151);
+  if((void *) b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_158);
   CcJob * running = Scope_calloc(b -> request -> jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
   b -> cc_n = Array_len(b -> c_sources);
   b -> cc_start = report_now_us();
   {
     String source;
-    Array _x2c_macro_object_14 = b -> c_sources;
-    int _x2c_macro_cursor_14 = 0;
-    Var _x2c_macro_cursor_output_14;
-    while(Array_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_14)){
-      source = Var_string(_x2c_macro_cursor_output_14);
+    Array _x2c_macro_object_16 = b -> c_sources;
+    int _x2c_macro_cursor_16 = 0;
+    Var _x2c_macro_cursor_output_16;
+    while(Array_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_16)){
+      source = Var_string(_x2c_macro_cursor_output_16);
       {
         report_progress(7477414666, b -> cc_done, b -> cc_n, source);
-        String key = _key(source), object = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_12), NULL)))));
+        String key = _key(source), object = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_14), NULL)))));
         if(b -> request -> compile_only && ! List_truth(List_cdr(b -> request -> inputs)) && String_truth(b -> output)) object = b -> output;
-        String depfile = String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_24), NULL)))));
+        String depfile = String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_26), NULL)))));
         Array include_dirs = Array_new();
         if(String_startswith(source, b -> gen_root)) Array_push(include_dirs, String_var(Path_dirname(source)));
         {
           Var directory;
-          Array _x2c_macro_object_13 = b -> gen_dirs;
-          int _x2c_macro_cursor_13 = 0;
-          Var _x2c_macro_cursor_output_13;
-          while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
-            directory = _x2c_macro_cursor_output_13;
+          Array _x2c_macro_object_15 = b -> gen_dirs;
+          int _x2c_macro_cursor_15 = 0;
+          Var _x2c_macro_cursor_output_15;
+          while(Array_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_15)){
+            directory = _x2c_macro_cursor_output_15;
             if(! Array_contains(include_dirs, directory)) Array_push(include_dirs, directory);
           }
 
@@ -1367,7 +1431,7 @@ static int _compile_sources(Build b){
         ToolAction action = Toolchain_compile_action(b -> toolchain, source, object, depfile, directories);
         Array_push(b -> objects, String_var(object));
         if((void *) b -> compile_commands != NULL) Array_push(b -> compile_commands, String_var(_compile_command(b, action, source, object)));
-        String state_path = String_truth(b -> state_root) ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_53), cons(String_var(_key(source)), NULL)))) : NULL;
+        String state_path = String_truth(b -> state_root) ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_61), cons(String_var(_key(source)), NULL)))) : NULL;
         if(_finish_compiles(b, running, &(running_count), 0)){
           failed = 1;
           break;
@@ -1377,7 +1441,7 @@ static int _compile_sources(Build b){
         }
         ;
         if(String_truth(state_path) && ! b -> request -> dry_run){
-          pending.preprocessed = String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_54), cons(String_var(_process_suffix()), cons(String_var(_55), NULL)))))));
+          pending.preprocessed = String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(key), cons(String_var(_62), cons(String_var(_process_suffix()), cons(String_var(_63), NULL)))))));
           pending.execution = ToolAction_start(Toolchain_preprocess_action(b -> toolchain, source, pending.preprocessed, directories));
         }
         else pending.execution = ToolAction_start(action);
@@ -1396,7 +1460,7 @@ static int _compile_sources(Build b){
   Scope_free(running);
   if(! failed && b -> cc_n){
     unsigned long elapsed = report_now_us() - b -> cc_start;
-    report_phase(7477414666, b -> cc_n, b -> cc_n == 1 ? _152 : _153, b -> cc_cached, elapsed);
+    report_phase(7477414666, b -> cc_n, b -> cc_n == 1 ? _159 : _160, b -> cc_cached, elapsed);
   }
   return failed;
 }
@@ -1405,22 +1469,22 @@ static List _native_action_inputs(Build state){
   Array inputs = Array_new();
   {
     Var value;
-    Array _x2c_macro_object_15 = state -> objects;
-    int _x2c_macro_cursor_15 = 0;
-    Var _x2c_macro_cursor_output_15;
-    while(Array_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_15)){
-      value = _x2c_macro_cursor_output_15;
+    Array _x2c_macro_object_17 = state -> objects;
+    int _x2c_macro_cursor_17 = 0;
+    Var _x2c_macro_cursor_output_17;
+    while(Array_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_17)){
+      value = _x2c_macro_cursor_output_17;
       Array_push(inputs, value);
     }
 
   }
   {
     Var value;
-    Array _x2c_macro_object_16 = state -> native_inputs;
-    int _x2c_macro_cursor_16 = 0;
-    Var _x2c_macro_cursor_output_16;
-    while(Array_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_16)){
-      value = _x2c_macro_cursor_output_16;
+    Array _x2c_macro_object_18 = state -> native_inputs;
+    int _x2c_macro_cursor_18 = 0;
+    Var _x2c_macro_cursor_output_18;
+    while(Array_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_18)){
+      value = _x2c_macro_cursor_output_18;
       Array_push(inputs, value);
     }
 
@@ -1434,14 +1498,14 @@ static int _mapped_debug(Build state){
   int enabled = 0;
   {
     String flag;
-    List _x2c_macro_object_17 = state -> toolchain -> cc_args;
-    List _x2c_macro_cursor_17 = _x2c_macro_object_17;
-    Var _x2c_macro_cursor_output_17;
-    while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_17)){
-      flag = Var_string(_x2c_macro_cursor_output_17);
+    List _x2c_macro_object_19 = state -> toolchain -> cc_args;
+    List _x2c_macro_cursor_19 = _x2c_macro_object_19;
+    Var _x2c_macro_cursor_output_19;
+    while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_19)){
+      flag = Var_string(_x2c_macro_cursor_output_19);
       {
-        if(String_equal(flag, _56) || String_equal(flag, _57)) enabled = 0;
-        else if(String_equal(flag, _58) || String_equal(flag, _59) || String_equal(flag, _60) || String_equal(flag, _61) || String_equal(flag, _62) || String_equal(flag, _63) || String_equal(flag, _64) || String_equal(flag, _65) || String_equal(flag, _66) || String_equal(flag, _67) || String_startswith(flag, _154)) enabled = 1;
+        if(String_equal(flag, _64) || String_equal(flag, _65)) enabled = 0;
+        else if(String_equal(flag, _66) || String_equal(flag, _67) || String_equal(flag, _68) || String_equal(flag, _69) || String_equal(flag, _70) || String_equal(flag, _71) || String_equal(flag, _72) || String_equal(flag, _73) || String_equal(flag, _74) || String_equal(flag, _75) || String_startswith(flag, _161)) enabled = 1;
       }
 
     }
@@ -1469,54 +1533,54 @@ static void Build__place_unit_headers(Build b){
   Map headers = Map_new();
   {
     String unit;
-    Array _x2c_macro_object_18 = b -> units;
-    int _x2c_macro_cursor_18 = 0;
-    Var _x2c_macro_cursor_output_18;
-    while(Array_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_18)){
-      unit = Var_string(_x2c_macro_cursor_output_18);
-      Map_setindex(headers, String_var(Path_absolute(unit)), String_var(String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(unit)), cons(String_var(_5), cons(String_var(Path_stem(unit)), cons(String_var(_27), NULL)))))))));
+    Array _x2c_macro_object_20 = b -> units;
+    int _x2c_macro_cursor_20 = 0;
+    Var _x2c_macro_cursor_output_20;
+    while(Array_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_20)){
+      unit = Var_string(_x2c_macro_cursor_output_20);
+      Map_setindex(headers, String_var(Path_absolute(unit)), String_var(String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(unit)), cons(String_var(_5), cons(String_var(Path_stem(unit)), cons(String_var(_29), NULL)))))))));
     }
 
   }
   {
     String unit;
-    Array _x2c_macro_object_22 = b -> units;
-    int _x2c_macro_cursor_22 = 0;
-    Var _x2c_macro_cursor_output_22;
-    while(Array_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_22)){
-      unit = Var_string(_x2c_macro_cursor_output_22);
+    Array _x2c_macro_object_24 = b -> units;
+    int _x2c_macro_cursor_24 = 0;
+    Var _x2c_macro_cursor_output_24;
+    while(Array_try_next(_x2c_macro_object_24, & _x2c_macro_cursor_24, & _x2c_macro_cursor_output_24)){
+      unit = Var_string(_x2c_macro_cursor_output_24);
       {
         String directory = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(unit)), NULL))));
         String stem = Path_stem(unit);
         List searched = cons(String_var(Path_dirname(unit)), List_append(b -> request -> include_dirs, NULL));
-        List outputs = cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_27), NULL)))))), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_25), NULL)))))), NULL));
+        List outputs = cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_29), NULL)))))), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(stem), cons(String_var(_27), NULL)))))), NULL));
         {
           String generated;
-          List _x2c_macro_object_21 = outputs;
-          List _x2c_macro_cursor_21 = _x2c_macro_object_21;
-          Var _x2c_macro_cursor_output_21;
-          while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_21)){
-            generated = Var_string(_x2c_macro_cursor_output_21);
+          List _x2c_macro_object_23 = outputs;
+          List _x2c_macro_cursor_23 = _x2c_macro_object_23;
+          Var _x2c_macro_cursor_output_23;
+          while(List_try_next(_x2c_macro_object_23, & _x2c_macro_cursor_23, & _x2c_macro_cursor_output_23)){
+            generated = Var_string(_x2c_macro_cursor_output_23);
             {
               String line;
-              List _x2c_macro_object_20 = String_split_lines(Path_read_text(generated), 0);
-              List _x2c_macro_cursor_20 = _x2c_macro_object_20;
-              Var _x2c_macro_cursor_output_20;
-              while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_20)){
-                line = Var_string(_x2c_macro_cursor_output_20);
+              List _x2c_macro_object_22 = String_split_lines(Path_read_text(generated), 0);
+              List _x2c_macro_cursor_22 = _x2c_macro_object_22;
+              Var _x2c_macro_cursor_output_22;
+              while(List_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_22)){
+                line = Var_string(_x2c_macro_cursor_output_22);
                 {
                   String text = String_strip(line, " \t");
-                  if(! String_startswith(text, _155) || ! String_endswith(text, _156)) continue;
+                  if(! String_startswith(text, _162) || ! String_endswith(text, _163)) continue;
                   String target = String_getslice(text, 10, String_len(text) - 1, 1);
-                  if(! String_contains(target, _133)) continue;
-                  String source = String_join(NULL, cons(String_var(String_getslice(target, -2147483648, String_len(target) - 2, 1)), cons(String_var(_68), NULL)));
+                  if(! String_contains(target, _140)) continue;
+                  String source = String_join(NULL, cons(String_var(String_getslice(target, -2147483648, String_len(target) - 2, 1)), cons(String_var(_53), NULL)));
                   {
                     String dir;
-                    List _x2c_macro_object_19 = searched;
-                    List _x2c_macro_cursor_19 = _x2c_macro_object_19;
-                    Var _x2c_macro_cursor_output_19;
-                    while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_19)){
-                      dir = Var_string(_x2c_macro_cursor_output_19);
+                    List _x2c_macro_object_21 = searched;
+                    List _x2c_macro_cursor_21 = _x2c_macro_object_21;
+                    Var _x2c_macro_cursor_output_21;
+                    while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_21)){
+                      dir = Var_string(_x2c_macro_cursor_output_21);
                       {
                         Var header;
                         if(! Map_try_get(headers, String_var(Path_absolute(Path_join(dir, source))), & header)) continue;
@@ -1554,10 +1618,6 @@ ToolAction Toolchain_module_action(Toolchain, String, List);
 
 ToolAction Toolchain_link_action(Toolchain, String, List);
 
-int List_len(List);
-
-Path Path_basename(Path);
-
 int ToolAction_run(ToolAction);
 
 void Path_remove_tree(Path);
@@ -1575,18 +1635,18 @@ int Build_finish(Build b){
   else if(b -> request -> kind == 904178442) action = Toolchain_module_action(b -> toolchain, b -> output, inputs);
   else{
     String output = b -> output;
-    if(b -> request -> command == 38236 && ! String_truth(output)) output = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_69), NULL)));
+    if(b -> request -> command == 38236 && ! String_truth(output)) output = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_76), NULL)));
     b -> output = output;
     action = Toolchain_link_action(b -> toolchain, output, inputs);
   }
   b -> final_at = report_now_us();
   report_progress(action -> phase, 0, 1, b -> output);
   int input_count = List_len(inputs);
-  String noun = action -> phase == 3362278794 ?(input_count == 1 ? _157 : _158) :(input_count == 1 ? _159 : _160);
-  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_70), cons(String_var(_key(b -> output)), NULL)))) : NULL;
+  String noun = action -> phase == 3362278794 ?(input_count == 1 ? _164 : _165) :(input_count == 1 ? _166 : _167);
+  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_77), cons(String_var(_key(b -> output)), NULL)))) : NULL;
   if(String_truth(state_path) && ! b -> request -> dry_run && ! access(b -> output, R_OK)){
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, & ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &(ok));
     if(ok && _state_matches(state_path, hash)){
       if(b -> request -> verbose) fprintf(stderr, "x2c: up-to-date %s %s\n", Symbol_str(action -> phase), b -> output);
       b -> final_cached = 1;
@@ -1600,7 +1660,7 @@ int Build_finish(Build b){
   String staging = NULL, staged = NULL;
   if(! b -> request -> dry_run){
     String name = Path_basename(b -> output);
-    staging = String_join(NULL, cons(String_var(Path_dirname(b -> output)), cons(String_var(_71), cons(String_var(name), cons(String_var(_54), cons(String_var(_process_suffix()), NULL))))));
+    staging = String_join(NULL, cons(String_var(Path_dirname(b -> output)), cons(String_var(_78), cons(String_var(name), cons(String_var(_62), cons(String_var(_process_suffix()), NULL))))));
     Path_make_dirs(staging);
     staged = String_join(NULL, cons(String_var(staging), cons(String_var(_5), cons(String_var(name), NULL))));
     publish = b -> request -> kind == 1381098885964356 ? Toolchain_archive_action(b -> toolchain, staged, inputs) : b -> request -> kind == 904178442 ? Toolchain_module_action(b -> toolchain, staged, inputs) : Toolchain_link_action(b -> toolchain, staged, inputs);
@@ -1624,15 +1684,15 @@ int Build_finish(Build b){
   }
   if(String_truth(staging)) Path_remove_tree(staging);
   if(_mapped_debug(b)){
-    String output = b -> output, symbols = String_join(NULL, cons(String_var(output), cons(String_var(_72), NULL)));
-    ToolAction debug = tool_action_new(302682, cons(_74, cons(String_var(output), cons(_76, cons(String_var(symbols), NULL)))), b -> request -> verbose, b -> request -> dry_run);
+    String output = b -> output, symbols = String_join(NULL, cons(String_var(output), cons(String_var(_79), NULL)));
+    ToolAction debug = tool_action_new(302682, cons(_81, cons(String_var(output), cons(_83, cons(String_var(symbols), NULL)))), b -> request -> verbose, b -> request -> dry_run);
     if(ToolAction_run(debug)) return 1;
   }
   report_progress(action -> phase, 1, 1, b -> output);
   report_phase(action -> phase, input_count, noun, 0, report_now_us() - b -> final_at);
   if(String_truth(state_path)){
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, & ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &(ok));
     if(ok) _state_write(state_path, hash);
   }
   return 0;
@@ -1658,44 +1718,44 @@ void Build_report_success(Build b){
   if(! report_receipts()) return;
   unsigned long elapsed = report_now_us() - b -> started_at;
   String duration = report_duration(elapsed);
-  String cache = _all_cached(b) ? _161 : _162;
-  String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_77), cons(String_var(b -> request -> label), cons(String_var(_78), NULL)))) : _162;
+  String cache = _all_cached(b) ? _168 : _169;
+  String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_84), cons(String_var(b -> request -> label), cons(String_var(_85), NULL)))) : _169;
   String result;
   if(b -> request -> compile_only){
     int objects = Array_len(b -> objects);
-    if(objects == 1) result = String_join(NULL, cons(String_var(_79), cons(String_var(label), cons(String_var(_80), cons(String_var(b -> output), cons(String_var(_81), cons(String_var(duration), cons(String_var(cache), NULL))))))));
+    if(objects == 1) result = String_join(NULL, cons(String_var(_86), cons(String_var(label), cons(String_var(_87), cons(String_var(b -> output), cons(String_var(_88), cons(String_var(duration), cons(String_var(cache), NULL))))))));
     else{
-      String tail = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_81), cons(String_var(duration), cons(String_var(cache), NULL)))));
-      result = String_join(NULL, cons(String_var(_79), cons(String_var(label), cons(String_var(_82), cons(String_var(int_str(objects)), cons(String_var(_83), cons(String_var(tail), NULL)))))));
+      String tail = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_88), cons(String_var(duration), cons(String_var(cache), NULL)))));
+      result = String_join(NULL, cons(String_var(_86), cons(String_var(label), cons(String_var(_89), cons(String_var(int_str(objects)), cons(String_var(_90), cons(String_var(tail), NULL)))))));
     }
 
   }
   else{
-    String kind = b -> request -> kind == 1381098885964356 ? _163 : b -> request -> kind == 904178442 ? _164 : _165;
-    result = String_join(NULL, cons(String_var(_79), cons(String_var(label), cons(String_var(_82), cons(String_var(kind), cons(String_var(_82), cons(String_var(b -> output), cons(String_var(_81), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
+    String kind = b -> request -> kind == 1381098885964356 ? _170 : b -> request -> kind == 904178442 ? _171 : _172;
+    result = String_join(NULL, cons(String_var(_86), cons(String_var(label), cons(String_var(_89), cons(String_var(kind), cons(String_var(_89), cons(String_var(b -> output), cons(String_var(_88), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
   }
   report_line(42217975014, result);
   if(b -> xlat_n){
     String size = report_size(b -> gen_bytes);
-    String c_noun = b -> xlat_n == 1 ? _152 : _153;
-    String h_noun = b -> xlat_n == 1 ? _166 : _167;
-    report_line(28680520, String_join(NULL, cons(String_var(_84), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_82), cons(String_var(c_noun), cons(String_var(_85), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_82), cons(String_var(h_noun), cons(String_var(_86), cons(String_var(size), cons(String_var(_87), NULL)))))))))))));
+    String c_noun = b -> xlat_n == 1 ? _159 : _160;
+    String h_noun = b -> xlat_n == 1 ? _173 : _174;
+    report_line(28680520, String_join(NULL, cons(String_var(_91), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_89), cons(String_var(c_noun), cons(String_var(_92), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_89), cons(String_var(h_noun), cons(String_var(_93), cons(String_var(size), cons(String_var(_94), NULL)))))))))))));
   }
   if(b -> cc_n){
     int count = b -> request -> jobs;
-    String jobs = count == 1 ? _168 : String_join(NULL, cons(String_var(int_str(count)), cons(String_var(_88), NULL)));
-    report_line(28680520, String_join(NULL, cons(String_var(_89), cons(String_var(b -> toolchain -> cc), cons(String_var(_90), cons(String_var(jobs), NULL))))));
+    String jobs = count == 1 ? _175 : String_join(NULL, cons(String_var(int_str(count)), cons(String_var(_95), NULL)));
+    report_line(28680520, String_join(NULL, cons(String_var(_96), cons(String_var(b -> toolchain -> cc), cons(String_var(_97), cons(String_var(jobs), NULL))))));
   }
   if(! b -> request -> compile_only){
-    if(b -> request -> kind == 1381098885964356) report_line(28680520, String_join(NULL, cons(String_var(_91), cons(String_var(b -> toolchain -> ar), NULL))));
-    else report_line(28680520, String_join(NULL, cons(String_var(_92), cons(String_var(b -> toolchain -> cc), NULL))));
+    if(b -> request -> kind == 1381098885964356) report_line(28680520, String_join(NULL, cons(String_var(_98), cons(String_var(b -> toolchain -> ar), NULL))));
+    else report_line(28680520, String_join(NULL, cons(String_var(_99), cons(String_var(b -> toolchain -> cc), NULL))));
   }
-  String retention = ! b -> temporary ? _169 : b -> request -> command == 38236 ? _170 : _171;
-  report_line(28680520, String_join(NULL, cons(String_var(_93), cons(String_var(b -> work_dir), cons(String_var(_86), cons(String_var(retention), cons(String_var(_87), NULL)))))));
+  String retention = ! b -> temporary ? _176 : b -> request -> command == 38236 ? _177 : _178;
+  report_line(28680520, String_join(NULL, cons(String_var(_100), cons(String_var(b -> work_dir), cons(String_var(_93), cons(String_var(retention), cons(String_var(_94), NULL)))))));
   if(! b -> request -> compile_only){
     String size = report_size(report_file_bytes(b -> output));
-    report_line(28680520, String_join(NULL, cons(String_var(_94), cons(String_var(b -> output), cons(String_var(_86), cons(String_var(size), cons(String_var(_87), NULL)))))));
-    if(_mapped_debug(b)) report_line(28680520, String_join(NULL, cons(String_var(_95), cons(String_var(b -> output), cons(String_var(_72), NULL)))));
+    report_line(28680520, String_join(NULL, cons(String_var(_101), cons(String_var(b -> output), cons(String_var(_93), cons(String_var(size), cons(String_var(_94), NULL)))))));
+    if(_mapped_debug(b)) report_line(28680520, String_join(NULL, cons(String_var(_102), cons(String_var(b -> output), cons(String_var(_79), NULL)))));
   }
 
 }
@@ -1704,16 +1764,16 @@ void ToolAction_as_program(ToolAction);
 
 int Build_run_program(Build b){
   if(! _init_guard_) _file_init_();
-  report_line(34081994, String_join(NULL, cons(String_var(_96), cons(String_var(b -> output), NULL))));
+  report_line(34081994, String_join(NULL, cons(String_var(_103), cons(String_var(b -> output), NULL))));
   Array arguments = Array_new();
   Array_push(arguments, String_var(b -> output));
   {
     String argument;
-    List _x2c_macro_object_23 = b -> request -> run_args;
-    List _x2c_macro_cursor_23 = _x2c_macro_object_23;
-    Var _x2c_macro_cursor_output_23;
-    while(List_try_next(_x2c_macro_object_23, & _x2c_macro_cursor_23, & _x2c_macro_cursor_output_23)){
-      argument = Var_string(_x2c_macro_cursor_output_23);
+    List _x2c_macro_object_25 = b -> request -> run_args;
+    List _x2c_macro_cursor_25 = _x2c_macro_object_25;
+    Var _x2c_macro_cursor_output_25;
+    while(List_try_next(_x2c_macro_object_25, & _x2c_macro_cursor_25, & _x2c_macro_cursor_output_25)){
+      argument = Var_string(_x2c_macro_cursor_output_25);
       Array_push(arguments, String_var(argument));
     }
 
@@ -1760,40 +1820,40 @@ x2c_exception_leave(& _x2c_exception_frame_8);
 String Env_get(String);
 
 static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites, int * ok){
-  uint64_t hash = _state_base(c, cc, ok);
-  hash = _state_text(hash, _172);
+  uint64_t hash = _state_base(c, cc, &((* ok)));
+  hash = _state_text(hash, _179);
   hash = _state_list(hash, c -> inputs);
   hash = _state_list(hash, c -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(c));
   hash = _state_list(hash, c -> cpp_args);
   hash = _state_list(hash, c -> cc_args);
   hash = _state_list(hash, c -> ld_args);
-  hash = _state_text(hash, c -> source_map ? _146 : _147);
+  hash = _state_text(hash, c -> source_map ? _153 : _154);
   {
     String name;
-    List _x2c_macro_object_24 = _108;
-    List _x2c_macro_cursor_24 = _x2c_macro_object_24;
-    Var _x2c_macro_cursor_output_24;
-    while(List_try_next(_x2c_macro_object_24, & _x2c_macro_cursor_24, & _x2c_macro_cursor_output_24)){
-      name = Var_string(_x2c_macro_cursor_output_24);
+    List _x2c_macro_object_26 = _115;
+    List _x2c_macro_cursor_26 = _x2c_macro_object_26;
+    Var _x2c_macro_cursor_output_26;
+    while(List_try_next(_x2c_macro_object_26, & _x2c_macro_cursor_26, & _x2c_macro_cursor_output_26)){
+      name = Var_string(_x2c_macro_cursor_output_26);
       hash = _state_text(hash, Env_get(name));
     }
 
   }
   {
     String path;
-    List _x2c_macro_object_25 = prerequisites;
-    List _x2c_macro_cursor_25 = _x2c_macro_object_25;
-    Var _x2c_macro_cursor_output_25;
-    while(List_try_next(_x2c_macro_object_25, & _x2c_macro_cursor_25, & _x2c_macro_cursor_output_25)){
-      path = Var_string(_x2c_macro_cursor_output_25);
+    List _x2c_macro_object_27 = prerequisites;
+    List _x2c_macro_cursor_27 = _x2c_macro_object_27;
+    Var _x2c_macro_cursor_output_27;
+    while(List_try_next(_x2c_macro_object_27, & _x2c_macro_cursor_27, & _x2c_macro_cursor_output_27)){
+      path = Var_string(_x2c_macro_cursor_output_27);
       {
-        if(! String_endswith(path, _133)){
-          hash = _state_file(hash, path, ok);
+        if(! String_endswith(path, _140)){
+          hash = _state_file(hash, path, &((* ok)));
           continue;
         }
         hash = _state_text(hash, path);
-        hash = _state_text(hash, Path_is_dir(path) ? String_printf(_109, Path_modified_time(path)) : _173);
+        hash = _state_text(hash, Path_is_dir(path) ? String_printf(_116, Path_modified_time(path)) : _180);
       }
 
     }
@@ -1812,11 +1872,11 @@ static List Build__script_directories(Build b, List prerequisites){
   Array directories = Array_new();
   {
     Var directory;
-    List _x2c_macro_object_26 = b -> request -> include_dirs;
-    List _x2c_macro_cursor_26 = _x2c_macro_object_26;
-    Var _x2c_macro_cursor_output_26;
-    while(List_try_next(_x2c_macro_object_26, & _x2c_macro_cursor_26, & _x2c_macro_cursor_output_26)){
-      directory = _x2c_macro_cursor_output_26;
+    List _x2c_macro_object_28 = b -> request -> include_dirs;
+    List _x2c_macro_cursor_28 = _x2c_macro_object_28;
+    Var _x2c_macro_cursor_output_28;
+    while(List_try_next(_x2c_macro_object_28, & _x2c_macro_cursor_28, & _x2c_macro_cursor_output_28)){
+      directory = _x2c_macro_cursor_output_28;
       Array_push(directories, directory);
     }
 
@@ -1824,21 +1884,21 @@ static List Build__script_directories(Build b, List prerequisites){
   Array_push(directories, String_var(b -> toolchain -> include_dir));
   {
     List args;
-    List _x2c_macro_object_28 = cons(List_var(b -> toolchain -> cc_args), cons(List_var(b -> toolchain -> ld_args), NULL));
-    List _x2c_macro_cursor_28 = _x2c_macro_object_28;
-    Var _x2c_macro_cursor_output_28;
-    while(List_try_next(_x2c_macro_object_28, & _x2c_macro_cursor_28, & _x2c_macro_cursor_output_28)){
-      args = Var_list(_x2c_macro_cursor_output_28);
+    List _x2c_macro_object_30 = cons(List_var(b -> toolchain -> cc_args), cons(List_var(b -> toolchain -> ld_args), NULL));
+    List _x2c_macro_cursor_30 = _x2c_macro_object_30;
+    Var _x2c_macro_cursor_output_30;
+    while(List_try_next(_x2c_macro_object_30, & _x2c_macro_cursor_30, & _x2c_macro_cursor_output_30)){
+      args = Var_list(_x2c_macro_cursor_output_30);
       {
         for(List p = args;  List_truth(p);  p = List_cdr(p)){
           String arg = Var_string(List_car(p));
           {
             Var flag;
-            List _x2c_macro_object_27 = _124;
-            List _x2c_macro_cursor_27 = _x2c_macro_object_27;
-            Var _x2c_macro_cursor_output_27;
-            while(List_try_next(_x2c_macro_object_27, & _x2c_macro_cursor_27, & _x2c_macro_cursor_output_27)){
-              flag = _x2c_macro_cursor_output_27;
+            List _x2c_macro_object_29 = _131;
+            List _x2c_macro_cursor_29 = _x2c_macro_object_29;
+            Var _x2c_macro_cursor_output_29;
+            while(List_try_next(_x2c_macro_object_29, & _x2c_macro_cursor_29, & _x2c_macro_cursor_output_29)){
+              flag = _x2c_macro_cursor_output_29;
               {
                 String spelling = Var_string(flag);
                 if(! String_startswith(arg, spelling)) continue;
@@ -1860,22 +1920,22 @@ static List Build__script_directories(Build b, List prerequisites){
   }
   {
     String path;
-    List _x2c_macro_object_29 = prerequisites;
-    List _x2c_macro_cursor_29 = _x2c_macro_object_29;
-    Var _x2c_macro_cursor_output_29;
-    while(List_try_next(_x2c_macro_object_29, & _x2c_macro_cursor_29, & _x2c_macro_cursor_output_29)){
-      path = Var_string(_x2c_macro_cursor_output_29);
+    List _x2c_macro_object_31 = prerequisites;
+    List _x2c_macro_cursor_31 = _x2c_macro_object_31;
+    Var _x2c_macro_cursor_output_31;
+    while(List_try_next(_x2c_macro_object_31, & _x2c_macro_cursor_31, & _x2c_macro_cursor_output_31)){
+      path = Var_string(_x2c_macro_cursor_output_31);
       Array_push(directories, String_var(Path_dirname(path)));
     }
 
   }
   {
     Var directory;
-    List _x2c_macro_object_30 = Toolchain_search_directories(b -> toolchain);
-    List _x2c_macro_cursor_30 = _x2c_macro_object_30;
-    Var _x2c_macro_cursor_output_30;
-    while(List_try_next(_x2c_macro_object_30, & _x2c_macro_cursor_30, & _x2c_macro_cursor_output_30)){
-      directory = _x2c_macro_cursor_output_30;
+    List _x2c_macro_object_32 = Toolchain_search_directories(b -> toolchain);
+    List _x2c_macro_cursor_32 = _x2c_macro_object_32;
+    Var _x2c_macro_cursor_output_32;
+    while(List_try_next(_x2c_macro_object_32, & _x2c_macro_cursor_32, & _x2c_macro_cursor_output_32)){
+      directory = _x2c_macro_cursor_output_32;
       Array_push(directories, directory);
     }
 
@@ -1883,15 +1943,15 @@ static List Build__script_directories(Build b, List prerequisites){
   Array unique = Array_new();
   {
     Var value;
-    Array _x2c_macro_object_31 = directories;
-    int _x2c_macro_cursor_31 = 0;
-    Var _x2c_macro_cursor_output_31;
-    while(Array_try_next(_x2c_macro_object_31, & _x2c_macro_cursor_31, & _x2c_macro_cursor_output_31)){
-      value = _x2c_macro_cursor_output_31;
+    Array _x2c_macro_object_33 = directories;
+    int _x2c_macro_cursor_33 = 0;
+    Var _x2c_macro_cursor_output_33;
+    while(Array_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_33)){
+      value = _x2c_macro_cursor_output_33;
       {
         String directory = Path_absolute(Var_string(value));
         if(String_startswith(directory, Path_absolute(b -> work_dir))) continue;
-        String entry = String_endswith(directory, _133) ? directory : String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL)));
+        String entry = String_endswith(directory, _140) ? directory : String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL)));
         if(! Array_contains(unique, String_var(entry))) Array_push(unique, String_var(entry));
       }
 
@@ -1910,23 +1970,23 @@ Func Func_new_context(FuncAdapter, List, const void *, size_t);
 List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
   String script = Var_string(List_car(b -> request -> inputs)), root = x2c_get_root();
-  String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(script)), cons(String_var(_5), cons(String_var(Path_stem(script)), cons(String_var(_24), NULL)))))));
-  List excluded = List_append(cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_125), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_126), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_127), NULL)))), NULL))), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
+  String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(script)), cons(String_var(_5), cons(String_var(Path_stem(script)), cons(String_var(_26), NULL)))))));
+  List excluded = List_append(cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_132), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_133), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_134), NULL)))), NULL))), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   Array helpers = Array_new();
   {
     String path;
-    List _x2c_macro_object_32 = _state_dep_inputs(translation);
-    List _x2c_macro_cursor_32 = _x2c_macro_object_32;
-    Var _x2c_macro_cursor_output_32;
-    while(List_try_next(_x2c_macro_object_32, & _x2c_macro_cursor_32, & _x2c_macro_cursor_output_32)){
-      path = Var_string(_x2c_macro_cursor_output_32);
+    List _x2c_macro_object_34 = _state_dep_inputs(translation);
+    List _x2c_macro_cursor_34 = _x2c_macro_object_34;
+    Var _x2c_macro_cursor_output_34;
+    while(List_try_next(_x2c_macro_object_34, & _x2c_macro_cursor_34, & _x2c_macro_cursor_output_34)){
+      path = Var_string(_x2c_macro_cursor_output_34);
       {
         if(! x2c_source_file(path) || String_equal(path, script) || Array_contains(helpers, String_var(path))) continue;
         if(List_any(excluded, ({
           Var _x2c_lambda_capture_value_0 = String_var(path);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
             _x2c_lambda_capture_value_0
           }
-          ;  Func_new_context(_x2c_lambda_1, _194, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+          ;  Func_new_context(_x2c_lambda_1, _201, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
         }
         ))) continue;
         Array_push(helpers, String_var(path));
@@ -1945,38 +2005,38 @@ void Build_publish_script(Build b, String executable){
   if(! _init_guard_) _file_init_();
   Path_move_to(b -> output, executable);
   if(_mapped_debug(b)){
-    Path symbols = String_join(NULL, cons(String_var(executable), cons(String_var(_72), NULL)));
+    Path symbols = String_join(NULL, cons(String_var(executable), cons(String_var(_79), NULL)));
     Path_remove_tree(symbols);
-    Path_move_to(String_join(NULL, cons(String_var(b -> output), cons(String_var(_72), NULL))), symbols);
+    Path_move_to(String_join(NULL, cons(String_var(b -> output), cons(String_var(_79), NULL))), symbols);
   }
   String input = Var_string(List_car(b -> request -> inputs));
   Array prerequisites = Array_new();
-  String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(input)), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))))));
+  String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_5), cons(String_var(_key(input)), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_26), NULL)))))));
   {
     String path;
-    List _x2c_macro_object_33 = _state_dep_inputs(translation);
-    List _x2c_macro_cursor_33 = _x2c_macro_object_33;
-    Var _x2c_macro_cursor_output_33;
-    while(List_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_33)){
-      path = Var_string(_x2c_macro_cursor_output_33);
+    List _x2c_macro_object_35 = _state_dep_inputs(translation);
+    List _x2c_macro_cursor_35 = _x2c_macro_object_35;
+    Var _x2c_macro_cursor_output_35;
+    while(List_try_next(_x2c_macro_object_35, & _x2c_macro_cursor_35, & _x2c_macro_cursor_output_35)){
+      path = Var_string(_x2c_macro_cursor_output_35);
       Array_push(prerequisites, String_var(path));
     }
 
   }
   {
     String source;
-    Array _x2c_macro_object_35 = b -> c_sources;
-    int _x2c_macro_cursor_35 = 0;
-    Var _x2c_macro_cursor_output_35;
-    while(Array_try_next(_x2c_macro_object_35, & _x2c_macro_cursor_35, & _x2c_macro_cursor_output_35)){
-      source = Var_string(_x2c_macro_cursor_output_35);
+    Array _x2c_macro_object_37 = b -> c_sources;
+    int _x2c_macro_cursor_37 = 0;
+    Var _x2c_macro_cursor_output_37;
+    while(Array_try_next(_x2c_macro_object_37, & _x2c_macro_cursor_37, & _x2c_macro_cursor_output_37)){
+      source = Var_string(_x2c_macro_cursor_output_37);
       {
         String path;
-        List _x2c_macro_object_34 = _state_dep_inputs(String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(_key(source)), cons(String_var(_24), NULL))))));
-        List _x2c_macro_cursor_34 = _x2c_macro_object_34;
-        Var _x2c_macro_cursor_output_34;
-        while(List_try_next(_x2c_macro_object_34, & _x2c_macro_cursor_34, & _x2c_macro_cursor_output_34)){
-          path = Var_string(_x2c_macro_cursor_output_34);
+        List _x2c_macro_object_36 = _state_dep_inputs(String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_5), cons(String_var(_key(source)), cons(String_var(_26), NULL))))));
+        List _x2c_macro_cursor_36 = _x2c_macro_object_36;
+        Var _x2c_macro_cursor_output_36;
+        while(List_try_next(_x2c_macro_object_36, & _x2c_macro_cursor_36, & _x2c_macro_cursor_output_36)){
+          path = Var_string(_x2c_macro_cursor_output_36);
           Array_push(prerequisites, String_var(path));
         }
 
@@ -1987,11 +2047,11 @@ void Build_publish_script(Build b, String executable){
   }
   {
     Var path;
-    Array _x2c_macro_object_36 = b -> native_inputs;
-    int _x2c_macro_cursor_36 = 0;
-    Var _x2c_macro_cursor_output_36;
-    while(Array_try_next(_x2c_macro_object_36, & _x2c_macro_cursor_36, & _x2c_macro_cursor_output_36)){
-      path = _x2c_macro_cursor_output_36;
+    Array _x2c_macro_object_38 = b -> native_inputs;
+    int _x2c_macro_cursor_38 = 0;
+    Var _x2c_macro_cursor_output_38;
+    while(Array_try_next(_x2c_macro_object_38, & _x2c_macro_cursor_38, & _x2c_macro_cursor_output_38)){
+      path = _x2c_macro_cursor_output_38;
       Array_push(prerequisites, path);
     }
 
@@ -2000,14 +2060,14 @@ void Build_publish_script(Build b, String executable){
   List files = Array_list_free(prerequisites);
   List paths = List_append(files, Build__script_directories(b, files));
   int ok = 1;
-  uint64_t hash = _script_fingerprint(b -> request, b -> toolchain -> cc, paths, & ok);
-  if(ok && _files_unchanged(b, files)) _state_write_lines(String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_128), NULL))), hash, paths);
+  uint64_t hash = _script_fingerprint(b -> request, b -> toolchain -> cc, paths, &(ok));
+  if(ok && _files_unchanged(b, files)) _state_write_lines(String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_135), NULL))), hash, paths);
 }
 
 int CliRequest_script_current(CliRequest c, String directory){
   if(! _init_guard_) _file_init_();
-  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_129), NULL)));
-  if(access(String_join(NULL, cons(String_var(directory), cons(String_var(_69), NULL))), X_OK) || access(record, R_OK)) return 0;
+  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_136), NULL)));
+  if(access(String_join(NULL, cons(String_var(directory), cons(String_var(_76), NULL))), X_OK) || access(record, R_OK)) return 0;
   List volatile lines = NULL;
   {
     ExceptionFrame _x2c_exception_frame_9;
@@ -2050,7 +2110,7 @@ x2c_exception_leave(& _x2c_exception_frame_9);
 }
 Toolchain toolchain = toolchain_new(c -> cc, c -> ar, c -> cpp_args, c -> cc_args, c -> ld_args, 0, 0);
 int ok = 1;
-uint64_t hash = _script_fingerprint(c, toolchain -> cc, List_cdr(lines), & ok);
+uint64_t hash = _script_fingerprint(c, toolchain -> cc, List_cdr(lines), &(ok));
 return ok && _state_matches(record, hash);
 }
 

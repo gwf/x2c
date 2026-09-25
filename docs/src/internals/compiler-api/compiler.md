@@ -691,7 +691,7 @@ Source: `src/compiler.x:1284`
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
 
-`int Compiler.read_source(Compiler c, String path, String volatile *text)`
+`int Compiler.read_source(Compiler c, String path, String volatile &text)`
 
 Reads a source through the request view and retains exact response
 bytes.
@@ -1272,7 +1272,7 @@ Source: `src/compiler.x:2650`
 <a id="Sym.next_typedef"></a>
 #### Sym.next_typedef
 
-`Type Sym.next_typedef(Sym sym, Type type, int *hops)`
+`Type Sym.next_typedef(Sym sym, Type type, int &hops)`
 
 Resolves one typedef hop and counts against the shared cycle budget.
 

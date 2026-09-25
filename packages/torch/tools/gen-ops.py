@@ -175,7 +175,7 @@ def map_arg(arg):
                 "at::TensorList(xg_to_tensors(%s, %s_n))" % (name, name),
                 [("List", name)],
                 ["int64_t %s_n = 0;" % name,
-                 "xt_tensor *%s_items = _handles(%s, &%s_n);"
+                 "xt_tensor *%s_items = _handles(%s, %s_n);"
                  % (name, name, name)],
                 ["%s_items" % name, "%s_n" % name])
     if kind in ("Scalar", "Scalar?"):
@@ -186,7 +186,7 @@ def map_arg(arg):
                 [("Var", name)],
                 ["int64_t %s_int = 0;" % name,
                  "double %s_dbl = 0;" % name,
-                 "int %s_kind = _scalar(%s, &%s_int, &%s_dbl);"
+                 "int %s_kind = _scalar(%s, %s_int, %s_dbl);"
                  % (name, name, name, name)],
                 ["%s_kind" % name, "%s_int" % name, "%s_dbl" % name])
     if kind == "int":
@@ -219,7 +219,7 @@ def map_arg(arg):
                 "at::IntArrayRef(%s, %s_n)" % (name, name),
                 [("List", name)],
                 ["int64_t %s_n = 0;" % name,
-                 "int64_t *%s_dims = _dims(%s, &%s_n);" % (name, name, name)],
+                 "int64_t *%s_dims = _dims(%s, %s_n);" % (name, name, name)],
                 ["%s_dims" % name, "%s_n" % name])
     if kind == "int[]?":
         return ([("const int64_t *", name), ("int64_t", name + "_n")],
@@ -227,7 +227,7 @@ def map_arg(arg):
                 ": at::OptionalIntArrayRef()" % (name, name, name),
                 [("List", name)],
                 ["int64_t %s_n = 0;" % name,
-                 "int64_t *%s_dims = %s ? _dims(%s, &%s_n) : NULL;"
+                 "int64_t *%s_dims = %s ? _dims(%s, %s_n) : NULL;"
                  % (name, name, name, name)],
                 ["%s_dims" % name, "%s_n" % name])
     if kind == "ScalarType":
@@ -600,34 +600,34 @@ X_PRELUDE = '''\
 
 static xt_tensor _native(Tensor t) => t ? t.native() : NULL;
 
-static int64_t *_dims(List sizes, int64_t *count) {
+static int64_t *_dims(List sizes, int64_t &count) {
   int len = sizes.len();
   int64_t *dims = Scope.calloc(len ? len : 1, sizeof(int64_t));
   int index = 0;
   foreach (Var size, sizes) dims[index++] = size.integer();
-  *count = len;
+  count = len;
   return dims;
 }
 
-static xt_tensor *_handles(List tensors, int64_t *count) {
+static xt_tensor *_handles(List tensors, int64_t &count) {
   int len = tensors ? tensors.len() : 0;
   xt_tensor *items = Scope.calloc(len ? len : 1, sizeof(xt_tensor));
   int index = 0;
   if (tensors) foreach (Var item, tensors) items[index++] = _native(
     item.tensor());
-  *count = len;
+  count = len;
   return items;
 }
 
 /* Crosses a Scalar exactly: 0 int64, 1 double, -1 absent. */
-static int _scalar(Var value, int64_t *integer, double *floating) {
+static int _scalar(Var value, int64_t &integer, double &floating) {
   if (value.is_null() || value.is_void()) return -1;
   if (value.is_floating()) {
-    *floating = value.double();
+    floating = value.double();
     return 1;
   }
   if (value.is_integer()) {
-    *integer = value.integer();
+    integer = value.integer();
     return 0;
   }
   raise %(bad-arg (library "torch")

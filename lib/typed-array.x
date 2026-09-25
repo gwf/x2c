@@ -224,3 +224,27 @@ Self ArrayString.remslice(Self, int, int);
 Self ArrayString.splice(Self, int, int, Self);
 Self ArrayString.concat(Self, Self);
 Self ArrayString.reverse(Self);
+
+/* Compile-time code reaches the typed-array conversions through these literal
+   `meta` prototypes; a family macro cannot emit one. */
+meta Var ArrayChar.var(ArrayChar);
+meta ArrayChar Var.arraychar(Var);
+meta ArrayChar Array.arraychar(Array);
+meta Var ArrayShort.var(ArrayShort);
+meta ArrayShort Var.arrayshort(Var);
+meta ArrayShort Array.arrayshort(Array);
+meta Var ArrayInt.var(ArrayInt);
+meta ArrayInt Var.arrayint(Var);
+meta ArrayInt Array.arrayint(Array);
+meta Var ArrayLong.var(ArrayLong);
+meta ArrayLong Var.arraylong(Var);
+meta ArrayLong Array.arraylong(Array);
+meta Var ArrayFloat.var(ArrayFloat);
+meta ArrayFloat Var.arrayfloat(Var);
+meta ArrayFloat Array.arrayfloat(Array);
+meta Var ArrayDbl.var(ArrayDbl);
+meta ArrayDbl Var.arraydbl(Var);
+meta ArrayDbl Array.arraydbl(Array);
+meta Var ArrayString.var(ArrayString);
+meta ArrayString Var.arraystring(Var);
+meta ArrayString Array.arraystring(Array);

@@ -346,14 +346,14 @@ static RegexpMatch _regexp_result(Regexp regexp, String subject) {
 
 static RegexpMatch _regexp_match_at(
   Regexp regexp, String subject, PCRE2_SIZE offset, uint32_t options,
-  int *result) {
-  *result = pcre2_match(
+  int &result) {
+  result = pcre2_match(
     regexp.code, _pcre2_bytes(subject), subject.len(), offset, options,
     regexp.match_data, regexp.match_context
   );
-  if (*result == PCRE2_ERROR_NOMATCH) return NULL;
-  if (*result < 0) {
-    _pcre2_match_error("match", *result);
+  if (result == PCRE2_ERROR_NOMATCH) return NULL;
+  if (result < 0) {
+    _pcre2_match_error("match", result);
   }
   return _regexp_result(regexp, subject);
 }
@@ -370,7 +370,7 @@ RegexpMatch Regexp.match_from(
   }
   int result = 0;
   return _regexp_match_at(
-    regexp, subject, (PCRE2_SIZE) offset, options, &result
+    regexp, subject, (PCRE2_SIZE) offset, options, result
   );
 }
 
@@ -395,7 +395,7 @@ List Regexp.find_all_from(
   while (1) {
     int result = 0;
     RegexpMatch current = _regexp_match_at(
-      regexp, subject, offset, match_options | global_options, &result
+      regexp, subject, offset, match_options | global_options, result
     );
     if (result == PCRE2_ERROR_NOMATCH) break;
     found = cons(current, found);

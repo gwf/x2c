@@ -111,6 +111,10 @@ String Compiler_load_native_module(String path);
 
 void Compiler_preload_native_module(String path);
 
+void x2c_register_extension(const char * name, Map(* targets)(void));
+
+int Compiler_links_extension(String name);
+
 void Compiler_select_package_module(Compiler c, String name, String root, Token token);
 
 void Compiler_select_native_modules(List paths);

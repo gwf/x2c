@@ -376,12 +376,12 @@ static VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
 /* Returns custom `tag`'s row, assigning it on first box, or -1 when `tag`
    names no declared class. Sets `descriptor` for a declared class that has
    no direct row. */
-static int _custom_row(Symbol tag, VarDescriptor **descriptor) {
+static int _custom_row(Symbol tag, VarDescriptor *&descriptor) {
   unsigned count = _row_count();
   for (unsigned i = 0; i < count; i++)
     if (rows[i].tag == tag) return (int) i;
-  *descriptor = _declared(tag);
-  return *descriptor ? _assign_row(*descriptor) : -1;
+  descriptor = _declared(tag);
+  return descriptor ? _assign_row(descriptor) : -1;
 }
 
 meta Symbol Var.tag(Var v);
@@ -789,7 +789,7 @@ static Var _new_symbol(TagId id, unsigned long u) {
 Var Var.new(Symbol tag, ...) {
   va_list ap, TagId id = _tag2id(tag);
   VarDescriptor *descriptor = NULL;
-  int row = id == _invalid_ ? _custom_row(tag, &descriptor) : -1;
+  int row = id == _invalid_ ? _custom_row(tag, descriptor) : -1;
   if (id == _invalid_ && row < 0)
     raise %(bad-target (owner "Var.new") (target $tag));
   va_start(ap, tag);
@@ -849,7 +849,7 @@ Var Var.new(Symbol tag, ...) {
 */
 Var Var.box_record(Symbol tag, const void *record, size_t size) {
   VarDescriptor *descriptor = NULL;
-  int row = _custom_row(tag, &descriptor);
+  int row = _custom_row(tag, descriptor);
   if (row < 0) raise %(bad-target (owner "Var.box_record") (target $tag));
   if (row < VAR_DIRECT_ROWS)
     return _new_custom_pointer(row, Scope.memdup(record, size));

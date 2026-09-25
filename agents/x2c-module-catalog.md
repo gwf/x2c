@@ -46,10 +46,10 @@ Public functions:
 
 `build_check_input`, `CliRequest.prepare`, `Build.generated_dir`,
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
-`Build.module_entry`, `Build.begin_translation`, `Build.end_translation`,
-`compile_commands_write`, `Build.finish`, `Build.report_success`,
-`Build.run_program`, `Build.cleanup`, `Build.script_helpers`,
-`Build.publish_script`, `CliRequest.script_current`
+`Build.module_entry`, `Build.extension_entries`, `Build.begin_translation`,
+`Build.end_translation`, `compile_commands_write`, `Build.finish`,
+`Build.report_success`, `Build.run_program`, `Build.cleanup`,
+`Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -306,7 +306,8 @@ Public functions:
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_declaration`,
 `Compiler.record_native_meta_effect`, `Compiler.native_module_loaded`,
 `Compiler.add_native_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.select_package_module`,
+`Compiler.preload_native_module`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.select_package_module`,
 `Compiler.select_native_modules`, `Compiler.supplies_native_meta`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
@@ -461,16 +462,16 @@ Public functions:
 `Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
 `Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
 `Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.var_signature_type`,
-`Type.numeric_literal_value`, `Type.numeric_literal`, `Type.tag`, `Type.body`,
-`Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
-`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
-`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
-`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
-`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
-`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`Type.var_numeric_update_helper`, `Type.numeric_literal_value`,
+`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
+`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
+`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
+`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
+`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
+`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
+`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -557,9 +558,9 @@ Public functions:
 `Buffer.clear`, `Buffer.write_len`, `Buffer.write`, `Buffer.printf`,
 `Buffer.write_char`, `Buffer.write_repeat`, `Buffer.unwrite`, `Buffer.pad`,
 `Buffer.newline`, `Buffer.indent`, `Buffer.newline_indent`, `Buffer.push`,
-`Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`, `Buffer.len`,
-`Buffer.str`, `Buffer.str_free`, `Buffer.repr`, `Buffer.truth`,
-`Buffer.cleanup`
+`Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`,
+`Buffer.getindex`, `Buffer.len`, `Buffer.str`, `Buffer.str_free`,
+`Buffer.repr`, `Buffer.truth`, `Buffer.cleanup`
 
 ### [lib/clibc.x](../lib/clibc.x)
 

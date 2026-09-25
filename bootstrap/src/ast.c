@@ -264,14 +264,14 @@ int String_find(String, String);
 
 String preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
-  * angle = 0;
+  (* angle) = 0;
   String body = preproc_directive(text);
   if(! String_startswith(body, _125)) return NULL;
   body = String_lstrip(String_remove_prefix(body, _125), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
-  * angle = String_getindex(body, 0) == '<';
+  (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, * angle ? _126 : _127);
+  int close = String_find(rest, (* angle) ? _126 : _127);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
@@ -537,13 +537,13 @@ int Ast_never_returns(Ast ast){
 }
 
 List Ast_initializer_cases(Ast ast, List * input){
-  if(! _init_guard_) _file_init_();  * input = NULL;
+  if(! _init_guard_) _file_init_(); (* input) = NULL;
   {
     List _x2c_match_expr = ast;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 20287107160: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_100), &_x2c_match_capture)) {Var header = _x2c_match_values[0];  List cases = Var_list(_x2c_match_values[1]); {
-    * input = Var_list(header);  return cases;
+    (* input) = Var_list(header);  return cases;
   }
   break;
 }
@@ -556,7 +556,7 @@ return List_cdr(ast);
 Var List_getindex(List, int);
 List Array_list(Array);
 List Ast_initializer_functions(Ast ast, List * source){
-  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_40, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
+  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_40, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
   _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & functions};
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
@@ -597,7 +597,7 @@ List Ast_initializer_functions(Ast ast, List * source){
     }
 
   }
-  * source = value; {
+  (* source) = value; {
     List _x2c_return_value_4 = Array_list(functions); {
       x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_4;
     }
