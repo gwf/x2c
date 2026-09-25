@@ -630,7 +630,8 @@ static int _package_protocol_row(List key, Var value) {
   if (key.car() != "source-node" || value is not <list>) return 0;
   List row = value;
   return row && row.car() in
-    %(protocol adopt meta-protocol declaration-source native-meta);
+    %(protocol adopt meta-protocol declaration-source native-meta
+      package-macro);
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does
