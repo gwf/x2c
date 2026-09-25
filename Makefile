@@ -70,6 +70,8 @@ bootstrap-ready: configure
 ##@ Getting started
 configure:						## Report core build prerequisites
 	@./configure
+	@git rev-parse --git-dir >/dev/null 2>&1 && \
+	  git config core.hooksPath tools/hooks || true
 
 configure-packages:					## Report package build prerequisites
 	@./configure --packages

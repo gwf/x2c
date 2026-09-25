@@ -1,0 +1,18 @@
+#!/bin/sh
+# pre-push -- keep subagent workers from pushing to dev or main.
+#
+# Workers run in worktrees named agent-*; the orchestrator integrates their
+# patches and lands each batch with tools/land-dev. `make configure` installs
+# this directory as core.hooksPath.
+case "$(basename "$(git rev-parse --show-toplevel)")" in
+  agent-*) ;;
+  *) exit 0 ;;
+esac
+while read -r _ _ remote_ref _; do
+  case "$remote_ref" in
+    refs/heads/dev|refs/heads/main)
+      echo "pre-push: worker worktrees do not push to ${remote_ref#refs/heads/};" \
+        "the orchestrator lands each batch" >&2
+      exit 1 ;;
+  esac
+done

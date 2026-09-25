@@ -35,7 +35,8 @@ Launch each worker with worktree isolation. Tell it to:
 - make only its change and run `make build`, the fixtures and unit tests it
   affects, and `git diff --check`;
 - not merge `dev`, commit, push, or run `tools/gate-state.py` or
-  `tools/land-dev`, which refuse to run in `agent-*` worktrees;
+  `tools/land-dev`; both, and pushes to `dev` or `main`, refuse to run in
+  `agent-*` worktrees;
 - save its patch against its branch point, never against the current
   `origin/dev`, and only for files it authored:
   `git diff --binary $(git merge-base HEAD origin/dev) -- src lib etc unittest docs/src/guide docs/src/reference plans`;
