@@ -37,9 +37,8 @@ struct AdTape {
 };
 
 /** Boxes a node for `Var` participation. */
-Var AdNode.var(AdNode node) => Var.new(<adnode>, node);
+meta native Var AdNode.var(AdNode node) => Var.new(<adnode>, node);
 
-meta Var AdNode.var(AdNode node);
 /** Unboxes a node from a `Var` produced by `AdNode.var`. */
 meta native AdNode Var.adnode(Var value) => (AdNode) value.pointer();
 

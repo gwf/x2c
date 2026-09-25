@@ -92,7 +92,8 @@ use it when working with Lisp code already in the compiler session.
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. Functions that
 need compiler queries, explicit compile-time calls or source-template
-construction are exceptions: they only run during translation. We will reach those after ordinary calculations.
+construction are exceptions: they only run during translation. We will
+reach those after ordinary calculations.
 
 ## Compute the arguments too
 
@@ -242,13 +243,13 @@ meta static int compile_counter = 0;
 ```
 
 The emitted program keeps the ordinary C declarations and initializers.
-Compile-time code gets separate per-translation-unit values built from the
-same source initializers, so compile-time mutation never changes the
-eventual program's object. An explicit dollar call reads and writes the
-compile-time values; an ordinary call reads the program's. Each value lives in bytes the compile-time session
-owns, so taking its address and reading or writing through a correctly typed
-pointer has the same aliasing effect as in C. `const` prevents compile-time
-writes.
+Compile-time code gets separate per-translation-unit values built from the same
+source initializers, so compile-time mutation never changes the eventual
+program's object. An explicit dollar call reads and writes the compile-time
+values; an ordinary call reads the program's. Each value lives in bytes the
+compile-time session owns, so taking its address and reading or writing through
+a correctly typed pointer has the same aliasing effect as in C. `const`
+prevents compile-time writes.
 
 A function-local `static` has no compile-time lowering, so a meta function
 that declares one declines like any other unsupported form.
@@ -433,8 +434,8 @@ x2c build --kind meta-module --output helpers.so helpers.x
 ```
 
 The module contains every function that a `meta native` definition or a
-bodyless `meta` prototype in its own sources declares. Code that includes the prototype can call the
-function during translation when the compiler loads the module:
+bodyless `meta` prototype in its own sources declares. Code that includes
+the declaration can call the function during translation when the compiler loads the module:
 
 <!-- ignore: the sample needs helpers.x and the module built from it -->
 ```x2c,ignore
@@ -947,7 +948,7 @@ means feasible in principle, not scheduled or promised support.
 | `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
 | Postfix increment expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. Prefix increments on locals and reference arguments are supported. |
 | Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
-| Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
+| Structs with bitfields, array members, anonymous members or layout attributes; arrays of structs | **Gap:** compute a layout for these shapes. A `packed` struct is a compile error. Other structs use native bytes in C layout. |
 | Unions | **Gap:** model overlapping storage in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |

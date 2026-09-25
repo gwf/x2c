@@ -36,7 +36,7 @@ Reverse-mode differentiation recorded on a runtime tape.
 
 Sum.
 
-Source: `lib/autodiff.x:82`
+Source: `lib/autodiff.x:81`
 
 <a id="AdNode.compare"></a>
 #### AdNode.compare
@@ -45,7 +45,7 @@ Source: `lib/autodiff.x:82`
 
 Orders nodes by primal value, so `<` and `>` compare values.
 
-Source: `lib/autodiff.x:129`
+Source: `lib/autodiff.x:128`
 
 <a id="AdNode.cos"></a>
 #### AdNode.cos
@@ -54,7 +54,7 @@ Source: `lib/autodiff.x:129`
 
 Cosine.
 
-Source: `lib/autodiff.x:142`
+Source: `lib/autodiff.x:141`
 
 <a id="AdNode.div"></a>
 #### AdNode.div
@@ -63,7 +63,7 @@ Source: `lib/autodiff.x:142`
 
 Quotient.
 
-Source: `lib/autodiff.x:112`
+Source: `lib/autodiff.x:111`
 
 <a id="AdNode.exp"></a>
 #### AdNode.exp
@@ -72,7 +72,7 @@ Source: `lib/autodiff.x:112`
 
 Exponential.
 
-Source: `lib/autodiff.x:145`
+Source: `lib/autodiff.x:144`
 
 <a id="AdNode.log"></a>
 #### AdNode.log
@@ -81,7 +81,7 @@ Source: `lib/autodiff.x:145`
 
 Natural logarithm.
 
-Source: `lib/autodiff.x:151`
+Source: `lib/autodiff.x:150`
 
 <a id="AdNode.mul"></a>
 #### AdNode.mul
@@ -90,7 +90,7 @@ Source: `lib/autodiff.x:151`
 
 Product.
 
-Source: `lib/autodiff.x:102`
+Source: `lib/autodiff.x:101`
 
 <a id="AdNode.neg"></a>
 #### AdNode.neg
@@ -99,7 +99,7 @@ Source: `lib/autodiff.x:102`
 
 Negation.
 
-Source: `lib/autodiff.x:122`
+Source: `lib/autodiff.x:121`
 
 <a id="AdNode.sin"></a>
 #### AdNode.sin
@@ -108,7 +108,7 @@ Source: `lib/autodiff.x:122`
 
 Sine.
 
-Source: `lib/autodiff.x:139`
+Source: `lib/autodiff.x:138`
 
 <a id="AdNode.sqrt"></a>
 #### AdNode.sqrt
@@ -117,7 +117,7 @@ Source: `lib/autodiff.x:139`
 
 Square root.
 
-Source: `lib/autodiff.x:154`
+Source: `lib/autodiff.x:153`
 
 <a id="AdNode.sub"></a>
 #### AdNode.sub
@@ -126,7 +126,7 @@ Source: `lib/autodiff.x:154`
 
 Difference.
 
-Source: `lib/autodiff.x:92`
+Source: `lib/autodiff.x:91`
 
 <a id="AdNode.tanh"></a>
 #### AdNode.tanh
@@ -135,12 +135,12 @@ Source: `lib/autodiff.x:92`
 
 Hyperbolic tangent.
 
-Source: `lib/autodiff.x:160`
+Source: `lib/autodiff.x:159`
 
 <a id="AdNode.var"></a>
 #### AdNode.var
 
-`Var AdNode.var(AdNode node)`
+`meta native Var AdNode.var(AdNode node)`
 
 Boxes a node for `Var` participation.
 
@@ -157,7 +157,7 @@ Seeds `result` with adjoint 1 and propagates active adjoints to its
 operands. Zero adjoints do not invoke reverse callbacks. Earlier adjoints
 on the tape are cleared first, so repeated calls do not accumulate.
 
-Source: `lib/autodiff.x:69`
+Source: `lib/autodiff.x:68`
 
 <a id="AdTape.input"></a>
 #### AdTape.input
@@ -166,7 +166,7 @@ Source: `lib/autodiff.x:69`
 
 Records an input or constant. Read `adjoint` after `AdTape.backward`.
 
-Source: `lib/autodiff.x:62`
+Source: `lib/autodiff.x:61`
 
 <a id="AdTape.new"></a>
 #### AdTape.new
@@ -175,7 +175,7 @@ Source: `lib/autodiff.x:62`
 
 Creates an empty tape in the active `Scope`.
 
-Source: `lib/autodiff.x:47`
+Source: `lib/autodiff.x:46`
 
 ### `Var`
 
@@ -186,7 +186,7 @@ Source: `lib/autodiff.x:47`
 
 Unboxes a node from a `Var` produced by `AdNode.var`.
 
-Source: `lib/autodiff.x:44`
+Source: `lib/autodiff.x:43`
 
 ## Public types
 

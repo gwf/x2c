@@ -410,8 +410,9 @@ int main(void) {
 
 The call does not write `&`; x2c takes each argument's address. Passing a
 reference parameter to another reference parameter forwards the same object.
-The argument must be an addressable lvalue whose storage remains live for the
-call.
+The argument must be an addressable lvalue of the referenced type whose
+storage remains live for the call. A pointer, `NULL` or `0` is a compile
+error; to pass the object a pointer `p` addresses, write `*p`.
 
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership

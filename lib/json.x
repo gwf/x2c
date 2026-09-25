@@ -24,8 +24,6 @@ typedef enum Json {
   JSON_NAMESPACE
 } Json;
 
-meta Var Json.parse(String source);
-
 /** A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
     The two values are process-lifetime singletons made by `Json.bool`.
 */
@@ -396,7 +394,7 @@ static Var _parse(String source, String path) {
     arrays and objects more than 512 deep, or contains a number too large for
     a `double`, an unpaired surrogate escape, or `\u0000`.
 */
-Var Json.parse(String source) => _parse(source, NULL);
+meta native Var Json.parse(String source) => _parse(source, NULL);
 
 /** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
     Raises: the causes of `Path.read_text`, or `<bad-arg>` as

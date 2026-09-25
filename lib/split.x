@@ -121,11 +121,6 @@ meta native List String.split_n(String str, String sep, int max_splits) {
 */
 meta native List String.split(String str, String sep) => str.split_n(sep, -1);
 
-meta List String.split_lines(String str, int keep_ends);
-meta Split String.words(String str);
-meta Split String.lines(String str);
-meta Split String.splits(String str, String sep);
-
 /** Splits `str` into a `List` of lines.
     LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
     nonzero `keep_ends` leaves each line's ending attached to it. A trailing
@@ -137,7 +132,7 @@ meta Split String.splits(String str, String sep);
     Raises: `<alloc-fail>` or `<size-limit>` while constructing fields or the
     result.
 */
-List String.split_lines(String str, int keep_ends) {
+meta native List String.split_lines(String str, int keep_ends) {
   if (!str) return %();
   Array results = [], int start = 0;
   while (start < str.len()) {
@@ -203,7 +198,7 @@ static int _splits_next(Split split, int *cursor, String *out) {
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
-Split String.words(String str) => _new(str, NULL, _words_next);
+meta native Split String.words(String str) => _new(str, NULL, _words_next);
 
 /** Returns a lazy cursor over lines in `str`, with endings removed.
     LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
@@ -218,7 +213,7 @@ Split String.words(String str) => _new(str, NULL, _words_next);
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
-Split String.lines(String str) => _new(str, NULL, _lines_next);
+meta native Split String.lines(String str) => _new(str, NULL, _lines_next);
 
 /** Returns a lazy cursor over fields separated by `sep`.
     Separators are not coalesced, so adjacent separators produce empty
@@ -232,7 +227,8 @@ Split String.lines(String str) => _new(str, NULL, _lines_next);
     `sep`; both actual owning pools must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
 */
-Split String.splits(String str, String sep) => _new(str, sep, _splits_next);
+meta native Split String.splits(String str, String sep) =>
+  _new(str, sep, _splits_next);
 
 /** Yields the next field and advances a caller-owned position on success.
     Position must start at zero and thereafter retain only values written by

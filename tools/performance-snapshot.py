@@ -397,6 +397,11 @@ def run_snapshot_locked(
   build_mode = (ROOT / "etc/build-mode").read_text(encoding="utf-8").strip()
   if build_mode != "optimize":
     raise SnapshotError("tracked etc/build-mode must be optimize")
+  local = ROOT / "etc/build-mode.local"
+  local_mode = local.read_text(encoding="utf-8").strip() \
+    if local.exists() else "optimize"
+  if local_mode != "optimize":
+    raise SnapshotError("etc/build-mode.local overrides optimize")
 
   output_root.mkdir(parents=True, exist_ok=True)
   history_path = output_root / "history.jsonl"

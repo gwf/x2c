@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/reference-argument-pointer.x:10:3: type: cannot pass (* int) where (& int) is expected
+    set(pointer);
+    ^^^
+  note: pass an lvalue of the referenced type; write *p for a pointer
+

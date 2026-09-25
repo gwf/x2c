@@ -24,12 +24,6 @@
 */
 class Path String;
 
-meta Self Path.join(Self base, Path name);
-meta Self Path.dirname(Self path);
-meta Self Path.basename(Self path);
-meta String Path.extension(Path path);
-meta String Path.stem(Path path);
-
 #pragma private
 
 #include <dirent.h>
@@ -50,7 +44,7 @@ static String _trimmed(String path) {
 /** Returns `name` joined to `base` with one separating slash.
     An absolute `name`, or an empty `base`, is returned unchanged.
 */
-Self Path.join(Self base, Path name) {
+meta native Self Path.join(Self base, Path name) {
   if (!name) return base;
   if (!base || name.startswith("/")) return name;
   return base.endswith("/") ? %"$base$name" : %"$base/$name";
@@ -59,7 +53,7 @@ Self Path.join(Self base, Path name) {
 /** Returns the directory part of `path`: `.` when it has no slash and `/`
     for a path directly under the root.
 */
-Self Path.dirname(Self path) {
+meta native Self Path.dirname(Self path) {
   String trimmed = _trimmed(path);
   int slash = trimmed.rfind("/");
   if (slash < 0) return ".";
@@ -68,7 +62,7 @@ Self Path.dirname(Self path) {
 }
 
 /** Returns the last component of `path`, ignoring trailing slashes. */
-Self Path.basename(Self path) {
+meta native Self Path.basename(Self path) {
   String trimmed = _trimmed(path);
   if (trimmed == "/") return trimmed;
   int slash = trimmed.rfind("/");
@@ -85,14 +79,14 @@ static int _extension_dot(String base) {
     NULL when there is none. A leading or trailing dot does not start an
     extension, so `..` and `notes.` have none.
 */
-String Path.extension(Path path) {
+meta native String Path.extension(Path path) {
   String base = path.basename();
   int dot = _extension_dot(base);
   return dot < 0 ? NULL : base[dot:];
 }
 
 /** Returns `path`'s last component without its extension. */
-String Path.stem(Path path) {
+meta native String Path.stem(Path path) {
   String base = path.basename();
   int dot = _extension_dot(base);
   return dot < 0 ? base : base[:dot];
