@@ -1386,7 +1386,9 @@ static Type _raise_nested_invalid_type(Compiler compiler, Var node) {
 // Normalize raise detail crossings to the counted runtime's Var pairs.
 static List _raise(
   Compiler compiler, List ast, Var cause, List arguments) {
-  Array values = [], int changed = 0, index = 0;
+  Array values = [], int index = 0;
+  List code = compiler.convert_expression(cause, %("Symbol"));
+  int changed = code != cause;
   foreach (List value, arguments) {
     Type invalid = NULL;
     if (index & 1) value = compiler.promote_string_literal(value);
@@ -1417,7 +1419,7 @@ static List _raise(
     return ast;
   }
   List converted = values.list_free();
-  return %(raise $cause (args @converted));
+  return %(raise $code (args @converted));
 }
 
 // Lower bracket reads into helper calls with method-call conversions.

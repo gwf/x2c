@@ -1,0 +1,4 @@
+bad-enc ((index 0) (cause (bad-enc (text "x"))))
+conv-range ((index 1) (cause (conv-range (value 300))))
+alloc-fail ((bytes 8))
+member conv-range

@@ -4159,8 +4159,9 @@ cleanup rules apply to guarded arms too.
 
 `try` requires a following filtered `catch`, `finally`, or both.
 
-`raise %(CODE (KEY VALUE)...);` records one structured `Error`. `CODE` and
-every `KEY` are bare `Symbol`s read by this syntax; each `VALUE` is one
+`raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY`
+is a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol`
+or `$name`, a variable converted to `Symbol`; each `VALUE` is one
 expression. Values are restricted recursively to `Null`/`nil`, numeric and enum
 values, `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
@@ -4178,7 +4179,9 @@ catch: return -1;
 
 The newest `Error` is matched as `%(CODE @DETAIL)`. Filtered arms use the same
 pattern and binder rules as `match`; `?name` declares a `Var`, `*name`
-declares a `List`, and the first matching arm runs. A bare `catch:` is the
+declares a `List`, and the first matching arm runs. The code position takes a
+bare `Symbol`, a binder, or any single pattern, so
+`%((!or ?code bad-enc conv-range) *cause)` selects either code and binds it. A bare `catch:` is the
 optional default and must be last. Every filter expression is evaluated once
 when the `try` is entered.
 
