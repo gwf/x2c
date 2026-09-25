@@ -33,6 +33,9 @@ certify_check 0 certify_scalar_rows "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_scalar_rows-line"
 certify_check 0 certify_wide_scoped "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_wide_scoped-line"
+certify_check 1 certify_wide_dangle "$fixtures/certify.x"
+grep -q 'violation .*certify_wide_dangle.*region' \
+  "$tmp/certify-certify_wide_dangle-line"
 certify_check 0 certify_pure_branch "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_pure_branch-line"
 certify_check 3 certify_conditional_alloc "$fixtures/certify.x"
@@ -53,6 +56,9 @@ grep -q 'call has no project body or lifetime effect contract' \
 certify_check 3 certify_dynamic_printf "$fixtures/certify.x"
 grep -q 'call has no project body or lifetime effect contract' \
   "$tmp/certify-certify_dynamic_printf-line"
+certify_check 1 certify_index_escape "$fixtures/certify.x"
+grep -q 'violation .*certify_index_escape.*region' \
+  "$tmp/certify-certify_index_escape-line"
 certify_check 0 certify_nested "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_nested-line"
 certify_check 1 certify_dangle "$fixtures/certify.x"

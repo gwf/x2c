@@ -2633,6 +2633,8 @@ static int _certify_round(Frontend frontend, Array inputs, List graph,
 
 static int _certify_aggregate(Compiler compiler, Var value) {
   match (value) case %(expr ?type ?): {
+    /* Var is one encoded word whose owner the region walk follows. */
+    if (type == %("Var")) return 0;
     Type resolved = compiler.sym.resolve_key(type);
     return resolved && resolved.is_aggregate();
   }
@@ -2827,6 +2829,22 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       if (operator == <=> && _certify_aggregate(compiler, right))
         obstacles.push(%(obstacle $caller $location
           "aggregate copy may hide a borrowed pointer"));
+      /* The region walk checks an indexed store against its base owner. */
+      Var indexed = NULL;
+      if (operator == <=>)
+        match (left) case %(expr ? ?inner): indexed = inner;
+      match (indexed) case %((!or getindex index) ?base ?key): {
+        _certify_scan(compiler, definitions, publics, base, path, name,
+          origin, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, conditional, deferred);
+        _certify_scan(compiler, definitions, publics, key, path, name,
+          origin, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, conditional, deferred);
+        _certify_scan(compiler, definitions, publics, right, path, name,
+          origin, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, conditional, deferred);
+        return;
+      }
     }
     case %(op (!quote *) ?):
       obstacles.push(%(obstacle $caller $location

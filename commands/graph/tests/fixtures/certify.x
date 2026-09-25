@@ -11,6 +11,12 @@ long certify_wide_scoped(void) {
   return 42L.var().integer();
 }
 
+Var certify_wide_dangle(void) {
+  Scope.retain();
+  defer Scope.release();
+  return 42L.var();
+}
+
 int certify_pure_branch(Var value, int choose) {
   if (choose) return value.integer();
   return 0;
@@ -39,6 +45,12 @@ int certify_escaped_printf(int *value) {
 
 int certify_dynamic_printf(const char *format) {
   return printf(format, 7);
+}
+
+void certify_index_escape(int **out) {
+  Scope.retain();
+  defer Scope.release();
+  out[0] = Scope.malloc(sizeof(int));
 }
 
 int certify_safe(int choose) {
