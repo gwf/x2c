@@ -680,7 +680,7 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
     _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if(! Var_equal(head, Symbol_var(2005352)) && List_truth(args) && _named_binder(List_car(args))){
+  if(List_truth(args) && List_truth(List_cdr(args)) && _named_binder(List_car(args))){
     int index = _layout_index(layout, List_car(args));
     assert(index >= 0);
     * definite |= 1UL << index;
@@ -697,16 +697,15 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
     * definite = 0;
     return;
   }
-  if(Var_equal(head, Symbol_var(62436))){
+  if(Var_equal(head, Symbol_var(2005352)) && List_len(args) == 1){
+    _layout_analyze_sequence(layout, args, definite, possible);
+    return;
+  }
+  if(Var_equal(head, Symbol_var(62436)) || Var_equal(head, Symbol_var(2005352))){
     unsigned long alt_definite = 0, alt_possible = 0;
     _layout_analyze_alternatives(layout, args, & alt_definite, & alt_possible);
     * definite |= alt_definite;
     * possible |= alt_possible;
-    return;
-  }
-  if(Var_equal(head, Symbol_var(2005352))){
-    if(List_len(args) == 2 && _named_binder(List_car(args))) _layout_analyze_sequence(layout, args, definite, possible);
-    else _layout_analyze_alternatives(layout, args, definite, possible);
   }
 
 }

@@ -181,30 +181,10 @@ Var x2c_func_value_argument(
     try {
       converted = value.convert(want);
     }
-    catch %(bad-enc *cause): {
-      List lower = cons(<bad-enc>, cause);
-      raise %(bad-enc (sig $sig) (index $i)
-                       (want $want) (cause $lower));
-    }
-    catch %(void-op *cause): {
-      List lower = cons(<void-op>, cause);
-      raise %(void-op (sig $sig) (index $i)
-                       (want $want) (cause $lower));
-    }
-    catch %(bad-target *cause): {
-      List lower = cons(<bad-target>, cause);
-      raise %(bad-target (sig $sig) (index $i)
-                          (want $want) (cause $lower));
-    }
-    catch %(conv-range *cause): {
-      List lower = cons(<conv-range>, cause);
-      raise %(conv-range (sig $sig) (index $i)
-                          (want $want) (cause $lower));
-    }
-    catch %(no-convert *cause): {
-      List lower = cons(<no-convert>, cause);
-      raise %(no-convert (sig $sig) (index $i)
-                          (want $want) (cause $lower));
+    catch %((!or ?code bad-enc void-op bad-target conv-range no-convert)
+            *cause): {
+      List lower = cons(code, cause);
+      raise %($code (sig $sig) (index $i) (want $want) (cause $lower));
     }
     return converted;
   }

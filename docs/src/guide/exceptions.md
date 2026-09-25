@@ -153,7 +153,25 @@ printf("%s %s\n", code.str(), detail.repr());
 bad-arg ((operation "load"))
 ```
 
-Put this arm after any specific filters that should handle a cause first.
+A pattern in the code position selects several codes in one arm, and
+`raise` accepts the bound code as `$code`. This arm rewraps either cause
+under its own code and lets every other cause continue outward:
+
+```x2c
+try raise %(conv-range (value 300));
+catch %((!or ?code bad-enc conv-range) *cause): {
+  List lower = cons(code, cause);
+  try raise %($code (index 0) (cause $lower));
+  catch %(?outer *detail): printf("%s %s\n", outer, detail.repr());
+}
+```
+
+```text
+conv-range ((index 0) (cause (conv-range (value 300))))
+```
+
+Put a wildcard arm after any specific filters that should handle a cause
+first.
 Like any matching arm, it consumes the selected errors and does not catch an
 error raised by its own body.
 

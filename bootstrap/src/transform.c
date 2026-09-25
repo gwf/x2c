@@ -2340,7 +2340,7 @@ List Compiler_promote_string_literal(Compiler, List);
 List Compiler_origin_location(Compiler, int);
 void Diagnostics_report(Diagnostics, Symbol, String, List, List);
 static List _raise(Compiler compiler, List ast, Var cause, List arguments){
-  Array values = Array_new();  int changed = 0, index = 0; {
+  Array values = Array_new();  int index = 0;  List code = Compiler_convert_expression(compiler, Var_list(cause), List_type(_6));  int changed = ! Var_equal(List_var(code), cause); {
     List value;  List _x2c_macro_object_15 = arguments;  List _x2c_macro_cursor_16 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_14)){
       value = Var_list(_x2c_macro_cursor_output_14); {
         Type invalid = NULL;  if(index & 1) value = Compiler_promote_string_literal(compiler, value);  if(index & 1)
@@ -2366,7 +2366,7 @@ if(List_truth(Type_list(invalid))){
   if(! changed){
     Array_free(values);  return ast;
   }
-  List converted = Array_list_free(values);  return cons(_662, cons(cause, cons(List_var(cons(_13, List_append(converted, NULL))), NULL)));
+  List converted = Array_list_free(values);  return cons(_662, cons(List_var(code), cons(List_var(cons(_13, List_append(converted, NULL))), NULL)));
 }
 
 int Type_is_typedef_name(Type);

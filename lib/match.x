@@ -530,7 +530,9 @@ static void _layout_analyze_pattern(
     _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if (head != <!set> && args && _named_binder(args.car())) {
+  /* A leading binder captures the guard, as `_normalize_pattern` reads it;
+     `(!set BINDER PAT)` is the one-operand capture form. */
+  if (args && args.cdr() && _named_binder(args.car())) {
     int index = _layout_index(layout, args.car());
     assert(index >= 0);
     *definite |= 1UL << index;
@@ -547,17 +549,15 @@ static void _layout_analyze_pattern(
     *definite = 0;
     return;
   }
-  if (head == <!or>) {
+  if (head == <!set> && args.len() == 1) {
+    _layout_analyze_sequence(layout, args, definite, possible);
+    return;
+  }
+  if (head == <!or> || head == <!set>) {
     unsigned long alt_definite = 0, alt_possible = 0;
     _layout_analyze_alternatives(layout, args, &alt_definite, &alt_possible);
     *definite |= alt_definite;
     *possible |= alt_possible;
-    return;
-  }
-  if (head == <!set>) {
-    if (args.len() == 2 && _named_binder(args.car()))
-      _layout_analyze_sequence(layout, args, definite, possible);
-    else _layout_analyze_alternatives(layout, args, definite, possible);
   }
 }
 
