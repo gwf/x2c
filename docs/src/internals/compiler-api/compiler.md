@@ -1272,7 +1272,7 @@ Source: `src/compiler.x:2650`
 <a id="Sym.next_typedef"></a>
 #### Sym.next_typedef
 
-`Type Sym.next_typedef(Sym sym, Type type, int *hops)`
+`Type Sym.next_typedef(Sym sym, Type type, int &hops)`
 
 Resolves one typedef hop and counts against the shared cycle budget.
 

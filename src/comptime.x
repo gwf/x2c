@@ -3375,7 +3375,7 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
   int hops = 0;
   while (alias && (alias.is_typedef_name() || alias.is_typedef())) {
     if (sym.get(%(@alias "layout-attribute"))) return NULL;
-    alias = sym.next_typedef(alias, &hops).base_type();
+    alias = sym.next_typedef(alias, hops).base_type();
   }
   if (sym.is_var_type(declared)) return _meta_var_layout(declared);
   Type tagged = NULL;

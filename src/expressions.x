@@ -220,21 +220,21 @@ const PrintfFn *List.printf_family(List l) {
     steps over.
 */
 String Compiler.printf_static_format(
-  Compiler compiler, Var format, int *raw) {
+  Compiler compiler, Var format, int &raw) {
   match (format) {
     case %(expr (* char) (literal (* char) ?spelled)): {
       String spelling = spelled;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
         return NULL;
-      *raw = 1;
+      raw = 1;
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
       List key = compiler.id_keys[id];
       match (key)
         case %(string (expr ("String") (literal ("String") ?text))): {
-          *raw = 0;
+          raw = 0;
           return text;
         }
       match (key)
@@ -274,7 +274,7 @@ static void _check_explicit_converter_arguments(
      cannot read leaves those values unlowered, so nothing converts them. */
   const PrintfFn *info = callee.printf_family(), int raw = 0;
   if (!info ||
-      !compiler.printf_static_format(supplied[info.fmt_arg], &raw))
+      !compiler.printf_static_format(supplied[info.fmt_arg], raw))
     return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
@@ -391,7 +391,7 @@ List Compiler.resolve_postfix_member(
       if (field_type) return %(field . $field_type);
       type = NULL;
     }
-    else type = c.sym.next_typedef(type, &hops);
+    else type = c.sym.next_typedef(type, hops);
   }
   return NULL;
 }
@@ -544,7 +544,7 @@ static void _completion_methods(
         _completion_add(seen, names, name);
     }
     if (type.is_pointer() || type.is_aggregate()) type = NULL;
-    else type = compiler.sym.next_typedef(type, &hops);
+    else type = compiler.sym.next_typedef(type, hops);
   }
 }
 
@@ -1096,7 +1096,7 @@ static Array _typedef_names(Compiler compiler, Type type) {
   Array names = [];
   int hops = 0;
   for (; type && (type.is_bare_typedef_name() || type.is_typedef());
-       type = compiler.sym.next_typedef(type, &hops))
+       type = compiler.sym.next_typedef(type, hops))
     if (type.is_bare_typedef_name()) names.push(type);
   return names;
 }
@@ -1125,17 +1125,17 @@ static Type _shared_participant(
    participant is the unqualified type both here and in the operands'
    comparison. */
 static List _resolve_protocol_operator(
-  Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
+  Compiler compiler, Symbol op, List &lhs, List &rhs, Symbol *derived) {
   if (derived) *derived = 0;
-  Type lhs_type = (*lhs).cadr();
+  Type lhs_type = lhs.cadr();
   lhs_type = lhs_type.canonicalize();
   Type participant = lhs_type, rhs_type = NULL;
-  if (*rhs) {
-    rhs_type = (*rhs).cadr();
+  if (rhs) {
+    rhs_type = rhs.cadr();
     rhs_type = rhs_type.canonicalize();
   }
   Symbol member = 0;
-  if (!*rhs) {
+  if (!rhs) {
     if (op != <->) return NULL;
     member = <neg>;
   }
@@ -1163,13 +1163,13 @@ static List _resolve_protocol_operator(
         && _converts_operands(compiler, rhs_type);
       List converted = NULL;
       if (lhs_member && !rhs_member)
-        converted = _converter_call(compiler, *rhs, rhs_type, participant);
-      if (converted) *rhs = converted;
+        converted = _converter_call(compiler, rhs, rhs_type, participant);
+      if (converted) rhs = converted;
       else if (rhs_member && !lhs_member) {
-        converted = _converter_call(compiler, *lhs, lhs_type, rhs_type);
+        converted = _converter_call(compiler, lhs, lhs_type, rhs_type);
         if (!converted) return NULL;
         participant = rhs_type;
-        *lhs = converted;
+        lhs = converted;
       }
       else return NULL;
     }
@@ -1202,7 +1202,7 @@ static int _is_operator_temporary(Compiler c, List expression) {
 static List Compiler._protocol_operator_expression(
   Compiler c, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved = _resolve_protocol_operator(c, op, &lhs, &rhs, &derived);
+  List resolved = _resolve_protocol_operator(c, op, lhs, rhs, &derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
@@ -2905,7 +2905,7 @@ static List _converted_temporary(
 }
 
 static List _converter_owned_call(
-  Compiler compiler, List expr, Type owner, Type target, int *declared) {
+  Compiler compiler, List expr, Type owner, Type target, int &declared) {
   String typename = owner.car().str(), targetedname = target.car().str();
   /* A package type is spelled `pkg__Name`; its converter from an external
      owner is `pkg__owner_name`, the package's own spelling of `owner.name`. */
@@ -2921,7 +2921,7 @@ static List _converter_owned_call(
   List cvrtrtype = NULL;
   List converter_binding = compiler.sym.resolve_global(
     %($convfuncname), &cvrtrtype);
-  if (declared) *declared = !!converter_binding || !!cvrtrtype;
+  declared = !!converter_binding || !!cvrtrtype;
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
     ? expr : %(expr $owner $expr);
@@ -2957,7 +2957,7 @@ static List _converter_call(
     if (owner == target) return NULL;
     int declared = 0;
     List converted = _converter_owned_call(
-      c, expr, owner, target, &declared);
+      c, expr, owner, target, declared);
     if (converted || declared) return converted;
   }
   return NULL;

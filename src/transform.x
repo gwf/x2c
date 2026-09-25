@@ -174,7 +174,7 @@ static List _lower_printf_vars(Compiler c, List ast) {
   if (info.fmt_arg >= values.len())
     _printf_error(c, family, "call has no format argument");
   List format_arg = values[info.fmt_arg], int raw = 0;
-  String format = c.printf_static_format(format_arg, &raw);
+  String format = c.printf_static_format(format_arg, raw);
   if (!format)
     _printf_error(
       c, family,

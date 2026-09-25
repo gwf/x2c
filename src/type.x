@@ -340,10 +340,10 @@ Type Type.scalar(Type type) {
    performs an atomic native update, plus the Func signature spelling. */
 static Map scalartypes = $native_scalar_types();
 
-static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
+static int _scalar_numeric_info(Type type, X2CVarNumericInfo &info) {
   Var row = scalartypes[type];
   return row is <list> &&
-         Var.numeric_info(row.list().car(), info);
+         Var.numeric_info(row.list().car(), &info);
 }
 
 static List _scalar_row(Type type) {
@@ -814,7 +814,7 @@ Type Type.promote(Type type) {
   type = type.scalar();
   if (!type) return NULL;
   X2CVarNumericInfo info;
-  if (_scalar_numeric_info(type, &info) &&
+  if (_scalar_numeric_info(type, info) &&
       !info.floating && info.rank < 3)
     return %(int);
   return type;
@@ -840,8 +840,8 @@ Type Type.widest(Type a, Type b) {
   b = b.promote();
   if (!a || !b) return NULL;
   X2CVarNumericInfo ai = { 0 }, bi = { 0 };
-  _scalar_numeric_info(a, &ai);
-  _scalar_numeric_info(b, &bi);
+  _scalar_numeric_info(a, ai);
+  _scalar_numeric_info(b, bi);
   if (ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;
   int ua = ai.unsigned_value, ub = bi.unsigned_value;
   int ra = ai.rank, rb = bi.rank;

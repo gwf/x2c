@@ -3512,8 +3512,8 @@ Type Sym.resolve_key(Sym sym, Type key) {
     Returns `NULL` for an unresolved link. The shared budget turns a cycle
     into the same diagnostic as full-chain resolution.
 */
-Type Sym.next_typedef(Sym sym, Type type, int *hops) {
-  if (++*hops > RESOLVE_KEY_MAX_HOPS) {
+Type Sym.next_typedef(Sym sym, Type type, int &hops) {
+  if (++hops > RESOLVE_KEY_MAX_HOPS) {
     _typedef_budget_error(sym, type);
     return NULL;
   }
@@ -3791,7 +3791,7 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
       type = sym.resolve_key(type.dereference());
       break;
     }
-    type = sym.next_typedef(type, &hops);
+      type = sym.next_typedef(type, hops);
   }
   return type && type.is_aggregate_tag() ? type : NULL;
 }

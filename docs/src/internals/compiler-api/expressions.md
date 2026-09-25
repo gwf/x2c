@@ -284,7 +284,7 @@ Source: `src/expressions.x:570`
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
 
-`String Compiler.printf_static_format( Compiler compiler, Var format, int *raw)`
+`String Compiler.printf_static_format( Compiler compiler, Var format, int &raw)`
 
 Returns the format a printf-family call consumes when it is known at
 translation time, or `NULL`. That is a quoted C string literal, the

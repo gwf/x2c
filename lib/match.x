@@ -425,7 +425,7 @@ static int _named_binder(Var value) =>
   value.is_binder() && value != <?> && value != <*>;
 
 /* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
-static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
+static int _layout_builder_add(MatchLayoutBuilder &builder, Atom binder) {
   for (int i = 0; i < builder.count; i++)
     if (builder.binders[i].u64 == binder.u64) return i;
   if (builder.count >= MACHINE_BINDER_MAX) return -1;
@@ -437,7 +437,7 @@ static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
    is opaque. Compact matcher predicates are control vocabulary only
    as the final operand of !is. The compiler's dynamic-value marker retains
    binders in its literal children without treating the marker as data. */
-static void _layout_collect(MatchLayoutBuilder *builder, Var pattern) {
+static void _layout_collect(MatchLayoutBuilder &builder, Var pattern) {
   if (pattern is not <list>) {
     if (_malformed_binder_atom(pattern)) builder.malformed_binder = 1;
     else if (_named_binder(pattern) &&
@@ -566,7 +566,7 @@ static MatchCaptureLayout _capture_layout_analyze(
   MatchLayoutBuilder builder = {0};
   MachinePrepare status = MACHINE_PREPARED, const char *reason = "prepared";
   Var normalized = pattern;
-  _layout_collect(&builder, pattern);
+  _layout_collect(builder, pattern);
   if (builder.malformed_binder) {
     status = MACHINE_MALFORMED;
     reason = "binder-name";

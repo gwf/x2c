@@ -106,12 +106,12 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
 }
 
 static int _try_definition(
-  Compiler compiler, Atom name, int install_lisp, Var *stored) {
-  int found = compiler.macros.try_get(name, stored);
+  Compiler compiler, Atom name, int install_lisp, Var &stored) {
+  int found = compiler.macros.try_get(name, &stored);
   String spelling = name.str();
   if (!install_lisp || !spelling.startswith("lisp.")) return found;
   _use_lisp_bindings(compiler, !found);
-  return found || compiler.macros.try_get(name, stored);
+  return found || compiler.macros.try_get(name, &stored);
 }
 
 /** Installs the compiler-shipped source macros into `compiler` once. */
@@ -672,7 +672,7 @@ int Compiler.keyword_form_is_definition(Compiler c) =>
 /* Scans the dotted name after the current `$` without consuming tokens.
    Returns the token after the name, or the token where a name component is
    missing with `spelling` set to NULL. */
-static Token _scan_name(Compiler c, String *spelling) {
+static Token _scan_name(Compiler c, String &spelling) {
   Token token = c.token, String name = NULL;
   do {
     token = c.skip_trivia_from(token + 1);
@@ -683,13 +683,13 @@ static Token _scan_name(Compiler c, String *spelling) {
     name = name ? %"$name.${token.text}" : token.text;
     token = c.skip_trivia_from(token + 1);
   } while (token.type == <.>);
-  *spelling = name;
+  spelling = name;
   return token;
 }
 
 static Atom _name(Compiler c) {
   String spelling;
-  Token end = _scan_name(c, &spelling);
+  Token end = _scan_name(c, spelling);
   if (!spelling)
     c.report_error(
       <parse>, c.peek(1) == <ident>
@@ -714,9 +714,9 @@ static List _peek_invocation(Compiler c) {
   Var stored;
   if (c.peek(0) == <$>) {
     String spelling;
-    _scan_name(c, &spelling);
+    _scan_name(c, spelling);
     if (!spelling ||
-        !_try_definition(c, Atom.intern(spelling), !c.shallow, &stored))
+        !_try_definition(c, Atom.intern(spelling), !c.shallow, stored))
       return NULL;
     return stored;
   }
@@ -735,7 +735,7 @@ static List _peek_invocation(Compiler c) {
 void Compiler.skip_macro_invocation(Compiler c) {
   int bare = _bare(c.token, _peek_invocation(c));
   String spelling;
-  if (c.peek(0) == <$>) c.token = _scan_name(c, &spelling);
+  if (c.peek(0) == <$>) c.token = _scan_name(c, spelling);
   else c.next();
   if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
 }
@@ -801,7 +801,7 @@ static int _claims(Compiler c, List definition, AstPos position) {
   if (!definition) {
     if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes)) {
       String name;
-      _scan_name(c, &name);
+      _scan_name(c, name);
       Type type = name ? c.sym.get(%($name)) : NULL;
       if (type.is_function()) return 0;
     }
@@ -851,7 +851,7 @@ static String _canonical_path(Compiler c, String path) {
   return c.canonical_path(use_system ? system : local);
 }
 
-static int _literal_string(Var syntax, String *value) {
+static int _literal_string(Var syntax, String &value) {
   match (syntax)
     case %(expr ? (literal ? ?(String source))): {
       int quoted = source.len() >= 2 && source[0] == '"' &&
@@ -859,7 +859,7 @@ static int _literal_string(Var syntax, String *value) {
       int percent_quoted = source.len() >= 3 && source[0] == '%' &&
         source[1] == '"' && source[source.len() - 1] == '"';
       if (quoted || percent_quoted) {
-        *value = source.parse();
+        value = source.parse();
         return 1;
       }
     }
@@ -878,7 +878,7 @@ static Var _sdk_embed_text(Var requested) {
     Var key = ((ulong) requested.u64);
     if (!macro_sdk_source_captures ||
         !macro_sdk_source_captures.try_get(key, &stored) ||
-        !_literal_string(requested, &requested_path))
+        !_literal_string(requested, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
         %("value: ${requested.repr()}"));
@@ -954,7 +954,7 @@ String x2c_embed_text(Var path) => _sdk_embed_text(path);
 Var x2c_literal_value(Var syntax) {
   _sdk_guard("x2c.literal.value");
   String value = NULL;
-  if (_literal_string(syntax, &value)) return value;
+  if (_literal_string(syntax, value)) return value;
   match (syntax) case %(expr ? (literal (int) ?(String digits))): {
     long parsed = 0;
     if (digits.try_long(&parsed)) return parsed;
@@ -3369,7 +3369,7 @@ List Compiler.publish_macro_definition_node(Compiler compiler, List node) {
 static List _lookup(Compiler compiler, Atom name, Token invocation) {
   Var stored;
   String spelling = name.str();
-  if (!_try_definition(compiler, name, 1, &stored))
+  if (!_try_definition(compiler, name, 1, stored))
     compiler.report_error(
       <parse>, %"unknown or forward-referenced macro '$spelling'",
       invocation, NULL);
@@ -3865,7 +3865,7 @@ static List _take_invocation(Compiler c, AstPos position) {
   Atom name = _name(c);
   Var existing;
   if (c.macro_holes && c.peek(0) != <(> &&
-      !_try_definition(c, name, 1, &existing)) {
+      !_try_definition(c, name, 1, existing)) {
     String spelling = name.str();
     c.report_error(
       <parse>, %"unbound replacement variable '$spelling'",

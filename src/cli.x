@@ -655,7 +655,7 @@ static int _valid_utf8(const unsigned char *text, size_t length) {
   return 1;
 }
 
-static char *_read_response_file(const char *path, size_t *length) {
+static char *_read_response_file(const char *path, size_t &length) {
   FILE *file = fopen(path, "rb");
   if (!file) _response_error(path, 1, strerror(errno));
   if (fseek(file, 0, SEEK_END)) {
@@ -678,7 +678,7 @@ static char *_read_response_file(const char *path, size_t *length) {
   if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
   if (!_valid_utf8((unsigned char *) text, got))
     _response_error(path, 1, "input is not valid UTF-8");
-  *length = got;
+  length = got;
   return text;
 }
 
@@ -761,7 +761,7 @@ static void _tokenize_response(
     arguments retain the producing pool lifetime.
 */
 List cli_response_arguments(String path) {
-  size_t length = 0, char *text = _read_response_file(path, &length);
+  size_t length = 0, char *text = _read_response_file(path, length);
   Array arguments = [];
   _tokenize_response(arguments, path, text, length);
   Scope.free(text);
@@ -797,8 +797,8 @@ static void _expand_argument(Array output, String argument, List stack) {
    takes a value also accepts it in the same argument, as `-Idir`, and
    reports the remainder through `attached`. */
 static CliOption *_find_option(
-  String spelling, int command_mask, String *attached) {
-  *attached = NULL;
+  String spelling, int command_mask, String &attached) {
+  attached = NULL;
   for (CliOption *option = cli_options; option.spelling; option++) {
     if (!(option.commands & command_mask)) continue;
     String form = option.spelling;
@@ -809,7 +809,7 @@ static CliOption *_find_option(
     }
     if (spelling == form || spelling == option.alias) return option;
     if (option.value && form.len() == 2 && longer) {
-      *attached = spelling[2:];
+      attached = spelling[2:];
       return option;
     }
   }
@@ -822,11 +822,11 @@ static CliOption *_find_option(
    because it forwards the argument as written to the C compiler and
    linker. */
 static CliOption *_take_option(
-  Array args, int *index, int mask,
-  String *spelling, String *value, int *attached) {
+  Array args, int &index, int mask,
+  String *spelling, String &value, int *attached) {
   // A long option may carry its value after '=', as `--out-dir=gen`. An
   // empty one is the option's own missing-value case, not the next word.
-  String arg = args[*index], written = arg, joined = NULL;
+  String arg = args[index], written = arg, joined = NULL;
   int equals = arg.startswith("--") ? arg.find("=") : -1;
   if (equals > 2) {
     written = arg[:equals];
@@ -834,17 +834,17 @@ static CliOption *_take_option(
     if (joined && !joined[0]) joined = NULL;
   }
   String suffix = NULL;
-  CliOption *option = _find_option(written, mask, &suffix);
+  CliOption *option = _find_option(written, mask, suffix);
   if (!option) return NULL;
   if (equals > 2 && !option.value)
     x2c_driver_error(%"option takes no value '$arg'");
   if (spelling) *spelling = written;
   if (attached) *attached = suffix != NULL;
-  *value = equals > 2 ? joined : suffix;
-  if (option.value && !*value && equals <= 2) {
-    if (++*index == args.len())
+  value = equals > 2 ? joined : suffix;
+  if (option.value && !value && equals <= 2) {
+    if (++index == args.len())
       x2c_driver_error(%"option requires a value '$arg'");
-    *value = args[*index];
+    value = args[index];
   }
   return option;
 }
@@ -1001,7 +1001,7 @@ CliRequest cli_package_options(String path, String package) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option = _take_option(
-      words, &i, CLI_BUILD, &spelling, &value, &attached);
+      words, i, CLI_BUILD, &spelling, value, &attached);
     if (!option)
       x2c_driver_error(%"unsupported package native argument '$argument'");
     switch (option.id) {
@@ -1045,7 +1045,7 @@ CliRequest cli_request(Symbol command) {
 static void _one_dash_removed(String arg) {
   String attached;
   if (arg.len() > 2 && arg[0] == '-' && arg[1] != '-' &&
-      _find_option(%"-$arg", CLI_TRANSLATE, &attached)) {
+      _find_option(%"-$arg", CLI_TRANSLATE, attached)) {
     fprintf(
       stderr,
       "x2c: error: one-dash long option '%s' was removed\n", arg);
@@ -1099,7 +1099,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option =
-      _take_option(args, &i, mask, &spelling, &value, &attached);
+      _take_option(args, i, mask, &spelling, value, &attached);
     if (!option) {
       if (mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(%"unknown option '$arg'");
@@ -1194,7 +1194,7 @@ CliRequest cli_parse(int argc, char **argv) {
   if (first == "-o") _removed_output();
   String attached;
   if (first.len() > 2 && first[0] == '-' && first[1] != '-' &&
-      _find_option(%"-$first", CLI_TRANSLATE, &attached)) {
+      _find_option(%"-$first", CLI_TRANSLATE, attached)) {
     fprintf(
       stderr,
       "x2c: error: one-dash long option '%s' was removed\n", first);
