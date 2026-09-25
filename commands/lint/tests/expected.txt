@@ -86,6 +86,11 @@ exit 0
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `count` aliases one caller variable; declare it as a `&` reference parameter
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `pair` aliases one caller variable; declare it as a `&` reference parameter
 exit 0
+# spacing that formatting changes
+spacing.x: 4 lines to format
+4 lines to format
+exit 1
+exit 0
 # idiom fixes proven by the generated C
 idioms.x:4: candidate internal-type: struct Point has 1 members and no use outside its file
 idioms.x:10: candidate member-arrow: reach the member with `.`
