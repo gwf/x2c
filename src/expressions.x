@@ -32,8 +32,11 @@ static List _iter_destination(void) => %(expr (* struct "Iter")
         (expr () (composite
           (commas (expr (int) (literal (int) "0")))))))));
 
-static int _iter_parameters_variadic(List parameters) {
-  foreach (Var parameter, parameters) if (parameter == <...>) return 1;
+static int _parameters_variadic(List parameters) {
+  foreach (Var parameter, parameters)
+    if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
+        parameter.car() == <...>))
+      return 1;
   return 0;
 }
 
@@ -56,7 +59,7 @@ List Compiler.complete_iter_chain(Compiler compiler, List expression) {
               (ident ?binding))) (args *arguments))): {
       String name = binding_identity_spelling(binding);
       if (!_exact_iter_type(result) || name == "Iter_unzip" ||
-          _iter_parameters_variadic(parameters))
+          _parameters_variadic(parameters))
         return expression;
 
       Array completed = [];
@@ -1536,6 +1539,16 @@ static List _finish_call(
         result_type = %(<macro-expr>);
     }
   if (!result_type) result_type = applied;
+  if (receiver && result_type !== %(<macro-expr>))
+    match (callee_type)
+      case %((func (!set ?parameters (*))) *):
+        if (!_parameters_variadic(parameters) &&
+            arguments.len() > List.len(parameters))
+          compiler.report_error(
+            <type>,
+            %"method takes ${List.len(parameters) - 1} arguments, not ${
+              arguments.len() - 1}",
+            origin, NULL);
   compiler.check_meta_call(callee, origin);
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
