@@ -37,7 +37,8 @@ if [ "$samples" -lt 1 ]; then
   exit 2
 fi
 
-if [ "$(cat "$root/etc/build-mode" 2>/dev/null || true)" != optimize ]; then
+if [ "$(cat "$root/etc/build-mode.local" 2>/dev/null ||
+  cat "$root/etc/build-mode" 2>/dev/null)" != optimize ]; then
   echo "map-comparison requires the optimized x2c build mode" >&2
   echo "run 'make config-optimize', clean, and rebuild before benchmarking" >&2
   exit 2

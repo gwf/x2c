@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/match-capture-benchmark"
 PROGRAM="$BUILD/match-capture-benchmark"
-MODE=${MATCH_CAPTURE_BENCH_MODE:-$(cat "$ROOT/etc/build-mode" \
-  2>/dev/null || echo debug)}
+MODE=${MATCH_CAPTURE_BENCH_MODE:-$(cat "$ROOT/etc/build-mode.local" \
+  2>/dev/null || cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)}
 ITERATIONS=${MATCH_CAPTURE_BENCH_ITERATIONS:-100000}
 SAMPLES=${MATCH_CAPTURE_BENCH_SAMPLES:-15}
 mkdir -p "$BUILD"

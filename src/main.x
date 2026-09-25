@@ -90,7 +90,7 @@ static void _translate_unit(
   Frontend frontend, String filename, String output_dir) {
   CliRequest request = frontend.request;
   ParsedUnit unit;
-  int ok = frontend.start(filename, &unit);
+  int ok = frontend.start(filename, unit);
   defer unit.close();
   Compiler compiler = unit.compiler;
   if (!ok) {

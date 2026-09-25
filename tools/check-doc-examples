@@ -71,6 +71,11 @@ static String _stdout(Job job):
   try return job.output()
   catch %(cmd-fail *detail): return %"${detail.assoc(<output>)}"
 
+/* Each command runs with empty input under a CPU limit, so a sample that
+   spins or waits for input fails instead of stalling the check. */
+static Job _limited(List command):
+  return %(sh -c "ulimit -t 60; exec \"\x24@\"" sample @command).job()
+
 static void _launch(Job job, List attempt):
   running.push(job.start())
   attempts.push(%($job @attempt))
@@ -83,10 +88,10 @@ static void _begin(int index, int candidate):
   Path work = Path.temp_dir(), program = work.join("sample")
   work.join("sample.x").write_text(source)
   List mode = sample.runs() ? %() : %(--compile-only)
-  Job job = %($compiler build @mode @build_flags
-              --build-dir ${work.join("build")} --output $program
-              ${work.join("sample.x")})
-  _launch(job.options({dir: root, stderr: <capture>}),
+  Job job = _limited(%($compiler build @mode @build_flags
+                       --build-dir ${work.join("build")} --output $program
+                       ${work.join("sample.x")}))
+  _launch(job.options({dir: root, input: "", stderr: <capture>}),
           %($index $candidate $work <build>))
 
 static void _failed(int index, int candidate, String detail):
@@ -112,8 +117,8 @@ static void _advance(List attempt):
   int exit = job.status()
   String output = _stdout(job), errors = job.errors()
   if phase == <build> && !exit && runs:
-    _launch(%(${work.join("sample")}).job()
-              .options({dir: work, stderr: <capture>}),
+    _launch(_limited(%(${work.join("sample")}))
+              .options({dir: work, input: "", stderr: <capture>}),
             %($index $candidate $work <run>))
     return
   work.remove_tree()

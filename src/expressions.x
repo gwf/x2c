@@ -1546,7 +1546,8 @@ static List _finish_call(
             arguments.len() > List.len(parameters))
           compiler.report_error(
             <type>,
-            %"method takes ${List.len(parameters) - 1} arguments, not ${
+            %"method takes ${List.len(parameters) - 1} argument${
+              List.len(parameters) == 2 ? "" : "s"}, not ${
               arguments.len() - 1}",
             origin, NULL);
   compiler.check_meta_call(callee, origin);
@@ -4050,6 +4051,14 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
           (op $operator $condition $converted_true $converted_false));
     }
   }
+  /* A reference names an object, so null never reaches one. */
+  if (target.car() == <&> &&
+      (_integer_literal_kind(expr, NULL) == <zero> ||
+       expr.match(%(expr () (ident (binding ? ?)))) &&
+       binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
+    c.report_error(
+      <type>, %"cannot pass a null pointer where ${target.repr()} is expected",
+      NULL, %("a reference argument must name an object"));
   if (!type) {
     /* A generic selection has no x2c type of its own, and only one
        association runs, so each one converts to the destination the way
@@ -4106,6 +4115,15 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
   }
   if (type == target || (type_is_var && target_is_var)) return expr;
+  /* A reference names an object, so its argument is an lvalue of the
+     referenced type; a pointer or null is spelled `*p` by the caller. */
+  if (target.car() == <&> && type.car() != <&> && type !== cdr(target)) {
+    c.report_error(
+      <type>,
+      %"cannot pass ${type.repr()} where ${target.repr()} is expected",
+      NULL, %("pass an lvalue of the referenced type; write *p for a pointer"));
+    return expr;
+  }
   if (_integer_literal_kind(expr, NULL) == <zero> &&
       c.sym.resolve_key(target).is_pointer())
     return expr;
@@ -4113,12 +4131,9 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   // T -> &T : pass address of LHS as ref w/ updated type
   if (type === cdr(target) && target.car() == <&>)
     return %(expr $target (op & (parens $expr)));
-  // *T -> &T : pass pointer as ref w/ updated type
   // &T -> *T : pass ref as pointer w/ updated type
-  if (cdr(type) == cdr(target))
-    if ( (type.car() == <*> && target.car() == <&>) ||
-         (type.car() == <&> && target.car() == <*>))
-      return %(expr $target $expr);
+  if (cdr(type) == cdr(target) && type.car() == <&> && target.car() == <*>)
+    return %(expr $target $expr);
   // &T -> T : pass deref ref as value
   if (type.car() == <&> && cdr(type) === target)
     return %(expr $target (op * (parens $expr)));
