@@ -125,7 +125,7 @@ void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int 
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = ! quiet && ! diagnostic;
-  report.transient = report.receipts && terminal && ! plain && ! report_make_owned();
+  report.transient = report.receipts && terminal && ! plain;
   report.columns = _columns();
   report.start = report_now_us();
   if(plain || color_mode == 29733220) report.color = 0;
