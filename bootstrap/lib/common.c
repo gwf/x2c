@@ -67,6 +67,8 @@ static inline String _x2c_proto_buffer_repr_0(Var a0);
 
 static inline int _x2c_proto_buffer_truth_0(Var a0);
 
+static inline Var _x2c_proto_buffer_getindex_0(Var a0, Var a1);
+
 static VarMethods _x2c__x2c_protocol_methods_2;
 
 int Bytes_truth(Bytes);
@@ -297,7 +299,7 @@ void x2c_initialize_protocols(void){
   ;
   x2c_register_builtin_descriptor(5011670, _x2c__x2c_protocol_methods_1);
   _x2c__x2c_protocol_methods_2 =(VarMethods){
-    .str = _x2c_proto_buffer_str_0, .repr = _x2c_proto_buffer_repr_0, .truth = _x2c_proto_buffer_truth_0
+    .str = _x2c_proto_buffer_str_0, .repr = _x2c_proto_buffer_repr_0, .truth = _x2c_proto_buffer_truth_0, .getindex = _x2c_proto_buffer_getindex_0
   }
   ;
   x2c_register_builtin_descriptor(178663780, _x2c__x2c_protocol_methods_2);
@@ -466,6 +468,12 @@ static inline String _x2c_proto_buffer_repr_0(Var a0){
 
 static inline int _x2c_proto_buffer_truth_0(Var a0){
   return Buffer_truth(Var_buffer(a0));
+}
+
+int Buffer_getindex(Buffer, int);
+
+static inline Var _x2c_proto_buffer_getindex_0(Var a0, Var a1){
+  return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert(a1, 3453797))));
 }
 
 static inline int _x2c_proto_bytes_truth_0(Var a0){
