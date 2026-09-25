@@ -384,8 +384,6 @@ static int _custom_row(Symbol tag, VarDescriptor *&descriptor) {
   return descriptor ? _assign_row(descriptor) : -1;
 }
 
-meta Symbol Var.tag(Var v);
-
 /** Returns the `Symbol` naming the exact family of `v`'s payload.
     The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
     registered custom object tag. Built-in families have one row in the
@@ -402,7 +400,7 @@ meta Symbol Var.tag(Var v);
     printf("%s %s\n", raw.tag().str(), void.tag().str());
     ```
 */
-Symbol Var.tag(Var v) {
+meta native Symbol Var.tag(Var v) {
   VarDecoded decoded = _decode(v);
   if (decoded.valid && decoded.custom_id >= 0)
     return _row_descriptor(decoded.custom_id, v).tag;
@@ -418,8 +416,6 @@ Symbol Var.tag(Var v) {
 */
 int Var.is(Var var, Symbol tag) => var.tag() == tag;
 
-meta Symbol Var.kind(Var v);
-
 /** Returns the `Symbol` naming the coarse category of `v`'s payload.
     The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
     `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
@@ -431,13 +427,11 @@ meta Symbol Var.kind(Var v);
     means a pointer to an object handle such as `<string*>`. NaN and the
     infinities are `<floating>`. Only `void` is `<void>`.
 */
-Symbol Var.kind(Var v) {
+meta native Symbol Var.kind(Var v) {
   VarDecoded decoded = _decode(v);
   if (decoded.valid && decoded.custom_id >= 0) return <object>;
   return taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
-
-meta int Var.is_floating(Var v);
 
 /** Reports whether `v` belongs to the floating runtime family.
     True for `<f32>`, `<f64>`, and `<ldouble>`, and for the discrete `<nan>`,
@@ -445,7 +439,7 @@ meta int Var.is_floating(Var v);
     with `Var.long_double_value` when the tag is `<ldouble>` and the extra
     precision matters.
 */
-int Var.is_floating(Var v)  => v.kind() == <floating>;
+meta native int Var.is_floating(Var v)  => v.kind() == <floating>;
 
 /** Reports whether `v` belongs to the integer runtime family.
     True for every signed and unsigned integer family from `<u8>` through
@@ -455,17 +449,11 @@ int Var.is_floating(Var v)  => v.kind() == <floating>;
 */
 int Var.is_integer(Var v)   => v.kind() == <integer>;
 
-meta int Var.is_pointer(Var v);
-
 /** Reports whether `v` holds a native pointer. */
-int Var.is_pointer(Var v)   => v.kind() == <pointer>;
-
-meta int Var.is_reference(Var v);
+meta native int Var.is_pointer(Var v)   => v.kind() == <pointer>;
 
 /** Reports whether `v` holds a pointer to a boxed handle. */
-int Var.is_reference(Var v) => v.kind() == <reference>;
-
-meta int Var.is_object(Var v);
+meta native int Var.is_reference(Var v) => v.kind() == <reference>;
 
 /** Reports whether `v` holds a registered boxed object.
     True for the builtin classes such as `String`, `List`, `Array`, `Map`,
@@ -474,7 +462,7 @@ meta int Var.is_object(Var v);
     pointer to a handle, such as `<string*>`, is `<reference>` instead and
     answers 0 here.
 */
-int Var.is_object(Var v)    => v.kind() == <object>;
+meta native int Var.is_object(Var v)    => v.kind() == <object>;
 
 /** Reports whether `v` is the absence sentinel `void`.
     An API returns `void` to say there is nothing here. It is excluded from
@@ -498,8 +486,6 @@ int Var.is_object(Var v)    => v.kind() == <object>;
 */
 int Var.is_void(Var v)      => v.u64 == VAR_VOID_BITS;
 
-meta int Var.is_null(Var v);
-
 /** Reports whether `v` is the all-zero `Null` value.
     `Null` is a value: the null pointer and the external `nil`. It is legal
     collection data, iterating a `List` can return it, and it is false in a
@@ -509,20 +495,16 @@ meta int Var.is_null(Var v);
     Write `Null` as `(Var) { .u64 = 0 }`. An unresolved C `NULL` macro also
     converts to this value when its x2c target is `Var`.
 */
-int Var.is_null(Var v)      => v.u64 == VAR_NULL_BITS;
-
-meta Var Var.null(void);
+meta native int Var.is_null(Var v)      => v.u64 == VAR_NULL_BITS;
 
 /** Returns `Null`, the all-zero `Var` that stands for external `nil`.
     Generated call adapters return it for a `void` target.
 */
-Var Var.null(void) {
+meta native Var Var.null(void) {
   Var v;
   v.u64 = VAR_NULL_BITS;
   return v;
 }
-
-meta int Var.is_nil(Var v);
 
 /** Reports whether `v` is the typed empty `List`.
     The empty `List` is a native null pointer carrying the `<list>` tag.
@@ -530,7 +512,7 @@ meta int Var.is_nil(Var v);
     every exhausted `List.cdr` yields this one value, so an identity test on
     the bits is a valid emptiness test.
 */
-int Var.is_nil(Var v) => v.u64 == VAR_LIST_PREFIX;
+meta native int Var.is_nil(Var v) => v.u64 == VAR_LIST_PREFIX;
 
 static Var _new_floating(TagId id, double d) {
   Var v;
@@ -673,15 +655,13 @@ Var Var.box_long_double(long double value) {
   return _new_wide(_ldouble_, wide);
 }
 
-meta Var Var.clone_wide(Var value);
-
 /** Clones the wide numeric `value` into a new box in the active `Scope`.
     The clone compares equal but not identical to `value`. Returns `void` when
     `value` is not wide.
     Raises: `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>`
     if its address cannot be represented in a `Var`.
 */
-Var Var.clone_wide(Var value) {
+meta native Var Var.clone_wide(Var value) {
   if (!value.is_wide()) return void;
   VarWideBox source = _wide_box(value);
   VarWideBox box = Scope.malloc(sizeof(struct VarWideBox));
@@ -859,8 +839,6 @@ Var Var.box_record(Symbol tag, const void *record, size_t size) {
   return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
 }
 
-meta double Var.floating(Var v);
-
 /** Returns `v`'s payload as a `double` when its tag is floating, or 0.0.
     Handles `<f32>`, `<f64>`, and `<ldouble>`, and reconstructs NaN,
     `+Inf`, and `-Inf` from their discrete tags. An `<ldouble>` payload is
@@ -875,7 +853,7 @@ meta double Var.floating(Var v);
 
     An unhandled tag yields 0.0.
 */
-double Var.floating(Var v) {
+meta native double Var.floating(Var v) {
   switch (v.tag()) {
     case <f32>: case <float>: {
       unsigned u = v.u64 & _bitmask(32);
@@ -897,8 +875,6 @@ double Var.floating(Var v) {
   }
   return 0.0;
 }
-
-meta long Var.integer(Var v);
 
 /** Returns `v`'s payload as a `long` when its tag is integral, or 0.
     This reads the payload; it does not convert. It decodes every integer
@@ -922,7 +898,7 @@ meta long Var.integer(Var v);
 
     An unhandled tag yields 0.
 */
-long Var.integer(Var v) {
+meta native long Var.integer(Var v) {
   unsigned top = _top_bits(v);
   if (top == taginfo[_u48_].top) return v.u64 & _bitmask(48);
   if (top == taginfo[_i48_].top) {
@@ -958,8 +934,6 @@ long Var.integer(Var v) {
   return 0;
 }
 
-meta long Var.long_value(Var v);
-
 /** Returns the payload of a `<long>` box, or 0 if `v` has a different tag.
     The test is on the tag, so a `<ulong>`, `<llong>`, or `<i32>` value
     reads as 0 with no complaint. `Var.integer` accepts any integer family;
@@ -967,9 +941,8 @@ meta long Var.long_value(Var v);
 
     A tag mismatch yields 0.
 */
-long Var.long_value(Var v) => v is <long> ? _wide_box(v).value.long_value : 0;
-
-meta unsigned long Var.ulong_value(Var v);
+meta native long Var.long_value(Var v) =>
+  v is <long> ? _wide_box(v).value.long_value : 0;
 
 /** Returns the payload of a `<ulong>` box, or 0 if `v` has a different tag.
     Prefer this to `Var.integer` for a `<ulong>`: the general reader casts the
@@ -980,22 +953,16 @@ meta unsigned long Var.ulong_value(Var v);
 
     A tag mismatch yields 0.
 */
-unsigned long Var.ulong_value(Var v) =>
+meta native unsigned long Var.ulong_value(Var v) =>
   v is <ulong> ? _wide_box(v).value.ulong_value : 0;
 
-meta long long Var.long_long_value(Var v);
-
 /** Returns an `<llong>` box's signed payload, or 0 for another tag. */
-long long Var.long_long_value(Var v) =>
+meta native long long Var.long_long_value(Var v) =>
   v is <llong> ? _wide_box(v).value.long_long_value : 0;
 
-meta unsigned long long Var.ulong_long_value(Var v);
-
 /** Returns a `<ullong>` box's unsigned payload, or 0 for another tag. */
-unsigned long long Var.ulong_long_value(Var v) =>
+meta native unsigned long long Var.ulong_long_value(Var v) =>
   v is <ullong> ? _wide_box(v).value.ulong_long_value : 0;
-
-meta long double Var.long_double_value(Var v);
 
 /** Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag.
     This is the only reader that preserves a `long double`. Every other
@@ -1004,7 +971,7 @@ meta long double Var.long_double_value(Var v);
 
     A tag mismatch yields 0.0.
 */
-long double Var.long_double_value(Var v) =>
+meta native long double Var.long_double_value(Var v) =>
   v is <ldouble> ? _wide_box(v).value.long_double_value : 0.0L;
 
 /* A wide box holds one or two machine words, so it mixes as words rather
@@ -1215,8 +1182,6 @@ void *Var.pointer(Var v) {
   return NULL;
 }
 
-meta Var Var.parse(String str, Symbol kind);
-
 /** Parses `str` as source text of kind `kind` and returns the boxed value.
     The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
     `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
@@ -1245,7 +1210,7 @@ meta Var Var.parse(String str, Symbol kind);
     Raises: `<alloc-fail>` while constructing `String` or quoted-`Symbol`
     output.
 */
-Var Var.parse(String str, Symbol kind) {
+meta native Var Var.parse(String str, Symbol kind) {
   switch (kind) {
     case <int>: {
       long value;

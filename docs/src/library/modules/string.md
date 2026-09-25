@@ -73,12 +73,12 @@ concatenation in a loop allocates and hashes at every step. Use
 **Raises:** `<size-limit>` when the result cannot fit the `String`
 representation. Allocation failures propagate from the owning allocator.
 
-Source: `lib/string.x:597`
+Source: `lib/string.x:577`
 
 <a id="String.capitalize"></a>
 #### String.capitalize
 
-`String String.capitalize(String str)`
+`meta native String String.capitalize(String str)`
 
 Upper-cases the first byte of `str` and lower-cases the remainder.
 Mapping is bytewise through C's `toupper` and `tolower`. `Null`, empty, and
@@ -86,34 +86,34 @@ unchanged inputs are returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:751`
+Source: `lib/string.x:719`
 
 <a id="String.contains"></a>
 #### String.contains
 
-`int String.contains(String str, String sub)`
+`meta native int String.contains(String str, String sub)`
 
 Reports whether the bytes of `sub` occur anywhere in `str`.
 An empty `sub` is contained in every `String`, including the empty one,
 so a truth test on user-supplied text should check for emptiness
 separately if that matters.
 
-Source: `lib/string.x:548`
+Source: `lib/string.x:532`
 
 <a id="String.count"></a>
 #### String.count
 
-`int String.count(String str, String sub)`
+`meta native int String.count(String str, String sub)`
 
 Returns the non-overlapping count of `sub` in `str`.
 A null or empty `str` or `sub` returns zero.
 
-Source: `lib/string.x:521`
+Source: `lib/string.x:507`
 
 <a id="String.dedent"></a>
 #### String.dedent
 
-`String String.dedent(String str)`
+`meta native String String.dedent(String str)`
 
 Removes the indentation the text was written with.
 The prefix is the run of spaces and tabs that opens the first content
@@ -128,19 +128,19 @@ the prefix after a newline is removed.
 **Raises:** `<alloc-fail>` while constructing a changed result. Null input
 returns NULL and text with no prefix is returned as-is.
 
-Source: `lib/string.x:814`
+Source: `lib/string.x:780`
 
 <a id="String.endswith"></a>
 #### String.endswith
 
-`int String.endswith(String str, String suffix)`
+`meta native int String.endswith(String str, String suffix)`
 
 Reports whether `str` ends with `suffix`.
 An empty `suffix` is a suffix of every `String`. The comparison is
 bytewise, so this is a safe test for a file extension but not for a
 case-insensitive one; lower both sides first.
 
-Source: `lib/string.x:575`
+Source: `lib/string.x:555`
 
 <a id="String.filter"></a>
 #### String.filter
@@ -156,12 +156,12 @@ is called once per byte from left to right and is not retained.
 operation
 raises, or `<alloc-fail>` when the result cannot be allocated.
 
-Source: `lib/string.x:859`
+Source: `lib/string.x:825`
 
 <a id="String.find"></a>
 #### String.find
 
-`int String.find(String str, String sub)`
+`meta native int String.find(String str, String sub)`
 
 Returns the index of the first occurrence of `sub` in `str`, or -1.
 The search is byte-oriented rather than character-oriented, so an index
@@ -169,12 +169,12 @@ may land inside a multibyte sequence. An empty `sub` matches at index
 0. Use `String.find_within` to bound the search to a range, or
 `String.rfind` to scan from the end.
 
-Source: `lib/string.x:465`
+Source: `lib/string.x:456`
 
 <a id="String.find_all"></a>
 #### String.find_all
 
-`List String.find_all(String str, String sub, int start, int end)`
+`meta native List String.find_all(String str, String sub, int start, int end)`
 
 Returns each non-overlapping starting index at which `sub` occurs.
 The search begins at `start` and uses the same normalized exclusive `end`
@@ -183,12 +183,12 @@ result is a canonical `List` whose cells follow their owning pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:491`
+Source: `lib/string.x:479`
 
 <a id="String.find_within"></a>
 #### String.find_within
 
-`int String.find_within(String str, String sub, int start, int end)`
+`meta native int String.find_within( String str, String sub, int start, int end)`
 
 Returns the first index of `sub` within `str[start:end]`, or -1.
 The returned index is absolute, measured from the start of `str` rather
@@ -206,7 +206,7 @@ printf("%d %d %d\n", text.find_within("c", 0, -1),
        text.find_within("c", 0, 2), text.find_within("a", -3, -1));
 ```
 
-Source: `lib/string.x:442`
+Source: `lib/string.x:434`
 
 <a id="String.format"></a>
 #### String.format
@@ -231,7 +231,7 @@ published on failure. Formatting follows the process locale.
 conversion failures are nested as `cause`. Allocation failures may also
 transfer while staging or canonicalizing the result.
 
-Source: `lib/string.x:1400`
+Source: `lib/string.x:1340`
 
 <a id="String.getindex"></a>
 #### String.getindex
@@ -247,12 +247,12 @@ The byte is unsigned, so the result is 0 through 255 on every platform and
 -1 means out of range and nothing else. An `index` at or beyond the length
 is out of range.
 
-Source: `lib/string.x:535`
+Source: `lib/string.x:521`
 
 <a id="String.getslice"></a>
 #### String.getslice
 
-`String String.getslice(String s, int start, int stop, int step)`
+`meta native String String.getslice(String s, int start, int stop, int step)`
 
 Returns the canonical `String` `s[start:stop:step]`.
 This is what slice syntax lowers to. `stop` is exclusive, negative
@@ -265,7 +265,7 @@ slice can split a multibyte sequence. A full unit-step slice may return
 range, a range that runs the wrong way for its `step`, or a `step` of zero
 also returns NULL, the empty `String`, without raising.
 
-Source: `lib/string.x:683`
+Source: `lib/string.x:657`
 
 <a id="String.iter"></a>
 #### String.iter
@@ -287,12 +287,12 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1843`
+Source: `lib/string.x:1769`
 
 <a id="String.join"></a>
 #### String.join
 
-`String String.join(String sep, List strings)`
+`meta native String String.join(String sep, List strings)`
 
 Joins `strings` into one canonical `String` with `sep` between elements.
 The receiver is the separator, not the sequence, so this reads
@@ -307,19 +307,19 @@ empty `List`, or an oversized result, also returns NULL, the empty
 `String`,
 without raising.
 
-Source: `lib/string.x:1058`
+Source: `lib/string.x:1002`
 
 <a id="String.keep"></a>
 #### String.keep
 
-`String String.keep(String str, String chars)`
+`meta native String String.keep(String str, String chars)`
 
 Returns a canonical `String` containing only bytes found in `chars`.
 `Null` `str` returns NULL; null `chars` returns NULL for any nonnull input.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:899`
+Source: `lib/string.x:863`
 
 <a id="String.len"></a>
 #### String.len
@@ -336,12 +336,12 @@ rather than the length of anything written so far.
 The empty `String` is the null pointer, whose length
 is 0.
 
-Source: `lib/string.x:250`
+Source: `lib/string.x:248`
 
 <a id="String.lower"></a>
 #### String.lower
 
-`String String.lower(String str)`
+`meta native String String.lower(String str)`
 
 Returns `str` with every upper-case byte lowered.
 Case mapping runs byte by byte through C's `tolower`, so it covers
@@ -351,7 +351,7 @@ the unchanged temporary buffer is released.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:728`
+Source: `lib/string.x:700`
 
 <a id="String.lstrip"></a>
 #### String.lstrip
@@ -364,7 +364,7 @@ returns NULL and an unchanged input is returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:760`
+Source: `lib/string.x:728`
 
 <a id="String.map"></a>
 #### String.map
@@ -383,7 +383,7 @@ not retained. Each result must convert to a non-NUL byte.
 `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
 the result cannot be allocated.
 
-Source: `lib/string.x:875`
+Source: `lib/string.x:841`
 
 <a id="String.new"></a>
 #### String.new
@@ -403,23 +403,23 @@ representation.
 empty, or oversized input returns NULL, which is indistinguishable from the
 empty `String`, without raising.
 
-Source: `lib/string.x:382`
+Source: `lib/string.x:378`
 
 <a id="String.pad_center"></a>
 #### String.pad_center
 
-`String String.pad_center(String str, int width, char fill)`
+`meta native String String.pad_center(String str, int width, char fill)`
 
 Pads both sides of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string.x:968`
+Source: `lib/string.x:922`
 
 <a id="String.pad_left"></a>
 #### String.pad_left
 
-`String String.pad_left(String str, int width, char fill)`
+`meta native String String.pad_left(String str, int width, char fill)`
 
 Pads the left side of `str` to the requested width.
 
@@ -427,23 +427,23 @@ Pads the left side of `str` to the requested width.
 cannot be represented, or `<alloc-fail>` when result storage cannot be
 allocated.
 
-Source: `lib/string.x:952`
+Source: `lib/string.x:910`
 
 <a id="String.pad_right"></a>
 #### String.pad_right
 
-`String String.pad_right(String str, int width, char fill)`
+`meta native String String.pad_right(String str, int width, char fill)`
 
 Pads the right side of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string.x:960`
+Source: `lib/string.x:916`
 
 <a id="String.partition"></a>
 #### String.partition
 
-`List String.partition(String str, String sep)`
+`meta native List String.partition(String str, String sep)`
 
 Splits `str` at the first `sep` into a three-element `List`.
 The elements are the text before the separator, the separator itself,
@@ -459,24 +459,24 @@ transient input must outlive the returned `List`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:1011`
+Source: `lib/string.x:959`
 
 <a id="String.reject"></a>
 #### String.reject
 
-`String String.reject(String str, String chars)`
+`meta native String String.reject(String str, String chars)`
 
 Returns a canonical `String` after removing bytes found in `chars`.
 `Null` or empty `str`, or null `chars`, returns `str` unchanged.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:912`
+Source: `lib/string.x:874`
 
 <a id="String.remove_prefix"></a>
 #### String.remove_prefix
 
-`String String.remove_prefix(String str, String prefix)`
+`meta native String String.remove_prefix(String str, String prefix)`
 
 Removes `prefix` when `str` starts with it and returns a canonical
 `String`.
@@ -485,12 +485,12 @@ A null or absent prefix returns `str` unchanged; removing the complete
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:979`
+Source: `lib/string.x:931`
 
 <a id="String.remove_suffix"></a>
 #### String.remove_suffix
 
-`String String.remove_suffix(String str, String suffix)`
+`meta native String String.remove_suffix(String str, String suffix)`
 
 Removes `suffix` when `str` ends with it and returns a canonical `String`.
 A null or absent suffix returns `str` unchanged; removing the complete
@@ -498,12 +498,12 @@ A null or absent suffix returns `str` unchanged; removing the complete
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:991`
+Source: `lib/string.x:941`
 
 <a id="String.repeat"></a>
 #### String.repeat
 
-`String String.repeat(String str, int count)`
+`meta native String String.repeat(String str, int count)`
 
 Returns a canonical `String` containing `count` copies of `str`.
 `Null` or empty input, a nonpositive count, or an oversized result returns
@@ -512,12 +512,12 @@ pool; a transient buffer is copied and interned instead.
 
 **Raises:** `<alloc-fail>` while constructing a nonempty result.
 
-Source: `lib/string.x:623`
+Source: `lib/string.x:601`
 
 <a id="String.replace"></a>
 #### String.replace
 
-`String String.replace(String str, String old, String replacement)`
+`meta native String String.replace( String str, String old, String replacement)`
 
 Returns `str` with every occurrence of `old` replaced by `replacement`.
 Scanning runs left to right and matches do not overlap: each one
@@ -533,12 +533,12 @@ result may be the same pointer as the input.
 or null `old` returns `str`, and an oversized result returns NULL, without
 raising.
 
-Source: `lib/string.x:1155`
+Source: `lib/string.x:1094`
 
 <a id="String.replace_n"></a>
 #### String.replace_n
 
-`String String.replace_n( String str, String old, String replacement, int max_replacements)`
+`meta native String String.replace_n( String str, String old, String replacement, int max_replacements)`
 
 Replaces at most `max_replacements` non-overlapping occurrences of `old`.
 Scanning proceeds left to right and does not rescan replacement text. A
@@ -548,12 +548,12 @@ An oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1103`
+Source: `lib/string.x:1044`
 
 <a id="String.rfind"></a>
 #### String.rfind
 
-`int String.rfind(String str, String sub)`
+`meta native int String.rfind(String str, String sub)`
 
 Returns the index of the last occurrence of `sub` in `str`, or -1.
 Scanning runs backwards from the end, and the returned index still
@@ -561,12 +561,12 @@ measures from the start of `str`. An empty `sub` reports the length of
 `str`, matching after the last byte and mirroring the forward search
 reporting 0.
 
-Source: `lib/string.x:475`
+Source: `lib/string.x:465`
 
 <a id="String.rpartition"></a>
 #### String.rpartition
 
-`List String.rpartition(String str, String sep)`
+`meta native List String.rpartition(String str, String sep)`
 
 Splits `str` around its final occurrence of `sep`.
 The three elements are the text before the separator, the separator itself,
@@ -578,7 +578,7 @@ borrowed into the result, so a transient input must outlive the returned
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:1033`
+Source: `lib/string.x:979`
 
 <a id="String.rstrip"></a>
 #### String.rstrip
@@ -591,12 +591,12 @@ returns NULL and an unchanged input is returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:773`
+Source: `lib/string.x:741`
 
 <a id="String.squeeze"></a>
 #### String.squeeze
 
-`String String.squeeze(String str, String chars)`
+`meta native String String.squeeze(String str, String chars)`
 
 Collapses adjacent runs of each byte listed in `chars`.
 `Bytes` outside `chars` are preserved even when repeated. `Null` or empty
@@ -604,19 +604,19 @@ Collapses adjacent runs of each byte listed in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:924`
+Source: `lib/string.x:884`
 
 <a id="String.startswith"></a>
 #### String.startswith
 
-`int String.startswith(String str, String prefix)`
+`meta native int String.startswith(String str, String prefix)`
 
 Reports whether `str` starts with `prefix`.
 An empty `prefix` is a prefix of every `String`. `String.remove_prefix`
 performs the same test and returns the remainder, so there is rarely a
 reason to run both.
 
-Source: `lib/string.x:562`
+Source: `lib/string.x:544`
 
 <a id="String.strip"></a>
 #### String.strip
@@ -634,7 +634,7 @@ set, and `str` itself is returned when nothing is trimmed.
 entirely of removable bytes trims to NULL, the empty `String`, without
 raising.
 
-Source: `lib/string.x:791`
+Source: `lib/string.x:759`
 
 <a id="String.try_next"></a>
 #### String.try_next
@@ -649,12 +649,12 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
 loop.
 
-Source: `lib/string.x:1820`
+Source: `lib/string.x:1746`
 
 <a id="String.unescape"></a>
 #### String.unescape
 
-`String String.unescape(String str)`
+`meta native String String.unescape(String str)`
 
 Decodes supported backslash escapes in `str` into a canonical `String`.
 Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
@@ -667,12 +667,12 @@ is returned unchanged.
 **Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
 a byte, or `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1621`
+Source: `lib/string.x:1559`
 
 <a id="String.upper"></a>
 #### String.upper
 
-`String String.upper(String str)`
+`meta native String String.upper(String str)`
 
 Returns `str` with every lower-case byte raised.
 Like `String.lower`, mapping runs byte by byte through C's `toupper` and
@@ -681,12 +681,12 @@ would change.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:740`
+Source: `lib/string.x:710`
 
 <a id="String.withindex"></a>
 #### String.withindex
 
-`String String.withindex(String str, int index, char value)`
+`meta native String String.withindex(String str, int index, char value)`
 
 Returns a canonical copy of `str` with the byte at `index` set.
 Canonical `String`s are immutable, so `str` is not modified. When the byte
@@ -706,7 +706,7 @@ printf("%s %s\n", word, capital);
 or `<alloc-fail>` while constructing the result. An out-of-range `index`
 returns `str` unchanged.
 
-Source: `lib/string.x:656`
+Source: `lib/string.x:632`
 
 <a id="String.write_str"></a>
 #### String.write_str
@@ -720,7 +720,7 @@ borrowed `out` is returned and not retained.
 
 **Raises:** any cause from `Buffer.write`.
 
-Source: `lib/string.x:1688`
+Source: `lib/string.x:1624`
 
 ## Advanced and interop API
 
@@ -751,7 +751,7 @@ Source: `lib/string.x:1688`
 <a id="String.compare"></a>
 #### String.compare
 
-`int String.compare(String x, String y)`
+`meta native int String.compare(String x, String y)`
 
 Compares `x` and `y` bytewise, returning negative, zero, or positive.
 The ordering is C's `strcmp` on the raw bytes, so it is neither
@@ -759,7 +759,7 @@ locale-aware nor Unicode collation, and only the sign of the result is
 meaningful. The empty `String`, being the null pointer, sorts before
 every non-empty `String`, and two empty `String`s compare equal.
 
-Source: `lib/string.x:1796`
+Source: `lib/string.x:1722`
 
 <a id="String.equal"></a>
 #### String.equal
@@ -773,12 +773,12 @@ Interning already makes `x == y` a content test for two canonical
 are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
-Source: `lib/string.x:1782`
+Source: `lib/string.x:1710`
 
 <a id="String.escape"></a>
 #### String.escape
 
-`String String.escape(String str)`
+`meta native String String.escape(String str)`
 
 Returns a canonical escaped representation of the bytes in `str`.
 Common control and delimiter bytes use named escapes, printable ASCII is
@@ -788,12 +788,12 @@ an oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1654`
+Source: `lib/string.x:1590`
 
 <a id="String.free"></a>
 #### String.free
 
-`void String.free(String str)`
+`meta native void String.free(String str)`
 
 Releases a transient `String.malloc` buffer early.
 The pointer is first looked up in the intern table, including the
@@ -804,23 +804,23 @@ unrelated pool is not a valid argument.
 
 A null argument is ignored.
 
-Source: `lib/string.x:229`
+Source: `lib/string.x:227`
 
 <a id="String.hash"></a>
 #### String.hash
 
-`unsigned String.hash(String str)`
+`meta native unsigned String.hash(String str)`
 
 Returns the content hash of `str`, or zero for the empty `String`.
 Canonical `String`s use the cached hash; transient buffers are hashed from
 their current NUL-terminated contents.
 
-Source: `lib/string.x:1769`
+Source: `lib/string.x:1697`
 
 <a id="String.intern"></a>
 #### String.intern
 
-`Self String.intern(Self string)`
+`meta native Self String.intern(Self string)`
 
 Returns the canonical `String` for the borrowed bytes of `string`.
 This is `String.new` under another name. The bytes are copied into
@@ -834,7 +834,7 @@ caller to free. Use `String.intern_free` for an owned buffer.
 allocated. `Null` or
 empty input returns NULL, the empty `String`, without raising.
 
-Source: `lib/string.x:287`
+Source: `lib/string.x:283`
 
 <a id="String.intern_free"></a>
 #### String.intern_free
@@ -865,7 +865,7 @@ null argument returns NULL, and a buffer
 empty at its first byte is released and reported as NULL, the empty
 `String`, without raising.
 
-Source: `lib/string.x:312`
+Source: `lib/string.x:308`
 
 <a id="String.malloc"></a>
 #### String.malloc
@@ -897,7 +897,7 @@ Source: `lib/string.x:207`
 <a id="String.new_fill"></a>
 #### String.new_fill
 
-`String String.new_fill(char fill, int count)`
+`meta native String String.new_fill(char fill, int count)`
 
 Returns the canonical `String` containing `count` copies of `fill`.
 
@@ -906,7 +906,7 @@ Returns the canonical `String` containing `count` copies of `fill`.
 `<alloc-fail>` when canonical storage cannot be allocated. A nonpositive
 `count` returns NULL without raising.
 
-Source: `lib/string.x:414`
+Source: `lib/string.x:408`
 
 <a id="String.new_in"></a>
 #### String.new_in
@@ -940,12 +940,12 @@ larger buffer.
 `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
 without raising.
 
-Source: `lib/string.x:399`
+Source: `lib/string.x:395`
 
 <a id="String.parse"></a>
 #### String.parse
 
-`String String.parse(String str)`
+`meta native String String.parse(String str)`
 
 Returns the canonical unescaped contents of `str`.
 Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input
@@ -955,12 +955,12 @@ without backslashes is returned unchanged.
 
 **Raises:** `<alloc-fail>` while copying or decoding.
 
-Source: `lib/string.x:1753`
+Source: `lib/string.x:1683`
 
 <a id="String.parse_char"></a>
 #### String.parse_char
 
-`int String.parse_char(String str)`
+`meta native int String.parse_char(String str)`
 
 Parses one leading single-quoted escaped or literal byte, or returns -1.
 The opening quote, one decoded byte, and a closing quote are required.
@@ -968,7 +968,7 @@ Text after that closing quote is ignored. A decoded NUL is returned as
 zero; malformed and null input returns -1, as does an octal escape above
 `\377`, which does not fit a byte.
 
-Source: `lib/string.x:1714`
+Source: `lib/string.x:1648`
 
 <a id="String.printf"></a>
 #### String.printf
@@ -987,7 +987,7 @@ you want.
 `fmt` or formatting error also returns NULL without raising. Arguments
 that do not match the conversions are undefined behavior as in C.
 
-Source: `lib/string.x:1169`
+Source: `lib/string.x:1109`
 
 <a id="String.promote"></a>
 #### String.promote
@@ -1013,7 +1013,7 @@ Empty input returns the canonical literal spelling `"\"\""`.
 
 **Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
 
-Source: `lib/string.x:1677`
+Source: `lib/string.x:1613`
 
 <a id="String.str"></a>
 #### String.str
@@ -1023,19 +1023,19 @@ Source: `lib/string.x:1677`
 Returns `str` itself as its display `String` without copying or retaining
 it.
 
-Source: `lib/string.x:1671`
+Source: `lib/string.x:1607`
 
 <a id="String.symbol"></a>
 #### String.symbol
 
-`Symbol String.symbol(String str)`
+`meta native Symbol String.symbol(String str)`
 
 Returns the compact `Symbol` encoded from `str`, or zero for empty input.
 `Symbol`'s restricted spelling folds case and `_` with `-`; other spellings
 use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
-Source: `lib/string.x:1739`
+Source: `lib/string.x:1671`
 
 <a id="String.write_repr"></a>
 #### String.write_repr
@@ -1049,7 +1049,7 @@ remains in the `Buffer`.
 
 **Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
 
-Source: `lib/string.x:1696`
+Source: `lib/string.x:1632`
 
 ## Runtime-internal callables
 

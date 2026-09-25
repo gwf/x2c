@@ -20,8 +20,6 @@ static int _only_space(const char *rest) {
   return !*rest;
 }
 
-meta int String.try_long(String str, long *out);
-
 /** Parses all of `str` as an integer, writing it through `out`.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched on failure.
@@ -38,7 +36,7 @@ meta int String.try_long(String str, long *out);
     printf("%d\n", "42junk".try_long(&value));
     ```
 */
-int String.try_long(String str, long *out) {
+meta native int String.try_long(String str, long *out) {
   if (!str || !out) return 0;
   const char *digits = str;
   while (isspace((unsigned char) *digits)) digits++;
@@ -74,8 +72,6 @@ int String.try_long(String str, long *out) {
   return 1;
 }
 
-meta int String.try_double(String str, double *out);
-
 /** Parses all of `str` as a floating-point number, writing `out`.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched on failure.
@@ -90,7 +86,7 @@ meta int String.try_double(String str, double *out);
     that the integer parser adds, so `0b101` fails instead of yielding the
     leading zero.
 */
-int String.try_double(String str, double *out) {
+meta native int String.try_double(String str, double *out) {
   if (!str || !out) return 0;
   char *stop = NULL;
   errno = 0;

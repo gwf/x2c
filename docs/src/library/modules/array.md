@@ -50,7 +50,7 @@ Dynamic contiguous arrays of `Var` elements.
 <a id="Array.concat"></a>
 #### Array.concat
 
-`Self Array.concat(Self a, Self b)`
+`meta native Self Array.concat(Self a, Self b)`
 
 Returns a new `Array` holding the elements of `a` followed by those of `b`.
 Neither input is modified and the result is a fresh object. A null or
@@ -59,7 +59,7 @@ empty `b` yields a copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/array.x:460`
+Source: `lib/array.x:439`
 
 <a id="Array.contains"></a>
 #### Array.contains
@@ -73,12 +73,12 @@ Use a `Map` for frequent membership tests.
 **Raises:** `<size-limit>` when `array` exceeds the `INT_MAX` index limit that
 `Array.getindex` describes.
 
-Source: `lib/array.x:437`
+Source: `lib/array.x:422`
 
 <a id="Array.copy"></a>
 #### Array.copy
 
-`Self Array.copy(Self array)`
+`meta native Self Array.copy(Self array)`
 
 Returns a new `Array` holding the same elements as `array`.
 The copy is shallow and independent: pushing to one does not affect the
@@ -90,21 +90,21 @@ it.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/array.x:322`
+Source: `lib/array.x:316`
 
 <a id="Array.count"></a>
 #### Array.count
 
-`int Array.count(Array array, Var value)`
+`meta native int Array.count(Array array, Var value)`
 
 Returns how many elements compare equal to `value`.
 
-Source: `lib/array.x:442`
+Source: `lib/array.x:425`
 
 <a id="Array.find"></a>
 #### Array.find
 
-`int Array.find(Array array, Var value)`
+`meta native int Array.find(Array array, Var value)`
 
 Returns the index of the first element equal to `value`, or -1.
 The scan is linear and compares with `Var` equality, the same rule `==`
@@ -115,7 +115,7 @@ structurally, while
 **Raises:** `<size-limit>` when `array` exceeds the `INT_MAX` index limit that
 `Array.getindex` describes.
 
-Source: `lib/array.x:426`
+Source: `lib/array.x:411`
 
 <a id="Array.foldl"></a>
 #### Array.foldl
@@ -131,7 +131,7 @@ then the next element and is not retained. It must not structurally mutate
 `array` during the walk. Any cause from `Func.apply` or `fn` propagates
 without changing `array`.
 
-Source: `lib/array.x:527`
+Source: `lib/array.x:504`
 
 <a id="Array.free"></a>
 #### Array.free
@@ -171,12 +171,12 @@ printf("%s %s\n", digits[6].repr(), digits[-7].repr());
 
 **Raises:** `<size-limit>` when `array` holds more than `INT_MAX` elements.
 
-Source: `lib/array.x:135`
+Source: `lib/array.x:133`
 
 <a id="Array.getslice"></a>
 #### Array.getslice
 
-`Self Array.getslice(Self array, int start, int end, int step)`
+`meta native Self Array.getslice(Self array, int start, int end, int step)`
 
 Returns a new `Array` holding the elements `array[start:end:step]`.
 This is what `array[start:end:step]` lowers to; a part omitted from that
@@ -200,16 +200,16 @@ printf("%s %s\n", digits[::2].repr(), digits[::-1].repr());
 **Raises:** `<bad-arg>` when `step` is zero, or `<size-limit>` when `array`
 exceeds the `INT_MAX` index limit that `Array.getindex` describes.
 
-Source: `lib/array.x:349`
+Source: `lib/array.x:341`
 
 <a id="Array.indexof"></a>
 #### Array.indexof
 
-`int Array.indexof(Array array, Var value)`
+`meta native int Array.indexof(Array array, Var value)`
 
 Returns `Array.find(array, value)`.
 
-Source: `lib/array.x:450`
+Source: `lib/array.x:431`
 
 <a id="Array.insert"></a>
 #### Array.insert
@@ -231,7 +231,7 @@ further out inserts nothing and returns `void`.
 `Array.getindex` describes, or `<alloc-fail>` when storage cannot grow.
 These failures leave `array` unchanged.
 
-Source: `lib/array.x:287`
+Source: `lib/array.x:283`
 
 <a id="Array.iter"></a>
 #### Array.iter
@@ -254,12 +254,12 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:850`
+Source: `lib/array.x:817`
 
 <a id="Array.join"></a>
 #### Array.join
 
-`String Array.join(Array array, String separator)`
+`meta native String Array.join(Array array, String separator)`
 
 Joins the elements of `array` into one `String` separated by `separator`.
 Elements are converted with their `str` form, so a `String` element
@@ -272,7 +272,7 @@ receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
 `<size-limit>` while rendering or canonicalizing the result, or a cause
 from an element's `write_str`.
 
-Source: `lib/array.x:759`
+Source: `lib/array.x:726`
 
 <a id="Array.map"></a>
 #### Array.map
@@ -289,7 +289,7 @@ callback is invoked front to back and is not retained. It must not mutate
 **Raises:** whatever `Func.apply` or `func` raises, or an allocation cause
 while constructing the result. The partial result is freed.
 
-Source: `lib/array.x:488`
+Source: `lib/array.x:465`
 
 <a id="Array.map2"></a>
 #### Array.map2
@@ -304,7 +304,7 @@ structurally mutated during the walk.
 **Raises:** whatever `Func.apply` or `func` raises, or an allocation cause
 while constructing the result. The partial result is freed.
 
-Source: `lib/array.x:505`
+Source: `lib/array.x:482`
 
 <a id="Array.new"></a>
 #### Array.new
@@ -332,7 +332,7 @@ the index or operation is invalid.
 its length cannot be indexed, or any cause from `Var.postfix`. The element
 is unchanged on failure.
 
-Source: `lib/array.x:195`
+Source: `lib/array.x:193`
 
 <a id="Array.push"></a>
 #### Array.push
@@ -355,7 +355,7 @@ printf("%s\n", queue.repr().str());
 `Array` cannot grow within its index domain, or `<alloc-fail>` when storage
 cannot grow. These failures leave `array` unchanged.
 
-Source: `lib/array.x:220`
+Source: `lib/array.x:218`
 
 <a id="Array.remove"></a>
 #### Array.remove
@@ -371,12 +371,12 @@ a different rule. An empty array yields `void`.
 **Raises:** `<size-limit>` when `array` exceeds the `INT_MAX` index limit that
 `Array.getindex` describes.
 
-Source: `lib/array.x:305`
+Source: `lib/array.x:301`
 
 <a id="Array.resize"></a>
 #### Array.resize
 
-`void Array.resize(Array arr, size_t size)`
+`meta native void Array.resize(Array arr, size_t size)`
 
 Resizes `arr`, truncating or appending `Null` elements as needed.
 
@@ -384,18 +384,18 @@ Resizes `arr`, truncating or appending `Null` elements as needed.
 any cause from `Block` growth. Allocation and size failure do not return
 here. A growth failure leaves the length and existing elements unchanged.
 
-Source: `lib/array.x:78`
+Source: `lib/array.x:76`
 
 <a id="Array.reverse"></a>
 #### Array.reverse
 
-`Self Array.reverse(Self array)`
+`meta native Self Array.reverse(Self array)`
 
 Reverses `array` in place and returns that same `Array`.
 To preserve the original order, slice with a negative step
 (`array[::-1]`), which builds a fresh `Array`.
 
-Source: `lib/array.x:477`
+Source: `lib/array.x:454`
 
 <a id="Array.setindex"></a>
 #### Array.setindex
@@ -415,12 +415,12 @@ of `void` returns `void` instead of failing.
 `<size-limit>` when `array` exceeds the `INT_MAX` index limit that
 `Array.getindex` describes.
 
-Source: `lib/array.x:155`
+Source: `lib/array.x:153`
 
 <a id="Array.setslice"></a>
 #### Array.setslice
 
-`Self Array.setslice(Self array, int start, int end, Self values)`
+`meta native Self Array.setslice(Self array, int start, int end, Self values)`
 
 Replaces the region `array[start:end]` with the elements of `values` and
 returns `array`.
@@ -440,7 +440,7 @@ is not accepted, so call the method. Aliasing is handled, so passing
 cannot be represented, or `<alloc-fail>` while copying an aliased source
 or growing. These failures leave `array` unchanged.
 
-Source: `lib/array.x:380`
+Source: `lib/array.x:370`
 
 <a id="Array.shift"></a>
 #### Array.shift
@@ -453,12 +453,12 @@ Every remaining element moves down one position, so this is O(n) in the
 length while `Array.take_last` is O(1). Pair `Array.push` with `shift`
 for a FIFO queue and with `Array.take_last` for a stack.
 
-Source: `lib/array.x:250`
+Source: `lib/array.x:248`
 
 <a id="Array.sort"></a>
 #### Array.sort
 
-`Self Array.sort(Self array)`
+`meta native Self Array.sort(Self array)`
 
 Sorts `array` in place in ascending order and returns that same `Array`.
 Call `Array.copy` first to preserve the original order. Ordering is
@@ -476,7 +476,7 @@ printf("%s %d\n", numbers.repr(), sorted == numbers);
 partially
 reordered when a catch receives the cause.
 
-Source: `lib/array.x:570`
+Source: `lib/array.x:545`
 
 <a id="Array.sort_by"></a>
 #### Array.sort_by
@@ -491,7 +491,7 @@ the callback is valid. Raises: allocation, key comparison, `Func.apply`,
 or callback causes. Failure leaves the original Array unchanged;
 callback side effects are not undone.
 
-Source: `lib/array.x:636`
+Source: `lib/array.x:611`
 
 <a id="Array.sort_with"></a>
 #### Array.sort_with
@@ -509,12 +509,12 @@ Null and fewer than two elements return unchanged without a callback.
 leaves the original Array unchanged; temporary storage is released.
 Callback side effects are not undone.
 
-Source: `lib/array.x:591`
+Source: `lib/array.x:566`
 
 <a id="Array.splice"></a>
 #### Array.splice
 
-`Self Array.splice(Self array, int index, int remove_count, Self values)`
+`meta native Self Array.splice( Self array, int index, int remove_count, Self values)`
 
 Replaces `remove_count` elements at `index` with `values` and returns
 what was removed.
@@ -528,7 +528,7 @@ makes it a deletion.
 represented, or `<alloc-fail>` while copying or growing. These failures
 leave `array` unchanged.
 
-Source: `lib/array.x:410`
+Source: `lib/array.x:396`
 
 <a id="Array.take_last"></a>
 #### Array.take_last
@@ -541,7 +541,7 @@ move no other elements, and are amortized O(1). Capacity is retained
 after taking the element, so taking and pushing again does not
 reallocate.
 
-Source: `lib/array.x:236`
+Source: `lib/array.x:234`
 
 <a id="Array.try_next"></a>
 #### Array.try_next
@@ -557,12 +557,12 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 
 **Raises:** `<size-limit>` for an `Array` outside the integer index domain.
 
-Source: `lib/array.x:826`
+Source: `lib/array.x:793`
 
 <a id="Array.unshift"></a>
 #### Array.unshift
 
-`Var Array.unshift(Array array, Var elem)`
+`meta native Var Array.unshift(Array array, Var elem)`
 
 Inserts `elem` at the front of `array` and returns it.
 Existing elements move up one position, so this is O(n); `Array.push` is
@@ -573,7 +573,7 @@ be used directly in another expression, as `Array.push` does.
 `Array` cannot grow within its index domain, or `<alloc-fail>` when storage
 cannot grow. These failures leave `array` unchanged.
 
-Source: `lib/array.x:265`
+Source: `lib/array.x:261`
 
 <a id="Array.updateindex"></a>
 #### Array.updateindex
@@ -591,7 +591,7 @@ Updates one `Array` element in place.
  any cause from `Var.update`. These failures leave the element unchanged
 .
 
-Source: `lib/array.x:175`
+Source: `lib/array.x:173`
 
 <a id="Array.write_str"></a>
 #### Array.write_str
@@ -602,7 +602,7 @@ Appends the `Array` display text to `out`, using each element's
 `write_str`.
 `Array.str` materializes this into a `String`.
 
-Source: `lib/array.x:781`
+Source: `lib/array.x:748`
 
 ### `Block`
 
@@ -620,11 +620,11 @@ Source: `lib/array.x:58`
 <a id="Iter.array"></a>
 #### Iter.array
 
-`Array Iter.array(Iter iter)`
+`meta native Array Iter.array(Iter iter)`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:858`
+Source: `lib/array.x:823`
 
 ## Advanced and interop API
 
@@ -647,11 +647,11 @@ Source: `lib/array.x:858`
 <a id="Array.cleanup"></a>
 #### Array.cleanup
 
-`void Array.cleanup(Array value)`
+`meta native void Array.cleanup(Array value)`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:868`
+Source: `lib/array.x:831`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -660,7 +660,7 @@ Source: `lib/array.x:868`
 
 Compares `Array`s lexicographically with `Var.compare`.
 
-Source: `lib/array.x:547`
+Source: `lib/array.x:524`
 
 <a id="Array.equal"></a>
 #### Array.equal
@@ -669,12 +669,12 @@ Source: `lib/array.x:547`
 
 Returns nonzero when two `Array`s have structurally equal elements.
 
-Source: `lib/array.x:772`
+Source: `lib/array.x:739`
 
 <a id="Array.heap_pop"></a>
 #### Array.heap_pop
 
-`Var Array.heap_pop(Array heap)`
+`meta native Var Array.heap_pop(Array heap)`
 
 Removes and returns the smallest element of `heap`, or `void` when it is
 empty. The remaining elements are re-heaped in O(log n), so repeated calls
@@ -686,12 +686,12 @@ error. Call `Array.heapify` first if it was not built with
 **Raises:** any cause reported by element comparison while restoring the heap.
 The heap may already have removed its root when a catch receives the error.
 
-Source: `lib/array.x:721`
+Source: `lib/array.x:692`
 
 <a id="Array.heap_push"></a>
 #### Array.heap_push
 
-`void Array.heap_push(Array heap, Var val)`
+`meta native void Array.heap_push(Array heap, Var val)`
 
 Adds `val` to `heap`, an `Array` maintained as a binary min-heap.
 The heap operations arrange an `Array` as a priority queue in place, with
@@ -718,12 +718,12 @@ cannot grow, or a cause from element comparison. A value or earlier swap
 may remain when comparison fails; pre-insertion failures leave the heap
 unchanged.
 
-Source: `lib/array.x:704`
+Source: `lib/array.x:677`
 
 <a id="Array.heapify"></a>
 #### Array.heapify
 
-`void Array.heapify(Array heap)`
+`meta native void Array.heapify(Array heap)`
 
 Rearranges `heap` in place so that it satisfies the min-heap invariant.
 Use this before the first `Array.heap_pop` on an `Array` that was built by
@@ -735,19 +735,19 @@ time.
 `Array.getindex` describes, or a cause from element comparison. Comparison
 failure may leave a partially rearranged `Array`.
 
-Source: `lib/array.x:742`
+Source: `lib/array.x:711`
 
 <a id="Array.remslice"></a>
 #### Array.remslice
 
-`Self Array.remslice(Self array, int start, int end)`
+`meta native Self Array.remslice(Self array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh `Array`.
 Bounds are normalized the way that slice normalizes them, so a negative
 `end` is a stop. A reversed pair is swapped. Allocation or size failure
 occurs before `array` is changed.
 
-Source: `lib/array.x:392`
+Source: `lib/array.x:380`
 
 <a id="Array.repr"></a>
 #### Array.repr
@@ -766,7 +766,7 @@ allocating a `String`, and the two `String` forms are built on them.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/array.x:801`
+Source: `lib/array.x:768`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -775,7 +775,7 @@ Source: `lib/array.x:801`
 
 Returns an `Array` display `String` using each element's `str`.
 
-Source: `lib/array.x:784`
+Source: `lib/array.x:751`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -787,7 +787,7 @@ Values appended before a later `<void-op>`, `<size-limit>`, or
 `<alloc-fail>` remain in `array`. The caller must supply that many `Var`
 arguments.
 
-Source: `lib/array.x:102`
+Source: `lib/array.x:100`
 
 <a id="Array.write_repr"></a>
 #### Array.write_repr
@@ -796,7 +796,7 @@ Source: `lib/array.x:102`
 
 Appends the readable `Array` representation to `out`.
 
-Source: `lib/array.x:775`
+Source: `lib/array.x:742`
 
 ## Runtime-internal callables
 

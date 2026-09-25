@@ -68,14 +68,12 @@ Array Array.new(void) => Block.new(sizeof(Var));
 */
 meta void Array.free(Array array);
 
-meta void Array.resize(Array arr, size_t size);
-
 /** Resizes `arr`, truncating or appending `Null` elements as needed.
     Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus
     any cause from `Block` growth. Allocation and size failure do not return
     here. A growth failure leaves the length and existing elements unchanged.
 */
-void Array.resize(Array arr, size_t size) {
+meta native void Array.resize(Array arr, size_t size) {
   if (size > INT_MAX) raise %(size-limit (size $size));
   if (size < arr.length) Block.truncate(arr, size);
   else if (size > arr.length) Block.append(arr, NULL, size - arr.length);
@@ -252,8 +250,6 @@ Var Array.shift(Array array) {
   return array._core_shift(&elem) ? elem : void;
 }
 
-meta Var Array.unshift(Array array, Var elem);
-
 /** Inserts `elem` at the front of `array` and returns it.
     Existing elements move up one position, so this is O(n); `Array.push` is
     the amortized O(1) end of the array. Returning `elem` lets an unshift
@@ -262,7 +258,7 @@ meta Var Array.unshift(Array array, Var elem);
     `Array` cannot grow within its index domain, or `<alloc-fail>` when storage
     cannot grow. These failures leave `array` unchanged.
 */
-Var Array.unshift(Array array, Var elem) {
+meta native Var Array.unshift(Array array, Var elem) {
   _require_array_value(elem);
   size_t n = array.len();
   if (n >= INT_MAX) raise %(size-limit (size $n));
@@ -308,8 +304,6 @@ Var Array.remove(Array array, int index) {
   return array._core_remove(index, &elem) ? elem : void;
 }
 
-meta Self Array.copy(Self array);
-
 /** Returns a new `Array` holding the same elements as `array`.
     The copy is shallow and independent: pushing to one does not affect the
     other, but the two share whatever objects their elements point at.
@@ -319,12 +313,10 @@ meta Self Array.copy(Self array);
     Raises: `<size-limit>` or `<alloc-fail>` when the copy cannot be
     represented or allocated.
 */
-Self Array.copy(Self array) {
+meta native Self Array.copy(Self array) {
   _int_length(array);
   return array._core_copy();
 }
-
-meta Self Array.getslice(Self array, int start, int end, int step);
 
 /** Returns a new `Array` holding the elements `array[start:end:step]`.
     This is what `array[start:end:step]` lowers to; a part omitted from that
@@ -346,7 +338,7 @@ meta Self Array.getslice(Self array, int start, int end, int step);
     ```
     Raises: `<bad-arg>` when `step` is zero, or `<size-limit>` when `array`
     exceeds the `INT_MAX` index limit that `Array.getindex` describes. */
-Self Array.getslice(Self array, int start, int end, int step) {
+meta native Self Array.getslice(Self array, int start, int end, int step) {
   if (!step) raise %(bad-arg (owner "Array.getslice") (step $step));
   _int_length(array);
   return array._core_getslice(start, end, step);
@@ -357,8 +349,6 @@ static void _setslice(Array array, int start, int end, Array values) {
   if (values) _int_length(values);
   array._core_setslice(start, end, values);
 }
-
-meta Self Array.setslice(Self array, int start, int end, Self values);
 
 /** Replaces the region `array[start:end]` with the elements of `values` and
     returns `array`.
@@ -377,24 +367,20 @@ meta Self Array.setslice(Self array, int start, int end, Self values);
     cannot be represented, or `<alloc-fail>` while copying an aliased source
     or growing. These failures leave `array` unchanged.
 */
-Self Array.setslice(Self array, int start, int end, Self values) {
+meta native Self Array.setslice(Self array, int start, int end, Self values) {
   _setslice(array, start, end, values);
   return array;
 }
-
-meta Self Array.remslice(Self array, int start, int end);
 
 /** Removes the region `array[start:end]` and returns a fresh `Array`.
     Bounds are normalized the way that slice normalizes them, so a negative
     `end` is a stop. A reversed pair is swapped. Allocation or size failure
     occurs before `array` is changed.
 */
-Self Array.remslice(Self array, int start, int end) {
+meta native Self Array.remslice(Self array, int start, int end) {
   _int_length(array);
   return array._core_remslice(start, end);
 }
-
-meta Self Array.splice(Self array, int index, int remove_count, Self values);
 
 /** Replaces `remove_count` elements at `index` with `values` and returns
     what was removed.
@@ -407,13 +393,12 @@ meta Self Array.splice(Self array, int index, int remove_count, Self values);
     represented, or `<alloc-fail>` while copying or growing. These failures
     leave `array` unchanged.
 */
-Self Array.splice(Self array, int index, int remove_count, Self values) {
+meta native Self Array.splice(
+  Self array, int index, int remove_count, Self values) {
   _int_length(array);
   if (values) _int_length(values);
   return array._core_splice(index, remove_count, values);
 }
-
-meta int Array.find(Array array, Var value);
 
 /** Returns the index of the first element equal to `value`, or -1.
     The scan is linear and compares with `Var` equality, the same rule `==`
@@ -423,7 +408,7 @@ meta int Array.find(Array array, Var value);
     Raises: `<size-limit>` when `array` exceeds the `INT_MAX` index limit that
     `Array.getindex` describes.
 */
-int Array.find(Array array, Var value) {
+meta native int Array.find(Array array, Var value) {
   _int_length(array);
   return array._core_find(value);
 }
@@ -436,20 +421,14 @@ int Array.find(Array array, Var value) {
 */
 int Array.contains(Array array, Var value) => array.find(value) != -1;
 
-meta int Array.count(Array array, Var value);
-
 /** Returns how many elements compare equal to `value`. */
-int Array.count(Array array, Var value) {
+meta native int Array.count(Array array, Var value) {
   _int_length(array);
   return array._core_count(value);
 }
 
-meta int Array.indexof(Array array, Var value);
-
 /** Returns `Array.find(array, value)`. */
-int Array.indexof(Array array, Var value) => array.find(value);
-
-meta Self Array.concat(Self a, Self b);
+meta native int Array.indexof(Array array, Var value) => array.find(value);
 
 /** Returns a new `Array` holding the elements of `a` followed by those of `b`.
     Neither input is modified and the result is a fresh object. A null or
@@ -457,7 +436,7 @@ meta Self Array.concat(Self a, Self b);
     Raises: `<size-limit>` or `<alloc-fail>` when the result cannot be
     represented or allocated.
 */
-Self Array.concat(Self a, Self b) {
+meta native Self Array.concat(Self a, Self b) {
   _int_length(a);
   if (b && b.length) {
     if (b.length > INT_MAX - a.length) {
@@ -468,13 +447,11 @@ Self Array.concat(Self a, Self b) {
   return a._core_concat(b);
 }
 
-meta Self Array.reverse(Self array);
-
 /** Reverses `array` in place and returns that same `Array`.
     To preserve the original order, slice with a negative step
     (`array[::-1]`), which builds a fresh `Array`.
 */
-Self Array.reverse(Self array) => array._core_reverse();
+meta native Self Array.reverse(Self array) => array._core_reverse();
 
 /** Returns a new `Array` holding `func` applied to each element of `array`.
     `array` itself is untouched, and elements are passed as values. An empty
@@ -551,8 +528,6 @@ static int _sort_compare(const void *ap, const void *bp) {
   return a.compare(b);
 }
 
-meta Self Array.sort(Self array);
-
 /** Sorts `array` in place in ascending order and returns that same `Array`.
     Call `Array.copy` first to preserve the original order. Ordering is
     `Var.compare`, which compares numbers numerically and `String`s, `Symbol`s,
@@ -567,7 +542,7 @@ meta Self Array.sort(Self array);
     Raises: causes from element comparison. The `Array` may already be
     partially
     reordered when a catch receives the cause. */
-Self Array.sort(Self array) {
+meta native Self Array.sort(Self array) {
   if (!array || array.length < 2) return array;
   qsort(array.bytes, array.length, sizeof(Var), _sort_compare);
   return array;
@@ -675,8 +650,6 @@ static void _heap_shift_down(Array heap, int i) {
   }
 }
 
-meta void Array.heap_push(Array heap, Var val);
-
 /** Adds `val` to `heap`, an `Array` maintained as a binary min-heap.
     The heap operations arrange an `Array` as a priority queue in place, with
     no second data structure and no extra allocation. The elements stay in
@@ -701,13 +674,11 @@ meta void Array.heap_push(Array heap, Var val);
     may remain when comparison fails; pre-insertion failures leave the heap
     unchanged.
 */
-void Array.heap_push(Array heap, Var val) {
+meta native void Array.heap_push(Array heap, Var val) {
   heap.push(val);
   int n = _int_length(heap);
   _heap_shift_up(heap, n - 1);
 }
-
-meta Var Array.heap_pop(Array heap);
 
 /** Removes and returns the smallest element of `heap`, or `void` when it is
     empty. The remaining elements are re-heaped in O(log n), so repeated calls
@@ -718,7 +689,7 @@ meta Var Array.heap_pop(Array heap);
     Raises: any cause reported by element comparison while restoring the heap.
     The heap may already have removed its root when a catch receives the error.
 */
-Var Array.heap_pop(Array heap) {
+meta native Var Array.heap_pop(Array heap) {
   if (!heap.len()) return void;
   Var root = heap[0], last = heap.take_last();
   if (heap.len()) {
@@ -727,8 +698,6 @@ Var Array.heap_pop(Array heap) {
   }
   return root;
 }
-
-meta void Array.heapify(Array heap);
 
 /** Rearranges `heap` in place so that it satisfies the min-heap invariant.
     Use this before the first `Array.heap_pop` on an `Array` that was built by
@@ -739,12 +708,10 @@ meta void Array.heapify(Array heap);
     `Array.getindex` describes, or a cause from element comparison. Comparison
     failure may leave a partially rearranged `Array`.
 */
-void Array.heapify(Array heap) {
+meta native void Array.heapify(Array heap) {
   int n = _int_length(heap);
   for (int i = (n / 2) - 1; i >= 0; i--) _heap_shift_down(heap, i);
 }
-
-meta String Array.join(Array array, String separator);
 
 /** Joins the elements of `array` into one `String` separated by `separator`.
     Elements are converted with their `str` form, so a `String` element
@@ -756,7 +723,7 @@ meta String Array.join(Array array, String separator);
     receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
     `<size-limit>` while rendering or canonicalizing the result, or a cause
     from an element's `write_str`. */
-String Array.join(Array array, String separator) {
+meta native String Array.join(Array array, String separator) {
   size_t n = array.length;
   if (n == 0) return "";
   Buffer buf = Buffer.new(0);
@@ -852,17 +819,13 @@ Iter Array.iter(Array x, Iter dest) {
   return dest.init(x, _next, 0);
 }
 
-meta Array Iter.array(Iter iter);
-
 /** Drains `iter` into a fresh `Array`. */
-Array Iter.array(Iter iter) {
+meta native Array Iter.array(Iter iter) {
   Array output = [], result = NULL;
   defer if ((void *) result == NULL) output.free();
   foreach (Var item, iter) output.push(item);
   return result = output;
 }
 
-meta void Array.cleanup(Array value);
-
 /** Ends the owned lifetime when a managed local leaves its block. */
-void Array.cleanup(Array value) { value.free(); }
+meta native void Array.cleanup(Array value) { value.free(); }

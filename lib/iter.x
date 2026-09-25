@@ -161,8 +161,6 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
   return iter;
 }
 
-meta Iter Iter.new(void);
-
 /** Returns zeroed iterator storage owned by the active `Scope`.
     Use this when an iterator itself must be returned or stored as a value.
     Producers such as `Map.keys` initialize the result through their existing
@@ -174,7 +172,7 @@ meta Iter Iter.new(void);
     traversal because it allocates nothing.
     Raises: `<alloc-fail>` when storage cannot be allocated.
 */
-Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
+meta native Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
 
 static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
   if (pair is not <list>)
@@ -244,8 +242,6 @@ int Iter.try_next(Iter iter, Var *out) {
   return 1;
 }
 
-meta Var Iter.next(Iter iter);
-
 /** Returns the next element, or `void` once `iter` is exhausted.
     An adapter over `Iter.try_next`, unambiguous because no iterator may
     yield `void` as an element. Prefer `Iter.try_next` in new code; it reports
@@ -253,7 +249,7 @@ meta Var Iter.next(Iter iter);
     Raises: `<void-op>` when the source callback claims success with `void`,
     plus any cause raised by that callback.
 */
-Var Iter.next(Iter iter) {
+meta native Var Iter.next(Iter iter) {
   Var out;
   return iter.try_next(&out) ? out : void;
 }
@@ -833,8 +829,6 @@ Var Iter.find(Iter iter, Func pred) {
   return void;
 }
 
-meta int Iter.count(Iter iter);
-
 /** Returns the number of remaining elements, consuming `iter`.
     Counting drains the iterator, and an `Iter` cannot be rewound, so if you
     need the elements as well, collect them with `Iter.list` or `Iter.array`
@@ -843,14 +837,12 @@ meta int Iter.count(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause raised by that callback.
 */
-int Iter.count(Iter iter) {
+meta native int Iter.count(Iter iter) {
   int total = 0;
   Var item;
   while (iter.try_next(&item)) total++;
   return total;
 }
-
-meta Var Iter.sum(Iter iter);
 
 /** Returns the sum of the remaining elements, consuming `iter`.
     Starts from the integer 0 and adds with ordinary `Var` arithmetic, so
@@ -859,13 +851,11 @@ meta Var Iter.sum(Iter iter);
     Raises: any cause from the source or `Var.binary` while adding an element
     to the running total.
 */
-Var Iter.sum(Iter iter) {
+meta native Var Iter.sum(Iter iter) {
   Var total = 0;
   foreach (Var item, iter) total = total.binary(<+>, item);
   return total;
 }
-
-meta Var Iter.product(Iter iter);
 
 /** Returns the product of the remaining elements, consuming `iter`.
     Starts from the integer 1 and multiplies with ordinary `Var` arithmetic,
@@ -874,13 +864,11 @@ meta Var Iter.product(Iter iter);
     Raises: any cause from the source or `Var.binary` while multiplying an
     element into the running product.
 */
-Var Iter.product(Iter iter) {
+meta native Var Iter.product(Iter iter) {
   Var total = 1;
   foreach (Var item, iter) total = total.binary(<*>, item);
   return total;
 }
-
-meta Var Iter.max(Iter iter);
 
 /** Returns the largest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
@@ -889,14 +877,12 @@ meta Var Iter.max(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause from the source or `Var.compare`.
 */
-Var Iter.max(Iter iter) {
+meta native Var Iter.max(Iter iter) {
   Var best;
   if (!iter.try_next(&best)) return void;
   foreach (Var item, iter) if (item > best) best = item;
   return best;
 }
-
-meta Var Iter.min(Iter iter);
 
 /** Returns the smallest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
@@ -905,7 +891,7 @@ meta Var Iter.min(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause from the source or `Var.compare`.
 */
-Var Iter.min(Iter iter) {
+meta native Var Iter.min(Iter iter) {
   Var best;
   if (!iter.try_next(&best)) return void;
   foreach (Var item, iter) if (item < best) best = item;

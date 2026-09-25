@@ -347,8 +347,6 @@ int Var.fallback_truth(Var value) {
   return !!truth;
 }
 
-meta int Var.truth(Var value);
-
 /** Returns dynamic truthiness through registered dispatch or built-in rules.
     Numeric and `Symbol` zero and null unhandled pointer-bearing values are
     false; their nonzero or nonnull counterparts are true. A registered truth
@@ -359,7 +357,7 @@ meta int Var.truth(Var value);
     `<bad-types>` when no truthiness rule exists, plus any cause raised by a
     selected descriptor callback.
 */
-int Var.truth(Var value) {
+meta native int Var.truth(Var value) {
   if (!value.encoding_valid() || value is void)
     return value.fallback_truth();
   int handled = 0, truth = value.dispatch_truth(&handled);
@@ -393,31 +391,28 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   return _general_numeric_binary(op, lhs, rhs);
 }
 
-meta Var Var.add(Var lhs, Var rhs);
-
 /** Adds dynamic values through numeric, `String`, or registered `add`
     behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`;
     `String` addition returns a canonical concatenation, and a protocol result
     keeps the ownership chosen by its callback.
 */
-Var Var.add(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <add>, <+>, rhs);
-
-meta Var Var.sub(Var lhs, Var rhs);
+meta native Var Var.add(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <add>, <+>, rhs);
 
 /** Subtracts dynamic values through numeric or registered `sub` behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`; a
     protocol result keeps the ownership chosen by its callback.
 */
-Var Var.sub(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <sub>, <->, rhs);
-
-meta Var Var.mul(Var lhs, Var rhs);
+meta native Var Var.sub(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <sub>, <->, rhs);
 
 /** Multiplies dynamic values through numeric or registered `mul` behavior.
     Numeric promotion, failure, and result ownership follow `Var.binary`; a
     protocol result keeps the ownership chosen by its callback.
 */
-Var Var.mul(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mul>, <*>, rhs);
+meta native Var Var.mul(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <mul>, <*>, rhs);
 
 /** Multiplies matrices through a registered `matmul` behavior.
     `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
@@ -426,25 +421,21 @@ Var Var.mul(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mul>, <*>, rhs);
 Var Var.matmul(Var lhs, Var rhs) =>
   _protocol_arithmetic(lhs, <matmul>, <@>, rhs);
 
-meta Var Var.div(Var lhs, Var rhs);
-
 /** Divides dynamic values through numeric or registered `div` behavior.
     Numeric integer zero divisors raise; floating division uses host infinity
     and NaN behavior. Other promotion, failure, and ownership follow
     `Var.binary`.
 */
-Var Var.div(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <div>, </>, rhs);
-
-meta Var Var.mod(Var lhs, Var rhs);
+meta native Var Var.div(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <div>, </>, rhs);
 
 /** Computes dynamic remainder through integer or registered `mod` behavior.
     Numeric operands use the common promoted integer type and reject a zero
     divisor; floating operands are not accepted. Other failure and ownership
     follow `Var.binary`.
 */
-Var Var.mod(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mod>, <%>, rhs);
-
-meta Var Var.neg(Var value);
+meta native Var Var.mod(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <mod>, <%>, rhs);
 
 /** Negates a dynamic value through registered `neg` or numeric subtraction.
     Without a selected protocol, this computes `0 - value` with ordinary `Var`
@@ -453,7 +444,7 @@ meta Var Var.neg(Var value);
     for an object without `neg`, or any cause from protocol or numeric
     subtraction.
 */
-Var Var.neg(Var value) {
+meta native Var Var.neg(Var value) {
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits));

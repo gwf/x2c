@@ -239,20 +239,20 @@ Source: `lib/regex.x:723`
 <a id="Var.regexcapture"></a>
 #### Var.regexcapture
 
-`RegexCapture Var.regexcapture(Var value)`
+`meta native RegexCapture Var.regexcapture(Var value)`
 
 Reads a `RegexCapture` back out of a `Var`, as `foreach` does.
 
-Source: `lib/regex.x:749`
+Source: `lib/regex.x:747`
 
 <a id="Var.regexmatch"></a>
 #### Var.regexmatch
 
-`RegexMatch Var.regexmatch(Var value)`
+`meta native RegexMatch Var.regexmatch(Var value)`
 
 Reads a `RegexMatch` back out of a `Var`, as `foreach` does.
 
-Source: `lib/regex.x:754`
+Source: `lib/regex.x:751`
 
 ## Public types
 

@@ -81,8 +81,6 @@ static inline int _line_end(String str, int start, int keep_ends, int *next) {
   return keep_ends ? *next : end;
 }
 
-meta List String.split_n(String str, String sep, int max_splits);
-
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
     A null `str` returns `nil`. A null or empty `sep` returns `str` as one
@@ -91,7 +89,7 @@ meta List String.split_n(String str, String sep, int max_splits);
     `List` pools are released.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-List String.split_n(String str, String sep, int max_splits) {
+meta native List String.split_n(String str, String sep, int max_splits) {
   if (!str) return %();
   Array results = [], int start = 0, splits = 0;
   while (start >= 0) {
@@ -105,8 +103,6 @@ List String.split_n(String str, String sep, int max_splits) {
   }
   return results.list_free();
 }
-
-meta List String.split(String str, String sep);
 
 /** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
     Separators are not coalesced, so adjacent ones produce empty fields and
@@ -123,7 +119,7 @@ meta List String.split(String str, String sep);
     ```
     Raises: the same causes as `String.split_n`.
 */
-List String.split(String str, String sep) => str.split_n(sep, -1);
+meta native List String.split(String str, String sep) => str.split_n(sep, -1);
 
 meta List String.split_lines(String str, int keep_ends);
 meta Split String.words(String str);

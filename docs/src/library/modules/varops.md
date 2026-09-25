@@ -27,7 +27,7 @@ Boxed `Var` operators, updates, and truthiness.
 <a id="Var.add"></a>
 #### Var.add
 
-`Var Var.add(Var lhs, Var rhs)`
+`meta native Var Var.add(Var lhs, Var rhs)`
 
 Adds dynamic values through numeric, `String`, or registered `add`
 behavior.
@@ -35,7 +35,7 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 `String` addition returns a canonical concatenation, and a protocol result
 keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:404`
+Source: `lib/varops.x:400`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -57,19 +57,19 @@ or `<bad-shift>`, and `String` concatenation or wide boxing may raise
 `<size-limit>`, `<alloc-fail>`, or `<bad-enc>`.
 A selected protocol, truth, or comparison callback may raise its own cause.
 
-Source: `lib/varops.x:486`
+Source: `lib/varops.x:477`
 
 <a id="Var.div"></a>
 #### Var.div
 
-`Var Var.div(Var lhs, Var rhs)`
+`meta native Var Var.div(Var lhs, Var rhs)`
 
 Divides dynamic values through numeric or registered `div` behavior.
 Numeric integer zero divisors raise; floating division uses host infinity
 and NaN behavior. Other promotion, failure, and ownership follow
 `Var.binary`.
 
-Source: `lib/varops.x:436`
+Source: `lib/varops.x:429`
 
 <a id="Var.fallback_truth"></a>
 #### Var.fallback_truth
@@ -94,35 +94,35 @@ Multiplies matrices through a registered `matmul` behavior.
 `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:426`
+Source: `lib/varops.x:421`
 
 <a id="Var.mod"></a>
 #### Var.mod
 
-`Var Var.mod(Var lhs, Var rhs)`
+`meta native Var Var.mod(Var lhs, Var rhs)`
 
 Computes dynamic remainder through integer or registered `mod` behavior.
 Numeric operands use the common promoted integer type and reject a zero
 divisor; floating operands are not accepted. Other failure and ownership
 follow `Var.binary`.
 
-Source: `lib/varops.x:445`
+Source: `lib/varops.x:437`
 
 <a id="Var.mul"></a>
 #### Var.mul
 
-`Var Var.mul(Var lhs, Var rhs)`
+`meta native Var Var.mul(Var lhs, Var rhs)`
 
 Multiplies dynamic values through numeric or registered `mul` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:420`
+Source: `lib/varops.x:414`
 
 <a id="Var.neg"></a>
 #### Var.neg
 
-`Var Var.neg(Var value)`
+`meta native Var Var.neg(Var value)`
 
 Negates a dynamic value through registered `neg` or numeric subtraction.
 Without a selected protocol, this computes `0 - value` with ordinary `Var`
@@ -132,7 +132,7 @@ promotion and wrapping, so a narrow integer promotes before negation.
 for an object without `neg`, or any cause from protocol or numeric
 subtraction.
 
-Source: `lib/varops.x:456`
+Source: `lib/varops.x:447`
 
 <a id="Var.postfix"></a>
 #### Var.postfix
@@ -149,23 +149,23 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:574`
+Source: `lib/varops.x:565`
 
 <a id="Var.sub"></a>
 #### Var.sub
 
-`Var Var.sub(Var lhs, Var rhs)`
+`meta native Var Var.sub(Var lhs, Var rhs)`
 
 Subtracts dynamic values through numeric or registered `sub` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:412`
+Source: `lib/varops.x:407`
 
 <a id="Var.truth"></a>
 #### Var.truth
 
-`int Var.truth(Var value)`
+`meta native int Var.truth(Var value)`
 
 Returns dynamic truthiness through registered dispatch or built-in rules.
 Numeric and `Symbol` zero and null unhandled pointer-bearing values are
@@ -178,7 +178,7 @@ return false independently of object state. The call does not retain
 `<bad-types>` when no truthiness rule exists, plus any cause raised by a
 selected descriptor callback.
 
-Source: `lib/varops.x:362`
+Source: `lib/varops.x:360`
 
 <a id="Var.update"></a>
 #### Var.update
@@ -196,7 +196,7 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/varops.x:542`
+Source: `lib/varops.x:533`
 
 ## Advanced and interop API
 

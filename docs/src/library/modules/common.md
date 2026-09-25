@@ -103,7 +103,7 @@ The shared `Var` union and operations used by every module.
 
 Initializes the x2c runtime once for the current process.
 
-Source: `lib/common.x:833`
+Source: `lib/common.x:807`
 
 #### x2c_initialize_protocols
 
@@ -111,7 +111,7 @@ Source: `lib/common.x:833`
 
 Runs compiler-generated runtime protocol registration.
 
-Source: `lib/common.x:829`
+Source: `lib/common.x:803`
 
 #### x2c_normalize_index
 
@@ -119,7 +119,7 @@ Source: `lib/common.x:829`
 
 Normalizes one element index against `length`.
 
-Source: `lib/common.x:857`
+Source: `lib/common.x:831`
 
 #### x2c_normalize_slice
 
@@ -127,7 +127,7 @@ Source: `lib/common.x:857`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:877`
+Source: `lib/common.x:851`
 
 ### `Array`
 
@@ -389,14 +389,14 @@ Source: `lib/common.x:631`
 <a id="Var.char"></a>
 #### Var.char
 
-`char Var.char(Var x)`
+`meta native char Var.char(Var x)`
 
 Returns `x` as a native `char` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:661`
+Source: `lib/common.x:659`
 
 <a id="Var.decode_f32"></a>
 #### Var.decode_f32
@@ -419,14 +419,14 @@ Source: `lib/common.x:483`
 <a id="Var.double"></a>
 #### Var.double
 
-`double Var.double(Var x)`
+`meta native double Var.double(Var x)`
 
 Returns `x` as a native `double` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:814`
+Source: `lib/common.x:788`
 
 <a id="Var.file"></a>
 #### Var.file
@@ -440,14 +440,14 @@ Source: `lib/common.x:632`
 <a id="Var.float"></a>
 #### Var.float
 
-`float Var.float(Var x)`
+`meta native float Var.float(Var x)`
 
 Returns `x` as a native `float` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:803`
+Source: `lib/common.x:779`
 
 <a id="Var.int"></a>
 #### Var.int
@@ -459,7 +459,7 @@ Returns `x` as a native `int` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:703`
+Source: `lib/common.x:695`
 
 <a id="Var.is_row"></a>
 #### Var.is_row
@@ -496,38 +496,38 @@ Source: `lib/common.x:634`
 <a id="Var.long"></a>
 #### Var.long
 
-`long Var.long(Var x)`
+`meta native long Var.long(Var x)`
 
 Returns `x` as a native `long` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:736`
+Source: `lib/common.x:722`
 
 <a id="Var.long_double"></a>
 #### Var.long_double
 
-`long double Var.long_double(Var x)`
+`meta native long double Var.long_double(Var x)`
 
 Returns `x` as a native `long double` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:791`
+Source: `lib/common.x:769`
 
 <a id="Var.long_long"></a>
 #### Var.long_long
 
-`long long Var.long_long(Var x)`
+`meta native long long Var.long_long(Var x)`
 
 Returns `x` as a native `long long` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:763`
+Source: `lib/common.x:745`
 
 <a id="Var.map"></a>
 #### Var.map
@@ -550,14 +550,14 @@ Source: `lib/common.x:472`
 <a id="Var.short"></a>
 #### Var.short
 
-`short Var.short(Var x)`
+`meta native short Var.short(Var x)`
 
 Returns `x` as a native `short` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:683`
+Source: `lib/common.x:677`
 
 <a id="Var.string"></a>
 #### Var.string
@@ -581,43 +581,43 @@ Source: `lib/common.x:645`
 <a id="Var.uchar"></a>
 #### Var.uchar
 
-`uchar Var.uchar(Var x)`
+`meta native uchar Var.uchar(Var x)`
 
 Returns `x` as a native `uchar` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:672`
+Source: `lib/common.x:668`
 
 <a id="Var.uint"></a>
 #### Var.uint
 
-`uint Var.uint(Var x)`
+`meta native uint Var.uint(Var x)`
 
 Returns `x` as a native `uint` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:714`
+Source: `lib/common.x:704`
 
 <a id="Var.ulong"></a>
 #### Var.ulong
 
-`ulong Var.ulong(Var x)`
+`meta native ulong Var.ulong(Var x)`
 
 Returns `x` as a native `ulong` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:750`
+Source: `lib/common.x:734`
 
 <a id="Var.ulong_long"></a>
 #### Var.ulong_long
 
-`unsigned long long Var.ulong_long(Var x)`
+`meta native unsigned long long Var.ulong_long(Var x)`
 
 Returns `x` as a native `unsigned long long` under the `Var.convert`
 rules.
@@ -625,31 +625,31 @@ rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:777`
+Source: `lib/common.x:757`
 
 <a id="Var.unsigned"></a>
 #### Var.unsigned
 
-`unsigned Var.unsigned(Var x)`
+`meta native unsigned Var.unsigned(Var x)`
 
 Returns `x` as a native `unsigned` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:725`
+Source: `lib/common.x:713`
 
 <a id="Var.ushort"></a>
 #### Var.ushort
 
-`ushort Var.ushort(Var x)`
+`meta native ushort Var.ushort(Var x)`
 
 Returns `x` as a native `ushort` under the `Var.convert` rules.
 
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:694`
+Source: `lib/common.x:686`
 
 ### `char`
 
