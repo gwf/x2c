@@ -393,7 +393,7 @@ void * Scope_malloc_in(Scope * slot, size_t size){
 
 void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! drop){
-    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 810};  x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 809};  x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);  __builtin_unreachable();
   }
   return _malloc_in(slot, size, drop);
 }
@@ -424,7 +424,7 @@ Scope Scope_owner(void * ptr){
 
 void Scope_move(void * ptr, Scope * slot){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  if(! slot){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 937};  x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 936};  x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);  __builtin_unreachable();
   }
   if(! * slot) * slot = _new_scope(NULL);  Scope scope = * slot;  ScopeAlloc alloc = PTR_ALLOC(ptr), next = alloc -> next, prev = alloc -> prev;  if(IS_TAGGED(prev)){
     Scope owner = UNTAG_POINTER(prev);  owner -> first = next;
@@ -437,7 +437,7 @@ void * Scope_realloc(void * ptr, size_t size){
     _free_alloc(PTR_ALLOC(ptr));  return NULL;
   }
   ScopeAlloc old = PTR_ALLOC(ptr), next = old -> next, prev = old -> prev;  ScopeMetadata * old_meta = ALLOC_META(old);  size_t old_size = old_meta -> requested_size;  if(size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 975};  x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 974};  x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);  __builtin_unreachable();
   }
   ScopeMetadata * meta = _data_realloc(old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);  meta -> requested_size = size;  ScopeAlloc replacement =(ScopeAlloc)(meta + 1);  replacement -> next = next;  replacement -> prev = prev;  if(next) next -> prev = replacement;  if(IS_TAGGED(prev)){
     Scope scope = UNTAG_POINTER(prev);  scope -> first = replacement;
