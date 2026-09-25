@@ -279,7 +279,7 @@ void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
 int List_truth(List);
 static void _translate_unit(Frontend frontend, String filename, String output_dir){
-  CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, &(unit)); {
+  CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, & unit); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
 
   X2CCleanup _x2c_defer_record_0 = {
@@ -571,7 +571,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
       running[running_count ++] = pid;
     }
     if(! running_count) continue;
-    int status, slot = worker_wait_any(running, running_count, & status);
+    int status, slot = worker_wait_any(running, running_count, &(status));
     if(status) failed ++;
     List slice = carried[slot];
     if(build && ! status) Build_end_translation(build, Var_string(List_car(slice)), 0);

@@ -442,7 +442,7 @@ int Array_try_next(Array, int *, Var *);
 int String_equal(String, String);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
-  * covered = 0;
+  (* covered) = 0;
   if(String_startswith(target, _172)) return SourceView_exists(sources, target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = Array_new();
@@ -478,7 +478,7 @@ static String _resolve_include_dirs(SourceView sources, List extra_dirs, String 
         String path = String_join(NULL, cons(String_var(dir), cons(String_var(_3), cons(String_var(target), NULL))));
         if(! SourceView_exists(sources, path)) continue;
         found = path;
-        * covered = String_equal(dir, lib_dir) || String_equal(dir, include_dir);
+        (* covered) = String_equal(dir, lib_dir) || String_equal(dir, include_dir);
         break;
       }
 
@@ -490,7 +490,7 @@ static String _resolve_include_dirs(SourceView sources, List extra_dirs, String 
 }
 
 static String _resolve_include(Compiler compiler, String includer_dir, String target, int angle, int * covered){
-  return _resolve_include_dirs(compiler -> sources, compiler -> include_dirs, includer_dir, target, angle, covered);
+  return _resolve_include_dirs(compiler -> sources, compiler -> include_dirs, includer_dir, target, angle, &((* covered)));
 }
 
 void Scope_destroy(Scope);
@@ -713,7 +713,7 @@ static void _parse_segment(Compiler c, String path, String source, String text, 
     shadow -> filename = path;
     shadow -> layout = c -> layout;
     shadow -> source_private = private;
-    shadow -> open_linkage = * linkage;
+    shadow -> open_linkage =(* linkage);
     Compiler_take_unit_state(shadow, c);
     Compiler_tokenize(shadow, text);
     shadow -> text = source;
@@ -724,7 +724,7 @@ static void _parse_segment(Compiler c, String path, String source, String text, 
       token -> pos += start_pos;
     }
     Compiler_shallow_parse_overlay(shadow, globs, overlay);
-    * linkage = shadow -> open_linkage;
+    (* linkage) = shadow -> open_linkage;
     Compiler_return_unit_state(shadow, c);
     if(unit){
       Map_merge(c -> fn_defs, shadow -> fn_defs);
@@ -839,14 +839,14 @@ static void _publish_unit_statics(Map statics, Map overlay, String path){
 unsigned Map_len(Map);
 Var Map_var(Map);
 static void _flush_segment(Compiler compiler, String path, String source, String text, int start_line, int start_pos, Map globs, Array parts, Map definitions, Map dependencies, int private, int * linkage){
-  if(! String_truth(text) || ! * text) return;  Scope_push(& process_cache_scope);  Map overlay = Map_new();  Scope_pop();  _parse_segment(compiler, path, source, text, start_line, start_pos, globs, overlay, definitions, dependencies, private, linkage);  if(! Map_len(overlay)) return;  Var overlay_var = Map_var(overlay);  Array_push(parts, overlay_var);
+  if(! String_truth(text) || ! * text) return;  Scope_push(& process_cache_scope);  Map overlay = Map_new();  Scope_pop();  _parse_segment(compiler, path, source, text, start_line, start_pos, globs, overlay, definitions, dependencies, private, &((* linkage)));  if(! Map_len(overlay)) return;  Var overlay_var = Map_var(overlay);  Array_push(parts, overlay_var);
 }
 
 String String_printf(String, ...);
 unsigned String_hash(String);
 Var List_cadr(List);
 static String _include(Compiler c, String target, int angle, String dir, Map globs, Map visited, Map dependencies){
-  int covered = 0;  String path = _resolve_include(c, dir, target, angle, & covered);  if(! String_truth(path)) return NULL;  if(covered && ! x2c_source_file(path)) return NULL;  String canonical = _canonical_path(path);  List entry = _entry(c, canonical);  Compiler_add_translation_dependency(c, canonical);  if(! Map_contains(visited, String_var(canonical))){
+  int covered = 0;  String path = _resolve_include(c, dir, target, angle, &(covered));  if(! String_truth(path)) return NULL;  if(covered && ! x2c_source_file(path)) return NULL;  String canonical = _canonical_path(path);  List entry = _entry(c, canonical);  Compiler_add_translation_dependency(c, canonical);  if(! Map_contains(visited, String_var(canonical))){
     Map_setindex(visited, String_var(canonical), int_var(1));  if(! List_truth(entry)) entry = _walk_cold(c, target, canonical, globs, visited);  _replay_cached(c, entry, globs, visited);
   }
   Var walked = Map_getindex(_process_cache(), String_var(canonical));  String content_hash = Var_string(Var_is_void(walked) ? String_var(String_printf(_47, String_hash(_include_text(c, target, canonical)))) : List_cadr(Var_list(walked)));  _cache_dependency(dependencies, canonical, String_var(content_hash));  return canonical;
@@ -951,7 +951,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
               int angle = 0, visibility = _visibility_pragma(token -> text);
               String target = hidden ? NULL : preproc_include_target(token -> text, &(angle));
               if(! String_truth(target) && visibility < 0) continue;
-              _flush_segment(c, path, text, String_getslice(text, segment_position, token -> pos, 1), segment_line, segment_position, globs, parts, definitions, dependencies, private, & linkage);
+              _flush_segment(c, path, text, String_getslice(text, segment_position, token -> pos, 1), segment_line, segment_position, globs, parts, definitions, dependencies, private, &(linkage));
               if(String_truth(target)){
                 String canonical = _include(c, target, angle, dir, globs, visited, dependencies);
                 if(String_truth(canonical)) Array_push(parts, String_var(canonical));
@@ -965,7 +965,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
               segment_line = next -> line;
               segment_position = next -> pos;
             }
-            _flush_segment(c, path, text, String_getslice(text, segment_position, -2147483648, 1), segment_line, segment_position, globs, parts, definitions, dependencies, private, & linkage);
+            _flush_segment(c, path, text, String_getslice(text, segment_position, -2147483648, 1), segment_line, segment_position, globs, parts, definitions, dependencies, private, &(linkage));
             Map generated = NULL;
             int producers = 0;
             {

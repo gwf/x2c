@@ -1777,9 +1777,9 @@ static List _make_catch_binders(List binders, String handle_name){
 int Array_contains(Array, Var);
 
 static List _match_arm_label(Symbol head, Array heads, int * labelling){
-  if(! * labelling) return NULL;
+  if(!(* labelling)) return NULL;
   if(! head){
-    * labelling = 0;
+    (* labelling) = 0;
     return _334;
   }
   if(Array_contains(heads, Symbol_var(head))) return NULL;
@@ -1876,7 +1876,7 @@ Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
         Symbol flat_head = match_value_flat_head(value, binders, & flat_tags);
         List pattern = Emitter__emit(e, pattern_ast);
         List body = Emitter__emit(e, body_ast);
-        List label = _match_arm_label(match_value_head(value), heads, & labelling);
+        List label = _match_arm_label(match_value_head(value), heads, &(labelling));
         if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));
         if(pattern == _19) Array_push(values, List_var(cons(List_var(body), List_append(implicit_break, NULL))));
         else if(flat_head){
@@ -1900,7 +1900,7 @@ Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
 
   }
   if(labelling) Array_push(values, List_var(_370));
-  * dispatched = Array_len(heads) != 0;
+  (* dispatched) = Array_len(heads) != 0;
   Array_free(heads);
   return Array_list_free(values);
 }
@@ -1935,7 +1935,7 @@ static List Emitter__match_cases(Emitter e, List ast){
   }
   else capture_declarations = _377;
   int dispatched;
-  List arms = Emitter__match_if(e, cases, & dispatched);
+  List arms = Emitter__match_if(e, cases, &(dispatched));
   List selector = dispatched ? _380 : _383;
   return cons(_385, cons(List_var(expr), cons(_387, List_append(capture_declarations, cons(_389, List_append(selector, cons(_391, List_append(arms, _394))))))));
 }

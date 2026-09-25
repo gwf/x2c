@@ -1899,14 +1899,14 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
   Block_free(walk.spine);
   MatchMachine_dispose(machine);
   if(status < 0) return - 1;
-  * out_results = results;
+  (* out_results) = results;
   return 1;
 }
 
 int MatchPlan_search(MatchPlan plan, List input, List * out_results){
   if(! _init_guard_) _file_init_();
   if(! _plan_prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
-  return MatchPlan__all(plan, input, out_results);
+  return MatchPlan__all(plan, input, &(* out_results));
 }
 
 static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out){
