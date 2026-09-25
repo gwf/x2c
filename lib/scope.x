@@ -445,8 +445,6 @@ void Scope.initialize(void) {
   _initialize();
 }
 
-meta Scope Scope.new(void);
-
 /** Creates a detached, unnamed scope and returns it.
     A detached scope sits in no slot and is not active, so nothing is charged
     to it until you allocate through `Scope.malloc_in` and friends or make it
@@ -456,12 +454,10 @@ meta Scope Scope.new(void);
     Raises: `<alloc-fail>` when the scope cannot be allocated. Before `Error`
     initialization it terminates at the error floor.
 */
-Scope Scope.new(void) {
+meta native Scope Scope.new(void) {
   _require_running();
   return _new_scope(NULL);
 }
-
-meta Scope Scope.new_named(const char *name);
 
 /** Creates a detached scope carrying a copy of `name` for diagnostics.
     The name is copied, so a temporary buffer is fine. `Scope.name` reports
@@ -482,7 +478,7 @@ meta Scope Scope.new_named(const char *name);
     or `<size-limit>` when the name is too large. Before `Error`
     initialization these failures terminate the process.
 */
-Scope Scope.new_named(const char *name) {
+meta native Scope Scope.new_named(const char *name) {
   _require_running();
   return _new_scope(name);
 }
@@ -544,8 +540,6 @@ ScopeStats Scope.stats(void) {
   return result;
 }
 
-meta void Scope.destroy(Scope scope);
-
 /** Destroys a detached scope and frees every allocation it owns.
     This ends a scope you hold in a variable, and is the counterpart to
     `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
@@ -563,7 +557,7 @@ meta void Scope.destroy(Scope scope);
     lower scope. The failure leaves the scope intact. A NULL `scope` does
     nothing. Before `Error` initialization it terminates at the error floor.
 */
-void Scope.destroy(Scope scope) {
+meta native void Scope.destroy(Scope scope) {
   if (!scope) return;
   _require_running();
   ScopeThreadState state = _thread();
@@ -590,8 +584,6 @@ void Scope.shutdown_hook(void (*hook)(void)) {
   hooks = _raw_grow(hooks, hook_count, hook_capacity, sizeof(*hooks));
   hooks[hook_count++] = hook;
 }
-
-meta void Scope.push(Scope *scope);
 
 /** Makes the scope in `scope` active until a matching `Scope.pop`.
     `scope` is the address of a caller-owned `Scope` variable, and it may hold
@@ -620,7 +612,7 @@ meta void Scope.push(Scope *scope);
     cannot be allocated. These failures leave the active slot unchanged.
     Before `Error` initialization they terminate at the error floor.
 */
-void Scope.push(Scope *scope) {
+meta native void Scope.push(Scope *scope) {
   _require_running();
   if (!scope) raise %(bad-arg);
   ScopeThreadState state = _thread();
@@ -643,8 +635,6 @@ Scope *Scope.top(void) {
   return _thread().active;
 }
 
-meta void Scope.pop(void);
-
 /** Restores the slot that was active before the matching `Scope.push`.
     Popping frees nothing. The popped slot keeps its scope and every
     allocation in it, so you can destroy that scope later or pass it
@@ -655,7 +645,7 @@ meta void Scope.pop(void);
     active slot unchanged. Before `Error` initialization it terminates at the
     error floor.
 */
-void Scope.pop(void) {
+meta native void Scope.pop(void) {
   _require_running();
   ScopeThreadState state = _thread();
   if (!state.stack_size) raise %(bad-state);
@@ -663,8 +653,6 @@ void Scope.pop(void) {
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
                                  : &state.root;
 }
-
-meta void Scope.retain(void);
 
 /** Opens a new scope in the active slot and makes it the current one.
     Allocations that follow are charged to the new scope. The scope that was
@@ -699,7 +687,7 @@ meta void Scope.retain(void);
     allocated, or `<size-limit>` when that record cannot grow. Before `Error`
     initialization they terminate at the error floor.
 */
-void Scope.retain(void) {
+meta native void Scope.retain(void) {
   _require_running();
   Scope scope = _new_scope(NULL);
   ScopeThreadState state = _thread();
@@ -710,8 +698,6 @@ void Scope.retain(void) {
   }
   *state.active = scope;
 }
-
-meta void Scope.release(void);
 
 /** Destroys the scope in the active slot and frees everything it owns.
     Every allocation charged to that scope is freed: `Scope.malloc`,
@@ -739,7 +725,7 @@ meta void Scope.release(void);
     failure leaves the active region intact. Before `Error` initialization it
     terminates at the error floor.
 */
-void Scope.release(void) {
+meta native void Scope.release(void) {
   _require_running();
   ScopeThreadState state = _thread();
   with state.active as active {
@@ -754,8 +740,6 @@ void Scope.release(void) {
   }
 }
 
-meta void *Scope.malloc(size_t size);
-
 /** Allocates `size` uninitialized bytes in the active scope.
     The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
     ends its life early, `Scope.move` reassigns its owner, and
@@ -766,7 +750,7 @@ meta void *Scope.malloc(size_t size);
     or `<alloc-fail>` when the underlying allocation fails. Before `Error`
     initialization they terminate at the error floor.
 */
-void *Scope.malloc(size_t size) {
+meta native void *Scope.malloc(size_t size) {
   _require_running();
   return _malloc_in(_thread().active, size, NULL);
 }
@@ -826,8 +810,6 @@ void *Scope.malloc_finalized_in(
   return _malloc_in(slot, size, drop);
 }
 
-meta void *Scope.calloc(size_t count, size_t size);
-
 /** Allocates `count` objects of `size` bytes each, zeroed, in the active
     scope.
     The product is checked for overflow before anything is allocated, and the
@@ -838,7 +820,7 @@ meta void *Scope.calloc(size_t count, size_t size);
     when allocation fails. Before `Error` initialization they terminate at the
     error floor.
 */
-void *Scope.calloc(size_t count, size_t size) {
+meta native void *Scope.calloc(size_t count, size_t size) {
   _require_running();
   return _calloc_in(_thread().active, count, size);
 }
@@ -856,8 +838,6 @@ void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
   return _calloc_in(slot, count, size);
 }
 
-meta void *Scope.memdup(const void *ptr, size_t size);
-
 /** Copies `size` bytes from `ptr` into a new allocation in the active scope.
     The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
     release that ends the region. Nothing about the source is remembered, so
@@ -870,7 +850,7 @@ meta void *Scope.memdup(const void *ptr, size_t size);
     Raises: `<size-limit>` or `<alloc-fail>` from the underlying allocation.
     A NULL `ptr` or zero `size` returns NULL without raising.
 */
-void *Scope.memdup(const void *ptr, size_t size) {
+meta native void *Scope.memdup(const void *ptr, size_t size) {
   _require_running();
   return _memdup_in(_thread().active, ptr, size);
 }
@@ -889,8 +869,6 @@ void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
   return _memdup_in(slot, ptr, size);
 }
 
-meta void Scope.free(void *ptr);
-
 /** Frees one scope-owned allocation before its scope ends.
     `ptr` must be a pointer returned by `Scope.malloc`, `Scope.calloc`,
     `Scope.memdup`, one of their `_in` forms, or `Scope.realloc`. It is
@@ -904,7 +882,7 @@ meta void Scope.free(void *ptr);
 
     A NULL `ptr` does nothing.
 */
-void Scope.free(void *ptr) {
+meta native void Scope.free(void *ptr) {
   _require_running();
   if (!ptr) return;
   _free_alloc(PTR_ALLOC(ptr));
@@ -925,8 +903,6 @@ Scope Scope.owner(void *ptr) {
   while (alloc && !IS_TAGGED(alloc.prev)) alloc = alloc.prev;
   return alloc ? UNTAG_POINTER(alloc.prev) : NULL;
 }
-
-meta void Scope.move(void *ptr, Scope *slot);
 
 /** Relinks one allocation onto the scope held by `slot`.
     The bytes are not copied and the pointer does not change; only ownership
@@ -954,7 +930,7 @@ meta void Scope.move(void *ptr, Scope *slot);
     unchanged. A NULL `ptr` does nothing. Before `Error` initialization they
     terminate at the error floor.
 */
-void Scope.move(void *ptr, Scope *slot) {
+meta native void Scope.move(void *ptr, Scope *slot) {
   _require_running();
   if (!ptr) return;
   if (!slot) raise %(bad-arg);
@@ -973,8 +949,6 @@ void Scope.move(void *ptr, Scope *slot) {
   scope.first = alloc;
 }
 
-meta void *Scope.realloc(void *ptr, size_t size);
-
 /** Resizes one scope-owned allocation and returns the new pointer.
     Ownership does not change: the allocation stays with the scope that
     already held it, even if that is not the active one. Two edge cases follow
@@ -987,7 +961,7 @@ meta void *Scope.realloc(void *ptr, size_t size);
     allocation fails. Before `Error` initialization these failures terminate at
     the error floor.
 */
-void *Scope.realloc(void *ptr, size_t size) {
+meta native void *Scope.realloc(void *ptr, size_t size) {
   _require_running();
   if (!ptr) return _malloc_in(_thread().active, size, NULL);
   if (!size) {
@@ -1048,7 +1022,5 @@ void Scope_shutdown(void) {
   x2c_thread_state_release();
 }
 
-meta void Scope.cleanup(Scope value);
-
 /** Ends the owned lifetime when a managed local leaves its block. */
-void Scope.cleanup(Scope value) { value.destroy(); }
+meta native void Scope.cleanup(Scope value) { value.destroy(); }

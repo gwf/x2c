@@ -1804,10 +1804,29 @@ int Compiler.protocol_form_starts(Compiler c) {
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
   Token head = c.token;
-  c.next();
+  c.take_meta_marker(NULL);
   int marker = c.test_declaration();
   c.token = head;
   return marker;
+}
+
+/** Consumes the `meta` marker at the cursor and the contextual `native`
+    marker that may follow it, and returns the `meta` token. `native` binds
+    the definition after it the way a bodyless prototype would. `*native`,
+    when requested, reports whether that marker was present. */
+Token Compiler.take_meta_marker(Compiler c, int *native) {
+  Token meta = c.token;
+  c.next();
+  Token after = c.token;
+  int marked = c.peek(0) == <ident> && c.token.text == "native";
+  if (marked) {
+    c.next();
+    Token declaration = c.token;
+    marked = c.test_declaration();
+    c.token = marked ? declaration : after;
+  }
+  if (native) *native = marked;
+  return meta;
 }
 
 /** Reports whether the top-level item at the cursor is one of a script
@@ -1951,12 +1970,13 @@ List Compiler.parse_top_level(Compiler c) {
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   Token meta = NULL;
-  if (c.meta_form_is_declaration()) {
-    meta = c.token;
-    c.next();
-  }
+  int native = 0;
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(&native);
   Token definition_start = c.token;
   List decl = c.parse_declaration_row();
+  if (native && !decl.type_from_ast().is_function())
+    c.report_error(
+      <parse>, "a native meta declaration must be a function", meta, NULL);
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
       c.install_native_meta_function(decl, meta);
@@ -1975,14 +1995,16 @@ List Compiler.parse_top_level(Compiler c) {
     Token tokens = c.tokenizer.tokens;
     int start = (meta ? meta : definition_start) - tokens;
     int body = c.token - tokens;
-    $let(c.meta_body, meta != NULL) {
+    Token lowered = native ? NULL : meta;
+    if (native) c.install_native_meta_function(decl, meta);
+    $let(c.meta_body, lowered != NULL) {
       function = _finish_function_definition(c, decl);
     }
-    if (meta) c.install_meta_function(function, meta);
+    if (lowered) c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (meta && c.meta_is_comptime_only(function)) return NULL;
+    if (lowered && c.meta_is_comptime_only(function)) return NULL;
     if (c.macro_holes)
       return %(api-source ${definition_start.line}
                ${c.definition_doc(definition_start)} $function);

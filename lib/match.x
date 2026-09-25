@@ -372,31 +372,23 @@ static int _binder_kind(Var atom) {
   return sigil;
 }
 
-meta int Var.is_atom_binder(Var atom);
-
 /** Reports whether `atom` is a valid named or anonymous `?` binder.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_atom_binder(Var atom) => _binder_kind(atom) == '?';
-
-meta int Var.is_list_binder(Var atom);
+meta native int Var.is_atom_binder(Var atom) => _binder_kind(atom) == '?';
 
 /** Reports whether `atom` is a valid named or anonymous `*` binder.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_list_binder(Var atom) => _binder_kind(atom) == '*';
-
-meta int Var.is_binder(Var atom);
+meta native int Var.is_list_binder(Var atom) => _binder_kind(atom) == '*';
 
 /** Reports whether `atom` is either valid `Match` binder form.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_binder(Var atom) => _binder_kind(atom) != 0;
-
-meta int Var.is_match_op(Var atom);
+meta native int Var.is_binder(Var atom) => _binder_kind(atom) != 0;
 
 /** Reports whether `atom` is a compact built-in `Match` guard operator. */
-int Var.is_match_op(Var atom) {
+meta native int Var.is_match_op(Var atom) {
   if (atom is not <symbol>) return 0;
   Symbol symbol = atom;
   switch (symbol) {
@@ -756,8 +748,6 @@ static Var _replace(Var input, List bindings) {
   return %($head @tail);
 }
 
-meta List List.replace(List template, List bindings);
-
 /** Replaces named binders in `template` according to `bindings`.
     A sequence binder in list-head position splices its captured `List`;
     `!quote` removes itself and leaves its operand literal. Missing binders are
@@ -766,7 +756,7 @@ meta List List.replace(List template, List bindings);
     unchanged. New structure follows the module pool-chain lifetime above.
     Raises: `<alloc-fail>` while constructing replacement `List`s.
 */
-List List.replace(List template, List bindings) {
+meta native List List.replace(List template, List bindings) {
   if (!template) return NULL;
   if (!bindings) return template;
   return _replace(template, bindings);
@@ -824,15 +814,13 @@ int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
   out && _plan_cache().try_match_replace(
     input, pat, template, out, "List.try_match_replace");
 
-meta List List.match_replace(List input, Var pat, Var template);
-
 /** Returns the `List` replacement when `input` matches `pat`.
     A miss returns `input` unchanged. A successful scalar replacement cannot
     inhabit the `List` result and returns `nil`. Matching and replacement
     failures
     follow `List.try_match_replace`.
 */
-List List.match_replace(List input, Var pat, Var template) {
+meta native List List.match_replace(List input, Var pat, Var template) {
   Var result;
   if (!input.try_match_replace(pat, template, &result)) return input;
   return result is <list> ? result : NULL;

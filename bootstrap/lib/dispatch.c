@@ -502,7 +502,7 @@ int Var_contains(Var value, Var needle){
   if(descriptor -> methods.contains) return descriptor -> methods.contains(value, needle);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 363};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 361};
     x2c_error_raise_n(& _x2c_error_site_8, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -518,7 +518,7 @@ Var Var_getindex(Var value, Var key){
   if(descriptor -> methods.getindex) return descriptor -> methods.getindex(value, key);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 380};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 376};
     x2c_error_raise_n(& _x2c_error_site_9, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -535,7 +535,7 @@ Var Var_setindex(Var value, Var key, Var replacement){
   if(descriptor -> methods.setindex) return descriptor -> methods.setindex(value, key, replacement);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 398};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 392};
     x2c_error_raise_n(& _x2c_error_site_10, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -552,7 +552,7 @@ Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
   if(descriptor -> methods.updateindex) return descriptor -> methods.updateindex(value, key, op, rhs);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 418};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 410};
     x2c_error_raise_n(& _x2c_error_site_11, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -568,7 +568,7 @@ Var Var_postfixindex(Var value, Var key, Symbol op){
   if(descriptor -> methods.postfixindex) return descriptor -> methods.postfixindex(value, key, op);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 435};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 425};
     x2c_error_raise_n(& _x2c_error_site_12, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -837,7 +837,7 @@ unsigned Var_wide_hash(Var);
 unsigned Var_fallback_hash(Var v){
   if(! _init_guard_) _file_init_();
   if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 723};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 713};
     x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.fallback_hash")), NULL))));
     __builtin_unreachable();
   }
@@ -858,7 +858,7 @@ unsigned String_hash(String);
 unsigned Var_hash(Var v){
   if(! _init_guard_) _file_init_();
   if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 732};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 722};
     x2c_error_raise_n(& _x2c_error_site_14, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.hash")), NULL))));
     __builtin_unreachable();
   }
@@ -987,14 +987,14 @@ int Var_fallback_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 866};
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 854};
       x2c_error_raise_n(& _x2c_error_site_15, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 869};
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 857};
     x2c_error_raise_n(& _x2c_error_site_16, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
   }
@@ -1012,14 +1012,14 @@ int Var_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 889};
+      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 875};
       x2c_error_raise_n(& _x2c_error_site_17, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 892};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 878};
     x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
   }
@@ -1047,7 +1047,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter Var_fallback_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 919};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 905};
     x2c_error_raise_n(& _x2c_error_site_19, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }
@@ -1064,7 +1064,7 @@ Iter Var_fallback_iter(Var x, Iter dest){
 Iter Var_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 931};
+    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 915};
     x2c_error_raise_n(& _x2c_error_site_20, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }

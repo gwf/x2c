@@ -103,8 +103,6 @@ static void _promote_node(Var node) {
   }
 }
 
-meta Self List.promote(Self lst);
-
 /** Moves `lst` out of the innermost interning pool into its parent.
     Cells, nested `List`s, interned `String` cars, and long `Atom` payloads
     all move together, so a promoted `List` keeps its complete identity graph
@@ -121,7 +119,7 @@ meta Self List.promote(Self lst);
     canonical; this one still survives, but `Pool.is_permanent` answers 0 for
     it. A null `lst` returns itself unchanged.
 */
-Self List.promote(Self lst) {
+meta native Self List.promote(Self lst) {
   if (!lst) return lst;
   _promote_node(lst);
   return lst;
@@ -309,10 +307,8 @@ Var List.last(List lst) {
   return lst.car();
 }
 
-meta int List.index(List l, Var key);
-
 /** Returns the first index of `key`, or -1 when absent. */
-int List.index(List l, Var key) {
+meta native int List.index(List l, Var key) {
   for (int index = 0; l; l = l.cdr(), index++) if (l.car == key) return index;
   return -1;
 }
@@ -480,8 +476,6 @@ List Array.list_free(Array arr) {
   return arr;
 }
 
-meta List Map.list(Map map);
-
 /** Returns the entries of `map` as a `List` of two-element `(key value)`
     `List`s, in the map's iteration order.
     This is the eager form of `Map.enumerate`, for a caller that wants the
@@ -489,7 +483,7 @@ meta List Map.list(Map map);
     returns nil. The pair cells are new; the keys and values are shared.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-List Map.list(Map map) {
+meta native List Map.list(Map map) {
   Array pairs = [];
   foreach (Var (key, value), map) pairs.push(%($key $value));
   return pairs.list_free();
@@ -508,8 +502,6 @@ Array List.array(List lst) {
   return array;
 }
 
-meta Self List.unique(Self lst);
-
 /** Returns a copy of `lst` with later duplicates removed.
     The first occurrence of each value is kept and the original order is
     preserved. Duplicate detection runs through `Iter.unique`, whose state is
@@ -519,7 +511,7 @@ meta Self List.unique(Self lst);
     Raises: causes from `Map` hashing or equality, or `<alloc-fail>` or
     `<size-limit>` while constructing the result.
 */
-Self List.unique(Self lst) {
+meta native Self List.unique(Self lst) {
   if (!lst || !lst.cdr()) return lst;
   $scope() {
     struct Iter iter_storage, unique_storage;
@@ -573,8 +565,6 @@ static Var _sublis_node(List alist, Var node) {
   return items.list();
 }
 
-meta List List.sublis(List alist, List tree);
-
 /** Recursively substitutes non-`List` nodes in `tree` from `alist`.
     Each association is a `List` whose first value is the key and whose second
     value is the replacement. Unmatched leaves are shared; `List` structure is
@@ -582,12 +572,10 @@ meta List List.sublis(List alist, List tree);
     Raises: a cause from key equality, or `<alloc-fail>` or `<size-limit>`
     while constructing the result.
 */
-List List.sublis(List alist, List tree) {
+meta native List List.sublis(List alist, List tree) {
   if (!tree) return NULL;
   return _sublis_node(alist, tree);
 }
-
-meta Self List.flatten(Self lst);
 
 /** Flattens one level of nested `List`s into a canonical result.
     A nested `nil` contributes no element, non-`List` values retain their
@@ -595,7 +583,7 @@ meta Self List.flatten(Self lst);
     and `nil` returns `nil`.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-Self List.flatten(Self lst) {
+meta native Self List.flatten(Self lst) {
   if (!lst) return lst;
   Array values = $auto([]);
   foreach (Var head, lst) {
@@ -615,25 +603,21 @@ static void _flatten_all_collect(Array values, List lst) {
   }
 }
 
-meta Self List.flatten_all(Self lst);
-
 /** Recursively flattens every nested `List` into a canonical result.
     Nested `nil` contributes no element and `nil` returns `nil`.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-Self List.flatten_all(Self lst) {
+meta native Self List.flatten_all(Self lst) {
   if (!lst) return lst;
   Array values = $auto([]);
   _flatten_all_collect(values, lst);
   return values;
 }
 
-meta Self List.nth_cdr(Self list, int n);
-
 /** Returns the shared tail beginning `n` cells in.
     Returns `nil` past the end and `list` itself when `n` is nonpositive.
 */
-Self List.nth_cdr(Self list, int n) {
+meta native Self List.nth_cdr(Self list, int n) {
   while (n-- > 0 && list) list = list.cdr();
   return list;
 }
@@ -687,13 +671,11 @@ Var List.get(List list, Var key) {
   return list[(int) index];
 }
 
-meta Self List.tail(Self list, unsigned count);
-
 /** Returns the last `count` elements of `list`.
     The result is an existing tail of `list`, so nothing is allocated. When
     `count` reaches or exceeds the length, the whole `list` comes back.
 */
-Self List.tail(Self list, unsigned count) {
+meta native Self List.tail(Self list, unsigned count) {
   List lead = list;
   for (unsigned i = 0; i < count; i++) {
     if (!lead) return list;
@@ -707,15 +689,13 @@ Self List.tail(Self list, unsigned count) {
   return lag;
 }
 
-meta Self List.head(Self list, unsigned count);
-
 /** Returns the first `count` elements of `list`.
     When `count` reaches or exceeds the length, `list` itself comes back, the
     same pointer. `List`s are immutable, so sharing it is safe. Otherwise fresh
     canonical cells are built for the prefix.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing that prefix.
 */
-Self List.head(Self list, unsigned count) {
+meta native Self List.head(Self list, unsigned count) {
   List original = list, Array values = $auto([]);
   while (list && count--) {
     values.push(list.car);
@@ -736,20 +716,16 @@ static List _collect_subseq(List list, int start, int step, int span) {
   return values;
 }
 
-meta Self List.subseq(Self list, int start, int stop, int step);
-
 /** Returns every `step`th element from `start` up to exclusive `stop`.
     Negative bounds count from the end. `step` must be positive.
     Raises: `<bad-arg>` when `step` is less than 1, or `<alloc-fail>` while
     constructing the result.
 */
-Self List.subseq(Self list, int start, int stop, int step) {
+meta native Self List.subseq(Self list, int start, int stop, int step) {
   if (step < 1) raise %(bad-arg (owner "List.subseq") (step $step));
   int span = x2c_normalize_slice(&start, &stop, step, list.len());
   return _collect_subseq(list, start, step, span);
 }
-
-meta Self List.getslice(Self list, int start, int stop, int step);
 
 /** Returns `list[start:stop:step]`.
     `stop` is exclusive, negative bounds count from the end, and a negative
@@ -759,7 +735,7 @@ meta Self List.getslice(Self list, int start, int stop, int step);
     Raises: `<bad-arg>` when `step` is zero, or `<alloc-fail>` or
     `<size-limit>` while constructing the result.
 */
-Self List.getslice(Self list, int start, int stop, int step) {
+meta native Self List.getslice(Self list, int start, int stop, int step) {
   if (!step) raise %(bad-arg (owner "List.getslice") (step $step));
   int len = list.len(), span = x2c_normalize_slice(&start, &stop, step, len);
   if (step == 1 && start == 0 && span == len &&
@@ -828,8 +804,6 @@ int List.unpack_vars_n(List src, unsigned destination_count, ...) {
 
 // object methods
 
-meta unsigned List.hash(List lst);
-
 /** Returns the stable hash of `List`'s exact head bits and tail identity.
     This is a constant-time hash of one cell, which canonical cells make
     sound. It reaches an element's content only when the `Var` word holds it:
@@ -839,7 +813,7 @@ meta unsigned List.hash(List lst);
     `List`s two hashes. Mutating an object referenced by the head does not
     change this hash.
 */
-unsigned List.hash(List lst) {
+meta native unsigned List.hash(List lst) {
   if (!lst) return 0;
   uint64_t h = (uint64_t)(uintptr_t) lst.cdr;
   h ^= lst.car.u64 + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
@@ -862,12 +836,10 @@ int List.equal(List a, List b) {
   return a.car === b.car && a.cdr == b.cdr;
 }
 
-meta int List.compare(List a, List b);
-
 /** Compares `a` and `b` lexicographically through `Var.compare`.
     Element comparison causes propagate.
 */
-int List.compare(List a, List b) {
+meta native int List.compare(List a, List b) {
   if ((void *) a == (void *) b) return 0;
   while (a && b) {
     int c = a.car().compare(b.car());
@@ -1031,15 +1003,13 @@ Iter List.iter(List lst, Iter dest) {
   return dest.init(lst, _next, lst);
 }
 
-meta List Iter.list(Iter iter);
-
 /** Drains `iter` into a new `List`.
     The iterator is consumed to exhaustion, so this is meaningful once and
     never returns for an infinite source. Elements appear in iteration order.
     Raises: whatever the iterator's source raises, or `<alloc-fail>` while
     constructing the result.
 */
-List Iter.list(Iter iter) {
+meta native List Iter.list(Iter iter) {
   Array values = $auto([]);
   foreach (Var item, iter) values.push(item);
   return values;

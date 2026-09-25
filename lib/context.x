@@ -136,8 +136,6 @@ static Context _open(const char *name, int isolated) {
   }
 }
 
-meta Context Context.open(void);
-
 /** Opens and makes current a `Context` using the active canonical-value pool.
     Close it before its parent; its `Scope` owns subsequent mutable
     allocations.
@@ -145,7 +143,7 @@ meta Context Context.open(void);
     Raises: `<alloc-fail>` or `<size-limit>` while constructing nested state.
     Failed construction restores the parent's `Scope`, canonical pool, `Error`,
     `Match`, and current `Context` state. */
-Context Context.open(void) => _open(NULL, 0);
+meta native Context Context.open(void) => _open(NULL, 0);
 
 /** Opens and makes current a named `Context` that inherits immutable values.
     The diagnostic name is copied, and the `Context` must close before its
@@ -173,10 +171,8 @@ Context Context.open_isolated(void) => _open(NULL, 1);
     `Match`, and current `Context` state. */
 Context Context.open_isolated_named(const char *name) => _open(name, 1);
 
-meta Context Context.current(void);
-
 /** Returns the `Context` currently active on this thread, or NULL. */
-Context Context.current(void) => _thread().current;
+meta native Context Context.current(void) => _thread().current;
 
 /** Recursively exports one nested value through an active or sealed `Context`.
     Registered custom exporters call this; other callers export their
@@ -293,8 +289,6 @@ static Var _export_value(Var v, Context source) {
   raise %(bad-types (owner "Context.export") (tag $tag));
 }
 
-meta Var Context.export(Context context, Var value);
-
 /** Exports `value` into the parent of the current `Context`.
     Values may belong to a retained region of that `Context`; export them
     while live, before releasing their `Scope` or closing the `Context`.
@@ -311,7 +305,7 @@ meta Var Context.export(Context context, Var value);
     Raises: `<bad-state>` unless `context` is current, `<bad-types>` for an
     unsupported value without a registered exporter, or a cause from nested
     allocation, hashing, equality, or custom export. */
-Var Context.export(Context context, Var value) {
+meta native Var Context.export(Context context, Var value) {
   if (!context || _thread().current != context)
     raise %(bad-state (owner "Context.export"));
   return _export_value(value, context);
@@ -342,8 +336,6 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
   return _export_value(value, &source);
 }
 
-meta void Context.close(Context c);
-
 /** Closes the current `Context`, reclaims unexported state, and restores
     parent.
     The `Context` must be current; all pointers into its remaining `Scope` or
@@ -352,7 +344,7 @@ meta void Context.close(Context c);
     Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
     `Match`
     cache has an active lease. The failure leaves the `Context` active. */
-void Context.close(Context c) {
+meta native void Context.close(Context c) {
   if (!c || _thread().current != c) raise %(bad-state (owner "Context.close"));
 
   /* Match and Error teardown can still use Context-owned values. Release the
@@ -374,7 +366,5 @@ void Context.close(Context c) {
   Scope.free(c);
 }
 
-meta void Context.cleanup(Context value);
-
 /** Ends the owned lifetime when a managed local leaves its block. */
-void Context.cleanup(Context value) { value.close(); }
+meta native void Context.cleanup(Context value) { value.close(); }

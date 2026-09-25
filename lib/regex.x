@@ -738,12 +738,9 @@ int RegexCapture.start(RegexCapture capture) => capture.getindex(4).int();
 /** Returns the byte offset just past the capture, or -1. */
 int RegexCapture.end(RegexCapture capture) => capture.getindex(5).int();
 
-meta RegexCapture Var.regexcapture(Var value);
-
 /** Reads a `RegexCapture` back out of a `Var`, as `foreach` does. */
-RegexCapture Var.regexcapture(Var value) => (RegexCapture) value.list();
-
-meta RegexMatch Var.regexmatch(Var value);
+meta native RegexCapture Var.regexcapture(Var value) =>
+  (RegexCapture) value.list();
 
 /** Reads a `RegexMatch` back out of a `Var`, as `foreach` does. */
-RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();
+meta native RegexMatch Var.regexmatch(Var value) => (RegexMatch) value.list();

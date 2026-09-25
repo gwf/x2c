@@ -16,7 +16,7 @@
 <a id="Var.convert"></a>
 #### Var.convert
 
-`Var Var.convert(Var value, Symbol target)`
+`meta native Var Var.convert(Var value, Symbol target)`
 
 Converts `value` to a numeric `target`, or returns exact-tag identity.
 All fifteen numeric families cross through the rules in this module.
@@ -34,7 +34,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/varconvert.x:275`
+Source: `lib/varconvert.x:273`
 
 ## Advanced and interop API
 

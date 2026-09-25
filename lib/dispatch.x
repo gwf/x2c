@@ -346,13 +346,11 @@ static VarDescriptor *_required_descriptor(Var value, Symbol member) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-meta int Var.contains(Var value, Var needle);
-
 /** Tests dynamic membership through the receiver's registered protocol row.
     Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
     receiver cannot perform membership.
 */
-int Var.contains(Var value, Var needle) {
+meta native int Var.contains(Var value, Var needle) {
   _valid_member_operand(value, "receiver");
   _valid_member_operand(needle, "needle");
   Symbol member = <contains>;
@@ -363,13 +361,11 @@ int Var.contains(Var value, Var needle) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-meta Var Var.getindex(Var value, Var key);
-
 /** Reads a dynamic indexed value through the receiver's protocol row.
     Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
     receiver cannot be indexed.
 */
-Var Var.getindex(Var value, Var key) {
+meta native Var Var.getindex(Var value, Var key) {
   _valid_member_operand(value, "receiver");
   _valid_member_operand(key, "key");
   Symbol member = <getindex>;
@@ -380,13 +376,11 @@ Var Var.getindex(Var value, Var key) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-meta Var Var.setindex(Var value, Var key, Var replacement);
-
 /** Stores and returns a dynamic indexed value through its protocol row.
     Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
     receiver's indexed assignment.
 */
-Var Var.setindex(Var value, Var key, Var replacement) {
+meta native Var Var.setindex(Var value, Var key, Var replacement) {
   _valid_member_operand(value, "receiver");
   _valid_member_operand(key, "key");
   _valid_member_operand(replacement, "value");
@@ -398,15 +392,13 @@ Var Var.setindex(Var value, Var key, Var replacement) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-meta Var Var.updateindex(Var value, Var key, Symbol op, Var rhs);
-
 /** Applies the registered dynamic compound update at `key` and returns its
     result. Mutation and failure behavior belong to that callback; this
     dispatch adds no thread or failure atomicity guarantee.
     Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
     receiver's indexed update.
 */
-Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
+meta native Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
   _valid_member_operand(value, "receiver");
   _valid_member_operand(key, "key");
   _valid_member_operand(rhs, "right");
@@ -418,13 +410,11 @@ Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
   raise %(no-member (tag $tag) (member $member));
 }
 
-meta Var Var.postfixindex(Var value, Var key, Symbol op);
-
 /** Applies a dynamic postfix update at `key` and returns its prior value.
     Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
     receiver's indexed update.
 */
-Var Var.postfixindex(Var value, Var key, Symbol op) {
+meta native Var Var.postfixindex(Var value, Var key, Symbol op) {
   _valid_member_operand(value, "receiver");
   _valid_member_operand(key, "key");
   Symbol member = <postfx-idx>;
@@ -775,10 +765,8 @@ int Var.equal(Var a, Var b) {
   return 0;
 }
 
-meta int Var.same(Var a, Var b);
-
 /** Reports whether `a` and `b` have identical `Var` bits. */
-int Var.same(Var a, Var b) => a.u64 == b.u64;
+meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
 
 static int _compare_default(Var a, Var b) {
   if (a.u64 == b.u64) return 0;
@@ -879,12 +867,10 @@ int Var.fallback_compare(Var a, Var b) {
   return _compare_default(a, b);
 }
 
-meta int Var.compare(Var a, Var b);
-
 /** Compares `a` and `b` by runtime value group and registered ordering.
     Raises: `<void-op>` when either operand is `void`.
 */
-int Var.compare(Var a, Var b) {
+meta native int Var.compare(Var a, Var b) {
   if (a.u64 == b.u64) {
     if (a.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.compare"));
     return 0;
@@ -921,13 +907,11 @@ Iter Var.fallback_iter(Var x, Iter dest) {
   return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
 }
 
-meta Iter Var.iter(Var x, Iter dest);
-
 /** Returns an iterator over `Var`.
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
     raising.
 */
-Iter Var.iter(Var x, Iter dest) {
+meta native Iter Var.iter(Var x, Iter dest) {
   if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
   if (!dest) return NULL;
   VarDescriptor *descriptor = _descriptor_for_value(x);

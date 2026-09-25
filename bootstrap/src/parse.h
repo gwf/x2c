@@ -60,6 +60,8 @@ int Compiler_protocol_form_starts(Compiler c);
 
 int Compiler_meta_form_is_declaration(Compiler c);
 
+Token Compiler_take_meta_marker(Compiler c, int * native);
+
 int Compiler_script_statement_starts(Compiler c);
 
 int Compiler_script_statement_executes(Compiler c);

@@ -1131,16 +1131,16 @@ static void _report_script_statement(Compiler c) {
 }
 
 static void _shallow_finish_declaration(Compiler c) {
-  /* Collection records the runtime function a `meta` marker precedes; the
+  /* Collection records the runtime function a `meta` marker precedes, and
+     the native binding a bodyless or `native` marker advertises; the
      compile-time form is installed by the full parse. */
   Token meta = NULL;
-  if (c.meta_form_is_declaration()) {
-    meta = c.token;
-    c.next();
-  }
+  int native = 0;
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(&native);
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
+    if (native) c.record_native_meta_effect(declaration, meta);
     match (declaration)
       case %(declare ? (bindings (bind ?binding ?))):
         _shallow_record_function_definition(

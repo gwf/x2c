@@ -1628,7 +1628,8 @@ int main(void) {
 ```
 
 `meta` is contextual. It marks a function definition, a bodyless function
-prototype, an initialized file-static value, or a protocol adoption.
+prototype, a native function definition, an initialized file-static value, or
+a protocol adoption.
 Everywhere else it is an ordinary identifier, including as a file-scope name,
 an assignment target, and a struct field. Types need no marker: compile-time
 code can use any type the compiler sees.
@@ -1639,7 +1640,9 @@ calls the compiler's copy. The declared signature must match that function
 exactly. A function the compiler does not link can come from a loaded
 [native module](../guide/meta-functions.md#native-modules). A prototype for
 a function that neither supplies is accepted, and compile-time code that
-calls it is diagnosed. See
+calls it is diagnosed. `meta native` before a function definition declares
+that function native in the same way, and its body is compiled only for the
+program. See
 [native C functions](../guide/meta-functions.md#native-c-functions).
 
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, adopts the

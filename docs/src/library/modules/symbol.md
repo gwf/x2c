@@ -20,20 +20,20 @@ Immediate encoded names.
 <a id="Symbol.last"></a>
 #### Symbol.last
 
-`char Symbol.last(Symbol symbol)`
+`meta native char Symbol.last(Symbol symbol)`
 
 Returns the final decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:256`
+Source: `lib/symbol.x:246`
 
 <a id="Symbol.len"></a>
 #### Symbol.len
 
-`int Symbol.len(Symbol symbol)`
+`meta native int Symbol.len(Symbol symbol)`
 
 Returns the number of decoded bytes in `symbol`.
 
-Source: `lib/symbol.x:125`
+Source: `lib/symbol.x:121`
 
 <a id="Symbol.new"></a>
 #### Symbol.new
@@ -48,7 +48,7 @@ Source: `lib/symbol.x:104`
 <a id="Symbol.try_new"></a>
 #### Symbol.try_new
 
-`int Symbol.try_new(String spelling, Symbol *out)`
+`meta native int Symbol.try_new(String spelling, Symbol *out)`
 
 Encodes `spelling` only when the `Symbol` preserves every byte.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
@@ -57,7 +57,7 @@ the spelling. The null `String` is the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while checking the decoded spelling.
 
-Source: `lib/symbol.x:114`
+Source: `lib/symbol.x:112`
 
 <a id="Symbol.write_str"></a>
 #### Symbol.write_str
@@ -70,7 +70,7 @@ appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:211`
+Source: `lib/symbol.x:205`
 
 ## Advanced and interop API
 
@@ -90,14 +90,14 @@ Source: `lib/symbol.x:211`
 <a id="Symbol.compare"></a>
 #### Symbol.compare
 
-`int Symbol.compare(Symbol a, Symbol b)`
+`meta native int Symbol.compare(Symbol a, Symbol b)`
 
 Compares decoded `Symbol` spellings bytewise.
 Zero sorts before nonzero values. Equal decoded lengths and bytes are
 ordered by the encoded value, so distinct encodings still have a total
 order. The result is -1, 0, or 1.
 
-Source: `lib/symbol.x:180`
+Source: `lib/symbol.x:174`
 
 <a id="Symbol.decode"></a>
 #### Symbol.decode
@@ -110,16 +110,16 @@ is
 NUL-terminated there. A null destination or zero `Symbol` leaves storage
 unchanged.
 
-Source: `lib/symbol.x:137`
+Source: `lib/symbol.x:133`
 
 <a id="Symbol.first"></a>
 #### Symbol.first
 
-`char Symbol.first(Symbol symbol)`
+`meta native char Symbol.first(Symbol symbol)`
 
 Returns the first decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:243`
+Source: `lib/symbol.x:235`
 
 <a id="Symbol.new_len"></a>
 #### Symbol.new_len
@@ -149,7 +149,7 @@ malformed input returns zero. Zero is also the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while unescaping a quoted literal.
 
-Source: `lib/symbol.x:270`
+Source: `lib/symbol.x:260`
 
 <a id="Symbol.repr"></a>
 #### Symbol.repr
@@ -163,7 +163,7 @@ described by `Symbol.str`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/symbol.x:200`
+Source: `lib/symbol.x:194`
 
 <a id="Symbol.str"></a>
 #### Symbol.str
@@ -179,7 +179,7 @@ returns NULL, the empty `String`.
 
 **Raises:** `<alloc-fail>` while canonicalizing the spelling.
 
-Source: `lib/symbol.x:166`
+Source: `lib/symbol.x:162`
 
 <a id="Symbol.write_repr"></a>
 #### Symbol.write_repr
@@ -192,7 +192,7 @@ values use a quoted angled spelling, escaping backslash and double quote.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:223`
+Source: `lib/symbol.x:217`
 
 ## Design notes
 

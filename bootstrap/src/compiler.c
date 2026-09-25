@@ -2009,14 +2009,12 @@ static void _report_script_statement(Compiler c){
 }
 
 int Compiler_meta_form_is_declaration(Compiler);
-Type List_type_from_ast(List);
+Token Compiler_take_meta_marker(Compiler, int *);
 void Compiler_record_native_meta_effect(Compiler, List, Token);
+Type List_type_from_ast(List);
 static void _shallow_finish_declaration(Compiler c){
-  Token meta = NULL;  if(Compiler_meta_form_is_declaration(c)){
-    meta = c -> token;  Compiler_next(c);
-  }
-  List declaration = _shallow_parse_declaration(c);  if(Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 9719 || Compiler__at_function_arrow(c)){
-
+  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, & native);  List declaration = _shallow_parse_declaration(c);  if(Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 9719 || Compiler__at_function_arrow(c)){
+    if(native) Compiler_record_native_meta_effect(c, declaration, meta);
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };

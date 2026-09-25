@@ -103,15 +103,13 @@ Symbol Symbol.new_len(const char *str, int len) {
 */
 Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
 
-meta int Symbol.try_new(String spelling, Symbol *out);
-
 /** Encodes `spelling` only when the `Symbol` preserves every byte.
     Returns 1 and writes `out` on success; returns 0 and leaves `out`
     untouched when case folding, `_`/`-` folding, or truncation would change
     the spelling. The null `String` is the empty `Symbol`.
     Raises: `<alloc-fail>` while checking the decoded spelling.
 */
-int Symbol.try_new(String spelling, Symbol *out) {
+meta native int Symbol.try_new(String spelling, Symbol *out) {
   if (!out) return 0;
   Symbol symbol = spelling ? Symbol.new(spelling) : 0;
   if (!spelling.equal(symbol)) return 0;
@@ -119,10 +117,8 @@ int Symbol.try_new(String spelling, Symbol *out) {
   return 1;
 }
 
-meta int Symbol.len(Symbol symbol);
-
 /** Returns the number of decoded bytes in `symbol`. */
-int Symbol.len(Symbol symbol) {
+meta native int Symbol.len(Symbol symbol) {
   int len = 0, bits = (symbol & 1) ? 7 : 5;
   for (symbol >>= 1; symbol; symbol >>= bits) len++;
   return len;
@@ -170,14 +166,12 @@ String Symbol.str(Symbol symbol) {
   return String.new_len(text, strlen(text));
 }
 
-meta int Symbol.compare(Symbol a, Symbol b);
-
 /** Compares decoded `Symbol` spellings bytewise.
     Zero sorts before nonzero values. Equal decoded lengths and bytes are
     ordered by the encoded value, so distinct encodings still have a total
     order. The result is -1, 0, or 1.
 */
-int Symbol.compare(Symbol a, Symbol b) {
+meta native int Symbol.compare(Symbol a, Symbol b) {
   if (a == b) return 0;
   if (!a) return b ? -1 : 0;
   if (!b) return 1;
@@ -237,10 +231,8 @@ Buffer Symbol.write_repr(Symbol symbol, Buffer out) {
   return out.write_char('>');
 }
 
-meta char Symbol.first(Symbol symbol);
-
 /** Returns the first decoded byte of `symbol`, or NUL for zero. */
-char Symbol.first(Symbol symbol) {
+meta native char Symbol.first(Symbol symbol) {
   if (!symbol) return '\0';
   int bits = (symbol & 1) ? 7 : 5, uint64_t value = symbol >> 1;
   int len = symbol.len();
@@ -250,10 +242,8 @@ char Symbol.first(Symbol symbol) {
   return value & 0x7F;
 }
 
-meta char Symbol.last(Symbol symbol);
-
 /** Returns the final decoded byte of `symbol`, or NUL for zero. */
-char Symbol.last(Symbol symbol) {
+meta native char Symbol.last(Symbol symbol) {
   if (!symbol) return '\0';
   int bits = (symbol & 1) ? 7 : 5, uint64_t value = symbol >> 1;
   if (bits == 5) return _symbol_alphabet[value & 0x1F];

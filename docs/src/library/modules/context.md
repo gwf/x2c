@@ -23,16 +23,16 @@ Bounded runtime state and value export.
 <a id="Context.cleanup"></a>
 #### Context.cleanup
 
-`void Context.cleanup(Context value)`
+`meta native void Context.cleanup(Context value)`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:380`
+Source: `lib/context.x:370`
 
 <a id="Context.close"></a>
 #### Context.close
 
-`void Context.close(Context c)`
+`meta native void Context.close(Context c)`
 
 Closes the current `Context`, reclaims unexported state, and restores
 parent.
@@ -43,21 +43,21 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:355`
+Source: `lib/context.x:347`
 
 <a id="Context.current"></a>
 #### Context.current
 
-`Context Context.current(void)`
+`meta native Context Context.current(void)`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:179`
+Source: `lib/context.x:175`
 
 <a id="Context.export"></a>
 #### Context.export
 
-`Var Context.export(Context context, Var value)`
+`meta native Var Context.export(Context context, Var value)`
 
 Exports `value` into the parent of the current `Context`.
 Values may belong to a retained region of that `Context`; export them
@@ -76,12 +76,12 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:314`
+Source: `lib/context.x:308`
 
 <a id="Context.open"></a>
 #### Context.open
 
-`Context Context.open(void)`
+`meta native Context Context.open(void)`
 
 Opens and makes current a `Context` using the active canonical-value pool.
 Close it before its parent; its `Scope` owns subsequent mutable
@@ -91,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:148`
+Source: `lib/context.x:146`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:165`
+Source: `lib/context.x:163`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:174`
+Source: `lib/context.x:172`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:157`
+Source: `lib/context.x:155`
 
 ## Advanced and interop API
 
@@ -213,7 +213,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:196`
+Source: `lib/context.x:192`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -235,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:335`
+Source: `lib/context.x:329`
 
 <a id="Context.initialize"></a>
 #### Context.initialize

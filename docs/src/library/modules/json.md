@@ -32,7 +32,7 @@ JSON text to and from ordinary x2c values.
 
 Returns the JSON boolean for the truth of `value`.
 
-Source: `lib/json.x:73`
+Source: `lib/json.x:71`
 
 <a id="Json.boolean"></a>
 #### Json.boolean
@@ -43,7 +43,7 @@ Returns 1 for JSON `true` and 0 for JSON `false`.
 
 **Raises:** `<bad-types>` when `value` is not a JSON boolean.
 
-Source: `lib/json.x:81`
+Source: `lib/json.x:79`
 
 <a id="Json.is_bool"></a>
 #### Json.is_bool
@@ -52,7 +52,7 @@ Source: `lib/json.x:81`
 
 Reports whether `value` is a JSON boolean.
 
-Source: `lib/json.x:76`
+Source: `lib/json.x:74`
 
 <a id="Json.parse"></a>
 #### Json.parse
@@ -71,7 +71,7 @@ when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
 
-Source: `lib/json.x:401`
+Source: `lib/json.x:399`
 
 <a id="Json.read_file"></a>
 #### Json.read_file
@@ -83,7 +83,7 @@ Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 **Raises:** the causes of `Path.read_text`, or `<bad-arg>` as
 `Json.parse` does, with a `path` detail added.
 
-Source: `lib/json.x:407`
+Source: `lib/json.x:405`
 
 <a id="Json.write_file"></a>
 #### Json.write_file
@@ -105,7 +105,7 @@ Source: `lib/json.x:572`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:67`
+Source: `lib/json.x:65`
 
 <a id="JsonBool.str"></a>
 #### JsonBool.str
@@ -114,7 +114,7 @@ Source: `lib/json.x:67`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:64`
+Source: `lib/json.x:62`
 
 <a id="JsonBool.truth"></a>
 #### JsonBool.truth
@@ -123,7 +123,7 @@ Source: `lib/json.x:64`
 
 Returns nonzero for `true`.
 
-Source: `lib/json.x:70`
+Source: `lib/json.x:68`
 
 <a id="JsonBool.var"></a>
 #### JsonBool.var
@@ -159,11 +159,11 @@ Source: `lib/json.x:562`
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
 
-`JsonBool Var.jsonbool(Var value)`
+`meta native JsonBool Var.jsonbool(Var value)`
 
 Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`.
 
-Source: `lib/json.x:61`
+Source: `lib/json.x:59`
 
 <a id="Var.pretty_json"></a>
 #### Var.pretty_json

@@ -27,113 +27,113 @@ Byte classification for canonical strings.
 <a id="String.contains_digit"></a>
 #### String.contains_digit
 
-`int String.contains_digit(String str)`
+`meta native int String.contains_digit(String str)`
 
 Reports whether `str` contains a decimal digit.
 A null or empty `String` returns false.
 
-Source: `lib/string-classify.x:21`
+Source: `lib/string-classify.x:19`
 
 <a id="String.is_alnum"></a>
 #### String.is_alnum
 
-`int String.is_alnum(String s)`
+`meta native int String.is_alnum(String s)`
 
 Reports whether every byte of nonempty `s` is alphanumeric.
 
-Source: `lib/string-classify.x:63`
+Source: `lib/string-classify.x:53`
 
 <a id="String.is_alnum_under"></a>
 #### String.is_alnum_under
 
-`int String.is_alnum_under(String s)`
+`meta native int String.is_alnum_under(String s)`
 
 Reports whether nonempty `s` is alphanumeric or underscore.
 
-Source: `lib/string-classify.x:70`
+Source: `lib/string-classify.x:58`
 
 <a id="String.is_alpha"></a>
 #### String.is_alpha
 
-`int String.is_alpha(String s)`
+`meta native int String.is_alpha(String s)`
 
 Reports whether every byte of nonempty `s` is alphabetic.
 
-Source: `lib/string-classify.x:42`
+Source: `lib/string-classify.x:38`
 
 <a id="String.is_alpha_under"></a>
 #### String.is_alpha_under
 
-`int String.is_alpha_under(String s)`
+`meta native int String.is_alpha_under(String s)`
 
 Reports whether every byte of nonempty `s` is alphabetic or underscore.
 
-Source: `lib/string-classify.x:49`
+Source: `lib/string-classify.x:43`
 
 <a id="String.is_digit"></a>
 #### String.is_digit
 
-`int String.is_digit(String s)`
+`meta native int String.is_digit(String s)`
 
 Reports whether every byte of nonempty `s` is a decimal digit.
 
-Source: `lib/string-classify.x:56`
+Source: `lib/string-classify.x:48`
 
 <a id="String.is_identifier"></a>
 #### String.is_identifier
 
-`int String.is_identifier(String s)`
+`meta native int String.is_identifier(String s)`
 
 Reports whether `s` is a C identifier under C character classes.
 The first byte must be alphabetic or underscore; later bytes may also be
 decimal digits. A null or empty `String` returns false.
 
-Source: `lib/string-classify.x:80`
+Source: `lib/string-classify.x:66`
 
 <a id="String.is_lower"></a>
 #### String.is_lower
 
-`int String.is_lower(String s)`
+`meta native int String.is_lower(String s)`
 
 Reports whether every byte of nonempty `s` is lower-case.
 
-Source: `lib/string-classify.x:99`
+Source: `lib/string-classify.x:81`
 
 <a id="String.is_lower_under"></a>
 #### String.is_lower_under
 
-`int String.is_lower_under(String s)`
+`meta native int String.is_lower_under(String s)`
 
 Reports whether every byte of nonempty `s` is lower-case or underscore.
 
-Source: `lib/string-classify.x:106`
+Source: `lib/string-classify.x:86`
 
 <a id="String.is_space"></a>
 #### String.is_space
 
-`int String.is_space(String s)`
+`meta native int String.is_space(String s)`
 
 Reports whether every byte of nonempty `s` is whitespace.
 
-Source: `lib/string-classify.x:92`
+Source: `lib/string-classify.x:76`
 
 <a id="String.is_upper"></a>
 #### String.is_upper
 
-`int String.is_upper(String s)`
+`meta native int String.is_upper(String s)`
 
 Reports whether every byte of nonempty `s` is upper-case.
 
-Source: `lib/string-classify.x:113`
+Source: `lib/string-classify.x:91`
 
 <a id="String.is_upper_under"></a>
 #### String.is_upper_under
 
-`int String.is_upper_under(String s)`
+`meta native int String.is_upper_under(String s)`
 
 Reports whether every byte of nonempty `s` is upper-case or underscore.
 
-Source: `lib/string-classify.x:120`
+Source: `lib/string-classify.x:96`
 
 ## Design notes
 
