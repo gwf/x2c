@@ -223,8 +223,7 @@ ReplCompletion ReplSession.complete(
     rows = found;
     keywords = found_keywords;
   }
-  catch %(incomplete *): return result;
-  catch %(malformed *): return result;
+  catch %((!or incomplete malformed) *): return result;
   if (rows || keywords) result.candidates = _completion_filter(
     session, kind, rows, keywords, prefix);
   return result;

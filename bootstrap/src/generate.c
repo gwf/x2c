@@ -2367,19 +2367,18 @@ void generate_code(Compiler c, List ast, String dir){
     List _x2c_destructure_5 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_709), cons(String_var(hash), cons(String_var(_710), NULL)))), String_join(NULL, cons(String_var(_711), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_712), cons(String_var(hash), NULL))));  header = Var_list(List_getindex(_x2c_destructure_5, 0));  source = Var_list(List_getindex(_x2c_destructure_5, 1));
   }
   List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, "/")), cons(String_var(_713), cons(String_var(Path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_677), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_714), NULL)));  List outputs = cons(String_var(hfile), cons(String_var(String_new(Compiler_code_pretty_string(c, header, hfile))), cons(String_var(cfile), cons(String_var(String_new(Compiler_code_pretty_string(c, source, cfile))), NULL))));  String interface = c -> source_facts ? NULL : interface_text(c, _public_definition_rows(Compiler_definition_rows(c, ast)));  if(String_truth(interface)) outputs = List_append(outputs, cons(String_var(String_join(NULL, cons(String_var(basename), cons(String_var(_715), NULL)))), cons(String_var(interface), NULL)));  List volatile failure = NULL; {
-    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_catch_arms_0[2];  static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_0[2];  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(58262293080), NULL));  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);  List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));  _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
+    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_catch_arms_0[1];  static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_0[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL));  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) file_publish(outputs);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  if (_x2c_catch_selected_0 == 0) {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));  failure = Var_list(Error_snapshot(List_var(detail)));
+      x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));  failure = Var_list(Error_snapshot(List_var(detail)));
     }
-    else {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));  failure = Var_list(Error_snapshot(List_var(detail)));
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
   }
 
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
-}
 }
 }
 x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);

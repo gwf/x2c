@@ -143,8 +143,7 @@ static String _state_line(uint64_t hash) =>
 static int _state_matches(String path, uint64_t hash) {
   String text = NULL;
   try text = Path.read_text(path);
-  catch %(not-found *): return 0;
-  catch %(io-fail *): return 0;
+  catch %((!or not-found io-fail) *): return 0;
   List lines = text.split_lines(0);
   if (!lines) return 0;
   String first = lines.car();
@@ -157,8 +156,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
   String text = %"${_state_line(hash)}\n";
   foreach (String line, lines) text = %"$text$line\n";
   try file_publish(%($path $text));
-  catch %(not-found *): {}
-  catch %(io-fail *): {}
+  catch %((!or not-found io-fail) *): {}
 }
 
 static void _state_write(String path, uint64_t hash) {
@@ -645,8 +643,7 @@ int compile_commands_write(String path, Array commands) {
     report_line(<muted>, %"  Compilation database $path");
     return 1;
   }
-  catch %(not-found *): {}
-  catch %(io-fail *): {}
+  catch %((!or not-found io-fail) *): {}
   fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
   return 0;
 }

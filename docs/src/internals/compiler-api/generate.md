@@ -74,7 +74,7 @@ Source: `src/generate.x:839`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1274`
+Source: `src/generate.x:1273`
 
 ## Design notes
 

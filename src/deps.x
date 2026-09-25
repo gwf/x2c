@@ -131,8 +131,7 @@ int translation_depfile_write(
     file_publish(%($path ${_contents(request, compiler, input, output_dir)}));
     return 1;
   }
-  catch %(not-found *failure): error = failure.assoc(<errno>);
-  catch %(io-fail *failure): error = failure.assoc(<errno>);
+  catch %((!or not-found io-fail) *failure): error = failure.assoc(<errno>);
   fprintf(
     stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path,
     strerror(error));

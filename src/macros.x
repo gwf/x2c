@@ -891,8 +891,7 @@ static Var _sdk_embed_text(Var requested) {
       %("path: ${compiler.display_path(path)}"));
   File file = NULL, int open_failed = 0;
   try file = path.open("r");
-  catch %(not-found *): open_failed = 1;
-  catch %(io-fail *): open_failed = 1;
+  catch %((!or not-found io-fail) *): open_failed = 1;
   if (open_failed)
     _sdk_reject(
       "cannot open embedded text",

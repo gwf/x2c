@@ -2979,19 +2979,18 @@ static Var _sdk_embed_text(Var requested){
     String text;  if(! Compiler_read_source(compiler, path, &(text))) _sdk_reject(_1117, cons(String_var(String_join(NULL, cons(String_var(_321), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  Map_merge_translation_dependency(compiler -> deps, path, String_var(String_printf(_322, String_hash(text))));  return String_var(text);
   }
   struct stat info;  if(! stat(path, & info) && ! S_ISREG(info.st_mode)) _sdk_reject(_1118, cons(String_var(String_join(NULL, cons(String_var(_321), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  File volatile file = NULL;  int volatile open_failed = 0; {
-    ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[2];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 2, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[2];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_2 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_2);  List _x2c_catch_pattern_3 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_1[1] = List_var(_x2c_catch_pattern_3);
+    ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_2 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_2);
   }
   ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) file = String_open(path, "r");  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);  x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  if (_x2c_catch_selected_1 == 0) {open_failed = 1;
+      x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  {open_failed = 1;
     }
-    else {open_failed = 1;
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
   }
 
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
-}
 }
 }
 x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);
@@ -3003,7 +3002,7 @@ if((uintmax_t) info.st_size >= INT_MAX){
   File_close(file);  _sdk_reject(_1120, cons(String_var(String_join(NULL, cons(String_var(_321), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));
 }
 String volatile result = NULL;  int volatile read_failed = 0;  int volatile embedded_nul = 0;  int volatile size_overflow = 0; {
-  ExceptionFrame _x2c_exception_frame_2;  static MatchCaptureSite _x2c_catch_arms_2[3];  static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 3, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_2[3];  if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_4 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_4);  List _x2c_catch_pattern_5 = cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[1] = List_var(_x2c_catch_pattern_5);  List _x2c_catch_pattern_6 = cons(Symbol_var(1358596898646632), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[2] = List_var(_x2c_catch_pattern_6);
+  ExceptionFrame _x2c_exception_frame_2;  static MatchCaptureSite _x2c_catch_arms_2[3];  static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 3, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_2[3];  if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_3 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_3);  List _x2c_catch_pattern_4 = cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[1] = List_var(_x2c_catch_pattern_4);  List _x2c_catch_pattern_5 = cons(Symbol_var(1358596898646632), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_2[2] = List_var(_x2c_catch_pattern_5);
 }
 ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) result = File_string_close(file);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
   if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
@@ -3192,8 +3191,8 @@ Lisp Compiler_open_macro_library(Compiler compiler){
         static MatchCaptureSite _x2c_catch_arms_3[1];
         static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 1, ERROR_CATCH_PENDING, -1 };
         Var _x2c_catch_patterns_3[1];
-        if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_7 = cons(Symbol_var(58), cons(Symbol_var(54), NULL));
-        _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_7);
+        if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_6 = cons(Symbol_var(58), cons(Symbol_var(54), NULL));
+        _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_6);
       }
       ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)){
         {
@@ -3330,7 +3329,7 @@ void Lisp_adopt(Lisp, Lisp);
 
 static void _ensure_lisp(Compiler compiler){
   if(macro_library_pending() && ! library_filling){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1252};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1251};
     x2c_error_raise_n(& _x2c_error_site_4, 27048696089866, 0);
   }
   {
@@ -3744,8 +3743,8 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
           static MatchCaptureSite _x2c_catch_arms_4[1];
           static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
           Var _x2c_catch_patterns_4[1];
-          if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_8 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
-          _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_8);
+          if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_7 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
+          _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_7);
         }
         ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)){
           Var value = Lisp_eval(c -> macro_lisp, form);  Lisp_eval(c -> macro_lisp, List_var(cons(_607, cons(int_var(id), cons(List_var(cons(_494, cons(value, NULL))), NULL)))));
@@ -4123,7 +4122,7 @@ int List_len(List);
 static void _bind_native_meta(Compiler c, String name, List signature, Token marker){
   _certify_native_meta(c, name, signature, marker);  int iterator = _iterator_operation(signature);  Var bound;  Var volatile function;  int present = Lisp_try_get(c -> macro_lisp, name, & bound);  if(present && ! iterator) function = bound;  else{
     String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_250), NULL))) : name;  List suppliers = _native_module_suppliers(target); {
-      ExceptionFrame _x2c_exception_frame_5;  static MatchCaptureSite _x2c_catch_arms_5[1];  static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_5[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_9 = cons(Symbol_var(31885018076120), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_9);
+      ExceptionFrame _x2c_exception_frame_5;  static MatchCaptureSite _x2c_catch_arms_5[1];  static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_5[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_8 = cons(Symbol_var(31885018076120), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_8);
     }
     ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)){
       function = Lisp_eval(c -> macro_lisp, List_var(cons(_39, cons(String_var(target), cons(List_var(cons(_494, cons(List_var(signature), NULL))), NULL)))));  if(List_truth(suppliers)) Compiler_report_warning(c, 942951818, _1202, marker, cons(String_var(String_join(NULL, cons(String_var(_692), cons(String_var(name), NULL)))), NULL));
@@ -4215,7 +4214,7 @@ int Compiler_install_comptime(Compiler, List);
 int Compiler_lower_reached_meta(Compiler);
 void Compiler_install_meta_function(Compiler c, List fn, Token marker){
   if(! _init_guard_) _file_init_();  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  _ensure_lisp(c);  Compiler_check_meta_regions(c, fn);  int volatile installed = 0; {
-    ExceptionFrame _x2c_exception_frame_6;  static MatchCaptureSite _x2c_catch_arms_6[1];  static ErrorCatchSite _x2c_catch_site_6 = {  _x2c_catch_arms_6, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_6[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_6)) {List _x2c_catch_pattern_10 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));  _x2c_catch_patterns_6[0] = List_var(_x2c_catch_pattern_10);
+    ExceptionFrame _x2c_exception_frame_6;  static MatchCaptureSite _x2c_catch_arms_6[1];  static ErrorCatchSite _x2c_catch_site_6 = {  _x2c_catch_arms_6, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_6[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_6)) {List _x2c_catch_pattern_9 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));  _x2c_catch_patterns_6[0] = List_var(_x2c_catch_pattern_9);
   }
   ErrorHandler volatile _x2c_error_handler_6 = x2c_error_catch_site_push(&_x2c_exception_frame_6, &_x2c_catch_site_6, _x2c_catch_patterns_6);  x2c_exception_push(& _x2c_exception_frame_6);  if (!sigsetjmp(_x2c_exception_frame_6.env, 0)) installed = Compiler_install_comptime(c, fn);  else {x2c_exception_landed(& _x2c_exception_frame_6); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_6)){
@@ -4379,14 +4378,14 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                               static MatchCaptureSite _x2c_catch_arms_7[4];
                               static ErrorCatchSite _x2c_catch_site_7 = {  _x2c_catch_arms_7, -1, 4, ERROR_CATCH_TRANSIENT, -1 };
                               Var _x2c_catch_patterns_7[4];
-                              if (x2c_error_catch_site_pending(&_x2c_catch_site_7)) {List _x2c_catch_pattern_11 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), NULL));
-                              _x2c_catch_patterns_7[0] = List_var(_x2c_catch_pattern_11);
-                              List _x2c_catch_pattern_12 = cons(Symbol_var(214157780846806), cons(Symbol_var(54), cons(List_var(cons(Symbol_var(47666), cons(String_var(_1211), NULL))), cons(Symbol_var(54), NULL))));
-                              _x2c_catch_patterns_7[1] = List_var(_x2c_catch_pattern_12);
-                              List _x2c_catch_pattern_13 = cons(Symbol_var(214157780846806), cons(Symbol_var(54), NULL));
-                              _x2c_catch_patterns_7[2] = List_var(_x2c_catch_pattern_13);
-                              List _x2c_catch_pattern_14 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
-                              _x2c_catch_patterns_7[3] = List_var(_x2c_catch_pattern_14);
+                              if (x2c_error_catch_site_pending(&_x2c_catch_site_7)) {List _x2c_catch_pattern_10 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), NULL));
+                              _x2c_catch_patterns_7[0] = List_var(_x2c_catch_pattern_10);
+                              List _x2c_catch_pattern_11 = cons(Symbol_var(214157780846806), cons(Symbol_var(54), cons(List_var(cons(Symbol_var(47666), cons(String_var(_1211), NULL))), cons(Symbol_var(54), NULL))));
+                              _x2c_catch_patterns_7[1] = List_var(_x2c_catch_pattern_11);
+                              List _x2c_catch_pattern_12 = cons(Symbol_var(214157780846806), cons(Symbol_var(54), NULL));
+                              _x2c_catch_patterns_7[2] = List_var(_x2c_catch_pattern_12);
+                              List _x2c_catch_pattern_13 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
+                              _x2c_catch_patterns_7[3] = List_var(_x2c_catch_pattern_13);
                             }
                             ErrorHandler volatile _x2c_error_handler_7 = x2c_error_catch_site_push(&_x2c_exception_frame_7, &_x2c_catch_site_7, _x2c_catch_patterns_7);  x2c_exception_push(& _x2c_exception_frame_7);  if (!sigsetjmp(_x2c_exception_frame_7.env, 0)) value = Lisp_eval(c -> macro_lisp, form);  else {x2c_exception_landed(& _x2c_exception_frame_7); {
                               if (x2c_exception_is_error_target(&_x2c_exception_frame_7)){
@@ -4395,7 +4394,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2148};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2147};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }

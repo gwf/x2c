@@ -250,8 +250,8 @@ static String _start_failure(String program, List detail) {
 static Job _start_tool(Job command, String program, String &failure) {
   Job job = NULL;
   try job = command.start();
-  catch %(not-found *detail): failure = _start_failure(program, detail);
-  catch %(io-fail *detail): failure = _start_failure(program, detail);
+  catch %((!or not-found io-fail) *detail):
+    failure = _start_failure(program, detail);
   return job;
 }
 

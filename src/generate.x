@@ -1260,8 +1260,7 @@ void generate_code(Compiler c, List ast, String dir) {
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   List failure = NULL;
   try file_publish(outputs);
-  catch %(not-found *detail): failure = Error.snapshot(detail);
-  catch %(io-fail *detail): failure = Error.snapshot(detail);
+  catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (failure) {
     String reason = String.new(strerror((int) failure.assoc(<errno>)));
     c.report_error(

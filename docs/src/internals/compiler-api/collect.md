@@ -64,7 +64,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1047`
+Source: `src/collect.x:1043`
 
 ### `Compiler`
 

@@ -814,8 +814,7 @@ String interface_prelude(void) {
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
-    catch %(not-found *): continue;
-    catch %(io-fail *): continue;
+    catch %((!or not-found io-fail) *): continue;
     if (text.startswith(header)) return path;
   }
   return NULL;
@@ -850,9 +849,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     try {
       if (!compiler.read_source(path, text)) return 0;
     }
-    catch %(io-fail *): return 0;
-    catch %(bad-arg *): return 0;
-    catch %(size-limit *): return 0;
+    catch %((!or io-fail bad-arg size-limit) *): return 0;
     String value = "%08x".printf(text.hash());
     _require_retained(path.try_own());
     _require_retained(value.try_own());
@@ -876,8 +873,7 @@ static List _interface_load(Compiler c, String canonical, String path) {
   Var record = void;
   Symbol status = 0;
   try status = Lisp.read(_interface_lisp(), source, &cursor, &record);
-  catch %(incomplete *): return NULL;
-  catch %(malformed *): return NULL;
+  catch %((!or incomplete malformed) *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)
     case %(interface 4 ?(String compiler) ?(String owner) ?(String hash)

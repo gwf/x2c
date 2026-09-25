@@ -239,8 +239,7 @@ void bootstrap_write_interfaces(Bootstrap b) {
          stdout: <capture>, stderr: <capture>});
   int status = 127;
   try status = translate.status();
-  catch %(not-found *): {}
-  catch %(io-fail *): {}
+  catch %((!or not-found io-fail) *): {}
   if (status)
     _error(%"cannot write runtime interfaces: ${translate.errors_text}");
   Array outputs = [];
@@ -250,8 +249,7 @@ void bootstrap_write_interfaces(Bootstrap b) {
     outputs.push(Path.read_text(%"$prefix/$out/$name"));
   }
   try file_publish(outputs.list_free());
-  catch %(not-found *detail): x2c_host_error(detail);
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %((!or not-found io-fail) *detail): x2c_host_error(detail);
   Path.remove_tree(%"$prefix/$out");
 }
 

@@ -30,7 +30,7 @@ compiler and runtime interfaces exist. The compiler object archive omits
 still creates the command directory and its empty installed manifest.
 Failure exits before the bootstrap completion marker is written.
 
-Source: `src/bootstrap.x:264`
+Source: `src/bootstrap.x:262`
 
 #### bootstrap_build_request
 
@@ -81,7 +81,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:342`
+Source: `src/bootstrap.x:340`
 
 #### bootstrap_write_interfaces
 
