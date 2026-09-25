@@ -295,8 +295,9 @@ String Args.usage(String program, List spec) {
   }
   String option_rows = options, operand_rows = operands;
   String words = synopsis;
-  out.printf("Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
-             words ? words : "");
+  out.printf(
+    "Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
+    words ? words : "");
   if (option_rows) out.printf("\nOptions:\n%s", option_rows);
   if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
   return out;

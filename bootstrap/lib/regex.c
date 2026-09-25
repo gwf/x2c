@@ -520,10 +520,7 @@ static _RegexNode _class(_Parser * p){
       if(high < byte) _fail(&((* p)), _22);
       _set_range(node, byte, high);
     }
-    else{
-      _set_add(node, byte);
-    }
-
+    else _set_add(node, byte);
   }
   if((* p).regex -> caseless) _set_fold(node);
   if(negate) for(int i = 0;  i < 32;  i ++) node -> set[i] =(unsigned char) ~ node -> set[i];
@@ -538,9 +535,7 @@ static _RegexNode _group(_Parser * p){
   if(_peek(&((* p))) == '?'){
     (* p).pos ++;
     int marker = _peek(&((* p)));
-    if(marker == ':'){
-      (* p).pos ++;
-    }
+    if(marker == ':')(* p).pos ++;
     else if(marker == '<'){
       (* p).pos ++;
       int start =(* p).pos;
@@ -559,9 +554,7 @@ static _RegexNode _group(_Parser * p){
     }
 
   }
-  else{
-    index = ++(* p).regex -> capture_count;
-  }
+  else index = ++(* p).regex -> capture_count;
   if(index > 0)(* p).regex -> capture_names = List_append((* p).regex -> capture_names, cons(String_var(name), NULL));
   _RegexNode node = _node(15891808);
   node -> index = index;
@@ -722,7 +715,7 @@ static int _iterate(_State * st, _RegexNode rep, int count, int pos, int last_st
   if((* st).depth == _DEPTH_LIMIT){
     String pattern =(* st).regex -> pattern;
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_iterate",.line = 417};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_iterate",.line = 414};
       x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))), Symbol_var(34470112412), String_var(pattern), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL))), Symbol_var(25782888), int_var(_DEPTH_LIMIT));
       __builtin_unreachable();
     }
@@ -925,9 +918,7 @@ static void _expand(Buffer out, RegexMatch found, String replacement){
   for(int i = 0;  i < n;  i ++){
     char byte = String_getindex(replacement, i);
     int next = i + 1 < n ? String_getindex(replacement, i + 1) : - 1, close = - 1;
-    if(byte != '$' || next < 0){
-      Buffer_write_char(out, byte);
-    }
+    if(byte != '$' || next < 0) Buffer_write_char(out, byte);
     else if(next == '$'){
       Buffer_write_char(out, '$');
       i ++;
@@ -940,10 +931,7 @@ static void _expand(Buffer out, RegexMatch found, String replacement){
       String_write_str(RegexMatch_getindex(found, String_var(String_getslice(replacement, i + 2, close, 1))), out);
       i = close;
     }
-    else{
-      Buffer_write_char(out, byte);
-    }
-
+    else Buffer_write_char(out, byte);
   }
 
 }

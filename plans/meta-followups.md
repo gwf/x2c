@@ -1,6 +1,9 @@
 # Meta follow-ups
 
-> Status: active
+> Status: A and C done (C on `dev` as `81de06d8`); B measured with no
+> code change; E, F phase 8 and G continue in
+> [meta sequencing](meta-sequencing.md). Open: D, and `off_t` and `time_t`
+> stay `long` (track C).
 > Written 2026-09-22 after [meta recovery](archive/meta-recovery.md) landed
 > on `dev` as `db86d4b7`. Tracks A-D are independent implementation work and
 > can run in parallel; E and G need design decisions with Gary first, and F
@@ -83,7 +86,7 @@ Each should decline with a plain reason or work as C does:
   `lisp_peek` and `lisp_poke`; a generic retag by the layout's TAG would
   remove it.
 
-Status: done on `gwf/meta-c-small-defects`. Pointer indexing, `NULL`,
+Status: done on `dev` as `81de06d8`. Pointer indexing, `NULL`,
 `true`, `false`, typed `foreach` outputs, `bool` and int-range enum layouts,
 C `bool` conversion and `strncmp`'s `size_t` now behave as C does, and
 `lisp_peek` and `lisp_poke` retag by the layout's TAG. The layout accepts a

@@ -181,30 +181,10 @@ Var x2c_func_value_argument(
     try {
       converted = value.convert(want);
     }
-    catch %(bad-enc *cause): {
-      List lower = cons(<bad-enc>, cause);
-      raise %(bad-enc (sig $sig) (index $i)
-                       (want $want) (cause $lower));
-    }
-    catch %(void-op *cause): {
-      List lower = cons(<void-op>, cause);
-      raise %(void-op (sig $sig) (index $i)
-                       (want $want) (cause $lower));
-    }
-    catch %(bad-target *cause): {
-      List lower = cons(<bad-target>, cause);
-      raise %(bad-target (sig $sig) (index $i)
-                          (want $want) (cause $lower));
-    }
-    catch %(conv-range *cause): {
-      List lower = cons(<conv-range>, cause);
-      raise %(conv-range (sig $sig) (index $i)
-                          (want $want) (cause $lower));
-    }
-    catch %(no-convert *cause): {
-      List lower = cons(<no-convert>, cause);
-      raise %(no-convert (sig $sig) (index $i)
-                          (want $want) (cause $lower));
+    catch %((!or ?code bad-enc void-op bad-target conv-range no-convert)
+            *cause): {
+      List lower = cons(code, cause);
+      raise %($code (sig $sig) (index $i) (want $want) (cause $lower));
     }
     return converted;
   }
@@ -215,14 +195,13 @@ Var x2c_func_value_argument(
   return value;
 }
 
-/** Returns reference argument `i` after checking its declared source type.
+/* Returns reference argument `i` after checking its declared source type.
     The adapter supplies the pointee type it will cast to.
     `argv` must address the prepared argument array and `i` must be in bounds;
     generated adapters establish both facts.
     Raises: `<bad-types>` when the carrier is a value, its address is null, the
     `Func` signature and adapter disagree, its type differs, or conversion
-    would
-    discard a qualifier. It does not return on failure.
+    would discard a qualifier. It does not return on failure.
 */
 static void *_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target,
@@ -286,7 +265,6 @@ FuncArg x2c_func_unrepresentable_argument(
   Func fn, unsigned i, List source) {
   List sig = fn ? fn.sig : NULL;
   raise %(bad-types (sig $sig) (index $i) (source $source) (want value));
-  return FuncArg.value(void);
 }
 
 static size_t _context_offset(void) {
@@ -449,10 +427,9 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
 */
 Var Func.var(Func function) => Var.new(<func>, function);
 
-/** Returns the borrowed native callable carried by `value`.
+/** Returns the borrowed native callable carried by `v`.
     Raises: `<bad-types>` when the value is not a `Func`. */
-Func Var.func(Var value) {
-  if (value is not <func>)
-    raise %(bad-types (want func) (actual ${value.tag()}));
-  return value.pointer();
+Func Var.func(Var v) {
+  if (v is not <func>) raise %(bad-types (want func) (actual ${v.tag()}));
+  return v.pointer();
 }

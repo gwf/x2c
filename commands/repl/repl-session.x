@@ -136,7 +136,7 @@ static List _completion_filter(
 List ReplSession.complete_functions(ReplSession session, String prefix) {
   Array names = $auto([]), candidates = [];
   foreach (Var (candidate, stored), session.names) {
-    if (!(candidate is <string>) || !(stored is <list>)) continue;
+    if (candidate is not <string> || stored is not <list>) continue;
     String name = candidate;
     List entry = stored;
     if (entry.car() == <function> && name.startswith(prefix)) names.push(name);
@@ -201,11 +201,11 @@ ReplCompletion ReplSession.complete(
        declaration is submitted instead. */
     if (c.meta_form_is_declaration()) return result;
     c.mark_completion(marked.len() - marker.len());
-    c.__complete_here(<submit>, %(
-      "void" "char" "short" "int" "long" "float" "double"
-      "signed" "unsigned" "if" "while" "for" "do" "return"
-      "try" "raise" "defer" "match" "switch" "with"
-    ));
+    c.__complete_here(
+      <submit>,
+      %("void" "char" "short" "int" "long" "float" "double"
+        "signed" "unsigned" "if" "while" "for" "do" "return"
+        "try" "raise" "defer" "match" "switch" "with"));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
@@ -223,8 +223,7 @@ ReplCompletion ReplSession.complete(
     rows = found;
     keywords = found_keywords;
   }
-  catch %(incomplete *): return result;
-  catch %(malformed *): return result;
+  catch %((!or incomplete malformed) *): return result;
   if (rows || keywords) result.candidates = _completion_filter(
     session, kind, rows, keywords, prefix);
   return result;
@@ -297,8 +296,8 @@ static List _initializers(List node, Map names, Array added, Array ids) {
                Braced initialization has meaning only in that type context;
                the compile-time lowering consumes this private wrapper with
                the same initializer path used by ordinary declarations. */
-            statements.push(%(repl-init $spec
-              (bind (binding $id $name) $mods) $value));
+            statements.push(
+              %(repl-init $spec (bind (binding $id $name) $mods) $value));
             continue;
           }
         }

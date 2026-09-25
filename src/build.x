@@ -143,8 +143,7 @@ static String _state_line(uint64_t hash) =>
 static int _state_matches(String path, uint64_t hash) {
   String text = NULL;
   try text = Path.read_text(path);
-  catch %(not-found *): return 0;
-  catch %(io-fail *): return 0;
+  catch %((!or not-found io-fail) *): return 0;
   List lines = text.split_lines(0);
   if (!lines) return 0;
   String first = lines.car();
@@ -157,8 +156,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
   String text = %"${_state_line(hash)}\n";
   foreach (String line, lines) text = %"$text$line\n";
   try file_publish(%($path $text));
-  catch %(not-found *): {}
-  catch %(io-fail *): {}
+  catch %((!or not-found io-fail) *): {}
 }
 
 static void _state_write(String path, uint64_t hash) {
@@ -470,7 +468,6 @@ $exports");
   catch %(io-fail *detail): x2c_host_error(detail);
 }
 
-/* The request that translates this build's entry units `entries`. */
 static CliRequest Build._entry_request(Build b, List entries) {
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
   request.inputs = entries;
@@ -488,7 +485,8 @@ CliRequest Build.module_entry(Build b) {
   String stamp = build_module_stamp();
   if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
-  _write_entry(entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
+  _write_entry(
+    entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
 Map x2c_module_targets(void) => \$module.targets();
 ");
   return b._entry_request(%($entry));
@@ -506,7 +504,8 @@ CliRequest Build.extension_entries(Build b) {
   foreach (String package, b.request.extensions) {
     String root = Path.absolute(package), name = Path.basename(root);
     Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
-    _write_entry(entry, Path.glob(%"$root/src/*.x"),
+    _write_entry(
+      entry, Path.glob(%"$root/src/*.x"),
       %"void x2c_register_extension(const char *, Map (*)(void));
 static Map _targets(void) => \$module.targets();
 __attribute__((constructor)) static void _register(void) {
@@ -644,8 +643,7 @@ int compile_commands_write(String path, Array commands) {
     report_line(<muted>, %"  Compilation database $path");
     return 1;
   }
-  catch %(not-found *): {}
-  catch %(io-fail *): {}
+  catch %((!or not-found io-fail) *): {}
   fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
   return 0;
 }
@@ -1028,7 +1026,8 @@ static uint64_t _script_fingerprint(
       continue;
     }
     hash = _state_text(hash, path);
-    hash = _state_text(hash, Path.is_dir(path)
+    hash = _state_text(
+      hash, Path.is_dir(path)
       ? "%.9f".printf(Path.modified_time(path)) : "absent");
   }
   return hash;

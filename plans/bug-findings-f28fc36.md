@@ -210,7 +210,7 @@ Save the complete probe sources below under their stated paths, then run:
 ```sh
 mkdir -p debug probes/out
 make build-safe >debug/bootstrap.log 2>&1
-make -C tools/x2c-graph X2C_ROOT=../.. all >debug/graph-build.log 2>&1
+make commands >debug/graph-build.log 2>&1
 ```
 
 Run the following commands individually: the first three native compilations
@@ -228,8 +228,8 @@ builds/0/x2c translate --out-dir probes/out probes/local_vla.x
 cc -fsigned-char -pthread -O2 -iquote builds/0/lib \
   -c probes/out/local_vla.c -o probes/out/local_vla.o
 builds/0/x2c translate --out-dir probes/out probes/ownership.x
-tools/x2c-graph/builds/x2c-graph loop-allocations --all probes/ownership.x
-tools/x2c-graph/builds/x2c-graph allocation-returns make_list probes/ownership.x
+builds/0/x2c graph loop-allocations --all probes/ownership.x
+builds/0/x2c graph allocation-returns make_list probes/ownership.x
 builds/0/x2c translate --out-dir probes/out src/audit_surface.x
 cc -fsigned-char -pthread -O2 -iquote builds/0/lib \
   -c probes/out/audit_surface.c -o probes/out/audit_surface.o

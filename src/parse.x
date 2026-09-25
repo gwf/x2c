@@ -637,8 +637,8 @@ static List _struct_or_union(Compiler c) {
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(tag, usedname.car(),
-    c.peek(0) == <"{"> || c.peek(0) == <;>)});
+  usedname = %(${c.aggregate_name(
+    tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List type = cons(tag, usedname), fields = NULL;
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
@@ -766,8 +766,8 @@ static List _enum(Compiler c) {
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   if (name && c.macro_holes)
-    name = %(${c.aggregate_name(<enum>, name.car(),
-      c.peek(0) == <"{"> || c.peek(0) == <;>)});
+    name = %(${c.aggregate_name(
+      <enum>, name.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List usedname = name ? name : c.gensym();
   List type = cons(<enum>, usedname), enums = NULL;
   if (c.test(<"{">)) {
@@ -1469,8 +1469,9 @@ static void _append_managed_declaration(
           output.push(%(declare $base (bindings @{ordinary})));
           ordinary.clear();
         }
-        output.push(%(declare $base
-          (bindings (op = (bind $binding $modifiers) $initializer))));
+        output.push(
+          %(declare $base
+            (bindings (op = (bind $binding $modifiers) $initializer))));
         List receiver = %(expr $type (ident $binding));
         List cleanup = c.resolve_expression(
           %(expr () (call (expr () (op . $receiver ("cleanup")))
@@ -1803,10 +1804,29 @@ int Compiler.protocol_form_starts(Compiler c) {
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
   Token head = c.token;
-  c.next();
+  c.take_meta_marker(NULL);
   int marker = c.test_declaration();
   c.token = head;
   return marker;
+}
+
+/** Consumes the `meta` marker at the cursor and the contextual `native`
+    marker that may follow it, and returns the `meta` token. `native` binds
+    the definition after it the way a bodyless prototype would. `*native`,
+    when requested, reports whether that marker was present. */
+Token Compiler.take_meta_marker(Compiler c, int *native) {
+  Token meta = c.token;
+  c.next();
+  Token after = c.token;
+  int marked = c.peek(0) == <ident> && c.token.text == "native";
+  if (marked) {
+    c.next();
+    Token declaration = c.token;
+    marked = c.test_declaration();
+    c.token = marked ? declaration : after;
+  }
+  if (native) *native = marked;
+  return meta;
 }
 
 /** Reports whether the top-level item at the cursor is one of a script
@@ -1950,12 +1970,13 @@ List Compiler.parse_top_level(Compiler c) {
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   Token meta = NULL;
-  if (c.meta_form_is_declaration()) {
-    meta = c.token;
-    c.next();
-  }
+  int native = 0;
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(&native);
   Token definition_start = c.token;
   List decl = c.parse_declaration_row();
+  if (native && !decl.type_from_ast().is_function())
+    c.report_error(
+      <parse>, "a native meta declaration must be a function", meta, NULL);
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
       c.install_native_meta_function(decl, meta);
@@ -1974,14 +1995,16 @@ List Compiler.parse_top_level(Compiler c) {
     Token tokens = c.tokenizer.tokens;
     int start = (meta ? meta : definition_start) - tokens;
     int body = c.token - tokens;
-    $let(c.meta_body, meta != NULL) {
+    Token lowered = native ? NULL : meta;
+    if (native) c.install_native_meta_function(decl, meta);
+    $let(c.meta_body, lowered != NULL) {
       function = _finish_function_definition(c, decl);
     }
-    if (meta) c.install_meta_function(function, meta);
+    if (lowered) c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (meta && c.meta_is_comptime_only(function)) return NULL;
+    if (lowered && c.meta_is_comptime_only(function)) return NULL;
     if (c.macro_holes)
       return %(api-source ${definition_start.line}
                ${c.definition_doc(definition_start)} $function);
@@ -2111,10 +2134,11 @@ static List _finish_declarator_parameters(Compiler compiler, List declarator) {
               defer compiler.sym.pop_scope();
               foreach (List parameter, parameters) match (parameter) {
                 case %(param ?base ?declarator):
-                  params.push(_finish_parameter(
-                    compiler, base,
-                    _finish_declarator_parameters(compiler, declarator),
-                    NULL, NULL, NULL));
+                  params.push(
+                    _finish_parameter(
+                      compiler, base,
+                      _finish_declarator_parameters(compiler, declarator),
+                      NULL, NULL, NULL));
                 default: params.push(parameter);
               }
             }
@@ -2493,9 +2517,10 @@ List Compiler.bind_syntax(
                 if (context != AST_FIELD && mods.is_bitfield())
                   goto construction_error;
               }
-            output.push(_install_declarator_node(
-              _, base, declaration_context, declarator, NULL,
-              preserved_self));
+            output.push(
+              _install_declarator_node(
+                _, base, declaration_context, declarator, NULL,
+                preserved_self));
           }
           List result = _finish_declaration(
             _, tag, base, output.list_free(), preserved_self);
@@ -2626,8 +2651,7 @@ List Compiler.bind_syntax(
       case %(defer ?body):
         if (statement_position)
           return %(defer ${_.bind_syntax(
-            body, AST_STATEMENT, _.return_type
-          )});
+            body, AST_STATEMENT, _.return_type)});
       case %(do ?body ?condition):
         if (statement_position)
           return %(do
@@ -2687,10 +2711,11 @@ List Compiler.bind_syntax(
           _.begin_catch_arm(pattern, _.token);
           {
             defer _.sym.pop_scope();
-            bound.push(%(
-              $pattern
-              ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
-            ));
+            bound.push(
+              %(
+                $pattern
+                ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
+              ));
           }
         }
         return %(catchcases ${bound.list_free()});

@@ -143,7 +143,7 @@ static int _calls(Lint l, int from, int to, String name):
     if after > 0 && _is(l, after, "("): return 1
   return 0
 
-/* Whether `name` holds a validator word between `.`, `_`, or its ends. */
+/* A word counts only between `.`, `_`, or the ends of `name`. */
 static int _validator_name(String name):
   foreach String word in validator_words:
     int n = word.len()
@@ -206,6 +206,11 @@ static int _fresh_null_guard(Lint l, int from, int to):
         return 1
   return 0
 
+/* Whether the token at `at` begins an unconditional statement. */
+static int _statement_start(Lint l, int at):
+  String before = l.tokens[l.prev(at)].text
+  return before == ";" || before == "{" || before == "}" || before == ":"
+
 /* The reasons one function earns, with the score of each, as
    `(SCORE CODE MESSAGE)` rows. */
 static List _reasons(Lint l, List function):
@@ -222,12 +227,13 @@ static List _reasons(Lint l, List function):
     if t.text == "if" && _is(l, l.next(at), "("): branches++
     if t.text == "report_error" && _is(l, at - 1, ".") &&
        _is(l, l.next(at), "("):
+      int receiver = at
+      while _is(l, l.prev(receiver), "."):
+        receiver = l.prev(l.prev(receiver))
       int semi = _semicolon(l, at, to)
       report_return |= _is(l, l.prev(semi), ")") &&
-        _is(l, l.next(semi), "return")
-    String before = l.tokens[l.prev(at)].text
-    if _raised(l, at) && _then_return(l, at, to) &&
-       (before == ";" || before == "{" || before == "}" || before == ":"):
+        _is(l, l.next(semi), "return") && _statement_start(l, receiver)
+    if _raised(l, at) && _then_return(l, at, to) && _statement_start(l, at):
       raise_return = 1
     if t.text == "fallback" && _is(l, at - 1, ".") && _is(l, at - 2, "error"):
       int open = l.next(at)
@@ -270,7 +276,6 @@ static List _reasons(Lint l, List function):
 
 static int _line(Lint l, Var at) => l.tokens[at.int()].line
 
-/* The last line of a function whose tokens end before `end`. */
 static int _last_line(Lint l, Var end) => l.end_line(l.prev(end.int()))
 
 static List _rows(Map reasons, String name):
@@ -348,7 +353,7 @@ static String _action(Lint l, int from, int to):
       return "use default"
   return NULL
 
-/* Whether a function keeps partial state across a skipped element. */
+/* A push, append, insert, or indexed store: state a skip leaves half built. */
 static int _partial(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
     Token t = l.at(at)

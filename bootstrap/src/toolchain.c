@@ -464,33 +464,28 @@ static Job _start_tool(Job command, String program, String * failure){
   Job volatile job = NULL;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_catch_arms_1[2];
-    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 2, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_1[2];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(31862161386376), cons(Symbol_var(58262293080), NULL));
+    static MatchCaptureSite _x2c_catch_arms_1[1];
+    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_1[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL));
     _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
-    List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
-    _x2c_catch_patterns_1[1] = List_var(_x2c_catch_pattern_2);
   }
   ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) job = Job_start(command);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
-      if (_x2c_catch_selected_1 == 0) {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
+       {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
       (* failure) = _start_failure(program, detail);
     }
-    else {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-    (* failure) = _start_failure(program, detail);
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_1);
+    _x2c_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_1);
+    __builtin_unreachable();
   }
 
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_1);
-  _x2c_error_handler_1 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_1);
-  __builtin_unreachable();
-}
 }
 }
 x2c_error_catch_close(_x2c_error_handler_1);
@@ -675,8 +670,8 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
       static MatchCaptureSite _x2c_catch_arms_2[1];
       static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
       Var _x2c_catch_patterns_2[1];
-      if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_3 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
-      _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_3);
+      if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
+      _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
     }
     ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) * dependencies = Path_read_text(depfile);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){

@@ -372,31 +372,23 @@ static int _binder_kind(Var atom) {
   return sigil;
 }
 
-meta int Var.is_atom_binder(Var atom);
-
 /** Reports whether `atom` is a valid named or anonymous `?` binder.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_atom_binder(Var atom) => _binder_kind(atom) == '?';
-
-meta int Var.is_list_binder(Var atom);
+meta native int Var.is_atom_binder(Var atom) => _binder_kind(atom) == '?';
 
 /** Reports whether `atom` is a valid named or anonymous `*` binder.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_list_binder(Var atom) => _binder_kind(atom) == '*';
-
-meta int Var.is_binder(Var atom);
+meta native int Var.is_list_binder(Var atom) => _binder_kind(atom) == '*';
 
 /** Reports whether `atom` is either valid `Match` binder form.
     Raises: `<alloc-fail>` while decoding a compact `Atom`.
 */
-int Var.is_binder(Var atom) => _binder_kind(atom) != 0;
-
-meta int Var.is_match_op(Var atom);
+meta native int Var.is_binder(Var atom) => _binder_kind(atom) != 0;
 
 /** Reports whether `atom` is a compact built-in `Match` guard operator. */
-int Var.is_match_op(Var atom) {
+meta native int Var.is_match_op(Var atom) {
   if (atom is not <symbol>) return 0;
   Symbol symbol = atom;
   switch (symbol) {
@@ -530,7 +522,9 @@ static void _layout_analyze_pattern(
     _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if (head != <!set> && args && _named_binder(args.car())) {
+  /* A leading binder captures the guard, as `_normalize_pattern` reads it;
+     `(!set BINDER PAT)` is the one-operand capture form. */
+  if (args && args.cdr() && _named_binder(args.car())) {
     int index = _layout_index(layout, args.car());
     assert(index >= 0);
     *definite |= 1UL << index;
@@ -547,17 +541,15 @@ static void _layout_analyze_pattern(
     *definite = 0;
     return;
   }
-  if (head == <!or>) {
+  if (head == <!set> && args.len() == 1) {
+    _layout_analyze_sequence(layout, args, definite, possible);
+    return;
+  }
+  if (head == <!or> || head == <!set>) {
     unsigned long alt_definite = 0, alt_possible = 0;
     _layout_analyze_alternatives(layout, args, &alt_definite, &alt_possible);
     *definite |= alt_definite;
     *possible |= alt_possible;
-    return;
-  }
-  if (head == <!set>) {
-    if (args.len() == 2 && _named_binder(args.car()))
-      _layout_analyze_sequence(layout, args, definite, possible);
-    else _layout_analyze_alternatives(layout, args, definite, possible);
   }
 }
 
@@ -756,8 +748,6 @@ static Var _replace(Var input, List bindings) {
   return %($head @tail);
 }
 
-meta List List.replace(List template, List bindings);
-
 /** Replaces named binders in `template` according to `bindings`.
     A sequence binder in list-head position splices its captured `List`;
     `!quote` removes itself and leaves its operand literal. Missing binders are
@@ -766,7 +756,7 @@ meta List List.replace(List template, List bindings);
     unchanged. New structure follows the module pool-chain lifetime above.
     Raises: `<alloc-fail>` while constructing replacement `List`s.
 */
-List List.replace(List template, List bindings) {
+meta native List List.replace(List template, List bindings) {
   if (!template) return NULL;
   if (!bindings) return template;
   return _replace(template, bindings);
@@ -824,15 +814,13 @@ int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
   out && _plan_cache().try_match_replace(
     input, pat, template, out, "List.try_match_replace");
 
-meta List List.match_replace(List input, Var pat, Var template);
-
 /** Returns the `List` replacement when `input` matches `pat`.
     A miss returns `input` unchanged. A successful scalar replacement cannot
     inhabit the `List` result and returns `nil`. Matching and replacement
     failures
     follow `List.try_match_replace`.
 */
-List List.match_replace(List input, Var pat, Var template) {
+meta native List List.match_replace(List input, Var pat, Var template) {
   Var result;
   if (!input.try_match_replace(pat, template, &result)) return input;
   return result is <list> ? result : NULL;
@@ -859,7 +847,6 @@ static int _walk_prepared(MatchWalk walk, Var input) =>
 static List _walk_bindings(MatchWalk walk, Var input) =>
   cons(%(* $input), _capture_publish(walk.plan.layout, walk.captures));
 
-/* A prepared walk stages every node through one positional stack buffer. */
 macro Statement $match.walk_buffer(
   Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
@@ -987,8 +974,8 @@ static Var _walk_replace_prepared(
   for (size_t i = heads.length; i > base && !*error; i--) {
     List tail = node;
     node =
-      _walk_replace_node(walk, cons(_spine_get(heads, i - 1), tail),
-                         template, error);
+      _walk_replace_node(
+        walk, cons(_spine_get(heads, i - 1), tail), template, error);
   }
   heads.truncate(base);
   return node;
@@ -2335,7 +2322,6 @@ void MatchCache.dispose(MatchCache cache) {
   Scope.destroy(cache.scope);
 }
 
-
 // cached consumer adapters
 
 /* Each adapter preserves its consumer's result and executes only a prepared
@@ -2456,7 +2442,6 @@ int MatchCache.search_replace(
   *out = result;
   return status == MACHINE_PREPARED && answered;
 }
-
 
 typedef struct MatchContextState {
   struct MatchContextState *prev, MatchCache cache;

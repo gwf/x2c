@@ -89,8 +89,6 @@ static int _remote(String spec) =>
   spec.startswith("http://") || spec.startswith("https://") ||
   spec.startswith("file://");
 
-// fetch and verify
-
 static String _fetch(String url, String directory, String name) {
   String target = %"$directory/$name";
   _run(%( "curl" "-fsSL" "-o" $target $url ), "download");
@@ -160,7 +158,7 @@ static String _marker_string(String path, String field) {
   Var marker = NULL;
   try marker = Json.read_file(path);
   catch: return NULL;
-  if (!(marker is <map>)) return NULL;
+  if (marker is not <map>) return NULL;
   Var value = marker[field];
   return value is <string> ? value : NULL;
 }
@@ -199,25 +197,30 @@ static void _build_source(String package, String name, String spec) {
   try builds.remove_tree();
   catch %(io-fail *detail): _host_error(detail);
   builds.make_dirs();
-  _run(%( $x2c "translate" "--out-dir" $builds
-          "--x-include-dir" "$package/src"
-          "--package-dir" ${Path.dirname(package)} )
-         .append(units), "translate");
+  _run(
+    %( $x2c "translate" "--out-dir" $builds
+       "--x-include-dir" "$package/src"
+       "--package-dir" ${Path.dirname(package)} ).append(units),
+    "translate");
   List inputs = _files_with(builds, ".c")
     .append(_files_with(%"$package/src", ".c"));
-  _run(%( $x2c "build" "--kind" "static-library"
-          "--output" "$builds/lib$name.a"
-          "--build-dir" "$builds/cc" ).append(inputs), "build");
+  _run(
+    %( $x2c "build" "--kind" "static-library"
+       "--output" "$builds/lib$name.a"
+       "--build-dir" "$builds/cc" ).append(inputs),
+    "build");
   String row = %"native-meta \"${name}__";
   if (_files_with(builds, ".xi").any(
-        %!(String path) => Path.read_text(path).contains(row)))
-    _run(%( $x2c "build" "--kind" "meta-module"
-            "--output" "$builds/$name.module"
-            "--build-dir" "$builds/module"
-            "--x-include-dir" "$package/src"
-            "--package-dir" ${Path.dirname(package)} )
-           .append(units)
-           .append(_files_with(%"$package/src", ".c")), "module build");
+    %!(String path) => row in Path.read_text(path)))
+    _run(
+      %( $x2c "build" "--kind" "meta-module"
+         "--output" "$builds/$name.module"
+         "--build-dir" "$builds/module"
+         "--x-include-dir" "$package/src"
+         "--package-dir" ${Path.dirname(package)} )
+        .append(units)
+        .append(_files_with(%"$package/src", ".c")),
+      "module build");
   Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
 
@@ -227,7 +230,6 @@ static String _installed_kind(String package) =>
   Path.exists(%"$package/BUNDLE.json") ? "bundle" :
   Path.exists(%"$package/SOURCE.json") ? "source" : NULL;
 
-/* The version an installed package's marker records, or NULL. */
 static String _installed_version(String package) {
   String kind = _installed_kind(package);
   if (!kind) return NULL;

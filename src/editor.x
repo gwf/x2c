@@ -114,17 +114,19 @@ static CliRequest _configure(
         foreach (String input, node.request.inputs) {
           if (Path.absolute(input) != source) continue;
           if (selected && selected != node.request) {
-            fputs("x2c editor: source belongs to multiple selected targets\n",
-                  stderr);
+            fputs(
+              "x2c editor: source belongs to multiple selected targets\n",
+              stderr);
             exit(2);
           }
           selected = node.request;
         }
       }
       if (!selected) {
-        fputs("x2c editor: this document is not a selected target input; "
-              "open its owning source for semantic results or configure "
-              "a direct translate command\n", stderr);
+        fputs(
+          "x2c editor: this document is not a selected target input; "
+          "open its owning source for semantic results or configure "
+          "a direct translate command\n", stderr);
         exit(2);
       }
       request = selected;
@@ -133,8 +135,9 @@ static CliRequest _configure(
   request.sources = sources;
   if (sources.is_changed(source) &&
       (request.live_symbols || request.cpp_symbols)) {
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are "
-          "not supported; syntax highlighting remains available\n", stderr);
+    fputs(
+      "x2c editor: unsaved sources with native CPP symbol modes are "
+      "not supported; syntax highlighting remains available\n", stderr);
     exit(2);
   }
   request.source_facts = 1;
@@ -182,8 +185,9 @@ int editor_request(int argc, char **argv) {
   int parsed = frontend.open(source, unit);
   if ((request.live_symbols || request.cpp_symbols) &&
       _changed_dependency(unit.compiler, sources)) {
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are "
-          "not supported; syntax highlighting remains available\n", stderr);
+    fputs(
+      "x2c editor: unsaved sources with native CPP symbol modes are "
+      "not supported; syntax highlighting remains available\n", stderr);
     unit.close();
     command.close();
     return 2;

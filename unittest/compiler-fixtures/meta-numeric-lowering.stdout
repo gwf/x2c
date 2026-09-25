@@ -4,3 +4,6 @@ unsigned 1 1
 signed -254 -254
 float 0 0
 integer 6 6
+joined abc"dAB abc"dAB
+negated -0 -0
+sign 0 1 0

@@ -16,8 +16,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-List Compiler_lift_func_expression(Compiler compiler, List expression);
-
 #include "utils.h"
 #include "parse.h"
 #include "protocol.h"
@@ -1425,7 +1423,8 @@ String binding_identity_spelling(List);
 String Compiler_emitted_binding_name(Compiler compiler, List binding){
   if(! _init_guard_) _file_init_();
   Var renamed;
-  if(Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_7, cons(List_var(binding), NULL))), & renamed)) return Var_string(renamed);
+  Map facts = Compiler_semantic_binding_facts(compiler);
+  if(Map_try_get(facts, List_var(cons(_7, cons(List_var(binding), NULL))), & renamed)) return Var_string(renamed);
   return binding_identity_spelling(binding);
 }
 
@@ -1616,9 +1615,7 @@ static void _scan_conditionals(Compiler c){
           Array_setindex(stack, - 1, List_var(cons(id, cons(long_var(Var_integer(arm) + 1), cons(int_var(Var_integer(state) == 1 ? 2 : 0), NULL)))));
         }
         else if(kind == 7109834 && Array_len(stack)) Array_take_last(stack);
-        else{
-          if(! hidden) _note_layout_macro(token -> text, layout, Array_len(stack));
-        }
+        else if(! hidden) _note_layout_macro(token -> text, layout, Array_len(stack));
         if(! conditional) continue;
         Map_setindex(c -> arm_stacks, long_var((long) i), List_var(Array_list(stack)));
         hidden = 0;
@@ -1742,8 +1739,8 @@ void Compiler_mark_completion(Compiler compiler, int position){
 
 }
 
-int Compiler_at_completion(Compiler compiler){
-  return compiler -> token -> type == 1248787135328;
+int Compiler_at_completion(Compiler c){
+  return c -> token -> type == 1248787135328;
 }
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
@@ -1751,7 +1748,7 @@ void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! Compiler_at_completion(compiler)) return;
   List rows = Sym_visible_symbols(compiler -> sym);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 891};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 885};
     x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
@@ -1785,7 +1782,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
   if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 941};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 935};
       x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
@@ -1803,7 +1800,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 959};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 953};
     x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);
     __builtin_unreachable();
   }
@@ -2012,14 +2009,12 @@ static void _report_script_statement(Compiler c){
 }
 
 int Compiler_meta_form_is_declaration(Compiler);
-Type List_type_from_ast(List);
+Token Compiler_take_meta_marker(Compiler, int *);
 void Compiler_record_native_meta_effect(Compiler, List, Token);
+Type List_type_from_ast(List);
 static void _shallow_finish_declaration(Compiler c){
-  Token meta = NULL;  if(Compiler_meta_form_is_declaration(c)){
-    meta = c -> token;  Compiler_next(c);
-  }
-  List declaration = _shallow_parse_declaration(c);  if(Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 9719 || Compiler__at_function_arrow(c)){
-
+  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, & native);  List declaration = _shallow_parse_declaration(c);  if(Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 9719 || Compiler__at_function_arrow(c)){
+    if(native) Compiler_record_native_meta_effect(c, declaration, meta);
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3110,7 +3105,7 @@ if(! Map_len(locals)) return; {
                 }
                 );  Var _x2c_macro_item_33;  while(Iter_try_next(_x2c_macro_iterator_33, & _x2c_macro_item_33)){
                   name = _x2c_macro_item_33; {
-                    Var found;  List bindings;  if(! List_try_search(Var_list(statement), List_var(cons(_244, cons(_242, cons(List_var(cons(_245, cons(List_var(cons(_291, cons(_63, cons(name, NULL)))), NULL))), NULL)))), & found, & bindings)) continue;  c -> origin = Var_int(Var_convert(origin, 3453797));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_27), cons(String_var(Var_str(name)), cons(String_var(_411), NULL)))), NULL, _417);
+                    Var found;  List bindings;  int present = List_try_search(Var_list(statement), List_var(cons(_244, cons(_242, cons(List_var(cons(_245, cons(List_var(cons(_291, cons(_63, cons(name, NULL)))), NULL))), NULL)))), & found, & bindings);  if(! present) continue;  c -> origin = Var_int(Var_convert(origin, 3453797));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_27), cons(String_var(Var_str(name)), cons(String_var(_411), NULL)))), NULL, _417);
                   }
 
                 }

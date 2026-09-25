@@ -199,7 +199,7 @@ Var Lisp_apply(Lisp lisp, Var callable, List values);
 
 Var Lisp_eval_string(Lisp lisp, String source);
 
-Var Lisp_eval_file(Lisp lisp, File source);
+Var Lisp_eval_file(Lisp l, File source);
 
 int Lisp_try_get(Lisp lisp, String name, Var * out);
 

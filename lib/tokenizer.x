@@ -34,7 +34,6 @@ class Tokenizer struct {
 #include "exception.x"
 #include <string.h>
 
-/* Recovers a borrowed Token pointer from its non-owning Var wrapper. */
 inline Token Var.token(Var x) => x.pointer();
 
 /* Wraps a borrowed Token pointer without extending its storage lifetime. */
@@ -47,7 +46,7 @@ protocol Var(Token);
 /* Hashes a live Token's complete representation; it must be nonnull. */
 unsigned Token.hash(Token t) => x2c_hash_bytes(0, t, sizeof(struct Token));
 
-/* Reports byte-for-byte Token equality, with two null Tokens equal. */
+/* Compares bytes; two null Tokens are equal. */
 int Token.equal(Token a, Token b) {
   if ((void *) a == (void *) b) return 1;
   if (!a || !b) return 0;
@@ -263,7 +262,7 @@ static int _token_ends_operand(Token token) {
   return 0;
 }
 
-/* Returns the significant token before `token`, or NULL at stream start. */
+/* NULL at stream start. */
 static Token _significant_before(Tokenizer tokenizer, Token token) {
   struct Token *first = (struct Token *) tokenizer.tokens;
   while (token > first) {
@@ -581,8 +580,9 @@ static inline int _conditional(Token t) =>
 
 /* Makes the colon at `colon` end the condition of the last control keyword
    at depth zero before it, adding parentheses unless one group already
-   spans the condition. A `for` header keeps the parentheses it must have. The colon then becomes `body`, or goes when `body`
-   is NULL. Returns 0 when no control keyword precedes the colon. */
+   spans the condition. A `for` header keeps the parentheses it must have.
+   The colon then becomes `body`, or goes when `body` is NULL.
+   Returns 0 when no control keyword precedes the colon. */
 static int _layout_condition(
   Token *sig, int *depths, _LayoutEdit *edits, struct Token *all, int first,
   int colon, String body) {
@@ -710,8 +710,8 @@ static void Tokenizer._layout(Tokenizer t) {
       enumeration &= !parameters;
       if (labeled)
         tail.after = "{";
-      else if (!_layout_condition(sig, depths, edits, all, line.first,
-                                  line.last, "{"))
+      else if (!_layout_condition(
+        sig, depths, edits, all, line.first, line.last, "{"))
         tail.type = <"{">;
       /* `do:` without a `while` trailer is a bare block. */
       if (first.text == "do" && line.last == line.first + 1) {
@@ -752,9 +752,8 @@ static void Tokenizer._layout(Tokenizer t) {
       else if (last.type != <;> && !enums[top] && !lisp && !hole)
         suffix = ";";
     }
-    while (next < indents[top]) {
+    while (top && next < indents[top])
       suffix = %"${suffix}${closers[top--]}";
-    }
     if (next != indents[top] && !error_at && j < nlines)
       error_at = sig[lines[j].first];
     if (suffix) tail.after = tail.after ? %"${tail.after}$suffix" : suffix;
@@ -840,5 +839,5 @@ Token Tokenizer.next(Tokenizer tokenizer) {
   }
 }
 
-/* Returns the first scan status, or `<malformed>` for a null Tokenizer. */
+/* `<malformed>` for a null Tokenizer. */
 Symbol Tokenizer.status(Tokenizer t) => t ? t.scan_status : <malformed>;

@@ -1559,8 +1559,8 @@ static int _has_private_native(Compiler compiler, List templates){
 
 int String_find(String, String);
 String String_lower(String);
-String Compiler_reverse_converter_spelling(Compiler compiler, String base_name, String infix, String participant){
-  if(! _init_guard_) _file_init_();  int split = String_find(participant, _952);  String package = split > 0 &&(String_equal(compiler -> package, String_getslice(participant, -2147483648, split, 1)) || Map_contains(compiler -> package_roots, String_var(String_getslice(participant, -2147483648, split, 1)))) ? String_getslice(participant, -2147483648, split, 1) : NULL;  String bare = String_truth(package) ? String_getslice(participant, split + 2, -2147483648, 1) : participant;  String binding = String_join(NULL, cons(String_var(base_name), cons(String_var(_184), cons(String_var(infix), cons(String_var(String_lower(bare)), NULL)))));  return String_truth(package) ? String_join(NULL, cons(String_var(package), cons(String_var(_185), cons(String_var(binding), NULL)))) : binding;
+String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant){
+  if(! _init_guard_) _file_init_();  int split = String_find(participant, _952);  String package = split > 0 &&(String_equal(c -> package, String_getslice(participant, -2147483648, split, 1)) || Map_contains(c -> package_roots, String_var(String_getslice(participant, -2147483648, split, 1)))) ? String_getslice(participant, -2147483648, split, 1) : NULL;  String bare = String_truth(package) ? String_getslice(participant, split + 2, -2147483648, 1) : participant;  String binding = String_join(NULL, cons(String_var(base_name), cons(String_var(_184), cons(String_var(infix), cons(String_var(String_lower(bare)), NULL)))));  return String_truth(package) ? String_join(NULL, cons(String_var(package), cons(String_var(_185), cons(String_var(binding), NULL)))) : binding;
 }
 
 static List Compiler__record(Compiler compiler, Type base){

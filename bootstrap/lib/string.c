@@ -339,12 +339,12 @@ Var int_var(int);
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 416};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 411};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 417};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 412};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))), Symbol_var(7318440), int_var(count));
     __builtin_unreachable();
   }
@@ -446,7 +446,7 @@ String String_add(String str, String other){
   int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_add",.line = 602};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_add",.line = 583};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
@@ -480,7 +480,7 @@ String String_repeat(String str, int count){
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 658};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 635};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
@@ -671,12 +671,9 @@ String String_map(String str, Func fn){
     for(int i = 0;  i < n;  i ++){
       char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
       if(! ch){
-        {
-          static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 884};
-          x2c_error_raise_n(& _x2c_error_site_4, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
-          __builtin_unreachable();
-        }
-
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 850};
+        x2c_error_raise_n(& _x2c_error_site_4, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
+        __builtin_unreachable();
       }
       out[i] = ch;
     }
@@ -800,14 +797,14 @@ String String_squeeze(String str, String chars){
 
 static String _pad(String str, int width, char fill, int left_padding){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 931};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 890};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 934};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 893};
     x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -988,7 +985,7 @@ String String_printf(String fmt, ...){
 
 _Noreturn static void _format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_format_error",.line = 1216};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_format_error",.line = 1155};
     x2c_error_raise_n(& _x2c_error_site_7, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
@@ -1020,7 +1017,7 @@ static Var _format_convert(Var value, Symbol target, int offset){
       {
         List cause = cons(code, details);
         {
-          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_format_convert",.line = 1224};
+          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_format_convert",.line = 1163};
           x2c_error_raise_n(& _x2c_error_site_8, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("value conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
           __builtin_unreachable();
         }
@@ -1067,7 +1064,7 @@ static String _format_string(Var value, int offset){
       {
         List cause = cons(code, details);
         {
-          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "_format_string",.line = 1235};
+          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "_format_string",.line = 1174};
           x2c_error_raise_n(& _x2c_error_site_9, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("string conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
           __builtin_unreachable();
         }
@@ -1504,7 +1501,7 @@ String String_unescape(String str){
       if(esc > 0377){
         _free_unchecked(string);
         {
-          static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1635};
+          static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1572};
           x2c_error_raise_n(& _x2c_error_site_10, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
           __builtin_unreachable();
         }

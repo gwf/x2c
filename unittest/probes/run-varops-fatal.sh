@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/varops-probes"
 PROGRAM="$BUILD/varops-fatal"
-MODE=$(cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)
+MODE=$(cat "$ROOT/etc/build-mode.local" 2>/dev/null ||
+  cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)
 mkdir -p "$BUILD"
 
 case "$MODE" in

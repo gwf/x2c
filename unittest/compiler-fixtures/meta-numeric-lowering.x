@@ -34,6 +34,12 @@ meta static int array_integer(int n) {
   return values[0] - values[1];
 }
 
+meta static String joined(void) => "ab" "c\"d" "\x41" "B";
+
+meta static double negated(double z) => -z;
+
+meta static int reciprocal_sign(double z) => 1.0 / z < 0;
+
 int main(int argc, char **argv) {
   int n = argc - 1;
   (void) argv;
@@ -43,5 +49,9 @@ int main(int argc, char **argv) {
   printf("signed %d %d\n", $(array_signed 129), array_signed(n + 129));
   printf("float %d %d\n", $(array_float 0), array_float(n));
   printf("integer %d %d\n", $(array_integer 0), array_integer(n));
+  printf("joined %s %s\n", $joined(), joined());
+  printf("negated %g %g\n", $negated(0.0), negated(n + 0.0));
+  printf("sign %d %d %d\n", $reciprocal_sign(0.0), $reciprocal_sign(-0.0),
+         reciprocal_sign(n + 0.0));
   return 0;
 }

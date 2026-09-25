@@ -60,25 +60,6 @@ struct UnzipShared {
   struct Iter column_iters[2];
 };
 
-/* Compile-time code calls these producers natively. Each takes its
-   destination last, so a compile-time call may omit it and get a fresh
-   `Iter`. The collections' own `iter` methods are available through their
-   `meta protocol Iter` adoptions in protocols.x; `Map.keys`,
-   `Map.enumerate` and `Var.iter` are marked beside their definitions. */
-meta Iter range(int start, int end, int step, Iter dest);
-meta Iter Iter.map(Iter, Func, Iter dest);
-meta Iter Iter.filter(Iter, Func, Iter dest);
-meta Iter Iter.zip(Iter left, Iter right, Iter dest);
-meta Iter Iter.zip_with(Iter left, Iter right, Func, Iter dest);
-meta Iter Iter.map2(Iter left, Iter right, Func, Iter dest);
-meta Iter Iter.chain(Iter first, Iter second, Iter dest);
-meta Iter Iter.enumerate(Iter, int start, Iter dest);
-meta Iter Iter.repeat(Var value, int count, Iter dest);
-meta Iter Iter.head(Iter, int count, Iter dest);
-meta Iter Iter.accumulate(Iter, Var initial, Iter dest);
-meta Iter Iter.scan(Iter, Var seed, Func, Iter dest);
-meta Iter Iter.unique(Iter, Iter dest);
-
 #pragma private
 
 #include "list.x"
@@ -161,8 +142,6 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
   return iter;
 }
 
-meta Iter Iter.new(void);
-
 /** Returns zeroed iterator storage owned by the active `Scope`.
     Use this when an iterator itself must be returned or stored as a value.
     Producers such as `Map.keys` initialize the result through their existing
@@ -174,7 +153,7 @@ meta Iter Iter.new(void);
     traversal because it allocates nothing.
     Raises: `<alloc-fail>` when storage cannot be allocated.
 */
-Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
+meta native Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
 
 static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
   if (pair is not <list>)
@@ -244,8 +223,6 @@ int Iter.try_next(Iter iter, Var *out) {
   return 1;
 }
 
-meta Var Iter.next(Iter iter);
-
 /** Returns the next element, or `void` once `iter` is exhausted.
     An adapter over `Iter.try_next`, unambiguous because no iterator may
     yield `void` as an element. Prefer `Iter.try_next` in new code; it reports
@@ -253,7 +230,7 @@ meta Var Iter.next(Iter iter);
     Raises: `<void-op>` when the source callback claims success with `void`,
     plus any cause raised by that callback.
 */
-Var Iter.next(Iter iter) {
+meta native Var Iter.next(Iter iter) {
   Var out;
   return iter.try_next(&out) ? out : void;
 }
@@ -322,7 +299,7 @@ static int _range_general_next(Iter iter, Var *out) {
     Raises: `<bad-arg>` when `step` is zero. A null `iter` returns NULL
     without raising.
 */
-Iter range(int start, int end, int step, Iter iter) {
+meta native Iter range(int start, int end, int step, Iter iter) {
   if (!iter) return NULL;
   if (!step) raise %(bad-arg (owner "range") (step $step));
   if (step == 1)
@@ -372,7 +349,7 @@ static int _filter_next(Iter iter, Var *out) {
     exhausted iterator. An empty source does not invoke or check `func`.
     Raises: whatever the source, `Func.apply`, or `func` raises while pulling.
 */
-Iter Iter.filter(Iter iter, Func func, Iter dest) {
+meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
   if (!dest) return NULL;
   dest.init(iter, _filter_next, void);
   dest.aux = func;
@@ -413,7 +390,7 @@ static int _map_next(Iter iter, Var *out) {
     pulling, including `<void-op>` when `func` returns `void` and the iterator
     rejects it as an element.
 */
-Iter Iter.map(Iter iter, Func func, Iter dest) {
+meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
   if (!dest) return NULL;
   dest.init(iter, _map_next, void);
   dest.aux = func;
@@ -440,7 +417,7 @@ static int _zip_next(Iter iter, Var *out) {
     Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
     cause raised by either source. A null `dest` returns NULL.
 */
-Iter Iter.zip(Iter left, Iter right, Iter dest) {
+meta native Iter Iter.zip(Iter left, Iter right, Iter dest) {
   if (!dest) return NULL;
   return dest.init(left, _zip_next, right);
 }
@@ -469,7 +446,7 @@ static int _zip_with_next(Iter iter, Var *out) {
     pulling. With a null `fn`, pair interning may raise `<alloc-fail>` or
     `<size-limit>`.
 */
-Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
+meta native Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
   if (!dest) return NULL;
   dest.init(left, _zip_with_next, right);
   dest.aux = fn;
@@ -485,7 +462,7 @@ Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
     The sources, destination, callback lifetime, value passing, and pull-time
     failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
 */
-Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
+meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
   if (!fn) return NULL;
   return left.zip_with(right, fn, dest);
 }
@@ -505,7 +482,7 @@ static int _chain_next(Iter iter, Var *out) {
     no elements, and a null `dest` returns NULL. Pulling may raise any cause
     raised by either source.
 */
-Iter Iter.chain(Iter first, Iter second, Iter dest) {
+meta native Iter Iter.chain(Iter first, Iter second, Iter dest) {
   if (!dest) return NULL;
   return dest.init(first, _chain_next, second);
 }
@@ -530,7 +507,7 @@ static int _enumerate_next(Iter iter, Var *out) {
     Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
     cause raised by the source. A null `dest` returns NULL.
 */
-Iter Iter.enumerate(Iter iter, int start, Iter dest) {
+meta native Iter Iter.enumerate(Iter iter, int start, Iter dest) {
   if (!dest) return NULL;
   return dest.init(iter, _enumerate_next, start);
 }
@@ -548,7 +525,7 @@ static int _repeat_next(Iter iter, Var *out) {
     storage referenced by `value` must outlive traversal. A null `dest`
     returns NULL. Pulling a repeated `void` raises `<void-op>`.
 */
-Iter Iter.repeat(Var value, int count, Iter dest) {
+meta native Iter Iter.repeat(Var value, int count, Iter dest) {
   if (!dest) return NULL;
   return dest.init(value, _repeat_next, count > 0 ? count : 0);
 }
@@ -569,7 +546,7 @@ static int _head_next(Iter iter, Var *out) {
     caller-owned `dest` must outlive traversal; a null `dest` returns NULL.
     Pulling may raise any cause raised by the source.
 */
-Iter Iter.head(Iter iter, int count, Iter dest) {
+meta native Iter Iter.head(Iter iter, int count, Iter dest) {
   if (!dest) return NULL;
   return dest.init(iter, _head_next, count > 0 ? count : 0);
 }
@@ -595,7 +572,7 @@ static int _accumulate_next(Iter iter, Var *out) {
     Raises: any cause from the source or `Var.binary` while adding an element
     to the running total. A null `dest` returns NULL without raising.
 */
-Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
+meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
   if (!dest) return NULL;
   return dest.init(
     iter, _accumulate_next, initial is void ? (Var) 0 : initial);
@@ -639,7 +616,7 @@ static int _scan_next(Iter iter, Var *out) {
     raises, including `<void-op>` when `fn` returns `void` and the iterator
     rejects it as an element. A null `fn` or `dest` returns NULL.
 */
-Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
+meta native Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
   if (!dest || !fn) return NULL;
   dest.init(iter, _scan_next, seed);
   dest.aux = fn;
@@ -671,7 +648,7 @@ static int _unique_next(Iter iter, Var *out) {
     source, hashing, or equality while constructing or pulling. A null `dest`
     returns NULL without allocating.
 */
-Iter Iter.unique(Iter iter, Iter dest) {
+meta native Iter Iter.unique(Iter iter, Iter dest) {
   if (!dest) return NULL;
   return dest.init(iter, _unique_next, %{});
 }
@@ -792,9 +769,8 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 */
 int Iter.any(Iter iter, Func pred) {
   if (!pred) return 0;
-  foreach (Var item, iter) {
+  foreach (Var item, iter)
     if (_apply1(pred, item)) return 1;
-  }
   return 0;
 }
 
@@ -810,9 +786,8 @@ int Iter.all(Iter iter, Func pred) {
   Var item;
   if (!iter.try_next(&item)) return 1;
   if (!pred) return 0;
-  do {
+  do
     if (!_apply1(pred, item)) return 0;
-  }
   while (iter.try_next(&item));
   return 1;
 }
@@ -827,13 +802,10 @@ int Iter.all(Iter iter, Func pred) {
 */
 Var Iter.find(Iter iter, Func pred) {
   if (!pred) return void;
-  foreach (Var item, iter) {
+  foreach (Var item, iter)
     if (_apply1(pred, item)) return item;
-  }
   return void;
 }
-
-meta int Iter.count(Iter iter);
 
 /** Returns the number of remaining elements, consuming `iter`.
     Counting drains the iterator, and an `Iter` cannot be rewound, so if you
@@ -843,14 +815,12 @@ meta int Iter.count(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause raised by that callback.
 */
-int Iter.count(Iter iter) {
+meta native int Iter.count(Iter iter) {
   int total = 0;
   Var item;
   while (iter.try_next(&item)) total++;
   return total;
 }
-
-meta Var Iter.sum(Iter iter);
 
 /** Returns the sum of the remaining elements, consuming `iter`.
     Starts from the integer 0 and adds with ordinary `Var` arithmetic, so
@@ -859,13 +829,11 @@ meta Var Iter.sum(Iter iter);
     Raises: any cause from the source or `Var.binary` while adding an element
     to the running total.
 */
-Var Iter.sum(Iter iter) {
+meta native Var Iter.sum(Iter iter) {
   Var total = 0;
   foreach (Var item, iter) total = total.binary(<+>, item);
   return total;
 }
-
-meta Var Iter.product(Iter iter);
 
 /** Returns the product of the remaining elements, consuming `iter`.
     Starts from the integer 1 and multiplies with ordinary `Var` arithmetic,
@@ -874,13 +842,11 @@ meta Var Iter.product(Iter iter);
     Raises: any cause from the source or `Var.binary` while multiplying an
     element into the running product.
 */
-Var Iter.product(Iter iter) {
+meta native Var Iter.product(Iter iter) {
   Var total = 1;
   foreach (Var item, iter) total = total.binary(<*>, item);
   return total;
 }
-
-meta Var Iter.max(Iter iter);
 
 /** Returns the largest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
@@ -889,14 +855,12 @@ meta Var Iter.max(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause from the source or `Var.compare`.
 */
-Var Iter.max(Iter iter) {
+meta native Var Iter.max(Iter iter) {
   Var best;
   if (!iter.try_next(&best)) return void;
   foreach (Var item, iter) if (item > best) best = item;
   return best;
 }
-
-meta Var Iter.min(Iter iter);
 
 /** Returns the smallest remaining element, or `void` when there is none.
     Consumes the iterator, comparing with `Var` ordering, which is total
@@ -905,7 +869,7 @@ meta Var Iter.min(Iter iter);
     Raises: `<void-op>` for a source callback that yields `void`, plus any
     cause from the source or `Var.compare`.
 */
-Var Iter.min(Iter iter) {
+meta native Var Iter.min(Iter iter) {
   Var best;
   if (!iter.try_next(&best)) return void;
   foreach (Var item, iter) if (item < best) best = item;

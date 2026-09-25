@@ -37,8 +37,6 @@ class Job struct {
 
 protocol Cleanup(Job);
 
-meta Job List.job(List command);
-meta Job Job.start(Job job);
 meta Job Var.job(Var value);
 meta Var Job.var(Job job);
 
@@ -267,8 +265,8 @@ static void Job._start(Job job) {
     int spawned = 0;
     {
       defer if (!spawned) { _close(link[0]); _close(link[1]); }
-      job._spawn(index, stage, previous, index < last ? link[1] : output,
-                 errors);
+      job._spawn(
+        index, stage, previous, index < last ? link[1] : output, errors);
       spawned = 1;
     }
     _close(link[1]);
@@ -371,7 +369,7 @@ static Job Job._unstarted(Job job, String operation) {
     ~}
     ```
 */
-Job List.job(List command) => Job.new(command);
+meta native Job List.job(List command) => Job.new(command);
 
 /** Sets `options` on `job` and returns it.
     The keys are atoms: `dir` names the working directory, `env` is a `Map`
@@ -451,7 +449,7 @@ Job Job.pipe(Job job, List command) {
     `<io-fail>` when a pipe, fork, output file, or other start step fails, or
     `<bad-arg>` for an empty command.
 */
-Job Job.start(Job job) {
+meta native Job Job.start(Job job) {
   if (!job.started) job._start();
   return job;
 }

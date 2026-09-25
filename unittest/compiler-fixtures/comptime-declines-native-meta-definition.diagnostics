@@ -1,0 +1,9 @@
+unittest/compiler-fixtures/comptime-declines-native-meta-definition.x:1:1: type: native meta function declaration does not match its target
+  meta native double sin(int x) { return x; }
+  ^^^^
+  note: name: sin signature: ((func ((int))) double)
+
+unittest/compiler-fixtures/comptime-declines-native-meta-definition.x:2:1: parse: a native meta declaration must be a function
+  meta native static int value = 3;
+  ^^^^
+

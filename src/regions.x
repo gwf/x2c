@@ -353,11 +353,12 @@ static void _move(Fact fact, Region region) {
   fact.param = -1;
 }
 
-static void _warn(Walk w, Symbol code, int origin, String message,
-                  List notes) {
+static void _warn(
+  Walk w, Symbol code, int origin, String message, List notes) {
   w.warnings.push(w.audit
     ? %(${w.function} $code $origin $message $notes)
-    : %($code $origin $message $notes));
+    : %($code $origin $message $notes)
+  );
 }
 
 static List _opened(Walk w, Region region) {
@@ -427,7 +428,7 @@ static Fact _value_fact(Walk w, Var value, List *named) {
   return fact;
 }
 
-/* The Scope local a slot argument names: `&local`, or a `Scope *` local. */
+/* Accepts `&local` or a `Scope *` local. */
 static Fact _slot(Walk w, Var argument) {
   Fact fact = _fact_of(w, _address_of(argument), NULL);
   return fact ? fact : _fact_of(w, argument, NULL);
@@ -461,8 +462,8 @@ static Region _pooled(Walk w, int &born) {
    set; NULL with `born` set is the caller's active region. A mixed
    Scope/Pool result keeps its Pool region in `other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
-static Region _birth(Walk w, Var value, Type type, int &born,
-                     Region &other) {
+static Region _birth(
+  Walk w, Var value, Type type, int &born, Region &other) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   born = 1;
@@ -520,9 +521,9 @@ static Region _birth(Walk w, Var value, Type type, int &born,
    destination copies. A parameter adds the sink to this function's summary;
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
-static int _flow_region(Walk w, Var value, Type type, Symbol sink,
-                        Fact target, Fact fact, List named, Region region,
-                        int born, int report) {
+static int _flow_region(
+  Walk w, Var value, Type type, Symbol sink, Fact target, Fact fact,
+  List named, Region region, int born, int report) {
   if (_copies(w, type, value) && !(born & 2) &&
       (!region || region.kind != <pool>))
     return 0;
@@ -533,9 +534,10 @@ static int _flow_region(Walk w, Var value, Type type, Symbol sink,
   String subject = _subject(w, value, named, fact);
   if (region.closed) {
     if (report)
-      _warn(w, <region>, w.origin,
-            %"$subject is used after the region that allocated it ended",
-            _opened(w, region));
+      _warn(
+        w, <region>, w.origin,
+        %"$subject is used after the region that allocated it ended",
+        _opened(w, region));
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -562,14 +564,15 @@ static int _flow_region(Walk w, Var value, Type type, Symbol sink,
     if (region == w.frame) {
       String message =
         %"$subject can outlive the local storage it points into when $exit";
-      _warn(w, <region>, w.origin,
-            message,
-            %("local storage ends when the function returns"));
+      _warn(
+        w, <region>, w.origin, message,
+        %("local storage ends when the function returns"));
     }
     else
-      _warn(w, <region>, w.origin,
-            %"$subject can outlive the region it was allocated in when $exit",
-            _opened(w, region));
+      _warn(
+        w, <region>, w.origin,
+        %"$subject can outlive the region it was allocated in when $exit",
+        _opened(w, region));
   }
   return 1;
 }
@@ -611,14 +614,14 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
       struct Fact pooled = *target;
       pooled.region = target.other;
       pooled.born = 2;
-      reported |= _flow_region(w, value, type, sink, target, fact,
-                               named, owner, kind, !reported);
-      reported |= _flow_region(w, value, type, sink, &pooled, fact,
-                               named, owner, kind, !reported);
+      reported |= _flow_region(
+        w, value, type, sink, target, fact, named, owner, kind, !reported);
+      reported |= _flow_region(
+        w, value, type, sink, &pooled, fact, named, owner, kind, !reported);
     }
     else
-      reported |= _flow_region(w, value, type, sink, target, fact,
-                               named, owner, kind, !reported);
+      reported |= _flow_region(
+        w, value, type, sink, target, fact, named, owner, kind, !reported);
   }
   return reported;
 }
@@ -773,10 +776,11 @@ static void _end(Walk w, Var argument, String op, Symbol how) {
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
                              : _subject(w, argument, named, storage);
-    _warn(w, <bad-free>, w.origin,
-          %"$op is given $subject, which no Scope allocator returned",
-          %("only Scope.malloc, calloc, memdup, and realloc storage can be"
-            "freed or reallocated"));
+    _warn(
+      w, <bad-free>, w.origin,
+      %"$op is given $subject, which no Scope allocator returned",
+      %("only Scope.malloc, calloc, memdup, and realloc storage can be"
+        "freed or reallocated"));
   }
   Fact fact = _fact_of(w, argument, NULL);
   if (!fact || fact.depth != w.depth) return;
@@ -812,8 +816,8 @@ static void _scan(Walk w, Var value, int deferred) {
         String name = binding_identity_spelling(binding);
         String ended = fact.dead == <moved> ? "Scope.realloc moved it"
                                             : "it was freed";
-        _warn(w, <after-free>, w.origin,
-              %"'$name' is used after $ended", NULL);
+        _warn(
+          w, <after-free>, w.origin, %"'$name' is used after $ended", NULL);
         fact.dead = 0;
       }
       case %(op (!quote =) ?target ?stored) if (node != root): {
@@ -1043,7 +1047,7 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
   return 1;
 }
 
-/* Close the regions a block opened, oldest first. */
+/* Closes oldest first. */
 static void _close_to(Walk w, Region region, Region outer) {
   if (region == outer) return;
   _close_to(w, region.outer, outer);

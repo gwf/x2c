@@ -410,8 +410,9 @@ int main(void) {
 
 The call does not write `&`; x2c takes each argument's address. Passing a
 reference parameter to another reference parameter forwards the same object.
-The argument must be an addressable lvalue whose storage remains live for the
-call.
+The argument must be an addressable lvalue of the referenced type whose
+storage remains live for the call. A pointer, `NULL` or `0` is a compile
+error; to pass the object a pointer `p` addresses, write `*p`.
 
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership
@@ -1628,7 +1629,8 @@ int main(void) {
 ```
 
 `meta` is contextual. It marks a function definition, a bodyless function
-prototype, an initialized file-static value, or a protocol adoption.
+prototype, a native function definition, an initialized file-static value, or
+a protocol adoption.
 Everywhere else it is an ordinary identifier, including as a file-scope name,
 an assignment target, and a struct field. Types need no marker: compile-time
 code can use any type the compiler sees.
@@ -1639,7 +1641,9 @@ calls the compiler's copy. The declared signature must match that function
 exactly. A function the compiler does not link can come from a loaded
 [native module](../guide/meta-functions.md#native-modules). A prototype for
 a function that neither supplies is accepted, and compile-time code that
-calls it is diagnosed. See
+calls it is diagnosed. `meta native` before a function definition declares
+that function native in the same way, and its body is compiled only for the
+program. See
 [native C functions](../guide/meta-functions.md#native-c-functions).
 
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, adopts the
@@ -3020,8 +3024,9 @@ cleanup rules apply to guarded arms too.
 
 `try` requires a following filtered `catch`, `finally`, or both.
 
-`raise %(CODE (KEY VALUE)...);` records one structured `Error`. `CODE` and
-every `KEY` are bare `Symbol`s read by this syntax; each `VALUE` is one
+`raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY`
+is a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol`
+or `$name`, a variable converted to `Symbol`; each `VALUE` is one
 expression. Values are restricted recursively to `Null`/`nil`, numeric and enum
 values, `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
@@ -3039,7 +3044,9 @@ catch: return -1;
 
 The newest `Error` is matched as `%(CODE @DETAIL)`. Filtered arms use the same
 pattern and binder rules as `match`; `?name` declares a `Var`, `*name`
-declares a `List`, and the first matching arm runs. A bare `catch:` is the
+declares a `List`, and the first matching arm runs. The code position takes a
+bare `Symbol`, a binder, or any single pattern, so
+`%((!or ?code bad-enc conv-range) *cause)` selects either code and binds it. A bare `catch:` is the
 optional default and must be last. Every filter expression is evaluated once
 when the `try` is entered.
 

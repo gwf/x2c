@@ -81,8 +81,6 @@ static inline int _line_end(String str, int start, int keep_ends, int *next) {
   return keep_ends ? *next : end;
 }
 
-meta List String.split_n(String str, String sep, int max_splits);
-
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
     A null `str` returns `nil`. A null or empty `sep` returns `str` as one
@@ -91,7 +89,7 @@ meta List String.split_n(String str, String sep, int max_splits);
     `List` pools are released.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
-List String.split_n(String str, String sep, int max_splits) {
+meta native List String.split_n(String str, String sep, int max_splits) {
   if (!str) return %();
   Array results = [], int start = 0, splits = 0;
   while (start >= 0) {
@@ -105,8 +103,6 @@ List String.split_n(String str, String sep, int max_splits) {
   }
   return results.list_free();
 }
-
-meta List String.split(String str, String sep);
 
 /** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
     Separators are not coalesced, so adjacent ones produce empty fields and
@@ -123,12 +119,7 @@ meta List String.split(String str, String sep);
     ```
     Raises: the same causes as `String.split_n`.
 */
-List String.split(String str, String sep) => str.split_n(sep, -1);
-
-meta List String.split_lines(String str, int keep_ends);
-meta Split String.words(String str);
-meta Split String.lines(String str);
-meta Split String.splits(String str, String sep);
+meta native List String.split(String str, String sep) => str.split_n(sep, -1);
 
 /** Splits `str` into a `List` of lines.
     LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
@@ -141,7 +132,7 @@ meta Split String.splits(String str, String sep);
     Raises: `<alloc-fail>` or `<size-limit>` while constructing fields or the
     result.
 */
-List String.split_lines(String str, int keep_ends) {
+meta native List String.split_lines(String str, int keep_ends) {
   if (!str) return %();
   Array results = [], int start = 0;
   while (start < str.len()) {
@@ -207,7 +198,7 @@ static int _splits_next(Split split, int *cursor, String *out) {
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
-Split String.words(String str) => _new(str, NULL, _words_next);
+meta native Split String.words(String str) => _new(str, NULL, _words_next);
 
 /** Returns a lazy cursor over lines in `str`, with endings removed.
     LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
@@ -222,7 +213,7 @@ Split String.words(String str) => _new(str, NULL, _words_next);
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
 */
-Split String.lines(String str) => _new(str, NULL, _lines_next);
+meta native Split String.lines(String str) => _new(str, NULL, _lines_next);
 
 /** Returns a lazy cursor over fields separated by `sep`.
     Separators are not coalesced, so adjacent separators produce empty
@@ -236,7 +227,8 @@ Split String.lines(String str) => _new(str, NULL, _lines_next);
     `sep`; both actual owning pools must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
 */
-Split String.splits(String str, String sep) => _new(str, sep, _splits_next);
+meta native Split String.splits(String str, String sep) =>
+  _new(str, sep, _splits_next);
 
 /** Yields the next field and advances a caller-owned position on success.
     Position must start at zero and thereafter retain only values written by

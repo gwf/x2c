@@ -104,8 +104,6 @@ $map.core.family(
   _record_key, _record_value,
   _reinsert_error, _insert_error);
 
-meta Map Map.new_capacity(unsigned capacity);
-
 /** Returns a fresh empty `Map` with exactly `capacity` slots.
     `Pool` uses this internal constructor to reuse a previous child's proven
     power-of-two table size. `capacity` must be a power of two of at least
@@ -113,7 +111,7 @@ meta Map Map.new_capacity(unsigned capacity);
     Raises: `<bad-arg>` when `capacity` is not a valid table capacity, or
     `<alloc-fail>` / `<size-limit>` when initial storage cannot be allocated.
 */
-Map Map.new_capacity(unsigned capacity) {
+meta native Map Map.new_capacity(unsigned capacity) {
   if (capacity < 2 || (capacity & (capacity - 1)))
     raise %(bad-arg (owner "Map.new_capacity") (capacity $capacity));
   Map map = NULL;
@@ -140,8 +138,6 @@ Map Map.new_capacity(unsigned capacity) {
     storage cannot be allocated. */
 Map Map.new(void) => Map.new_capacity(2);
 
-meta unsigned Map.len(Map map);
-
 /** Returns the number of key/value pairs in `map`.
     O(1), and the emptiness test for a `Map`, because an empty `Map` is a
     nonnull
@@ -149,7 +145,7 @@ meta unsigned Map.len(Map map);
     entries to hold its load factor, so `Map.len` is not the allocation
     size. `map` must be nonnull.
 */
-unsigned Map.len(Map map) => map.used;
+meta native unsigned Map.len(Map map) => map.used;
 
 /** Writes the value stored under `key` to `out` and returns nonzero when the
     key is present.
@@ -226,8 +222,6 @@ Var Map.get(Map map, Var key) {
 */
 Var Map.getindex(Map map, Var key) => map.get(key);
 
-meta Var Map.get_hashed(Map map, Var key, unsigned key_hash);
-
 /** Returns the value stored under `key`, or `void` when absent, probing with
     the caller's precomputed `key_hash`.
     `key_hash` must be `Var.hash` of `key`; another value reports the key as
@@ -237,13 +231,11 @@ meta Var Map.get_hashed(Map map, Var key, unsigned key_hash);
     Raises: a cause raised by custom key equality. Hashing happens in the
     caller, so a `void` key raises there instead.
 */
-Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
+meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
   if ((void *) map == NULL) return void;
   long index = map._core_find_hashed(&key, key_hash);
   return index < 0 ? void : *_record_value(map, (unsigned) index);
 }
-
-meta Var Map.getdefault(Map map, Var key, Var defval);
 
 /** Returns the value stored under `key`, or `defval` when it is absent.
     Nothing is inserted and `Map.len` does not change, unlike `Map.setdefault`.
@@ -252,12 +244,10 @@ meta Var Map.getdefault(Map map, Var key, Var defval);
     Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key
     hashing or equality.
 */
-Var Map.getdefault(Map map, Var key, Var defval) {
+meta native Var Map.getdefault(Map map, Var key, Var defval) {
   Var val;
   return map.try_get(key, &val) ? val : defval;
 }
-
-meta Var Map.setdefault(Map map, Var key, Var defval);
 
 /** Returns the value stored under `key`, inserting `defval` first when the
     key is absent.
@@ -275,7 +265,7 @@ meta Var Map.setdefault(Map map, Var key, Var defval);
     `<alloc-fail>`, or `<invariant>` while inserting; or a cause raised by
     custom key hashing or equality.
 */
-Var Map.setdefault(Map map, Var key, Var defval) {
+meta native Var Map.setdefault(Map map, Var key, Var defval) {
   if ((void *) map == NULL) raise %(bad-arg);
   if (key is void) raise %(void-op);
   int inserted;
@@ -298,8 +288,6 @@ static void _set(Map map, Var key, Var val) {
   if (key is void || val is void) raise %(void-op);
   map._core_set(&key, &val);
 }
-
-meta void Map.set(Map map, Var key, Var val);
 
 /** Stores `val` under `key`, replacing any value already there.
     A `void` key or value raises. That refusal is what makes `void` usable
@@ -325,7 +313,7 @@ meta void Map.set(Map map, Var key, Var val);
     `<void-op>` when
     `key` or `val` is `void`; `<size-limit>`, `<alloc-fail>`, or `<invariant>`
     while inserting; or a cause raised by custom key hashing or equality. */
-void Map.set(Map map, Var key, Var val) {
+meta native void Map.set(Map map, Var key, Var val) {
   _set(map, key, val);
 }
 
@@ -439,8 +427,6 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
   return map;
 }
 
-meta Self Map.copy(Self map);
-
 /** Returns a new `Map` holding shallow copies of `map`'s key/value pairs.
     The copy is shallow and independent: inserting into one does not affect
     the other, but the two share whatever objects their keys and values point
@@ -456,7 +442,7 @@ meta Self Map.copy(Self map);
     constructing the result, or a cause raised by custom key hashing or
     equality.
 */
-Self Map.copy(Self map) => map._core_copy();
+meta native Self Map.copy(Self map) => map._core_copy();
 
 /** Exports every key and value, rebuilds the table, then moves its `Block`s.
     The borrowed `export_value` callback runs synchronously for each stored
@@ -512,8 +498,6 @@ void Map.export_to(
   map.scope = *scope;
 }
 
-meta Self Map.merge(Self map, Self other);
-
 /** Copies every entry of `other` into `map` and returns `map`.
     This mutates `map` in place, which is the difference from `Map.copy`. Keys
     already present are overwritten, so `other` wins every conflict. A null
@@ -525,7 +509,7 @@ meta Self Map.merge(Self map, Self other);
     or a cause raised by custom key hashing or equality. A supplied destination
     is not rolled back; a newly created destination is discarded.
 */
-Self Map.merge(Self map, Self other) => map._core_merge(other);
+meta native Self Map.merge(Self map, Self other) => map._core_merge(other);
 
 /** Yields the next occupied entry at or after `cursor`, advances it, and
     returns nonzero while entries remain.
@@ -631,8 +615,6 @@ Iter Map.iter(Map x, Iter dest) {
   return dest.init(x, _next, 0u);
 }
 
-meta Iter Map.keys(Map x, Iter dest);
-
 /** Initializes `dest` as an iterator over `x`, yielding each key. The mirror
     of `Map.iter`, and like it, it allocates nothing.
 
@@ -643,12 +625,10 @@ meta Iter Map.keys(Map x, Iter dest);
 
     Neither constructing the iterator nor pulling from it raises.
 */
-Iter Map.keys(Map x, Iter dest) {
+meta native Iter Map.keys(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _keys_next, 0u);
 }
-
-meta Iter Map.enumerate(Map x, Iter dest);
 
 /** Initializes `dest` as an iterator over `x`, yielding each entry as a
     `(key value)` two-element `List`. Destructure pairs with
@@ -665,7 +645,7 @@ meta Iter Map.enumerate(Map x, Iter dest);
     Constructing the iterator does not raise. Pulling may raise
     `<alloc-fail>` or `<size-limit>` while interning a pair.
 */
-Iter Map.enumerate(Map x, Iter dest) {
+meta native Iter Map.enumerate(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _enumerate_next, 0u);
 }
@@ -738,7 +718,5 @@ String Map.repr(Map map) {
   return buf;
 }
 
-meta void Map.cleanup(Map value);
-
 /** Releases this Map and both backing Blocks without freeing stored values. */
-void Map.cleanup(Map value) { value._core_free(); }
+meta native void Map.cleanup(Map value) { value._core_free(); }

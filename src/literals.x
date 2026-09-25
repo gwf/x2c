@@ -503,6 +503,8 @@ static List _parse_error_symbol(
   Compiler compiler, String owner, String role, String hint) {
   List slot = owner == "raise"
     ? compiler.try_parse_macro_slot(<expression>) : NULL;
+  if (!slot && owner == "raise" && role == "code")
+    slot = _parse_variable_reference(compiler);
   if (slot) return slot;
   Token token = compiler.token;
   if (compiler.peek(0) != <lit-atom>)
@@ -516,9 +518,9 @@ static List _parse_error_symbol(
 }
 
 /** Parses the `%()` payload following `raise` into a `(raise CODE (args ...))`
-    node and consumes its closing `)`. The code and detail keys must be bare
-    `Symbol`s, each keyed detail has one value, and payload literals bypass the
-    compiler cache.
+    node and consumes its closing `)`. The code is a bare `Symbol` or a
+    `$name` reference, detail keys are bare `Symbol`s, each keyed detail has
+    one value, and payload literals bypass the compiler cache.
 */
 List Compiler.parse_raise_literal(Compiler c) {
   c.expect(<"%(">);
@@ -571,17 +573,18 @@ static List _build_error_pattern_list(Compiler compiler, Array values) {
 }
 
 /** Parses a filtered-catch `%()` payload into a typed `List` pattern.
-    The call consumes the closing `)`. A bare code `Symbol` may be followed by
-    `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state
+    The call consumes the closing `)`. A code `Symbol`, binder, or pattern
+    may be followed by `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state
     is restored on every exit.
 */
 List Compiler.parse_catch_pattern_literal(Compiler c) {
   c.expect(<"%(">);
   $let(c.in_pattern, 1)
   $let(c.runtime_literals, 1) {
-    List code = _parse_error_symbol(
-      c, "catch filter", "code",
-      "use catch %(code (key pattern)...):");
+    List code = c.peek(0) == <lit-atom>
+      ? _parse_error_symbol(
+          c, "catch filter", "code", "use catch %(code (key pattern)...):")
+      : _parse_list_head(c);
 
     Array elements = [];
     elements.push(code);
@@ -930,7 +933,8 @@ List Compiler.end_lambda_captures(Compiler c) {
     case %(lambda-scope ?scope ? ? ?): {
       Var stored;
       if (c.semantic_binding_facts().try_get(
-            %(lambda-order $scope), &stored)) rows = stored;
+        %(lambda-order $scope), &stored))
+        rows = stored;
     }
   c.lambda_scopes = c.lambda_scopes.cdr();
   return rows.reverse();
@@ -1132,9 +1136,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
           name = c.sym.lookup(name, NULL);
           reference = cons(<&>, value.cadr());
         }
-        prescribed.push(%(
-          capture $name $reference (expr $reference (op & $value))
-        ));
+        prescribed.push(
+          %(capture $name $reference (expr $reference (op & $value))));
         continue;
       }
       Token origin = c.token;

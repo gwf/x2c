@@ -174,20 +174,11 @@ static Var _lower_name(Lowering l, String stem) {
   return Atom.intern(%"$stem$count-${l.own}");
 }
 
-/* --- a dynamic Func call ------------------------------------------------ */
-
-static Var _lower_decline(Lowering l, String why);
-
 /* --- the single scan --------------------------------------------------- */
-
-static void _lower_scan(Lowering l, Var form);
-static Var _lower_decline(Lowering l, String why);
-static Var _lower_bare(Var form);
 
 static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
-
 
 /* The ordinary cursor calls emitted by the foreach expansion. Their
    cursor and outputs can occupy frame slots instead of addressed cells. */
@@ -303,8 +294,6 @@ static void _lower_scan_bind(Lowering l, List form) {
   }
 }
 
-static int _lower_dimension(Lowering l, int id, int &out);
-
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
   List binding = NULL;
@@ -388,8 +377,6 @@ static void _lower_scan_function_value(Lowering l, List form) {
       if (!l.locals.contains(id)) _lower_scan_callee(l, name);
     }
 }
-
-static List _lower_param_type(List params);
 
 static void _lower_scan_call(Lowering l, List form) {
   match (form)
@@ -563,11 +550,21 @@ static Var _lower_number(Lowering l, List type, String text) {
 /* `*` is a sequence binder in a pattern, so the `(* char)` that selects a C
    string also matches a plain `(char)`. The spelling settles it: a string
    carries its double quote and a character literal its single quote, and a
-   character is its code, not its text. */
+   character is its code, not its text. Adjacent string literals share one
+   spelling; each piece is unescaped on its own, as C does, and joined. */
 static Var _lower_text(String spelling) {
   int len = spelling.len();
-  if (len >= 2 && spelling[0] == '"')
-    return String.new_len(spelling + 1, len - 2).unescape();
+  if (len >= 2 && spelling[0] == '"') {
+    String text = "";
+    for (int i = 0; i < len; i++) {
+      if (spelling[i] != '"') continue;
+      int start = ++i;
+      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
+      String piece = String.new_len(spelling + start, i - start).unescape();
+      text = %"$text$piece";
+    }
+    return text;
+  }
   if (len >= 3 && spelling[0] == '\'') {
     String body = String.new_len(spelling + 1, len - 2).unescape();
     return (char) (body.len() ? body[0] : 0);
@@ -581,7 +578,6 @@ static Var _lower_text(String spelling) {
    compiler cache and leaves `(cache ID)` behind, so a `match` pattern and a
    template's constant head are not visible in the syntax. The cache is a
    graph of ids over `cons`, `var` and `string` leaves. */
-static Var _lower_constant(Lowering l, Var node);
 
 static Var _lower_constant_leaf(Lowering l, List value) {
   match (value) {
@@ -593,7 +589,8 @@ static Var _lower_constant_leaf(Lowering l, List value) {
       Symbol tag = ((Type) type).scalar_tag();
       return tag ? constant.convert(tag) : constant;
     }
-    case %(expr ? (!set ?node (cache ?))):      return _lower_constant(l, node);
+    case %(expr ? (!set ?node (cache ?))):
+      return _lower_constant(l, node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return _lower_constant(l, node);
     case %(expr ? (nil)):                       return %();
@@ -709,15 +706,6 @@ static Var _lower_quoted(Lowering l, Var node) {
 
 /* --- expressions -------------------------------------------------------- */
 
-static Var _lower_expr(Lowering l, Var form);
-static Var _lower_coerce(Lowering l, List want, Var node, Var value);
-static Var _lower_assign_expr(Lowering l, Var target, Var rhs);
-static Var _lower_update_expr(
-  Lowering l, Var target, Symbol operator, Var right);
-static Symbol _lower_compound(Var operator);
-static Var _lower_step_of(Var target);
-static Var _lower_initializer(Lowering l, List type, int id, Var init);
-
 /* Reads the `type` object a place addresses. An object with a native layout
    is read from its bytes, and a record reads as its own address; any other
    place is an evaluator cell. A field place's offset goes to the access
@@ -816,8 +804,6 @@ static Var _lower_field_place(
   return %(C.at $object $offset (quote $tag));
 }
 
-static Var _lower_initializer(Lowering l, List type, int id, Var init);
-
 /* One owner for addressable x2c places. A substitution-only scalar returns
    void and continues through the existing SSA-style local path. */
 static Var _lower_place(Lowering l, Var target) {
@@ -902,8 +888,8 @@ static List _lower_args(
       int direct = callee_name && callee_name.equal("List_map") &&
         parameter.equal(%("Func")) &&
         l.lambda_signatures.try_get(value, &signature);
-      values.push(direct ? value
-                         : _lower_coerce(l, parameter, argument, value));
+      values.push(
+        direct ? value : _lower_coerce(l, parameter, argument, value));
     }
   }
   return values;
@@ -942,8 +928,9 @@ static Var _lower_application(Lowering l, Var content) {
         if (_lower_failed(l, value)) return void;
         by_value = %(C.func.value $argv $index $value);
       }
-      prepare.push(%(if (C.func.reference-type $fn $count $index)
-        (C.func.reference $argv $index $pointer $type) $by_value));
+      List reference = %(C.func.reference $argv $index $pointer $type);
+      prepare.push(
+        %(if (C.func.reference-type $fn $count $index) $reference $by_value));
       index++;
     }
   l.automatic = 1;
@@ -1046,8 +1033,6 @@ static int _lower_object_pointer_operands(Lowering l, List operands) {
          (b && _lower_null_constant(left));
 }
 
-static List _lower_pointee_layout(Lowering l, Var receiver);
-
 /* The element layout of an object pointer or C array operand, or NULL. A
    semantic handle such as String keeps its own operators. */
 static List _lower_step_layout(Lowering l, Var operand) {
@@ -1084,7 +1069,7 @@ static Var _lower_operands(
   }
   if (values.len() == 1) {
     Var only = values[0];
-    if (operator == <->) return %(_binary 0 (quote <->) $only);
+    if (operator == <->) return %(C.neg $only);
     if (operator == <+>) return only;
     if (operator == <~>) return %(_binary -1 (quote <^>) $only);
     if (operator == <!>) return %(C.not $only);
@@ -1116,10 +1101,6 @@ static Var _lower_operands(
   }
   return _lower_decline(l, "unsupported operator arity");
 }
-
-static Var _lower_boxed(Lowering l, int id, Var value, int fresh);
-static Var _lower_block(Lowering l, List items, List k);
-static Map _lower_env_copy(Lowering l);
 
 /* Capture expressions run at construction, including loads from addressed
    locals. The expression body has its own parameters and captures. */
@@ -1330,7 +1311,8 @@ static Var _lower_expr(Lowering l, Var form) {
        typed `foreach` output reads through, is the Symbol's code. */
     case %(expr ("Symbol") ?(String code)):
       return %(quote ${(Symbol) strtoul(code, NULL, 10)});
-    case %(expr ?type ?content):          return _lower_content(l, type, content);
+    case %(expr ?type ?content):
+      return _lower_content(l, type, content);
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
     case %(cons ?head ?tail):
@@ -1390,7 +1372,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       }
       return _lower_value(l, id);
     }
-    case %(parens (block *)):             return _lower_application(l, content);
+    case %(parens (block *)):
+      return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
     /* A braced value takes its type from the destination, as in C. */
     case %(cast ? (expr ? (composite (commas *items)))):
@@ -1407,7 +1390,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
         return _lower_to_type(l, target, value);
       return _lower_coerce(l, type, inner, value);
     }
-    case %(expr ?inner ?within):          return _lower_content(l, inner, within);
+    case %(expr ?inner ?within):
+      return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
     case %(op & (expr ? (ident (binding ?(int id) ?)))):
       return _lower_typed_address(l, type, id);
@@ -1491,7 +1475,6 @@ static Var _lower_content(Lowering l, List type, Var content) {
 
 /* The continuation after a block is data, not a closure: either the end of
    the function, or one more turn of the loop it sits inside. */
-static Var _lower_block(Lowering l, List items, List k);
 
 static Map _lower_env_copy(Lowering l) {
   Map copy = _lower_scratch_map(l.scratch);
@@ -1516,8 +1499,6 @@ static int _lower_depth(Lowering l) => l.pending ? l.pending.depth : 0;
    had, however many cleanups hold the point that reaches it. */
 static List _lower_here(Lowering l, List k) =>
   %(at-depth ${_lower_depth(l)} $k);
-
-static Var _lower_apply_k(Lowering l, List k);
 
 /* Leaves the innermost cleanup's body for a continuation outside it. The
    body answers the exit's tag, and the exit's code runs after the cleanup,
@@ -1572,7 +1553,8 @@ static Var _lower_apply_k(Lowering l, List k) {
 
 /* The equality adapters box Lisp equality as an int. A guard needs only
    the equality, without boxing and retesting it. Other values still need
-   C.true?: even a typed parameter may arrive through an uncoerced Lisp call. */
+   C.true?: even a typed parameter may arrive through an uncoerced Lisp
+   call. */
 static Var _lower_truth(Lowering l, Var test) {
   Var value = _lower_expr(l, test);
   if (_lower_failed(l, value)) return void;
@@ -1597,6 +1579,7 @@ static int _lower_pure(Var form) {
   if (name == "quote") return 1;
   if (name != "_binary" && name != "C.conv" && name != "C.compare" &&
       name != "C.nonzero?" && name != "C.true?" && name != "C.not" &&
+      name != "C.neg" &&
       name != "C.and" && name != "C.or" && name != "C.ternary" &&
       name != "not" && name != "eq?")
     return 0;
@@ -1630,8 +1613,6 @@ static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
   Var discarded = _lower_name(l, "discard");
   return %((lambda ($discarded) $after) $effect);
 }
-
-static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
 
 /* Inside a cleanup, a return's value is computed first and leaves in a
    cell, which every wrapper passes out after running its cleanup. */
@@ -1929,8 +1910,8 @@ static Var _lower_switch(
   if (_lower_failed(l, value)) return void;
   int bound = !_lower_pure(value);
   if (bound && l.on_loop)
-    return _lower_decline(l, "a switch subject needing a binding is on a "
-                             "loop path");
+    return _lower_decline(
+      l, "a switch subject needing a binding is on a loop path");
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
   Array arms = $auto([]);
@@ -2040,8 +2021,6 @@ static int _lower_dimension(Lowering l, int id, int &out) {
     }
   return 0;
 }
-
-static Var _lower_coerce(Lowering l, List want, Var node, Var value);
 
 /* A record's storage is zeroed bytes, the way C zero-fills an object whose
    initializer names no field. `into` names storage a loop already holds for
@@ -2468,8 +2447,9 @@ static Var _lower_update(
   if (l.declined) return void;
   if (place is not void) {
     Var slot = _lower_name(l, "place");
-    Var combined = _lower_to_type(l, want, %(
-      _binary ${_lower_load(l, want, slot)} (quote $operator) $right));
+    Var loaded = _lower_load(l, want, slot);
+    Var combined = _lower_to_type(
+      l, want, %(_binary $loaded (quote $operator) $right));
     return _lower_effect(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
       rest, k);
@@ -2802,10 +2782,12 @@ static List _lower_function(
   struct Lowering state = {
     .compiler = compiler, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
-    .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
+    .cells = _lower_scratch_map(scratch),
+    .arrays = _lower_scratch_map(scratch),
     .records = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
-    .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
+    .callees = _lower_scratch_map(scratch),
+    .cursors = _lower_scratch_map(scratch),
     .definitions = [],
     .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
@@ -2880,13 +2862,11 @@ static List _lower_function(
     function's own, in evaluation order. This method does not open a
     semantic transaction.
 */
-List Compiler.lower_comptime(Compiler compiler, List fn) =>
-  _lower_function(compiler, fn, 0);
+List Compiler.lower_comptime(Compiler c, List fn) => _lower_function(c, fn, 0);
 
 /** Lowers a REPL execution wrapper whose unresolved bindings name the
     session's persistent value table rather than program file-scope state. */
-List Compiler.lower_repl(Compiler compiler, List fn) =>
-  _lower_function(compiler, fn, 1);
+List Compiler.lower_repl(Compiler c, List fn) => _lower_function(c, fn, 1);
 
 /** Returns why the last `Compiler.lower_comptime` declined, or `NULL`. */
 String Compiler.lower_declined(Compiler compiler) {
@@ -3010,12 +2990,12 @@ static void _evaluate_lowering(Compiler compiler, String own, List forms) {
     Returns whether the lowering succeeded. This method mutates the macro
     session and does not open a semantic transaction.
 */
-int Compiler.install_comptime(Compiler compiler, List fn) {
-  String own = NULL, key = _lowering_key(compiler, fn, own);
+int Compiler.install_comptime(Compiler c, List fn) {
+  String own = NULL, key = _lowering_key(c, fn, own);
   /* The shared session installed this definition, from this file, before any
      unit opened. Installing it again would only try to replace a name an
      ancestor binds; the unit reads the shared one. */
-  if (key && compiler.shared_definition(key))
+  if (key && c.shared_definition(key))
     match (_lowered_defs()[key])
       case %(? ? ?(int shared_meta) ?): {
         lower_reached_meta = shared_meta;
@@ -3024,17 +3004,17 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   if (key)
     match (_lowered_defs()[key])
       case %(?(List forms) ?(List callees) ?(int meta) ?):
-        if (_lowered_callable(compiler, callees)) {
-          _evaluate_lowering(compiler, own, forms);
+        if (_lowered_callable(c, callees)) {
+          _evaluate_lowering(c, own, forms);
           lower_reached_meta = meta;
           return 1;
         }
-  List forms = compiler.lower_comptime(fn);
+  List forms = c.lower_comptime(fn);
   if (!forms) return 0;
   if (key)
     _retain_lowering(
-      key, forms, lower_session_callees, compiler.meta_regions[own]);
-  _evaluate_lowering(compiler, own, forms);
+      key, forms, lower_session_callees, c.meta_regions[own]);
+  _evaluate_lowering(c, own, forms);
   return 1;
 }
 
@@ -3139,8 +3119,9 @@ static int _meta_immutable(Var value) {
    program does not have, so it never becomes a constant in code. */
 static void _meta_refuse_address(Compiler c, Var value, Token site) {
   if (value.is_pointer() && value.u64)
-    c.report_error(<macro>, "compile-time result is a compiler address",
-      site, %("return data built from the pointed-to values instead"));
+    c.report_error(
+      <macro>, "compile-time result is a compiler address", site,
+      %("return data built from the pointed-to values instead"));
 }
 
 /* Builds the parser's form of one data value. Immutable values come from
@@ -3166,7 +3147,9 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
   if (value is not <array> && value is not <map>) return NULL;
   ulong address = (ulong) value.u64;
   if (address in marks)
-    c.report_error(<macro>, marks[address] == 1
+    c.report_error(
+      <macro>,
+      marks[address] == 1
         ? "compile-time result contains itself"
         : "compile-time result holds one collection twice",
       site, %("each Array and Map in a result is built separately"));
@@ -3273,11 +3256,11 @@ List Compiler.meta_value_expression(
     compile-time only.
 
     Such a function reaches a `Meta` operation, so it exists only inside a
-    compiler and the unit emits no definition for it. The call used to reach
-    the linker as an undefined symbol, which names the C spelling and not the
-    source. Another `meta` function may call it: calling one is what makes
-    the caller compile-time only too, so a body being parsed under the marker
-    is left alone.
+    compiler and the unit emits no definition for it. Unchecked, the call
+    reaches the linker as an undefined symbol, which names the C spelling
+    and not the source. Another `meta` function may call it: calling one is
+    what makes the caller compile-time only too, so a body being parsed
+    under the marker is left alone.
 */
 void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
@@ -3292,9 +3275,8 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
 }
 
 /** Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. */
-int Sym.is_bool_type(Sym sym, Type type) =>
-  sym.is_named_value_type(type, "bool") ||
-  sym.is_named_value_type(type, "_Bool");
+int Sym.is_bool_type(Sym s, Type type) =>
+  s.is_named_value_type(type, "bool") || s.is_named_value_type(type, "_Bool");
 
 static size_t _meta_align_up(size_t offset, size_t alignment) =>
   (offset + alignment - 1) / alignment * alignment;

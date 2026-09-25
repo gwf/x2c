@@ -100,3 +100,9 @@ const char *color_name(Color color) {
   }
   return NULL;
 }
+
+/* A return after a conditional report still runs. */
+int Checker.check_text(Checker c, String text) {
+  if (!text) c.report_error("none");
+  return 1;
+}

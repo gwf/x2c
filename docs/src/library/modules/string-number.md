@@ -17,7 +17,7 @@ Numeric parsing from canonical byte strings.
 <a id="String.try_double"></a>
 #### String.try_double
 
-`int String.try_double(String str, double *out)`
+`meta native int String.try_double(String str, double *out)`
 
 Parses all of `str` as a floating-point number, writing `out`.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
@@ -33,12 +33,12 @@ underflows `double` fails. It does not know the `0o` and `0b` prefixes
 that the integer parser adds, so `0b101` fails instead of yielding the
 leading zero.
 
-Source: `lib/string-number.x:93`
+Source: `lib/string-number.x:89`
 
 <a id="String.try_long"></a>
 #### String.try_long
 
-`int String.try_long(String str, long *out)`
+`meta native int String.try_long(String str, long *out)`
 
 Parses all of `str` as an integer, writing it through `out`.
 Returns 1 and writes `out` on success; returns 0 and leaves `out`
@@ -56,7 +56,7 @@ printf("%d %ld\n", " -0b101 ".try_long(&value), value);
 printf("%d\n", "42junk".try_long(&value));
 ```
 
-Source: `lib/string-number.x:41`
+Source: `lib/string-number.x:39`
 
 ## Design notes
 

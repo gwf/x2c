@@ -16,9 +16,12 @@
 
 // C compares after the usual arithmetic conversions, which `_binary`'s
 // arithmetic already performs, so the tag of a sum names the common type.
-// The lowering emits this only where the two operand types differ.
+// The lowering emits this only where the two operand types differ. An
+// infinite or NaN sum carries its own tag, which is no conversion target;
+// its order is the same in double.
 (defun C.compare (a op b)
-  (let ((tag (Var.tag (_binary a '+ b))))
+  (let* ((sum (Var.tag (_binary a '+ b)))
+         (tag (if (member sum '(+inf -inf nan)) 'f64 sum)))
     (_binary (C.conv a tag) op (C.conv b tag))))
 
 // x2c truth: nil is false, a number is false at zero, a C pointer is false
@@ -35,6 +38,13 @@
         (true true)))
 
 (defun C.not (a) (if (C.true? a) 0 1))
+
+// C negation keeps the operand's type. A floating zero is multiplied by -1 in
+// its own type, since `0 - 0.0` is `+0.0` where C gives `-0.0`.
+(defun C.neg (a)
+  (if (eq? (Var.kind a) 'floating)
+      (if (C.true? a) (_binary 0 '- a) (_binary (C.conv -1 (Var.tag a)) '* a))
+      (_binary 0 '- a)))
 
 // A value reaching `bool` is 0 or 1, and reads as the int C promotes it to.
 (defun C.bool (a) (if (C.true? a) 1 0))

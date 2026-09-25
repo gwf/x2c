@@ -242,9 +242,7 @@ List Diff_lines(String old, String new){
     lo ++;
   }
   int tail = 0;
-  while(old_hi > lo && new_hi > lo && _same(&(d), old_hi - 1, new_hi - 1)){
-    old_hi --, new_hi --, tail ++;
-  }
+  while(old_hi > lo && new_hi > lo && _same(&(d), old_hi - 1, new_hi - 1)) old_hi --, new_hi --, tail ++;
   if(_myers(&(d), lo, old_hi, new_hi) < 0) _replace(&(d), lo, old_hi, new_hi);
   for(int i = old_hi;  i < old_hi + tail;  i ++) _emit(&(d), 1248074, Var_string(Array_getindex(d.old, i)));
   return List_reverse(d.edits);

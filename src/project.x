@@ -475,10 +475,9 @@ static Array _target_sources(
   sources.free();
   excluded.free();
   kept.sort();
-  foreach (String path, kept) {
+  foreach (String path, kept)
     if (!(x2c_source_file(path) || path.endswith(".c")))
       _error_name(project, 0, "manifest source is not .x or .c", path);
-  }
   return kept;
 }
 
@@ -703,8 +702,9 @@ static void _resolve_dependencies(Project project, CliRequest request) {
   Array rows = [];
   for (ProjectDependency entry = project.dependencies; entry;
        entry = entry.next)
-    rows.push(install_require(
-      request, entry.name, entry.version, _locked_row(locked, entry)));
+    rows.push(
+      install_require(
+        request, entry.name, entry.version, _locked_row(locked, entry)));
   _write_lock(path, rows.list_free());
 }
 

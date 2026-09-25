@@ -877,10 +877,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
     Var _x2c_macro_cursor_output_8;
     while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
       path = Var_string(_x2c_macro_cursor_output_8);
-      {
-        if(!(x2c_source_file(path) || String_endswith(path, _97))) _error_name(project, 0, _98, path);
-      }
-
+      if(!(x2c_source_file(path) || String_endswith(path, _97))) _error_name(project, 0, _98, path);
     }
 
   }

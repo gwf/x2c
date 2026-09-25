@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/indent-below-first.x:4:1: parse: inconsistent indentation
+  int main(void):
+  ^
+

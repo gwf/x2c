@@ -11,7 +11,6 @@
 #pragma once
 #include "common.x"
 
-/* Explicit ownership cleanup for an initialized automatic local. */
 protocol Cleanup(T) {
   void T.cleanup(T);
 }

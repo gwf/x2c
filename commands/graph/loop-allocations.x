@@ -9,9 +9,6 @@ typedef struct LoopAllocations *LoopAllocations;
 
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
-List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path);
-List LoopAllocations.finish(List units, int limit);
-
 #pragma private
 
 static void _loop_increment(Map counts, List key, int amount) {
@@ -34,146 +31,127 @@ static void _loop_collect(
   String operation = NULL;
   Symbol direct_kind = 0;
   if (loop_depth) {
-    direct_kind = Lifetime.loop_allocation_kind(
-      compiler, node, operation
-    );
-    if (direct_kind)
-      direct.push(%(
+    direct_kind = Lifetime.loop_allocation_kind(compiler, node, operation);
+    if (direct_kind) {
+      List event = %(
         direct-allocation $path $function $visibility
         $direct_kind $operation $use
         ${project_location(compiler, path, origin)} $loop_depth
-      ));
+      );
+      direct.push(event);
+    }
   }
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
       _loop_collect(
         compiler, definitions, inner, path, function, visibility,
-        next_origin.integer(), loop_depth, use, direct, pending
-      );
+        next_origin.integer(), loop_depth, use, direct, pending);
       return;
     }
     case %(while ?condition ?body): {
       _loop_collect(
         compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending
-      );
+        origin, loop_depth + 1, <condition>, direct, pending);
       _loop_collect(
         compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending
-      );
+        origin, loop_depth + 1, <nested>, direct, pending);
       return;
     }
     case %(do ?body ?condition): {
       _loop_collect(
         compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending
-      );
+        origin, loop_depth + 1, <nested>, direct, pending);
       _loop_collect(
         compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending
-      );
+        origin, loop_depth + 1, <condition>, direct, pending);
       return;
     }
     case %(for ?initial ?condition ?increment ?body): {
       _loop_collect(
         compiler, definitions, initial, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending
-      );
+        origin, loop_depth, <nested>, direct, pending);
       _loop_collect(
         compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending
-      );
+        origin, loop_depth + 1, <condition>, direct, pending);
       _loop_collect(
         compiler, definitions, increment, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending
-      );
+        origin, loop_depth + 1, <nested>, direct, pending);
       _loop_collect(
         compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending
-      );
+        origin, loop_depth + 1, <nested>, direct, pending);
       return;
     }
     case %(return ? ?expression): {
       _loop_collect(
         compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <returned>, direct, pending
-      );
+        origin, loop_depth, <returned>, direct, pending);
       return;
     }
     case %(stmnt ?expression): {
       _loop_collect(
         compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <discarded>, direct, pending
-      );
+        origin, loop_depth, <discarded>, direct, pending);
       return;
     }
     case %(expr ? ?inner): {
       _loop_collect(
         compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending
-      );
+        origin, loop_depth, use, direct, pending);
       return;
     }
     case %(parens ?inner): {
       _loop_collect(
         compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending
-      );
+        origin, loop_depth, use, direct, pending);
       return;
     }
     case %(cast ?declaration ?expression): {
       _loop_collect(
         compiler, definitions, declaration, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending
-      );
+        origin, loop_depth, <nested>, direct, pending);
       _loop_collect(
         compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, use, direct, pending
-      );
+        origin, loop_depth, use, direct, pending);
       return;
     }
     case %(op = ?left ?right): {
       _loop_collect(
         compiler, definitions, left, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending
-      );
+        origin, loop_depth, <nested>, direct, pending);
       _loop_collect(
         compiler, definitions, right, path, function, visibility,
-        origin, loop_depth, <assigned>, direct, pending
-      );
+        origin, loop_depth, <assigned>, direct, pending);
       return;
     }
     case %(call ?callee (!set ?arguments (args *))): {
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, name, NULL
-        );
-        if (target && !List.equal(target, %(computed)))
-          pending.push(%(
+          compiler, definitions, node, name, NULL);
+        if (target && !List.equal(target, %(computed))) {
+          List event = %(
             allocation-return $target $path $function $visibility
             $name $use ${project_location(compiler, path, origin)}
             $loop_depth
-          ));
+          );
+          pending.push(event);
+        }
       }
       _loop_collect(
         compiler, definitions, callee, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending
-      );
+        origin, loop_depth, <nested>, direct, pending);
       foreach (Var argument, cdr(arguments))
         _loop_collect(
           compiler, definitions, argument, path, function, visibility,
-          origin, loop_depth, <argument>, direct, pending
-        );
+          origin, loop_depth, <argument>, direct, pending);
       return;
     }
   }
   foreach (Var child, node)
     _loop_collect(
       compiler, definitions, child, path, function, visibility,
-      origin, loop_depth, <nested>, direct, pending
-    );
+      origin, loop_depth, <nested>, direct, pending);
 }
 
 List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
@@ -189,16 +167,13 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
                           ? <static> : <public>;
         _loop_collect(
           compiler, definitions, body, path, function, visibility,
-          0, 0, <nested>, direct, pending
-        );
+          0, 0, <nested>, direct, pending);
       }
   direct.sort();
   pending.sort();
   return %(
     loop-allocation-unit
-    (lifetime ${Lifetime.analyze_unit(
-      compiler, ast, path, definitions
-    )})
+    (lifetime ${Lifetime.analyze_unit(compiler, ast, path, definitions)})
     (direct @{direct.list_free()})
     (pending @{pending.list_free()})
   );
@@ -259,18 +234,10 @@ static List _loop_candidate(List key, List events) {
         if (loop_depth < depth.integer()) loop_depth = depth.integer();
       }
 
-  int direct_pooled = _loop_count(
-    counts, %(allocation direct pooled)
-  );
-  int direct_scoped = _loop_count(
-    counts, %(allocation direct scoped)
-  );
-  int helper_pooled = _loop_count(
-    counts, %(allocation helper pooled)
-  );
-  int helper_scoped = _loop_count(
-    counts, %(allocation helper scoped)
-  );
+  int direct_pooled = _loop_count(counts, %(allocation direct pooled));
+  int direct_scoped = _loop_count(counts, %(allocation direct scoped));
+  int helper_pooled = _loop_count(counts, %(allocation helper pooled));
+  int helper_scoped = _loop_count(counts, %(allocation helper scoped));
   int returned = _loop_count(counts, %(use returned));
   int assigned = _loop_count(counts, %(use assigned));
   int argument = _loop_count(counts, %(use argument));
@@ -338,8 +305,7 @@ List LoopAllocations.finish(List units, int limit) {
         foreach (List event, unit_pending) pending.push(event);
       }
   List resolved = Lifetime.resolve_allocation_returns(
-    lifetime_units.list_free(), pending.list_free()
-  );
+    lifetime_units.list_free(), pending.list_free());
 
   Map groups = {}, totals = {}, functions = {};
   foreach (List event, direct)
@@ -349,9 +315,7 @@ List LoopAllocations.finish(List units, int limit) {
 
   Array ranked = [];
   foreach (Var (raw_key, raw_events), groups)
-    ranked.push(
-      _loop_candidate(raw_key.list(), raw_events.list())
-    );
+    ranked.push(_loop_candidate(raw_key.list(), raw_events.list()));
   ranked.sort_by(%!(List candidate) => _loop_candidate_rank(candidate));
   if (limit && (int) ranked.len() > limit)
     ranked.remslice(limit, ranked.len()).free();

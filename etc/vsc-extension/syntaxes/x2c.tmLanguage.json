@@ -24,6 +24,9 @@
 			"include": "#x2c_macro_context"
 		},
 		{
+			"include": "#x2c_builtin_macro_reference"
+		},
+		{
 			"include": "#x2c_macro_reference"
 		},
 		{
@@ -37,6 +40,9 @@
 		},
 		{
 			"include": "#x2c_protocol_header"
+		},
+		{
+			"include": "#x2c_native_meta_declaration"
 		},
 		{
 			"include": "#x2c_meta_declaration"
@@ -3679,9 +3685,16 @@
 			]
 		},
 		"x2c_meta_declaration": {
-			"match": "^\\s*(meta)\\b(?=\\s+(?!protocol\\b)(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)\\s+)*[A-Za-z_]\\w*(?:\\s*[*&]+)?\\s+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?\\s*(?:\\(|=|;|\\[))",
+			"match": "^[ \\t]*(meta)\\b(?=[ \\t]+(?!protocol\\b|native\\b)(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:[ \\t]*[*&]+)?[ \\t]+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*(?:\\(|=|;|\\[))",
 			"captures": {
 				"1": { "name": "storage.modifier.meta.x2c" }
+			}
+		},
+		"x2c_native_meta_declaration": {
+			"match": "^[ \\t]*(meta)[ \\t]+(native)\\b(?=[ \\t]+(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:[ \\t]*[*&]+)?[ \\t]+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*\\()",
+			"captures": {
+				"1": { "name": "storage.modifier.meta.x2c" },
+				"2": { "name": "storage.modifier.native.x2c" }
 			}
 		},
 		"x2c_foreach_statement": {
@@ -3908,6 +3921,13 @@
 					"name": "keyword.other.macro.using.x2c"
 				}
 			]
+		},
+		"x2c_builtin_macro_reference": {
+			"match": "(\\$)(auto|scope|let|lock)(?=[ \\t]*\\()",
+			"captures": {
+				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
+				"2": { "name": "support.function.macro.builtin.x2c" }
+			}
 		},
 		"x2c_macro_reference": {
 			"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*\\()",

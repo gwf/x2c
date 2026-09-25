@@ -25,7 +25,7 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
 | [`Toolchain.module_action`](#Toolchain.module_action) | Builds but does not start the link of a native module. |
 | [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
-| [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Captures the native preprocessor view used to identify reusable objects. |
+| [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Builds the preprocessor action whose output identifies an object. |
 | [`Toolchain.search_directories`](#Toolchain.search_directories) | Returns the directories the C compiler searches for headers and libraries without explicit options, as it reports them, plus the `lib` directory beside each reported `include` directory. |
 
 ### Functions
@@ -195,10 +195,11 @@ Source: `src/toolchain.x:180`
 Runs the configured C preprocessor without a shell.
 System headers keep their include directives when the host supports
 that mode. `fname`, `output`, and `errors` are required; output pointers
-are cleared before use. Source and include paths remain distinct argv elements, and
-stdout and stderr are captured separately. When `dependencies` is present,
-its temporary depfile is read when possible and removed on returning paths,
-including a handled `<io-fail>` while reading it. A non-returning
+are cleared before use. Source and include paths remain distinct argv
+elements, and stdout and stderr are captured separately. When
+`dependencies` is present, its temporary depfile is read when possible
+and removed on returning paths, including a handled `<io-fail>` while
+reading it. A non-returning
 `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
 Returns the shell-style child status, 127 when the preprocessor cannot
 start, or -1 for invalid arguments or local setup failure. This operation
@@ -207,16 +208,16 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:387`
+Source: `src/toolchain.x:388`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
 
 `ToolAction Toolchain.preprocess_action( Toolchain t, String source, String output, List gen_dirs)`
 
-Captures the native preprocessor view used to identify reusable objects.
-Uses the compilation's native flags and include order, retaining line
-markers so source locations also belong to the identity.
+Builds the preprocessor action whose output identifies an object.
+It uses the compilation's native flags and include order and keeps line
+markers, so source locations belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 

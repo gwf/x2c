@@ -24,8 +24,6 @@ typedef enum Json {
   JSON_NAMESPACE
 } Json;
 
-meta Var Json.parse(String source);
-
 /** A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
     The two values are process-lifetime singletons made by `Json.bool`.
 */
@@ -55,10 +53,8 @@ static struct JsonBool _json_false = { 0 }, _json_true = { 1 };
 /** Boxes a JSON boolean. */
 Var JsonBool.var(JsonBool value) => Var.new(<jsonbool>, value);
 
-meta JsonBool Var.jsonbool(Var value);
-
 /** Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. */
-JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
+meta native JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 
 /** Returns `true` or `false`. */
 String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
@@ -398,7 +394,7 @@ static Var _parse(String source, String path) {
     arrays and objects more than 512 deep, or contains a number too large for
     a `double`, an unpaired surrogate escape, or `\u0000`.
 */
-Var Json.parse(String source) => _parse(source, NULL);
+meta native Var Json.parse(String source) => _parse(source, NULL);
 
 /** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
     Raises: the causes of `Path.read_text`, or `<bad-arg>` as
@@ -452,10 +448,9 @@ static void _write_string(Buffer out, String text) {
    Python's `repr` does, and a fraction or exponent is always present so the
    text reads back as a `double`. */
 static void _write_double(Buffer out, double number) {
-  if (!isfinite(number)) {
+  if (!isfinite(number))
     raise %(conv-range (operation "Var.json")
             (why "JSON has no NaN or infinity"));
-  }
   char text[32];
   int precision = 0;
   do snprintf(text, sizeof(text), "%.*e", precision++, number);
@@ -524,10 +519,9 @@ static void _write_members(Buffer out, Map object, int pretty, int depth) {
 }
 
 static void _write(Buffer out, Var value, int pretty, int depth) {
-  if (depth > JSON_MAX_DEPTH) {
+  if (depth > JSON_MAX_DEPTH)
     raise %(size-limit (operation "Var.json")
             (why "nesting exceeds 512 levels"));
-  }
   if (value.is_null()) out.write("null");
   else if (value is <jsonbool>) out.write(value.jsonbool().str());
   else if (value is <string> || value.is_atom())

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/reference-argument-null.x:8:3: type: cannot pass a null pointer where (& int) is expected
+    set(NULL);
+    ^^^
+  note: a reference argument must name an object
+

@@ -162,7 +162,7 @@ void Compiler_tokenize(Compiler c, char * text);
 
 void Compiler_mark_completion(Compiler compiler, int position);
 
-int Compiler_at_completion(Compiler compiler);
+int Compiler_at_completion(Compiler c);
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords);
 

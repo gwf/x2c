@@ -194,10 +194,10 @@ static void _replay_cached(
 /* Read an include's text, reporting an unreadable target as a driver error. */
 static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
-  if (!c.read_source(path, text))
-    c.report_error(<driver>, "cannot read include", c.token,
-                   %("stage: collect" "include: $target" "path: $path"));
-  return text;
+  if (c.read_source(path, text)) return text;
+  c.report_error(
+    <driver>, "cannot read include", c.token,
+    %("stage: collect" "include: $target" "path: $path"));
 }
 
 /* Walk a file other than the unit cold, then restore the unit's binding
@@ -538,11 +538,9 @@ static void _file(
 
 static String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
-  if (!c.read_source(runtime, text))
-    c.report_error(
-      <driver>, "cannot read runtime source", c.token,
-      %("path: $runtime"));
-  return text;
+  if (c.read_source(runtime, text)) return text;
+  c.report_error(
+    <driver>, "cannot read runtime source", c.token, %("path: $runtime"));
 }
 
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
@@ -816,8 +814,7 @@ String interface_prelude(void) {
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
-    catch %(not-found *): continue;
-    catch %(io-fail *): continue;
+    catch %((!or not-found io-fail) *): continue;
     if (text.startswith(header)) return path;
   }
   return NULL;
@@ -852,9 +849,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     try {
       if (!compiler.read_source(path, text)) return 0;
     }
-    catch %(io-fail *): return 0;
-    catch %(bad-arg *): return 0;
-    catch %(size-limit *): return 0;
+    catch %((!or io-fail bad-arg size-limit) *): return 0;
     String value = "%08x".printf(text.hash());
     _require_retained(path.try_own());
     _require_retained(value.try_own());
@@ -878,8 +873,7 @@ static List _interface_load(Compiler c, String canonical, String path) {
   Var record = void;
   Symbol status = 0;
   try status = Lisp.read(_interface_lisp(), source, &cursor, &record);
-  catch %(incomplete *): return NULL;
-  catch %(malformed *): return NULL;
+  catch %((!or incomplete malformed) *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)
     case %(interface 4 ?(String compiler) ?(String owner) ?(String hash)
@@ -1052,8 +1046,7 @@ String interface_text(Compiler compiler, List selected) {
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
-  if (!_write_interface_entry(out, canonical, cached, selected))
-    compiler.report_error(
-      <emit>, "failed to write interface file", NULL, NULL);
-  return out;
+  if (_write_interface_entry(out, canonical, cached, selected)) return out;
+  compiler.report_error(
+    <emit>, "failed to write interface file", NULL, NULL);
 }

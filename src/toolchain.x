@@ -132,9 +132,9 @@ ToolAction Toolchain.compile_action(
       "-MT" $object "-c" $source "-o" $object),
     t.verbose, t.dry_run);
 
-/** Captures the native preprocessor view used to identify reusable objects.
-    Uses the compilation's native flags and include order, retaining line
-    markers so source locations also belong to the identity.
+/** Builds the preprocessor action whose output identifies an object.
+    It uses the compilation's native flags and include order and keeps line
+    markers, so source locations belong to the identity.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
@@ -250,8 +250,8 @@ static String _start_failure(String program, List detail) {
 static Job _start_tool(Job command, String program, String &failure) {
   Job job = NULL;
   try job = command.start();
-  catch %(not-found *detail): failure = _start_failure(program, detail);
-  catch %(io-fail *detail): failure = _start_failure(program, detail);
+  catch %((!or not-found io-fail) *detail):
+    failure = _start_failure(program, detail);
   return job;
 }
 
@@ -279,8 +279,8 @@ List Toolchain.search_directories(Toolchain t) {
   Array directories = [];
   List flags = t.cc_args;
   String output = NULL, errors = NULL;
-  if (!tool_capture(%(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
-                    output, errors)) {
+  if (!tool_capture(
+    %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"), output, errors)) {
     int listing = 0;
     foreach (String line, errors.split_lines(0)) {
       if (line.startswith("End of search list")) break;
@@ -372,10 +372,11 @@ static List _includes(List directories) =>
 /** Runs the configured C preprocessor without a shell.
     System headers keep their include directives when the host supports
     that mode. `fname`, `output`, and `errors` are required; output pointers
-    are cleared before use. Source and include paths remain distinct argv elements, and
-    stdout and stderr are captured separately. When `dependencies` is present,
-    its temporary depfile is read when possible and removed on returning paths,
-    including a handled `<io-fail>` while reading it. A non-returning
+    are cleared before use. Source and include paths remain distinct argv
+    elements, and stdout and stderr are captured separately. When
+    `dependencies` is present, its temporary depfile is read when possible
+    and removed on returning paths, including a handled `<io-fail>` while
+    reading it. A non-returning
     `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
     Returns the shell-style child status, 127 when the preprocessor cannot
     start, or -1 for invalid arguments or local setup failure. This operation

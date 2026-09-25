@@ -92,7 +92,8 @@ use it when working with Lisp code already in the compiler session.
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. Functions that
 need compiler queries, explicit compile-time calls or source-template
-construction are exceptions: they only run during translation. We will reach those after ordinary calculations.
+construction are exceptions: they only run during translation. We will
+reach those after ordinary calculations.
 
 ## Compute the arguments too
 
@@ -229,7 +230,8 @@ int main(void) {
 ```
 
 A bodyless `meta` prototype declares a native C function for compile-time
-code. [Native C functions](#native-c-functions) below describes which
+code, and `meta native` before a definition does the same for the function
+it defines. [Native C functions](#native-c-functions) below describes which
 functions the compiler provides.
 
 At file scope, `meta` can also advertise one initialized static value to
@@ -241,13 +243,13 @@ meta static int compile_counter = 0;
 ```
 
 The emitted program keeps the ordinary C declarations and initializers.
-Compile-time code gets separate per-translation-unit values built from the
-same source initializers, so compile-time mutation never changes the
-eventual program's object. An explicit dollar call reads and writes the
-compile-time values; an ordinary call reads the program's. Each value lives in bytes the compile-time session
-owns, so taking its address and reading or writing through a correctly typed
-pointer has the same aliasing effect as in C. `const` prevents compile-time
-writes.
+Compile-time code gets separate per-translation-unit values built from the same
+source initializers, so compile-time mutation never changes the eventual
+program's object. An explicit dollar call reads and writes the compile-time
+values; an ordinary call reads the program's. Each value lives in bytes the
+compile-time session owns, so taking its address and reading or writing through
+a correctly typed pointer has the same aliasing effect as in C. `const`
+prevents compile-time writes.
 
 A function-local `static` has no compile-time lowering, so a meta function
 that declares one declines like any other unsupported form.
@@ -317,6 +319,40 @@ callable and adapts it.
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
 witness of that conformance the way a bodyless prototype would.
 
+### Native definitions
+
+A function that has an x2c body can be declared native where it is defined.
+Write `native` after `meta`:
+
+```x2c
+/** Returns the number of set bits in `value`. */
+meta native int bits(unsigned value) {
+  int count = 0;
+  for (; value; value &= value - 1) count++;
+  return count;
+}
+```
+
+This means the same as a bodyless `meta` prototype followed by the ordinary
+definition. The body is compiled only for the program, never lowered to
+Lisp, so it may use any C. Compile-time code that calls the function runs
+the compiler's native copy, and the signature must match that copy just as a
+prototype's must. `native` applies only to functions; before any other
+declaration it is an error:
+
+```text
+sample.x:1:1: parse: a native meta declaration must be a function
+  meta native static int value = 3;
+  ^^^^
+```
+
+`native` is a marker only directly after `meta` and before a declaration.
+Elsewhere, including as a type name after `meta`, it is an ordinary
+identifier.
+
+Keep the bodyless prototype for a function that has no x2c body, such as
+`sin` from the C library.
+
 The compiler checks a `meta` body's storage against what each native callee
 allocates and keeps; see [Regions](regions.md). The runtime's own functions
 state this in a table. For any other native function, the compiler infers
@@ -385,15 +421,10 @@ write `$sin(1.0)` to compute the value during translation.
 ## Native modules
 
 A native module lets compile-time code call functions from your own
-project. Declare each function with a bodyless `meta` prototype and define
-it as usual:
+project. Define each function with `meta native`:
 
 ```x2c
-meta int triple(int);
-
-#pragma private
-
-int triple(int x) { return 3 * x; }
+meta native int triple(int x) { return 3 * x; }
 ```
 
 Save that as `helpers.x` and build it as a module:
@@ -402,9 +433,9 @@ Save that as `helpers.x` and build it as a module:
 x2c build --kind meta-module --output helpers.so helpers.x
 ```
 
-The module contains every function that a bodyless `meta` prototype in its
-own sources declares. Code that includes the prototype can call the
-function during translation when the compiler loads the module:
+The module contains every function that a `meta native` definition or a
+bodyless `meta` prototype in its own sources declares. Code that includes
+the declaration can call the function during translation when the compiler loads the module:
 
 <!-- ignore: the sample needs helpers.x and the module built from it -->
 ```x2c,ignore
@@ -430,8 +461,8 @@ x2c run --native-module helpers.so helpers.x main.x
 `$nine()` runs the module's `triple` during translation. The ordinary call
 `triple(5)` uses the copy linked into the program, so `helpers.x` is also
 one of the program's sources. `--native-module` works with `translate`,
-`build`, `run`, and `repl`, and the REPL accepts the same bodyless
-prototype.
+`build`, `run`, and `repl`, and the REPL accepts a bodyless prototype for
+the same function.
 
 A module function may take or return a handle:
 
@@ -491,8 +522,9 @@ before it loads any of the module's code:
 x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
 ```
 
-Every function the module exports needs a bodyless `meta` prototype in the
-module's sources, and a module whose sources declare none fails to build.
+Every function the module exports needs a `meta native` definition or a
+bodyless `meta` prototype in the module's sources, and a module whose sources
+declare none fails to build.
 
 A module can call any runtime function, because the compiler links the
 whole runtime. This holds for a compiler built from a checkout and for one
@@ -916,7 +948,7 @@ means feasible in principle, not scheduled or promised support.
 | `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
 | Postfix increment expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. Prefix increments on locals and reference arguments are supported. |
 | Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
-| Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
+| Structs with bitfields, array members, anonymous members or layout attributes; arrays of structs | **Gap:** compute a layout for these shapes. A `packed` struct is a compile error. Other structs use native bytes in C layout. |
 | Unions | **Gap:** model overlapping storage in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
@@ -1517,8 +1549,9 @@ their tags from it.
 ### Names the compile-time library already defines
 
 A unit's compile-time session inherits the compiler's own Lisp library and
-cannot replace one of its definitions. A macro file or a `$(...)` form that
-defines an inherited name reports:
+cannot replace one of its definitions. A `meta` function is installed under
+its C name, so `meta int add(int x)` reports that it could not be installed.
+A macro file or a `$(...)` form that defines an inherited name reports:
 
 ```text
 sample.x:2:1: macro: compile-time Lisp evaluation failed

@@ -139,7 +139,7 @@ function activate(context) {
   }
 
   const watcher = vscode.workspace.createFileSystemWatcher(
-    "**/*.{x,xh,xc,x2c,xmacro,xlisp,toml,h}"
+    "**/*.{x,xh,xc,x2c,xmacro,xp,xpmacro,xlisp,toml,h}"
   );
   function diskChanged() {
     for (const service of services.values()) service.invalidate();

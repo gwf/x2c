@@ -72,8 +72,8 @@ List Compiler.parse_governed(Compiler c, AstPos position) {
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
-    items.push(position == AST_BLOCK ? c.parse_block_item()
-                                     : c.parse_statement());
+    items.push(
+      position == AST_BLOCK ? c.parse_block_item() : c.parse_statement());
     /* A directive inside the statement may close the group; those after its
        last token precede the next item. */
     int pending = 0;
@@ -283,8 +283,9 @@ static List _match_capture_temporaries(Compiler c, List types, Array locals) {
   foreach (List row, types) match (row)
     case %(?name ?type): {
       String temporary = c.fresh_name("match_value");
-      declarations.push(_match_capture_declaration(
-        c, %("Var"), temporary, %(expr () (ident ($name))), 1));
+      declarations.push(
+        _match_capture_declaration(
+          c, %("Var"), temporary, %(expr () (ident ($name))), 1));
       locals.push(%($name $type $temporary));
     }
   return declarations.list_free();
@@ -294,8 +295,9 @@ static List _match_capture_locals(Compiler c, Array locals) {
   Array declarations = [];
   foreach (List row, locals) match (row)
     case %(?name ?type ?temporary):
-      declarations.push(_match_capture_declaration(
-        c, type, name, %(expr () (ident ($temporary))), 0));
+      declarations.push(
+        _match_capture_declaration(
+          c, type, name, %(expr () (ident ($temporary))), 0));
   return declarations.list_free();
 }
 
@@ -538,10 +540,10 @@ List Compiler.parse_block_item(Compiler c) {
     temporary `Sym` scopes opened by the statement have been closed.
 */
 List Compiler.parse_statement(Compiler c) {
-  c.__complete_here(<statement>, %(
-    "if" "while" "for" "do" "return" "case" "break" "continue"
-    "goto" "try" "raise" "defer" "match" "switch" "default" "with"
-  ));
+  c.__complete_here(
+    <statement>,
+    %("if" "while" "for" "do" "return" "case" "break" "continue" "goto"
+      "try" "raise" "defer" "match" "switch" "default" "with"));
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
   /* A `with` alias records its source expression, not a temporary. Its `Sym`

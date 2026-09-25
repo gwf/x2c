@@ -88,10 +88,8 @@ Buffer Atom.write_repr(Atom value, Buffer out) {
 
 #include <stdlib.h>
 
-meta int Var.is_atom(Var value);
-
 /** Reports whether `value` is an exact-spelling `Atom`. */
-int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
+meta native int Var.is_atom(Var value) => value is <symbol> || value is <lsym>;
 
 /** Returns the exact spelling of `atom` as a `String`.
     A compact `Atom` is decoded and canonicalized through the active pool

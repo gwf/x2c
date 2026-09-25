@@ -7,14 +7,6 @@
 
 typedef struct Lifetime *Lifetime;
 
-Symbol Lifetime.loop_allocation_kind(
-  Compiler compiler, List node, String &operation);
-List Lifetime.analyze_unit(
-  Compiler compiler, List ast, String path, Map definitions);
-List Lifetime.finish(List units);
-List Lifetime.allocation_returns(List units, String wanted);
-List Lifetime.resolve_allocation_returns(List units, List pending);
-
 #pragma private
 
 #include <string.h>
@@ -56,9 +48,8 @@ static Type _lifetime_expression_type(Var value) {
 
 static Type _lifetime_binding_type(Lifetime lifetime, List binding) {
   Var stored;
-  return lifetime.compiler.semantic_binding_facts().try_get(
-           %(type $binding), &stored
-         ) && stored is <list>
+  Map facts = lifetime.compiler.semantic_binding_facts();
+  return facts.try_get(%(type $binding), &stored) && stored is <list>
        ? stored.list().type() : NULL;
 }
 
@@ -139,14 +130,12 @@ static Symbol _lifetime_region_allocation_kind(
     }
   }
   Symbol kind = Lifetime.loop_allocation_kind(
-    lifetime.compiler, node, operation
-  );
+    lifetime.compiler, node, operation);
   if (kind) return kind;
   List arguments;
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   if (!name) return 0;
   kind = _lifetime_result_kind(name);
   if (kind) operation = name;
@@ -200,8 +189,7 @@ static void _lifetime_end_region(Lifetime lifetime, int id, int deferred) {
         lifetime.regions[id] = %(
           region $identity $kind $isolated ${deferred ? 1 : 0}
           $deferred $owner ${project_location(
-            lifetime.compiler, lifetime.path, lifetime.origin
-          )}
+            lifetime.compiler, lifetime.path, lifetime.origin)}
         );
 }
 
@@ -228,14 +216,11 @@ static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
     case %(cast *): return %(unresolved);
   }
   String operation = NULL;
-  Symbol kind = _lifetime_region_allocation_kind(
-    lifetime, node, operation
-  );
+  Symbol kind = _lifetime_region_allocation_kind(lifetime, node, operation);
   if (kind) return %(kind $kind);
   String name;
   List target = project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   if (!name) return %(other);
   if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
     return _lifetime_summary_fact(lifetime, arguments[1]);
@@ -287,8 +272,7 @@ static int _lifetime_wrapped_allocation(Lifetime lifetime, Var value) {
   }
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   return name && Compiler.region_wrapper(name) && arguments &&
          arguments.len() > 1
        ? _lifetime_wrapped_allocation(lifetime, arguments[1]) : 0;
@@ -303,8 +287,7 @@ static int _lifetime_export_result(Lifetime lifetime, Var value) {
   }
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   if (!name) return 0;
   if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
     return _lifetime_export_result(lifetime, arguments[1]);
@@ -365,13 +348,10 @@ static void _lifetime_replace_return_fact(
   List node = value, arguments;
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   if (name && Compiler.region_wrapper(name) && arguments &&
       arguments.len() > 1)
-    _lifetime_replace_return_fact(
-      lifetime, arguments[1], replacement
-    );
+    _lifetime_replace_return_fact(lifetime, arguments[1], replacement);
 }
 
 static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
@@ -389,8 +369,7 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
   }
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, node, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, node, name, &arguments);
   if (arguments) {
     if (!_lifetime_known_call(name))
       foreach (Var argument, cdr(arguments)) {
@@ -398,12 +377,9 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
         List cause = %(
           call ${lifetime.path} ${lifetime.function}
           ${name ? name : %"computed"} ${project_location(
-            lifetime.compiler, lifetime.path, lifetime.origin
-          )}
+            lifetime.compiler, lifetime.path, lifetime.origin)}
         );
-        if (id) {
-          _lifetime_unresolve(lifetime, id, cause);
-        }
+        if (id) _lifetime_unresolve(lifetime, id, cause);
         _lifetime_replace_return_fact(lifetime, argument, %(unresolved));
       }
     foreach (Var argument, cdr(arguments))
@@ -419,8 +395,7 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
   if (id) return id;
   String operation = NULL;
   Symbol allocation_kind = _lifetime_region_allocation_kind(
-    lifetime, value, operation
-  );
+    lifetime, value, operation);
   int region = allocation_kind
              ? _lifetime_region(lifetime, allocation_kind) : 0;
   if (region) {
@@ -435,8 +410,7 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
   List arguments;
   String name;
   List target = project_call_target(
-    lifetime.compiler, lifetime.definitions, value, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, value, name, &arguments);
   if (name && Compiler.region_wrapper(name) && arguments &&
       arguments.len() > 1)
     return _lifetime_expression(lifetime, arguments[1]);
@@ -450,12 +424,10 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
       lifetime.allocations[id] = %(
         pending-allocation $id $target $name
         $scope_region $pool_region known ${project_location(
-          lifetime.compiler, lifetime.path, lifetime.origin
-        )}
+          lifetime.compiler, lifetime.path, lifetime.origin)}
       );
-      lifetime.pending_allocations.push(%(
-        pending-allocation $target $scope_region $pool_region
-      ));
+      lifetime.pending_allocations.push(
+        %(pending-allocation $target $scope_region $pool_region));
       return id;
     }
   }
@@ -468,8 +440,7 @@ static int _lifetime_context_open(
   List arguments;
   String name;
   project_call_target(
-    lifetime.compiler, lifetime.definitions, value, name, &arguments
-  );
+    lifetime.compiler, lifetime.definitions, value, name, &arguments);
   if (!name) return 0;
   isolated = name == "Context_open_isolated" ||
               name == "Context_open_isolated_named";
@@ -480,14 +451,12 @@ static int _lifetime_context_open(
 static void _lifetime_bind(Lifetime lifetime, List binding, Var expression) {
   Type target = _lifetime_binding_type(lifetime, binding);
   List return_fact = _lifetime_typed_summary_fact(
-    lifetime, expression, target
-  );
+    lifetime, expression, target);
   if (lifetime.return_bindings.contains(binding)) {
     List previous = lifetime.return_bindings[binding];
-    if (!List.equal(previous, return_fact)) {
+    if (!List.equal(previous, return_fact))
       match (previous)
         case %((!or kind call) *): lifetime.summary_unresolved = 1;
-    }
   }
   lifetime.return_bindings[binding] = return_fact;
   int previous_allocation = lifetime.bindings.contains(binding)
@@ -531,17 +500,17 @@ static void _lifetime_emit_unresolved(Lifetime lifetime, int id) {
 
 static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
   lifetime.return_facts.push(
-    _lifetime_typed_summary_fact(lifetime, expression, target)
-  );
+    _lifetime_typed_summary_fact(lifetime, expression, target));
   String operation = NULL;
   Symbol direct = _lifetime_region_allocation_kind(
-    lifetime, expression, operation
-  );
-  if (direct)
-    lifetime.allocation_returns.push(%(
+    lifetime, expression, operation);
+  if (direct) {
+    List row = %(
       return ${lifetime.path} ${lifetime.function} $direct $operation
       ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
-    ));
+    );
+    lifetime.allocation_returns.push(row);
+  }
   Type source = _lifetime_expression_type(expression);
   if (!_lifetime_preserves_value(lifetime, source, target)) return;
   int id = _lifetime_expression(lifetime, expression);
@@ -558,14 +527,14 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
             _lifetime_emit_unresolved(lifetime, id);
             return;
           }
-          lifetime.findings.push(%(
+          List finding = %(
             finding dangling-return ${lifetime.path}
             ${lifetime.function} $kind $operation
             (allocated $allocated) (ended $ended)
             (returned ${project_location(
-              lifetime.compiler, lifetime.path, lifetime.origin
-            )})
-          ));
+              lifetime.compiler, lifetime.path, lifetime.origin)})
+          );
+          lifetime.findings.push(finding);
         }
       }
       return;
@@ -584,17 +553,17 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
                   ? lifetime.allocation_unresolved[id].list() : NULL;
       Symbol final_status = lifetime.uncertain_allocations.contains(id)
                           ? <unresolved> : status.symbol();
-      lifetime.pending_returns.push(%(
+      List pending = %(
         pending-return ${lifetime.path} ${lifetime.function}
         $target $name $final_status
         (scope ${_lifetime_owner(lifetime, scope.integer())})
         (pool ${_lifetime_owner(lifetime, pool.integer())})
         (allocated $allocated)
         (returned ${project_location(
-          lifetime.compiler, lifetime.path, lifetime.origin
-        )})
+          lifetime.compiler, lifetime.path, lifetime.origin)})
         (causes @causes)
-      ));
+      );
+      lifetime.pending_returns.push(pending);
       return;
     }
   }
@@ -617,8 +586,6 @@ static void _lifetime_transfer(Lifetime lifetime, int id) {
       );
   }
 }
-
-static void _lifetime_statement(Lifetime lifetime, Var value, int nested);
 
 static void _lifetime_block(Lifetime lifetime, List statements, int nested) {
   Map saved_bindings = lifetime.bindings;
@@ -681,19 +648,15 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
       List arguments;
       String name;
       project_call_target(
-        lifetime.compiler, lifetime.definitions, cleanup, name, &arguments
-      );
+        lifetime.compiler, lifetime.definitions, cleanup, name, &arguments);
       if (name == "Scope_release")
-        _lifetime_end_region(
-          lifetime, _lifetime_scope_region(lifetime), 1
-        );
+        _lifetime_end_region(lifetime, _lifetime_scope_region(lifetime), 1);
       else if (name == "Context_close" && arguments &&
                arguments.len() > 1) {
         List binding = _lifetime_binding(arguments[1]);
         if (binding)
           _lifetime_end_region(
-            lifetime, _lifetime_context_region(lifetime, binding), 1
-          );
+            lifetime, _lifetime_context_region(lifetime, binding), 1);
       }
       return;
     }
@@ -723,17 +686,14 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
       List arguments;
       String name;
       project_call_target(
-        lifetime.compiler, lifetime.definitions, expression, name, &arguments
-      );
+        lifetime.compiler, lifetime.definitions, expression, name, &arguments);
       if (name == "Scope_retain") {
         int id = ++lifetime.next_region;
         lifetime.regions[id] = %(region $id scope 0 1 0 none none);
         return;
       }
       if (name == "Scope_release") {
-        _lifetime_end_region(
-          lifetime, _lifetime_scope_region(lifetime), 0
-        );
+        _lifetime_end_region(lifetime, _lifetime_scope_region(lifetime), 0);
         return;
       }
       if (name == "Scope_move" && arguments && arguments.len() > 1) {
@@ -748,8 +708,7 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
         List binding = _lifetime_binding(arguments[1]);
         if (binding)
           _lifetime_end_region(
-            lifetime, _lifetime_context_region(lifetime, binding), 0
-          );
+            lifetime, _lifetime_context_region(lifetime, binding), 0);
         return;
       }
       _lifetime_scan_calls(lifetime, expression);
@@ -799,10 +758,11 @@ List Lifetime.analyze_unit(
           return_facts.push(%(unresolved));
         Symbol visibility = ((Type) type).is_static()
                           ? <static> : <public>;
-        functions.push(%(
+        List summary = %(
           function ${state.target} ${state.function} $visibility
           (returns @{return_facts.list_free()})
-        ));
+        );
+        functions.push(summary);
         regions += state.next_region;
         allocations += state.direct_allocations;
         transfers += state.transfers;
@@ -870,8 +830,7 @@ static Map _lifetime_summaries(List functions, Map publics) {
       case %(function ?target ?name public (returns *)):
         publics[name] = cons(
           target,
-          publics.contains(name) ? publics[name].list() : NULL
-        );
+          publics.contains(name) ? publics[name].list() : NULL);
   for (int pass = 0; pass < functions.len(); pass++) {
     int changed = 0;
     foreach (List function, functions) {
@@ -881,9 +840,7 @@ static Map _lifetime_summaries(List functions, Map publics) {
           target = function_target;
       if (summaries.contains(target)) continue;
       Symbol kind;
-      if (_lifetime_resolve_summary(
-            function, publics, summaries, kind
-          )) {
+      if (_lifetime_resolve_summary(function, publics, summaries, kind)) {
         summaries[target] = kind;
         changed = 1;
       }
@@ -934,16 +891,12 @@ List Lifetime.allocation_returns(List units, String wanted) {
 
 List Lifetime.resolve_allocation_returns(List units, List pending) {
   Map publics = {};
-  Map summaries = _lifetime_summaries(
-    _lifetime_functions(units), publics
-  );
+  Map summaries = _lifetime_summaries(_lifetime_functions(units), publics);
   Array resolved = [];
   foreach (List row, pending)
     match (row)
       case %(allocation-return ?target *payload): {
-        Symbol kind = _lifetime_resolved_kind(
-          target, publics, summaries
-        );
+        Symbol kind = _lifetime_resolved_kind(target, publics, summaries);
         if (kind)
           resolved.push(%(allocation-return $kind @payload));
       }
@@ -978,22 +931,16 @@ static void _lifetime_finish_return(
       allocated = allocation_location, returned = return_location;
       causes = return_causes;
     }
-  Symbol allocation_kind = _lifetime_resolved_kind(
-    target, publics, summaries
-  );
+  Symbol allocation_kind = _lifetime_resolved_kind(target, publics, summaries);
   if (!allocation_kind) {
     List scoped_owner = _lifetime_pending_owner(<scoped>, scoped, pooled);
     List pooled_owner = _lifetime_pending_owner(<pooled>, scoped, pooled);
     if (_lifetime_owner_ended(scoped_owner) ||
         _lifetime_owner_ended(pooled_owner))
-      unresolved.push(%(
-        call $path $function $name $allocated
-      ));
+      unresolved.push(%(call $path $function $name $allocated));
     return;
   }
-  List owner = _lifetime_pending_owner(
-    allocation_kind, scoped, pooled
-  );
+  List owner = _lifetime_pending_owner(allocation_kind, scoped, pooled);
   if (!_lifetime_owner_ended(owner) || status == <moved>) return;
   if (status == <unresolved> || causes) {
     foreach (List cause, causes)
@@ -1001,11 +948,13 @@ static void _lifetime_finish_return(
     return;
   }
   match (owner)
-    case %(region ? ?region_kind ? ? ? ? ?ended):
-      findings.push(%(
+    case %(region ? ?region_kind ? ? ? ? ?ended): {
+      List finding = %(
         finding dangling-return $path $function $region_kind $name
         (allocated $allocated) (ended $ended) (returned $returned)
-      ));
+      );
+      findings.push(finding);
+    }
 }
 
 List Lifetime.finish(List units) {
@@ -1037,9 +986,7 @@ List Lifetime.finish(List units) {
       }
   functions.sort();
   Map publics = {};
-  Map summaries = _lifetime_summaries(
-    functions.list_free(), publics
-  );
+  Map summaries = _lifetime_summaries(functions.list_free(), publics);
   foreach (List allocation, pending_allocations)
     match (allocation)
       case %(pending-allocation ?target ?scope ?pool): {
@@ -1049,9 +996,7 @@ List Lifetime.finish(List units) {
           allocation_count++;
       }
   foreach (List pending, pending_returns)
-    _lifetime_finish_return(
-      pending, publics, summaries, findings, unresolved
-    );
+    _lifetime_finish_return(pending, publics, summaries, findings, unresolved);
   findings.sort();
   unresolved.sort();
   int finding_count = findings.len(), unresolved_count = unresolved.len();

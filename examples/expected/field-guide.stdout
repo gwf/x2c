@@ -1,0 +1,12 @@
+count: 3
+name: Ada Lovelace
+Hello, Ada! You have 3 messages.
+array: [ 10, 25, 30 ]; second: 25
+Ada: 15; Grace: 0
+list: ("plan" "write" "compile" "run"); original: ("write" "compile" "run")
+shared tail: yes
+answer: 43
+answer now: forty-three
+phase compile: member 1, index 1
+doubled: ( 2 4 6 ); original: ( 1 2 3 )
+match: Ada scored 15

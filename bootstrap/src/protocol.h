@@ -11,7 +11,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration);
 
 void Compiler_rebuild_protocols(Compiler compiler, Map symbols);
 
-String Compiler_reverse_converter_spelling(Compiler compiler, String base_name, String infix, String participant);
+String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
 
 List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
 

@@ -321,9 +321,8 @@ inline int MachineSlot.prefix_equal(
   MachineSlot *slot, List input, int length, MachineStats *stats) {
   if (stats) stats.range_comparisons++;
   List expected, end = NULL;
-  if (slot.kind == MACHINE_SLOT_VALUE) {
+  if (slot.kind == MACHINE_SLOT_VALUE)
     expected = slot.value;
-  }
   else {
     if (slot.span.length != length) return 0;
     expected = slot.span.begin;
@@ -515,7 +514,7 @@ MachineView MachineProgram.view(MachineProgram program) {
 
 /* Return the exact byte size of the program's single packed allocation. */
 size_t MachineProgram.bytes(MachineProgram program) => _program_bytes(
-    program.length, program.const_count, program.binder_count);
+  program.length, program.const_count, program.binder_count);
 
 /* Copy a prepared builder with a selected root into one immutable Scope
    allocation. Return null for an ineligible or rootless builder. The producer

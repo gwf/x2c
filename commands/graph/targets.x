@@ -4,13 +4,6 @@
 
 #include "compiler.x"
 
-Map project_function_targets(Compiler compiler, List ast, String path);
-List project_call_target(
-  Compiler compiler, Map definitions, Var value, String &name,
-  List *arguments);
-List resolve_project_target(List target, Map publics);
-List project_location(Compiler compiler, String path, int origin);
-
 #pragma private
 
 #include <string.h>
@@ -38,20 +31,17 @@ List project_call_target(
   match (node) {
     case %((!or expr at) ? ?inner):
       return project_call_target(
-        compiler, definitions, inner, name, arguments
-      );
+        compiler, definitions, inner, name, arguments);
     case %((!or stmnt parens) ?inner):
       return project_call_target(
-        compiler, definitions, inner, name, arguments
-      );
+        compiler, definitions, inner, name, arguments);
     case %(call
            (expr ?
              (ident (!set ?binding (binding ? ?spelling))))
            (!set ?call_arguments (args *))): {
       if (arguments) *arguments = call_arguments;
       if (compiler.semantic_binding_facts().contains(
-            %(automatic $binding)
-          )) {
+        %(automatic $binding))) {
         name = "computed";
         return %(computed);
       }

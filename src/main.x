@@ -90,7 +90,7 @@ static void _translate_unit(
   Frontend frontend, String filename, String output_dir) {
   CliRequest request = frontend.request;
   ParsedUnit unit;
-  int ok = frontend.start(filename, &unit);
+  int ok = frontend.start(filename, unit);
   defer unit.close();
   Compiler compiler = unit.compiler;
   if (!ok) {
@@ -276,8 +276,7 @@ static int _translate_workers(
 static List _imported_packages(String path) {
   String text = NULL;
   try text = Path.read_text(path);
-  catch %(not-found *): return NULL;
-  catch %(io-fail *): return NULL;
+  catch %((!or not-found io-fail) *): return NULL;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.scan();
   Array names = [];
@@ -308,8 +307,7 @@ static void _preload_package_modules(CliRequest c, Map unit_dirs) {
     String directory = _unit_output_dir(c, unit_dirs, input);
     String depfile = %"$directory/${Path.stem(input)}.d", text = NULL;
     try text = Path.read_text(depfile);
-    catch %(not-found *): continue;
-    catch %(io-fail *): continue;
+    catch %((!or not-found io-fail) *): continue;
     foreach (String dependency, translation_depfile_parse(text)) {
       String package = x2c_package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;

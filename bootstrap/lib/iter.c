@@ -133,13 +133,13 @@ Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 180};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 159};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
   List list = Var_list(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 184};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 163};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
@@ -183,7 +183,7 @@ int Iter_try_next(Iter iter, Var * out){
     return 0;
   }
   if(Var_is_void(out[0])){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 243};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 222};
     x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
     __builtin_unreachable();
   }
@@ -255,7 +255,7 @@ static int _range_general_next(Iter iter, Var * out){
 Iter range(int start, int end, int step, Iter iter){
   if(! Iter_truth(iter)) return NULL;
   if(! step){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "range",.line = 327};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "range",.line = 304};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("range")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -564,10 +564,7 @@ int Iter_any(Iter iter, Func pred){
     Var _x2c_macro_item_1;
     while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
       item = _x2c_macro_item_1;
-      {
-        if(Var_truth(_apply1(pred, item))) return 1;
-      }
-
+      if(Var_truth(_apply1(pred, item))) return 1;
     }
 
   }
@@ -578,9 +575,7 @@ int Iter_all(Iter iter, Func pred){
   Var item;
   if(! Iter_try_next(iter, & item)) return 1;
   if(! pred) return 0;
-  do{
-    if(! Var_truth(_apply1(pred, item))) return 0;
-  }
+  do if(! Var_truth(_apply1(pred, item))) return 0;
   while(Iter_try_next(iter, & item));
   ;
   return 1;
@@ -594,10 +589,7 @@ Var Iter_find(Iter iter, Func pred){
     Var _x2c_macro_item_2;
     while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
       item = _x2c_macro_item_2;
-      {
-        if(Var_truth(_apply1(pred, item))) return item;
-      }
-
+      if(Var_truth(_apply1(pred, item))) return item;
     }
 
   }

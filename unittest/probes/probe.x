@@ -23,12 +23,13 @@ void probe_fail(String message) {
   exit(1);
 }
 
-/** Returns the C compiler flags for the mode in `etc/build-mode`, which is
-    `debug` when the file is absent. An unknown mode ends the probe with
-    status 2.
+/** Returns the C compiler flags for the build mode: `etc/build-mode.local`
+    when present, else `etc/build-mode`, else `debug`. An unknown mode ends
+    the probe with status 2.
 */
 List probe_mode_flags(Path root) {
-  Path file = root.join("etc/build-mode");
+  Path file = root.join("etc/build-mode.local");
+  if (!file.exists()) file = root.join("etc/build-mode");
   String mode = file.exists() ? file.read_text().strip(NULL) : "debug";
   if (mode == "debug") return %("-g");
   if (mode == "optimize") return %("-O2");

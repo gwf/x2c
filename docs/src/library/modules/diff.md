@@ -17,7 +17,7 @@ Line differences between two texts.
 <a id="Diff.lines"></a>
 #### Diff.lines
 
-`List Diff.lines(String old, String new)`
+`meta native List Diff.lines(String old, String new)`
 
 Returns the line edits that turn `old` into `new`: a `List` of
 `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
@@ -25,18 +25,18 @@ each line's ending removed. Two equal texts give only `same` forms.
 Past 2,000 edits the differing middle is one run of deletions followed
 by one run of insertions.
 
-Source: `lib/diff.x:121`
+Source: `lib/diff.x:120`
 
 <a id="Diff.unified"></a>
 #### Diff.unified
 
-`String Diff.unified(String old, String new, String old_name, String new_name)`
+`meta native String Diff.unified( String old, String new, String old_name, String new_name)`
 
 Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:141`
+Source: `lib/diff.x:139`
 
 ## Public types
 

@@ -72,7 +72,7 @@ static List _atom_intern(String spelling);
 
 static List Emitter__literal(Emitter emitter, List ast);
 
-static List Emitter__var_collection(Emitter emitter, String type, List elements);
+static List Emitter__var_collection(Emitter e, String type, List elements);
 
 static List Emitter__binding(Emitter emitter, List ast);
 
@@ -1434,9 +1434,9 @@ String int_str(int);
 
 int List_len(List);
 
-static List Emitter__var_collection(Emitter emitter, String type, List elements){
+static List Emitter__var_collection(Emitter e, String type, List elements){
   if(! List_truth(elements)) return cons(String_var(String_join(NULL, cons(String_var(type), cons(String_var(_77), NULL)))), NULL);
-  List emitted = Emitter__commas(emitter, Emitter__emit(emitter, elements));
+  List emitted = Emitter__commas(e, Emitter__emit(e, elements));
   String count = String_join(NULL, cons(String_var(int_str(List_len(elements))), NULL));
   return cons(String_var(String_join(NULL, cons(String_var(type), cons(String_var(_78), cons(String_var(type), cons(String_var(_79), NULL)))))), cons(String_var(count), cons(_37, cons(List_var(emitted), _4))));
 }

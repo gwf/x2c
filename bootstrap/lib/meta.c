@@ -251,19 +251,16 @@ default: break;
   }
 List arguments = NULL; {
   List parameter;  List _x2c_macro_object_0 = value;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-    parameter = Var_list(_x2c_macro_cursor_output_0); {
-
+    parameter = Var_list(_x2c_macro_cursor_output_0);
   {
     List _x2c_match_expr = parameter;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_68), &_x2c_match_capture)) {Var identity = _x2c_match_values[0];  arguments = cons(List_var(x2c_expr_ident(Var_list(identity))), arguments);  break;
-    }
-    default: break;
+  }
+  default: break;
     }
   }
-  }
-
 }
 }
 return List_reverse(arguments);

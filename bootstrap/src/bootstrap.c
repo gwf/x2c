@@ -511,37 +511,30 @@ void bootstrap_write_interfaces(Bootstrap b){
   int volatile status = 127;
   {
     ExceptionFrame _x2c_exception_frame_3;
-    static MatchCaptureSite _x2c_catch_arms_3[2];
-    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 2, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_3[2];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_3 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
+    static MatchCaptureSite _x2c_catch_arms_3[1];
+    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_3[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_3 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_3);
-    List _x2c_catch_pattern_4 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_3[1] = List_var(_x2c_catch_pattern_4);
   }
   ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) status = Job_status(translate);  else {x2c_exception_landed(& _x2c_exception_frame_3); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
-      int _x2c_catch_selected_3 = x2c_error_catch_selected(_x2c_error_handler_3);
       x2c_error_catch_detach(_x2c_error_handler_3);
       x2c_exception_mark_handled(&_x2c_exception_frame_3);
-      if (_x2c_catch_selected_3 == 0) {{
+       {{
 
       }
 
     }
-    else {{
-
-    }
 
   }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_3);
+    _x2c_error_handler_3 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_3);
+    __builtin_unreachable();
+  }
 
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_3);
-  _x2c_error_handler_3 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_3);
-  __builtin_unreachable();
-}
 }
 }
 x2c_error_catch_close(_x2c_error_handler_3);
@@ -568,25 +561,20 @@ Array outputs = Array_new();
 }
 {
   ExceptionFrame _x2c_exception_frame_4;
-  static MatchCaptureSite _x2c_catch_arms_4[2];
-  static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 2, ERROR_CATCH_PENDING, -1 };
-  Var _x2c_catch_patterns_4[2];
-  if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_5 = cons(Symbol_var(31862161386376), cons(Symbol_var(58262293080), NULL));
-  _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_5);
-  List _x2c_catch_pattern_6 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
-  _x2c_catch_patterns_4[1] = List_var(_x2c_catch_pattern_6);
+  static MatchCaptureSite _x2c_catch_arms_4[1];
+  static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
+  Var _x2c_catch_patterns_4[1];
+  if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_4 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL));
+  _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_4);
 }
 ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) file_publish(Array_list_free(outputs));  else {x2c_exception_landed(& _x2c_exception_frame_4); {
   if (x2c_exception_is_error_target(&_x2c_exception_frame_4)){
-    int _x2c_catch_selected_4 = x2c_error_catch_selected(_x2c_error_handler_4);
     x2c_error_catch_detach(_x2c_error_handler_4);
     x2c_exception_mark_handled(&_x2c_exception_frame_4);
-    if (_x2c_catch_selected_4 == 0) {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_4, 0));
+     {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_4, 0));
     x2c_host_error(detail);
   }
-  else {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_4, 0));
-  x2c_host_error(detail);
-}
+
 }
 else{
   x2c_error_catch_close(_x2c_error_handler_4);
