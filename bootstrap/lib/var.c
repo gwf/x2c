@@ -469,6 +469,30 @@ static TagId _tag2id(Symbol tag){
   return(TagId) SymbolSet_index(tags, tag);
 }
 
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+unsigned long Var_tag_top(Symbol tag){
+  TagId id = _tag2id(tag);
+  if(id == _invalid_){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_tag_top",.line = 103};
+    x2c_error_raise_n(& _x2c_error_site_0, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.tag_top")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+  return taginfo[id].top;
+}
+
+unsigned long Var_tag_bottom(Symbol tag){
+  TagId id = _tag2id(tag);
+  if(id == _invalid_){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "Var_tag_bottom",.line = 111};
+    x2c_error_raise_n(& _x2c_error_site_1, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.tag_bottom")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+  return taginfo[id].bottom;
+}
+
 static inline unsigned long _bitmask(unsigned n){
   return(1ul << n) - 1;
 }
@@ -494,8 +518,6 @@ static VarWideBox _wide_box(Var v){
 }
 
 Var Map_getindex(Map, Var);
-
-Var Symbol_var(Symbol);
 
 static VarDescriptor * _declared(Symbol tag){
   if((void *) declared == NULL) return NULL;
@@ -811,8 +833,6 @@ void x2c_descriptor_thread_start_begin(void);
 
 int x2c_descriptor_registration_frozen(void);
 
-Var String_var(String);
-
 int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
@@ -824,8 +844,8 @@ int Var_register_object_tag(Symbol tag){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     if(x2c_descriptor_registration_frozen()){
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 328};
-      x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 344};
+      x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
       __builtin_unreachable();
     }
     if(! tag){
@@ -1084,8 +1104,8 @@ static Var _new_wide(TagId id, VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 570};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 586};
+      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1155,8 +1175,8 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 671};
-      x2c_error_raise_n(& _x2c_error_site_2, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 687};
+      x2c_error_raise_n(& _x2c_error_site_4, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1205,8 +1225,8 @@ static Var _new_integer(TagId id, long value){
     case _u48_ : case _i48_ : bits = 48;
     break;
     default:{
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 713};
-      x2c_error_raise_n(& _x2c_error_site_3, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 729};
+      x2c_error_raise_n(& _x2c_error_site_5, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1218,8 +1238,8 @@ static Var _new_integer(TagId id, long value){
     if((long long) value < min ||(long long) value > max){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 721};
-        x2c_error_raise_n(& _x2c_error_site_4, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 737};
+        x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1230,8 +1250,8 @@ static Var _new_integer(TagId id, long value){
     if(value < 0 ||(unsigned long long) value > mask){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 727};
-        x2c_error_raise_n(& _x2c_error_site_5, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 743};
+        x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1251,8 +1271,8 @@ static Var _new_integer(TagId id, long value){
 static Var _new_symbol(TagId id, unsigned long u){
   static unsigned long const offset = taginfo[_symbol_].top << 48;
   if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 739};
-    x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 755};
+    x2c_error_raise_n(& _x2c_error_site_8, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
   Var v ={
@@ -1268,8 +1288,8 @@ Var Var_new(Symbol tag, ...){
   VarDescriptor * descriptor = NULL;
   int row = id == _invalid_ ? _custom_row(tag, &(descriptor)) : - 1;
   if(id == _invalid_ && row < 0){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "Var_new",.line = 772};
-    x2c_error_raise_n(& _x2c_error_site_7, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 788};
+    x2c_error_raise_n(& _x2c_error_site_9, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
   va_start(ap, tag);
@@ -1277,8 +1297,8 @@ Var Var_new(Symbol tag, ...){
     void * pointer = va_arg(ap, void *);
     va_end(ap);
     if((uintptr_t) pointer & 0x7){
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "Var_new",.line = 778};
-      x2c_error_raise_n(& _x2c_error_site_8, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 794};
+      x2c_error_raise_n(& _x2c_error_site_10, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
     if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
@@ -1291,8 +1311,8 @@ Var Var_new(Symbol tag, ...){
       if((id == _array_ || id == _map_) && ! pointer){
         va_end(ap);
         {
-          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 789};
-          x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+          static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "Var_new",.line = 805};
+          x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
           __builtin_unreachable();
         }
 
@@ -1328,8 +1348,8 @@ Var Var_new(Symbol tag, ...){
     break;
     default: va_end(ap);
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 817};
-      x2c_error_raise_n(& _x2c_error_site_10, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_new",.line = 833};
+      x2c_error_raise_n(& _x2c_error_site_12, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -1344,8 +1364,8 @@ Var Var_box_record(Symbol tag, const void * record, size_t size){
   VarDescriptor * descriptor = NULL;
   int row = _custom_row(tag, &(descriptor));
   if(row < 0){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 832};
-    x2c_error_raise_n(& _x2c_error_site_11, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 848};
+    x2c_error_raise_n(& _x2c_error_site_13, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
   if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, Scope_memdup(record, size));

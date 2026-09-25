@@ -1308,18 +1308,19 @@ variant type for dynamic typing.
 
 Public functions:
 
-`Var.known_tag`, `x2c_var_descriptor_index`, `Var.custom_descriptor_index`,
-`x2c_var_custom_descriptor`, `x2c_var_declare`, `x2c_var_tag_descriptor_index`,
-`Var.encoding_valid`, `Var.register_object_tag`, `Var.tag`, `Var.is`,
-`Var.kind`, `Var.is_floating`, `Var.is_integer`, `Var.is_pointer`,
-`Var.is_reference`, `Var.is_object`, `Var.is_void`, `Var.is_null`, `Var.null`,
-`Var.is_nil`, `Var.box_long`, `Var.box_ulong`, `Var.box_long_long`,
-`Var.box_ulong_long`, `Var.box_long_double`, `Var.clone_wide`,
-`Var.move_wide_to`, `Var.wide_owner`, `Var.new`, `Var.box_record`,
-`Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
-`Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
-`Var.wide_hash`, `Var.wide_equal`, `Var.integer_compare`,
-`Var.integer_floating_compare`, `Var.wide_compare`, `Var.pointer`, `Var.parse`
+`Var.known_tag`, `Var.tag_top`, `Var.tag_bottom`, `x2c_var_descriptor_index`,
+`Var.custom_descriptor_index`, `x2c_var_custom_descriptor`, `x2c_var_declare`,
+`x2c_var_tag_descriptor_index`, `Var.encoding_valid`,
+`Var.register_object_tag`, `Var.tag`, `Var.is`, `Var.kind`, `Var.is_floating`,
+`Var.is_integer`, `Var.is_pointer`, `Var.is_reference`, `Var.is_object`,
+`Var.is_void`, `Var.is_null`, `Var.null`, `Var.is_nil`, `Var.box_long`,
+`Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
+`Var.box_long_double`, `Var.clone_wide`, `Var.move_wide_to`, `Var.wide_owner`,
+`Var.new`, `Var.box_record`, `Var.floating`, `Var.integer`, `Var.long_value`,
+`Var.ulong_value`, `Var.long_long_value`, `Var.ulong_long_value`,
+`Var.long_double_value`, `Var.wide_hash`, `Var.wide_equal`,
+`Var.integer_compare`, `Var.integer_floating_compare`, `Var.wide_compare`,
+`Var.pointer`, `Var.parse`
 
 ### [lib/varconvert.x](../lib/varconvert.x)
 
