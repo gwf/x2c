@@ -1131,7 +1131,7 @@ int Symbol_is_type_qualifier(Symbol);
 
 static List Emitter__pointer_declarator(Emitter e, List decl, List mods){
   Var first = List_car(mods);
-  if(Var_equal(first, Symbol_var(77))) return Emitter__declarator(e, cons(Symbol_var(54), decl), List_cdr(mods));
+  if(Var_equal(first, Symbol_var(77)) || Var_equal(first, Symbol_var(33330008396))) return Emitter__declarator(e, cons(Symbol_var(54), decl), List_cdr(mods));
   if(Var_equal(first, Symbol_var(54)) || Symbol_is_type_qualifier(Var_symbol(first))) return Emitter__declarator(e, cons(first, decl), List_cdr(mods));
   return List_append(mods, List_append(decl, NULL));
 }
@@ -1157,7 +1157,7 @@ static List Emitter__declarator(Emitter e, List decl, List mods){
   Symbol sym = Var_symbol(first);
   switch(sym){
     case 8794 : return Emitter__array_declarator(e, decl, NULL, List_cdr(mods));
-    case 54 : case 77 : return Emitter__pointer_declarator(e, decl, mods);
+    case 54 : case 77 : case 33330008396 : return Emitter__pointer_declarator(e, decl, mods);
     case 158121667336 : return Emitter__emit(e, List_cdr(mods));
     case 44661285196 : return cons(Symbol_var(44661285196), Emitter__declarator(e, decl, List_cdr(mods)));
   }

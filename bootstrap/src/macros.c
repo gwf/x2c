@@ -3991,7 +3991,7 @@ static List _native_signature_type(Compiler c, List signature){
       List parameters = Var_list(_x2c_match_value_16); {
         Array resolved = Array_new(); {
           Type parameter;  List _x2c_macro_object_22 = parameters;  List _x2c_macro_cursor_22 = _x2c_macro_object_22;  Var _x2c_macro_cursor_output_28;  while(List_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_28)){
-            parameter = Var_type(_x2c_macro_cursor_output_28);  Array_push(resolved, Var_equal(List_car(Type_list(parameter)), Symbol_var(77)) ? List_var(cons(Symbol_var(77), Type_list(Sym_normalize_declared_type(c -> sym, List_cdr(parameter))))) : List_var(Sym_normalize_declared_type(c -> sym, parameter)));
+            parameter = Var_type(_x2c_macro_cursor_output_28);  Array_push(resolved, (Var_equal(List_car(Type_list(parameter)), Symbol_var(77)) || Var_equal(List_car(Type_list(parameter)), Symbol_var(33330008396))) ? List_var(cons(List_car(Type_list(parameter)), Type_list(Sym_normalize_declared_type(c -> sym, List_cdr(parameter))))) : List_var(Sym_normalize_declared_type(c -> sym, parameter)));
           }
 
         }
@@ -4394,7 +4394,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2147};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2148};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }

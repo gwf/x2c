@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _120, _119, _118, _116, _115, _114, _112, _111, _108, _107, _106, _104, _103, _102, _100, _99, _98, _95, _94, _93, _91, _81, _80, _78, _77, _76, _74, _73, _72, _70, _69, _66, _65, _64, _62, _61, _55, _54, _53, _51, _50, _49, _48, _43, _39, _38, _37, _35, _34, _33, _29, _28, _27, _22, _21, _17, _16, _15, _13, _11, _10, _8;
+static List _120, _119, _118, _116, _115, _114, _112, _111, _108, _107, _106, _104, _103, _102, _100, _99, _98, _95, _94, _93, _91, _81, _80, _78, _77, _76, _74, _73, _72, _70, _69, _66, _65, _64, _62, _61, _55, _54, _53, _51, _50, _49, _48, _43, _39, _38, _37, _35, _34, _33, _22, _21, _17, _16, _15, _13, _11, _10, _8;
 
-static String _127, _126, _125, _124, _123, _122, _121, _86, _85, _84, _83, _82, _41, _25, _19;
+static String _127, _126, _125, _124, _123, _122, _121, _86, _85, _84, _83, _82, _41, _19;
 
-static Var _117, _113, _110, _109, _105, _101, _97, _96, _92, _90, _89, _88, _87, _79, _75, _71, _68, _67, _63, _60, _59, _58, _57, _56, _52, _47, _46, _45, _44, _42, _40, _36, _32, _31, _30, _26, _24, _23, _20, _18, _14, _12, _9, _7, _2, _1, _0;
+static Var _117, _113, _110, _109, _105, _101, _97, _96, _92, _90, _89, _88, _87, _79, _75, _71, _68, _67, _63, _60, _59, _58, _57, _56, _52, _47, _46, _45, _44, _42, _40, _36, _32, _31, _30, _23, _20, _18, _14, _12, _9, _7, _2, _1, _0;
 
 #include "symbolset.h"
 static int _init_guard_ = 0;
@@ -75,12 +75,6 @@ __attribute__((constructor)) static void _file_init_(void){
   _21 = cons(_20, NULL);
   _22 = cons(_18, _21);
   _23 = Symbol_var(54);
-  _24 = Symbol_var(1318234344);
-  _25 = String_new("List");
-  _26 = String_var(_25);
-  _27 = cons(_26, NULL);
-  _28 = cons(_24, _27);
-  _29 = cons(_23, _28);
   _30 = Symbol_var(104);
   _31 = Symbol_var(63322012252);
   _32 = Symbol_var(806120);
@@ -424,7 +418,6 @@ int Var_equal(Var, Var);
 int List_equal(List, List);
 
 Ast Ast_rewrite_children(Ast ast, Func per_child){
-  if(! _init_guard_) _file_init_();
   Var child;
   List _x2c_macro_original_0 = ast;
   Array _x2c_macro_rewritten_0 = NULL;
@@ -433,7 +426,7 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
     if(Var_is_row(_x2c_macro_item_3, 9, 7, 4)){
       child = _x2c_macro_item_3;
       _x2c_macro_value_0 =({
-        Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, _29);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
+        Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
           _x2c_func_argument_0
         }
         );

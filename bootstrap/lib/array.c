@@ -458,7 +458,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
     __builtin_unreachable();
   }
   Var * arr =(Var *) array -> bytes;
-  return Var_update(arr + index, op, rhs);
+  return Var_update(&(arr[index]), op, rhs);
 }
 
 Var Var_postfix(Var *, Symbol);
@@ -477,7 +477,7 @@ Var Array_postfixindex(Array array, int index, Symbol op){
     __builtin_unreachable();
   }
   Var * arr =(Var *) array -> bytes;
-  return Var_postfix(arr + index, op);
+  return Var_postfix(&(arr[index]), op);
 }
 
 Var Array_push(Array array, Var elem){

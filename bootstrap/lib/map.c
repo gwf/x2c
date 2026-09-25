@@ -687,7 +687,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
     int inserted;
     Var * stored = Map__core_get_or_insert(map, & key, & rhs, & inserted);
     if(inserted) return rhs;
-    return Var_update(stored, op, rhs);
+    return Var_update(&(* stored), op, rhs);
   }
   long index = Map__core_find_index(map, & key);
   if(index < 0){
@@ -696,7 +696,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
     __builtin_unreachable();
   }
   struct MapRecord * recs = map -> entries;
-  return Var_update(& recs[index].val, op, rhs);
+  return Var_update(&(recs[index].val), op, rhs);
 }
 
 Var Var_postfix(Var *, Symbol);
@@ -719,7 +719,7 @@ Var Map_postfixindex(Map map, Var key, Symbol op){
     __builtin_unreachable();
   }
   struct MapRecord * recs = map -> entries;
-  return Var_postfix(& recs[index].val, op);
+  return Var_postfix(&(recs[index].val), op);
 }
 
 int Map_try_del(Map map, Var key, Var * out){

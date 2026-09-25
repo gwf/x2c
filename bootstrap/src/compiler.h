@@ -150,6 +150,10 @@ void Compiler_record_source_reference(Compiler c, List binding, Type type, Token
 
 Map Compiler_semantic_binding_facts(Compiler c);
 
+List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
+
+int reference_guard_exits(List arm);
+
 Map Compiler_macro_definition_locals(Compiler compiler);
 
 String Compiler_fresh_name(Compiler compiler, String stem);

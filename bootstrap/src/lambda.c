@@ -1167,7 +1167,7 @@ static List _func_signature_literal(Compiler compiler, Type type){
 Type Type_reference(Type);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 static List _checked_func_argument(Compiler compiler, List adapter_type, Type parameter_type, List value_helper, Type value_helper_type, List reference_helper, Type reference_helper_type, List fn_binding, List argv_binding, int index, Type * storage_type){
-  if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77))){
+  if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77)) || Var_equal(List_car(Type_list(parameter_type)), Symbol_var(33330008396))){
     Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = cons(_62, cons(_136, cons(List_var(cons(_64, cons(List_var(cons(_62, cons(List_var(reference_helper_type), cons(List_var(cons(_63, cons(List_var(reference_helper), NULL))), NULL)))), cons(List_var(cons(_65, cons(List_var(cons(_62, cons(_140, cons(List_var(cons(_63, cons(List_var(fn_binding), NULL))), NULL)))), cons(List_var(cons(_62, cons(_147, cons(List_var(cons(_63, cons(List_var(argv_binding), NULL))), NULL)))), cons(List_var(_adapter_index_literal(index)), cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))))))), NULL)))), NULL))); (* storage_type) = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
   }
   Symbol tag = Sym_var_tag_for_type(compiler -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key(compiler -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))){
@@ -1437,7 +1437,7 @@ static Type _entry_type(Compiler compiler, List entry){
       case 4928588686: ;  static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_24), &_x2c_match_capture)) {return List_type(_31);  break;
 }
 case 33656922: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_33), &_x2c_match_capture)) {{
-  Type type = Type_declared(List_type_from_ast(entry));  if(Var_equal(List_car(Type_list(type)), Symbol_var(77))) return List_type(cons(Symbol_var(77), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(type)))));  return type;
+  Type type = Type_declared(List_type_from_ast(entry));  if(Var_equal(List_car(Type_list(type)), Symbol_var(77)) || Var_equal(List_car(Type_list(type)), Symbol_var(33330008396))) return List_type(cons(List_car(Type_list(type)), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(type)))));  return type;
 }
 break;
 }
@@ -1604,7 +1604,7 @@ break;
 }
 case 199448: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_327), &_x2c_match_capture)) {Var callee_type = _x2c_match_values[0];  List arguments = Var_list(_x2c_match_values[1]); {
   List parameters = NULL;  if(_typed_function_parts(Var_type(callee_type), &(parameters), NULL)) for(;  List_truth(parameters) && List_truth(arguments);  parameters = List_cdr(parameters), arguments = List_cdr(arguments)){
-    Type parameter = Var_type(List_car(parameters));  if(Var_equal(List_car(Type_list(parameter)), Symbol_var(77))) _require_capture_lvalue(c, Var_list(List_car(arguments)));
+    Type parameter = Var_type(List_car(parameters));  if(Var_equal(List_car(Type_list(parameter)), Symbol_var(77)) || Var_equal(List_car(Type_list(parameter)), Symbol_var(33330008396))) _require_capture_lvalue(c, Var_list(List_car(arguments)));
   }
 
 }
@@ -2046,7 +2046,7 @@ List Compiler_lambda_param_types(Compiler compiler, List entries){
       case 4928588686: ;  static MatchCaptureSite _x2c_match_site_61;  if (x2c_match_site_try_capture(& _x2c_match_site_61, _x2c_match_expr, List_var(_24), &_x2c_match_capture)) {Array_push(types, List_var(_31));  break;
     }
     case 33656922: ;  static MatchCaptureSite _x2c_match_site_62;  if (x2c_match_site_try_capture(& _x2c_match_site_62, _x2c_match_expr, List_var(_33), &_x2c_match_capture)) {{
-      Type type = Type_declared(List_type_from_ast(entry));  if(Var_equal(List_car(Type_list(type)), Symbol_var(77))) type = List_type(cons(Symbol_var(77), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(type)))));  Array_push(types, List_var(type));
+      Type type = Type_declared(List_type_from_ast(entry));  if(Var_equal(List_car(Type_list(type)), Symbol_var(77)) || Var_equal(List_car(Type_list(type)), Symbol_var(33330008396))) type = List_type(cons(List_car(Type_list(type)), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(type)))));  Array_push(types, List_var(type));
     }
     break;
   }
