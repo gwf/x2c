@@ -151,11 +151,19 @@ command below.
 
 Before publishing, fetch and integrate current `origin/dev`, review the
 resulting diff and generated changes, and run `git diff --check`. Commit
-subjects are short, lower-case, and present tense. Validate the final tree:
+subjects are short, lower-case, and present tense. Choose validation from the
+change being delivered, compared with current `origin/dev`, not from unrelated
+code brought in by that integration. Validate the final tree:
 
 - Code, runtime, build, test, tool, executable-example, or generated-artifact
   changes: `tools/gate-state.py ensure agent-pr-check`.
 - Documentation-only changes: `tools/gate-state.py ensure doc-check`.
+
+For example, after rebasing a plans-only edit onto a newer `dev` that changed
+compiler code, run `doc-check`; do not run `agent-pr-check` just because the
+worktree now contains those upstream commits. If a merge obscures this
+boundary, replay the authored documentation commit on current `origin/dev`
+and verify that its diff contains only documentation.
 
 The code command reuses valid evidence or runs `precommit` and the remaining
 extended checks. It owns bootstrap refresh, safe rebuild, and self-host
