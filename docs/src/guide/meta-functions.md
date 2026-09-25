@@ -797,7 +797,18 @@ so every `Var` member they implement is available: `str`, `repr`,
 `write_str`, `write_repr`, `equal`, `compare`, `contains`, `getindex`,
 `setindex`, `updateindex` and `postfixindex`, and `truth` for a Map.
 `write_str` and `write_repr` return the Buffer they were given, so their
-result belongs to that Buffer.
+result belongs to that Buffer. The `Array` Block adoption is marked too, so
+`len`, `capacity`, `truth`, `clear`, `pop`, `truncate` and `free` are
+available.
+
+`Buffer.new` and the `Buffer` writers are `meta` prototypes beside their
+definitions in `lib/buffer.x`: `reserve`, `clear`, `write`, `write_len`,
+`write_char`, `write_repeat`, `unwrite`, `pad`, `newline`, `indent`,
+`newline_indent`, `push` and `pop`. The marked `Buffer` Var adoption adds
+`str`, `repr` and `truth`. A String argument supplies a writer's text. Each
+writer returns the Buffer it was given, so returning a local
+`struct Buffer`'s address through a writer is a region error. `printf` is
+not available.
 
 Iterator producers and functional collection operations are also available in
 x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`

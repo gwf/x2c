@@ -1,10 +1,15 @@
 # Meta-capable protocols beyond Iter
 
 > Status: active - designed 2026-09-24 as step 3 of
-> [meta sequencing](meta-sequencing.md). Delivery 1 landed 2026-09-24;
-> delivery 2's compiler rule landed as `7fd8c5dd`. Deliveries 1-3 do not
-> depend on steps 1 and 2; delivery 4 follows
-> [class registration](class-registration.md).
+> [meta sequencing](meta-sequencing.md). Deliveries 1-3 landed 2026-09-24;
+> delivery 4 follows [class registration](class-registration.md).
+> In delivery 3 a String argument reaches a `const char *` writer
+> directly; only `write_len` has an adapter, which rejects a count past
+> the String's length. Delivery 3 also marks
+> `meta protocol Var(Buffer);` so meta code can read a Buffer's text.
+> Open gap: a region error is missed when a writer's result is the Buffer
+> argument of another returning writer, as in
+> `return Buffer.write(&local, "a").newline();`.
 
 ## Result
 

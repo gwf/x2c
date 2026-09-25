@@ -1592,6 +1592,15 @@ static Job _lisp_Job_start(Job job) {
   return job;
 }
 
+/* Meta text is a NUL-terminated String, so a count past its end would read
+   beyond it. */
+static Buffer _lisp_Buffer_write_len(Buffer buf, const char *text,
+                                     size_t length) {
+  if (text && strnlen(text, length) < length)
+    raise %(bad-arg (operation "Buffer.write_len"));
+  return buf.write_len(text, length);
+}
+
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype. The `x2c_` operations
 // `meta.x` declares exist only inside a compiler, which supplies them.
@@ -1733,12 +1742,7 @@ $(def lisp.native.target.rows (append '(
   // The core value types: their operations are the library's own, so a
   // Lisp session and a compiled program build the same List, String, Map,
   // and Array. `etc/lisp-values.xlisp` names them.
-  (Array_truth)
   (String_truth)
-  (Array_capacity)
-  (Array_clear)
-  (Array_pop)
-  (Array_truncate)
   (Var_list)
   (Var_array)
   (Var_map)
@@ -1780,7 +1784,6 @@ $(def lisp.native.target.rows (append '(
   (List_assoc)
   (List_array)
   (Array_new)
-  (Array_len)
   (Array_push)
   (Array_take_last)
   (Array_shift)
@@ -1802,6 +1805,7 @@ $(def lisp.native.target.rows (append '(
   // Adapters that replace generated direct targets come last to win.
   (_lisp_List_job (as List_job))
   (_lisp_Job_start (as Job_start))
+  (_lisp_Buffer_write_len (as Buffer_write_len))
 )))
 
 macro Expression $lisp.native.target.map() =>

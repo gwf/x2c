@@ -44,11 +44,11 @@ protocol Contains(T) {
    beside those converters in tokenizer.x, file.x, and string.x. A `meta`
    adoption also lets compile-time code call the members it implements. */
 
-protocol Block(Array);  protocol Block(Bytes);
+meta protocol Block(Array);  protocol Block(Bytes);
 meta protocol Iter(Array);  protocol Iter(File);  meta protocol Iter(List);
 meta protocol Iter(Map);    meta protocol Iter(String);
 
-meta protocol Var(Array);  protocol Var(Block);  protocol Var(Buffer);
+meta protocol Var(Array);  protocol Var(Block);  meta protocol Var(Buffer);
 protocol Var(Bytes);   protocol Var(File);   protocol Var(Iter);
 protocol Var(List);    meta protocol Var(Map);  protocol Var(String);
 protocol Var(Symbol);  protocol Var(ulong);
