@@ -130,7 +130,7 @@ Source: `src/ast.x:113`
 <a id="Ast.initializer_cases"></a>
 #### Ast.initializer_cases
 
-`List Ast.initializer_cases(Ast ast, List *input)`
+`List Ast.initializer_cases(Ast ast, List &input)`
 
 Returns initializer alternatives and their optional native macro input.
 
@@ -139,7 +139,7 @@ Source: `src/ast.x:242`
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
 
-`List Ast.initializer_functions(Ast ast, List *source)`
+`List Ast.initializer_functions(Ast ast, List &source)`
 
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return

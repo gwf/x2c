@@ -2159,7 +2159,7 @@ static List _resolve_content(
     }
     case %(initval *choices): {
       List header = NULL;
-      List cases = Ast.initializer_cases(content, &header);
+      List cases = Ast.initializer_cases(content, header);
       Array resolved = [];
       if (header) {
         Array inputs = [];
@@ -3553,7 +3553,7 @@ List Compiler.initializer_rows(
     match (value)
       case %(expr ? (!set ?body (initval *))): {
         List header = NULL;
-        List choices = Ast.initializer_cases(body, &header);
+        List choices = Ast.initializer_cases(body, header);
         Array following = [];
         foreach (List choice, choices) {
           (List condition, List path, Type type, List input) = choice;
@@ -3857,7 +3857,7 @@ static List _convert_composite(
           checked.push(%($condition $path $destination $value));
         }
         List header = NULL;
-        Ast.initializer_cases(terminal.caddr(), &header);
+        Ast.initializer_cases(terminal.caddr(), header);
         List choices = checked.list_free();
         if (header) choices = cons(header, choices);
         List value = %(expr () (initval @choices));

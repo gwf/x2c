@@ -141,7 +141,7 @@ static List _zero_static_initializer(Compiler compiler, List value) {
   match (value) {
     case %(expr ?type (!set ?body (initval *))): {
       List header = NULL;
-      List cases = Ast.initializer_cases(body, &header);
+      List cases = Ast.initializer_cases(body, header);
       Array zeroed = [];
       foreach (List choice, cases) {
         (List condition, List path, Type destination, List input) = choice;
@@ -186,8 +186,8 @@ static List _build_static_array_block(
     List functions = NULL;
     match (terminal)
       case %(expr ? (!set ?body (initval *))): {
-        Ast.initializer_cases(body, &header);
-        functions = Ast.initializer_functions(body, &source);
+        Ast.initializer_cases(body, header);
+        functions = Ast.initializer_functions(body, source);
       }
     Array assigned = [];
     List applicable = NULL;

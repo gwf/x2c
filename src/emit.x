@@ -994,11 +994,11 @@ static List Emitter._source_initializer(Emitter e, List function) {
 
 static List Emitter._initializer_value(Emitter e, List ast) {
   List source = NULL;
-  List functions = Ast.initializer_functions(ast, &source);
+  List functions = Ast.initializer_functions(ast, source);
   if (functions)
     return e._emit(%(call (expr () (initval @functions)) (args $source)));
   List input = NULL;
-  List cases = Ast.initializer_cases(ast, &input);
+  List cases = Ast.initializer_cases(ast, input);
   if (input)
     return e._initializer_macro(input, %(initval @cases));
   List result = NULL;
