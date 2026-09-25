@@ -25,18 +25,18 @@ each line's ending removed. Two equal texts give only `same` forms.
 Past 2,000 edits the differing middle is one run of deletions followed
 by one run of insertions.
 
-Source: `lib/diff.x:121`
+Source: `lib/diff.x:124`
 
 <a id="Diff.unified"></a>
 #### Diff.unified
 
-`String Diff.unified(String old, String new, String old_name, String new_name)`
+`String Diff.unified( String old, String new, String old_name, String new_name)`
 
 Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:141`
+Source: `lib/diff.x:143`
 
 ## Public types
 

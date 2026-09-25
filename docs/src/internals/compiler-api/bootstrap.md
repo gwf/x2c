@@ -30,7 +30,7 @@ compiler and runtime interfaces exist. The compiler object archive omits
 still creates the command directory and its empty installed manifest.
 Failure exits before the bootstrap completion marker is written.
 
-Source: `src/bootstrap.x:262`
+Source: `src/bootstrap.x:264`
 
 #### bootstrap_build_request
 
@@ -47,7 +47,7 @@ their actual canonical pool lifetimes, which may belong to ancestor pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the request.
 
-Source: `src/bootstrap.x:194`
+Source: `src/bootstrap.x:195`
 
 #### bootstrap_materialize
 
@@ -67,7 +67,7 @@ status 2.
 or `<alloc-fail>` or `<size-limit>` while reading the manifest or
 constructing the result.
 
-Source: `src/bootstrap.x:147`
+Source: `src/bootstrap.x:148`
 
 #### bootstrap_record_install
 
@@ -81,7 +81,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:339`
+Source: `src/bootstrap.x:342`
 
 #### bootstrap_write_interfaces
 
@@ -97,7 +97,7 @@ afterward. A translation that fails or cannot start prints a bootstrap
 diagnostic with any errors the compiler printed; a failed write prints
 the host error. Either exits with status 2.
 
-Source: `src/bootstrap.x:228`
+Source: `src/bootstrap.x:229`
 
 ## Public types
 

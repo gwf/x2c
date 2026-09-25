@@ -73,7 +73,7 @@ file as `source` is left as it is.
 
 **Raises:** `<not-found>` or `<io-fail>`, including for a directory `source`.
 
-Source: `lib/path.x:456`
+Source: `lib/path.x:457`
 
 <a id="Path.copy_tree"></a>
 #### Path.copy_tree
@@ -86,7 +86,7 @@ a link, and a regular file with `Path.copy_file`.
 **Raises:** `<not-found>` or `<io-fail>`, with `EINVAL` when `source` is a
 directory and `target` is that directory or inside it.
 
-Source: `lib/path.x:496`
+Source: `lib/path.x:497`
 
 <a id="Path.dirname"></a>
 #### Path.dirname
@@ -203,7 +203,7 @@ An existing directory is left as it is.
 **Raises:** `<io-fail>` when a component cannot be created or names an
 existing non-directory, or `<not-found>`.
 
-Source: `lib/path.x:387`
+Source: `lib/path.x:388`
 
 <a id="Path.modified_time"></a>
 #### Path.modified_time
@@ -227,7 +227,7 @@ different filesystems.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:508`
+Source: `lib/path.x:509`
 
 <a id="Path.read_text"></a>
 #### Path.read_text
@@ -239,7 +239,7 @@ Returns the contents of the file at `path`, or NULL when it is empty.
 **Raises:** `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
 a NUL byte.
 
-Source: `lib/path.x:526`
+Source: `lib/path.x:527`
 
 <a id="Path.remove_file"></a>
 #### Path.remove_file
@@ -250,7 +250,7 @@ Removes the file or symbolic link `path` when it exists.
 
 **Raises:** `<io-fail>` when it exists and cannot be removed.
 
-Source: `lib/path.x:400`
+Source: `lib/path.x:401`
 
 <a id="Path.remove_tree"></a>
 #### Path.remove_tree
@@ -263,7 +263,7 @@ entry that cannot be removed.
 
 **Raises:** `<io-fail>` naming the first path that could not be removed.
 
-Source: `lib/path.x:443`
+Source: `lib/path.x:444`
 
 <a id="Path.size"></a>
 #### Path.size
@@ -294,7 +294,7 @@ Creates the symbolic link `link` pointing at `target`.
 
 **Raises:** `<io-fail>` when the link cannot be created.
 
-Source: `lib/path.x:518`
+Source: `lib/path.x:519`
 
 <a id="Path.temp_dir"></a>
 #### Path.temp_dir
@@ -306,7 +306,7 @@ its path. The caller removes it, usually with `Path.remove_tree`.
 
 **Raises:** `<io-fail>` when the directory cannot be created.
 
-Source: `lib/path.x:542`
+Source: `lib/path.x:543`
 
 <a id="Path.walk"></a>
 #### Path.walk
@@ -343,7 +343,7 @@ Replaces the contents of the file at `path` with `text`.
 
 **Raises:** `<not-found>` when the directory does not exist, or `<io-fail>`.
 
-Source: `lib/path.x:532`
+Source: `lib/path.x:533`
 
 ## Public types
 

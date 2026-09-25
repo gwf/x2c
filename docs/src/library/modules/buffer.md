@@ -115,7 +115,7 @@ Source: `lib/buffer.x:314`
 | [`Buffer.reserve`](#Buffer.reserve) | Reserves room for at least `minimum` output bytes in `buf`. |
 | [`Buffer.str`](#Buffer.str) | Returns a canonical copy of `buf`'s text without consuming the `Buffer`. |
 | [`Buffer.str_free`](#Buffer.str_free) | Returns `buf.str()` and frees `buf`. |
-| [`Buffer.tabstop`](#Buffer.tabstop) | Returns the most recently pushed indentation depth. |
+| [`Buffer.tabstop`](#Buffer.tabstop) | Returns the indentation depth on top of the stack, or 0 when empty. |
 | [`Buffer.unwrite`](#Buffer.unwrite) | Removes the final `count` bytes from `buf`. |
 | [`Buffer.write`](#Buffer.write) | Appends NUL-terminated `text` to `buf`. |
 | [`Buffer.write_char`](#Buffer.write_char) | Appends the non-NUL byte `value` to `buf`. |
@@ -250,7 +250,7 @@ Source: `lib/buffer.x:367`
 
 `size_t Buffer.tabstop(Buffer buf)`
 
-Returns the most recently pushed indentation depth.
+Returns the indentation depth on top of the stack, or 0 when empty.
 
 Source: `lib/buffer.x:304`
 

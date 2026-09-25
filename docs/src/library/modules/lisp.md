@@ -69,9 +69,10 @@ Source: `lib/lisp.x:1121`
 `Var lisp_array(List layout, List values)`
 
 Builds a local C array in live native storage, shared by indexing and
-references to its elements. Initializer values already have element type.
+references to its elements. Initializer values already have element
+type.
 
-Source: `lib/lisp.x:1236`
+Source: `lib/lisp.x:1239`
 
 #### lisp_at
 
@@ -87,7 +88,7 @@ Source: `lib/lisp.x:1149`
 
 Boxes a source value at the compiler-selected native Var tag.
 
-Source: `lib/lisp.x:1194`
+Source: `lib/lisp.x:1196`
 
 #### lisp_bytes
 
@@ -137,7 +138,7 @@ Source: `lib/lisp.x:1159`
 
 Allocates the borrowed carriers for one lowered dynamic call.
 
-Source: `lib/lisp.x:1378`
+Source: `lib/lisp.x:1381`
 
 #### lisp_func_invalid
 
@@ -145,7 +146,7 @@ Source: `lib/lisp.x:1378`
 
 Uses the native rejection for an unrepresentable value argument.
 
-Source: `lib/lisp.x:1398`
+Source: `lib/lisp.x:1401`
 
 #### lisp_func_new
 
@@ -153,7 +154,7 @@ Source: `lib/lisp.x:1398`
 
 Constructs a signature-bearing Func for one lowered source callable.
 
-Source: `lib/lisp.x:1372`
+Source: `lib/lisp.x:1375`
 
 #### lisp_func_reference
 
@@ -162,7 +163,7 @@ Source: `lib/lisp.x:1372`
 Prepares an address without loading the caller's object. A non-lvalue
 supplies zero, which the ordinary reference reader rejects.
 
-Source: `lib/lisp.x:1389`
+Source: `lib/lisp.x:1392`
 
 #### lisp_func_value
 
@@ -170,7 +171,7 @@ Source: `lib/lisp.x:1389`
 
 Prepares one value without excluding the terminal void value.
 
-Source: `lib/lisp.x:1382`
+Source: `lib/lisp.x:1385`
 
 #### lisp_load
 
@@ -199,7 +200,7 @@ Reads the object of compiler layout `layout` at `offset` bytes past
 `pointer`. A record reads as its own address, which is how lowered source
 carries record values.
 
-Source: `lib/lisp.x:1204`
+Source: `lib/lisp.x:1206`
 
 #### lisp_poke
 
@@ -208,7 +209,7 @@ Source: `lib/lisp.x:1204`
 Writes `value`, already converted to the layout's type, at `offset`
 bytes past `pointer`.
 
-Source: `lib/lisp.x:1220`
+Source: `lib/lisp.x:1222`
 
 #### lisp_record_result
 
@@ -226,7 +227,7 @@ Source: `lib/lisp.x:1166`
 Copies a record, or a wide scalar's box, into storage the session owns,
 for file-scope state. `size` is the record's size.
 
-Source: `lib/lisp.x:1174`
+Source: `lib/lisp.x:1175`
 
 #### lisp_source_function
 
@@ -234,7 +235,7 @@ Source: `lib/lisp.x:1174`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp.x:1248`
+Source: `lib/lisp.x:1251`
 
 #### lisp_store
 
@@ -284,7 +285,7 @@ Applies `body` to `arguments`, then `cleanup` to the same arguments on
 every exit, including a raise out of `body`, and returns what `body`
 returned. A lowered block that holds a cleanup runs through this.
 
-Source: `lib/lisp.x:1259`
+Source: `lib/lisp.x:1262`
 
 #### lisp_void
 
@@ -420,7 +421,7 @@ Source: `lib/lisp.x:3066`
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
 
-`Var Lisp.eval_file(Lisp lisp, File source)`
+`Var Lisp.eval_file(Lisp l, File source)`
 
 Reads and evaluates every form from `file`.
 Reading starts at the current stream position, consumes through EOF, and

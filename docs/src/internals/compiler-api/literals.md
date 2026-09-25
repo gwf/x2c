@@ -54,7 +54,7 @@ Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;
 supplied canonical capture rows retain their value or reference mode.
 
-Source: `src/literals.x:1023`
+Source: `src/literals.x:1024`
 
 <a id="Compiler.capture_lambda_identifier"></a>
 #### Compiler.capture_lambda_identifier
@@ -66,7 +66,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/literals.x:947`
+Source: `src/literals.x:948`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -130,7 +130,7 @@ active return type, and capture rows come from `semantic_binding_facts`.
 Capturing lambdas have type `Func`; noncapturing lambdas retain a native
 function type.
 
-Source: `src/literals.x:1105`
+Source: `src/literals.x:1106`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal

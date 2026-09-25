@@ -62,7 +62,7 @@ Source: `lib/scope.x:794`
 <a id="Scope.malloc_finalized_in"></a>
 #### Scope.malloc_finalized_in
 
-`void *Scope.malloc_finalized_in( Scope *slot, size_t size, void (*drop)(void *) )`
+`void *Scope.malloc_finalized_in( Scope *slot, size_t size, void (*drop)(void *))`
 
 Allocates `size` bytes with finalizer `drop` in the scope held by `slot`.
 The slot-targeted form of `Scope.malloc_finalized`, with the same lazy
@@ -179,7 +179,7 @@ Releases resources owned by `Scope`.
 retain/release and push/pop boundaries remain caller
 responsibilities.
 
-Source: `lib/scope.x:1026`
+Source: `lib/scope.x:1025`
 
 ### `Scope`
 
@@ -199,7 +199,7 @@ distinct pointer the scope owns, so it is not a failure signal.
 when allocation fails. Before `Error` initialization they terminate at the
 error floor.
 
-Source: `lib/scope.x:842`
+Source: `lib/scope.x:841`
 
 <a id="Scope.calloc_in"></a>
 #### Scope.calloc_in
@@ -215,7 +215,7 @@ alone.
 count overflows, or `<alloc-fail>` when allocation fails. Before `Error`
 initialization they terminate at the error floor.
 
-Source: `lib/scope.x:855`
+Source: `lib/scope.x:854`
 
 <a id="Scope.cleanup"></a>
 #### Scope.cleanup
@@ -224,7 +224,7 @@ Source: `lib/scope.x:855`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/scope.x:1055`
+Source: `lib/scope.x:1054`
 
 <a id="Scope.destroy"></a>
 #### Scope.destroy
@@ -269,7 +269,7 @@ either.
 
 A NULL `ptr` does nothing.
 
-Source: `lib/scope.x:908`
+Source: `lib/scope.x:907`
 
 <a id="Scope.malloc"></a>
 #### Scope.malloc
@@ -325,7 +325,7 @@ check the arguments yourself when that distinction matters.
 **Raises:** `<size-limit>` or `<alloc-fail>` from the underlying allocation.
 A NULL `ptr` or zero `size` returns NULL without raising.
 
-Source: `lib/scope.x:874`
+Source: `lib/scope.x:873`
 
 <a id="Scope.memdup_in"></a>
 #### Scope.memdup_in
@@ -342,7 +342,7 @@ current region.
 `<alloc-fail>` from the underlying allocation. A NULL `ptr` or zero
 `size` returns NULL without raising.
 
-Source: `lib/scope.x:888`
+Source: `lib/scope.x:887`
 
 <a id="Scope.move"></a>
 #### Scope.move
@@ -376,7 +376,7 @@ destination scope cannot be allocated. These failures leave ownership
 unchanged. A NULL `ptr` does nothing. Before `Error` initialization they
 terminate at the error floor.
 
-Source: `lib/scope.x:958`
+Source: `lib/scope.x:957`
 
 <a id="Scope.name"></a>
 #### Scope.name
@@ -436,7 +436,7 @@ As with C, the old pointer must be treated as dead once a resize succeeds.
 allocation fails. Before `Error` initialization these failures terminate at
 the error floor.
 
-Source: `lib/scope.x:991`
+Source: `lib/scope.x:990`
 
 <a id="Scope.release"></a>
 #### Scope.release
@@ -593,7 +593,7 @@ out of its own `Scope` chain. Passing any other nonnull pointer is
 undefined
 behavior, matching `Scope.free` and `Scope.move`.
 
-Source: `lib/scope.x:922`
+Source: `lib/scope.x:921`
 
 <a id="Scope.shutdown_hook"></a>
 #### Scope.shutdown_hook

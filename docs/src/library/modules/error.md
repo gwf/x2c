@@ -32,7 +32,7 @@ Handler stack and accumulated errors.
 | [`Error.policy_get`](#Error.policy_get) | Returns the default disposition for `code`. |
 | [`Error.policy_release`](#Error.policy_release) | Releases a policy capture that no thread adopted. |
 | [`Error.policy_set`](#Error.policy_set) | Sets the default disposition for `code`. |
-| [`Error.pop`](#Error.pop) | Closes the most recently pushed observing handler. |
+| [`Error.pop`](#Error.pop) | Closes the observing handler on top of the handler stack. |
 | [`Error.push`](#Error.push) | Pushes an observing handler and returns its removal handle. |
 | [`Error.raise`](#Error.raise) | Raises one cause with optional structured detail. |
 | [`Error.ready`](#Error.ready) | Reports whether the rich `Error` runtime can currently accept raises. |
@@ -339,14 +339,13 @@ Source: `lib/error.x:872`
 
 `void Error.pop(ErrorHandler handle)`
 
-Closes the most recently pushed observing handler.
+Closes the observing handler on top of the handler stack.
 Closing truncates and reclaims every error above the handler's registration
 watermark, then unregisters it. `Error`s below the watermark remain.
-Handles
-must be popped in stack order. An out-of-order pop reaches the
+Handles must be popped in stack order. An out-of-order pop reaches the
 non-reentrant error floor; a null handle does nothing.
 
-Source: `lib/error.x:1111`
+Source: `lib/error.x:1110`
 
 <a id="Error.push"></a>
 #### Error.push
@@ -386,7 +385,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1345`
+Source: `lib/error.x:1344`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -397,7 +396,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1357`
+Source: `lib/error.x:1356`
 
 <a id="Error.restore"></a>
 #### Error.restore
@@ -517,7 +516,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error.x:1147`
+Source: `lib/error.x:1146`
 
 <a id="Error.context_open"></a>
 #### Error.context_open
@@ -533,7 +532,7 @@ close. An unavailable `Error` runtime returns NULL.
 
 **Raises:** `<alloc-fail>` when the overlay cannot be allocated.
 
-Source: `lib/error.x:1129`
+Source: `lib/error.x:1128`
 
 <a id="Error.since_in"></a>
 #### Error.since_in
