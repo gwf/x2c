@@ -822,9 +822,9 @@ static Symbol _type_kind(Token first, List base, List modifiers) {
 static List _location(Token tokens, List range) {
   match (range)
     case %(?(int start) ?(int end) *): {
-      Token last = tokens + end - 1;
-      return %((line ${tokens[start].line})
-               (span ${tokens[start].pos} ${last.pos + last.len}));
+      Token first = tokens + start, last = tokens + end - 1;
+      return %((line ${first.line})
+               (span ${first.pos} ${last.pos + last.len}));
     }
   return %((line 0) (span));
 }
@@ -858,8 +858,8 @@ void Compiler.dump_definitions(Compiler c, List ast) {
       List location = _location(tokens, span), privacy = NULL;
       match (span)
         case %(?(int start) ?(int end) ?private): {
-          Token last = tokens + end;
-          if (last[-1].type == <;>) last--;
+          Token last = tokens + end, final = last - 1;
+          if (final.type == <;>) last = final;
           text = _source_text(tokens + start, last);
           kind = _type_kind(tokens + start, base, modifiers);
           String written = c.definition_doc(tokens + start);
