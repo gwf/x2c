@@ -372,13 +372,13 @@ void worker_exit(int status) {
     or -1 when it cannot be waited. Other children stay unreaped, so the
     wait polls with a short sleep.
 */
-int worker_wait_any(long *pids, int count, int *status) {
+int worker_wait_any(long *pids, int count, int &status) {
   loop {
     for (int i = 0; i < count; i++) {
       int raw;
       pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
       if (!done || (done < 0 && errno == EINTR)) continue;
-      *status = done < 0 ? -1 : WIFEXITED(raw) ? WEXITSTATUS(raw) :
+      status = done < 0 ? -1 : WIFEXITED(raw) ? WEXITSTATUS(raw) :
                 WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
       return i;
     }

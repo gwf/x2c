@@ -52,7 +52,7 @@ static const _Sha256 _INITIAL = {{
 static inline uint32_t _rotate(uint32_t x, int n) =>
   (x >> n) | (x << (32 - n));
 
-static void _compress(_Sha256 *sha, const unsigned char *block) {
+static void _compress(_Sha256 &sha, const unsigned char *block) {
   uint32_t w[64], s[8];
   for (int i = 0; i < 16; i++)
     w[i] = (uint32_t) block[4 * i] << 24 | (uint32_t) block[4 * i + 1] << 16 |
@@ -76,7 +76,7 @@ static void _compress(_Sha256 *sha, const unsigned char *block) {
   for (int i = 0; i < 8; i++) sha.state[i] += s[i];
 }
 
-static void _absorb(_Sha256 *sha, const unsigned char *bytes, size_t count) {
+static void _absorb(_Sha256 &sha, const unsigned char *bytes, size_t count) {
   sha.length += count;
   while (count) {
     size_t take = 64 - sha.used;
@@ -92,7 +92,7 @@ static void _absorb(_Sha256 *sha, const unsigned char *bytes, size_t count) {
   }
 }
 
-static String _finish(_Sha256 *sha) {
+static String _finish(_Sha256 &sha) {
   uint64_t bits = sha.length * 8;
   unsigned char tail[72] = {0x80};
   size_t pad = (sha.used < 56 ? 56 : 120) - sha.used;
@@ -109,8 +109,8 @@ static String _finish(_Sha256 *sha) {
 /** Returns the SHA-256 digest of the bytes of `text`; NULL is empty text. */
 String String.sha256(String text) {
   _Sha256 sha = _INITIAL;
-  _absorb(&sha, (const unsigned char *) text, text.len());
-  return _finish(&sha);
+  _absorb(sha, (const unsigned char *) text, text.len());
+  return _finish(sha);
 }
 
 /** Returns the SHA-256 digest of the bytes from the current position of
@@ -121,10 +121,10 @@ String File.sha256(File file) {
   _Sha256 sha = _INITIAL;
   unsigned char bytes[BUFSIZ], size_t count;
   while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
-    _absorb(&sha, bytes, count);
+    _absorb(sha, bytes, count);
   if (ferror(file)) {
     int error = errno;
     raise %(io-fail (operation <read>) (errno $error));
   }
-  return _finish(&sha);
+  return _finish(sha);
 }

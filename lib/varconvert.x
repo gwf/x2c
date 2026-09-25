@@ -86,7 +86,7 @@ void Var.numeric_decode(Var value, X2CVarNumeric *out) {
   X2CVarNumericInfo info;
   Symbol tag = value.tag();
   if (!Var.numeric_info(tag, &info)) raise %(bad-types (source $tag));
-  _numeric_decode(value, info, out);
+  _numeric_decode(value, info, *out);
 }
 
 /** Boxes the low target-width bits of `raw` using integer `target`.
@@ -156,7 +156,7 @@ int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out) {
 /* Both callers establish valid numeric encoding and family metadata before
    payload extraction; the public decoder still owns its argument checks. */
 static void _numeric_decode(
-  Var value, X2CVarNumericInfo info, X2CVarNumeric *out) {
+  Var value, X2CVarNumericInfo info, X2CVarNumeric &out) {
   X2CVarNumeric decoded = { 0 };
   with decoded {
     _.tag = info.tag;
@@ -180,7 +180,7 @@ static void _numeric_decode(
         _.floating_value = (long double) value.decode_f64(); break;
       case <ldouble>: _.floating_value = value.long_double_value(); break;
     }
-    *out = _;
+    out = _;
   }
 }
 
@@ -292,7 +292,7 @@ Var Var.convert(Var value, Symbol target) {
     raise %(no-convert (target $target) (cause $lower));
   }
   X2CVarNumeric source;
-  _numeric_decode(value, info, &source);
+  _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, &info))
     raise %(no-convert (source $source_tag) (target $target));
   return info.floating
