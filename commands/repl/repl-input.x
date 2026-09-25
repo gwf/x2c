@@ -135,27 +135,27 @@ static int _utf8_byte_len(char c) {
 
 /* Decode one codepoint without reading beyond the available input. Invalid
  * or incomplete sequences remain independently editable bytes. */
-static uint32_t _utf8_decode(const char *s, size_t available, size_t *len) {
+static uint32_t _utf8_decode(const char *s, size_t available, size_t &len) {
   const unsigned char *p = (const unsigned char *)s;
   int expected;
 
   if (!available) {
-    *len = 0;
+    len = 0;
     return 0;
   }
   expected = _utf8_byte_len(*p);
   if (expected == 1 || (size_t)expected > available) {
-    *len = 1;
+    len = 1;
     return *p;
   }
   for (int i = 1; i < expected; i++) {
     if ((p[i] & 0xc0) != 0x80) {
-      *len = 1;
+      len = 1;
       return *p;
     }
   }
 
-  *len = expected;
+  len = expected;
   if (expected == 2)
     return ((*p & 0x1f) << 6) | (p[1] & 0x3f);
   if (expected == 3)
@@ -201,11 +201,11 @@ static int _is_grapheme_extension(uint32_t cp) {
 }
 
 /* Decode the UTF-8 codepoint ending at position 'pos' (exclusive) and
- * return its value. Also sets *cplen to the byte length of the codepoint. */
+ * return its value. Also sets cplen to the byte length of the codepoint. */
 static uint32_t _utf8_decode_previous(
-  const char *buf, size_t pos, size_t *cplen) {
+  const char *buf, size_t pos, size_t &cplen) {
   if (pos == 0) {
-    *cplen = 0;
+    cplen = 0;
     return 0;
   }
   /* Scan backwards to find the start byte. */
@@ -213,9 +213,9 @@ static uint32_t _utf8_decode_previous(
   do i--;
   while (i > 0 && (pos - i) < 4 &&
          ((unsigned char)buf[i] & 0xC0) == 0x80);
-  *cplen = pos - i;
+  cplen = pos - i;
   size_t dummy;
-  return _utf8_decode(buf + i, pos - i, &dummy);
+  return _utf8_decode(buf + i, pos - i, dummy);
 }
 
 /* Given a buffer and a position, return the byte length of the grapheme
@@ -232,7 +232,7 @@ static size_t _previous_grapheme_len(const char *buf, size_t pos) {
 
   /* First, get the last codepoint. */
   size_t cplen;
-  uint32_t cp = _utf8_decode_previous(buf, curpos, &cplen);
+  uint32_t cp = _utf8_decode_previous(buf, curpos, cplen);
   if (cplen == 0) return 0;
   total += cplen;
   curpos -= cplen;
@@ -241,7 +241,7 @@ static size_t _previous_grapheme_len(const char *buf, size_t pos) {
    * Keep going back through the grapheme cluster. */
   while (curpos > 0) {
     size_t prevlen;
-    uint32_t prevcp = _utf8_decode_previous(buf, curpos, &prevlen);
+    uint32_t prevcp = _utf8_decode_previous(buf, curpos, prevlen);
     if (prevlen == 0) break;
 
     if (_is_joiner(prevcp)) {
@@ -250,7 +250,7 @@ static size_t _previous_grapheme_len(const char *buf, size_t pos) {
       total += prevlen;
       curpos -= prevlen;
       /* Now get the character before ZWJ. */
-      prevcp = _utf8_decode_previous(buf, curpos, &prevlen);
+      prevcp = _utf8_decode_previous(buf, curpos, prevlen);
       if (prevlen == 0) break;
       total += prevlen;
       curpos -= prevlen;
@@ -283,7 +283,7 @@ static size_t _next_grapheme_len(const char *buf, size_t pos, size_t len) {
 
   /* Get the first codepoint. */
   size_t cplen;
-  uint32_t cp = _utf8_decode(buf + curpos, len - curpos, &cplen);
+  uint32_t cp = _utf8_decode(buf + curpos, len - curpos, cplen);
   total += cplen;
   curpos += cplen;
 
@@ -292,14 +292,14 @@ static size_t _next_grapheme_len(const char *buf, size_t pos, size_t len) {
   /* Consume any extending characters that follow. */
   while (curpos < len) {
     size_t nextlen;
-    uint32_t nextcp = _utf8_decode(buf + curpos, len - curpos, &nextlen);
+    uint32_t nextcp = _utf8_decode(buf + curpos, len - curpos, nextlen);
 
     if (_is_joiner(nextcp) && curpos + nextlen < len) {
       /* ZWJ: include it and the following character. */
       total += nextlen;
       curpos += nextlen;
       /* Get the character after ZWJ. */
-      nextcp = _utf8_decode(buf + curpos, len - curpos, &nextlen);
+      nextcp = _utf8_decode(buf + curpos, len - curpos, nextlen);
       total += nextlen;
       curpos += nextlen;
       continue;  /* Check for more extending after the joined char. */
@@ -410,7 +410,7 @@ static size_t _display_width(const char *s, size_t len) {
 
   while (i < len) {
     size_t clen;
-    uint32_t cp = _utf8_decode(s + i, len - i, &clen);
+    uint32_t cp = _utf8_decode(s + i, len - i, clen);
 
     /* Skip ANSI CSI escape sequences entirely: they produce no
      * glyph, so they must not contribute to the display width.
@@ -439,7 +439,7 @@ static size_t _display_width(const char *s, size_t len) {
 static int _single_char_width(const char *s, size_t len) {
   if (len == 0) return 0;
   size_t clen;
-  uint32_t cp = _utf8_decode(s, len, &clen);
+  uint32_t cp = _utf8_decode(s, len, clen);
   return _codepoint_width(cp);
 }
 

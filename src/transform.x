@@ -637,27 +637,27 @@ static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
 
 // Helper-backed indexes bypass getindex lowering.
 static int _indexed_parts(
-  Compiler compiler, List expr, Symbol *owner, List *base, List *selector) {
+  Compiler compiler, List expr, Symbol &owner, List &base, List &selector) {
   match (expr)
     case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
                             ?matched_selector)): {
-      *owner = _indexed_builtin_helper(compiler, type);
-      *base = matched_base;
-      *selector = matched_selector;
+      owner = _indexed_builtin_helper(compiler, type);
+      base = matched_base;
+      selector = matched_selector;
       return 1;
     }
   return 0;
 }
 
 static void _convert_indexed_parts(
-  Compiler compiler, Symbol owner, List *base, List *selector) {
+  Compiler compiler, Symbol owner, List &base, List &selector) {
   if (owner == <array>) {
-    *base = compiler.convert_expression(*base, %("Array"));
-    *selector = compiler.convert_expression(*selector, %(int));
+    base = compiler.convert_expression(base, %("Array"));
+    selector = compiler.convert_expression(selector, %(int));
   }
   else {
-    *base = compiler.convert_expression(*base, %("Map"));
-    *selector = compiler.convert_expression(*selector, %("Var"));
+    base = compiler.convert_expression(base, %("Map"));
+    selector = compiler.convert_expression(selector, %("Var"));
   }
 }
 
@@ -693,7 +693,7 @@ static List _sequenced_protocol_call(
 static List _indexed_update(
   Compiler c, List lhs, Symbol op, List rhs) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(c, lhs, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(c, lhs, owner, base, selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved = c.resolve_protocol_member(base_type, "updateindex");
@@ -718,7 +718,7 @@ static List _indexed_update(
       c, resolved,
       %($base $selector ${_symbol_expression(op)} $rhs));
 
-  _convert_indexed_parts(c, owner, &base, &selector);
+  _convert_indexed_parts(c, owner, base, selector);
   rhs = c.convert_expression(rhs, %("Var"));
   String helper = owner == <array> ? "Array_updateindex" : "Map_updateindex";
   return %(
@@ -728,7 +728,7 @@ static List _indexed_update(
 static List _indexed_postfix(
   Compiler compiler, List arg, Symbol op) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(compiler, arg, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(compiler, arg, owner, base, selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved =
@@ -743,7 +743,7 @@ static List _indexed_postfix(
     return _sequenced_protocol_call(
       compiler, resolved,
       %($base $selector ${_symbol_expression(op)}));
-  _convert_indexed_parts(compiler, owner, &base, &selector);
+  _convert_indexed_parts(compiler, owner, base, selector);
   String helper = owner == <array> ? "Array_postfixindex" : "Map_postfixindex";
   return %(call $helper (args $base $selector ${_symbol_expression(op)}));
 }

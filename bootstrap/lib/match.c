@@ -800,8 +800,8 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
       {
         if(Var_is_list_binder(part)) return 0;
         if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)) && _bits_unique(part))){
-          * anchor = part;
-          * offset = width;
+          (* anchor) = part;
+          (* offset) = width;
           return 1;
         }
         width ++;
@@ -1627,7 +1627,7 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
     if(List_truth(tail)){
       tail_entry = MatchLower__compile_child_segment(l, tail);
       if(tail_entry < 0) return - 1;
-      anchored = _find_fixed_anchor(tail, & anchor, & anchor_offset);
+      anchored = _find_fixed_anchor(tail, &(anchor), &(anchor_offset));
     }
 
   }
@@ -1800,7 +1800,7 @@ static int MatchPlan__run(MatchPlan mm, MatchMachine m, Var input, List * out){
   }
   ;
   int result = _run_prepared_capture(MachineProgram_view(mm -> program), m, input, & captures);
-  if(result == 1) * out = _capture_publish(mm -> layout, & captures);
+  if(result == 1)(* out) = _capture_publish(mm -> layout, & captures);
   return result;
 }
 
@@ -1833,7 +1833,7 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   MatchMachine_open(machine);
   machine -> stats = stats;
   List bindings;
-  int result = MatchPlan__run(plan, machine, input, & bindings);
+  int result = MatchPlan__run(plan, machine, input, &(bindings));
   MatchMachine_dispose(machine);
   if(result == 1) * out_bindings = bindings;
   return result;

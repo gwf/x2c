@@ -382,18 +382,18 @@ static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')
 
 // Read a validated integer token's unsigned magnitude and radix.
 static int _literal_magnitude(
-  String text, int end, unsigned long long *value, int *decimal) {
+  String text, int end, unsigned long long &value, int &decimal) {
   int pos = 0, base = 10;
-  *decimal = 1;
+  decimal = 1;
   if (pos + 1 < end && text[pos] == '0') {
     switch (text[pos + 1]) {
-      case 'x': case 'X': base = 16; pos += 2; *decimal = 0; break;
-      case 'b': case 'B': base = 2;  pos += 2; *decimal = 0; break;
-      case 'o': case 'O': base = 8;  pos += 2; *decimal = 0; break;
+      case 'x': case 'X': base = 16; pos += 2; decimal = 0; break;
+      case 'b': case 'B': base = 2;  pos += 2; decimal = 0; break;
+      case 'o': case 'O': base = 8;  pos += 2; decimal = 0; break;
       default:
         if (text[pos + 1] >= '0' && text[pos + 1] <= '7') {
           base = 8;
-          *decimal = 0;
+          decimal = 0;
         }
     }
   }
@@ -404,7 +404,7 @@ static int _literal_magnitude(
     result = result * (unsigned) base + digit;
     pos++;
   }
-  *value = result;
+  value = result;
   return 1;
 }
 
@@ -466,7 +466,7 @@ Var Type.numeric_literal_value(Type type, String text) {
   unsigned long long magnitude;
   int decimal;
   if (!_literal_magnitude(text, _integer_literal_end(text),
-                          &magnitude, &decimal)) return void;
+                          magnitude, decimal)) return void;
   Var value = negative ? 0ULL - magnitude : magnitude;
   return value.convert(tag);
 }
@@ -492,7 +492,7 @@ Type Type.numeric_literal(String text, int floating) {
   }
   unsigned long long value;
   int decimal;
-  if (!_literal_magnitude(text, suffix, &value, &decimal)) return NULL;
+  if (!_literal_magnitude(text, suffix, value, decimal)) return NULL;
   return _integer_literal_type(value, decimal, is_unsigned, longs);
 }
 
@@ -548,13 +548,14 @@ static Map varrows = %{ ${$var.tag.constant.rows()} };
     clause, an immediate width, or a user registration has no constant row.
 */
 int Type.var_tag_row(
-  Symbol tag, unsigned long *top, unsigned long *mask, unsigned long *bottom) {
+  Symbol tag, unsigned long &top, unsigned long &mask,
+  unsigned long &bottom) {
   Var row = varrows[tag];
   if (row is void) return 0;
   List fields = row;
-  *top = fields.car();
-  *mask = fields.cadr();
-  *bottom = fields.caddr();
+  top = fields.car();
+  mask = fields.cadr();
+  bottom = fields.caddr();
   return 1;
 }
 

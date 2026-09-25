@@ -4,11 +4,11 @@
 
 #include <stdint.h>
 
-static Var _atom_read_lisp(String source, Symbol *status) {
+static Var _atom_read_lisp(String source, Symbol &status) {
   Lisp lisp = Lisp.kernel();
   unsigned cursor = 0;
   Var value = void;
-  *status = lisp.read(source, &cursor, &value);
+  status = lisp.read(source, &cursor, &value);
   lisp.destroy();
   return value;
 }
@@ -88,7 +88,7 @@ static void atom_repr_round_trips_lisp_reader(void) {
   for (int i = 0; i < sizeof spellings / sizeof spellings[0]; i++) {
     Atom expected = Atom.intern(spellings[i]);
     Symbol status;
-    Var actual = _atom_read_lisp(expected.repr(), &status);
+    Var actual = _atom_read_lisp(expected.repr(), status);
     EXPECT_TRUE(status == <value>);
     EXPECT_TRUE(actual.u64 == expected.u64);
   }
@@ -108,7 +108,7 @@ static void atom_write_repr_escapes_leading_angle(void) {
     String written = out.str_free();
     EXPECT_TRUE(written.startswith("\\x3C"));
     Symbol status;
-    Var actual = _atom_read_lisp(written, &status);
+    Var actual = _atom_read_lisp(written, status);
     EXPECT_TRUE(status == <value>);
     EXPECT_TRUE(actual.u64 == expected.u64);
   }
@@ -119,7 +119,7 @@ static void atom_write_repr_escapes_leading_angle(void) {
     String written = out.str_free();
     EXPECT_STR_EQ(written, bare[i]);
     Symbol status;
-    Var actual = _atom_read_lisp(written, &status);
+    Var actual = _atom_read_lisp(written, status);
     EXPECT_TRUE(status == <value>);
     EXPECT_TRUE(actual.u64 == expected.u64);
   }
@@ -188,7 +188,7 @@ static void atom_list_and_lisp_readers_canonicalize(void) {
   );
   EXPECT_TRUE(first == second);
   Symbol status;
-  Var read = _atom_read_lisp(first.repr(), &status);
+  Var read = _atom_read_lisp(first.repr(), status);
   EXPECT_TRUE(status == <value>);
   EXPECT_TRUE(read is <list>);
   EXPECT_TRUE(read.pointer() == first);

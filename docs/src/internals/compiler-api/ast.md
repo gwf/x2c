@@ -97,7 +97,7 @@ Source: `src/ast.x:78`
 
 #### preproc_include_target
 
-`String preproc_include_target(String text, int *angle)`
+`String preproc_include_target(String text, int &angle)`
 
 Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after

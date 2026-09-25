@@ -1975,7 +1975,7 @@ static List Compiler._binary_expression(
 static List _constant_row_test(
   Compiler c, List lhs, Symbol tag, Token origin) {
   unsigned long top, mask, bottom;
-  if (!Type.var_tag_row(tag, &top, &mask, &bottom)) return NULL;
+  if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
   List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
   return %(expr (int) (call $callee (args $lhs
     (expr (unsigned) (literal (unsigned) "$top"))
@@ -3055,7 +3055,7 @@ static List _initializer_first(
 }
 
 // Decode only a literal fact; native expressions are never evaluated here.
-static int _initializer_integer(List expression, unsigned long long *value) {
+static int _initializer_integer(List expression, unsigned long long &value) {
   String text = NULL;
   match (expression) {
     case %(expr ? (literal ? ?spelling)): text = spelling;
@@ -3070,7 +3070,7 @@ static int _initializer_integer(List expression, unsigned long long *value) {
   unsigned long long decoded = strtoull(digits, &end, base);
   while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
   if (*end) return 0;
-  *value = decoded;
+  value = decoded;
   return 1;
 }
 
@@ -3110,7 +3110,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
             reused = %(dim $prior);
             captured = 1;
           }
-        if (bound && !captured && !_initializer_integer(bound, &count)) {
+        if (bound && !captured && !_initializer_integer(bound, count)) {
           String name = c.fresh_name("initializer_bound");
           Type bytes = %((dim $bound) char);
           List field = bytes.declaration_ast(%("bytes"));
@@ -3140,7 +3140,7 @@ static List _initializer_index(Compiler c, List index, List *reference) {
       return index;
     }
   unsigned long long at;
-  if (_initializer_integer(index, &at)) {
+  if (_initializer_integer(index, at)) {
     *reference = index;
     return index;
   }
@@ -3156,17 +3156,17 @@ static List _initializer_index(Compiler c, List index, List *reference) {
    is not. Keep one base-plus-offset expression instead of nested
    increments. */
 static void _initializer_position(
-  List index, List *base, unsigned long long *offset) {
-  *base = NULL;
+  List index, List &base, unsigned long long &offset) {
+  base = NULL;
   if (_initializer_integer(index, offset)) return;
   match (index)
     case %(expr ? (op + (expr ? (parens ?origin)) ?amount)):
       if (_initializer_integer(amount, offset)) {
-        *base = origin;
+        base = origin;
         return;
       }
-  *base = index;
-  *offset = 0;
+  base = index;
+  offset = 0;
 }
 
 static List _initializer_drop_bound(
@@ -3181,7 +3181,7 @@ static List _initializer_drop_bound(
                         (expr ? (parens ?length)))): {
       unsigned long long at;
       List origin;
-      _initializer_position(index, &origin, &at);
+      _initializer_position(index, origin, at);
       if (length === bound && origin === base && at <= minimum) return NULL;
     }
   }
@@ -3196,7 +3196,7 @@ static List _initializer_and(List first, List second) {
                         (expr ? (parens ?bound)))): {
       unsigned long long at;
       List base;
-      _initializer_position(index, &base, &at);
+      _initializer_position(index, base, at);
       first = _initializer_drop_bound(first, bound, base, at);
     }
   return first ? %(expr (int) (op && (expr (int) (parens $first))
@@ -3233,7 +3233,7 @@ static void _initializer_next(
       List index = selector, dimension = owner.car().cadr();
       unsigned long long at, count;
       List base;
-      _initializer_position(index, &base, &at);
+      _initializer_position(index, base, at);
       int known_index = !base;
       String next_index = %"${at + 1}ULL";
       List increment = %(expr (unsigned long long)
@@ -3247,7 +3247,7 @@ static void _initializer_next(
         states.push(%($condition $next 1));
         return;
       }
-      if (known_index && _initializer_integer(dimension, &count)) {
+      if (known_index && _initializer_integer(dimension, count)) {
         if (at + 1 < count) {
           states.push(%($condition $next 1));
           return;
@@ -3392,7 +3392,7 @@ static List _initializer_layout(
     if (!dimension) return NULL;
     if (string && _initializer_string_array(c, type, string)) return NULL;
     unsigned long long size;
-    if (!_initializer_integer(dimension, &size)) *symbolic = 1;
+    if (!_initializer_integer(dimension, size)) *symbolic = 1;
     List path = _initializer_first(c, type, NULL);
     List element = c.initializer_slot(target, path);
     List child = _initializer_layout(c, owner.cdr(), element,

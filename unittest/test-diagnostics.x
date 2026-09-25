@@ -7,11 +7,11 @@ $(import "test-macros.xmacro")
 
 /* Stderr goes to a temporary file between the two calls, so a test reads
    exactly what its printer streamed. */
-static int _capture_stderr(File *file) {
+static int _capture_stderr(File &file) {
   fflush(stderr);
-  *file = tmpfile();
+  file = tmpfile();
   int saved = dup(STDERR_FILENO);
-  dup2(fileno(*file), STDERR_FILENO);
+  dup2(fileno(file), STDERR_FILENO);
   return saved;
 }
 
@@ -30,7 +30,7 @@ static void diagnostics_records_entries(void) {
     Diagnostics.new(Scope.calloc(1, sizeof(struct Compiler)), 2);
   List first_notes = %( "initialize flag before use" );
   File file;
-  int saved = _capture_stderr(&file);
+  int saved = _capture_stderr(file);
   diag.report(<first>, "first", NULL, first_notes);
   diag.report(<second>, "second", NULL, NULL);
   diag.report(<third>, "third", NULL, NULL);
@@ -74,7 +74,7 @@ static void diagnostics_release_keeps_or_discards(void) {
   Compiler printer = Scope.calloc(1, sizeof(struct Compiler));
   Diagnostics diag = Diagnostics.new(printer, 1);
   File file;
-  int saved = _capture_stderr(&file);
+  int saved = _capture_stderr(file);
   DiagnosticsHold hold = diag.hold();
   EXPECT_NULL(diag.printer);
   diag.report(<discarded>, "discarded", NULL, NULL);
@@ -86,7 +86,7 @@ static void diagnostics_release_keeps_or_discards(void) {
   hold = diag.hold();
   diag.report(<kept>, "kept", NULL, NULL);
   EXPECT_STR_EQ(_captured_stderr(file, saved), NULL);
-  saved = _capture_stderr(&file);
+  saved = _capture_stderr(file);
   diag.release(hold, 1);
   EXPECT_STR_EQ(_captured_stderr(file, saved), "kept: kept\n\n");
   EXPECT_INT_EQ(diag.count, 1);

@@ -264,14 +264,14 @@ int String_find(String, String);
 
 String preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
-  * angle = 0;
+  (* angle) = 0;
   String body = preproc_directive(text);
   if(! String_startswith(body, _125)) return NULL;
   body = String_lstrip(String_remove_prefix(body, _125), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
-  * angle = String_getindex(body, 0) == '<';
+  (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, * angle ? _126 : _127);
+  int close = String_find(rest, (* angle) ? _126 : _127);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 

@@ -178,16 +178,16 @@ static void *_raw_realloc(void *ptr, size_t size) {
 }
 
 /* Returns `items` with room for one element past `count`, starting at 16 and
-   doubling `*capacity` when full. */
-static void *_raw_grow(void *items, int count, int *capacity, size_t size) {
+   doubling `capacity` when full. */
+static void *_raw_grow(void *items, int count, int &capacity, size_t size) {
   if (!items) {
     items = _raw_malloc(16 * size);
-    *capacity = 16;
+    capacity = 16;
   }
-  else if (count == *capacity) {
-    if (*capacity > INT_MAX / 2) raise %(size-limit);
-    items = _raw_realloc(items, *capacity * 2 * size);
-    *capacity *= 2;
+  else if (count == capacity) {
+    if (capacity > INT_MAX / 2) raise %(size-limit);
+    items = _raw_realloc(items, capacity * 2 * size);
+    capacity *= 2;
   }
   return items;
 }
@@ -271,7 +271,7 @@ static void _unregister_name(Scope scope) {
 static void _record_retain(Scope scope, Scope *slot) {
   ScopeThreadState state = _thread();
   state.retains = _raw_grow(
-    state.retains, state.retain_count, &state.retain_capacity,
+    state.retains, state.retain_count, state.retain_capacity,
     sizeof(*state.retains));
   state.retains[state.retain_count++] =
     (ScopeRetain) { .scope = scope, .slot = slot };
@@ -587,7 +587,7 @@ void Scope.destroy(Scope scope) {
 void Scope.shutdown_hook(void (*hook)(void)) {
   _require_running();
   if (!hook) raise %(bad-arg);
-  hooks = _raw_grow(hooks, hook_count, &hook_capacity, sizeof(*hooks));
+  hooks = _raw_grow(hooks, hook_count, hook_capacity, sizeof(*hooks));
   hooks[hook_count++] = hook;
 }
 
@@ -625,7 +625,7 @@ void Scope.push(Scope *scope) {
   if (!scope) raise %(bad-arg);
   ScopeThreadState state = _thread();
   state.stack = _raw_grow(
-    state.stack, state.stack_size, &state.stack_capacity,
+    state.stack, state.stack_size, state.stack_capacity,
     sizeof(*state.stack));
   state.active = state.stack[state.stack_size++] = scope;
 }
