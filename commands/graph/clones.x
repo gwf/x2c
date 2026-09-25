@@ -3,7 +3,6 @@
 #pragma once
 #include "frontend.x"
 #include "targets.x"
-List graph_clones(Frontend frontend, Array inputs, int minimum);
 
 #pragma private
 #include <stdint.h>
@@ -146,8 +145,6 @@ static int _clone_root(List node) {
     %(function expr stmnt block if while for foreach return op call).contains(
       tag);
 }
-
-static uint64_t _clone_value(CloneIndex *index, Var value, int origin);
 
 static uint64_t _clone_list(CloneIndex *index, List node, int origin) {
   if (!node) return 0;

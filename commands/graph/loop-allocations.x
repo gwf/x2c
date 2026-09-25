@@ -9,9 +9,6 @@ typedef struct LoopAllocations *LoopAllocations;
 
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
-List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path);
-List LoopAllocations.finish(List units, int limit);
-
 #pragma private
 
 static void _loop_increment(Map counts, List key, int amount) {

@@ -136,7 +136,7 @@ static List _completion_filter(
 List ReplSession.complete_functions(ReplSession session, String prefix) {
   Array names = $auto([]), candidates = [];
   foreach (Var (candidate, stored), session.names) {
-    if (!(candidate is <string>) || !(stored is <list>)) continue;
+    if (candidate is not <string> || stored is not <list>) continue;
     String name = candidate;
     List entry = stored;
     if (entry.car() == <function> && name.startswith(prefix)) names.push(name);

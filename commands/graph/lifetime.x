@@ -7,14 +7,6 @@
 
 typedef struct Lifetime *Lifetime;
 
-Symbol Lifetime.loop_allocation_kind(
-  Compiler compiler, List node, String &operation);
-List Lifetime.analyze_unit(
-  Compiler compiler, List ast, String path, Map definitions);
-List Lifetime.finish(List units);
-List Lifetime.allocation_returns(List units, String wanted);
-List Lifetime.resolve_allocation_returns(List units, List pending);
-
 #pragma private
 
 #include <string.h>
@@ -617,8 +609,6 @@ static void _lifetime_transfer(Lifetime lifetime, int id) {
       );
   }
 }
-
-static void _lifetime_statement(Lifetime lifetime, Var value, int nested);
 
 static void _lifetime_block(Lifetime lifetime, List statements, int nested) {
   Map saved_bindings = lifetime.bindings;

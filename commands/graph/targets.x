@@ -4,13 +4,6 @@
 
 #include "compiler.x"
 
-Map project_function_targets(Compiler compiler, List ast, String path);
-List project_call_target(
-  Compiler compiler, Map definitions, Var value, String &name,
-  List *arguments);
-List resolve_project_target(List target, Map publics);
-List project_location(Compiler compiler, String path, int origin);
-
 #pragma private
 
 #include <string.h>
