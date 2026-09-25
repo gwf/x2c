@@ -1,11 +1,9 @@
-> Status: active
-> Gary cleared development/staging cutover on 2026-09-19 with a changed baseline:
-> create dev from freshly fetched origin/main, then integrate this work there.
-> Baseline: b265e2582df4e6d9172f70de3add039e7df3b41b. The earlier requirement
-> to wait for the language sessions' checkpoint is superseded. Their branches
-> and sessions remain untouched; Gary will redirect their later delivery.
-> Production release, tags and main advancement still require Gary's separate
-> decision. First staging deployment needs account provisioning and validation.
+> Status: staging active; production promotion pending.
+> `gwf/x2c-staging` serves `https://staging.x2c-lang.dev` with HTTPS.
+> Successful staging runs on `dev` include 2026-09-21 and 2026-09-24
+> (`stage candidate` run 36015318554). The provisioning and first-deployment
+> instructions below are historical. Production baseline recovery, candidate
+> selection, version/tag, and advancement of `main` remain separate decisions.
 
 # Public dev, staging, and production
 
@@ -339,20 +337,16 @@ insufficient, decide coverage explicitly rather than silently claiming full
 verification. Existing `agent-pr-check`, `doc-check`, `precommit` and
 `sanity-check` definitions stay unchanged.
 
-## Remaining user actions and production decisions
+## Remaining production decisions
 
-- Add the Name.com CNAME `staging` -> `gwf.github.io` for `x2c-lang.dev`, then
-  allow GitHub to provision HTTPS. The public staging repository and intended
-  custom domain are already authorized.
-- Create/install the narrowly scoped staging GitHub App and enter its App ID
-  and private key directly in the source staging-publication environment.
-  Existing local GitHub authentication already has repository admin access.
-- Before the first production release, settle the legacy site's recovery
-  baseline and select an unpublished version and verified candidate. Main
-  advancement and tag/promotion authority remain Gary's.
-- Dev as default, delivery to dev, release-only verification cost and durable
-  public-candidate retention are approved. Changes to those contracts need a
-  separate decision; there is no remaining wait for the ongoing sessions.
+Staging is operating: `gwf/x2c-staging` has the custom domain and HTTPS, and
+candidate and staging workflows succeeded on 2026-09-24. The setup steps above
+record how it was established; they are not pending user actions.
+
+Before a production promotion, confirm the production baseline and recovery
+procedure for the legacy site, select a verified staging candidate and an
+unpublished version, and authorize the tag and `main` advancement. These are
+release decisions, separate from the x2c script porting backlog.
 
 ## Plan review
 

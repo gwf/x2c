@@ -44,13 +44,14 @@ execution.
 
 ### Current work
 
-- [Public release workflow](public-release-workflow.md): active in the Dev
-  Staging Workflow task. Account activation and production decisions remain;
-  source files alone do not establish that deployment is complete.
-- [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and numeric
-  Func cost measurement are recorded; system-header cost work and selected
-  design tracks remain open. Meta-capable protocols and native extensions
-  retain their separate design and implementation status.
+- [Public release workflow](public-release-workflow.md): staging is live at
+  `staging.x2c-lang.dev`, with successful candidate and staging runs. Only
+  production baseline recovery, candidate/version choice, and promotion to
+  `main` remain as release decisions.
+- [Meta follow-ups](meta-followups.md): the meta protocol and native extension
+  milestones were delivered through [meta sequencing](archive/meta-sequencing.md).
+  The remaining recorded limits are system-header/layout details and
+  `off_t`/`time_t` mapping; they do not block the delivered capabilities.
 
 ### Open backlog and scoped follow-ups
 

@@ -1,14 +1,11 @@
 # Meta follow-ups
 
-> Status: A and C done (C on `dev` as `81de06d8`); B measured with no
-> code change; E, F phase 8 and G continue in
-> [meta sequencing](archive/meta-sequencing.md). Open: D, and `off_t` and `time_t`
-> stay `long` (track C).
-> Written 2026-09-22 after [meta recovery](archive/meta-recovery.md) landed
-> on `dev` as `db86d4b7`. Tracks A-D are independent implementation work and
-> can run in parallel; E and G need design decisions with Gary first, and F
-> has an approved design. Each track is a separate session and worktree
-> based on `dev`.
+> Status: reference with selected follow-ups. A and C shipped, B was
+> measured and declined, and F's selected-root lifetime proof is done.
+> Track E's Iter adoptions and track G's loadable modules shipped; the
+> broader protocol and package extension work completed under
+> [meta sequencing](archive/meta-sequencing.md) on 2026-09-25. Track D's
+> layout limitations and `off_t`/`time_t` mapping remain recorded below.
 
 ## Implementation tracks
 
@@ -169,10 +166,11 @@ withdrawn. Gary decided on September 23 that packing is unsupported: any
 The compiler still declines meta use of other layout attributes it cannot
 prove. The `_Atomic` limit above remains separate.
 
-## Design tracks (decide with Gary first)
+## Delivered design tracks
 
-The remaining E, F and G work follows the order in
-[meta sequencing](archive/meta-sequencing.md).
+Tracks E, F and G and their broader follow-ups were delivered through
+[meta sequencing](archive/meta-sequencing.md). The descriptions below retain
+the design and validation record.
 
 ### E. Meta-capable protocols
 
