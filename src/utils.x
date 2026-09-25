@@ -272,7 +272,7 @@ static String _identity(void) {
                                                : x2c_executable_path;
   int ok = path != NULL;
   uint64_t hash = UINT64_C(1469598103934665603);
-  if (ok) hash = x2c_fnv_file(hash, path, &ok);
+  if (ok) hash = x2c_fnv_file(hash, path, ok);
   return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
 }
 
@@ -313,16 +313,16 @@ uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
 /** Returns `hash` extended with the contents of the file at `path`.
     A missing or unreadable file clears `ok`.
 */
-uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok) {
+uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok) {
   File input = fopen(path, "rb");
   if (!input) {
-    *ok = 0;
+    ok = 0;
     return hash;
   }
   unsigned char buffer[16384], size_t length;
   while ((length = fread(buffer, 1, sizeof(buffer), input)))
     hash = x2c_fnv_bytes(hash, buffer, length);
-  if (ferror(input)) *ok = 0;
+  if (ferror(input)) ok = 0;
   input.close();
   return hash;
 }

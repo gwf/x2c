@@ -558,7 +558,7 @@ static Symbol _malformed(String source, unsigned at) {
 #define LISP_READ_DEPTH_MAX 1024
 
 static Symbol _read_token_list(
-  Tokenizer tokenizer, char *source, unsigned base, unsigned *end, Var *out,
+  Tokenizer tokenizer, char *source, unsigned base, unsigned &end, Var &out,
   int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
@@ -570,41 +570,41 @@ static Symbol _read_token_list(
       break;
     }
     if (token.type == <")">) {
-      *end = token.pos + token.len;
+      end = token.pos + token.len;
       break;
     }
     Var element = void;
     status =
-      _read_token_form(tokenizer, token, source, base, end, &element, depth);
+      _read_token_form(tokenizer, token, source, base, end, element, depth);
     if (status != <value>) break;
     elements.push(element);
   }
-  if (status == <value>) *out = elements.list();
+  if (status == <value>) out = elements.list();
   elements.free();
   return status;
 }
 
 static Symbol _read_token_atom(
-  Token token, char *source, unsigned base, Var *out) {
+  Token token, char *source, unsigned base, Var &out) {
   String text = token.text;
   switch (token.type) {
     case <lit-char*>:
-      *out = String.new_len(text + 1, token.len - 2).unescape();
+      out = String.new_len(text + 1, token.len - 2).unescape();
       return <value>;
     case <lit-int>: {
       long value;
       String literal = String.new_len(text, token.len);
       if (!literal.try_long(&value))
         return _malformed(source, base + token.pos);
-      if (value == (int) value) *out = (int) value;
-      else *out = value;
+      if (value == (int) value) out = (int) value;
+      else out = value;
       return <value>;
     }
     case <lit-float>: {
       double value, String literal = String.new_len(text, token.len);
       if (!literal.try_double(&value))
         return _malformed(source, base + token.pos);
-      *out = value;
+      out = value;
       return <value>;
     }
     case <lit-symbol>: {
@@ -613,19 +613,19 @@ static Symbol _read_token_atom(
         ? String.new_len(text + 2, n - 4).unescape()
         : String.new_len(text + 1, n - 2);
       if (!inner) return _malformed(source, base + token.pos);
-      *out = Symbol.new(inner);
+      out = Symbol.new(inner);
       return <value>;
     }
     case <ident>:
-      *out = Atom.intern(text.unescape());
+      out = Atom.intern(text.unescape());
       return <value>;
   }
   return _malformed(source, base + token.pos);
 }
 
 static Symbol _read_token_form(
-  Tokenizer tokenizer, Token token, char *source, unsigned base, unsigned *end,
-  Var *out, int depth) {
+  Tokenizer tokenizer, Token token, char *source, unsigned base, unsigned &end,
+  Var &out, int depth) {
   if (!token || token.type == <eof>) return <incomplete>;
   Var prefix = void;
   switch (token.type) {
@@ -643,11 +643,11 @@ static Symbol _read_token_form(
   if (prefix is not void) {
     Var inner = void;
     Symbol status = _read_token_form(
-      tokenizer, tokenizer.next(), source, base, end, &inner, depth + 1);
-    if (status == <value>) *out = %($prefix $inner);
+      tokenizer, tokenizer.next(), source, base, end, inner, depth + 1);
+    if (status == <value>) out = %($prefix $inner);
     return status;
   }
-  *end = token.pos + token.len;
+  end = token.pos + token.len;
   return _read_token_atom(token, source, base, out);
 }
 
@@ -664,7 +664,7 @@ static Symbol _read_tokenizer(
   unsigned end = 0;
   Var value = void;
   Symbol status = _read_token_form(
-    tokenizer, token, source, base, &end, &value, 0);
+    tokenizer, token, source, base, end, value, 0);
   if (status == <value>) {
     if (out) *out = value;
     *cursor = base + end;
@@ -2495,7 +2495,7 @@ static List LispLower._auto_live_bindings(LispLower l, List bindings) {
 }
 
 static int LispLower._auto_expand(LispLower l, Var head, List args,
-                                  Var *expansion, List *dependencies) {
+                                  Var &expansion, List &dependencies) {
   Var value;
   if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
   Lambda macro = value;
@@ -2506,10 +2506,10 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
      branch; keep its failures local by rejecting rather than raising. */
   LispExpansion trace = { %(( $head $value )), 0, 0 };
   try $let(l.lisp.expansion, &trace)
-    *expansion = _call_lambda(l.lisp, macro, args);
+    expansion = _call_lambda(l.lisp, macro, args);
   catch: return 0;
-  if (!_expansion_value(*expansion, 0)) return 0;
-  *dependencies = trace.dependencies;
+  if (!_expansion_value(expansion, 0)) return 0;
+  dependencies = trace.dependencies;
   return 1;
 }
 
@@ -2618,7 +2618,7 @@ static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
     return l._auto_compile_special(form, tail);
   Var expansion;
   List dependencies;
-  if (l._auto_expand(head, form.cdr(), &expansion, &dependencies))
+  if (l._auto_expand(head, form.cdr(), expansion, dependencies))
     $let(l.depth, l.depth + 1) {
       List live = l._auto_live_bindings(dependencies);
       int guard = live ? b.emit(MW_LEXPAND, 0, 0, 0, 0, -1) : 0;

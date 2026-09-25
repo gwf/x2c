@@ -29,12 +29,12 @@
 
 static xt_tensor _native(Tensor t) => t ? t.native() : NULL;
 
-static int64_t *_dims(List sizes, int64_t *count) {
+static int64_t *_dims(List sizes, int64_t &count) {
   int len = sizes.len();
   int64_t *dims = Scope.calloc(len ? len : 1, sizeof(int64_t));
   int index = 0;
   foreach (Var size, sizes) dims[index++] = size.integer();
-  *count = len;
+  count = len;
   return dims;
 }
 
@@ -49,14 +49,14 @@ static xt_tensor *_handles(List tensors, int64_t &count) {
 }
 
 /* Crosses a Scalar exactly: 0 int64, 1 double, -1 absent. */
-static int _scalar(Var value, int64_t *integer, double *floating) {
+static int _scalar(Var value, int64_t &integer, double &floating) {
   if (value.is_null() || value.is_void()) return -1;
   if (value.is_floating()) {
-    *floating = value.double();
+    floating = value.double();
     return 1;
   }
   if (value.is_integer()) {
-    *integer = value.integer();
+    integer = value.integer();
     return 0;
   }
   raise %(bad-arg (library "torch")
@@ -116,7 +116,7 @@ void Torch.sym_constrain_range(Var size, int64_t min, int min_set,
     int64_t max, int max_set) {
   int64_t size_int = 0;
   double size_dbl = 0;
-  int size_kind = _scalar(size, &size_int, &size_dbl);
+  int size_kind = _scalar(size, size_int, size_dbl);
   Torch.check(xt_sym_constrain_range(size_kind, size_int, size_dbl, min,
       min_set, max, max_set), "sym_constrain_range");
 }
@@ -125,7 +125,7 @@ void Torch.sym_constrain_range_for_size(Var size, int64_t min, int min_set,
     int64_t max, int max_set) {
   int64_t size_int = 0;
   double size_dbl = 0;
-  int size_kind = _scalar(size, &size_int, &size_dbl);
+  int size_kind = _scalar(size, size_int, size_dbl);
   Torch.check(xt_sym_constrain_range_for_size(size_kind, size_int, size_dbl,
       min, min_set, max, max_set), "sym_constrain_range_for_size");
 }
@@ -228,11 +228,11 @@ Tensor Tensor.arccos_(Tensor self) =>
 Tensor Tensor.avg_pool1d(Tensor self, List kernel_size, List stride,
     List padding, int ceil_mode, int count_include_pad) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_avg_pool1d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       ceil_mode, count_include_pad), "avg_pool1d");
@@ -240,14 +240,14 @@ Tensor Tensor.avg_pool1d(Tensor self, List kernel_size, List stride,
 
 Tensor Tensor.adaptive_avg_pool1d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_adaptive_avg_pool1d(_native(self), output_size_dims,
       output_size_n), "adaptive_avg_pool1d");
 }
 
 List Tensor.adaptive_max_pool1d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_adaptive_max_pool1d(_native(self), output_size_dims,
       output_size_n, &out0, &out1), "adaptive_max_pool1d");
@@ -257,7 +257,7 @@ List Tensor.adaptive_max_pool1d(Tensor self, List output_size) {
 Tensor Tensor.add_tensor(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_add_tensor(_native(self), _native(other), alpha_kind,
       alpha_int, alpha_dbl), "add");
 }
@@ -265,7 +265,7 @@ Tensor Tensor.add_tensor(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.add__tensor(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_add__tensor(_native(self), _native(other),
       alpha_kind, alpha_int, alpha_dbl), "add_");
 }
@@ -273,10 +273,10 @@ Tensor Tensor.add__tensor(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.add_scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_add_scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "add");
 }
@@ -284,10 +284,10 @@ Tensor Tensor.add_scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.add__scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_add__scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "add_");
 }
@@ -295,10 +295,10 @@ Tensor Tensor.add__scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.addmv(Tensor self, Tensor mat, Tensor vec, Var beta, Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addmv(_native(self), _native(mat), _native(vec),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addmv");
@@ -308,10 +308,10 @@ Tensor Tensor.addmv_(Tensor self, Tensor mat, Tensor vec, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addmv_(_native(self), _native(mat), _native(vec),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addmv_");
@@ -321,10 +321,10 @@ Tensor Tensor.addr(Tensor self, Tensor vec1, Tensor vec2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addr(_native(self), _native(vec1), _native(vec2),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addr");
@@ -334,10 +334,10 @@ Tensor Tensor.addr_(Tensor self, Tensor vec1, Tensor vec2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addr_(_native(self), _native(vec1), _native(vec2),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addr_");
@@ -346,7 +346,7 @@ Tensor Tensor.addr_(Tensor self, Tensor vec1, Tensor vec2, Var beta,
 Tensor Tensor.affine_grid_generator(Tensor theta, List size,
     int align_corners) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_affine_grid_generator(_native(theta), size_dims,
       size_n, align_corners), "affine_grid_generator");
 }
@@ -356,7 +356,7 @@ Tensor Tensor.all(Tensor self, int64_t dim, int keepdim) =>
 
 Tensor Tensor.all_dims(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_all_dims(_native(self), dim_dims, dim_n, keepdim),
       "all");
 }
@@ -366,7 +366,7 @@ Tensor Tensor.any(Tensor self, int64_t dim, int keepdim) =>
 
 Tensor Tensor.any_dims(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_any_dims(_native(self), dim_dims, dim_n, keepdim),
       "any");
 }
@@ -374,10 +374,10 @@ Tensor Tensor.any_dims(Tensor self, List dim, int keepdim) {
 Tensor Torch.arange_start(Var start, Var end, int dtype, String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   return Tensor.adopt(xt_arange_start(start_kind, start_int, start_dbl,
       end_kind, end_int, end_dbl, dtype, device), "arange");
 }
@@ -386,13 +386,13 @@ Tensor Torch.arange_start_step(Var start, Var end, Var step, int dtype,
     String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   int64_t step_int = 0;
   double step_dbl = 0;
-  int step_kind = _scalar(step, &step_int, &step_dbl);
+  int step_kind = _scalar(step, step_int, step_dbl);
   return Tensor.adopt(xt_arange_start_step(start_kind, start_int, start_dbl,
       end_kind, end_int, end_dbl, step_kind, step_int, step_dbl, dtype,
       device), "arange");
@@ -440,9 +440,9 @@ Tensor Tensor.arctanh_(Tensor self) =>
 Tensor Tensor.as_strided(Tensor self, List size, List stride,
     int64_t storage_offset, int storage_offset_set) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_as_strided(_native(self), size_dims, size_n,
       stride_dims, stride_n, storage_offset, storage_offset_set),
       "as_strided");
@@ -451,9 +451,9 @@ Tensor Tensor.as_strided(Tensor self, List size, List stride,
 Tensor Tensor.as_strided_(Tensor self, List size, List stride,
     int64_t storage_offset, int storage_offset_set) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_as_strided_(_native(self), size_dims, size_n,
       stride_dims, stride_n, storage_offset, storage_offset_set),
       "as_strided_");
@@ -541,10 +541,10 @@ Tensor Tensor.baddbmm(Tensor self, Tensor batch1, Tensor batch2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_baddbmm(_native(self), _native(batch1),
       _native(batch2), beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int,
       alpha_dbl), "baddbmm");
@@ -554,10 +554,10 @@ Tensor Tensor.baddbmm_(Tensor self, Tensor batch1, Tensor batch2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_baddbmm_(_native(self), _native(batch1),
       _native(batch2), beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int,
       alpha_dbl), "baddbmm_");
@@ -567,10 +567,10 @@ Tensor Tensor.baddbmm_dtype(Tensor self, Tensor batch1, Tensor batch2,
     int out_dtype, Var beta, Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_baddbmm_dtype(_native(self), _native(batch1),
       _native(batch2), out_dtype, beta_kind, beta_int, beta_dbl, alpha_kind,
       alpha_int, alpha_dbl), "baddbmm");
@@ -648,7 +648,7 @@ Tensor Tensor.copysign_(Tensor self, Tensor other) =>
 Tensor Tensor.copysign_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_copysign_scalar(_native(self), other_kind, other_int,
       other_dbl), "copysign");
 }
@@ -656,7 +656,7 @@ Tensor Tensor.copysign_scalar(Tensor self, Var other) {
 Tensor Tensor.copysign__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_copysign__scalar(_native(self), other_kind,
       other_int, other_dbl), "copysign_");
 }
@@ -718,7 +718,7 @@ List Torch.broadcast_tensors(List tensors) {
 
 Tensor Tensor.broadcast_to(Tensor self, List size) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_broadcast_to(_native(self), size_dims, size_n),
       "broadcast_to");
 }
@@ -797,7 +797,7 @@ List Tensor.tensor_split(Tensor self, int64_t sections, int64_t dim) {
 
 List Tensor.tensor_split_indices(Tensor self, List indices, int64_t dim) {
   int64_t indices_n = 0;
-  int64_t *indices_dims = _dims(indices, &indices_n);
+  int64_t *indices_dims = _dims(indices, indices_n);
   xt_tensor *items = NULL;
   int64_t count = xt_tensor_split_indices(_native(self), indices_dims,
       indices_n, dim, &items);
@@ -829,10 +829,10 @@ List Tensor.tensor_split_tensor(Tensor self,
 Tensor Tensor.clamp(Tensor self, Var min, Var max) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clamp(_native(self), min_kind, min_int, min_dbl,
       max_kind, max_int, max_dbl), "clamp");
 }
@@ -844,10 +844,10 @@ Tensor Tensor.clamp_tensor(Tensor self, Tensor min, Tensor max) =>
 Tensor Tensor.clamp_(Tensor self, Var min, Var max) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clamp_(_native(self), min_kind, min_int, min_dbl,
       max_kind, max_int, max_dbl), "clamp_");
 }
@@ -859,7 +859,7 @@ Tensor Tensor.clamp__tensor(Tensor self, Tensor min, Tensor max) =>
 Tensor Tensor.clamp_max(Tensor self, Var max) {
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clamp_max(_native(self), max_kind, max_int, max_dbl),
       "clamp_max");
 }
@@ -870,7 +870,7 @@ Tensor Tensor.clamp_max_tensor(Tensor self, Tensor max) =>
 Tensor Tensor.clamp_max_(Tensor self, Var max) {
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clamp_max_(_native(self), max_kind, max_int,
       max_dbl), "clamp_max_");
 }
@@ -882,7 +882,7 @@ Tensor Tensor.clamp_max__tensor(Tensor self, Tensor max) =>
 Tensor Tensor.clamp_min(Tensor self, Var min) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   return Tensor.adopt(xt_clamp_min(_native(self), min_kind, min_int, min_dbl),
       "clamp_min");
 }
@@ -893,7 +893,7 @@ Tensor Tensor.clamp_min_tensor(Tensor self, Tensor min) =>
 Tensor Tensor.clamp_min_(Tensor self, Var min) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   return Tensor.adopt(xt_clamp_min_(_native(self), min_kind, min_int,
       min_dbl), "clamp_min_");
 }
@@ -905,10 +905,10 @@ Tensor Tensor.clamp_min__tensor(Tensor self, Tensor min) =>
 Tensor Tensor.clip(Tensor self, Var min, Var max) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clip(_native(self), min_kind, min_int, min_dbl,
       max_kind, max_int, max_dbl), "clip");
 }
@@ -920,10 +920,10 @@ Tensor Tensor.clip_tensor(Tensor self, Tensor min, Tensor max) =>
 Tensor Tensor.clip_(Tensor self, Var min, Var max) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_clip_(_native(self), min_kind, min_int, min_dbl,
       max_kind, max_int, max_dbl), "clip_");
 }
@@ -947,10 +947,10 @@ Tensor Tensor.polar(Tensor abs, Tensor angle) =>
 
 Tensor Tensor.constant_pad_nd(Tensor self, List pad, Var value) {
   int64_t pad_n = 0;
-  int64_t *pad_dims = _dims(pad, &pad_n);
+  int64_t *pad_dims = _dims(pad, pad_n);
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_constant_pad_nd(_native(self), pad_dims, pad_n,
       value_kind, value_int, value_dbl), "constant_pad_nd");
 }
@@ -959,13 +959,13 @@ Tensor Tensor.convolution(Tensor input, Tensor weight, Tensor bias,
     List stride, List padding, List dilation, int transposed,
     List output_padding, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   return Tensor.adopt(xt_convolution(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, transposed, output_padding_dims,
@@ -976,13 +976,13 @@ Tensor Tensor.convolution_overrideable(Tensor input, Tensor weight,
     Tensor bias, List stride, List padding, List dilation, int transposed,
     List output_padding, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   return Tensor.adopt(xt_convolution_overrideable(_native(input),
       _native(weight), _native(bias), stride_dims, stride_n, padding_dims,
       padding_n, dilation_dims, dilation_n, transposed, output_padding_dims,
@@ -992,11 +992,11 @@ Tensor Tensor.convolution_overrideable(Tensor input, Tensor weight,
 Tensor Tensor.conv1d(Tensor input, Tensor weight, Tensor bias, List stride,
     List padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv1d(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, groups), "conv1d");
@@ -1005,11 +1005,11 @@ Tensor Tensor.conv1d(Tensor input, Tensor weight, Tensor bias, List stride,
 Tensor Tensor.conv2d(Tensor input, Tensor weight, Tensor bias, List stride,
     List padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv2d(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, groups), "conv2d");
@@ -1018,11 +1018,11 @@ Tensor Tensor.conv2d(Tensor input, Tensor weight, Tensor bias, List stride,
 Tensor Tensor.conv3d(Tensor input, Tensor weight, Tensor bias, List stride,
     List padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv3d(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, groups), "conv3d");
@@ -1031,9 +1031,9 @@ Tensor Tensor.conv3d(Tensor input, Tensor weight, Tensor bias, List stride,
 Tensor Tensor.conv1d_padding(Tensor input, Tensor weight, Tensor bias,
     List stride, String padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv1d_padding(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding, dilation_dims,
       dilation_n, groups), "conv1d");
@@ -1042,9 +1042,9 @@ Tensor Tensor.conv1d_padding(Tensor input, Tensor weight, Tensor bias,
 Tensor Tensor.conv2d_padding(Tensor input, Tensor weight, Tensor bias,
     List stride, String padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv2d_padding(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding, dilation_dims,
       dilation_n, groups), "conv2d");
@@ -1053,9 +1053,9 @@ Tensor Tensor.conv2d_padding(Tensor input, Tensor weight, Tensor bias,
 Tensor Tensor.conv3d_padding(Tensor input, Tensor weight, Tensor bias,
     List stride, String padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv3d_padding(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding, dilation_dims,
       dilation_n, groups), "conv3d");
@@ -1069,13 +1069,13 @@ Tensor Tensor.conv_transpose1d(Tensor input, Tensor weight, Tensor bias,
     List stride, List padding, List output_padding, int64_t groups,
     List dilation) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv_transpose1d(_native(input), _native(weight),
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
       output_padding_dims, output_padding_n, groups, dilation_dims,
@@ -1086,13 +1086,13 @@ Tensor Tensor.conv_transpose2d(Tensor input, Tensor weight, Tensor bias,
     List stride, List padding, List output_padding, int64_t groups,
     List dilation) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv_transpose2d_input(_native(input),
       _native(weight), _native(bias), stride_dims, stride_n, padding_dims,
       padding_n, output_padding_dims, output_padding_n, groups, dilation_dims,
@@ -1103,13 +1103,13 @@ Tensor Tensor.conv_transpose3d(Tensor input, Tensor weight, Tensor bias,
     List stride, List padding, List output_padding, int64_t groups,
     List dilation) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv_transpose3d_input(_native(input),
       _native(weight), _native(bias), stride_dims, stride_n, padding_dims,
       padding_n, output_padding_dims, output_padding_n, groups, dilation_dims,
@@ -1138,7 +1138,7 @@ Tensor Tensor.cosine_embedding_loss(Tensor input1, Tensor input2,
 
 Tensor Tensor.count_nonzero(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_count_nonzero_dim_intlist(_native(self), dim_dims,
       dim_n), "count_nonzero");
 }
@@ -1180,11 +1180,11 @@ Tensor Tensor.cudnn_convolution(Tensor self, Tensor weight, List padding,
     List stride, List dilation, int64_t groups, int benchmark,
     int deterministic, int allow_tf32) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_cudnn_convolution(_native(self), _native(weight),
       padding_dims, padding_n, stride_dims, stride_n, dilation_dims,
       dilation_n, groups, benchmark, deterministic, allow_tf32),
@@ -1195,13 +1195,13 @@ Tensor Tensor.cudnn_convolution_transpose(Tensor self, Tensor weight,
     List padding, List output_padding, List stride, List dilation,
     int64_t groups, int benchmark, int deterministic, int allow_tf32) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_cudnn_convolution_transpose(_native(self),
       _native(weight), padding_dims, padding_n, output_padding_dims,
       output_padding_n, stride_dims, stride_n, dilation_dims, dilation_n,
@@ -1212,11 +1212,11 @@ Tensor Tensor.cudnn_convolution_transpose(Tensor self, Tensor weight,
 Tensor Tensor.cudnn_convolution_relu(Tensor self, Tensor weight, Tensor bias,
     List stride, List padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_cudnn_convolution_relu(_native(self),
       _native(weight), _native(bias), stride_dims, stride_n, padding_dims,
       padding_n, dilation_dims, dilation_n, groups), "cudnn_convolution_relu");
@@ -1227,13 +1227,13 @@ Tensor Tensor.cudnn_convolution_add_relu(Tensor self, Tensor weight, Tensor z,
     int64_t groups) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_cudnn_convolution_add_relu(_native(self),
       _native(weight), _native(z), alpha_kind, alpha_int, alpha_dbl,
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
@@ -1275,7 +1275,7 @@ Tensor Tensor.cumulative_trapezoid(Tensor y, Tensor x, int64_t dim) =>
 Tensor Tensor.cumulative_trapezoid_dx(Tensor y, Var dx, int64_t dim) {
   int64_t dx_int = 0;
   double dx_dbl = 0;
-  int dx_kind = _scalar(dx, &dx_int, &dx_dbl);
+  int dx_kind = _scalar(dx, dx_int, dx_dbl);
   return Tensor.adopt(xt_cumulative_trapezoid_dx(_native(y), dx_kind, dx_int,
       dx_dbl, dim), "cumulative_trapezoid");
 }
@@ -1283,9 +1283,9 @@ Tensor Tensor.cumulative_trapezoid_dx(Tensor y, Var dx, int64_t dim) {
 Tensor Tensor.ctc_loss(Tensor log_probs, Tensor targets, List input_lengths,
     List target_lengths, int64_t blank, int64_t reduction, int zero_infinity) {
   int64_t input_lengths_n = 0;
-  int64_t *input_lengths_dims = _dims(input_lengths, &input_lengths_n);
+  int64_t *input_lengths_dims = _dims(input_lengths, input_lengths_n);
   int64_t target_lengths_n = 0;
-  int64_t *target_lengths_dims = _dims(target_lengths, &target_lengths_n);
+  int64_t *target_lengths_dims = _dims(target_lengths, target_lengths_n);
   return Tensor.adopt(xt_ctc_loss_intlist(_native(log_probs),
       _native(targets), input_lengths_dims, input_lengths_n,
       target_lengths_dims, target_lengths_n, blank, reduction, zero_infinity),
@@ -1318,7 +1318,7 @@ Tensor Tensor.linalg_diagonal(Tensor A, int64_t offset, int64_t dim1,
 Tensor Tensor.fill_diagonal_(Tensor self, Var fill_value, int wrap) {
   int64_t fill_value_int = 0;
   double fill_value_dbl = 0;
-  int fill_value_kind = _scalar(fill_value, &fill_value_int, &fill_value_dbl);
+  int fill_value_kind = _scalar(fill_value, fill_value_int, fill_value_dbl);
   return Tensor.adopt(xt_fill_diagonal_(_native(self), fill_value_kind,
       fill_value_int, fill_value_dbl, wrap), "fill_diagonal_");
 }
@@ -1332,7 +1332,7 @@ List Tensor.gradient(Tensor self, Var spacing, int64_t dim, int dim_set,
     int64_t edge_order) {
   int64_t spacing_int = 0;
   double spacing_dbl = 0;
-  int spacing_kind = _scalar(spacing, &spacing_int, &spacing_dbl);
+  int spacing_kind = _scalar(spacing, spacing_int, spacing_dbl);
   xt_tensor *items = NULL;
   int64_t count = xt_gradient_scalarint(_native(self), spacing_kind,
       spacing_int, spacing_dbl, dim, dim_set, edge_order, &items);
@@ -1350,9 +1350,9 @@ List Tensor.gradient_scalararray(Tensor self, Var spacing, List dim,
     int64_t edge_order) {
   int64_t spacing_int = 0;
   double spacing_dbl = 0;
-  int spacing_kind = _scalar(spacing, &spacing_int, &spacing_dbl);
+  int spacing_kind = _scalar(spacing, spacing_int, spacing_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   xt_tensor *items = NULL;
   int64_t count = xt_gradient_scalararray(_native(self), spacing_kind,
       spacing_int, spacing_dbl, dim_dims, dim_n, edge_order, &items);
@@ -1368,7 +1368,7 @@ List Tensor.gradient_scalararray(Tensor self, Var spacing, List dim,
 
 List Tensor.gradient_array(Tensor self, List dim, int64_t edge_order) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   xt_tensor *items = NULL;
   int64_t count = xt_gradient_array(_native(self), dim_dims, dim_n,
       edge_order, &items);
@@ -1404,7 +1404,7 @@ List Tensor.gradient_tensorarray(Tensor self, List spacing, List dim,
   int64_t spacing_n = 0;
   xt_tensor *spacing_items = _handles(spacing, spacing_n);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   xt_tensor *items = NULL;
   int64_t count = xt_gradient_tensorarray(_native(self), spacing_items,
       spacing_n, dim_dims, dim_n, edge_order, &items);
@@ -1436,7 +1436,7 @@ Tensor Tensor.div__tensor(Tensor self, Tensor other, String rounding_mode) =>
 Tensor Tensor.div_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_div_scalar(_native(self), other_kind, other_int,
       other_dbl), "div");
 }
@@ -1444,7 +1444,7 @@ Tensor Tensor.div_scalar(Tensor self, Var other) {
 Tensor Tensor.div__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_div__scalar(_native(self), other_kind, other_int,
       other_dbl), "div_");
 }
@@ -1452,7 +1452,7 @@ Tensor Tensor.div__scalar(Tensor self, Var other) {
 Tensor Tensor.div_scalar_mode(Tensor self, Var other, String rounding_mode) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_div_scalar_mode(_native(self), other_kind, other_int,
       other_dbl, rounding_mode), "div");
 }
@@ -1460,7 +1460,7 @@ Tensor Tensor.div_scalar_mode(Tensor self, Var other, String rounding_mode) {
 Tensor Tensor.div__scalar_mode(Tensor self, Var other, String rounding_mode) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_div__scalar_mode(_native(self), other_kind,
       other_int, other_dbl, rounding_mode), "div_");
 }
@@ -1474,7 +1474,7 @@ Tensor Tensor.divide_(Tensor self, Tensor other) =>
 Tensor Tensor.divide_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_divide_scalar(_native(self), other_kind, other_int,
       other_dbl), "divide");
 }
@@ -1482,7 +1482,7 @@ Tensor Tensor.divide_scalar(Tensor self, Var other) {
 Tensor Tensor.divide__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_divide__scalar(_native(self), other_kind, other_int,
       other_dbl), "divide_");
 }
@@ -1500,7 +1500,7 @@ Tensor Tensor.divide_scalar_mode(Tensor self, Var other,
     String rounding_mode) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_divide_scalar_mode(_native(self), other_kind,
       other_int, other_dbl, rounding_mode), "divide");
 }
@@ -1509,7 +1509,7 @@ Tensor Tensor.divide__scalar_mode(Tensor self, Var other,
     String rounding_mode) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_divide__scalar_mode(_native(self), other_kind,
       other_int, other_dbl, rounding_mode), "divide_");
 }
@@ -1525,7 +1525,7 @@ Tensor Tensor.true_divide_(Tensor self, Tensor other) =>
 Tensor Tensor.true_divide_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_true_divide_scalar(_native(self), other_kind,
       other_int, other_dbl), "true_divide");
 }
@@ -1533,7 +1533,7 @@ Tensor Tensor.true_divide_scalar(Tensor self, Var other) {
 Tensor Tensor.true_divide__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_true_divide__scalar(_native(self), other_kind,
       other_int, other_dbl), "true_divide_");
 }
@@ -1548,7 +1548,7 @@ Tensor Torch.einsum(String equation, List tensors, List path) {
   int64_t tensors_n = 0;
   xt_tensor *tensors_items = _handles(tensors, tensors_n);
   int64_t path_n = 0;
-  int64_t *path_dims = path ? _dims(path, &path_n) : NULL;
+  int64_t *path_dims = path ? _dims(path, path_n) : NULL;
   return Tensor.adopt(xt_einsum(equation, tensors_items, tensors_n, path_dims,
       path_n), "einsum");
 }
@@ -1612,7 +1612,7 @@ List Tensor.embedding_bag_padding(Tensor weight, Tensor indices,
 
 Tensor Torch.empty(List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_empty_memory_format(size_dims, size_n, dtype,
       device), "empty");
 }
@@ -1620,9 +1620,9 @@ Tensor Torch.empty(List size, int dtype, String device) {
 Tensor Torch.empty_permuted(List size, List physical_layout, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t physical_layout_n = 0;
-  int64_t *physical_layout_dims = _dims(physical_layout, &physical_layout_n);
+  int64_t *physical_layout_dims = _dims(physical_layout, physical_layout_n);
   return Tensor.adopt(xt_empty_permuted(size_dims, size_n,
       physical_layout_dims, physical_layout_n, dtype, device),
       "empty_permuted");
@@ -1630,7 +1630,7 @@ Tensor Torch.empty_permuted(List size, List physical_layout, int dtype,
 
 Tensor Tensor.new_empty(Tensor self, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_new_empty(_native(self), size_dims, size_n, dtype,
       device), "new_empty");
 }
@@ -1638,9 +1638,9 @@ Tensor Tensor.new_empty(Tensor self, List size, int dtype, String device) {
 Tensor Tensor.new_empty_strided(Tensor self, List size, List stride,
     int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_new_empty_strided(_native(self), size_dims, size_n,
       stride_dims, stride_n, dtype, device), "new_empty_strided");
 }
@@ -1648,10 +1648,10 @@ Tensor Tensor.new_empty_strided(Tensor self, List size, List stride,
 Tensor Tensor.new_full(Tensor self, List size, Var fill_value, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t fill_value_int = 0;
   double fill_value_dbl = 0;
-  int fill_value_kind = _scalar(fill_value, &fill_value_int, &fill_value_dbl);
+  int fill_value_kind = _scalar(fill_value, fill_value_int, fill_value_dbl);
   return Tensor.adopt(xt_new_full(_native(self), size_dims, size_n,
       fill_value_kind, fill_value_int, fill_value_dbl, dtype, device),
       "new_full");
@@ -1659,28 +1659,28 @@ Tensor Tensor.new_full(Tensor self, List size, Var fill_value, int dtype,
 
 Tensor Tensor.new_zeros(Tensor self, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_new_zeros(_native(self), size_dims, size_n, dtype,
       device), "new_zeros");
 }
 
 Tensor Tensor.new_ones(Tensor self, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_new_ones(_native(self), size_dims, size_n, dtype,
       device), "new_ones");
 }
 
 Tensor Tensor.resize_(Tensor self, List size) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_resize_(_native(self), size_dims, size_n), "resize_");
 }
 
 Tensor Torch.empty_quantized(List size, Tensor qtensor, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_empty_quantized(size_dims, size_n, _native(qtensor),
       dtype, device), "empty_quantized");
 }
@@ -1690,9 +1690,9 @@ Tensor Tensor.empty_like(Tensor self, int dtype, String device) =>
 
 Tensor Torch.empty_strided(List size, List stride, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_empty_strided(size_dims, size_n, stride_dims,
       stride_n, dtype, device), "empty_strided");
 }
@@ -1726,7 +1726,7 @@ Tensor Tensor.expm1_(Tensor self) =>
 
 Tensor Tensor.expand(Tensor self, List size, int implicit) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_expand(_native(self), size_dims, size_n, implicit),
       "expand");
 }
@@ -1746,7 +1746,7 @@ Tensor Tensor.flatten_using(Tensor self, int64_t start_dim, int64_t end_dim) =>
 
 Tensor Tensor.unflatten(Tensor self, int64_t dim, List sizes) {
   int64_t sizes_n = 0;
-  int64_t *sizes_dims = _dims(sizes, &sizes_n);
+  int64_t *sizes_dims = _dims(sizes, sizes_n);
   return Tensor.adopt(xt_unflatten_int(_native(self), dim, sizes_dims,
       sizes_n), "unflatten");
 }
@@ -1754,7 +1754,7 @@ Tensor Tensor.unflatten(Tensor self, int64_t dim, List sizes) {
 Tensor Tensor.fill(Tensor self, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_fill_scalar(_native(self), value_kind, value_int,
       value_dbl), "fill");
 }
@@ -1765,7 +1765,7 @@ Tensor Tensor.fill_tensor(Tensor self, Tensor value) =>
 Tensor Tensor.fill_(Tensor self, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_fill__scalar(_native(self), value_kind, value_int,
       value_dbl), "fill_");
 }
@@ -1789,7 +1789,7 @@ Tensor Tensor.floor_divide_(Tensor self, Tensor other) =>
 Tensor Tensor.floor_divide_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_floor_divide_scalar(_native(self), other_kind,
       other_int, other_dbl), "floor_divide");
 }
@@ -1797,7 +1797,7 @@ Tensor Tensor.floor_divide_scalar(Tensor self, Var other) {
 Tensor Tensor.floor_divide__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_floor_divide__scalar(_native(self), other_kind,
       other_int, other_dbl), "floor_divide_");
 }
@@ -1812,7 +1812,7 @@ Tensor Tensor.full_like(Tensor self, Var fill_value, int dtype,
     String device) {
   int64_t fill_value_int = 0;
   double fill_value_dbl = 0;
-  int fill_value_kind = _scalar(fill_value, &fill_value_int, &fill_value_dbl);
+  int fill_value_kind = _scalar(fill_value, fill_value_int, fill_value_dbl);
   return Tensor.adopt(xt_full_like(_native(self), fill_value_kind,
       fill_value_int, fill_value_dbl, dtype, device), "full_like");
 }
@@ -1947,8 +1947,8 @@ Tensor Tensor.isin_tensor(Tensor elements, Var test_element,
     int assume_unique, int invert) {
   int64_t test_element_int = 0;
   double test_element_dbl = 0;
-  int test_element_kind = _scalar(test_element, &test_element_int,
-      &test_element_dbl);
+  int test_element_kind = _scalar(test_element, test_element_int,
+      test_element_dbl);
   return Tensor.adopt(xt_isin_tensor_scalar(_native(elements),
       test_element_kind, test_element_int, test_element_dbl, assume_unique,
       invert), "isin");
@@ -1958,7 +1958,7 @@ Tensor Torch.isin_scalar(Var element, Tensor test_elements, int assume_unique,
     int invert) {
   int64_t element_int = 0;
   double element_dbl = 0;
-  int element_kind = _scalar(element, &element_int, &element_dbl);
+  int element_kind = _scalar(element, element_int, element_dbl);
   return Tensor.adopt(xt_isin_scalar_tensor(element_kind, element_int,
       element_dbl, _native(test_elements), assume_unique, invert), "isin");
 }
@@ -2043,8 +2043,7 @@ List Tensor.kthvalue(Tensor self, int64_t k, int64_t dim, int keepdim) {
 Tensor Tensor.layer_norm(Tensor input, List normalized_shape, Tensor weight,
     Tensor bias, double eps, int cudnn_enable) {
   int64_t normalized_shape_n = 0;
-  int64_t *normalized_shape_dims = _dims(normalized_shape,
-      &normalized_shape_n);
+  int64_t *normalized_shape_dims = _dims(normalized_shape, normalized_shape_n);
   return Tensor.adopt(xt_layer_norm(_native(input), normalized_shape_dims,
       normalized_shape_n, _native(weight), _native(bias), eps, cudnn_enable),
       "layer_norm");
@@ -2053,8 +2052,7 @@ Tensor Tensor.layer_norm(Tensor input, List normalized_shape, Tensor weight,
 List Tensor.native_layer_norm(Tensor input, List normalized_shape,
     Tensor weight, Tensor bias, double eps) {
   int64_t normalized_shape_n = 0;
-  int64_t *normalized_shape_dims = _dims(normalized_shape,
-      &normalized_shape_n);
+  int64_t *normalized_shape_dims = _dims(normalized_shape, normalized_shape_n);
   xt_tensor out0 = NULL, out1 = NULL, out2 = NULL;
   Torch.check(xt_native_layer_norm(_native(input), normalized_shape_dims,
       normalized_shape_n, _native(weight), _native(bias), eps, &out0, &out1,
@@ -2072,8 +2070,7 @@ List Tensor.native_layer_norm(Tensor input, List normalized_shape,
 Tensor Tensor.rms_norm(Tensor input, List normalized_shape, Tensor weight,
     double eps, int eps_set) {
   int64_t normalized_shape_n = 0;
-  int64_t *normalized_shape_dims = _dims(normalized_shape,
-      &normalized_shape_n);
+  int64_t *normalized_shape_dims = _dims(normalized_shape, normalized_shape_n);
   return Tensor.adopt(xt_rms_norm(_native(input), normalized_shape_dims,
       normalized_shape_n, _native(weight), eps, eps_set), "rms_norm");
 }
@@ -2101,12 +2098,12 @@ Tensor Tensor.fbgemm_linear_int8_weight_fp32_activation(Tensor input,
     Var weight_zero_point, Tensor bias) {
   int64_t weight_scale_int = 0;
   double weight_scale_dbl = 0;
-  int weight_scale_kind = _scalar(weight_scale, &weight_scale_int,
-      &weight_scale_dbl);
+  int weight_scale_kind = _scalar(weight_scale, weight_scale_int,
+      weight_scale_dbl);
   int64_t weight_zero_point_int = 0;
   double weight_zero_point_dbl = 0;
   int weight_zero_point_kind = _scalar(weight_zero_point,
-      &weight_zero_point_int, &weight_zero_point_dbl);
+      weight_zero_point_int, weight_zero_point_dbl);
   return Tensor.adopt(xt_fbgemm_linear_int8_weight_fp32_activation(_native(input),
       _native(weight), _native(packed), _native(col_offsets),
       weight_scale_kind, weight_scale_int, weight_scale_dbl,
@@ -2119,12 +2116,12 @@ Tensor Tensor.fbgemm_linear_int8_weight(Tensor input, Tensor weight,
     Var weight_zero_point, Tensor bias) {
   int64_t weight_scale_int = 0;
   double weight_scale_dbl = 0;
-  int weight_scale_kind = _scalar(weight_scale, &weight_scale_int,
-      &weight_scale_dbl);
+  int weight_scale_kind = _scalar(weight_scale, weight_scale_int,
+      weight_scale_dbl);
   int64_t weight_zero_point_int = 0;
   double weight_zero_point_dbl = 0;
   int weight_zero_point_kind = _scalar(weight_zero_point,
-      &weight_zero_point_int, &weight_zero_point_dbl);
+      weight_zero_point_int, weight_zero_point_dbl);
   return Tensor.adopt(xt_fbgemm_linear_int8_weight(_native(input),
       _native(weight), _native(packed), _native(col_offsets),
       weight_scale_kind, weight_scale_int, weight_scale_dbl,
@@ -2166,10 +2163,10 @@ Tensor Torch.linspace(Var start, Var end, int64_t steps, int dtype,
     String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   return Tensor.adopt(xt_linspace(start_kind, start_int, start_dbl, end_kind,
       end_int, end_dbl, steps, dtype, device), "linspace");
 }
@@ -2183,7 +2180,7 @@ Tensor Tensor.linspace_tensor_scalar(Tensor start, Var end, int64_t steps,
     int dtype, String device) {
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   return Tensor.adopt(xt_linspace_tensor_scalar(_native(start), end_kind,
       end_int, end_dbl, steps, dtype, device), "linspace");
 }
@@ -2192,7 +2189,7 @@ Tensor Torch.linspace_scalar(Var start, Tensor end, int64_t steps, int dtype,
     String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   return Tensor.adopt(xt_linspace_scalar_tensor(start_kind, start_int,
       start_dbl, _native(end), steps, dtype, device), "linspace");
 }
@@ -2230,7 +2227,7 @@ Tensor Tensor.xlogy(Tensor self, Tensor other) =>
 Tensor Torch.xlogy_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_xlogy_scalar_self(self_kind, self_int, self_dbl,
       _native(other)), "xlogy");
 }
@@ -2238,7 +2235,7 @@ Tensor Torch.xlogy_scalar(Var self, Tensor other) {
 Tensor Tensor.xlogy_scalar_other(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_xlogy_scalar_other(_native(self), other_kind,
       other_int, other_dbl), "xlogy");
 }
@@ -2249,7 +2246,7 @@ Tensor Tensor.xlogy_(Tensor self, Tensor other) =>
 Tensor Tensor.xlogy__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_xlogy__scalar_other(_native(self), other_kind,
       other_int, other_dbl), "xlogy_");
 }
@@ -2258,10 +2255,10 @@ Tensor Torch.logspace(Var start, Var end, int64_t steps, double base,
     int dtype, String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   return Tensor.adopt(xt_logspace(start_kind, start_int, start_dbl, end_kind,
       end_int, end_dbl, steps, base, dtype, device), "logspace");
 }
@@ -2275,7 +2272,7 @@ Tensor Tensor.logspace_tensor_scalar(Tensor start, Var end, int64_t steps,
     double base, int dtype, String device) {
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   return Tensor.adopt(xt_logspace_tensor_scalar(_native(start), end_kind,
       end_int, end_dbl, steps, base, dtype, device), "logspace");
 }
@@ -2284,7 +2281,7 @@ Tensor Torch.logspace_scalar(Var start, Tensor end, int64_t steps,
     double base, int dtype, String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   return Tensor.adopt(xt_logspace_scalar_tensor(start_kind, start_int,
       start_dbl, _native(end), steps, base, dtype, device), "logspace");
 }
@@ -2297,7 +2294,7 @@ Tensor Tensor.logcumsumexp(Tensor self, int64_t dim) =>
 
 Tensor Tensor.logsumexp(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_logsumexp(_native(self), dim_dims, dim_n, keepdim),
       "logsumexp");
 }
@@ -2328,7 +2325,7 @@ List Tensor.max_dim(Tensor self, int64_t dim, int keepdim) {
 
 Tensor Tensor.amax(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_amax(_native(self), dim_dims, dim_n, keepdim),
       "amax");
 }
@@ -2336,13 +2333,13 @@ Tensor Tensor.amax(Tensor self, List dim, int keepdim) {
 List Tensor.max_pool1d_with_indices(Tensor self, List kernel_size,
     List stride, List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_max_pool1d_with_indices(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
@@ -2354,13 +2351,13 @@ List Tensor.max_pool1d_with_indices(Tensor self, List kernel_size,
 Tensor Tensor.max_pool1d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_max_pool1d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "max_pool1d");
@@ -2369,13 +2366,13 @@ Tensor Tensor.max_pool1d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.max_pool2d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_max_pool2d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "max_pool2d");
@@ -2384,13 +2381,13 @@ Tensor Tensor.max_pool2d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.mkldnn_max_pool2d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_mkldnn_max_pool2d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "mkldnn_max_pool2d");
@@ -2399,13 +2396,13 @@ Tensor Tensor.mkldnn_max_pool2d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.mkldnn_max_pool3d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_mkldnn_max_pool3d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "mkldnn_max_pool3d");
@@ -2414,13 +2411,13 @@ Tensor Tensor.mkldnn_max_pool3d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.quantized_max_pool1d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_quantized_max_pool1d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "quantized_max_pool1d");
@@ -2429,13 +2426,13 @@ Tensor Tensor.quantized_max_pool1d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.quantized_max_pool2d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_quantized_max_pool2d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "quantized_max_pool2d");
@@ -2444,13 +2441,13 @@ Tensor Tensor.quantized_max_pool2d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.quantized_max_pool3d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_quantized_max_pool3d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "quantized_max_pool3d");
@@ -2459,13 +2456,13 @@ Tensor Tensor.quantized_max_pool3d(Tensor self, List kernel_size, List stride,
 Tensor Tensor.max_pool3d(Tensor self, List kernel_size, List stride,
     List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_max_pool3d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       dilation_dims, dilation_n, ceil_mode), "max_pool3d");
@@ -2473,7 +2470,7 @@ Tensor Tensor.max_pool3d(Tensor self, List kernel_size, List stride,
 
 Tensor Tensor.nanmean(Tensor self, List dim, int keepdim, int dtype) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_nanmean(_native(self), dim_dims, dim_n, keepdim,
       dtype), "nanmean");
 }
@@ -2506,7 +2503,7 @@ List Tensor.min_dim(Tensor self, int64_t dim, int keepdim) {
 
 Tensor Tensor.amin(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_amin(_native(self), dim_dims, dim_n, keepdim),
       "amin");
 }
@@ -2514,11 +2511,11 @@ Tensor Tensor.amin(Tensor self, List dim, int keepdim) {
 Tensor Tensor.mkldnn_convolution(Tensor self, Tensor weight, Tensor bias,
     List padding, List stride, List dilation, int64_t groups) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_mkldnn_convolution(_native(self), _native(weight),
       _native(bias), padding_dims, padding_n, stride_dims, stride_n,
       dilation_dims, dilation_n, groups), "mkldnn_convolution");
@@ -2529,7 +2526,7 @@ List Tensor.mkldnn_rnn_layer(Tensor input, Tensor weight0, Tensor weight1,
     List batch_sizes, int64_t mode, int64_t hidden_size, int64_t num_layers,
     int has_biases, int bidirectional, int batch_first, int train) {
   int64_t batch_sizes_n = 0;
-  int64_t *batch_sizes_dims = _dims(batch_sizes, &batch_sizes_n);
+  int64_t *batch_sizes_dims = _dims(batch_sizes, batch_sizes_n);
   xt_tensor out0 = NULL, out1 = NULL, out2 = NULL, out3 = NULL;
   Torch.check(xt_mkldnn_rnn_layer(_native(input), _native(weight0),
       _native(weight1), _native(weight2), _native(weight3), _native(hx_),
@@ -2570,11 +2567,11 @@ Tensor Tensor.miopen_convolution(Tensor self, Tensor weight, Tensor bias,
     List padding, List stride, List dilation, int64_t groups, int benchmark,
     int deterministic) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_miopen_convolution(_native(self), _native(weight),
       _native(bias), padding_dims, padding_n, stride_dims, stride_n,
       dilation_dims, dilation_n, groups, benchmark, deterministic),
@@ -2585,13 +2582,13 @@ Tensor Tensor.miopen_convolution_transpose(Tensor self, Tensor weight,
     Tensor bias, List padding, List output_padding, List stride,
     List dilation, int64_t groups, int benchmark, int deterministic) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_miopen_convolution_transpose(_native(self),
       _native(weight), _native(bias), padding_dims, padding_n,
       output_padding_dims, output_padding_n, stride_dims, stride_n,
@@ -2603,11 +2600,11 @@ Tensor Tensor.miopen_depthwise_convolution(Tensor self, Tensor weight,
     Tensor bias, List padding, List stride, List dilation, int64_t groups,
     int benchmark, int deterministic) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_miopen_depthwise_convolution(_native(self),
       _native(weight), _native(bias), padding_dims, padding_n, stride_dims,
       stride_n, dilation_dims, dilation_n, groups, benchmark, deterministic),
@@ -2617,11 +2614,11 @@ Tensor Tensor.miopen_depthwise_convolution(Tensor self, Tensor weight,
 Tensor Tensor.miopen_convolution_relu(Tensor self, Tensor weight, Tensor bias,
     List stride, List padding, List dilation, int64_t groups) {
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_miopen_convolution_relu(_native(self),
       _native(weight), _native(bias), stride_dims, stride_n, padding_dims,
       padding_n, dilation_dims, dilation_n, groups),
@@ -2633,13 +2630,13 @@ Tensor Tensor.miopen_convolution_add_relu(Tensor self, Tensor weight,
     List dilation, int64_t groups) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_miopen_convolution_add_relu(_native(self),
       _native(weight), _native(z), alpha_kind, alpha_int, alpha_dbl,
       _native(bias), stride_dims, stride_n, padding_dims, padding_n,
@@ -2667,7 +2664,7 @@ Tensor Tensor.mul_(Tensor self, Tensor other) =>
 Tensor Tensor.mul_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_mul_scalar(_native(self), other_kind, other_int,
       other_dbl), "mul");
 }
@@ -2675,7 +2672,7 @@ Tensor Tensor.mul_scalar(Tensor self, Var other) {
 Tensor Tensor.mul__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_mul__scalar(_native(self), other_kind, other_int,
       other_dbl), "mul_");
 }
@@ -2690,7 +2687,7 @@ Tensor Tensor.multiply_(Tensor self, Tensor other) =>
 Tensor Tensor.multiply_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_multiply_scalar(_native(self), other_kind, other_int,
       other_dbl), "multiply");
 }
@@ -2698,7 +2695,7 @@ Tensor Tensor.multiply_scalar(Tensor self, Var other) {
 Tensor Tensor.multiply__scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_multiply__scalar(_native(self), other_kind,
       other_int, other_dbl), "multiply_");
 }
@@ -2810,15 +2807,15 @@ Tensor Tensor.cosine_similarity(Tensor x1, Tensor x2, int64_t dim,
 
 Tensor Tensor.permute(Tensor self, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_permute(_native(self), dims_dims, dims_n), "permute");
 }
 
 Tensor Tensor.movedim(Tensor self, List source, List destination) {
   int64_t source_n = 0;
-  int64_t *source_dims = _dims(source, &source_n);
+  int64_t *source_dims = _dims(source, source_n);
   int64_t destination_n = 0;
-  int64_t *destination_dims = _dims(destination, &destination_n);
+  int64_t *destination_dims = _dims(destination, destination_n);
   return Tensor.adopt(xt_movedim_intlist(_native(self), source_dims, source_n,
       destination_dims, destination_n), "movedim");
 }
@@ -2828,9 +2825,9 @@ Tensor Tensor.movedim_int(Tensor self, int64_t source, int64_t destination) =>
 
 Tensor Tensor.moveaxis(Tensor self, List source, List destination) {
   int64_t source_n = 0;
-  int64_t *source_dims = _dims(source, &source_n);
+  int64_t *source_dims = _dims(source, source_n);
   int64_t destination_n = 0;
-  int64_t *destination_dims = _dims(destination, &destination_n);
+  int64_t *destination_dims = _dims(destination, destination_n);
   return Tensor.adopt(xt_moveaxis_intlist(_native(self), source_dims,
       source_n, destination_dims, destination_n), "moveaxis");
 }
@@ -2901,14 +2898,14 @@ Tensor Tensor.deg2rad_(Tensor self) =>
 Tensor Torch.scalar_tensor(Var s, int dtype, String device) {
   int64_t s_int = 0;
   double s_dbl = 0;
-  int s_kind = _scalar(s, &s_int, &s_dbl);
+  int s_kind = _scalar(s, s_int, s_dbl);
   return Tensor.adopt(xt_scalar_tensor(s_kind, s_int, s_dbl, dtype, device),
       "scalar_tensor");
 }
 
 Tensor Torch.rand_generator(List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_rand_generator(size_dims, size_n, dtype, device),
       "rand");
 }
@@ -2922,7 +2919,7 @@ Tensor Tensor.rand_like_generator(Tensor self, int dtype, String device) =>
 
 Tensor Torch.randint(int64_t high, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_randint(high, size_dims, size_n, dtype, device),
       "randint");
 }
@@ -2930,7 +2927,7 @@ Tensor Torch.randint(int64_t high, List size, int dtype, String device) {
 Tensor Torch.randint_generator(int64_t high, List size, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_randint_generator(high, size_dims, size_n, dtype,
       device), "randint");
 }
@@ -2938,7 +2935,7 @@ Tensor Torch.randint_generator(int64_t high, List size, int dtype,
 Tensor Torch.randint_low(int64_t low, int64_t high, List size, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_randint_low(low, high, size_dims, size_n, dtype,
       device), "randint");
 }
@@ -2946,7 +2943,7 @@ Tensor Torch.randint_low(int64_t low, int64_t high, List size, int dtype,
 Tensor Torch.randint_low_generator(int64_t low, int64_t high, List size,
     int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_randint_low_generator(low, high, size_dims, size_n,
       dtype, device), "randint");
 }
@@ -2983,7 +2980,7 @@ Tensor Tensor.randint_like_low_generator(Tensor self, int64_t low,
 
 Tensor Torch.randn_generator(List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_randn_generator(size_dims, size_n, dtype, device),
       "randn");
 }
@@ -3001,13 +2998,13 @@ Tensor Torch.randperm_generator(int64_t n, int dtype, String device) =>
 Tensor Torch.range(Var start, Var end, Var step, int dtype, String device) {
   int64_t start_int = 0;
   double start_dbl = 0;
-  int start_kind = _scalar(start, &start_int, &start_dbl);
+  int start_kind = _scalar(start, start_int, start_dbl);
   int64_t end_int = 0;
   double end_dbl = 0;
-  int end_kind = _scalar(end, &end_int, &end_dbl);
+  int end_kind = _scalar(end, end_int, end_dbl);
   int64_t step_int = 0;
   double step_dbl = 0;
-  int step_kind = _scalar(step, &step_int, &step_dbl);
+  int step_kind = _scalar(step, step_int, step_dbl);
   return Tensor.adopt(xt_range_step(start_kind, start_int, start_dbl,
       end_kind, end_int, end_dbl, step_kind, step_int, step_dbl, dtype,
       device), "range");
@@ -3033,7 +3030,7 @@ Tensor Tensor.negative_(Tensor self) =>
 
 Tensor Tensor.repeat(Tensor self, List repeats) {
   int64_t repeats_n = 0;
-  int64_t *repeats_dims = _dims(repeats, &repeats_n);
+  int64_t *repeats_dims = _dims(repeats, repeats_n);
   return Tensor.adopt(xt_repeat(_native(self), repeats_dims, repeats_n),
       "repeat");
 }
@@ -3072,10 +3069,10 @@ Tensor Tensor.round__decimals(Tensor self, int64_t decimals) =>
 Tensor Tensor.rrelu(Tensor self, Var lower, Var upper, int training) {
   int64_t lower_int = 0;
   double lower_dbl = 0;
-  int lower_kind = _scalar(lower, &lower_int, &lower_dbl);
+  int lower_kind = _scalar(lower, lower_int, lower_dbl);
   int64_t upper_int = 0;
   double upper_dbl = 0;
-  int upper_kind = _scalar(upper, &upper_int, &upper_dbl);
+  int upper_kind = _scalar(upper, upper_int, upper_dbl);
   return Tensor.adopt(xt_rrelu(_native(self), lower_kind, lower_int,
       lower_dbl, upper_kind, upper_int, upper_dbl, training), "rrelu");
 }
@@ -3083,10 +3080,10 @@ Tensor Tensor.rrelu(Tensor self, Var lower, Var upper, int training) {
 Tensor Tensor.rrelu_(Tensor self, Var lower, Var upper, int training) {
   int64_t lower_int = 0;
   double lower_dbl = 0;
-  int lower_kind = _scalar(lower, &lower_int, &lower_dbl);
+  int lower_kind = _scalar(lower, lower_int, lower_dbl);
   int64_t upper_int = 0;
   double upper_dbl = 0;
-  int upper_kind = _scalar(upper, &upper_int, &upper_dbl);
+  int upper_kind = _scalar(upper, upper_int, upper_dbl);
   return Tensor.adopt(xt_rrelu_(_native(self), lower_kind, lower_int,
       lower_dbl, upper_kind, upper_int, upper_dbl, training), "rrelu_");
 }
@@ -3112,7 +3109,7 @@ Tensor Tensor.gelu(Tensor self, String approximate) =>
 Tensor Tensor.hardshrink(Tensor self, Var lambd) {
   int64_t lambd_int = 0;
   double lambd_dbl = 0;
-  int lambd_kind = _scalar(lambd, &lambd_int, &lambd_dbl);
+  int lambd_kind = _scalar(lambd, lambd_int, lambd_dbl);
   return Tensor.adopt(xt_hardshrink(_native(self), lambd_kind, lambd_int,
       lambd_dbl), "hardshrink");
 }
@@ -3135,7 +3132,7 @@ Tensor Tensor.selu_(Tensor self) =>
 Tensor Tensor.celu(Tensor self, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_celu(_native(self), alpha_kind, alpha_int,
       alpha_dbl), "celu");
 }
@@ -3143,7 +3140,7 @@ Tensor Tensor.celu(Tensor self, Var alpha) {
 Tensor Tensor.celu_(Tensor self, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_celu_(_native(self), alpha_kind, alpha_int,
       alpha_dbl), "celu_");
 }
@@ -3224,9 +3221,9 @@ Tensor Tensor.diagonal_scatter(Tensor self, Tensor src, int64_t offset,
 Tensor Tensor.as_strided_scatter(Tensor self, Tensor src, List size,
     List stride, int64_t storage_offset, int storage_offset_set) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_as_strided_scatter(_native(self), _native(src),
       size_dims, size_n, stride_dims, stride_n, storage_offset,
       storage_offset_set), "as_strided_scatter");
@@ -3267,7 +3264,7 @@ List Tensor.split(Tensor self, int64_t split_size, int64_t dim) {
 
 List Tensor.split_sizes(Tensor self, List split_size, int64_t dim) {
   int64_t split_size_n = 0;
-  int64_t *split_size_dims = _dims(split_size, &split_size_n);
+  int64_t *split_size_dims = _dims(split_size, split_size_n);
   xt_tensor *items = NULL;
   int64_t count = xt_split_sizes(_native(self), split_size_dims, split_size_n,
       dim, &items);
@@ -3284,7 +3281,7 @@ List Tensor.split_sizes(Tensor self, List split_size, int64_t dim) {
 List Tensor.unsafe_split_with_sizes(Tensor self, List split_sizes,
     int64_t dim) {
   int64_t split_sizes_n = 0;
-  int64_t *split_sizes_dims = _dims(split_sizes, &split_sizes_n);
+  int64_t *split_sizes_dims = _dims(split_sizes, split_sizes_n);
   xt_tensor *items = NULL;
   int64_t count = xt_unsafe_split_with_sizes(_native(self), split_sizes_dims,
       split_sizes_n, dim, &items);
@@ -3300,7 +3297,7 @@ List Tensor.unsafe_split_with_sizes(Tensor self, List split_sizes,
 
 List Tensor.split_with_sizes(Tensor self, List split_sizes, int64_t dim) {
   int64_t split_sizes_n = 0;
-  int64_t *split_sizes_dims = _dims(split_sizes, &split_sizes_n);
+  int64_t *split_sizes_dims = _dims(split_sizes, split_sizes_n);
   xt_tensor *items = NULL;
   int64_t count = xt_split_with_sizes(_native(self), split_sizes_dims,
       split_sizes_n, dim, &items);
@@ -3329,7 +3326,7 @@ List Tensor.hsplit(Tensor self, int64_t sections) {
 
 List Tensor.hsplit_array(Tensor self, List indices) {
   int64_t indices_n = 0;
-  int64_t *indices_dims = _dims(indices, &indices_n);
+  int64_t *indices_dims = _dims(indices, indices_n);
   xt_tensor *items = NULL;
   int64_t count = xt_hsplit_array(_native(self), indices_dims, indices_n,
       &items);
@@ -3358,7 +3355,7 @@ List Tensor.vsplit(Tensor self, int64_t sections) {
 
 List Tensor.vsplit_array(Tensor self, List indices) {
   int64_t indices_n = 0;
-  int64_t *indices_dims = _dims(indices, &indices_n);
+  int64_t *indices_dims = _dims(indices, indices_n);
   xt_tensor *items = NULL;
   int64_t count = xt_vsplit_array(_native(self), indices_dims, indices_n,
       &items);
@@ -3387,7 +3384,7 @@ List Tensor.dsplit(Tensor self, int64_t sections) {
 
 List Tensor.dsplit_array(Tensor self, List indices) {
   int64_t indices_n = 0;
-  int64_t *indices_dims = _dims(indices, &indices_n);
+  int64_t *indices_dims = _dims(indices, indices_n);
   xt_tensor *items = NULL;
   int64_t count = xt_dsplit_array(_native(self), indices_dims, indices_n,
       &items);
@@ -3406,7 +3403,7 @@ Tensor Tensor.squeeze_dim(Tensor self, int64_t dim) =>
 
 Tensor Tensor.squeeze_dims(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_squeeze_dims(_native(self), dim_dims, dim_n),
       "squeeze");
 }
@@ -3419,7 +3416,7 @@ Tensor Tensor.squeeze__dim(Tensor self, int64_t dim) =>
 
 Tensor Tensor.squeeze__dims(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_squeeze__dims(_native(self), dim_dims, dim_n),
       "squeeze_");
 }
@@ -3428,10 +3425,10 @@ Tensor Tensor.sspaddmm(Tensor self, Tensor mat1, Tensor mat2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sspaddmm(_native(self), _native(mat1), _native(mat2),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "sspaddmm");
@@ -3490,28 +3487,28 @@ int64_t Tensor.stride(Tensor self, int64_t dim) {
 
 Tensor Tensor.sum_dim_intlist(Tensor self, List dim, int keepdim, int dtype) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_sum_dim_intlist(_native(self), dim_dims, dim_n,
       keepdim, dtype), "sum");
 }
 
 Tensor Tensor.nansum(Tensor self, List dim, int keepdim, int dtype) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_nansum(_native(self), dim_dims, dim_n, keepdim,
       dtype), "nansum");
 }
 
 Tensor Tensor.hash_tensor(Tensor self, List dim, int keepdim, int64_t mode) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_hash_tensor(_native(self), dim_dims, dim_n, keepdim,
       mode), "hash_tensor");
 }
 
 Tensor Tensor.sum_to_size(Tensor self, List size) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sum_to_size(_native(self), size_dims, size_n),
       "sum_to_size");
 }
@@ -3530,7 +3527,7 @@ Tensor Tensor.std(Tensor self, int unbiased) =>
 
 Tensor Tensor.std_dim(Tensor self, List dim, int unbiased, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_std_dim(_native(self), dim_dims, dim_n, unbiased,
       keepdim), "std");
 }
@@ -3538,10 +3535,10 @@ Tensor Tensor.std_dim(Tensor self, List dim, int unbiased, int keepdim) {
 Tensor Tensor.std_correction(Tensor self, List dim, Var correction,
     int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   int64_t correction_int = 0;
   double correction_dbl = 0;
-  int correction_kind = _scalar(correction, &correction_int, &correction_dbl);
+  int correction_kind = _scalar(correction, correction_int, correction_dbl);
   return Tensor.adopt(xt_std_correction(_native(self), dim_dims, dim_n,
       correction_kind, correction_int, correction_dbl, keepdim), "std");
 }
@@ -3554,7 +3551,7 @@ List Tensor.std_mean(Tensor self, int unbiased) {
 
 List Tensor.std_mean_dim(Tensor self, List dim, int unbiased, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_std_mean_dim(_native(self), dim_dims, dim_n, unbiased,
       keepdim, &out0, &out1), "std_mean");
@@ -3564,10 +3561,10 @@ List Tensor.std_mean_dim(Tensor self, List dim, int unbiased, int keepdim) {
 List Tensor.std_mean_correction(Tensor self, List dim, Var correction,
     int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   int64_t correction_int = 0;
   double correction_dbl = 0;
-  int correction_kind = _scalar(correction, &correction_int, &correction_dbl);
+  int correction_kind = _scalar(correction, correction_int, correction_dbl);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_std_mean_correction(_native(self), dim_dims, dim_n,
       correction_kind, correction_int, correction_dbl, keepdim, &out0, &out1),
@@ -3596,9 +3593,9 @@ Tensor Tensor.tanh_(Tensor self) =>
 Tensor Tensor.tensordot(Tensor self, Tensor other, List dims_self,
     List dims_other) {
   int64_t dims_self_n = 0;
-  int64_t *dims_self_dims = _dims(dims_self, &dims_self_n);
+  int64_t *dims_self_dims = _dims(dims_self, dims_self_n);
   int64_t dims_other_n = 0;
-  int64_t *dims_other_dims = _dims(dims_other, &dims_other_n);
+  int64_t *dims_other_dims = _dims(dims_other, dims_other_n);
   return Tensor.adopt(xt_tensordot(_native(self), _native(other),
       dims_self_dims, dims_self_n, dims_other_dims, dims_other_n),
       "tensordot");
@@ -3607,10 +3604,10 @@ Tensor Tensor.tensordot(Tensor self, Tensor other, List dims_self,
 Tensor Tensor.threshold(Tensor self, Var threshold, Var value) {
   int64_t threshold_int = 0;
   double threshold_dbl = 0;
-  int threshold_kind = _scalar(threshold, &threshold_int, &threshold_dbl);
+  int threshold_kind = _scalar(threshold, threshold_int, threshold_dbl);
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_threshold(_native(self), threshold_kind,
       threshold_int, threshold_dbl, value_kind, value_int, value_dbl),
       "threshold");
@@ -3619,10 +3616,10 @@ Tensor Tensor.threshold(Tensor self, Var threshold, Var value) {
 Tensor Tensor.threshold_(Tensor self, Var threshold, Var value) {
   int64_t threshold_int = 0;
   double threshold_dbl = 0;
-  int threshold_kind = _scalar(threshold, &threshold_int, &threshold_dbl);
+  int threshold_kind = _scalar(threshold, threshold_int, threshold_dbl);
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_threshold_(_native(self), threshold_kind,
       threshold_int, threshold_dbl, value_kind, value_int, value_dbl),
       "threshold_");
@@ -3630,7 +3627,7 @@ Tensor Tensor.threshold_(Tensor self, Var threshold, Var value) {
 
 Tensor Tensor.tile(Tensor self, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_tile(_native(self), dims_dims, dims_n), "tile");
 }
 
@@ -3645,7 +3642,7 @@ Tensor Tensor.one_hot(Tensor self, int64_t num_classes) =>
 
 Tensor Tensor.flip(Tensor self, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_flip(_native(self), dims_dims, dims_n), "flip");
 }
 
@@ -3657,16 +3654,16 @@ Tensor Tensor.flipud(Tensor self) =>
 
 Tensor Tensor.roll(Tensor self, List shifts, List dims) {
   int64_t shifts_n = 0;
-  int64_t *shifts_dims = _dims(shifts, &shifts_n);
+  int64_t *shifts_dims = _dims(shifts, shifts_n);
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_roll(_native(self), shifts_dims, shifts_n, dims_dims,
       dims_n), "roll");
 }
 
 Tensor Tensor.rot90(Tensor self, int64_t k, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_rot90(_native(self), k, dims_dims, dims_n), "rot90");
 }
 
@@ -3676,7 +3673,7 @@ Tensor Tensor.trapezoid(Tensor y, Tensor x, int64_t dim) =>
 Tensor Tensor.trapezoid_dx(Tensor y, Var dx, int64_t dim) {
   int64_t dx_int = 0;
   double dx_dbl = 0;
-  int dx_kind = _scalar(dx, &dx_int, &dx_dbl);
+  int dx_kind = _scalar(dx, dx_int, dx_dbl);
   return Tensor.adopt(xt_trapezoid_dx(_native(y), dx_kind, dx_int, dx_dbl,
       dim), "trapezoid");
 }
@@ -3768,7 +3765,7 @@ List Tensor.var_mean(Tensor self, int unbiased) {
 
 List Tensor.var_mean_dim(Tensor self, List dim, int unbiased, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_var_mean_dim(_native(self), dim_dims, dim_n, unbiased,
       keepdim, &out0, &out1), "var_mean");
@@ -3778,10 +3775,10 @@ List Tensor.var_mean_dim(Tensor self, List dim, int unbiased, int keepdim) {
 List Tensor.var_mean_correction(Tensor self, List dim, Var correction,
     int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   int64_t correction_int = 0;
   double correction_dbl = 0;
-  int correction_kind = _scalar(correction, &correction_int, &correction_dbl);
+  int correction_kind = _scalar(correction, correction_int, correction_dbl);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_var_mean_correction(_native(self), dim_dims, dim_n,
       correction_kind, correction_int, correction_dbl, keepdim, &out0, &out1),
@@ -3799,7 +3796,7 @@ Tensor Tensor.where_self(Tensor condition, Tensor self, Tensor other) =>
 Tensor Tensor.where_scalarself(Tensor condition, Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_where_scalarself(_native(condition), self_kind,
       self_int, self_dbl, _native(other)), "where");
 }
@@ -3807,7 +3804,7 @@ Tensor Tensor.where_scalarself(Tensor condition, Var self, Tensor other) {
 Tensor Tensor.where_scalarother(Tensor condition, Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_where_scalarother(_native(condition), _native(self),
       other_kind, other_int, other_dbl), "where");
 }
@@ -3815,10 +3812,10 @@ Tensor Tensor.where_scalarother(Tensor condition, Tensor self, Var other) {
 Tensor Tensor.where_scalar(Tensor condition, Var self, Var other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_where_scalar(_native(condition), self_kind, self_int,
       self_dbl, other_kind, other_int, other_dbl), "where");
 }
@@ -3838,7 +3835,7 @@ Tensor Tensor.binomial(Tensor count, Tensor prob) =>
 Tensor Tensor.native_norm(Tensor self, Var p) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   return Tensor.adopt(xt_native_norm(_native(self), p_kind, p_int, p_dbl),
       "native_norm");
 }
@@ -3847,9 +3844,9 @@ Tensor Tensor.native_norm_scalaropt(Tensor self, Var p, List dim, int keepdim,
     int dtype) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_native_norm_scalaropt_dim_dtype(_native(self),
       p_kind, p_int, p_dbl, dim_dims, dim_n, keepdim, dtype), "native_norm");
 }
@@ -3857,7 +3854,7 @@ Tensor Tensor.native_norm_scalaropt(Tensor self, Var p, List dim, int keepdim,
 Tensor Tensor.norm(Tensor self, Var p, int dtype) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   return Tensor.adopt(xt_norm_scalaropt_dtype(_native(self), p_kind, p_int,
       p_dbl, dtype), "norm");
 }
@@ -3865,7 +3862,7 @@ Tensor Tensor.norm(Tensor self, Var p, int dtype) {
 Tensor Tensor.norm_scalar(Tensor self, Var p) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   return Tensor.adopt(xt_norm_scalar(_native(self), p_kind, p_int, p_dbl),
       "norm");
 }
@@ -3874,9 +3871,9 @@ Tensor Tensor.norm_scalaropt(Tensor self, Var p, List dim, int keepdim,
     int dtype) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_norm_scalaropt_dim_dtype(_native(self), p_kind,
       p_int, p_dbl, dim_dims, dim_n, keepdim, dtype), "norm");
 }
@@ -3884,9 +3881,9 @@ Tensor Tensor.norm_scalaropt(Tensor self, Var p, List dim, int keepdim,
 Tensor Tensor.norm_scalaropt_dim(Tensor self, Var p, List dim, int keepdim) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_norm_scalaropt_dim(_native(self), p_kind, p_int,
       p_dbl, dim_dims, dim_n, keepdim), "norm");
 }
@@ -3899,7 +3896,7 @@ List Tensor.frexp(Tensor self) {
 
 Tensor Tensor.frobenius_norm(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_frobenius_norm_dim(_native(self), dim_dims, dim_n,
       keepdim), "frobenius_norm");
 }
@@ -3909,7 +3906,7 @@ Tensor Tensor.nuclear_norm(Tensor self, int keepdim) =>
 
 Tensor Tensor.nuclear_norm_dim(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_nuclear_norm_dim(_native(self), dim_dims, dim_n,
       keepdim), "nuclear_norm");
 }
@@ -3931,7 +3928,7 @@ Tensor Tensor.zero_(Tensor self) =>
 Tensor Tensor.sub_tensor(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sub_tensor(_native(self), _native(other), alpha_kind,
       alpha_int, alpha_dbl), "sub");
 }
@@ -3939,7 +3936,7 @@ Tensor Tensor.sub_tensor(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.sub_(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sub__tensor(_native(self), _native(other),
       alpha_kind, alpha_int, alpha_dbl), "sub_");
 }
@@ -3947,10 +3944,10 @@ Tensor Tensor.sub_(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.sub_scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sub_scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "sub");
 }
@@ -3958,10 +3955,10 @@ Tensor Tensor.sub_scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.sub__scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sub__scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "sub_");
 }
@@ -3969,7 +3966,7 @@ Tensor Tensor.sub__scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.subtract(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_subtract_tensor(_native(self), _native(other),
       alpha_kind, alpha_int, alpha_dbl), "subtract");
 }
@@ -3977,7 +3974,7 @@ Tensor Tensor.subtract(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.subtract_(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_subtract__tensor(_native(self), _native(other),
       alpha_kind, alpha_int, alpha_dbl), "subtract_");
 }
@@ -3985,10 +3982,10 @@ Tensor Tensor.subtract_(Tensor self, Tensor other, Var alpha) {
 Tensor Tensor.subtract_scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_subtract_scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "subtract");
 }
@@ -3996,10 +3993,10 @@ Tensor Tensor.subtract_scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.subtract__scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_subtract__scalar(_native(self), other_kind,
       other_int, other_dbl, alpha_kind, alpha_int, alpha_dbl), "subtract_");
 }
@@ -4007,7 +4004,7 @@ Tensor Tensor.subtract__scalar(Tensor self, Var other, Var alpha) {
 Tensor Tensor.rsub(Tensor self, Tensor other, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_rsub_tensor(_native(self), _native(other),
       alpha_kind, alpha_int, alpha_dbl), "rsub");
 }
@@ -4021,10 +4018,10 @@ Tensor Tensor.heaviside_(Tensor self, Tensor values) =>
 Tensor Tensor.rsub_scalar(Tensor self, Var other, Var alpha) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_rsub_scalar(_native(self), other_kind, other_int,
       other_dbl, alpha_kind, alpha_int, alpha_dbl), "rsub");
 }
@@ -4033,10 +4030,10 @@ Tensor Tensor.sparse_sampled_addmm(Tensor self, Tensor mat1, Tensor mat2,
     Var beta, Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_sparse_sampled_addmm(_native(self), _native(mat1),
       _native(mat2), beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int,
       alpha_dbl), "sparse_sampled_addmm");
@@ -4046,10 +4043,10 @@ Tensor Tensor.addmm(Tensor self, Tensor mat1, Tensor mat2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addmm(_native(self), _native(mat1), _native(mat2),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addmm");
@@ -4059,10 +4056,10 @@ Tensor Tensor.addmm_dtype(Tensor self, Tensor mat1, Tensor mat2,
     int out_dtype, Var beta, Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addmm_dtype(_native(self), _native(mat1),
       _native(mat2), out_dtype, beta_kind, beta_int, beta_dbl, alpha_kind,
       alpha_int, alpha_dbl), "addmm");
@@ -4072,10 +4069,10 @@ Tensor Tensor.addmm_(Tensor self, Tensor mat1, Tensor mat2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addmm_(_native(self), _native(mat1), _native(mat2),
       beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int, alpha_dbl),
       "addmm_");
@@ -4084,7 +4081,7 @@ Tensor Tensor.addmm_(Tensor self, Tensor mat1, Tensor mat2, Var beta,
 Tensor Tensor.sparse_compressed_tensor(Tensor compressed_indices,
     Tensor plain_indices, Tensor values, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_compressed_tensor_comp_plain_value_size(_native(compressed_indices),
       _native(plain_indices), _native(values), size_dims, size_n, dtype,
       device), "sparse_compressed_tensor");
@@ -4093,7 +4090,7 @@ Tensor Tensor.sparse_compressed_tensor(Tensor compressed_indices,
 Tensor Tensor.sparse_csr_tensor(Tensor crow_indices, Tensor col_indices,
     Tensor values, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_csr_tensor_crow_col_value_size(_native(crow_indices),
       _native(col_indices), _native(values), size_dims, size_n, dtype,
       device), "sparse_csr_tensor");
@@ -4102,7 +4099,7 @@ Tensor Tensor.sparse_csr_tensor(Tensor crow_indices, Tensor col_indices,
 Tensor Tensor.sparse_csc_tensor(Tensor ccol_indices, Tensor row_indices,
     Tensor values, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_csc_tensor_ccol_row_value_size(_native(ccol_indices),
       _native(row_indices), _native(values), size_dims, size_n, dtype,
       device), "sparse_csc_tensor");
@@ -4111,7 +4108,7 @@ Tensor Tensor.sparse_csc_tensor(Tensor ccol_indices, Tensor row_indices,
 Tensor Tensor.sparse_bsr_tensor(Tensor crow_indices, Tensor col_indices,
     Tensor values, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_bsr_tensor_crow_col_value_size(_native(crow_indices),
       _native(col_indices), _native(values), size_dims, size_n, dtype,
       device), "sparse_bsr_tensor");
@@ -4120,7 +4117,7 @@ Tensor Tensor.sparse_bsr_tensor(Tensor crow_indices, Tensor col_indices,
 Tensor Tensor.sparse_bsc_tensor(Tensor ccol_indices, Tensor row_indices,
     Tensor values, List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_bsc_tensor_ccol_row_value_size(_native(ccol_indices),
       _native(row_indices), _native(values), size_dims, size_n, dtype,
       device), "sparse_bsc_tensor");
@@ -4158,7 +4155,7 @@ Tensor Tensor.sparse_bsc_tensor_ccol(Tensor ccol_indices, Tensor row_indices,
 
 Tensor Torch.sparse_coo_tensor(List size, int dtype, String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_coo_tensor_size(size_dims, size_n, dtype,
       device), "sparse_coo_tensor");
 }
@@ -4172,7 +4169,7 @@ Tensor Tensor.sparse_coo_tensor_indices_size(Tensor indices, Tensor values,
     List size, int dtype, String device, int is_coalesced,
     int is_coalesced_set) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_coo_tensor_indices_size(_native(indices),
       _native(values), size_dims, size_n, dtype, device, is_coalesced,
       is_coalesced_set), "sparse_coo_tensor");
@@ -4181,7 +4178,7 @@ Tensor Tensor.sparse_coo_tensor_indices_size(Tensor indices, Tensor values,
 Tensor Tensor.sparse_resize_(Tensor self, List size, int64_t sparse_dim,
     int64_t dense_dim) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_resize_(_native(self), size_dims, size_n,
       sparse_dim, dense_dim), "sparse_resize_");
 }
@@ -4189,7 +4186,7 @@ Tensor Tensor.sparse_resize_(Tensor self, List size, int64_t sparse_dim,
 Tensor Tensor.sparse_resize_and_clear_(Tensor self, List size,
     int64_t sparse_dim, int64_t dense_dim) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_sparse_resize_and_clear_(_native(self), size_dims,
       size_n, sparse_dim, dense_dim), "sparse_resize_and_clear_");
 }
@@ -4279,7 +4276,7 @@ Tensor Tensor.to_sparse_csc(Tensor self, int64_t dense_dim,
 Tensor Tensor.to_sparse_bsr(Tensor self, List blocksize, int64_t dense_dim,
     int dense_dim_set) {
   int64_t blocksize_n = 0;
-  int64_t *blocksize_dims = _dims(blocksize, &blocksize_n);
+  int64_t *blocksize_dims = _dims(blocksize, blocksize_n);
   return Tensor.adopt(xt_to_sparse_bsr(_native(self), blocksize_dims,
       blocksize_n, dense_dim, dense_dim_set), "to_sparse_bsr");
 }
@@ -4287,7 +4284,7 @@ Tensor Tensor.to_sparse_bsr(Tensor self, List blocksize, int64_t dense_dim,
 Tensor Tensor.to_sparse_bsc(Tensor self, List blocksize, int64_t dense_dim,
     int dense_dim_set) {
   int64_t blocksize_n = 0;
-  int64_t *blocksize_dims = _dims(blocksize, &blocksize_n);
+  int64_t *blocksize_dims = _dims(blocksize, blocksize_n);
   return Tensor.adopt(xt_to_sparse_bsc(_native(self), blocksize_dims,
       blocksize_n, dense_dim, dense_dim_set), "to_sparse_bsc");
 }
@@ -4298,14 +4295,14 @@ Tensor Tensor.to_mkldnn(Tensor self, int dtype) =>
 Tensor Tensor.mkldnn_reorder_conv2d_weight(Tensor self, List padding,
     List stride, List dilation, int64_t groups, List input_size) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t input_size_n = 0;
   int64_t *input_size_dims = input_size ? _dims(input_size,
-      &input_size_n) : NULL;
+      input_size_n) : NULL;
   return Tensor.adopt(xt_mkldnn_reorder_conv2d_weight(_native(self),
       padding_dims, padding_n, stride_dims, stride_n, dilation_dims,
       dilation_n, groups, input_size_dims, input_size_n),
@@ -4315,14 +4312,14 @@ Tensor Tensor.mkldnn_reorder_conv2d_weight(Tensor self, List padding,
 Tensor Tensor.mkldnn_reorder_conv3d_weight(Tensor self, List padding,
     List stride, List dilation, int64_t groups, List input_size) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t input_size_n = 0;
   int64_t *input_size_dims = input_size ? _dims(input_size,
-      &input_size_n) : NULL;
+      input_size_n) : NULL;
   return Tensor.adopt(xt_mkldnn_reorder_conv3d_weight(_native(self),
       padding_dims, padding_n, stride_dims, stride_n, dilation_dims,
       dilation_n, groups, input_size_dims, input_size_n),
@@ -4667,18 +4664,18 @@ List Tensor.quantized_lstm_cell(Tensor input, List hx, Tensor w_ih,
   xt_tensor *hx_items = _handles(hx, hx_n);
   int64_t scale_ih_int = 0;
   double scale_ih_dbl = 0;
-  int scale_ih_kind = _scalar(scale_ih, &scale_ih_int, &scale_ih_dbl);
+  int scale_ih_kind = _scalar(scale_ih, scale_ih_int, scale_ih_dbl);
   int64_t scale_hh_int = 0;
   double scale_hh_dbl = 0;
-  int scale_hh_kind = _scalar(scale_hh, &scale_hh_int, &scale_hh_dbl);
+  int scale_hh_kind = _scalar(scale_hh, scale_hh_int, scale_hh_dbl);
   int64_t zero_point_ih_int = 0;
   double zero_point_ih_dbl = 0;
-  int zero_point_ih_kind = _scalar(zero_point_ih, &zero_point_ih_int,
-      &zero_point_ih_dbl);
+  int zero_point_ih_kind = _scalar(zero_point_ih, zero_point_ih_int,
+      zero_point_ih_dbl);
   int64_t zero_point_hh_int = 0;
   double zero_point_hh_dbl = 0;
-  int zero_point_hh_kind = _scalar(zero_point_hh, &zero_point_hh_int,
-      &zero_point_hh_dbl);
+  int zero_point_hh_kind = _scalar(zero_point_hh, zero_point_hh_int,
+      zero_point_hh_dbl);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_quantized_lstm_cell(_native(input), hx_items, hx_n,
       _native(w_ih), _native(w_hh), _native(b_ih), _native(b_hh),
@@ -4697,18 +4694,18 @@ Tensor Tensor.quantized_gru_cell(Tensor input, Tensor hx, Tensor w_ih,
     Var zero_point_ih, Var zero_point_hh) {
   int64_t scale_ih_int = 0;
   double scale_ih_dbl = 0;
-  int scale_ih_kind = _scalar(scale_ih, &scale_ih_int, &scale_ih_dbl);
+  int scale_ih_kind = _scalar(scale_ih, scale_ih_int, scale_ih_dbl);
   int64_t scale_hh_int = 0;
   double scale_hh_dbl = 0;
-  int scale_hh_kind = _scalar(scale_hh, &scale_hh_int, &scale_hh_dbl);
+  int scale_hh_kind = _scalar(scale_hh, scale_hh_int, scale_hh_dbl);
   int64_t zero_point_ih_int = 0;
   double zero_point_ih_dbl = 0;
-  int zero_point_ih_kind = _scalar(zero_point_ih, &zero_point_ih_int,
-      &zero_point_ih_dbl);
+  int zero_point_ih_kind = _scalar(zero_point_ih, zero_point_ih_int,
+      zero_point_ih_dbl);
   int64_t zero_point_hh_int = 0;
   double zero_point_hh_dbl = 0;
-  int zero_point_hh_kind = _scalar(zero_point_hh, &zero_point_hh_int,
-      &zero_point_hh_dbl);
+  int zero_point_hh_kind = _scalar(zero_point_hh, zero_point_hh_int,
+      zero_point_hh_dbl);
   return Tensor.adopt(xt_quantized_gru_cell(_native(input), _native(hx),
       _native(w_ih), _native(w_hh), _native(b_ih), _native(b_hh),
       _native(packed_ih), _native(packed_hh), _native(col_offsets_ih),
@@ -4724,18 +4721,18 @@ Tensor Tensor.quantized_rnn_relu_cell(Tensor input, Tensor hx, Tensor w_ih,
     Var zero_point_ih, Var zero_point_hh) {
   int64_t scale_ih_int = 0;
   double scale_ih_dbl = 0;
-  int scale_ih_kind = _scalar(scale_ih, &scale_ih_int, &scale_ih_dbl);
+  int scale_ih_kind = _scalar(scale_ih, scale_ih_int, scale_ih_dbl);
   int64_t scale_hh_int = 0;
   double scale_hh_dbl = 0;
-  int scale_hh_kind = _scalar(scale_hh, &scale_hh_int, &scale_hh_dbl);
+  int scale_hh_kind = _scalar(scale_hh, scale_hh_int, scale_hh_dbl);
   int64_t zero_point_ih_int = 0;
   double zero_point_ih_dbl = 0;
-  int zero_point_ih_kind = _scalar(zero_point_ih, &zero_point_ih_int,
-      &zero_point_ih_dbl);
+  int zero_point_ih_kind = _scalar(zero_point_ih, zero_point_ih_int,
+      zero_point_ih_dbl);
   int64_t zero_point_hh_int = 0;
   double zero_point_hh_dbl = 0;
-  int zero_point_hh_kind = _scalar(zero_point_hh, &zero_point_hh_int,
-      &zero_point_hh_dbl);
+  int zero_point_hh_kind = _scalar(zero_point_hh, zero_point_hh_int,
+      zero_point_hh_dbl);
   return Tensor.adopt(xt_quantized_rnn_relu_cell(_native(input), _native(hx),
       _native(w_ih), _native(w_hh), _native(b_ih), _native(b_hh),
       _native(packed_ih), _native(packed_hh), _native(col_offsets_ih),
@@ -4751,18 +4748,18 @@ Tensor Tensor.quantized_rnn_tanh_cell(Tensor input, Tensor hx, Tensor w_ih,
     Var zero_point_ih, Var zero_point_hh) {
   int64_t scale_ih_int = 0;
   double scale_ih_dbl = 0;
-  int scale_ih_kind = _scalar(scale_ih, &scale_ih_int, &scale_ih_dbl);
+  int scale_ih_kind = _scalar(scale_ih, scale_ih_int, scale_ih_dbl);
   int64_t scale_hh_int = 0;
   double scale_hh_dbl = 0;
-  int scale_hh_kind = _scalar(scale_hh, &scale_hh_int, &scale_hh_dbl);
+  int scale_hh_kind = _scalar(scale_hh, scale_hh_int, scale_hh_dbl);
   int64_t zero_point_ih_int = 0;
   double zero_point_ih_dbl = 0;
-  int zero_point_ih_kind = _scalar(zero_point_ih, &zero_point_ih_int,
-      &zero_point_ih_dbl);
+  int zero_point_ih_kind = _scalar(zero_point_ih, zero_point_ih_int,
+      zero_point_ih_dbl);
   int64_t zero_point_hh_int = 0;
   double zero_point_hh_dbl = 0;
-  int zero_point_hh_kind = _scalar(zero_point_hh, &zero_point_hh_int,
-      &zero_point_hh_dbl);
+  int zero_point_hh_kind = _scalar(zero_point_hh, zero_point_hh_int,
+      zero_point_hh_dbl);
   return Tensor.adopt(xt_quantized_rnn_tanh_cell(_native(input), _native(hx),
       _native(w_ih), _native(w_hh), _native(b_ih), _native(b_hh),
       _native(packed_ih), _native(packed_hh), _native(col_offsets_ih),
@@ -4775,9 +4772,9 @@ Tensor Tensor.quantized_rnn_tanh_cell(Tensor input, Tensor hx, Tensor w_ih,
 Tensor Tensor.set_(Tensor self, Tensor source, int64_t storage_offset,
     List size, List stride) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_set__source_tensor_storage_offset(_native(self),
       _native(source), storage_offset, size_dims, size_n, stride_dims,
       stride_n), "set_");
@@ -4805,7 +4802,7 @@ int Tensor.is_set_to(Tensor self, Tensor tensor) {
 Tensor Tensor.masked_fill_(Tensor self, Tensor mask, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_masked_fill__scalar(_native(self), _native(mask),
       value_kind, value_int, value_dbl), "masked_fill_");
 }
@@ -4813,7 +4810,7 @@ Tensor Tensor.masked_fill_(Tensor self, Tensor mask, Var value) {
 Tensor Tensor.masked_fill(Tensor self, Tensor mask, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_masked_fill_scalar(_native(self), _native(mask),
       value_kind, value_int, value_dbl), "masked_fill");
 }
@@ -4836,7 +4833,7 @@ Tensor Tensor.masked_scatter(Tensor self, Tensor mask, Tensor source) =>
 
 Tensor Tensor.view(Tensor self, List size) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_view(_native(self), size_dims, size_n), "view");
 }
 
@@ -4855,7 +4852,7 @@ Tensor Tensor.index_add_(Tensor self, int64_t dim, Tensor index,
     Tensor source, Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_index_add_(_native(self), dim, _native(index),
       _native(source), alpha_kind, alpha_int, alpha_dbl), "index_add_");
 }
@@ -4864,7 +4861,7 @@ Tensor Tensor.index_add(Tensor self, int64_t dim, Tensor index, Tensor source,
     Var alpha) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_index_add(_native(self), dim, _native(index),
       _native(source), alpha_kind, alpha_int, alpha_dbl), "index_add");
 }
@@ -4882,7 +4879,7 @@ Tensor Tensor.index_reduce(Tensor self, int64_t dim, Tensor index,
 Tensor Tensor.index_fill_(Tensor self, int64_t dim, Tensor index, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_index_fill__int_scalar(_native(self), dim,
       _native(index), value_kind, value_int, value_dbl), "index_fill_");
 }
@@ -4890,7 +4887,7 @@ Tensor Tensor.index_fill_(Tensor self, int64_t dim, Tensor index, Var value) {
 Tensor Tensor.index_fill(Tensor self, int64_t dim, Tensor index, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_index_fill_int_scalar(_native(self), dim,
       _native(index), value_kind, value_int, value_dbl), "index_fill");
 }
@@ -4917,7 +4914,7 @@ Tensor Tensor.scatter_value(Tensor self, int64_t dim, Tensor index,
     Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_scatter_value(_native(self), dim, _native(index),
       value_kind, value_int, value_dbl), "scatter");
 }
@@ -4926,7 +4923,7 @@ Tensor Tensor.scatter__value(Tensor self, int64_t dim, Tensor index,
     Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_scatter__value(_native(self), dim, _native(index),
       value_kind, value_int, value_dbl), "scatter_");
 }
@@ -4945,7 +4942,7 @@ Tensor Tensor.scatter_value_reduce(Tensor self, int64_t dim, Tensor index,
     Var value, String reduce) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_scatter_value_reduce(_native(self), dim,
       _native(index), value_kind, value_int, value_dbl, reduce), "scatter");
 }
@@ -4954,7 +4951,7 @@ Tensor Tensor.scatter__value_reduce(Tensor self, int64_t dim, Tensor index,
     Var value, String reduce) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_scatter__value_reduce(_native(self), dim,
       _native(index), value_kind, value_int, value_dbl, reduce), "scatter_");
 }
@@ -4982,7 +4979,7 @@ Tensor Tensor.scatter_reduce_(Tensor self, int64_t dim, Tensor index,
 Tensor Tensor.eq_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_eq__scalar(_native(self), other_kind, other_int,
       other_dbl), "eq_");
 }
@@ -4993,7 +4990,7 @@ Tensor Tensor.eq__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_and(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_and_scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_and");
 }
@@ -5001,7 +4998,7 @@ Tensor Tensor.bitwise_and(Tensor self, Var other) {
 Tensor Torch.bitwise_and_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bitwise_and_scalar_tensor(self_kind, self_int,
       self_dbl, _native(other)), "bitwise_and");
 }
@@ -5013,7 +5010,7 @@ Tensor Tensor.bitwise_and_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_and_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_and__scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_and_");
 }
@@ -5025,7 +5022,7 @@ Tensor Tensor.bitwise_and__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_or(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_or_scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_or");
 }
@@ -5033,7 +5030,7 @@ Tensor Tensor.bitwise_or(Tensor self, Var other) {
 Tensor Torch.bitwise_or_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bitwise_or_scalar_tensor(self_kind, self_int,
       self_dbl, _native(other)), "bitwise_or");
 }
@@ -5045,7 +5042,7 @@ Tensor Tensor.bitwise_or_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_or_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_or__scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_or_");
 }
@@ -5057,7 +5054,7 @@ Tensor Tensor.bitwise_or__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_xor(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_xor_scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_xor");
 }
@@ -5065,7 +5062,7 @@ Tensor Tensor.bitwise_xor(Tensor self, Var other) {
 Tensor Torch.bitwise_xor_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bitwise_xor_scalar_tensor(self_kind, self_int,
       self_dbl, _native(other)), "bitwise_xor");
 }
@@ -5077,7 +5074,7 @@ Tensor Tensor.bitwise_xor_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_xor_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_xor__scalar(_native(self), other_kind,
       other_int, other_dbl), "bitwise_xor_");
 }
@@ -5097,7 +5094,7 @@ Tensor Tensor.bitwise_left_shift_(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_left_shift_tensor(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_left_shift_tensor_scalar(_native(self),
       other_kind, other_int, other_dbl), "bitwise_left_shift");
 }
@@ -5105,7 +5102,7 @@ Tensor Tensor.bitwise_left_shift_tensor(Tensor self, Var other) {
 Tensor Tensor.bitwise_left_shift__tensor(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_left_shift__tensor_scalar(_native(self),
       other_kind, other_int, other_dbl), "bitwise_left_shift_");
 }
@@ -5113,7 +5110,7 @@ Tensor Tensor.bitwise_left_shift__tensor(Tensor self, Var other) {
 Tensor Torch.bitwise_left_shift_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bitwise_left_shift_scalar_tensor(self_kind, self_int,
       self_dbl, _native(other)), "bitwise_left_shift");
 }
@@ -5129,7 +5126,7 @@ Tensor Tensor.bitwise_right_shift_(Tensor self, Tensor other) =>
 Tensor Tensor.bitwise_right_shift_tensor(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_right_shift_tensor_scalar(_native(self),
       other_kind, other_int, other_dbl), "bitwise_right_shift");
 }
@@ -5137,7 +5134,7 @@ Tensor Tensor.bitwise_right_shift_tensor(Tensor self, Var other) {
 Tensor Tensor.bitwise_right_shift__tensor(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_bitwise_right_shift__tensor_scalar(_native(self),
       other_kind, other_int, other_dbl), "bitwise_right_shift_");
 }
@@ -5145,7 +5142,7 @@ Tensor Tensor.bitwise_right_shift__tensor(Tensor self, Var other) {
 Tensor Torch.bitwise_right_shift_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bitwise_right_shift_scalar_tensor(self_kind,
       self_int, self_dbl, _native(other)), "bitwise_right_shift");
 }
@@ -5162,7 +5159,7 @@ Tensor Tensor.digamma_(Tensor self) =>
 Tensor Tensor.lerp_(Tensor self, Tensor end, Var weight) {
   int64_t weight_int = 0;
   double weight_dbl = 0;
-  int weight_kind = _scalar(weight, &weight_int, &weight_dbl);
+  int weight_kind = _scalar(weight, weight_int, weight_dbl);
   return Tensor.adopt(xt_lerp__scalar(_native(self), _native(end),
       weight_kind, weight_int, weight_dbl), "lerp_");
 }
@@ -5175,10 +5172,10 @@ Tensor Tensor.addbmm_(Tensor self, Tensor batch1, Tensor batch2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addbmm_(_native(self), _native(batch1),
       _native(batch2), beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int,
       alpha_dbl), "addbmm_");
@@ -5188,10 +5185,10 @@ Tensor Tensor.addbmm(Tensor self, Tensor batch1, Tensor batch2, Var beta,
     Var alpha) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   return Tensor.adopt(xt_addbmm(_native(self), _native(batch1),
       _native(batch2), beta_kind, beta_int, beta_dbl, alpha_kind, alpha_int,
       alpha_dbl), "addbmm");
@@ -5246,7 +5243,7 @@ Tensor Tensor.trace(Tensor self) =>
 Tensor Tensor.ne(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_ne_scalar(_native(self), other_kind, other_int,
       other_dbl), "ne");
 }
@@ -5257,7 +5254,7 @@ Tensor Tensor.ne_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.ne_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_ne__scalar(_native(self), other_kind, other_int,
       other_dbl), "ne_");
 }
@@ -5268,7 +5265,7 @@ Tensor Tensor.ne__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.not_equal(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_not_equal_scalar(_native(self), other_kind,
       other_int, other_dbl), "not_equal");
 }
@@ -5280,7 +5277,7 @@ Tensor Tensor.not_equal_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.not_equal_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_not_equal__scalar(_native(self), other_kind,
       other_int, other_dbl), "not_equal_");
 }
@@ -5292,7 +5289,7 @@ Tensor Tensor.not_equal__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.eq_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_eq_scalar(_native(self), other_kind, other_int,
       other_dbl), "eq");
 }
@@ -5303,7 +5300,7 @@ Tensor Tensor.eq_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.ge(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_ge_scalar(_native(self), other_kind, other_int,
       other_dbl), "ge");
 }
@@ -5314,7 +5311,7 @@ Tensor Tensor.ge_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.ge_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_ge__scalar(_native(self), other_kind, other_int,
       other_dbl), "ge_");
 }
@@ -5325,7 +5322,7 @@ Tensor Tensor.ge__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.greater_equal(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_greater_equal_scalar(_native(self), other_kind,
       other_int, other_dbl), "greater_equal");
 }
@@ -5337,7 +5334,7 @@ Tensor Tensor.greater_equal_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.greater_equal_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_greater_equal__scalar(_native(self), other_kind,
       other_int, other_dbl), "greater_equal_");
 }
@@ -5349,7 +5346,7 @@ Tensor Tensor.greater_equal__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.le(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_le_scalar(_native(self), other_kind, other_int,
       other_dbl), "le");
 }
@@ -5360,7 +5357,7 @@ Tensor Tensor.le_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.le_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_le__scalar(_native(self), other_kind, other_int,
       other_dbl), "le_");
 }
@@ -5371,7 +5368,7 @@ Tensor Tensor.le__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.less_equal(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_less_equal_scalar(_native(self), other_kind,
       other_int, other_dbl), "less_equal");
 }
@@ -5383,7 +5380,7 @@ Tensor Tensor.less_equal_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.less_equal_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_less_equal__scalar(_native(self), other_kind,
       other_int, other_dbl), "less_equal_");
 }
@@ -5395,7 +5392,7 @@ Tensor Tensor.less_equal__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.gt_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_gt_scalar(_native(self), other_kind, other_int,
       other_dbl), "gt");
 }
@@ -5406,7 +5403,7 @@ Tensor Tensor.gt_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.gt_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_gt__scalar(_native(self), other_kind, other_int,
       other_dbl), "gt_");
 }
@@ -5417,7 +5414,7 @@ Tensor Tensor.gt__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.greater(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_greater_scalar(_native(self), other_kind, other_int,
       other_dbl), "greater");
 }
@@ -5428,7 +5425,7 @@ Tensor Tensor.greater_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.greater_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_greater__scalar(_native(self), other_kind, other_int,
       other_dbl), "greater_");
 }
@@ -5439,7 +5436,7 @@ Tensor Tensor.greater__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.lt_scalar(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_lt_scalar(_native(self), other_kind, other_int,
       other_dbl), "lt");
 }
@@ -5450,7 +5447,7 @@ Tensor Tensor.lt_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.lt_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_lt__scalar(_native(self), other_kind, other_int,
       other_dbl), "lt_");
 }
@@ -5461,7 +5458,7 @@ Tensor Tensor.lt__tensor(Tensor self, Tensor other) =>
 Tensor Tensor.less(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_less_scalar(_native(self), other_kind, other_int,
       other_dbl), "less");
 }
@@ -5472,7 +5469,7 @@ Tensor Tensor.less_tensor(Tensor self, Tensor other) =>
 Tensor Tensor.less_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_less__scalar(_native(self), other_kind, other_int,
       other_dbl), "less_");
 }
@@ -5519,7 +5516,7 @@ Tensor Tensor.gather(Tensor self, int64_t dim, Tensor index,
 Tensor Tensor.addcmul(Tensor self, Tensor tensor1, Tensor tensor2, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_addcmul(_native(self), _native(tensor1),
       _native(tensor2), value_kind, value_int, value_dbl), "addcmul");
 }
@@ -5528,7 +5525,7 @@ Tensor Tensor.addcmul_(Tensor self, Tensor tensor1, Tensor tensor2,
     Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_addcmul_(_native(self), _native(tensor1),
       _native(tensor2), value_kind, value_int, value_dbl), "addcmul_");
 }
@@ -5536,7 +5533,7 @@ Tensor Tensor.addcmul_(Tensor self, Tensor tensor1, Tensor tensor2,
 Tensor Tensor.addcdiv(Tensor self, Tensor tensor1, Tensor tensor2, Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_addcdiv(_native(self), _native(tensor1),
       _native(tensor2), value_kind, value_int, value_dbl), "addcdiv");
 }
@@ -5545,7 +5542,7 @@ Tensor Tensor.addcdiv_(Tensor self, Tensor tensor1, Tensor tensor2,
     Var value) {
   int64_t value_int = 0;
   double value_dbl = 0;
-  int value_kind = _scalar(value, &value_int, &value_dbl);
+  int value_kind = _scalar(value, value_int, value_dbl);
   return Tensor.adopt(xt_addcdiv_(_native(self), _native(tensor1),
       _native(tensor2), value_kind, value_int, value_dbl), "addcdiv_");
 }
@@ -5690,7 +5687,7 @@ Tensor Tensor.signbit(Tensor self) =>
 Tensor Tensor.dist(Tensor self, Tensor other, Var p) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   return Tensor.adopt(xt_dist(_native(self), _native(other), p_kind, p_int,
       p_dbl), "dist");
 }
@@ -5710,7 +5707,7 @@ Tensor Tensor.arctan2_(Tensor self, Tensor other) =>
 Tensor Tensor.lerp(Tensor self, Tensor end, Var weight) {
   int64_t weight_int = 0;
   double weight_dbl = 0;
-  int weight_kind = _scalar(weight, &weight_int, &weight_dbl);
+  int weight_kind = _scalar(weight, weight_int, weight_dbl);
   return Tensor.adopt(xt_lerp_scalar(_native(self), _native(end), weight_kind,
       weight_int, weight_dbl), "lerp");
 }
@@ -5722,10 +5719,10 @@ Tensor Tensor.lerp_tensor(Tensor self, Tensor end, Tensor weight) =>
 Tensor Tensor.histc(Tensor self, int64_t bins, Var min, Var max) {
   int64_t min_int = 0;
   double min_dbl = 0;
-  int min_kind = _scalar(min, &min_int, &min_dbl);
+  int min_kind = _scalar(min, min_int, min_dbl);
   int64_t max_int = 0;
   double max_dbl = 0;
-  int max_kind = _scalar(max, &max_int, &max_dbl);
+  int max_kind = _scalar(max, max_int, max_dbl);
   return Tensor.adopt(xt_histc(_native(self), bins, min_kind, min_int,
       min_dbl, max_kind, max_int, max_dbl), "histc");
 }
@@ -5740,7 +5737,7 @@ List Tensor.histogram(Tensor self, Tensor bins, Tensor weight, int density) {
 Tensor Tensor.fmod(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_fmod_scalar(_native(self), other_kind, other_int,
       other_dbl), "fmod");
 }
@@ -5748,7 +5745,7 @@ Tensor Tensor.fmod(Tensor self, Var other) {
 Tensor Tensor.fmod_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_fmod__scalar(_native(self), other_kind, other_int,
       other_dbl), "fmod_");
 }
@@ -5786,7 +5783,7 @@ Tensor Tensor.nextafter_(Tensor self, Tensor other) =>
 Tensor Tensor.remainder(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_remainder_scalar(_native(self), other_kind,
       other_int, other_dbl), "remainder");
 }
@@ -5794,7 +5791,7 @@ Tensor Tensor.remainder(Tensor self, Var other) {
 Tensor Tensor.remainder_(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_remainder__scalar(_native(self), other_kind,
       other_int, other_dbl), "remainder_");
 }
@@ -5810,7 +5807,7 @@ Tensor Tensor.remainder__tensor(Tensor self, Tensor other) =>
 Tensor Torch.remainder_scalar(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_remainder_scalar_tensor(self_kind, self_int,
       self_dbl, _native(other)), "remainder");
 }
@@ -5889,10 +5886,10 @@ List Tensor.topk(Tensor self, int64_t k, int64_t dim, int largest,
 Tensor Tensor.renorm(Tensor self, Var p, int64_t dim, Var maxnorm) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t maxnorm_int = 0;
   double maxnorm_dbl = 0;
-  int maxnorm_kind = _scalar(maxnorm, &maxnorm_int, &maxnorm_dbl);
+  int maxnorm_kind = _scalar(maxnorm, maxnorm_int, maxnorm_dbl);
   return Tensor.adopt(xt_renorm(_native(self), p_kind, p_int, p_dbl, dim,
       maxnorm_kind, maxnorm_int, maxnorm_dbl), "renorm");
 }
@@ -5900,10 +5897,10 @@ Tensor Tensor.renorm(Tensor self, Var p, int64_t dim, Var maxnorm) {
 Tensor Tensor.renorm_(Tensor self, Var p, int64_t dim, Var maxnorm) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t maxnorm_int = 0;
   double maxnorm_dbl = 0;
-  int maxnorm_kind = _scalar(maxnorm, &maxnorm_int, &maxnorm_dbl);
+  int maxnorm_kind = _scalar(maxnorm, maxnorm_int, maxnorm_dbl);
   return Tensor.adopt(xt_renorm_(_native(self), p_kind, p_int, p_dbl, dim,
       maxnorm_kind, maxnorm_int, maxnorm_dbl), "renorm_");
 }
@@ -5918,7 +5915,7 @@ Tensor Tensor.pow_tensor(Tensor self, Tensor exponent) =>
 Tensor Torch.pow_scalar(Var self, Tensor exponent) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_pow_scalar(self_kind, self_int, self_dbl,
       _native(exponent)), "pow");
 }
@@ -5926,7 +5923,7 @@ Tensor Torch.pow_scalar(Var self, Tensor exponent) {
 Tensor Tensor.pow_tensor_scalar(Tensor self, Var exponent) {
   int64_t exponent_int = 0;
   double exponent_dbl = 0;
-  int exponent_kind = _scalar(exponent, &exponent_int, &exponent_dbl);
+  int exponent_kind = _scalar(exponent, exponent_int, exponent_dbl);
   return Tensor.adopt(xt_pow_tensor_scalar(_native(self), exponent_kind,
       exponent_int, exponent_dbl), "pow");
 }
@@ -5934,7 +5931,7 @@ Tensor Tensor.pow_tensor_scalar(Tensor self, Var exponent) {
 Tensor Tensor.pow_(Tensor self, Var exponent) {
   int64_t exponent_int = 0;
   double exponent_dbl = 0;
-  int exponent_kind = _scalar(exponent, &exponent_int, &exponent_dbl);
+  int exponent_kind = _scalar(exponent, exponent_int, exponent_dbl);
   return Tensor.adopt(xt_pow__scalar(_native(self), exponent_kind,
       exponent_int, exponent_dbl), "pow_");
 }
@@ -5949,7 +5946,7 @@ Tensor Tensor.float_power(Tensor self, Tensor exponent) =>
 Tensor Torch.float_power_scalar(Var self, Tensor exponent) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_float_power_scalar(self_kind, self_int, self_dbl,
       _native(exponent)), "float_power");
 }
@@ -5957,7 +5954,7 @@ Tensor Torch.float_power_scalar(Var self, Tensor exponent) {
 Tensor Tensor.float_power_tensor(Tensor self, Var exponent) {
   int64_t exponent_int = 0;
   double exponent_dbl = 0;
-  int exponent_kind = _scalar(exponent, &exponent_int, &exponent_dbl);
+  int exponent_kind = _scalar(exponent, exponent_int, exponent_dbl);
   return Tensor.adopt(xt_float_power_tensor_scalar(_native(self),
       exponent_kind, exponent_int, exponent_dbl), "float_power");
 }
@@ -5965,7 +5962,7 @@ Tensor Tensor.float_power_tensor(Tensor self, Var exponent) {
 Tensor Tensor.float_power_(Tensor self, Var exponent) {
   int64_t exponent_int = 0;
   double exponent_dbl = 0;
-  int exponent_kind = _scalar(exponent, &exponent_int, &exponent_dbl);
+  int exponent_kind = _scalar(exponent, exponent_int, exponent_dbl);
   return Tensor.adopt(xt_float_power__scalar(_native(self), exponent_kind,
       exponent_int, exponent_dbl), "float_power_");
 }
@@ -5993,7 +5990,7 @@ Tensor Tensor.normal_tensor(Tensor mean, Tensor std) =>
 Tensor Torch.normal_float_float(double mean, double std, List size, int dtype,
     String device) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_normal_float_float(mean, std, size_dims, size_n,
       dtype, device), "normal");
 }
@@ -6010,7 +6007,7 @@ Tensor Torch.bucketize_scalar(Var self, Tensor boundaries, int out_int32,
     int right) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_bucketize_scalar(self_kind, self_int, self_dbl,
       _native(boundaries), out_int32, right), "bucketize");
 }
@@ -6024,7 +6021,7 @@ Tensor Tensor.searchsorted_scalar(Tensor sorted_sequence, Var self,
     int out_int32, int right, String side, Tensor sorter) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_searchsorted_scalar(_native(sorted_sequence),
       self_kind, self_int, self_dbl, out_int32, right, side, _native(sorter)),
       "searchsorted");
@@ -6038,10 +6035,10 @@ Tensor Tensor.multi_margin_loss(Tensor self, Tensor target, Var p, Var margin,
     Tensor weight, int64_t reduction) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   int64_t margin_int = 0;
   double margin_dbl = 0;
-  int margin_kind = _scalar(margin, &margin_int, &margin_dbl);
+  int margin_kind = _scalar(margin, margin_int, margin_dbl);
   return Tensor.adopt(xt_multi_margin_loss(_native(self), _native(target),
       p_kind, p_int, p_dbl, margin_kind, margin_int, margin_dbl,
       _native(weight), reduction), "multi_margin_loss");
@@ -6107,14 +6104,14 @@ Tensor Tensor.soft_margin_loss(Tensor self, Tensor target,
 Tensor Tensor.elu(Tensor self, Var alpha, Var scale, Var input_scale) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   int64_t scale_int = 0;
   double scale_dbl = 0;
-  int scale_kind = _scalar(scale, &scale_int, &scale_dbl);
+  int scale_kind = _scalar(scale, scale_int, scale_dbl);
   int64_t input_scale_int = 0;
   double input_scale_dbl = 0;
-  int input_scale_kind = _scalar(input_scale, &input_scale_int,
-      &input_scale_dbl);
+  int input_scale_kind = _scalar(input_scale, input_scale_int,
+      input_scale_dbl);
   return Tensor.adopt(xt_elu(_native(self), alpha_kind, alpha_int, alpha_dbl,
       scale_kind, scale_int, scale_dbl, input_scale_kind, input_scale_int,
       input_scale_dbl), "elu");
@@ -6123,14 +6120,14 @@ Tensor Tensor.elu(Tensor self, Var alpha, Var scale, Var input_scale) {
 Tensor Tensor.elu_(Tensor self, Var alpha, Var scale, Var input_scale) {
   int64_t alpha_int = 0;
   double alpha_dbl = 0;
-  int alpha_kind = _scalar(alpha, &alpha_int, &alpha_dbl);
+  int alpha_kind = _scalar(alpha, alpha_int, alpha_dbl);
   int64_t scale_int = 0;
   double scale_dbl = 0;
-  int scale_kind = _scalar(scale, &scale_int, &scale_dbl);
+  int scale_kind = _scalar(scale, scale_int, scale_dbl);
   int64_t input_scale_int = 0;
   double input_scale_dbl = 0;
-  int input_scale_kind = _scalar(input_scale, &input_scale_int,
-      &input_scale_dbl);
+  int input_scale_kind = _scalar(input_scale, input_scale_int,
+      input_scale_dbl);
   return Tensor.adopt(xt_elu_(_native(self), alpha_kind, alpha_int, alpha_dbl,
       scale_kind, scale_int, scale_dbl, input_scale_kind, input_scale_int,
       input_scale_dbl), "elu_");
@@ -6152,10 +6149,10 @@ Tensor Tensor.hardsigmoid_(Tensor self) =>
 Tensor Tensor.hardtanh(Tensor self, Var min_val, Var max_val) {
   int64_t min_val_int = 0;
   double min_val_dbl = 0;
-  int min_val_kind = _scalar(min_val, &min_val_int, &min_val_dbl);
+  int min_val_kind = _scalar(min_val, min_val_int, min_val_dbl);
   int64_t max_val_int = 0;
   double max_val_dbl = 0;
-  int max_val_kind = _scalar(max_val, &max_val_int, &max_val_dbl);
+  int max_val_kind = _scalar(max_val, max_val_int, max_val_dbl);
   return Tensor.adopt(xt_hardtanh(_native(self), min_val_kind, min_val_int,
       min_val_dbl, max_val_kind, max_val_int, max_val_dbl), "hardtanh");
 }
@@ -6163,10 +6160,10 @@ Tensor Tensor.hardtanh(Tensor self, Var min_val, Var max_val) {
 Tensor Tensor.hardtanh_(Tensor self, Var min_val, Var max_val) {
   int64_t min_val_int = 0;
   double min_val_dbl = 0;
-  int min_val_kind = _scalar(min_val, &min_val_int, &min_val_dbl);
+  int min_val_kind = _scalar(min_val, min_val_int, min_val_dbl);
   int64_t max_val_int = 0;
   double max_val_dbl = 0;
-  int max_val_kind = _scalar(max_val, &max_val_int, &max_val_dbl);
+  int max_val_kind = _scalar(max_val, max_val_int, max_val_dbl);
   return Tensor.adopt(xt_hardtanh_(_native(self), min_val_kind, min_val_int,
       min_val_dbl, max_val_kind, max_val_int, max_val_dbl), "hardtanh_");
 }
@@ -6180,8 +6177,8 @@ Tensor Tensor.hardswish_(Tensor self) =>
 Tensor Tensor.leaky_relu(Tensor self, Var negative_slope) {
   int64_t negative_slope_int = 0;
   double negative_slope_dbl = 0;
-  int negative_slope_kind = _scalar(negative_slope, &negative_slope_int,
-      &negative_slope_dbl);
+  int negative_slope_kind = _scalar(negative_slope, negative_slope_int,
+      negative_slope_dbl);
   return Tensor.adopt(xt_leaky_relu(_native(self), negative_slope_kind,
       negative_slope_int, negative_slope_dbl), "leaky_relu");
 }
@@ -6189,8 +6186,8 @@ Tensor Tensor.leaky_relu(Tensor self, Var negative_slope) {
 Tensor Tensor.leaky_relu_(Tensor self, Var negative_slope) {
   int64_t negative_slope_int = 0;
   double negative_slope_dbl = 0;
-  int negative_slope_kind = _scalar(negative_slope, &negative_slope_int,
-      &negative_slope_dbl);
+  int negative_slope_kind = _scalar(negative_slope, negative_slope_int,
+      negative_slope_dbl);
   return Tensor.adopt(xt_leaky_relu_(_native(self), negative_slope_kind,
       negative_slope_int, negative_slope_dbl), "leaky_relu_");
 }
@@ -6208,10 +6205,10 @@ List Tensor.log_sigmoid_forward(Tensor self) {
 Tensor Tensor.softplus(Tensor self, Var beta, Var threshold) {
   int64_t beta_int = 0;
   double beta_dbl = 0;
-  int beta_kind = _scalar(beta, &beta_int, &beta_dbl);
+  int beta_kind = _scalar(beta, beta_int, beta_dbl);
   int64_t threshold_int = 0;
   double threshold_dbl = 0;
-  int threshold_kind = _scalar(threshold, &threshold_int, &threshold_dbl);
+  int threshold_kind = _scalar(threshold, threshold_int, threshold_dbl);
   return Tensor.adopt(xt_softplus(_native(self), beta_kind, beta_int,
       beta_dbl, threshold_kind, threshold_int, threshold_dbl), "softplus");
 }
@@ -6219,35 +6216,35 @@ Tensor Tensor.softplus(Tensor self, Var beta, Var threshold) {
 Tensor Tensor.softshrink(Tensor self, Var lambd) {
   int64_t lambd_int = 0;
   double lambd_dbl = 0;
-  int lambd_kind = _scalar(lambd, &lambd_int, &lambd_dbl);
+  int lambd_kind = _scalar(lambd, lambd_int, lambd_dbl);
   return Tensor.adopt(xt_softshrink(_native(self), lambd_kind, lambd_int,
       lambd_dbl), "softshrink");
 }
 
 Tensor Tensor.adaptive_avg_pool2d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_adaptive_avg_pool2d(_native(self), output_size_dims,
       output_size_n), "adaptive_avg_pool2d");
 }
 
 Tensor Tensor.mkldnn_adaptive_avg_pool2d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_mkldnn_adaptive_avg_pool2d(_native(self),
       output_size_dims, output_size_n), "mkldnn_adaptive_avg_pool2d");
 }
 
 Tensor Tensor.adaptive_avg_pool3d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_adaptive_avg_pool3d(_native(self), output_size_dims,
       output_size_n), "adaptive_avg_pool3d");
 }
 
 List Tensor.adaptive_max_pool2d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_adaptive_max_pool2d(_native(self), output_size_dims,
       output_size_n, &out0, &out1), "adaptive_max_pool2d");
@@ -6256,7 +6253,7 @@ List Tensor.adaptive_max_pool2d(Tensor self, List output_size) {
 
 List Tensor.adaptive_max_pool3d(Tensor self, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_adaptive_max_pool3d(_native(self), output_size_dims,
       output_size_n, &out0, &out1), "adaptive_max_pool3d");
@@ -6267,11 +6264,11 @@ Tensor Tensor.avg_pool2d(Tensor self, List kernel_size, List stride,
     List padding, int ceil_mode, int count_include_pad,
     int64_t divisor_override, int divisor_override_set) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_avg_pool2d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       ceil_mode, count_include_pad, divisor_override, divisor_override_set),
@@ -6282,11 +6279,11 @@ Tensor Tensor.avg_pool3d(Tensor self, List kernel_size, List stride,
     List padding, int ceil_mode, int count_include_pad,
     int64_t divisor_override, int divisor_override_set) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_avg_pool3d(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
       ceil_mode, count_include_pad, divisor_override, divisor_override_set),
@@ -6296,9 +6293,9 @@ Tensor Tensor.avg_pool3d(Tensor self, List kernel_size, List stride,
 List Tensor.fractional_max_pool2d(Tensor self, List kernel_size,
     List output_size, Tensor random_samples) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_fractional_max_pool2d(_native(self), kernel_size_dims,
       kernel_size_n, output_size_dims, output_size_n, _native(random_samples),
@@ -6309,9 +6306,9 @@ List Tensor.fractional_max_pool2d(Tensor self, List kernel_size,
 List Tensor.fractional_max_pool3d(Tensor self, List kernel_size,
     List output_size, Tensor random_samples) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_fractional_max_pool3d(_native(self), kernel_size_dims,
       kernel_size_n, output_size_dims, output_size_n, _native(random_samples),
@@ -6322,13 +6319,13 @@ List Tensor.fractional_max_pool3d(Tensor self, List kernel_size,
 List Tensor.max_pool2d_with_indices(Tensor self, List kernel_size,
     List stride, List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_max_pool2d_with_indices(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
@@ -6340,13 +6337,13 @@ List Tensor.max_pool2d_with_indices(Tensor self, List kernel_size,
 List Tensor.max_pool3d_with_indices(Tensor self, List kernel_size,
     List stride, List padding, List dilation, int ceil_mode) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_max_pool3d_with_indices(_native(self), kernel_size_dims,
       kernel_size_n, stride_dims, stride_n, padding_dims, padding_n,
@@ -6357,7 +6354,7 @@ List Tensor.max_pool3d_with_indices(Tensor self, List kernel_size,
 
 Tensor Tensor.max_unpool2d(Tensor self, Tensor indices, List output_size) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_max_unpool2d(_native(self), _native(indices),
       output_size_dims, output_size_n), "max_unpool2d");
 }
@@ -6365,11 +6362,11 @@ Tensor Tensor.max_unpool2d(Tensor self, Tensor indices, List output_size) {
 Tensor Tensor.max_unpool3d(Tensor self, Tensor indices, List output_size,
     List stride, List padding) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_max_unpool3d(_native(self), _native(indices),
       output_size_dims, output_size_n, stride_dims, stride_n, padding_dims,
       padding_n), "max_unpool3d");
@@ -6377,42 +6374,42 @@ Tensor Tensor.max_unpool3d(Tensor self, Tensor indices, List output_size,
 
 Tensor Tensor.reflection_pad1d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_reflection_pad1d(_native(self), padding_dims,
       padding_n), "reflection_pad1d");
 }
 
 Tensor Tensor.reflection_pad2d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_reflection_pad2d(_native(self), padding_dims,
       padding_n), "reflection_pad2d");
 }
 
 Tensor Tensor.reflection_pad3d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_reflection_pad3d(_native(self), padding_dims,
       padding_n), "reflection_pad3d");
 }
 
 Tensor Tensor.replication_pad1d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_replication_pad1d(_native(self), padding_dims,
       padding_n), "replication_pad1d");
 }
 
 Tensor Tensor.replication_pad2d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_replication_pad2d(_native(self), padding_dims,
       padding_n), "replication_pad2d");
 }
 
 Tensor Tensor.replication_pad3d(Tensor self, List padding) {
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_replication_pad3d(_native(self), padding_dims,
       padding_n), "replication_pad3d");
 }
@@ -6420,7 +6417,7 @@ Tensor Tensor.replication_pad3d(Tensor self, List padding) {
 Tensor Tensor.pad(Tensor self, List pad, String mode, double value,
     int value_set) {
   int64_t pad_n = 0;
-  int64_t *pad_dims = _dims(pad, &pad_n);
+  int64_t *pad_dims = _dims(pad, pad_n);
   return Tensor.adopt(xt_pad(_native(self), pad_dims, pad_n, mode, value,
       value_set), "pad");
 }
@@ -6428,7 +6425,7 @@ Tensor Tensor.pad(Tensor self, List pad, String mode, double value,
 Tensor Tensor.upsample_linear1d(Tensor self, List output_size,
     int align_corners, double scales, int scales_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_linear1d(_native(self), output_size_dims,
       output_size_n, align_corners, scales, scales_set), "upsample_linear1d");
 }
@@ -6437,7 +6434,7 @@ Tensor Tensor.upsample_bilinear2d(Tensor self, List output_size,
     int align_corners, double scales_h, int scales_h_set, double scales_w,
     int scales_w_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_bilinear2d(_native(self), output_size_dims,
       output_size_n, align_corners, scales_h, scales_h_set, scales_w,
       scales_w_set), "upsample_bilinear2d");
@@ -6447,7 +6444,7 @@ Tensor Tensor.upsample_bicubic2d(Tensor self, List output_size,
     int align_corners, double scales_h, int scales_h_set, double scales_w,
     int scales_w_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_bicubic2d(_native(self), output_size_dims,
       output_size_n, align_corners, scales_h, scales_h_set, scales_w,
       scales_w_set), "upsample_bicubic2d");
@@ -6457,7 +6454,7 @@ Tensor Tensor.upsample_trilinear3d(Tensor self, List output_size,
     int align_corners, double scales_d, int scales_d_set, double scales_h,
     int scales_h_set, double scales_w, int scales_w_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_trilinear3d(_native(self), output_size_dims,
       output_size_n, align_corners, scales_d, scales_d_set, scales_h,
       scales_h_set, scales_w, scales_w_set), "upsample_trilinear3d");
@@ -6466,7 +6463,7 @@ Tensor Tensor.upsample_trilinear3d(Tensor self, List output_size,
 Tensor Tensor.upsample_nearest1d(Tensor self, List output_size, double scales,
     int scales_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_nearest1d(_native(self), output_size_dims,
       output_size_n, scales, scales_set), "upsample_nearest1d");
 }
@@ -6474,7 +6471,7 @@ Tensor Tensor.upsample_nearest1d(Tensor self, List output_size, double scales,
 Tensor Tensor.upsample_nearest2d(Tensor self, List output_size,
     double scales_h, int scales_h_set, double scales_w, int scales_w_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_nearest2d(_native(self), output_size_dims,
       output_size_n, scales_h, scales_h_set, scales_w, scales_w_set),
       "upsample_nearest2d");
@@ -6484,7 +6481,7 @@ Tensor Tensor.upsample_nearest3d(Tensor self, List output_size,
     double scales_d, int scales_d_set, double scales_h, int scales_h_set,
     double scales_w, int scales_w_set) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   return Tensor.adopt(xt_upsample_nearest3d(_native(self), output_size_dims,
       output_size_n, scales_d, scales_d_set, scales_h, scales_h_set, scales_w,
       scales_w_set), "upsample_nearest3d");
@@ -6494,15 +6491,15 @@ Tensor Tensor.slow_conv_transpose2d(Tensor self, Tensor weight,
     List kernel_size, Tensor bias, List stride, List padding,
     List output_padding, List dilation) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_slow_conv_transpose2d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n, output_padding_dims, output_padding_n,
@@ -6513,15 +6510,15 @@ Tensor Tensor.slow_conv_transpose3d(Tensor self, Tensor weight,
     List kernel_size, Tensor bias, List stride, List padding,
     List output_padding, List dilation) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t output_padding_n = 0;
-  int64_t *output_padding_dims = _dims(output_padding, &output_padding_n);
+  int64_t *output_padding_dims = _dims(output_padding, output_padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_slow_conv_transpose3d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n, output_padding_dims, output_padding_n,
@@ -6531,11 +6528,11 @@ Tensor Tensor.slow_conv_transpose3d(Tensor self, Tensor weight,
 Tensor Tensor.thnn_conv2d(Tensor self, Tensor weight, List kernel_size,
     Tensor bias, List stride, List padding) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_thnn_conv2d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n), "thnn_conv2d");
@@ -6544,13 +6541,13 @@ Tensor Tensor.thnn_conv2d(Tensor self, Tensor weight, List kernel_size,
 Tensor Tensor.conv_depthwise3d(Tensor self, Tensor weight, List kernel_size,
     Tensor bias, List stride, List padding, List dilation) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_conv_depthwise3d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n, dilation_dims, dilation_n), "conv_depthwise3d");
@@ -6559,11 +6556,11 @@ Tensor Tensor.conv_depthwise3d(Tensor self, Tensor weight, List kernel_size,
 Tensor Tensor.slow_conv3d(Tensor self, Tensor weight, List kernel_size,
     Tensor bias, List stride, List padding) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_slow_conv3d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n), "slow_conv3d");
@@ -6572,11 +6569,11 @@ Tensor Tensor.slow_conv3d(Tensor self, Tensor weight, List kernel_size,
 Tensor Tensor.slow_conv3d_forward(Tensor self, Tensor weight,
     List kernel_size, Tensor bias, List stride, List padding) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   return Tensor.adopt(xt_slow_conv3d_forward(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n), "slow_conv3d_forward");
@@ -6585,13 +6582,13 @@ Tensor Tensor.slow_conv3d_forward(Tensor self, Tensor weight,
 Tensor Tensor.slow_conv_dilated2d(Tensor self, Tensor weight,
     List kernel_size, Tensor bias, List stride, List padding, List dilation) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_slow_conv_dilated2d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n, dilation_dims, dilation_n),
@@ -6601,13 +6598,13 @@ Tensor Tensor.slow_conv_dilated2d(Tensor self, Tensor weight,
 Tensor Tensor.slow_conv_dilated3d(Tensor self, Tensor weight,
     List kernel_size, Tensor bias, List stride, List padding, List dilation) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   return Tensor.adopt(xt_slow_conv_dilated3d(_native(self), _native(weight),
       kernel_size_dims, kernel_size_n, _native(bias), stride_dims, stride_n,
       padding_dims, padding_n, dilation_dims, dilation_n),
@@ -6617,15 +6614,15 @@ Tensor Tensor.slow_conv_dilated3d(Tensor self, Tensor weight,
 Tensor Tensor.col2im(Tensor self, List output_size, List kernel_size,
     List dilation, List padding, List stride) {
   int64_t output_size_n = 0;
-  int64_t *output_size_dims = _dims(output_size, &output_size_n);
+  int64_t *output_size_dims = _dims(output_size, output_size_n);
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_col2im(_native(self), output_size_dims,
       output_size_n, kernel_size_dims, kernel_size_n, dilation_dims,
       dilation_n, padding_dims, padding_n, stride_dims, stride_n), "col2im");
@@ -6641,13 +6638,13 @@ Tensor Torch.column_stack(List tensors) {
 Tensor Tensor.im2col(Tensor self, List kernel_size, List dilation,
     List padding, List stride) {
   int64_t kernel_size_n = 0;
-  int64_t *kernel_size_dims = _dims(kernel_size, &kernel_size_n);
+  int64_t *kernel_size_dims = _dims(kernel_size, kernel_size_n);
   int64_t dilation_n = 0;
-  int64_t *dilation_dims = _dims(dilation, &dilation_n);
+  int64_t *dilation_dims = _dims(dilation, dilation_n);
   int64_t padding_n = 0;
-  int64_t *padding_dims = _dims(padding, &padding_n);
+  int64_t *padding_dims = _dims(padding, padding_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_im2col(_native(self), kernel_size_dims,
       kernel_size_n, dilation_dims, dilation_n, padding_dims, padding_n,
       stride_dims, stride_n), "im2col");
@@ -6711,7 +6708,7 @@ Tensor Tensor.special_xlog1py(Tensor self, Tensor other) =>
 Tensor Torch.special_xlog1py_self(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_special_xlog1py_self_scalar(self_kind, self_int,
       self_dbl, _native(other)), "special_xlog1py");
 }
@@ -6719,7 +6716,7 @@ Tensor Torch.special_xlog1py_self(Var self, Tensor other) {
 Tensor Tensor.special_xlog1py_other(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_special_xlog1py_other_scalar(_native(self),
       other_kind, other_int, other_dbl), "special_xlog1py");
 }
@@ -6731,7 +6728,7 @@ Tensor Tensor.special_xlogy(Tensor self, Tensor other) =>
 Tensor Torch.special_xlogy_self(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_special_xlogy_self_scalar(self_kind, self_int,
       self_dbl, _native(other)), "special_xlogy");
 }
@@ -6739,7 +6736,7 @@ Tensor Torch.special_xlogy_self(Var self, Tensor other) {
 Tensor Tensor.special_xlogy_other(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_special_xlogy_other_scalar(_native(self), other_kind,
       other_int, other_dbl), "special_xlogy");
 }
@@ -6750,7 +6747,7 @@ Tensor Tensor.special_zeta(Tensor self, Tensor other) =>
 Tensor Torch.special_zeta_self(Var self, Tensor other) {
   int64_t self_int = 0;
   double self_dbl = 0;
-  int self_kind = _scalar(self, &self_int, &self_dbl);
+  int self_kind = _scalar(self, self_int, self_dbl);
   return Tensor.adopt(xt_special_zeta_self_scalar(self_kind, self_int,
       self_dbl, _native(other)), "special_zeta");
 }
@@ -6758,7 +6755,7 @@ Tensor Torch.special_zeta_self(Var self, Tensor other) {
 Tensor Tensor.special_zeta_other(Tensor self, Var other) {
   int64_t other_int = 0;
   double other_dbl = 0;
-  int other_kind = _scalar(other, &other_int, &other_dbl);
+  int other_kind = _scalar(other, other_int, other_dbl);
   return Tensor.adopt(xt_special_zeta_other_scalar(_native(self), other_kind,
       other_int, other_dbl), "special_zeta");
 }
@@ -6783,7 +6780,7 @@ Tensor Torch.special_polygamma(int64_t n, Tensor self) =>
 
 Tensor Tensor.special_logsumexp(Tensor self, List dim, int keepdim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_special_logsumexp(_native(self), dim_dims, dim_n,
       keepdim), "special_logsumexp");
 }
@@ -6846,108 +6843,108 @@ Tensor Tensor.fft_ihfft(Tensor self, int64_t n, int n_set, int64_t dim,
 
 Tensor Tensor.fft_fft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_fft2(_native(self), s_dims, s_n, dim_dims, dim_n,
       norm), "fft_fft2");
 }
 
 Tensor Tensor.fft_ifft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_ifft2(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_ifft2");
 }
 
 Tensor Tensor.fft_rfft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_rfft2(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_rfft2");
 }
 
 Tensor Tensor.fft_irfft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_irfft2(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_irfft2");
 }
 
 Tensor Tensor.fft_hfft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_hfft2(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_hfft2");
 }
 
 Tensor Tensor.fft_ihfft2(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_fft_ihfft2(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_ihfft2");
 }
 
 Tensor Tensor.fft_fftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_fftn(_native(self), s_dims, s_n, dim_dims, dim_n,
       norm), "fft_fftn");
 }
 
 Tensor Tensor.fft_ifftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_ifftn(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_ifftn");
 }
 
 Tensor Tensor.fft_rfftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_rfftn(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_rfftn");
 }
 
 Tensor Tensor.fft_irfftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_irfftn(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_irfftn");
 }
 
 Tensor Tensor.fft_hfftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_hfftn(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_hfftn");
 }
 
 Tensor Tensor.fft_ihfftn(Tensor self, List s, List dim, String norm) {
   int64_t s_n = 0;
-  int64_t *s_dims = s ? _dims(s, &s_n) : NULL;
+  int64_t *s_dims = s ? _dims(s, s_n) : NULL;
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_ihfftn(_native(self), s_dims, s_n, dim_dims,
       dim_n, norm), "fft_ihfftn");
 }
@@ -6960,14 +6957,14 @@ Tensor Torch.fft_rfftfreq(int64_t n, double d, int dtype, String device) =>
 
 Tensor Tensor.fft_fftshift(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_fftshift(_native(self), dim_dims, dim_n),
       "fft_fftshift");
 }
 
 Tensor Tensor.fft_ifftshift(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_fft_ifftshift(_native(self), dim_dims, dim_n),
       "fft_ifftshift");
 }
@@ -7150,9 +7147,9 @@ Tensor Tensor.linalg_norm(Tensor self, Var ord, List dim, int keepdim,
     int dtype) {
   int64_t ord_int = 0;
   double ord_dbl = 0;
-  int ord_kind = _scalar(ord, &ord_int, &ord_dbl);
+  int ord_kind = _scalar(ord, ord_int, ord_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_linalg_norm(_native(self), ord_kind, ord_int,
       ord_dbl, dim_dims, dim_n, keepdim, dtype), "linalg_norm");
 }
@@ -7160,7 +7157,7 @@ Tensor Tensor.linalg_norm(Tensor self, Var ord, List dim, int keepdim,
 Tensor Tensor.linalg_norm_ord(Tensor self, String ord, List dim, int keepdim,
     int dtype) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_linalg_norm_ord_str(_native(self), ord, dim_dims,
       dim_n, keepdim, dtype), "linalg_norm");
 }
@@ -7169,9 +7166,9 @@ Tensor Tensor.linalg_vector_norm(Tensor self, Var ord, List dim, int keepdim,
     int dtype) {
   int64_t ord_int = 0;
   double ord_dbl = 0;
-  int ord_kind = _scalar(ord, &ord_int, &ord_dbl);
+  int ord_kind = _scalar(ord, ord_int, ord_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = dim ? _dims(dim, &dim_n) : NULL;
+  int64_t *dim_dims = dim ? _dims(dim, dim_n) : NULL;
   return Tensor.adopt(xt_linalg_vector_norm(_native(self), ord_kind, ord_int,
       ord_dbl, dim_dims, dim_n, keepdim, dtype), "linalg_vector_norm");
 }
@@ -7180,9 +7177,9 @@ Tensor Tensor.linalg_matrix_norm(Tensor self, Var ord, List dim, int keepdim,
     int dtype) {
   int64_t ord_int = 0;
   double ord_dbl = 0;
-  int ord_kind = _scalar(ord, &ord_int, &ord_dbl);
+  int ord_kind = _scalar(ord, ord_int, ord_dbl);
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_linalg_matrix_norm(_native(self), ord_kind, ord_int,
       ord_dbl, dim_dims, dim_n, keepdim, dtype), "linalg_matrix_norm");
 }
@@ -7190,7 +7187,7 @@ Tensor Tensor.linalg_matrix_norm(Tensor self, Var ord, List dim, int keepdim,
 Tensor Tensor.linalg_matrix_norm_str(Tensor self, String ord, List dim,
     int keepdim, int dtype) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_linalg_matrix_norm_str_ord(_native(self), ord,
       dim_dims, dim_n, keepdim, dtype), "linalg_matrix_norm");
 }
@@ -7215,7 +7212,7 @@ Tensor Tensor.linalg_svdvals(Tensor A, String driver) =>
 Tensor Tensor.linalg_cond(Tensor self, Var p) {
   int64_t p_int = 0;
   double p_dbl = 0;
-  int p_kind = _scalar(p, &p_int, &p_dbl);
+  int p_kind = _scalar(p, p_int, p_dbl);
   return Tensor.adopt(xt_linalg_cond(_native(self), p_kind, p_int, p_dbl),
       "linalg_cond");
 }
@@ -7252,7 +7249,7 @@ Tensor Tensor.linalg_tensorinv(Tensor self, int64_t ind) =>
 
 Tensor Tensor.linalg_tensorsolve(Tensor self, Tensor other, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = dims ? _dims(dims, &dims_n) : NULL;
+  int64_t *dims_dims = dims ? _dims(dims, dims_n) : NULL;
   return Tensor.adopt(xt_linalg_tensorsolve(_native(self), _native(other),
       dims_dims, dims_n), "linalg_tensorsolve");
 }
@@ -7293,7 +7290,7 @@ Tensor Tensor.nested_to_padded_tensor(Tensor self, double padding,
     List output_size) {
   int64_t output_size_n = 0;
   int64_t *output_size_dims = output_size ? _dims(output_size,
-      &output_size_n) : NULL;
+      output_size_n) : NULL;
   return Tensor.adopt(xt_nested_to_padded_tensor(_native(self), padding,
       output_size_dims, output_size_n), "nested_to_padded_tensor");
 }
@@ -7302,7 +7299,7 @@ Tensor Tensor.segment_reduce(Tensor data, String reduce, Tensor lengths,
     Tensor indices, Tensor offsets, int64_t axis, int unsafe, Var initial) {
   int64_t initial_int = 0;
   double initial_dbl = 0;
-  int initial_kind = _scalar(initial, &initial_int, &initial_dbl);
+  int initial_kind = _scalar(initial, initial_int, initial_dbl);
   return Tensor.adopt(xt_segment_reduce(_native(data), reduce,
       _native(lengths), _native(indices), _native(offsets), axis, unsafe,
       initial_kind, initial_int, initial_dbl), "segment_reduce");
@@ -7348,9 +7345,9 @@ Tensor Tensor.view_as_complex_copy(Tensor self) =>
 Tensor Tensor.as_strided_copy(Tensor self, List size, List stride,
     int64_t storage_offset, int storage_offset_set) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   int64_t stride_n = 0;
-  int64_t *stride_dims = _dims(stride, &stride_n);
+  int64_t *stride_dims = _dims(stride, stride_n);
   return Tensor.adopt(xt_as_strided_copy(_native(self), size_dims, size_n,
       stride_dims, stride_n, storage_offset, storage_offset_set),
       "as_strided_copy");
@@ -7363,14 +7360,14 @@ Tensor Tensor.diagonal_copy(Tensor self, int64_t offset, int64_t dim1,
 
 Tensor Tensor.expand_copy(Tensor self, List size, int implicit) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_expand_copy(_native(self), size_dims, size_n,
       implicit), "expand_copy");
 }
 
 Tensor Tensor.permute_copy(Tensor self, List dims) {
   int64_t dims_n = 0;
-  int64_t *dims_dims = _dims(dims, &dims_n);
+  int64_t *dims_dims = _dims(dims, dims_n);
   return Tensor.adopt(xt_permute_copy(_native(self), dims_dims, dims_n),
       "permute_copy");
 }
@@ -7401,7 +7398,7 @@ List Tensor.split_copy(Tensor self, int64_t split_size, int64_t dim) {
 
 List Tensor.split_with_sizes_copy(Tensor self, List split_sizes, int64_t dim) {
   int64_t split_sizes_n = 0;
-  int64_t *split_sizes_dims = _dims(split_sizes, &split_sizes_n);
+  int64_t *split_sizes_dims = _dims(split_sizes, split_sizes_n);
   xt_tensor *items = NULL;
   int64_t count = xt_split_with_sizes_copy(_native(self), split_sizes_dims,
       split_sizes_n, dim, &items);
@@ -7423,7 +7420,7 @@ Tensor Tensor.squeeze_copy_dim(Tensor self, int64_t dim) =>
 
 Tensor Tensor.squeeze_copy_dims(Tensor self, List dim) {
   int64_t dim_n = 0;
-  int64_t *dim_dims = _dims(dim, &dim_n);
+  int64_t *dim_dims = _dims(dim, dim_n);
   return Tensor.adopt(xt_squeeze_copy_dims(_native(self), dim_dims, dim_n),
       "squeeze_copy");
 }
@@ -7471,7 +7468,7 @@ List Tensor.unbind_copy(Tensor self, int64_t dim) {
 
 Tensor Tensor.view_copy(Tensor self, List size) {
   int64_t size_n = 0;
-  int64_t *size_dims = _dims(size, &size_n);
+  int64_t *size_dims = _dims(size, size_n);
   return Tensor.adopt(xt_view_copy(_native(self), size_dims, size_n),
       "view_copy");
 }
@@ -7490,7 +7487,7 @@ Tensor Tensor.alias_copy(Tensor self) =>
 Tensor Tensor.to_padded_tensor(Tensor self, double padding, List output_size) {
   int64_t output_size_n = 0;
   int64_t *output_size_dims = output_size ? _dims(output_size,
-      &output_size_n) : NULL;
+      output_size_n) : NULL;
   return Tensor.adopt(xt_to_padded_tensor(_native(self), padding,
       output_size_dims, output_size_n), "to_padded_tensor");
 }
@@ -7524,7 +7521,7 @@ Tensor Tensor.special_chebyshev_polynomial_t(Tensor x, Tensor n) =>
 Tensor Torch.special_chebyshev_polynomial_t_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_t_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_chebyshev_polynomial_t");
 }
@@ -7532,7 +7529,7 @@ Tensor Torch.special_chebyshev_polynomial_t_x(Var x, Tensor n) {
 Tensor Tensor.special_chebyshev_polynomial_t_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_t_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_chebyshev_polynomial_t");
 }
@@ -7544,7 +7541,7 @@ Tensor Tensor.special_chebyshev_polynomial_u(Tensor x, Tensor n) =>
 Tensor Torch.special_chebyshev_polynomial_u_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_u_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_chebyshev_polynomial_u");
 }
@@ -7552,7 +7549,7 @@ Tensor Torch.special_chebyshev_polynomial_u_x(Var x, Tensor n) {
 Tensor Tensor.special_chebyshev_polynomial_u_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_u_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_chebyshev_polynomial_u");
 }
@@ -7564,7 +7561,7 @@ Tensor Tensor.special_chebyshev_polynomial_v(Tensor x, Tensor n) =>
 Tensor Torch.special_chebyshev_polynomial_v_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_v_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_chebyshev_polynomial_v");
 }
@@ -7572,7 +7569,7 @@ Tensor Torch.special_chebyshev_polynomial_v_x(Var x, Tensor n) {
 Tensor Tensor.special_chebyshev_polynomial_v_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_v_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_chebyshev_polynomial_v");
 }
@@ -7584,7 +7581,7 @@ Tensor Tensor.special_chebyshev_polynomial_w(Tensor x, Tensor n) =>
 Tensor Torch.special_chebyshev_polynomial_w_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_w_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_chebyshev_polynomial_w");
 }
@@ -7592,7 +7589,7 @@ Tensor Torch.special_chebyshev_polynomial_w_x(Var x, Tensor n) {
 Tensor Tensor.special_chebyshev_polynomial_w_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_chebyshev_polynomial_w_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_chebyshev_polynomial_w");
 }
@@ -7604,7 +7601,7 @@ Tensor Tensor.special_hermite_polynomial_h(Tensor x, Tensor n) =>
 Tensor Torch.special_hermite_polynomial_h_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_hermite_polynomial_h_x_scalar(x_kind, x_int,
       x_dbl, _native(n)), "special_hermite_polynomial_h");
 }
@@ -7612,7 +7609,7 @@ Tensor Torch.special_hermite_polynomial_h_x(Var x, Tensor n) {
 Tensor Tensor.special_hermite_polynomial_h_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_hermite_polynomial_h_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_hermite_polynomial_h");
 }
@@ -7624,7 +7621,7 @@ Tensor Tensor.special_hermite_polynomial_he(Tensor x, Tensor n) =>
 Tensor Torch.special_hermite_polynomial_he_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_hermite_polynomial_he_x_scalar(x_kind, x_int,
       x_dbl, _native(n)), "special_hermite_polynomial_he");
 }
@@ -7632,7 +7629,7 @@ Tensor Torch.special_hermite_polynomial_he_x(Var x, Tensor n) {
 Tensor Tensor.special_hermite_polynomial_he_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_hermite_polynomial_he_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_hermite_polynomial_he");
 }
@@ -7644,7 +7641,7 @@ Tensor Tensor.special_laguerre_polynomial_l(Tensor x, Tensor n) =>
 Tensor Torch.special_laguerre_polynomial_l_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_laguerre_polynomial_l_x_scalar(x_kind, x_int,
       x_dbl, _native(n)), "special_laguerre_polynomial_l");
 }
@@ -7652,7 +7649,7 @@ Tensor Torch.special_laguerre_polynomial_l_x(Var x, Tensor n) {
 Tensor Tensor.special_laguerre_polynomial_l_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_laguerre_polynomial_l_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_laguerre_polynomial_l");
 }
@@ -7664,7 +7661,7 @@ Tensor Tensor.special_legendre_polynomial_p(Tensor x, Tensor n) =>
 Tensor Torch.special_legendre_polynomial_p_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_legendre_polynomial_p_x_scalar(x_kind, x_int,
       x_dbl, _native(n)), "special_legendre_polynomial_p");
 }
@@ -7672,7 +7669,7 @@ Tensor Torch.special_legendre_polynomial_p_x(Var x, Tensor n) {
 Tensor Tensor.special_legendre_polynomial_p_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_legendre_polynomial_p_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_legendre_polynomial_p");
 }
@@ -7708,7 +7705,7 @@ Tensor Tensor.special_shifted_chebyshev_polynomial_t(Tensor x, Tensor n) =>
 Tensor Torch.special_shifted_chebyshev_polynomial_t_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_t_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_shifted_chebyshev_polynomial_t");
 }
@@ -7716,7 +7713,7 @@ Tensor Torch.special_shifted_chebyshev_polynomial_t_x(Var x, Tensor n) {
 Tensor Tensor.special_shifted_chebyshev_polynomial_t_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_t_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_shifted_chebyshev_polynomial_t");
 }
@@ -7728,7 +7725,7 @@ Tensor Tensor.special_shifted_chebyshev_polynomial_u(Tensor x, Tensor n) =>
 Tensor Torch.special_shifted_chebyshev_polynomial_u_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_u_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_shifted_chebyshev_polynomial_u");
 }
@@ -7736,7 +7733,7 @@ Tensor Torch.special_shifted_chebyshev_polynomial_u_x(Var x, Tensor n) {
 Tensor Tensor.special_shifted_chebyshev_polynomial_u_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_u_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_shifted_chebyshev_polynomial_u");
 }
@@ -7748,7 +7745,7 @@ Tensor Tensor.special_shifted_chebyshev_polynomial_v(Tensor x, Tensor n) =>
 Tensor Torch.special_shifted_chebyshev_polynomial_v_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_v_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_shifted_chebyshev_polynomial_v");
 }
@@ -7756,7 +7753,7 @@ Tensor Torch.special_shifted_chebyshev_polynomial_v_x(Var x, Tensor n) {
 Tensor Tensor.special_shifted_chebyshev_polynomial_v_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_v_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_shifted_chebyshev_polynomial_v");
 }
@@ -7768,7 +7765,7 @@ Tensor Tensor.special_shifted_chebyshev_polynomial_w(Tensor x, Tensor n) =>
 Tensor Torch.special_shifted_chebyshev_polynomial_w_x(Var x, Tensor n) {
   int64_t x_int = 0;
   double x_dbl = 0;
-  int x_kind = _scalar(x, &x_int, &x_dbl);
+  int x_kind = _scalar(x, x_int, x_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_w_x_scalar(x_kind,
       x_int, x_dbl, _native(n)), "special_shifted_chebyshev_polynomial_w");
 }
@@ -7776,7 +7773,7 @@ Tensor Torch.special_shifted_chebyshev_polynomial_w_x(Var x, Tensor n) {
 Tensor Tensor.special_shifted_chebyshev_polynomial_w_n(Tensor x, Var n) {
   int64_t n_int = 0;
   double n_dbl = 0;
-  int n_kind = _scalar(n, &n_int, &n_dbl);
+  int n_kind = _scalar(n, n_int, n_dbl);
   return Tensor.adopt(xt_special_shifted_chebyshev_polynomial_w_n_scalar(_native(x),
       n_kind, n_int, n_dbl), "special_shifted_chebyshev_polynomial_w");
 }

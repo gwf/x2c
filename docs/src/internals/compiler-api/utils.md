@@ -181,7 +181,7 @@ Source: `src/utils.x:304`
 
 #### x2c_fnv_file
 
-`uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok)`
+`uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok)`
 
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
