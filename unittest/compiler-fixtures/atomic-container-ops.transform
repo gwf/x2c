@@ -112,7 +112,8 @@
                       (ident (binding 15 "String_var"))) 
                 (args (expr ("String") (cache 0))))) 
               (expr ("Var") 
-               (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
+               (call (expr ((func ((int))) "Var") 
+                      (ident (binding 18 "int_var"))) 
                 (args (expr (int) (literal (int) "100")))))) 
         (vpair 
          (expr ("Var") 
@@ -130,7 +131,8 @@
                       (ident (binding 15 "String_var"))) 
                 (args (expr ("String") (cache 2))))) 
               (expr ("Var") 
-               (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
+               (call (expr ((func ((int))) "Var") 
+                      (ident (binding 18 "int_var"))) 
                 (args (expr (int) (literal (int) "4")))))))))))) 
   (at 13 
    (stmnt 
