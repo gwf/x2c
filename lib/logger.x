@@ -100,9 +100,6 @@ typedef struct LogMemorySink {
   Block wide_values;
 } *LogMemorySink;
 
-static inline Var LogTextSink.var(LogTextSink);
-static inline LogTextSink Var.logtextsink(Var);
-
 $(import "var-adapters.xmacro") $var.pointer(LogTextSink, logtextsink, <p48>);
 
 protocol Var(LogTextSink) as void *;

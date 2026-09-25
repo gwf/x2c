@@ -481,9 +481,6 @@ typedef struct Lambda {
   MachineProgram auto_program;
 } *Lambda;
 
-static inline Var Lambda.var(Lambda);
-static inline Lambda Var.lambda(Var);
-
 $(import "var-adapters.xmacro") $var.pointer(Lambda, lambda, <lambda>);
 
 protocol Var(Lambda);

@@ -220,16 +220,12 @@ generated declaration location with the macro invocation location. Shallow
 collection transactionally expands file-scope unit macros that contain
 protocol rows, so importing units receive them and the expansion's public
 declarations too. Public definitions may complete prototypes earlier in the
-same expansion. Keep each private alias and exact converter prototype literal;
-private declarations are discarded with generated bodies. The iterator family
-keeps its rows direct because those relationships are useful source
+same expansion. Keep each private alias literal. The iterator family keeps
+its adoption rows direct because those relationships are useful source
 documentation:
 
 ```x2c
 typedef LocalState *LocalStateRef;
-
-static inline Var LocalStateRef.var(LocalStateRef);
-static inline LocalStateRef Var.localstateref(Var);
 
 $(import "var-adapters.xmacro")
 $var.raw.pointer(LocalStateRef, localstateref);
@@ -237,9 +233,9 @@ $var.raw.pointer(LocalStateRef, localstateref);
 protocol Var(LocalStateRef);
 ```
 
-Keep `static inline` in both a literal private prototype and its generated
-definition; plain `inline` macro output can otherwise escape into the
-generated header. Repeated adoption families may be generated when that makes
+Keep `static inline` in the generated private definition; plain `inline`
+macro output can otherwise escape into the generated header. Repeated
+adoption families may be generated when that makes
 the family easier to read; keep a row direct when the relationship itself is
 useful source documentation.
 
