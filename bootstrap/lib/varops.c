@@ -563,11 +563,11 @@ unsigned Var_payload32(Var);
 static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int * handled){
   switch(op){
     case 56 : case 62 : case 54 : case 95 : case 75 : case 77 : case 249 : case 189 : case 15481 : case 15997 : break;
-    default: * handled = 0;
+    default:(* handled) = 0;
     return((void) 0, Void);
   }
   Symbol tag = _fast_numeric_tag(lhs, rhs);
-  * handled = 1;
+  (* handled) = 1;
   switch(tag){
     case 3453797 : return _fast_i32(op, Var_payload32(lhs), Var_payload32(rhs), 0);
     case 3847013 : return _fast_i32(op, Var_payload32(lhs), Var_payload32(rhs), 1);
@@ -585,7 +585,7 @@ static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int * handled){
     }
 
   }
-  * handled = 0;
+  (* handled) = 0;
   return((void) 0, Void);
 }
 
@@ -675,7 +675,7 @@ int Var_try_dispatch_binary(Var, Symbol, Var, Var *);
 
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   int fast_handled;
-  Var result = _fast_numeric(op, lhs, rhs, & fast_handled);
+  Var result = _fast_numeric(op, lhs, rhs, &(fast_handled));
   if(fast_handled) return result;
   if(! Var_encoding_valid(lhs)){
     unsigned long bits = lhs.u64;
@@ -784,7 +784,7 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     case 129 : return Var_matmul(lhs, rhs);
   }
   int fast_handled;
-  Var result = _fast_numeric(op, lhs, rhs, & fast_handled);
+  Var result = _fast_numeric(op, lhs, rhs, &(fast_handled));
   if(fast_handled) return result;
   if(! Var_encoding_valid(lhs)){
     unsigned long bits = lhs.u64;

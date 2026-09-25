@@ -406,7 +406,7 @@ static String _identity(void){
   String path = Path_exists(_34) ? _14 : x2c_executable_path;
   int ok = path != NULL;
   uint64_t hash = UINT64_C(1469598103934665603);
-  if(ok) hash = x2c_fnv_file(hash, path, & ok);
+  if(ok) hash = x2c_fnv_file(hash, path, &(ok));
   return ok ? String_printf(_15, (unsigned long long) hash) : NULL;
 }
 
@@ -452,13 +452,13 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok){
   if(! _init_guard_) _file_init_();
   File input = fopen(path, "rb");
   if(! input){
-    * ok = 0;
+    (* ok) = 0;
     return hash;
   }
   unsigned char buffer[16384];
   size_t length;
   while((length = fread(buffer, 1, sizeof(buffer), input))) hash = x2c_fnv_bytes(hash, buffer, length);
-  if(ferror(input)) * ok = 0;
+  if(ferror(input))(* ok) = 0;
   File_close(input);
   return hash;
 }

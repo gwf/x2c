@@ -374,7 +374,7 @@ static uint64_t _state_list(uint64_t hash, List values){
 uint64_t x2c_fnv_file(uint64_t, String, int *);
 
 static uint64_t _state_file(uint64_t hash, String path, int * ok){
-  return x2c_fnv_file(_state_text(hash, path), path, ok);
+  return x2c_fnv_file(_state_text(hash, path), path, &((* ok)));
 }
 
 int String_contains(String, String);
@@ -383,12 +383,12 @@ String x2c_find_program(String);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   if(! String_truth(tool)){
-    * ok = 0;
+    (* ok) = 0;
     return hash;
   }
   String path = String_contains(tool, _133) ? tool : x2c_find_program(tool);
-  if(String_truth(path)) return _state_file(hash, path, ok);
-  * ok = 0;
+  if(String_truth(path)) return _state_file(hash, path, &((* ok)));
+  (* ok) = 0;
   return _state_text(hash, tool);
 }
 
@@ -399,9 +399,9 @@ static uint64_t _state_base(CliRequest request, String tool, int * ok){
   hash = _state_text(hash, _134);
   hash = _state_text(hash, request -> state_seed);
   String compiler = x2c_compiler_identity();
-  if(! String_truth(compiler)) * ok = 0;
+  if(! String_truth(compiler))(* ok) = 0;
   hash = _state_text(hash, compiler);
-  hash = _state_tool(hash, tool, ok);
+  hash = _state_tool(hash, tool, &((* ok)));
   return hash;
 }
 
@@ -460,7 +460,7 @@ int List_truth(List);
 static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
   List inputs = _state_dep_inputs(depfile);
   if(! List_truth(inputs)){
-    * ok = 0;
+    (* ok) = 0;
     return hash;
   }
   {
@@ -470,7 +470,7 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       input = Var_string(_x2c_macro_cursor_output_1);
-      hash = _state_file(hash, input, ok);
+      hash = _state_file(hash, input, &((* ok)));
     }
 
   }
@@ -818,7 +818,7 @@ String Build_generated_dir(Build state, String input){
 List CliRequest_package_roots(CliRequest);
 
 static uint64_t _translation_fingerprint(Build state, String input, String directory, int * ok){
-  uint64_t hash = _state_base(state -> request, state -> toolchain -> cc, ok);
+  uint64_t hash = _state_base(state -> request, state -> toolchain -> cc, &((* ok)));
   hash = _state_text(hash, _139);
   hash = _state_text(hash, input);
   CliRequest request = state -> request;
@@ -836,12 +836,12 @@ static uint64_t _translation_fingerprint(Build state, String input, String direc
     Var _x2c_macro_cursor_output_7;
     while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
       module = Var_string(_x2c_macro_cursor_output_7);
-      hash = _state_file(hash, module, ok);
+      hash = _state_file(hash, module, &((* ok)));
     }
 
   }
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))));
-  return _state_dependencies(hash, depfile, ok);
+  return _state_dependencies(hash, depfile, &((* ok)));
 }
 
 int Build_translation_current(Build state, String input, String directory){
@@ -860,7 +860,7 @@ int Build_translation_current(Build state, String input, String directory){
 
   }
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, & ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, &(ok));
   String path = String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_34), cons(String_var(_key(input)), NULL))));
   int current = ok && _state_matches(path, hash);
   if(current && state -> request -> verbose) fprintf(stderr, "x2c: up-to-date translate %s\n", input);
@@ -872,7 +872,7 @@ void Build_record_translation(Build state, String input, String directory){
   if(! String_truth(state -> state_root) || state -> request -> dry_run) return;
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_24), NULL)))));
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, & ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, &(ok));
   if(ok && _files_unchanged(state, _state_dep_inputs(depfile))) _state_write(String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_34), cons(String_var(_key(input)), NULL)))), hash);
 }
 
@@ -1075,7 +1075,7 @@ String Symbol_str(Symbol);
 
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok){
   String tool = List_truth(action -> arguments) ? Var_string(List_car(action -> arguments)) : NULL;
-  uint64_t hash = _state_base(state -> request, tool, ok);
+  uint64_t hash = _state_base(state -> request, tool, &((* ok)));
   hash = _state_text(hash, Symbol_str(action -> phase));
   hash = _state_list(hash, action -> arguments);
   {
@@ -1085,7 +1085,7 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
       input = Var_string(_x2c_macro_cursor_output_12);
-      hash = _state_file(hash, input, ok);
+      hash = _state_file(hash, input, &((* ok)));
     }
 
   }
@@ -1190,7 +1190,7 @@ x2c_exception_leave(& _x2c_exception_frame_5);
 }
 
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok){
-  return x2c_fnv_file(_action_fingerprint(state, action, NULL, ok), preprocessed, ok);
+  return x2c_fnv_file(_action_fingerprint(state, action, NULL, &((* ok))), preprocessed, &((* ok)));
 }
 
 int ToolRun_wait(ToolRun);
@@ -1202,7 +1202,7 @@ static int _finish_compile(Build state, CcJob * pending){
   if(String_truth(pending -> preprocessed)){
     int ok = 1;
     String preprocessed = pending -> preprocessed;
-    if(! status) pending -> fingerprint = _compile_fingerprint(state, pending -> action, preprocessed, & ok);
+    if(! status) pending -> fingerprint = _compile_fingerprint(state, pending -> action, preprocessed, &(ok));
     unlink(pending -> preprocessed);
     pending -> preprocessed = NULL;
     if(status) return 1;
@@ -1586,7 +1586,7 @@ int Build_finish(Build b){
   String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_70), cons(String_var(_key(b -> output)), NULL)))) : NULL;
   if(String_truth(state_path) && ! b -> request -> dry_run && ! access(b -> output, R_OK)){
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, & ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &(ok));
     if(ok && _state_matches(state_path, hash)){
       if(b -> request -> verbose) fprintf(stderr, "x2c: up-to-date %s %s\n", Symbol_str(action -> phase), b -> output);
       b -> final_cached = 1;
@@ -1632,7 +1632,7 @@ int Build_finish(Build b){
   report_phase(action -> phase, input_count, noun, 0, report_now_us() - b -> final_at);
   if(String_truth(state_path)){
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, & ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &(ok));
     if(ok) _state_write(state_path, hash);
   }
   return 0;
@@ -1760,7 +1760,7 @@ x2c_exception_leave(& _x2c_exception_frame_8);
 String Env_get(String);
 
 static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites, int * ok){
-  uint64_t hash = _state_base(c, cc, ok);
+  uint64_t hash = _state_base(c, cc, &((* ok)));
   hash = _state_text(hash, _172);
   hash = _state_list(hash, c -> inputs);
   hash = _state_list(hash, c -> include_dirs);
@@ -1789,7 +1789,7 @@ static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites,
       path = Var_string(_x2c_macro_cursor_output_25);
       {
         if(! String_endswith(path, _133)){
-          hash = _state_file(hash, path, ok);
+          hash = _state_file(hash, path, &((* ok)));
           continue;
         }
         hash = _state_text(hash, path);
@@ -2000,7 +2000,7 @@ void Build_publish_script(Build b, String executable){
   List files = Array_list_free(prerequisites);
   List paths = List_append(files, Build__script_directories(b, files));
   int ok = 1;
-  uint64_t hash = _script_fingerprint(b -> request, b -> toolchain -> cc, paths, & ok);
+  uint64_t hash = _script_fingerprint(b -> request, b -> toolchain -> cc, paths, &(ok));
   if(ok && _files_unchanged(b, files)) _state_write_lines(String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_128), NULL))), hash, paths);
 }
 
@@ -2050,7 +2050,7 @@ x2c_exception_leave(& _x2c_exception_frame_9);
 }
 Toolchain toolchain = toolchain_new(c -> cc, c -> ar, c -> cpp_args, c -> cc_args, c -> ld_args, 0, 0);
 int ok = 1;
-uint64_t hash = _script_fingerprint(c, toolchain -> cc, List_cdr(lines), & ok);
+uint64_t hash = _script_fingerprint(c, toolchain -> cc, List_cdr(lines), &(ok));
 return ok && _state_matches(record, hash);
 }
 

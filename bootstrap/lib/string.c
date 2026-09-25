@@ -1385,9 +1385,9 @@ static inline int _hex_digit(int ch){
 }
 
 static inline int _decode_escape_char(const char * * psrc, int * emit){
-  const char * src = * psrc;
+  const char * src =(* psrc);
   int result = 0, esc =(unsigned char) * src ++;
-  * emit = 1;
+  (* emit) = 1;
   switch(esc){
     case 'a' : result = '\a';
     break;
@@ -1436,12 +1436,12 @@ static inline int _decode_escape_char(const char * * psrc, int * emit){
       break;
     }
     case '\n' : result = 0;
-    * emit = 0;
+    (* emit) = 0;
     break;
     default: result = esc;
     break;
   }
-  * psrc = src;
+  (* psrc) = src;
   return result;
 }
 
@@ -1500,7 +1500,7 @@ String String_unescape(String str){
       src ++;
       if(! * src) break;
       const char * cursor = src;
-      int emit, esc = _decode_escape_char(& cursor, & emit);
+      int emit, esc = _decode_escape_char(&(cursor), &(emit));
       if(esc > 0377){
         _free_unchecked(string);
         {
@@ -1599,7 +1599,7 @@ int String_parse_char(String str){
     s ++;
     if(! * s) return - 1;
     const char * cursor = s;
-    int emit, esc = _decode_escape_char(& cursor, & emit);
+    int emit, esc = _decode_escape_char(&(cursor), &(emit));
     if(! emit || esc > 0377) return - 1;
     value = esc;
     s = cursor;
