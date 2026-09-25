@@ -51,10 +51,10 @@ static void _configure_logging(int debugging) {
 
 // Emit collected diagnostics when the compiler has not already logged them.
 static void _report_diagnostics(Compiler compiler) {
-  report_suspend();
   Diagnostics diag = compiler ? compiler.diagnostics : NULL;
   if (!diag || diag.printer) return;
   List entries = compiler.diagnostics();
+  if (entries) report_suspend();
   foreach (Var entry, entries) compiler.print_diagnostic(entry);
 }
 

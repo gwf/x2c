@@ -2,12 +2,14 @@
 
 #include "report.h"
 
-static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _18, _17, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
@@ -15,7 +17,8 @@ static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3
 #include <unistd.h>
 #include "process.h"
 static struct ReportState{
-  int receipts, transient, color, columns, width;
+  int receipts, transient, color, columns, width, terminal, owner;
+  pid_t pid;
   unsigned long start, update;
 }
 report;
@@ -32,7 +35,9 @@ static const char * _color(Symbol tone);
 
 static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline);
 
-static int _clear(char * line, int capacity);
+static const char _clear[] = "\r\033[K";
+
+static int _own_line(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -54,8 +59,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _13 = String_new("MAKELEVEL");
   _14 = String_new("COLUMNS");
   _15 = String_new("NO_COLOR");
-  _16 = String_new(" (up to date)");
-  _17 = String_new("");
+  _17 = String_new(" (up to date)");
+  _18 = String_new("");
 }
 
 unsigned long report_now_us(void){
@@ -119,7 +124,7 @@ static int _columns(void){
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
   if(! _init_guard_) _file_init_();
   report =(struct ReportState){
-    0
+    .terminal = - 1, .pid = getpid()
   }
   ;
   int terminal = _terminal();
@@ -176,29 +181,29 @@ static void _emit(const char * prefix, int prefix_length, const char * color, co
 
 }
 
-static int _clear(char * line, int capacity){
-  if(! report.width) return 0;
-  int width = report.width;
-  if(width > capacity - 2) width = capacity - 2;
-  line[0] = '\r';
-  for(int i = 0;  i < width;  i ++) line[i + 1] = ' ';
-  line[width + 1] = '\r';
-  report.width = 0;
-  return width + 2;
+static int _own_line(void){
+  if(report.owner) return 1;
+  if(report.terminal == - 1){
+    char * path = ttyname(fileno(stderr));
+    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : - 1;
+    report.terminal = fd >= 0 ? fd : - 2;
+  }
+  report.owner = report.terminal >= 0 && ! flock(report.terminal, LOCK_EX | LOCK_NB);
+  return report.owner;
 }
 
 void report_suspend(void){
-  if(! report.width) return;
-  char clear[1002];
-  int length = _clear(clear, sizeof(clear));
-  _emit(clear, length, "", "", 0);
+  if(! report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
 }
 
 void report_line(Symbol tone, String line){
-  report_suspend();
+  report.width = 0;
   if(! report.receipts) return;
   const char * color = _color(tone);
-  _emit(NULL, 0, color, line, 1);
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, color, line, 1);
 }
 
 String String_capitalize(String);
@@ -212,6 +217,7 @@ void report_progress(Symbol phase, int done, int total, String detail){
   if(done >= total && ! report.width) return;
   if(report.update && now - report.update < 50000ul && done < total) return;
   report.update = now;
+  if(! _own_line()) return;
   enum{
     bar_width = 14
   }
@@ -231,10 +237,7 @@ void report_progress(Symbol phase, int done, int total, String detail){
     line[limit] = 0;
     length = limit;
   }
-  char clear[1002];
-  int clear_length = _clear(clear, sizeof(clear));
-  const char * color = _color(34081994);
-  _emit(clear, clear_length, color, line, 0);
+  _emit(_clear, sizeof(_clear) - 1, _color(34081994), line, 0);
   report.width = length;
 }
 
@@ -244,7 +247,7 @@ String int_str(int);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  String cache = cached == count && count ? _16 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : _17;
+  String cache = cached == count && count ? _17 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : _18;
   String name = String_capitalize(Symbol_str(phase));
   String duration = report_duration(microseconds);
   String line = String_join(NULL, cons(String_var(_9), cons(String_var(name), cons(String_var(_10), cons(String_var(int_str(count)), cons(String_var(_10), cons(String_var(noun), cons(String_var(_11), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
