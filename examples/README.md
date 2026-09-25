@@ -179,6 +179,8 @@ and file operations.
 
 [programs/mandelbrot.x](programs/mandelbrot.x) renders a deep zoom on native
 threads. [tours/language.x](tours/language.x) is a broader language tour;
+[tours/field-guide.x](tours/field-guide.x) builds one expedition log from
+native values through collections, structured data, recovery, and concurrency;
 [tours/hello-worlds.x](tours/hello-worlds.x) finds twelve ways to say hello.
 
 The [language shootout](shootout/README.md) keeps fourteen problems, each

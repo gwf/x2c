@@ -1,0 +1,15 @@
+day 1: Pine Loop (clear)
+state planned has index 0
+route: ( lookout lake ridge camp )
+next: ridge (5 mi); stops: 3
+water: 4; tent: none
+pack more water
+miles: 10; lake visits: 2; finish: 10
+adjusted: ( 3 8 11 )
+arrived: ridge after 5 miles; long legs: 2
+log: lake (2 mi)
+ridge (5 mi)
+camp (3 mi)
+estimated hours: 10; daylight: 6
+survey hours: 10
+Expedition complete.
