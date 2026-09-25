@@ -46,10 +46,10 @@ Public functions:
 
 `build_check_input`, `CliRequest.prepare`, `Build.generated_dir`,
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
-`Build.module_entry`, `Build.begin_translation`, `Build.end_translation`,
-`compile_commands_write`, `Build.finish`, `Build.report_success`,
-`Build.run_program`, `Build.cleanup`, `Build.script_helpers`,
-`Build.publish_script`, `CliRequest.script_current`
+`Build.module_entry`, `Build.extension_entries`, `Build.begin_translation`,
+`Build.end_translation`, `compile_commands_write`, `Build.finish`,
+`Build.report_success`, `Build.run_program`, `Build.cleanup`,
+`Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -306,7 +306,8 @@ Public functions:
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_declaration`,
 `Compiler.record_native_meta_effect`, `Compiler.native_module_loaded`,
 `Compiler.add_native_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.select_package_module`,
+`Compiler.preload_native_module`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.select_package_module`,
 `Compiler.select_native_modules`, `Compiler.supplies_native_meta`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
