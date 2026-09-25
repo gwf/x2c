@@ -468,12 +468,12 @@ static String _JsonReader__string(_JsonReader j){
   while(1){
     int byte = _JsonReader__peek(j);
     if(byte == '"'){
-      String text =(void *) decoded == NULL ? String_new_len(j -> text + run, j -> at - run) : Buffer_str_free(Buffer_write_len(decoded, j -> text + run, j -> at - run));
+      String text = decoded == NULL ? String_new_len(j -> text + run, j -> at - run) : Buffer_str_free(Buffer_write_len(decoded, j -> text + run, j -> at - run));
       j -> at ++;
       return text;
     }
     if(byte == '\\'){
-      if((void *) decoded == NULL) decoded = Buffer_new(0);
+      if(decoded == NULL) decoded = Buffer_new(0);
       Buffer_write_len(decoded, j -> text + run, j -> at - run);
       _JsonReader__escape(j, decoded);
       run = j -> at;

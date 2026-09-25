@@ -207,8 +207,8 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling){
       String name = Var_string(_x2c_match_value_0);
       {
         if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;
-        if(identity) * identity = Var_int(Var_convert(id, 3453797));
-        if(spelling) * spelling = name;
+        if(identity)(* identity) = Var_int(Var_convert(id, 3453797));
+        if(spelling)(* spelling) = name;
         return 1;
       }
 
@@ -225,7 +225,7 @@ return 0;
 String binding_identity_spelling(List binding){
   if(! _init_guard_) _file_init_();
   String spelling = NULL;
-  return binding_identity_try_parts(binding, NULL, & spelling) ? spelling : NULL;
+  return binding_identity_try_parts(binding, NULL, &(spelling)) ? spelling : NULL;
 }
 
 int String_startswith(String, String);

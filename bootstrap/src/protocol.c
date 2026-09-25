@@ -1244,7 +1244,7 @@ Var Map_setindex(Map, Var, Var);
 
 static String _path(Compiler compiler){
   Var cached;
-  if(Map_try_get(compiler -> protocol_helpers, Symbol_var(1166557139963152), & cached)) return Var_string(cached);
+  if(Map_try_get(compiler -> protocol_helpers, Symbol_var(1166557139963152), &(cached))) return Var_string(cached);
   String result = _normalize_file(compiler, String_truth(compiler -> filename) ? compiler -> filename : _951);
   Map_setindex(compiler -> protocol_helpers, Symbol_var(1166557139963152), String_var(result));
   return result;
@@ -1469,7 +1469,7 @@ static String _location_string(List location){
 }
 
 static List _adoption_row(Compiler compiler, Type base, Type participant, Symbol storage){
-  String path = _path(compiler);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  return Map_try_get(compiler -> adoptions, List_var(key), & stored) ? Var_list(stored) : NULL;
+  String path = _path(compiler);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  return Map_try_get(compiler -> adoptions, List_var(key), &(stored)) ? Var_list(stored) : NULL;
 }
 
 int String_equal(String, String);
@@ -1494,7 +1494,7 @@ int String_compare(String, String);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 String List_repr(List);
 static void Compiler__install_protocol_occurrence(Compiler c, Type base, List record, Symbol storage, List location){
-  String file = _canonical_file(c, location);  if(storage == 1317118534 && ! String_equal(file, _path(c))) return;  Var stored;  if(! Map_try_get(c -> protocols, List_var(base), & stored)){
+  String file = _canonical_file(c, location);  if(storage == 1317118534 && ! String_equal(file, _path(c))) return;  Var stored;  if(! Map_try_get(c -> protocols, List_var(base), &(stored))){
     Map_setindex(c -> protocols, List_var(base), List_var(_occurrence(record, storage, location)));  return;
   }
   List occurrence = Var_list(stored), existing = Var_list(List_car(occurrence));  if(List_equal(existing, record)){
@@ -1538,7 +1538,7 @@ void Compiler_rebuild_protocols(Compiler compiler, Map symbols){
 
 void Type_register_var_adoption(Type, Type, Symbol);
 static void Compiler__install_protocol_adoption(Compiler compiler, Type base, Type participant, Symbol storage, Type representation, Symbol tag, List tag_expression, List location){
-  String path = _canonical_file(compiler, location);  if(storage == 1317118534 && ! String_equal(path, _path(compiler))) return;  Type_register_var_adoption(participant, representation, tag);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  List row = _adoption_node(base, participant, storage, representation, tag_expression, location);  Var stored;  if(! Map_try_get(compiler -> adoptions, List_var(key), & stored)){
+  String path = _canonical_file(compiler, location);  if(storage == 1317118534 && ! String_equal(path, _path(compiler))) return;  Type_register_var_adoption(participant, representation, tag);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  List row = _adoption_node(base, participant, storage, representation, tag_expression, location);  Var stored;  if(! Map_try_get(compiler -> adoptions, List_var(key), &(stored))){
     Map_setindex(compiler -> adoptions, List_var(key), List_var(row));  return;
   }
   List existing = Var_list(stored);  if(List_equal(existing, row)) return;  List first_location = _adoption_location(existing);  if(String_equal(_canonical_file(compiler, first_location), path)) return;  String first = String_join(NULL, cons(String_var(_124), cons(String_var(_location_string(first_location)), NULL)));  String second = String_join(NULL, cons(String_var(_125), cons(String_var(_location_string(location)), NULL)));  String base_name = _type_spelling(base);  String participant_name = _type_spelling(participant);  String detail = String_join(NULL, cons(String_var(base_name), cons(String_var(_181), cons(String_var(participant_name), cons(String_var(_182), NULL)))));  Compiler_report_error(compiler, 1139215899608, String_join(NULL, cons(String_var(_183), cons(String_var(detail), NULL))), compiler -> token, cons(String_var(first), cons(String_var(second), NULL)));
@@ -1565,7 +1565,7 @@ String Compiler_reverse_converter_spelling(Compiler c, String base_name, String 
 
 static List Compiler__record(Compiler compiler, Type base){
   Var stored;
-  if(! Map_try_get(compiler -> protocols, List_var(base), & stored)) return NULL;
+  if(! Map_try_get(compiler -> protocols, List_var(base), &(stored))) return NULL;
   List occurrence = Var_list(stored);
   return Var_list(List_car(occurrence));
 }
@@ -1648,7 +1648,7 @@ static List Compiler__publish_protocol_adoption(Compiler c, Type base, Type part
   String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _954, spelling) : NULL;
   String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _955, spelling) : NULL;
   Var occurrence_value;
-  List occurrence = Map_try_get(c -> protocols, List_var(base), & occurrence_value) ? Var_list(occurrence_value) : NULL;
+  List occurrence = Map_try_get(c -> protocols, List_var(base), &(occurrence_value)) ? Var_list(occurrence_value) : NULL;
   int inferred_private = storage == 1317118534;
   if(c -> source_private >= 0) inferred_private = inferred_private || _lexically_private(c) ||(List_truth(occurrence) && _occurrence_storage(occurrence) == 1317118534) || _declaration_is_private(c, 1362954, spelling) ||(String_truth(forward) && _declaration_is_private(c, 4928588686, forward)) ||(String_truth(reverse) && _declaration_is_private(c, 4928588686, reverse)) ||(String_truth(alternate) && _declaration_is_private(c, 4928588686, alternate)) || private_native;
   if(inferred_private) storage = 1317118534;
@@ -1656,7 +1656,7 @@ static List Compiler__publish_protocol_adoption(Compiler c, Type base, Type part
     String path = _canonical_file(c, location);
     List key = cons(_192, cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))));
     Var previous;
-    if(Map_try_get(c -> protocol_helpers, List_var(key), & previous)){
+    if(Map_try_get(c -> protocol_helpers, List_var(key), &(previous))){
       List row = Var_list(previous);
       Type first_representation = _adoption_representation(row);
       List first_tag = _adoption_tag(row);
@@ -1786,7 +1786,7 @@ if(! String_truth(name)) return NULL;  return Map_contains(variables, String_var
 int Var_equal(Var, Var);
 static int _unify(Var pattern, Var actual, Map variables, Map bindings){
   String variable = _type_variable(pattern, variables);  if(String_truth(variable)){
-    Var bound;  if(! Map_try_get(bindings, String_var(variable), & bound)){
+    Var bound;  if(! Map_try_get(bindings, String_var(variable), &(bound))){
       Map_setindex(bindings, String_var(variable), actual);  return 1;
     }
     return Var_equal(bound, actual);
@@ -1869,11 +1869,11 @@ Type Type_base_type(Type);
 Type Type_canonicalize(Type);
 List List_search_replace(List, Var, Var);
 static Type _receiver_relative_signature(Compiler compiler, List binding, Type signature, Type receiver){
-  Var stored;  if(! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_324, cons(List_var(binding), NULL))), & stored)) return signature;  Type relative = Var_type(stored), base = Type_base_type(Type_canonicalize(receiver));  return List_type(({ static MatchCaptureSite _x2c_match_site_20;  x2c_match_site_search_replace(& _x2c_match_site_20, Type_list(relative), Symbol_var(1256204), List_car(Type_list(base))); }));
+  Var stored;  if(! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_324, cons(List_var(binding), NULL))), &(stored))) return signature;  Type relative = Var_type(stored), base = Type_base_type(Type_canonicalize(receiver));  return List_type(({ static MatchCaptureSite _x2c_match_site_20;  x2c_match_site_search_replace(& _x2c_match_site_20, Type_list(relative), Symbol_var(1256204), List_car(Type_list(base))); }));
 }
 
 String Compiler_imported_spelling(Compiler, String);
-List Sym_reference(Sym, List, List *);
+List Sym_reference(Sym, List, Type *);
 static Type _method_signature(Compiler compiler, Type owner, Type participant, String member, String * selected){
   if(! Type_is_bare_typedef_name(owner)) return NULL;  String source = _member_spelling(owner, member);  Type signature = _declared(compiler, source);  if(! List_truth(Type_list(signature))){
     String imported = Compiler_imported_spelling(compiler, source);  if(String_truth(imported)){
@@ -1967,7 +1967,7 @@ break;
 
 Map Map_copy(Map);
 static List Compiler__resolve_native_protocol_participant(Compiler c, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure){
-  (* failure) = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(c -> conforms, List_var(key), & stored)){
+  (* failure) = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(c -> conforms, List_var(key), &(stored))){
     if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, participant, List_cdr(Var_list(List_last(conformance))));  return conformance;
   }
   if(! Type_is_bare_typedef_name(participant) || ! List_truth(Type_list(participant_definition))){
@@ -2162,7 +2162,7 @@ return NULL;
 }
 
 static List Compiler__resolve_ordinary_protocol(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, List * failure){
-  (* failure) = NULL;  Var stored;  List key = cons(List_var(base), cons(List_var(participant), NULL));  if(Map_try_get(compiler -> conforms, List_var(key), & stored)) return Var_is_row(stored, 9, 7, 4) ? Var_list(stored) : NULL;  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) goto does_not_conform;  String forward = _forward_binding(compiler, base, participant);  String reverse = _reverse_binding(compiler, base, participant);  Map variables = NULL, bindings = NULL;  List rows = _resolve_members(compiler, base, binder, associations, templates, participant, &(variables), &(bindings));  List requirement = _ordinary_requirement(compiler, base, binder, rows, forward, reverse);  if(List_truth(requirement)){
+  (* failure) = NULL;  Var stored;  List key = cons(List_var(base), cons(List_var(participant), NULL));  if(Map_try_get(compiler -> conforms, List_var(key), &(stored))) return Var_is_row(stored, 9, 7, 4) ? Var_list(stored) : NULL;  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) goto does_not_conform;  String forward = _forward_binding(compiler, base, participant);  String reverse = _reverse_binding(compiler, base, participant);  Map variables = NULL, bindings = NULL;  List rows = _resolve_members(compiler, base, binder, associations, templates, participant, &(variables), &(bindings));  List requirement = _ordinary_requirement(compiler, base, binder, rows, forward, reverse);  if(List_truth(requirement)){
     (* failure) = requirement;  goto does_not_conform;
   }
   List conformance = cons(_370, cons(List_var(base), cons(List_var(participant), cons(String_var(forward), cons(String_var(reverse), cons(Map_var(variables), cons(Map_var(bindings), cons(List_var(cons(_212, List_append(rows, NULL))), NULL))))))));  Map_setindex(compiler -> conforms, List_var(key), List_var(conformance));  return conformance;  does_not_conform : Map_setindex(compiler -> conforms, List_var(key), int_var(0));  return NULL;
@@ -2383,7 +2383,7 @@ List Compiler_protocol_members_for(Compiler c, Type participant, Type base){
 }
 
 int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member){
-  if(! _init_guard_) _file_init_();  Type owner = Type_canonicalize(participant);  List cache_key = cons(_558, cons(List_var(owner), cons(String_var(member), NULL)));  Var cached;  if(Map_try_get(compiler -> proto_cache, List_var(cache_key), & cached)) return Var_int(Var_convert(cached, 3453797));  List protocols = _ordered_occurrences(compiler);  int rejects = 0; {
+  if(! _init_guard_) _file_init_();  Type owner = Type_canonicalize(participant);  List cache_key = cons(_558, cons(List_var(owner), cons(String_var(member), NULL)));  Var cached;  if(Map_try_get(compiler -> proto_cache, List_var(cache_key), &(cached))) return Var_int(Var_convert(cached, 3453797));  List protocols = _ordered_occurrences(compiler);  int rejects = 0; {
     Type ancestor;  List _x2c_macro_object_22 = _ancestry(compiler, owner);  List _x2c_macro_cursor_22 = _x2c_macro_object_22;  Var _x2c_macro_cursor_output_26;  while(List_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_26)){
       ancestor = Var_type(_x2c_macro_cursor_output_26); {
         List row = _member_row(compiler, protocols, ancestor, member);  if(List_truth(row)){
@@ -2496,7 +2496,7 @@ FuncArg FuncArg_value(Var);
 Var Compiler_var(Compiler);
 Var Func_apply(Func, unsigned, const FuncArg *);
 static List _proto_cached(Compiler compiler, Var key, Func compute){
-  Var cached;  if(Map_try_get(compiler -> proto_cache, key, & cached)) return Var_is_row(cached, 9, 7, 4) ? Var_list(cached) : NULL;  List result = Var_list(({
+  Var cached;  if(Map_try_get(compiler -> proto_cache, key, &(cached))) return Var_is_row(cached, 9, 7, 4) ? Var_list(cached) : NULL;  List result = Var_list(({
     Func _x2c_func_call_0 = compute;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(&(compiler), _584);  else _x2c_func_argument_0 = FuncArg_value(Compiler_var(compiler));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
       _x2c_func_argument_0
     }
@@ -2636,7 +2636,7 @@ String Compiler_protocol_update_helper(Compiler c, Type participant, String memb
   if(! _init_guard_) _file_init_();
   List key = cons(_638, cons(List_var(participant), cons(String_var(member), cons(int_var(postfix), NULL))));
   Var stored;
-  if(Map_try_get(c -> protocol_helpers, List_var(key), & stored)) return Var_string(stored);
+  if(Map_try_get(c -> protocol_helpers, List_var(key), &(stored))) return Var_string(stored);
   List resolved = Compiler_resolve_protocol_member(c, participant, member);
   if(! List_truth(resolved)) return NULL;
   List source_binding, source_type;
@@ -2673,7 +2673,7 @@ int Type_is_aggregate(Type);
 String int_str(int);
 List Type_parameter_ast(Type, List);
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which){
-  if(! _init_guard_) _file_init_();  List key = cons(_680, cons(String_var(stem), cons(int_var(which), NULL)));  Var stored;  if(Map_try_get(c -> protocol_helpers, List_var(key), & stored)) return Var_list(stored);  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  Type resolved_result = Sym_resolve_key(c -> sym, result);  long callee_identity =(long) binding;  int fresh = Map_contains(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_681), cons(String_var(long_str(callee_identity)), NULL)))));
+  if(! _init_guard_) _file_init_();  List key = cons(_680, cons(String_var(stem), cons(int_var(which), NULL)));  Var stored;  if(Map_try_get(c -> protocol_helpers, List_var(key), &(stored))) return Var_list(stored);  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  Type resolved_result = Sym_resolve_key(c -> sym, result);  long callee_identity =(long) binding;  int fresh = Map_contains(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_681), cons(String_var(long_str(callee_identity)), NULL)))));
   if(! fresh &&(Type_is_pointer(resolved_result) || Type_is_aggregate(resolved_result))) return NULL;
   Array declarations = Array_new(), arguments = Array_new(), discards = Array_new();
   int index = 0;
@@ -2795,7 +2795,7 @@ static List Compiler__generate_protocol_function(Compiler compiler, String name,
   List result = _adapter_result(compiler, call, template_result, target_result, variables);
   List function_binding = Sym_reference(compiler -> sym, cons(String_var(name), NULL), NULL);
   if(make_static) function_binding = Sym_introduce(compiler -> sym, name);
-  if(binding_out) * binding_out = function_binding;
+  if(binding_out)(* binding_out) = function_binding;
   List storage = make_static ? cons(_249, cons(_691, List_append(Type_list(target_result), NULL))) : Type_list(target_result);
   List function = cons(_21, cons(List_var(storage), cons(List_var(cons(_3, cons(List_var(function_binding), cons(List_var(cons(List_var(cons(_677, cons(List_var(cons(_678, List_append(declarations, NULL))), NULL))), NULL)), NULL)))), cons(List_var(cons(_675, cons(List_var(cons(_676, cons(List_var(target_result), cons(List_var(result), NULL)))), NULL))), NULL))));
   Array_free(parameter_bindings);
@@ -2805,7 +2805,7 @@ static List Compiler__generate_protocol_function(Compiler compiler, String name,
 static int _defines_function(Compiler compiler, String name){
   List binding = Sym_reference(compiler -> sym, cons(String_var(name), NULL), NULL);
   Var stored;
-  if(! List_truth(binding) || ! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_692, cons(List_var(binding), NULL))), & stored)) return 0;
+  if(! List_truth(binding) || ! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_692, cons(List_var(binding), NULL))), &(stored))) return 0;
   Symbol state = Var_symbol(List_car(Var_list(stored)));
   return state == 292902696930268 || state == 7656878481736;
 }
@@ -2978,7 +2978,7 @@ static List Compiler__generate_protocol_thunk(Compiler c, Type participant, Stri
     }
 
   }
-  Type target = _substitute_signature(template, variables, erased);  String participant_name = String_lower(Var_str(List_car(Type_list(participant))));  String thunk_name = Compiler_fresh_name(c, String_join(NULL, cons(String_var(_815), cons(String_var(participant_name), cons(String_var(_184), cons(String_var(member), NULL))))));  List thunk_binding = NULL;  List function = Compiler__generate_protocol_function(c, thunk_name, 1, target, expected, template, variables, binder, source, reverse, & thunk_binding);  if((String_equal(member, _779) || String_equal(member, _780) || String_equal(member, _816) || String_equal(member, _817)) && Type_is_aggregate(Sym_normalize_declared_type(c -> sym, participant))) function = _guard_value_rendering(c, function, member);  Compiler_add_early(c, function);  return cons(String_var(member), cons(List_var(thunk_binding), cons(List_var(target), NULL)));
+  Type target = _substitute_signature(template, variables, erased);  String participant_name = String_lower(Var_str(List_car(Type_list(participant))));  String thunk_name = Compiler_fresh_name(c, String_join(NULL, cons(String_var(_815), cons(String_var(participant_name), cons(String_var(_184), cons(String_var(member), NULL))))));  List thunk_binding = NULL;  List function = Compiler__generate_protocol_function(c, thunk_name, 1, target, expected, template, variables, binder, source, reverse, &(thunk_binding));  if((String_equal(member, _779) || String_equal(member, _780) || String_equal(member, _816) || String_equal(member, _817)) && Type_is_aggregate(Sym_normalize_declared_type(c -> sym, participant))) function = _guard_value_rendering(c, function, member);  Compiler_add_early(c, function);  return cons(String_var(member), cons(List_var(thunk_binding), cons(List_var(target), NULL)));
 }
 
 static void Compiler__generate_ordinary_protocol_adapters(Compiler c, Type base, Type participant, String forward, String reverse, Map variables, Map bindings, String binder, List rows, int central_initializer){
@@ -3077,7 +3077,7 @@ List Compiler_generate_protocol_adapters(Compiler c, List ast){
     }
   }
 if(native){
-            Var stored;  if(! Map_try_get(c -> protocol_helpers, List_var(cons(_2, cons(List_car(Type_list(participant)), NULL))), & stored)) continue;  List _x2c_destructure_13 = Var_list(stored);  List source = Var_list(List_getindex(_x2c_destructure_13, 0));  int private = Var_int(Var_convert(List_getindex(_x2c_destructure_13, 1), 3453797));  int make_static = _adoption_visibility(c, base, participant) == 1317118534;  Array aliases = Array_new(); {
+            Var stored;  if(! Map_try_get(c -> protocol_helpers, List_var(cons(_2, cons(List_car(Type_list(participant)), NULL))), &(stored))) continue;  List _x2c_destructure_13 = Var_list(stored);  List source = Var_list(List_getindex(_x2c_destructure_13, 0));  int private = Var_int(Var_convert(List_getindex(_x2c_destructure_13, 1), 3453797));  int make_static = _adoption_visibility(c, base, participant) == 1317118534;  Array aliases = Array_new(); {
               List row;  List _x2c_macro_object_49 = rows;  List _x2c_macro_cursor_49 = _x2c_macro_object_49;  Var _x2c_macro_cursor_output_55;  while(List_try_next(_x2c_macro_object_49, & _x2c_macro_cursor_49, & _x2c_macro_cursor_output_55)){
                 row = Var_list(_x2c_macro_cursor_output_55);
   {

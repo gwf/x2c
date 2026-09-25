@@ -64,9 +64,9 @@ void Block_free(Block);
 void Scope_free(void *);
 
 void Buffer_free(Buffer buf){
-  if((void *) buf == NULL) return;
-  if((void *) buf -> content != NULL) Block_free(buf -> content);
-  if((void *) buf -> indents != NULL) Block_free(buf -> indents);
+  if(buf == NULL) return;
+  if(buf -> content != NULL) Block_free(buf -> content);
+  if(buf -> indents != NULL) Block_free(buf -> indents);
   Scope_free(buf);
 }
 
@@ -75,7 +75,7 @@ void Block_move_to(Block, Scope *);
 void Scope_move(void *, Scope *);
 
 void Buffer_move_to(Buffer buf, Scope * scope){
-  if((void *) buf == NULL) return;
+  if(buf == NULL) return;
   Block_move_to(buf -> content, scope);
   Block_move_to(buf -> indents, scope);
   Scope_move(buf, scope);
@@ -302,7 +302,8 @@ size_t Buffer_tabstop(Buffer buf){
 }
 
 int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out){
-  if(! Buffer_truth(buf) || ! out) return 0;
+  if(! Buffer_truth(buf)) return 0;
+  if(! out) return 0;
   size_t normalized;
   if(index < 0){
     size_t distance =(size_t)(-(index + 1)) + 1;
@@ -313,13 +314,13 @@ int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out){
     normalized = index;
     if(normalized >= buf -> content -> length) return 0;
   }
-  * out =((char *) buf -> content -> bytes)[normalized];
+  (* out) =((char *) buf -> content -> bytes)[normalized];
   return 1;
 }
 
 char Buffer_get(Buffer buf, ptrdiff_t index){
   char out;
-  return Buffer_try_get(buf, index, & out) ? out : '\0';
+  return Buffer_try_get(buf, index, &(out)) ? out : '\0';
 }
 
 int Buffer_getindex(Buffer buf, int index){
@@ -338,7 +339,7 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 329};
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 330};
       x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
       __builtin_unreachable();
     }
@@ -381,7 +382,7 @@ String Buffer_repr(Buffer buf){
 }
 
 int Buffer_truth(Buffer b){
-  return(void *) b != NULL && b -> content -> length != 0;
+  return b != NULL && b -> content -> length != 0;
 }
 
 void Buffer_cleanup(Buffer value){

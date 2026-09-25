@@ -306,11 +306,11 @@ List Sym_get_exact(Sym sym, List key);
 
 List Sym_get(Sym sym, List key);
 
-List Sym_lookup(Sym sym, List key, List * type);
+List Sym_lookup(Sym sym, List key, Type * type);
 
-List Sym_reference(Sym sym, List key, List * type);
+List Sym_reference(Sym sym, List key, Type * type);
 
-List Sym_resolve_global(Sym sym, List key, List * type);
+List Sym_resolve_global(Sym sym, List key, Type * type);
 
 List Sym_reference_global(Sym sym, List key);
 

@@ -316,7 +316,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_26), NULL))) : NULL;
-  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, runtime, & text, & errors, & dependency_text);
+  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = text;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
@@ -533,7 +533,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
         name = Var_string(_x2c_macro_item_3);
         {
           Var function;
-          if(String_startswith(name, _65) && Lisp_try_get(shared, name, & function)) Compiler_bind_meta_operation(shared, name, function);
+          if(String_startswith(name, _65) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
         }
 
       }

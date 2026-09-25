@@ -695,7 +695,7 @@ Buffer Var_fallback_write_str(Var v, Buffer out){
 
 Buffer Var_write_str(Var v, Buffer out){
   if(! _init_guard_) _file_init_();
-  if((void *) out == NULL) return NULL;
+  if(out == NULL) return NULL;
   VarDescriptor * descriptor = _descriptor_for_value(v);
   if(descriptor && descriptor -> methods.write_str) return descriptor -> methods.write_str(v, out);
   if(descriptor && descriptor -> methods.str){
@@ -800,7 +800,7 @@ Buffer Var_fallback_write_repr(Var v, Buffer out){
 
 Buffer Var_write_repr(Var v, Buffer out){
   if(! _init_guard_) _file_init_();
-  if((void *) out == NULL) return NULL;
+  if(out == NULL) return NULL;
   VarDescriptor * descriptor = _descriptor_for_value(v);
   if(descriptor && descriptor -> methods.write_repr) return descriptor -> methods.write_repr(v, out);
   if(descriptor && descriptor -> methods.repr){

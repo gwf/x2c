@@ -601,7 +601,7 @@ int Map_try_get(Map map, Var key, Var * out){
 
 Var Map_get(Map map, Var key){
   Var out;
-  return Map_try_get(map, key, & out) ? out :((void) 0, Void);
+  return Map_try_get(map, key, &(out)) ? out :((void) 0, Void);
 }
 
 Var Map_getindex(Map map, Var key){
@@ -609,18 +609,18 @@ Var Map_getindex(Map map, Var key){
 }
 
 Var Map_get_hashed(Map map, Var key, unsigned key_hash){
-  if((void *) map == NULL) return((void) 0, Void);
+  if(map == NULL) return((void) 0, Void);
   long index = Map__core_find_hashed(map, & key, key_hash);
   return index < 0 ?((void) 0, Void) : * _record_value(map, (unsigned) index);
 }
 
 Var Map_getdefault(Map map, Var key, Var defval){
   Var val;
-  return Map_try_get(map, key, & val) ? val : defval;
+  return Map_try_get(map, key, &(val)) ? val : defval;
 }
 
 Var Map_setdefault(Map map, Var key, Var defval){
-  if((void *) map == NULL){
+  if(map == NULL){
     static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 269};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 0);
     __builtin_unreachable();
@@ -640,7 +640,7 @@ int Map_contains(Map m, Var key){
 }
 
 static void _set(Map map, Var key, Var val){
-  if((void *) map == NULL){
+  if(map == NULL){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "_set",.line = 287};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 0);
     __builtin_unreachable();
@@ -671,7 +671,7 @@ Symbol Var_tag(Var);
 Var Var_update(Var *, Symbol, Var);
 
 Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
-  if((void *) map == NULL){
+  if(map == NULL){
     static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 352};
     x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 0);
     __builtin_unreachable();
@@ -702,7 +702,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
 Var Var_postfix(Var *, Symbol);
 
 Var Map_postfixindex(Map map, Var key, Symbol op){
-  if((void *) map == NULL){
+  if(map == NULL){
     static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 376};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);
     __builtin_unreachable();
@@ -732,7 +732,7 @@ Var Map_del(Map map, Var key){
 }
 
 Map Map_update_n(Map map, unsigned pair_count, ...){
-  if((void *) map == NULL) return NULL;
+  if(map == NULL) return NULL;
   va_list ap;
   va_start(ap, pair_count);
   for(unsigned i = 0;  i < pair_count;  i ++){
@@ -750,7 +750,7 @@ Map Map_copy(Map map){
 void Block_move_to(Block, Scope *);
 
 void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope){
-  if((void *) map == NULL || ! export_value || ! scope) return;
+  if(map == NULL || ! export_value || ! scope) return;
   Bytes old_hashes = map -> hashes, old_entries = map -> entries;
   Bytes rebuilt_hashes = Bytes_new(sizeof(unsigned));
   Bytes rebuilt_entries = Bytes_new(sizeof(struct MapRecord));
@@ -852,8 +852,8 @@ void * Scope_malloc_in(Scope *, size_t);
 
 static int Map__core_compare(Map _x2c_macro_a_4, Map _x2c_macro_b_4){
   if((void *) _x2c_macro_a_4 ==(void *) _x2c_macro_b_4) return 0;
-  if((void *) _x2c_macro_a_4 == NULL) return - 1;
-  if((void *) _x2c_macro_b_4 == NULL) return 1;
+  if(_x2c_macro_a_4 == NULL) return - 1;
+  if(_x2c_macro_b_4 == NULL) return 1;
   unsigned _x2c_macro_asz_0 = _x2c_macro_a_4 -> used, _x2c_macro_bsz_0 = _x2c_macro_b_4 -> used;
   if(_x2c_macro_asz_0 != _x2c_macro_bsz_0) return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
   if(! _x2c_macro_asz_0) return 0;
@@ -976,7 +976,7 @@ Map Var_map(Var);
 
 static int _next(Iter iter, Var * out){
   Map map = Var_map(iter -> obj);
-  if((void *) map == NULL) return 0;
+  if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
   if(! Map_try_next(map, & cursor, & key, & val)) return 0;
@@ -987,7 +987,7 @@ static int _next(Iter iter, Var * out){
 
 static int _keys_next(Iter iter, Var * out){
   Map map = Var_map(iter -> obj);
-  if((void *) map == NULL) return 0;
+  if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
   if(! Map_try_next(map, & cursor, & key, & val)) return 0;
@@ -1000,7 +1000,7 @@ Var List_var(List);
 
 static int _enumerate_next(Iter iter, Var * out){
   Map map = Var_map(iter -> obj);
-  if((void *) map == NULL) return 0;
+  if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
   if(! Map_try_next(map, & cursor, & key, & val)) return 0;

@@ -895,15 +895,15 @@ Var Map_setindex(Map, Var, Var);
 Symbol String_symbol(String);
 String String_lower(String);
 void Type_register_var_tag(Type t, String name, String converter){
-  if(! _init_guard_) _file_init_();  if((void *) declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){
-  if(! _init_guard_) _file_init_();  if((void *) declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(tag), cons(List_cadr(Var_list(row)), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(tag), cons(List_cadr(Var_list(row)), NULL))));
 }
 
 String Type_var_converter(Type type){
-  if(! _init_guard_) _file_init_();  if((void *) declared_typetags == NULL || ! List_truth(Type_list(type))) return NULL;  Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(Var_is_void(row)) return NULL;  return Var_string(List_cadr(Var_list(row)));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return NULL;  Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(Var_is_void(row)) return NULL;  return Var_string(List_cadr(Var_list(row)));
 }
 
 Symbol Type_fixed_var_tag(Type type){
@@ -911,7 +911,7 @@ Symbol Type_fixed_var_tag(Type type){
 }
 
 Symbol Type_var_tag(Type type){
-  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type))) return 0;  if((void *) declared_typetags != NULL){
+  if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type))) return 0;  if(declared_typetags != NULL){
     Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(! Var_is_void(row)) return Var_symbol(List_car(Var_list(row)));
   }
   return Type_fixed_var_tag(type);

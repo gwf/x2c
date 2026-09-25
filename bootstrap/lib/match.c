@@ -2439,14 +2439,14 @@ static void _site_unlock(void){
 
 static void _capture_sites_shutdown(void){
   if(! match_capture_site_scope) return;
-  MatchCaptureSite * * sites =(void *) match_capture_sites != NULL ? match_capture_sites -> bytes : NULL;
+  MatchCaptureSite * * sites = match_capture_sites != NULL ? match_capture_sites -> bytes : NULL;
   for(size_t i = 0;  i < match_capture_sites -> length;  i ++){
     MatchCaptureSite * site = sites[i];
     if(! site || ! site -> plan) continue;
     MatchPlan_free(site -> plan);
     site -> plan = NULL;
   }
-  if((void *) match_capture_sites != NULL) Block_free(match_capture_sites);
+  if(match_capture_sites != NULL) Block_free(match_capture_sites);
   Scope_destroy(match_capture_site_scope);
   match_capture_site_scope = NULL;
 }

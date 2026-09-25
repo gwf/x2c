@@ -699,7 +699,7 @@ void Compiler_define_match_binders(Compiler, List);
 
 static void _define_pattern_binders(Compiler compiler, List pattern, Token start, String role){
   List possible = NULL;
-  List definite = Compiler_match_pattern_binders(compiler, pattern, & possible);
+  List definite = Compiler_match_pattern_binders(compiler, pattern, &(possible));
   {
     Var binder;
     List _x2c_macro_object_3 = possible;
@@ -1065,14 +1065,14 @@ int Map_try_get(Map, Var, Var *);
 
 Map Compiler_semantic_binding_facts(Compiler);
 
-List Sym_lookup(Sym, List, List *);
+List Sym_lookup(Sym, List, Type *);
 
 int List_equal(List, List);
 
 List Compiler_with_binding(Compiler c){
   if(! _init_guard_) _file_init_();
   Var candidate;
-  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(c -> token -> text), NULL))), & candidate)) return NULL;
+  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(c -> token -> text), NULL))), &(candidate))) return NULL;
   List binding = Sym_lookup(c -> sym, cons(String_var(c -> token -> text), NULL), NULL);
   return List_equal(binding, Var_list(candidate)) ? binding : NULL;
 }
@@ -1158,7 +1158,7 @@ List Compiler_parse_statement(Compiler c){
   default: break;
     }
   }
-Sym_push_new_scope(c -> sym);  List binding = Sym_define(c -> sym, cons(String_var(alias), NULL), type);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_182, cons(List_var(binding), NULL))), List_var(expression));  Var old_with;  int had_previous_with = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(alias), NULL))), & old_with);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(alias), NULL))), List_var(binding));  List body = NULL; {
+Sym_push_new_scope(c -> sym);  List binding = Sym_define(c -> sym, cons(String_var(alias), NULL), type);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_182, cons(List_var(binding), NULL))), List_var(expression));  Var old_with;  int had_previous_with = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(alias), NULL))), &(old_with));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_172, cons(String_var(alias), NULL))), List_var(binding));  List body = NULL; {
     {
   _x2c_defer_env_3 _x2c_defer_env_16 = {._x2c_defer_capture_5 =(const void *) & c, ._x2c_defer_capture_6 =(const void *) & binding, ._x2c_defer_capture_7 =(const void *) & had_previous_with, ._x2c_defer_capture_8 =(const void *) & alias, ._x2c_defer_capture_9 =(const void *) & old_with};
 

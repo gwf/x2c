@@ -995,7 +995,7 @@ int Map_try_get(Map, Var, Var *);
 static Var _effect(Walk w, String name){
   if(! w -> audit) return Map_getindex(runtime, String_var(name));
   Var effect;
-  return Map_truth(w -> effects) && Map_try_get(w -> effects, String_var(name), & effect) ? effect : Map_getindex(runtime, String_var(name));
+  return Map_truth(w -> effects) && Map_try_get(w -> effects, String_var(name), &(effect)) ? effect : Map_getindex(runtime, String_var(name));
 }
 
 List Var_list(Var);
@@ -1203,17 +1203,17 @@ static Fact _fact_of(Walk w, Var expression, List * named){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 19147688: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-    if(named) * named = Var_list(binding);  Var found = Map_getindex(w -> facts, binding);  return Var_is_void(found) ? NULL : Var_fact(found);
+    if(named)(* named) = Var_list(binding);  Var found = Map_getindex(w -> facts, binding);  return Var_is_void(found) ? NULL : Var_fact(found);
   }
   break;
 }
 case 992: ;  static MatchCaptureSite _x2c_match_site_14;  if (x2c_match_site_try_capture(& _x2c_match_site_14, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return _borrow(w, place, named);  break;
 }
 static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_458), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1]; {
-  List yes_name = NULL, no_name = NULL;  Fact fact = _fact_of(w, yes, & yes_name);  Fact other = _fact_of(w, no, & no_name);  if(other &&(! fact ||((other -> region || other -> other) && ! fact -> region && ! fact -> other))){
+  List yes_name = NULL, no_name = NULL;  Fact fact = _fact_of(w, yes, &(yes_name));  Fact other = _fact_of(w, no, &(no_name));  if(other &&(! fact ||((other -> region || other -> other) && ! fact -> region && ! fact -> other))){
     fact = other;  yes_name = no_name;
   }
-  if(named && fact) * named = yes_name;  return fact;
+  if(! fact) return NULL;  if(named)(* named) = yes_name;  return fact;
 }
 break;
 }
@@ -1368,7 +1368,7 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target){
 default: break;
     }
   }
-List named = NULL;  Fact fact = _value_fact(w, value, & named);  if(! fact) fact = _returned_argument(w, value, & named);  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, &(born), &(other));  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
+List named = NULL;  Fact fact = _value_fact(w, value, &(named));  if(! fact) fact = _returned_argument(w, value, &(named));  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, &(born), &(other));  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
   Var row = Symbol_var(sink);  if(sink == 534624){
     if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_257, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
   }
@@ -1448,7 +1448,10 @@ return NULL;
 }
 
 static Fact _borrow(Walk w, Var place, List * named){
-  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, &(through));  if(! base) return NULL;  if(named && ! List_truth(* named)) * named = _root(place);  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  borrow -> other = through ? base -> other : NULL;  borrow -> born = through ? base -> born : 0;  if(through) borrow -> param = base -> param;  return borrow;
+  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, &(through));  if(! base) return NULL;  if(named){
+    if(! List_truth((* named)))(* named) = _root(place);
+  }
+  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  borrow -> other = through ? base -> other : NULL;  borrow -> born = through ? base -> born : 0;  if(through) borrow -> param = base -> param;  return borrow;
 }
 
 static List _root(Var place){
@@ -1523,7 +1526,7 @@ static void _scan_call(Walk w, Var call, String callee, List arguments){
 }
 
 static void _end(Walk w, Var argument, String op, Symbol how){
-  List named = NULL;  Fact storage = _value_fact(w, argument, & named);  int literal = 0;
+  List named = NULL;  Fact storage = _value_fact(w, argument, &(named));  int literal = 0;
   {
     List _x2c_match_expr = Var_list(_unwrap(argument));
     MatchCaptureBuffer _x2c_match_capture = { 0 };

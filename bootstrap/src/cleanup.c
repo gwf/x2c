@@ -851,7 +851,7 @@ int Map_try_get(Map, Var, Var *);
 int List_len(List);
 List List_cdr(List);
 static int _goto_stop(Walk walk, Var label){
-  String name = _label_spelling(label);  Var stored;  if(! String_truth(name) || ! Map_try_get(walk -> labels, String_var(name), & stored)){
+  String name = _label_spelling(label);  Var stored;  if(! String_truth(name) || ! Map_try_get(walk -> labels, String_var(name), &(stored))){
     _report_at(walk, walk -> origin, _384, NULL);  return(int) Array_len(walk -> regions);
   }
   List target = Var_list(stored), source = _region_path(walk);  int source_depth = List_len(source), target_depth = List_len(target);  List suffix = source;  for(int i = source_depth;  i > target_depth && List_truth(suffix);  i --) suffix = List_cdr(suffix);  if(target_depth > source_depth || suffix != target){
@@ -890,7 +890,7 @@ int Type_is_static(Type);
 int Type_is_extern(Type);
 int Type_is_threaded(Type);
 static int _automatic_static_input(Compiler c, List binding){
-  Var automatic, stored;  Map facts = Compiler_semantic_binding_facts(c);  if(! Map_try_get(facts, List_var(cons(_117, cons(List_var(binding), NULL))), & automatic) || ! Var_truth(automatic)) return 0;  if(! Map_try_get(facts, List_var(cons(_24, cons(List_var(binding), NULL))), & stored)) return 1;  Type type = Var_type(stored);  return ! Type_is_static(type) && ! Type_is_extern(type) && ! Type_is_threaded(type);
+  Var automatic, stored;  Map facts = Compiler_semantic_binding_facts(c);  if(! Map_try_get(facts, List_var(cons(_117, cons(List_var(binding), NULL))), &(automatic)) || ! Var_truth(automatic)) return 0;  if(! Map_try_get(facts, List_var(cons(_24, cons(List_var(binding), NULL))), &(stored))) return 1;  Type type = Var_type(stored);  return ! Type_is_static(type) && ! Type_is_extern(type) && ! Type_is_threaded(type);
 }
 
 static int _runtime_sizeof_dimensions(Compiler c, List operand, Map runtime){

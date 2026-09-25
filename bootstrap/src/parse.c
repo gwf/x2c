@@ -1336,7 +1336,7 @@ int Compiler_test(Compiler, Symbol);
 String Compiler_imported_spelling(Compiler, String);
 
 static List _complex_identifier(Compiler c, List * method_identity){
-  if(method_identity) * method_identity = NULL;
+  if(method_identity)(* method_identity) = NULL;
   String ident = _package_alias_member(c);
   Symbol toktype = c -> token -> type;
   if(! String_truth(ident) && toktype == 19147688 && ! method_identity) ident = Compiler_package_member_spelling(c, c -> token -> text);
@@ -1348,7 +1348,7 @@ static List _complex_identifier(Compiler c, List * method_identity){
       if(String_is_identifier(c -> token -> text)){
         String owner = ident, member = c -> token -> text;
         ident = String_join(NULL, cons(String_var(owner), cons(String_var(_4), cons(String_var(member), NULL))));
-        if(method_identity) * method_identity = cons(String_var(owner), cons(String_var(member), NULL));
+        if(method_identity)(* method_identity) = cons(String_var(owner), cons(String_var(member), NULL));
         if(! method_identity && ! List_truth(Sym_get_exact(c -> sym, cons(String_var(ident), NULL)))){
           String imported = Compiler_imported_spelling(c, ident);
           if(String_truth(imported)) ident = imported;
@@ -1424,11 +1424,11 @@ return NULL;
 int Map_try_get(Map, Var, Var *);
 Map Compiler_semantic_binding_facts(Compiler);
 static List _method_self_signature(Compiler compiler, List binding){
-  Var stored;  return Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), & stored) ? Var_list(stored) : NULL;
+  Var stored;  return Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_25, cons(List_var(binding), NULL))), &(stored)) ? Var_list(stored) : NULL;
 }
 
 static List _method_identity(Compiler compiler, List binding){
-  Var stored;  return Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))), & stored) ? Var_list(stored) : NULL;
+  Var stored;  return Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_26, cons(List_var(binding), NULL))), &(stored)) ? Var_list(stored) : NULL;
 }
 
 Var List_car(List);
@@ -1447,7 +1447,7 @@ static void _lower_parameter_self(Compiler compiler, Var replacement){
     Var key, value;  Map _x2c_macro_object_0 = symbols;  unsigned _x2c_macro_cursor_0 = 0;  Var _x2c_macro_cursor_output_0;  Var _x2c_macro_cursor_output_1;  while(Map_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
       key = _x2c_macro_cursor_output_0;  value = _x2c_macro_cursor_output_1; {
         List original = Var_list(value);  List lowered =({ static MatchCaptureSite _x2c_match_site_2;  x2c_match_site_search_replace(& _x2c_match_site_2, original, Symbol_var(1256204), replacement); });  if(! List_equal(lowered, original)){
-          Map_setindex(symbols, key, List_var(lowered));  Var binding;  if(Map_try_get(compiler -> params.bindings, key, & binding)) Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_14, cons(binding, NULL))), List_var(lowered));
+          Map_setindex(symbols, key, List_var(lowered));  Var binding;  if(Map_try_get(compiler -> params.bindings, key, &(binding))) Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_14, cons(binding, NULL))), List_var(lowered));
         }
 
       }
@@ -1595,7 +1595,7 @@ static List _finish_declaration(Compiler compiler, Symbol tag, List base, List d
 int String_equal(String, String);
 int Var_equal(Var, Var);
 static int _attribute_starts(Compiler c){
-  Var definition;  return Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81 &&(String_equal(c -> token -> text, _41) ||(Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition) && Var_equal(definition, Symbol_var(102150700288988))));
+  Var definition;  return Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 81 &&(String_equal(c -> token -> text, _41) ||(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) && Var_equal(definition, Symbol_var(102150700288988))));
 }
 
 Token Token_group_close(Token);
@@ -1607,7 +1607,7 @@ static String _attribute(Compiler c){
 
 static void _skip_aggregate_attributes(Compiler c){
   if(! c -> shallow) return;  while(1){
-    Var definition;  if(String_truth(_attribute(c))) continue;  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition) || ! Var_equal(definition, List_var(NULL))) return;  Compiler_next(c);
+    Var definition;  if(String_truth(_attribute(c))) continue;  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) || ! Var_equal(definition, List_var(NULL))) return;  Compiler_next(c);
   }
 
 }
@@ -1620,7 +1620,7 @@ static int _unseen_prefix(Compiler c){
 
 Iter Var_iter(Var, Iter);
 static int _prefix_macro_words(Compiler c, int rank, Array words){
-  Var definition;  if(Compiler_peek(c, 0) != 19147688) return 0;  if(! Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition)){
+  Var definition;  if(Compiler_peek(c, 0) != 19147688) return 0;  if(! Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition))){
     if(rank || ! _unseen_prefix(c)) return 0;  Compiler_next(c);  return 1;
   }
   if(Var_equal(definition, Symbol_var(50603262308)) && Compiler_peek(c, 1) == 81){
@@ -2018,7 +2018,7 @@ static List _struct_or_union(Compiler c){
 Var Compiler_evaluate_macro_slot(Compiler, Var);
 List Compiler_resolve_expression(Compiler, List, Token);
 Symbol Sym_enumerator_owner(Sym, List);
-List Sym_lookup(Sym, List, List *);
+List Sym_lookup(Sym, List, Type *);
 List Type_declaration_ast(Type, List);
 void Sym_declare_enumerator(Sym, List, Symbol);
 static List _publish_enumerator(Compiler compiler, List input, Type context, Token origin){
@@ -2302,7 +2302,7 @@ static List _direct_declarator(Compiler c, Type context, List * method_identity,
     }
 
   }
-  if(! String_is_identifier(c -> token -> text)) return _205;  Token first = c -> token;  List ident = _complex_identifier(c, &(* method_identity)); (* source_first) = first; (* source_after) = c -> token;  return cons(_27, cons(List_var(ident), _179));
+  if(! String_is_identifier(c -> token -> text)) return _205;  Token first = c -> token;  List ident = _complex_identifier(c, &((* method_identity))); (* source_first) = first; (* source_after) = c -> token;  return cons(_27, cons(List_var(ident), _179));
 }
 
 Type Type_base_type(Type);
@@ -2388,7 +2388,7 @@ static int _test_declaration_start(Compiler c, int require_declarator){
     }
     return Compiler_macro_lisp_starts_declaration(c);
   }
-  if(Symbol_is_storage_class(sym) || Symbol_is_type_qualifier(sym) || Symbol_is_builtin_type(sym) || sym == 634145674) return 1;  if(sym != 19147688) return 0;  if(String_equal(c -> token -> text, _41) && _attribute_starts(c)) return 1;  Var definition;  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition) &&(Var_is_row(definition, 9, 7, 4) || Var_equal(definition, Symbol_var(50603262308)))) return 1;  Token head = c -> token;  String alias = Compiler_package_alias_spelling(c);  String name = String_truth(alias) ? alias : Compiler_package_member_spelling(c, c -> token -> text);  Type lookup = List_type(Sym_get(c -> sym, cons(String_var(String_truth(name) ? name : c -> token -> text), NULL)));  if(List_truth(Type_list(lookup)) && ! Type_is_typedef(lookup)) return 0;  Compiler_next(c);  if(String_truth(alias)){
+  if(Symbol_is_storage_class(sym) || Symbol_is_type_qualifier(sym) || Symbol_is_builtin_type(sym) || sym == 634145674) return 1;  if(sym != 19147688) return 0;  if(String_equal(c -> token -> text, _41) && _attribute_starts(c)) return 1;  Var definition;  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || Var_equal(definition, Symbol_var(50603262308)))) return 1;  Token head = c -> token;  String alias = Compiler_package_alias_spelling(c);  String name = String_truth(alias) ? alias : Compiler_package_member_spelling(c, c -> token -> text);  Type lookup = List_type(Sym_get(c -> sym, cons(String_var(String_truth(name) ? name : c -> token -> text), NULL)));  if(List_truth(Type_list(lookup)) && ! Type_is_typedef(lookup)) return 0;  Compiler_next(c);  if(String_truth(alias)){
     Compiler_next(c);  Compiler_next(c);
   }
   Symbol next = Compiler_peek(c, 0);  int is_operator = next == 19147688 && String_equal(c -> token -> text, _216);  int attribute = _attribute_starts(c);  c -> token = head;  if(Map_truth(c -> macro_holes) && is_operator) return 0;  if(Type_is_typedef(lookup) && ! require_declarator) return next != 93;  return next == 54 || next == 77 ||(next == 19147688 && ! attribute) ||(! require_declarator && next == 83) ||(require_declarator &&(next == 189 || Symbol_is_type_qualifier(next)));
@@ -2877,7 +2877,7 @@ Token Compiler_take_meta_marker(Compiler c, int * native){
   if(! _init_guard_) _file_init_();  Token meta = c -> token;  Compiler_next(c);  Token after = c -> token;  int marked = Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _335);  if(marked){
     Compiler_next(c);  Token declaration = c -> token;  marked = Compiler_test_declaration(c);  c -> token = marked ? declaration : after;
   }
-  if(native) * native = marked;  return meta;
+  if(native)(* native) = marked;  return meta;
 }
 
 int Compiler_keyword_form_is_definition(Compiler);
@@ -2906,7 +2906,7 @@ int Compiler_skip_linkage_brace(Compiler c){
 
 Var long_var(long);
 static void _track_conditional_arms(Compiler c){
-  Token base = c -> tokenizer -> tokens;  Var stack;  for(Token token = c -> token - 1;  token >= base &&(token -> type == 40896714 || token -> type == 7477210024 || token -> type == 35579270086);  token --) if(Map_try_get(c -> arm_stacks, long_var((long)(token - base)), & stack)){
+  Token base = c -> tokenizer -> tokens;  Var stack;  for(Token token = c -> token - 1;  token >= base &&(token -> type == 40896714 || token -> type == 7477210024 || token -> type == 35579270086);  token --) if(Map_try_get(c -> arm_stacks, long_var((long)(token - base)), &(stack))){
     c -> arms = Var_list(stack);  return;
   }
 
@@ -2963,7 +2963,7 @@ List Compiler_parse_top_level(Compiler c){
     }
     case 129 : Compiler_report_error(c, 33658058, _875, c -> token, _348);
   }
-  if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, & native);  Token definition_start = c -> token;  List decl = Compiler_parse_declaration_row(c);  if(native && ! Type_is_function(List_type_from_ast(decl))) Compiler_report_error(c, 33658058, _876, meta, NULL);  if(Compiler_test(c, 119)){
+  if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, &(native));  Token definition_start = c -> token;  List decl = Compiler_parse_declaration_row(c);  if(native && ! Type_is_function(List_type_from_ast(decl))) Compiler_report_error(c, 33658058, _876, meta, NULL);  if(Compiler_test(c, 119)){
     if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta) Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  return decl;
   }
   if(Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c)){

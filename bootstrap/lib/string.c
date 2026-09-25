@@ -198,7 +198,7 @@ static int _is_active_canonical(String str){
 void Pool_free(Pool, void *);
 
 static void _free_unchecked(String str){
-  if((void *) str != NULL) Pool_free(Pool_current(), _header(str));
+  if(str != NULL) Pool_free(Pool_current(), _header(str));
 }
 
 static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
@@ -226,7 +226,7 @@ int Var_is_void(Var);
 String Var_string(Var);
 
 void String_free(String str){
-  if((void *) str == NULL) return;
+  if(str == NULL) return;
   if(! _header(str) -> hash){
     _free_unchecked(str);
     return;
@@ -244,7 +244,7 @@ int String_len(String str){
 void Pool_insert(Pool, Var);
 
 static String _intern_owned(String string){
-  if((void *) string == NULL || ! * string) return NULL;
+  if(string == NULL || ! * string) return NULL;
   StringHeader header = _header(string);
   if(! header -> hash){
     int length = strlen(string);
@@ -263,7 +263,7 @@ String String_intern(String string){
 }
 
 String String_intern_free(String string){
-  if((void *) string == NULL) return NULL;
+  if(string == NULL) return NULL;
   if(! * string){
     _free_unchecked(string);
     return NULL;
@@ -913,7 +913,7 @@ String String_join(String sep, List strings){
     }
 
   }
-  if((void *) string != NULL) return _finish(string, (int) total);
+  if(string != NULL) return _finish(string, (int) total);
   return _from_bytes(stack_bytes, (int) total);
 }
 

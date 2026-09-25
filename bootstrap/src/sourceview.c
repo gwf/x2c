@@ -262,7 +262,7 @@ Var Symbol_var(Symbol);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;
-  if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), & value)){
+  if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), &(value))){
     (* text) = Var_string(value);
     return 1;
   }

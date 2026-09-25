@@ -1837,14 +1837,14 @@ static List _protocol_update(Compiler c, Type type, Symbol op, List arg, List * 
     List _x2c_match_expr = resolved;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_353), &_x2c_match_capture)) {Var parameter = _x2c_match_values[0];  converted = Compiler_convert_expression(c, * rhs, Var_type(parameter));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_353), &_x2c_match_capture)) {Var parameter = _x2c_match_values[0];  converted = Compiler_convert_expression(c, (* rhs), Var_type(parameter));  break;
   }
 
     }
   }
-if(! List_truth(converted)) return NULL;  * rhs = converted;
+if(! List_truth(converted)) return NULL; (* rhs) = converted;
 }
-String helper = Compiler_protocol_update_helper(c, type, member_name, ! rhs);  if(! String_truth(helper)) return NULL;  List spell = _symbol_expression(spelled);  if(! rhs) return cons(_354, cons(List_var(arg), cons(List_var(spell), cons(String_var(helper), NULL))));  List value = * rhs;  return cons(_355, cons(List_var(arg), cons(List_var(spell), cons(List_var(value), cons(String_var(helper), NULL)))));
+String helper = Compiler_protocol_update_helper(c, type, member_name, ! rhs);  if(! String_truth(helper)) return NULL;  List spell = _symbol_expression(spelled);  if(! rhs) return cons(_354, cons(List_var(arg), cons(List_var(spell), cons(String_var(helper), NULL))));  List value =(* rhs);  return cons(_355, cons(List_var(arg), cons(List_var(spell), cons(List_var(value), cons(String_var(helper), NULL)))));
 }
 
 int Type_is_bitfield(Type);
@@ -1858,7 +1858,7 @@ static List _dynamic_compound(Compiler c, List ast, Symbol op, List lhs, List rh
     if(op != 56 || ! _string_operand(c, rhs_type)) Compiler_report_error(c, 50756762, _885, NULL, NULL);  member_type = List_type(_40);
   }
   if(! lhs_is_var){
-    List updated = _protocol_update(c, member_type, op, lhs, & rhs, op);  if(List_truth(updated)) return updated; {
+    List updated = _protocol_update(c, member_type, op, lhs, &(rhs), op);  if(List_truth(updated)) return updated; {
       List _x2c_destructure_14 = rhs;  rhs_tag = List_getindex(_x2c_destructure_14, 0);  rhs_type = Var_type(List_getindex(_x2c_destructure_14, 1));
     }
 
@@ -1902,7 +1902,7 @@ break;
 }
 static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_415), &_x2c_match_capture)) {Var operator = _x2c_match_values[0];  Var argument = _x2c_match_values[1];  Var argument_type = _x2c_match_values[2]; {
   Type type = Var_type(argument_type);  List arg = Var_list(argument);  List indexed = _indexed_prefix(c, arg, Var_symbol(operator));  if(List_truth(indexed)) return indexed;  if(! Sym_is_var_type(c -> sym, type)){
-    Symbol binary = Var_equal(operator, Symbol_var(1848)) ? 56 : 62;  List one = _337;  List updated = _protocol_update(c, type, binary, arg, & one, binary);  if(List_truth(updated)) return updated;
+    Symbol binary = Var_equal(operator, Symbol_var(1848)) ? 56 : 62;  List one = _337;  List updated = _protocol_update(c, type, binary, arg, &(one), binary);  if(List_truth(updated)) return updated;
   }
   if(Sym_is_var_type(c -> sym, type)){
     List one = _337;  one = Compiler_convert_expression(c, one, List_type(_2));  Symbol binary = Var_equal(operator, Symbol_var(1848)) ? 56 : 62;  return cons(_355, cons(List_var(arg), cons(List_var(_symbol_expression(binary)), cons(List_var(one), _418))));
@@ -2000,7 +2000,7 @@ static List _append(Compiler compiler, List ast){
 
 String Var_string(Var);
 String String_escape(String);
-List Sym_reference(Sym, List, List *);
+List Sym_reference(Sym, List, Type *);
 static List _process_raw_segment(Compiler compiler, List seg){
   String raw = Var_string(List_cadr(seg)), literal = String_join(NULL, cons(String_var(_495), cons(String_var(String_escape(raw)), cons(String_var(_495), NULL))));  List constructor = Sym_reference(compiler -> sym, _498, NULL);  return cons(_3, cons(_41, cons(List_var(cons(_11, cons(List_var(cons(_3, cons(_507, cons(List_var(cons(_12, cons(List_var(constructor), NULL))), NULL)))), cons(List_var(cons(_13, cons(List_var(cons(_3, cons(_500, cons(List_var(cons(_216, cons(String_var(literal), NULL))), NULL)))), NULL))), NULL)))), NULL)));
 }
@@ -2037,7 +2037,7 @@ Array values = Array_new(); {
 int segment_count = Array_len(values);  List segments = Array_list_free(values);  if(segment_count <= 128){
   segments = _build_cons_list(segments);  return cons(_528, cons(List_var(cons(_3, cons(_217, cons(List_var(segments), NULL)))), _531));
 }
-String count = String_join(NULL, cons(String_var(int_str(segment_count)), cons(String_var(_532), NULL)));  Type signature = NULL;  List binding = Sym_reference(compiler -> sym, _535, & signature);  List list = cons(_3, cons(_217, cons(List_var(cons(_11, cons(List_var(cons(_3, cons(List_var(signature), cons(List_var(cons(_12, cons(List_var(binding), NULL))), NULL)))), cons(List_var(cons(_13, cons(List_var(cons(_3, cons(_536, cons(List_var(cons(_216, cons(_536, cons(String_var(count), NULL)))), NULL)))), List_append(segments, NULL)))), NULL)))), NULL)));  return cons(_528, cons(List_var(list), _531));
+String count = String_join(NULL, cons(String_var(int_str(segment_count)), cons(String_var(_532), NULL)));  Type signature = NULL;  List binding = Sym_reference(compiler -> sym, _535, &(signature));  List list = cons(_3, cons(_217, cons(List_var(cons(_11, cons(List_var(cons(_3, cons(List_var(signature), cons(List_var(cons(_12, cons(List_var(binding), NULL))), NULL)))), cons(List_var(cons(_13, cons(List_var(cons(_3, cons(_536, cons(List_var(cons(_216, cons(_536, cons(String_var(count), NULL)))), NULL)))), List_append(segments, NULL)))), NULL)))), NULL)));  return cons(_528, cons(List_var(list), _531));
 }
 
 static List _without_origin(List ast){
@@ -2139,7 +2139,7 @@ default: break;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_577), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
-  List binding = Var_list(bound);  Var automatic, existing, stored_type;  if(List_truth(binding) && ! List_contains((* declared), List_var(binding)) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_578, cons(List_var(binding), NULL))), & automatic) && ! Map_try_get(captures, List_var(binding), & existing)){
+  List binding = Var_list(bound);  Var automatic, existing, stored_type;  if(List_truth(binding) && ! List_contains((* declared), List_var(binding)) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_578, cons(List_var(binding), NULL))), &(automatic)) && ! Map_try_get(captures, List_var(binding), &(existing))){
     stored_type = Map_getindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_579, cons(List_var(binding), NULL))));  if(! _defer_type_hoistable(compiler, Var_type(stored_type))){
       (* unsupported) = 1;  return;
     }
@@ -2172,7 +2172,7 @@ static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x
   }
 
 }
-Var field;  List changed =(* written);  if(List_truth(modified) && Map_try_get(captures, List_var(modified), & field) && ! List_contains(changed, List_var(modified)))(* written) = cons(List_var(modified), changed);
+Var field;  List changed =(* written);  if(List_truth(modified) && Map_try_get(captures, List_var(modified), &(field)) && ! List_contains(changed, List_var(modified)))(* written) = cons(List_var(modified), changed);
 }
 
 int Var_equal(Var, Var);
@@ -2183,7 +2183,7 @@ static List _defer_rewrite_captures(List ast, Map captures, List written, String
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_593), &_x2c_match_capture)) {Var captured_type = _x2c_match_values[0];  Var bound = _x2c_match_values[1]; {
-    List binding = Var_list(bound);  Var field_var;  if(Map_try_get(captures, List_var(binding), & field_var)){
+    List binding = Var_list(bound);  Var field_var;  if(Map_try_get(captures, List_var(binding), &(field_var))){
       String field_name = binding_identity_spelling(Var_list(field_var));  Type type = Var_type(captured_type), target = type;  if(List_contains(written, List_var(binding)) && ! List_contains(Type_list(List_flatten_all(type)), Symbol_var(1544849476362))) target = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Type pointer = List_type(cons(Symbol_var(54), Type_list(target)));  String reference = String_join(NULL, cons(String_var(env_name), cons(String_var(_594), cons(String_var(field_name), NULL))));  List source = cons(_3, cons(_600, cons(String_var(reference), NULL)));  List cast = cons(_3, cons(List_var(pointer), cons(List_var(cons(_601, cons(List_var(pointer), cons(List_var(source), NULL)))), NULL)));  List dereference = cons(_3, cons(List_var(type), cons(List_var(cons(_144, cons(_62, cons(List_var(cast), NULL)))), NULL)));  return cons(_3, cons(List_var(type), cons(List_var(cons(_424, cons(List_var(dereference), NULL))), NULL)));
     }
     return ast;
@@ -2712,7 +2712,7 @@ Var head = List_car(ast);  if(! Var_is(head, 1328354264)) return _children(c, as
   Array_push(c -> origins, List_var(cons(_723, cons(int_var(occurrence), _772))));  int generated = Array_len(c -> origins);  return cons(_537, cons(int_var(generated), cons(List_var(transformed), NULL)));
 }
 break; } } case 458361162716: ;  static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_783), &_x2c_match_capture)) {Var return_type = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Var binding = _x2c_match_values[2];  Var body = _x2c_match_values[3]; {
-  String owner = binding_identity_spelling(Var_list(binding));  Var stored_owner;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_616, cons(binding, NULL))), & stored_owner)) owner = Var_string(stored_owner);  String previous = c -> fn_name;  int previous_inline = c -> inline_header;  c -> fn_name = owner;  Type function_type = Var_type(return_type);  c -> inline_header = Type_is_inline(function_type) && ! Type_is_static(function_type);  List new_return = _node(c, Var_list(return_type));  List new_decl = _node(c, Var_list(declarator));  List prepared_body = _lower_lambda_destructuring(c, Var_list(body));  prepared_body = Compiler_prepare_lambda_cells(c, Var_list(declarator), prepared_body);  List new_body = _node(c, prepared_body);  List transformed = cons(_612, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));  c -> fn_name = previous;  c -> inline_header = previous_inline;  return transformed;
+  String owner = binding_identity_spelling(Var_list(binding));  Var stored_owner;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_616, cons(binding, NULL))), &(stored_owner))) owner = Var_string(stored_owner);  String previous = c -> fn_name;  int previous_inline = c -> inline_header;  c -> fn_name = owner;  Type function_type = Var_type(return_type);  c -> inline_header = Type_is_inline(function_type) && ! Type_is_static(function_type);  List new_return = _node(c, Var_list(return_type));  List new_decl = _node(c, Var_list(declarator));  List prepared_body = _lower_lambda_destructuring(c, Var_list(body));  prepared_body = Compiler_prepare_lambda_cells(c, Var_list(declarator), prepared_body);  List new_body = _node(c, prepared_body);  List transformed = cons(_612, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));  c -> fn_name = previous;  c -> inline_header = previous_inline;  return transformed;
 }
 break;
 }

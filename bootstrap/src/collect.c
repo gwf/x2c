@@ -527,7 +527,7 @@ void Scope_shutdown_hook(void(*)(void));
 void Scope_pop(void);
 
 static Map _process_cache(void){
-  if((void *) process_cache != NULL) return process_cache;
+  if(process_cache != NULL) return process_cache;
   Scope_push(& process_cache_scope);
   Scope_shutdown_hook(_cache_shutdown);
   process_cache = Map_new();
@@ -868,7 +868,7 @@ void Compiler_record_generated_symbol(Compiler c, String name, Type signature){
     }
 
   }
-  if((void *) contribution == NULL) return;  List key = cons(String_var(name), NULL), marker_key = cons(_49, cons(String_var(name), NULL));  List marker = _51;  _require_retained(List_try_own(key));  _require_retained(List_try_own(marker_key));  _require_retained(List_try_own(marker));  _require_retained(List_try_own(Type_list(signature)));  Map_setindex(contribution, List_var(key), List_var(signature));  Map_setindex(contribution, List_var(marker_key), List_var(marker));
+  if(contribution == NULL) return;  List key = cons(String_var(name), NULL), marker_key = cons(_49, cons(String_var(name), NULL));  List marker = _51;  _require_retained(List_try_own(key));  _require_retained(List_try_own(marker_key));  _require_retained(List_try_own(marker));  _require_retained(List_try_own(Type_list(signature)));  Map_setindex(contribution, List_var(key), List_var(signature));  Map_setindex(contribution, List_var(marker_key), List_var(marker));
 }
 
 Tokenizer Tokenizer_new(char *, Symbol);
@@ -1069,7 +1069,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical){
 
 Map Compiler_collect_symbols(Compiler c, Map globs){
   if(! _init_guard_) _file_init_();
-  if((void *) globs == NULL) globs = Map_new();
+  if(globs == NULL) globs = Map_new();
   c -> kw_aliases = NULL;
   c -> kw_seen = NULL;
   Map visited = Map_new();
@@ -1691,7 +1691,7 @@ List binding_identity_new(int, String);
 int Var_equal(Var, Var);
 int List_equal(List, List);
 static List _renumber_bindings(List node, Map identities){
-  String spelling = NULL;  if(binding_identity_try_parts(node, NULL, & spelling)){
+  String spelling = NULL;  if(binding_identity_try_parts(node, NULL, &(spelling))){
     Var identity = Map_setdefault(identities, List_var(node), unsigned_var(Map_len(identities) + 1));  return binding_identity_new(Var_int(Var_convert(identity, 3453797)), spelling);
   }
   Var child;  List _x2c_macro_original_0 = node;  Array _x2c_macro_rewritten_0 = NULL;  for(List _x2c_macro_cursor_26 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_26);  _x2c_macro_cursor_26 = List_cdr(_x2c_macro_cursor_26)){

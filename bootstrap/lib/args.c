@@ -258,7 +258,7 @@ long Var_integer(Var);
 
 static _Option * _find(_Spec * spec, String spelling){
   Var position;
-  if(! Map_try_get(spec -> index, String_var(spelling), & position)) _bad_option(_15, spelling);
+  if(! Map_try_get(spec -> index, String_var(spelling), &(position))) _bad_option(_15, spelling);
   return & spec -> options[Var_integer(position)];
 }
 

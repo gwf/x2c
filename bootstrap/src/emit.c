@@ -1243,7 +1243,7 @@ static List Emitter__function(Emitter e, List ast){
   List function_binding = Var_list(List_cadr(bindings));
   e -> fn_name = binding_identity_spelling(function_binding);
   Var defer_owner;
-  if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_25, cons(List_var(function_binding), NULL))), & defer_owner)) e -> fn_name = Var_string(defer_owner);
+  if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_25, cons(List_var(function_binding), NULL))), &(defer_owner))) e -> fn_name = Var_string(defer_owner);
   type = Emitter__emit(e, cons(List_var(type), NULL));
   bindings = cons(List_var(bindings), NULL);
   body = cons(List_var(body), NULL);
@@ -1347,7 +1347,7 @@ static List Emitter__typedef(Emitter e, List ast){
       {
         List binding = Var_list(List_cadr(declarator));
         Var type;
-        if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_54, cons(List_var(binding), NULL))), & type)) e -> native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), e -> native_aliases);
+        if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_54, cons(List_var(binding), NULL))), &(type))) e -> native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), e -> native_aliases);
       }
 
     }
@@ -1547,7 +1547,7 @@ static String _match_site_entry(String name){
   if(! String_truth(name)) return NULL;  if(String_equal(name, _210)) return _807;  if(String_equal(name, _211)) return _808;  if(String_equal(name, _212)) return _809;  if(String_equal(name, _213)) return _810;  if(String_equal(name, _214)) return _811;  if(String_equal(name, _215)) return _812;  if(String_equal(name, _216)) return _813;  return NULL;
 }
 
-List Sym_resolve_global(Sym, List, List *);
+List Sym_resolve_global(Sym, List, Type *);
 int List_equal(List, List);
 int Type_is_function(Type);
 int Compiler_match_pattern_is_static(Compiler, List);
@@ -1564,7 +1564,7 @@ static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2
 default: ;  return NULL;  break;
     }
   }
-String name = binding_identity_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global(e -> compiler -> sym, cons(String_var(name), NULL), & type);  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list(arguments);
+String name = binding_identity_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global(e -> compiler -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list(arguments);
   {
     List _x2c_match_expr = args;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -1873,7 +1873,7 @@ static List Emitter__match_if(Emitter e, List ast, int * dispatched){
   }
 Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
         List flat_tags = NULL;
-        Symbol flat_head = match_value_flat_head(value, binders, & flat_tags);
+        Symbol flat_head = match_value_flat_head(value, binders, &(flat_tags));
         List pattern = Emitter__emit(e, pattern_ast);
         List body = Emitter__emit(e, body_ast);
         List label = _match_arm_label(match_value_head(value), heads, &(labelling));
@@ -2566,7 +2566,7 @@ break;
   List c_name = Emitter__emit(e, cons(name, NULL));  return List_append(c_name, _774);
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0]; {
-  Var pointer;  if(Map_truth(e -> static_objects) && Map_try_get(e -> static_objects, binding, & pointer)) return cons(_779, cons(pointer, _4));  return Emitter__emit(e, cons(binding, NULL));
+  Var pointer;  if(Map_truth(e -> static_objects) && Map_try_get(e -> static_objects, binding, &(pointer))) return cons(_779, cons(pointer, _4));  return Emitter__emit(e, cons(binding, NULL));
 }
 break; } }
     }

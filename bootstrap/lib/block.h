@@ -19,7 +19,7 @@ Block Block_new(size_t width);
 Bytes Bytes_new(size_t width);
 
 static inline Block Bytes_block(Bytes bytes){
-  if((void *) bytes == NULL) return NULL;
+  if(bytes == NULL) return NULL;
   unsigned char * data = bytes;
   return *((Block *)(data - sizeof(Block)));
 }
@@ -33,11 +33,11 @@ static inline Bytes Bytes_reserve(Bytes bytes, size_t minimum){
 }
 
 static inline void Block_truncate(Block block, size_t length){
-  if((void *) block != NULL && length < block -> length) block -> length = length;
+  if(block != NULL && length < block -> length) block -> length = length;
 }
 
 static inline void Block_clear(Block block){
-  if((void *) block != NULL) block -> length = 0;
+  if(block != NULL) block -> length = 0;
 }
 
 void Block_append(Block b, const void * source, size_t count);
@@ -57,7 +57,7 @@ static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t 
 }
 
 static inline int Block_try_pop(Block b, void * out){
-  if((void *) b == NULL || ! b -> length) return 0;
+  if(b == NULL || ! b -> length) return 0;
   size_t index = b -> length - 1;
   if(out) memmove(out, (unsigned char *) b -> bytes + index * b -> width, b -> width);
   b -> length = index;
@@ -85,13 +85,13 @@ void Block_free(Block block);
 void Block_move_to(Block block, Scope * scope);
 
 static inline size_t Block_len(Block b){
-  return(void *) b != NULL ? b -> length : 0;
+  return b != NULL ? b -> length : 0;
 }
 
 int Block_truth(Block block);
 
 static inline size_t Block_capacity(Block b){
-  return(void *) b != NULL ? b -> cap : 0;
+  return b != NULL ? b -> cap : 0;
 }
 
 void Block_cleanup(Block value);

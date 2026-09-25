@@ -490,7 +490,7 @@ void Block_clear(Block);
 
 FileReadStatus File_readline_into(File file, Block dest){
   if(! _init_guard_) File_initialize();
-  if(! file ||(void *) dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
+  if(! file || dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
   Block_clear(dest);
   int failed, error;
   {
@@ -522,7 +522,7 @@ FileReadStatus File_readline_into(File file, Block dest){
 
 FileReadStatus File_read_into(File file, Block dest){
   if(! _init_guard_) File_initialize();
-  if(! file ||(void *) dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
+  if(! file || dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
   Block_clear(dest);
   unsigned char bytes[BUFSIZ];
   size_t count;
@@ -627,7 +627,7 @@ static int _next(Iter iter, Var * out){
   File file = Var_file(iter -> obj);
   if(! file) return 0;
   Block line = Var_block(iter -> state);
-  if((void *) line == NULL) return 0;
+  if(line == NULL) return 0;
   int keep = 0;
   {
   _x2c_defer_env_4 _x2c_defer_env_14 = {._x2c_defer_capture_5 =(const void *) & keep, ._x2c_defer_capture_6 =(const void *) & line, ._x2c_defer_capture_7 =(const void *) & iter};
@@ -673,7 +673,7 @@ Var Block_var(Block);
 
 Iter File_iter(File file, Iter dest){
   if(! _init_guard_) File_initialize();
-  if((void *) dest == NULL) return NULL;
+  if(dest == NULL) return NULL;
   if(! file) return Iter_init(dest, (Var){
     0
   }
@@ -766,8 +766,8 @@ void File_cleanup(File value){
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   {
-    if((void *)(*(String *) _x2c_defer_data_0->_x2c_defer_capture_0) != NULL) String_free((*(String *) _x2c_defer_data_0->_x2c_defer_capture_0));
-    if((void *)(*(Block *) _x2c_defer_data_0->_x2c_defer_capture_1) != NULL) Block_free((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_1));
+    if((*(String *) _x2c_defer_data_0->_x2c_defer_capture_0) != NULL) String_free((*(String *) _x2c_defer_data_0->_x2c_defer_capture_0));
+    if((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_1) != NULL) Block_free((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_1));
   }
 
 }
@@ -779,7 +779,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  if((void *)(*(String *) _x2c_defer_data_2->_x2c_defer_capture_3) != NULL) String_free((*(String *) _x2c_defer_data_2->_x2c_defer_capture_3));
+  if((*(String *) _x2c_defer_data_2->_x2c_defer_capture_3) != NULL) String_free((*(String *) _x2c_defer_data_2->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){

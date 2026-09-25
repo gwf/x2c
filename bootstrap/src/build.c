@@ -1369,7 +1369,7 @@ ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
 void Scope_free(void *);
 
 static int _compile_sources(Build b){
-  if((void *) b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_158);
+  if(b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_158);
   CcJob * running = Scope_calloc(b -> request -> jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
   b -> cc_n = Array_len(b -> c_sources);
@@ -1402,7 +1402,7 @@ static int _compile_sources(Build b){
         List directories = Array_list_free(include_dirs);
         ToolAction action = Toolchain_compile_action(b -> toolchain, source, object, depfile, directories);
         Array_push(b -> objects, String_var(object));
-        if((void *) b -> compile_commands != NULL) Array_push(b -> compile_commands, String_var(_compile_command(b, action, source, object)));
+        if(b -> compile_commands != NULL) Array_push(b -> compile_commands, String_var(_compile_command(b, action, source, object)));
         String state_path = String_truth(b -> state_root) ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_61), cons(String_var(_key(source)), NULL)))) : NULL;
         if(_finish_compiles(b, running, &(running_count), 0)){
           failed = 1;
@@ -1555,7 +1555,7 @@ static void Build__place_unit_headers(Build b){
                       dir = Var_string(_x2c_macro_cursor_output_21);
                       {
                         Var header;
-                        if(! Map_try_get(headers, String_var(Path_absolute(Path_join(dir, source))), & header)) continue;
+                        if(! Map_try_get(headers, String_var(Path_absolute(Path_join(dir, source))), &(header))) continue;
                         Path placed = Path_join(directory, target);
                         Path_make_dirs(Path_dirname(placed));
                         Path_copy_file(Var_string(header), placed);

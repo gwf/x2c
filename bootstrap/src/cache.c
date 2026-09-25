@@ -471,7 +471,7 @@ int List_truth(List);
 
 int List_try_next(List, List *, Var *);
 
-List Sym_reference(Sym, List, List *);
+List Sym_reference(Sym, List, Type *);
 
 Var Array_push(Array, Var);
 
@@ -864,7 +864,7 @@ static void _report_static_initializer_cycle(Compiler compiler, Array initialize
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_241), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        Var status;  if(! Map_try_get(state, binding, & status) || ! Var_equal(status, int_var(1))) continue;  if(! List_truth(first)) first = Var_list(binding);  String name = binding_identity_spelling(Var_list(binding));  if(String_truth(name)) Array_push(notes, String_var(String_join(NULL, cons(String_var(_242), cons(String_var(name), NULL)))));
+        Var status;  if(! Map_try_get(state, binding, &(status)) || ! Var_equal(status, int_var(1))) continue;  if(! List_truth(first)) first = Var_list(binding);  String name = binding_identity_spelling(Var_list(binding));  if(String_truth(name)) Array_push(notes, String_var(String_join(NULL, cons(String_var(_242), cons(String_var(name), NULL)))));
       }
       break;
     }
@@ -874,7 +874,7 @@ static void _report_static_initializer_cycle(Compiler compiler, Array initialize
   }
 
 }
-Token token = NULL;  Var token_index;  if(List_truth(first) && Map_try_get(compiler -> init_tokens, List_var(first), & token_index)){
+Token token = NULL;  Var token_index;  if(List_truth(first) && Map_try_get(compiler -> init_tokens, List_var(first), &(token_index))){
   Token tokens = compiler -> tokenizer -> tokens;  token = tokens + Var_integer(token_index);
 }
 List details = Array_list_free(notes);  Compiler_report_error(compiler, 6363658, _342, token, details);
@@ -890,10 +890,10 @@ Var Var_car(Var);
 List preproc_within_arms(List, List);
 void Compiler_add_init(Compiler, Symbol, List);
 static void _queue_one_static_initializer(Compiler compiler, List binding, Map pending, Map state, Map phases, Array initializers, Symbol deferred_kind){
-  Var status;  if(Map_try_get(state, List_var(binding), & status)){
+  Var status;  if(Map_try_get(state, List_var(binding), &(status))){
     if(Var_equal(status, int_var(2))) return;  _report_static_initializer_cycle(compiler, initializers, state);
   }
-  Map_setindex(state, List_var(binding), int_var(1));  Array definitions = Var_array(Map_getindex(pending, List_var(binding)));  int late = 0;  Var stored;  if(Map_try_get(compiler -> static_init_deps, List_var(binding), & stored)){
+  Map_setindex(state, List_var(binding), int_var(1));  Array definitions = Var_array(Map_getindex(pending, List_var(binding)));  int late = 0;  Var stored;  if(Map_try_get(compiler -> static_init_deps, List_var(binding), &(stored))){
     List dependencies = Var_list(stored); {
       List dependency;  List _x2c_macro_object_9 = dependencies;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
         dependency = Var_list(_x2c_macro_cursor_output_9); {
@@ -943,7 +943,7 @@ static void _queue_static_initializers(Compiler compiler, Array initializers, Sy
   Map pending = Map_new(), state = Map_new(), phases = Map_new(); {
     List initializer;  Array _x2c_macro_object_13 = initializers;  int _x2c_macro_cursor_13 = 0;  Var _x2c_macro_cursor_output_13;  while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
       initializer = Var_list(_x2c_macro_cursor_output_13); {
-        Var definitions;  if(! Map_try_get(pending, List_car(initializer), & definitions)) Map_setindex(pending, List_car(initializer), definitions = Array_var(Array_new()));  Array_push(Var_array(definitions), List_var(initializer));
+        Var definitions;  if(! Map_try_get(pending, List_car(initializer), &(definitions))) Map_setindex(pending, List_car(initializer), definitions = Array_var(Array_new()));  Array_push(Var_array(definitions), List_var(initializer));
       }
 
     }
@@ -1081,7 +1081,7 @@ static List _rewrite_header_cache_refs(Compiler compiler, List node, String pref
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6363658: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936767982090ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var id = _x2c_match_values[0]; {
-    if(replaced) * replaced = 1;  String ident = _generate_cache_ident(id, prefix);  List binding = Sym_reference(compiler -> sym, cons(String_var(ident), NULL), NULL);  return cons(_35, cons(List_var(binding), NULL));
+    if(replaced)(* replaced) = 1;  String ident = _generate_cache_ident(id, prefix);  List binding = Sym_reference(compiler -> sym, cons(String_var(ident), NULL), NULL);  return cons(_35, cons(List_var(binding), NULL));
   }
   break; } } default: break;
     }
@@ -1117,7 +1117,7 @@ static List _setup_header_cache(Compiler c, List header, Array ids, String prefi
   Array_push(declarations, List_var(_make_header_cache_init(guard, initializer, Array_list_free(statements))));  Array_free(ids);  List prelude = Array_list_free(declarations);  Array output = Array_new();  int inserted = 0; {
     List node;  List _x2c_macro_object_18 = header;  List _x2c_macro_cursor_19 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_18)){
       node = Var_list(_x2c_macro_cursor_output_18); {
-        int replaced = 0;  node = _rewrite_header_cache_refs(c, node, prefix, & replaced);  int captured = Var_equal(List_car(node), Symbol_var(1371473464357480));  List function = node;  if(captured) function = Var_list(List_cadr(node));
+        int replaced = 0;  node = _rewrite_header_cache_refs(c, node, prefix, &(replaced));  int captured = Var_equal(List_car(node), Symbol_var(1371473464357480));  List function = node;  if(captured) function = Var_list(List_cadr(node));
   {
     List _x2c_match_expr = function;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };

@@ -196,7 +196,7 @@ static VarWideBox _wide_box(Var v){
 Var Map_getindex(Map, Var);
 
 static VarDescriptor * _declared(Symbol tag){
-  if((void *) declared == NULL) return NULL;
+  if(declared == NULL) return NULL;
   Var found = Map_getindex(declared, Symbol_var(tag));
   return Var_is_void(found) ? NULL : Var_pointer(found);
 }
@@ -339,7 +339,7 @@ VarDescriptor * x2c_var_declare(Symbol tag){
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
         {
-          if((void *) declared == NULL) declared = Map_new();
+          if(declared == NULL) declared = Map_new();
           descriptor = Scope_calloc(1, sizeof(VarDescriptor));
           descriptor -> tag = tag;
           descriptor -> row = - 1;
@@ -488,7 +488,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
           {
-            if((void *) cells == NULL) cells = Map_new();
+            if(cells == NULL) cells = Map_new();
             Var head = Map_getindex(cells, key);
             cell = Var_is_void(head) ? NULL : Var_pointer(head);
             while(cell && cell -> descriptor != descriptor) cell = cell -> next;

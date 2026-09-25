@@ -1330,8 +1330,8 @@ static CliOption * _take_option(Array args, int * index, int mask, String * spel
   CliOption * option = _find_option(written, mask, &(suffix));
   if(! option) return NULL;
   if(equals > 2 && ! option -> value) x2c_driver_error(String_join(NULL, cons(String_var(_75), cons(String_var(arg), cons(String_var(_74), NULL)))));
-  if(spelling) * spelling = written;
-  if(attached) * attached = suffix != NULL;
+  if(spelling)(* spelling) = written;
+  if(attached)(* attached) = suffix != NULL;
   (* value) = equals > 2 ? joined : suffix;
   if(option -> value && ! String_truth((* value)) && equals <= 2){
     if(++(* index) == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_76), cons(String_var(arg), cons(String_var(_74), NULL)))));
@@ -1650,7 +1650,7 @@ CliRequest cli_package_options(String path, String package){
       }
       String spelling = NULL, value = NULL;
       int attached = 0;
-      CliOption * option = _take_option(words, &(i), CLI_BUILD, & spelling, &(value), & attached);
+      CliOption * option = _take_option(words, &(i), CLI_BUILD, &(spelling), &(value), &(attached));
       if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_90), cons(String_var(argument), cons(String_var(_74), NULL)))));
       switch(option -> id){
         case 20273998090 : case 8747647543562 : case 274059207002 : case 279333770 : case 1473453116298 : case 26380018276 : case 26379160754 : case 38800656 : case 35719882824 : case 14434122038422 : case 1496 : case 52364728676 : break;
@@ -1755,7 +1755,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
     }
     String spelling = NULL, value = NULL;
     int attached = 0;
-    CliOption * option = _take_option(args, &(i), mask, & spelling, &(value), & attached);
+    CliOption * option = _take_option(args, &(i), mask, &(spelling), &(value), &(attached));
     if(! option){
       if(mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(String_join(NULL, cons(String_var(_95), cons(String_var(arg), cons(String_var(_74), NULL)))));

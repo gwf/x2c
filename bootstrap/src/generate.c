@@ -998,7 +998,7 @@ static List _within_definitions(List found, List statements){
 
 int String_truth(String);
 
-List Sym_reference(Sym, List, List *);
+List Sym_reference(Sym, List, Type *);
 
 static List _make_shutdown_registration(Compiler compiler, List source){
   String shutdown = compiler -> fini_fn;
@@ -1215,7 +1215,7 @@ static int _is_pragma_once(String content){
 int Map_try_get(Map, Var, Var *);
 Map Compiler_semantic_binding_facts(Compiler);
 static int _is_completed_function_prototype(Compiler compiler, List binding){
-  Var stored;  if(! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_225, cons(List_var(binding), NULL))), & stored)) return 0;
+  Var stored;  if(! Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_225, cons(List_var(binding), NULL))), &(stored))) return 0;
   {
     List _x2c_match_expr = Var_list(stored);
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -1608,7 +1608,7 @@ static List _header_and_source(Compiler compiler, List ast){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ;  static MatchCaptureSite _x2c_match_site_24;  if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_355), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        Map facts = Compiler_semantic_binding_facts(compiler);  Var attributes;  if(Map_try_get(facts, List_var(cons(_356, cons(binding, NULL))), & attributes)) function_type = List_type(List_append(Var_list(attributes), List_append(Type_list(function_type), NULL)));  generated = Map_contains(facts, List_var(cons(_357, cons(String_var(binding_identity_spelling(Var_list(binding))), NULL))));
+        Map facts = Compiler_semantic_binding_facts(compiler);  Var attributes;  if(Map_try_get(facts, List_var(cons(_356, cons(binding, NULL))), &(attributes))) function_type = List_type(List_append(Var_list(attributes), List_append(Type_list(function_type), NULL)));  generated = Map_contains(facts, List_var(cons(_357, cons(String_var(binding_identity_spelling(Var_list(binding))), NULL))));
       }
       break;
     }
@@ -1696,7 +1696,7 @@ static List _parameter_names(Compiler c, List modifiers){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_417), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        String name = binding_identity_spelling(Var_list(binding));  Var spelling;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_418, cons(binding, NULL))), & spelling)) name = Var_string(spelling);  Array_push(names, String_truth(name) ? String_var(name) : String_var(_458));
+        String name = binding_identity_spelling(Var_list(binding));  Var spelling;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_418, cons(binding, NULL))), &(spelling))) name = Var_string(spelling);  Array_push(names, String_truth(name) ? String_var(name) : String_var(_458));
       }
       break;
     }
@@ -1715,7 +1715,7 @@ return Array_list_free(names);
 }
 
 static List _span(Compiler c, List key){
-  Var span = Var_null();  Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_419, cons(List_var(key), NULL))), & span);  return Var_list(span);
+  Var span = Var_null();  Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_419, cons(List_var(key), NULL))), &(span));  return Var_list(span);
 }
 
 Type List_type_from_ast(List);
@@ -2022,7 +2022,7 @@ break;
 }
 
 static void _forward_declaration(Compiler c, Var key, Map available, Map declarations, Map seen, Array output){
-  Var declaration;  if(Map_contains(available, key) || Map_contains(seen, key) || ! Map_try_get(declarations, key, & declaration)) return;  Map_setindex(seen, key, int_var(1));  Map_setindex(seen, declaration, int_var(1));  _collect_declared_bindings(declaration, available);  _collect_forward_dependencies(c, declaration, available, declarations, seen, output);  Array_push(output, declaration);
+  Var declaration;  if(Map_contains(available, key) || Map_contains(seen, key) || ! Map_try_get(declarations, key, &(declaration))) return;  Map_setindex(seen, key, int_var(1));  Map_setindex(seen, declaration, int_var(1));  _collect_declared_bindings(declaration, available);  _collect_forward_dependencies(c, declaration, available, declarations, seen, output);  Array_push(output, declaration);
 }
 
 static void _forward_types(Compiler c, List type, Map available, Map declarations, Map seen, Array output){
@@ -2038,7 +2038,7 @@ static void _forward_types(Compiler c, List type, Map available, Map declaration
 
 }
 
-List Sym_resolve_global(Sym, List, List *);
+List Sym_resolve_global(Sym, List, Type *);
 int List_equal(List, List);
 List Sym_get(Sym, List);
 List Type_declaration_ast(Type, List);
@@ -2059,7 +2059,7 @@ static void _collect_forward_dependencies(Compiler compiler, Var value, Map loca
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_50;  if (x2c_match_site_try_capture(& _x2c_match_site_50, _x2c_match_expr, List_var(_572), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
         String spelling = binding_identity_spelling(Var_list(binding));  List native = cons(_587, cons(String_var(spelling), NULL));  if(Map_contains(statics, binding)) _forward_declaration(compiler, binding, locals, statics, seen, prototypes);  else if(Map_contains(statics, List_var(native))) _forward_declaration(compiler, List_var(native), locals, statics, seen, prototypes);  else{
-          Type type = NULL;  List global = String_truth(spelling) ? Sym_resolve_global(compiler -> sym, cons(String_var(spelling), NULL), & type) : NULL;  if(List_truth(global) && List_equal(global, Var_list(binding)) && Type_is_function(type) && ! Map_contains(locals, List_var(global)) && ! Map_contains(seen, List_var(global)) && ! List_truth(Sym_get(compiler -> sym, cons(_601, cons(String_var(spelling), NULL))))){
+          Type type = NULL;  List global = String_truth(spelling) ? Sym_resolve_global(compiler -> sym, cons(String_var(spelling), NULL), &(type)) : NULL;  if(List_truth(global) && List_equal(global, Var_list(binding)) && Type_is_function(type) && ! Map_contains(locals, List_var(global)) && ! Map_contains(seen, List_var(global)) && ! List_truth(Sym_get(compiler -> sym, cons(_601, cons(String_var(spelling), NULL))))){
             Map_setindex(seen, List_var(global), int_var(1));  _forward_types(compiler, Type_list(type), locals, statics, seen, prototypes);  Array_push(prototypes, List_var(ast_prototype_declarator(Type_declaration_ast(type, global))));
           }
 

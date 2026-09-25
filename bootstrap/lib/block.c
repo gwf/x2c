@@ -48,7 +48,7 @@ Bytes Bytes_new(size_t width){
 void * Scope_realloc(void *, size_t);
 
 void Block_reserve(Block block, size_t minimum){
-  if((void *) block == NULL){
+  if(block == NULL){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 92};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 0);
     __builtin_unreachable();
@@ -80,7 +80,7 @@ void Block_reserve(Block block, size_t minimum){
 }
 
 void Block_append(Block b, const void * source, size_t count){
-  if((void *) b == NULL){
+  if(b == NULL){
     static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append",.line = 147};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 0);
     __builtin_unreachable();
@@ -129,7 +129,7 @@ void Block_append(Block b, const void * source, size_t count){
 }
 
 void Block_append_fill(Block b, const void * element, size_t count){
-  if((void *) b == NULL){
+  if(b == NULL){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 214};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 0);
     __builtin_unreachable();
@@ -174,21 +174,21 @@ void Block_append_fill(Block b, const void * element, size_t count){
 void Scope_free(void *);
 
 void Block_free(Block block){
-  if((void *) block == NULL) return;
-  if((void *) block -> bytes != NULL) Scope_free((unsigned char *) block -> bytes - sizeof(Block));
+  if(block == NULL) return;
+  if(block -> bytes != NULL) Scope_free((unsigned char *) block -> bytes - sizeof(Block));
   Scope_free(block);
 }
 
 void Scope_move(void *, Scope *);
 
 void Block_move_to(Block block, Scope * scope){
-  if((void *) block == NULL) return;
-  if((void *) block -> bytes != NULL) Scope_move((unsigned char *) block -> bytes - sizeof(Block), scope);
+  if(block == NULL) return;
+  if(block -> bytes != NULL) Scope_move((unsigned char *) block -> bytes - sizeof(Block), scope);
   Scope_move(block, scope);
 }
 
 int Block_truth(Block block){
-  return(void *) block != NULL && block -> length != 0;
+  return block != NULL && block -> length != 0;
 }
 
 void Block_cleanup(Block value){

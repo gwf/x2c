@@ -186,7 +186,7 @@ static Array _sources(Compiler compiler, Map needed){
       key = _x2c_macro_item_2;
       {
         Var text;
-        if(Map_try_get(compiler -> source_texts, key, & text)) Array_push(sources, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), key, Symbol_var(1322536), text)));
+        if(Map_try_get(compiler -> source_texts, key, &(text))) Array_push(sources, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), key, Symbol_var(1322536), text)));
       }
 
     }

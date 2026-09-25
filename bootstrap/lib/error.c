@@ -496,7 +496,7 @@ void Error_shutdown_raw(void){
   _reclaim_hidden(state);
   _unwind_to(state, NULL, 1);
   _truncate(0);
-  if((void *) state -> stack != NULL){
+  if(state -> stack != NULL){
     Block_free(state -> stack);
     state -> stack = NULL;
   }
@@ -1027,7 +1027,7 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
 }
 
 static void _retained_destroy(Block retained){
-  if((void *) retained == NULL) return;
+  if(retained == NULL) return;
   ErrorRecord * records = retained -> bytes;
   for(size_t i = 0;  i < retained -> length;  i ++) _region_destroy(& records[i].region);
   Block_free(retained);
@@ -1074,7 +1074,7 @@ void MatchPlan_free(MatchPlan);
 static void _handler_free(ErrorHandler handle){
   if(! handle) return;
   if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
-  if((void *) handle -> plans != NULL){
+  if(handle -> plans != NULL){
     MatchPlan * plans = handle -> plans -> bytes;
     for(size_t i = 0;  i < handle -> plans -> length;  i ++){
       MatchPlan plan = plans[i];
@@ -1082,7 +1082,7 @@ static void _handler_free(ErrorHandler handle){
     }
     Block_free(handle -> plans);
   }
-  if((void *) handle -> capture_values != NULL) Block_free(handle -> capture_values);
+  if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
   _retained_destroy(handle -> retained);
   _region_destroy(& handle -> view);
   Scope_free(handle);
@@ -1172,7 +1172,7 @@ static Symbol _catch_match(ErrorHandler h){
   List projection = _cons(& record -> region, Symbol_var(code), detail);
   Pool_open_named("Error catch bindings");
   ErrorCatchSite * site = h -> site;
-  MatchPlan * plans =(void *) h -> plans != NULL ? h -> plans -> bytes : NULL;
+  MatchPlan * plans = h -> plans != NULL ? h -> plans -> bytes : NULL;
   for(int i = 0;  i < site -> arm_count;  i ++){
     int is_default = i == site -> default_arm;
     MatchPlan plan = is_default ? NULL : plans ? plans[i] : site -> arms[i].plan;

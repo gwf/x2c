@@ -1045,7 +1045,7 @@ static int _run_build_request(CliRequest c, Array commands){
         }
 
       }
-      if((void *) commands != NULL){
+      if(commands != NULL){
         String entry;
         Array _x2c_macro_object_14 = state -> compile_commands;
         int _x2c_macro_cursor_14 = 0;
@@ -1056,7 +1056,7 @@ static int _run_build_request(CliRequest c, Array commands){
         }
 
       }
-      if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
+      if(commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
         Build_cleanup(state, 0);
         {
           int _x2c_return_value_3 = 1;
@@ -1113,7 +1113,7 @@ static int _run_build(CliRequest request){
     }
 
   }
-  if((void *) commands != NULL && request -> command != 38236 && ! compile_commands_write(request -> compile_commands, commands)) return 1;
+  if(commands != NULL && request -> command != 38236 && ! compile_commands_write(request -> compile_commands, commands)) return 1;
   return 0;
 }
 
