@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/optional-reference-postfix.x:2:8: type: check optional reference before using its value
+    value++;
+         ^^
+

@@ -1638,9 +1638,8 @@ static List _resolve_func_call(
       locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
 
       List address = %(expr () (ident $null_binding));
-      if (null_reference) address = %(expr () (ident $null_binding));
-      else if (forwarded_reference) address = argument;
-      else if (addressable) {
+      if (forwarded_reference) address = argument;
+      else if (addressable && !null_reference) {
         Type pointer = source_type.reference();
         address = %(expr $pointer (op & (parens $argument)));
       }
@@ -2401,6 +2400,10 @@ static List _resolve_content(
     case %(postfix ?operator ?operand): {
       operand = c.resolve_expression(operand, origin);
       Type operand_type = operand.cadr();
+      if (operand_type.car() == <opt-ref>)
+        c.report_error(
+          <type>, "check optional reference before using its value",
+          origin, NULL);
       if (operand_type === %(<macro-expr>))
         return %(expr (<macro-expr>) (postfix $operator $operand));
       return %(expr $operand_type (postfix $operator $operand));
