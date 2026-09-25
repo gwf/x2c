@@ -216,7 +216,7 @@ even though both are empty. The literal `%{}` calls this constructor.
 The `Map` and its growing storage belong to the scope in which it was
 created. An empty `Map` is an allocated object, never a null pointer.
 A bare `if (...)` uses `Map.truth` and tests content; use an
-explicit `(void *) map != NULL` comparison when pointer presence matters.
+explicit `map != NULL` comparison when pointer presence matters.
 
 It starts with two buckets, the smallest table whose mask is nonzero, and
 doubles from there.
@@ -351,7 +351,7 @@ Source: `lib/map.x:395`
 <a id="Map.try_get"></a>
 #### Map.try_get
 
-`int Map.try_get(Map map, Var key, Var *out)`
+`int Map.try_get(Map map, Var key, Var &?out)`
 
 Writes the value stored under `key` to `out` and returns nonzero when the
 key is present.
@@ -376,8 +376,8 @@ value hold two boxes and are two keys.
 ```x2c
 ~Map ages = {"ada": 36, "grace": 45};
 Var found;
-if (ages.try_get("ada", &found)) printf("%s\n", found.repr());
-if (!ages.try_get("nobody", &found)) printf("absent\n");
+if (ages.try_get("ada", found)) printf("%s\n", found.repr());
+if (!ages.try_get("nobody", found)) printf("absent\n");
 ```
 
 **Raises:** `<void-op>` when `key` is `void`, or a cause raised by custom key

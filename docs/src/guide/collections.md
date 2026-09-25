@@ -977,11 +977,11 @@ int main(void) {
   values.push(20);
 
   int found = -1;
-  int present = values.try_get(1, &found);
+  int present = values.try_get(1, found);
   printf("%d %d\n", present, found);
-  present = values.try_get(5, &found);
+  present = values.try_get(5, found);
   printf("%d %d\n", present, found);
-  present = values.try_get(-1, &found);
+  present = values.try_get(-1, found);
   printf("%d %d\n", present, found);
   return 0;
 }
@@ -1081,9 +1081,9 @@ Map ages = {"ada": 36, "grace": 45};
 ages["alan"] = 41;
 
 Var found;
-if (ages.try_get("ada", &found))
+if (ages.try_get("ada", found))
   printf("ada is %s\n", found.repr());
-if (!ages.try_get("nobody", &found))
+if (!ages.try_get("nobody", found))
   printf("nobody is absent\n");
 
 printf("bracket read of a missing key: %s\n", ages["nobody"].repr());
@@ -1177,7 +1177,7 @@ int main(void) {
   label.updateindex("name", <+>, "2c");
 
   int out = 0;
-  printf("one=%d present=%d\n", counts.get(1), counts.try_get(5, &out));
+  printf("one=%d present=%d\n", counts.get(1), counts.try_get(5, out));
 
   unsigned cursor = 0;
   int key, value, total = 0;

@@ -148,7 +148,7 @@ fallback would lose information:
 Map map = {"name": "x2c"};
 Var key = "name";
 Var value;
-if (!map.try_get(key, &value))
+if (!map.try_get(key, value))
   printf("missing\n");
 ```
 

@@ -290,7 +290,7 @@ Statement Statement.bind_named(Statement statement, Map values) {
     const char *native_name = sqlite3_bind_parameter_name(
       statement.handle, index);
     Var value;
-    if (!native_name || !values.try_get(String.new(native_name), &value))
+    if (!native_name || !values.try_get(String.new(native_name), value))
       raise %(bad-arg (library "SQLite") (operation "bind_named")
               (reason "missing named parameter") (index $index));
     _statement_bind(statement, index, value);

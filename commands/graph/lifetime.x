@@ -49,7 +49,7 @@ static Type _lifetime_expression_type(Var value) {
 static Type _lifetime_binding_type(Lifetime lifetime, List binding) {
   Var stored;
   Map facts = lifetime.compiler.semantic_binding_facts();
-  return facts.try_get(%(type $binding), &stored) && stored is <list>
+  return facts.try_get(%(type $binding), stored) && stored is <list>
        ? stored.list().type() : NULL;
 }
 

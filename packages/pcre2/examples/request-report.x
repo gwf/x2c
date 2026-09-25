@@ -33,7 +33,7 @@ int main(void) {
 
     String method = parsed[<method>], path = parsed[<path>];
     Var old = 0;
-    methods.try_get(method, &old);
+    methods.try_get(method, old);
     methods[method] = old + 1;
     if (api_path.match(path)) api_requests++;
 

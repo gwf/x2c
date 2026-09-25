@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
       String channel = Json.boolean(release["prerelease"])
         ? "preview" : "stable";
       Var count = 0;
-      channels.try_get(channel, &count);
+      channels.try_get(channel, count);
       channels[channel] = count + 1;
 
       Array files = release["assets"];
@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
     }
 
     Var stable = 0, preview = 0;
-    channels.try_get("stable", &stable);
-    channels.try_get("preview", &preview);
+    channels.try_get("stable", stable);
+    channels.try_get("preview", preview);
     printf("%s", %"stable: $stable; preview: $preview; assets: $assets\n");
 
     /*  The catalog the report just summarized goes back as one JSON document,

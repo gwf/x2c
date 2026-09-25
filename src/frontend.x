@@ -191,7 +191,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL;
   int status = frontend.toolchain.preprocess(
-    filename, c.include_dirs, runtime, &text, &errors, &dependency_text);
+    filename, c.include_dirs, runtime, text, errors, dependency_text);
   unit.preprocessor_output = text;
   unit.preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)
@@ -313,7 +313,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   }
   foreach (String name, unit.compiler.meta_regions.keys()) {
     Var function;
-    if (name.startswith("x2c_") && shared.try_get(name, &function))
+    if (name.startswith("x2c_") && shared.try_get(name, function))
       Compiler.bind_meta_operation(shared, name, function);
   }
   return 1;

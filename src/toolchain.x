@@ -371,12 +371,11 @@ static List _includes(List directories) =>
 
 /** Runs the configured C preprocessor without a shell.
     System headers keep their include directives when the host supports
-    that mode. `fname`, `output`, and `errors` are required; output pointers
-    are cleared before use. Source and include paths remain distinct argv
-    elements, and stdout and stderr are captured separately. When
-    `dependencies` is present, its temporary depfile is read when possible
-    and removed on returning paths, including a handled `<io-fail>` while
-    reading it. A non-returning
+    that mode. `output`, `errors`, and `dependencies` are cleared before
+    use. Source and include paths remain distinct argv elements, and stdout
+    and stderr are captured separately. The temporary depfile is read into
+    `dependencies` when possible and removed on returning paths, including a
+    handled `<io-fail>` while reading it. A non-returning
     `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
     Returns the shell-style child status, 127 when the preprocessor cannot
     start, or -1 for invalid arguments or local setup failure. This operation
@@ -387,11 +386,11 @@ static List _includes(List directories) =>
 */
 int Toolchain.preprocess(
   Toolchain t, const char *fname, List include_dirs, const char *imacros,
-  String *output, String *errors, String *dependencies) {
-  if (output) *output = NULL;
-  if (errors) *errors = NULL;
-  if (dependencies) *dependencies = NULL;
-  if (!fname || !output || !errors) return -1;
+  String &output, String &errors, String &dependencies) {
+  output = NULL;
+  errors = NULL;
+  dependencies = NULL;
+  if (!fname) return -1;
   String source = fname, macros = imacros;
   if (!t.keep_system_includes) {
     String probe_output = NULL, probe_errors = NULL;
@@ -399,7 +398,7 @@ int Toolchain.preprocess(
       %(${t.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
       probe_output, probe_errors) == 0 ? 1 : -1;
   }
-  Path scratch = dependencies ? Path.temp_dir() : NULL;
+  Path scratch = Path.temp_dir();
   String depfile = %"$scratch/cpp.d";
   List arguments = %(
     ${t.cc} "-E" "-P" "-x" "c"
@@ -411,16 +410,14 @@ int Toolchain.preprocess(
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
     "-I" "." @{_includes(x2c_cpp_include_dirs())} @{_includes(include_dirs)}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
-    @{scratch ? %("-MMD" "-MF" $depfile "-MT" "x2c-dependencies") : NULL}
+    "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     $source);
   if (t.verbose) _print_action(<preprocess>, arguments);
-  int result = tool_capture(arguments, *output, *errors);
+  int result = tool_capture(arguments, output, errors);
   /* The dependency file is consumed and removed even after host failure. The
      returned status tells the caller whether stdout is usable. */
-  if (scratch) {
-    try *dependencies = Path.read_text(depfile);
-    catch %(not-found *): {}
-    scratch.remove_tree();
-  }
+  try dependencies = Path.read_text(depfile);
+  catch %(not-found *): {}
+  scratch.remove_tree();
   return result;
 }

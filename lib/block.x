@@ -76,7 +76,7 @@ Bytes Bytes.new(size_t width) => Block.new(width).bytes;
     An interior or stale pointer is invalid; NULL returns NULL.
 */
 inline Block Bytes.block(Bytes bytes) {
-  if ((void *) bytes == NULL) return NULL;
+  if (bytes == NULL) return NULL;
   unsigned char *data = bytes;
   return *((Block *) (data - sizeof(Block)));
 }
@@ -89,7 +89,7 @@ inline Block Bytes.block(Bytes bytes) {
     These failures leave the `Block` unchanged.
 */
 void Block.reserve(Block block, size_t minimum) {
-  if ((void *) block == NULL) raise %(bad-arg);
+  if (block == NULL) raise %(bad-arg);
 
   if (minimum <= block.cap) return;
   size_t cap = block.cap ? block.cap : 1;
@@ -125,12 +125,12 @@ inline Self Bytes.reserve(Self bytes, size_t minimum) {
 
 /** Shortens `block` to at most `length` elements. */
 inline void Block.truncate(Block block, size_t length) {
-  if ((void *) block != NULL && length < block.length) block.length = length;
+  if (block != NULL && length < block.length) block.length = length;
 }
 
 /** Removes every element from `block` without releasing capacity. */
 inline void Block.clear(Block block) {
-  if ((void *) block != NULL) block.length = 0;
+  if (block != NULL) block.length = 0;
 }
 
 /** Appends `count` elements copied from `source` to `block`.
@@ -144,7 +144,7 @@ inline void Block.clear(Block block) {
     failures leave the `Block` unchanged.
 */
 void Block.append(Block b, const void *source, size_t count) {
-  if ((void *) b == NULL) raise %(bad-arg);
+  if (b == NULL) raise %(bad-arg);
 
   if (!count) return;
   if (count <= b.cap - b.length) {
@@ -211,7 +211,7 @@ inline Self Bytes.append(Self bytes, const void *source, size_t count) {
     `Block` unchanged.
 */
 void Block.append_fill(Block b, const void *element, size_t count) {
-  if ((void *) b == NULL) raise %(bad-arg);
+  if (b == NULL) raise %(bad-arg);
 
   if (!count) return;
   if (!element) raise %(bad-arg);
@@ -258,7 +258,7 @@ inline Self Bytes.append_fill(Self bytes, const void *element, size_t count) {
     `out` still removes a present element.
 */
 inline int Block.try_pop(Block b, void *out) {
-  if ((void *) b == NULL || !b.length) return 0;
+  if (b == NULL || !b.length) return 0;
   size_t index = b.length - 1;
   if (out) memmove(out, (unsigned char *) b.bytes + index * b.width, b.width);
   b.length = index;
@@ -284,8 +284,8 @@ inline void Block.pop(Block block) {
 
 /** Releases the `Block` and its backing storage, invalidating every alias. */
 void Block.free(Block block) {
-  if ((void *) block == NULL) return;
-  if ((void *) block.bytes != NULL)
+  if (block == NULL) return;
+  if (block.bytes != NULL)
     Scope.free((unsigned char *) block.bytes - sizeof(Block));
   Scope.free(block);
 }
@@ -300,20 +300,20 @@ void Block.free(Block block) {
     ownership unchanged.
 */
 void Block.move_to(Block block, Scope *scope) {
-  if ((void *) block == NULL) return;
-  if ((void *) block.bytes != NULL)
+  if (block == NULL) return;
+  if (block.bytes != NULL)
     Scope.move((unsigned char *) block.bytes - sizeof(Block), scope);
   Scope.move(block, scope);
 }
 
 /** Returns the number of elements stored in `b`. */
-inline size_t Block.len(Block b) => (void *) b != NULL ? b.length : 0;
+inline size_t Block.len(Block b) => b != NULL ? b.length : 0;
 
 /** Returns nonzero when `block` contains at least one element. */
-int Block.truth(Block block) => (void *) block != NULL && block.length != 0;
+int Block.truth(Block block) => block != NULL && block.length != 0;
 
 /** Returns how many elements `b` can hold without growing. */
-inline size_t Block.capacity(Block b) => (void *) b != NULL ? b.cap : 0;
+inline size_t Block.capacity(Block b) => b != NULL ? b.cap : 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Block.cleanup(Block value) { value.free(); }

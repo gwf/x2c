@@ -200,7 +200,7 @@ static List _pattern_content(Compiler c, List node) {
 
 static List _typed_pattern(Compiler c, List node, Map tags) {
   Var value = c.match_pattern_value(node), tag;
-  if (value.is_atom_binder() && tags.try_get(value, &tag))
+  if (value.is_atom_binder() && tags.try_get(value, tag))
     return _typed_capture_pattern(c, value, tag);
   List content = _pattern_content(c, node);
   match (content) {
@@ -227,7 +227,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     Var binder = c.match_pattern_value(elements[1]);
     if (binder.is_atom_binder() &&
         (operator != <!set> || elements.len() == 3)) {
-      if (tags.try_get(binder, &tag)) capture_tag = tag;
+      if (tags.try_get(binder, tag)) capture_tag = tag;
       first++;
     }
   }
@@ -895,7 +895,7 @@ static int _lambda_binding_is_outer(
   Compiler c, List binding, int depth) {
   Var captured_depth;
   Map facts = c.semantic_binding_facts();
-  if (facts.try_get(%(lambda-depth $binding), &captured_depth))
+  if (facts.try_get(%(lambda-depth $binding), captured_depth))
     return captured_depth.integer() < depth;
   return %(automatic $binding) in facts &&
          c.sym.binding_is_local_before(binding, depth);
@@ -933,7 +933,7 @@ List Compiler.end_lambda_captures(Compiler c) {
     case %(lambda-scope ?scope ? ? ?): {
       Var stored;
       if (c.semantic_binding_facts().try_get(
-        %(lambda-order $scope), &stored))
+        %(lambda-order $scope), stored))
         rows = stored;
     }
   c.lambda_scopes = c.lambda_scopes.cdr();
@@ -964,7 +964,7 @@ List Compiler.capture_lambda_identifier(
         List key = %(lambda-capture $scope $binding);
         Var stored;
         List row = NULL;
-        if (facts.try_get(key, &stored)) row = stored;
+        if (facts.try_get(key, stored)) row = stored;
         else {
           Type captured_type = type.car() == <&> ? type.cdr() : type;
           List expression = %(expr $type (ident $binding));
@@ -1005,7 +1005,7 @@ List Compiler.capture_lambda_identifier(
           if (reference) facts[%(reference-param $captured)] = 1;
           else facts[%(lambda-snapshot $captured)] = 1;
           List order = NULL;
-          if (facts.try_get(%(lambda-order $scope), &stored)) order = stored;
+          if (facts.try_get(%(lambda-order $scope), stored)) order = stored;
           facts[%(lambda-order $scope)] = cons(row, order);
         }
         match (row)
@@ -1029,7 +1029,7 @@ List Compiler.bind_lambda_expression(
       case %(capture ?target ?captured_type ?expression): {
         Type source = NULL, target_type = captured_type;
         List binding = target is <string>
-                     ? c.sym.lookup(%($target), &source) : target;
+                     ? c.sym.lookup(%($target), source) : target;
         if (<macro-expr> in target_type)
           target_type = source.car() == <&> ? source : cons(<&>, source);
         if (!binding_identity_spelling(binding)) {
@@ -1144,7 +1144,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
       String spelling = c.token.text;
       c.expect(<ident>);
       Type type = NULL;
-      List binding = c.sym.lookup(%($spelling), &type);
+      List binding = c.sym.lookup(%($spelling), type);
       if (!type)
         c.report_error(
           <type>, %"identifier '$spelling' has no semantic type",

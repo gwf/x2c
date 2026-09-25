@@ -85,7 +85,7 @@ static Type _lower_record_type(Lowering l, Type type) {
    `&x` is the slot itself and a native callee receives real storage. */
 static List _lower_storage_layout(Lowering l, int id) {
   Var layout;
-  return l.cells.try_get(id, &layout) && layout is <list> ? layout : NULL;
+  return l.cells.try_get(id, layout) && layout is <list> ? layout : NULL;
 }
 
 /* The Var tag of a slot for an object of `layout`: the tag native code
@@ -273,7 +273,7 @@ static void _lower_scan_op(Lowering l, List form) {
       if (id in l.compiler.meta_values) return;
       if (!l.cursors.contains(id)) {
         Var layout;
-        l.cells[id] = l.locals.try_get(id, &layout) ? layout : 1;
+        l.cells[id] = l.locals.try_get(id, layout) ? layout : 1;
       }
       return;
     }
@@ -346,7 +346,7 @@ static void _lower_scan_targets(Lowering l, List targets) {
 static int _lower_known(Lowering l, String name) {
   Var value;
   if (l.own && l.own.equal(name)) return 1;
-  if (!l.compiler.macro_lisp.try_get(name, &value) &&
+  if (!l.compiler.macro_lisp.try_get(name, value) &&
       !l.compiler.bind_native_meta(name)) return 0;
   l.callees[name] = 1;
   return 1;
@@ -491,7 +491,7 @@ static int _lower_failed(Lowering l, Var value) =>
    zero. */
 static int _lower_meta_global(Lowering l, int id, int write) {
   Var row;
-  if (!l.compiler.meta_values.try_get(id, &row)) {
+  if (!l.compiler.meta_values.try_get(id, row)) {
     if (l.session_globals) return 2;
     (void) _lower_decline(l, "file-scope state not declared meta");
     return -1;
@@ -517,7 +517,7 @@ static List _lower_meta_layout(Lowering l, int id) =>
 /* A name the function never declares is advertised file-scope state. */
 static Var _lower_read(Lowering l, int id) {
   Var form;
-  if (l.env.try_get(id, &form)) return form;
+  if (l.env.try_get(id, form)) return form;
   if (!l.locals.contains(id)) {
     int kind = _lower_meta_global(l, id, 0);
     if (kind < 0) return void;
@@ -650,7 +650,7 @@ static Var _lower_constant(Lowering l, Var node) {
 static Var _lower_address(Lowering l, int id) {
   if (id in l.compiler.meta_values) return %(C.mgaddress $id);
   Var slot;
-  if (!l.env.try_get(id, &slot))
+  if (!l.env.try_get(id, slot))
     return _lower_decline(l, "address of an unknown local");
   return slot;
 }
@@ -745,7 +745,7 @@ static Type _lower_type_of(Var node) {
    their own Var equality. */
 static int _lower_object_pointer_type(Lowering l, Type type) {
   Type represented = NULL;
-  (void) l.compiler.sym.var_tag_for_type(type, &represented);
+  (void) l.compiler.sym.var_tag_for_type(type, represented);
   /* A semantic handle such as List or Array owns a non-pointer Type at the
      Var boundary even though its native typedef later resolves to a pointer.
      This fact is process-stable during shallow xmacro lowering, unlike the
@@ -893,7 +893,7 @@ static List _lower_args(
       /* The bootstrap Lisp binding accepts these callbacks directly. */
       int direct = callee_name && callee_name.equal("List_map") &&
         parameter.equal(%("Func")) &&
-        l.lambda_signatures.try_get(value, &signature);
+        l.lambda_signatures.try_get(value, signature);
       values.push(
         direct ? value : _lower_coerce(l, parameter, argument, value));
     }
@@ -1362,7 +1362,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
       if (!l.locals.contains(id) && named.is_enum()) {
         Var rule;
         l.compiler.semantic_binding_facts().try_get(
-          %(enum-value (binding $id $name)), &rule);
+          %(enum-value (binding $id $name)), rule);
         match (rule) {
           case %(first):        return 0;
           case %(value ?value): return _lower_expr(l, value);
@@ -1601,7 +1601,7 @@ static Var _lower_bind_value(
   if (_lower_failed(l, value)) return void;
   if (_lower_pure(value)) {
     Var previous = void;
-    l.env.try_get(id, &previous);
+    l.env.try_get(id, previous);
     l.env[id] = value;
     return _lower_block(l, rest, k);
   }
@@ -1635,12 +1635,12 @@ static Var _lower_returned(Lowering l, Var value) {
 
 /* A binder is an atom spelled `?name` or `*name`; a bare `?` or `*` is a
    wildcard and names nothing. */
-static int _lower_binder(Var value, String *name) {
+static int _lower_binder(Var value, String &?name) {
   if (!value.is_atom()) return 0;
   String spelling = value.str();
   if (!spelling || spelling.len() < 2) return 0;
   if (spelling[0] != '?' && spelling[0] != '*') return 0;
-  if (name) *name = String.new_len(spelling + 1, spelling.len() - 1);
+  if (name) name = String.new_len(spelling + 1, spelling.len() - 1);
   return 1;
 }
 
@@ -1685,7 +1685,7 @@ static Var _lower_arms(
   Map saved = _lower_env_copy(l);
   foreach (Var binder, binders) {
     String name = NULL;
-    _lower_binder(binder, &name);
+    _lower_binder(binder, name);
     Array ids = $auto([]);
     _lower_arm_ids(arm.cadr(), name, ids);
     foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));
@@ -2019,7 +2019,7 @@ static Var _lower_boxed(Lowering l, int id, Var value, int fresh) {
    zero-filled the way C fills it. A computed dimension has no such answer. */
 static int _lower_dimension(Lowering l, int id, int &out) {
   Var size;
-  if (!l.arrays.try_get(id, &size)) return 0;
+  if (!l.arrays.try_get(id, size)) return 0;
   match (size)
     case %(expr ? (literal ?(List type) ?(String text))): {
       Var count = ((Type) type).numeric_literal_value(text);
@@ -2131,7 +2131,7 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
   Type type = _lower_type_of(node);
   Var signature;
   if ((want.equal(%("Func")) || (type && type.equal(%("Func")))) &&
-      l.lambda_signatures.try_get(value, &signature))
+      l.lambda_signatures.try_get(value, signature))
     return _lower_func_adapter(l, signature, value);
   match (node)
     case %(expr ?from (ident (binding ?(int id) ?))):
@@ -2320,7 +2320,7 @@ static Var _lower_destructure(
     /* A cell is filled when the enclosing loop allocated it, and bound
        fresh otherwise, as a declarator does. */
     Var slot;
-    if (l.env.try_get(id, &slot)) {
+    if (l.env.try_get(id, slot)) {
       Var discarded = _lower_name(l, "discard");
       wraps = cons(%($discarded (C.store $slot $element)), wraps);
       continue;
@@ -2909,7 +2909,7 @@ static void _lowered_shutdown(void) {
 }
 
 static Map _lowered_defs(void) {
-  if ((void *) lowered_defs != NULL) return lowered_defs;
+  if (lowered_defs != NULL) return lowered_defs;
   Scope.push(&lowered_scope);
   Scope.shutdown_hook(_lowered_shutdown);
   lowered_defs = {};
@@ -2922,7 +2922,7 @@ static Map _lowered_defs(void) {
     creating a lowering cache in the unit's Context.
 */
 void Compiler.inherit_shared_meta(Compiler compiler) {
-  if ((void *) lowered_defs == NULL) return;
+  if (lowered_defs == NULL) return;
   Map definitions = compiler.shared_definitions();
   if (!definitions) return;
   foreach (String key, definitions.keys())
@@ -2951,7 +2951,7 @@ static int _lowered_portable(Var form) {
 static int _lowered_callable(Compiler compiler, List callees) {
   Var value;
   foreach (String name, callees)
-    if (!compiler.macro_lisp.try_get(name, &value)) return 0;
+    if (!compiler.macro_lisp.try_get(name, value)) return 0;
   return 1;
 }
 
@@ -2980,7 +2980,7 @@ static String _lowering_key(Compiler compiler, List fn, String &name) {
     recorded with its lowering, or NULL when the process has none. */
 List Compiler.lowered_meta_regions(Compiler compiler, List fn) {
   String name = NULL, key = _lowering_key(compiler, fn, name);
-  if (!key || (void *) lowered_defs == NULL) return NULL;
+  if (!key || lowered_defs == NULL) return NULL;
   match (lowered_defs[key]) case %(? ? ? ?(List regions)): return regions;
   return NULL;
 }
@@ -3202,7 +3202,7 @@ List Compiler.meta_value_expression(
   _meta_refuse_address(c, value, site);
   Type type = declared ? declared : _meta_value_type(value);
   if (c.sym.is_var_type(type)) type = %("Var");
-  else c.sym.var_tag_for_type(type, &type);
+  else c.sym.var_tag_for_type(type, type);
   if ((value.is_integer() || value.is_floating()) &&
       type !== %("Var")) {
     type = c.sym.resolve_numeric_type(type);
@@ -3326,7 +3326,7 @@ static List _meta_pointer_layout(Type declared, Symbol tag) {
 
 static List _meta_record_layout(Sym sym, Type record, Map cache) {
   Var cached;
-  if (cache.try_get(record, &cached)) return cached;
+  if (cache.try_get(record, cached)) return cached;
   List order = sym.field_order(record);
   if (!order) return NULL;
   Array fields = [];
@@ -3370,7 +3370,7 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
   }
   if (sym.is_var_type(declared)) return _meta_var_layout(declared);
   Type tagged = NULL;
-  Symbol tag = sym.var_tag_for_type(declared, &tagged);
+  Symbol tag = sym.var_tag_for_type(declared, tagged);
   Type native = sym.normalize_declared_type(declared);
   Type exact = native.scalar();
   NativeScalarAccess scalar = exact ? native_scalar_access(exact) : NULL;

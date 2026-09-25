@@ -687,7 +687,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.try_get"></a>
 #### ArrayChar.try_get
 
-`int ArrayChar.try_get(ArrayChar array, int index, char *out)`
+`int ArrayChar.try_get(ArrayChar array, int index, char &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1109,7 +1109,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.try_get"></a>
 #### ArrayDbl.try_get
 
-`int ArrayDbl.try_get(ArrayDbl array, int index, double *out)`
+`int ArrayDbl.try_get(ArrayDbl array, int index, double &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1529,7 +1529,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.try_get"></a>
 #### ArrayFloat.try_get
 
-`int ArrayFloat.try_get(ArrayFloat array, int index, float *out)`
+`int ArrayFloat.try_get(ArrayFloat array, int index, float &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1949,7 +1949,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.try_get"></a>
 #### ArrayInt.try_get
 
-`int ArrayInt.try_get(ArrayInt array, int index, int *out)`
+`int ArrayInt.try_get(ArrayInt array, int index, int &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -2371,7 +2371,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.try_get"></a>
 #### ArrayLong.try_get
 
-`int ArrayLong.try_get(ArrayLong array, int index, long *out)`
+`int ArrayLong.try_get(ArrayLong array, int index, long &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -2793,7 +2793,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.try_get"></a>
 #### ArrayShort.try_get
 
-`int ArrayShort.try_get(ArrayShort array, int index, short *out)`
+`int ArrayShort.try_get(ArrayShort array, int index, short &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -3212,7 +3212,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.try_get"></a>
 #### ArrayString.try_get
 
-`int ArrayString.try_get(ArrayString array, int index, String *out)`
+`int ArrayString.try_get(ArrayString array, int index, String &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or

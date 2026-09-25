@@ -246,7 +246,7 @@ static List _default_statement(Compiler compiler) {
 static void _define_pattern_binders(
   Compiler compiler, List pattern, Token start, String role) {
   List possible = NULL;
-  List definite = compiler.match_pattern_binders(pattern, &possible);
+  List definite = compiler.match_pattern_binders(pattern, possible);
   foreach (Var binder, possible) {
     if (!definite.contains(binder))
       compiler.report_error(
@@ -523,7 +523,7 @@ List Compiler.with_binding(Compiler c) {
   Var candidate;
   if (c.peek(0) != <ident> ||
       !c.semantic_binding_facts().try_get(
-        %(with-name ${c.token.text}), &candidate))
+        %(with-name ${c.token.text}), candidate))
     return NULL;
   List binding = c.sym.lookup(%(${c.token.text}), NULL);
   return binding.equal(candidate) ? binding : NULL;
@@ -595,7 +595,7 @@ List Compiler.parse_statement(Compiler c) {
     c.semantic_binding_facts()[%(with $binding)] = expression;
     Var old_with;
     int had_previous_with = c.semantic_binding_facts().try_get(
-      %(with-name $alias), &old_with);
+      %(with-name $alias), old_with);
     c.semantic_binding_facts()[%(with-name $alias)] = binding;
     List body = NULL;
     {

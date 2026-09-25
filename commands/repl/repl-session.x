@@ -86,7 +86,7 @@ List ReplSession.symbols(ReplSession session) {
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
-  return session.names.try_get(name, &entry) ? entry.list() : NULL;
+  return session.names.try_get(name, entry) ? entry.list() : NULL;
 }
 
 static List _completion_filter(
@@ -114,7 +114,7 @@ static List _completion_filter(
       Type semantic = type;
       Var callable;
       if (semantic.is_function() && !session.names.contains(name) &&
-          !session.compiler.macro_lisp.try_get(name, &callable))
+          !session.compiler.macro_lisp.try_get(name, callable))
         continue;
     }
     Symbol candidate_kind = <name>;
@@ -428,7 +428,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
           Var bound;
           if (names.contains(name))
             _refuse("function redeclaration is disabled");
-          if (!c.macro_lisp.try_get(name, &bound))
+          if (!c.macro_lisp.try_get(name, bound))
             _refuse(%"no native function is available for $name");
           transaction.commit_transient();
           names[name] = %(native);
@@ -459,7 +459,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         case %(function ? (bind (binding ? ?(String name)) ?) ?): {
           Var existing;
           if (names.contains(name) || name.startswith("__repl_") ||
-              c.macro_lisp.try_get(name, &existing))
+              c.macro_lisp.try_get(name, existing))
             _refuse("function redeclaration is disabled");
           added.push(name);
           function_name = name;
@@ -500,7 +500,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   catch %(?cause *details): {
     // Discard cells for unpublished bindings before rollback reuses their IDs.
     Var storage;
-    if (c.macro_lisp.try_get("C._globals", &storage)) {
+    if (c.macro_lisp.try_get("C._globals", storage)) {
       Map globals = storage;
       foreach (Var id, ids) globals.del(id);
     }

@@ -441,7 +441,7 @@ void Error.shutdown_raw(void) {
   _reclaim_hidden(state);
   _unwind_to(state, NULL, 1);
   _truncate(0);
-  if ((void *) state.stack != NULL) {
+  if (state.stack != NULL) {
     state.stack.free();
     state.stack = NULL;
   }
@@ -1027,7 +1027,7 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
 }
 
 static void _retained_destroy(Block retained) {
-  if ((void *) retained == NULL) return;
+  if (retained == NULL) return;
   ErrorRecord *records = retained.bytes;
   for (size_t i = 0; i < retained.length; i++)
     _region_destroy(&records[i].region);
@@ -1087,7 +1087,7 @@ static void _handler_free(ErrorHandler handle) {
   if (!handle) return;
   // a per-call site has no static arm storage and belongs to this handler
   if (handle.site && !handle.site.arms) Scope.free(handle.site);
-  if ((void *) handle.plans != NULL) {
+  if (handle.plans != NULL) {
     MatchPlan *plans = handle.plans.bytes;
     for (size_t i = 0; i < handle.plans.length; i++) {
       MatchPlan plan = plans[i];
@@ -1095,7 +1095,7 @@ static void _handler_free(ErrorHandler handle) {
     }
     handle.plans.free();
   }
-  if ((void *) handle.capture_values != NULL) handle.capture_values.free();
+  if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
   _region_destroy(&handle.view);
   Scope.free(handle);
@@ -1204,7 +1204,7 @@ static Symbol _catch_match(ErrorHandler h) {
   List projection = _cons(&record.region, code, detail);
   Pool.open_named("Error catch bindings");
   ErrorCatchSite *site = h.site;
-  MatchPlan *plans = (void *) h.plans != NULL ? h.plans.bytes : NULL;
+  MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
   for (int i = 0; i < site.arm_count; i++) {
     int is_default = i == site.default_arm;
     MatchPlan plan = is_default ? NULL

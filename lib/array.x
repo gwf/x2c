@@ -171,7 +171,7 @@ Var Array.setindex(Array array, int index, Var elem) {
    .
 */
 Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
-  if ((void *) array == NULL) raise %(bad-arg (owner "Array.updateindex"));
+  if (array == NULL) raise %(bad-arg (owner "Array.updateindex"));
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if (index < 0)
@@ -191,7 +191,7 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
     is unchanged on failure.
 */
 Var Array.postfixindex(Array array, int index, Symbol op) {
-  if ((void *) array == NULL) raise %(bad-arg (owner "Array.postfixindex"));
+  if (array == NULL) raise %(bad-arg (owner "Array.postfixindex"));
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if (index < 0)
@@ -464,7 +464,7 @@ meta native Self Array.reverse(Self array) => array._core_reverse();
 */
 Array Array.map(Array array, Func func) {
   Array output = [], result = NULL;
-  defer if ((void *) result == NULL) output.free();
+  defer if (result == NULL) output.free();
   foreach (Var item, array) {
     FuncArg arguments[1] = { FuncArg.value(item) };
     output.push(func.apply(1, arguments));
@@ -481,7 +481,7 @@ Array Array.map(Array array, Func func) {
 */
 Array Array.map2(Array a, Array b, Func func) {
   Array output = [], result = NULL;
-  defer if ((void *) result == NULL) output.free();
+  defer if (result == NULL) output.free();
   size_t an = a.len(), bn = b.len(), n = (an < bn) ? an : bn;
   for (size_t i = 0; i < n; i++) {
     FuncArg arguments[2] = {
@@ -822,7 +822,7 @@ Iter Array.iter(Array x, Iter dest) {
 /** Drains `iter` into a fresh `Array`. */
 meta native Array Iter.array(Iter iter) {
   Array output = [], result = NULL;
-  defer if ((void *) result == NULL) output.free();
+  defer if (result == NULL) output.free();
   foreach (Var item, iter) output.push(item);
   return result = output;
 }

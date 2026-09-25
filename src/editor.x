@@ -88,7 +88,7 @@ static Array _sources(Compiler compiler, Map needed) {
   Array sources = [];
   foreach (Var key, needed.keys()) {
     Var text;
-    if (compiler.source_texts.try_get(key, &text))
+    if (compiler.source_texts.try_get(key, text))
       sources.push({file: key, text: text});
   }
   return sources;

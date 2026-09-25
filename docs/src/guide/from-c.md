@@ -176,7 +176,7 @@ separately:
 ```x2c
 Map settings = {theme: "dark"};
 Var found;
-if (settings.try_get(<theme>, &found))
+if (settings.try_get(<theme>, found))
   printf("theme=%s\n", found);
 
 long number;

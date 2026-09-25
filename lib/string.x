@@ -171,7 +171,7 @@ static int _is_active_canonical(String str) =>
 static void _free_unchecked(String str) {
   /* Only Pool-backed transient or losing-candidate storage may enter here;
      callers establish that the pointer is not a live canonical table entry. */
-  if ((void *) str != NULL)
+  if (str != NULL)
     Pool.current().free(_header(str));
 }
 
@@ -226,7 +226,7 @@ String String.malloc(int len) {
     A null argument is ignored.
 */
 meta native void String.free(String str) {
-  if ((void *) str == NULL) return;
+  if (str == NULL) return;
   if (!_header(str).hash) {
     _free_unchecked(str);
     return;
@@ -256,7 +256,7 @@ static String _intern_owned(String string) {
      it without copying; installing a detached or sibling-owned pointer would
      leave a table entry dangling when that other pool is released. The caller
      disposes of an ancestor-hit candidate. */
-  if ((void *) string == NULL || !*string) return NULL;
+  if (string == NULL || !*string) return NULL;
   StringHeader header = _header(string);
   if (!header.hash) {
     int length = strlen(string);
@@ -307,7 +307,7 @@ meta native Self String.intern(Self string) => string.new();
     `String`, without raising.
 */
 Self String.intern_free(Self string) {
-  if ((void *) string == NULL) return NULL;
+  if (string == NULL) return NULL;
   if (!*string) {
     _free_unchecked(string);
     return NULL;
@@ -1029,7 +1029,7 @@ meta native String String.join(String sep, List strings) {
       dst += sep_len;
     }
   }
-  if ((void *) string != NULL) return _finish(string, (int) total);
+  if (string != NULL) return _finish(string, (int) total);
   return _from_bytes(stack_bytes, (int) total);
 }
 

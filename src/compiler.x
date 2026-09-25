@@ -481,7 +481,7 @@ void Compiler.copy_source_declaration(
   if (!compiler.source_facts) return;
   Var declaration;
   List target_key = %($target $key);
-  if (compiler.source_declarations.try_get(%($source $key), &declaration))
+  if (compiler.source_declarations.try_get(%($source $key), declaration))
     compiler.source_declarations[target_key] = declaration;
   else compiler.source_declarations.del(target_key);
 }
@@ -510,7 +510,7 @@ void Compiler.record_source_declaration(
   Compiler c, List binding, Token first, Token after) {
   if (!c.source_facts || c.macro_holes) return;
   Var value;
-  if (!c.semantic_binding_facts().try_get(%(src-key $binding), &value)) return;
+  if (!c.semantic_binding_facts().try_get(%(src-key $binding), value)) return;
   List source_key = value, range = _source_range(c, first, after);
   if (!range) return;
   Map symbols = source_key.car();
@@ -544,7 +544,7 @@ Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 /** Returns the optional references proven present in this lexical path. */
 List Compiler.present_references(Compiler c) {
   Var stored;
-  return c.semantic_binding_facts().try_get(%(present-references), &stored)
+  return c.semantic_binding_facts().try_get(%(present-references), stored)
        ? stored.list() : NULL;
 }
 
@@ -633,7 +633,7 @@ Map Compiler.macro_definition_locals(Compiler compiler) {
 String Compiler.fresh_name(Compiler compiler, String stem) {
   String key = compiler.import_src ? %"m$stem" : stem;
   Var stored;
-  int count = compiler.names.counters.try_get(key, &stored) ? stored : 0;
+  int count = compiler.names.counters.try_get(key, stored) ? stored : 0;
   String name = %"_x2c_${key}_${count++}";
   compiler.names.counters[key] = count;
   return name;
@@ -646,7 +646,7 @@ String Compiler.fresh_name(Compiler compiler, String stem) {
 String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   Var renamed;
   Map facts = compiler.semantic_binding_facts();
-  if (facts.try_get(%(emitted $binding), &renamed)) return renamed;
+  if (facts.try_get(%(emitted $binding), renamed)) return renamed;
   return binding_identity_spelling(binding);
 }
 
@@ -1210,7 +1210,7 @@ static void _shallow_finish_declaration(Compiler c) {
      compile-time form is installed by the full parse. */
   Token meta = NULL;
   int native = 0;
-  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(&native);
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
@@ -1761,11 +1761,11 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
     contributes above `base`.
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  int initialize_macros = (void *) c.macros == NULL || !c.macros.len();
+  int initialize_macros = c.macros == NULL || !c.macros.len();
   if (initialize_macros) {
     c.macros = {};
-    if ((void *) c.kw_aliases == NULL) c.kw_aliases = {};
-    if ((void *) c.kw_seen == NULL) c.kw_seen = {};
+    if (c.kw_aliases == NULL) c.kw_aliases = {};
+    if (c.kw_seen == NULL) c.kw_seen = {};
     c.imports = {};
     c.import_stack.clear();
   }
@@ -1814,13 +1814,13 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
     else if (type != <ident>) return 1;
     else if (word == "__attribute__" || word == "__declspec" ||
-             (c.object_macros.try_get(word, &definition) &&
+             (c.object_macros.try_get(word, definition) &&
               definition.equal(<annotation>))) {
       if (next.type != <(>) return 1;
       next = next.after_group();
     }
     else if (param && word == param && !wrapped) wrapped = 1;
-    else if (!c.object_macros.try_get(word, &definition) ||
+    else if (!c.object_macros.try_get(word, definition) ||
              definition is not <list>)
       return 1;
     else foreach (Var item, definition) words.push(item);
@@ -1874,7 +1874,7 @@ static void _note_object_macro(Compiler c, String content) {
   /* A name another arm defines to anything but a string literal is no string
      literal: `Var v = SEP;` must not make a String of the other arm's
      number. */
-  if (!c.object_macros.try_get(name, &existing) ||
+  if (!c.object_macros.try_get(name, existing) ||
       _prefix_rank(definition) > _prefix_rank(existing) ||
       (existing.equal(<string>) && !definition.equal(<string>)))
     c.object_macros[name] = definition;
@@ -2413,7 +2413,7 @@ static Symbol _flat_capture_tag(Var element, Var binder) {
     capture of one. When `tags` is non-null, stores one entry per binder
     in order: the capture's tag Symbol, or integer zero when untyped.
 */
-Symbol match_value_flat_head(Var value, List binders, List *tags) {
+Symbol match_value_flat_head(Var value, List binders, List &?tags) {
   Symbol head = match_value_head(value);
   if (!head) return 0;
   List elements = value.list().cdr();
@@ -2428,7 +2428,7 @@ Symbol match_value_flat_head(Var value, List binders, List *tags) {
     typed.push(tag ? (Var) tag : (Var) 0);
   }
   if (binders.len() != typed.len() || elements) return 0;
-  if (tags) *tags = typed.list_free();
+  if (tags) tags = typed.list_free();
   else typed.free();
   return head;
 }
@@ -2437,11 +2437,11 @@ Symbol match_value_flat_head(Var value, List binders, List *tags) {
 
     When `possible` is non-null, stores every binder appearing on any path.
 */
-List Compiler.match_pattern_binders(Compiler c, List pattern, List *possible) {
+List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible) {
   Var value = c.match_pattern_value(pattern);
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
   List definite = layout.definite_list();
-  if (possible) *possible = layout.possible_list();
+  if (possible) possible = layout.possible_list();
   layout.free();
   return definite;
 }
@@ -2568,7 +2568,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   c.merge_source_declarations(scope.symbols, transaction.scope.symbols);
   scope.bindings = transaction.scope.bindings.copy();
   scope.enumerators = transaction.scope.enumerators.copy();
-  scope.macros = (void *) transaction.scope.macros != NULL
+  scope.macros = transaction.scope.macros != NULL
                ? transaction.scope.macros.copy() : NULL;
   c.sym.statics = c.sym.statics.copy();
   c.sym.binding_facts = c.semantic_binding_facts().copy();
@@ -2591,8 +2591,8 @@ void SymTxn.commit(SymTxn s) {
   compiler.merge_source_declarations(scope.symbols, staged.symbols);
   scope.bindings.merge(staged.bindings);
   scope.enumerators.merge(staged.enumerators);
-  if ((void *) staged.macros != NULL) {
-    if ((void *) scope.macros == NULL) scope.macros = {};
+  if (staged.macros != NULL) {
+    if (scope.macros == NULL) scope.macros = {};
     scope.macros.merge(staged.macros);
   }
   s.meta_layouts.merge(compiler.meta_layouts);
@@ -2630,7 +2630,7 @@ void SymTxn.commit_transient(SymTxn s) {
 int SymTxn.local_macros_changed(SymTxn s) {
   SymScope *scope = _semantic_scope(s.compiler.sym, s.scope_index);
   Map before = s.scope.macros, after = scope.macros;
-  if ((void *) before == NULL || (void *) after == NULL)
+  if (before == NULL || after == NULL)
     return (void *) before != (void *) after;
   return !before.equal(after);
 }
@@ -2662,14 +2662,14 @@ void SymTxn.rollback(SymTxn transaction) {
 
 static void _semantic_reset(Sym sym, Map base, Map globals, int overlay) {
   sym.scopes.clear();
-  sym.globals = (void *) globals != NULL ? globals : {};
+  sym.globals = globals != NULL ? globals : {};
   sym.statics = {};
   sym.base_scopes = overlay ? 2 : 1;
   sym.local_macro_names = 0;
   sym.binding_facts = {};
   if (overlay) {
     struct SymScope base_scope = {
-      .symbols = (void *) base != NULL ? base : {},
+      .symbols = base != NULL ? base : {},
       .bindings = {}, .enumerators = {}
     };
     sym.scopes.push(&base_scope);
@@ -2740,7 +2740,7 @@ List Sym.visible_symbols(Sym sym) {
             seen[name] = 1;
             rows.push(%($name $value));
           }
-    if ((void *) scope.macros != NULL)
+    if (scope.macros != NULL)
       foreach (Var (name, definition), scope.macros)
         if (name is <string> && !seen.contains(name)) {
           seen[name] = 1;
@@ -2756,7 +2756,7 @@ List Sym.visible_symbols(Sym sym) {
 List Sym.current_binding(Sym sym, List key) {
   SymScope *scope = _semantic_scope(sym, -1);
   Var binding;
-  return scope && scope.bindings.try_get(key, &binding)
+  return scope && scope.bindings.try_get(key, binding)
        ? binding : NULL;
 }
 
@@ -2764,7 +2764,7 @@ List Sym.current_binding(Sym sym, List key) {
 Symbol Sym.enumerator_owner(Sym sym, List key) {
   SymScope *scope = _semantic_scope(sym, -1);
   Var owner;
-  return scope && scope.enumerators.try_get(key, &owner)
+  return scope && scope.enumerators.try_get(key, owner)
        ? owner : 0;
 }
 
@@ -2782,7 +2782,7 @@ void Sym.declare_enumerator(Sym sym, List key, Symbol owner) {
 */
 void Sym.define_macro(Sym sym, Atom name, List definition) {
   SymScope *scope = _semantic_scope(sym, -1);
-  if ((void *) scope.macros == NULL) scope.macros = {};
+  if (scope.macros == NULL) scope.macros = {};
   if (!scope.macros.contains(name)) sym.local_macro_names++;
   scope.macros[name] = definition;
   Var captures = definition.assoc(<captures>);
@@ -2805,8 +2805,8 @@ List Sym.lookup_macro(Sym sym, Atom name) {
   Var definition;
   for (int i = (int) sym.scopes.len() - 1; i >= sym.base_scopes; i--) {
     SymScope *scope = _semantic_scope(sym, i);
-    if ((void *) scope.macros != NULL &&
-        scope.macros.try_get(name, &definition))
+    if (scope.macros != NULL &&
+        scope.macros.try_get(name, definition))
       return definition;
   }
   return NULL;
@@ -2837,7 +2837,7 @@ static List _semantic_new_binding(Sym sym, List key) {
 static List _semantic_scope_binding(Sym sym, SymScope *scope, List key) {
   Var found;
   List binding;
-  if (scope.bindings.try_get(key, &found)) binding = found;
+  if (scope.bindings.try_get(key, found)) binding = found;
   else {
     binding = _semantic_new_binding(sym, key);
     scope.bindings[key] = binding;
@@ -2849,7 +2849,7 @@ static List _semantic_scope_binding(Sym sym, SymScope *scope, List key) {
   List self_key = %(self $binding);
   if (!sym.binding_facts.contains(self_key)) {
     Var relative;
-    if (scope.symbols.try_get(%(self $spelling), &relative))
+    if (scope.symbols.try_get(%(self $spelling), relative))
       sym.binding_facts[self_key] = relative;
   }
   if (sym.compiler.source_facts) {
@@ -2857,7 +2857,7 @@ static List _semantic_scope_binding(Sym sym, SymScope *scope, List key) {
     sym.binding_facts[%(src-key $binding)] = source_key;
     Var declaration;
     if (sym.compiler.source_primary && !sym.compiler.shallow &&
-        sym.compiler.source_declarations.try_get(source_key, &declaration))
+        sym.compiler.source_declarations.try_get(source_key, declaration))
       sym.compiler.source_definitions[binding] = declaration;
   }
   return binding;
@@ -2917,10 +2917,10 @@ List Sym.get_exact(Sym sym, List key) {
   Var val;
   for (int i = (int) sym.scopes.len() - 1; i >= 0; i--) {
     Map scope = _semantic_scope(sym, i).symbols;
-    if (scope.try_get(key, &val)) return val;
+    if (scope.try_get(key, val)) return val;
   }
   if (_retained_aggregate_member(key) &&
-      sym.binding_facts.try_get(%(aggfact $key), &val)) return val;
+      sym.binding_facts.try_get(%(aggfact $key), val)) return val;
   return NULL;
 }
 
@@ -2944,23 +2944,23 @@ List Sym.get(Sym sym, List key) {
 }
 
 static List _semantic_lookup(
-  Sym sym, List key, List *type, int first, int forward) {
+  Sym sym, List key, Type &?type, int first, int forward) {
   Var found;
   for (int i = first; i >= 0; i--) {
     SymScope *scope = _semantic_scope(sym, i);
-    if (scope.symbols.try_get(key, &found)) {
-      if (type) *type = found;
+    if (scope.symbols.try_get(key, found)) {
+      if (type) type = found;
       return _semantic_scope_binding(sym, scope, key);
     }
-    if (scope.bindings.try_get(key, &found)) {
-      if (type) *type = NULL;
+    if (scope.bindings.try_get(key, found)) {
+      if (type) type = NULL;
       return found;
     }
   }
   List retry = _package_retry_key(sym, key);
   if (retry && (!forward || sym.get_exact(retry)))
     return _semantic_lookup(sym, retry, type, first, forward);
-  if (type) *type = NULL;
+  if (type) type = NULL;
   return forward
        ? _semantic_scope_binding(sym, _semantic_scope(sym, -1), key)
        : NULL;
@@ -2971,21 +2971,21 @@ static List _semantic_lookup(
     A symbol row without a binding receives a stable binding identity. A total
     miss returns `NULL` and stores `NULL` through `type` when provided.
 */
-List Sym.lookup(Sym sym, List key, List *type) =>
+List Sym.lookup(Sym sym, List key, Type &?type) =>
   _semantic_lookup(sym, key, type, (int) sym.scopes.len() - 1, 0);
 
 /** Resolves `key` or creates a forward binding in the current scope.
 
     Stores `NULL` through `type` when no declaration supplies a type.
 */
-List Sym.reference(Sym sym, List key, List *type) =>
+List Sym.reference(Sym sym, List key, Type &?type) =>
   _semantic_lookup(sym, key, type, (int) sym.scopes.len() - 1, 1);
 
 /** Resolves a binding through base scopes and optionally stores its type.
 
     Returns `NULL` when no base scope contains the key.
 */
-List Sym.resolve_global(Sym sym, List key, List *type) =>
+List Sym.resolve_global(Sym sym, List key, Type &?type) =>
   _semantic_lookup(sym, key, type, sym.base_scopes - 1, 0);
 
 /** Resolves a global name or creates its forward binding in the base scope.
@@ -3230,8 +3230,8 @@ List Sym.declare(Sym sym, List context, List key, List ast) {
   if (!context && (int) sym.scopes.len() > sym.base_scopes) {
     sym.binding_facts[%(automatic $binding)] = 1;
     sym.binding_facts[%(type $binding)] = declared_type;
-    List global_type = NULL;
-    sym.resolve_global(key, &global_type);
+    Type global_type = NULL;
+    sym.resolve_global(key, global_type);
     if (_declared_var_converter_owner(key, global_type) &&
         !sym.binding_facts.contains(%(emitted $binding)))
       sym.binding_facts[%(emitted $binding)] =
@@ -3299,13 +3299,13 @@ static List _function_completion_contract(
 static List _binding_method_identity(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(method $binding), &stored) ? stored : NULL;
+    %(method $binding), stored) ? stored : NULL;
 }
 
 static List _binding_self_signature(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(self $binding), &stored) ? stored : NULL;
+    %(self $binding), stored) ? stored : NULL;
 }
 
 // Record only prototypes reached in positioned full-parse source order.
@@ -3331,7 +3331,7 @@ static void _record_function_prototypes(
           _binding_self_signature(c, binding));
         Var stored;
         if (c.semantic_binding_facts().try_get(
-          %(completion $binding), &stored)) {
+          %(completion $binding), stored)) {
           List state = stored;
           Var (state_kind, prior_contract) = state;
           if (state_kind == <definition> || state_kind == <completed>)
@@ -3355,7 +3355,7 @@ static void _record_function_prototypes(
    is therefore not detected, and the later initializer wins. */
 static void _report_redefinition(Compiler c, String kind, List binding) {
   Var arms;
-  if (!c.semantic_binding_facts().try_get(%(arms $binding), &arms) ||
+  if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
       !List.equal(arms, c.arms))
     return;
   String spelling = binding_identity_spelling(binding);
@@ -3370,7 +3370,7 @@ static void _record_function_definition(
     type, _binding_method_identity(c, binding),
     _binding_self_signature(c, binding));
   Var stored;
-  if (c.semantic_binding_facts().try_get(%(completion $binding), &stored)) {
+  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
     List state = stored;
     Var (state_kind, prior_contract) = state;
     String spelling = binding_identity_spelling(binding);
@@ -3468,7 +3468,7 @@ static void _validate_static_object_initializers(Compiler compiler) {
       String target = binding_identity_spelling(binding);
       Token token = NULL;
       Var token_index;
-      if (compiler.init_tokens.try_get(binding, &token_index)) {
+      if (compiler.init_tokens.try_get(binding, token_index)) {
         Token tokens = compiler.tokenizer.tokens;
         token = tokens + token_index.integer();
       }
@@ -3663,7 +3663,7 @@ Type Sym.local_type(Sym sym, Type type) {
     for (int i = sym.scopes.len() - 1; i >= sym.base_scopes; i--) {
       SymScope *scope = _semantic_scope(sym, i);
       Var binding;
-      if (scope.bindings.try_get(base, &binding))
+      if (scope.bindings.try_get(base, binding))
         return _replace_type_base(type, base, %(${base.car()} $binding));
     }
     return type;
@@ -3672,11 +3672,11 @@ Type Sym.local_type(Sym sym, Type type) {
   for (int i = sym.scopes.len() - 1; i >= sym.base_scopes; i--) {
     Map symbols = _semantic_scope(sym, i).symbols;
     Var marker;
-    if (!symbols.try_get(base, &marker)) continue;
+    if (!symbols.try_get(base, marker)) continue;
     Type declared = marker;
     if (!declared.is_typedef()) return type;
     Var target;
-    if (!symbols.try_get(declared, &target)) return type;
+    if (!symbols.try_get(declared, target)) return type;
     return _replace_type_base(type, base, target);
   }
   return type;
@@ -3716,7 +3716,7 @@ Var Compiler.aggregate_name(
 static Type _typedef_target(Sym sym, Type key) {
   for (int i = sym.base_scopes - 1; i >= 0; i--) {
     Var target;
-    if (_semantic_scope(sym, i).symbols.try_get(key, &target)) return target;
+    if (_semantic_scope(sym, i).symbols.try_get(key, target)) return target;
   }
   return NULL;
 }
@@ -3741,11 +3741,11 @@ Type Sym.normalize_declared_type(Sym sym, Type type) =>
   type ? _normalize_declared_type(sym, type, type, 0) : NULL;
 
 static Symbol _var_tag_for_type_helper(
-  Sym sym, Type type, Type origin, Type *resolved, int hops) {
+  Sym sym, Type type, Type origin, Type &?resolved, int hops) {
   type = type.canonicalize();
   Symbol tag = type.var_tag();
   if (tag) {
-    if (resolved) *resolved = type;
+    if (resolved) resolved = type;
     return tag;
   }
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(sym, origin);
@@ -3759,7 +3759,7 @@ static Symbol _var_tag_for_type_helper(
         sym, replaced, origin, resolved, hops + 1);
     }
   }
-  if (resolved) *resolved = type;
+  if (resolved) resolved = type;
   return 0;
 }
 
@@ -3768,9 +3768,9 @@ static Symbol _var_tag_for_type_helper(
     `resolved` receives the final type even when the result is zero because no
     `Var` tag is registered. A null input stores `NULL` and returns zero.
 */
-Symbol Sym.var_tag_for_type(Sym sym, Type type, Type *resolved) {
+Symbol Sym.var_tag_for_type(Sym sym, Type type, Type &?resolved) {
   if (!type) {
-    if (resolved) *resolved = NULL;
+    if (resolved) resolved = NULL;
     return 0;
   }
   Type origin = type.canonicalize();
@@ -3874,7 +3874,7 @@ List Compiler.gensym(Compiler c) {
     ? home_portable_path(c.canonical_path(c.filename)) : "";
   String key = %"gensym:$owner";
   Var stored;
-  int count = c.names.counters.try_get(key, &stored) ? stored.int() + 1 : 1;
+  int count = c.names.counters.try_get(key, stored) ? stored.int() + 1 : 1;
   c.names.counters[key] = count;
   return %((gensym $owner $count));
 }
@@ -3898,7 +3898,7 @@ void Sym.push_scope(Sym sym, SymScope scope) {
 SymScope Sym.pop_scope(Sym s) {
   struct SymScope scope = { 0 };
   s.scopes.try_pop(&scope);
-  if ((void *) scope.macros != NULL) s.local_macro_names -= scope.macros.len();
+  if (scope.macros != NULL) s.local_macro_names -= scope.macros.len();
   return scope;
 }
 

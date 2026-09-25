@@ -52,7 +52,7 @@ static void _install_source(
   int builtin) {
   (void) marker.try_own();
   Var installed;
-  if (compiler.macros.try_get(marker, &installed)) {
+  if (compiler.macros.try_get(marker, installed)) {
     compiler.kw_aliases.merge(installed);
     return;
   }
@@ -106,11 +106,11 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
 
 static int _try_definition(
   Compiler compiler, Atom name, int install_lisp, Var &stored) {
-  int found = compiler.macros.try_get(name, &stored);
+  int found = compiler.macros.try_get(name, stored);
   String spelling = name.str();
   if (!install_lisp || !spelling.startswith("lisp.")) return found;
   _use_lisp_bindings(compiler, !found);
-  return found || compiler.macros.try_get(name, &stored);
+  return found || compiler.macros.try_get(name, stored);
 }
 
 /** Installs the compiler-shipped source macros into `compiler` once. */
@@ -207,7 +207,7 @@ static Var _sdk_function_reference(String name) {
   Compiler compiler = macro_import_compiler;
   if (!compiler) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
-  List binding = compiler.sym.lookup(%($name), &type);
+  List binding = compiler.sym.lookup(%($name), type);
   if (!binding || !type || !type.is_function()) return %();
   return %(expr $type (ident $binding));
 }
@@ -364,7 +364,7 @@ String x2c_binding_spelling(Var syntax) {
         _sdk_reject(
           "x2c.binding.spelling requires a known binding",
           %("binding: ${value.repr()}"));
-  if (!binding_identity_try_parts(value, &identity, &spelling))
+  if (!binding_identity_try_parts(value, identity, spelling))
     _sdk_reject(
       "x2c.binding.spelling requires an identifier or binding",
       %("value: ${syntax.repr()}" ));
@@ -382,7 +382,7 @@ static Var _sdk_source_text(Var value) {
   Var stored = void;
   Var key = ((ulong) value.u64);
   if (!macro_sdk_source_captures ||
-      !macro_sdk_source_captures.try_get(key, &stored))
+      !macro_sdk_source_captures.try_get(key, stored))
     _sdk_reject(
       "x2c.source.text requires complete captured syntax",
       macro_sdk_has_references ? NULL : %("value: ${value.repr()}"));
@@ -710,7 +710,7 @@ static List _peek_invocation(Compiler c) {
   Atom name = Atom.intern(c.token.text);
   List definition = c.sym.has_local_macros()
                   ? c.sym.lookup_macro(name) : NULL;
-  if (!definition && c.kw_aliases.try_get(name, &stored)) definition = stored;
+  if (!definition && c.kw_aliases.try_get(name, stored)) definition = stored;
   return definition && (c.peek(1) == <(> || _bare(c.token, definition))
        ? definition : NULL;
 }
@@ -862,7 +862,7 @@ static Var _sdk_embed_text(Var requested) {
     Var stored = void;
     Var key = ((ulong) requested.u64);
     if (!macro_sdk_source_captures ||
-        !macro_sdk_source_captures.try_get(key, &stored) ||
+        !macro_sdk_source_captures.try_get(key, stored) ||
         !_literal_string(requested, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
@@ -1003,7 +1003,7 @@ static int library_restartable = 0, static int library_settled = 0;
 
 static int _inherited_import(String path) {
   /* An empty `Map` is false, so the test is for the allocation. */
-  return !library_filling && (void *) library_imports != NULL &&
+  return !library_filling && library_imports != NULL &&
          path in library_imports;
 }
 
@@ -1090,7 +1090,7 @@ static String _meta_lisp_name(String name) {
 void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
   String dotted = _meta_lisp_name(name);
   Var bound;
-  if (lisp.try_get(dotted, &bound)) return;
+  if (lisp.try_get(dotted, bound)) return;
   if (name.startswith("x2c_type_is_"))
     function = lisp.eval(
       %(lambda (value) (if (C.true? ((quote $function) value)) true nil)));
@@ -1153,7 +1153,7 @@ static void _install_native_operations(Compiler compiler) {
     unit opened in between still builds its own.
 */
 Lisp Compiler.open_macro_library(Compiler compiler) {
-  if ((void *) library_session != NULL) return NULL;
+  if (library_session != NULL) return NULL;
   Scope.push(&library_scope);
   defer Scope.pop();
   if (!library_shutdown_registered) {
@@ -1210,7 +1210,7 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
 int Compiler.shared_definition(Compiler compiler, String key) {
   (void) compiler;
   /* An empty `Map` is false, so the test is for the allocation. */
-  if ((void *) library_definitions == NULL) return 0;
+  if (library_definitions == NULL) return 0;
   int known = key in library_definitions;
   if (library_filling) library_definitions[key] = 1;
   return known;
@@ -1251,7 +1251,7 @@ static void _ensure_lisp(Compiler compiler) {
   if (macro_library_pending() && !library_filling) raise %(lisp-late);
   with compiler {
     int loaded = _.macro_lisp != NULL;
-    int shared = (void *) library_session != NULL;
+    int shared = library_session != NULL;
     if (!loaded) {
       _.macro_lisp = Lisp.kernel();
       _.macro_lisp.adopt(library_session);
@@ -1290,7 +1290,7 @@ static String _lisp_form(Compiler c) {
   return %"(${String.new_len(c.text + begin, close.pos - begin)})";
 }
 
-static int _import_path(Compiler compiler, String *path) {
+static int _import_path(Compiler compiler, String &?path) {
   Token token = compiler.skip_trivia_from(compiler.token + 1);
   /* The checked-in bootstrap still tokenizes `import` as an identifier, so
      both spellings of the same word open a compile-time import. */
@@ -1299,7 +1299,7 @@ static int _import_path(Compiler compiler, String *path) {
     return 0;
   token = compiler.skip_trivia_from(token + 1);
   if (token.type != <lit-char*>) return 0;
-  if (path) *path = String.new_len(token.text + 1, token.len - 2).unescape();
+  if (path) path = String.new_len(token.text + 1, token.len - 2).unescape();
   token = compiler.skip_trivia_from(token + 1);
   return token.type == <)>;
 }
@@ -1309,7 +1309,7 @@ static void _import_reference_bindings(
   match (syntax)
     case %(expr ? (ident ?binding)): {
       String spelling = NULL;
-      if (binding_identity_try_parts(binding, NULL, &spelling))
+      if (binding_identity_try_parts(binding, NULL, spelling))
         replacements[binding] = compiler.sym.reference_global(%($spelling));
       return;
     }
@@ -1342,7 +1342,7 @@ static List _import(
   if (library_filling) library_imports[path] = 1;
   Var cached;
   int replay = 0;
-  if (c.imports.try_get(path, &cached)) {
+  if (c.imports.try_get(path, cached)) {
     match (cached)
       case %(imported ?aliases ?definitions ?dependencies ?(int meta)): {
         c.merge_translation_dependencies(dependencies);
@@ -1505,7 +1505,7 @@ static List _import(
 List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   Token invocation = compiler.token;
   String import_path = NULL;
-  int is_import = _import_path(compiler, &import_path);
+  int is_import = _import_path(compiler, import_path);
   String form = _lisp_form(compiler);
   if (is_import) return _import(compiler, import_path, invocation);
   /* The shared session evaluated this file's forms once for the target and
@@ -1805,7 +1805,7 @@ void Compiler.select_native_modules(List paths) {
 int Compiler.supplies_native_meta(String name) {
   Var targets;
   return (void *) native_modules &&
-         native_modules.try_get(compiler_supplier, &targets) &&
+         native_modules.try_get(compiler_supplier, targets) &&
          name in ((Map) targets);
 }
 
@@ -1923,7 +1923,7 @@ static void _bind_native_meta(
   _certify_native_meta(c, name, signature, marker);
   int iterator = _iterator_operation(signature);
   Var bound, function;
-  int present = c.macro_lisp.try_get(name, &bound);
+  int present = c.macro_lisp.try_get(name, bound);
   if (present && !iterator) function = bound;
   else {
     String target = iterator ? %"${name}_into" : name;
@@ -1992,9 +1992,9 @@ int Compiler.bind_native_meta(Compiler c, String name) {
     if (current) symbols.merge(current);
     c.install_native_meta_effects(symbols);
   }
-  if (!c.native_meta.try_get(name, &signature)) return 0;
+  if (!c.native_meta.try_get(name, signature)) return 0;
   _bind_native_meta(c, name, signature, NULL);
-  return c.macro_lisp.try_get(name, &bound);
+  return c.macro_lisp.try_get(name, bound);
 }
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
@@ -2124,7 +2124,7 @@ static Map _source_captures(List bindings) {
   foreach (List pair, bindings) {
     List source;
     Var syntax;
-    if (pair && _source_capture_parts(pair.cadr(), &source, &syntax))
+    if (pair && _source_capture_parts(pair.cadr(), source, syntax))
       captures[((ulong) syntax.u64)] = source;
   }
   return captures;
@@ -2257,7 +2257,7 @@ static Var _eval_template_form(
     String spelling = binder.str()[1:];
     String temporary = %"_x2c_meta_${serial}_$spelling";
     Var unwrapped;
-    if (!_source_capture_parts(syntax, NULL, &unwrapped))
+    if (!_source_capture_parts(syntax, NULL, unwrapped))
       unwrapped = _source_unwrap(syntax);
     compiler.macro_lisp.set_global(temporary, unwrapped);
     references = cons(%($spelling $temporary), references);
@@ -2400,7 +2400,7 @@ static String _file_scope_name(Compiler c, Token root, String source) {
   List owner_key = %(${c.filename} ${c.package});
   Var cached;
   String owner;
-  if (c.names.file_scope_owners.try_get(owner_key, &cached)) owner = cached;
+  if (c.names.file_scope_owners.try_get(owner_key, cached)) owner = cached;
   else {
     owner = "";
     if (c.filename) {
@@ -2417,7 +2417,7 @@ static String _file_scope_name(Compiler c, Token root, String source) {
   }
   String key = %"macro:$owner:${root.pos}:$source";
   Var stored;
-  int count = c.names.counters.try_get(key, &stored) ? stored : 0;
+  int count = c.names.counters.try_get(key, stored) ? stored : 0;
   c.names.counters[key] = count + 1;
   String digest = "%08x".printf(%"$key:$count".hash());
   return %"_x2c_macro_${source}_$digest";
@@ -2465,7 +2465,7 @@ static Atom _replacement_binder(Var binder, String projection, int seq) {
    Its ordinal keeps same-spelled declarations distinct within a template. */
 static Atom _local_binder(Var identity, int tag) {
   int number = 0;
-  (void) binding_identity_try_parts(identity, &number, NULL);
+  (void) binding_identity_try_parts(identity, number, NULL);
   int ordinal = INT_MAX - number;
   return Atom.intern(%"?__macro_${tag ? "tag" : "local"}_${ordinal}");
 }
@@ -2475,7 +2475,7 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
   if (!candidate && value is <list> && !value.is_nil())
     candidate = binding_identity_try_parts(value, NULL, NULL);
   Var replacement;
-  if (candidate && bindings.try_get(value, &replacement)) return replacement;
+  if (candidate && bindings.try_get(value, replacement)) return replacement;
   if (value is not <list> || value.is_nil()) return value;
   Array items = $auto([]);
   int changed = 0;
@@ -2798,7 +2798,7 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
 
 static List _hole_record(Compiler compiler, Atom name) {
   Var stored;
-  if (!compiler.macro_holes.try_get(name, &stored)) return NULL;
+  if (!compiler.macro_holes.try_get(name, stored)) return NULL;
   return stored;
 }
 
@@ -3143,7 +3143,7 @@ List Compiler.parse_macro_definition(Compiler c) {
       start, %("x2c.* is reserved for compiler facilities"));
   Var existing;
   if (c.import_src &&
-      c.macros.try_get(name, &existing)) {
+      c.macros.try_get(name, existing)) {
     List previous = existing;
     c.report_error(
       <macro>, %"imported macro '$spelling' collides with a visible macro",
@@ -3394,7 +3394,7 @@ List Compiler.parse_macro_definition(Compiler c) {
     fresh.push(%($binder $spelling 0));
   }
   List fresh_rows = fresh.list_free();
-  Var capture_order = (void *) definition_captures != NULL
+  Var capture_order = definition_captures != NULL
     ? definition_captures[<order>] : void;
   List captures = capture_order is <list>
                 ? capture_order.list().reverse() : NULL;
@@ -3447,7 +3447,7 @@ void Compiler.parse_keyword_definition(Compiler c) {
   Var existing;
   if (!c.builtin_defs &&
       (alias == <with> ||
-       (c.kw_aliases.try_get(alias, &existing) &&
+       (c.kw_aliases.try_get(alias, existing) &&
         existing.list().assoc(<builtin>).int())))
     c.report_error(
       <macro>, "built-in keyword alias cannot be replaced",
@@ -3492,11 +3492,11 @@ int Compiler.skip_named_type_declaration(Compiler c) {
    or decorator target. Constructed syntax can reproduce that List shape, so
    source access trusts only captured syntax identities registered for the
    active expansion. Forwarding preserves the registered capture. */
-static int _source_capture_parts(Var value, List *source, Var *syntax) {
+static int _source_capture_parts(Var value, List &?source, Var &?syntax) {
   match (value)
     case %(src ?record ?captured): {
-      if (source) *source = record;
-      if (syntax) *syntax = captured;
+      if (source) source = record;
+      if (syntax) syntax = captured;
       return 1;
     }
   return 0;
@@ -3556,7 +3556,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
       // A visible template local passes its identity, which each expansion
       // renames.
       Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
-      List local = (void *) locals != NULL
+      List local = locals != NULL
                  ? c.sym.lookup(%($spelling), NULL) : NULL;
       return local && local in locals ? local : spelling;
     }
@@ -3651,7 +3651,7 @@ static List _member_bindings(Compiler c, List parameters, List input) {
     Var value = capture.assoc(<value>), spelling;
     if (value is <list> &&
         c.semantic_binding_facts().try_get(
-          %(source-spelling $value), &spelling))
+          %(source-spelling $value), spelling))
       value = spelling;
     Var member = _replacement_binder(parameter.assoc(<binder>), "member", 0);
     bindings = cons(%($member $value), bindings);

@@ -43,12 +43,12 @@ List binding_identity_new(int identity, String spelling) =>
     Returns one on success and writes only non-`NULL` outputs; failure returns
     zero without changing either output.
 */
-int binding_identity_try_parts(List binding, int *identity, String *spelling) {
+int binding_identity_try_parts(List binding, int &?identity, String &?spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
-      if (identity) *identity = id;
-      if (spelling) *spelling = name;
+      if (identity) identity = id;
+      if (spelling) spelling = name;
       return 1;
     }
   return 0;
@@ -57,7 +57,7 @@ int binding_identity_try_parts(List binding, int *identity, String *spelling) {
 /** Returns a valid binding node's source spelling, or `NULL`. */
 String binding_identity_spelling(List binding) {
   String spelling = NULL;
-  return binding_identity_try_parts(binding, NULL, &spelling)
+  return binding_identity_try_parts(binding, NULL, spelling)
        ? spelling : NULL;
 }
 

@@ -186,7 +186,7 @@ separately:
 ```x2c
 Map settings = {theme: "dark"};
 Var found;
-if (settings.try_get(<theme>, &found))
+if (settings.try_get(<theme>, found))
   printf("theme=%s\n", found);
 
 long number;
@@ -1079,7 +1079,7 @@ fallback would lose information:
 Map map = {"name": "x2c"};
 Var key = "name";
 Var value;
-if (!map.try_get(key, &value))
+if (!map.try_get(key, value))
   printf("missing\n");
 ```
 

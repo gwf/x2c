@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
       lines++;
       foreach(String word, line.lower().words()) {
         Var old;
-        long count = counts.try_get(word, &old) ? old.integer() : 0;
+        long count = counts.try_get(word, old) ? old.integer() : 0;
         counts[word] = count + 1;
         words++;
       }
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   }
 
   Var beta = 0;
-  counts.try_get("beta", &beta);
+  counts.try_get("beta", beta);
   printf("lines=%d words=%d beta=%ld\n", lines, words, beta.integer());
   return 0;
 }

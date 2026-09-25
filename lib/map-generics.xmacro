@@ -337,7 +337,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   $map $map.new_capacity(unsigned);
   $map Map.$unbox(Map);
   unsigned $map.len($map);
-  int $map.try_get($map, $key, $value *);
+  int $map.try_get($map map, $key key, $value &?out);
   $value $map.get($map, $key);
   $value $map.getindex($map, $key);
   $value $map.getdefault($map, $key, $value);
@@ -402,7 +402,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   /** Writes the value for `key` to `out` and returns one when present.
       A null map, null `out`, or absent key returns zero without writing.
   */
-  int $map.try_get($map map, $key key, $value *out) {
+  int $map.try_get($map map, $key key, $value &?out) {
     return map._core_try_get(&key, out);
   }
 
@@ -411,7 +411,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.get($map map, $key key) {
     $value out = $zero;
-    if (map.try_get(key, &out)) return out;
+    if (map.try_get(key, out)) return out;
     (void) $bad_arg($owner);
     return $zero;
   }
@@ -429,7 +429,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.getdefault($map map, $key key, $value defval) {
     $value out;
-    return map.try_get(key, &out) ? out : defval;
+    return map.try_get(key, out) ? out : defval;
   }
 
   /** Returns the value for `key`, inserting `defval` when absent.
@@ -585,8 +585,8 @@ macro Unit $map.core.observe(
 
   static int $map._core_compare($map a, $map b) {
     if ((void *) a == (void *) b) return 0;
-    if ((void *) a == NULL) return -1;
-    if ((void *) b == NULL) return 1;
+    if (a == NULL) return -1;
+    if (b == NULL) return 1;
     unsigned asz = a.used, bsz = b.used;
     if (asz != bsz) return asz < bsz ? -1 : 1;
     if (!asz) return 0;
@@ -658,7 +658,7 @@ macro Unit $map.typed.observe(
       Raises: any cause from boxing or inserting an entry.
   */
   Map $map.map($map map) {
-    if ((void *) map == NULL) return NULL;
+    if (map == NULL) return NULL;
     Map boxed = {};
     unsigned cursor = 0;
     $key key;

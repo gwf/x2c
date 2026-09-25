@@ -561,7 +561,7 @@ Buffer Var.fallback_write_str(Var v, Buffer out) {
     recurse.
 */
 Buffer Var.write_str(Var v, Buffer out) {
-  if ((void *) out == NULL) return NULL;
+  if (out == NULL) return NULL;
   VarDescriptor *descriptor = _descriptor_for_value(v);
   if (descriptor && descriptor.methods.write_str)
     return descriptor.methods.write_str(v, out);
@@ -677,7 +677,7 @@ Buffer Var.fallback_write_repr(Var v, Buffer out) {
 
 /** Appends the readable representation of `Var` to a `Buffer`. */
 Buffer Var.write_repr(Var v, Buffer out) {
-  if ((void *) out == NULL) return NULL;
+  if (out == NULL) return NULL;
   VarDescriptor *descriptor = _descriptor_for_value(v);
   if (descriptor && descriptor.methods.write_repr)
     return descriptor.methods.write_repr(v, out);

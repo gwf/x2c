@@ -118,7 +118,7 @@ static _Spec _read_spec(List spec) {
 
 static _Option *_find(_Spec *spec, String spelling) {
   Var position;
-  if (!spec.index.try_get(spelling, &position))
+  if (!spec.index.try_get(spelling, position))
     _bad_option("unknown option", spelling);
   return &spec.options[position.integer()];
 }

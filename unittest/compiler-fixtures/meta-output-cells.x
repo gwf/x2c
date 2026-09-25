@@ -47,9 +47,9 @@ meta int output_cells(int unused) {
 
   Map map = {"x": Var.null()};
   Var value = 7;
-  if (!map.try_get("x", &value) || !value.is_null()) return 0;
+  if (!map.try_get("x", value) || !value.is_null()) return 0;
   value = 9;
-  if (map.try_get("missing", &value) || value != 9) return 0;
+  if (map.try_get("missing", value) || value != 9) return 0;
   map["remove"] = 7;
   if (!map.try_del("remove", &value) || value != 7) return 0;
   value = 9;

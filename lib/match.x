@@ -2563,7 +2563,7 @@ static void _site_unlock(void) {
 
 static void _capture_sites_shutdown(void) {
   if (!match_capture_site_scope) return;
-  MatchCaptureSite **sites = (void *) match_capture_sites != NULL
+  MatchCaptureSite **sites = match_capture_sites != NULL
                            ? match_capture_sites.bytes : NULL;
   for (size_t i = 0; i < match_capture_sites.length; i++) {
     MatchCaptureSite *site = sites[i];
@@ -2571,7 +2571,7 @@ static void _capture_sites_shutdown(void) {
     site.plan.free();
     site.plan = NULL;
   }
-  if ((void *) match_capture_sites != NULL) match_capture_sites.free();
+  if (match_capture_sites != NULL) match_capture_sites.free();
   match_capture_site_scope.destroy();
   match_capture_site_scope = NULL;
 }

@@ -676,7 +676,7 @@ static int _finish_compiles(
 }
 
 static int _compile_sources(Build b) {
-  if ((void *) b.compile_commands != NULL)
+  if (b.compile_commands != NULL)
     b.compile_directory = Path.absolute(".");
   CcJob *running = Scope.calloc(b.request.jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
@@ -696,7 +696,7 @@ static int _compile_sources(Build b) {
     ToolAction action = b.toolchain.compile_action(
       source, object, depfile, directories);
     b.objects.push(object);
-    if ((void *) b.compile_commands != NULL)
+    if (b.compile_commands != NULL)
       b.compile_commands.push(_compile_command(b, action, source, object));
     String state_path =
       b.state_root ? %"${b.state_root}/c-${_key(source)}" : NULL;
@@ -787,7 +787,7 @@ static void Build._place_unit_headers(Build b) {
         String source = %"${target[:target.len() - 2]}.x";
         foreach (String dir, searched) {
           Var header;
-          if (!headers.try_get(Path.join(dir, source).absolute(), &header))
+          if (!headers.try_get(Path.join(dir, source).absolute(), header))
             continue;
           Path placed = Path.join(directory, target);
           placed.dirname().make_dirs();

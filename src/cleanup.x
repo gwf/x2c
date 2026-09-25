@@ -218,7 +218,7 @@ static void _report_at(Walk w, int origin, String message, List note) {
 static int _goto_stop(Walk walk, Var label) {
   String name = _label_spelling(label);
   Var stored;
-  if (!name || !walk.labels.try_get(name, &stored)) {
+  if (!name || !walk.labels.try_get(name, stored)) {
     _report_at(
       walk, walk.origin, "goto target label is not defined in this function",
       NULL);
@@ -258,9 +258,9 @@ static Var _changed_operand(List node) {
 static int _automatic_static_input(Compiler c, List binding) {
   Var automatic, stored;
   Map facts = c.semantic_binding_facts();
-  if (!facts.try_get(%(automatic $binding), &automatic) ||
+  if (!facts.try_get(%(automatic $binding), automatic) ||
       !automatic.truth()) return 0;
-  if (!facts.try_get(%(type $binding), &stored)) return 1;
+  if (!facts.try_get(%(type $binding), stored)) return 1;
   Type type = stored;
   return !type.is_static() && !type.is_extern() && !type.is_threaded();
 }

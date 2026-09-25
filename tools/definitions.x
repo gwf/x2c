@@ -149,6 +149,9 @@ static String _render(Var node, String declarator):
     Var target = _target(rest)
     if _needs_parens(target): inner = %"($inner)"
     return _render(target, inner)
+  if head == <&> || head == <opt-ref>:
+    String mark = head == <&> ? "&" : "&?"
+    return _render(_target(rest), mark + declarator)
   if head == <const> || head == <volatile>:
     return _joined(head.str(), _render(_target(rest), declarator))
   if head == <struct> || head == <union> || head == <enum>:

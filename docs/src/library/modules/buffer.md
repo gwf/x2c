@@ -36,7 +36,7 @@ Source: `lib/buffer.x:107`
 
 Returns `buf.get(index)`, so `buf[index]` reads a byte.
 
-Source: `lib/buffer.x:313`
+Source: `lib/buffer.x:314`
 
 <a id="Buffer.len"></a>
 #### Buffer.len
@@ -45,7 +45,7 @@ Source: `lib/buffer.x:313`
 
 Returns the number of bytes currently stored in `buf`.
 
-Source: `lib/buffer.x:316`
+Source: `lib/buffer.x:317`
 
 <a id="Buffer.new"></a>
 #### Buffer.new
@@ -87,12 +87,12 @@ Source: `lib/buffer.x:265`
 
 Returns nonzero when `b` contains at least one byte.
 
-Source: `lib/buffer.x:355`
+Source: `lib/buffer.x:356`
 
 <a id="Buffer.try_get"></a>
 #### Buffer.try_get
 
-`int Buffer.try_get(Buffer buf, ptrdiff_t index, char *out)`
+`int Buffer.try_get(Buffer buf, ptrdiff_t index, char &?out)`
 
 Writes the byte at normalized `index` to `out` when it exists.
 Negative indexes count from the end. Returns zero for a null `Buffer`, null
@@ -131,7 +131,7 @@ Source: `lib/buffer.x:287`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/buffer.x:358`
+Source: `lib/buffer.x:359`
 
 <a id="Buffer.free"></a>
 #### Buffer.free
@@ -200,7 +200,7 @@ Returns the readable representation of `Buffer`.
 
 **Raises:** the same causes as `Buffer.str` or `String` rendering.
 
-Source: `lib/buffer.x:348`
+Source: `lib/buffer.x:349`
 
 <a id="Buffer.reserve"></a>
 #### Buffer.reserve
@@ -229,7 +229,7 @@ live until its owning `String` pool is released.
 **Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
 `<alloc-fail>` while canonicalizing it.
 
-Source: `lib/buffer.x:325`
+Source: `lib/buffer.x:326`
 
 <a id="Buffer.str_free"></a>
 #### Buffer.str_free
@@ -243,7 +243,7 @@ on success and when the conversion transfers an `Error`.
 
 **Raises:** the same causes as `Buffer.str`.
 
-Source: `lib/buffer.x:340`
+Source: `lib/buffer.x:341`
 
 <a id="Buffer.tabstop"></a>
 #### Buffer.tabstop
@@ -331,7 +331,7 @@ Returns the byte at `index`, or NUL when `index` is out of range.
 Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
 byte.
 
-Source: `lib/buffer.x:307`
+Source: `lib/buffer.x:308`
 
 ## Runtime-internal callables
 

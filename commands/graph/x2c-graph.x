@@ -20,7 +20,7 @@
 
 static void _increment(Map counts, List key, int amount) {
   Var prior;
-  int count = counts.try_get(key, &prior) ? prior.int() : 0;
+  int count = counts.try_get(key, prior) ? prior.int() : 0;
   counts[key] = count + amount;
 }
 
@@ -67,7 +67,7 @@ static List _call_records(Map calls) {
 
 static String _source_function_name(Compiler compiler, List binding) {
   Var stored;
-  if (compiler.semantic_binding_facts().try_get(%(method $binding), &stored)) {
+  if (compiler.semantic_binding_facts().try_get(%(method $binding), stored)) {
     List method = stored;
     match (method)
       case %((!is ?owner type string) (!is ?member type string)):
@@ -244,7 +244,7 @@ static void _collect_tail_calls(
 
 static int _kind_count(Map counts, Symbol kind) {
   Var count;
-  return counts.try_get(%(kind $kind), &count) ? count.int() : 0;
+  return counts.try_get(%(kind $kind), count) ? count.int() : 0;
 }
 
 static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
@@ -361,7 +361,7 @@ static int _walk_root_parameter(List root, Map parameters) {
   match (root)
     case %(root ?binding ? ? (path *) ?): {
       Var position;
-      if (parameters.try_get(binding, &position)) return position.integer();
+      if (parameters.try_get(binding, position)) return position.integer();
     }
   return -1;
 }
@@ -1389,7 +1389,7 @@ static void _resolve_call(
       _increment(resolved, %(indirect $name), count);
     case %(call direct ?identity ?name ?count): {
       Var target;
-      if (local.try_get(identity, &target)) {
+      if (local.try_get(identity, target)) {
         List destination = target;
         match (destination)
           case %(target ?target_path ?target_name):
@@ -1658,11 +1658,11 @@ static List _architecture_choke_points(List graph) {
   foreach (Var (raw_key, raw_visibility), definitions) {
     List key = raw_key;
     Var value;
-    int cross = cross_units.try_get(key, &value) ? value.int() : 0;
+    int cross = cross_units.try_get(key, value) ? value.int() : 0;
     if (!cross) continue;
-    int unit_count = units.try_get(key, &value) ? value.int() : 0;
-    int function_count = functions.try_get(key, &value) ? value.int() : 0;
-    int call_count = calls.try_get(key, &value) ? value.int() : 0;
+    int unit_count = units.try_get(key, value) ? value.int() : 0;
+    int function_count = functions.try_get(key, value) ? value.int() : 0;
+    int call_count = calls.try_get(key, value) ? value.int() : 0;
     (String path, String name) = key;
     Symbol visibility = raw_visibility;
     List record = %(
@@ -1711,7 +1711,7 @@ static List _architecture_reciprocal(List graph) {
     (String left, String right) = key;
     if (strcmp(left, right) >= 0) continue;
     Var reverse_value;
-    if (!edges.try_get(%($right $left), &reverse_value)) continue;
+    if (!edges.try_get(%($right $left), reverse_value)) continue;
     int forward = raw_count.int(), reverse = reverse_value.int();
     if (forward < ARCHITECTURE_RECIPROCAL_CALLS ||
         reverse < ARCHITECTURE_RECIPROCAL_CALLS)
@@ -1735,7 +1735,7 @@ static List _architecture_reciprocal(List graph) {
 
 static int _architecture_count(Map counts, List key) {
   Var value;
-  return counts.try_get(key, &value) ? value.int() : 0;
+  return counts.try_get(key, value) ? value.int() : 0;
 }
 
 static void _record_boundary_function(

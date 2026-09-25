@@ -237,7 +237,7 @@ static Map pooled_results = %{
 static Var _effect(Walk w, String name) {
   if (!w.audit) return runtime[name];
   Var effect;
-  return w.effects && w.effects.try_get(name, &effect)
+  return w.effects && w.effects.try_get(name, effect)
        ? effect : runtime[name];
 }
 
@@ -410,25 +410,26 @@ static List _summary(Walk w, String callee) {
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument
    through and either arm of `?:`, preferring an arm with a region. */
-static Fact _fact_of(Walk w, Var expression, List *named) {
+static Fact _fact_of(Walk w, Var expression, List &?named) {
   Var inner = _unwrap(expression);
   match (inner) {
     case %(ident (!set ?binding (binding ? ?))): {
-      if (named) *named = binding;
+      if (named) named = binding;
       Var found = w.facts[binding];
       return found is void ? NULL : found;
     }
     case %(op (!quote &) ?place): return _borrow(w, place, named);
     case %(op (!quote ?) ? ?yes ?no): {
       List yes_name = NULL, no_name = NULL;
-      Fact fact = _fact_of(w, yes, &yes_name);
-      Fact other = _fact_of(w, no, &no_name);
+      Fact fact = _fact_of(w, yes, yes_name);
+      Fact other = _fact_of(w, no, no_name);
       if (other && (!fact || ((other.region || other.other) &&
                              !fact.region && !fact.other))) {
         fact = other;
         yes_name = no_name;
       }
-      if (named && fact) *named = yes_name;
+      if (!fact) return NULL;
+      if (named) named = yes_name;
       return fact;
     }
   }
@@ -442,7 +443,7 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
 /* What is known about a value that is returned, stored, or passed on. A
    local C array there decays to the address of its first element, which
    is the function's own storage. */
-static Fact _value_fact(Walk w, Var value, List *named) {
+static Fact _value_fact(Walk w, Var value, List &?named) {
   Fact fact = _fact_of(w, value, named);
   Type type = _expression_type(value);
   if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
@@ -458,7 +459,7 @@ static Fact _slot(Walk w, Var argument) {
 
 /* The argument a callee hands back as its result, when that argument is a
    parameter or region-born, so the result keeps its identity. */
-static Fact _returned_argument(Walk w, Var value, List *named) {
+static Fact _returned_argument(Walk w, Var value, List &?named) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
@@ -604,8 +605,8 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
     return _flow(w, yes, type, sink, target) ||
            _flow(w, no, type, sink, target);
   List named = NULL;
-  Fact fact = _value_fact(w, value, &named);
-  if (!fact) fact = _returned_argument(w, value, &named);
+  Fact fact = _value_fact(w, value, named);
+  if (!fact) fact = _returned_argument(w, value, named);
   int born = 0;
   Region other = NULL;
   Region region = fact ? fact.region
@@ -701,14 +702,16 @@ static Fact _base(Walk w, Var place, int &through) {
 
 /* The storage `&place` borrows. A local, a parameter, or a compound
    literal is this function's own storage; a place reached through a
-   pointer is storage that pointer holds. `*named` is the local the place
+   pointer is storage that pointer holds. `named` is the local the place
    is part of. */
-static Fact _borrow(Walk w, Var place, List *named) {
+static Fact _borrow(Walk w, Var place, List &?named) {
   int through = 0;
   Fact base = _fact_of(w, place, named);
   if (!base) base = _base(w, place, through);
   if (!base) return NULL;
-  if (named && !*named) *named = _root(place);
+  if (named) {
+    if (!named) named = _root(place);
+  }
   Fact borrow = _fact(w, NULL, -1);
   borrow.points = base;
   borrow.place = _unwrap(place);
@@ -791,7 +794,7 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
    expression, `how` recording whether it was freed or moved. */
 static void _end(Walk w, Var argument, String op, Symbol how) {
   List named = NULL;
-  Fact storage = _value_fact(w, argument, &named);
+  Fact storage = _value_fact(w, argument, named);
   int literal = 0;
   match (_unwrap(argument)) case %(literal *): literal = 1;
   if (op && (literal || (storage &&

@@ -153,7 +153,7 @@ macro Unit $array.typed.update.string(Type $array) {
 
 macro Unit $array.core.family(Type $array, Type $element) {
   static int $array._core_shift($array array, $element *out) {
-    if ((void *) array == NULL || !array.length || !out) return 0;
+    if (array == NULL || !array.length || !out) return 0;
     size_t n = array.length;
     $element *data = ($element *) array.bytes;
     *out = data[0];
@@ -175,7 +175,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 
   static int $array._core_remove($array array, int index, $element *out) {
-    if ((void *) array == NULL || !out) return 0;
+    if (array == NULL || !out) return 0;
     int n = (int) array.length;
     index = x2c_normalize_index(index, n);
     if (index < 0) return 0;
@@ -189,7 +189,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 
   static $array $array._core_copy($array array) {
-    if ((void *) array == NULL) return NULL;
+    if (array == NULL) return NULL;
     $array copy = ($array) Block_new(sizeof($element));
     Block_append((Block) copy, array.bytes, array.length);
     return copy;
@@ -197,7 +197,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
 
   static $array $array._core_getslice(
     $array array, int start, int end, int step) {
-    if ((void *) array == NULL || !step) return NULL;
+    if (array == NULL || !step) return NULL;
     $array slice = ($array) Block_new(sizeof($element));
     int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
     if (newlen <= 0) return slice;
@@ -321,7 +321,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 
   static $array $array._core_reverse($array array) {
-    if ((void *) array == NULL || array.length < 2) return array;
+    if (array == NULL || array.length < 2) return array;
     $element *data = ($element *) array.bytes;
     for (size_t i = 0, j = array.length - 1; i < j; i++, j--) {
       $element tmp = data[i];
@@ -333,7 +333,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
 
   static int $array._core_equal($array a, $array b) {
     if ((void *) a == (void *) b) return 1;
-    if ((void *) a == NULL || (void *) b == NULL ||
+    if (a == NULL || b == NULL ||
         a.length != b.length || a.width != b.width) return 0;
     $element *adata = ($element *) a.bytes;
     $element *bdata = ($element *) b.bytes;
@@ -346,7 +346,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
   Literal $owner
 ) {
   $array $array.new(void);
-  int $array.try_get($array, int, $element *);
+  int $array.try_get($array array, int index, $element &?out);
   int $array.try_next($array, int *, $element *);
   inline $element $array.getindex($array, int);
   inline $element $array.setindex($array, int, $element);
@@ -382,12 +382,13 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       out-of-range index returns zero without writing; success returns one.
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
-  int $array.try_get($array array, int index, $element *out) {
-    if ((void *) array == NULL || !out) return 0;
+  int $array.try_get($array array, int index, $element &?out) {
+    if (array == NULL) return 0;
+    if (!out) return 0;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     index = x2c_normalize_index(index, (int) array.length);
     if (index < 0) return 0;
-    *out = (($element *) array.bytes)[index];
+    out = (($element *) array.bytes)[index];
     return 1;
   }
 
@@ -398,7 +399,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       the cursor.
   */
   int $array.try_next($array array, int *cursor, $element *out) {
-    if ((void *) array == NULL || !cursor || !out || *cursor < 0 ||
+    if (array == NULL || !cursor || !out || *cursor < 0 ||
         array.length > INT_MAX || *cursor >= (int) array.length) return 0;
     *out = (($element *) array.bytes)[*cursor];
     *cursor += 1;
@@ -426,7 +427,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.push($array array, $element value) {
-    if ((void *) array == NULL) _bad_operation($owner, <push>);
+    if (array == NULL) _bad_operation($owner, <push>);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
     return value;
@@ -437,7 +438,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       changing the array.
   */
   int $array.try_take_last($array array, $element *out) {
-    return (void *) array != NULL && out
+    return array != NULL && out
       ? Block_try_pop((Block) array, out) : 0;
   }
 
@@ -470,7 +471,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
-    if ((void *) array == NULL) _bad_operation($owner, <unshift>);
+    if (array == NULL) _bad_operation($owner, <unshift>);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array._core_insert(0, value);
     return value;
@@ -484,7 +485,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
-    if ((void *) array == NULL || array.length >= INT_MAX ||
+    if (array == NULL || array.length >= INT_MAX ||
         !array._core_insert(index, value)) {
       if (array && array.length >= INT_MAX)
         _size_limit($owner, array.length);
@@ -516,7 +517,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       represented or allocated.
   */
   Self $array.copy(Self array) {
-    if ((void *) array == NULL) return NULL;
+    if (array == NULL) return NULL;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array._core_copy();
   }
@@ -527,7 +528,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       the integer index domain, or `<alloc-fail>` on allocation failure.
   */
   Self $array.getslice(Self array, int start, int end, int step) {
-    if ((void *) array == NULL || !step) _bad_step($owner, step);
+    if (array == NULL || !step) _bad_step($owner, step);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array._core_getslice(start, end, step);
   }
@@ -542,7 +543,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       unchanged.
   */
   Self $array.setslice(Self array, int start, int end, Self values) {
-    if ((void *) array == NULL) _bad_operation($owner, <setslice>);
+    if (array == NULL) _bad_operation($owner, <setslice>);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     if (values && values.length > INT_MAX)
       _size_limit($owner, values.length);
@@ -557,7 +558,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       index domain, or `<alloc-fail>` on allocation failure.
   */
   Self $array.remslice(Self array, int start, int end) {
-    if ((void *) array == NULL) _bad_operation($owner, <remslice>);
+    if (array == NULL) _bad_operation($owner, <remslice>);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array._core_remslice(start, end);
   }
@@ -569,7 +570,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       index domain, or `<alloc-fail>` on allocation failure.
   */
   Self $array.splice(Self array, int index, int remove_count, Self values) {
-    if ((void *) array == NULL) _bad_operation($owner, <splice>);
+    if (array == NULL) _bad_operation($owner, <splice>);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     if (values && values.length > INT_MAX)
       _size_limit($owner, values.length);
@@ -581,7 +582,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.find($array array, $element value) {
-    if ((void *) array == NULL) return -1;
+    if (array == NULL) return -1;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array._core_find(value);
   }
@@ -599,7 +600,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       Raises: `<size-limit>` when the length exceeds the integer index domain.
   */
   int $array.count($array array, $element value) {
-    if ((void *) array == NULL) return 0;
+    if (array == NULL) return 0;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     return array._core_count(value);
   }
@@ -616,7 +617,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       represented or allocated.
   */
   Self $array.concat(Self a, Self b) {
-    if ((void *) a == NULL) return NULL;
+    if (a == NULL) return NULL;
     if (a.length > INT_MAX) _size_limit($owner, a.length);
     if (b && b.length > INT_MAX - a.length)
       _size_limit($owner, b.length);
@@ -644,8 +645,8 @@ macro Unit $array.core.observe(
 ) {
   static int $array._core_compare($array a, $array b) {
     if ((void *) a == (void *) b) return 0;
-    if ((void *) a == NULL) return -1;
-    if ((void *) b == NULL) return 1;
+    if (a == NULL) return -1;
+    if (b == NULL) return 1;
     size_t asz = a.length, bsz = b.length;
     size_t n = asz < bsz ? asz : bsz;
     $element *adata = ($element *) a.bytes;
@@ -694,10 +695,10 @@ macro Unit $array.typed.observe(
       Raises: any cause from boxing or appending an element.
   */
   Array $family.array($family array) {
-    if ((void *) array == NULL) return NULL;
+    if (array == NULL) return NULL;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     Array boxed = [], result = NULL;
-    defer if ((void *) result == NULL) Block_free((Block) boxed);
+    defer if (result == NULL) Block_free((Block) boxed);
     $element *data = ($element *) array.bytes;
     for (size_t i = 0; i < array.length; i++) {
       Var element = data[i];
@@ -774,9 +775,9 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
       allocation releases the partial result before transferring its cause.
   */
   $array Array.$unbox(Array values) {
-    if ((void *) values == NULL) return NULL;
+    if (values == NULL) return NULL;
     $array packed = ($array) Block_new(sizeof($element)), result = NULL;
-    defer if ((void *) result == NULL) packed.free();
+    defer if (result == NULL) packed.free();
     for (size_t i = 0; i < values.length; i++) packed.push(values[i]);
     return result = packed;
   }
@@ -802,17 +803,17 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
       Raises: any cause from boxing an element.
   */
   Iter $array.iter($array array, Iter dest) {
-    if ((void *) dest == NULL) return NULL;
+    if (dest == NULL) return NULL;
     return Iter_init(dest, array, next, 0);
   }
 
   static $array $array.export_context($array array, Context source) {
-    if ((void *) array == NULL || !source.owns(array)) return array;
+    if (array == NULL || !source.owns(array)) return array;
     $array staged = $prepare_export(array, source), committed = NULL;
-    defer if ((void *) staged != NULL && (void *) committed == NULL)
+    defer if (staged != NULL && committed == NULL)
       staged.free();
     Scope *destination = source.export_destination();
-    if ((void *) staged == NULL) {
+    if (staged == NULL) {
       array.block().move_to(destination);
       return array;
     }

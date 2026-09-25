@@ -92,7 +92,7 @@ static Block _prepare_array_export(Block array, Context source) {
 static ArrayString _prepare_string_array_export(
   ArrayString array, Context source) {
   ArrayString staged = ArrayString.new(), result = NULL;
-  defer if ((void *) result == NULL) staged.free();
+  defer if (result == NULL) staged.free();
   ((Block) staged).reserve(array.cap);
   String *data = array.bytes;
   for (size_t i = 0; i < array.length; i++) {

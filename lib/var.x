@@ -213,7 +213,7 @@ static VarWideBox _wide_box(Var v) {
 }
 
 static VarDescriptor *_declared(Symbol tag) {
-  if ((void *) declared == NULL) return NULL;
+  if (declared == NULL) return NULL;
   Var found = declared[tag];
   return found is void ? NULL : found.pointer();
 }
@@ -340,7 +340,7 @@ VarDescriptor *x2c_var_declare(Symbol tag) {
     Scope.shutdown_hook(_classes_shutdown);
   }
   $scope(&class_scope) {
-    if ((void *) declared == NULL) declared = {};
+    if (declared == NULL) declared = {};
     descriptor = Scope.calloc(1, sizeof(VarDescriptor));
     descriptor.tag = tag;
     descriptor.row = -1;
@@ -404,7 +404,7 @@ static VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
   Var key = { .p64 = pointer };
   VarCell *cell = NULL;
   $scope(&class_scope) {
-    if ((void *) cells == NULL) cells = {};
+    if (cells == NULL) cells = {};
     Var head = cells[key];
     cell = head is void ? NULL : head.pointer();
     while (cell && cell.descriptor != descriptor) cell = cell.next;

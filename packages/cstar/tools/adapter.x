@@ -112,7 +112,7 @@ static String _ctype(Adapter adapter, Var declared) {
   if (type && type.car() === <"*">)
     return _pointers(adapter, _ctype(adapter, type.cdr()), %(*));
   Var named;
-  if (_scalar_types.try_get(type, &named)) return named.str();
+  if (_scalar_types.try_get(type, named)) return named.str();
   return _reject(adapter, %"type ${type.repr()}");
 }
 
@@ -197,7 +197,7 @@ static String _expression(Adapter adapter, Var value) {
           return _call(adapter, callee, args, rendered);
         case %(op ?operator ?left ?right): {
           Var selected;
-          if (!_binary_operators.try_get(operator, &selected))
+          if (!_binary_operators.try_get(operator, selected))
             return _reject(adapter, %"operator ${operator.repr()}");
           String first = _expression(adapter, left);
           String second = _expression(adapter, right);
@@ -213,7 +213,7 @@ static String _expression(Adapter adapter, Var value) {
           if (operator === <"&">)
             return %"make_addrof_expr(${only}, ${rendered})";
           Var selected;
-          if (!_unary_operators.try_get(operator, &selected))
+          if (!_unary_operators.try_get(operator, selected))
             return _reject(adapter, %"operator ${operator.repr()}");
           return %"make_unary_expr(${selected}, ${only}, ${rendered})";
         }
@@ -235,7 +235,7 @@ static List _annotation(Adapter adapter, List node) {
                  (args (expr ? (literal ? ?spelling)))))): {
       Var record;
       int id = atoi(spelling.str());
-      return adapter.annotations.try_get(Var.new(<i32>, id), &record)
+      return adapter.annotations.try_get(Var.new(<i32>, id), record)
         ? record.list() : NULL;
     }
   return NULL;

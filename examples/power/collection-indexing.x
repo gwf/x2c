@@ -26,8 +26,8 @@ int main(void) {
   packed.push(20);
   packed[1] += 5;
   int checked = -1;
-  int last_ok = packed.try_get(-1, &checked);
-  int missing = packed.try_get(99, &checked);
+  int last_ok = packed.try_get(-1, checked);
+  int missing = packed.try_get(99, checked);
 
   // List and String indexing (read paths via brackets or helpers).
   List words = %("alpha" "beta" "gamma");

@@ -48,7 +48,7 @@ static void source_rows(
 
 static String field(Map identity, String name):
   Var value
-  if !identity.try_get(name, &value):
+  if !identity.try_get(name, value):
     raise %(bad-arg (why "BUNDLE.json has no $name"))
   return value.str()
 

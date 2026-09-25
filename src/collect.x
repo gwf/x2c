@@ -136,7 +136,7 @@ void collect_forget_preload_entries(void) {
 }
 
 static Map _process_cache(void) {
-  if ((void *) process_cache != NULL) return process_cache;
+  if (process_cache != NULL) return process_cache;
   Scope.push(&process_cache_scope);
   Scope.shutdown_hook(_cache_shutdown);
   process_cache = {};
@@ -385,7 +385,7 @@ void Compiler.record_generated_symbol(
   Map contribution = NULL;
   foreach (Var part, cached.list().car())
     if (part is <map>) contribution = part;
-  if ((void *) contribution == NULL) return;
+  if (contribution == NULL) return;
   List key = %($name), marker_key = %("generated-protocol" $name);
   List marker = %(generated);
   _require_retained(key.try_own());
@@ -565,7 +565,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical) {
     and restored when each file walk ends.
 */
 Map Compiler.collect_symbols(Compiler c, Map globs) {
-  if ((void *) globs == NULL) globs = {};
+  if (globs == NULL) globs = {};
   c.kw_aliases = NULL;
   c.kw_seen = NULL;
   Map visited = {}, String canonical = _canonical_path(c.filename);
@@ -962,7 +962,7 @@ static List _interface_read(Compiler c, String canonical) {
    of first appearance, keeping equal bindings equal. */
 static List _renumber_bindings(List node, Map identities) {
   String spelling = NULL;
-  if (binding_identity_try_parts(node, NULL, &spelling)) {
+  if (binding_identity_try_parts(node, NULL, spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);
     return binding_identity_new(identity, spelling);
   }

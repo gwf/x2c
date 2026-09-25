@@ -25,7 +25,7 @@ foreach(String line, lines) {
   RegexpMatch found = entry.match(line);
   if (!found) continue;
   Var seen = 0;
-  counts.try_get(found[<program>], &seen);
+  counts.try_get(found[<program>], seen);
   counts[found[<program>]] = seen + 1;
   printf("%s %s\n", found[<time>], found[<program>]);
   foreach(String field, fields.split(found[<text>]))

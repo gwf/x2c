@@ -72,7 +72,7 @@ static void typed_map_empty_native_layout_and_zero_data(void) {
 
   first.set(0, 0);
   int out = 71;
-  EXPECT_TRUE(first.try_get(0, &out));
+  EXPECT_TRUE(first.try_get(0, out));
   EXPECT_INT_EQ(out, 0);
   EXPECT_INT_EQ(first.len(), 1);
   EXPECT_TRUE(first.truth());
@@ -84,7 +84,7 @@ static void typed_map_lookup_replace_and_defaults(void) {
   MapIntInt map = MapIntInt.new();
   int out = 91;
 
-  EXPECT_FALSE(map.try_get(4, &out));
+  EXPECT_FALSE(map.try_get(4, out));
   EXPECT_INT_EQ(out, 91);
   EXPECT_INT_EQ(map.getdefault(4, 27), 27);
   EXPECT_INT_EQ(map.len(), 0);
@@ -238,12 +238,12 @@ static void typed_map_missing_and_null_status_paths(void) {
   int out = 73, key = 61, val = 62;
   unsigned cursor = 0;
 
-  EXPECT_FALSE(map.try_get(4, &out));
+  EXPECT_FALSE(map.try_get(4, out));
   EXPECT_INT_EQ(out, 73);
   EXPECT_FALSE(map.try_del(4, &out));
   EXPECT_INT_EQ(out, 73);
   EXPECT_FALSE(map.try_get(4, NULL));
-  EXPECT_FALSE(missing.try_get(4, &out));
+  EXPECT_FALSE(missing.try_get(4, out));
   EXPECT_FALSE(missing.try_del(4, &out));
   EXPECT_FALSE(missing.try_next(&cursor, &key, &val));
   EXPECT_FALSE(map.try_next(NULL, &key, &val));
@@ -338,7 +338,7 @@ static void typed_map_interned_string_keys_and_values(void) {
 
   /* A String assembled at run time canonicalizes to the same pointer, so it
      finds the entry stored under the literal. */
-  EXPECT_TRUE(map.try_get(built, &out));
+  EXPECT_TRUE(map.try_get(built, out));
   EXPECT_STR_EQ(out, "one");
 
   /* The empty String is NULL and hashes to zero, the value reserved for an
@@ -410,7 +410,7 @@ static void typed_map_string_int_family(void) {
   EXPECT_NULL(missing.map());
   EXPECT_STR_EQ(empty.str(), Map.new().str());
   EXPECT_TRUE(missing.compare(empty) < 0);
-  EXPECT_TRUE(counts.try_get(built, &out));
+  EXPECT_TRUE(counts.try_get(built, out));
   EXPECT_INT_EQ(out, 5);
   EXPECT_INT_EQ(counts["alpha"] += 3, 8);
   EXPECT_INT_EQ(counts["alpha"] *= 4, 32);

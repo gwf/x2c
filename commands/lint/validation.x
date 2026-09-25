@@ -280,7 +280,7 @@ static int _last_line(Lint l, Var end) => l.end_line(l.prev(end.int()))
 
 static List _rows(Map reasons, String name):
   Var rows
-  return reasons.try_get(name, &rows) ? rows : NULL
+  return reasons.try_get(name, rows) ? rows : NULL
 
 /* Validator helpers that call each other, joined into components; each
    component of 40 or more lines that is named like a validator and is

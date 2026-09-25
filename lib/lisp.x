@@ -1321,7 +1321,7 @@ static int _lisp_List_try_search(
 
 static int _lisp_Map_try_get(Map map, Var key, Var out) {
   Var value;
-  int status = map.try_get(key, &value);
+  int status = map.try_get(key, value);
   if (status) lisp_store(out, value);
   return status;
 }
@@ -1813,7 +1813,7 @@ static Map lisp_native_targets = $lisp.native.target.map();
 
 static Func _native_target(String name) {
   Var target;
-  if (!lisp_native_targets.try_get(name, &target)) return NULL;
+  if (!lisp_native_targets.try_get(name, target)) return NULL;
   return (Func) target.pointer();
 }
 
@@ -1830,14 +1830,14 @@ static Func _native_target(String name) {
    matches, no case where the two disagreed. */
 static int _binding_get(Map bindings, Var name, Var &out) {
   Var slot;
-  if (!bindings || !bindings.try_get(name, &slot)) return 0;
+  if (!bindings || !bindings.try_get(name, slot)) return 0;
   out = lisp_load(slot);
   return 1;
 }
 
 static void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
   Var slot;
-  if (bindings.try_get(name, &slot)) lisp_store(slot, value);
+  if (bindings.try_get(name, slot)) lisp_store(slot, value);
   else bindings[name] = _cell(owner, value);
 }
 
@@ -1929,7 +1929,7 @@ static int _inherited(Lisp lisp, Var name) {
    rule above therefore makes it final for this session's whole life. */
 static int _frozen_binding(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp.parent; s; s = s.parent)
-    if (_binding_get(s.globals, name, out) || s.reserved.try_get(name, &out))
+    if (_binding_get(s.globals, name, out) || s.reserved.try_get(name, out))
       return s.frozen;
   return 0;
 }
@@ -1946,7 +1946,7 @@ static int _global_lookup(Lisp lisp, Var name, Var &out) {
    guards correctly when a child runs it. */
 static int _reserved_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
-    if (s.reserved.try_get(name, &out)) return 1;
+    if (s.reserved.try_get(name, out)) return 1;
   return 0;
 }
 
@@ -3140,8 +3140,8 @@ Var Lisp.eval_file(Lisp l, File source) {
     `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
     canonicalized.
 */
-int Lisp.try_get(Lisp lisp, String name, Var *out) =>
-  lisp && name && out && _global_lookup(lisp, Atom.intern(name), *out);
+int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
+  lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
 
 /** Binds `name` to `value` in the embedded Lisp global environment.
     The session stores the value in a raw slot, so `void` remains distinct

@@ -345,7 +345,7 @@ static int _is_pragma_once(String content) =>
 static int _is_completed_function_prototype(Compiler compiler, List binding) {
   Var stored;
   if (!compiler.semantic_binding_facts().try_get(
-    %(completion $binding), &stored))
+    %(completion $binding), stored))
     return 0;
   match (stored) case %(completed *): return 1;
   return 0;
@@ -626,7 +626,7 @@ static List _header_and_source(Compiler compiler, List ast) {
         match (declarator) case %(bind ?binding *): {
           Map facts = compiler.semantic_binding_facts();
           Var attributes;
-          if (facts.try_get(%(attributes $binding), &attributes))
+          if (facts.try_get(%(attributes $binding), attributes))
             function_type = %( @{attributes.list()} @function_type );
           generated = facts.contains(
             %(declaration-default ${binding_identity_spelling(binding)}));
@@ -705,7 +705,7 @@ static List _parameter_names(Compiler c, List modifiers) {
           String name = binding_identity_spelling(binding);
           Var spelling;
           if (c.semantic_binding_facts().try_get(
-            %(source-spelling $binding), &spelling))
+            %(source-spelling $binding), spelling))
             name = spelling;
           names.push(name ? name : "");
         }
@@ -714,7 +714,7 @@ static List _parameter_names(Compiler c, List modifiers) {
 
 static List _span(Compiler c, List key) {
   Var span = NULL;
-  c.semantic_binding_facts().try_get(%(definition-span $key), &span);
+  c.semantic_binding_facts().try_get(%(definition-span $key), span);
   return span;
 }
 
@@ -923,7 +923,7 @@ static void _forward_declaration(
   Array output) {
   Var declaration;
   if (key in available || key in seen ||
-      !declarations.try_get(key, &declaration)) return;
+      !declarations.try_get(key, declaration)) return;
   seen[key] = 1;
   seen[declaration] = 1;
   _collect_declared_bindings(declaration, available);
@@ -965,7 +965,7 @@ static void _collect_forward_dependencies(
         else {
           Type type = NULL;
           List global = spelling
-            ? compiler.sym.resolve_global(%($spelling), &type) : NULL;
+            ? compiler.sym.resolve_global(%($spelling), type) : NULL;
           /* A generated protocol symbol is declared by the header that
              published it. A native alias among them is a macro over the
              host function, and newlib spells some of those as function-like

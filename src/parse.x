@@ -58,8 +58,8 @@ static String _package_alias_member(Compiler c) {
    IDENTIFIER.TYPE. Preserve the explicit owner/member pair for declarations
    whose mangled spellings alone would be ambiguous. */
 static List _complex_identifier(
-  Compiler c, List *method_identity) {
-  if (method_identity) *method_identity = NULL;
+  Compiler c, List &?method_identity) {
+  if (method_identity) method_identity = NULL;
   String ident = _package_alias_member(c), Symbol toktype = c.token.type;
   /* Only a declarator asks for the method identity, and there the name is
      being defined. A `with` spelling must not fold, because the declaration
@@ -76,7 +76,7 @@ static List _complex_identifier(
       if (c.token.text.is_identifier()) {
         String owner = ident, member = c.token.text;
         ident = %"${owner}_$member";
-        if (method_identity) *method_identity = %($owner $member);
+        if (method_identity) method_identity = %($owner $member);
         /* `Type.member` where an imported package declared that method on
            one of its own header's types: the header spells the type, the
            package spells the method. A declarator never folds. */
@@ -132,13 +132,13 @@ static String _syntax_exact_name(Var value) {
 static List _method_self_signature(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(self $binding), &stored) ? stored : NULL;
+    %(self $binding), stored) ? stored : NULL;
 }
 
 static List _method_identity(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(method $binding), &stored) ? stored : NULL;
+    %(method $binding), stored) ? stored : NULL;
 }
 
 static Type _self_owner_type(Compiler compiler, List method) {
@@ -159,7 +159,7 @@ static void _lower_parameter_self(Compiler compiler, Var replacement) {
     if (lowered != original) {
       symbols[key] = lowered;
       Var binding;
-      if (compiler.params.bindings.try_get(key, &binding))
+      if (compiler.params.bindings.try_get(key, binding))
         compiler.semantic_binding_facts()[
           %(type $binding)
         ] = lowered;
@@ -252,7 +252,7 @@ static int _attribute_starts(Compiler c) {
   Var definition;
   return c.peek(0) == <ident> && c.peek(1) == <(> &&
          (c.token.text == "__attribute__" ||
-          (c.object_macros.try_get(c.token.text, &definition) &&
+          (c.object_macros.try_get(c.token.text, definition) &&
            definition.equal(<annotation>)));
 }
 
@@ -273,7 +273,7 @@ static void _skip_aggregate_attributes(Compiler c) {
     Var definition;
     if (_attribute(c)) continue;
     if (c.peek(0) != <ident> ||
-        !c.object_macros.try_get(c.token.text, &definition) ||
+        !c.object_macros.try_get(c.token.text, definition) ||
         !definition.equal(%()))
       return;
     c.next();
@@ -302,7 +302,7 @@ static int _unseen_prefix(Compiler c) {
 static int _prefix_macro_words(Compiler c, int rank, Array words) {
   Var definition;
   if (c.peek(0) != <ident>) return 0;
-  if (!c.object_macros.try_get(c.token.text, &definition)) {
+  if (!c.object_macros.try_get(c.token.text, definition)) {
     if (rank || !_unseen_prefix(c)) return 0;
     c.next();
     return 1;
@@ -1072,7 +1072,7 @@ static List _direct_declarator(
   if (!c.token.text.is_identifier()) return %(bind () ());
   // Identifier or typedef name or method-sugar target
   Token first = c.token;
-  List ident = _complex_identifier(c, &method_identity);
+  List ident = _complex_identifier(c, method_identity);
   source_first = first;
   source_after = c.token;
   return %(bind $ident ());
@@ -1235,7 +1235,7 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
   /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
      is a declaration wherever it is written. */
   Var definition;
-  if (c.object_macros.try_get(c.token.text, &definition) &&
+  if (c.object_macros.try_get(c.token.text, definition) &&
       (definition is <list> || definition.equal(<wrapper>)))
     return 1;
 
@@ -1824,7 +1824,7 @@ int Compiler.meta_form_is_declaration(Compiler c) {
     marker that may follow it, and returns the `meta` token. `native` binds
     the definition after it the way a bodyless prototype would. `*native`,
     when requested, reports whether that marker was present. */
-Token Compiler.take_meta_marker(Compiler c, int *native) {
+Token Compiler.take_meta_marker(Compiler c, int &?native) {
   Token meta = c.token;
   c.next();
   Token after = c.token;
@@ -1835,7 +1835,7 @@ Token Compiler.take_meta_marker(Compiler c, int *native) {
     marked = c.test_declaration();
     c.token = marked ? declaration : after;
   }
-  if (native) *native = marked;
+  if (native) native = marked;
   return meta;
 }
 
@@ -1902,7 +1902,7 @@ static void _track_conditional_arms(Compiler c) {
   for (Token token = c.token - 1; token >= base &&
        (token.type == <space> || token.type == <comment> ||
         token.type == <preproc>); token--)
-    if (c.arm_stacks.try_get((long) (token - base), &stack)) {
+    if (c.arm_stacks.try_get((long) (token - base), stack)) {
       c.arms = stack;
       return;
     }
@@ -1981,7 +1981,7 @@ List Compiler.parse_top_level(Compiler c) {
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   Token meta = NULL;
   int native = 0;
-  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(&native);
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   Token definition_start = c.token;
   List decl = c.parse_declaration_row();
   if (native && !decl.type_from_ast().is_function())

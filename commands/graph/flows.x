@@ -32,7 +32,7 @@ static List _flow_summary(
       return _flow_summary(compiler, inner, parameters, locals);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
-      if (parameters.try_get(binding, &position)) return position.list();
+      if (parameters.try_get(binding, position)) return position.list();
       if (locals.contains(binding)) return %(local $spelling);
       String name = compiler.emitted_binding_name(binding);
       return %(identifier ${name ? name : spelling.str()});
@@ -95,7 +95,7 @@ static List _flow_source(
         compiler, right, path, origin, definitions, parameters, locals);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
-      if (parameters.try_get(binding, &position)) return position.list();
+      if (parameters.try_get(binding, position)) return position.list();
       if (locals.contains(binding)) return locals[binding].list();
       return %(value ${_flow_summary(compiler, node, parameters, locals)});
     }
@@ -718,7 +718,7 @@ static void _flow_trace(
           publics, functions, active, paths, unresolved);
     case %(parameter ?position ?spelling ?type): {
       Var replacement;
-      if (environment.try_get(position.integer(), &replacement)) {
+      if (environment.try_get(position.integer(), replacement)) {
         _flow_trace(
           replacement.list(), current, {},
           _flow_prepend(

@@ -413,7 +413,7 @@ Source: `src/parse.x:1879`
 <a id="Compiler.take_meta_marker"></a>
 #### Compiler.take_meta_marker
 
-`Token Compiler.take_meta_marker(Compiler c, int *native)`
+`Token Compiler.take_meta_marker(Compiler c, int &?native)`
 
 Consumes the `meta` marker at the cursor and the contextual `native`
 marker that may follow it, and returns the `meta` token. `native` binds

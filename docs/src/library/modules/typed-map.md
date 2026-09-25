@@ -517,7 +517,7 @@ Source: `lib/typed-map.x:280`
 <a id="MapIntInt.try_get"></a>
 #### MapIntInt.try_get
 
-`int MapIntInt.try_get(MapIntInt map, int key, int *out)`
+`int MapIntInt.try_get(MapIntInt map, int key, int &?out)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -894,7 +894,7 @@ Source: `lib/typed-map.x:300`
 <a id="MapLongDouble.try_get"></a>
 #### MapLongDouble.try_get
 
-`int MapLongDouble.try_get(MapLongDouble map, long key, double *out)`
+`int MapLongDouble.try_get(MapLongDouble map, long key, double &?out)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -1271,7 +1271,7 @@ Source: `lib/typed-map.x:358`
 <a id="MapStringInt.try_get"></a>
 #### MapStringInt.try_get
 
-`int MapStringInt.try_get(MapStringInt map, String key, int *out)`
+`int MapStringInt.try_get(MapStringInt map, String key, int &?out)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -1648,7 +1648,7 @@ Source: `lib/typed-map.x:321`
 <a id="MapStringString.try_get"></a>
 #### MapStringString.try_get
 
-`int MapStringString.try_get(MapStringString map, String key, String *out)`
+`int MapStringString.try_get(MapStringString map, String key, String &?out)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.

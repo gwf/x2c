@@ -22,7 +22,7 @@ static String expand(String text, Map variables) {
   Regex hole = Regex.compile("\\{(\\w*)\\}");
   return hole.replace_fn(text, %!(RegexMatch found) => {
     Var value;
-    if (!variables.try_get(found[1], &value))
+    if (!variables.try_get(found[1], value))
       fail(%"unknown manifest variable: '${found[1]}'");
     return value.str();
   });
@@ -78,7 +78,7 @@ if (options["manifest"]) {
   if (!manifest["name"] || !manifest["sources"])
     fail(%"$path: name and sources are required");
   Var found;
-  if (!manifest.try_get("distribution", &found))
+  if (!manifest.try_get("distribution", found))
     fail("dependency manifest has no distribution data");
   distribution = found;
 }

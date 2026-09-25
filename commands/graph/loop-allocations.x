@@ -13,13 +13,13 @@ enum { LOOP_ALLOCATION_LIMIT = 25 };
 
 static void _loop_increment(Map counts, List key, int amount) {
   Var prior;
-  int count = counts.try_get(key, &prior) ? prior.int() : 0;
+  int count = counts.try_get(key, prior) ? prior.int() : 0;
   counts[key] = count + amount;
 }
 
 static int _loop_count(Map counts, List key) {
   Var value;
-  return counts.try_get(key, &value) ? value.int() : 0;
+  return counts.try_get(key, value) ? value.int() : 0;
 }
 
 static void _loop_collect(

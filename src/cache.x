@@ -356,7 +356,7 @@ static void _report_static_initializer_cycle(
     match (initializer)
       case %(?binding *): {
         Var status;
-        if (!state.try_get(binding, &status) || status != 1)
+        if (!state.try_get(binding, status) || status != 1)
           continue;
         if (!first) first = binding;
         String name = binding_identity_spelling(binding);
@@ -364,7 +364,7 @@ static void _report_static_initializer_cycle(
       }
   Token token = NULL;
   Var token_index;
-  if (first && compiler.init_tokens.try_get(first, &token_index)) {
+  if (first && compiler.init_tokens.try_get(first, token_index)) {
     Token tokens = compiler.tokenizer.tokens;
     token = tokens + token_index.integer();
   }
@@ -378,7 +378,7 @@ static void _queue_one_static_initializer(
   Compiler compiler, List binding, Map pending, Map state,
   Map phases, Array initializers, Symbol deferred_kind) {
   Var status;
-  if (state.try_get(binding, &status)) {
+  if (state.try_get(binding, status)) {
     if (status == 2) return;
     _report_static_initializer_cycle(compiler, initializers, state);
   }
@@ -386,7 +386,7 @@ static void _queue_one_static_initializer(
   Array definitions = pending[binding];
   int late = 0;
   Var stored;
-  if (compiler.static_init_deps.try_get(binding, &stored)) {
+  if (compiler.static_init_deps.try_get(binding, stored)) {
     List dependencies = stored;
     foreach (List dependency, dependencies) {
       if (dependency in pending) {
@@ -433,7 +433,7 @@ static void _queue_static_initializers(
   Map pending = {}, state = {}, phases = {};
   foreach (List initializer, initializers) {
     Var definitions;
-    if (!pending.try_get(initializer.car(), &definitions))
+    if (!pending.try_get(initializer.car(), definitions))
       pending[initializer.car()] = definitions = [];
     definitions.array().push(initializer);
   }
@@ -543,11 +543,11 @@ static Array _cache_ids_in(Compiler compiler, List code) {
 
 // Replace cache nodes with the TU-local identifiers used by a header region.
 static List _rewrite_header_cache_refs(
-  Compiler compiler, List node, String prefix, int *replaced) {
+  Compiler compiler, List node, String prefix, int &?replaced) {
   if (!node) return node;
   match (node)
     case %(cache ?id): {
-      if (replaced) *replaced = 1;
+      if (replaced) replaced = 1;
       String ident = _generate_cache_ident(id, prefix);
       List binding = compiler.sym.reference(%($ident), NULL);
       return %(ident $binding);
@@ -613,7 +613,7 @@ static List _setup_header_cache(
   int inserted = 0;
   foreach (List node, header) {
     int replaced = 0;
-    node = _rewrite_header_cache_refs(c, node, prefix, &replaced);
+    node = _rewrite_header_cache_refs(c, node, prefix, replaced);
     int captured = node.car() == <sourceinit>;
     List function = node;
     if (captured) function = node.cadr();

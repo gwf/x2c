@@ -185,7 +185,7 @@ static String _tier(String path):
       if row && row[0] != '#' && fields.len() >= 2:
         tiers[fields.car()] = fields.cadr()
   Var tier
-  return tiers.try_get(path, &tier) ? tier : NULL
+  return tiers.try_get(path, tier) ? tier : NULL
 
 /* Rules that read one comment, the line after it, and the next function
    name. `next` is the first non-blank line after the comment. */

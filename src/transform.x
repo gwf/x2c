@@ -784,7 +784,7 @@ static List _dynamic_binary(
    The converted operand stays in `*rhs` when no helper exists, so a caller
    continues into the dynamic path with the operand it already built. */
 static List _protocol_update(
-  Compiler c, Type type, Symbol op, List arg, List *rhs, Symbol spelled) {
+  Compiler c, Type type, Symbol op, List arg, List &?rhs, Symbol spelled) {
   Symbol member = c.operator_member(op);
   if (!member) return NULL;
   String member_name = member;
@@ -794,15 +794,15 @@ static List _protocol_update(
     List converted = NULL;
     match (resolved)
       case %(? ((func (? ?parameter *)) ?)):
-        converted = c.convert_expression(*rhs, parameter);
+        converted = c.convert_expression(rhs, parameter);
     if (!converted) return NULL;
-    *rhs = converted;
+    rhs = converted;
   }
   String helper = c.protocol_update_helper(type, member_name, !rhs);
   if (!helper) return NULL;
   List spell = _symbol_expression(spelled);
   if (!rhs) return %(vpostfix $arg $spell $helper);
-  List value = *rhs;
+  List value = rhs;
   return %(vcompound $arg $spell $value $helper);
 }
 
@@ -833,7 +833,7 @@ static List _dynamic_compound(
     member_type = %("String");
   }
   if (!lhs_is_var) {
-    List updated = _protocol_update(c, member_type, op, lhs, &rhs, op);
+    List updated = _protocol_update(c, member_type, op, lhs, rhs, op);
     if (updated) return updated;
     (rhs_tag, rhs_type) = rhs;
   }
@@ -919,7 +919,7 @@ static List _operator(Compiler c, List ast) {
       if (!c.sym.is_var_type(type)) {
         Symbol binary = operator == <++> ? <+> : <->;
         List one = %(expr (int) (literal (int) "1"));
-        List updated = _protocol_update(c, type, binary, arg, &one, binary);
+        List updated = _protocol_update(c, type, binary, arg, one, binary);
         if (updated) return updated;
       }
       if (c.sym.is_var_type(type)) {
@@ -1088,7 +1088,7 @@ static List _string_segments(Compiler compiler, List ast) {
   }
   String count = %"${segment_count}U";
   Type signature = NULL;
-  List binding = compiler.sym.reference(%("List_list_n"), &signature);
+  List binding = compiler.sym.reference(%("List_list_n"), signature);
   List list = %(expr ("List")
     (call (expr $signature (ident $binding))
           (args (expr (unsigned) (literal (unsigned) $count)) @segments)));
@@ -1172,8 +1172,8 @@ static void _defer_collect_captures(
       Var automatic, existing, stored_type;
       if (binding && !declared.contains(binding) &&
           compiler.semantic_binding_facts().try_get(
-            %(automatic $binding), &automatic) &&
-          !captures.try_get(binding, &existing)) {
+            %(automatic $binding), automatic) &&
+          !captures.try_get(binding, existing)) {
         stored_type = compiler.semantic_binding_facts()[%(type $binding)];
         if (!_defer_type_hoistable(compiler, stored_type)) {
           unsupported = 1;
@@ -1202,7 +1202,7 @@ static void _defer_collect_captures(
         unsupported);
   Var field;
   List changed = written;
-  if (modified && captures.try_get(modified, &field) &&
+  if (modified && captures.try_get(modified, field) &&
       !changed.contains(modified))
     written = cons(modified, changed);
 }
@@ -1216,7 +1216,7 @@ static List _defer_rewrite_captures(
     case %(expr ?captured_type (ident ?bound)): {
       List binding = bound;
       Var field_var;
-      if (captures.try_get(binding, &field_var)) {
+      if (captures.try_get(binding, field_var)) {
         String field_name = binding_identity_spelling(field_var);
         Type type = captured_type, target = type;
         if (binding in written &&
@@ -1621,7 +1621,7 @@ static Ast _node(Compiler c, Ast ast) {
       String owner = binding_identity_spelling(binding);
       Var stored_owner;
       if (c.semantic_binding_facts().try_get(
-        %(defer-ownr $binding), &stored_owner))
+        %(defer-ownr $binding), stored_owner))
         owner = stored_owner;
       String previous = c.fn_name;
       int previous_inline = c.inline_header;

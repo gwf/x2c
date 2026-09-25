@@ -30,7 +30,7 @@ static String _normalize_file(Compiler compiler, String file) {
 
 static String _path(Compiler compiler) {
   Var cached;
-  if (compiler.protocol_helpers.try_get(<proto-path>, &cached)) return cached;
+  if (compiler.protocol_helpers.try_get(<proto-path>, cached)) return cached;
   String result = _normalize_file(
     compiler, compiler.filename ? compiler.filename : "<stdin>");
   compiler.protocol_helpers[<proto-path>] = result;
@@ -181,7 +181,7 @@ static List _adoption_row(
            ? %($base $participant $path)
            : %($base $participant);
   Var stored;
-  return compiler.adoptions.try_get(key, &stored)
+  return compiler.adoptions.try_get(key, stored)
        ? stored : NULL;
 }
 
@@ -224,7 +224,7 @@ static void Compiler._install_protocol_occurrence(
   String file = _canonical_file(c, location);
   if (storage == <static> && file != _path(c)) return;
   Var stored;
-  if (!c.protocols.try_get(base, &stored)) {
+  if (!c.protocols.try_get(base, stored)) {
     c.protocols[base] = _occurrence(record, storage, location);
     return;
   }
@@ -301,7 +301,7 @@ static void Compiler._install_protocol_adoption(
   List row = _adoption_node(
     base, participant, storage, representation, tag_expression, location);
   Var stored;
-  if (!compiler.adoptions.try_get(key, &stored)) {
+  if (!compiler.adoptions.try_get(key, stored)) {
     compiler.adoptions[key] = row;
     return;
   }
@@ -349,7 +349,7 @@ String Compiler.reverse_converter_spelling(
 
 static List Compiler._record(Compiler compiler, Type base) {
   Var stored;
-  if (!compiler.protocols.try_get(base, &stored)) return NULL;
+  if (!compiler.protocols.try_get(base, stored)) return NULL;
   List occurrence = stored;
   return occurrence.car();
 }
@@ -443,7 +443,7 @@ static List Compiler._publish_protocol_adoption(
     ? c.reverse_converter_spelling(base_name, "as_", spelling)
     : NULL;
   Var occurrence_value;
-  List occurrence = c.protocols.try_get(base, &occurrence_value)
+  List occurrence = c.protocols.try_get(base, occurrence_value)
     ? occurrence_value : NULL;
   int inferred_private = storage == <static>;
   if (c.source_private >= 0)
@@ -463,7 +463,7 @@ static List Compiler._publish_protocol_adoption(
     String path = _canonical_file(c, location);
     List key = %("parsed-protocol-adoption" $base $participant $path);
     Var previous;
-    if (c.protocol_helpers.try_get(key, &previous)) {
+    if (c.protocol_helpers.try_get(key, previous)) {
       List row = previous;
       Type first_representation = _adoption_representation(row);
       List first_tag = _adoption_tag(row);
@@ -590,7 +590,7 @@ static int _unify(
   String variable = _type_variable(pattern, variables);
   if (variable) {
     Var bound;
-    if (!bindings.try_get(variable, &bound)) {
+    if (!bindings.try_get(variable, bound)) {
       bindings[variable] = actual;
       return 1;
     }
@@ -701,7 +701,7 @@ static List _inherited_parameters(
 static Type _receiver_relative_signature(
   Compiler compiler, List binding, Type signature, Type receiver) {
   Var stored;
-  if (!compiler.semantic_binding_facts().try_get(%(self $binding), &stored))
+  if (!compiler.semantic_binding_facts().try_get(%(self $binding), stored))
     return signature;
   Type relative = stored, base = receiver.canonicalize().base_type();
   return relative.search_replace(<self>, base.car());
@@ -820,7 +820,7 @@ static List Compiler._resolve_native_protocol_participant(
   failure = NULL;
   List key = %($base $participant);
   Var stored;
-  if (c.conforms.try_get(key, &stored)) {
+  if (c.conforms.try_get(key, stored)) {
     if (stored is not <list>) return NULL;
     List conformance = stored;
     _install_native_bindings(c, participant, conformance.last().list().cdr());
@@ -1054,7 +1054,7 @@ static List Compiler._resolve_ordinary_protocol(
   failure = NULL;
   Var stored;
   List key = %($base $participant);
-  if (compiler.conforms.try_get(key, &stored))
+  if (compiler.conforms.try_get(key, stored))
     return stored is <list> ? stored : NULL;
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) goto does_not_conform;
@@ -1355,7 +1355,7 @@ int Compiler.protocol_rejects_direct_member(
   Type owner = participant.canonicalize();
   List cache_key = %("protocol-rejects" $owner $member);
   Var cached;
-  if (compiler.proto_cache.try_get(cache_key, &cached)) return cached;
+  if (compiler.proto_cache.try_get(cache_key, cached)) return cached;
   List protocols = _ordered_occurrences(compiler), int rejects = 0;
   foreach (Type ancestor, _ancestry(compiler, owner)) {
     List row = _member_row(
@@ -1474,7 +1474,7 @@ Symbol Compiler.derived_member(Compiler compiler, Symbol op) {
    stores what it returns. */
 static List _proto_cached(Compiler compiler, Var key, Func compute) {
   Var cached;
-  if (compiler.proto_cache.try_get(key, &cached))
+  if (compiler.proto_cache.try_get(key, cached))
     return cached is <list> ? cached : NULL;
   List result = compute(compiler);
   compiler.proto_cache[key] = result ? result : 0;
@@ -1741,7 +1741,7 @@ String Compiler.protocol_update_helper(
   Compiler c, Type participant, String member, int postfix) {
   List key = %("protocol-update-helper" $participant $member $postfix);
   Var stored;
-  if (c.protocol_helpers.try_get(key, &stored)) return stored;
+  if (c.protocol_helpers.try_get(key, stored)) return stored;
 
   List resolved = c.resolve_protocol_member(participant, member);
   if (!resolved) return NULL;
@@ -1819,7 +1819,7 @@ List Compiler.discard_helper(
   Compiler c, List binding, Type signature, String stem, int which) {
   List key = %("discard-helper" $stem $which);
   Var stored;
-  if (c.protocol_helpers.try_get(key, &stored)) return stored;
+  if (c.protocol_helpers.try_get(key, stored)) return stored;
 
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
@@ -1927,7 +1927,7 @@ static List _adapter_result(
 static List Compiler._generate_protocol_function(
   Compiler compiler, String name, int make_static, Type target_signature,
   Type source_signature, Type template, Map variables, String binder,
-  String source, String reverse, List *binding_out) {
+  String source, String reverse, List &?binding_out) {
   List target_parameters = target_signature.car().list().cadr();
   Type target_result = target_signature.cdr();
   List source_parameters = source_signature.car().list().cadr();
@@ -1959,7 +1959,7 @@ static List Compiler._generate_protocol_function(
     compiler, call, template_result, target_result, variables);
   List function_binding = compiler.sym.reference(%($name), NULL);
   if (make_static) function_binding = compiler.sym.introduce(name);
-  if (binding_out) *binding_out = function_binding;
+  if (binding_out) binding_out = function_binding;
   List storage = make_static ? %(static inline @target_result) : target_result;
   List function = %(
     function $storage
@@ -1975,7 +1975,7 @@ static int _defines_function(Compiler compiler, String name) {
   Var stored;
   if (!binding ||
       !compiler.semantic_binding_facts().try_get(
-        %(completion $binding), &stored))
+        %(completion $binding), stored))
     return 0;
   Symbol state = stored.list().car();
   return state == <definition> || state == <completed>;
@@ -2185,7 +2185,7 @@ static List Compiler._generate_protocol_thunk(
   List thunk_binding = NULL;
   List function = c._generate_protocol_function(
     thunk_name, 1, target, expected, template,
-    variables, binder, source, reverse, &thunk_binding);
+    variables, binder, source, reverse, thunk_binding);
   if ((member == "str" || member == "repr" || member == "write_str" ||
        member == "write_repr") &&
       c.sym.normalize_declared_type(participant).is_aggregate())
@@ -2311,7 +2311,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         if (native) {
           Var stored;
           if (!c.protocol_helpers.try_get(
-            %("source-typedef" ${participant.car()}), &stored))
+            %("source-typedef" ${participant.car()}), stored))
             continue;
           (List source, int private) = stored;
           int make_static =

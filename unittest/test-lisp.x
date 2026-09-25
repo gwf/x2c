@@ -317,7 +317,7 @@ static void _install(Lisp lisp, const char *name, FuncAdapter fn, List sig) {
   Func func = Func.new(fn, sig);
   lisp.set_global(String.new(name), Func.var(func));
   Var installed = void;
-  EXPECT_TRUE(lisp.try_get(String.new(name), &installed));
+  EXPECT_TRUE(lisp.try_get(String.new(name), installed));
 }
 
 static Lisp _session(void) {
@@ -363,12 +363,12 @@ static void lisp_eval_def_and_globals(void) {
   Lisp lisp = _session();
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(def x 41)")), 41);
   Var native = void;
-  EXPECT_TRUE(lisp.try_get("add", &native));
+  EXPECT_TRUE(lisp.try_get("add", native));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(add x 1)")), 42);
   Var stored = void;
-  EXPECT_TRUE(lisp.try_get("x", &stored));
+  EXPECT_TRUE(lisp.try_get("x", stored));
   EXPECT_INT_EQ(stored.integer(), 41);
-  EXPECT_FALSE(lisp.try_get("missing", &stored));
+  EXPECT_FALSE(lisp.try_get("missing", stored));
   lisp.set_global("y", Var.new(<i32>, 5));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "y")), 5);
   EXPECT_INT_EQ(_raised_code(lisp, "unbound-name"), <unbound>);
@@ -389,7 +389,7 @@ static void lisp_transports_void_outside_collections(void) {
 
   lisp.set_global("global-void", void);
   Var stored = 7;
-  EXPECT_TRUE(lisp.try_get("global-void", &stored));
+  EXPECT_TRUE(lisp.try_get("global-void", stored));
   EXPECT_TRUE(stored is void);
   EXPECT_TRUE(_ev(lisp, "global-void") is void);
   EXPECT_TRUE(_ev(lisp, "(identity (no-value))") is void);
@@ -463,7 +463,7 @@ static void lisp_apply_uses_evaluated_values(void) {
   EXPECT_INT_EQ(_raised_code(lisp, "(apply quote '(x))"), <not-call>);
 
   Var plus = void;
-  EXPECT_TRUE(lisp.try_get("+", &plus));
+  EXPECT_TRUE(lisp.try_get("+", plus));
   EXPECT_INT_EQ(Var.integer(lisp.apply(plus, %(20 22))), 42);
   lisp.destroy();
 }
@@ -1202,8 +1202,8 @@ static void lisp_bootstrap_predicates_are_exact(void) {
 static void lisp_optional_layers_are_explicit(void) {
   Lisp lisp = _boot_session();
   Var value = void;
-  EXPECT_FALSE(lisp.try_get("fib", &value));
-  EXPECT_FALSE(lisp.try_get("read-file", &value));
+  EXPECT_FALSE(lisp.try_get("fib", value));
+  EXPECT_FALSE(lisp.try_get("read-file", value));
 
   if (_load_lisp_layer(lisp, "../etc/lisp-extras.xlisp")) {
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(fib 8)")), 21);
@@ -1233,7 +1233,7 @@ static void lisp_value_layer_uses_library_operations(void) {
   _install(lisp, "no-value", _native_void,
            %((func ((void))) "Var"));
   Var value = void;
-  EXPECT_FALSE(lisp.try_get("Map.new", &value));
+  EXPECT_FALSE(lisp.try_get("Map.new", value));
   if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
 
   EXPECT_VAR_EQ(_ev(lisp, "(List.getindex '(a b c) 1)"), _ev(lisp, "'b"));

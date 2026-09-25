@@ -165,7 +165,7 @@ static List _render(Options options) {
   if (!_open_input(frontend, options.input, &parsed)) return NULL;
   Var stored;
   List rendered = NULL;
-  if (!Lisp.try_get(parsed.compiler.macro_lisp, "cstar.records", &stored))
+  if (!Lisp.try_get(parsed.compiler.macro_lisp, "cstar.records", stored))
     Stderr.printf("cstar-verify: %s: no cstar annotations\n", options.input);
   else rendered = _program(options, parsed, stored.list().reverse());
   if (rendered) rendered = parsed.context.export(rendered);

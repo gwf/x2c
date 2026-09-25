@@ -144,7 +144,7 @@ static List Emitter._function(Emitter e, List ast) {
   e.fn_name = binding_identity_spelling(function_binding);
   Var defer_owner;
   if (e.semantic_binding_facts().try_get(
-    %(defer-ownr $function_binding), &defer_owner))
+    %(defer-ownr $function_binding), defer_owner))
     e.fn_name = defer_owner;
   type = e._emit(%( $type ));
   bindings = %( $bindings );
@@ -227,7 +227,7 @@ static List Emitter._typedef(Emitter e, List ast) {
   foreach (List declarator, ast.caddr().cdr()) {
     List binding = declarator.cadr();
     Var type;
-    if (e.semantic_binding_facts().try_get(%(ntype $binding), &type))
+    if (e.semantic_binding_facts().try_get(%(ntype $binding), type))
       e.native_aliases = cons(%($type $binding), e.native_aliases);
   }
   return code;
@@ -450,7 +450,7 @@ static List Emitter._match_site_call(
   String entry = _match_site_entry(name);
   if (!entry) return NULL;
   Type type = NULL;
-  List global = e.compiler.sym.resolve_global(%($name), &type);
+  List global = e.compiler.sym.resolve_global(%($name), type);
   if (!global || !global.equal(binding) || !type.is_function())
     return NULL;
   List args = arguments;
@@ -774,7 +774,7 @@ static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
       }
     Var value = e.match_pattern_value(pattern_ast);
     List flat_tags = NULL;
-    Symbol flat_head = match_value_flat_head(value, binders, &flat_tags);
+    Symbol flat_head = match_value_flat_head(value, binders, flat_tags);
     List pattern = e._emit(pattern_ast);
     List body = e._emit(body_ast);
     List label =
@@ -1382,7 +1382,7 @@ static List Emitter._emit(Emitter e, List ast) {
     }
     case %(ident ?binding): {
       Var pointer;
-      if (e.static_objects && e.static_objects.try_get(binding, &pointer))
+      if (e.static_objects && e.static_objects.try_get(binding, pointer))
         return %("(*" $pointer ")");
       return e._emit(%($binding));
     }

@@ -470,7 +470,7 @@ static void _destroy_text(Var data) {
   LogTextSink context = data;
   if (!context) return;
   if (context.file) fflush(context.file);
-  if ((void *) context.scratch != NULL) {
+  if (context.scratch != NULL) {
     Buffer *buffers = context.scratch.bytes;
     for (size_t i = 0; i < context.scratch.length; i++) buffers[i].free();
     context.scratch.free();

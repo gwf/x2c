@@ -61,7 +61,7 @@ static void _prototypes(Lint l, Compiler c, List ast):
       case %(function ? (bind ?binding ?) ?): defined[binding] = 1
   foreach List node in ast:
     Var span
-    if !facts.try_get(%(definition-span $node), &span): continue
+    if !facts.try_get(%(definition-span $node), span): continue
     match node:
       case %(declare ?type (bindings *items)):
         Var (start, end) = span.list()

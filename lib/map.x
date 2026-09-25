@@ -124,7 +124,7 @@ meta native Map Map.new_capacity(unsigned capacity) {
     The `Map` and its growing storage belong to the scope in which it was
     created. An empty `Map` is an allocated object, never a null pointer.
     A bare `if (...)` uses `Map.truth` and tests content; use an
-    explicit `(void *) map != NULL` comparison when pointer presence matters.
+    explicit `map != NULL` comparison when pointer presence matters.
 
     It starts with two buckets, the smallest table whose mask is nonzero, and
     doubles from there.
@@ -170,12 +170,12 @@ meta native unsigned Map.len(Map map) => map.used;
     ```x2c
     ~Map ages = {"ada": 36, "grace": 45};
     Var found;
-    if (ages.try_get("ada", &found)) printf("%s\n", found.repr());
-    if (!ages.try_get("nobody", &found)) printf("absent\n");
+    if (ages.try_get("ada", found)) printf("%s\n", found.repr());
+    if (!ages.try_get("nobody", found)) printf("absent\n");
     ```
     Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key
     hashing or equality. */
-int Map.try_get(Map map, Var key, Var *out) => map._core_try_get(&key, out);
+int Map.try_get(Map map, Var key, Var &?out) => map._core_try_get(&key, out);
 
 /** Returns the value stored under `key`, or `void` when absent.
     A convenience over `Map.try_get`, kept because it reads well inside a
@@ -203,7 +203,7 @@ int Map.try_get(Map map, Var key, Var *out) => map._core_try_get(&key, out);
     hashing or equality. */
 Var Map.get(Map map, Var key) {
   Var out;
-  return map.try_get(key, &out) ? out : void;
+  return map.try_get(key, out) ? out : void;
 }
 
 /** Returns the value selected by bracket indexing.
@@ -232,7 +232,7 @@ Var Map.getindex(Map map, Var key) => map.get(key);
     caller, so a `void` key raises there instead.
 */
 meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
-  if ((void *) map == NULL) return void;
+  if (map == NULL) return void;
   long index = map._core_find_hashed(&key, key_hash);
   return index < 0 ? void : *_record_value(map, (unsigned) index);
 }
@@ -246,7 +246,7 @@ meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
 */
 meta native Var Map.getdefault(Map map, Var key, Var defval) {
   Var val;
-  return map.try_get(key, &val) ? val : defval;
+  return map.try_get(key, val) ? val : defval;
 }
 
 /** Returns the value stored under `key`, inserting `defval` first when the
@@ -266,7 +266,7 @@ meta native Var Map.getdefault(Map map, Var key, Var defval) {
     custom key hashing or equality.
 */
 meta native Var Map.setdefault(Map map, Var key, Var defval) {
-  if ((void *) map == NULL) raise %(bad-arg);
+  if (map == NULL) raise %(bad-arg);
   if (key is void) raise %(void-op);
   int inserted;
   Var *stored = map._core_get_or_insert(&key, &defval, &inserted);
@@ -284,7 +284,7 @@ meta native Var Map.setdefault(Map map, Var key, Var defval) {
 int Map.contains(Map m, Var key) => m && m._core_find_index(&key) >= 0;
 
 static void _set(Map map, Var key, Var val) {
-  if ((void *) map == NULL) raise %(bad-arg);
+  if (map == NULL) raise %(bad-arg);
   if (key is void || val is void) raise %(void-op);
   map._core_set(&key, &val);
 }
@@ -349,7 +349,7 @@ Var Map.setindex(Map map, Var key, Var val) {
     cause, or any cause from `Var.update`.
 */
 Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
-  if ((void *) map == NULL) raise %(bad-arg);
+  if (map == NULL) raise %(bad-arg);
   if (key is void || rhs is void) raise %(void-op);
   X2CVarNumericInfo info;
   int numeric = Var.encoding_valid(rhs) && Var.numeric_info(rhs.tag(), &info);
@@ -373,7 +373,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     These failures leave the existing value unchanged.
 */
 Var Map.postfixindex(Map map, Var key, Symbol op) {
-  if ((void *) map == NULL) raise %(bad-arg);
+  if (map == NULL) raise %(bad-arg);
   if (key is void) raise %(void-op);
   long index = map._core_find_index(&key);
   if (index < 0) raise %(bad-arg (key $key));
@@ -416,7 +416,7 @@ Var Map.del(Map map, Var key) {
     Raises: the same causes as `Map.set`.
 */
 Self Map.update_n(Self map, unsigned pair_count, ...) {
-  if ((void *) map == NULL) return NULL;
+  if (map == NULL) return NULL;
   va_list ap;
   va_start(ap, pair_count);
   for (unsigned i = 0; i < pair_count; i++) {
@@ -463,7 +463,7 @@ meta native Self Map.copy(Self map) => map._core_copy();
     export, key hashing, or moving the rebuilt `Block`s. */
 void Map.export_to(
   Map map, Context source, VarExportContextFn export_value, Scope *scope) {
-  if ((void *) map == NULL || !export_value || !scope) return;
+  if (map == NULL || !export_value || !scope) return;
   Bytes old_hashes = map.hashes, old_entries = map.entries;
 
   /* Stage both arrays without publishing either one. A transfer frees the
@@ -566,7 +566,7 @@ int Map.compare(Map a, Map b) => a._core_compare(b);
 
 static int _next(Iter iter, Var *out) {
   Map map = iter.obj;
-  if ((void *) map == NULL) return 0;
+  if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
   if (!map.try_next(&cursor, &key, &val)) return 0;
@@ -577,7 +577,7 @@ static int _next(Iter iter, Var *out) {
 
 static int _keys_next(Iter iter, Var *out) {
   Map map = iter.obj;
-  if ((void *) map == NULL) return 0;
+  if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
   if (!map.try_next(&cursor, &key, &val)) return 0;
@@ -588,7 +588,7 @@ static int _keys_next(Iter iter, Var *out) {
 
 static int _enumerate_next(Iter iter, Var *out) {
   Map map = iter.obj;
-  if ((void *) map == NULL) return 0;
+  if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
   if (!map.try_next(&cursor, &key, &val)) return 0;

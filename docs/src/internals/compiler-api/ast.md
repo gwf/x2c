@@ -68,7 +68,7 @@ Source: `src/ast.x:58`
 
 #### binding_identity_try_parts
 
-`int binding_identity_try_parts(List binding, int *identity, String *spelling)`
+`int binding_identity_try_parts(List binding, int &?identity, String &?spelling)`
 
 Extracts a valid `(binding positive-integer string)` node.
 Returns one on success and writes only non-`NULL` outputs; failure returns

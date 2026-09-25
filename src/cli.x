@@ -828,7 +828,7 @@ static CliOption *_find_option(
    linker. */
 static CliOption *_take_option(
   Array args, int &index, int mask,
-  String *spelling, String &value, int *attached) {
+  String &?spelling, String &value, int &?attached) {
   // A long option may carry its value after '=', as `--out-dir=gen`. An
   // empty one is the option's own missing-value case, not the next word.
   String arg = args[index], written = arg, joined = NULL;
@@ -843,8 +843,8 @@ static CliOption *_take_option(
   if (!option) return NULL;
   if (equals > 2 && !option.value)
     x2c_driver_error(%"option takes no value '$arg'");
-  if (spelling) *spelling = written;
-  if (attached) *attached = suffix != NULL;
+  if (spelling) spelling = written;
+  if (attached) attached = suffix != NULL;
   value = equals > 2 ? joined : suffix;
   if (option.value && !value && equals <= 2) {
     if (++index == args.len())
@@ -1007,7 +1007,7 @@ CliRequest cli_package_options(String path, String package) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option = _take_option(
-      words, i, CLI_BUILD, &spelling, value, &attached);
+      words, i, CLI_BUILD, spelling, value, attached);
     if (!option)
       x2c_driver_error(%"unsupported package native argument '$argument'");
     switch (option.id) {
@@ -1106,7 +1106,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option =
-      _take_option(args, i, mask, &spelling, value, &attached);
+      _take_option(args, i, mask, spelling, value, attached);
     if (!option) {
       if (mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(%"unknown option '$arg'");

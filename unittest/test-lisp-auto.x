@@ -167,7 +167,7 @@ static void lisp_auto_replacement_guards(void) {
   // L4: replacing the native add is visible immediately through the
   // late lookup, with no reanalysis and no republication.
   Var original = void;
-  EXPECT_TRUE(lisp.try_get("add", &original));
+  EXPECT_TRUE(lisp.try_get("add", original));
   lisp.set_global("add",
                   Func.var(_make_func(
                                       _auto_native_add100,

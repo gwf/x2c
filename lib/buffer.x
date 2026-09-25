@@ -73,9 +73,9 @@ meta native Buffer Buffer.new(size_t padding) {
 
 /** Releases `buf` and both backing `Block`s, invalidating every alias. */
 void Buffer.free(Buffer buf) {
-  if ((void *) buf == NULL) return;
-  if ((void *) buf.content != NULL) buf.content.free();
-  if ((void *) buf.indents != NULL) buf.indents.free();
+  if (buf == NULL) return;
+  if (buf.content != NULL) buf.content.free();
+  if (buf.indents != NULL) buf.indents.free();
   Scope.free(buf);
 }
 
@@ -86,7 +86,7 @@ void Buffer.free(Buffer buf) {
     ownership unchanged.
 */
 void Buffer.move_to(Buffer buf, Scope *scope) {
-  if ((void *) buf == NULL) return;
+  if (buf == NULL) return;
   buf.content.move_to(scope);
   buf.indents.move_to(scope);
   Scope.move(buf, scope);
@@ -284,8 +284,9 @@ size_t Buffer.tabstop(Buffer buf) {
     Negative indexes count from the end. Returns zero for a null `Buffer`, null
     output, or missing byte and leaves `out` unchanged.
 */
-int Buffer.try_get(Buffer buf, ptrdiff_t index, char *out) {
-  if (!buf || !out) return 0;
+int Buffer.try_get(Buffer buf, ptrdiff_t index, char &?out) {
+  if (!buf) return 0;
+  if (!out) return 0;
   size_t normalized;
   if (index < 0) {
     size_t distance = (size_t) (-(index + 1)) + 1;
@@ -296,7 +297,7 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char *out) {
     normalized = index;
     if (normalized >= buf.content.length) return 0;
   }
-  *out = ((char *) buf.content.bytes)[normalized];
+  out = ((char *) buf.content.bytes)[normalized];
   return 1;
 }
 
@@ -306,7 +307,7 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char *out) {
 */
 char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;
-  return buf.try_get(index, &out) ? out : '\0';
+  return buf.try_get(index, out) ? out : '\0';
 }
 
 /** Returns `buf.get(index)`, so `buf[index]` reads a byte. */
@@ -352,7 +353,7 @@ String Buffer.repr(Buffer buf) {
 }
 
 /** Returns nonzero when `b` contains at least one byte. */
-int Buffer.truth(Buffer b) => (void *) b != NULL && b.content.length != 0;
+int Buffer.truth(Buffer b) => b != NULL && b.content.length != 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Buffer.cleanup(Buffer value) { value.free(); }

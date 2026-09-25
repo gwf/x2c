@@ -171,7 +171,7 @@ Source: `src/compiler.x:469`
 
 #### match_value_flat_head
 
-`Symbol match_value_flat_head(Var value, List binders, List *tags)`
+`Symbol match_value_flat_head(Var value, List binders, List &?tags)`
 
 Returns the head of a flat Symbol-and-captures pattern value, or zero.
 
@@ -580,7 +580,7 @@ Source: `src/compiler.x:552`
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
 
-`List Compiler.match_pattern_binders(Compiler c, List pattern, List *possible)`
+`List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible)`
 
 Returns definite binders from a typed `Match` pattern AST.
 
@@ -1281,7 +1281,7 @@ Source: `src/compiler.x:3660`
 <a id="Sym.lookup"></a>
 #### Sym.lookup
 
-`List Sym.lookup(Sym sym, List key, List *type)`
+`List Sym.lookup(Sym sym, List key, Type &?type)`
 
 Resolves an existing key and optionally stores its semantic type.
 
@@ -1372,7 +1372,7 @@ Source: `src/compiler.x:3893`
 <a id="Sym.reference"></a>
 #### Sym.reference
 
-`List Sym.reference(Sym sym, List key, List *type)`
+`List Sym.reference(Sym sym, List key, Type &?type)`
 
 Resolves `key` or creates a forward binding in the current scope.
 
@@ -1404,7 +1404,7 @@ Source: `src/compiler.x:2689`
 <a id="Sym.resolve_global"></a>
 #### Sym.resolve_global
 
-`List Sym.resolve_global(Sym sym, List key, List *type)`
+`List Sym.resolve_global(Sym sym, List key, Type &?type)`
 
 Resolves a binding through base scopes and optionally stores its type.
 
@@ -1463,7 +1463,7 @@ Source: `src/compiler.x:2820`
 <a id="Sym.var_tag_for_type"></a>
 #### Sym.var_tag_for_type
 
-`Symbol Sym.var_tag_for_type(Sym sym, Type type, Type *resolved)`
+`Symbol Sym.var_tag_for_type(Sym sym, Type type, Type &?resolved)`
 
 Returns a type's `Var` tag and optionally stores its resolved type.
 

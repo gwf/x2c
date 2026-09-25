@@ -487,10 +487,10 @@ static int _run_build_request(CliRequest c, Array commands) {
     state.cleanup(0);
     return result;
   }
-  if ((void *) commands != NULL)
+  if (commands != NULL)
     foreach (String entry, state.compile_commands)
       commands.push(target.export(entry));
-  if ((void *) commands != NULL && c.command == <run> &&
+  if (commands != NULL && c.command == <run> &&
       !compile_commands_write(c.compile_commands, commands)) {
     state.cleanup(0);
     return 1;
@@ -527,7 +527,7 @@ static int _run_build(CliRequest request) {
       if (result) return result;
     }
   }
-  if ((void *) commands != NULL && request.command != <run> &&
+  if (commands != NULL && request.command != <run> &&
       !compile_commands_write(request.compile_commands, commands))
     return 1;
   return 0;

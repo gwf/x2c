@@ -31,7 +31,7 @@ int main(void) {
     String channel = release["channel"].string();
     unsigned long long total = release["downloads"].uint();
     Var count = 0;
-    downloads.try_get(channel, &count);
+    downloads.try_get(channel, count);
     downloads[channel] = count + total;
     printf("%s", %"  $version ($channel) $total downloads\n");
   }

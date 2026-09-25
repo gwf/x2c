@@ -562,7 +562,7 @@ void Type.end_unit(void) {
     or no active unit, leaves the table unchanged.
 */
 void Type.register_var_tag(Type t, String name, String converter) {
-  if ((void *) declared_typetags == NULL || !t || !name || !converter) return;
+  if (declared_typetags == NULL || !t || !name || !converter) return;
   Type key = t.canonicalize();
   Var row = declared_typetags[key];
   if (row is void)
@@ -575,7 +575,7 @@ void Type.register_var_tag(Type t, String name, String converter) {
 */
 void Type.register_var_adoption(
   Type type, Type representation, Symbol tag) {
-  if ((void *) declared_typetags == NULL || !type) return;
+  if (declared_typetags == NULL || !type) return;
   Type key = type.canonicalize();
   Var row = declared_typetags[key];
   if (!tag && representation) tag = representation.fixed_var_tag();
@@ -587,7 +587,7 @@ void Type.register_var_adoption(
     `type`, or `NULL`.
 */
 String Type.var_converter(Type type) {
-  if ((void *) declared_typetags == NULL || !type) return NULL;
+  if (declared_typetags == NULL || !type) return NULL;
   Var row = declared_typetags[type.canonicalize()];
   if (row is void) return NULL;
   return row.list().cadr();
@@ -607,7 +607,7 @@ Symbol Type.fixed_var_tag(Type type) {
 */
 Symbol Type.var_tag(Type type) {
   if (!type) return 0;
-  if ((void *) declared_typetags != NULL) {
+  if (declared_typetags != NULL) {
     Var row = declared_typetags[type.canonicalize()];
     if (row is not void) return row.list().car();
   }

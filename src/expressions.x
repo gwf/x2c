@@ -443,11 +443,11 @@ static List _delegate_step(Compiler compiler, Type receiver, String name) {
 
 static void _find_delegate_methods(
   Compiler compiler, Type receiver, String member, List reverse_path,
-  List seen, Array candidates, List *first_cycle, Type outer, Token origin) {
+  List seen, Array candidates, List &first_cycle, Type outer, Token origin) {
   Type aggregate = compiler.sym.delegate_aggregate(receiver);
   if (!aggregate) return;
   if (aggregate in seen) {
-    if (!*first_cycle) *first_cycle = cons(<path>, reverse_path.reverse());
+    if (!first_cycle) first_cycle = cons(<path>, reverse_path.reverse());
     return;
   }
   seen = cons(aggregate, seen);
@@ -484,7 +484,7 @@ static List _resolve_delegate_method(
   Array found = [], List first_cycle = NULL;
   _find_delegate_methods(
     compiler, receiver, member, NULL, NULL,
-    found, &first_cycle, receiver, origin);
+    found, first_cycle, receiver, origin);
   List candidates = found.list_free();
   if (candidates && candidates.cdr()) {
     List notes = NULL;
@@ -599,7 +599,7 @@ List Compiler.postfix_completions(
       case %(method ?binding ?): {
         Var callable;
         String spelling = binding_identity_spelling(binding);
-        if (c.macro_lisp.try_get(spelling, &callable)) accepted.push(name);
+        if (c.macro_lisp.try_get(spelling, callable)) accepted.push(name);
       }
     }
   }
@@ -1037,7 +1037,7 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
           %(lambda-depth $binding) in compiler.semantic_binding_facts();
         if (compiler.lambda_capture_required(binding)) return 1;
         if (retained_parameter &&
-            ((void *) compiler.local_macro_captures != NULL ||
+            (compiler.local_macro_captures != NULL ||
              %(local-macro-capture $binding) in
                compiler.semantic_binding_facts()))
           return 1;
@@ -1349,15 +1349,15 @@ static List _resolve_identifier(
   if (deferred) type = NULL;
   int read_reference = !type;
   List binding = NULL, int require_type = value is <string>;
-  if (value is <string>) binding = c.sym.reference(%($value), &type);
+  if (value is <string>) binding = c.sym.reference(%($value), type);
   else if (value is <list>) {
     List name = value;
     int identity = 0;
     String spelling = NULL;
-    if (binding_identity_try_parts(name, &identity, &spelling)) {
+    if (binding_identity_try_parts(name, identity, spelling)) {
       Var issued;
       if (!c.semantic_binding_facts().try_get(
-        %(known $identity), &issued) ||
+        %(known $identity), issued) ||
           issued is not <string> || !issued.string().equal(spelling))
         c.report_error(
           <type>, "identifier has an unknown binding identity",
@@ -1367,10 +1367,10 @@ static List _resolve_identifier(
     else match (name) {
       case %("x2c.ident" ?(String spelling)): {
         require_type = 1;
-        binding = c.sym.reference(%($spelling), &type);
+        binding = c.sym.reference(%($spelling), type);
       }
       case %((!is ? type string)):
-        binding = c.sym.reference(name, &type);
+        binding = c.sym.reference(name, type);
     }
   }
   int macro_binder = value.is_binder() ||
@@ -1379,7 +1379,7 @@ static List _resolve_identifier(
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
-  if ((void *) c.local_macro_captures != NULL && binding &&
+  if (c.local_macro_captures != NULL && binding &&
       c.sym.binding_is_local_before(
         binding, c.local_macro_capture_scopes) &&
       !c.local_macro_captures.contains(binding)) {
@@ -1389,8 +1389,8 @@ static List _resolve_identifier(
     c.local_macro_captures[binding] = 1;
   }
   if (spelling) {
-    List visible_type = NULL;
-    List visible = c.sym.lookup(%($spelling), &visible_type);
+    Type visible_type = NULL;
+    List visible = c.sym.lookup(%($spelling), visible_type);
     if (visible && visible != binding) {
       if (%(local-macro-capture $binding) in binding_facts) {
         if (!binding_facts.contains(%(emitted $visible)))
@@ -1409,7 +1409,7 @@ static List _resolve_identifier(
   }
   if (!type) {
     Var stored;
-    if (binding_facts.try_get(%(type $binding), &stored) && stored is <list>)
+    if (binding_facts.try_get(%(type $binding), stored) && stored is <list>)
       type = stored;
     if (!type && spelling) {
       type = c.sym.get(%($spelling));
@@ -1600,16 +1600,16 @@ static List _resolve_func_call(
       %(declare ("Func")
           (bindings (op = (bind $callee_binding ()) $callee))));
     invoked = %(expr ("Func") (ident $callee_binding));
-    List query_type = NULL, value_type = NULL, reference_type = NULL;
-    List unrepresentable_type = NULL;
+    Type query_type = NULL, value_type = NULL, reference_type = NULL;
+    Type unrepresentable_type = NULL;
     List query = compiler.sym.resolve_global(
-      %("x2c_func_reference_type"), &query_type);
+      %("x2c_func_reference_type"), query_type);
     List value_constructor = compiler.sym.resolve_global(
-      %("FuncArg_value"), &value_type);
+      %("FuncArg_value"), value_type);
     List reference_constructor = compiler.sym.resolve_global(
-      %("FuncArg_reference"), &reference_type);
+      %("FuncArg_reference"), reference_type);
     List unrepresentable = compiler.sym.resolve_global(
-      %("x2c_func_unrepresentable_argument"), &unrepresentable_type);
+      %("x2c_func_unrepresentable_argument"), unrepresentable_type);
     List null_binding = compiler.sym.reference(%("NULL"), NULL);
     int index = 0;
     foreach (List argument, arguments) {
@@ -1690,8 +1690,8 @@ static List _resolve_func_call(
     List null_binding = compiler.sym.reference(%("NULL"), NULL);
     storage = %(expr () (ident $null_binding));
   }
-  List apply_type = NULL;
-  List apply = compiler.sym.resolve_global(%("Func_apply"), &apply_type);
+  Type apply_type = NULL;
+  List apply = compiler.sym.resolve_global(%("Func_apply"), apply_type);
   List call = %(
     expr ("Var")
       (call (expr $apply_type (ident $apply))
@@ -1898,7 +1898,7 @@ static List _resolve_call(
 Symbol Compiler.require_var_tag(
   Compiler compiler, Type target, Token origin) {
   Type resolved = NULL;
-  Symbol vartag = compiler.sym.var_tag_for_type(target, &resolved);
+  Symbol vartag = compiler.sym.var_tag_for_type(target, resolved);
   if (resolved && resolved.is_enum()) {
     String note =
       "enum values box as the shared i32 family and retain no enum identity";
@@ -2625,7 +2625,7 @@ List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
   Var definition;
   // A macro defined to a string literal is that literal after preprocessing.
-  if (c.object_macros.try_get(origin.text, &definition) &&
+  if (c.object_macros.try_get(origin.text, definition) &&
       definition.equal(<string>)) {
     c.next();
     return _join_c_string_literals(
@@ -2691,7 +2691,7 @@ List Compiler.parse_assignment(Compiler compiler) =>
 static int _string_word_follows(Compiler c) {
   if (c.peek(0) != <ident>) return 0;
   Var definition;
-  if (c.object_macros.try_get(c.token.text, &definition))
+  if (c.object_macros.try_get(c.token.text, definition))
     return definition.equal(<string>);
   return !c.sym.get(%(${c.token.text}));
 }
@@ -2731,7 +2731,7 @@ List Compiler.parse_primary(Compiler compiler) {
       List binding = compiler.with_binding();
       Var stored;
       if (binding && compiler.semantic_binding_facts().try_get(
-        %(with $binding), &stored)) {
+        %(with $binding), stored)) {
         List expression = stored;
         compiler.next();
         match (expression)
@@ -2831,7 +2831,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
    remains here is whether a digit is nonzero.  A float, a name, or an enum
    constant answers <unknown>; the null-pointer guard below stays silent
    when it cannot decide. */
-static Symbol _integer_literal_kind(List expr, String *out_text) {
+static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
     case %(expr ? (parens ?inner)):
       return _integer_literal_kind(inner, out_text);
@@ -2842,7 +2842,7 @@ static Symbol _integer_literal_kind(List expr, String *out_text) {
       // A character constant is integral too, but it is not spelled in
       // digits, and '\0' is a null pointer constant.
       if (s[0] < '0' || s[0] > '9') return <unknown>;
-      if (out_text) *out_text = spelling;
+      if (out_text) out_text = spelling;
       char radix = s[0] == '0' ? s[1] : 0;
       int i = radix == 'x' || radix == 'X' || radix == 'b' ||
               radix == 'B' || radix == 'o' || radix == 'O' ? 2 : 0;
@@ -2901,7 +2901,7 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
       Symbol op = oper;
       if (op != <-> && op != <+>) return NULL;
       String inner = NULL;
-      if (_integer_literal_kind(operand, &inner) != <nonzero>) return NULL;
+      if (_integer_literal_kind(operand, inner) != <nonzero>) return NULL;
       return %"$op$inner";
     }
     // A variable is never a permitted operand of an integer constant
@@ -2917,7 +2917,7 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     }
   }
   String spelling = NULL;
-  if (_integer_literal_kind(expr, &spelling) != <nonzero>) return NULL;
+  if (_integer_literal_kind(expr, spelling) != <nonzero>) return NULL;
   return spelling;
 }
 
@@ -2937,8 +2937,8 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
    pointer with no typed Var reader should still take that path. */
 static List _var_exact_reader(Compiler compiler, List expr, Type target) {
   if (!target.match(%(?))) return NULL;
-  String reader = %"Var_${target.car().str().lower()}", List readertype = NULL;
-  List binding = compiler.sym.resolve_global(%($reader), &readertype);
+  String reader = %"Var_${target.car().str().lower()}", Type readertype = NULL;
+  List binding = compiler.sym.resolve_global(%($reader), readertype);
   if (!binding || !readertype || readertype.car() is not <list>) return NULL;
   List function = readertype.car();
   (Var function_tag, List parameters) = function;
@@ -2977,9 +2977,9 @@ static List _converter_owned_call(
   String convfuncname = targetedname == "String"
                       ? %"$prefix${typename}_str"
                       : %"$prefix${typename}_${targetedname.lower()}";
-  List cvrtrtype = NULL;
+  Type cvrtrtype = NULL;
   List converter_binding = compiler.sym.resolve_global(
-    %($convfuncname), &cvrtrtype);
+    %($convfuncname), cvrtrtype);
   declared = !!converter_binding || !!cvrtrtype;
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
@@ -3340,7 +3340,7 @@ static List _initializer_merge(Array states) {
     (List condition, List path, int available) = state;
     List key = %($path $available);
     Var stored;
-    if (!positions.try_get(key, &stored)) {
+    if (!positions.try_get(key, stored)) {
       positions[key] = merged.len();
       merged.push(state);
       continue;
@@ -3667,10 +3667,10 @@ static List _initializer_zero(Type type, List target) {
    data. */
 static List _initializer_conversion(
   Compiler c, List value, Type type, List condition, List target,
-  int *native_used) {
+  int &?native_used) {
   if (!condition)
     return _convert_initializer(c, value, type, target, native_used);
-  if (native_used) *native_used = 1;
+  if (native_used) native_used = 1;
   match (value)
     case %(expr ?stored (call "__builtin_choose_expr"
                              (args ?when ?yes ?no))):
@@ -3774,7 +3774,7 @@ static List _initializer_adapter(
   List body = converted.search_replace(%(!quote $source), formal);
   List key = %(iadapt $from $result $body);
   Var stored;
-  if (c.names.adapters.try_get(key, &stored)) return stored;
+  if (c.names.adapters.try_get(key, stored)) return stored;
   List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
   List input = %(expr ${source.cadr()} (ident $parameter));
   body = body.search_replace(%(!quote $formal), input);
@@ -3836,7 +3836,7 @@ static List _empty_collection(Compiler c, Type target) {
 
 static List _convert_composite(
   Compiler compiler, List expr, Type target, List native_target,
-  List parent_condition, int *native_used) {
+  List parent_condition, int &?native_used) {
   if (!expr.caddr().cadr().cdr()) {
     List fresh = _empty_collection(compiler, target);
     if (fresh) return fresh;
@@ -3992,7 +3992,7 @@ static List _convert_composite(
 }
 
 static List _convert_initializer(
-  Compiler c, List value, Type type, List target, int *native_used) {
+  Compiler c, List value, Type type, List target, int &?native_used) {
   if (value.match(%(expr ? (composite ?))))
     return _convert_composite(
       c, value, type.canonicalize(), target, NULL, native_used);
@@ -4014,7 +4014,7 @@ List Compiler.convert_compound_literal(
   List target = %(expr $type (parens (expr $type
     (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
   int native_used = 0;
-  List converted = _convert_initializer(c, value, type, target, &native_used);
+  List converted = _convert_initializer(c, value, type, target, native_used);
   if (!native_used) definition = native_type;
   return %(cast $definition $converted);
 }
@@ -4248,13 +4248,13 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     Type converter_type = type;
     String converter = converter_type.var_converter();
     if (!converter) {
-      c.sym.var_tag_for_type(type, &converter_type);
+      c.sym.var_tag_for_type(type, converter_type);
       converter = converter_type.var_converter();
     }
     if (converter) {
-      String typename = converter_type.car().str(), List cvrtrtype = NULL;
+      String typename = converter_type.car().str(), Type cvrtrtype = NULL;
       List converter_binding = c.sym.resolve_global(
-        %($converter), &cvrtrtype);
+        %($converter), cvrtrtype);
       if (cvrtrtype === %((func (($typename))) "Var")) {
         List argument = type == converter_type
           ? expr : %(expr $converter_type $expr);
@@ -4272,7 +4272,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   // non-Var -> Var
   if (!type_is_var && target_is_var) {
     Type tagged_type = NULL;
-    Symbol tag = c.sym.var_tag_for_type(type, &tagged_type);
+    Symbol tag = c.sym.var_tag_for_type(type, tagged_type);
     if (!tag && tagged_type && tagged_type.is_enum()) tag = <i32>;
     if (tag) {
       String box = NULL;

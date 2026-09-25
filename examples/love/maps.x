@@ -14,7 +14,7 @@ printf("tea: %s; biscuits: %s\n",
 
 // A stored zero is different from an absent key.
 Var sugar;
-if (stock.try_get("sugar", &sugar))
+if (stock.try_get("sugar", sugar))
   puts(%"sugar is stocked: $sugar remaining");
 
 // Visit each key and value; traversal order is unspecified.

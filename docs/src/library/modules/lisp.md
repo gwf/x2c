@@ -524,7 +524,7 @@ Source: `lib/lisp.x:187`
 <a id="Lisp.try_get"></a>
 #### Lisp.try_get
 
-`int Lisp.try_get(Lisp lisp, String name, Var *out)`
+`int Lisp.try_get(Lisp lisp, String name, Var &?out)`
 
 Writes the global binding for `name` to `out` when present.
 Returns 1 only after writing the borrowed value. A null session, name, or

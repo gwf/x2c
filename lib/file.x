@@ -182,8 +182,8 @@ static String _regular_text(File file, size_t requested) {
   int allocation = _string_allocation(requested);
   String first = String.malloc(allocation), Block content = NULL;
   defer {
-    if ((void *) first != NULL) first.free();
-    if ((void *) content != NULL) content.free();
+    if (first != NULL) first.free();
+    if (content != NULL) content.free();
   }
   size_t count = fread(first, 1, requested, file);
   _check_read(file);
@@ -383,7 +383,7 @@ String File.readblock(File file, long size) {
   size_t requested = (size_t) size;
   int allocation = _string_allocation(requested);
   String result = String.malloc(allocation), owned = result;
-  defer if ((void *) owned != NULL) owned.free();
+  defer if (owned != NULL) owned.free();
   size_t count = file.read(result, 1, requested);
   _check_read(file);
   String output = _finish_text(result, count);
@@ -401,7 +401,7 @@ String File.readblock(File file, long size) {
     `<alloc-fail>` when the destination cannot grow.
 */
 FileReadStatus File.readline_into(File file, Block dest) {
-  if (!file || (void *) dest == NULL || dest.width != sizeof(char))
+  if (!file || dest == NULL || dest.width != sizeof(char))
     return FILE_READ_ERROR;
   dest.clear();
   int failed, error;
@@ -431,7 +431,7 @@ FileReadStatus File.readline_into(File file, Block dest) {
     `Block.append` when the destination cannot grow.
 */
 FileReadStatus File.read_into(File file, Block dest) {
-  if (!file || (void *) dest == NULL || dest.width != sizeof(char))
+  if (!file || dest == NULL || dest.width != sizeof(char))
     return FILE_READ_ERROR;
   dest.clear();
   unsigned char bytes[BUFSIZ], size_t count;
@@ -514,7 +514,7 @@ static int _next(Iter iter, Var *out) {
   File file = iter.obj;
   if (!file) return 0;
   Block line = iter.state;
-  if ((void *) line == NULL) return 0;
+  if (line == NULL) return 0;
   int keep = 0;
   defer if (!keep) {
     line.free();
@@ -542,7 +542,7 @@ static int _next(Iter iter, Var *out) {
     the iterator's line storage.
 */
 Iter File.iter(File file, Iter dest) {
-  if ((void *) dest == NULL) return NULL;
+  if (dest == NULL) return NULL;
   if (!file) return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
   Block line = Block.new(sizeof(char)), int keep = 0;
   defer if (!keep) line.free();

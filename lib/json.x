@@ -290,14 +290,14 @@ static String _JsonReader._string(_JsonReader j) {
   loop {
     int byte = j._peek();
     if (byte == '"') {
-      String text = (void *) decoded == NULL
+      String text = decoded == NULL
         ? String.new_len(j.text + run, j.at - run)
         : decoded.write_len(j.text + run, j.at - run).str_free();
       j.at++;
       return text;
     }
     if (byte == '\\') {
-      if ((void *) decoded == NULL) decoded = Buffer.new(0);
+      if (decoded == NULL) decoded = Buffer.new(0);
       decoded.write_len(j.text + run, j.at - run);
       j._escape(decoded);
       run = j.at;

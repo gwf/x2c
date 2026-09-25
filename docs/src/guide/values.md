@@ -226,7 +226,7 @@ form that keeps presence separate from the payload. Prefer it:
 Map settings = {width: 80};
 
 Var height;
-if (settings.try_get(<height>, &height)) {
+if (settings.try_get(<height>, height)) {
   int value = height;
   printf("height is %d\n", value);
 } else {

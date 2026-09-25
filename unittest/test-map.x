@@ -292,7 +292,7 @@ static void map_reference_model_churn(void) {
       for (int i = 0; i < 32; i++) {
         Var expected_key = i, out;
         EXPECT_INT_EQ(map.contains(expected_key), present[i]);
-        EXPECT_INT_EQ(map.try_get(expected_key, &out), present[i]);
+        EXPECT_INT_EQ(map.try_get(expected_key, out), present[i]);
         if (present[i]) {
           EXPECT_INT_EQ(out.integer(), values[i]);
           expected_len++;
@@ -559,14 +559,14 @@ static void map_null_pair_status_iteration(void) {
 
   Map copy = map.copy();
   EXPECT_INT_EQ(copy.len(), 1);
-  EXPECT_TRUE(copy.try_get(null, &val));
+  EXPECT_TRUE(copy.try_get(null, val));
   EXPECT_INT_EQ(val.u64, 0);
   EXPECT_TRUE(map.equal(copy));
   EXPECT_INT_EQ(map.compare(copy), 0);
 
   Map merged = {};
   merged.merge(map);
-  EXPECT_TRUE(merged.try_get(null, &val));
+  EXPECT_TRUE(merged.try_get(null, val));
   EXPECT_INT_EQ(val.u64, 0);
 }
 

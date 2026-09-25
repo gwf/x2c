@@ -48,18 +48,18 @@ static void typed_array_int_uses_packed_storage(void) {
 
   EXPECT_NOT_NULL(values);
   EXPECT_INT_EQ(values.width, sizeof(int));
-  EXPECT_FALSE(values.try_get(0, &missing));
+  EXPECT_FALSE(values.try_get(0, missing));
   EXPECT_INT_EQ(missing, 73);
   EXPECT_INT_EQ(values.push(10), 10);
   EXPECT_INT_EQ(values.push(20), 20);
   EXPECT_INT_EQ(values.push(30), 30);
   EXPECT_INT_EQ(values.len(), 3);
   EXPECT_INT_EQ(values[2], 30);
-  EXPECT_FALSE(values.try_get(3, &missing));
-  EXPECT_FALSE(values.try_get(-4, &missing));
+  EXPECT_FALSE(values.try_get(3, missing));
+  EXPECT_FALSE(values.try_get(-4, missing));
   EXPECT_INT_EQ(values.setindex(1, 22), 22);
   EXPECT_INT_EQ(values[1], 22);
-  EXPECT_TRUE(values.try_get(1, &missing));
+  EXPECT_TRUE(values.try_get(1, missing));
   EXPECT_INT_EQ(missing, 22);
   EXPECT_TRUE(values.try_take_last(&missing));
   EXPECT_INT_EQ(missing, 30);

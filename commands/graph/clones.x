@@ -87,7 +87,7 @@ static uint64_t _clone_cons(
 
 static uint64_t _clone_atom(CloneIndex *index, Var value) {
   Var found;
-  if (index.atoms.try_get(value, &found)) return found.integer();
+  if (index.atoms.try_get(value, found)) return found.integer();
   if (index.atoms.len() >= INT_MAX / 2)
     raise %(size-limit (owner "graph clones"));
   uint64_t id = index.atoms.len() * 2 + 1;
@@ -100,7 +100,7 @@ static int _clone_local(CloneIndex *index, List binding) {
   Map facts = index.parsed.compiler.semantic_binding_facts();
   if (!facts.contains(%(automatic $binding))) return 0;
   Var declared;
-  if (facts.try_get(%(type $binding), &declared)) {
+  if (facts.try_get(%(type $binding), declared)) {
     Type type = declared;
     if (type.is_extern() || type.is_function()) return 0;
   }
@@ -170,7 +170,7 @@ static uint64_t _clone_value(CloneIndex *index, Var value, int origin) {
       Var source_key;
       int file_static = index.statics.contains(node);
       if (index.parsed.compiler.semantic_binding_facts().try_get(
-        %(src-key $node), &source_key))
+        %(src-key $node), source_key))
         file_static |= index.parsed.compiler.sym.file_statics().contains(
           source_key);
       List key = file_static

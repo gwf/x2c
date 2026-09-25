@@ -11,7 +11,7 @@ static void ast_bindings_separate_identity_from_spelling(void) {
   int identity = 0;
   String spelling = NULL;
 
-  EXPECT_TRUE(binding_identity_try_parts(captured, &identity, &spelling));
+  EXPECT_TRUE(binding_identity_try_parts(captured, identity, spelling));
   EXPECT_INT_EQ(identity, 17);
   EXPECT_STR_EQ(spelling, "value");
   EXPECT_TRUE(retained == captured);

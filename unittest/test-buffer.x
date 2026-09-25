@@ -88,14 +88,14 @@ static void buffer_status_get(void) {
   Buffer buf = Buffer.new(0);
   buf.write("abc");
   char out = 'z';
-  EXPECT_TRUE(buf.try_get(0, &out));
+  EXPECT_TRUE(buf.try_get(0, out));
   EXPECT_TRUE(out == 'a');
-  EXPECT_TRUE(buf.try_get(-1, &out));
+  EXPECT_TRUE(buf.try_get(-1, out));
   EXPECT_TRUE(out == 'c');
   out = 'z';
-  EXPECT_FALSE(buf.try_get(3, &out));
+  EXPECT_FALSE(buf.try_get(3, out));
   EXPECT_TRUE(out == 'z');
-  EXPECT_FALSE(buf.try_get(-4, &out));
+  EXPECT_FALSE(buf.try_get(-4, out));
   EXPECT_TRUE(out == 'z');
   EXPECT_TRUE(buf.get(-1) == 'c');
   EXPECT_TRUE(buf.get(99) == '\0');
