@@ -519,7 +519,7 @@ function rows are promoted out of the parse's pool, and the proven
 keeps lint experimental and uninstalled, and the phase makes it conditional
 on shipping lint to users. `x2c lint --fmt-check` (with `--fmt-diff` to
 print the difference) reports files whose spacing would change and never
-writes; `commands/lint/format.x` is 88 lines. Formatting changes only space:
+writes; `commands/lint/format.x` is 84 lines. Formatting changes only space:
 trailing space (also inside comments), more than one blank line in a row,
 the final newline, space before `,` or `;`, and a missing space after `,` or
 between a control keyword and `(`, outside quoted forms. It keeps
