@@ -332,6 +332,42 @@ for pass in first replay; do
   printf '/* edited */\n' >>viaheader/app.x
 done
 
+# The first root with an entry owns the package. A module in a later root
+# must not run in the parent before parallel workers fork.
+mkdir -p shadow/first/tally/src shadow/second/tally/src \
+  shadow/second/tally/builds shadow/out
+cat >shadow/first/tally/src/tally.x <<'EOF'
+int value(void) => 1;
+EOF
+cat >shadow/second/tally/src/tally.x <<'EOF'
+meta int value(void);
+#pragma private
+int value(void) => 2;
+EOF
+cat >shadow/second/tally/src/trace.c <<'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+__attribute__((constructor)) static void track(void) {
+  const char *path = getenv("X2C_SHADOW_TRACE");
+  if (!path) return;
+  FILE *file = fopen(path, "w");
+  if (file) { fputs("loaded\n", file); fclose(file); }
+}
+EOF
+"$X2C" build -q --kind meta-module \
+  --output shadow/second/tally/builds/tally.module \
+  shadow/second/tally/src/tally.x shadow/second/tally/src/trace.c
+printf 'import "tally";\nint main(void) { return tally.value(); }\n' \
+  >shadow/app.x
+printf 'int other(void) { return 0; }\n' >shadow/other.x
+X2C_SHADOW_TRACE="$BUILD/shadow/loaded" \
+  "$X2C" translate -q -j 2 --package-dir shadow/first \
+    --package-dir shadow/second --out-dir shadow/out \
+    shadow/app.x shadow/other.x
+[[ ! -e shadow/loaded ]] || fail "loaded a shadowed package module"
+grep -Fq 'shadow/first/tally/src/tally.x' shadow/out/app.d ||
+  fail "shadowed package did not use the first root"
+
 # A module another compiler built is an error at the import.
 cp stale.so packages/tally/builds/tally.module
 expect_error "package 'tally' was built by another compiler; rebuild it" \

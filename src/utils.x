@@ -12,6 +12,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "path.x"
 #include "process.x"
+#include "sourceview.x"
 
 /* Initializes ordinary and external command paths with the chosen identity. */
 static void _initialize_environment(
@@ -90,6 +91,22 @@ String x2c_package_directory(List roots, String path) {
     String name = source.remove_prefix(prefix).split("/").car();
     if (name.is_identifier() && source != %"$prefix$name")
       return %"$prefix$name";
+  }
+  return NULL;
+}
+
+/** Resolves the first readable package entry under `roots`, using the same
+    source view as the importing compiler. Returns its canonical directory
+    through `directory`, or NULL when the package does not exist. */
+String x2c_package_entry(
+  SourceView sources, List roots, String name, String &directory) {
+  foreach (String package_dir, roots) {
+    String root = %"${Path.absolute(package_dir)}/$name";
+    String nested = %"$root/src/$name.x";
+    String entry = sources.exists(nested) ? nested : %"$root/$name.x";
+    if (!sources.exists(entry)) continue;
+    directory = root;
+    return Path.absolute(entry);
   }
   return NULL;
 }

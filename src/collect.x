@@ -605,22 +605,6 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 
 // package imports
 
-/* Resolve a package name under the registered roots. The entry unit is
-   `<root>/<name>/src/<name>.x`, or `<root>/<name>/<name>.x` for the
-   single-file layout used by toys and fixtures. */
-static String _package_entry(
-  Compiler compiler, String name, String &directory) {
-  foreach (String package_dir, compiler.package_dirs) {
-    String root = %"${_canonical_path(package_dir)}/$name";
-    String nested = %"$root/src/$name.x";
-    String entry = compiler.sources.exists(nested) ? nested : %"$root/$name.x";
-    if (!compiler.sources.exists(entry)) continue;
-    directory = root;
-    return _canonical_path(entry);
-  }
-  return NULL;
-}
-
 /* A declaration key is a plain name, or a typedef or aggregate name that a
    member row may extend; the tag covers the whole family, so a member of a
    prefixed aggregate crosses with it. Source-node and helper rows carry no C
@@ -739,7 +723,8 @@ static void _package_contributions(
 */
 void Compiler.collect_package(Compiler c, String name, Token token) {
   if (name in c.package_roots) return;
-  String root = NULL, entry = _package_entry(c, name, root);
+  String root = NULL;
+  String entry = x2c_package_entry(c.sources, c.package_dirs, name, root);
   if (!entry)
     c.report_error(
       <driver>, %"unknown package '$name'", token,

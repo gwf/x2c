@@ -315,15 +315,13 @@ static void _preload_package_modules(CliRequest c, Map unit_dirs) {
       if (package) names[Path.basename(package)] = 1;
     }
   }
-  char root[PATH_MAX];
-  foreach (String name, names.keys())
-    foreach (String package_dir, roots) {
-      if (!realpath(package_dir, root)) continue;
-      String module = %"$root/$name/builds/$name.module";
-      if (Compiler.links_extension(name) || !Path.is_file(module)) continue;
-      Compiler.preload_native_module(module);
-      break;
-    }
+  foreach (String name, names.keys()) {
+    String root = NULL;
+    if (!x2c_package_entry(c.sources, roots, name, root) ||
+        Compiler.links_extension(name)) continue;
+    String module = %"$root/builds/$name.module";
+    if (Path.is_file(module)) Compiler.preload_native_module(module);
+  }
 }
 
 /* One slice per worker. Fewer, larger slices measured better than more,

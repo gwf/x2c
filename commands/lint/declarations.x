@@ -25,7 +25,7 @@ static int _under(String path, String name) =>
    Returns 0 for a macro invocation, whose declarations are generated, and
    for a `meta` declaration, which declares a compile-time operation. */
 static int _prototype_line(Compiler c, int start, int end):
-  Token tokens = c.tokenizer.tokens
+  struct Token *tokens = c.tokenizer.tokens
   while tokens[start].type == <space> || tokens[start].type == <comment>:
     start++
   if tokens[start].text == "meta" || tokens[start].text[0] == '$': return 0
