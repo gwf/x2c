@@ -374,30 +374,30 @@ static inline Symbol _fast_numeric_tag(Var lhs, Var rhs){
 }
 
 static unsigned long long _raw_for_width(X2CVarNumeric * value, int bits){
-  unsigned long long raw = value -> unsigned_value ? value -> raw :(unsigned long long) Var_signed_from_bits(value -> raw, value -> bits);
+  unsigned long long raw =(* value).unsigned_value ?(* value).raw :(unsigned long long) Var_signed_from_bits((* value).raw, (* value).bits);
   return raw & Var_width_mask(bits);
 }
 
 static void _promote_integer(X2CVarNumeric * value){
-  if(value -> rank >= 3) return;
-  if(! value -> unsigned_value) value -> raw =(unsigned long long) Var_signed_from_bits(value -> raw, value -> bits);
-  value -> tag = 3453797;
-  value -> unsigned_value = 0;
-  value -> bits = 32;
-  value -> rank = 3;
+  if((* value).rank >= 3) return;
+  if(!(* value).unsigned_value)(* value).raw =(unsigned long long) Var_signed_from_bits((* value).raw, (* value).bits);
+  (* value).tag = 3453797;
+  (* value).unsigned_value = 0;
+  (* value).bits = 32;
+  (* value).rank = 3;
 }
 
 Symbol Var_integer_tag(int, int);
 
 static Symbol _integer_result_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
-  _promote_integer(lhs);
-  _promote_integer(rhs);
-  if(lhs -> unsigned_value == rhs -> unsigned_value){
-    X2CVarNumeric * value = lhs -> rank >= rhs -> rank ? lhs : rhs;
+  _promote_integer(&((* lhs)));
+  _promote_integer(&((* rhs)));
+  if((* lhs).unsigned_value ==(* rhs).unsigned_value){
+    X2CVarNumeric * value =(* lhs).rank >=(* rhs).rank ? &(* lhs) : &(* rhs);
     return Var_integer_tag(value -> rank, value -> unsigned_value);
   }
-  X2CVarNumeric * unsigned_value = lhs -> unsigned_value ? lhs : rhs;
-  X2CVarNumeric * signed_value = lhs -> unsigned_value ? rhs : lhs;
+  X2CVarNumeric * unsigned_value =(* lhs).unsigned_value ? &(* lhs) : &(* rhs);
+  X2CVarNumeric * signed_value =(* lhs).unsigned_value ? &(* rhs) : &(* lhs);
   if(unsigned_value -> rank >= signed_value -> rank) return Var_integer_tag(unsigned_value -> rank, 1);
   if(signed_value -> bits > unsigned_value -> bits) return Var_integer_tag(signed_value -> rank, 0);
   return Var_integer_tag(signed_value -> rank, 1);
@@ -408,22 +408,22 @@ int Var_numeric_info(Symbol, X2CVarNumericInfo *);
 Var Var_integer_box(Symbol, unsigned long long);
 
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
-  Symbol tag = _integer_result_tag(& lhs, & rhs);
+  Symbol tag = _integer_result_tag(&(lhs), &(rhs));
   X2CVarNumericInfo info;
   if(! Var_numeric_info(tag, & info)){
     static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/varops.x",.function = "_integer_binary",.line = 165};
     x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
-  unsigned long long raw = _integer_raw(op, _raw_for_width(& lhs, info.bits), _raw_for_width(& rhs, info.bits), info.bits, info.unsigned_value);
+  unsigned long long raw = _integer_raw(op, _raw_for_width(&(lhs), info.bits), _raw_for_width(&(rhs), info.bits), info.bits, info.unsigned_value);
   return Var_integer_box(tag, raw);
 }
 
 Var int_var(int);
 
 static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
-  _promote_integer(& lhs);
-  _promote_integer(& rhs);
+  _promote_integer(&(lhs));
+  _promote_integer(&(rhs));
   if(! rhs.unsigned_value && Var_signed_from_bits(rhs.raw, rhs.bits) < 0){
     static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/varops.x",.function = "_shift_binary",.line = 175};
     x2c_error_raise_n(& _x2c_error_site_17, 4477476686248, 1, Symbol_var(992), Symbol_var(op));
@@ -435,7 +435,7 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
     x2c_error_raise_n(& _x2c_error_site_18, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), Var_box_ulong_long(count), Symbol_var(48833808), int_var(lhs.bits));
     __builtin_unreachable();
   }
-  unsigned long long raw = _integer_raw(op, _raw_for_width(& lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
+  unsigned long long raw = _integer_raw(op, _raw_for_width(&(lhs), lhs.bits), count, lhs.bits, lhs.unsigned_value);
   return Var_integer_box(lhs.tag, raw);
 }
 
@@ -446,9 +446,9 @@ float Var_float(Var);
 double Var_floating(Var);
 
 static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var rhs_value, X2CVarNumeric * rhs){
-  Symbol tag = lhs -> floating && lhs -> rank >= rhs -> rank ? lhs -> tag : rhs -> tag;
-  if(! lhs -> floating) tag = rhs -> tag;
-  if(! rhs -> floating) tag = lhs -> tag;
+  Symbol tag =(* lhs).floating &&(* lhs).rank >=(* rhs).rank ?(* lhs).tag :(* rhs).tag;
+  if(!(* lhs).floating) tag =(* rhs).tag;
+  if(!(* rhs).floating) tag =(* lhs).tag;
   Var left = Var_convert(lhs_value, tag);
   Var right = Var_convert(rhs_value, tag);
   Var result;
@@ -542,7 +542,7 @@ static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value){
     }
     case 56 : case 62 : case 54 : case 95 : break;
   }
-  if(lhs.floating || rhs.floating) return _floating_binary(op, lhs_value, & lhs, rhs_value, & rhs);
+  if(lhs.floating || rhs.floating) return _floating_binary(op, lhs_value, &(lhs), rhs_value, &(rhs));
   return _integer_binary(op, lhs, rhs);
 }
 

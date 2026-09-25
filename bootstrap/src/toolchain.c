@@ -478,10 +478,10 @@ static Job _start_tool(Job command, String program, String * failure){
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
       if (_x2c_catch_selected_1 == 0) {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-      * failure = _start_failure(program, detail);
+      (* failure) = _start_failure(program, detail);
     }
     else {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-    * failure = _start_failure(program, detail);
+    (* failure) = _start_failure(program, detail);
   }
 
 }
@@ -511,11 +511,11 @@ int Job_status(Job);
 int tool_capture(List arguments, String * output, String * errors){
   if(! _init_guard_) _file_init_();
   Job command = Job_options(List_job(arguments), Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
-  Job j = _start_tool(command, Var_string(List_car(arguments)), errors);
+  Job j = _start_tool(command, Var_string(List_car(arguments)), &((* errors)));
   if(! j) return 127;
   int status = Job_status(j);
-  * output = j -> output_text;
-  * errors = j -> errors_text;
+  (* output) = j -> output_text;
+  (* errors) = j -> errors_text;
   return status;
 }
 
@@ -540,7 +540,7 @@ List Toolchain_search_directories(Toolchain t){
   Array directories = Array_new();
   List flags = t -> cc_args;
   String output = NULL, errors = NULL;
-  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _54)), & output, & errors)){
+  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _54)), &(output), &(errors))){
     int listing = 0;
     {
       String line;
@@ -568,7 +568,7 @@ List Toolchain_search_directories(Toolchain t){
     }
 
   }
-  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _57)), & output, & errors)){
+  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _57)), &(output), &(errors))){
     String line;
     List _x2c_macro_object_6 = String_split_lines(output, 0);
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
@@ -612,7 +612,7 @@ ToolRun ToolAction_start(ToolAction action){
   execution -> action = action;
   if(action -> dry_run) return execution;
   Job command = action -> inherit_stdio ? Job_live(List_job(action -> arguments)) : Job_options(List_job(action -> arguments), Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
-  execution -> job = _start_tool(command, Var_string(List_car(action -> arguments)), & execution -> start_error);
+  execution -> job = _start_tool(command, Var_string(List_car(action -> arguments)), &(execution -> start_error));
   return execution;
 }
 
@@ -662,13 +662,13 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
   String source = String_new(fname), macros = String_new(imacros);
   if(! t -> keep_system_includes){
     String probe_output = NULL, probe_errors = NULL;
-    t -> keep_system_includes = tool_capture(cons(String_var(t -> cc), _65), & probe_output, & probe_errors) == 0 ? 1 : - 1;
+    t -> keep_system_includes = tool_capture(cons(String_var(t -> cc), _65), &(probe_output), &(probe_errors)) == 0 ? 1 : - 1;
   }
   Path scratch = dependencies ? Path_temp_dir() : NULL;
   String depfile = String_join(NULL, cons(String_var(scratch), cons(String_var(_66), NULL)));
   List arguments = cons(String_var(t -> cc), cons(_24, cons(_68, cons(_45, cons(_47, cons(_70, cons(_72, cons(_74, cons(_76, cons(_78, cons(_80, cons(_82, cons(_84, cons(_86, cons(_88, cons(_90, cons(_92, cons(_94, cons(_96, cons(_98, List_append(t -> keep_system_includes > 0 ? _99 : NULL, cons(_59, cons(_101, List_append(_includes(x2c_cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_103, cons(String_var(macros), NULL)) : NULL, List_append(String_truth(scratch) ? cons(_12, cons(_16, cons(String_var(depfile), _107))) : NULL, cons(String_var(source), NULL)))))))))))))))))))))))))))));
   if(t -> verbose) _print_action(1165861522189542, arguments);
-  int result = tool_capture(arguments, output, errors);
+  int result = tool_capture(arguments, &(* output), &(* errors));
   if(String_truth(scratch)){
     {
       ExceptionFrame _x2c_exception_frame_2;

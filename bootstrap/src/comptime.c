@@ -2276,7 +2276,7 @@ static int _lower_cursor(Var test, struct LowerCursor * walk){
       case 377892: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_214), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var object = _x2c_match_values[1];  Var cursor = _x2c_match_values[2];  Var item = _x2c_match_values[3]; {
     Var _x2c_match_value_0 = name;  Var _x2c_match_value_1 = object;  Var _x2c_match_value_2 = cursor;  Var _x2c_match_value_3 = item; {
       String name = Var_string(_x2c_match_value_0);  int object = Var_int(Var_convert(_x2c_match_value_1, 3453797));  int cursor = Var_int(Var_convert(_x2c_match_value_2, 3453797));  int item = Var_int(Var_convert(_x2c_match_value_3, 3453797)); {
-        if(! String_equal(name, _215) && ! String_equal(name, _216)) return 0;  walk -> kind = String_equal(name, _215) ? 806120 : 3313778;  walk -> object = object;  walk -> cursor = cursor;  walk -> item = item;  walk -> value = 0;  return 1;
+        if(! String_equal(name, _215) && ! String_equal(name, _216)) return 0; (* walk).kind = String_equal(name, _215) ? 806120 : 3313778; (* walk).object = object; (* walk).cursor = cursor; (* walk).item = item; (* walk).value = 0;  return 1;
       }
 
     }
@@ -2287,7 +2287,7 @@ static int _lower_cursor(Var test, struct LowerCursor * walk){
 static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_296), &_x2c_match_capture)) {Var object = _x2c_match_values[0];  Var cursor = _x2c_match_values[1];  Var item = _x2c_match_values[2];  Var value = _x2c_match_values[3]; {
   Var _x2c_match_value_4 = object;  Var _x2c_match_value_5 = cursor;  Var _x2c_match_value_6 = item;  Var _x2c_match_value_7 = value; {
     int object = Var_int(Var_convert(_x2c_match_value_4, 3453797));  int cursor = Var_int(Var_convert(_x2c_match_value_5, 3453797));  int item = Var_int(Var_convert(_x2c_match_value_6, 3453797));  int value = Var_int(Var_convert(_x2c_match_value_7, 3453797)); {
-      walk -> kind = 26720;  walk -> object = object;  walk -> cursor = cursor;  walk -> item = item;  walk -> value = value;  return 1;
+      (* walk).kind = 26720; (* walk).object = object; (* walk).cursor = cursor; (* walk).item = item; (* walk).value = value;  return 1;
     }
 
   }
@@ -2309,7 +2309,7 @@ static int _lower_cursor_addressed(Var form, struct LowerCursor * walk){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 992: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_327), &_x2c_match_capture)) {Var id = _x2c_match_values[0]; {
     Var _x2c_match_value_8 = id; {
-      int id = Var_int(Var_convert(_x2c_match_value_8, 3453797));  return id == walk -> cursor || id == walk -> item || id == walk -> value;
+      int id = Var_int(Var_convert(_x2c_match_value_8, 3453797));  return id ==(* walk).cursor || id ==(* walk).item || id ==(* walk).value;
     }
 
   }
@@ -2320,7 +2320,7 @@ default: break;
   }
 {
   Var part;  List _x2c_macro_object_1 = items;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-    part = _x2c_macro_cursor_output_1;  if(_lower_cursor_addressed(part, walk)) return 1;
+    part = _x2c_macro_cursor_output_1;  if(_lower_cursor_addressed(part, &((* walk)))) return 1;
   }
 
 }
@@ -2338,7 +2338,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 48777994: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936810396426ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var test = _x2c_match_values[0];  Var body = _x2c_match_values[1]; {
-    if(! _lower_cursor(test, & walk) || _lower_cursor_addressed(body, & walk)) return;  Map declared = Map_new(); {
+    if(! _lower_cursor(test, &(walk)) || _lower_cursor_addressed(body, &(walk))) return;  Map declared = Map_new(); {
   _x2c_defer_env_6 _x2c_defer_env_46 = {._x2c_defer_capture_12 =(const void *) & declared};
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_7,
@@ -2347,7 +2347,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
       for(List rest = parts;  List_truth(List_cdr(rest));  rest = List_cdr(rest)){
-        Var part = _lower_bare(List_car(rest));  if(_lower_cursor_addressed(part, & walk)){
+        Var part = _lower_bare(List_car(rest));  if(_lower_cursor_addressed(part, &(walk))){
           x2c_cleanup_leave(& _x2c_defer_record_1);  return;
         }
 
@@ -4255,7 +4255,7 @@ static Var _lower_loop(Lowering l, Var test, List body, List step, List rest, Li
   };
   x2c_cleanup_push(&_x2c_defer_record_18);
   {
-      _lower_referenced(test, used);  _lower_referenced(List_var(body), used);  _lower_referenced(List_var(step), used);  _lower_referenced(List_var(rest), used);  _lower_referenced(List_var(k), used);  struct LowerCursor walk;  int walking = _lower_cursor(test, & walk) && Map_contains(l -> cursors, int_var(walk.cursor));  if(walking){
+      _lower_referenced(test, used);  _lower_referenced(List_var(body), used);  _lower_referenced(List_var(step), used);  _lower_referenced(List_var(rest), used);  _lower_referenced(List_var(k), used);  struct LowerCursor walk;  int walking = _lower_cursor(test, &(walk)) && Map_contains(l -> cursors, int_var(walk.cursor));  if(walking){
         Map_del(used, int_var(walk.item));  if(walk.value) Map_del(used, int_var(walk.value));
       }
       Array ids = Array_new(); {

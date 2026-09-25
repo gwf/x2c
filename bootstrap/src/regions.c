@@ -1160,19 +1160,19 @@ static Fact _returned_argument(Walk w, Var value, List * named){
 }
 
 static Region _pooled(Walk w, int * born){
-  Region pool = _innermost(w, 1080280);  * born = 2;  return pool;
+  Region pool = _innermost(w, 1080280); (* born) = 2;  return pool;
 }
 
 int List_try_next(List, List *, Var *);
 static Region _birth(Walk w, Var value, Type type, int * born, Region * other){
-  List arguments = NULL;  String callee = _callee_of(value, &(arguments));  * born = 1;  * other = NULL;
+  List arguments = NULL;  String callee = _callee_of(value, &(arguments)); (* born) = 1; (* other) = NULL;
   {
     List _x2c_match_expr = Var_list(String_truth(callee) ? Map_getindex(runtime, String_var(callee)) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 2909126: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {return _owner(w, _slot(w, List_car(arguments)));  break;
 }
-static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {return _pooled(w, born);  break;
+static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
 }
 static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_113), &_x2c_match_capture)) {if(w -> meta){
   return w -> frame;  break;
@@ -1180,7 +1180,7 @@ static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x
 }
 static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_264), &_x2c_match_capture)) {return _active(w);  break;
 }
-case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _pooled(w, born);  break; } } default: break;
+case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _pooled(w, &((* born)));  break; } } default: break;
     }
   }
 
@@ -1188,7 +1188,7 @@ case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_exp
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 228262: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_382), &_x2c_match_capture)) {return _pooled(w, born);  break;
+      case 228262: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_382), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
 }
 case 808259842: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_391), &_x2c_match_capture)) {List captures = Var_list(_x2c_match_values[0]); {
   {
@@ -1200,7 +1200,7 @@ case 808259842: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_si
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6544469130: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_397), &_x2c_match_capture)) {Var captured = _x2c_match_values[0]; {
         Var place = _address_of(captured);  Fact fact = _fact_of(w, Var_is_void(place) ? captured : place, NULL);  if(fact &&(fact -> born || fact -> region || fact -> other)){
-          if(fact -> born) * born = fact -> born;  * other = fact -> other;  return fact -> region;
+          if(fact -> born)(* born) = fact -> born; (* other) = fact -> other;  return fact -> region;
         }
 
       }
@@ -1227,11 +1227,11 @@ static MatchCaptureSite _x2c_match_site_25;  if (x2c_match_site_try_capture(& _x
   }
 if(String_truth(callee)){
   int owner = Var_int(List_car(_summary(w, callee)));  if(owner == 3){
-    * born = owner;  * other = _innermost(w, 1080280);  return _active(w);
+    (* born) = owner; (* other) = _innermost(w, 1080280);  return _active(w);
   }
-  if(owner & 2) return _pooled(w, born);  if(owner & 1) return _active(w);
+  if(owner & 2) return _pooled(w, &((* born)));  if(owner & 1) return _active(w);
 }
-* born = 0;  return NULL;
+(* born) = 0;  return NULL;
 }
 
 static int _flow_region(Walk w, Var value, Type type, Symbol sink, Fact target, Fact fact, List named, Region region, int born, int report){
@@ -1264,7 +1264,7 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target){
 default: break;
     }
   }
-List named = NULL;  Fact fact = _value_fact(w, value, & named);  if(! fact) fact = _returned_argument(w, value, & named);  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, & born, & other);  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
+List named = NULL;  Fact fact = _value_fact(w, value, & named);  if(! fact) fact = _returned_argument(w, value, & named);  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, &(born), &(other));  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
   Var row = Symbol_var(sink);  if(sink == 534624){
     if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_177, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
   }
@@ -1308,32 +1308,32 @@ return String_join(NULL, cons(String_var(_422), cons(String_var(name), NULL)));
 
 Type Var_type(Var);
 static Fact _base(Walk w, Var place, int * through){
-  * through = 1;
+  (* through) = 1;
   {
     List _x2c_match_expr = Var_list(_unwrap(place));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 992: ;  static MatchCaptureSite _x2c_match_site_29;  if (x2c_match_site_try_capture(& _x2c_match_site_29, _x2c_match_expr, List_var(_430), &_x2c_match_capture)) {Var base = _x2c_match_values[0]; {
-    Fact fact = _fact_of(w, base, NULL);  if(! fact) fact = _base(w, base, through);  * through = 1;  return fact;
+    Fact fact = _fact_of(w, base, NULL);  if(! fact) fact = _base(w, base, &((* through))); (* through) = 1;  return fact;
   }
   break;
 }
-static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_436), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _base(w, base, through);  break;
+static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_436), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _base(w, base, &((* through)));  break;
 }
 static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_439), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _fact_of(w, base, NULL);  break;
 }
 default: ;  static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_452), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var type = _x2c_match_values[1]; {
-  Fact fact = _fact_of(w, base, NULL);  if(! fact) return _base(w, base, through);  Type declared = Var_type(type);  * through = ! Type_is_array(declared) || fact -> param >= 0;  return fact;
+  Fact fact = _fact_of(w, base, NULL);  if(! fact) return _base(w, base, &((* through)));  Type declared = Var_type(type); (* through) = ! Type_is_array(declared) || fact -> param >= 0;  return fact;
 }
 break;
 }
 static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_453), &_x2c_match_capture)) {{
-  * through = 0;  return _fact_of(w, place, NULL);
+  (* through) = 0;  return _fact_of(w, place, NULL);
 }
 break;
 }
 static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_404), &_x2c_match_capture)) {{
-  * through = 0;  return _fact(w, NULL, - 1);
+  (* through) = 0;  return _fact(w, NULL, - 1);
 }
 break;
 }
@@ -1344,7 +1344,7 @@ return NULL;
 }
 
 static Fact _borrow(Walk w, Var place, List * named){
-  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, & through);  if(! base) return NULL;  if(named && ! List_truth(* named)) * named = _root(place);  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  borrow -> other = through ? base -> other : NULL;  borrow -> born = through ? base -> born : 0;  if(through) borrow -> param = base -> param;  return borrow;
+  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, &(through));  if(! base) return NULL;  if(named && ! List_truth(* named)) * named = _root(place);  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  borrow -> other = through ? base -> other : NULL;  borrow -> born = through ? base -> born : 0;  if(through) borrow -> param = base -> param;  return borrow;
 }
 
 static List _root(Var place){
@@ -1368,7 +1368,7 @@ static Symbol _sink_of(Fact base, int through, Fact * target){
   if(through && base && base -> points){
     base = base -> points;  through = 0;
   }
-  int own = base && base -> param < 0 && ! base -> born;  * target = through && own ? NULL : base;  return ! through && own ? 26155096 : 534624;
+  int own = base && base -> param < 0 && ! base -> born; (* target) = through && own ? NULL : base;  return ! through && own ? 26155096 : 534624;
 }
 
 static List _parameter_types(Var call){
@@ -1394,7 +1394,7 @@ static void _scan_call(Walk w, Var call, String callee, List arguments){
     );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
       row = Var_list(_x2c_macro_item_2); {
         List _x2c_destructure_1 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  Var target = List_getindex(_x2c_destructure_1, 1);  if(index >= count) continue;  Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void);  Type type = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(Var_equal(target, Symbol_var(1317118534))) _flow(w, argument, type, 1317118534, NULL);  else if(Var_equal(target, Symbol_var(46060699100))) _flow(w, argument, type, 534624, NULL);  else if(Var_equal(target, Symbol_var(1219734312))){
-          int born = 0;  Region other = NULL;  Region region = _birth(w, call, NULL, & born, & other);  struct Fact result ={
+          int born = 0;  Region other = NULL;  Region region = _birth(w, call, NULL, &(born), &(other));  struct Fact result ={
             .param = - 1, .born = born, .region = region, .other = other
           }
           ;  _flow(w, argument, type, 534624, & result);
@@ -1405,7 +1405,7 @@ static void _scan_call(Walk w, Var call, String callee, List arguments){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936795275354ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var other = _x2c_match_values[0]; {
-          if(Var_int(other) >= count) continue;  Var holder = List_getindex(arguments, Var_int(other));  int through = 1;  Fact base = _base(w, _address_of(holder), & through), object = NULL;  if(! base) base = _fact_of(w, holder, NULL);  Symbol sink = _sink_of(base, through, & object);  _flow(w, argument, type, sink, object);
+          if(Var_int(other) >= count) continue;  Var holder = List_getindex(arguments, Var_int(other));  int through = 1;  Fact base = _base(w, _address_of(holder), &(through)), object = NULL;  if(! base) base = _fact_of(w, holder, NULL);  Symbol sink = _sink_of(base, through, &(object));  _flow(w, argument, type, sink, object);
         }
         break; } } default: break;
     }
@@ -1480,7 +1480,7 @@ break;
 default: ;  static MatchCaptureSite _x2c_match_site_47;  if (x2c_match_site_try_capture(& _x2c_match_site_47, _x2c_match_expr, List_var(_517), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761846694ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var head = _x2c_match_values[0];  Var tail = _x2c_match_values[1]; {
-  int born = 0;  Region other = NULL;  Region region = _birth(w, node, NULL, & born, & other);  struct Fact result ={
+  int born = 0;  Region other = NULL;  Region region = _birth(w, node, NULL, &(born), &(other));  struct Fact result ={
     .param = - 1, .born = born, .region = region
   }
   ;  _flow(w, head, NULL, 534624, & result);  _flow(w, tail, NULL, 534624, & result);  Array_push(w -> pending, tail);  Array_push(w -> pending, head);
@@ -1514,7 +1514,7 @@ static void _revive(Walk w){
 }
 
 static void _assign(Walk w, Fact fact, Var value, Type type, int store){
-  _scan(w, value, 0);  Fact source = _value_fact(w, value, NULL);  if(! source) source = _returned_argument(w, value, NULL);  int born = 0;  Region other = source ? source -> other : NULL;  Region region = source ? source -> region : _birth(w, value, type, & born, & other);  int owners = source ? source -> born : born;  int kept = source || born;  if(kept && _copies(w, type, value)){
+  _scan(w, value, 0);  Fact source = _value_fact(w, value, NULL);  if(! source) source = _returned_argument(w, value, NULL);  int born = 0;  Region other = source ? source -> other : NULL;  Region region = source ? source -> region : _birth(w, value, type, &(born), &(other));  int owners = source ? source -> born : born;  int kept = source || born;  if(kept && _copies(w, type, value)){
     if(owners == 3){
       region = other;  other = NULL;  owners = 2;
     }
@@ -1550,10 +1550,10 @@ static void _store(Walk w, Var target, Var value){
   _scan(w, value, 0);  if(List_truth(named)){
     _flow(w, value, type, 1317118534, NULL);  return;
   }
-  int through = 0;  Fact object = NULL, base = _base(w, target, & through);  if(! base && ! through && List_truth(_root(target))){
+  int through = 0;  Fact object = NULL, base = _base(w, target, &(through));  if(! base && ! through && List_truth(_root(target))){
     _flow(w, value, type, 1317118534, NULL);  return;
   }
-  Symbol sink = _sink_of(base, through, & object);  _flow(w, value, type, sink, object);
+  Symbol sink = _sink_of(base, through, &(object));  _flow(w, value, type, sink, object);
 }
 
 Map Compiler_semantic_binding_facts(Compiler);

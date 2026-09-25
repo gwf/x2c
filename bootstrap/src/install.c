@@ -354,7 +354,7 @@ String String_strip(String, char *);
 
 static String _run(List arguments, const char * what){
   String output = NULL, errors = NULL;
-  if(! tool_capture(arguments, & output, & errors)) return output;
+  if(! tool_capture(arguments, &(output), &(errors))) return output;
   _error(String_join(NULL, cons(String_var(String_new(what)), cons(String_var(_3), cons(String_var(Var_str(List_car(arguments))), cons(String_var(_4), cons(String_var(String_strip(errors, " \n")), NULL)))))));
   return NULL;
 }
