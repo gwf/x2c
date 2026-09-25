@@ -564,11 +564,11 @@ static int Compiler._is_adopted(
     !!_adoption_visibility(compiler, base, participant);
 
 static int _function_parts(
-  Type signature, List *parameters, Type *result) {
+  Type signature, List &parameters, Type &result) {
   match (signature)
     case %((func ?arguments) *return_type): {
-      *parameters = arguments;
-      *result = return_type;
+      parameters = arguments;
+      result = return_type;
       return 1;
     }
   return 0;
@@ -612,7 +612,7 @@ static int _unify_signature(
   Type pattern_result = pattern.cdr();
   List actual_parameters = NULL;
   Type actual_result = NULL;
-  if (!_function_parts(actual, &actual_parameters, &actual_result))
+  if (!_function_parts(actual, actual_parameters, actual_result))
     return 0;
   while (pattern_parameters && actual_parameters) {
     if (!_unify(
@@ -650,7 +650,7 @@ static Type _substitute_signature(
 static int _exact_conversion(
   Type signature, Type parameter, Type result) {
   List parameters = NULL, Type actual_result = NULL;
-  if (!_function_parts(signature, &parameters, &actual_result))
+  if (!_function_parts(signature, parameters, actual_result))
     return 0;
   return parameters && !parameters.cdr() &&
          parameters.car() == parameter &&
@@ -725,7 +725,7 @@ static Type _method_signature(
   signature = _receiver_relative_signature(
     compiler, binding, signature, participant);
   List parameters = NULL, Type result = NULL;
-  if (_function_parts(signature, &parameters, &result) &&
+  if (_function_parts(signature, parameters, result) &&
       parameters && parameters.car() == owner) {
     parameters = _inherited_parameters(
       parameters, owner, participant);
