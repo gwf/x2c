@@ -69,7 +69,7 @@ values and the result uses ordinary `Var` truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null `pred`
 answers 1 for an empty iterator and 0 for any other.
 
-Source: `lib/iter.x:805`
+Source: `lib/iter.x:804`
 
 <a id="Iter.any"></a>
 #### Iter.any
@@ -114,7 +114,7 @@ fit in `int`.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause raised by that callback.
 
-Source: `lib/iter.x:840`
+Source: `lib/iter.x:837`
 
 <a id="Iter.enumerate"></a>
 #### Iter.enumerate
@@ -166,7 +166,7 @@ unambiguous because no iterator may yield `void`.
 Elements are passed as values. Raises: whatever the source, `Func.apply`,
 or `pred` raises. A null `pred` returns `void`.
 
-Source: `lib/iter.x:824`
+Source: `lib/iter.x:822`
 
 <a id="Iter.foldl"></a>
 #### Iter.foldl
@@ -208,7 +208,7 @@ Source: `lib/iter.x:568`
 Returns `iter` unchanged as its own iterator.
 `dest` is ignored; ownership and remaining traversal state are unchanged.
 
-Source: `lib/iter.x:904`
+Source: `lib/iter.x:901`
 
 <a id="Iter.map"></a>
 #### Iter.map
@@ -273,7 +273,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:880`
+Source: `lib/iter.x:877`
 
 <a id="Iter.min"></a>
 #### Iter.min
@@ -288,7 +288,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:894`
+Source: `lib/iter.x:891`
 
 <a id="Iter.new"></a>
 #### Iter.new
@@ -322,7 +322,7 @@ an expression. Integer results wrap to `Var.binary`'s promoted type width.
 **Raises:** any cause from the source or `Var.binary` while multiplying an
 element into the running product.
 
-Source: `lib/iter.x:867`
+Source: `lib/iter.x:864`
 
 <a id="Iter.repeat"></a>
 #### Iter.repeat
@@ -384,7 +384,7 @@ iterator sums to 0. Use `Iter.accumulate` for the running totals.
 **Raises:** any cause from the source or `Var.binary` while adding an element
 to the running total.
 
-Source: `lib/iter.x:854`
+Source: `lib/iter.x:851`
 
 <a id="Iter.try_next"></a>
 #### Iter.try_next
