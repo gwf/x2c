@@ -160,7 +160,7 @@ static String _marker_string(String path, String field) {
   Var marker = NULL;
   try marker = Json.read_file(path);
   catch: return NULL;
-  if (!(marker is <map>)) return NULL;
+  if (marker is not <map>) return NULL;
   Var value = marker[field];
   return value is <string> ? value : NULL;
 }

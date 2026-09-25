@@ -174,20 +174,11 @@ static Var _lower_name(Lowering l, String stem) {
   return Atom.intern(%"$stem$count-${l.own}");
 }
 
-/* --- a dynamic Func call ------------------------------------------------ */
-
-static Var _lower_decline(Lowering l, String why);
-
 /* --- the single scan --------------------------------------------------- */
-
-static void _lower_scan(Lowering l, Var form);
-static Var _lower_decline(Lowering l, String why);
-static Var _lower_bare(Var form);
 
 static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
-
 
 /* The ordinary cursor calls emitted by the foreach expansion. Their
    cursor and outputs can occupy frame slots instead of addressed cells. */
@@ -303,8 +294,6 @@ static void _lower_scan_bind(Lowering l, List form) {
   }
 }
 
-static int _lower_dimension(Lowering l, int id, int &out);
-
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
   List binding = NULL;
@@ -388,8 +377,6 @@ static void _lower_scan_function_value(Lowering l, List form) {
       if (!l.locals.contains(id)) _lower_scan_callee(l, name);
     }
 }
-
-static List _lower_param_type(List params);
 
 static void _lower_scan_call(Lowering l, List form) {
   match (form)
@@ -591,7 +578,6 @@ static Var _lower_text(String spelling) {
    compiler cache and leaves `(cache ID)` behind, so a `match` pattern and a
    template's constant head are not visible in the syntax. The cache is a
    graph of ids over `cons`, `var` and `string` leaves. */
-static Var _lower_constant(Lowering l, Var node);
 
 static Var _lower_constant_leaf(Lowering l, List value) {
   match (value) {
@@ -719,15 +705,6 @@ static Var _lower_quoted(Lowering l, Var node) {
 
 /* --- expressions -------------------------------------------------------- */
 
-static Var _lower_expr(Lowering l, Var form);
-static Var _lower_coerce(Lowering l, List want, Var node, Var value);
-static Var _lower_assign_expr(Lowering l, Var target, Var rhs);
-static Var _lower_update_expr(
-  Lowering l, Var target, Symbol operator, Var right);
-static Symbol _lower_compound(Var operator);
-static Var _lower_step_of(Var target);
-static Var _lower_initializer(Lowering l, List type, int id, Var init);
-
 /* Reads the `type` object a place addresses. An object with a native layout
    is read from its bytes, and a record reads as its own address; any other
    place is an evaluator cell. A field place's offset goes to the access
@@ -825,8 +802,6 @@ static Var _lower_field_place(
   if (_lower_failed(l, object)) return void;
   return %(C.at $object $offset (quote $tag));
 }
-
-static Var _lower_initializer(Lowering l, List type, int id, Var init);
 
 /* One owner for addressable x2c places. A substitution-only scalar returns
    void and continues through the existing SSA-style local path. */
@@ -1056,8 +1031,6 @@ static int _lower_object_pointer_operands(Lowering l, List operands) {
          (b && _lower_null_constant(left));
 }
 
-static List _lower_pointee_layout(Lowering l, Var receiver);
-
 /* The element layout of an object pointer or C array operand, or NULL. A
    semantic handle such as String keeps its own operators. */
 static List _lower_step_layout(Lowering l, Var operand) {
@@ -1126,10 +1099,6 @@ static Var _lower_operands(
   }
   return _lower_decline(l, "unsupported operator arity");
 }
-
-static Var _lower_boxed(Lowering l, int id, Var value, int fresh);
-static Var _lower_block(Lowering l, List items, List k);
-static Map _lower_env_copy(Lowering l);
 
 /* Capture expressions run at construction, including loads from addressed
    locals. The expression body has its own parameters and captures. */
@@ -1501,7 +1470,6 @@ static Var _lower_content(Lowering l, List type, Var content) {
 
 /* The continuation after a block is data, not a closure: either the end of
    the function, or one more turn of the loop it sits inside. */
-static Var _lower_block(Lowering l, List items, List k);
 
 static Map _lower_env_copy(Lowering l) {
   Map copy = _lower_scratch_map(l.scratch);
@@ -1526,8 +1494,6 @@ static int _lower_depth(Lowering l) => l.pending ? l.pending.depth : 0;
    had, however many cleanups hold the point that reaches it. */
 static List _lower_here(Lowering l, List k) =>
   %(at-depth ${_lower_depth(l)} $k);
-
-static Var _lower_apply_k(Lowering l, List k);
 
 /* Leaves the innermost cleanup's body for a continuation outside it. The
    body answers the exit's tag, and the exit's code runs after the cleanup,
@@ -1641,8 +1607,6 @@ static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
   Var discarded = _lower_name(l, "discard");
   return %((lambda ($discarded) $after) $effect);
 }
-
-static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
 
 /* Inside a cleanup, a return's value is computed first and leaves in a
    cell, which every wrapper passes out after running its cleanup. */
@@ -2051,8 +2015,6 @@ static int _lower_dimension(Lowering l, int id, int &out) {
     }
   return 0;
 }
-
-static Var _lower_coerce(Lowering l, List want, Var node, Var value);
 
 /* A record's storage is zeroed bytes, the way C zero-fills an object whose
    initializer names no field. `into` names storage a loop already holds for

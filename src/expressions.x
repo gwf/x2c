@@ -271,7 +271,7 @@ static void _check_explicit_converter_arguments(
   List n = notes;
   for (List p = params, a = arguments; p && a;
        p = cdr(p), a = cdr(a), n = cdr(n)) {
-    if (!(car(p) is <list>) || !(car(a) is <list>)) continue;
+    if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
     _check_noted_converter(compiler, car(n), argument, expected, 0);

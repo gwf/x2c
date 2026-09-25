@@ -484,9 +484,6 @@ static void _collect_aliased(
   }
 }
 
-static Var _rewrite(Walk walk, Var value);
-static List _function(Compiler compiler, List node);
-
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
    because a `continue` inside it still targets the enclosing loop. */
