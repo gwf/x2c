@@ -718,7 +718,7 @@ static int _layout_statement_start(Tokenizer tokenizer){
   Token previous = _significant_back(tokenizer, 0);
   if(! previous) return 0;
   Token start = previous;
-  for(Token scan = previous;  scan > tokens && scan[- 1].line == previous -> line; ) if((-- scan) -> type != 40896714 && scan -> type != 7477210024) start = scan;
+  for(struct Token * scan = previous;  scan > tokens && scan[- 1].line == previous -> line; ) if((-- scan) -> type != 40896714 && scan -> type != 7477210024) start = scan;
   return tokenizer -> col <= start -> col;
 }
 

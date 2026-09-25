@@ -1888,7 +1888,7 @@ static List _location(Token tokens, List range){
       default: ;  static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_521), &_x2c_match_capture)) {Var start = _x2c_match_values[0];  Var end = _x2c_match_values[1]; {
     Var _x2c_match_value_11 = start;  Var _x2c_match_value_12 = end; {
       int start = Var_int(Var_convert(_x2c_match_value_11, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_12, 3453797)); {
-        Token last = tokens + end - 1;  return cons(List_var(cons(_522, cons(int_var(tokens[start].line), NULL))), cons(List_var(cons(_523, cons(int_var(tokens[start].pos), cons(int_var(last -> pos + last -> len), NULL)))), NULL));
+        Token first = tokens + start, last = tokens + end - 1;  return cons(List_var(cons(_522, cons(int_var(first -> line), NULL))), cons(List_var(cons(_523, cons(int_var(first -> pos), cons(int_var(last -> pos + last -> len), NULL)))), NULL));
       }
 
     }
@@ -1939,7 +1939,7 @@ List location = _location(tokens, Var_list(span));  printf("%s\n", List_repr(con
       default: ;  static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_567), &_x2c_match_capture)) {Var start = _x2c_match_values[0];  Var end = _x2c_match_values[1];  Var private = _x2c_match_values[2]; {
         Var _x2c_match_value_15 = start;  Var _x2c_match_value_16 = end; {
           int start = Var_int(Var_convert(_x2c_match_value_15, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_16, 3453797)); {
-            Token last = tokens + end;  if(last[- 1].type == 119) last --;  text = String_var(_source_text(tokens + start, last));  kind = Symbol_var(_type_kind(tokens + start, Var_list(base), Var_list(modifiers)));  String written = Compiler_definition_doc(c, tokens + start);  if(String_truth(written)) doc = String_var(written);  privacy = cons(List_var(cons(_568, cons(private, NULL))), NULL);
+            Token last = tokens + end, final = last - 1;  if(final -> type == 119) last = final;  text = String_var(_source_text(tokens + start, last));  kind = Symbol_var(_type_kind(tokens + start, Var_list(base), Var_list(modifiers)));  String written = Compiler_definition_doc(c, tokens + start);  if(String_truth(written)) doc = String_var(written);  privacy = cons(List_var(cons(_568, cons(private, NULL))), NULL);
           }
 
         }
