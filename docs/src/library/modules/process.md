@@ -37,7 +37,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:577`
+Source: `lib/process.x:575`
 
 ### `Job`
 
@@ -51,7 +51,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:476`
+Source: `lib/process.x:474`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -61,7 +61,7 @@ Source: `lib/process.x:476`
 Terminates and reaps a job that is still running: `SIGTERM`, then
 `SIGKILL` to any stage still running a second later.
 
-Source: `lib/process.x:548`
+Source: `lib/process.x:546`
 
 <a id="Job.errors"></a>
 #### Job.errors
@@ -74,7 +74,7 @@ needed, or NULL when standard error was not captured or was empty.
 **Raises:** the start causes of `Job.start`, or `<bad-arg>` when the captured
 text contains a NUL byte.
 
-Source: `lib/process.x:523`
+Source: `lib/process.x:521`
 
 <a id="Job.kill"></a>
 #### Job.kill
@@ -83,7 +83,7 @@ Source: `lib/process.x:523`
 
 Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:540`
+Source: `lib/process.x:538`
 
 <a id="Job.lines"></a>
 #### Job.lines
@@ -95,7 +95,7 @@ endings.
 
 **Raises:** the causes of `Job.output`.
 
-Source: `lib/process.x:516`
+Source: `lib/process.x:514`
 
 <a id="Job.live"></a>
 #### Job.live
@@ -107,7 +107,7 @@ same as `options({stdout: <inherit>})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:435`
+Source: `lib/process.x:433`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -132,7 +132,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:394`
+Source: `lib/process.x:392`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -145,7 +145,7 @@ as needed. A live job, or one whose output was empty, returns NULL.
 **Raises:** the causes of `Job.check`, or `<bad-arg>` when the output
 contains a NUL byte.
 
-Source: `lib/process.x:507`
+Source: `lib/process.x:505`
 
 <a id="Job.pipe"></a>
 #### Job.pipe
@@ -158,7 +158,7 @@ stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:442`
+Source: `lib/process.x:440`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -168,7 +168,7 @@ Source: `lib/process.x:442`
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
 
-Source: `lib/process.x:531`
+Source: `lib/process.x:529`
 
 <a id="Job.run"></a>
 #### Job.run
@@ -180,12 +180,12 @@ status is not zero: `live()` followed by `check()`.
 
 **Raises:** the causes of `Job.live` and `Job.check`.
 
-Source: `lib/process.x:498`
+Source: `lib/process.x:496`
 
 <a id="Job.start"></a>
 #### Job.start
 
-`Job Job.start(Job job)`
+`meta native Job Job.start(Job job)`
 
 Starts `job` without waiting and returns it. A job that has started is
 returned unchanged.
@@ -194,7 +194,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:454`
+Source: `lib/process.x:452`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -207,7 +207,7 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:464`
+Source: `lib/process.x:462`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -219,14 +219,14 @@ until one does. An empty `jobs` returns NULL.
 
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
-Source: `lib/process.x:558`
+Source: `lib/process.x:556`
 
 ### `List`
 
 <a id="List.job"></a>
 #### List.job
 
-`Job List.job(List command)`
+`meta native Job List.job(List command)`
 
 Returns a `Job` for `command`, a command or pipeline, without starting
 it. The job captures standard output and passes standard error through.
@@ -241,7 +241,7 @@ Job job = %(printf "a\nb\n");
 ~}
 ```
 
-Source: `lib/process.x:374`
+Source: `lib/process.x:372`
 
 ## Public types
 
@@ -257,7 +257,7 @@ Source: `lib/process.x:374`
 
 The receiverless owner of `Env.get`.
 
-Source: `lib/process.x:46`
+Source: `lib/process.x:44`
 
 <a id="Job"></a>
 ### Job

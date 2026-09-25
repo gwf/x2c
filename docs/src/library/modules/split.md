@@ -40,7 +40,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/split.x:284`
+Source: `lib/split.x:280`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -69,7 +69,7 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/split.x:258`
+Source: `lib/split.x:254`
 
 <a id="Split.var"></a>
 #### Split.var
@@ -87,7 +87,7 @@ Source: `lib/split.x:30`
 <a id="String.lines"></a>
 #### String.lines
 
-`Split String.lines(String str)`
+`meta native Split String.lines(String str)`
 
 Returns a lazy cursor over lines in `str`, with endings removed.
 LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
@@ -103,7 +103,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:221`
+Source: `lib/split.x:216`
 
 <a id="String.split"></a>
 #### String.split
@@ -131,7 +131,7 @@ Source: `lib/split.x:122`
 <a id="String.split_lines"></a>
 #### String.split_lines
 
-`List String.split_lines(String str, int keep_ends)`
+`meta native List String.split_lines(String str, int keep_ends)`
 
 Splits `str` into a `List` of lines.
 LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
@@ -145,7 +145,7 @@ actual
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
 result.
 
-Source: `lib/split.x:140`
+Source: `lib/split.x:135`
 
 <a id="String.split_n"></a>
 #### String.split_n
@@ -166,7 +166,7 @@ Source: `lib/split.x:92`
 <a id="String.splits"></a>
 #### String.splits
 
-`Split String.splits(String str, String sep)`
+`meta native Split String.splits(String str, String sep)`
 
 Returns a lazy cursor over fields separated by `sep`.
 Separators are not coalesced, so adjacent separators produce empty
@@ -181,12 +181,12 @@ temporary. The cursor borrows `str` and
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/split.x:235`
+Source: `lib/split.x:230`
 
 <a id="String.words"></a>
 #### String.words
 
-`Split String.words(String str)`
+`meta native Split String.words(String str)`
 
 Returns a lazy cursor over whitespace-delimited words in `str`.
 Runs of C `isspace` bytes are coalesced, leading and trailing whitespace
@@ -202,7 +202,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:206`
+Source: `lib/split.x:201`
 
 ### `Var`
 

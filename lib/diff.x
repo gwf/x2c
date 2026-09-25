@@ -18,10 +18,6 @@ typedef enum Diff {
   DIFF_NAMESPACE
 } Diff;
 
-meta List Diff.lines(String old, String new);
-meta String Diff.unified(
-  String old, String new, String old_name, String new_name);
-
 #pragma private
 
 static const int _LIMIT = 2000;
@@ -121,7 +117,7 @@ static void _hunk(
     Past 2,000 edits the differing middle is one run of deletions followed
     by one run of insertions.
 */
-List Diff.lines(String old, String new) {
+meta native List Diff.lines(String old, String new) {
   _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
   int lo = 0, old_hi = d.old.len(), new_hi = d.new.len();
   while (lo < old_hi && lo < new_hi && _same(d, lo, lo)) {
@@ -140,7 +136,7 @@ List Diff.lines(String old, String new) {
     prints it with `old_name` and `new_name` in the header and three lines
     of context, or NULL when the texts are equal line for line.
 */
-String Diff.unified(
+meta native String Diff.unified(
   String old, String new, String old_name, String new_name) {
   Array edits = $auto(Diff.lines(old, new).array());
   Buffer out = $auto(Buffer.new(0));
