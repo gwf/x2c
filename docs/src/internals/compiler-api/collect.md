@@ -42,7 +42,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:797`
+Source: `src/collect.x:798`
 
 #### interface_prelude
 
@@ -52,7 +52,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:825`
+Source: `src/collect.x:826`
 
 #### interface_text
 
@@ -64,7 +64,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1063`
+Source: `src/collect.x:1064`
 
 ### `Compiler`
 

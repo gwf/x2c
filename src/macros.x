@@ -18,6 +18,8 @@ $(import "../src/ast-rewrite.xmacro")
 #include "regions.x"
 #include "statements.x"
 #include "utils.x"
+#include <dlfcn.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1653,6 +1655,115 @@ void Compiler.add_native_module(String path, Map (*entry)(void)) {
     name.string().try_own();
     ((Func) target.pointer()).signature().try_own();
   }
+}
+
+/* Reads the stamp in the bytes of the module at `path`: 1 when its one
+   stamp names the running compiler, 0 when it names another compiler or
+   there is more than one, and -1 when the file holds none. Loading runs a
+   module's code, so a module from another compiler is rejected before it
+   is loaded. */
+static int _module_stamp(String path) {
+  String expected = build_module_stamp();
+  if (!expected)
+    x2c_driver_error(
+      %"cannot read the running compiler to check native module '$path'");
+  File input = fopen(path, "rb");
+  if (!input)
+    x2c_driver_error(
+      %"cannot read native module '$path': ${String.new(strerror(errno))}");
+  fseek(input, 0, SEEK_END);
+  long end = ftell(input);
+  rewind(input);
+  char *data = Scope.malloc(end > 0 ? (size_t) end : 1);
+  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
+  input.close();
+  String marker = "x2c-module-stamp:";
+  int stamps = 0, current = 0, width = expected.len();
+  for (size_t i = 0; i + marker.len() <= size; i++)
+    if (!memcmp(data + i, marker, marker.len())) {
+      stamps++;
+      current = i + width <= size && !memcmp(data + i, expected, width);
+    }
+  Scope.free(data);
+  return !stamps ? -1 : stamps == 1 && current;
+}
+
+/* Opens the module at absolute `path`, whose stamp was checked, and records
+   its targets. A module is never unloaded, because its Funcs borrow its
+   code. */
+static void _open_native_module(String path) {
+  void *handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+  if (!handle)
+    x2c_driver_error(
+      %"cannot load native module '$path': ${String.new(dlerror())}");
+  Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
+  if (!entry) x2c_driver_error(%"not an x2c native module: $path");
+  Compiler.add_native_module(path, entry);
+}
+
+#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#define X2C_NATIVE_MODULES 0
+#else
+#define X2C_NATIVE_MODULES 1
+#endif
+
+/** Loads the native module at `path` once per process and returns its
+    absolute path. Loading runs the module's code inside the compiler, so it
+    happens only on request. A module from another compiler, a file that is
+    not a module, or an unsupported platform prints a diagnostic and exits.
+*/
+String Compiler.load_native_module(String path) {
+  if (!X2C_NATIVE_MODULES)
+    x2c_driver_error("native modules are not supported on this platform");
+  String absolute = Path.absolute(path);
+  if (Compiler.native_module_loaded(absolute)) return absolute;
+  int stamp = _module_stamp(path);
+  if (stamp < 0) x2c_driver_error(%"not an x2c native module: $path");
+  if (!stamp)
+    x2c_driver_error(
+      %"native module '$path' was built by another compiler; rebuild it");
+  _open_native_module(absolute);
+  return absolute;
+}
+
+/** Loads the native module at absolute `path` when this compiler built it
+    and the platform loads modules. A process that loads a module before it
+    forks translation workers lets them inherit it; anything else is left
+    for the import to report.
+*/
+void Compiler.preload_native_module(String path) {
+  if (X2C_NATIVE_MODULES && !Compiler.native_module_loaded(path) &&
+      _module_stamp(path) == 1)
+    _open_native_module(path);
+}
+
+/** Selects package `name`'s native module, when it has one, after the
+    modules already selected, and records it as a prerequisite of the unit.
+    The module is `<root>/builds/<name>.module`; a worker loads it itself
+    when the process has not. A module from another compiler, or one on a
+    platform that loads none, is reported at the import `token`.
+*/
+void Compiler.select_package_module(
+  Compiler c, String name, String root, Token token) {
+  String module = %"$root/builds/$name.module";
+  if (!Path.is_file(module)) return;
+  if (!X2C_NATIVE_MODULES)
+    c.report_error(
+      <driver>, "native modules are not supported on this platform", token,
+      %("package: $name" "module: $module"));
+  c.add_translation_dependency(module);
+  if (!Compiler.native_module_loaded(module)) {
+    if (_module_stamp(module) != 1)
+      c.report_error(
+        <driver>,
+        %"package '$name' was built by another compiler; rebuild it", token,
+        %("module: $module"));
+    _open_native_module(module);
+  }
+  if (native_module_order.contains(module)) return;
+  Scope.push(&native_module_scope);
+  native_module_order = native_module_order.append(%($module));
+  Scope.pop();
 }
 
 /** Selects the loaded native modules, by absolute path, that bodyless `meta`

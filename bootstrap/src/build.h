@@ -27,8 +27,6 @@ typedef struct Build{
 }
 * Build;
 
-String build_module_stamp(void);
-
 void build_check_input(String input);
 
 Build CliRequest_prepare(CliRequest c);

@@ -118,15 +118,6 @@ static uint64_t _state_base(CliRequest request, String tool, int *ok) {
   return hash;
 }
 
-/** Returns the stamp a native module records: `x2c-module-stamp:` and the
-    running compiler's identity. Returns NULL when the executable cannot be
-    read. Only the compiler that built a module loads it.
-*/
-String build_module_stamp(void) {
-  String identity = x2c_compiler_identity();
-  return identity ? %"x2c-module-stamp:$identity" : NULL;
-}
-
 static List _state_dep_inputs(String depfile) {
   File input = fopen(depfile, "r");
   if (!input) return NULL;
@@ -372,23 +363,33 @@ void Build.record_translation(Build state, String input, String directory) {
     _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
 
+/* Whether one of the request's inputs is a source of `package`. A package's
+   own sources, and a module built from them, link no archive of their own;
+   a test or example inside the package directory imports the package like
+   any consumer. */
+static int _package_built_here(Build state, List roots, String package) {
+  foreach (String input, state.request.inputs) {
+    String source = Path.absolute(input);
+    if (x2c_package_directory(roots, source) == package &&
+        x2c_package_source(package, source)) return 1;
+  }
+  return 0;
+}
+
 /* Imported packages reach the build through the unit's recorded
    dependencies. Only an import pulls a package file into a consumer, and
    the record is present even when the translation result was reused. */
 static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
-  // A package's own sources link no archive of their own; a test or example
-  // inside the package directory imports the package like any consumer.
-  String self = Path.absolute(input), own = x2c_package_directory(roots, self);
-  if (!x2c_package_source(own, self)) own = NULL;
+  String self = Path.absolute(input);
   String depfile = %"$directory/${Path.stem(input)}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
     if (dependency == self || dependency == input) continue;
     String package = x2c_package_directory(roots, dependency);
-    if (!package || (own && package == own)) continue;
+    if (!package || _package_built_here(state, roots, package)) continue;
     String builds = %"$package/builds";
     if (builds in state.gen_dirs) continue;
     state.gen_dirs.push(builds);

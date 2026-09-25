@@ -284,6 +284,14 @@ It does not expose macros, `.xmacro` definitions, private declarations, or the
 package's own imports. Packages have no re-exports or hierarchy. One program
 uses one version of a package.
 
+A public bodyless `meta` prototype crosses the import like any function
+declaration. When the package has built its native module,
+`<dir>/builds/<name>.module`, the import loads it, so compile-time code in
+the consumer can call the function. Modules named by `--native-module` or
+`native-modules` are consulted first. A module built by another compiler is
+an error at the import; see
+[packages with compile-time parts](../guide/packages.md#packages-with-compile-time-parts).
+
 Names from a C header remain unprefixed, as if the consumer included that
 header directly. A package renames what it declares, not what it includes.
 

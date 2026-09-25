@@ -10,7 +10,9 @@
 # driver compiles those files and src/*.c into builds/lib$(PACKAGE).a,
 # retaining objects and dependency state under builds/cc.
 # builds/$(PACKAGE).native.rsp holds the native arguments a consumer needs
-# besides that archive, one argument per line.
+# besides that archive, one argument per line. A package whose sources
+# declare bodyless `meta` prototypes also builds builds/$(PACKAGE).module,
+# the native module an import loads so compile-time code can call them.
 #
 # src/*.c is C the package itself must compile, such as a single-header
 # library's instantiation unit. The driver keeps distinct object paths for
@@ -48,6 +50,7 @@ PACKAGE_HEADERS := $(PACKAGE_SOURCES:src/%.x=builds/%.h)
 PACKAGE_GENERATED := $(PACKAGE_SOURCES:src/%.x=builds/%.c)
 PACKAGE_ARCHIVE := builds/lib$(PACKAGE).a
 PACKAGE_RESPONSE := builds/$(PACKAGE).native.rsp
+PACKAGE_MODULE := builds/$(PACKAGE).module
 PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
@@ -64,7 +67,8 @@ all: test
 
 package-build-force:
 
-build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE)
+build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE) \
+  $(PACKAGE_MODULE)
 
 BUNDLE_DIR ?= builds/bundle
 bundle: build
@@ -117,6 +121,17 @@ $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
   $(PACKAGE_RESPONSE) package-build-force | $(DEPENDENCY_PREREQUISITE)
 	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
 	  $(PACKAGE_C_FLAGS) $(PACKAGE_GENERATED) $(PACKAGE_NATIVE)
+
+# The interfaces translation wrote record each of the package's own native
+# `meta` prototypes; without one there is no module to build.
+$(PACKAGE_MODULE): $(PACKAGE_GENERATED) package-build-force \
+  | $(DEPENDENCY_PREREQUISITE)
+	@if grep -qs 'native-meta "$(PACKAGE)__' \
+	    $(PACKAGE_SOURCES:src/%.x=builds/%.xi); then \
+	  "$(X2C)" build --kind meta-module --output $@ \
+	    --build-dir builds/module $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
+	    $(PACKAGE_LINK) $(PACKAGE_SOURCES) $(PACKAGE_NATIVE); \
+	else rm -f $@; fi
 
 # One argument per line, the response-file form the compiler reads.
 $(PACKAGE_RESPONSE): Makefile | builds

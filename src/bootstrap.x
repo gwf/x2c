@@ -165,20 +165,19 @@ Bootstrap bootstrap_materialize(CliRequest request) {
   return b;
 }
 
-/* The runtime objects the compiler links whole, so native modules can call
-   them: those `etc/runtime-objects.txt` names by stem, as the runtime build
-   placed them. A payload without the list links the runtime as an archive
-   only. */
-static List _runtime_objects(String prefix) {
-  String stems = NULL;
-  try stems = Path.read_text(%"$prefix/etc/runtime-objects.txt");
-  catch %(not-found *): return NULL;
-  Array objects = [];
-  foreach (String stem, stems.split_lines(0))
-    foreach (Var object,
-             Path.glob(%"$prefix/.x2c-build/runtime/obj/$stem-????????.o"))
-      objects.push(object);
-  return objects.list_free();
+/* The link argument that links the prefix's whole runtime archive into a
+   program that loads native modules, which bind to the program's own
+   runtime, and on Linux exports its functions. NULL where modules do not
+   load. */
+static String _whole_runtime(String prefix) {
+  struct utsname host;
+  if (uname(&host)) return NULL;
+  String system = String.new(host.sysname), archive = %"$prefix/lib/libx2c.a";
+  if (system == "Darwin") return %"-Wl,-force_load,$archive";
+  if (system == "Linux")
+    return
+      %"-Wl,--export-dynamic,--whole-archive,$archive,--no-whole-archive";
+  return NULL;
 }
 
 /** Builds an ordinary native request for one materialized bootstrap component.
@@ -197,20 +196,16 @@ CliRequest bootstrap_build_request(
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
   request.kind = component == <runtime> ? <static-lib> : <executable>;
-  request.inputs = component == <runtime> ? payload.runtime_srcs :
-    %(@{payload.compiler_srcs} @{_runtime_objects(payload.prefix)});
+  request.inputs =
+    component == <runtime> ? payload.runtime_srcs : payload.compiler_srcs;
   String prefix = payload.prefix;
   request.output =
     component == <runtime> ? %"$prefix/lib/libx2c.a" : %"$prefix/bin/x2c";
   request.build_dir = %"$prefix/.x2c-build/$component";
   request.include_dirs = cons(%"$prefix/include/x2c", NULL);
   request.cc_args = command.cc_args;
-  // A native module binds to the compiler's own runtime, which a Linux
-  // executable exports only when asked.
-  struct utsname host;
-  if (component == <compiler> && !uname(&host) &&
-      String.new(host.sysname) == "Linux")
-    request.ld_args = %("-rdynamic");
+  String whole = _whole_runtime(prefix);
+  if (component == <compiler> && whole) request.ld_args = %($whole);
   request.cc = command.cc;
   request.ar = command.ar;
   request.jobs = command.jobs;
@@ -310,8 +305,7 @@ void bootstrap_build_commands(Bootstrap b) {
   foreach (Path source,
            Path.glob(%"$prefix/.x2c-build/compiler/gen/*/*.h"))
     Path.copy_file(source, headers.join(source.basename()));
-  struct utsname host;
-  int linux = !uname(&host) && String.new(host.sysname) == "Linux";
+  String whole = _whole_runtime(prefix);
   foreach (String name, names) {
     List sources = Path.glob(%"$prefix/commands/$name/*.x");
     String build_dir = %"$commands_build/$name";
@@ -321,15 +315,10 @@ void bootstrap_build_commands(Bootstrap b) {
       $build_dir "--output" $output
       "--x-include-dir" $prefix "--x-include-dir" $src_dir
       "--c-include-dir" $headers);
-    if (linux) {
-      arguments.push("-Xlinker");
-      arguments.push("-export-dynamic");
-    }
+    if (whole) arguments.push(whole);
     foreach (Path source, sources) arguments.push(source);
     arguments.push(identity_source);
     arguments.push(archive);
-    foreach (String object, _runtime_objects(prefix))
-      arguments.push(object);
     Job command = arguments.list_free().job()
       .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
                 stderr: <capture>});

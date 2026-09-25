@@ -44,19 +44,20 @@ CFLAGS           += $(BUILD_CFLAGS) $(STRICT_CFLAGS)
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
 X2C_TRANSLATE    = $(X2C_COMPILER) translate $(STRICT_X2C_FLAGS) $(X2C_FLAGS)
-LDFLAGS          += -lx2c
-LDFLAGS          += $(BUILD_LDFLAGS)
-# A native module binds to the compiler's own runtime. The compiler links
-# whole every runtime object etc/runtime-objects.sh selects, and a Linux
-# executable exports its functions only when asked.
+# A native module binds to the compiler's own runtime, so the compiler links
+# the whole runtime archive, and a Linux executable exports its functions
+# only when asked.
 UNAME_S          := $(shell uname -s)
-RUNTIME_SELECT    = :
-ifneq ($(filter Darwin Linux,$(UNAME_S)),)
-RUNTIME_SELECT    = sh $(ROOT)/etc/runtime-objects.sh
+RUNTIME_LINK     = -lx2c
+ifeq ($(UNAME_S),Darwin)
+RUNTIME_LINK     = -Wl,-force_load,$(LIBRARY)
 endif
 ifeq ($(UNAME_S),Linux)
+RUNTIME_LINK     = -Wl,--whole-archive -lx2c -Wl,--no-whole-archive
 LDFLAGS          += -rdynamic
 endif
+LDFLAGS          += $(RUNTIME_LINK)
+LDFLAGS          += $(BUILD_LDFLAGS)
 MAKEFLAGS        += -S
 ###############################################################################
 .SUFFIXES: # Disable built-in suffix rules
@@ -181,8 +182,7 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
-	whole=$$($(RUNTIME_SELECT) $(BIN_OBJECTS) -- $(LIB_OBJECTS)) && \
-	$(CC) $(BIN_OBJECTS) $$whole -L. $(LDFLAGS) -lm -o $(BINARY)
+	$(CC) $(BIN_OBJECTS) -L. $(LDFLAGS) -lm -o $(BINARY)
 ###############################################################################
 # clean build directories
 clean:

@@ -48,8 +48,17 @@ BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
 STAGE0_X2C ?= ./builds/0/x2c
 STATS_COLOR ?= auto
 COMMAND_NAMES = $(shell cut -d'|' -f1 commands/manifest.txt)
-COMMAND_LINK_FLAGS = $(if $(filter Linux,$(shell uname -s)),\
-	-Xlinker -export-dynamic,)
+# Commands load native modules, which bind to the command's own runtime, so
+# they link the whole runtime archive like the compiler.
+COMMAND_OS := $(shell uname -s)
+COMMAND_LINK_FLAGS =
+ifeq ($(COMMAND_OS),Darwin)
+COMMAND_LINK_FLAGS = -Wl,-force_load,builds/0/libx2c.a
+endif
+ifeq ($(COMMAND_OS),Linux)
+COMMAND_LINK_FLAGS = -Xlinker -export-dynamic \
+	-Wl,--whole-archive,builds/0/libx2c.a,--no-whole-archive
+endif
 
 bootstrap-ready: configure
 	@if [ ! -f $(BOOTSTRAP_SENTINEL) ]; then \
