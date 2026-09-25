@@ -25,6 +25,8 @@
 #include "declarations.x"
 #include "idioms.x"
 #include "comments.x"
+#include "validation.x"
+#include "structure.x"
 #include "fix.x"
 #include <stdio.h>
 #include <string.h>
@@ -45,7 +47,10 @@ static int _parse(Lint l, Frontend frontend, String path):
   if ok:
     parsed.compiler.own_diagnostics()
     ok = parsed.collect(frontend) && parsed.parse()
-  if ok: l.declaration_rules(parsed.compiler, parsed.ast)
+  if ok:
+    l.declaration_rules(parsed.compiler, parsed.ast)
+    foreach List finding in l.findings: finding.promote()
+    foreach List function in l.functions: function.promote()
   else if !parsed.compiler.diagnostics.printer:
     foreach Var entry in parsed.compiler.diagnostics():
       parsed.compiler.print_diagnostic(entry)
@@ -98,19 +103,27 @@ int main(int argc, char **argv):
     translate.push("-I")
     translate.push(dir)
   Path work = fix ? Path.temp_dir() : NULL
-  int status = 0
-  foreach String path in inputs:
-    Path file = path
-    Lint l = Lint.new(path, file.read_text(), selected)
+  int status = 0, count = inputs.len()
+  Lint *lints = Scope.calloc(count + 1, sizeof(Lint))
+  for (int at = 0; at < count; at++):
+    Path file = inputs[at]
+    Lint l = lints[at] = Lint.new(file, file.read_text(), selected)
     l.token_rules()
     l.idiom_rules()
     l.comment_rules()
-    if !_parse(l, frontend, path): status = 1
+    if !_parse(l, frontend, file): status = 1
+    l.validation_rules()
+    l.structure_rules()
+  lint_corpus_rules(lints, count)
+  for (int at = 0; at < count; at++):
+    Lint l = lints[at]
     l.print()
     if !fix || !l.edits.len(): continue
     int proposed = l.edits.len()
     int fixed = l.apply_fixes(translate, work)
-    if fixed < 0: printf("%s: not fixed; the file does not translate\n", path)
-    else: printf("%s: fixed %d of %d\n", path, fixed, proposed)
+    if fixed < 0:
+      printf("%s: not fixed; the file does not translate\n", l.path)
+    else:
+      printf("%s: fixed %d of %d\n", l.path, fixed, proposed)
   if work: Path.remove_tree(work)
   return status

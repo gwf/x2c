@@ -1,7 +1,7 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 5
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 through 6
 > are implemented; see [Progress](#progress). The completed linter moved
 > into experimental `commands/lint` in `9b31112e` under the
 > [external commands](archive/external-commands.md) plan.
@@ -462,6 +462,58 @@ units the old tool took 0.6 s and `x2c lint --all` takes 5.5 s, because it
 also parses every unit. Phase 4's `--fix` read the include directories after
 they were freed, which crashed about one run in thirty; it now reads the
 request's copy.
+
+**Reference parameters, 2026-09-24.** Added between Phases 5 and 6 at
+Gary's request: `reference-parameter`, a style candidate in
+`commands/lint/declarations.x` (66 lines), reports a `T *p` parameter of a
+static function when the typed AST shows every use of `p` is `*p` or
+`p->field` and every call passes `&v` for a caller's plain local. It has no
+fix: the respelling changes generated C and callers.
+
+**Phase 6, 2026-09-24.** `commands/lint/validation.x` (447 lines) and
+`commands/lint/structure.x` (361 lines) add 20 rules over the functions the
+compiler's definition rows give, in brace-syntax units, and
+`agents/skills/find-x2c-overengineering/scripts/overengineering` (483 lines)
+replaces the Python queue. Deleted: `audit-source-bloat.py`,
+`redundant_validation.py` and `overengineering.py` with their tests, and all
+of `x2c_source.py` except `mask_non_code`, which `tools/repo-metrics.py`
+imports (3,238 lines of Python). Parity on `src/` and `lib/` (and
+`*.xmacro`, which the validation analyzer read), as file, line, and rule:
+
+| Rule | Old | New | Both | Differences |
+| --- | --- | --- | --- | --- |
+| return after `report_error` | 21 | 21 | 21 | - |
+| shape-check diagnostics | 43 | 43 | 43 | - |
+| validator diagnostics | 4 | 4 | 4 | - |
+| recursive validator | 19 | 14 | 14 | 5 compile-time `meta` functions in `autodiff.xmacro`, which have no definition rows |
+| validation framework | 4 | 4 | 4 | - |
+| static match capture | 1 | 1 | 1 | - |
+| silent shape guard | 336 | 367 | 334 | 2 in `autodiff.xmacro` meta functions; 33 new in `lib/lisp.x` functions the regex never found |
+| return after raise | 0 | 1 | 0 | the old reader looked for `<cause>` and found no shared causes; the rule now reads the atoms and skips a raise that is a braceless body |
+| struct copy | 188 | 188 | 185 | 3 are the first function of a file, which the regex started after the includes |
+| manual bookkeeping | 9 | 9 | 9 | - |
+| lifecycle pair | 2 | 2 | 2 | - |
+| enum, table, and switch | 1 | 1 | 1 | - |
+| internal type | 107 | 106 | 106 | `ErrorCatchSite`, which `src/emit.x` spells inside a quoted form |
+| duplicate body | 8 | 8 | 8 | - |
+| repeated routes | 53 | 62 | 50 | the regex read hyphenated atoms in quoted forms as calls (`void-op (` as `op`); 9 groups gain or lose members |
+
+Not carried over: the bloat audit's merged areas, scores, stable IDs, JSON,
+and `--compare`; its ordinal-switch detector (no current findings) and its
+cosmetic counts, which the width, blank-line, ruler, and stock-prose rules
+report; and the validation analyzer's scores, producer grouping, JSON,
+`--rev`, and `--compare`. A historical tree is now checked from a worktree
+of that revision. The overengineering script keeps the inventory, history,
+selection, and run record; `trace-deletion` output matched the old script on
+`79417aab` (32 lines, 28 ranges). Its structure signal now comes from lint
+findings, so of the old run's five selections one (`_import`) is still
+selected, and 3,886 of 3,959 shared regions have the same term, bookkeeping,
+and size signals; 17 regions the regex invented from macro text and one
+`static struct` variable are gone. Old tools: validation 5-7 s, bloat audit
+15-26 s of processor time, overengineering 66 s; `x2c lint --all` over the
+same units takes 11-16 s and the overengineering scan 14 s. Findings and
+function rows are promoted out of the parse's pool, and the proven
+`contains-in` fixes were applied to the linter itself.
 
 ## Process ceiling
 

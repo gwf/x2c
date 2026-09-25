@@ -71,7 +71,7 @@ static void _prototypes(Lint l, Compiler c, List ast):
             case %(bind ?binding ?):
               List single = %(declare $type (bindings $item))
               if line && single.type_from_ast().is_function():
-                _prototype(l, line, defined.contains(binding))
+                _prototype(l, line, binding in defined)
 
 /* Facts about each line of one function that a rename leaves unchanged,
    read from the code that remains once comments and literals are masked:
@@ -321,7 +321,7 @@ static void _reference_parameters(Lint l, Compiler c, List ast):
                  _alias_arguments(calls, index, locals):
                 l.add("reference-parameter", lines[function].int(),
                       %"`$name` aliases one caller variable; declare it " +
-                      %"as a `&` reference parameter")
+                      "as a `&` reference parameter")
           index++
 
 /** Runs the rules that read the compiler's parse of the unit: `ast` and
@@ -331,9 +331,11 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast):
   _prototypes(l, c, ast)
   if l.selected.contains("reference-parameter"):
     _reference_parameters(l, c, ast)
-  if l.layout || !l.selected.contains("subject-parameter-name"): return
   foreach List row in c.definition_rows(ast):
     match row:
-      case %(function ? ? ? ? ? ? ? source (?(int start) ?(int body))
+      case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))
              (? ?(int end) *)):
-        _subject(l, start, body, end)
+        if l.layout: continue
+        l.functions.push(%($name $start $body $end))
+        if l.selected.contains("subject-parameter-name"):
+          _subject(l, start, body, end)

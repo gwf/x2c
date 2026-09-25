@@ -262,7 +262,8 @@ static void _repeated_prose(Lint l, Comment *all, int n):
     Array each = starts
     if each.len() < 2: continue
     foreach Var start in each:
-      l.add("repeated-prose", start.int(), "repeats prose elsewhere in the file")
+      l.add("repeated-prose", start.int(),
+            "repeats prose elsewhere in the file")
 
 /** Runs the comment rules over `l`. */
 void Lint.comment_rules(Lint l):

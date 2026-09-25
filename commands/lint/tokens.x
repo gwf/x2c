@@ -110,7 +110,8 @@ static const List prose_phrases = %(
   "load bearing" "load-bearing" "it is important to note" "note that"
   "keep in mind" "in order to" "serves to" "leverage" "utilize" "robust"
   "powerful" "seamless" "comprehensive" "elegant" "clearly" "simply"
-  "obviously" "obvious" "important" "just" "deliberately" "honest" "honestly" "on purpose"
+  "obviously" "obvious" "important" "just" "deliberately" "honest"
+  "honestly" "on purpose"
   "rather than" "this ensures" "as mentioned above" "we can see"
 )
 
@@ -244,7 +245,7 @@ static void _wrapping(Lint l):
    qualifiers, a type word, pointer stars, and a name. Returns -1 when the
    tokens are not one. */
 static int _declared_name(Lint l, int at):
-  while at < l.count && qualifier_words.contains(l.tokens[at].type):
+  while at < l.count && l.tokens[at].type in qualifier_words:
     at = l.next(at)
   if at >= l.count: return -1
   Symbol type = l.tokens[at].type
@@ -343,7 +344,7 @@ static void _repeated_accessors(Lint l):
       continue
     String call = %"${t.text}.${l.tokens[at + 2].text}()"
     List key = %($line_depth $call)
-    if reported.contains(key): continue
+    if key in reported: continue
     if !seen.contains(key): seen[key] = []
     Array lines = seen[key]
     lines.push(line)
