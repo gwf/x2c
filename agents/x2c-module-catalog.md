@@ -461,16 +461,16 @@ Public functions:
 `Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
 `Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
 `Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.var_signature_type`,
-`Type.numeric_literal_value`, `Type.numeric_literal`, `Type.tag`, `Type.body`,
-`Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
-`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
-`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
-`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
-`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
-`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`Type.var_numeric_update_helper`, `Type.numeric_literal_value`,
+`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
+`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
+`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
+`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
+`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
+`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
+`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 
