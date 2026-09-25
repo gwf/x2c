@@ -2074,7 +2074,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
   String requested = NULL;
-  if (_import_path(compiler, &requested)) {
+  if (_import_path(compiler, requested)) {
     Token first = compiler.token;
     compiler.parse_macro_lisp_top_level();
     String name = compiler.package;
