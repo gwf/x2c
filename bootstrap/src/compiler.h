@@ -150,6 +150,12 @@ void Compiler_record_source_reference(Compiler c, List binding, Type type, Token
 
 Map Compiler_semantic_binding_facts(Compiler c);
 
+List Compiler_present_references(Compiler c);
+
+void Compiler_mark_reference_present(Compiler c, List binding);
+
+void Compiler_restore_reference_presence(Compiler c, List before);
+
 List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
 
 int reference_guard_exits(List arm);

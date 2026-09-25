@@ -105,12 +105,10 @@ static List _continued(Compiler c, List statement) {
 
 static List _parse_reference_arm(Compiler c, List binding, int present) {
   if (!binding) return c.parse_governed(AST_STATEMENT);
-  Map facts = c.semantic_binding_facts();
-  List key = %(present-reference $binding);
-  int previous = facts.contains(key);
-  if (present) facts[key] = 1;
+  List before = c.present_references();
+  if (present) c.mark_reference_present(binding);
   List arm = c.parse_governed(AST_STATEMENT);
-  if (!previous) facts.del(key);
+  c.restore_reference_presence(before);
   return arm;
 }
 
@@ -123,7 +121,7 @@ static List _if_statement(Compiler compiler) {
   compiler.__complete_here(<continue>, %("else"));
   if (compiler.peek(0) != <else>) {
     if (binding && !true_is_present && reference_guard_exits(ontrue))
-      compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+      compiler.mark_reference_present(binding);
     return %(if $cond $ontrue);
   }
   ontrue = _continued(compiler, ontrue);
@@ -131,9 +129,9 @@ static List _if_statement(Compiler compiler) {
   List onfalse = _parse_reference_arm(
     compiler, binding, !true_is_present);
   if (binding && reference_guard_exits(ontrue) && !true_is_present)
-    compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+    compiler.mark_reference_present(binding);
   if (binding && reference_guard_exits(onfalse) && true_is_present)
-    compiler.semantic_binding_facts()[%(present-reference $binding)] = 1;
+    compiler.mark_reference_present(binding);
   return %(if $cond $ontrue $onfalse);
 }
 
@@ -657,15 +655,8 @@ List Compiler.parse_statement(Compiler c) {
 */
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
   Array block = $auto([]), List stmt = NULL;
-  Map facts = c.semantic_binding_facts(), present_before = {};
-  foreach (Var key, facts.keys())
-    match (key) case %(present-reference ?): present_before[key] = 1;
-  defer {
-    Array keys = $auto(facts.keys());
-    foreach (Var key, keys)
-      match (key) case %(present-reference ?):
-        if (!present_before.contains(key)) facts.del(key);
-  }
+  List present_before = c.present_references();
+  defer c.restore_reference_presence(present_before);
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   loop {

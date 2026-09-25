@@ -2326,12 +2326,10 @@ static List _bind_optional_reference_arm(
   Compiler c, Var arm, List binding, int present) {
   if (!binding)
     return c.bind_syntax(arm, AST_STATEMENT, c.return_type);
-  Map facts = c.semantic_binding_facts();
-  List key = %(present-reference $binding);
-  int previous = facts.contains(key);
-  if (present) facts[key] = 1;
+  List before = c.present_references();
+  if (present) c.mark_reference_present(binding);
   List bound = c.bind_syntax(arm, AST_STATEMENT, c.return_type);
-  if (!previous) facts.del(key);
+  c.restore_reference_presence(before);
   return bound;
 }
 
@@ -2698,7 +2696,7 @@ List Compiler.bind_syntax(
           List yes = _bind_optional_reference_arm(
             _, ontrue, binding, true_is_present);
           if (binding && !true_is_present && reference_guard_exits(yes))
-            _.semantic_binding_facts()[%(present-reference $binding)] = 1;
+            _.mark_reference_present(binding);
           return %(if $test $yes);
         }
       case %(if ?condition ?ontrue ?onfalse):
@@ -2713,7 +2711,7 @@ List Compiler.bind_syntax(
           if (binding &&
               ((reference_guard_exits(yes) && !true_is_present) ||
                (reference_guard_exits(no) && true_is_present)))
-            _.semantic_binding_facts()[%(present-reference $binding)] = 1;
+            _.mark_reference_present(binding);
           return %(if $test $yes $no);
         }
       case %(for ?init ?condition ?increment ?body): {
@@ -2801,15 +2799,8 @@ List Compiler.bind_syntax(
       case %(block *children): {
         if (!statement_position) goto construction_error;
         Array fields = [];
-        Map facts = _.semantic_binding_facts(), present_before = {};
-        foreach (Var key, facts.keys())
-          match (key) case %(present-reference ?): present_before[key] = 1;
-        defer {
-          Array keys = $auto(facts.keys());
-          foreach (Var key, keys)
-            match (key) case %(present-reference ?):
-              if (!present_before.contains(key)) facts.del(key);
-        }
+        List present_before = _.present_references();
+        defer _.restore_reference_presence(present_before);
         _.sym.push_new_scope();
         {
           defer _.sym.pop_scope();

@@ -541,6 +541,27 @@ void Compiler.record_source_reference(
 */
 Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
+/** Returns the optional references proven present in this lexical path. */
+List Compiler.present_references(Compiler c) {
+  Var stored;
+  return c.semantic_binding_facts().try_get(%(present-references), &stored)
+       ? stored.list() : NULL;
+}
+
+/** Records a nonnull optional parameter for the current lexical path. */
+void Compiler.mark_reference_present(Compiler c, List binding) {
+  List present = c.present_references();
+  if (!(binding in present))
+    c.semantic_binding_facts()[%(present-references)] = cons(binding, present);
+}
+
+/** Restores the optional-reference facts saved before a lexical path. */
+void Compiler.restore_reference_presence(Compiler c, List before) {
+  if (before === c.present_references()) return;
+  if (before) c.semantic_binding_facts()[%(present-references)] = before;
+  else c.semantic_binding_facts().del(%(present-references));
+}
+
 static int _optional_reference_null(List expression) {
   match (expression) {
     case %(expr ? (parens ?inner)):

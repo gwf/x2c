@@ -61,7 +61,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2344`
+Source: `src/parse.x:2342`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local

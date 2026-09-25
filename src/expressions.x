@@ -1434,7 +1434,7 @@ static List _resolve_identifier(
   if (read_reference &&
       %(reference-param $binding) in binding_facts) {
     if (%(optional-reference-param $binding) in binding_facts &&
-        !(%(present-reference $binding) in binding_facts))
+        !(binding in c.present_references()))
       return result;
     Type value_type = cdr(type);
     return %(expr $value_type
