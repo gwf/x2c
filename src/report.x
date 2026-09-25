@@ -4,6 +4,8 @@
 
     The reporter writes only to stderr. Its transient mode uses one carriage-
     return line and never takes terminal input or changes terminal modes.
+    Processes sharing a terminal, such as parallel Make recipes, take turns
+    owning that line through a lock on the terminal device.
 */
 
 #pragma once
@@ -11,9 +13,11 @@
 #pragma private
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
@@ -26,7 +30,8 @@
    before dispatch; diagnostics, tool output, and stable receipts suspend the
    line before writing to stderr. */
 static struct ReportState {
-  int receipts, transient, color, columns, width;
+  int receipts, transient, color, columns, width, terminal, owner;
+  pid_t pid;
   unsigned long start, update;
 } report;
 
@@ -96,7 +101,7 @@ static int _columns(void) {
 void report_configure(
   int quiet, int plain, Symbol color_mode, int verbose, int dry_run,
   int inspecting) {
-  report = (struct ReportState) {0};
+  report = (struct ReportState) {.terminal = -1, .pid = getpid()};
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = !quiet && !diagnostic;
@@ -150,32 +155,42 @@ static void _emit(
   while (writev(fileno(stderr), parts, count) < 0 && errno == EINTR) {}
 }
 
-static int _clear(char *line, int capacity) {
-  if (!report.width) return 0;
-  int width = report.width;
-  if (width > capacity - 2) width = capacity - 2;
-  line[0] = '\r';
-  for (int i = 0; i < width; i++) line[i + 1] = ' ';
-  line[width + 1] = '\r';
-  report.width = 0;
-  return width + 2;
+static const char _clear[] = "\r\033[K";
+
+/* Takes the terminal's transient line, or reports that another process
+   holds it. The lock lives on a separate open of the terminal because
+   processes that inherit stderr share one lock owner. */
+static int _own_line(void) {
+  if (report.owner) return 1;
+  if (report.terminal == -1) {
+    char *path = ttyname(fileno(stderr));
+    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : -1;
+    report.terminal = fd >= 0 ? fd : -2;
+  }
+  report.owner =
+    report.terminal >= 0 && !flock(report.terminal, LOCK_EX | LOCK_NB);
+  return report.owner;
 }
 
-/** Clears the active transient line from stderr, if one exists. */
+/** Clears the active transient line from stderr, if this process drew one.
+    Forked workers inherit the state but leave the line to their parent.
+*/
 void report_suspend(void) {
-  if (!report.width) return;
-  char clear[1002], int length = _clear(clear, sizeof(clear));
-  _emit(clear, length, "", "", 0);
+  if (!report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
 }
 
 /** Writes one newline-terminated receipt to stderr when receipts are enabled.
-    Any active transient line is cleared first, and `line` must be non-NULL.
+    In transient mode the receipt first clears the terminal line, which
+    another process may be drawing, and `line` must be non-NULL.
 */
 void report_line(Symbol tone, String line) {
-  report_suspend();
+  report.width = 0;
   if (!report.receipts) return;
   const char *color = _color(tone);
-  _emit(NULL, 0, color, line, 1);
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, color, line, 1);
 }
 
 /** Updates the terminal's transient progress line when transient mode is
@@ -190,6 +205,7 @@ void report_progress(Symbol phase, int done, int total, String detail) {
   if (done >= total && !report.width) return;
   if (report.update && now - report.update < 50000ul && done < total) return;
   report.update = now;
+  if (!_own_line()) return;
 
   enum { bar_width = 14 };
   char bar[bar_width + 1];
@@ -209,9 +225,7 @@ void report_progress(Symbol phase, int done, int total, String detail) {
     line[limit] = 0;
     length = limit;
   }
-  char clear[1002], int clear_length = _clear(clear, sizeof(clear));
-  const char *color = _color(<phase>);
-  _emit(clear, clear_length, color, line, 0);
+  _emit(_clear, sizeof(_clear) - 1, _color(<phase>), line, 0);
   report.width = length;
 }
 

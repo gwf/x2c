@@ -198,9 +198,11 @@ static void _configure_logging(int debugging){
   Logger_add_stderr_sink(logger);
 }
 
-void report_suspend(void);
-
 List Compiler_diagnostics(Compiler);
+
+int List_truth(List);
+
+void report_suspend(void);
 
 int List_try_next(List, List *, Var *);
 
@@ -209,10 +211,10 @@ void Compiler_print_diagnostic(Compiler, List);
 List Var_list(Var);
 
 static void _report_diagnostics(Compiler compiler){
-  report_suspend();
   Diagnostics diag = compiler ? compiler -> diagnostics : NULL;
   if(! diag || diag -> printer) return;
   List entries = Compiler_diagnostics(compiler);
+  if(List_truth(entries)) report_suspend();
   {
     Var entry;
     List _x2c_macro_object_0 = entries;
@@ -277,7 +279,6 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 List Compiler_emit(Compiler, List);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
-int List_truth(List);
 static void _translate_unit(Frontend frontend, String filename, String output_dir){
   CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, &(unit)); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
