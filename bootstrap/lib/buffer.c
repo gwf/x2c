@@ -322,6 +322,10 @@ char Buffer_get(Buffer buf, ptrdiff_t index){
   return Buffer_try_get(buf, index, & out) ? out : '\0';
 }
 
+int Buffer_getindex(Buffer buf, int index){
+  return Buffer_get(buf, index);
+}
+
 size_t Buffer_len(Buffer buf){
   return Buffer_truth(buf) ? buf -> content -> length : 0;
 }
@@ -334,7 +338,7 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 325};
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 328};
       x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
       __builtin_unreachable();
     }

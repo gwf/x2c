@@ -104,6 +104,9 @@ when the edits can affect behavior, then follow root publication validation
 and delivery instructions. Refresh affected generated files only through
 repository targets and inspect their changes.
 
+`builds/0/x2c lint --fmt-diff path/to/file.x` shows the spacing changes
+formatting would make; it never writes.
+
 If changing the linter itself, run `make commands-check`.
 
 The result is clearer source with preserved behavior and technical knowledge.

@@ -10,6 +10,7 @@ Growable text buffer with indentation support.
 | Function | Summary |
 | --- | --- |
 | [`Buffer.clear`](#Buffer.clear) | Empties `buf` and its indentation stack without releasing capacity. |
+| [`Buffer.getindex`](#Buffer.getindex) | Returns `buf.get(index)`, so `buf[index]` reads a byte. |
 | [`Buffer.len`](#Buffer.len) | Returns the number of bytes currently stored in `buf`. |
 | [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` whose `pad` method writes `padding` spaces. |
 | [`Buffer.pop`](#Buffer.pop) | Pops one indentation depth from `buf`'s stack when present. |
@@ -28,6 +29,15 @@ Empties `buf` and its indentation stack without releasing capacity.
 
 Source: `lib/buffer.x:107`
 
+<a id="Buffer.getindex"></a>
+#### Buffer.getindex
+
+`int Buffer.getindex(Buffer buf, int index)`
+
+Returns `buf.get(index)`, so `buf[index]` reads a byte.
+
+Source: `lib/buffer.x:312`
+
 <a id="Buffer.len"></a>
 #### Buffer.len
 
@@ -35,7 +45,7 @@ Source: `lib/buffer.x:107`
 
 Returns the number of bytes currently stored in `buf`.
 
-Source: `lib/buffer.x:312`
+Source: `lib/buffer.x:315`
 
 <a id="Buffer.new"></a>
 #### Buffer.new
@@ -77,7 +87,7 @@ Source: `lib/buffer.x:264`
 
 Returns nonzero when `b` contains at least one byte.
 
-Source: `lib/buffer.x:351`
+Source: `lib/buffer.x:354`
 
 <a id="Buffer.try_get"></a>
 #### Buffer.try_get
@@ -121,7 +131,7 @@ Source: `lib/buffer.x:286`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/buffer.x:354`
+Source: `lib/buffer.x:357`
 
 <a id="Buffer.free"></a>
 #### Buffer.free
@@ -190,7 +200,7 @@ Returns the readable representation of `Buffer`.
 
 **Raises:** the same causes as `Buffer.str` or `String` rendering.
 
-Source: `lib/buffer.x:344`
+Source: `lib/buffer.x:347`
 
 <a id="Buffer.reserve"></a>
 #### Buffer.reserve
@@ -219,7 +229,7 @@ live until its owning `String` pool is released.
 **Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
 `<alloc-fail>` while canonicalizing it.
 
-Source: `lib/buffer.x:321`
+Source: `lib/buffer.x:324`
 
 <a id="Buffer.str_free"></a>
 #### Buffer.str_free
@@ -233,7 +243,7 @@ on success and when the conversion transfers an `Error`.
 
 **Raises:** the same causes as `Buffer.str`.
 
-Source: `lib/buffer.x:336`
+Source: `lib/buffer.x:339`
 
 <a id="Buffer.tabstop"></a>
 #### Buffer.tabstop

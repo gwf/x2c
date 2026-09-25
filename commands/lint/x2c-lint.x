@@ -2,6 +2,7 @@
 /*  x2c-lint.x -- report x2c source that is not this repository's idiom
 
     Usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... FILE...
+           x2c-lint --fmt-check [--fmt-diff] FILE...
            x2c-lint --rules
 
     Prints one line per finding, `FILE:LINE: KIND CODE: MESSAGE`, in line
@@ -16,6 +17,11 @@
     rules that leave its generated C and header byte-identical, and prints
     `FILE: fixed N of M` after its findings.
 
+    `--fmt-check` reports, for each file whose spacing formatting would
+    change, `FILE: N lines to format`, and exits 1 when any would change;
+    `--fmt-diff` also prints the unified difference. Neither writes; see
+    `format.x` for what formatting changes.
+
     The command links the compiler's objects through `make commands`.
     `make commands-check` checks its findings on `tests/`.
 */
@@ -28,12 +34,15 @@
 #include "validation.x"
 #include "structure.x"
 #include "fix.x"
+#include "format.x"
+#include "diff.x"
 #include <stdio.h>
 #include <string.h>
 
 static void _usage(void):
   fputs("usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... "
         "FILE...\n"
+        "       x2c-lint --fmt-check [--fmt-diff] FILE...\n"
         "       x2c-lint --rules\n", stderr)
 
 static void _preprocessor_errors(String text):
@@ -57,13 +66,32 @@ static int _parse(Lint l, Frontend frontend, String path):
   parsed.close()
   return ok
 
+/* Reports the files of `inputs` whose spacing formatting would change. */
+static int _format_check(Array inputs, int diff):
+  int status = 0, total = 0
+  foreach String path in inputs:
+    Path file = path
+    Lint l = Lint.new(path, file.read_text(), {})
+    int changed = l.format_changes()
+    String text = diff && changed > 0 ? l.formatted() : NULL
+    if text: fputs(Diff.unified(l.text, text, path, path), stdout)
+    if changed < 0:
+      printf("%s: not formatted; spacing changes would alter tokens\n", path)
+      status = 1
+    else if changed:
+      printf("%s: %d lines to format\n", path, changed)
+      status = 1
+    if changed > 0: total += changed
+  if total: printf("%d lines to format\n", total)
+  return status
+
 String x2c_embedded_identity(void)
 
 int main(int argc, char **argv):
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity())
   Map selected = {}
   Array inputs = [], include_dirs = []
-  int fix = 0
+  int fix = 0, format = 0, diff = 0
   for (int at = 1; at < argc; at++):
     String arg = argv[at]
     if arg == "--rules":
@@ -72,7 +100,9 @@ int main(int argc, char **argv):
     if arg == "-h" || arg == "--help":
       _usage()
       return 0
-    if arg == "--fix": fix = 1
+    if arg == "--fmt-check": format = 1
+    else if arg == "--fmt-diff": format = diff = 1
+    else if arg == "--fix": fix = 1
     else if arg == "--all":
       Rule.select_family(selected, <language>)
       Rule.select_family(selected, <style>)
@@ -90,6 +120,7 @@ int main(int argc, char **argv):
   if !inputs.len():
     _usage()
     return 2
+  if format: return _format_check(inputs, diff)
   if !selected.len(): Rule.select_family(selected, <language>)
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest))
   request.command = <translate>

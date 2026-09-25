@@ -12,6 +12,8 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 mkdir -p "$work"
 # Repository files stay ASCII, so the non-ASCII case is written here.
 printf '// caf\303\251\n' >"$work/ascii.x"
+# Formatting input that the fixtures would otherwise have to hold.
+printf '/* spacing.x */\nint add(int a,int b) {\n  int total = a + b ;\n\n\n  if(total) return total;\n  for (;;) break;\n  return 0;\n}\n' >"$work/spacing.x"
 
 run() {
   status=0
@@ -37,6 +39,9 @@ run() {
   run --all "$tests/src/review.x"
   echo "# reference parameters"
   run --rule reference-parameter "$tests/src/references.x"
+  echo "# spacing that formatting changes"
+  (cd "$work" && run --fmt-check spacing.x)
+  run --fmt-check "$tests/src/clean.x"
   echo "# idiom fixes proven by the generated C"
   cp "$tests/src/idioms.x" "$work/idioms.x"
   (cd "$work" && run --all --fix idioms.x)

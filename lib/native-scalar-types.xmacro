@@ -10,34 +10,31 @@
     `native_scalar_types` is the one table. Each key is Type.scalar's
     canonical spelling, and each value is:
 
-      (TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)
+      (TAG C-EXTRACTOR C-UPDATE)
 
     C-EXTRACTOR and C-UPDATE retain the existing compiler emission
-    spellings. SIGNATURE-TYPE is the compact Type spelling used by Func's
-    Var calling convention. `src/type.x` inserts the table with
+    spellings. `src/type.x` inserts the table with
     `$native_scalar_types()`, and the Lisp helpers below call it during
     expansion.
 */
 
 meta static Map native_scalar_types(void) => {
-  %(char): %(i8 "Var_char" "x2c_var_update_i8" (char)),
-  %(signed char): %(i8 "Var_char" "x2c_var_update_schar" (schar)),
-  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8" (uchar)),
-  %(short): %(i16 "Var_short" "x2c_var_update_i16" (short)),
-  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16" (ushort)),
-  %(int): %(i32 "Var_int" "x2c_var_update_i32" (int)),
-  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32" (uint)),
-  %(long): %(long "Var_long" "x2c_var_update_long" (long)),
-  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong" (ulong)),
-  %(long long):
-    %(llong "Var_long_long" "x2c_var_update_long_long" (llong)),
+  %(char): %(i8 "Var_char" "x2c_var_update_i8"),
+  %(signed char): %(i8 "Var_char" "x2c_var_update_schar"),
+  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8"),
+  %(short): %(i16 "Var_short" "x2c_var_update_i16"),
+  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16"),
+  %(int): %(i32 "Var_int" "x2c_var_update_i32"),
+  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32"),
+  %(long): %(long "Var_long" "x2c_var_update_long"),
+  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong"),
+  %(long long): %(llong "Var_long_long" "x2c_var_update_long_long"),
   %(unsigned long long):
-    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long" (ullong)),
-  %(float): %(f32 "Var_float" "x2c_var_update_f32" (float)),
-  %(double): %(f64 "Var_floating" "x2c_var_update_f64" (double)),
+    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long"),
+  %(float): %(f32 "Var_float" "x2c_var_update_f32"),
+  %(double): %(f64 "Var_floating" "x2c_var_update_f64"),
   %(long double):
-    %(ldouble "Var_long_double" "x2c_var_update_long_double"
-      (long double)),
+    %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
 
 $(defun native.scalar.list (items)

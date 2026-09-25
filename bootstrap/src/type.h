@@ -73,8 +73,6 @@ String Type_var_numeric_extractor(Type type);
 
 String Type_var_numeric_update_helper(Type type);
 
-Type Type_var_signature_type(Type type);
-
 Var Type_numeric_literal_value(Type type, String text);
 
 Type Type_numeric_literal(String text, int floating);

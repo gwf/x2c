@@ -450,7 +450,7 @@ A module function may take or return a handle:
 helpers.x:3:1: type: unproved native meta lifetime
   meta Widget widget_wrap(Widget inner);
   ^^^^
-  note: name: widget_wrap signature: ((func ((* struct "Widget"))) * struct "Widget") it might return or keep its argument; ownership cannot be inferred
+  note: name: widget_wrap signature: ((func (("Widget"))) "Widget") it might return or keep its argument; ownership cannot be inferred
 ```
 
 The compiler loads a module only when an option, a manifest or an import
