@@ -1,15 +1,9 @@
 # Meta-capable protocols beyond Iter
 
-> Status: active - designed 2026-09-24 as step 3 of
-> [meta sequencing](meta-sequencing.md). Deliveries 1-3 landed 2026-09-24;
-> delivery 4 follows [class registration](class-registration.md).
-> In delivery 3 a String argument reaches a `const char *` writer
-> directly; only `write_len` has an adapter, which rejects a count past
-> the String's length. Delivery 3 also marks
-> `meta protocol Var(Buffer);` so meta code can read a Buffer's text.
-> Open gap: a region error is missed when a writer's result is the Buffer
-> argument of another returning writer, as in
-> `return Buffer.write(&local, "a").newline();`.
+> Status: done - landed on `dev` 2026-09-24: the default-member rule as
+> `7fd8c5dd`, delivery 1 as `186ed550`, deliveries 2-4 as `7a371fa6`.
+> Delivery 4's prototypes are written after the generated families,
+> because a `meta` prototype inside a `macro Unit` does not parse yet.
 
 ## Result
 
@@ -49,7 +43,7 @@ Facts from source on `dev` at `5023c07c`, with probes run by
 - Only the typed containers use custom class rows (11). Array, Map,
   Buffer, Block and Iter are built-in rows. So class registration
   matters only to delivery 4, which narrows the dependency
-  [meta sequencing](meta-sequencing.md) assumed.
+  [meta sequencing](../meta-sequencing.md) assumed.
 
 ## Design
 

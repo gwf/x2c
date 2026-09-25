@@ -1,8 +1,8 @@
 # Class registration on first box, and unlimited classes
 
-> Status: active - designed 2026-09-24 as step 1 of
-> [meta sequencing](meta-sequencing.md). Implemented 2026-09-24 on branch
-> `class-registration`; awaiting review and `agent-pr-check`.
+> Status: done - landed on `dev` 2026-09-24 as `547bcdfc`. Rows are
+> assigned on first box; 30 direct rows, then prefixed records and interned
+> heap-class cells.
 
 ## Result
 

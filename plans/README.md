@@ -52,13 +52,8 @@ execution.
   and system-header investigations record their outcomes. Meta-capable
   protocols and native extensions retain their separate design and
   implementation status.
-- [Class registration](class-registration.md): active. Rows assigned on
-  first box and an overflow cell for classes past the direct rows.
-- [Package meta modules](package-meta-modules.md): active. Importing a
-  package loads its compile-time part; the compiler links the whole
-  runtime.
-- [Meta protocols beyond Iter](meta-protocols-beyond-iter.md): active.
-  Array, Map, Buffer and typed conversions reach compile-time code.
+
+
 - [Meta sequencing](meta-sequencing.md): active. The order of class
   registration and capacity, native extensions and packages, protocols
   beyond Iter, and whole-project lifetime certification.

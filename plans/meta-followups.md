@@ -331,7 +331,7 @@ implements them; the book documents it under
   `x2c_module_stamp`, the content hash of the building compiler. The loader
   rejects any other hash.
 - **Runtime coverage.** Superseded on 2026-09-24: the compiler links the
-  whole runtime ([package meta modules](package-meta-modules.md)).
+  whole runtime ([package meta modules](archive/package-meta-modules.md)).
   Gary chose on 2026-09-22 to link whole every runtime
   object that reserves no Var class row. `etc/runtime-objects.sh` derives the
   set from the objects' symbol tables at each compiler link: an object the

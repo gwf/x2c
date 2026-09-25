@@ -1,9 +1,7 @@
 # Packages with compile-time parts
 
-> Status: active - designed 2026-09-24 as step 2 of
-> [meta sequencing](meta-sequencing.md). Delivery 1 implemented
-> 2026-09-24 (see [Delivery 1 result](#delivery-1-result)); Delivery 2
-> implemented 2026-09-24 (see [Delivery 2 result](#delivery-2-result)).
+> Status: done - delivery 1 landed on `dev` 2026-09-24 as `b51c3642`;
+> delivery 2 (extensions linked into the compiler) as `7a371fa6`.
 
 ## Result
 
