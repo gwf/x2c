@@ -38,9 +38,14 @@ grep -q 'violation .*certify_wide_dangle.*region' \
   "$tmp/certify-certify_wide_dangle-line"
 certify_check 0 certify_pure_branch "$fixtures/certify.x"
 grep -q '(status proved)' "$tmp/certify-certify_pure_branch-line"
-certify_check 3 certify_conditional_alloc "$fixtures/certify.x"
-grep -q 'conditional memory effects are outside the proof subset' \
-  "$tmp/certify-certify_conditional_alloc-line"
+certify_check 0 certify_conditional_alloc "$fixtures/certify.x"
+grep -q '(status proved)' "$tmp/certify-certify_conditional_alloc-line"
+certify_check 1 certify_conditional_dangle "$fixtures/certify.x"
+grep -q 'violation .*certify_conditional_dangle.*region' \
+  "$tmp/certify-certify_conditional_dangle-line"
+certify_check 1 certify_conditional_store "$fixtures/certify.x"
+grep -q 'violation .*certify_conditional_store.*region' \
+  "$tmp/certify-certify_conditional_store-line"
 certify_check 0 certify_literal_printf "$fixtures/certify.x"
 grep -q '(assumptions (native "printf" (summary 0 ())))' \
   "$tmp/certify-certify_literal_printf-line"

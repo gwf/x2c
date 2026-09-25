@@ -27,6 +27,19 @@ int certify_conditional_alloc(int choose) {
   return 0;
 }
 
+char *certify_conditional_dangle(int choose) {
+  Scope.retain();
+  defer Scope.release();
+  if (choose) return Scope.malloc(8);
+  return NULL;
+}
+
+void certify_conditional_store(int **out, int choose) {
+  Scope.retain();
+  defer Scope.release();
+  if (choose) out[0] = Scope.malloc(sizeof(int));
+}
+
 int certify_literal_printf(void) {
   return printf("value=%d\n", 7);
 }
