@@ -2134,11 +2134,11 @@ String Atom_str(Atom);
 int String_startswith(String, String);
 
 static int _try_definition(Compiler compiler, Atom name, int install_lisp, Var * stored){
-  int found = Map_try_get(compiler -> macros, name, stored);
+  int found = Map_try_get(compiler -> macros, name, &(* stored));
   String spelling = Atom_str(name);
   if(! install_lisp || ! String_startswith(spelling, _1077)) return found;
   _use_lisp_bindings(compiler, ! found);
-  return found || Map_try_get(compiler -> macros, name, stored);
+  return found || Map_try_get(compiler -> macros, name, &(* stored));
 }
 
 void Compiler_install_builtin_macros(Compiler compiler){
@@ -2845,11 +2845,11 @@ static Token _scan_name(Compiler c, String * spelling){
     }
     name = String_truth(name) ? String_join(NULL, cons(String_var(name), cons(String_var(_146), cons(String_var(token -> text), NULL)))) : token -> text;  token = Compiler_skip_trivia_from(c, token + 1);
   }
-  while(token -> type == 93); ;  * spelling = name;  return token;
+  while(token -> type == 93); ; (* spelling) = name;  return token;
 }
 
 static Atom _name(Compiler c){
-  String spelling;  Token end = _scan_name(c, & spelling);  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, Compiler_peek(c, 1) == 19147688 ? _1108 : _1109, end, NULL);  c -> token = end;  return Atom_intern(spelling);
+  String spelling;  Token end = _scan_name(c, &(spelling));  if(! String_truth(spelling)) Compiler_report_error(c, 33658058, Compiler_peek(c, 1) == 19147688 ? _1108 : _1109, end, NULL);  c -> token = end;  return Atom_intern(spelling);
 }
 
 static int _bare(Token invocation, List definition){
@@ -2860,7 +2860,7 @@ int Sym_has_local_macros(Sym);
 List Sym_lookup_macro(Sym, Atom);
 static List _peek_invocation(Compiler c){
   Var stored;  if(Compiler_peek(c, 0) == 73){
-    String spelling;  _scan_name(c, & spelling);  if(! String_truth(spelling) || ! _try_definition(c, Atom_intern(spelling), ! c -> shallow, & stored)) return NULL;  return Var_list(stored);
+    String spelling;  _scan_name(c, &(spelling));  if(! String_truth(spelling) || ! _try_definition(c, Atom_intern(spelling), ! c -> shallow, &(stored))) return NULL;  return Var_list(stored);
   }
   if(Compiler_peek(c, 0) != 19147688) return NULL;  Atom name = Atom_intern(c -> token -> text);  List definition = Sym_has_local_macros(c -> sym) ? Sym_lookup_macro(c -> sym, name) : NULL;  if(! List_truth(definition) && Map_try_get(c -> kw_aliases, name, & stored)) definition = Var_list(stored);  return List_truth(definition) &&(Compiler_peek(c, 1) == 81 || _bare(c -> token, definition)) ? definition : NULL;
 }
@@ -2868,7 +2868,7 @@ static List _peek_invocation(Compiler c){
 void Compiler_next(Compiler);
 Token Token_after_group(Token);
 void Compiler_skip_macro_invocation(Compiler c){
-  if(! _init_guard_) _file_init_();  int bare = _bare(c -> token, _peek_invocation(c));  String spelling;  if(Compiler_peek(c, 0) == 73) c -> token = _scan_name(c, & spelling);  else Compiler_next(c);  if(! bare && Compiler_peek(c, 0) == 81) c -> token = Token_after_group(c -> token);
+  if(! _init_guard_) _file_init_();  int bare = _bare(c -> token, _peek_invocation(c));  String spelling;  if(Compiler_peek(c, 0) == 73) c -> token = _scan_name(c, &(spelling));  else Compiler_next(c);  if(! bare && Compiler_peek(c, 0) == 81) c -> token = Token_after_group(c -> token);
 }
 
 int Var_int(Var);
@@ -2893,7 +2893,7 @@ List Sym_get(Sym, List);
 static int _claims(Compiler c, List definition, AstPos position){
   Symbol kind = List_truth(definition) ? _result_kind(definition) : 0;  if(kind == _position(position) -> kind) return 1;  if(position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;  if(! List_truth(definition)){
     if(Compiler_peek(c, 0) == 73 &&(position == AST_BLOCK || Map_truth(c -> macro_holes))){
-      String name;  _scan_name(c, & name);  Type type = String_truth(name) ? List_type(Sym_get(c -> sym, cons(String_var(name), NULL))) : NULL;  if(Type_is_function(type)) return 0;
+      String name;  _scan_name(c, &(name));  Type type = String_truth(name) ? List_type(Sym_get(c -> sym, cons(String_var(name), NULL))) : NULL;  if(Type_is_function(type)) return 0;
     }
     return Compiler_peek(c, 0) == 73;
   }
@@ -2937,7 +2937,7 @@ static int _literal_string(Var syntax, String * value){
     Var _x2c_match_value_9 = source; {
       String source = Var_string(_x2c_match_value_9); {
         int quoted = String_len(source) >= 2 && String_getindex(source, 0) == '"' && String_getindex(source, String_len(source) - 1) == '"';  int percent_quoted = String_len(source) >= 3 && String_getindex(source, 0) == '%' && String_getindex(source, 1) == '"' && String_getindex(source, String_len(source) - 1) == '"';  if(quoted || percent_quoted){
-          * value = String_parse(source);  return 1;
+          (* value) = String_parse(source);  return 1;
         }
 
       }
@@ -2961,7 +2961,7 @@ int File_stat(File, struct stat *);
 String File_string_close(File);
 static Var _sdk_embed_text(Var requested){
   Compiler compiler = macro_sdk_compiler;  if(! compiler) _sdk_reject(_1112, NULL);  String source_file = macro_sdk_source_file, requested_path = NULL;  if(Var_is_row(requested, 11, 7, 1)) requested_path = Var_string(requested);  else{
-    Var stored =((void) 0, Void);  Var key = ulong_var(((ulong) requested.u64));  if(! Map_truth(macro_sdk_source_captures) || ! Map_try_get(macro_sdk_source_captures, key, & stored) || ! _literal_string(requested, & requested_path)) _sdk_reject(_1113, cons(String_var(String_join(NULL, cons(String_var(_109), cons(String_var(Var_repr(requested)), NULL)))), NULL));  List source = Var_list(stored);  source_file = Var_string(List_cadr(source));
+    Var stored =((void) 0, Void);  Var key = ulong_var(((ulong) requested.u64));  if(! Map_truth(macro_sdk_source_captures) || ! Map_try_get(macro_sdk_source_captures, key, & stored) || ! _literal_string(requested, &(requested_path))) _sdk_reject(_1113, cons(String_var(String_join(NULL, cons(String_var(_109), cons(String_var(Var_repr(requested)), NULL)))), NULL));  List source = Var_list(stored);  source_file = Var_string(List_cadr(source));
   }
   if(! String_len(requested_path)) _sdk_reject(_1114, NULL);  String path = _embed_path(compiler, source_file, requested_path);  if(compiler -> sources){
     String text;  if(! Compiler_read_source(compiler, path, &(text))) _sdk_reject(_1115, cons(String_var(String_join(NULL, cons(String_var(_321), cons(String_var(Compiler_display_path(compiler, path)), NULL)))), NULL));  Map_merge_translation_dependency(compiler -> deps, path, String_var(String_printf(_322, String_hash(text))));  return String_var(text);
@@ -3019,7 +3019,7 @@ String x2c_embed_text(Var path){
 int String_try_long(String, long *);
 Var long_var(long);
 Var x2c_literal_value(Var syntax){
-  if(! _init_guard_) _file_init_();  _sdk_guard(_1120);  String value = NULL;  if(_literal_string(syntax, & value)) return String_var(value);
+  if(! _init_guard_) _file_init_();  _sdk_guard(_1120);  String value = NULL;  if(_literal_string(syntax, &(value))) return String_var(value);
   {
     List _x2c_match_expr = Var_list(syntax);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -5601,7 +5601,7 @@ List Compiler_publish_macro_definition_node(Compiler compiler, List node){
 static List _lookup(Compiler compiler, Atom name, Token invocation){
   Var stored;
   String spelling = Atom_str(name);
-  if(! _try_definition(compiler, name, 1, & stored)) Compiler_report_error(compiler, 33658058, String_join(NULL, cons(String_var(_996), cons(String_var(spelling), cons(String_var(_144), NULL)))), invocation, NULL);
+  if(! _try_definition(compiler, name, 1, &(stored))) Compiler_report_error(compiler, 33658058, String_join(NULL, cons(String_var(_996), cons(String_var(spelling), cons(String_var(_144), NULL)))), invocation, NULL);
   return Var_list(stored);
 }
 
@@ -6122,7 +6122,7 @@ static List _take_invocation(Compiler c, AstPos position){
   Token invocation = c -> token;
   Atom name = _name(c);
   Var existing;
-  if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) != 81 && ! _try_definition(c, name, 1, & existing)){
+  if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) != 81 && ! _try_definition(c, name, 1, &(existing))){
     String spelling = Atom_str(name);
     Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_919), cons(String_var(spelling), cons(String_var(_144), NULL)))), invocation, NULL);
   }

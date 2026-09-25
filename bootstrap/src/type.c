@@ -683,7 +683,7 @@ List List_append(List, List);
 static Type _declarator_parts(Type type, List * modifiers){
   Type base = Type_base_type(type);
   if(! List_truth(Type_list(base))){
-    if(modifiers) * modifiers = NULL;
+    (* modifiers) = NULL;
     return type;
   }
   List reversed = NULL, qualifiers = NULL;
@@ -692,7 +692,7 @@ static Type _declarator_parts(Type type, List * modifiers){
     qualifiers = cons(List_car(reversed), qualifiers);
     reversed = List_cdr(reversed);
   }
-  if(modifiers) * modifiers = List_reverse(reversed);
+  (* modifiers) = List_reverse(reversed);
   return List_type(List_append(qualifiers, Type_list(base)));
 }
 
@@ -721,7 +721,7 @@ List Array_list_free(Array);
 List Type_declaration_parts(Type type){
   if(! _init_guard_) _file_init_();
   List modifiers = NULL;
-  Type base = _declarator_parts(type, & modifiers);
+  Type base = _declarator_parts(type, &(modifiers));
   Array syntax = Array_new();
   {
     Var item;
@@ -1007,7 +1007,7 @@ Type Type_scalar(Type type){
 Var Map_getindex(Map, Var);
 int Var_numeric_info(Symbol, X2CVarNumericInfo *);
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info){
-  Var row = Map_getindex(scalartypes, List_var(type));  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), info);
+  Var row = Map_getindex(scalartypes, List_var(type));  return Var_is_row(row, 9, 7, 4) && Var_numeric_info(Var_symbol(List_car(Var_list(row))), &(* info));
 }
 
 static List _scalar_row(Type type){
@@ -1252,7 +1252,7 @@ Type Type_apply(Type type){
 }
 
 Type Type_promote(Type type){
-  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return List_type(_47);  type = Type_scalar(type);  if(! List_truth(Type_list(type))) return NULL;  X2CVarNumericInfo info;  if(_scalar_numeric_info(type, & info) && ! info.floating && info.rank < 3) return List_type(_47);  return type;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return List_type(_47);  type = Type_scalar(type);  if(! List_truth(Type_list(type))) return NULL;  X2CVarNumericInfo info;  if(_scalar_numeric_info(type, &(info)) && ! info.floating && info.rank < 3) return List_type(_47);  return type;
 }
 
 static Type _unsigned_scalar(Type type){
@@ -1269,7 +1269,7 @@ Type Type_widest(Type a, Type b){
   , bi ={
     0
   }
-  ;  _scalar_numeric_info(a, & ai);  _scalar_numeric_info(b, & bi);  if(ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;  int ua = ai.unsigned_value, ub = bi.unsigned_value;  int ra = ai.rank, rb = bi.rank;  if(ua == ub) return(ra >= rb) ? a : b;  if(ua && ra >= rb) return a;  if(ub && rb >= ra) return b;  Type signed_type = ua ? b : a, unsigned_type = ua ? a : b;  int signed_bits = ua ? bi.bits : ai.bits;  int unsigned_bits = ua ? ai.bits : bi.bits;  if(signed_bits > unsigned_bits) return signed_type;  return _unsigned_scalar(signed_type);
+  ;  _scalar_numeric_info(a, &(ai));  _scalar_numeric_info(b, &(bi));  if(ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;  int ua = ai.unsigned_value, ub = bi.unsigned_value;  int ra = ai.rank, rb = bi.rank;  if(ua == ub) return(ra >= rb) ? a : b;  if(ua && ra >= rb) return a;  if(ub && rb >= ra) return b;  Type signed_type = ua ? b : a, unsigned_type = ua ? a : b;  int signed_bits = ua ? bi.bits : ai.bits;  int unsigned_bits = ua ? ai.bits : bi.bits;  if(signed_bits > unsigned_bits) return signed_type;  return _unsigned_scalar(signed_type);
 }
 
 static Type Type__modify(Type type, List mods){

@@ -1120,7 +1120,7 @@ static String _package_entry(Compiler compiler, String name, String * directory)
         String nested = String_join(NULL, cons(String_var(root), cons(String_var(_55), cons(String_var(name), cons(String_var(_56), NULL)))));
         String entry = SourceView_exists(compiler -> sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_3), cons(String_var(name), cons(String_var(_56), NULL)))));
         if(! SourceView_exists(compiler -> sources, entry)) continue;
-        if(directory) * directory = root;
+        (* directory) = root;
         return _canonical_path(entry);
       }
 
@@ -1267,7 +1267,7 @@ Map Sym_base_symbols(Sym);
 void Sym_set(Sym, List, List);
 Map Sym_current_symbols(Sym);
 void Compiler_collect_package(Compiler c, String name, Token token){
-  if(! _init_guard_) _file_init_();  if(Map_contains(c -> package_roots, String_var(name))) return;  String root = NULL, entry = _package_entry(c, name, & root);  if(! String_truth(entry)) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_96), cons(String_var(name), cons(String_var(_73), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_97), cons(String_var(name), cons(String_var(_55), cons(String_var(name), cons(String_var(_98), cons(String_var(name), cons(String_var(_3), cons(String_var(name), cons(String_var(_56), NULL))))))))))), NULL));  Map_setindex(c -> package_roots, String_var(name), String_var(root));  Compiler_select_package_module(c, name, root, token);  Compiler package = Compiler_new_shared(c); {
+  if(! _init_guard_) _file_init_();  if(Map_contains(c -> package_roots, String_var(name))) return;  String root = NULL, entry = _package_entry(c, name, &(root));  if(! String_truth(entry)) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_96), cons(String_var(name), cons(String_var(_73), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_97), cons(String_var(name), cons(String_var(_55), cons(String_var(name), cons(String_var(_98), cons(String_var(name), cons(String_var(_3), cons(String_var(name), cons(String_var(_56), NULL))))))))))), NULL));  Map_setindex(c -> package_roots, String_var(name), String_var(root));  Compiler_select_package_module(c, name, root, token);  Compiler package = Compiler_new_shared(c); {
   _x2c_defer_env_3 _x2c_defer_env_10 = {._x2c_defer_capture_6 =(const void *) & c, ._x2c_defer_capture_7 =(const void *) & package};
   X2CCleanup _x2c_defer_record_4 = {
     .fn = _x2c_defer_cleanup_3,
