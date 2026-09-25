@@ -1021,7 +1021,7 @@ static List Emitter._initializer_value(Emitter e, List ast) {
 // Normalize #include directives to reference generated headers.
 static List Emitter._preproc(Emitter emitter, List ast) {
   int angle = 0;
-  String target = preproc_include_target(ast.cadr(), &angle);
+  String target = preproc_include_target(ast.cadr(), angle);
   if (!target || !x2c_source_file(target)) return ast.cdr();
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";

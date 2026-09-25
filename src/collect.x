@@ -451,7 +451,7 @@ static void _file(
       }
       int angle = 0, visibility = _visibility_pragma(token.text);
       String target =
-        hidden ? NULL : preproc_include_target(token.text, &angle);
+        hidden ? NULL : preproc_include_target(token.text, angle);
       if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,

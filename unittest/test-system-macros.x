@@ -9,11 +9,11 @@ $(import "system-macros.xmacro")
 
 /* Stderr goes to a temporary file between the two calls, so a test reads
    exactly what $time streamed. */
-static int _capture_stderr(File *file) {
+static int _capture_stderr(File &file) {
   fflush(stderr);
-  *file = tmpfile();
+  file = tmpfile();
   int saved = dup(STDERR_FILENO);
-  dup2(fileno(*file), STDERR_FILENO);
+  dup2(fileno(file), STDERR_FILENO);
   return saved;
 }
 
@@ -135,14 +135,14 @@ static void system_macro_time_reports_a_body_that_leaves(void) {
   $test.scoped();
 
   File file;
-  int saved = _capture_stderr(&file);
+  int saved = _capture_stderr(file);
   int doubled = _timed_returning(21);
   String returned = _captured_stderr(file, saved);
   EXPECT_INT_EQ(doubled, 42);
   EXPECT_TRUE(returned.contains("[time] returning-body"));
 
   String note = NULL;
-  saved = _capture_stderr(&file);
+  saved = _capture_stderr(file);
   try _timed_raising();
   catch %(bad-arg (note ?text)): note = text;
   String raised = _captured_stderr(file, saved);

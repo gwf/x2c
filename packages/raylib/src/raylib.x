@@ -600,7 +600,7 @@ static int _raylib_pixel_xy(
 /*  raylib has no polygon record, so a polygon crosses as a List of (x y)
     pairs and is copied into the Vector2 span its own fan and line
     operations take. */
-static Vector2 *_raylib_vertices(List points, String operation, int *count) {
+static Vector2 *_raylib_vertices(List points, String operation, int &count) {
   int total = points.len();
   if (total < 3) {
     raise %(bad-arg (library "raylib") (operation $operation) (points $total)
@@ -617,7 +617,7 @@ static Vector2 *_raylib_vertices(List points, String operation, int *count) {
     float x = point[0], y = point[1];
     vertices[index++] = (Vector2) { x, y };
   }
-  *count = total;
+  count = total;
   return vertices;
 }
 
@@ -632,7 +632,7 @@ void Image.draw_polygon(Image image, List points, Color color) {
   defer Scope.release();
 
   int count = 0;
-  Vector2 *vertices = _raylib_vertices(points, "draw polygon", &count);
+  Vector2 *vertices = _raylib_vertices(points, "draw polygon", count);
   ImageDrawTriangleFan(&image, vertices, count, color);
 }
 
@@ -642,7 +642,7 @@ void Image.draw_polygon_lines(
   defer Scope.release();
 
   int count = 0;
-  Vector2 *vertices = _raylib_vertices(points, "draw polygon lines", &count);
+  Vector2 *vertices = _raylib_vertices(points, "draw polygon lines", count);
   for (int index = 0; index < count; index++)
     ImageDrawLineEx(
       &image, vertices[index], vertices[(index + 1) % count],

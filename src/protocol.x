@@ -710,7 +710,7 @@ static Type _receiver_relative_signature(
 
 static Type _method_signature(
   Compiler compiler, Type owner, Type participant, String member,
-  String *selected) {
+  String &selected) {
   if (!owner.is_bare_typedef_name()) return NULL;
   String source = _member_spelling(owner, member);
   Type signature = _declared(compiler, source);
@@ -733,7 +733,7 @@ static Type _method_signature(
       parameters, owner, participant);
     signature = %((func $parameters) @result);
   }
-  *selected = source;
+  selected = source;
   return signature;
 }
 
@@ -817,8 +817,8 @@ static void _install_native_bindings(
 static List Compiler._resolve_native_protocol_participant(
   Compiler c, Type base, Type participant, String binder,
   List associations, List templates, Type participant_definition,
-  List *failure) {
-  *failure = NULL;
+  List &failure) {
+  failure = NULL;
   List key = %($base $participant);
   Var stored;
   if (c.conforms.try_get(key, &stored)) {
@@ -846,7 +846,7 @@ static List Compiler._resolve_native_protocol_participant(
       member_name, native_name, template_type, binder,
       participant_definition, base);
     if (requirement) {
-      *failure = requirement;
+      failure = requirement;
       members.free();
       c.conforms[key] = 0;
       return NULL;
@@ -901,7 +901,7 @@ static String _forward_binding(
 
 static List _resolve_members(
   Compiler compiler, Type base, String binder, List associations,
-  List templates, Type participant, Map *variables_out, Map *bindings_out) {
+  List templates, Type participant, Map &variables_out, Map &bindings_out) {
   Type representation = base === %("Var")
     ? _adoption_representation(
       _visible_adoption_row(compiler, base, participant))
@@ -941,7 +941,7 @@ static List _resolve_members(
           if (owner == base) break;
           if (base === %("Var") && owner != representation) continue;
           actual = _method_signature(
-            compiler, owner, participant, member_name, &selected);
+            compiler, owner, participant, member_name, selected);
           if (actual || base === %("Var")) break;
         }
         if (actual) {
@@ -988,8 +988,8 @@ static List _resolve_members(
             $template_type));
       }
   resolved.free();
-  *variables_out = variables;
-  *bindings_out = bindings;
+  variables_out = variables;
+  bindings_out = bindings;
   return final.list_free();
 }
 
@@ -1051,8 +1051,8 @@ static List _ordinary_requirement(
 
 static List Compiler._resolve_ordinary_protocol(
   Compiler compiler, Type base, Type participant, String binder,
-  List associations, List templates, List *failure) {
-  *failure = NULL;
+  List associations, List templates, List &failure) {
+  failure = NULL;
   Var stored;
   List key = %($base $participant);
   if (compiler.conforms.try_get(key, &stored))
@@ -1066,11 +1066,11 @@ static List Compiler._resolve_ordinary_protocol(
   Map variables = NULL, bindings = NULL;
   List rows = _resolve_members(
     compiler, base, binder, associations, templates,
-    participant, &variables, &bindings);
+    participant, variables, bindings);
   List requirement = _ordinary_requirement(
     compiler, base, binder, rows, forward, reverse);
   if (requirement) {
-    *failure = requirement;
+    failure = requirement;
     goto does_not_conform;
   }
   List conformance = %(
@@ -1230,11 +1230,11 @@ static void _resolve_protocol_record(
     Type definition = _participant_definition(compiler, participant);
     conformance = compiler._resolve_native_protocol_participant(
       base, participant, binder, associations, templates,
-      definition, &failure);
+      definition, failure);
   }
   else
     conformance = compiler._resolve_ordinary_protocol(
-      base, participant, binder, associations, templates, &failure);
+      base, participant, binder, associations, templates, failure);
 
   if (!conformance) {
     if (!location) return;
