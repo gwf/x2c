@@ -70,7 +70,7 @@ static String _platform(void) {
 /* Runs one host tool and returns its stdout, or exits with its stderr. */
 static String _run(List arguments, const char *what) {
   String output = NULL, errors = NULL;
-  if (!tool_capture(arguments, &output, &errors)) return output;
+  if (!tool_capture(arguments, output, errors)) return output;
   _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
   return NULL;
 }

@@ -414,22 +414,22 @@ static Fact _returned_argument(Walk w, Var value, List *named) {
 
 /* A pool value remains pooled even without a local bracket: a caller may
    open one around a helper call. */
-static Region _pooled(Walk w, int *born) {
+static Region _pooled(Walk w, int &born) {
   Region pool = _innermost(w, <pool>);
-  *born = 2;
+  born = 2;
   return pool;
 }
 
-/* The region fresh storage an expression makes is born in, with `*born`
-   set; NULL with `*born` set is the caller's active region. A mixed
-   Scope/Pool result keeps its Pool region in `*other`. `type` is the
+/* The region fresh storage an expression makes is born in, with `born`
+   set; NULL with `born` set is the caller's active region. A mixed
+   Scope/Pool result keeps its Pool region in `other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
-static Region _birth(Walk w, Var value, Type type, int *born,
-                     Region *other) {
+static Region _birth(Walk w, Var value, Type type, int &born,
+                     Region &other) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
-  *born = 1;
-  *other = NULL;
+  born = 1;
+  other = NULL;
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
     case %(alloc pool): return _pooled(w, born);
@@ -448,8 +448,8 @@ static Region _birth(Walk w, Var value, Type type, int *born,
           Var place = _address_of(captured);
           Fact fact = _fact_of(w, place is void ? captured : place, NULL);
           if (fact && (fact.born || fact.region || fact.other)) {
-            if (fact.born) *born = fact.born;
-            *other = fact.other;
+            if (fact.born) born = fact.born;
+            other = fact.other;
             return fact.region;
           }
         }
@@ -463,14 +463,14 @@ static Region _birth(Walk w, Var value, Type type, int *born,
   if (callee) {
     int owner = _summary(w, callee).car().int();
     if (owner == 3) {
-      *born = owner;
-      *other = _innermost(w, <pool>);
+      born = owner;
+      other = _innermost(w, <pool>);
       return _active(w);
     }
     if (owner & 2) return _pooled(w, born);
     if (owner & 1) return _active(w);
   }
-  *born = 0;
+  born = 0;
   return NULL;
 }
 
@@ -546,7 +546,7 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
   int born = 0;
   Region other = NULL;
   Region region = fact ? fact.region
-                       : _birth(w, value, NULL, &born, &other);
+                       : _birth(w, value, NULL, born, other);
   if (!fact && !born) return 0;
   if (fact && fact.param >= 0) {
     Var row = sink;
@@ -601,16 +601,16 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
   return %"an address inside $name";
 }
 
-/* The local a store target's storage belongs to. `*through` is zero when
+/* The local a store target's storage belongs to. `through` is zero when
    the store writes the local itself and one when it writes storage the
    local reaches. */
-static Fact _base(Walk w, Var place, int *through) {
-  *through = 1;
+static Fact _base(Walk w, Var place, int &through) {
+  through = 1;
   match (_unwrap(place)) {
     case %(op (!quote ->) ?base ?): {
       Fact fact = _fact_of(w, base, NULL);
       if (!fact) fact = _base(w, base, through);
-      *through = 1;
+      through = 1;
       return fact;
     }
     case %(op (!quote .) ?base ?): return _base(w, base, through);
@@ -620,16 +620,16 @@ static Fact _base(Walk w, Var place, int *through) {
       if (!fact) return _base(w, base, through);
       /* A C array local owns its elements; a parameter is a pointer. */
       Type declared = type;
-      *through = !declared.is_array() || fact.param >= 0;
+      through = !declared.is_array() || fact.param >= 0;
       return fact;
     }
     case %(ident ?): {
-      *through = 0;
+      through = 0;
       return _fact_of(w, place, NULL);
     }
     /* A compound literal is storage of the block the store is in. */
     case %(composite *): {
-      *through = 0;
+      through = 0;
       return _fact(w, NULL, -1);
     }
   }
@@ -643,7 +643,7 @@ static Fact _base(Walk w, Var place, int *through) {
 static Fact _borrow(Walk w, Var place, List *named) {
   int through = 0;
   Fact base = _fact_of(w, place, named);
-  if (!base) base = _base(w, place, &through);
+  if (!base) base = _base(w, place, through);
   if (!base) return NULL;
   if (named && !*named) *named = _root(place);
   Fact borrow = _fact(w, NULL, -1);
@@ -670,13 +670,13 @@ static List _root(Var place) {
 /* The sink a store through `base` reaches. A struct local is its own
    storage; a pointer local reaches the storage it was given, and a pointer
    taken with `&x` reaches `x`. */
-static Symbol _sink_of(Fact base, int through, Fact *target) {
+static Symbol _sink_of(Fact base, int through, Fact &target) {
   if (through && base && base.points) {
     base = base.points;
     through = 0;
   }
   int own = base && base.param < 0 && !base.born;
-  *target = through && own ? NULL : base;
+  target = through && own ? NULL : base;
   return !through && own ? <local> : <heap>;
 }
 
@@ -703,7 +703,7 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
     else if (target == <result>) {
       int born = 0;
       Region other = NULL;
-      Region region = _birth(w, call, NULL, &born, &other);
+      Region region = _birth(w, call, NULL, born, other);
       struct Fact result = {
         .param = -1, .born = born, .region = region, .other = other};
       _flow(w, argument, type, <heap>, &result);
@@ -712,9 +712,9 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
       if (other.int() >= count) continue;
       Var holder = arguments[other.int()];
       int through = 1;
-      Fact base = _base(w, _address_of(holder), &through), object = NULL;
+      Fact base = _base(w, _address_of(holder), through), object = NULL;
       if (!base) base = _fact_of(w, holder, NULL);
-      Symbol sink = _sink_of(base, through, &object);
+      Symbol sink = _sink_of(base, through, object);
       _flow(w, argument, type, sink, object);
     }
   }
@@ -796,7 +796,7 @@ static void _scan(Walk w, Var value, int deferred) {
       case %(cons ?head ?tail): {
         int born = 0;
         Region other = NULL;
-        Region region = _birth(w, node, NULL, &born, &other);
+        Region region = _birth(w, node, NULL, born, other);
         struct Fact result = {.param = -1, .born = born, .region = region};
         _flow(w, head, NULL, <heap>, &result);
         _flow(w, tail, NULL, <heap>, &result);
@@ -833,7 +833,7 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   int born = 0;
   Region other = source ? source.other : NULL;
   Region region = source ? source.region
-                         : _birth(w, value, type, &born, &other);
+                         : _birth(w, value, type, born, other);
   int owners = source ? source.born : born;
   int kept = source || born;
   if (kept && _copies(w, type, value)) {
@@ -890,13 +890,13 @@ static void _store(Walk w, Var target, Var value) {
     return;
   }
   int through = 0;
-  Fact object = NULL, base = _base(w, target, &through);
+  Fact object = NULL, base = _base(w, target, through);
   /* A field or element of file-scope storage is that storage. */
   if (!base && !through && _root(target)) {
     _flow(w, value, type, <static>, NULL);
     return;
   }
-  Symbol sink = _sink_of(base, through, &object);
+  Symbol sink = _sink_of(base, through, object);
   _flow(w, value, type, sink, object);
 }
 

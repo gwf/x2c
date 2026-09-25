@@ -196,7 +196,7 @@ struct LowerCursor {
   int object, cursor, item, value;
 };
 
-static int _lower_cursor(Var test, struct LowerCursor *walk) {
+static int _lower_cursor(Var test, struct LowerCursor &walk) {
   match (test) {
     case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
           (args (expr ? (ident (binding ?(int object) ?)))
@@ -229,7 +229,7 @@ static int _lower_cursor(Var test, struct LowerCursor *walk) {
 /* A cursor's storage cannot escape its block or be addressed by the body.
    Direct `try_next` loops whose outputs live after the loop keep their
    storage. */
-static int _lower_cursor_addressed(Var form, struct LowerCursor *walk) {
+static int _lower_cursor_addressed(Var form, struct LowerCursor &walk) {
   if (form is not <list>) return 0;
   List items = form;
   match (items)
@@ -244,12 +244,12 @@ static void _lower_scan_cursor_block(Lowering l, List parts) {
   if (!parts) return;
   struct LowerCursor walk;
   match (_lower_bare(parts.last())) case %(while ?test ?body): {
-    if (!_lower_cursor(test, &walk) || _lower_cursor_addressed(body, &walk))
+    if (!_lower_cursor(test, walk) || _lower_cursor_addressed(body, walk))
       return;
     Map declared = $auto({});
     for (List rest = parts; rest.cdr(); rest = rest.cdr()) {
       Var part = _lower_bare(rest.car());
-      if (_lower_cursor_addressed(part, &walk)) return;
+      if (_lower_cursor_addressed(part, walk)) return;
       match (part) case %(declare ? (bindings *bindings)):
         foreach (Var binding, bindings) {
           match (binding) case %(op = ?target ?): binding = target;
@@ -1794,7 +1794,7 @@ static Var _lower_loop(
   _lower_referenced(k, used);
   /* The element is read where it is used, so the loop does not carry it. */
   struct LowerCursor walk;
-  int walking = _lower_cursor(test, &walk) && walk.cursor in l.cursors;
+  int walking = _lower_cursor(test, walk) && walk.cursor in l.cursors;
   if (walking) {
     used.del(walk.item);
     if (walk.value) used.del(walk.value);
