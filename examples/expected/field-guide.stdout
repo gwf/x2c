@@ -1,18 +1,12 @@
 count: 3
 name: Ada Lovelace
 Hello, Ada! You have 3 messages.
+array: [ 10, 25, 30 ]; second: 25
+Ada: 15; Grace: 0
+list: ("plan" "write" "compile" "run"); original: ("write" "compile" "run")
+shared tail: yes
 answer: 43
 answer now: forty-three
-array: [ 10, 25, 30 ]; item 1: 25
-Ada: 15; Grace: 0
-Grace is present: no
-list: ( plan write compile run ); original: ( write compile run )
 phase compile: member 1, index 1
-typed: 5, 2, 9
-mapped: ( 4 7 10 ); source: ( 3 6 9 )
-at least five: 2
+doubled: ( 2 4 6 ); original: ( 1 2 3 )
 match: Ada scored 15
-buffer: 10, 25, 30
-file: Ada Lovelace: 3
-Lisp: 5
-compile-time Lisp: 5
