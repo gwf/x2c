@@ -1128,8 +1128,8 @@ static Type _shared_participant(
    participant is the unqualified type both here and in the operands'
    comparison. */
 static List _resolve_protocol_operator(
-  Compiler compiler, Symbol op, List &lhs, List &rhs, Symbol *derived) {
-  if (derived) *derived = 0;
+  Compiler compiler, Symbol op, List &lhs, List &rhs, Symbol &derived) {
+  derived = 0;
   Type lhs_type = lhs.cadr();
   lhs_type = lhs_type.canonicalize();
   Type participant = lhs_type, rhs_type = NULL;
@@ -1151,7 +1151,7 @@ static List _resolve_protocol_operator(
     member = compiler.operator_member(op);
     Symbol source = compiler.derived_member(op);
     if (!member) member = source;
-    if (derived) *derived = source;
+    derived = source;
     if (!member) return NULL;
     if (participant !== rhs_type) {
       if (compiler.sym.is_var_type(participant) ||
@@ -1205,7 +1205,7 @@ static int _is_operator_temporary(Compiler c, List expression) {
 static List Compiler._protocol_operator_expression(
   Compiler c, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved = _resolve_protocol_operator(c, op, lhs, rhs, &derived);
+  List resolved = _resolve_protocol_operator(c, op, lhs, rhs, derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;

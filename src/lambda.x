@@ -50,7 +50,7 @@ static List _params_to_decl_params(List names) {
   return %(params @params);
 }
 
-static int _collect_param_types(List raw_params, List *out_types) {
+static int _collect_param_types(List raw_params, List &out_types) {
   Array types = [], int all_var = 1;
   foreach(Var entry, raw_params) {
     Var ptype = entry;
@@ -61,12 +61,12 @@ static int _collect_param_types(List raw_params, List *out_types) {
     if (all_var && ptype_list != %("Var")) all_var = 0;
   }
   List result = types.list_free();
-  if (out_types) *out_types = result;
+  out_types = result;
   return all_var;
 }
 
 // Split a direct or pointer function Type into fixed parameters and return.
-static int _typed_function_parts(Type type, List *params, Type *return_type) {
+static int _typed_function_parts(Type type, List &params, Type *return_type) {
   if (!type) return 0;
   type = type.canonicalize();
   if (type.is_pointer()) type = type.dereference();
@@ -76,7 +76,7 @@ static int _typed_function_parts(Type type, List *params, Type *return_type) {
       match (values)
         case %(?(Type only)) if (only.canonicalize() === %(void)):
           values = NULL;
-      if (params) *params = values;
+      params = values;
       if (return_type) *return_type = %($return_head @return_tail);
       return 1;
     }
@@ -184,12 +184,12 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
     }
     List target_params = NULL, source_params = NULL;
     Type target_return = NULL, source_return = NULL;
-    if (!_typed_function_parts(target_type, &target_params, &target_return)) {
+    if (!_typed_function_parts(target_type, target_params, &target_return)) {
       _typed_adapter_error(
         c, "typed callback adapter target is incomplete",
         target_type, source_type, NULL);
     }
-    if (!_typed_function_parts(source_type, &source_params, &source_return)) {
+    if (!_typed_function_parts(source_type, source_params, &source_return)) {
       _typed_adapter_error(
         c, "typed callback adapter source is incomplete",
         target_type, source_type, NULL);
@@ -255,12 +255,12 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
 }
 
 static int _func_adapter_source(
-  Type type, List payload, Type *source_type, List *source_binding) {
+  Type type, List payload, Type &source_type, List &source_binding) {
   match (payload) {
     case %(ident ?binding): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
-      if (source_type) *source_type = type;
-      if (source_binding) *source_binding = binding;
+      source_type = type;
+      source_binding = binding;
       return 1;
     }
     case %(cast ? (expr ?inner_type ?inner_payload)):
@@ -304,8 +304,8 @@ static List _adapter_index_literal(int index) {
   return %(expr (int) (literal (int) $text));
 }
 
-static List _adapter_helper(Compiler compiler, String name, List *type) =>
-  compiler.sym.resolve_global(%($name), type);
+static List _adapter_helper(Compiler compiler, String name, List &type) =>
+  compiler.sym.resolve_global(%($name), &type);
 
 static List _type_literal(Compiler compiler, Type type) =>
   compiler.cache_literal_list(
@@ -315,7 +315,7 @@ static List _type_literal(Compiler compiler, Type type) =>
 List Compiler.func_signature(Compiler compiler, Type type) {
   List params = NULL;
   Type result = NULL;
-  _typed_function_parts(type, &params, &result);
+  _typed_function_parts(type, params, &result);
   Array declared = [];
   foreach (List parameter, params) {
     declared.push(parameter.type().declared());
@@ -333,7 +333,7 @@ static List _checked_func_argument(
   Compiler compiler, List adapter_type, Type parameter_type,
   List value_helper, Type value_helper_type,
   List reference_helper, Type reference_helper_type,
-  List fn_binding, List argv_binding, int index, Type *storage_type) {
+  List fn_binding, List argv_binding, int index, Type &storage_type) {
   if (parameter_type.car() == <&>) {
     Type target = parameter_type.cdr(), pointer = target.reference();
     List picked = %(
@@ -345,7 +345,7 @@ static List _checked_func_argument(
                     ${compiler.cache_literal_list(target)}
                     ${_type_literal(compiler, target)}))
     );
-    if (storage_type) *storage_type = pointer;
+    storage_type = pointer;
     return compiler.convert_expression(picked, pointer);
   }
   Symbol tag = compiler.sym.var_tag_for_type(parameter_type, NULL);
@@ -356,7 +356,7 @@ static List _checked_func_argument(
        a record passed by value, as the address of its bytes. */
     List pointer_type = NULL;
     List pointer_helper = _adapter_helper(
-      compiler, "x2c_func_pointer_argument", &pointer_type);
+      compiler, "x2c_func_pointer_argument", pointer_type);
     List picked = %(
       expr (* void)
         (call (expr $pointer_type (ident $pointer_helper))
@@ -364,7 +364,7 @@ static List _checked_func_argument(
                     (expr (* const "FuncArg") (ident $argv_binding))
                     ${_adapter_index_literal(index)}))
     );
-    if (storage_type) *storage_type = parameter_type;
+    storage_type = parameter_type;
     if (resolved.is_pointer())
       return compiler.convert_expression(picked, parameter_type);
     Symbol star = <"*">;
@@ -386,7 +386,7 @@ static List _checked_func_argument(
                   ${_adapter_index_literal(index)}
                   ${_adapter_symbol_literal(tag)}))
   );
-  if (storage_type) *storage_type = parameter_type;
+  storage_type = parameter_type;
   return compiler.convert_expression(picked, parameter_type);
 }
 
@@ -397,9 +397,9 @@ static List _func_argument_locals(
   List fn_binding, List argv_binding) {
   List value_type = NULL, reference_type = NULL;
   List value_helper = _adapter_helper(
-    compiler, "x2c_func_value_argument", &value_type);
+    compiler, "x2c_func_value_argument", value_type);
   List reference_helper = _adapter_helper(
-    compiler, "x2c_func_declared_reference_argument", &reference_type);
+    compiler, "x2c_func_declared_reference_argument", reference_type);
   Array locals = [];
   int index = 0;
   foreach (Type type, types) {
@@ -409,7 +409,7 @@ static List _func_argument_locals(
     List value = _checked_func_argument(
       compiler, diagnostic_type, type,
       value_helper, value_type, reference_helper, reference_type,
-      fn_binding, argv_binding, index++, &storage_type);
+      fn_binding, argv_binding, index++, storage_type);
     List (base, mods) = storage_type.declaration_parts();
     locals.push(
       %(declare $base (bindings (op = (bind $binding $mods) $value))));
@@ -434,7 +434,7 @@ static List _build_func_adapter(
   Compiler c, Type diagnostic_type, Type source_type,
   List target, List supplied_fn_binding, List prefix) {
   List params = NULL, Type return_type = NULL;
-  _typed_function_parts(source_type, &params, &return_type);
+  _typed_function_parts(source_type, params, &return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
     String message = c.sym.resolve_key(diagnostic_type).equal(func_type)
@@ -450,7 +450,7 @@ static List _build_func_adapter(
            %("x2c_func_value_argument"
              "x2c_func_declared_reference_argument")) {
     List helper_type = NULL;
-    List helper = _adapter_helper(c, helper_name, &helper_type);
+    List helper = _adapter_helper(c, helper_name, helper_type);
     if (!helper || !helper_type)
       _typed_adapter_error(
         c, "native binding needs Func argument readers from lib/func.x",
@@ -474,7 +474,7 @@ static List _build_func_adapter(
     /* A record result is returned as `<p48>` to a copy of its bytes. */
     List result_type = NULL;
     List result_helper = _adapter_helper(
-      c, "x2c_func_record_result", &result_type);
+      c, "x2c_func_record_result", result_type);
     List result = c.sym.introduce(c.fresh_name("func_record"));
     List (base, mods) = return_type.declaration_parts();
     List address = %(expr ${return_type.reference()}
@@ -508,12 +508,12 @@ static List _direct_func_adapter(
 }
 
 static int _direct_func_source(
-  Type type, List payload, Type *source_type, List *source_binding) {
+  Type type, List payload, Type &source_type, List &source_binding) {
   match (payload) {
     case %(ident ?binding): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
-      if (source_type) *source_type = type;
-      if (source_binding) *source_binding = binding;
+      source_type = type;
+      source_binding = binding;
       return 1;
     }
     case %(parens (expr ?inner_type ?inner_payload)):
@@ -548,7 +548,7 @@ List Compiler.maybe_adapt_func_arg(
   if (_is_func_adapter(c, arg_type)) return argument;
   Type source_type = NULL, List source_binding = NULL;
   if (!_func_adapter_source(
-    arg_type, payload, &source_type, &source_binding)) {
+    arg_type, payload, source_type, source_binding)) {
     _typed_adapter_error(
       c, "native binding target must be a direct function",
       expected_type, arg_type,
@@ -576,13 +576,13 @@ static Type _func_pointer_value_type(Compiler compiler, Type type) {
 
 static List _indirect_func_adapter(
   Compiler compiler, Type diagnostic_type, Type pointer_type,
-  Type *out_context_type, List *out_context_field) {
+  Type &out_context_type, List &out_context_field) {
   List key = %(findirect $pointer_type);
   Var stored;
   if (compiler.names.adapters.try_get(key, &stored)) {
     (List adapter, Type context, List field) = stored.list().cdr();
-    if (out_context_type) *out_context_type = context;
-    if (out_context_field) *out_context_field = field;
+    out_context_type = context;
+    out_context_field = field;
     return adapter;
   }
 
@@ -605,7 +605,7 @@ static List _indirect_func_adapter(
   Type context_pointer = %(* const $context_name);
   List context_helper_type = NULL;
   List context_helper = _adapter_helper(
-    compiler, "Func_context", &context_helper_type);
+    compiler, "Func_context", context_helper_type);
   if (!context_helper || !context_helper_type) {
     _typed_adapter_error(
       compiler, "native binding needs Func.context from lib/func.x",
@@ -638,8 +638,8 @@ static List _indirect_func_adapter(
   compiler.names.adapters[key] = %(
     indirect-adapter $adapter $context_type $field_binding
   );
-  if (out_context_type) *out_context_type = context_type;
-  if (out_context_field) *out_context_field = field_binding;
+  out_context_type = context_type;
+  out_context_field = field_binding;
   return adapter;
 }
 
@@ -656,7 +656,7 @@ static List _direct_func_handle(
   List signature = _func_signature_literal(compiler, source_type);
   List constructor_type = NULL;
   List constructor = _adapter_helper(
-    compiler, "Func_new", &constructor_type);
+    compiler, "Func_new", constructor_type);
   if (!constructor || !constructor_type) {
     _typed_adapter_error(
       compiler, "function conversion needs Func.new from lib/func.x",
@@ -743,11 +743,11 @@ static List _indirect_func_value(
   List context_field = NULL;
   List adapter = _indirect_func_adapter(
     compiler, %("Func"), pointer_type,
-    &context_type, &context_field);
+    context_type, context_field);
   List signature = _func_signature_literal(compiler, pointer_type);
   List constructor_type = NULL;
   List constructor = _adapter_helper(
-    compiler, "Func_new_context", &constructor_type);
+    compiler, "Func_new_context", constructor_type);
   if (!constructor || !constructor_type) {
     _typed_adapter_error(
       compiler,
@@ -884,7 +884,7 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   Type source_type = NULL;
   List source_binding = NULL;
   if (_direct_func_source(
-        type, payload, &source_type, &source_binding))
+        type, payload, source_type, source_binding))
     return _direct_func_value(c, source_binding, source_type);
 
   Type pointer_type = _func_pointer_value_type(c, type);
@@ -943,10 +943,10 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   if (_typed_params_variadic(raw_params)) return argument;
 
   List param_types = NULL;
-  int all_params_var = _collect_param_types(raw_params, &param_types);
+  int all_params_var = _collect_param_types(raw_params, param_types);
   List source_params = NULL, source_param_types = NULL;
-  _typed_function_parts(orig_type, &source_params, NULL);
-  _collect_param_types(source_params, &source_param_types);
+  _typed_function_parts(orig_type, source_params, NULL);
+  _collect_param_types(source_params, source_param_types);
   List return_type_list = return_type is <list>
     ? return_type : %( $return_type );
   if (all_params_var && return_type_list === %("Var")) return argument;
@@ -991,13 +991,13 @@ static List _signature(Compiler compiler, List entries) {
 }
 
 static int _cell_parts(
-  Map cells, List binding, List *cell, Type *type) {
+  Map cells, List binding, List &cell, Type &type) {
   Var stored;
   if (!cells.try_get(binding, &stored)) return 0;
   match (stored)
     case %(lambda-cell ?matched_cell ?matched_type): {
-      if (cell) *cell = matched_cell;
-      if (type) *type = matched_type;
+      cell = matched_cell;
+      type = matched_type;
       return 1;
     }
   return 0;
@@ -1103,7 +1103,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
         foreach (List target, targets) _require_capture_lvalue(c, target);
       case %(call (expr ?callee_type ?) (args *arguments)): {
         List parameters = NULL;
-        if (_typed_function_parts(callee_type, &parameters, NULL))
+        if (_typed_function_parts(callee_type, parameters, NULL))
           for (; parameters && arguments;
                parameters = parameters.cdr(), arguments = arguments.cdr()) {
             Type parameter = parameters.car();
@@ -1152,7 +1152,7 @@ static List _cell_declaration(
   List allocator_type = NULL;
   String allocator_name = initializer ? "Scope_memdup" : "Scope_malloc";
   List allocator = _adapter_helper(
-    compiler, allocator_name, &allocator_type);
+    compiler, allocator_name, allocator_type);
   List (value_base, value_mods) = type.declaration_parts();
   List size = %(
     expr (size_t)
@@ -1217,7 +1217,7 @@ static List _rewrite_lambda_declaration(
     }
     List cell = NULL;
     Type type = NULL;
-    if (_cell_parts(cells, binding, &cell, &type)) {
+    if (_cell_parts(cells, binding, cell, type)) {
       sequence.push(
         _cell_declaration(
           compiler, cell, type, initializer));
@@ -1242,7 +1242,7 @@ static List _rewrite_lambda_cells(
     case %(expr ?source_type (ident ?binding)): {
       List cell = NULL;
       Type type = NULL;
-      if (_cell_parts(cells, binding, &cell, &type)) {
+      if (_cell_parts(cells, binding, cell, type)) {
         if (source_type.car() == <&>)
           return %(expr $source_type (ident $cell));
         return _cell_value(cell, type);
@@ -1287,7 +1287,7 @@ static List _parameter_setup(
     List binding = _entry_binding(entry);
     List cell = NULL;
     Type type = NULL;
-    if (!_cell_parts(cells, binding, &cell, &type)) continue;
+    if (!_cell_parts(cells, binding, cell, type)) continue;
     setup.push(
       _cell_declaration(
         compiler, cell, type,
@@ -1534,9 +1534,9 @@ static List _lower_captured_lambda(
 
   List context_type = NULL, constructor_type = NULL;
   List context_helper = _adapter_helper(
-    compiler, "Func_context", &context_type);
+    compiler, "Func_context", context_type);
   List constructor = _adapter_helper(
-    compiler, "Func_new_context", &constructor_type);
+    compiler, "Func_new_context", constructor_type);
   Type adapter_type = compiler.sym.resolve_key(%("FuncAdapter"));
   List types = entries.map(
     %!(List entry) => _entry_type(compiler, entry));

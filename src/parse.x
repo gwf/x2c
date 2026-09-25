@@ -895,7 +895,7 @@ List Compiler.parse_parameter(Compiler compiler) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(
-    compiler, type, NULL, &method, &first, &after);
+    compiler, type, NULL, method, first, after);
   return _finish_parameter(compiler, type, declarator, method, first, after);
 }
 
@@ -974,8 +974,8 @@ static List _declarator_suffix(Compiler compiler) {
 }
 
 static List _direct_declarator(
-  Compiler c, Type context, List *method_identity, Token *source_first,
-  Token *source_after) {
+  Compiler c, Type context, List &method_identity, Token &source_first,
+  Token &source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
   int member = context.is_aggregate();
   // Parenthesized declarator: ( declarator )
@@ -1062,9 +1062,9 @@ static List _direct_declarator(
   if (!c.token.text.is_identifier()) return %(bind () ());
   // Identifier or typedef name or method-sugar target
   Token first = c.token;
-  List ident = _complex_identifier(c, method_identity);
-  *source_first = first;
-  *source_after = c.token;
+  List ident = _complex_identifier(c, &method_identity);
+  source_first = first;
+  source_after = c.token;
   return %(bind $ident ());
 }
 
@@ -1098,7 +1098,7 @@ List Compiler.parse_named_type(Compiler c) {
   base = qualifiers.append(base);
   List method = NULL;
   Token first = NULL, after = NULL;
-  List declarator = _declarator(c, base, NULL, &method, &first, &after);
+  List declarator = _declarator(c, base, NULL, method, first, after);
   List modifiers = NULL;
   match (declarator) {
     case %(bind () ?captured): modifiers = captured;
@@ -1137,12 +1137,12 @@ void Compiler.bind_template_local(
 }
 
 static List _declarator(
-  Compiler compiler, List type, List context, List *method_identity_out,
-  Token *source_first, Token *source_after) {
+  Compiler compiler, List type, List context, List &method_identity_out,
+  Token &source_first, Token &source_after) {
   List ptr = _pointer(compiler), method_identity = NULL;
   List (key, infix) =
     _direct_declarator(
-      compiler, context, &method_identity, source_first,
+      compiler, context, method_identity, source_first,
       source_after).cdr();
   List sfx = _declarator_suffix(compiler);
   List modifiers = %( @infix @sfx @ptr );
@@ -1151,7 +1151,7 @@ static List _declarator(
   // the outer call has the base type and can establish the binding once.
   List binding = key;
   compiler.bind_template_local(key, ast, context);
-  if (method_identity_out) *method_identity_out = method_identity;
+  method_identity_out = method_identity;
   return %( bind $binding $modifiers );
 }
 
@@ -1164,7 +1164,7 @@ static List _declarator_init(
   Token origin = c.token;
   List method = NULL;
   Token first = NULL, after = NULL;
-  List bind = _declarator(c, type, context, &method, &first, &after);
+  List bind = _declarator(c, type, context, method, first, after);
   int preserved_self = 0;
   bind = _install_declarator_node(
     c, type, context, bind, method, preserved_self);

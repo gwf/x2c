@@ -609,13 +609,13 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
    `<root>/<name>/src/<name>.x`, or `<root>/<name>/<name>.x` for the
    single-file layout used by toys and fixtures. */
 static String _package_entry(
-  Compiler compiler, String name, String *directory) {
+  Compiler compiler, String name, String &directory) {
   foreach (String package_dir, compiler.package_dirs) {
     String root = %"${_canonical_path(package_dir)}/$name";
     String nested = %"$root/src/$name.x";
     String entry = compiler.sources.exists(nested) ? nested : %"$root/$name.x";
     if (!compiler.sources.exists(entry)) continue;
-    if (directory) *directory = root;
+    directory = root;
     return _canonical_path(entry);
   }
   return NULL;
@@ -739,7 +739,7 @@ static void _package_contributions(
 */
 void Compiler.collect_package(Compiler c, String name, Token token) {
   if (name in c.package_roots) return;
-  String root = NULL, entry = _package_entry(c, name, &root);
+  String root = NULL, entry = _package_entry(c, name, root);
   if (!entry)
     c.report_error(
       <driver>, %"unknown package '$name'", token,

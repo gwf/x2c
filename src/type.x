@@ -28,10 +28,10 @@ $(import "../lib/native-scalar-types.xmacro")
 // compiler declarations go through here so pointer, array, qualifier, and
 // function-pointer precedence matches parsed source.
 
-static Type _declarator_parts(Type type, List *modifiers) {
+static Type _declarator_parts(Type type, List &modifiers) {
   Type base = type.base_type();
   if (!base) {
-    if (modifiers) *modifiers = NULL;
+    modifiers = NULL;
     return type;
   }
   List reversed = %(), qualifiers = %();
@@ -42,7 +42,7 @@ static Type _declarator_parts(Type type, List *modifiers) {
     qualifiers = cons(reversed.car(), qualifiers);
     reversed = reversed.cdr();
   }
-  if (modifiers) *modifiers = reversed.reverse();
+  modifiers = reversed.reverse();
   return qualifiers.append(base);
 }
 
@@ -61,7 +61,7 @@ static Var _modifier_declaration_ast(Var value) {
 */
 List Type.declaration_parts(Type type) {
   List modifiers = NULL;
-  Type base = _declarator_parts(type, &modifiers), Array syntax = [];
+  Type base = _declarator_parts(type, modifiers), Array syntax = [];
   foreach (Var item, modifiers)
     syntax.push(_modifier_declaration_ast(item));
   return %($base (@{syntax.list_free()}));
