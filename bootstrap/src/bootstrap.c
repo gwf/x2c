@@ -468,6 +468,7 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
   request -> cc_args = command -> cc_args;
   String whole = _whole_runtime(prefix);
   if(component == 239277269348 && String_truth(whole)) request -> ld_args = cons(String_var(whole), NULL);
+  if(component == 239277269348) request -> extensions = command -> extensions;
   request -> cc = command -> cc;
   request -> ar = command -> ar;
   request -> jobs = command -> jobs;

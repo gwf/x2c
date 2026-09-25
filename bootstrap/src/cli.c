@@ -1,4 +1,4 @@
-#define _x2c_initializer_choice_29BB659F_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139) static void _x2c_static_initialize_0(void){\
+#define _x2c_initializer_choice_29BB659F_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139,_x2c_static_input_140,_x2c_static_input_141) static void _x2c_static_initialize_0(void){\
   {\
     if(_x2c_static_input_0) _x2c_static_input_1;\
     if(_x2c_static_input_2) _x2c_static_input_3;\
@@ -70,17 +70,18 @@
     if(_x2c_static_input_134) _x2c_static_input_135;\
     if(_x2c_static_input_136) _x2c_static_input_137;\
     if(_x2c_static_input_138) _x2c_static_input_139;\
+    if(_x2c_static_input_140) _x2c_static_input_141;\
   }\
 \
 }
-#define _x2c_initializer_choice_29BB659F_0(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139) _x2c_initializer_choice_29BB659F_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139)
+#define _x2c_initializer_choice_29BB659F_0(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139,_x2c_static_input_140,_x2c_static_input_141) _x2c_initializer_choice_29BB659F_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29,_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59,_x2c_static_input_60,_x2c_static_input_61,_x2c_static_input_62,_x2c_static_input_63,_x2c_static_input_64,_x2c_static_input_65,_x2c_static_input_66,_x2c_static_input_67,_x2c_static_input_68,_x2c_static_input_69,_x2c_static_input_70,_x2c_static_input_71,_x2c_static_input_72,_x2c_static_input_73,_x2c_static_input_74,_x2c_static_input_75,_x2c_static_input_76,_x2c_static_input_77,_x2c_static_input_78,_x2c_static_input_79,_x2c_static_input_80,_x2c_static_input_81,_x2c_static_input_82,_x2c_static_input_83,_x2c_static_input_84,_x2c_static_input_85,_x2c_static_input_86,_x2c_static_input_87,_x2c_static_input_88,_x2c_static_input_89,_x2c_static_input_90,_x2c_static_input_91,_x2c_static_input_92,_x2c_static_input_93,_x2c_static_input_94,_x2c_static_input_95,_x2c_static_input_96,_x2c_static_input_97,_x2c_static_input_98,_x2c_static_input_99,_x2c_static_input_100,_x2c_static_input_101,_x2c_static_input_102,_x2c_static_input_103,_x2c_static_input_104,_x2c_static_input_105,_x2c_static_input_106,_x2c_static_input_107,_x2c_static_input_108,_x2c_static_input_109,_x2c_static_input_110,_x2c_static_input_111,_x2c_static_input_112,_x2c_static_input_113,_x2c_static_input_114,_x2c_static_input_115,_x2c_static_input_116,_x2c_static_input_117,_x2c_static_input_118,_x2c_static_input_119,_x2c_static_input_120,_x2c_static_input_121,_x2c_static_input_122,_x2c_static_input_123,_x2c_static_input_124,_x2c_static_input_125,_x2c_static_input_126,_x2c_static_input_127,_x2c_static_input_128,_x2c_static_input_129,_x2c_static_input_130,_x2c_static_input_131,_x2c_static_input_132,_x2c_static_input_133,_x2c_static_input_134,_x2c_static_input_135,_x2c_static_input_136,_x2c_static_input_137,_x2c_static_input_138,_x2c_static_input_139,_x2c_static_input_140,_x2c_static_input_141)
 /* auto-generated by x2c.  Do not edit! */
 
 #include "cli.h"
 
 #include "exception.h"
 
-static String _218, _217, _216, _215, _214, _213, _212, _211, _210, _209, _208, _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _183, _182, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _52, _50, _49;
+static String _219, _218, _217, _216, _215, _214, _213, _212, _211, _210, _209, _208, _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _183, _182, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _52, _50, _49;
 
 #include <ctype.h>
 #include <errno.h>
@@ -247,6 +248,9 @@ static CliOption cli_options[] ={
   }
   , {
     0, 0, 0, 0, 0, 0, 0, .label = 0
+  }
+  , {
+    0, 0, 0, 0, 0, 0, 0
   }
   , {
     0, 0, 0, 0, 0, 0, 0
@@ -493,93 +497,96 @@ _x2c_initializer_choice_29BB659F_0((0 < sizeof(cli_options) / sizeof(cli_options
   942951818, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _147, "<file>", "Load a native module for compile-time calls", 0
 }
 ), (40ULL < sizeof(cli_options) / sizeof(cli_options[40ULL])), (cli_options[40ULL] =(CliOption){
-  973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _148, NULL, "Skip symbol collection and preprocessing", 0
+  12687699561436, CLI_BUILD | CLI_BOOTSTRAP, 1307939018, _148, "<dir>", "Link a package's compile-time part into a compiler", 0
 }
 ), (41ULL < sizeof(cli_options) / sizeof(cli_options[41ULL])), (cli_options[41ULL] =(CliOption){
-  27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _149, NULL, "Collect symbols through the host preprocessor", 0
+  973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _149, NULL, "Skip symbol collection and preprocessing", 0
 }
 ), (42ULL < sizeof(cli_options) / sizeof(cli_options[42ULL])), (cli_options[42ULL] =(CliOption){
-  241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _150, NULL, "Use CPP collection for this translation", 0
+  27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _150, NULL, "Collect symbols through the host preprocessor", 0
 }
 ), (43ULL < sizeof(cli_options) / sizeof(cli_options[43ULL])), (cli_options[43ULL] =(CliOption){
-  198, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, 279515230724452, _151, "<program>", "Use <program> as the host C compiler", 0
+  241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _151, NULL, "Use CPP collection for this translation", 0
 }
 ), (44ULL < sizeof(cli_options) / sizeof(cli_options[44ULL])), (cli_options[44ULL] =(CliOption){
-  100, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, 279515230724452, _152, "<program>", "Use <program> as the static-library archiver", 0
+  198, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, 279515230724452, _152, "<program>", "Use <program> as the host C compiler", 0
 }
 ), (45ULL < sizeof(cli_options) / sizeof(cli_options[45ULL])), (cli_options[45ULL] =(CliOption){
-  31784, CLI_NATIVE | CLI_BOOTSTRAP, 279515230724452, _153, NULL, "Set C optimization", 0, .label = _154, .prefix = 1
+  100, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, 279515230724452, _153, "<program>", "Use <program> as the static-library archiver", 0
 }
 ), (46ULL < sizeof(cli_options) / sizeof(cli_options[46ULL])), (cli_options[46ULL] =(CliOption){
-  14, CLI_NATIVE, 279515230724452, _155, NULL, "Emit debug information", 0
+  31784, CLI_NATIVE | CLI_BOOTSTRAP, 279515230724452, _154, NULL, "Set C optimization", 0, .label = _155, .prefix = 1
 }
 ), (47ULL < sizeof(cli_options) / sizeof(cli_options[47ULL])), (cli_options[47ULL] =(CliOption){
-  279333770, CLI_NATIVE, 279515230724452, _156, "<name>[=<value>]", "Define a C preprocessor macro", 0
+  14, CLI_NATIVE, 279515230724452, _156, NULL, "Emit debug information", 0
 }
 ), (48ULL < sizeof(cli_options) / sizeof(cli_options[48ULL])), (cli_options[48ULL] =(CliOption){
-  1473453116298, CLI_NATIVE, 279515230724452, _157, "<name>", "Undefine a C preprocessor macro", 0
+  279333770, CLI_NATIVE, 279515230724452, _157, "<name>[=<value>]", "Define a C preprocessor macro", 0
 }
 ), (49ULL < sizeof(cli_options) / sizeof(cli_options[49ULL])), (cli_options[49ULL] =(CliOption){
-  49350, CLI_NATIVE, 279515230724452, _158, "<arg>", "Pass one argument only to C compilation", 0
+  1473453116298, CLI_NATIVE, 279515230724452, _158, "<name>", "Undefine a C preprocessor macro", 0
 }
 ), (50ULL < sizeof(cli_options) / sizeof(cli_options[50ULL])), (cli_options[50ULL] =(CliOption){
-  26380018276, CLI_NATIVE, 825121124, _159, "<dir>", "Add a library search directory", 0
+  49350, CLI_NATIVE, 279515230724452, _159, "<arg>", "Pass one argument only to C compilation", 0
 }
 ), (51ULL < sizeof(cli_options) / sizeof(cli_options[51ULL])), (cli_options[51ULL] =(CliOption){
-  26379160754, CLI_NATIVE, 825121124, _160, "<name>", "Link library <name>", 0
+  26380018276, CLI_NATIVE, 825121124, _160, "<dir>", "Add a library search directory", 0
 }
 ), (52ULL < sizeof(cli_options) / sizeof(cli_options[52ULL])), (cli_options[52ULL] =(CliOption){
-  38800656, CLI_NATIVE, 825121124, _161, "<dir>", "Search <dir> for shared libraries when the program runs", 0
+  26379160754, CLI_NATIVE, 825121124, _161, "<name>", "Link library <name>", 0
 }
 ), (53ULL < sizeof(cli_options) / sizeof(cli_options[53ULL])), (cli_options[53ULL] =(CliOption){
-  1496, CLI_NATIVE, 825121124, _162, NULL, "Pass comma-separated arguments to the linker", 0, .label = _163, .prefix = 1
+  38800656, CLI_NATIVE, 825121124, _162, "<dir>", "Search <dir> for shared libraries when the program runs", 0
 }
 ), (54ULL < sizeof(cli_options) / sizeof(cli_options[54ULL])), (cli_options[54ULL] =(CliOption){
-  35719882824, CLI_NATIVE, 279515230724452, _164, NULL, "Enable native threading for compilation and linking", 0
+  1496, CLI_NATIVE, 825121124, _163, NULL, "Pass comma-separated arguments to the linker", 0, .label = _164, .prefix = 1
 }
 ), (55ULL < sizeof(cli_options) / sizeof(cli_options[55ULL])), (cli_options[55ULL] =(CliOption){
-  14434122038422, CLI_NATIVE, 825121124, _165, "<name>", "Link a native framework on macOS", 0
+  35719882824, CLI_NATIVE, 279515230724452, _165, NULL, "Enable native threading for compilation and linking", 0
 }
 ), (56ULL < sizeof(cli_options) / sizeof(cli_options[56ULL])), (cli_options[56ULL] =(CliOption){
-  52364728676, CLI_NATIVE, 825121124, _166, "<arg>", "Pass one argument to the linker", 0
+  14434122038422, CLI_NATIVE, 825121124, _166, "<name>", "Link a native framework on macOS", 0
 }
 ), (57ULL < sizeof(cli_options) / sizeof(cli_options[57ULL])), (cli_options[57ULL] =(CliOption){
-  1374366630, CLI_TRANSLATE, 665445396138972, _167, NULL, "Print source tokens and stop", 0
+  52364728676, CLI_NATIVE, 825121124, _167, "<arg>", "Pass one argument to the linker", 0
 }
 ), (58ULL < sizeof(cli_options) / sizeof(cli_options[58ULL])), (cli_options[58ULL] =(CliOption){
-  320883072032, CLI_TRANSLATE, 665445396138972, _168, NULL, "Print host-preprocessed text and stop", 0
+  1374366630, CLI_TRANSLATE, 665445396138972, _168, NULL, "Print source tokens and stop", 0
 }
 ), (59ULL < sizeof(cli_options) / sizeof(cli_options[59ULL])), (cli_options[59ULL] =(CliOption){
-  320883072032, CLI_TRANSLATE, 665445396138972, _169, NULL, "Alias for --dump-cpp", 0
+  320883072032, CLI_TRANSLATE, 665445396138972, _169, NULL, "Print host-preprocessed text and stop", 0
 }
 ), (60ULL < sizeof(cli_options) / sizeof(cli_options[60ULL])), (cli_options[60ULL] =(CliOption){
-  247458062609318, CLI_TRANSLATE, 665445396138972, _170, NULL, "Print host-preprocessed tokens and stop", 0
+  320883072032, CLI_TRANSLATE, 665445396138972, _170, NULL, "Alias for --dump-cpp", 0
 }
 ), (61ULL < sizeof(cli_options) / sizeof(cli_options[61ULL])), (cli_options[61ULL] =(CliOption){
-  320883068136, CLI_TRANSLATE, 665445396138972, _171, NULL, "Print the parsed AST and stop", 0
+  247458062609318, CLI_TRANSLATE, 665445396138972, _171, NULL, "Print host-preprocessed tokens and stop", 0
 }
 ), (62ULL < sizeof(cli_options) / sizeof(cli_options[62ULL])), (cli_options[62ULL] =(CliOption){
-  1447057375073126, CLI_TRANSLATE, 665445396138972, _172, NULL, "Print the transformed AST and stop", 0
+  320883068136, CLI_TRANSLATE, 665445396138972, _172, NULL, "Print the parsed AST and stop", 0
 }
 ), (63ULL < sizeof(cli_options) / sizeof(cli_options[63ULL])), (cli_options[63ULL] =(CliOption){
-  10268258347430, CLI_TRANSLATE, 665445396138972, _173, NULL, "Print each definition's location and documentation and stop", 0
+  1447057375073126, CLI_TRANSLATE, 665445396138972, _173, NULL, "Print the transformed AST and stop", 0
 }
 ), (64ULL < sizeof(cli_options) / sizeof(cli_options[64ULL])), (cli_options[64ULL] =(CliOption){
-  10268258302218, CLI_TRANSLATE, 665445396138972, _174, NULL, "Print unformatted generated code and stop", 0
+  10268258347430, CLI_TRANSLATE, 665445396138972, _174, NULL, "Print each definition's location and documentation and stop", 0
 }
 ), (65ULL < sizeof(cli_options) / sizeof(cli_options[65ULL])), (cli_options[65ULL] =(CliOption){
-  42507336486, CLI_TRANSLATE, 665445396138972, _175, NULL, "Print the source symbol table and stop", 0
+  10268258302218, CLI_TRANSLATE, 665445396138972, _175, NULL, "Print unformatted generated code and stop", 0
 }
 ), (66ULL < sizeof(cli_options) / sizeof(cli_options[66ULL])), (cli_options[66ULL] =(CliOption){
-  10268258311770, CLI_TRANSLATE, 665445396138972, _176, NULL, "Print the CPP symbol table and stop", 0
+  42507336486, CLI_TRANSLATE, 665445396138972, _176, NULL, "Print the source symbol table and stop", 0
 }
 ), (67ULL < sizeof(cli_options) / sizeof(cli_options[67ULL])), (cli_options[67ULL] =(CliOption){
-  328584264751626, CLI_TRANSLATE, 665445396138972, _177, NULL, "Print the compiler cache and stop", 0
+  10268258311770, CLI_TRANSLATE, 665445396138972, _177, NULL, "Print the CPP symbol table and stop", 0
 }
 ), (68ULL < sizeof(cli_options) / sizeof(cli_options[68ULL])), (cli_options[68ULL] =(CliOption){
-  7478869146, CLI_TRANSLATE, 665445396138972, _178, NULL, "Print protocol conformance and stop", 0
+  328584264751626, CLI_TRANSLATE, 665445396138972, _178, NULL, "Print the compiler cache and stop", 0
 }
 ), (69ULL < sizeof(cli_options) / sizeof(cli_options[69ULL])), (cli_options[69ULL] =(CliOption){
+  7478869146, CLI_TRANSLATE, 665445396138972, _179, NULL, "Print protocol conformance and stop", 0
+}
+), (70ULL < sizeof(cli_options) / sizeof(cli_options[70ULL])), (cli_options[70ULL] =(CliOption){
   0
 }
 ))
@@ -748,77 +755,78 @@ __attribute__((constructor)) static void _file_init_(void){
   _145 = String_new("--c-system-dir");
   _146 = String_new("--package-dir");
   _147 = String_new("--native-module");
-  _148 = String_new("--no-cpp");
-  _149 = String_new("--live-symbols");
-  _150 = String_new("--cpp-symbols");
-  _151 = String_new("--cc");
-  _152 = String_new("--ar");
-  _153 = String_new("-O");
-  _154 = String_new("-O0, -O1, -O2, -O3, -Os");
-  _155 = String_new("-g");
-  _156 = String_new("-D");
-  _157 = String_new("-U");
-  _158 = String_new("-Xcc");
-  _159 = String_new("-L");
-  _160 = String_new("-l");
-  _161 = String_new("--rpath");
-  _162 = String_new("-Wl,");
-  _163 = String_new("-Wl,<arg>[,<arg>...]");
-  _164 = String_new("-pthread");
-  _165 = String_new("-framework");
-  _166 = String_new("-Xlinker");
-  _167 = String_new("--dump-tokens");
-  _168 = String_new("--dump-cpp");
-  _169 = String_new("--dump-cpp-text");
-  _170 = String_new("--dump-cpp-tokens");
-  _171 = String_new("--dump-ast");
-  _172 = String_new("--dump-transforms");
-  _173 = String_new("--dump-definitions");
-  _174 = String_new("--dump-code");
-  _175 = String_new("--dump-symbols");
-  _176 = String_new("--dump-cpp-symbols");
-  _177 = String_new("--dump-cache");
-  _178 = String_new("--dump-conformance");
-  _179 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
-  _180 = String_new("Input syntax:\n");
-  _181 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
-  _182 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
-  _183 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.");
-  _184 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
-  _185 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
-  _186 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.");
-  _187 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.");
-  _188 = String_new("Usage:\n  x2c bootstrap --prefix <dir> [options]\n\nExtract the source distribution carried by this APE and use the host\nC compiler and archiver to install a native x2c under <dir>.");
-  _189 = String_new("The seed supplies x2c sources and headers. A GCC- or Clang-compatible\nC compiler and a compatible archiver must be installed.");
-  _190 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive, command\ndirectory, identity, package roots, host tools, and script cache this\ncompiler resolved, one \'name = value\' line each, or only one value.");
-  _191 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/compiler-sdk.xlisp. Package roots join with \':\'.");
-  _192 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
-  _193 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
-  _194 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
-  _195 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
-  _196 = String_new("Usage:\n  x2c new [options] <dir>\n\nCreate a project in <dir> that builds and runs as written: x2c.toml,\nsrc/main.x, and .gitignore. The directory may be missing or empty.");
-  _197 = String_new("The target is named after the last component of <dir>, which may\ncontain letters, digits, \'_\', and \'-\'. Run \'x2c run\' in <dir> next.");
-  _198 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
-  _199 = String_new("Every word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
-  _200 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, new, script, repl,\nbootstrap, env, install, remove, or list.");
-  _201 = String_new("=");
-  _202 = String_new("-MMD");
-  _203 = String_new("-MP");
-  _204 = String_new("-MF");
-  _205 = String_new("-MT");
-  _206 = String_new(",-MMD");
-  _207 = String_new(",-MP");
-  _208 = String_new(",-MF");
-  _209 = String_new(",-MT");
-  _210 = String_new("job count");
-  _211 = String_new("error limit");
-  _212 = String_new("-isystem");
-  _213 = String_new("{package}");
-  _214 = String_new(".a");
-  _215 = String_new("@");
-  _216 = String_new("--save-temps=");
-  _217 = String_new("-O2");
-  _218 = String_new("x2c 0.14.0");
+  _148 = String_new("--extension");
+  _149 = String_new("--no-cpp");
+  _150 = String_new("--live-symbols");
+  _151 = String_new("--cpp-symbols");
+  _152 = String_new("--cc");
+  _153 = String_new("--ar");
+  _154 = String_new("-O");
+  _155 = String_new("-O0, -O1, -O2, -O3, -Os");
+  _156 = String_new("-g");
+  _157 = String_new("-D");
+  _158 = String_new("-U");
+  _159 = String_new("-Xcc");
+  _160 = String_new("-L");
+  _161 = String_new("-l");
+  _162 = String_new("--rpath");
+  _163 = String_new("-Wl,");
+  _164 = String_new("-Wl,<arg>[,<arg>...]");
+  _165 = String_new("-pthread");
+  _166 = String_new("-framework");
+  _167 = String_new("-Xlinker");
+  _168 = String_new("--dump-tokens");
+  _169 = String_new("--dump-cpp");
+  _170 = String_new("--dump-cpp-text");
+  _171 = String_new("--dump-cpp-tokens");
+  _172 = String_new("--dump-ast");
+  _173 = String_new("--dump-transforms");
+  _174 = String_new("--dump-definitions");
+  _175 = String_new("--dump-code");
+  _176 = String_new("--dump-symbols");
+  _177 = String_new("--dump-cpp-symbols");
+  _178 = String_new("--dump-cache");
+  _179 = String_new("--dump-conformance");
+  _180 = String_new("Usage:\n  x2c <command> [options]\n\nx2c translates x2c source to C and can optionally compile and link the\nresult with the host C toolchain.\n\nCommands:\n");
+  _181 = String_new("Input syntax:\n");
+  _182 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
+  _183 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
+  _184 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.");
+  _185 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
+  _186 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
+  _187 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.");
+  _188 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.");
+  _189 = String_new("Usage:\n  x2c bootstrap --prefix <dir> [options]\n\nExtract the source distribution carried by this APE and use the host\nC compiler and archiver to install a native x2c under <dir>.");
+  _190 = String_new("The seed supplies x2c sources and headers. A GCC- or Clang-compatible\nC compiler and a compatible archiver must be installed.");
+  _191 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive, command\ndirectory, identity, package roots, host tools, and script cache this\ncompiler resolved, one \'name = value\' line each, or only one value.");
+  _192 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/compiler-sdk.xlisp. Package roots join with \':\'.");
+  _193 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
+  _194 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
+  _195 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
+  _196 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
+  _197 = String_new("Usage:\n  x2c new [options] <dir>\n\nCreate a project in <dir> that builds and runs as written: x2c.toml,\nsrc/main.x, and .gitignore. The directory may be missing or empty.");
+  _198 = String_new("The target is named after the last component of <dir>, which may\ncontain letters, digits, \'_\', and \'-\'. Run \'x2c run\' in <dir> next.");
+  _199 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
+  _200 = String_new("Every word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
+  _201 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, new, script, repl,\nbootstrap, env, install, remove, or list.");
+  _202 = String_new("=");
+  _203 = String_new("-MMD");
+  _204 = String_new("-MP");
+  _205 = String_new("-MF");
+  _206 = String_new("-MT");
+  _207 = String_new(",-MMD");
+  _208 = String_new(",-MP");
+  _209 = String_new(",-MF");
+  _210 = String_new(",-MT");
+  _211 = String_new("job count");
+  _212 = String_new("error limit");
+  _213 = String_new("-isystem");
+  _214 = String_new("{package}");
+  _215 = String_new(".a");
+  _216 = String_new("@");
+  _217 = String_new("--save-temps=");
+  _218 = String_new("-O2");
+  _219 = String_new("x2c 0.14.0");
   _x2c_static_initialize_0();
 }
 
@@ -922,7 +930,7 @@ static void _print_options(Symbol command){
 String x2c_home_libexec(void);
 
 static void _print_top_help(void){
-  puts(_179);
+  puts(_180);
   for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", Symbol_str(command -> name), command -> description);
   String libexec = x2c_home_libexec();
   File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_52), NULL))), "r") : NULL;
@@ -944,75 +952,75 @@ static void _print_top_help(void){
   }
   _print_options(0);
   puts("");
-  puts(_180);
+  puts(_181);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   _print_help_row("--", "End option parsing", 2);
   puts("");
-  puts(_181);
+  puts(_182);
 }
 
 static void _print_translate_help(void){
-  puts(_182);
+  puts(_183);
   _print_options(45220543335690);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   _print_help_row("--", "End option parsing", 2);
   puts("");
-  puts(_183);
+  puts(_184);
 }
 
 static void _print_driver_help(Symbol command){
-  if(command == 5589768) puts(_184);
-  else puts(_185);
+  if(command == 5589768) puts(_185);
+  else puts(_186);
   _print_options(command);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   if(command == 38236) _print_help_row("--", "End build options and begin program arguments", 2);
   else _print_help_row("--", "End option parsing", 2);
   puts("");
-  if(command == 5589768) puts(_186);
-  else puts(_187);
+  if(command == 5589768) puts(_187);
+  else puts(_188);
 }
 
 static void _print_bootstrap_help(void){
-  puts(_188);
+  puts(_189);
   _print_options(5462434287712);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   puts("");
-  puts(_189);
+  puts(_190);
 }
 
 static void _print_env_help(void){
-  puts(_190);
+  puts(_191);
   _print_options(11180);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   puts("");
-  puts(_191);
+  puts(_192);
 }
 
 static void _print_package_help(Symbol command){
-  if(command == 20308036376) puts(_192);
-  else if(command == 1219329418) puts(_193);
-  else puts(_194);
+  if(command == 20308036376) puts(_193);
+  else if(command == 1219329418) puts(_194);
+  else puts(_195);
   _print_options(command);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   if(command != 20308036376) return;
   puts("");
-  puts(_195);
+  puts(_196);
 }
 
 static void _print_new_help(void){
-  puts(_196);
+  puts(_197);
   _print_options(29038);
   _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   puts("");
-  puts(_197);
+  puts(_198);
 }
 
 static void _print_script_help(void){
-  puts(_198);
+  puts(_199);
   _print_options(1282559016);
   _print_help_row("@<file>", "Read additional options from a response file", 2);
   puts("");
-  puts(_199);
+  puts(_200);
 }
 
 void x2c_driver_error(const char *);
@@ -1052,7 +1060,7 @@ static void _print_help(Symbol command){
       break;
     }
     case 535328 :{
-      puts(_200);
+      puts(_201);
       break;
     }
     default:{
@@ -1313,7 +1321,7 @@ int String_find(String, String);
 
 static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
   String arg = Var_string(Array_getindex(args, (* index))), written = arg, joined = NULL;
-  int equals = String_startswith(arg, _93) ? String_find(arg, _201) : - 1;
+  int equals = String_startswith(arg, _93) ? String_find(arg, _202) : - 1;
   if(equals > 2){
     written = String_getslice(arg, -2147483648, equals, 1);
     joined = String_getslice(arg, equals + 1, -2147483648, 1);
@@ -1342,7 +1350,7 @@ int String_contains(String, String);
 
 int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
-  return String_truth(s) &&(String_startswith(s, _202) || String_startswith(s, _203) || String_startswith(s, _204) || String_startswith(s, _205) || String_contains(s, _206) || String_contains(s, _207) || String_contains(s, _208) || String_contains(s, _209));
+  return String_truth(s) &&(String_startswith(s, _203) || String_startswith(s, _204) || String_startswith(s, _205) || String_startswith(s, _206) || String_contains(s, _207) || String_contains(s, _208) || String_contains(s, _209) || String_contains(s, _210));
 }
 
 static void _driver_kind(CliRequest request, String value){
@@ -1446,6 +1454,10 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
       c -> native_modules = cons(String_var(value), c -> native_modules);
       break;
     }
+    case 12687699561436 :{
+      c -> extensions = cons(String_var(value), c -> extensions);
+      break;
+    }
     case 973020192 :{
       c -> no_cpp = 1;
       break;
@@ -1499,11 +1511,11 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
       break;
     }
     case 686246 :{
-      c -> jobs = _driver_count(value, 1, _210);
+      c -> jobs = _driver_count(value, 1, _211);
       break;
     }
     case 918708911504550 :{
-      c -> max_errors = _driver_count(value, 0, _211);
+      c -> max_errors = _driver_count(value, 0, _212);
       break;
     }
     case 9417250982666 :{
@@ -1540,7 +1552,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
       break;
     }
     case 274059207002 :{
-      _push_pair(cc_args, _212, value);
+      _push_pair(cc_args, _213, value);
       break;
     }
     case 198 :{
@@ -1623,7 +1635,7 @@ CliRequest cli_package_options(String path, String package){
       Var _x2c_macro_cursor_output_2;
       while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
         word = Var_string(_x2c_macro_cursor_output_2);
-        Array_push(words, String_var(String_replace(word, _213, package)));
+        Array_push(words, String_var(String_replace(word, _214, package)));
       }
 
     }
@@ -1633,7 +1645,7 @@ CliRequest cli_package_options(String path, String package){
     for(int i = 0;  i < Array_len(words);  i ++){
       String argument = Var_string(Array_getindex(words, i));
       if(! String_truth(argument)) x2c_driver_error("empty package native argument");
-      if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _214)){
+      if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _215)){
         Array_push(link, String_var(argument));
         continue;
       }
@@ -1721,7 +1733,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
       continue;
     }
     if(mask == CLI_BOOTSTRAP && ! dashed) x2c_driver_error(String_join(NULL, cons(String_var(_94), cons(String_var(arg), cons(String_var(_75), NULL)))));
-    if(mask == CLI_SCRIPT && ! operands && i >= expanded_end && String_startswith(arg, _215)){
+    if(mask == CLI_SCRIPT && ! operands && i >= expanded_end && String_startswith(arg, _216)){
       Array expanded = Array_new();
       _expand_argument(expanded, arg, NULL);
       Array_splice(args, i, 1, expanded);
@@ -1736,9 +1748,9 @@ static CliRequest _parse_command(Array args, CliCommand * command){
       continue;
     }
     if(mask != CLI_BOOTSTRAP && String_equal(arg, _95)) _removed_output();
-    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _216)){
+    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _217)){
       request -> save_temps = 1;
-      request -> temps_dir = String_remove_prefix(arg, _216);
+      request -> temps_dir = String_remove_prefix(arg, _217);
       if(! String_truth(request -> temps_dir)) x2c_driver_error("--save-temps= requires a directory");
       continue;
     }
@@ -1755,11 +1767,12 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   request -> run_args = Array_list_free(run_args);
   request -> include_dirs = Array_list_free(x_paths);
   request -> cpp_args = Array_list_free(cpp_args);
-  if(mask == CLI_BOOTSTRAP && ! Array_len(cc_args)) Array_push(cc_args, String_var(_217));
+  if(mask == CLI_BOOTSTRAP && ! Array_len(cc_args)) Array_push(cc_args, String_var(_218));
   request -> cc_args = Array_list_free(cc_args);
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);
   request -> native_modules = List_reverse(request -> native_modules);
+  request -> extensions = List_reverse(request -> extensions);
   if(mask == CLI_TRANSLATE && ! List_truth(request -> inputs)) x2c_driver_error("translate requires at least one input");
   if(List_truth(List_cdr(request -> inputs)) &&(String_truth(request -> dep_file) || String_truth(request -> dep_target))) x2c_driver_error("--dep-file and --dep-target require exactly one input");
   if(request -> no_deps &&(String_truth(request -> dep_file) || String_truth(request -> dep_target) || request -> no_phony_deps)) x2c_driver_error("--no-deps conflicts with dependency output options");
@@ -1842,7 +1855,7 @@ CliRequest cli_parse(int argc, char * * argv){
 
 String cli_version(void){
   if(! _init_guard_) _file_init_();
-  return _218;
+  return _219;
 }
 
 int CliRequest_inspects(CliRequest request){

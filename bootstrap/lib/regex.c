@@ -16,6 +16,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
+Regex Var_regex(Var value);
+
 #include <string.h>
 struct _RegexNode{
   Symbol kind;
@@ -401,7 +403,7 @@ _Noreturn static void _fail(_Parser * p, String why){
   String pattern =(* p).regex -> pattern;
   int offset =(* p).pos;
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "_fail",.line = 77};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "_fail",.line = 79};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(34470112412), String_var(pattern), Symbol_var(1019648360), int_var(offset));
     __builtin_unreachable();
   }
@@ -717,7 +719,7 @@ static int _iterate(_State * st, _RegexNode rep, int count, int pos, int last_st
   if((* st).depth == _DEPTH_LIMIT){
     String pattern =(* st).regex -> pattern;
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_iterate",.line = 415};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_iterate",.line = 417};
       x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))), Symbol_var(34470112412), String_var(pattern), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL))), Symbol_var(25782888), int_var(_DEPTH_LIMIT));
       __builtin_unreachable();
     }
