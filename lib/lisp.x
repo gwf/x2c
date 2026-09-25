@@ -680,7 +680,7 @@ static Symbol _read_tokenizer(
 static Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
   Tokenizer tokenizer = NULL;
   $scope(scope) {
-    tokenizer = Tokenizer.new_mode(source, <lisp>);
+    tokenizer = Tokenizer.new(source, <lisp>);
     tokenizer.scan();
   }
   return tokenizer;

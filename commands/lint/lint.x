@@ -197,7 +197,7 @@ static int _quoting(Lint l, int at, int outer):
 
 /** Scans `text` and indexes its brackets, quoting, and lines. */
 Lint Lint.new(String path, String text, Map selected):
-  Tokenizer scanner = Tokenizer.new(text)
+  Tokenizer scanner = Tokenizer.new(text, <x2c>)
   scanner.scan()
   struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1

@@ -5,7 +5,7 @@ $(import "test-macros.xmacro")
 #include <stdint.h>
 
 static Tokenizer _lisp_tokens(char *source) {
-  Tokenizer tokenizer = Tokenizer.new_mode(source, <lisp>);
+  Tokenizer tokenizer = Tokenizer.new(source, <lisp>);
   tokenizer.scan();
   return tokenizer;
 }
@@ -64,7 +64,7 @@ static void tokenizer_stray_close_keeps_lisp_mode(void) {
 }
 
 static void tokenizer_postfix_update_ends_operand(void) {
-  Tokenizer tokenizer = Tokenizer.new("x++ < y; x-- > z;");
+  Tokenizer tokenizer = Tokenizer.new("x++ < y; x-- > z;", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <ident>, <++>, <"<">, <ident>, <;>,
@@ -77,7 +77,7 @@ static void tokenizer_postfix_update_ends_operand(void) {
 
 /* Scans x2c source and returns the text of its last `%`-prefixed token. */
 static String _last_percent_token(char *source) {
-  Tokenizer tokenizer = Tokenizer.new(source);
+  Tokenizer tokenizer = Tokenizer.new(source, <x2c>);
   tokenizer.scan();
   EXPECT_INT_EQ(tokenizer.status(), <ok>);
   String text = NULL;
@@ -125,7 +125,7 @@ static void tokenizer_percent_after_closing_delimiter(void) {
   }
 
   // A `%` that ends the input is one byte, even where a literal could open.
-  Tokenizer tokenizer = Tokenizer.new("x = %");
+  Tokenizer tokenizer = Tokenizer.new("x = %", <x2c>);
   tokenizer.scan();
   Symbol expected[] = { <ident>, <=>, <%>, <eof> };
   for (int i = 0; i < 4; i++) {
@@ -138,7 +138,8 @@ static void tokenizer_percent_after_closing_delimiter(void) {
 
 
 static void tokenizer_list_mode_bare_at_is_an_atom(void) {
-  Tokenizer tokenizer = Tokenizer.new("%(op @ a b); %(op @= a); %(@); @rest");
+  Tokenizer tokenizer =
+    Tokenizer.new("%(op @ a b); %(op @= a); %(@); @rest", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <lit-atom>, <lit-atom>, <lit-atom>, <lit-atom>, <)>, <;>,
@@ -152,8 +153,7 @@ static void tokenizer_list_mode_bare_at_is_an_atom(void) {
 
 static void tokenizer_parenthesized_forms_stay_in_literal_modes(void) {
   Tokenizer tokenizer = Tokenizer.new(
-    "%(a $(call(1)) @(tail()) c); %\"x$(call())y\""
-  );
+    "%(a $(call(1)) @(tail()) c); %\"x$(call())y\"", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <lit-atom>, <$>, <(>, <lit-atom>, <(>, <lit-int>, <)>,
@@ -168,8 +168,8 @@ static void tokenizer_parenthesized_forms_stay_in_literal_modes(void) {
 
 static void tokenizer_braced_literal_unquote_modes(void) {
   Tokenizer tokenizer = Tokenizer.new(
-    "%(a ${call(1, %(b))} @{t()} \"x${call()}y\" c); %\"x${call()}y @{t}\""
-  );
+    "%(a ${call(1, %(b))} @{t()} \"x${call()}y\" c); %\"x${call()}y @{t}\"",
+    <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <lit-atom>, <"${">, <ident>, <(>, <lit-int>, <,>,
@@ -189,8 +189,7 @@ static void tokenizer_braced_literal_unquote_modes(void) {
 static void tokenizer_typed_capture_parentheses(void) {
   Tokenizer tokenizer = Tokenizer.new(
     "%(?($T value) ?(int (*)(String) fn) ? (String text) "
-    "${call()} @{tail()}); int after;"
-  );
+    "${call()} @{tail()}); int after;", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <"?(">, <$>, <ident>, <ident>, <)>,
@@ -207,7 +206,7 @@ static void tokenizer_typed_capture_parentheses(void) {
 
 
 static void tokenizer_list_reader_prefixes(void) {
-  Tokenizer tokenizer = Tokenizer.new("%(`(a ,(b) ,@tail))");
+  Tokenizer tokenizer = Tokenizer.new("%(`(a ,(b) ,@tail))", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%(">, <"`">, <"(">, <lit-atom>, <",">, <"(">,
@@ -225,7 +224,7 @@ static void tokenizer_list_reader_prefixes(void) {
 
 
 static void tokenizer_symbol_set_quotes_hold_the_terminator(void) {
-  Tokenizer tokenizer = Tokenizer.new("%<<\"|=\" \">>\" plain>>");
+  Tokenizer tokenizer = Tokenizer.new("%<<\"|=\" \">>\" plain>>", <x2c>);
   tokenizer.scan();
   Symbol expected[] = {
     <"%<<">, <lit-atom>, <lit-atom>, <lit-atom>, <">>">, <eof>
@@ -239,7 +238,7 @@ static void tokenizer_symbol_set_quotes_hold_the_terminator(void) {
   EXPECT_INT_EQ(tokenizer.status(), <ok>);
 
   // An unterminated entry fails the scan instead of truncating at `>>`.
-  Tokenizer unterminated = Tokenizer.new("%<<\"open>>");
+  Tokenizer unterminated = Tokenizer.new("%<<\"open>>", <x2c>);
   unterminated.scan();
   EXPECT_INT_EQ(unterminated.status(), <malformed>);
   EXPECT_INT_EQ(unterminated.next().type, <"%<<">);
@@ -250,7 +249,7 @@ static void tokenizer_symbol_set_quotes_hold_the_terminator(void) {
 
 static void tokenizer_failed_scan_preserves_source_and_mode(void) {
   $test.scoped();
-  Tokenizer transfer_percent = Tokenizer.new("%(");
+  Tokenizer transfer_percent = Tokenizer.new("%(", <x2c>);
   Block percent_tokens = transfer_percent.tokens;
   size_t percent_width = percent_tokens.width;
   size_t percent_cap = percent_tokens.cap;
@@ -269,7 +268,7 @@ static void tokenizer_failed_scan_preserves_source_and_mode(void) {
   EXPECT_TRUE(transfer_percent.modes[0] == <x2c>);
   EXPECT_INT_EQ(transfer_percent.pos, 0);
 
-  Tokenizer transfer_operator = Tokenizer.new_mode("[", <list>);
+  Tokenizer transfer_operator = Tokenizer.new("[", <list>);
   Block operator_tokens = transfer_operator.tokens;
   size_t operator_width = operator_tokens.width;
   size_t operator_cap = operator_tokens.cap;

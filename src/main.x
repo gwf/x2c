@@ -278,7 +278,7 @@ static List _imported_packages(String path) {
   try text = Path.read_text(path);
   catch %(not-found *): return NULL;
   catch %(io-fail *): return NULL;
-  Tokenizer tokens = Tokenizer.new(text);
+  Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.scan();
   Array names = [];
   int depth = 0;
