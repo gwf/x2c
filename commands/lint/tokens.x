@@ -16,7 +16,7 @@ static const SymbolSet type_words =
 static const SymbolSet qualifier_words =
   %<<static const unsigned signed long short>>
 
-/* A binary or assignment operator, which the style guide spaces once. */
+/* The style guide spaces binary and assignment operators once. */
 static int _operator(Token t) =>
   lint_code(t) && strchr("|&+*/=-", t.text[t.len - 1])
 
@@ -27,7 +27,7 @@ static String _next_line(char **cursor):
   *cursor = *end ? end + 1 : end
   return String.new_len(start, end - start)
 
-/* Whether a token starting on `line` is a literal. */
+/* Only tokens that start on `line` count. */
 static int _line_has_literal(Lint l, int line):
   for (int at = l.first[line]; at >= 0 && at < l.count &&
        l.tokens[at].line == line; at++):

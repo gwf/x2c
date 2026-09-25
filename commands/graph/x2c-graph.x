@@ -67,8 +67,7 @@ static List _call_records(Map calls) {
 
 static String _source_function_name(Compiler compiler, List binding) {
   Var stored;
-  if (compiler.semantic_binding_facts().try_get(
-        %(method $binding), &stored)) {
+  if (compiler.semantic_binding_facts().try_get(%(method $binding), &stored)) {
     List method = stored;
     match (method)
       case %((!is ?owner type string) (!is ?member type string)):
@@ -93,22 +92,20 @@ static List _analyze_unit(Compiler compiler, List ast) {
         Symbol visibility = ((Type) type).is_static()
                           ? <static> : <public>;
         source_order++;
-        functions.push(%(
-          function $identity $name $visibility
-          (source $source_name $source_order)
-          (calls @{_call_records(calls)})
-        ));
+        functions.push(
+          %(function $identity $name $visibility
+            (source $source_name $source_order)
+            (calls @{_call_records(calls)})));
         continue;
       }
     }
     _collect_calls(compiler, node, top_level_calls);
   }
   if (top_level_calls.len())
-    functions.push(%(
-      function 0 "<top-level>" static
-      (source "<top-level>" 0)
-      (calls @{_call_records(top_level_calls)})
-    ));
+    functions.push(
+      %(function 0 "<top-level>" static
+        (source "<top-level>" 0)
+        (calls @{_call_records(top_level_calls)})));
   functions.sort();
   return functions.list_free();
 }
@@ -125,12 +122,10 @@ static int _field_access_matches(
   match (node) {
     case %(op . (expr ?type ?) (?member)):
       return _field_access_parts(
-        type, member, receiver_name, field_name
-      );
+        type, member, receiver_name, field_name);
     case %(op (!quote ->) (expr ?type ?) (?member)):
       return _field_access_parts(
-        type, member, receiver_name, field_name
-      );
+        type, member, receiver_name, field_name);
   }
   return 0;
 }
@@ -196,41 +191,35 @@ static void _collect_tail_calls(
     case %(at ?next_origin ?inner): {
       _collect_tail_calls(
         compiler, inner, self, path, next_origin.integer(), tail,
-        counts, blockers, sites
-      );
+        counts, blockers, sites);
       return;
     }
     case %(return ? ?expression): {
       _collect_tail_calls(
         compiler, expression, self, path, origin, 1,
-        counts, blockers, sites
-      );
+        counts, blockers, sites);
       return;
     }
     case %(expr ? ?inner): {
       _collect_tail_calls(
         compiler, inner, self, path, origin, tail,
-        counts, blockers, sites
-      );
+        counts, blockers, sites);
       return;
     }
     case %(parens ?inner): {
       _collect_tail_calls(
         compiler, inner, self, path, origin, tail,
-        counts, blockers, sites
-      );
+        counts, blockers, sites);
       return;
     }
     case %(op (!quote ?) ?condition ?ontrue ?onfalse): {
       _collect_tail_calls(
         compiler, condition, self, path, origin, 0,
-        counts, blockers, sites
-      );
+        counts, blockers, sites);
       foreach (Var arm, %($ontrue $onfalse))
         _collect_tail_calls(
           compiler, arm, self, path, origin, tail,
-          counts, blockers, sites
-        );
+          counts, blockers, sites);
       return;
     }
     case %(defer *): blockers[<cleanup>] = 1;
@@ -242,17 +231,15 @@ static void _collect_tail_calls(
       if (List.equal(callee, self)) {
         Symbol kind = tail ? <tail> : <non-tail>;
         _increment(counts, %(kind $kind), 1);
-        sites.push(%(
-          site $kind ${project_location(compiler, path, origin)}
-        ));
+        sites.push(
+          %(site $kind ${project_location(compiler, path, origin)}));
       }
     }
   }
   foreach (Var child, node)
     _collect_tail_calls(
       compiler, child, self, path, origin, 0,
-      counts, blockers, sites
-    );
+      counts, blockers, sites);
 }
 
 static int _kind_count(Map counts, Symbol kind) {
@@ -271,8 +258,7 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         Array sites = [];
         _collect_tail_calls(
           compiler, body, binding, path, 0, 0,
-          counts, blockers, sites
-        );
+          counts, blockers, sites);
         int tail = _kind_count(counts, <tail>);
         int non_tail = _kind_count(counts, <non-tail>);
         if (!tail) continue;
@@ -283,12 +269,11 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         sites.sort();
         Symbol visibility = ((Type) type).is_static()
                           ? <static> : <public>;
-        functions.push(%(
-          function ${compiler.emitted_binding_name(binding)} $visibility
-          (calls (tail $tail) (non-tail $non_tail))
-          (blockers @{blocker_rows.list_free()})
-          (sites @{sites.list_free()})
-        ));
+        functions.push(
+          %(function ${compiler.emitted_binding_name(binding)} $visibility
+            (calls (tail $tail) (non-tail $non_tail))
+            (blockers @{blocker_rows.list_free()})
+            (sites @{sites.list_free()})));
       }
   functions.sort();
   return functions.list_free();
@@ -314,8 +299,7 @@ static void _collect_walk_calls(
     case %(function *): return;
     case %(at ?next_origin ?inner): {
       _collect_walk_calls(
-        compiler, inner, path, next_origin.integer(), definitions, calls
-      );
+        compiler, inner, path, next_origin.integer(), definitions, calls);
       return;
     }
     case %(expr ?
@@ -334,26 +318,23 @@ static void _collect_walk_calls(
       List target = definitions.contains(callee)
                   ? definitions[callee].list()
                   : %(public ${compiler.emitted_binding_name(callee)});
-      calls.push(%(
-        call $target ${compiler.emitted_binding_name(callee)}
-        ${project_location(compiler, path, origin)}
-        (arguments @{direct_arguments.list_free()})
-      ));
+      calls.push(
+        %(call $target ${compiler.emitted_binding_name(callee)}
+          ${project_location(compiler, path, origin)}
+          (arguments @{direct_arguments.list_free()})));
     }
     /* foreach over a List copies the collection into this local before its
        cursor loop, so the copy's initializer is the walked value. */
     case %(op = (bind (binding ? ?spelling) ?) ?collection): {
       List root = _walk_argument_root(collection);
       if (root && spelling.str().startswith("_x2c_macro_object_"))
-        calls.push(%(
-          foreach ${project_location(compiler, path, origin)} $root
-        ));
+        calls.push(
+          %(foreach ${project_location(compiler, path, origin)} $root));
     }
   }
   foreach (Var child, node)
     _collect_walk_calls(
-      compiler, child, path, origin, definitions, calls
-    );
+      compiler, child, path, origin, definitions, calls);
 }
 
 static void _walk_collect_parameters(
@@ -368,9 +349,8 @@ static void _walk_collect_parameters(
             (bind (binding (!set ?identity) ?spelling) ?)
           ): {
             parameters[identity] = position;
-            records.push(%(
-              parameter $position $identity $type $spelling
-            ));
+            records.push(
+              %(parameter $position $identity $type $spelling));
           }
         position++;
       }
@@ -503,25 +483,22 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
         Map parameters = {};
         Array parameter_records = [];
         _walk_collect_parameters(
-          modifiers, parameters, parameter_records
-        );
+          modifiers, parameters, parameter_records);
         List parameter_list = parameter_records.list_free();
         Array calls = [];
         _collect_walk_calls(
-          compiler, body, path, 0, definitions, calls
-        );
+          compiler, body, path, 0, definitions, calls);
         calls.sort();
         List call_list = calls.list_free();
         Symbol visibility = ((Type) type).is_static()
                           ? <static> : <public>;
-        functions.push(%(
-          function $target ${compiler.emitted_binding_name(binding)}
-          $visibility (parameters @parameter_list) (calls @call_list)
-          (direct
-            @{_walk_direct_parameters(
-              body, target, parameter_list, call_list
-            )})
-        ));
+        functions.push(
+          %(function $target ${compiler.emitted_binding_name(binding)}
+            $visibility (parameters @parameter_list) (calls @call_list)
+            (direct
+              @{_walk_direct_parameters(
+                body, target, parameter_list, call_list
+              )})));
       }
   functions.sort();
   return functions.list_free();
@@ -561,8 +538,7 @@ static List _walk_candidates(List functions) {
             ):
               _walk_add_summary(
                 walked, target,
-                %(walk $position $type $path $display $kind)
-              );
+                %(walk $position $type $path $display $kind));
 
   int changed;
   do {
@@ -601,12 +577,10 @@ static List _walk_candidates(List functions) {
                     }
                   if (position < 0 || path) continue;
                   List root = _walk_call_argument(
-                    arguments, position
-                  );
+                    arguments, position);
                   if (!root) continue;
                   int caller_position = _walk_root_parameter(
-                    root, parameter_map
-                  );
+                    root, parameter_map);
                   match (root)
                     case %(root ? ? ?root_type (path *root_path) ?display):
                       if (caller_position >= 0 && !root_path &&
@@ -650,8 +624,7 @@ static List _walk_candidates(List functions) {
                       List sites = groups.contains(key)
                                  ? groups[key].list() : NULL;
                       groups[key] = cons(
-                        %(site "<inline>" $location), sites
-                      );
+                        %(site "<inline>" $location), sites);
                     }
             }
         foreach (List call, calls)
@@ -680,8 +653,7 @@ static List _walk_candidates(List functions) {
                     }
                   if (position < 0) continue;
                   List root = _walk_call_argument(
-                    arguments, position
-                  );
+                    arguments, position);
                   match (root)
                     case %(
                       root ?argument_identity ?spelling ?
@@ -692,8 +664,7 @@ static List _walk_candidates(List functions) {
                       foreach (Var step, suffix) path_parts.push(step);
                       List combined = path_parts.list_free();
                       String display = _walk_root_spelling(
-                        spelling.str(), combined
-                      );
+                        spelling.str(), combined);
                       List key = %(
                         group $caller $path $caller_name $visibility
                         $argument_identity $spelling $terminal_type
@@ -704,8 +675,7 @@ static List _walk_candidates(List functions) {
                       List sites = groups.contains(key)
                                  ? groups[key].list() : NULL;
                       groups[key] = cons(
-                        %(site $callee_name $location), sites
-                      );
+                        %(site $callee_name $location), sites);
                     }
                 }
             }
@@ -736,12 +706,12 @@ static List _walk_candidates(List functions) {
       ): {
         List candidates = by_unit.contains(path)
                         ? by_unit[path].list() : NULL;
-        by_unit[path] = cons(%(
-          candidate $caller_name $visibility
-          (argument $type $display)
-          (walkers @{sorted_walkers.list_free()})
-          (sites @{sorted_sites.list_free()})
-        ), candidates);
+        by_unit[path] = cons(
+          %(candidate $caller_name $visibility
+            (argument $type $display)
+            (walkers @{sorted_walkers.list_free()})
+            (sites @{sorted_sites.list_free()})),
+          candidates);
       }
   }
   Array units = [];
@@ -749,9 +719,8 @@ static List _walk_candidates(List functions) {
     Array candidates = [];
     foreach (List candidate, values.list()) candidates.push(candidate);
     candidates.sort();
-    units.push(%(
-      unit $path (candidates @{candidates.list_free()})
-    ));
+    units.push(
+      %(unit $path (candidates @{candidates.list_free()})));
   }
   units.sort();
   return %(walks (units @{units.list_free()}));
@@ -783,16 +752,13 @@ static List _site_value_summary(
   match (node) {
     case %(expr ? ?inner):
       return _site_value_summary(
-        compiler, inner, parameters, prior_writes
-      );
+        compiler, inner, parameters, prior_writes);
     case %(parens ?inner):
       return _site_value_summary(
-        compiler, inner, parameters, prior_writes
-      );
+        compiler, inner, parameters, prior_writes);
     case %(at ? ?inner):
       return _site_value_summary(
-        compiler, inner, parameters, prior_writes
-      );
+        compiler, inner, parameters, prior_writes);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       if (parameters.contains(binding)) return %(parameter $spelling);
       if (prior_writes.contains(binding)) {
@@ -820,8 +786,7 @@ static List _site_value_summary(
     case %((!or index getindex) ?target ?):
       return %(
         index ${_site_value_summary(
-          compiler, target, parameters, prior_writes
-        )}
+          compiler, target, parameters, prior_writes)}
       );
     case %(literal ? ?spelling *): return %(literal $spelling);
     case %(cons *): return %(list);
@@ -830,8 +795,7 @@ static List _site_value_summary(
     case %(cast ? ?inner):
       return %(
         cast ${_site_value_summary(
-          compiler, inner, parameters, prior_writes
-        )}
+          compiler, inner, parameters, prior_writes)}
       );
     case %(op ?operator *): return %(operator $operator);
     case %(cache ?): return %(constant);
@@ -845,8 +809,7 @@ static List _site_argument_summary(
   match (argument)
     case %(expr ?type ?): {
       List summary = _site_value_summary(
-        compiler, argument, parameters, prior_writes
-      );
+        compiler, argument, parameters, prior_writes);
       if (type is <list> && List.equal(type.list(), %("List")) &&
           List.equal(summary, %(constant)))
         summary = %(list);
@@ -891,12 +854,10 @@ static void _collect_sites(
     case %(op = (bind (!set ?binding (binding ? ?)) ?) ?right): {
       _collect_sites(
         compiler, right, path, caller, visibility, wanted,
-        parameters, prior_writes, sites
-      );
+        parameters, prior_writes, sites);
       _site_add_prior_write(
         prior_writes, binding,
-        _site_value_summary(compiler, right, {}, {})
-      );
+        _site_value_summary(compiler, right, {}, {}));
       return;
     }
     case %(op ?operator ?left *right):
@@ -904,19 +865,15 @@ static void _collect_sites(
           ast_changes_left_operand(operator.symbol())) {
         _collect_sites(
           compiler, left, path, caller, visibility, wanted,
-          parameters, prior_writes, sites
-        );
+          parameters, prior_writes, sites);
         foreach (Var child, right)
           _collect_sites(
             compiler, child, path, caller, visibility, wanted,
-            parameters, prior_writes, sites
-          );
+            parameters, prior_writes, sites);
         List binding = _site_direct_binding(left);
         if (binding) {
           List summary = operator == <=> && right
-                       ? _site_value_summary(
-                           compiler, right.car(), {}, {}
-                         )
+                       ? _site_value_summary(compiler, right.car(), {}, {})
                        : %(operator $operator);
           _site_add_prior_write(prior_writes, binding, summary);
         }
@@ -925,13 +882,11 @@ static void _collect_sites(
     case %(postfix ?operator ?target): {
       _collect_sites(
         compiler, target, path, caller, visibility, wanted,
-        parameters, prior_writes, sites
-      );
+        parameters, prior_writes, sites);
       List binding = _site_direct_binding(target);
       if (binding)
         _site_add_prior_write(
-          prior_writes, binding, %(operator $operator)
-        );
+          prior_writes, binding, %(operator $operator));
       return;
     }
     case %(expr ? (call ?callee (args *arguments))): {
@@ -939,9 +894,9 @@ static void _collect_sites(
       if (name == wanted) {
         Array summaries = [];
         foreach (Var argument, arguments)
-          summaries.push(_site_argument_summary(
-            compiler, argument, parameters, prior_writes
-          ));
+          summaries.push(
+            _site_argument_summary(
+              compiler, argument, parameters, prior_writes));
         _increment(
           sites,
           %(
@@ -956,8 +911,7 @@ static void _collect_sites(
   foreach (Var child, node)
     _collect_sites(
       compiler, child, path, caller, visibility, wanted,
-      parameters, prior_writes, sites
-    );
+      parameters, prior_writes, sites);
 }
 
 static List _site_records(Map sites) {
@@ -966,10 +920,9 @@ static List _site_records(Map sites) {
     List call = key;
     match (call)
       case %(call ?path ?caller ?visibility (args *arguments)):
-        records.push(%(
-          call $path $caller $visibility ${count.int()}
-          (args @arguments)
-        ));
+        records.push(
+          %(call $path $caller $visibility ${count.int()}
+            (args @arguments)));
   }
   records.sort();
   return records.list_free();
@@ -990,14 +943,12 @@ static List _analyze_sites_unit(
                           ? <static> : <public>;
         _collect_sites(
           compiler, body, path, caller, visibility, wanted,
-          parameters, prior_writes, sites
-        );
+          parameters, prior_writes, sites);
         continue;
       }
     _collect_sites(
       compiler, node, path, "<top-level>", <static>, wanted,
-      {}, top_level_writes, sites
-    );
+      {}, top_level_writes, sites);
   }
   return _site_records(sites);
 }
@@ -1040,8 +991,7 @@ static void _collect_field_sites(
     if (access == <replace>) {
       Var type = _field_site_value_type(replacement);
       List summary = _site_value_summary(
-        compiler, replacement, parameters, {}
-      );
+        compiler, replacement, parameters, {});
       detail = %(access replace (value $type $summary));
     }
     else detail = %(access $access);
@@ -1061,40 +1011,34 @@ static void _collect_field_sites(
       _collect_field_sites(
         compiler, inner, path, caller, visibility,
         receiver_name, field_name, parameters, access, replacement,
-        next_origin.integer(), sites
-      );
+        next_origin.integer(), sites);
       return;
     }
     case %(expr ? ?inner): {
       _collect_field_sites(
         compiler, inner, path, caller, visibility,
         receiver_name, field_name, parameters, access, replacement,
-        origin, sites
-      );
+        origin, sites);
       return;
     }
     case %(parens ?inner): {
       _collect_field_sites(
         compiler, inner, path, caller, visibility,
         receiver_name, field_name, parameters, access, replacement,
-        origin, sites
-      );
+        origin, sites);
       return;
     }
     case %(op = ?left ?right): {
       Symbol left_access = _field_whole_target(
-        left, receiver_name, field_name
-      ) ? <replace> : <mutate>;
+        left, receiver_name, field_name) ? <replace> : <mutate>;
       _collect_field_sites(
         compiler, left, path, caller, visibility,
         receiver_name, field_name, parameters, left_access, right,
-        origin, sites
-      );
+        origin, sites);
       _collect_field_sites(
         compiler, right, path, caller, visibility,
         receiver_name, field_name, parameters, <read>, void,
-        origin, sites
-      );
+        origin, sites);
       return;
     }
     case %(op ?operator ?left *right):
@@ -1103,49 +1047,42 @@ static void _collect_field_sites(
         _collect_field_sites(
           compiler, left, path, caller, visibility,
           receiver_name, field_name, parameters, <mutate>, void,
-          origin, sites
-        );
+          origin, sites);
         foreach (Var child, right)
           _collect_field_sites(
             compiler, child, path, caller, visibility,
             receiver_name, field_name, parameters, <read>, void,
-            origin, sites
-          );
+            origin, sites);
         return;
       }
     case %(postfix ? ?target): {
       _collect_field_sites(
         compiler, target, path, caller, visibility,
         receiver_name, field_name, parameters, <mutate>, void,
-        origin, sites
-      );
+        origin, sites);
       return;
     }
     case %((!or vcompound vpostfix) ?target *rest): {
       _collect_field_sites(
         compiler, target, path, caller, visibility,
         receiver_name, field_name, parameters, <mutate>, void,
-        origin, sites
-      );
+        origin, sites);
       foreach (Var child, rest)
         _collect_field_sites(
           compiler, child, path, caller, visibility,
           receiver_name, field_name, parameters, <read>, void,
-          origin, sites
-        );
+          origin, sites);
       return;
     }
     case %((!or index getindex) ?target ?selector): {
       _collect_field_sites(
         compiler, target, path, caller, visibility,
         receiver_name, field_name, parameters,
-        access == <read> ? <read> : <mutate>, void, origin, sites
-      );
+        access == <read> ? <read> : <mutate>, void, origin, sites);
       _collect_field_sites(
         compiler, selector, path, caller, visibility,
         receiver_name, field_name, parameters, <read>, void,
-        origin, sites
-      );
+        origin, sites);
       return;
     }
     case %(function *): return;
@@ -1154,8 +1091,7 @@ static void _collect_field_sites(
     _collect_field_sites(
       compiler, child, path, caller, visibility,
       receiver_name, field_name, parameters, access, replacement,
-      origin, sites
-    );
+      origin, sites);
 }
 
 static List _field_site_records(Map sites) {
@@ -1164,10 +1100,9 @@ static List _field_site_records(Map sites) {
     List site = key;
     match (site)
       case %(site ?path ?caller ?visibility ?location ?access):
-        records.push(%(
-          site $path $caller $visibility $location $access
-          (count ${count.int()})
-        ));
+        records.push(
+          %(site $path $caller $visibility $location $access
+            (count ${count.int()})));
   }
   records.sort();
   return records.list_free();
@@ -1187,14 +1122,12 @@ static List _analyze_field_sites_unit(
         _collect_field_sites(
           compiler, body, path, compiler.emitted_binding_name(binding),
           ((Type) type).is_static() ? <static> : <public>,
-          receiver_name, field_name, parameters, <read>, void, 0, sites
-        );
+          receiver_name, field_name, parameters, <read>, void, 0, sites);
         continue;
       }
     _collect_field_sites(
       compiler, node, path, "<top-level>", <static>,
-      receiver_name, field_name, {}, <read>, void, 0, sites
-    );
+      receiver_name, field_name, {}, <read>, void, 0, sites);
   }
   return _field_site_records(sites);
 }
@@ -1223,10 +1156,9 @@ static List _field_functions_from_sites(List sites) {
         int reads_count = read_count.int();
         int lvalue_count = lvalues.contains(key)
                          ? lvalues[key].int() : 0;
-        records.push(%(
-          function $caller $visibility
-          (reads $reads_count) (lvalues $lvalue_count)
-        ));
+        records.push(
+          %(function $caller $visibility
+            (reads $reads_count) (lvalues $lvalue_count)));
       }
   }
   records.sort();
@@ -1294,8 +1226,7 @@ static List _parse_field_units(
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List sites = _analyze_field_sites_unit(
-      parsed.compiler, parsed.ast, path, receiver_name, field_name
-    );
+      parsed.compiler, parsed.ast, path, receiver_name, field_name);
     List functions = _field_functions_from_sites(sites);
     if (functions) {
       List record = %(unit $path (functions @functions));
@@ -1318,8 +1249,7 @@ static List _parse_field_sites(
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_field_sites_unit(
-      parsed.compiler, parsed.ast, path, receiver_name, field_name
-    );
+      parsed.compiler, parsed.ast, path, receiver_name, field_name);
     records = parsed.context.export(records).list();
     parsed.close();
     foreach (List record, records) sites.push(record);
@@ -1338,8 +1268,7 @@ static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_sites_unit(
-      parsed.compiler, parsed.ast, path, wanted
-    );
+      parsed.compiler, parsed.ast, path, wanted);
     records = parsed.context.export(records).list();
     parsed.close();
     foreach (List record, records) sites.push(record);
@@ -1355,8 +1284,7 @@ static List _parse_walk_units(Frontend frontend, Array inputs) {
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_walk_unit(
-      parsed.compiler, parsed.ast, path
-    );
+      parsed.compiler, parsed.ast, path);
     records = parsed.context.export(records).list();
     parsed.close();
     foreach (List record, records) functions.push(record);
@@ -1373,8 +1301,7 @@ static List _parse_flow_units(
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = Flow_analyze_unit(
-      parsed.compiler, parsed.ast, path
-    );
+      parsed.compiler, parsed.ast, path);
     records = parsed.context.export(records).list();
     parsed.close();
     foreach (List record, records) functions.push(record);
@@ -1390,8 +1317,7 @@ static List _parse_tail_units(Frontend frontend, Array inputs) {
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List functions = _analyze_tail_unit(
-      parsed.compiler, parsed.ast, path
-    );
+      parsed.compiler, parsed.ast, path);
     if (functions) {
       List record = %(unit $path (functions @functions));
       record = parsed.context.export(record).list();
@@ -1411,8 +1337,7 @@ static List _parse_loop_allocation_units(
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List record = LoopAllocations.analyze_unit(
-      parsed.compiler, parsed.ast, path
-    );
+      parsed.compiler, parsed.ast, path);
     record = parsed.context.export(record).list();
     parsed.close();
     units.push(record);
@@ -1429,11 +1354,9 @@ static List _parse_lifetime_units(
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     Map definitions = project_function_targets(
-      parsed.compiler, parsed.ast, path
-    );
+      parsed.compiler, parsed.ast, path);
     List record = Lifetime.analyze_unit(
-      parsed.compiler, parsed.ast, path, definitions
-    );
+      parsed.compiler, parsed.ast, path, definitions);
     record = parsed.context.export(record).list();
     parsed.close();
     units.push(record);
@@ -1471,8 +1394,7 @@ static void _resolve_call(
         match (destination)
           case %(target ?target_path ?target_name):
             _increment(
-              resolved, %(direct $target_path $target_name), count
-            );
+              resolved, %(direct $target_path $target_name), count);
         return;
       }
       List candidates = publics.contains(name) ? publics[name].list() : NULL;
@@ -1481,8 +1403,7 @@ static void _resolve_call(
         match (destination)
           case %(target ?target_path ?target_name):
             _increment(
-              resolved, %(direct $target_path $target_name), count
-            );
+              resolved, %(direct $target_path $target_name), count);
       }
       else _increment(resolved, %(external $name), count);
     }
@@ -1544,22 +1465,19 @@ static List _resolve_graph(List units, Map attributes) {
               if ((void *) attributes != NULL) {
                 int external_calls, indirect_calls;
                 _resolved_unresolved_counts(
-                  resolved, external_calls, indirect_calls
-                );
+                  resolved, external_calls, indirect_calls);
                 attributes[%(target $path $name)] = %(
                   node $subtree $source_lines $source_order $source_name
                   $external_calls $indirect_calls
                 );
               }
-              output_functions.push(%(
-                function $name $visibility
-                (calls @{_resolved_calls(resolved)})
-              ));
+              output_functions.push(
+                %(function $name $visibility
+                  (calls @{_resolved_calls(resolved)})));
             }
         output_functions.sort();
-        output_units.push(%(
-          unit $path (functions @{output_functions.list_free()})
-        ));
+        output_units.push(
+          %(unit $path (functions @{output_functions.list_free()})));
       }
   }
   output_units.sort();
@@ -1627,8 +1545,7 @@ static List _digest(List graph) {
                         direct_count += count;
                         if (target == path) internal_count += count;
                         else _increment(
-                          dependencies, %(unit $target), count
-                        );
+                          dependencies, %(unit $target), count);
                       }
                       case %(call external ? ?count):
                         external_count += count, unit_external += count;
@@ -1647,14 +1564,13 @@ static List _digest(List graph) {
             }
             dependency_rows.sort();
             adjacency[path] = adjacent;
-            units.push(%(
-              unit $path
-              (functions (public $public_count) (static $static_count))
-              (internal $internal_count)
-              (dependencies @{dependency_rows.list_free()})
-              (external $unit_external)
-              (indirect $unit_indirect)
-            ));
+            units.push(
+              %(unit $path
+                (functions (public $public_count) (static $static_count))
+                (internal $internal_count)
+                (dependencies @{dependency_rows.list_free()})
+                (external $unit_external)
+                (indirect $unit_indirect)));
           }
   units.sort();
   paths.sort();
@@ -1737,8 +1653,7 @@ static List _architecture_choke_points(List graph) {
   Map definitions = {}, cross_units = {}, units = {};
   Map functions = {}, calls = {};
   _architecture_call_counts(
-    graph, definitions, cross_units, units, functions, calls
-  );
+    graph, definitions, cross_units, units, functions, calls);
   Array ranked = [];
   foreach (Var (raw_key, raw_visibility), definitions) {
     List key = raw_key;
@@ -1758,15 +1673,16 @@ static List _architecture_choke_points(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(ranked, %!(List record) => {
-    match (record)
-      case %(function ?path ?name ?
-             (callers (cross-units ?cross) (units ?) (functions ?count))
-             (calls ?calls)):
-        return %(${-cross.int()} ${-count.int()} ${-calls.int()}
-                 $path $name);
-    return nil;
-  }, ARCHITECTURE_LIMIT);
+  return _ranked_records(
+    ranked, %!(List record) => {
+      match (record)
+        case %(function ?path ?name ?
+               (callers (cross-units ?cross) (units ?) (functions ?count))
+               (calls ?calls)):
+          return %(${-cross.int()} ${-count.int()} ${-calls.int()}
+                   $path $name);
+      return nil;
+    }, ARCHITECTURE_LIMIT);
 }
 
 static Map _unit_edges(List graph) {
@@ -1806,14 +1722,15 @@ static List _architecture_reciprocal(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(ranked, %!(List record) => {
-    match (record)
-      case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
-        int a = forward.int(), b = reverse.int();
-        return %(${a < b ? -a : -b} ${-(a + b)} $left $right);
-      }
-    return nil;
-  }, ARCHITECTURE_LIMIT);
+  return _ranked_records(
+    ranked, %!(List record) => {
+      match (record)
+        case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
+          int a = forward.int(), b = reverse.int();
+          return %(${a < b ? -a : -b} ${-(a + b)} $left $right);
+        }
+      return nil;
+    }, ARCHITECTURE_LIMIT);
 }
 
 static int _architecture_count(Map counts, List key) {
@@ -1878,19 +1795,15 @@ static List _architecture_dependency_width(List graph) {
                           _increment(edges, direction, 1);
                           _increment(calls, direction, count);
                           _record_boundary_function(
-                            seen_callers, callers, direction, caller_name
-                          );
+                            seen_callers, callers, direction, caller_name);
                           _record_boundary_function(
-                            seen_callees, callees, direction, callee_name
-                          );
+                            seen_callees, callees, direction, callee_name);
                           _record_boundary_participant(
                             seen_participants, participants,
-                            left, right, source_path, caller_name
-                          );
+                            left, right, source_path, caller_name);
                           _record_boundary_participant(
                             seen_participants, participants,
-                            left, right, target_path, callee_name
-                          );
+                            left, right, target_path, callee_name);
                         }
   Array ranked = [];
   foreach (Var (raw_pair, raw_value), pairs) {
@@ -1898,19 +1811,15 @@ static List _architecture_dependency_width(List graph) {
     List pair = raw_pair;
     (String left, String right) = pair;
     int left_width = _architecture_count(
-      participants, %($left $right $left)
-    );
+      participants, %($left $right $left));
     int right_width = _architecture_count(
-      participants, %($left $right $right)
-    );
+      participants, %($left $right $right));
     int lesser = left_width < right_width ? left_width : right_width;
     if (lesser < ARCHITECTURE_BOUNDARY_FUNCTIONS) continue;
     List forward = _boundary_direction(
-      left, right, callers, callees, edges, calls
-    );
+      left, right, callers, callees, edges, calls);
     List reverse = _boundary_direction(
-      right, left, callers, callees, edges, calls
-    );
+      right, left, callers, callees, edges, calls);
     List record = %(
       units $left $right
       (functions ($left $left_width) ($right $right_width))
@@ -1918,24 +1827,25 @@ static List _architecture_dependency_width(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(ranked, %!(List record) => {
-    match (record)
-      case %(units ?left ?right
-             (functions (? ?left_width) (? ?right_width))
-             (directions (direction ? ? ? (edges ?forward_edges)
-                                          (calls ?forward_calls))
-                         (direction ? ? ? (edges ?reverse_edges)
-                                          (calls ?reverse_calls)))): {
-        int a = left_width.int(), b = right_width.int();
-        return %(
-          ${a < b ? -a : -b} ${-(a + b)}
-          ${-(forward_edges.int() + reverse_edges.int())}
-          ${-(forward_calls.int() + reverse_calls.int())}
-          $left $right
-        );
-      }
-    return nil;
-  }, ARCHITECTURE_LIMIT);
+  return _ranked_records(
+    ranked, %!(List record) => {
+      match (record)
+        case %(units ?left ?right
+               (functions (? ?left_width) (? ?right_width))
+               (directions (direction ? ? ? (edges ?forward_edges)
+                                            (calls ?forward_calls))
+                           (direction ? ? ? (edges ?reverse_edges)
+                                            (calls ?reverse_calls)))): {
+          int a = left_width.int(), b = right_width.int();
+          return %(
+            ${a < b ? -a : -b} ${-(a + b)}
+            ${-(forward_edges.int() + reverse_edges.int())}
+            ${-(forward_calls.int() + reverse_calls.int())}
+            $left $right
+          );
+        }
+      return nil;
+    }, ARCHITECTURE_LIMIT);
 }
 
 static void _add_neighbor(Map adjacency, String from, String to) {
@@ -1980,8 +1890,7 @@ static void _collect_component(
                  ? adjacency[name].list() : NULL;
   foreach (String neighbor, neighbors)
     _collect_component(
-      neighbor, excluded, allowed, adjacency, seen, members
-    );
+      neighbor, excluded, allowed, adjacency, seen, members);
 }
 
 static List _components(List names, Map adjacency, String excluded) {
@@ -1992,12 +1901,12 @@ static List _components(List names, Map adjacency, String excluded) {
     if (name == excluded || seen.contains(name)) continue;
     Array members = [];
     _collect_component(
-      name, excluded, allowed, adjacency, seen, members
-    );
+      name, excluded, allowed, adjacency, seen, members);
     members.sort();
     groups.push(%(group @{members.list_free()}));
   }
-  groups.sort_by(%!(List group) => %(${1 - (int) group.len()} ${group.cadr()}));
+  groups.sort_by(
+    %!(List group) => %(${1 - (int) group.len()} ${group.cadr()}));
   return groups.list_free();
 }
 
@@ -2038,9 +1947,9 @@ static void _collect_unit_bridges(
     if (!groups || !groups.cdr()) continue;
     List sizes = _component_sizes(groups);
     if (sizes.cadr().int() < ARCHITECTURE_BRIDGE_SECOND_GROUP) continue;
-    ranked.push(detailed
-              ? %(function $name (groups @groups))
-              : %(function $path $name (groups @sizes)));
+    ranked.push(
+      detailed ? %(function $name (groups @groups))
+               : %(function $path $name (groups @sizes)));
   }
 }
 
@@ -2060,11 +1969,10 @@ static List _architecture_local_components(List graph) {
             List components = _nontrivial_components(groups, isolated);
             if ((int) components.len() < 2) continue;
             int isolated_count = isolated.len();
-            rows.push(%(
-              unit $path (functions $function_count)
-              (isolated $isolated_count)
-              (components @{_component_sizes(components)})
-            ));
+            rows.push(
+              %(unit $path (functions $function_count)
+                (isolated $isolated_count)
+                (components @{_component_sizes(components)})));
           }
   rows.sort();
   return rows.list_free();
@@ -2081,18 +1989,18 @@ static List _architecture_bridges(List graph) {
             Map adjacency = _unit_adjacency(path, functions);
             List components = _components(names, adjacency, NULL);
             _collect_unit_bridges(
-              path, names, adjacency, components, 0, ranked
-            );
+              path, names, adjacency, components, 0, ranked);
           }
-  return _ranked_records(ranked, %!(List record) => {
-    match (record)
-      case %(function ?path ?name (groups ? *rest)): {
-        int outside = 0;
-        foreach (Var size, rest) outside += size.int();
-        return %(${-rest.car().int()} ${-outside} $path $name);
-      }
-    return nil;
-  }, ARCHITECTURE_LIMIT);
+  return _ranked_records(
+    ranked, %!(List record) => {
+      match (record)
+        case %(function ?path ?name (groups ? *rest)): {
+          int outside = 0;
+          foreach (Var size, rest) outside += size.int();
+          return %(${-rest.car().int()} ${-outside} $path $name);
+        }
+      return nil;
+    }, ARCHITECTURE_LIMIT);
 }
 
 static List _architecture(List graph) {
@@ -2140,8 +2048,7 @@ static List _structure(List graph, String wanted) {
               List components = _nontrivial_components(groups, isolated);
               Array bridge_rows = [];
               _collect_unit_bridges(
-                path, names, adjacency, groups, 1, bridge_rows
-              );
+                path, names, adjacency, groups, 1, bridge_rows);
               List bridges = _ranked_records(
                 bridge_rows,
                 %!(List record) => {
@@ -2159,13 +2066,12 @@ static List _structure(List graph, String wanted) {
               );
               isolated.sort();
               int function_count = functions.len();
-              matches.push(%(
-                unit $path (functions $function_count)
-                (internal ${_unit_internal_calls(path, functions)})
-                (isolated @{isolated.list_free()})
-                (components @components)
-                (bridges @bridges)
-              ));
+              matches.push(
+                %(unit $path (functions $function_count)
+                  (internal ${_unit_internal_calls(path, functions)})
+                  (isolated @{isolated.list_free()})
+                  (components @components)
+                  (bridges @bridges)));
             }
   return %(structure $wanted (matches @{matches.list_free()}));
 }
@@ -2186,9 +2092,8 @@ static List _between_direction(List graph, String from, String to) {
                       match (call)
                         case %(call direct ?target ?callee ?count):
                           if (target == to) {
-                            edges.push(%(
-                              call $caller $visibility $callee $count
-                            ));
+                            edges.push(
+                              %(call $caller $visibility $callee $count));
                             total += count;
                           }
   edges.sort();
@@ -2222,9 +2127,8 @@ static List _callers(List graph, String target_path, String target_name) {
                       case %(call direct ?destination ?callee ?count):
                         if (destination == target_path &&
                             callee == target_name)
-                          rows.push(%(
-                            function $path $name $visibility $count
-                          ));
+                          rows.push(
+                            %(function $path $name $visibility $count));
   rows.sort();
   return rows.list_free();
 }
@@ -2240,11 +2144,10 @@ static List _focus(List graph, String wanted) {
               match (function)
                 case %(function ?name ?visibility (calls *calls)):
                   if (name == wanted)
-                    matches.push(%(
-                      function $path $name $visibility
-                      (callers @{_callers(graph, path, name)})
-                      (calls @calls)
-                    ));
+                    matches.push(
+                      %(function $path $name $visibility
+                        (callers @{_callers(graph, path, name)})
+                        (calls @calls)));
   matches.sort();
   return %(focus $wanted (matches @{matches.list_free()}));
 }
@@ -2354,11 +2257,10 @@ static List _compare_result(
     Symbol status = left_proved && right_proved ? <both>
                   : left_proved ? <left-only>
                   : right_proved ? <right-only> : <neither>;
-    rows.push(%(
-      operation $operation $status
-      (target ${_compare_definition(by_target, by_name, operation)})
-      (left $left_path) (right $right_path)
-    ));
+    rows.push(
+      %(operation $operation $status
+        (target ${_compare_definition(by_target, by_name, operation)})
+        (left $left_path) (right $right_path)));
   }
   rows.sort();
   return %(
@@ -2429,8 +2331,7 @@ static void _dataset_rows(
                           function_id, kind, subtree.symbol().str(), path,
                           unit_lines.int(), source_order.int(), source_name,
                           name, visibility.str(), external_calls.int(),
-                          indirect_calls.int()
-                        )
+                          indirect_calls.int())
                       );
                       foreach (List call, calls)
                         match (call)
@@ -2443,11 +2344,9 @@ static void _dataset_rows(
                             List callee_node =
                               attributes[callee_target].list();
                             String callee_id = _dataset_function_id(
-                              callee_path, callee_name
-                            );
+                              callee_path, callee_name);
                             String row = "%s\t%s\t%d".printf(
-                              function_id, callee_id, count.int()
-                            );
+                              function_id, callee_id, count.int());
                             Symbol callee_subtree;
                             match (callee_node)
                               case %(node ?callee_group *):
@@ -2469,32 +2368,586 @@ static void _write_datasets(
   src_calls.sort();
   lib_calls.sort();
   _dataset_mkdirs(output);
-  String function_header = "".join(%(
-    "function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
-    "source_name\temitted_name\tvisibility\texternal_calls\t"
-    "indirect_calls"
-  ));
+  String function_header = "".join(
+    %("function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
+      "source_name\temitted_name\tvisibility\texternal_calls\t"
+      "indirect_calls"));
   _dataset_write_rows(
     %"$output/functions.tsv",
-    function_header, functions
-  );
+    function_header, functions);
   _dataset_write_rows(
     %"$output/src-calls.tsv",
-    "caller_id\tcallee_id\tstatic_calls", src_calls
-  );
+    "caller_id\tcallee_id\tstatic_calls", src_calls);
   _dataset_write_rows(
     %"$output/lib-calls.tsv",
-    "caller_id\tcallee_id\tstatic_calls", lib_calls
+    "caller_id\tcallee_id\tstatic_calls", lib_calls);
+}
+
+/* Optional project lifetime proof from selected roots. */
+
+static int _certify_file_effect(Var value) {
+  if (value is not <list>) return 0;
+  List node = value;
+  match (node) {
+    case %(function *): return 0;
+    case %((!or call cons array map lambda) *): return 1;
+  }
+  foreach (Var child, node)
+    if (_certify_file_effect(child)) return 1;
+  return 0;
+}
+
+static int _certify_open(Frontend frontend, String input,
+                         ParsedUnit &parsed) {
+  int ok = frontend.start(input, parsed);
+  if (ok) ok = parsed.collect(frontend) && parsed.parse();
+  if (ok) return 1;
+  foreach (Var diagnostic, parsed.compiler.diagnostics())
+    parsed.compiler.print_diagnostic(diagnostic);
+  parsed.close();
+  return 0;
+}
+
+static List _certify_parse_units(Frontend frontend, Array inputs) {
+  Array units = [];
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return NULL;
+    Compiler compiler = parsed.compiler;
+    String path = compiler.display_path(input);
+    List functions = _analyze_unit(compiler, parsed.ast);
+    int effect = 0, has_top = 0;
+    foreach (List node, parsed.ast)
+      effect |= _certify_file_effect(node);
+    foreach (List function, functions)
+      match (function) case %(function ? "<top-level>" ? ? ?):
+        has_top = 1;
+    if (effect && !has_top) {
+      Array extended = [];
+      foreach (List function, functions) extended.push(function);
+      extended.push(%(function 0 "<top-level>" static
+                      (source "<top-level>" 0) (calls)));
+      functions = extended.sort().list_free();
+    }
+    List record = %(
+      unit $path <none> ${parsed.source_lines}
+      (functions @functions)
+    );
+    record = parsed.context.export(record).list();
+    parsed.close();
+    units.push(record);
+  }
+  units.sort();
+  return units.list_free();
+}
+
+static int _certify_sink(Var value) {
+  if (value in %(<return> <result> <static> <unknown>)) return 1;
+  match (value) case %(param ?(int index)): return index >= 0;
+  return 0;
+}
+
+static int _certify_effect(Var value) {
+  if (value in %((alloc) (alloc slot) (alloc pool) (alloc final)
+                 (alloc moved) (pool) (store) (wrap) (free)
+                 (free scope) (destroy) (open scope) (open pool)
+                 (open slot) (close scope) (close pool)
+                 (close slot) (move) (exit))) return 1;
+  match (value) case %(summary ?(int owner) ?(List sinks)): {
+    if (owner < 0 || owner > 3) return 0;
+    foreach (Var row, sinks) {
+      match (row) case %(?(int index) ?target)
+        if (index >= 0 && _certify_sink(target)): continue;
+      return 0;
+    }
+    return 1;
+  }
+  return 0;
+}
+
+Map certify_contracts(String path, int &valid) {
+  Map contracts = {};
+  valid = 1;
+  if (!path) return contracts;
+  String source = Path.read_text(path);
+  Lisp reader = Lisp.new();
+  defer reader.destroy();
+  unsigned cursor = 0;
+  Var form = void;
+  Symbol status;
+  while ((status = Lisp.read(reader, source, &cursor, &form)) == <value>) {
+    match (form) case %(native ?(String name) ?effect)
+      if (_certify_effect(effect) && !contracts.contains(name) &&
+          !Compiler.has_region_row(name)): {
+        contracts[name] = effect;
+        continue;
+      }
+    Stderr.printf("invalid or duplicate native contract in %s: %s\n",
+                  path, form.repr());
+    valid = 0;
+    return contracts;
+  }
+  if (status != <eof>) {
+    Stderr.printf("invalid native contract syntax in %s\n", path);
+    valid = 0;
+  }
+  return contracts;
+}
+
+static List _certify_path(List target, Map parent) {
+  Array reversed = [];
+  List current = target;
+  while (current) {
+    reversed.push(current);
+    Var prior = parent[current];
+    current = prior is <list> ? prior.list() : NULL;
+  }
+  Array path = [];
+  for (int i = reversed.len() - 1; i >= 0; i--)
+    path.push(reversed[i]);
+  return path.list_free();
+}
+
+static void _certify_reach(List graph, Array roots, Map nodes,
+                           Map reached, Map parent, Array missing) {
+  foreach (List unit, graph)
+    match (unit) case %(unit ?path (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name ? (calls *)):
+          nodes[%(target $path $name)] = function;
+  Array queue = [];
+  foreach (String root, roots) {
+    List found = NULL;
+    foreach (List target, nodes.keys())
+      match (target) case %(target ? ?name) if (name == root): {
+        if (found) { found = %(ambiguous); break; }
+        found = target;
+      }
+    if (!found || found == %(ambiguous)) {
+      missing.push(%(root $root ${found ? <ambiguous> : <missing>}));
+      continue;
+    }
+    if (!reached.contains(found)) {
+      reached[found] = 1;
+      queue.push(found);
+    }
+  }
+  foreach (List target, nodes.keys())
+    match (target) case %(target ? "<top-level>"):
+      if (!reached.contains(target)) {
+        reached[target] = 1;
+        queue.push(target);
+      }
+  for (int i = 0; i < queue.len(); i++) {
+    List caller = queue[i];
+    List function = nodes[caller];
+    match (function) case %(function ? ? (calls *calls)):
+      foreach (List call, calls)
+        match (call) case %(call direct ?path ?name ?): {
+          List target = %(target $path $name);
+          if (reached.contains(target)) continue;
+          reached[target] = 1;
+          parent[target] = caller;
+          queue.push(target);
+        }
+  }
+}
+
+static Map _certify_publics(List graph) {
+  Map publics = {};
+  foreach (List unit, graph)
+    match (unit) case %(unit ?path (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name public ?): {
+          List found = publics.contains(name) ? publics[name].list() : NULL;
+          publics[name] = cons(%(target $path $name), found);
+        }
+  return publics;
+}
+
+static Map _certify_seed(String path, List graph, Map summaries) {
+  Map seed = {};
+  foreach (List unit, graph)
+    match (unit) case %(unit ?unit_path (functions *functions))
+      if (path == unit_path):
+        foreach (List function, functions)
+          match (function) case %(function ?name ? (calls *calls)): {
+            List own = %(target $path $name);
+            if (summaries.contains(own)) seed[name] = summaries[own];
+            foreach (List call, calls)
+              match (call) case %(call direct ?target_path ?target_name ?): {
+                List target = %(target $target_path $target_name);
+                if (summaries.contains(target))
+                  seed[target_name] = summaries[target];
+              }
+          }
+  return seed;
+}
+
+static List _certify_unit_graph(String path, List graph) {
+  foreach (List unit, graph)
+    match (unit) case %(unit ?unit_path ?)
+      if (unit_path == path): return unit;
+  return NULL;
+}
+
+static int _certify_round(Frontend frontend, Array inputs, List graph,
+                          Map summaries, Map contracts, Array findings) {
+  int changed = 0;
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return -1;
+    Compiler compiler = parsed.compiler;
+    Context context = parsed.context;
+    String path = compiler.display_path(input);
+    Map seed = _certify_seed(path, graph, summaries);
+    Array current = [];
+    Map calculated = compiler.audit_regions(
+      parsed.ast, seed, contracts, current
+    );
+    List unit = _certify_unit_graph(path, graph);
+    match (unit) case %(unit ? (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name ? ?): {
+          if (name == "<top-level>") continue;
+          List target = %(target $path $name);
+          Var fresh = calculated[name], prior = summaries[target];
+          if (fresh is <list> && (prior is not <list> ||
+              !List.equal(fresh, prior))) {
+            summaries[context.export(target)] = context.export(fresh);
+            changed = 1;
+          }
+        }
+    foreach (List finding, current) {
+      (String name, Symbol code, int origin, String message, List notes) =
+        finding;
+      List location = project_location(compiler, path, origin);
+      findings.push(context.export(%(
+        finding (target $path $name) $code $location $message $notes
+      )).list());
+    }
+    parsed.close();
+  }
+  return changed;
+}
+
+static int _certify_aggregate(Compiler compiler, Var value) {
+  match (value) case %(expr ?type ?): {
+    Type resolved = compiler.sym.resolve_key(type);
+    return resolved && resolved.is_aggregate();
+  }
+  return 0;
+}
+
+static int _certify_indirect_result(Compiler compiler, Type type) {
+  if (!type) return 0;
+  Type resolved = compiler.sym.resolve_key(type);
+  return resolved && (resolved.is_pointer() || resolved.is_aggregate());
+}
+
+static int _certify_memory_path(Compiler compiler, Var value) {
+  if (value is not <list>) return 0;
+  List node = value;
+  match (node) {
+    case %((!or call cons array map lambda defer) *): return 1;
+    case %(expr ?type ?)
+      if (_certify_indirect_result(compiler, type)): return 1;
+  }
+  foreach (Var child, node)
+    if (_certify_memory_path(compiler, child)) return 1;
+  return 0;
+}
+
+static void _certify_scan(Compiler compiler, Map definitions, Map publics,
+                          Var value, String path, String name, int origin,
+                          Map reached, Map contracts, Map assumptions,
+                          Map scope_counts, Array obligations,
+                          Array obstacles, int conditional, int deferred) {
+  if (value is not <list>) return;
+  List node = value;
+  match (node) case %(at ?(int at) ?inner): {
+    _certify_scan(compiler, definitions, publics, inner, path, name, at,
+                  reached, contracts, assumptions, scope_counts,
+                  obligations, obstacles, conditional, deferred);
+    return;
+  }
+  List caller = %(target $path $name);
+  if (!reached.contains(caller)) return;
+  List location = project_location(compiler, path, origin);
+  match (node) {
+    case %(defer ?body *): {
+      _certify_scan(compiler, definitions, publics, body, path, name,
+        origin, reached, contracts, assumptions, scope_counts, obligations,
+        obstacles, conditional, 1);
+      return;
+    }
+    case %((!or if while do for switch try with match foreach finally)
+           *children): {
+      if (_certify_memory_path(compiler, node))
+        obstacles.push(%(obstacle $caller $location
+          "conditional memory effects are outside the proof subset"));
+      foreach (Var child, children)
+        _certify_scan(compiler, definitions, publics, child, path, name,
+          origin, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, 1, deferred);
+      return;
+    }
+    case %((!or goto label) *):
+      obstacles.push(%(obstacle $caller $location
+        "nonlocal control flow is outside the proof subset"));
+  }
+  match (node) {
+    case %(expr ?type ?inner): {
+      if (_certify_indirect_result(compiler, type))
+        match (inner) {
+          case %(op (!or (!quote .) (!quote ->)) *):
+            obstacles.push(%(obstacle $caller $location
+              "pointer-bearing field access is outside the proof subset"));
+          case %((!or getindex index) *):
+            obstacles.push(%(obstacle $caller $location
+              "pointer-bearing indexed access is outside the proof subset"));
+        }
+    }
+    case %(call ? ?): {
+      String callee = NULL;
+      List target = project_call_target(
+        compiler, definitions, node, callee, NULL
+      );
+      List resolved = target ? resolve_project_target(target, publics) : NULL;
+      if (!resolved && callee && contracts.contains(callee)) {
+        foreach (String declared, contracts.keys())
+          if (declared == callee) {
+            assumptions[declared] = contracts[declared];
+            break;
+          }
+      }
+      else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
+        obstacles.push(%(obstacle $caller $location
+          "call has no project body or lifetime effect contract" $callee));
+      if (callee in %("Scope_free" "Scope_realloc"))
+        obstacles.push(%(obstacle $caller $location
+          "explicit free or realloc has untracked aliases" $callee));
+      if (callee && callee.startswith("Context_"))
+        obstacles.push(%(obstacle $caller $location
+          "Context lifetime is outside the region walk" $callee));
+      if (callee in %("Scope_new" "Scope_new_named"))
+        obstacles.push(%(obstacle $caller $location
+          "Scope object destruction is outside the proof subset" $callee));
+      if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
+        List key = %(open $caller $callee);
+        Var prior = scope_counts[key];
+        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        if (conditional)
+          obstacles.push(%(obstacle $caller $location
+            "conditional region opening is outside the proof subset"
+            $callee));
+      }
+      if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
+        String open = callee == "Scope_release" ? "Scope_retain"
+                    : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
+        List key = %(close $caller $open);
+        Var prior = scope_counts[key];
+        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        if (!deferred || conditional)
+          obstacles.push(%(obstacle $caller $location
+            "region closing is not an unconditional lexical defer"
+            $callee));
+      }
+      if (callee in %("Scope_move" "Context_export" "List_promote"
+                      "String_promote" "Atom_promote"))
+        obligations.push(%(caller $caller $location
+          "transferred storage must be released by its destination"
+          $callee));
+    }
+    case %(cast ?type ?inner): {
+      Type target_type = type;
+      Type source_type = NULL;
+      match (inner) case %(expr ?source ?): source_type = source;
+      if ((target_type && target_type.is_pointer()) ||
+          (source_type && source_type.is_pointer()))
+        obstacles.push(%(obstacle $caller $location
+          "pointer cast is outside the lifetime model"));
+    }
+    case %(op ?operator ?left ?right): {
+      if (operator == <+> || operator == <->) {
+        Type left_type = NULL, right_type = NULL;
+        match (left) case %(expr ?t ?): left_type = t;
+        match (right) case %(expr ?t ?): right_type = t;
+        if ((left_type && left_type.is_pointer()) ||
+            (right_type && right_type.is_pointer()))
+          obstacles.push(%(obstacle $caller $location
+            "pointer arithmetic is outside the lifetime model"));
+      }
+      if (operator == <=> && _certify_aggregate(compiler, right))
+        obstacles.push(%(obstacle $caller $location
+          "aggregate copy may hide a borrowed pointer"));
+    }
+    case %(op (!quote *) ?):
+      obstacles.push(%(obstacle $caller $location
+        "pointer dereference is outside the proof subset"));
+    case %(return ? ?result): {
+      if (_certify_aggregate(compiler, result))
+        obstacles.push(%(obstacle $caller $location
+          "aggregate return may hide a borrowed pointer"));
+    }
+  }
+  foreach (Var child, node)
+    _certify_scan(compiler, definitions, publics, child, path, name,
+                  origin, reached, contracts, assumptions, scope_counts,
+                  obligations, obstacles, conditional, deferred);
+}
+
+static int _certify_coverage(Frontend frontend, Array inputs, List graph,
+                             Map reached, Map contracts, Map assumptions,
+                             Array obligations, Array obstacles) {
+  Map publics = _certify_publics(graph);
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return 0;
+    Compiler compiler = parsed.compiler;
+    Context context = parsed.context;
+    List ast = parsed.ast;
+    String path = compiler.display_path(input);
+    int first_obstacle = obstacles.len(), first_obligation = obligations.len();
+    Map definitions = project_function_targets(
+      compiler, ast, path
+    );
+    foreach (List node, ast) {
+      match (node) case %(function ?
+          (bind (!set ?binding (binding ? ?)) ?) ?body): {
+        String name = compiler.emitted_binding_name(binding);
+        List target = %(target $path $name);
+        Map scope_counts = {};
+        _certify_scan(compiler, definitions, publics, body, path,
+          name, 0, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, 0, 0);
+        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
+          Var opening = scope_counts[%(open $target $open)];
+          Var closing = scope_counts[%(close $target $open)];
+          if ((opening is void ? 0 : opening.int()) !=
+              (closing is void ? 0 : closing.int()))
+            obstacles.push(%(obstacle $target (location $path 0 0)
+              "region opening and lexical closing do not match" $open));
+        }
+        continue;
+      }
+      /* Executable file-scope forms are roots, but the region walk does
+         not model their process lifetime. */
+      if (_certify_file_effect(node) &&
+          reached.contains(%(target $path "<top-level>")))
+        obstacles.push(context.export(%(obstacle
+          (target $path "<top-level>")
+          (location $path 0 0)
+          "file-scope execution is outside the region walk"
+        )).list());
+    }
+    for (int i = first_obstacle; i < obstacles.len(); i++)
+      obstacles[i] = context.export(obstacles[i]);
+    for (int i = first_obligation; i < obligations.len(); i++)
+      obligations[i] = context.export(obligations[i]);
+    parsed.close();
+  }
+  return 1;
+}
+
+List certify_result(Frontend frontend, Array inputs, Array roots,
+                    Map contracts, int &status) {
+  List units = _certify_parse_units(frontend, inputs);
+  if (!units) { status = 2; return NULL; }
+  List graph = _resolve_graph(units, NULL);
+  Map nodes = {}, reached = {}, parent = {};
+  Array missing = [];
+  _certify_reach(graph, roots, nodes, reached, parent, missing);
+  foreach (String name, contracts.keys())
+    foreach (List target, nodes.keys())
+      match (target) case %(target ? ?defined) if (name == defined): {
+        Stderr.printf("contract shadows source function: %s\n", name);
+        status = 2;
+        return NULL;
+      }
+  Map summaries = {};
+  int changed = 1, rounds = 0;
+  while (changed && rounds++ < 256) {
+    Array ignored = [];
+    changed = _certify_round(frontend, inputs, graph, summaries,
+                             contracts, ignored);
+    if (changed < 0) { status = 2; return NULL; }
+  }
+  Array findings = [], obstacles = [], violations = [], obligations = [];
+  Map assumptions = {};
+  foreach (List row, missing)
+    match (row) case %(root ?name ?reason):
+      obstacles.push(%(obstacle (target "<root>" $name)
+        (location "<project>" 0 0) "selected root is unresolved" $reason));
+  if (changed) {
+    List target = NULL;
+    foreach (List current, reached.keys()) { target = current; break; }
+    obstacles.push(%(obstacle $target (location "<project>" 0 0)
+      "project summary did not settle"));
+  }
+  if (_certify_round(frontend, inputs, graph, summaries,
+                     contracts, findings) < 0 ||
+      !_certify_coverage(frontend, inputs, graph, reached, contracts,
+                          assumptions, obligations, obstacles)) {
+    status = 2;
+    return NULL;
+  }
+  Map blocked = {};
+  foreach (List obstacle, obstacles)
+    match (obstacle) case %(obstacle ?target ? ? *):
+      blocked[target] = 1;
+  foreach (List finding, findings)
+    match (finding) case %(finding ?target ?code ?location ?message ?notes)
+      if (reached.contains(target)): {
+        if (blocked.contains(target))
+          obstacles.push(%(obstacle $target $location
+            "region finding requires review with incomplete coverage"
+            $message));
+        else
+          violations.push(%(violation ${_certify_path(target, parent)}
+                            $code $location $message $notes));
+      }
+  Array reported_obstacles = [];
+  foreach (List obstacle, obstacles)
+    match (obstacle) case %(obstacle ?target ?location ?reason *rest):
+      reported_obstacles.push(%(obstacle
+        ${_certify_path(target, parent)} $location $reason @rest));
+  foreach (List target, reached.keys())
+    match (target) case %(target ? ?name) if (name in roots &&
+        summaries.contains(target)): {
+      List summary = summaries[target];
+      int owner = summary.car().int();
+      if (owner & 1)
+        obligations.push(%(caller $target
+          "returned storage may belong to the caller's active Scope"));
+      if (owner & 2)
+        obligations.push(%(caller $target
+          "returned storage may belong to the caller's active Pool"));
+    }
+  Array used = [];
+  foreach (String name, assumptions.keys())
+    used.push(%(native $name ${assumptions[name]}));
+  Symbol result = violations.len() ? <violation>
+                : reported_obstacles.len() ? <incomplete> : <proved>;
+  status = result == <proved> ? 0 : result == <violation> ? 1 : 3;
+  return %(
+    certify (status $result)
+    (roots @{roots.sort().list_free()})
+    (inputs @{inputs.list()})
+    (obligations @{obligations.sort().list_free()})
+    (assumptions @{used.sort().list_free()})
+    (violations @{violations.sort().list_free()})
+    (obstacles @{reported_obstacles.sort().list_free()})
   );
 }
+
 
 static void _usage(String program) {
   Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", program);
   Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", program);
   Stderr.printf(
     "       %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...\n",
-    program
-  );
+    program);
   Stderr.printf("       %s architecture [-I DIR] FILE...\n", program);
   Stderr.printf("       %s structure UNIT [-I DIR] FILE...\n", program);
   Stderr.printf("       %s between LEFT RIGHT [-I DIR] FILE...\n", program);
@@ -2505,19 +2958,20 @@ static void _usage(String program) {
   Stderr.printf("       %s walks [-I DIR] FILE...\n", program);
   Stderr.printf("       %s tail-calls [-I DIR] FILE...\n", program);
   Stderr.printf(
-    "       %s loop-allocations [--all] [-I DIR] FILE...\n", program
-  );
+    "       %s loop-allocations [--all] [-I DIR] FILE...\n", program);
   Stderr.printf("       %s lifetime-escapes [-I DIR] FILE...\n", program);
+  Stderr.printf(
+    "       %s certify --root NAME [--root NAME ...] "
+    "[--contracts FILE] [-I DIR] FILE...\n", program
+  );
   Stderr.printf(
     "       %s allocation-returns NAME [-I DIR] FILE...\n", program
   );
   Stderr.printf(
-    "       %s flows PRODUCER CONSUMER [-I DIR] FILE...\n", program
-  );
+    "       %s flows PRODUCER CONSUMER [-I DIR] FILE...\n", program);
   Stderr.printf(
     "       %s compare LEFT RIGHT TARGET... -- [-I DIR] FILE...\n",
-    program
-  );
+    program);
 }
 
 String x2c_embedded_identity(void);
@@ -2546,6 +3000,7 @@ int main(int argc, char **argv) {
   int loop_limit = LOOP_ALLOCATION_LIMIT;
   int lifetime_escapes =
     argc > 1 && !strcmp(argv[1], "lifetime-escapes");
+  int certify = argc > 1 && !strcmp(argv[1], "certify");
   int allocation_returns =
     argc > 1 && !strcmp(argv[1], "allocation-returns");
   int flows = argc > 1 && !strcmp(argv[1], "flows");
@@ -2575,12 +3030,14 @@ int main(int argc, char **argv) {
        !clones && !datasets && !architecture && !structure && !between &&
        !focus && !field &&
        !field_sites && !sites && !walks &&
-       !tail_calls && !loop_allocations && !lifetime_escapes &&
+       !tail_calls && !loop_allocations && !lifetime_escapes && !certify &&
        !allocation_returns && !flows && !compare)) {
     _usage(argv[0]);
     return 2;
   }
   Array inputs = [], include_dirs = [], compare_operations = [];
+  Array certify_roots = [];
+  String contract_path = NULL;
   Array src_inputs = [], lib_inputs = [];
   Map seen = {}, subtrees = {};
   String dataset_output = datasets ? String.new(argv[2]) : NULL;
@@ -2602,6 +3059,19 @@ int main(int argc, char **argv) {
       compare_operations.push(String.new(argv[i]));
   compare_operations.sort();
   for (int i = first_input; i < argc; i++) {
+    if (certify && !strcmp(argv[i], "--root")) {
+      if (++i == argc) { _usage(argv[0]); return 2; }
+      certify_roots.push(String.new(argv[i]));
+      continue;
+    }
+    if (certify && !strcmp(argv[i], "--contracts")) {
+      if (++i == argc || contract_path) {
+        _usage(argv[0]);
+        return 2;
+      }
+      contract_path = String.new(argv[i]);
+      continue;
+    }
     if (clones && !strcmp(argv[i], "--min-size")) {
       if (++i == argc) { _usage(argv[0]); return 2; }
       char *end;
@@ -2653,7 +3123,7 @@ int main(int argc, char **argv) {
       }
     }
   }
-  if (!inputs.len() || (datasets &&
+  if (!inputs.len() || (certify && !certify_roots.len()) || (datasets &&
       (!src_inputs.len() || !lib_inputs.len()))) {
     _usage(argv[0]);
     return 2;
@@ -2669,16 +3139,22 @@ int main(int argc, char **argv) {
   int status = 0;
   try {
     List result = NULL;
-    if (clones)
+    if (certify) {
+      int valid = 0;
+      Map contracts = certify_contracts(contract_path, valid);
+      if (!valid) status = 2;
+      else result = certify_result(
+        frontend, inputs, certify_roots, contracts, status
+      );
+    }
+    else if (clones)
       result = graph_clones(frontend, inputs, clone_minimum);
     else if (field)
       result = _parse_field_units(
-        frontend, inputs, receiver_name, field_name
-      );
+        frontend, inputs, receiver_name, field_name);
     else if (field_sites)
       result = _parse_field_sites(
-        frontend, inputs, receiver_name, field_name
-      );
+        frontend, inputs, receiver_name, field_name);
     else if (sites)
       result = _parse_sites(frontend, inputs, wanted);
     else if (walks)
@@ -2687,18 +3163,15 @@ int main(int argc, char **argv) {
       result = _parse_tail_units(frontend, inputs);
     else if (loop_allocations)
       result = _parse_loop_allocation_units(
-        frontend, inputs, loop_limit
-      );
+        frontend, inputs, loop_limit);
     else if (lifetime_escapes || allocation_returns)
       result = _parse_lifetime_units(
-        frontend, inputs, allocation_returns ? wanted : NULL
-      );
+        frontend, inputs, allocation_returns ? wanted : NULL);
     else if (flows)
       result = _parse_flow_units(frontend, inputs, producer, consumer);
     else {
       List units = _parse_units(
-        frontend, inputs, datasets ? subtrees : NULL
-      );
+        frontend, inputs, datasets ? subtrees : NULL);
       if (units) {
         Map attributes = datasets ? {} : NULL;
         List graph = _resolve_graph(units, attributes);
@@ -2710,9 +3183,8 @@ int main(int argc, char **argv) {
                : structure ? _structure(graph, wanted)
                : between ? _between(graph, left, right)
                : compare ? _compare_result(
-                   graph, compare_left, compare_right,
-                   compare_operations.list_free()
-                 )
+                 graph, compare_left, compare_right,
+                 compare_operations.list_free())
                : _focus(graph, wanted);
       }
     }

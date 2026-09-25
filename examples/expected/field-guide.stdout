@@ -1,15 +1,12 @@
-day 1: Pine Loop (clear)
-state planned has index 0
-route: ( lookout lake ridge camp )
-next: ridge (5 mi); stops: 3
-water: 4; tent: none
-pack more water
-miles: 10; lake visits: 2; finish: 10
-adjusted: ( 3 8 11 )
-arrived: ridge after 5 miles; long legs: 2
-log: lake (2 mi)
-ridge (5 mi)
-camp (3 mi)
-estimated hours: 10; daylight: 6
-survey hours: 10
-Expedition complete.
+count: 3
+name: Ada Lovelace
+Hello, Ada! You have 3 messages.
+array: [ 10, 25, 30 ]; second: 25
+Ada: 15; Grace: 0
+list: ("plan" "write" "compile" "run"); original: ("write" "compile" "run")
+shared tail: yes
+answer: 43
+answer now: forty-three
+phase compile: member 1, index 1
+doubled: ( 2 4 6 ); original: ( 1 2 3 )
+match: Ada scored 15

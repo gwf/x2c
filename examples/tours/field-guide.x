@@ -1,124 +1,56 @@
-/* A small expedition log, from native values to language extension. */
+#!/usr/bin/env -S x2c script
+/* Small steps from C to x2c.
+   Run with: x2c script examples/tours/field-guide.x */
 
-#include <assert.h>
-#include "typed-array.x"
-#include "typed-map.x"
-#include "typed-list.x"
+/* C declarations and calls still work. A script needs no main function. */
+int count = 3;
+printf("count: %d\n", count);
 
-class Stop struct { String name; int miles; } *;
+/* String values can be added and interpolated into other text. */
+String first = "Ada", last = "Lovelace";
+String name = first + " " + last;
+printf("name: %s\n", name);
+puts(%"Hello, $first! You have $count messages.");
 
-String Stop.describe(Stop stop) => %"${stop.name} (${stop.miles} mi)";
+/* Array is a growable sequence. Indexing can also change an item. */
+Array numbers = [10, 20];
+numbers.push(30);
+numbers[1] = 25;
+printf("array: %s; second: %s\n", numbers.repr(), numbers[1]);
 
-/* A macro keeps one repeated source-level action in one place. */
-macro Statement $announce(Expr $message) {
-  printf("%s\n", $message);
-}
+/* Map associates keys with values. A missing key can have a fallback. */
+Map scores = {"Ada": 10, "Lin": 20};
+scores["Ada"] += 5;
+printf("Ada: %s; Grace: %s\n", scores["Ada"],
+       scores.getdefault("Grace", 0));
 
-/* The same native function can be called by ordinary x2c and by Lisp. */
-int pace(int miles) => miles * 2;
+/* List adds a head without changing or copying its old tail. */
+List steps = %("write" "compile" "run");
+List with_plan = cons("plan", steps);
+printf("list: %s; original: %s\n", with_plan.repr(), steps.repr());
+printf("shared tail: %s\n", with_plan.cdr() == steps ? "yes" : "no");
 
-/* Workers receive a copy of plain C input and return a dynamic result. */
-static Var survey(const void *input, size_t bytes) {
-  const int *miles = input;
-  return bytes == sizeof(int) ? *miles * 2 : 0;
-}
+/* Var holds values of different types, including collection elements. */
+Var answer = 42;
+answer += 1;
+printf("answer: %s\n", answer);
+answer = "forty-three";
+printf("answer now: %s\n", answer);
 
-static void check_water(Map supplies, int hikers) {
-  if (supplies[<water>].int() < hikers)
-    raise %(lowwater (item water));
-}
+/* Symbols are names; a SymbolSet is a fixed, ordered vocabulary. */
+SymbolSet phases = %<<write compile run>>;
+Symbol phase = <compile>;
+printf("phase %s: member %d, index %d\n", phase.str(),
+       phases.contains(phase), phases.index(phase));
 
-int main(void) {
-  $scope() {
-    /* 1. C values stay native; String and Var add richer values. */
-    int day = 1;
-    String trail = "Pine Loop";
-    Var weather = "clear";
-    $announce(%"day $day: $trail ($weather)");
+/* A short lambda transforms a List without changing the source. */
+List small = %(1 2 3);
+List doubled = small.map(%!(value) => value * 2);
+printf("doubled: %s; original: %s\n", doubled.str(), small.str());
 
-    /* 2. Symbol names a state; SymbolSet owns the closed vocabulary. */
-    SymbolSet states = %<<planned walking done>>;
-    Symbol state = <planned>;
-    assert(states.contains(state));
-    printf("state %s has index %d\n", state.str(), states.index(state));
-
-    /* 3. List is persistent: the new route shares the old tail. */
-    List route = %(lake ridge camp);
-    List detour = cons(<lookout>, route);
-    assert(detour.cdr() == route);
-    printf("route: %s\n", detour.str());
-
-    /* 4. Array is a mutable, indexed work queue. */
-    Array stops = [Stop.new("lake", 2), Stop.new("ridge", 5)];
-    stops.push(Stop.new("camp", 3));
-    Stop next = stops[1];
-    printf("next: %s; stops: %zu\n", next.describe(), stops.len());
-
-    /* 5. Map associates names and values; absence is explicit. */
-    Map supplies = {water: 3, snacks: 2};
-    supplies[<water>] += 1;
-    Var missing;
-    assert(!supplies.try_get(<tent>, &missing));
-    printf("water: %d; tent: %s\n", supplies[<water>].int(),
-           supplies.getdefault(<tent>, "none"));
-
-    /* Errors cross a helper; the caller chooses the recovery. */
-    try check_water(supplies, 5);
-    catch %(lowwater (item ?item)):
-      printf("pack more %s\n", item);
-
-    /* 6. Typed families store native elements without boxing. */
-    ArrayInt legs = [2, 5, 3];
-    MapStringInt visits = {"lake": 1, "ridge": 1};
-    visits["lake"] += 1;
-    ListInt milestones = %(2 7 10);
-    printf("miles: %d; lake visits: %d; finish: %d\n",
-           legs[0] + legs[1] + legs[2], visits["lake"],
-           milestones.last());
-
-    /* 7. A lambda captures a native value for a collection operation. */
-    int bonus = 1;
-    List adjusted = milestones.map(%!(mile) => mile + bonus);
-    printf("adjusted: %s\n", adjusted.str());
-
-    /* 8. Iter streams a pipeline; match reads a structured message. */
-    int long_legs = legs.iter().filter(%!(mile) => mile >= 3).count();
-    List event = %(arrived ridge 5);
-    match (event) {
-      case %(arrived ?place ?distance):
-        printf("arrived: %s after %d miles; long legs: %d\n",
-               place, distance.int(), long_legs);
-    }
-
-    /* 9. Buffer grows text; File and $auto own temporary resources. */
-    Buffer report = $auto(Buffer.new(0));
-    foreach (Var item, stops) {
-      Stop stop = item;
-      report.write(stop.describe());
-      report.write("\n");
-    }
-    File log = $auto(tmpfile());
-    log.puts(report.str());
-    log.rewind();
-    printf("log: %s", log.string());
-
-    /* 10. Runtime Lisp can use an ordinary typed native function. */
-    Lisp lisp = $auto(Lisp.new());
-    $lisp.bind(lisp, "pace", pace);
-    int hours = lisp.eval(%(pace 5));
-    /* The Lisp expression below runs during translation. */
-    int daylight = $(+ 4 2);
-    printf("estimated hours: %d; daylight: %d\n", hours, daylight);
-
-    /* 11. Native workers own isolated x2c state until joined. */
-    int west = legs[0], east = legs[2];
-    Thread first = Thread.start(survey, &west, sizeof(west));
-    Thread second = Thread.start(survey, &east, sizeof(east));
-    int survey_hours = first.join() + second.join();
-    first.free();
-    second.free();
-    printf("survey hours: %d\n", survey_hours);
-    $announce("Expedition complete.");
-  }
-  return 0;
+/* Match picks apart a structured List by its shape. */
+List event = %(score "Ada" 15);
+match (event) {
+  case %(score ?who ?points):
+    printf("match: %s scored %d\n", who, points.int());
 }

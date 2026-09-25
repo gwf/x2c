@@ -46,8 +46,8 @@ static void _clone_rehash(CloneIndex *index, size_t count) {
   }
 }
 
-static uint64_t _clone_cons(CloneIndex *index, uint64_t head,
-                            uint64_t tail) {
+static uint64_t _clone_cons(
+  CloneIndex *index, uint64_t head, uint64_t tail) {
   index.visits++;
   if ((index.count + 1) * 2 >= index.slot_count)
     _clone_rehash(index, index.slot_count ? index.slot_count * 2 : 1024);
@@ -65,12 +65,12 @@ static uint64_t _clone_cons(CloneIndex *index, uint64_t head,
     raise %(size-limit (owner "graph clones"));
   if (index.count + 1 >= index.capacity) {
     index.capacity = index.capacity ? index.capacity * 2 : 1024;
-    CloneCell *cells = realloc(index.cells,
-                              index.capacity * sizeof(CloneCell));
+    CloneCell *cells = realloc(
+      index.cells, index.capacity * sizeof(CloneCell));
     if (!cells) raise %(alloc-fail (owner "graph clones"));
     index.cells = cells;
-    uint64_t *sizes = realloc(index.sizes,
-                              index.capacity * sizeof(uint64_t));
+    uint64_t *sizes = realloc(
+      index.sizes, index.capacity * sizeof(uint64_t));
     if (!sizes) raise %(alloc-fail (owner "graph clones"));
     index.sizes = sizes;
     index.sizes[0] = 0;
@@ -109,8 +109,8 @@ static int _clone_local(CloneIndex *index, List binding) {
 
 /* The ordered identity stream establishes one bijection per fragment.
    This optional verification is separate from linear structural indexing. */
-static void _clone_bindings(CloneIndex *index, Var value, Map names,
-                            Array stream) {
+static void _clone_bindings(
+  CloneIndex *index, Var value, Map names, Array stream) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
@@ -170,7 +170,7 @@ static uint64_t _clone_value(CloneIndex *index, Var value, int origin) {
       Var source_key;
       int file_static = index.statics.contains(node);
       if (index.parsed.compiler.semantic_binding_facts().try_get(
-            %(src-key $node), &source_key))
+        %(src-key $node), &source_key))
         file_static |= index.parsed.compiler.sym.file_statics().contains(
           source_key);
       List key = file_static
@@ -271,9 +271,10 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
     uint64_t id = key.list().car().integer() / 2;
     uint64_t size = index.sizes[id];
     sites = sites.sort();
-    ranked.push(%(${-(int64_t) (size * (count - 1))}
-      ${-(int64_t) size} $count
-      ${ (int64_t) index.cells[id].occurrences} (sites @sites)));
+    ranked.push(
+      %(${-(int64_t) (size * (count - 1))}
+        ${-(int64_t) size} $count
+        ${ (int64_t) index.cells[id].occurrences} (sites @sites)));
   }
   ranked.sort();
   Array candidates = [], retained = [];
@@ -286,9 +287,10 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
         if (_clone_covered(sites, parent)) { covered = 1; break; }
       if (covered) { suppressed++; continue; }
       retained.push(sites);
-      candidates.push(%(candidate (score ${-score.integer()})
-        (size ${-size.integer()}) (verified-occurrences $count)
-        (structural-occurrences $occurrences) (sites @{sites[:8]})));
+      candidates.push(
+        %(candidate (score ${-score.integer()})
+          (size ${-size.integer()}) (verified-occurrences $count)
+          (structural-occurrences $occurrences) (sites @{sites[:8]})));
     }
   }
   uint64_t unique[64] = {0}, visits[64] = {0}, repeated[64] = {0};
@@ -301,11 +303,12 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
   }
   Array distribution = [];
   for (int i = 0; i < 64; i++)
-    if (unique[i]) distribution.push(%(bucket
-      (minimum-size ${(int64_t) (1ULL << i)})
-      (unique-cells ${(int64_t) unique[i]})
-      (repeated-cells ${(int64_t) repeated[i]})
-      (occurrences ${(int64_t) visits[i]})));
+    if (unique[i]) distribution.push(
+      %(bucket
+        (minimum-size ${(int64_t) (1ULL << i)})
+        (unique-cells ${(int64_t) unique[i]})
+        (repeated-cells ${(int64_t) repeated[i]})
+        (occurrences ${(int64_t) visits[i]})));
   List result = %(clones
     (policy local-binding-bijection literals-preserved globals-preserved)
     (summary (units ${inputs.len()}) (cons-visits ${(int64_t) index.visits})

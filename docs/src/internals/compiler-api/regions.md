@@ -12,6 +12,7 @@ Values that can outlive the region that allocated them.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.audit_regions`](#Compiler.audit_regions) | Computes one unit's region summaries and findings for an optional project audit. |
 | [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 | [`Compiler.has_region_row`](#Compiler.has_region_row) | Reports whether the runtime table proves the lifetime effects of the native function `name`. |
@@ -19,6 +20,19 @@ Values that can outlive the region that allocated them.
 | [`Compiler.region_wrapper`](#Compiler.region_wrapper) | Reports whether the runtime operation `name` returns its argument's storage unchanged, as a `Var` box or its unboxing does. |
 
 ### `Compiler`
+
+<a id="Compiler.audit_regions"></a>
+#### Compiler.audit_regions
+
+`Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects, Array findings)`
+
+Computes one unit's region summaries and findings for an optional
+project audit. `seed` contains prior project-round summaries indexed by
+the emitted names visible in this unit. `effects` adds audit-only native
+contracts; neither input changes ordinary translation. Findings carry
+their function name and are returned without compiler diagnostics.
+
+Source: `src/regions.x:1238`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -35,7 +49,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1189`
+Source: `src/regions.x:1212`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -47,7 +61,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1164`
+Source: `src/regions.x:1187`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -57,7 +71,7 @@ Source: `src/regions.x:1164`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1212`
+Source: `src/regions.x:1252`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
@@ -69,7 +83,7 @@ for the active Scope, `<slot>` for the Scope its first argument names,
 `<pool>` for the canonical-value pool, or 0 when nothing is known. What
 the operation does to its arguments is a separate fact.
 
-Source: `src/regions.x:218`
+Source: `src/regions.x:226`
 
 <a id="Compiler.region_wrapper"></a>
 #### Compiler.region_wrapper
@@ -79,7 +93,7 @@ Source: `src/regions.x:218`
 Reports whether the runtime operation `name` returns its argument's
 storage unchanged, as a `Var` box or its unboxing does.
 
-Source: `src/regions.x:230`
+Source: `src/regions.x:238`
 
 ## Design notes
 

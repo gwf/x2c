@@ -75,10 +75,11 @@ protocol Var(Fact);
    while a `meta` definition is walked. */
 typedef struct Walk {
   Compiler compiler;
-  Map summaries, facts, sinks, restored;
+  Map summaries, facts, sinks, restored, effects;
   Array warnings, pending, freed;
   Region open, frame;
-  int depth, origin, fresh, changed, meta;
+  String function;
+  int depth, origin, fresh, changed, meta, audit;
 } *Walk;
 
 /* The runtime operations the pass reads by C name. (alloc) returns storage
@@ -210,6 +211,13 @@ static Map pooled_results = %{
   "Array_list_free": 1, "Atom_intern": 1, "List_append": 1,
   "String_concat": 1,   "String_join": 1
 };
+
+static Var _effect(Walk w, String name) {
+  if (!w.audit) return runtime[name];
+  Var effect;
+  return w.effects && w.effects.try_get(name, &effect)
+       ? effect : runtime[name];
+}
 
 /** The owner of the storage the runtime operation `name` returns: `<scope>`
     for the active Scope, `<slot>` for the Scope its first argument names,
@@ -347,7 +355,10 @@ static void _move(Fact fact, Region region) {
 
 static void _warn(
   Walk w, Symbol code, int origin, String message, List notes) {
-  w.warnings.push(%($code $origin $message $notes));
+  w.warnings.push(w.audit
+    ? %(${w.function} $code $origin $message $notes)
+    : %($code $origin $message $notes)
+  );
 }
 
 static List _opened(Walk w, Region region) {
@@ -363,7 +374,7 @@ static List _opened(Walk w, Region region) {
    `(param INDEX)`. <result> retains an argument in fresh result storage;
    <return> aliases an argument as the result. */
 static List _summary(Walk w, String callee) {
-  match (runtime[callee]) {
+  match (w.audit ? _effect(w, callee) : runtime[callee]) {
     case %(alloc pool): return %(2 ());
     case %(alloc *): return %(1 ());
     case %(pool): return %(2 ((0 result) (1 result)));
@@ -401,7 +412,8 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
   }
   List arguments = NULL;
   String callee = _callee_of(inner, arguments);
-  if (!callee || !Compiler.region_wrapper(callee)) return NULL;
+  if (!callee || (w.audit ? _effect(w, callee) != %(wrap)
+                          : !Compiler.region_wrapper(callee))) return NULL;
   return _fact_of(w, arguments.car(), named);
 }
 
@@ -456,7 +468,8 @@ static Region _birth(
   String callee = _callee_of(value, arguments);
   born = 1;
   other = NULL;
-  match (callee ? runtime[callee] : void) {
+  match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
+               : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
     case %(alloc pool): return _pooled(w, born);
     case %(alloc final) if (w.meta): return w.frame;
@@ -792,6 +805,13 @@ static void _scan(Walk w, Var value, int deferred) {
         Var found = w.facts[binding];
         if (found is void) break;
         Fact fact = found;
+        if (w.audit && ((fact.region && fact.region.closed) ||
+                        (fact.other && fact.other.closed))) {
+          String name = binding_identity_spelling(binding);
+          _warn(w, <region>, w.origin,
+                %"'$name' is read after its owning region ended", NULL);
+          break;
+        }
         if (!fact.dead) break;
         String name = binding_identity_spelling(binding);
         String ended = fact.dead == <moved> ? "Scope.realloc moved it"
@@ -807,7 +827,8 @@ static void _scan(Walk w, Var value, int deferred) {
       case %(call ? ?args): {
         List arguments = NULL;
         String callee = _callee_of(node, arguments);
-        match (callee ? runtime[callee] : void) {
+        match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
+                     : void) {
           case %((!or exit wrap)): break;
           case %(free): _end(w, arguments.car(), NULL, <freed>);
           case %(free scope):
@@ -983,7 +1004,8 @@ static void _walk_defer(Walk w, Var body) {
   match (body) case %(stmnt ?expression):
     callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
-  match (callee ? runtime[callee] : void) {
+  match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
+               : void) {
     case %(close ?): return;
     case %(free *) if (fact && fact.param < 0): {
       fact.region = _open(w, <auto>, NULL);
@@ -1008,7 +1030,7 @@ static void _walk_defer(Walk w, Var body) {
    whether `callee` is one. */
 static int _walk_region_call(Walk w, String callee, List arguments) {
   Fact fact = _fact_of(w, arguments.car(), NULL);
-  match (runtime[callee]) {
+  match (w.audit ? _effect(w, callee) : runtime[callee]) {
     case %(open ?kind): _open(w, kind, _slot(w, arguments.car()));
     case %(close ?kind): {
       Region region = _innermost(w, kind);
@@ -1119,6 +1141,7 @@ static void _collect_functions(Var node, Array found) {
    function's previous summary, so a summary only grows. */
 static void _analyze(Walk w, List function) {
   (String name, List parameters, Var body) = function;
+  w.function = name;
   (int fresh, List sinks) = w.summaries[name];
   w.facts = {};
   w.sinks = {};
@@ -1205,6 +1228,23 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
   $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
+}
+
+/** Computes one unit's region summaries and findings for an optional
+    project audit. `seed` contains prior project-round summaries indexed by
+    the emitted names visible in this unit. `effects` adds audit-only native
+    contracts; neither input changes ordinary translation. Findings carry
+    their function name and are returned without compiler diagnostics. */
+Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects,
+                           Array findings) {
+  struct Walk walk = {
+    .compiler = c, .summaries = seed.copy(), .effects = effects,
+    .pending = [], .freed = [], .audit = 1};
+  Walk w = &walk;
+  Array functions = $auto([]);
+  _fixpoint(w, ast, functions);
+  foreach (List finding, w.warnings) findings.push(finding);
+  return w.summaries;
 }
 
 /** Reports whether the runtime table proves the lifetime effects of the

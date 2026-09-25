@@ -1,8 +1,8 @@
 # x2c - C with batteries
 
 This VS Code extension provides the TextMate grammar and language
-configuration for x2c source files (`.x`, `.xc`, `.xh`, `.x2c`, and
-`.xmacro`) and compile-time Lisp files (`.xlisp`).
+configuration for x2c source files (`.x`, `.xc`, `.xh`, `.x2c`, `.xmacro`,
+`.xp`, and `.xpmacro`) and compile-time Lisp files (`.xlisp`).
 
 It highlights x2c list, array, map, string, Symbol, and SymbolSet literals,
 including data-first Array and Map contents and their runtime unquotes;

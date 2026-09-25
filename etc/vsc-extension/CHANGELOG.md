@@ -3,6 +3,12 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
+## Unreleased
+
+- Highlight contextual `meta native` function definitions and distinguish
+  always available `$auto`, `$scope`, `$let`, and `$lock` calls.
+- Associate `.xp` and `.xpmacro` indentation syntax files with x2c.
+
 ## 0.3.0
 
 - Use `x2c editor` from an installed compiler for diagnostics, definitions, and

@@ -60,6 +60,15 @@ meta static protocol Prepared(Plan);
 //          ^^^^^^^^ keyword.declaration.protocol.x2c
 meta static int compile_only(void);
 // <- storage.modifier.meta.x2c
+meta native int runtime_only(void) { return 0; }
+// <- storage.modifier.meta.x2c
+//   ^^^^^^ storage.modifier.native.x2c
+meta native static int local_runtime(void) { return 0; }
+//   ^^^^^^ storage.modifier.native.x2c
+int native = 0;
+//  ^^^^^^ - storage.modifier.native.x2c
+native();
+// <- - storage.modifier.native.x2c
 int meta = 0;
 //  ^^^^ - storage.modifier.meta.x2c
 typedef int meta;
@@ -381,7 +390,10 @@ $validated()
 // <- punctuation.definition.macro.sigil.x2c
 int answer(void) { return 42; }
 int truth = $nonzero() value + 1;
-//          ^ punctuation.definition.macro.sigil.x2c
+int managed = $auto(make_value());
+//             ^^^^ support.function.macro.builtin.x2c
+int scoped = $scope(make_value());
+//             ^ support.function.macro.builtin.x2c
 
 Var missing = void;
 //            ^^^^ constant.language.void.x2c
