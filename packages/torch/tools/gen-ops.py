@@ -175,7 +175,7 @@ def map_arg(arg):
                 "at::TensorList(xg_to_tensors(%s, %s_n))" % (name, name),
                 [("List", name)],
                 ["int64_t %s_n = 0;" % name,
-                 "xt_tensor *%s_items = _handles(%s, &%s_n);"
+                 "xt_tensor *%s_items = _handles(%s, %s_n);"
                  % (name, name, name)],
                 ["%s_items" % name, "%s_n" % name])
     if kind in ("Scalar", "Scalar?"):
@@ -609,13 +609,13 @@ static int64_t *_dims(List sizes, int64_t *count) {
   return dims;
 }
 
-static xt_tensor *_handles(List tensors, int64_t *count) {
+static xt_tensor *_handles(List tensors, int64_t &count) {
   int len = tensors ? tensors.len() : 0;
   xt_tensor *items = Scope.calloc(len ? len : 1, sizeof(xt_tensor));
   int index = 0;
   if (tensors) foreach (Var item, tensors) items[index++] = _native(
     item.tensor());
-  *count = len;
+  count = len;
   return items;
 }
 

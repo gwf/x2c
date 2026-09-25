@@ -87,7 +87,7 @@ static String _sandbox(String work) {
 /*  Reports every check that has finished since the last turn and returns
     how many of the batch are now accounted for.
 */
-static int _report_finished(Array checks, int *passed, int *expired) {
+static int _report_finished(Array checks, int &passed, int &expired) {
   int settled = 0;
   foreach(Var value, checks) {
     Check check = value.pointer();
@@ -96,7 +96,7 @@ static int _report_finished(Array checks, int *passed, int *expired) {
     check.reported = 1;
     settled++;
     if (check.process.timed_out()) {
-      (*expired)++;
+      expired++;
       printf("  %-12s timed out\n", check.name);
       continue;
     }
@@ -104,7 +104,7 @@ static int _report_finished(Array checks, int *passed, int *expired) {
       printf("  %-12s failed   %s", check.name, check.process.stderr());
       continue;
     }
-    (*passed)++;
+    passed++;
     printf("  %-12s ok       %s", check.name, check.process.stdout());
   }
   return settled;
@@ -142,7 +142,7 @@ int main(void) {
   ));
 
   printf("%s", %"${checks.len()} checks in $work\n");
-  while (_report_finished(checks, &passed, &expired) < checks.len()) {
+  while (_report_finished(checks, passed, expired) < checks.len()) {
     if (!loop.run(UV_RUN_ONCE)) break;
   }
 
@@ -156,7 +156,7 @@ int main(void) {
   }
   loop.timer(400, 0, 0, _settled);
   loop.run(UV_RUN_DEFAULT);
-  _report_finished(checks, &passed, &expired);
+  _report_finished(checks, passed, expired);
   watch.stop();
   budget.stop();
 

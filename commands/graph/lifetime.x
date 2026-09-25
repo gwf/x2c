@@ -824,9 +824,9 @@ List Lifetime.analyze_unit(
   );
 }
 
-static int _lifetime_combine_kind(Symbol *kind, Symbol next) {
-  if (*kind && *kind != next) return 0;
-  *kind = next;
+static int _lifetime_combine_kind(Symbol &kind, Symbol next) {
+  if (kind && kind != next) return 0;
+  kind = next;
   return 1;
 }
 
@@ -842,7 +842,7 @@ static int _lifetime_resolve_summary(
   foreach (List fact, facts)
     match (fact) {
       case %(kind ?direct):
-        if (!_lifetime_combine_kind(&kind, direct.symbol())) return 0;
+        if (!_lifetime_combine_kind(kind, direct.symbol())) return 0;
       case %((!or other unresolved)): return 0;
     }
   foreach (List fact, facts)
@@ -856,7 +856,7 @@ static int _lifetime_resolve_summary(
         }
         if (!summaries.contains(target)) return 0;
         Symbol next = summaries[target].symbol();
-        if (!_lifetime_combine_kind(&kind, next)) return 0;
+        if (!_lifetime_combine_kind(kind, next)) return 0;
       }
   if (!kind) return 0;
   *resolved = kind;

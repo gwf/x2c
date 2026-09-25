@@ -38,13 +38,13 @@ static int64_t *_dims(List sizes, int64_t *count) {
   return dims;
 }
 
-static xt_tensor *_handles(List tensors, int64_t *count) {
+static xt_tensor *_handles(List tensors, int64_t &count) {
   int len = tensors ? tensors.len() : 0;
   xt_tensor *items = Scope.calloc(len ? len : 1, sizeof(xt_tensor));
   int index = 0;
   if (tensors) foreach (Var item, tensors) items[index++] = _native(
     item.tensor());
-  *count = len;
+  count = len;
   return items;
 }
 
@@ -99,7 +99,7 @@ Tensor Tensor.align_as(Tensor self, Tensor other) =>
 
 List Torch.align_tensors(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_align_tensors(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "align_tensors");
@@ -488,7 +488,7 @@ Tensor Tensor.atleast_1d(Tensor self) =>
 
 List Torch.atleast_1d_sequence(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_atleast_1d_sequence(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "atleast_1d");
@@ -506,7 +506,7 @@ Tensor Tensor.atleast_2d(Tensor self) =>
 
 List Torch.atleast_2d_sequence(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_atleast_2d_sequence(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "atleast_2d");
@@ -524,7 +524,7 @@ Tensor Tensor.atleast_3d(Tensor self) =>
 
 List Torch.atleast_3d_sequence(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_atleast_3d_sequence(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "atleast_3d");
@@ -703,7 +703,7 @@ Tensor Tensor.bmm_dtype(Tensor self, Tensor mat2, int out_dtype) =>
 
 List Torch.broadcast_tensors(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_broadcast_tensors(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "broadcast_tensors");
@@ -725,20 +725,20 @@ Tensor Tensor.broadcast_to(Tensor self, List size) {
 
 Tensor Torch.concat(List tensors, int64_t dim) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_concat(tensors_items, tensors_n, dim), "concat");
 }
 
 Tensor Torch.concatenate(List tensors, int64_t dim) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_concatenate(tensors_items, tensors_n, dim),
       "concatenate");
 }
 
 Tensor Torch.block_diag(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_block_diag(tensors_items, tensors_n), "block_diag");
 }
 
@@ -750,7 +750,7 @@ Tensor Tensor.ceil_(Tensor self) =>
 
 Tensor Torch.chain_matmul(List matrices) {
   int64_t matrices_n = 0;
-  xt_tensor *matrices_items = _handles(matrices, &matrices_n);
+  xt_tensor *matrices_items = _handles(matrices, matrices_n);
   return Tensor.adopt(xt_chain_matmul(matrices_items, matrices_n),
       "chain_matmul");
 }
@@ -1385,7 +1385,7 @@ List Tensor.gradient_array(Tensor self, List dim, int64_t edge_order) {
 List Tensor.gradient_tensorarrayint(Tensor self, List spacing, int64_t dim,
     int dim_set, int64_t edge_order) {
   int64_t spacing_n = 0;
-  xt_tensor *spacing_items = _handles(spacing, &spacing_n);
+  xt_tensor *spacing_items = _handles(spacing, spacing_n);
   xt_tensor *items = NULL;
   int64_t count = xt_gradient_tensorarrayint(_native(self), spacing_items,
       spacing_n, dim, dim_set, edge_order, &items);
@@ -1402,7 +1402,7 @@ List Tensor.gradient_tensorarrayint(Tensor self, List spacing, int64_t dim,
 List Tensor.gradient_tensorarray(Tensor self, List spacing, List dim,
     int64_t edge_order) {
   int64_t spacing_n = 0;
-  xt_tensor *spacing_items = _handles(spacing, &spacing_n);
+  xt_tensor *spacing_items = _handles(spacing, spacing_n);
   int64_t dim_n = 0;
   int64_t *dim_dims = _dims(dim, &dim_n);
   xt_tensor *items = NULL;
@@ -1546,7 +1546,7 @@ Tensor Tensor.vdot(Tensor self, Tensor other) =>
 
 Tensor Torch.einsum(String equation, List tensors, List path) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   int64_t path_n = 0;
   int64_t *path_dims = path ? _dims(path, &path_n) : NULL;
   return Tensor.adopt(xt_einsum(equation, tensors_items, tensors_n, path_dims,
@@ -1565,7 +1565,7 @@ Tensor Tensor.embedding_renorm_(Tensor self, Tensor indices, double max_norm,
 
 Tensor Torch.row_stack(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_row_stack(tensors_items, tensors_n), "row_stack");
 }
 
@@ -3439,19 +3439,19 @@ Tensor Tensor.sspaddmm(Tensor self, Tensor mat1, Tensor mat2, Var beta,
 
 Tensor Torch.hstack(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_hstack(tensors_items, tensors_n), "hstack");
 }
 
 Tensor Torch.vstack(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_vstack(tensors_items, tensors_n), "vstack");
 }
 
 Tensor Torch.dstack(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_dstack(tensors_items, tensors_n), "dstack");
 }
 
@@ -4347,7 +4347,7 @@ Tensor Tensor.quantize_per_tensor_tensor(Tensor self, Tensor scale,
 List Torch.quantize_per_tensor_tensors(List tensors, Tensor scales,
     Tensor zero_points, int dtype) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_quantize_per_tensor_tensors(tensors_items, tensors_n,
       _native(scales), _native(zero_points), dtype, &items);
@@ -4371,7 +4371,7 @@ Tensor Tensor.dequantize(Tensor self) =>
 
 List Torch.dequantize_tensors(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_dequantize_tensors(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "dequantize");
@@ -4474,7 +4474,7 @@ Tensor Tensor.to_other(Tensor self, Tensor other, int non_blocking,
 
 List Torch.meshgrid(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_meshgrid(tensors_items, tensors_n, &items);
   if (count < 0) Torch.check(1, "meshgrid");
@@ -4489,7 +4489,7 @@ List Torch.meshgrid(List tensors) {
 
 List Torch.meshgrid_indexing(List tensors, String indexing) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_meshgrid_indexing(tensors_items, tensors_n, indexing,
       &items);
@@ -4505,7 +4505,7 @@ List Torch.meshgrid_indexing(List tensors, String indexing) {
 
 Tensor Torch.cartesian_prod(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_cartesian_prod(tensors_items, tensors_n),
       "cartesian_prod");
 }
@@ -4524,9 +4524,9 @@ List Tensor.lstm(Tensor input, List hx, List params, int has_biases,
     int64_t num_layers, double dropout, int train, int bidirectional,
     int batch_first) {
   int64_t hx_n = 0;
-  xt_tensor *hx_items = _handles(hx, &hx_n);
+  xt_tensor *hx_items = _handles(hx, hx_n);
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL, out2 = NULL;
   Torch.check(xt_lstm_input(_native(input), hx_items, hx_n, params_items,
       params_n, has_biases, num_layers, dropout, train, bidirectional,
@@ -4545,9 +4545,9 @@ List Tensor.lstm_data(Tensor data, Tensor batch_sizes, List hx, List params,
     int has_biases, int64_t num_layers, double dropout, int train,
     int bidirectional) {
   int64_t hx_n = 0;
-  xt_tensor *hx_items = _handles(hx, &hx_n);
+  xt_tensor *hx_items = _handles(hx, hx_n);
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL, out2 = NULL;
   Torch.check(xt_lstm_data(_native(data), _native(batch_sizes), hx_items,
       hx_n, params_items, params_n, has_biases, num_layers, dropout, train,
@@ -4566,7 +4566,7 @@ List Tensor.gru(Tensor input, Tensor hx, List params, int has_biases,
     int64_t num_layers, double dropout, int train, int bidirectional,
     int batch_first) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_gru_input(_native(input), _native(hx), params_items,
       params_n, has_biases, num_layers, dropout, train, bidirectional,
@@ -4578,7 +4578,7 @@ List Tensor.gru_data(Tensor data, Tensor batch_sizes, Tensor hx, List params,
     int has_biases, int64_t num_layers, double dropout, int train,
     int bidirectional) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_gru_data(_native(data), _native(batch_sizes), _native(hx),
       params_items, params_n, has_biases, num_layers, dropout, train,
@@ -4590,7 +4590,7 @@ List Tensor.rnn_tanh(Tensor input, Tensor hx, List params, int has_biases,
     int64_t num_layers, double dropout, int train, int bidirectional,
     int batch_first) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_rnn_tanh_input(_native(input), _native(hx), params_items,
       params_n, has_biases, num_layers, dropout, train, bidirectional,
@@ -4602,7 +4602,7 @@ List Tensor.rnn_tanh_data(Tensor data, Tensor batch_sizes, Tensor hx,
     List params, int has_biases, int64_t num_layers, double dropout,
     int train, int bidirectional) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_rnn_tanh_data(_native(data), _native(batch_sizes),
       _native(hx), params_items, params_n, has_biases, num_layers, dropout,
@@ -4614,7 +4614,7 @@ List Tensor.rnn_relu(Tensor input, Tensor hx, List params, int has_biases,
     int64_t num_layers, double dropout, int train, int bidirectional,
     int batch_first) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_rnn_relu_input(_native(input), _native(hx), params_items,
       params_n, has_biases, num_layers, dropout, train, bidirectional,
@@ -4626,7 +4626,7 @@ List Tensor.rnn_relu_data(Tensor data, Tensor batch_sizes, Tensor hx,
     List params, int has_biases, int64_t num_layers, double dropout,
     int train, int bidirectional) {
   int64_t params_n = 0;
-  xt_tensor *params_items = _handles(params, &params_n);
+  xt_tensor *params_items = _handles(params, params_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_rnn_relu_data(_native(data), _native(batch_sizes),
       _native(hx), params_items, params_n, has_biases, num_layers, dropout,
@@ -4637,7 +4637,7 @@ List Tensor.rnn_relu_data(Tensor data, Tensor batch_sizes, Tensor hx,
 List Tensor.lstm_cell(Tensor input, List hx, Tensor w_ih, Tensor w_hh,
     Tensor b_ih, Tensor b_hh) {
   int64_t hx_n = 0;
-  xt_tensor *hx_items = _handles(hx, &hx_n);
+  xt_tensor *hx_items = _handles(hx, hx_n);
   xt_tensor out0 = NULL, out1 = NULL;
   Torch.check(xt_lstm_cell(_native(input), hx_items, hx_n, _native(w_ih),
       _native(w_hh), _native(b_ih), _native(b_hh), &out0, &out1), "lstm_cell");
@@ -4664,7 +4664,7 @@ List Tensor.quantized_lstm_cell(Tensor input, List hx, Tensor w_ih,
     Tensor col_offsets_ih, Tensor col_offsets_hh, Var scale_ih, Var scale_hh,
     Var zero_point_ih, Var zero_point_hh) {
   int64_t hx_n = 0;
-  xt_tensor *hx_items = _handles(hx, &hx_n);
+  xt_tensor *hx_items = _handles(hx, hx_n);
   int64_t scale_ih_int = 0;
   double scale_ih_dbl = 0;
   int scale_ih_kind = _scalar(scale_ih, &scale_ih_int, &scale_ih_dbl);
@@ -6633,7 +6633,7 @@ Tensor Tensor.col2im(Tensor self, List output_size, List kernel_size,
 
 Tensor Torch.column_stack(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_column_stack(tensors_items, tensors_n),
       "column_stack");
 }
@@ -7284,7 +7284,7 @@ Tensor Tensor.linalg_matrix_rank_tol(Tensor input, Tensor tol,
 
 Tensor Torch.linalg_multi_dot(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_linalg_multi_dot(tensors_items, tensors_n),
       "linalg_multi_dot");
 }
@@ -7311,21 +7311,21 @@ Tensor Tensor.segment_reduce(Tensor data, String reduce, Tensor lengths,
 Tensor Torch.pad_sequence(List sequences, int batch_first,
     double padding_value, String padding_side) {
   int64_t sequences_n = 0;
-  xt_tensor *sequences_items = _handles(sequences, &sequences_n);
+  xt_tensor *sequences_items = _handles(sequences, sequences_n);
   return Tensor.adopt(xt_pad_sequence(sequences_items, sequences_n,
       batch_first, padding_value, padding_side), "pad_sequence");
 }
 
 Tensor Torch.flatten_dense_tensors(List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   return Tensor.adopt(xt_flatten_dense_tensors(tensors_items, tensors_n),
       "flatten_dense_tensors");
 }
 
 List Tensor.unflatten_dense_tensors(Tensor flat, List tensors) {
   int64_t tensors_n = 0;
-  xt_tensor *tensors_items = _handles(tensors, &tensors_n);
+  xt_tensor *tensors_items = _handles(tensors, tensors_n);
   xt_tensor *items = NULL;
   int64_t count = xt_unflatten_dense_tensors(_native(flat), tensors_items,
       tensors_n, &items);

@@ -199,7 +199,7 @@ static int _integer_dtype(int dtype) =>
   dtype == XT_UINT8 || dtype == XT_INT8 || dtype == XT_INT16 ||
   dtype == XT_INT32 || dtype == XT_INT64 || dtype == XT_BOOL;
 
-static int64_t *_shape(List sizes, int *rank) {
+static int64_t *_shape(List sizes, int &rank) {
   int count = sizes.len();
   int64_t *shape = Scope.calloc(count ? count : 1, sizeof(int64_t));
   int index = 0;
@@ -207,16 +207,16 @@ static int64_t *_shape(List sizes, int *rank) {
     long extent = size;  // converting; a Symbol or text raises
     shape[index++] = extent;
   }
-  *rank = count;
+  rank = count;
   return shape;
 }
 
-static xt_tensor *_handles(List tensors, int *count) {
+static xt_tensor *_handles(List tensors, int &count) {
   int total = tensors.len();
   xt_tensor *handles = Scope.calloc(total ? total : 1, sizeof(xt_tensor));
   int index = 0;
   foreach (Tensor tensor, tensors) handles[index++] = tensor.native;
-  *count = total;
+  count = total;
   return handles;
 }
 
@@ -276,7 +276,7 @@ String Tensor.device(Tensor tensor) {
     int64, so a value beyond a double's exact range survives. */
 Tensor Tensor.of(List values, List shape, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank), total = 1, count = 0;
+  int64_t *sizes = _shape(shape, rank), total = 1, count = 0;
   for (int i = 0; i < rank; i++) total *= sizes[i];
   if (_integer_dtype(dtype)) {
     int64_t *whole = Scope.calloc(total ? total : 1, sizeof(int64_t));
@@ -311,31 +311,31 @@ Tensor int.tensor(int value) => Tensor.scalar_integer(value, XT_INT64);
 
 Tensor Tensor.zeros(List shape, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_zeros(sizes, rank, dtype), "zeros");
 }
 
 Tensor Tensor.ones(List shape, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_ones(sizes, rank, dtype), "ones");
 }
 
 Tensor Tensor.full(List shape, double value, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_full(sizes, rank, value, dtype), "full");
 }
 
 Tensor Tensor.rand(List shape, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_rand(sizes, rank, dtype), "rand");
 }
 
 Tensor Tensor.randn(List shape, int dtype) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_randn(sizes, rank, dtype), "randn");
 }
 
@@ -557,7 +557,7 @@ Tensor Tensor.where(Tensor condition, Tensor a, Tensor b) =>
 
 Tensor Tensor.reshape(Tensor a, List shape) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap(xt_reshape(a.native, sizes, rank), "reshape");
 }
 Tensor Tensor.transpose(Tensor a, int dim0, int dim1) =>
@@ -583,14 +583,14 @@ Tensor Tensor.index_select(Tensor a, int dim, Tensor indexes) =>
 /** Joins `tensors` along an existing dimension. */
 Tensor Tensor.cat(List tensors, int dim) {
   int count;
-  xt_tensor *handles = _handles(tensors, &count);
+  xt_tensor *handles = _handles(tensors, count);
   return _wrap(xt_cat(handles, count, dim), "cat");
 }
 
 /** Joins `tensors` along a new dimension `dim`. */
 Tensor Tensor.stack(List tensors, int dim) {
   int count;
-  xt_tensor *handles = _handles(tensors, &count);
+  xt_tensor *handles = _handles(tensors, count);
   return _wrap(xt_stack(handles, count, dim), "stack");
 }
 
@@ -773,14 +773,14 @@ Module Module.batch_norm2d_with(long features, double eps, double momentum,
 /** Layer normalization over the trailing dimensions `shape` names. */
 Module Module.layer_norm(List shape) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap_module(xt_layer_norm_new(sizes, rank, 1e-5, 1),
                       "layer_norm");
 }
 
 Module Module.layer_norm_with(List shape, double eps, int affine) {
   int rank;
-  int64_t *sizes = _shape(shape, &rank);
+  int64_t *sizes = _shape(shape, rank);
   return _wrap_module(xt_layer_norm_new(sizes, rank, eps, affine),
                       "layer_norm_with");
 }
@@ -1032,7 +1032,7 @@ Optimizer Optimizer.adagrad(Module m, double lr) =>
     is one of the XT_SGD .. XT_ADAGRAD constants. */
 Optimizer Optimizer.over(List tensors, int kind, double lr) {
   int count;
-  xt_tensor *handles = _handles(tensors, &count);
+  xt_tensor *handles = _handles(tensors, count);
   return _wrap_optimizer(xt_optim_new_from_tensors(kind, handles, count, lr),
                          "over");
 }
@@ -1152,7 +1152,7 @@ Tensor Tensor.custom(Func forward, Func backward, List inputs) {
   TorchCallbackError error = {0};
   $let(callback_error, &error) {
     int count;
-    xt_tensor *handles = _handles(inputs, &count);
+    xt_tensor *handles = _handles(inputs, count);
     xt_tensor result =
       xt_custom(_custom_call, forward, backward, handles, count);
     if (error.cause) Error.raise(error.cause, error.detail);
@@ -1176,7 +1176,7 @@ void Tensor.backward_callbacks(Tensor tensor) {
     after the callback. Native autograd checks subsequent in-place changes. */
 void AutogradContext.save_for_backward(AutogradContext context, List tensors) {
   int count;
-  xt_tensor *handles = _handles(tensors, &count);
+  xt_tensor *handles = _handles(tensors, count);
   _check(xt_custom_save(context, handles, count), "save_for_backward");
 }
 
@@ -1395,7 +1395,7 @@ JitModule JitModule.load(String path) =>
     per element for a tuple of tensors. */
 List JitModule.forward(JitModule m, List inputs) {
   int count;
-  xt_tensor *handles = _handles(inputs, &count);
+  xt_tensor *handles = _handles(inputs, count);
   /* A forward returning more tensors than this reports as a failure
      rather than a truncated List. */
   int limit = 16;

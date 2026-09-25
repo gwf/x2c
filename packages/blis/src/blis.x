@@ -167,19 +167,19 @@ static Var _blis_sequence_value(Var values, int index) {
   return values is <list> ? values.list()[index] : values.array()[index];
 }
 
-static void _blis_numeric_rows(Var rows, int *columns) {
-  *columns = 0;
+static void _blis_numeric_rows(Var rows, int &columns) {
+  columns = 0;
   int row_count = _blis_sequence_length(rows, "copy_rows");
   if (!row_count) return;
   Var first = _blis_sequence_value(rows, 0);
-  *columns = _blis_sequence_length(first, "copy_rows");
+  columns = _blis_sequence_length(first, "copy_rows");
 
   for (int row_index = 0; row_index < row_count; row_index++) {
     Var row = _blis_sequence_value(rows, row_index);
     int row_length = _blis_sequence_length(row, "copy_rows");
-    if (row_length != *columns) {
+    if (row_length != columns) {
       _blis_bad_shape(
-        "copy_rows", row_count, *columns, row_count, row_length
+        "copy_rows", row_count, columns, row_count, row_length
       );
     }
     for (int column = 0; column < row_length; column++) {
@@ -269,7 +269,7 @@ BlisObject BlisObject.new(num_t storage, int rows, int columns) {
 
 BlisObject BlisObject.copy_rows(Var rows, num_t storage) {
   int columns = 0;
-  _blis_numeric_rows(rows, &columns);
+  _blis_numeric_rows(rows, columns);
   int row_count = _blis_sequence_length(rows, "copy_rows");
   BlisObject object = _blis_owned(
     storage, row_count, columns, "copy_rows"
