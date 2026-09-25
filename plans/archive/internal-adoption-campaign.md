@@ -12,7 +12,7 @@
 > - The 44 native-handle and packed-storage operations listed in phase 7
 >   stay parked until a caller exists.
 > - Json, Diff and Path meta exposure is owned by
->   [the REPL runtime surface plan](../repl-fit-and-runtime-surface.md).
+>   [the REPL runtime surface plan](repl-fit-and-runtime-surface.md).
 
 ## The result
 

@@ -47,25 +47,17 @@ execution.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
-- [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and measurement
-  of numeric Func's remaining per-call frame cost are open; the small-defect
-  and system-header investigations record their outcomes. Meta-capable
-  protocols and native extensions retain their separate design and
-  implementation status.
-
-
-- [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
-  terminal UX, live statistics, REPL-only output, and the Json, Diff, and
-  Path text operations (delivered in `ab74ef4b`) are implemented, and scalar
-  math is already callable. The REPL now lives in `commands/repl`. The
-  lexical-scope repair to the literate example shipped in `144a833d`.
+- [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and numeric
+  Func cost measurement are recorded; system-header cost work and selected
+  design tracks remain open. Meta-capable protocols and native extensions
+  retain their separate design and implementation status.
 
 ### Open backlog and scoped follow-ups
 
 | Record | What remains |
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-3 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
+| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
@@ -87,6 +79,12 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Native `meta` definitions](archive/meta-native-definitions.md): done
+  2026-09-25; definition marker and library migration delivered in
+  `c3ac95fd` and `56b75433`.
+- [REPL fit, status, and runtime surface](archive/repl-fit-and-runtime-surface.md):
+  done 2026-09-25; all eight deliveries reached `dev`, and later REPL work
+  belongs in `commands/repl`.
 - [Meta sequencing](archive/meta-sequencing.md): done 2026-09-25;
   the optional selected-root lifetime proof completed step 4.
 - [External commands](archive/external-commands.md): done 2026-09-24;

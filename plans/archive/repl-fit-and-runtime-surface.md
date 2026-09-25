@@ -1,6 +1,7 @@
 # REPL fit, status, and runtime surface
 
-> Status: implemented through delivery 8
+> Status: done 2026-09-25. Deliveries 1-8 are on `dev`; pure module
+> bindings landed in `39578b76` and the REPL later moved to `commands/repl`.
 > Deliveries 1-7 were implemented and validated on 2026-09-21. Delivery 8,
 > the pure-module step, was implemented on 2026-09-24 through `meta`
 > prototypes in json.x, diff.x and path.x that `lib/lisp.x` includes.
@@ -114,7 +115,7 @@ Gary accepted all four recommendations below on 2026-09-24.
 
 The REPL is now its own program. It moved out of the compiler into
 `commands/repl` in `3eff555c` and runs through `x2c repl`; see
-[external commands](archive/external-commands.md). The Json, Diff, and Path
+[external commands](external-commands.md). The Json, Diff, and Path
 bindings above landed before that move and are served through the
 compiler objects the command links. Later REPL work belongs in
 `commands/repl`.
