@@ -12,15 +12,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-Job Var_job(Var value);
-
-Var Job_var(Job job);
-
-typedef enum Env{
-  ENV_NAMESPACE
-}
-Env;
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>

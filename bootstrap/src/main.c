@@ -588,7 +588,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
 
 String Path_read_text(Path);
 
-Tokenizer Tokenizer_new(char *);
+Tokenizer Tokenizer_new(char *, Symbol);
 
 void Tokenizer_scan(Tokenizer);
 
@@ -655,7 +655,7 @@ x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
-Tokenizer tokens = Tokenizer_new(text);
+Tokenizer tokens = Tokenizer_new(text, 3945159);
 Tokenizer_scan(tokens);
 Array names = Array_new();
 int depth = 0;

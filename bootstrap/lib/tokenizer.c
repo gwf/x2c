@@ -4,14 +4,14 @@
 
 #include "exception.h"
 
-static String _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-#include "exception.h"
-#include <string.h>
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
+#include "exception.h"
+#include <string.h>
 static inline Symbol Tokenizer__scan_mode(Tokenizer t);
 
 static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode);
@@ -103,27 +103,62 @@ static inline int _x2c_proto_token_equal_0(Var a0, Var a1);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
+static inline String _x2c_proto_tokenizer_str_0(Var a0);
+
+static inline String _x2c_proto_tokenizer_repr_0(Var a0);
+
+static inline Buffer _x2c_proto_tokenizer_write_str_0(Var a0, Buffer a1);
+
+static inline Buffer _x2c_proto_tokenizer_write_repr_0(Var a0, Buffer a1);
+
+static inline unsigned _x2c_proto_tokenizer_hash_0(Var a0);
+
+static inline int _x2c_proto_tokenizer_equal_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_1;
+
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_3;
   const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
   const void * _x2c_defer_capture_9;
+  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_11;
+  const void * _x2c_defer_capture_12;
 }
-_x2c_defer_env_1;
+_x2c_defer_env_4;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -136,6 +171,11 @@ __attribute__((constructor)) static void _file_init_(void){
   if(! x2c_register_builtin_descriptor(42948956, _x2c__x2c_protocol_methods_0)){
     x2c_register_descriptor(String_new("token"), _x2c__x2c_protocol_methods_0);
   }
+  _x2c__x2c_protocol_methods_1 =(VarMethods){
+    .str = _x2c_proto_tokenizer_str_0, .repr = _x2c_proto_tokenizer_repr_0, .write_str = _x2c_proto_tokenizer_write_str_0, .write_repr = _x2c_proto_tokenizer_write_repr_0, .hash = _x2c_proto_tokenizer_hash_0, .equal = _x2c_proto_tokenizer_equal_0
+  }
+  ;
+  x2c_register_tagged_descriptor(224890660808, String_new("Tokenizer"), _x2c__x2c_protocol_methods_1);
   _0 = String_new("{{text:");
   _1 = String_new(", type:");
   _2 = String_new("line:");
@@ -171,6 +211,199 @@ __attribute__((constructor)) static void _file_init_(void){
   _32 = String_new("}");
   _33 = String_new("else");
   _34 = String_new(";");
+  _35 = String_new("<Tokenizer: 0x%012lX>");
+  _36 = String_new("Tokenizer { ");
+  _37 = String_new("tokens: ");
+  _38 = String_new("<opaque: 0x%012lX>");
+  _39 = String_new("text: ");
+  _40 = String_new("modes: ");
+  _41 = String_new("cursor: ");
+  _42 = String_new("scan_status: ");
+  _43 = String_new("line: ");
+  _44 = String_new("col: ");
+  _45 = String_new("pos: ");
+  _46 = String_new("layout: ");
+  _47 = String_new(" }");
+}
+
+Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1){
+  Tokenizer value = Tokenizer_alloc();
+  Tokenizer_init(value, argument_0, argument_1);
+  return value;
+}
+
+void * Scope_calloc(size_t, size_t);
+
+Tokenizer Tokenizer_alloc(){
+  Tokenizer value = Scope_calloc(1, sizeof(* value));
+  return value;
+}
+
+void Scope_free(void *);
+
+void Tokenizer_free(Tokenizer value){
+  Scope_free(value);
+}
+
+void Tokenizer_cleanup(Tokenizer value){
+  Tokenizer_free(value);
+}
+
+Var Var_new(Symbol, ...);
+
+Var Tokenizer_var(Tokenizer value){
+  return Var_new(224890660808, value);
+}
+
+void * Var_pointer(Var);
+
+Tokenizer Var_tokenizer(Var value){
+  return(Tokenizer) Var_pointer(value);
+}
+
+int Tokenizer_equal(Tokenizer left, Tokenizer right){
+  return(void *) left ==(void *) right;
+}
+
+unsigned x2c_hash_word(unsigned long);
+
+unsigned Tokenizer_hash(Tokenizer value){
+  return x2c_hash_word((unsigned long) value);
+}
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+Buffer Tokenizer_write_str(Tokenizer value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  return Buffer_printf(out, _35, (long) value);
+}
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str(Buffer);
+
+String Tokenizer_str(Tokenizer value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_5
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    Tokenizer_write_str(value, out);
+    {
+      String _x2c_return_value_0 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+}
+
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Array_write_repr(Array, Buffer);
+
+Buffer Symbol_write_repr(Symbol, Buffer);
+
+Buffer Var_write_repr(Var, Buffer);
+
+Var int_var(int);
+
+Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _35, (long) value);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _35, (long) value);
+  {
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & path};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_6
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    Buffer_write(out, _36);
+    Buffer_write(out, _37);
+    Buffer_printf(out, _38, (long) value -> tokens);
+    Buffer_write(out, _6);
+    Buffer_write(out, _39);
+    Buffer_printf(out, _38, (long) value -> text);
+    Buffer_write(out, _6);
+    Buffer_write(out, _40);
+    Array_write_repr(value -> modes, out);
+    Buffer_write(out, _6);
+    Buffer_write(out, _41);
+    Buffer_printf(out, _38, (long) value -> cursor);
+    Buffer_write(out, _6);
+    Buffer_write(out, _42);
+    Symbol_write_repr(value -> scan_status, out);
+    Buffer_write(out, _6);
+    Buffer_write(out, _43);
+    Var_write_repr(int_var(value -> line), out);
+    Buffer_write(out, _6);
+    Buffer_write(out, _44);
+    Var_write_repr(int_var(value -> col), out);
+    Buffer_write(out, _6);
+    Buffer_write(out, _45);
+    Var_write_repr(int_var(value -> pos), out);
+    Buffer_write(out, _6);
+    Buffer_write(out, _46);
+    Var_write_repr(int_var(value -> layout), out);
+    {
+      Buffer _x2c_return_value_1 = Buffer_write(out, _47);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+}
+}
+
+String Tokenizer_repr(Tokenizer value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_2 _x2c_defer_env_7 = {._x2c_defer_capture_2 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_7
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    Tokenizer_write_repr(value, out);
+    {
+      String _x2c_return_value_2 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
+
+}
 }
 
 unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
@@ -203,31 +436,17 @@ String Token_repr(Token token){
   return String_join(NULL, cons(String_var(head), cons(String_var(_6), cons(String_var(location), cons(String_var(_6), cons(String_var(extent), cons(String_var(_7), NULL)))))));
 }
 
-Tokenizer Tokenizer_new(char * text){
-  return Tokenizer_new_mode(text, 3945159);
-}
-
-void * Scope_malloc(size_t);
-
-Var Array_push(Array, Var);
-
 Var Symbol_var(Symbol);
 
 Bytes Bytes_new(size_t);
 
-Tokenizer Tokenizer_new_mode(char * text, Symbol mode){
-  Tokenizer tokenizer = Scope_malloc(sizeof(struct Tokenizer));
+void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
   tokenizer -> text = text ? text : "";
-  tokenizer -> pos = 0;
   tokenizer -> line = 1;
   tokenizer -> col = 1;
-  tokenizer -> cursor = NULL;
   tokenizer -> scan_status = 982;
-  tokenizer -> layout = 0;
-  tokenizer -> modes = Array_new();
-  Array_push(tokenizer -> modes, Symbol_var(mode));
+  tokenizer -> modes = Array_update_n(Array_new(), 1, Symbol_var(mode));
   tokenizer -> tokens = Bytes_new(sizeof(struct Token));
-  return tokenizer;
 }
 
 Var Array_getindex(Array, int);
@@ -235,6 +454,8 @@ Var Array_getindex(Array, int);
 static inline Symbol Tokenizer__scan_mode(Tokenizer t){
   return Var_symbol(Array_getindex(t -> modes, - 1));
 }
+
+Var Array_push(Array, Var);
 
 static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
   Array_push(tokenizer -> modes, Symbol_var(mode));
@@ -369,28 +590,28 @@ static int Tokenizer__operator(Tokenizer t, int len){
   if(push) Tokenizer__push_mode(t, push);
   int mode_committed = ! push;
   {
-  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & mode_committed, ._x2c_defer_capture_1 =(const void *) & t};
+  _x2c_defer_env_3 _x2c_defer_env_8 = {._x2c_defer_capture_3 =(const void *) & mode_committed, ._x2c_defer_capture_4 =(const void *) & t};
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_2
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_8
   };
-  x2c_cleanup_push(&_x2c_defer_record_0);
+  x2c_cleanup_push(&_x2c_defer_record_3);
   {
     Tokenizer_tokenize(t, token_len, token_type);
     mode_committed = 1;
     if(pop) Tokenizer__pop_mode(t);
     {
-      int _x2c_return_value_0 = 1;
+      int _x2c_return_value_3 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_3;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
 }
 }
@@ -759,13 +980,13 @@ static void Tokenizer__layout(Tokenizer t){
   String * closers = calloc(count + 2, sizeof(String));
   char * enums = calloc(count + 2, 1), * ternary = calloc(count + 1, 1);
   {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_2 =(const void *) & sig, ._x2c_defer_capture_3 =(const void *) & depths, ._x2c_defer_capture_4 =(const void *) & lines, ._x2c_defer_capture_5 =(const void *) & edits, ._x2c_defer_capture_6 =(const void *) & indents, ._x2c_defer_capture_7 =(const void *) & closers, ._x2c_defer_capture_8 =(const void *) & enums, ._x2c_defer_capture_9 =(const void *) & ternary};
+  _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_5 =(const void *) & sig, ._x2c_defer_capture_6 =(const void *) & depths, ._x2c_defer_capture_7 =(const void *) & lines, ._x2c_defer_capture_8 =(const void *) & edits, ._x2c_defer_capture_9 =(const void *) & indents, ._x2c_defer_capture_10 =(const void *) & closers, ._x2c_defer_capture_11 =(const void *) & enums, ._x2c_defer_capture_12 =(const void *) & ternary};
 
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_3
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = & _x2c_defer_env_9
   };
-  x2c_cleanup_push(&_x2c_defer_record_1);
+  x2c_cleanup_push(&_x2c_defer_record_4);
   {
     Token error_at = NULL;
     for(int i = 0;  i < count;  i ++) if(all[i].type != 40896714 && all[i].type != 7477210024) sig[nsig ++] = & all[i];
@@ -880,7 +1101,7 @@ static void Tokenizer__layout(Tokenizer t){
     }
     t -> tokens = out;
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
 }
 }
@@ -942,22 +1163,65 @@ static inline int _x2c_proto_token_equal_0(Var a0, Var a1){
   return Token_equal(Var_token(a0), Var_token(a1));
 }
 
+static inline String _x2c_proto_tokenizer_str_0(Var a0){
+  return Tokenizer_str(Var_tokenizer(a0));
+}
+
+static inline String _x2c_proto_tokenizer_repr_0(Var a0){
+  return Tokenizer_repr(Var_tokenizer(a0));
+}
+
+static inline Buffer _x2c_proto_tokenizer_write_str_0(Var a0, Buffer a1){
+  return Tokenizer_write_str(Var_tokenizer(a0), a1);
+}
+
+static inline Buffer _x2c_proto_tokenizer_write_repr_0(Var a0, Buffer a1){
+  return Tokenizer_write_repr(Var_tokenizer(a0), a1);
+}
+
+static inline unsigned _x2c_proto_tokenizer_hash_0(Var a0){
+  return Tokenizer_hash(Var_tokenizer(a0));
+}
+
+static inline int _x2c_proto_tokenizer_equal_0(Var a0, Var a1){
+  return Tokenizer_equal(Var_tokenizer(a0), Var_tokenizer(a1));
+}
+
+void Buffer_free(Buffer);
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)) Tokenizer__pop_mode((*(Tokenizer *) _x2c_defer_data_0->_x2c_defer_capture_1));
+  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
+
+void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_3)) Tokenizer__pop_mode((*(Tokenizer *) _x2c_defer_data_3->_x2c_defer_capture_4));
+}
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
   {
-    free((*(Token * *) _x2c_defer_data_1->_x2c_defer_capture_2));
-    free((*(int * *) _x2c_defer_data_1->_x2c_defer_capture_3));
-    free((*(_LayoutLine * *) _x2c_defer_data_1->_x2c_defer_capture_4));
-    free((*(_LayoutEdit * *) _x2c_defer_data_1->_x2c_defer_capture_5));
-    free((*(int * *) _x2c_defer_data_1->_x2c_defer_capture_6));
-    free((*(String * *) _x2c_defer_data_1->_x2c_defer_capture_7));
-    free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_8));
-    free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_9));
+    free((*(Token * *) _x2c_defer_data_4->_x2c_defer_capture_5));
+    free((*(int * *) _x2c_defer_data_4->_x2c_defer_capture_6));
+    free((*(_LayoutLine * *) _x2c_defer_data_4->_x2c_defer_capture_7));
+    free((*(_LayoutEdit * *) _x2c_defer_data_4->_x2c_defer_capture_8));
+    free((*(int * *) _x2c_defer_data_4->_x2c_defer_capture_9));
+    free((*(String * *) _x2c_defer_data_4->_x2c_defer_capture_10));
+    free((*(char * *) _x2c_defer_data_4->_x2c_defer_capture_11));
+    free((*(char * *) _x2c_defer_data_4->_x2c_defer_capture_12));
   }
 
 }

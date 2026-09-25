@@ -37,6 +37,15 @@ Buffer Job_write_repr(Job value, Buffer out);
 
 String Job_repr(Job value);
 
+Job Var_job(Var value);
+
+Var Job_var(Job job);
+
+typedef enum Env{
+  ENV_NAMESPACE
+}
+Env;
+
 Job List_job(List command);
 
 Job Job_options(Job job, Map options);

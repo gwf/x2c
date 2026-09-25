@@ -16,8 +16,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-Regex Var_regex(Var value);
-
 #include <string.h>
 struct _RegexNode{
   Symbol kind;

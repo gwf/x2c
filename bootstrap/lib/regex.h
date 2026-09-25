@@ -39,6 +39,8 @@ Buffer Regex_write_repr(Regex value, Buffer out);
 
 String Regex_repr(Regex value);
 
+Regex Var_regex(Var value);
+
 typedef List RegexCapture;
 
 typedef List RegexMatch;

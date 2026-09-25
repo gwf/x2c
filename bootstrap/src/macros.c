@@ -4490,11 +4490,11 @@ default: break;
 if(declared == _446) return _761;  if(List_truth(c -> macro_stack) && Var_is_row(value, 9, 7, 4)) return Compiler_lift_macro_lisp_expression(c, value, site);  List result = Compiler_meta_value_expression(c, declared, value, site);  return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
 }
 
-Tokenizer Tokenizer_new_mode(char *, Symbol);
+Tokenizer Tokenizer_new(char *, Symbol);
 void Tokenizer_scan(Tokenizer);
 Token Tokenizer_next(Tokenizer);
 static List _lisp_construction(Compiler compiler, String form){
-  Tokenizer tokenizer = Tokenizer_new_mode(form, 917238583151840);  Tokenizer_scan(tokenizer);  Array construction = Array_new();  Map seen = Map_new();
+  Tokenizer tokenizer = Tokenizer_new(form, 917238583151840);  Tokenizer_scan(tokenizer);  Array construction = Array_new();  Map seen = Map_new();
   Token token = Tokenizer_next(tokenizer);
   while(token && token -> type != 11212){
     if(token -> type == 73){
@@ -4580,7 +4580,7 @@ static Var _eval_template_form(Compiler compiler, String form, List bindings, To
 
   }
   if(List_truth(references)){
-    Tokenizer tokenizer = Tokenizer_new_mode(form, 917238583151840);
+    Tokenizer tokenizer = Tokenizer_new(form, 917238583151840);
     Tokenizer_scan(tokenizer);
     Buffer rewritten = Buffer_new(0);
     {
