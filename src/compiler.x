@@ -197,8 +197,6 @@ Compiler Var.compiler(Var value) => value.p64;
 protocol Var(Compiler) as void *;
 #pragma private
 
-List Compiler.lift_func_expression(Compiler compiler, List expression);
-
 #include "utils.x"
 #include "parse.x"
 #include "protocol.x"
@@ -573,9 +571,8 @@ String Compiler.fresh_name(Compiler compiler, String stem) {
 */
 String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   Var renamed;
-  if (compiler.semantic_binding_facts().try_get(%(emitted $binding),
-                                                &renamed))
-    return renamed;
+  Map facts = compiler.semantic_binding_facts();
+  if (facts.try_get(%(emitted $binding), &renamed)) return renamed;
   return binding_identity_spelling(binding);
 }
 
@@ -752,10 +749,8 @@ static void _scan_conditionals(Compiler c) {
       stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
     }
     else if (kind == <close> && stack.len()) stack.take_last();
-    else {
-      if (!hidden)
-        _note_layout_macro(token.text, layout, stack.len());
-    }
+    else if (!hidden)
+      _note_layout_macro(token.text, layout, stack.len());
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
@@ -879,8 +874,7 @@ void Compiler.mark_completion(Compiler compiler, int position) {
 }
 
 /** Reports whether the parser is at the private REPL completion marker. */
-int Compiler.at_completion(Compiler compiler) =>
-  compiler.token.type == <replcomp>;
+int Compiler.at_completion(Compiler c) => c.token.type == <replcomp>;
 
 /* Transfers completion from the grammar production that owns the cursor.
    Rows retain semantic namespace facts; keywords are choices owned by that
@@ -973,7 +967,6 @@ Symbol Compiler.expect(Compiler c, Symbol type) {
   return type;
 }
 
-// Unmatched-brace diagnostics use this source-order stack.
 static void _update_brace_stack(Compiler c, Token consumed) {
   if (!consumed) return;
   switch (consumed.type) {
@@ -1263,9 +1256,10 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
     }
     case %(declaration-origin ?location ?node): {
       List source = location;
-      c.origins.push(%(source ${source.assoc(<file>)}
-        ${source.assoc(<line>)} ${source.assoc(<column>)}
-        ${source.assoc(<length>)} ${source.assoc(<position>)}));
+      c.origins.push(
+        %(source ${source.assoc(<file>)}
+          ${source.assoc(<line>)} ${source.assoc(<column>)}
+          ${source.assoc(<length>)} ${source.assoc(<position>)}));
       return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
     }
   }
@@ -1322,7 +1316,8 @@ static int _retain_declaration_bundle(
       return _retain_declaration_bundle(compiler, only, first, after);
     case %(declaration-bundle (rows *)): {
       List frozen = compiler.freeze_declaration_syntax(syntax);
-      compiler.sym.set(_declaration_source_key(compiler, first),
+      compiler.sym.set(
+        _declaration_source_key(compiler, first),
         %(declaration-source ${after.pos} $frozen));
       return 1;
     }
@@ -1400,7 +1395,8 @@ static List _select_declaration_rows(
                 case %(?(String literal)): spelling = literal;
                 case %("x2c.ident" ?(String literal)): spelling = literal;
               }
-              if (spelling && _declaration_default_taken(
+              if (spelling &&
+                  _declaration_default_taken(
                     compiler, spelling, parts, definitions))
                 continue;
               syntax = %(function $return_type (bind $name $modifiers) $body);
@@ -1439,8 +1435,8 @@ static List _declaration_forward(
   int index = 0;
   foreach (Var type, types) {
     if (type == <...>)
-      compiler.report_error(<type>,
-        %"'$name' requires an explicit variadic constructor",
+      compiler.report_error(
+        <type>, %"'$name' requires an explicit variadic constructor",
         compiler.token, NULL);
     if (type == %(void)) continue;
     String argument = %"argument$index";
@@ -1542,7 +1538,8 @@ Map Compiler.select_declaration_defaults(
       sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
-      shadow.report_error(<type>,
+      shadow.report_error(
+        <type>,
         "a forwarded class constructor has no completed parent constructor",
         shadow.token, NULL);
   }
@@ -1561,8 +1558,8 @@ Map Compiler.select_declaration_defaults(
 }
 
 static List _replay_declaration_bundle(Compiler compiler) {
-  List source = compiler.sym.get(_declaration_source_key(
-    compiler, compiler.token));
+  List source =
+    compiler.sym.get(_declaration_source_key(compiler, compiler.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax): {
       List thawed = compiler.thaw_declaration_syntax(syntax);
@@ -2076,9 +2073,9 @@ static void _check_script_locals(Compiler c, List ast) {
         foreach (Var name, locals.keys()) {
           Var found;
           List bindings;
-          if (!statement.list().try_search(
-                %(expr () (ident (binding ? $name))), &found, &bindings))
-            continue;
+          int present = statement.list().try_search(
+            %(expr () (ident (binding ? $name))), &found, &bindings);
+          if (!present) continue;
           c.origin = origin;
           c.report_error(
             <type>,
@@ -2396,8 +2393,6 @@ void Compiler.add_early(Compiler compiler, List decl) {
 void Compiler.add_init(Compiler compiler, Symbol phase, List stmt) {
   compiler.inits.push(%($phase $stmt));
 }
-
-// symbol table
 
 /*  Symbol table implemented as stack of maps (scopes). Each map represents
     a scope level. Symbol lookup searches from top to bottom of stack.
@@ -2744,8 +2739,8 @@ List Sym.lookup_macro(Sym sym, Atom name) {
 }
 
 static int _retained_aggregate_member(List key) =>
-  !!key.match(%((!or struct union)
-    (!or (binding ? ?) (gensym ? ?)) ? *));
+  !!key.match(
+    %((!or struct union) (!or (binding ? ?) (gensym ? ?)) ? *));
 
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym s, List key, List type) {
@@ -3775,7 +3770,6 @@ void Sym.declare_field_order(Sym sym, Type type, List fields) {
 
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym sym, Type type) => sym.get(%(@type "field-order"));
-
 
 /** Marks one named aggregate field as a delegate. */
 void Sym.declare_delegate_field(Sym sym, Type aggregate, String name) {

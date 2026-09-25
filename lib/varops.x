@@ -64,8 +64,7 @@ macro Unit $native.update(Type $type, Name $function, Literal $row) {
     }
     Var $converted = _native_update(
       $(_update_box $row (x2c.ident "lhs")),
-      $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs")
-    );
+      $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs"));
     if ($converted is void) return $(_update_zero $row);
     $type value = $(_update_decode $row (x2c.expr.ident $converted));
     ($(x2c.ident "lhs"))[0] = value;

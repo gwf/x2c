@@ -589,7 +589,8 @@ static Var _lower_constant_leaf(Lowering l, List value) {
       Symbol tag = ((Type) type).scalar_tag();
       return tag ? constant.convert(tag) : constant;
     }
-    case %(expr ? (!set ?node (cache ?))):      return _lower_constant(l, node);
+    case %(expr ? (!set ?node (cache ?))):
+      return _lower_constant(l, node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return _lower_constant(l, node);
     case %(expr ? (nil)):                       return %();
@@ -887,8 +888,8 @@ static List _lower_args(
       int direct = callee_name && callee_name.equal("List_map") &&
         parameter.equal(%("Func")) &&
         l.lambda_signatures.try_get(value, &signature);
-      values.push(direct ? value
-                         : _lower_coerce(l, parameter, argument, value));
+      values.push(
+        direct ? value : _lower_coerce(l, parameter, argument, value));
     }
   }
   return values;
@@ -927,8 +928,9 @@ static Var _lower_application(Lowering l, Var content) {
         if (_lower_failed(l, value)) return void;
         by_value = %(C.func.value $argv $index $value);
       }
-      prepare.push(%(if (C.func.reference-type $fn $count $index)
-        (C.func.reference $argv $index $pointer $type) $by_value));
+      List reference = %(C.func.reference $argv $index $pointer $type);
+      prepare.push(
+        %(if (C.func.reference-type $fn $count $index) $reference $by_value));
       index++;
     }
   l.automatic = 1;
@@ -1309,7 +1311,8 @@ static Var _lower_expr(Lowering l, Var form) {
        typed `foreach` output reads through, is the Symbol's code. */
     case %(expr ("Symbol") ?(String code)):
       return %(quote ${(Symbol) strtoul(code, NULL, 10)});
-    case %(expr ?type ?content):          return _lower_content(l, type, content);
+    case %(expr ?type ?content):
+      return _lower_content(l, type, content);
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
     case %(cons ?head ?tail):
@@ -1369,7 +1372,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       }
       return _lower_value(l, id);
     }
-    case %(parens (block *)):             return _lower_application(l, content);
+    case %(parens (block *)):
+      return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
     /* A braced value takes its type from the destination, as in C. */
     case %(cast ? (expr ? (composite (commas *items)))):
@@ -1386,7 +1390,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
         return _lower_to_type(l, target, value);
       return _lower_coerce(l, type, inner, value);
     }
-    case %(expr ?inner ?within):          return _lower_content(l, inner, within);
+    case %(expr ?inner ?within):
+      return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
     case %(op & (expr ? (ident (binding ?(int id) ?)))):
       return _lower_typed_address(l, type, id);
@@ -1548,7 +1553,8 @@ static Var _lower_apply_k(Lowering l, List k) {
 
 /* The equality adapters box Lisp equality as an int. A guard needs only
    the equality, without boxing and retesting it. Other values still need
-   C.true?: even a typed parameter may arrive through an uncoerced Lisp call. */
+   C.true?: even a typed parameter may arrive through an uncoerced Lisp
+   call. */
 static Var _lower_truth(Lowering l, Var test) {
   Var value = _lower_expr(l, test);
   if (_lower_failed(l, value)) return void;
@@ -1904,8 +1910,8 @@ static Var _lower_switch(
   if (_lower_failed(l, value)) return void;
   int bound = !_lower_pure(value);
   if (bound && l.on_loop)
-    return _lower_decline(l, "a switch subject needing a binding is on a "
-                             "loop path");
+    return _lower_decline(
+      l, "a switch subject needing a binding is on a loop path");
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
   Array arms = $auto([]);
@@ -2441,8 +2447,9 @@ static Var _lower_update(
   if (l.declined) return void;
   if (place is not void) {
     Var slot = _lower_name(l, "place");
-    Var combined = _lower_to_type(l, want, %(
-      _binary ${_lower_load(l, want, slot)} (quote $operator) $right));
+    Var loaded = _lower_load(l, want, slot);
+    Var combined = _lower_to_type(
+      l, want, %(_binary $loaded (quote $operator) $right));
     return _lower_effect(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
       rest, k);
@@ -2775,10 +2782,12 @@ static List _lower_function(
   struct Lowering state = {
     .compiler = compiler, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
-    .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
+    .cells = _lower_scratch_map(scratch),
+    .arrays = _lower_scratch_map(scratch),
     .records = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
-    .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
+    .callees = _lower_scratch_map(scratch),
+    .cursors = _lower_scratch_map(scratch),
     .definitions = [],
     .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
@@ -2853,13 +2862,11 @@ static List _lower_function(
     function's own, in evaluation order. This method does not open a
     semantic transaction.
 */
-List Compiler.lower_comptime(Compiler compiler, List fn) =>
-  _lower_function(compiler, fn, 0);
+List Compiler.lower_comptime(Compiler c, List fn) => _lower_function(c, fn, 0);
 
 /** Lowers a REPL execution wrapper whose unresolved bindings name the
     session's persistent value table rather than program file-scope state. */
-List Compiler.lower_repl(Compiler compiler, List fn) =>
-  _lower_function(compiler, fn, 1);
+List Compiler.lower_repl(Compiler c, List fn) => _lower_function(c, fn, 1);
 
 /** Returns why the last `Compiler.lower_comptime` declined, or `NULL`. */
 String Compiler.lower_declined(Compiler compiler) {
@@ -2983,12 +2990,12 @@ static void _evaluate_lowering(Compiler compiler, String own, List forms) {
     Returns whether the lowering succeeded. This method mutates the macro
     session and does not open a semantic transaction.
 */
-int Compiler.install_comptime(Compiler compiler, List fn) {
-  String own = NULL, key = _lowering_key(compiler, fn, own);
+int Compiler.install_comptime(Compiler c, List fn) {
+  String own = NULL, key = _lowering_key(c, fn, own);
   /* The shared session installed this definition, from this file, before any
      unit opened. Installing it again would only try to replace a name an
      ancestor binds; the unit reads the shared one. */
-  if (key && compiler.shared_definition(key))
+  if (key && c.shared_definition(key))
     match (_lowered_defs()[key])
       case %(? ? ?(int shared_meta) ?): {
         lower_reached_meta = shared_meta;
@@ -2997,17 +3004,17 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   if (key)
     match (_lowered_defs()[key])
       case %(?(List forms) ?(List callees) ?(int meta) ?):
-        if (_lowered_callable(compiler, callees)) {
-          _evaluate_lowering(compiler, own, forms);
+        if (_lowered_callable(c, callees)) {
+          _evaluate_lowering(c, own, forms);
           lower_reached_meta = meta;
           return 1;
         }
-  List forms = compiler.lower_comptime(fn);
+  List forms = c.lower_comptime(fn);
   if (!forms) return 0;
   if (key)
     _retain_lowering(
-      key, forms, lower_session_callees, compiler.meta_regions[own]);
-  _evaluate_lowering(compiler, own, forms);
+      key, forms, lower_session_callees, c.meta_regions[own]);
+  _evaluate_lowering(c, own, forms);
   return 1;
 }
 
@@ -3112,8 +3119,9 @@ static int _meta_immutable(Var value) {
    program does not have, so it never becomes a constant in code. */
 static void _meta_refuse_address(Compiler c, Var value, Token site) {
   if (value.is_pointer() && value.u64)
-    c.report_error(<macro>, "compile-time result is a compiler address",
-      site, %("return data built from the pointed-to values instead"));
+    c.report_error(
+      <macro>, "compile-time result is a compiler address", site,
+      %("return data built from the pointed-to values instead"));
 }
 
 /* Builds the parser's form of one data value. Immutable values come from
@@ -3139,7 +3147,9 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
   if (value is not <array> && value is not <map>) return NULL;
   ulong address = (ulong) value.u64;
   if (address in marks)
-    c.report_error(<macro>, marks[address] == 1
+    c.report_error(
+      <macro>,
+      marks[address] == 1
         ? "compile-time result contains itself"
         : "compile-time result holds one collection twice",
       site, %("each Array and Map in a result is built separately"));
@@ -3246,11 +3256,11 @@ List Compiler.meta_value_expression(
     compile-time only.
 
     Such a function reaches a `Meta` operation, so it exists only inside a
-    compiler and the unit emits no definition for it. The call used to reach
-    the linker as an undefined symbol, which names the C spelling and not the
-    source. Another `meta` function may call it: calling one is what makes
-    the caller compile-time only too, so a body being parsed under the marker
-    is left alone.
+    compiler and the unit emits no definition for it. Unchecked, the call
+    reaches the linker as an undefined symbol, which names the C spelling
+    and not the source. Another `meta` function may call it: calling one is
+    what makes the caller compile-time only too, so a body being parsed
+    under the marker is left alone.
 */
 void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
@@ -3265,9 +3275,8 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
 }
 
 /** Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. */
-int Sym.is_bool_type(Sym sym, Type type) =>
-  sym.is_named_value_type(type, "bool") ||
-  sym.is_named_value_type(type, "_Bool");
+int Sym.is_bool_type(Sym s, Type type) =>
+  s.is_named_value_type(type, "bool") || s.is_named_value_type(type, "_Bool");
 
 static size_t _meta_align_up(size_t offset, size_t alignment) =>
   (offset + alignment - 1) / alignment * alignment;

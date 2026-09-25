@@ -336,11 +336,11 @@ static int _has_private_native(Compiler compiler, List templates) {
     inside it. The split is keyed on a known package because a foreign
     header may spell `__` in a type name. */
 String Compiler.reverse_converter_spelling(
-  Compiler compiler, String base_name, String infix, String participant) {
+  Compiler c, String base_name, String infix, String participant) {
   int split = participant.find("__");
   String package = split > 0 &&
-    (compiler.package == participant[:split] ||
-     participant[:split] in compiler.package_roots)
+    (c.package == participant[:split] ||
+     participant[:split] in c.package_roots)
       ? participant[:split] : NULL;
   String bare = package ? participant[split + 2:] : participant;
   String binding = %"${base_name}_$infix${bare.lower()}";
@@ -666,7 +666,6 @@ static String _base_name(Type base) =>
 static String _type_spelling(Type type) =>
   type.is_bare_typedef_name() ? type.car() : type.repr();
 
-// The C spelling of a participant's implemented or generated member.
 static String _member_spelling(Type participant, String member) =>
   %"${participant.car()}_$member";
 
@@ -1287,8 +1286,7 @@ static void _resolve_declared_adoption(
     compiler.diagnostics.report(
       <protocol>,
       %"adoption base ${_type_spelling(base)} names no visible protocol",
-      location, NULL
-    );
+      location, NULL);
     return;
   }
   match (record)
@@ -1462,7 +1460,7 @@ void Compiler.dump_conformance(Compiler compiler, Map globs) {
   names.free();
 }
 
-/** Returns the protocol member used to derive a comparison operator.
+/** Returns the protocol member that derives a comparison operator.
     Inequality derives from `equal`, ordered comparisons derive from `compare`,
     and unsupported operators return zero.
 */
@@ -1484,7 +1482,8 @@ static List _proto_cached(Compiler compiler, Var key, Func compute) {
 }
 
 static List _ordered_occurrences(Compiler compiler) =>
-  _proto_cached(compiler, <proto-ordr>, %!(Compiler &compiler) => {
+  _proto_cached(
+    compiler, <proto-ordr>, %!(Compiler &compiler) => {
     Array ordered = [];
     foreach (Var (base, occurrence), compiler.protocols)
       ordered.push(%($base $occurrence));
@@ -1493,16 +1492,16 @@ static List _ordered_occurrences(Compiler compiler) =>
   });
 
 static List _ancestry(Compiler compiler, Type participant) => _proto_cached(
-    compiler, %("protocol-ancestry" $participant),
-    %!(Compiler &compiler) => {
-      Array ancestry = [], Type current = participant;
-      for (int distance = 0; current && distance <= 128; distance++) {
-        ancestry.push(current);
-        if (!current.is_typedef_name() && !current.is_typedef()) break;
-        current = compiler.sym.get(current);
-      }
-      return ancestry.list_free();
-    });
+  compiler, %("protocol-ancestry" $participant),
+  %!(Compiler &compiler) => {
+    Array ancestry = [], Type current = participant;
+    for (int distance = 0; current && distance <= 128; distance++) {
+      ancestry.push(current);
+      if (!current.is_typedef_name() && !current.is_typedef()) break;
+      current = compiler.sym.get(current);
+    }
+    return ancestry.list_free();
+  });
 
 /* Drive visit(compiler, base, row) over every member row of participant's
    adopted conformances, in protocols order. A nonzero visit result stops the
@@ -1564,7 +1563,8 @@ static List _member_row(
 static List _generated_owner(
   Compiler compiler, Type participant, String member_name) {
   List cache_key = %("protocol-generated-owner" $participant $member_name);
-  return _proto_cached(compiler, cache_key, %!(Compiler &compiler) => {
+  return _proto_cached(
+    compiler, cache_key, %!(Compiler &compiler) => {
     Array candidates = [], List result = NULL, first_linkage = NULL;
     Symbol first_storage = 0;
     _each_adopted_row(
@@ -1654,7 +1654,8 @@ static void _report_generated_collision(
 static List _resolve_protocol_member(
   Compiler compiler, Type participant, String member_name) {
   List cache_key = %("protocol-member" $participant $member_name);
-  return _proto_cached(compiler, cache_key, %!(Compiler &compiler) => {
+  return _proto_cached(
+    compiler, cache_key, %!(Compiler &compiler) => {
     List protocols = _ordered_occurrences(compiler);
     List base_ancestry = _ancestry(compiler, participant);
     /* A generated member is selected before a direct base alias. */
@@ -1840,9 +1841,10 @@ List Compiler.discard_helper(
       List drop = c.resolve_protocol_member(parameter, "discard");
       if (drop) {
         List (drop_binding, drop_type) = drop;
-        discards.push(%(stmnt (expr (void)
-          (call (expr $drop_type (ident $drop_binding))
-                (args (expr $parameter (ident $argument_binding)))))));
+        discards.push(
+          %(stmnt (expr (void)
+            (call (expr $drop_type (ident $drop_binding))
+                  (args (expr $parameter (ident $argument_binding)))))));
       }
     }
     index++;
@@ -2319,8 +2321,9 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
             match (row)
               case %(?(String member) ? ?(String binding) ? ?
                      ?(Type signature)):
-                aliases.push(c._generate_native_alias(
-                  participant, member, binding, signature, make_static));
+                aliases.push(
+                  c._generate_native_alias(
+                    participant, member, binding, signature, make_static));
           ast = _insert_at_visibility_boundary(
             ast, source, private, aliases.list_free(), make_static);
           continue;

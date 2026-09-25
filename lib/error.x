@@ -1101,11 +1101,10 @@ static void _handler_free(ErrorHandler handle) {
   Scope.free(handle);
 }
 
-/** Closes the most recently pushed observing handler.
+/** Closes the observing handler on top of the handler stack.
     Closing truncates and reclaims every error above the handler's registration
     watermark, then unregisters it. `Error`s below the watermark remain.
-    Handles
-    must be popped in stack order. An out-of-order pop reaches the
+    Handles must be popped in stack order. An out-of-order pop reaches the
     non-reentrant error floor; a null handle does nothing.
 */
 void Error.pop(ErrorHandler handle) {

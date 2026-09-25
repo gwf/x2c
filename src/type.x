@@ -465,8 +465,8 @@ Var Type.numeric_literal_value(Type type, String text) {
   if (negative || text[0] == '+') text = text[1:];
   unsigned long long magnitude;
   int decimal;
-  if (!_literal_magnitude(text, _integer_literal_end(text),
-                          magnitude, decimal)) return void;
+  if (!_literal_magnitude(
+    text, _integer_literal_end(text), magnitude, decimal)) return void;
   Var value = negative ? 0ULL - magnitude : magnitude;
   return value.convert(tag);
 }
@@ -944,7 +944,6 @@ static List _from_ast(List ast, List context) {
     // Binding identity is AST metadata; semantic Types retain the spelling.
     case <binding>:
       return %(${ast.caddr()});
-    // (struct ...), (union ...)
     case <struct>: case <union>: {
       // (struct tag), (union tag) -> as is
       if (ast.type().is_aggregate_tag()) return ast;

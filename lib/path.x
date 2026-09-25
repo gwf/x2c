@@ -368,8 +368,9 @@ List Path.glob(Path pattern) {
   }
   Array paths = [], matches = [];
   if (root.is_dir())
-    _walk(root, recursive ? -1 : depth,
-          pattern.startswith(".") || pattern.contains("/."), paths);
+    _walk(
+      root, recursive ? -1 : depth,
+      pattern.startswith(".") || pattern.contains("/."), paths);
   foreach (String path, paths) {
     String candidate = base ? path : path[2:];
     if (directories) candidate = %"$candidate/";

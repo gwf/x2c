@@ -231,8 +231,9 @@ static ExceptionFrame *_landable(void) {
    point stays available for an abandoned transfer path. */
 static void _frame_trim(ExceptionFrame *frame, int unwinding) {
   if (!x2c_error_runtime_ready) return;
-  Error.trim(frame.error_handler_head,
-             unwinding ? frame.error_stack_height : Error.count());
+  Error.trim(
+    frame.error_handler_head,
+    unwinding ? frame.error_stack_height : Error.count());
 }
 
 static void _fatal(const char *message) {

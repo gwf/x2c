@@ -285,11 +285,10 @@ static void _check_explicit_converter_arguments(
       !compiler.printf_static_format(supplied[info.fmt_arg], raw))
     return;
   int first = info.first_arg - method, index = 0;
-  for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
+  for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
     if (index++ >= first && car(a) is <list>)
       _check_noted_converter(
         compiler, car(n), car(a), car(a).list().cadr(), 2);
-  }
 }
 
 static List _parse_postfix_apply(Compiler c, List expr) {
@@ -576,30 +575,27 @@ static void _completion_delegates(
 /** Returns sorted visible postfix names whose selected method is callable in
     the compiler's Lisp session. Fields remain eligible without a binding. */
 List Compiler.postfix_completions(
-  Compiler compiler, Type receiver, Symbol access) {
+  Compiler c, Type receiver, Symbol access) {
   Map seen = {}, visited = {};
   Array names = $auto([]), accepted = [];
-  Type fields = compiler.sym.resolve_key(receiver);
+  Type fields = c.sym.resolve_key(receiver);
   if (fields.is_pointer()) fields = fields.dereference();
-  _completion_fields(compiler, fields, seen, names, {});
+  _completion_fields(c, fields, seen, names, {});
   if (access == <.>) {
-    _completion_methods(compiler, receiver, seen, names);
-    _completion_delegates(compiler, receiver, seen, names, visited);
+    _completion_methods(c, receiver, seen, names);
+    _completion_delegates(c, receiver, seen, names, visited);
   }
   names.sort();
   foreach (String name, names) {
-    List resolution = compiler.resolve_postfix_member(
-      receiver, %($name), access, 1);
+    List resolution = c.resolve_postfix_member(receiver, %($name), access, 1);
     if (!resolution && access == <.>)
-      resolution = _resolve_delegate_method(
-        compiler, receiver, name, compiler.token);
+      resolution = _resolve_delegate_method(c, receiver, name, c.token);
     match (resolution) {
       case %(field ? ?): accepted.push(name);
       case %(method ?binding ?): {
         Var callable;
-        if (compiler.macro_lisp.try_get(
-              binding_identity_spelling(binding), &callable))
-          accepted.push(name);
+        String spelling = binding_identity_spelling(binding);
+        if (c.macro_lisp.try_get(spelling, &callable)) accepted.push(name);
       }
     }
   }
@@ -1021,7 +1017,7 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
             if (!compiler.semantic_binding_facts().contains(
-                  %(lambda-depth $binding))) return 1;
+              %(lambda-depth $binding))) return 1;
         continue;
       }
       case %(lambda ? ?): return 1;
@@ -1099,7 +1095,6 @@ static int _converts_operands(Compiler compiler, Type type) {
   return resolved && resolved.is_aggregate();
 }
 
-/* The typedef names `type` passes through, starting with itself. */
 static Array _typedef_names(Compiler compiler, Type type) {
   Array names = [];
   int hops = 0;
@@ -1581,10 +1576,9 @@ static List _resolve_func_call(
   if (arguments) {
     String callee_name = compiler.fresh_name("func_call");
     List callee_binding = compiler.sym.define(%($callee_name), %("Func"));
-    locals.push(%(
-      declare ("Func")
-        (bindings (op = (bind $callee_binding ()) $callee))
-    ));
+    locals.push(
+      %(declare ("Func")
+          (bindings (op = (bind $callee_binding ()) $callee))));
     invoked = %(expr ("Func") (ident $callee_binding));
     List query_type = NULL, value_type = NULL, reference_type = NULL;
     List unrepresentable_type = NULL;
@@ -1610,10 +1604,9 @@ static List _resolve_func_call(
           (call (expr $query_type (ident $query))
                 (args $invoked $count $index_expr))
       );
-      locals.push(%(
-        declare ("List")
-          (bindings (op = (bind $reference_name ()) $queried))
-      ));
+      locals.push(
+        %(declare ("List")
+            (bindings (op = (bind $reference_name ()) $queried))));
       String argument_name = compiler.fresh_name("func_argument");
       List binding = compiler.sym.define(%($argument_name), %("FuncArg"));
       locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
@@ -1644,11 +1637,10 @@ static List _resolve_func_call(
             (args $invoked $index_expr $source_type_literal))
       );
       List target = %(expr ("FuncArg") (ident $binding));
-      locals.push(%(
-        if (expr ("List") (ident $reference_name))
-          (stmnt (expr ("FuncArg") (op = $target $reference_value)))
-          (stmnt (expr ("FuncArg") (op = $target $value_value)))
-      ));
+      locals.push(
+        %(if (expr ("List") (ident $reference_name))
+            (stmnt (expr ("FuncArg") (op = $target $reference_value)))
+            (stmnt (expr ("FuncArg") (op = $target $value_value)))));
       values.push(%(expr ("FuncArg") (ident $binding)));
       index++;
     }
@@ -1945,11 +1937,10 @@ static List Compiler._binary_expression(
     List cached = c.cache(%(string $lowered));
     return %(expr ("String") $cached);
   }
-  if (operator == <in>) {
+  if (operator == <in>)
     c.report_error(
       <type>, "operator 'in' requires an implemented contains member",
       origin, %("receiver type: ${rhs_type.repr()}"));
-  }
   /* An operand with no x2c type, such as a preprocessor macro's name,
      cannot be converted for a participant that implements the operator;
      the C compiler would reject the emitted text, so say why here. */
@@ -2134,8 +2125,8 @@ static List _resolve_content(
       Array resolved = [];
       foreach (List association, associations) match (association)
         case %(association ?selector ?value):
-          resolved.push(%(association $selector
-                          ${c.resolve_expression(value, origin)}));
+          resolved.push(
+            %(association $selector ${c.resolve_expression(value, origin)}));
       Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
       return %(expr $type (generic $control @{resolved.list_free()}));
     }
@@ -2484,10 +2475,10 @@ static List _parse_binary_levels_from(Compiler compiler, List lhs) {
 static List _parse_binary_ops(Compiler compiler) =>
   _parse_binary_level(compiler, 1);
 
-static int _destructure_identifier(List expression) => !!expression.match(%(
-  !or (expr ? (ident ?))
-      (expr ? (parens (expr ? (op * (expr (& *) (ident ?))))))
-));
+static int _destructure_identifier(List expression) =>
+  !!expression.match(
+    %(!or (expr ? (ident ?))
+          (expr ? (parens (expr ? (op * (expr (& *) (ident ?))))))));
 
 static List _destructure_targets(Compiler compiler, List lhs) {
   match (lhs)
@@ -2542,7 +2533,6 @@ static int _brace_starts_map(Compiler c) {
   }
 }
 
-/* A bracket in operand position builds an Array of evaluated elements. */
 static List _parse_bracket_array(Compiler compiler) {
   compiler.expect(<[>);
   Array elements = [];
@@ -2690,7 +2680,7 @@ List Compiler.parse_primary(Compiler compiler) {
       List binding = compiler.with_binding();
       Var stored;
       if (binding && compiler.semantic_binding_facts().try_get(
-            %(with $binding), &stored)) {
+        %(with $binding), &stored)) {
         List expression = stored;
         compiler.next();
         match (expression)
@@ -3056,8 +3046,8 @@ static List _initializer_field(
   fields = _next_initializer_field(fields);
   if (!fields) return NULL;
   List row = fields.car();
-  return cons(%($owner field ${row.car()} ${row.cadr()} ${fields.cdr()}),
-              parent);
+  return cons(
+    %($owner field ${row.car()} ${row.cadr()} ${fields.cdr()}), parent);
 }
 
 static List _initializer_first(
@@ -3282,8 +3272,8 @@ static void _initializer_next(
           (op < (expr (int) (parens $index))
                 (expr (unsigned) (parens $length))));
         states.push(%(${_initializer_and(condition, inside)} $next 1));
-        condition = _initializer_and(condition,
-          %(expr (int) (op ! (expr (int) (parens $inside)))));
+        condition = _initializer_and(
+          condition, %(expr (int) (op ! (expr (int) (parens $inside)))));
       }
     }
     path = parent;
@@ -3412,8 +3402,8 @@ static List _initializer_layout(
     if (!_initializer_integer(dimension, size)) symbolic = 1;
     List path = _initializer_first(c, type, NULL);
     List element = c.initializer_slot(target, path);
-    List child = _initializer_layout(c, owner.cdr(), element,
-                                     string, symbolic);
+    List child =
+      _initializer_layout(c, owner.cdr(), element, string, symbolic);
     if (!child) return NULL;
     List bytes = %(expr (unsigned long long) (sizeof (parens $element)));
     List divisor = child.caddr() ? %(expr (unsigned long long)
@@ -3488,9 +3478,11 @@ static void _initializer_ordinal(
           (op - (expr (unsigned long long) (parens $ordinal))
                 (expr (unsigned long long) (parens $start))));
         if (units !== one)
-          active = _initializer_and(active, %(expr (int)
-            (op >= (expr (unsigned long long) (parens $ordinal))
-                   (expr (unsigned long long) (parens $start)))));
+          active = _initializer_and(
+            active,
+            %(expr (int)
+              (op >= (expr (unsigned long long) (parens $ordinal))
+                     (expr (unsigned long long) (parens $start)))));
       }
       List test = units === one
         ? %(expr (int) (op == (expr (unsigned long long) (parens $position))
@@ -3503,8 +3495,8 @@ static void _initializer_ordinal(
         (op + (expr (unsigned long long) (parens $start))
               (expr (unsigned long long) (parens $units)))) : units;
     }
-    _initializer_ordinal(child, position, cons(frame, path), active,
-                         value, cases);
+    _initializer_ordinal(
+      child, position, cons(frame, path), active, value, cases);
   }
 }
 
@@ -3655,8 +3647,8 @@ static List _initializer_conversion(
     c.recovery_depth = depth + 1;
     try {
       result = value.match(%(expr ? (composite ?)))
-        ? _convert_composite(c, value, type.canonicalize(), target,
-                             condition, native_used)
+        ? _convert_composite(
+          c, value, type.canonicalize(), target, condition, native_used)
         : c.convert_expression(value, type);
       transaction.commit();
       completed = 1;
@@ -3870,7 +3862,7 @@ static List _convert_composite(
           List effective = _initializer_and(row_condition, condition);
           List value = !destination ? input
             : _initializer_conversion(
-                compiler, input, destination, effective, slot, native_used);
+              compiler, input, destination, effective, slot, native_used);
           checked.push(%($condition $path $destination $value));
         }
         List header = NULL;
@@ -3885,11 +3877,11 @@ static List _convert_composite(
     if (homogeneous) {
       List slot = native_target
         ? compiler.initializer_slot(native_target, selected_path) : NULL;
-      List condition = _initializer_and(row_condition,
-        excess ? applicable : NULL);
+      List condition =
+        _initializer_and(row_condition, excess ? applicable : NULL);
       List converted = !type ? value
         : _initializer_conversion(
-            compiler, value, type, condition, slot, native_used);
+          compiler, value, type, condition, slot, native_used);
       elements.push(_initializer_replace(original, converted));
     }
     else {
@@ -3906,7 +3898,7 @@ static List _convert_composite(
         List effective = _initializer_and(row_condition, condition);
         List result = destination
           ? _initializer_conversion(
-              compiler, input, destination, effective, slot, native_used)
+            compiler, input, destination, effective, slot, native_used)
           : input;
         int identity = result === input;
         match (result)

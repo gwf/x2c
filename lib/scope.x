@@ -820,8 +820,7 @@ void *Scope.malloc_in(Scope *slot, size_t size) {
     `Error` initialization they terminate at the error floor.
 */
 void *Scope.malloc_finalized_in(
-  Scope *slot, size_t size, void (*drop)(void *)
-) {
+  Scope *slot, size_t size, void (*drop)(void *)) {
   _require_running();
   if (!drop) raise %(bad-arg);
   return _malloc_in(slot, size, drop);

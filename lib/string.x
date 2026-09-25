@@ -95,8 +95,9 @@ typedef struct StringHeader {
 
 /* Canonical String payloads are custom-object-safe: Scope allocations are
    max-aligned and the payload begins eight bytes after the base. */
-_Static_assert(sizeof(struct StringHeader) == 8,
-               "the String header is 8 bytes, so payloads stay aligned");
+_Static_assert(
+  sizeof(struct StringHeader) == 8,
+  "the String header is 8 bytes, so payloads stay aligned");
 
 #define STRING_STACK_BYTES 256
 
@@ -880,9 +881,7 @@ String String.map(String str, Func fn) {
   char *out = string, const char *src = str;
   for (int i = 0; i < n; i++) {
     char ch = (char) _apply(fn, src[i]);
-    if (!ch) {
-      raise %(bad-result (owner "String.map") (index $i));
-    }
+    if (!ch) raise %(bad-result (owner "String.map") (index $i));
     out[i] = ch;
   }
   String result = _finish(string, n);

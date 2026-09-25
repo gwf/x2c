@@ -84,8 +84,9 @@ static void Bootstrap._verify(Bootstrap b, List records, String root) {
     unsigned long long expected_hash = 0;
     size_t expected_size = 0;
     char spelling[1024], extra;
-    if (sscanf(record, "%llx %zu %1023s %c", &expected_hash, &expected_size,
-               spelling, &extra) != 3 || !_safe_path(String.new(spelling)))
+    if (sscanf(
+      record, "%llx %zu %1023s %c", &expected_hash, &expected_size,
+      spelling, &extra) != 3 || !_safe_path(String.new(spelling)))
       _error("malformed embedded source record");
     String relative = String.new(spelling);
     Path installed = %"$root/$relative";
@@ -233,8 +234,9 @@ void bootstrap_write_interfaces(Bootstrap b) {
     sources.push(source.remove_prefix(%"$prefix/"));
   Job translate =
     %("$prefix/bin/x2c" "translate" "--out-dir" $out @{sources.list()})
-      .job().options({dir: prefix, env: {"X2C_HOME": "."},
-                      stdout: <capture>, stderr: <capture>});
+      .job().options(
+        {dir: prefix, env: {"X2C_HOME": "."},
+         stdout: <capture>, stderr: <capture>});
   int status = 127;
   try status = translate.status();
   catch %(not-found *): {}
@@ -278,14 +280,15 @@ void bootstrap_build_commands(Bootstrap b) {
 
   String compiler = %"$prefix/bin/x2c";
   Job identity_job = %($compiler "env" "identity").job()
-    .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
-              stderr: <capture>});
+    .options(
+      {env: {"X2C_HOME": prefix}, stdout: <capture>, stderr: <capture>});
   String identity = identity_job.output().strip("\n");
   Path commands_build = %"$prefix/.x2c-build/commands";
   commands_build.make_dirs();
   Path identity_source = %"$commands_build/identity.x";
-  Path.write_text(identity_source,
-                  %"String x2c_embedded_identity(void) => \"$identity\";\n");
+  Path.write_text(
+    identity_source,
+    %"String x2c_embedded_identity(void) => \"$identity\";\n");
 
   Array objects = [];
   foreach (Path object, Path.glob(%"$prefix/.x2c-build/compiler/obj/*.o"))
@@ -294,8 +297,8 @@ void bootstrap_build_commands(Bootstrap b) {
   Path archive = %"$commands_build/libx2c-dev.a";
   Job library = %($compiler "build" "--plain" "--kind" "static-library"
     "--output" $archive @{objects.list()}).job()
-    .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
-              stderr: <capture>});
+    .options(
+      {env: {"X2C_HOME": prefix}, stdout: <capture>, stderr: <capture>});
   if (library.status())
     _error(%"cannot archive compiler objects: ${library.errors_text}");
 
@@ -321,8 +324,8 @@ void bootstrap_build_commands(Bootstrap b) {
     arguments.push(identity_source);
     arguments.push(archive);
     Job command = arguments.list_free().job()
-      .options({env: {"X2C_HOME": prefix}, stdout: <capture>,
-                stderr: <capture>});
+      .options(
+        {env: {"X2C_HOME": prefix}, stdout: <capture>, stderr: <capture>});
     if (command.status())
       _error(%"cannot build command $name: ${command.errors_text}");
   }

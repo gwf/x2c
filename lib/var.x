@@ -352,7 +352,6 @@ static int _assign_row(VarDescriptor *descriptor) {
   return row;
 }
 
-/* Returns the interned cell for `pointer` boxed as `descriptor`'s class. */
 static VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
   x2c_descriptor_thread_start_begin();
   defer x2c_descriptor_thread_start_end(0);
@@ -1020,16 +1019,21 @@ unsigned Var.wide_hash(Var v) {
   Symbol tag = v.tag();
   with box.value {
     switch (tag) {
-      case <long>: return _hash_bytes((unsigned) tag,
-        &_.long_value, sizeof(_.long_value));
-      case <ulong>: return _hash_bytes((unsigned) tag,
-        &_.ulong_value, sizeof(_.ulong_value));
-      case <llong>: return _hash_bytes((unsigned) tag,
-        &_.long_long_value, sizeof(_.long_long_value));
-      case <ullong>: return _hash_bytes((unsigned) tag,
-        &_.ulong_long_value, sizeof(_.ulong_long_value));
-      case <ldouble>: return _hash_bytes((unsigned) tag,
-        &_.long_double_value, sizeof(_.long_double_value));
+      case <long>:
+        return _hash_bytes(
+          (unsigned) tag, &_.long_value, sizeof(_.long_value));
+      case <ulong>:
+        return _hash_bytes(
+          (unsigned) tag, &_.ulong_value, sizeof(_.ulong_value));
+      case <llong>:
+        return _hash_bytes(
+          (unsigned) tag, &_.long_long_value, sizeof(_.long_long_value));
+      case <ullong>:
+        return _hash_bytes(
+          (unsigned) tag, &_.ulong_long_value, sizeof(_.ulong_long_value));
+      case <ldouble>:
+        return _hash_bytes(
+          (unsigned) tag, &_.long_double_value, sizeof(_.long_double_value));
     }
   }
   return 0;

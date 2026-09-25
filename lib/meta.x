@@ -176,11 +176,10 @@ meta List x2c_parameters_arguments(List value) {
   match (value) case %(params *items): value = items;
   match (value) case %((param (void) (bind () ?))): return %();
   List arguments = %();
-  foreach (List parameter, value) {
+  foreach (List parameter, value)
     match (parameter)
       case %(param ? (bind ?identity *)):
         arguments = cons(x2c_expr_ident(identity), arguments);
-  }
   return arguments.reverse();
 }
 

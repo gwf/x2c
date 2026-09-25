@@ -452,10 +452,9 @@ static void _write_string(Buffer out, String text) {
    Python's `repr` does, and a fraction or exponent is always present so the
    text reads back as a `double`. */
 static void _write_double(Buffer out, double number) {
-  if (!isfinite(number)) {
+  if (!isfinite(number))
     raise %(conv-range (operation "Var.json")
             (why "JSON has no NaN or infinity"));
-  }
   char text[32];
   int precision = 0;
   do snprintf(text, sizeof(text), "%.*e", precision++, number);
@@ -524,10 +523,9 @@ static void _write_members(Buffer out, Map object, int pretty, int depth) {
 }
 
 static void _write(Buffer out, Var value, int pretty, int depth) {
-  if (depth > JSON_MAX_DEPTH) {
+  if (depth > JSON_MAX_DEPTH)
     raise %(size-limit (operation "Var.json")
             (why "nesting exceeds 512 levels"));
-  }
   if (value.is_null()) out.write("null");
   else if (value is <jsonbool>) out.write(value.jsonbool().str());
   else if (value is <string> || value.is_atom())

@@ -19,7 +19,6 @@
 #include "exception.x"
 #include "lisp.x"
 
-/* Initialize fresh caller-owned or session-owned Lisp machine storage. */
 void LispMachine.open(LispMachine m) {
   memset(&m.program, 0, sizeof(MachineView));
   m.pc = 0;
@@ -153,9 +152,10 @@ static void LispMachine._call(LispMachine m, int argc) {
       return;
     }
     int old_locals = m.local_count;
-    int room = old_locals + argc + MACHINE_LOCAL_RESERVE <= MACHINE_LOCAL_MAX &&
-               m.fp + 1 < MACHINE_FRAME_MAX &&
-               callable_at + MACHINE_CALL_RESERVE <= MACHINE_VALUE_MAX;
+    int room =
+      old_locals + argc + MACHINE_LOCAL_RESERVE <= MACHINE_LOCAL_MAX &&
+      m.fp + 1 < MACHINE_FRAME_MAX &&
+      callable_at + MACHINE_CALL_RESERVE <= MACHINE_VALUE_MAX;
     if (room && m._push_frame()) {
       m.frames[m.fp - 1].caller_value_count = callable_at;
       for (int i = 0; i < argc; i++)
@@ -323,8 +323,8 @@ int LispMachine.step(LispMachine m) {
         m.locals[m.local_count + i] = m.values[m.value_count - count + i];
       m.value_count -= count;
       m.local_count += count;
-      Lisp.reslot(m.lisp_context, m.program.consts[w.a],
-                  m.local_count - m.local_base);
+      Lisp.reslot(
+        m.lisp_context, m.program.consts[w.a], m.local_count - m.local_base);
       break;
     }
 
@@ -332,8 +332,8 @@ int LispMachine.step(LispMachine m) {
       for (int i = m.local_count - w.b; i < m.local_count; i++)
         m.locals[i] = (Var) { .u64 = 0 };
       m.local_count -= w.b;
-      Lisp.reslot(m.lisp_context, m.program.consts[w.a],
-                  m.local_count - m.local_base);
+      Lisp.reslot(
+        m.lisp_context, m.program.consts[w.a], m.local_count - m.local_base);
       break;
 
     case MW_LCONST:

@@ -1163,19 +1163,21 @@ Var lisp_copy(Var destination, Var source, long size) {
 
 /** Copies a returned record into its caller's automatic storage before the
     returning frame ends. */
-Var lisp_record_result(Var source, long size) =>
-  Var.new(<p48>, Scope.memdup_in(
-    lisp_active.result_owner ? lisp_active.result_owner
-                             : &lisp_active.scope,
-    source.pointer(), (size_t) size));
+Var lisp_record_result(Var source, long size) {
+  void *copy = Scope.memdup_in(
+    lisp_active.result_owner ? lisp_active.result_owner : &lisp_active.scope,
+    source.pointer(), (size_t) size);
+  return Var.new(<p48>, copy);
+}
 
 /** Copies a record, or a wide scalar's box, into storage the session owns,
     for file-scope state. `size` is the record's size. */
 Var lisp_session_copy(Var source, long size) {
   if (source.is_wide())
     return Var.clone_wide(source).move_wide_to(&lisp_active.scope);
-  return Var.new(<p48>, Scope.memdup_in(
-    &lisp_active.scope, source.pointer(), (size_t) size));
+  void *copy = Scope.memdup_in(
+    &lisp_active.scope, source.pointer(), (size_t) size);
+  return Var.new(<p48>, copy);
 }
 
 /* A scalar layout's TAG can differ from its bytes' row: a bool's byte reads
@@ -1232,7 +1234,8 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
 }
 
 /** Builds a local C array in live native storage, shared by indexing and
-    references to its elements. Initializer values already have element type. */
+    references to its elements. Initializer values already have element
+    type. */
 Var lisp_array(List layout, List values) {
   (long size) = layout.cddr();
   long offset = 0;
@@ -1455,8 +1458,7 @@ static Func _lisp_predicate(Var callable) {
    pull ABI remains the library's IterNextFn; this adapter only carries its
    iterator and output-cell arguments into the interpreted source function. */
 static Var _lisp_iter_next_callback(
-  Func function, const FuncArg *arguments
-) {
+  Func function, const FuncArg *arguments) {
   LispCallbackContext *context = (void *) function.context();
   if (!lisp_active || lisp_active != context.lisp)
     raise %(bad-state (operation "Lisp iterator callback")
@@ -1524,8 +1526,7 @@ static String _lisp_String_filter(String value, Var callable) =>
    omits it gets a fresh one from `C.iterator.call`. Only a callable
    argument needs this session's Func bridge. */
 static Iter _lisp_Iter_init(
-  Iter destination, Var object, Var callable, Var state
-) {
+  Iter destination, Var object, Var callable, Var state) {
   if (!destination) return NULL;
   Func callback = _lisp_iter_callback(callable);
   destination.init(object, callback ? _lisp_iter_next : NULL, state);
@@ -1534,20 +1535,20 @@ static Iter _lisp_Iter_init(
 }
 
 static Iter _lisp_Iter_map_into(
-  Iter iter, Var callable, Iter destination
-) => iter.map(_lisp_callback(callable, 1), destination);
+  Iter iter, Var callable, Iter destination) =>
+  iter.map(_lisp_callback(callable, 1), destination);
 static Iter _lisp_Iter_filter_into(
-  Iter iter, Var callable, Iter destination
-) => iter.filter(_lisp_callback(callable, 1), destination);
+  Iter iter, Var callable, Iter destination) =>
+  iter.filter(_lisp_callback(callable, 1), destination);
 static Iter _lisp_Iter_zip_with_into(
-  Iter left, Iter right, Var callable, Iter destination
-) => left.zip_with(right, _lisp_callback(callable, 2), destination);
+  Iter left, Iter right, Var callable, Iter destination) =>
+  left.zip_with(right, _lisp_callback(callable, 2), destination);
 static Iter _lisp_Iter_map2_into(
-  Iter left, Iter right, Var callable, Iter destination
-) => left.map2(right, _lisp_callback(callable, 2), destination);
+  Iter left, Iter right, Var callable, Iter destination) =>
+  left.map2(right, _lisp_callback(callable, 2), destination);
 static Iter _lisp_Iter_scan_into(
-  Iter iter, Var seed, Var callable, Iter destination
-) => iter.scan(seed, _lisp_callback(callable, 2), destination);
+  Iter iter, Var seed, Var callable, Iter destination) =>
+  iter.scan(seed, _lisp_callback(callable, 2), destination);
 static int _lisp_Iter_any(Iter iter, Var callable) =>
   iter.any(_lisp_callback(callable, 1));
 static int _lisp_Iter_all(Iter iter, Var callable) =>
@@ -1594,8 +1595,8 @@ static Job _lisp_Job_start(Job job) {
 
 /* Meta text is a NUL-terminated String, so a count past its end would read
    beyond it. */
-static Buffer _lisp_Buffer_write_len(Buffer buf, const char *text,
-                                     size_t length) {
+static Buffer _lisp_Buffer_write_len(
+  Buffer buf, const char *text, size_t length) {
   if (text && strnlen(text, length) < length)
     raise %(bad-arg (operation "Buffer.write_len"));
   return buf.write_len(text, length);
@@ -2009,8 +2010,8 @@ static void _free_names(
   foreach (Var part, items) _free_names(lisp, part, bound, depth, out);
 }
 
-static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
-                     Map captures) {
+static void _capture(
+  Lisp lisp, LispEnv *env, List params, Var body, Map captures) {
   Array names = $auto([]);
   _free_names(lisp, body, params, 0, names);
   foreach (Var name, names) {
@@ -2079,7 +2080,8 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   return result = lambda;
 }
 
-static void _bind_params(Scope *frame, Lambda lambda, List args, Map bindings) {
+static void _bind_params(
+  Scope *frame, Lambda lambda, List args, Map bindings) {
   for (List p = lambda.params; p; p = p.cdr()) {
     Var (name, rest_name) = p;
     if (name.is_atom() && name.str() == ".") {
@@ -2281,7 +2283,6 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       return _apply_values(lisp, callable, values, env);
     }
   }
-  // LISP_IMPORT
   if (args.len() != 1) {
     int actual = args.len();
     raise %(bad-arity (operation "import") (expected 1) (actual $actual));
@@ -2390,8 +2391,8 @@ static int LispLower._auto_compile_constant(LispLower l, Var value) {
 }
 
 /* Only nil is false, so the branch tests for nil. */
-static int LispLower._auto_compile_cond(LispLower l, List clauses,
-                                        int tail) {
+static int LispLower._auto_compile_cond(
+  LispLower l, List clauses, int tail) {
   MachineBuilder b = l.b;
   if (!clauses) return 0;
   int end_jumps[64], end_count = 0;
@@ -2437,8 +2438,7 @@ static int LispLower._auto_qq_append(LispLower l) =>
   l.b.emit(MW_LQQ_APPEND, 0, 0, 0, 0, 0) >= 0;
 
 static int LispLower._auto_compile_qq(
-  LispLower l, Var expression, int list, int depth, int live
-) {
+  LispLower l, Var expression, int list, int depth, int live) {
   if (live >= MACHINE_VALUE_MAX - LISP_AUTO_PARAM_MAX)
     return 0;
   if (!_auto_qq_dynamic(expression, depth)) {
@@ -2501,8 +2501,8 @@ static List LispLower._auto_live_bindings(LispLower l, List bindings) {
   return live;
 }
 
-static int LispLower._auto_expand(LispLower l, Var head, List args,
-                                  Var &expansion, List &dependencies) {
+static int LispLower._auto_expand(
+  LispLower l, Var head, List args, Var &expansion, List &dependencies) {
   Var value;
   if (!_lookup(l.lisp, l.env, head, value) || value is not <lambda>) return 0;
   Lambda macro = value;
@@ -3121,11 +3121,11 @@ Var Lisp.eval_string(Lisp lisp, String source) {
     `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
     `Lisp.eval_string`.
 */
-Var Lisp.eval_file(Lisp lisp, File source) {
+Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
   Block content = $auto(Block.new(sizeof(char)));
   if (source.read_into(content) == FILE_READ_EOF)
-    return lisp.eval_string(NULL);
+    return l.eval_string(NULL);
   if (content.length > INT_MAX) {
     size_t size = content.length, int limit = INT_MAX;
     raise %(size-limit (operation "Lisp.eval_file") (size $size)
@@ -3134,7 +3134,7 @@ Var Lisp.eval_file(Lisp lisp, File source) {
   if (memchr(content.bytes, '\0', content.length))
     raise %(bad-arg (operation "Lisp.eval_file") (why "embedded NUL"));
   String text = String.new_len(content.bytes, (int) content.length);
-  return lisp.eval_string(text);
+  return l.eval_string(text);
 }
 
 /** Writes the global binding for `name` to `out` when present.

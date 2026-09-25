@@ -930,7 +930,8 @@ List Compiler.end_lambda_captures(Compiler c) {
     case %(lambda-scope ?scope ? ? ?): {
       Var stored;
       if (c.semantic_binding_facts().try_get(
-            %(lambda-order $scope), &stored)) rows = stored;
+        %(lambda-order $scope), &stored))
+        rows = stored;
     }
   c.lambda_scopes = c.lambda_scopes.cdr();
   return rows.reverse();
@@ -1132,9 +1133,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
           name = c.sym.lookup(name, NULL);
           reference = cons(<&>, value.cadr());
         }
-        prescribed.push(%(
-          capture $name $reference (expr $reference (op & $value))
-        ));
+        prescribed.push(
+          %(capture $name $reference (expr $reference (op & $value))));
         continue;
       }
       Token origin = c.token;

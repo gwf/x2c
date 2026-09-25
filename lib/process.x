@@ -267,8 +267,8 @@ static void Job._start(Job job) {
     int spawned = 0;
     {
       defer if (!spawned) { _close(link[0]); _close(link[1]); }
-      job._spawn(index, stage, previous, index < last ? link[1] : output,
-                 errors);
+      job._spawn(
+        index, stage, previous, index < last ? link[1] : output, errors);
       spawned = 1;
     }
     _close(link[1]);

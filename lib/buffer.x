@@ -300,7 +300,7 @@ Self Buffer.pop(Self buf) {
   return buf;
 }
 
-/** Returns the most recently pushed indentation depth. */
+/** Returns the indentation depth on top of the stack, or 0 when empty. */
 size_t Buffer.tabstop(Buffer buf) {
   if (!buf.indents || !buf.indents.length) return 0;
   size_t *indents = buf.indents.bytes;

@@ -223,7 +223,8 @@ static List _build_static_array_block(
         if (inner)
           rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
         if (condition) {
-          List zero = _build_static_initializer_rhs(type, NULL, NULL, type,
+          List zero = _build_static_initializer_rhs(
+            type, NULL, NULL, type,
             %(composite (commas (expr (int) (literal (int) "0")))));
           rhs = %(expr $type
             (call "__builtin_choose_expr" (args $condition $rhs $zero)));
@@ -252,7 +253,8 @@ static List _build_static_array_block(
       code = code.search_replace(%(!quote $formal), local);
       List initial = source;
       if (!unconditional) {
-        List zero = _build_static_initializer_rhs(type, NULL, NULL, type,
+        List zero = _build_static_initializer_rhs(
+          type, NULL, NULL, type,
           %(composite (commas (expr (int) (literal (int) "0")))));
         initial = %(expr $type (op ? $applicable $source $zero));
       }

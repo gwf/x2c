@@ -86,8 +86,8 @@ enum PoolBlockConstant {
   POOL_BLOCK_DATA_OFFSET = 64
 };
 
-_Static_assert(sizeof(struct PoolBlock) == 64,
-               "the pool block header is 64 bytes");
+_Static_assert(
+  sizeof(struct PoolBlock) == 64, "the pool block header is 64 bytes");
 
 static const unsigned pool_class_sizes[POOL_CLASS_COUNT] = {
   16, 32, 48, 64, 96, 128, 192, 256, 384, 512
@@ -656,8 +656,8 @@ unsigned long Pool.epoch(void) =>
 */
 Var Pool.lookup(Pool inner, Var key) {
   /* Every level probes the same key, so it is hashed once here rather than
-     once per level. An empty chain probes nothing and hashes nothing, which
-     is also why a void key still raises exactly where it used to. */
+     once per level. An empty chain probes nothing and hashes nothing, so a
+     void key raises only when a level is probed. */
   if (!inner) return void;
   unsigned key_hash = key.hash();
   /* `Map.get_hashed` raises for any cause from custom equality, so the

@@ -31,8 +31,8 @@ static pthread_cond_t static_changed =
 
 static void _native_error(int error) {
   if (!error) return;
-  fprintf(stderr, "static initialization: synchronization failed (%d)\n",
-          error);
+  fprintf(
+    stderr, "static initialization: synchronization failed (%d)\n", error);
   abort();
 }
 

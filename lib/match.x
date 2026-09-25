@@ -859,7 +859,6 @@ static int _walk_prepared(MatchWalk walk, Var input) =>
 static List _walk_bindings(MatchWalk walk, Var input) =>
   cons(%(* $input), _capture_publish(walk.plan.layout, walk.captures));
 
-/* A prepared walk stages every node through one positional stack buffer. */
 macro Statement $match.walk_buffer(
   Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
@@ -987,8 +986,8 @@ static Var _walk_replace_prepared(
   for (size_t i = heads.length; i > base && !*error; i--) {
     List tail = node;
     node =
-      _walk_replace_node(walk, cons(_spine_get(heads, i - 1), tail),
-                         template, error);
+      _walk_replace_node(
+        walk, cons(_spine_get(heads, i - 1), tail), template, error);
   }
   heads.truncate(base);
   return node;
@@ -2335,7 +2334,6 @@ void MatchCache.dispose(MatchCache cache) {
   Scope.destroy(cache.scope);
 }
 
-
 // cached consumer adapters
 
 /* Each adapter preserves its consumer's result and executes only a prepared
@@ -2456,7 +2454,6 @@ int MatchCache.search_replace(
   *out = result;
   return status == MACHINE_PREPARED && answered;
 }
-
 
 typedef struct MatchContextState {
   struct MatchContextState *prev, MatchCache cache;

@@ -19,8 +19,8 @@ typedef enum Diff {
 } Diff;
 
 meta List Diff.lines(String old, String new);
-meta String Diff.unified(String old, String new, String old_name,
-                         String new_name);
+meta String Diff.unified(
+  String old, String new, String old_name, String new_name);
 
 #pragma private
 
@@ -83,8 +83,9 @@ static int _myers(_Diff &d, int lo, int old_hi, int new_hi) {
       path = cons(%(same ${x - 1} ${y - 1}), path);
       x--, y--;
     }
-    path = cons(inserted ? %(insert $prev_x $prev_y)
-                         : %(delete $prev_x $prev_y), path);
+    path = cons(
+      inserted ? %(insert $prev_x $prev_y) : %(delete $prev_x $prev_y),
+      path);
     x = prev_x, y = prev_y;
   }
   while (x > 0 && y > 0) {
@@ -105,10 +106,12 @@ static void _replace(_Diff &d, int lo, int old_hi, int new_hi) {
 
 static Symbol _kind(Array edits, int at) => edits[at].list().car();
 
-static void _hunk(Buffer out, List lines, int old_start, int old_count,
-                  int new_start, int new_count) {
-  out.printf("@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
-             old_count, new_count ? new_start + 1 : new_start, new_count);
+static void _hunk(
+  Buffer out, List lines, int old_start, int old_count, int new_start,
+  int new_count) {
+  out.printf(
+    "@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
+    old_count, new_count ? new_start + 1 : new_start, new_count);
   foreach (String line, lines) out.write(line);
 }
 
@@ -126,9 +129,8 @@ List Diff.lines(String old, String new) {
     lo++;
   }
   int tail = 0;
-  while (old_hi > lo && new_hi > lo && _same(d, old_hi - 1, new_hi - 1)) {
+  while (old_hi > lo && new_hi > lo && _same(d, old_hi - 1, new_hi - 1))
     old_hi--, new_hi--, tail++;
-  }
   if (_myers(d, lo, old_hi, new_hi) < 0) _replace(d, lo, old_hi, new_hi);
   for (int i = old_hi; i < old_hi + tail; i++) _emit(d, <same>, d.old[i]);
   return d.edits.reverse();
@@ -138,8 +140,8 @@ List Diff.lines(String old, String new) {
     prints it with `old_name` and `new_name` in the header and three lines
     of context, or NULL when the texts are equal line for line.
 */
-String Diff.unified(String old, String new, String old_name,
-                    String new_name) {
+String Diff.unified(
+  String old, String new, String old_name, String new_name) {
   Array edits = $auto(Diff.lines(old, new).array());
   Buffer out = $auto(Buffer.new(0));
   int count = edits.len(), at = 0, old_line = 0, new_line = 0;

@@ -313,7 +313,6 @@ static List _typed_call(
   return %(call ${ast.cadr()} (args @newargs));
 }
 
-// Align call arguments with parameter annotations by inserting conversions.
 static List _call(Compiler compiler, List ast) {
   ast = _lower_printf_vars(compiler, ast);
   match (ast) {
@@ -363,7 +362,6 @@ static List _assignment(
   return %(op $op $lhs $rhs);
 }
 
-// Normalize declaration bindings to match declared type metadata.
 static List _declaration(Compiler compiler, List ast) {
   match (ast) {
     case %((!set ?head (!or declare decl)) ?target
@@ -440,13 +438,14 @@ static List _destructure_element(List temporary, int index) =>
 // Expand predeclared assignment targets into left-to-right statements.
 static List _destructure_assignments(List targets, List temporary) {
   int index = 0;
-  return targets.map(%!(List target) using &index => {
-    match (target)
-      case %(expr ?type ?): {
-        List value = _destructure_element(temporary, index++);
-        return %(stmnt (expr $type (op = $target $value)));
-      }
-  });
+  return targets.map(
+    %!(List target) using &index => {
+      match (target)
+        case %(expr ?type ?): {
+          List value = _destructure_element(temporary, index++);
+          return %(stmnt (expr $type (op = $target $value)));
+        }
+    });
 }
 
 // A discarded destructuring result retains the compact block lowering used
@@ -461,7 +460,7 @@ static List _destructure_statement(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type)})));
+                        compiler, source, source_type)})));
       List assignments = _destructure_assignments(targets, temporary);
       return %(block $temp_decl @assignments);
     }
@@ -487,7 +486,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type)})));
+                        compiler, source, source_type)})));
       List assignments =
         _destructure_assignments(expressions.list_free(), temporary);
       return %(seq $target_decl $temp_decl @assignments);
@@ -499,7 +498,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type)})));
+                        compiler, source, source_type)})));
       Array declarations = [];
       declarations.push(temp_decl);
       int index = 0;
@@ -549,7 +548,6 @@ static List _destructure_value(Compiler compiler, List ast) {
   }
   return ast;
 }
-// Ensure return expressions respect the function return annotation.
 static List _return(Compiler compiler, List ast) {
   match (ast)
     case %(return ?rtype ?expression):
@@ -586,7 +584,6 @@ static List _catch_cases(Compiler compiler, List ast) {
 
 // operator passes
 
-// Lower the comparison family from one typed operand match.
 static List _comparison(
   Compiler compiler, List ast, Symbol op, List lhs, List rhs) {
   (Var lhs_tag, Type lhs_type) = lhs;
@@ -878,7 +875,6 @@ static List _dynamic_compound(
   return %(vcompound $lhs ${_symbol_expression(op)} $rhs $helper);
 }
 
-// Dispatch operator rewrites that rely on Var semantics.
 static List _operator(Compiler c, List ast) {
   List truthy = _truthy(c, ast);
   if (truthy != ast) return truthy;
@@ -1024,14 +1020,14 @@ List transform_map_literal(Compiler compiler, List ast) {
   List elems = ast.cdr(), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
-    values.push(%(vpair ${_literal_element(compiler, key)}
-                        ${_literal_element(compiler, val)}));
+    values.push(
+      %(vpair ${_literal_element(compiler, key)}
+              ${_literal_element(compiler, val)}));
   }
   List velems = values.list_free();
   return %(vmap @velems);
 }
 
-// Ensure append targets operate on typed list operands.
 static List _append(Compiler compiler, List ast) {
   List (lhs, rhs) = ast.cdr();
   if (compiler.sym.is_var_type(lhs.cadr()))
@@ -1383,7 +1379,6 @@ static Type _raise_nested_invalid_type(Compiler compiler, Var node) {
   return NULL;
 }
 
-// Normalize raise detail crossings to the counted runtime's Var pairs.
 static List _raise(
   Compiler compiler, List ast, Var cause, List arguments) {
   Array values = [], int changed = 0, index = 0;
@@ -1438,7 +1433,6 @@ static List _nominal_getindex(Compiler compiler, Type type) {
   return NULL;
 }
 
-// Replace the parser's abstract cast declarator with its declared type.
 static List _cast(Compiler compiler, List ast) {
   match (ast)
     case %(cast (!set ?declarator (decl *parts))

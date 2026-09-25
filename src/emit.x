@@ -264,10 +264,9 @@ static List Emitter._literal(Emitter emitter, List ast) {
   return %( $text );
 }
 
-static List Emitter._var_collection(
-  Emitter emitter, String type, List elements) {
+static List Emitter._var_collection(Emitter e, String type, List elements) {
   if (!elements) return %("${type}_new()");
-  List emitted = emitter._commas(emitter._emit(elements));
+  List emitted = e._commas(e._emit(elements));
   String count = %"${elements.len()}";
   return %("${type}_update_n(${type}_new(), " $count ", " $emitted ")");
 }
@@ -326,8 +325,9 @@ static List Emitter._local_static(Emitter e, List ast) {
     e.compiler.origin = e.origin;
     String note = "place the declaration before the switch "
                 + "or within one case block";
-    e.report_error(<emit>,
-      "switch cannot bypass dynamic static initialization", NULL, %($note));
+    e.report_error(
+      <emit>, "switch cannot bypass dynamic static initialization", NULL,
+      %($note));
   }
   List (base, bindings) = declaration.cdr();
   Type declared_base = base;
@@ -410,8 +410,8 @@ static List Emitter._local_static(Emitter e, List ast) {
     );
     if (inferred) {
       List operand = %(expr $type (cast $type $initial));
-      acquisition = e._initializer_macro(%(input ($formal $operand)),
-                                        acquisition);
+      acquisition = e._initializer_macro(
+        %(input ($formal $operand)), acquisition);
     }
     output.push(acquisition);
     e.static_objects[name] = pointer;
@@ -420,7 +420,6 @@ static List Emitter._local_static(Emitter e, List ast) {
   return output.list_free();
 }
 
-/* Runtime Match entry points whose second argument is the pattern. */
 static String _match_site_entry(String name) {
   if (!name) return NULL;
   if (name == "List_match") return "x2c_match_site_match";
@@ -506,7 +505,6 @@ static List Emitter._destructure_value(
            @temporary_decl "=" @c_repr ";"
            @c_stmts $result_name ";" "})");
 }
-
 
 // Emit a callable defer region. The runtime record covers nonlocal transfer;
 // the cleanup pass placed `cleanup` on ordinary and structured exits.
@@ -733,16 +731,19 @@ static List _flat_match_condition(Symbol head, List tags) {
   Var literal = head;
   unsigned long long bits = literal.u64;
   Array condition = [];
-  condition.push("_x2c_match_expr && "
+  condition.push(
+    "_x2c_match_expr && "
     + %"_x2c_match_expr->car.u64 == ${bits}ULL && "
     + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)");
   int index = 0;
   foreach (Var tag, tags) {
     condition.push("&& _x2c_match_cursor ");
     if (tag is <symbol>)
-      condition.push("&& Var_is(_x2c_match_cursor->car, "
+      condition.push(
+        "&& Var_is(_x2c_match_cursor->car, "
         + %"${(unsigned long) tag.symbol()}) ");
-    condition.push(%"&& (_x2c_match_values[$index] = _x2c_match_cursor->car, "
+    condition.push(
+      %"&& (_x2c_match_values[$index] = _x2c_match_cursor->car, "
       + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)");
     index++;
   }
@@ -784,9 +785,9 @@ static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
       List condition = _flat_match_condition(flat_head, flat_tags);
       List declarations = _make_local_binders(binders, "_x2c_match_values");
       String closing = implicit_break ? "break; } }" : "} }";
-      values.push(%("{ List _x2c_match_cursor;"
-        "if (" @condition ") {" @declarations @body
-        $closing));
+      values.push(
+        %("{ List _x2c_match_cursor;" "if (" @condition ") {" @declarations
+          @body $closing));
     }
     else {
       int static_pattern = match_value_is_static(value);

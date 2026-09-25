@@ -60,7 +60,8 @@ static List _make_shutdown_registration(Compiler compiler, List source) {
   String shutdown = compiler.fini_fn;
   if (!shutdown) return NULL;
   List binding = compiler.sym.reference(%($shutdown), NULL);
-  return _within_definitions(_definition_arms(source, shutdown), %((
+  return _within_definitions(
+    _definition_arms(source, shutdown), %((
     stmnt
       (expr (void)
         (call "Scope_shutdown_hook"
@@ -704,7 +705,7 @@ static List _parameter_names(Compiler c, List modifiers) {
           String name = binding_identity_spelling(binding);
           Var spelling;
           if (c.semantic_binding_facts().try_get(
-                %(source-spelling $binding), &spelling))
+            %(source-spelling $binding), &spelling))
             name = spelling;
           names.push(name ? name : "");
         }
@@ -776,8 +777,9 @@ List Compiler.definition_rows(Compiler c, List ast) {
     case %(typedef ?base (bindings *declarators)):
       foreach (List declarator, declarators) match (declarator)
         case %(bind ?binding ?modifiers):
-          rows.push(%(typedef ${binding_identity_spelling(binding)}
-                      $base $modifiers ${_span(c, node)}));
+          rows.push(
+            %(typedef ${binding_identity_spelling(binding)} $base $modifiers
+              ${_span(c, node)}));
   }
   return rows.list_free();
 }
@@ -848,10 +850,11 @@ void Compiler.dump_definitions(Compiler c, List ast) {
         case %(?(int start) ?(int body)):
           text = _source_text(tokens + start, tokens + body);
       List location = _location(tokens, span);
-      printf("%s\n", %(function (name $name) (display $display)
-                       (line $line) ${location.cadr()} (static $is_static)
-                       (origin $origin) (doc $doc) (text $text)
-                       (type $type) (params $names)).repr());
+      printf(
+        "%s\n",
+        %(function (name $name) (display $display) (line $line)
+          ${location.cadr()} (static $is_static) (origin $origin)
+          (doc $doc) (text $text) (type $type) (params $names)).repr());
     }
     case %(typedef ?name ?base ?modifiers ?span): {
       Var doc = "", text = "", kind = <alias>;
@@ -866,8 +869,10 @@ void Compiler.dump_definitions(Compiler c, List ast) {
           if (written) doc = written;
           privacy = %((private $private));
         }
-      printf("%s\n", %(type (name $name) (kind $kind) @location
-                       @privacy (doc $doc) (text $text)).repr());
+      printf(
+        "%s\n",
+        %(type (name $name) (kind $kind) @location @privacy (doc $doc)
+          (text $text)).repr());
     }
   }
 }
@@ -976,11 +981,11 @@ static void _collect_forward_dependencies(
         }
       }
       case %(vcompound ? ? ? ?name):
-        _forward_declaration(compiler, %(native $name),
-          locals, statics, seen, prototypes);
+        _forward_declaration(
+          compiler, %(native $name), locals, statics, seen, prototypes);
       case %(vpostfix ? ? ?name):
-        _forward_declaration(compiler, %(native $name),
-          locals, statics, seen, prototypes);
+        _forward_declaration(
+          compiler, %(native $name), locals, statics, seen, prototypes);
       case %((!or expr declare typedef function cast param) ?type *):
         if (type is <list>)
           _forward_types(compiler, type, locals, statics, seen, prototypes);
@@ -1188,7 +1193,8 @@ static List _primary_include(Compiler compiler, List content) {
 // Inject compiler bootstrap invocation into main when present.
 static List _modify_main(Compiler compiler, List source) {
   List initializer = compiler.sym.reference(%("x2c_initialize"), NULL);
-  return source.map(%!(List unit) => {
+  return source.map(
+    %!(List unit) => {
     match (unit)
       case %(function ?rtype
              (bind (!set ?binding (*)) ?params)
@@ -1249,9 +1255,8 @@ void generate_code(Compiler c, List ast, String dir) {
     $hfile ${c.code_pretty_string(header, hfile)}
     $cfile ${c.code_pretty_string(source, cfile)}
   );
-  String interface = c.source_facts
-                   ? NULL : interface_text(
-                       c, _public_definition_rows(c.definition_rows(ast)));
+  String interface = c.source_facts ? NULL : interface_text(
+    c, _public_definition_rows(c.definition_rows(ast)));
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   List failure = NULL;
   try file_publish(outputs);

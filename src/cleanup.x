@@ -102,11 +102,13 @@ static List _try_cleanup(
   Array body = [];
   if (has_clause) {
     Type handler = %(($_handler_type));
-    body.push(%(stmnt (expr (void)
-      (call "x2c_error_catch_close"
-        (args (expr $handler (ident $handle)))))));
-    body.push(%(stmnt (expr $handler
-      (op = (expr $handler (ident $handle)) (expr $handler (nil))))));
+    body.push(
+      %(stmnt (expr (void)
+        (call "x2c_error_catch_close"
+          (args (expr $handler (ident $handle)))))));
+    body.push(
+      %(stmnt (expr $handler
+        (op = (expr $handler (ident $handle)) (expr $handler (nil))))));
   }
   if (finalizer) body.push(finalizer);
   List statements = body.list_free();
@@ -217,8 +219,9 @@ static int _goto_stop(Walk walk, Var label) {
   String name = _label_spelling(label);
   Var stored;
   if (!name || !walk.labels.try_get(name, &stored)) {
-    _report_at(walk, walk.origin,
-               "goto target label is not defined in this function", NULL);
+    _report_at(
+      walk, walk.origin, "goto target label is not defined in this function",
+      NULL);
     return (int) walk.regions.len();
   }
   List target = stored, source = _region_path(walk);
@@ -227,9 +230,10 @@ static int _goto_stop(Walk walk, Var label) {
   for (int i = source_depth; i > target_depth && suffix; i--)
     suffix = suffix.cdr();
   if (target_depth > source_depth || suffix !== target) {
-    _report_at(walk, walk.origin,
-               "goto cannot enter or cross a protected cleanup region",
-               %("jump only within the same region or outward"));
+    _report_at(
+      walk, walk.origin,
+      "goto cannot enter or cross a protected cleanup region",
+      %("jump only within the same region or outward"));
     return (int) walk.regions.len();
   }
   return target_depth;
@@ -673,8 +677,9 @@ static Var _rewrite(Walk walk, Var value) {
           Array rewritten = [];
           foreach (List record, records) {
             List arm = record.caddr();
-            rewritten.push(%(${record.car()} ${record.cadr()}
-                             ${_inside(walk, cleanup, arm, arm)}));
+            rewritten.push(
+              %(${record.car()} ${record.cadr()}
+                ${_inside(walk, cleanup, arm, arm)}));
           }
           clause_out = %(catcharms ${rewritten.list_free()});
         }

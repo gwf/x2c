@@ -181,9 +181,8 @@ static _RegexNode _class(_Parser &p) {
       if (high < byte) _fail(p, "character range out of order");
       _set_range(node, byte, high);
     }
-    else {
+    else
       _set_add(node, byte);
-    }
   }
   if (p.regex.caseless) _set_fold(node);
   if (negate)
@@ -199,9 +198,8 @@ static _RegexNode _group(_Parser &p) {
   if (_peek(p) == '?') {
     p.pos++;
     int marker = _peek(p);
-    if (marker == ':') {
+    if (marker == ':')
       p.pos++;
-    }
     else if (marker == '<') {
       p.pos++;
       int start = p.pos;
@@ -220,9 +218,8 @@ static _RegexNode _group(_Parser &p) {
       _fail(p, "unknown group syntax");
     }
   }
-  else {
+  else
     index = ++p.regex.capture_count;
-  }
   if (index > 0)
     p.regex.capture_names = p.regex.capture_names.append(%($name));
   _RegexNode node = _node(<group>);
@@ -273,7 +270,7 @@ static int _braces(_Parser &p, int &min, int &max) {
   return 1;
 }
 
-/* Reads one atom. A quantifier here has nothing before it to repeat. */
+/* A quantifier here has nothing before it to repeat. */
 static _RegexNode _atom(_Parser &p) {
   int byte = (unsigned char) p.text[p.pos++];
   _RegexNode atom;
@@ -407,11 +404,11 @@ static const int _DEPTH_LIMIT = 2000;
 
 static int _run(_State &st, _RegexNode n, int pos, _Cont *k);
 
-static int _iterate_from(_State &st, _RegexNode rep, int count, int pos,
-                         int last_start, _Cont *k);
+static int _iterate_from(
+  _State &st, _RegexNode rep, int count, int pos, int last_start, _Cont *k);
 
-static int _iterate(_State &st, _RegexNode rep, int count, int pos,
-                    int last_start, _Cont *k) {
+static int _iterate(
+  _State &st, _RegexNode rep, int count, int pos, int last_start, _Cont *k) {
   if (st.depth == _DEPTH_LIMIT) {
     String pattern = st.regex.pattern;
     raise %(size-limit (operation "Regex.match") (pattern $pattern)
@@ -424,8 +421,8 @@ static int _iterate(_State &st, _RegexNode rep, int count, int pos,
   return matched;
 }
 
-static int _iterate_from(_State &st, _RegexNode rep, int count, int pos,
-                         int last_start, _Cont *k) {
+static int _iterate_from(
+  _State &st, _RegexNode rep, int count, int pos, int last_start, _Cont *k) {
   if (count > 0 && pos == last_start && count >= rep.min)
     return _run(st, rep.next, pos, k);
   int more = rep.max < 0 || count < rep.max;
@@ -532,8 +529,8 @@ static int _run(_State &st, _RegexNode n, int pos, _Cont *k) {
   return _run(st, k.node, pos, k.up);
 }
 
-static RegexCapture _capture(Regex regex, String subject, int index,
-                             int start, int end) {
+static RegexCapture _capture(
+  Regex regex, String subject, int index, int start, int end) {
   int matched = start >= 0;
   String name = index ? regex.capture_names[index - 1] : NULL;
   String text = matched ? subject[start:end] : NULL;
@@ -552,8 +549,8 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
     ends[0] = st.end;
     List captures = NULL;
     for (int i = count - 1; i >= 0; i--)
-      captures = cons(_capture(regex, subject, i, starts[i], ends[i]),
-                      captures);
+      captures = cons(
+        _capture(regex, subject, i, starts[i], ends[i]), captures);
     return (RegexMatch) captures;
   }
   return NULL;
@@ -572,9 +569,8 @@ static void _expand(Buffer out, RegexMatch found, String replacement) {
   for (int i = 0; i < n; i++) {
     char byte = replacement[i];
     int next = i + 1 < n ? replacement[i + 1] : -1, close = -1;
-    if (byte != '$' || next < 0) {
+    if (byte != '$' || next < 0)
       out.write_char(byte);
-    }
     else if (next == '$') {
       out.write_char('$');
       i++;
@@ -588,14 +584,13 @@ static void _expand(Buffer out, RegexMatch found, String replacement) {
       found[replacement[i + 2:close]].write_str(out);
       i = close;
     }
-    else {
+    else
       out.write_char(byte);
-    }
   }
 }
 
-static String _rebuild(Regex r, String subject, int all, Func fn,
-                       String replacement) {
+static String _rebuild(
+  Regex r, String subject, int all, Func fn, String replacement) {
   Buffer out = $auto(Buffer.new(0));
   int cursor = 0;
   for (RegexMatch found = _search(r, subject, 0); found;

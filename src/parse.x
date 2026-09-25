@@ -637,8 +637,8 @@ static List _struct_or_union(Compiler c) {
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(tag, usedname.car(),
-    c.peek(0) == <"{"> || c.peek(0) == <;>)});
+  usedname = %(${c.aggregate_name(
+    tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List type = cons(tag, usedname), fields = NULL;
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
@@ -766,8 +766,8 @@ static List _enum(Compiler c) {
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   if (name && c.macro_holes)
-    name = %(${c.aggregate_name(<enum>, name.car(),
-      c.peek(0) == <"{"> || c.peek(0) == <;>)});
+    name = %(${c.aggregate_name(
+      <enum>, name.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List usedname = name ? name : c.gensym();
   List type = cons(<enum>, usedname), enums = NULL;
   if (c.test(<"{">)) {
@@ -1469,8 +1469,9 @@ static void _append_managed_declaration(
           output.push(%(declare $base (bindings @{ordinary})));
           ordinary.clear();
         }
-        output.push(%(declare $base
-          (bindings (op = (bind $binding $modifiers) $initializer))));
+        output.push(
+          %(declare $base
+            (bindings (op = (bind $binding $modifiers) $initializer))));
         List receiver = %(expr $type (ident $binding));
         List cleanup = c.resolve_expression(
           %(expr () (call (expr () (op . $receiver ("cleanup")))
@@ -2111,10 +2112,11 @@ static List _finish_declarator_parameters(Compiler compiler, List declarator) {
               defer compiler.sym.pop_scope();
               foreach (List parameter, parameters) match (parameter) {
                 case %(param ?base ?declarator):
-                  params.push(_finish_parameter(
-                    compiler, base,
-                    _finish_declarator_parameters(compiler, declarator),
-                    NULL, NULL, NULL));
+                  params.push(
+                    _finish_parameter(
+                      compiler, base,
+                      _finish_declarator_parameters(compiler, declarator),
+                      NULL, NULL, NULL));
                 default: params.push(parameter);
               }
             }
@@ -2493,9 +2495,10 @@ List Compiler.bind_syntax(
                 if (context != AST_FIELD && mods.is_bitfield())
                   goto construction_error;
               }
-            output.push(_install_declarator_node(
-              _, base, declaration_context, declarator, NULL,
-              preserved_self));
+            output.push(
+              _install_declarator_node(
+                _, base, declaration_context, declarator, NULL,
+                preserved_self));
           }
           List result = _finish_declaration(
             _, tag, base, output.list_free(), preserved_self);
@@ -2626,8 +2629,7 @@ List Compiler.bind_syntax(
       case %(defer ?body):
         if (statement_position)
           return %(defer ${_.bind_syntax(
-            body, AST_STATEMENT, _.return_type
-          )});
+            body, AST_STATEMENT, _.return_type)});
       case %(do ?body ?condition):
         if (statement_position)
           return %(do
@@ -2687,10 +2689,11 @@ List Compiler.bind_syntax(
           _.begin_catch_arm(pattern, _.token);
           {
             defer _.sym.pop_scope();
-            bound.push(%(
-              $pattern
-              ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
-            ));
+            bound.push(
+              %(
+                $pattern
+                ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
+              ));
           }
         }
         return %(catchcases ${bound.list_free()});

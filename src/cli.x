@@ -404,15 +404,17 @@ static void _print_top_help(void) {
   }
   _print_options(0);
   puts("");
-  puts($dedent(%"
-    Input syntax:
-  "));
+  puts(
+    $dedent(%"
+      Input syntax:
+    "));
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   _print_help_row("--", "End option parsing", 2);
   puts("");
-  puts($dedent(%"
-    Run 'x2c help <command>' or 'x2c <command> --help' for command help."));
+  puts(
+    $dedent(%"
+      Run 'x2c help <command>' or 'x2c <command> --help' for command help."));
 }
 
 static void _print_translate_help(void) {
@@ -607,12 +609,11 @@ static void _print_help(Symbol command) {
     case <list>:       _print_package_help(command);
     case <help>:
       puts(
-        $dedent(%"
-          Usage:
-            x2c help [command]
-
-          Show top-level help, or help for translate, build, run, new, script, repl,
-          bootstrap, env, install, remove, or list."));
+        "Usage:\n"
+        "  x2c help [command]\n"
+        "\n"
+        "Show top-level help, or help for translate, build, run, new, script, "
+        "repl,\nbootstrap, env, install, remove, or list.");
     default: x2c_driver_error(%"unknown help command '${command}'");
   }
 }
@@ -1017,8 +1018,9 @@ CliRequest cli_package_options(String path, String package) {
       default:
         x2c_driver_error(%"unsupported package native argument '$argument'");
     }
-    _apply_option(request, option, spelling, value, attached,
-      includes, cpp, compile, link);
+    _apply_option(
+      request, option, spelling, value, attached, includes, cpp, compile,
+      link);
   }
   includes.free();
   cpp.free();

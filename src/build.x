@@ -470,7 +470,6 @@ $exports");
   catch %(io-fail *detail): x2c_host_error(detail);
 }
 
-/* The request that translates this build's entry units `entries`. */
 static CliRequest Build._entry_request(Build b, List entries) {
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
   request.inputs = entries;
@@ -488,7 +487,8 @@ CliRequest Build.module_entry(Build b) {
   String stamp = build_module_stamp();
   if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
-  _write_entry(entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
+  _write_entry(
+    entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
 Map x2c_module_targets(void) => \$module.targets();
 ");
   return b._entry_request(%($entry));
@@ -506,7 +506,8 @@ CliRequest Build.extension_entries(Build b) {
   foreach (String package, b.request.extensions) {
     String root = Path.absolute(package), name = Path.basename(root);
     Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
-    _write_entry(entry, Path.glob(%"$root/src/*.x"),
+    _write_entry(
+      entry, Path.glob(%"$root/src/*.x"),
       %"void x2c_register_extension(const char *, Map (*)(void));
 static Map _targets(void) => \$module.targets();
 __attribute__((constructor)) static void _register(void) {
@@ -1028,7 +1029,8 @@ static uint64_t _script_fingerprint(
       continue;
     }
     hash = _state_text(hash, path);
-    hash = _state_text(hash, Path.is_dir(path)
+    hash = _state_text(
+      hash, Path.is_dir(path)
       ? "%.9f".printf(Path.modified_time(path)) : "absent");
   }
   return hash;

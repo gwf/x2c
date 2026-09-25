@@ -230,7 +230,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   return globs;
 }
 
-/** Opens and tokenizes an isolated source unit without printing diagnostics.
+/* Opens and tokenizes an isolated source unit without printing diagnostics.
     A failed unit remains open so its diagnostics can be inspected. Close
     it before opening the next unit; Type and collection caches are
     process-global.
@@ -380,7 +380,8 @@ int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
     Preload macro libraries first. The caller must close the unit on either
     result; submissions and inspection results borrow its Context. */
 int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
-  _start(frontend, NULL, unit, 0, "$(begin)\n"
+  _start(
+    frontend, NULL, unit, 0, "$(begin)\n"
     "void print(String text);\n"
     "void println(String text);\n") &&
   unit.collect(frontend) && unit.parse();

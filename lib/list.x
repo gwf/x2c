@@ -213,9 +213,8 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 
 static List _prepend_array(Array values, List tail) {
   Var *data = values.bytes;
-  for (size_t i = values.len(); i; i--) {
+  for (size_t i = values.len(); i; i--)
     tail = cons(data[i - 1], tail);
-  }
   return tail;
 }
 
@@ -297,9 +296,8 @@ List List.list_n(unsigned element_count, ...) {
 */
 Self List.reverse(Self lst) {
   List rev = NULL;
-  foreach (Var value, lst) {
+  foreach (Var value, lst)
     rev = cons(value, rev);
-  }
   return rev;
 }
 

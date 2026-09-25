@@ -792,9 +792,8 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 */
 int Iter.any(Iter iter, Func pred) {
   if (!pred) return 0;
-  foreach (Var item, iter) {
+  foreach (Var item, iter)
     if (_apply1(pred, item)) return 1;
-  }
   return 0;
 }
 
@@ -810,9 +809,8 @@ int Iter.all(Iter iter, Func pred) {
   Var item;
   if (!iter.try_next(&item)) return 1;
   if (!pred) return 0;
-  do {
+  do
     if (!_apply1(pred, item)) return 0;
-  }
   while (iter.try_next(&item));
   return 1;
 }
@@ -827,9 +825,8 @@ int Iter.all(Iter iter, Func pred) {
 */
 Var Iter.find(Iter iter, Func pred) {
   if (!pred) return void;
-  foreach (Var item, iter) {
+  foreach (Var item, iter)
     if (_apply1(pred, item)) return item;
-  }
   return void;
 }
 
