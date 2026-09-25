@@ -89,6 +89,26 @@ Each of these can still produce a dangling pointer that translates without a
 warning. The pass reports one pattern. A program without warnings is not
 shown to be memory safe.
 
+## Optional lifetime proof
+
+`x2c-graph certify` checks selected entry points and the functions they can
+call across the supplied source units. It applies the same region ownership
+and parameter-effect rules as the compiler's local pass, then asks whether
+every reachable memory effect is covered. A `proved` result establishes the
+scoped lifetime invariant for those paths under the native effect assumptions
+listed in the report. If a root hands storage to its caller or another owner,
+the report names the remaining release obligation.
+
+The audit distinguishes a proven lifetime violation from an incomplete
+proof. An unknown call, pointer cast or arithmetic, indirect storage access,
+aggregate copy, or unmodeled scope ending is an obstacle, not a compiler
+warning or error. A project may provide explicit native effect contracts to
+the audit; they are assumptions of its result and do not change compilation.
+The optional command and its contract format are described in the
+[source graph reference](../../../commands/graph/README.md#conditional-lifetime-proof).
+The proof concerns scoped ownership and lifetime. It does not establish
+general C memory safety or correctness of emitted code.
+
 ## How the check works
 
 Each function gets one summary of two facts: which of Scope and Pool storage

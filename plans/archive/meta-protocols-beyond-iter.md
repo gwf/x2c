@@ -43,7 +43,7 @@ Facts from source on `dev` at `5023c07c`, with probes run by
 - Only the typed containers use custom class rows (11). Array, Map,
   Buffer, Block and Iter are built-in rows. So class registration
   matters only to delivery 4, which narrows the dependency
-  [meta sequencing](../meta-sequencing.md) assumed.
+  [meta sequencing](meta-sequencing.md) assumed.
 
 ## Design
 

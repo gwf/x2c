@@ -1,12 +1,12 @@
-# Meta sequencing: classes, extensions, protocols, certification
+# Meta sequencing: classes, extensions, protocols, lifetime proof
 
-> Status: active - steps 1-3 landed on `dev` 2026-09-24 (last commit
-> `7a371fa6`); step 4 has not started.
+> Status: done 2026-09-25. Steps 1-3 landed on `dev` 2026-09-24
+> (last commit `7a371fa6`); step 4 was delivered through `fd9d7d3e`.
 
 The remaining meta work spans four threads from
-[meta follow-ups](meta-followups.md): Var class capacity, native
-extensions (track G), meta-capable protocols (track E), and whole-project
-lifetime certification (track F phase 8). They are not independent. This
+[meta follow-ups](../meta-followups.md): Var class capacity, native
+extensions (track G), meta-capable protocols (track E), and an optional
+lifetime proof (track F phase 8). They are not independent. This
 plan fixes the order so that no step builds on machinery a later step
 replaces.
 
@@ -15,11 +15,11 @@ replaces.
 1. **Class registration and capacity.**
 2. **Native extensions and packages.**
 3. **Meta-capable protocols beyond Iter.**
-4. **Whole-project lifetime certification.**
+4. **Conditional lifetime proof.**
 
 ### 1. Class registration and capacity
 
-Designed in [class registration](archive/class-registration.md).
+Designed in [class registration](class-registration.md).
 
 Two separate problems, designed together:
 
@@ -42,7 +42,7 @@ design should list them.
 
 ### 2. Native extensions and packages
 
-Designed in [package meta modules](archive/package-meta-modules.md).
+Designed in [package meta modules](package-meta-modules.md).
 
 Track G delivered loadable meta modules with a hash stamp and a
 name-to-`Func` target Map. Extend it so a package declares its role:
@@ -60,7 +60,7 @@ which today costs 13 more rows at startup.
 ### 3. Meta-capable protocols beyond Iter
 
 Designed in
-[meta protocols beyond Iter](archive/meta-protocols-beyond-iter.md).
+[meta protocols beyond Iter](meta-protocols-beyond-iter.md).
 Only its fourth delivery, the typed containers, depends on step 1;
 deliveries 1-3 can start earlier.
 
@@ -69,16 +69,28 @@ follow. Exposing them may require helper types visible to meta code, and
 each boxed helper type takes a class row, so this follows step 1. Packages
 that adopt protocols for meta use follow step 2.
 
-### 4. Whole-project lifetime certification
+### 4. Conditional lifetime proof
 
-Track F phase 8: opt-in whole-project certification that treats unknown
-calls as unproved, the effect inventory, and File and Job finalizers. It
-goes last because steps 1-3 change what runs at compile time and across
-module boundaries, which would invalidate an earlier certification.
+The optional `x2c-graph certify` audit starts from selected functions and
+follows their reachable project calls. It combines the compiler's region
+effects with explicit, reported native assumptions. A result distinguishes
+proved scoped lifetime behavior, established violations, and paths whose
+effects remain outside the proof. Ownership passed back to a caller appears
+as an obligation. The audit stays outside ordinary compilation; the
+per-definition check still runs before meta code executes. File and Job
+finalizers were delivered in the narrower meta lifetime work. This step
+follows the first three because they changed compile-time and module-boundary
+reachability.
+
+The first case study selected `main` over hand-authored `src/*.x` and
+`lib/*.x` (excluding generated `lib/x2c.x`). It returned `incomplete`: no
+root-wide proof, no reported violation, no native assumptions, and more than
+19,000 obstacles. The report is retained locally in
+`debug/certify-compiler-final.out`.
 
 ## Not in this sequence
 
-The smaller track C items stay in [meta follow-ups](meta-followups.md):
+The smaller track C items stay in [meta follow-ups](../meta-followups.md):
 an MSYS2 run of the LLP64 `size_t` mapping, `off_t` and `time_t` widths,
 and enum values across translation units.
 

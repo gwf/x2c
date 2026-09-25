@@ -61,6 +61,7 @@ builds/0/libexec/x2c-graph walks [-I DIR] FILE...
 builds/0/libexec/x2c-graph tail-calls [-I DIR] FILE...
 builds/0/libexec/x2c-graph loop-allocations [--all] [-I DIR] FILE...
 builds/0/libexec/x2c-graph lifetime-escapes [-I DIR] FILE...
+builds/0/libexec/x2c-graph certify --root NAME [--root NAME ...] [--contracts FILE] [-I DIR] FILE...
 builds/0/libexec/x2c-graph allocation-returns NAME [-I DIR] FILE...
 builds/0/libexec/x2c-graph flows PRODUCER CONSUMER [-I DIR] FILE...
 builds/0/libexec/x2c-graph compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
@@ -350,6 +351,40 @@ remain unresolved. Values passed to unknown or indirect calls also become
 unresolved instead of producing a finding. A missing report does not establish
 that the code is safe. A reported pooled return may reuse an ancestor's
 canonical value, so even a `dangling-return` finding needs source verification.
+
+### Conditional lifetime proof
+
+`certify` audits code reachable from named, uniquely resolved functions and
+includes executable file-scope initialization from the supplied units:
+
+```sh
+builds/0/libexec/x2c-graph certify --root certify_safe \
+  commands/graph/tests/fixtures/certify.x
+```
+
+The result is `proved`, `violation`, or `incomplete`. `proved` means the
+region walk found no lifetime violation and every reachable operation stayed
+within the audit's modeled subset or had a listed effect contract. It is a
+conditional proof of scoped ownership, not a claim about arbitrary C memory
+behavior. A `violation` includes its call path and source location. An
+`incomplete` result lists proof obstacles such as an indirect call, an unknown
+native effect, pointer arithmetic or casts, an aggregate copy, or a region
+closure the audit cannot establish. Obstacles do not change compiler warnings
+or errors. Returned or transferred ownership appears under `obligations`.
+
+The compiler's built-in region effect table supplies runtime operations.
+For other native calls, `--contracts FILE` reads Lisp data rows using the
+table's existing effect forms:
+
+```text
+(native "native_touch" (summary 0 ()))
+```
+
+The example assumes `native_touch` has no memory effects. Every used native
+assumption is printed in the result. Duplicate rows, invalid effects, and
+attempts to override a built-in or source-defined function are rejected.
+The file affects this audit only. Exit status is 0 for `proved`, 1 for
+`violation`, 3 for `incomplete`, and 2 for invalid input or failed parsing.
 
 `allocation-returns` reports return expressions in functions with the exact
 emitted `NAME` that call allocation operations for the caller's current Scope or

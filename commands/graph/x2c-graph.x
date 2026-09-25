@@ -2383,6 +2383,565 @@ static void _write_datasets(
     "caller_id\tcallee_id\tstatic_calls", lib_calls);
 }
 
+/* Optional project lifetime proof from selected roots. */
+
+static int _certify_file_effect(Var value) {
+  if (value is not <list>) return 0;
+  List node = value;
+  match (node) {
+    case %(function *): return 0;
+    case %((!or call cons array map lambda) *): return 1;
+  }
+  foreach (Var child, node)
+    if (_certify_file_effect(child)) return 1;
+  return 0;
+}
+
+static int _certify_open(Frontend frontend, String input,
+                         ParsedUnit &parsed) {
+  int ok = frontend.start(input, parsed);
+  if (ok) ok = parsed.collect(frontend) && parsed.parse();
+  if (ok) return 1;
+  foreach (Var diagnostic, parsed.compiler.diagnostics())
+    parsed.compiler.print_diagnostic(diagnostic);
+  parsed.close();
+  return 0;
+}
+
+static List _certify_parse_units(Frontend frontend, Array inputs) {
+  Array units = [];
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return NULL;
+    Compiler compiler = parsed.compiler;
+    String path = compiler.display_path(input);
+    List functions = _analyze_unit(compiler, parsed.ast);
+    int effect = 0, has_top = 0;
+    foreach (List node, parsed.ast)
+      effect |= _certify_file_effect(node);
+    foreach (List function, functions)
+      match (function) case %(function ? "<top-level>" ? ? ?):
+        has_top = 1;
+    if (effect && !has_top) {
+      Array extended = [];
+      foreach (List function, functions) extended.push(function);
+      extended.push(%(function 0 "<top-level>" static
+                      (source "<top-level>" 0) (calls)));
+      functions = extended.sort().list_free();
+    }
+    List record = %(
+      unit $path <none> ${parsed.source_lines}
+      (functions @functions)
+    );
+    record = parsed.context.export(record).list();
+    parsed.close();
+    units.push(record);
+  }
+  units.sort();
+  return units.list_free();
+}
+
+static int _certify_sink(Var value) {
+  if (value in %(<return> <result> <static> <unknown>)) return 1;
+  match (value) case %(param ?(int index)): return index >= 0;
+  return 0;
+}
+
+static int _certify_effect(Var value) {
+  if (value in %((alloc) (alloc slot) (alloc pool) (alloc final)
+                 (alloc moved) (pool) (store) (wrap) (free)
+                 (free scope) (destroy) (open scope) (open pool)
+                 (open slot) (close scope) (close pool)
+                 (close slot) (move) (exit))) return 1;
+  match (value) case %(summary ?(int owner) ?(List sinks)): {
+    if (owner < 0 || owner > 3) return 0;
+    foreach (Var row, sinks) {
+      match (row) case %(?(int index) ?target)
+        if (index >= 0 && _certify_sink(target)): continue;
+      return 0;
+    }
+    return 1;
+  }
+  return 0;
+}
+
+Map certify_contracts(String path, int &valid) {
+  Map contracts = {};
+  valid = 1;
+  if (!path) return contracts;
+  String source = Path.read_text(path);
+  Lisp reader = Lisp.new();
+  defer reader.destroy();
+  unsigned cursor = 0;
+  Var form = void;
+  Symbol status;
+  while ((status = Lisp.read(reader, source, &cursor, &form)) == <value>) {
+    match (form) case %(native ?(String name) ?effect)
+      if (_certify_effect(effect) && !contracts.contains(name) &&
+          !Compiler.has_region_row(name)): {
+        contracts[name] = effect;
+        continue;
+      }
+    Stderr.printf("invalid or duplicate native contract in %s: %s\n",
+                  path, form.repr());
+    valid = 0;
+    return contracts;
+  }
+  if (status != <eof>) {
+    Stderr.printf("invalid native contract syntax in %s\n", path);
+    valid = 0;
+  }
+  return contracts;
+}
+
+static List _certify_path(List target, Map parent) {
+  Array reversed = [];
+  List current = target;
+  while (current) {
+    reversed.push(current);
+    Var prior = parent[current];
+    current = prior is <list> ? prior.list() : NULL;
+  }
+  Array path = [];
+  for (int i = reversed.len() - 1; i >= 0; i--)
+    path.push(reversed[i]);
+  return path.list_free();
+}
+
+static void _certify_reach(List graph, Array roots, Map nodes,
+                           Map reached, Map parent, Array missing) {
+  foreach (List unit, graph)
+    match (unit) case %(unit ?path (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name ? (calls *)):
+          nodes[%(target $path $name)] = function;
+  Array queue = [];
+  foreach (String root, roots) {
+    List found = NULL;
+    foreach (List target, nodes.keys())
+      match (target) case %(target ? ?name) if (name == root): {
+        if (found) { found = %(ambiguous); break; }
+        found = target;
+      }
+    if (!found || found == %(ambiguous)) {
+      missing.push(%(root $root ${found ? <ambiguous> : <missing>}));
+      continue;
+    }
+    if (!reached.contains(found)) {
+      reached[found] = 1;
+      queue.push(found);
+    }
+  }
+  foreach (List target, nodes.keys())
+    match (target) case %(target ? "<top-level>"):
+      if (!reached.contains(target)) {
+        reached[target] = 1;
+        queue.push(target);
+      }
+  for (int i = 0; i < queue.len(); i++) {
+    List caller = queue[i];
+    List function = nodes[caller];
+    match (function) case %(function ? ? (calls *calls)):
+      foreach (List call, calls)
+        match (call) case %(call direct ?path ?name ?): {
+          List target = %(target $path $name);
+          if (reached.contains(target)) continue;
+          reached[target] = 1;
+          parent[target] = caller;
+          queue.push(target);
+        }
+  }
+}
+
+static Map _certify_publics(List graph) {
+  Map publics = {};
+  foreach (List unit, graph)
+    match (unit) case %(unit ?path (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name public ?): {
+          List found = publics.contains(name) ? publics[name].list() : NULL;
+          publics[name] = cons(%(target $path $name), found);
+        }
+  return publics;
+}
+
+static Map _certify_seed(String path, List graph, Map summaries) {
+  Map seed = {};
+  foreach (List unit, graph)
+    match (unit) case %(unit ?unit_path (functions *functions))
+      if (path == unit_path):
+        foreach (List function, functions)
+          match (function) case %(function ?name ? (calls *calls)): {
+            List own = %(target $path $name);
+            if (summaries.contains(own)) seed[name] = summaries[own];
+            foreach (List call, calls)
+              match (call) case %(call direct ?target_path ?target_name ?): {
+                List target = %(target $target_path $target_name);
+                if (summaries.contains(target))
+                  seed[target_name] = summaries[target];
+              }
+          }
+  return seed;
+}
+
+static List _certify_unit_graph(String path, List graph) {
+  foreach (List unit, graph)
+    match (unit) case %(unit ?unit_path ?)
+      if (unit_path == path): return unit;
+  return NULL;
+}
+
+static int _certify_round(Frontend frontend, Array inputs, List graph,
+                          Map summaries, Map contracts, Array findings) {
+  int changed = 0;
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return -1;
+    Compiler compiler = parsed.compiler;
+    Context context = parsed.context;
+    String path = compiler.display_path(input);
+    Map seed = _certify_seed(path, graph, summaries);
+    Array current = [];
+    Map calculated = compiler.audit_regions(
+      parsed.ast, seed, contracts, current
+    );
+    List unit = _certify_unit_graph(path, graph);
+    match (unit) case %(unit ? (functions *functions)):
+      foreach (List function, functions)
+        match (function) case %(function ?name ? ?): {
+          if (name == "<top-level>") continue;
+          List target = %(target $path $name);
+          Var fresh = calculated[name], prior = summaries[target];
+          if (fresh is <list> && (prior is not <list> ||
+              !List.equal(fresh, prior))) {
+            summaries[context.export(target)] = context.export(fresh);
+            changed = 1;
+          }
+        }
+    foreach (List finding, current) {
+      (String name, Symbol code, int origin, String message, List notes) =
+        finding;
+      List location = project_location(compiler, path, origin);
+      findings.push(context.export(%(
+        finding (target $path $name) $code $location $message $notes
+      )).list());
+    }
+    parsed.close();
+  }
+  return changed;
+}
+
+static int _certify_aggregate(Compiler compiler, Var value) {
+  match (value) case %(expr ?type ?): {
+    Type resolved = compiler.sym.resolve_key(type);
+    return resolved && resolved.is_aggregate();
+  }
+  return 0;
+}
+
+static int _certify_indirect_result(Compiler compiler, Type type) {
+  if (!type) return 0;
+  Type resolved = compiler.sym.resolve_key(type);
+  return resolved && (resolved.is_pointer() || resolved.is_aggregate());
+}
+
+static int _certify_memory_path(Compiler compiler, Var value) {
+  if (value is not <list>) return 0;
+  List node = value;
+  match (node) {
+    case %((!or call cons array map lambda defer) *): return 1;
+    case %(expr ?type ?)
+      if (_certify_indirect_result(compiler, type)): return 1;
+  }
+  foreach (Var child, node)
+    if (_certify_memory_path(compiler, child)) return 1;
+  return 0;
+}
+
+static void _certify_scan(Compiler compiler, Map definitions, Map publics,
+                          Var value, String path, String name, int origin,
+                          Map reached, Map contracts, Map assumptions,
+                          Map scope_counts, Array obligations,
+                          Array obstacles, int conditional, int deferred) {
+  if (value is not <list>) return;
+  List node = value;
+  match (node) case %(at ?(int at) ?inner): {
+    _certify_scan(compiler, definitions, publics, inner, path, name, at,
+                  reached, contracts, assumptions, scope_counts,
+                  obligations, obstacles, conditional, deferred);
+    return;
+  }
+  List caller = %(target $path $name);
+  if (!reached.contains(caller)) return;
+  List location = project_location(compiler, path, origin);
+  match (node) {
+    case %(defer ?body *): {
+      _certify_scan(compiler, definitions, publics, body, path, name,
+        origin, reached, contracts, assumptions, scope_counts, obligations,
+        obstacles, conditional, 1);
+      return;
+    }
+    case %((!or if while do for switch try with match foreach finally)
+           *children): {
+      if (_certify_memory_path(compiler, node))
+        obstacles.push(%(obstacle $caller $location
+          "conditional memory effects are outside the proof subset"));
+      foreach (Var child, children)
+        _certify_scan(compiler, definitions, publics, child, path, name,
+          origin, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, 1, deferred);
+      return;
+    }
+    case %((!or goto label) *):
+      obstacles.push(%(obstacle $caller $location
+        "nonlocal control flow is outside the proof subset"));
+  }
+  match (node) {
+    case %(expr ?type ?inner): {
+      if (_certify_indirect_result(compiler, type))
+        match (inner) {
+          case %(op (!or (!quote .) (!quote ->)) *):
+            obstacles.push(%(obstacle $caller $location
+              "pointer-bearing field access is outside the proof subset"));
+          case %((!or getindex index) *):
+            obstacles.push(%(obstacle $caller $location
+              "pointer-bearing indexed access is outside the proof subset"));
+        }
+    }
+    case %(call ? ?): {
+      String callee = NULL;
+      List target = project_call_target(
+        compiler, definitions, node, callee, NULL
+      );
+      List resolved = target ? resolve_project_target(target, publics) : NULL;
+      if (!resolved && callee && contracts.contains(callee)) {
+        foreach (String declared, contracts.keys())
+          if (declared == callee) {
+            assumptions[declared] = contracts[declared];
+            break;
+          }
+      }
+      else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
+        obstacles.push(%(obstacle $caller $location
+          "call has no project body or lifetime effect contract" $callee));
+      if (callee in %("Scope_free" "Scope_realloc"))
+        obstacles.push(%(obstacle $caller $location
+          "explicit free or realloc has untracked aliases" $callee));
+      if (callee && callee.startswith("Context_"))
+        obstacles.push(%(obstacle $caller $location
+          "Context lifetime is outside the region walk" $callee));
+      if (callee in %("Scope_new" "Scope_new_named"))
+        obstacles.push(%(obstacle $caller $location
+          "Scope object destruction is outside the proof subset" $callee));
+      if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
+        List key = %(open $caller $callee);
+        Var prior = scope_counts[key];
+        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        if (conditional)
+          obstacles.push(%(obstacle $caller $location
+            "conditional region opening is outside the proof subset"
+            $callee));
+      }
+      if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
+        String open = callee == "Scope_release" ? "Scope_retain"
+                    : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
+        List key = %(close $caller $open);
+        Var prior = scope_counts[key];
+        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        if (!deferred || conditional)
+          obstacles.push(%(obstacle $caller $location
+            "region closing is not an unconditional lexical defer"
+            $callee));
+      }
+      if (callee in %("Scope_move" "Context_export" "List_promote"
+                      "String_promote" "Atom_promote"))
+        obligations.push(%(caller $caller $location
+          "transferred storage must be released by its destination"
+          $callee));
+    }
+    case %(cast ?type ?inner): {
+      Type target_type = type;
+      Type source_type = NULL;
+      match (inner) case %(expr ?source ?): source_type = source;
+      if ((target_type && target_type.is_pointer()) ||
+          (source_type && source_type.is_pointer()))
+        obstacles.push(%(obstacle $caller $location
+          "pointer cast is outside the lifetime model"));
+    }
+    case %(op ?operator ?left ?right): {
+      if (operator == <+> || operator == <->) {
+        Type left_type = NULL, right_type = NULL;
+        match (left) case %(expr ?t ?): left_type = t;
+        match (right) case %(expr ?t ?): right_type = t;
+        if ((left_type && left_type.is_pointer()) ||
+            (right_type && right_type.is_pointer()))
+          obstacles.push(%(obstacle $caller $location
+            "pointer arithmetic is outside the lifetime model"));
+      }
+      if (operator == <=> && _certify_aggregate(compiler, right))
+        obstacles.push(%(obstacle $caller $location
+          "aggregate copy may hide a borrowed pointer"));
+    }
+    case %(op (!quote *) ?):
+      obstacles.push(%(obstacle $caller $location
+        "pointer dereference is outside the proof subset"));
+    case %(return ? ?result): {
+      if (_certify_aggregate(compiler, result))
+        obstacles.push(%(obstacle $caller $location
+          "aggregate return may hide a borrowed pointer"));
+    }
+  }
+  foreach (Var child, node)
+    _certify_scan(compiler, definitions, publics, child, path, name,
+                  origin, reached, contracts, assumptions, scope_counts,
+                  obligations, obstacles, conditional, deferred);
+}
+
+static int _certify_coverage(Frontend frontend, Array inputs, List graph,
+                             Map reached, Map contracts, Map assumptions,
+                             Array obligations, Array obstacles) {
+  Map publics = _certify_publics(graph);
+  foreach (String input, inputs) {
+    ParsedUnit parsed;
+    if (!_certify_open(frontend, input, parsed)) return 0;
+    Compiler compiler = parsed.compiler;
+    Context context = parsed.context;
+    List ast = parsed.ast;
+    String path = compiler.display_path(input);
+    int first_obstacle = obstacles.len(), first_obligation = obligations.len();
+    Map definitions = project_function_targets(
+      compiler, ast, path
+    );
+    foreach (List node, ast) {
+      match (node) case %(function ?
+          (bind (!set ?binding (binding ? ?)) ?) ?body): {
+        String name = compiler.emitted_binding_name(binding);
+        List target = %(target $path $name);
+        Map scope_counts = {};
+        _certify_scan(compiler, definitions, publics, body, path,
+          name, 0, reached, contracts, assumptions, scope_counts,
+          obligations, obstacles, 0, 0);
+        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
+          Var opening = scope_counts[%(open $target $open)];
+          Var closing = scope_counts[%(close $target $open)];
+          if ((opening is void ? 0 : opening.int()) !=
+              (closing is void ? 0 : closing.int()))
+            obstacles.push(%(obstacle $target (location $path 0 0)
+              "region opening and lexical closing do not match" $open));
+        }
+        continue;
+      }
+      /* Executable file-scope forms are roots, but the region walk does
+         not model their process lifetime. */
+      if (_certify_file_effect(node) &&
+          reached.contains(%(target $path "<top-level>")))
+        obstacles.push(context.export(%(obstacle
+          (target $path "<top-level>")
+          (location $path 0 0)
+          "file-scope execution is outside the region walk"
+        )).list());
+    }
+    for (int i = first_obstacle; i < obstacles.len(); i++)
+      obstacles[i] = context.export(obstacles[i]);
+    for (int i = first_obligation; i < obligations.len(); i++)
+      obligations[i] = context.export(obligations[i]);
+    parsed.close();
+  }
+  return 1;
+}
+
+List certify_result(Frontend frontend, Array inputs, Array roots,
+                    Map contracts, int &status) {
+  List units = _certify_parse_units(frontend, inputs);
+  if (!units) { status = 2; return NULL; }
+  List graph = _resolve_graph(units, NULL);
+  Map nodes = {}, reached = {}, parent = {};
+  Array missing = [];
+  _certify_reach(graph, roots, nodes, reached, parent, missing);
+  foreach (String name, contracts.keys())
+    foreach (List target, nodes.keys())
+      match (target) case %(target ? ?defined) if (name == defined): {
+        Stderr.printf("contract shadows source function: %s\n", name);
+        status = 2;
+        return NULL;
+      }
+  Map summaries = {};
+  int changed = 1, rounds = 0;
+  while (changed && rounds++ < 256) {
+    Array ignored = [];
+    changed = _certify_round(frontend, inputs, graph, summaries,
+                             contracts, ignored);
+    if (changed < 0) { status = 2; return NULL; }
+  }
+  Array findings = [], obstacles = [], violations = [], obligations = [];
+  Map assumptions = {};
+  foreach (List row, missing)
+    match (row) case %(root ?name ?reason):
+      obstacles.push(%(obstacle (target "<root>" $name)
+        (location "<project>" 0 0) "selected root is unresolved" $reason));
+  if (changed) {
+    List target = NULL;
+    foreach (List current, reached.keys()) { target = current; break; }
+    obstacles.push(%(obstacle $target (location "<project>" 0 0)
+      "project summary did not settle"));
+  }
+  if (_certify_round(frontend, inputs, graph, summaries,
+                     contracts, findings) < 0 ||
+      !_certify_coverage(frontend, inputs, graph, reached, contracts,
+                          assumptions, obligations, obstacles)) {
+    status = 2;
+    return NULL;
+  }
+  Map blocked = {};
+  foreach (List obstacle, obstacles)
+    match (obstacle) case %(obstacle ?target ? ? *):
+      blocked[target] = 1;
+  foreach (List finding, findings)
+    match (finding) case %(finding ?target ?code ?location ?message ?notes)
+      if (reached.contains(target)): {
+        if (blocked.contains(target))
+          obstacles.push(%(obstacle $target $location
+            "region finding requires review with incomplete coverage"
+            $message));
+        else
+          violations.push(%(violation ${_certify_path(target, parent)}
+                            $code $location $message $notes));
+      }
+  Array reported_obstacles = [];
+  foreach (List obstacle, obstacles)
+    match (obstacle) case %(obstacle ?target ?location ?reason *rest):
+      reported_obstacles.push(%(obstacle
+        ${_certify_path(target, parent)} $location $reason @rest));
+  foreach (List target, reached.keys())
+    match (target) case %(target ? ?name) if (name in roots &&
+        summaries.contains(target)): {
+      List summary = summaries[target];
+      int owner = summary.car().int();
+      if (owner & 1)
+        obligations.push(%(caller $target
+          "returned storage may belong to the caller's active Scope"));
+      if (owner & 2)
+        obligations.push(%(caller $target
+          "returned storage may belong to the caller's active Pool"));
+    }
+  Array used = [];
+  foreach (String name, assumptions.keys())
+    used.push(%(native $name ${assumptions[name]}));
+  Symbol result = violations.len() ? <violation>
+                : reported_obstacles.len() ? <incomplete> : <proved>;
+  status = result == <proved> ? 0 : result == <violation> ? 1 : 3;
+  return %(
+    certify (status $result)
+    (roots @{roots.sort().list_free()})
+    (inputs @{inputs.list()})
+    (obligations @{obligations.sort().list_free()})
+    (assumptions @{used.sort().list_free()})
+    (violations @{violations.sort().list_free()})
+    (obstacles @{reported_obstacles.sort().list_free()})
+  );
+}
+
+
 static void _usage(String program) {
   Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", program);
   Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", program);
@@ -2402,7 +2961,12 @@ static void _usage(String program) {
     "       %s loop-allocations [--all] [-I DIR] FILE...\n", program);
   Stderr.printf("       %s lifetime-escapes [-I DIR] FILE...\n", program);
   Stderr.printf(
-    "       %s allocation-returns NAME [-I DIR] FILE...\n", program);
+    "       %s certify --root NAME [--root NAME ...] "
+    "[--contracts FILE] [-I DIR] FILE...\n", program
+  );
+  Stderr.printf(
+    "       %s allocation-returns NAME [-I DIR] FILE...\n", program
+  );
   Stderr.printf(
     "       %s flows PRODUCER CONSUMER [-I DIR] FILE...\n", program);
   Stderr.printf(
@@ -2436,6 +3000,7 @@ int main(int argc, char **argv) {
   int loop_limit = LOOP_ALLOCATION_LIMIT;
   int lifetime_escapes =
     argc > 1 && !strcmp(argv[1], "lifetime-escapes");
+  int certify = argc > 1 && !strcmp(argv[1], "certify");
   int allocation_returns =
     argc > 1 && !strcmp(argv[1], "allocation-returns");
   int flows = argc > 1 && !strcmp(argv[1], "flows");
@@ -2465,12 +3030,14 @@ int main(int argc, char **argv) {
        !clones && !datasets && !architecture && !structure && !between &&
        !focus && !field &&
        !field_sites && !sites && !walks &&
-       !tail_calls && !loop_allocations && !lifetime_escapes &&
+       !tail_calls && !loop_allocations && !lifetime_escapes && !certify &&
        !allocation_returns && !flows && !compare)) {
     _usage(argv[0]);
     return 2;
   }
   Array inputs = [], include_dirs = [], compare_operations = [];
+  Array certify_roots = [];
+  String contract_path = NULL;
   Array src_inputs = [], lib_inputs = [];
   Map seen = {}, subtrees = {};
   String dataset_output = datasets ? String.new(argv[2]) : NULL;
@@ -2492,6 +3059,19 @@ int main(int argc, char **argv) {
       compare_operations.push(String.new(argv[i]));
   compare_operations.sort();
   for (int i = first_input; i < argc; i++) {
+    if (certify && !strcmp(argv[i], "--root")) {
+      if (++i == argc) { _usage(argv[0]); return 2; }
+      certify_roots.push(String.new(argv[i]));
+      continue;
+    }
+    if (certify && !strcmp(argv[i], "--contracts")) {
+      if (++i == argc || contract_path) {
+        _usage(argv[0]);
+        return 2;
+      }
+      contract_path = String.new(argv[i]);
+      continue;
+    }
     if (clones && !strcmp(argv[i], "--min-size")) {
       if (++i == argc) { _usage(argv[0]); return 2; }
       char *end;
@@ -2543,7 +3123,7 @@ int main(int argc, char **argv) {
       }
     }
   }
-  if (!inputs.len() || (datasets &&
+  if (!inputs.len() || (certify && !certify_roots.len()) || (datasets &&
       (!src_inputs.len() || !lib_inputs.len()))) {
     _usage(argv[0]);
     return 2;
@@ -2559,7 +3139,15 @@ int main(int argc, char **argv) {
   int status = 0;
   try {
     List result = NULL;
-    if (clones)
+    if (certify) {
+      int valid = 0;
+      Map contracts = certify_contracts(contract_path, valid);
+      if (!valid) status = 2;
+      else result = certify_result(
+        frontend, inputs, certify_roots, contracts, status
+      );
+    }
+    else if (clones)
       result = graph_clones(frontend, inputs, clone_minimum);
     else if (field)
       result = _parse_field_units(
