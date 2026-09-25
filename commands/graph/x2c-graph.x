@@ -2678,30 +2678,6 @@ static int _certify_printf_format(String callee, List arguments) {
   return 1;
 }
 
-static int _certify_memory_path(Compiler compiler, Map definitions,
-                                 Map publics, Map contracts, Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(call ? ?): {
-      String callee = NULL;
-      List arguments = NULL;
-      List target = project_call_target(
-        compiler, definitions, node, callee, &arguments);
-      List resolved = target ? resolve_project_target(target, publics) : NULL;
-      if (!callee || (resolved ||
-          (!Compiler.region_no_lifetime_effect(callee) &&
-           !(contracts[callee] in %((summary 0 ()) (wrap))) &&
-           !_certify_printf_format(callee, arguments)))) return 1;
-    }
-    case %((!or cons array map lambda defer) *): return 1;
-  }
-  foreach (Var child, node)
-    if (_certify_memory_path(
-          compiler, definitions, publics, contracts, child)) return 1;
-  return 0;
-}
-
 static void _certify_scan(Compiler compiler, Map definitions, Map publics,
                           Var value, String path, String name, int origin,
                           Map reached, Map contracts, Map assumptions,
@@ -2727,10 +2703,6 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
     }
     case %((!or if while do for switch try with match foreach finally)
            *children): {
-      if (_certify_memory_path(
-            compiler, definitions, publics, contracts, node))
-        obstacles.push(%(obstacle $caller $location
-          "conditional memory effects are outside the proof subset"));
       foreach (Var child, children)
         _certify_scan(compiler, definitions, publics, child, path, name,
           origin, reached, contracts, assumptions, scope_counts,

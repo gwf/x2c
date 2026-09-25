@@ -371,6 +371,9 @@ behavior. A `violation` includes its call path and source location. An
 native effect, pointer arithmetic or casts, an aggregate copy, or a region
 closure the audit cannot establish. Obstacles do not change compiler warnings
 or errors. Returned or transferred ownership appears under `obligations`.
+Calls and allocations inside a branch or loop are checked by the region
+walk. A conditional region opening or a close without an unconditional
+lexical `defer` remains an obstacle.
 
 The compiler's built-in region effect table supplies runtime operations.
 For other native calls, `--contracts FILE` reads Lisp data rows using the
