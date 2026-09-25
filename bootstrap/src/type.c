@@ -1090,10 +1090,10 @@ static unsigned _literal_digit(int ch){
 
 int String_getindex(String, int);
 static int _literal_magnitude(String text, int end, unsigned long long * value, int * decimal){
-  int pos = 0, base = 10;  * decimal = 1;  if(pos + 1 < end && String_getindex(text, pos) == '0'){
+  int pos = 0, base = 10; (* decimal) = 1;  if(pos + 1 < end && String_getindex(text, pos) == '0'){
     switch(String_getindex(text, pos + 1)){
-      case 'x' : case 'X' : base = 16;  pos += 2;  * decimal = 0;  break;  case 'b' : case 'B' : base = 2;  pos += 2;  * decimal = 0;  break;  case 'o' : case 'O' : base = 8;  pos += 2;  * decimal = 0;  break;  default: if(String_getindex(text, pos + 1) >= '0' && String_getindex(text, pos + 1) <= '7'){
-        base = 8;  * decimal = 0;
+      case 'x' : case 'X' : base = 16;  pos += 2; (* decimal) = 0;  break;  case 'b' : case 'B' : base = 2;  pos += 2; (* decimal) = 0;  break;  case 'o' : case 'O' : base = 8;  pos += 2; (* decimal) = 0;  break;  default: if(String_getindex(text, pos + 1) >= '0' && String_getindex(text, pos + 1) <= '7'){
+        base = 8; (* decimal) = 0;
       }
 
     }
@@ -1102,7 +1102,7 @@ static int _literal_magnitude(String text, int end, unsigned long long * value, 
   unsigned long long result = 0;  while(pos < end){
     unsigned digit = _literal_digit((unsigned char) String_getindex(text, pos));  if(result >(ULLONG_MAX - digit) /(unsigned) base) return 0;  result = result *(unsigned) base + digit;  pos ++;
   }
-  * value = result;  return 1;
+  (* value) = result;  return 1;
 }
 
 static Type _integer_literal_type(unsigned long long value, int decimal, int is_unsigned, int longs){
@@ -1142,7 +1142,7 @@ Var Type_numeric_literal_value(Type type, String text){
   if(tag == 26071077642){
     long double value = strtold(text, NULL);  return Var_box_long_double(value);
   }
-  int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, _integer_literal_end(text), & magnitude, & decimal)) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
+  int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, _integer_literal_end(text), &(magnitude), &(decimal))) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
 }
 
 Type Type_numeric_literal(String text, int floating){
@@ -1152,7 +1152,7 @@ Type Type_numeric_literal(String text, int floating){
   int suffix = _integer_literal_end(text);  int is_unsigned = 0, longs = 0;  for(int i = suffix;  i < length;  i ++){
     int ch = String_getindex(text, i);  if(ch == 'u' || ch == 'U') is_unsigned = 1;  else longs ++;
   }
-  unsigned long long value;  int decimal;  if(! _literal_magnitude(text, suffix, & value, & decimal)) return NULL;  return _integer_literal_type(value, decimal, is_unsigned, longs);
+  unsigned long long value;  int decimal;  if(! _literal_magnitude(text, suffix, &(value), &(decimal))) return NULL;  return _integer_literal_type(value, decimal, is_unsigned, longs);
 }
 
 List Type_tag(Type type){
@@ -1167,7 +1167,7 @@ List Type_body(Type t){
 
 int Var_is_void(Var);
 int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom){
-  if(! _init_guard_) _file_init_();  Var row = Map_getindex(varrows, Symbol_var(tag));  if(Var_is_void(row)) return 0;  List fields = Var_list(row);  * top = Var_ulong(Var_convert(List_car(fields), 44858254));  * mask = Var_ulong(Var_convert(List_cadr(fields), 44858254));  * bottom = Var_ulong(Var_convert(List_caddr(fields), 44858254));  return 1;
+  if(! _init_guard_) _file_init_();  Var row = Map_getindex(varrows, Symbol_var(tag));  if(Var_is_void(row)) return 0;  List fields = Var_list(row); (* top) = Var_ulong(Var_convert(List_car(fields), 44858254)); (* mask) = Var_ulong(Var_convert(List_cadr(fields), 44858254)); (* bottom) = Var_ulong(Var_convert(List_caddr(fields), 44858254));  return 1;
 }
 
 void Type_begin_unit(void){

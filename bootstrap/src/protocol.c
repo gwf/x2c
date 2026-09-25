@@ -1884,7 +1884,7 @@ static Type _method_signature(Compiler compiler, Type owner, Type participant, S
   if(! List_truth(Type_list(signature))) return NULL;  List binding = Sym_reference(compiler -> sym, cons(String_var(source), NULL), NULL);  signature = _receiver_relative_signature(compiler, binding, signature, participant);  List parameters = NULL;  Type result = NULL;  if(_function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && Var_equal(List_car(parameters), List_var(owner))){
     parameters = _inherited_parameters(parameters, owner, participant);  signature = List_type(cons(List_var(cons(_305, cons(List_var(parameters), NULL))), List_append(Type_list(result), NULL)));
   }
-  * selected = source;  return signature;
+  (* selected) = source;  return signature;
 }
 
 static int _contents(Var value, String variable){
@@ -1967,7 +1967,7 @@ break;
 
 Map Map_copy(Map);
 static List Compiler__resolve_native_protocol_participant(Compiler c, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure){
-  * failure = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(c -> conforms, List_var(key), & stored)){
+  (* failure) = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(c -> conforms, List_var(key), & stored)){
     if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, participant, List_cdr(Var_list(List_last(conformance))));  return conformance;
   }
   if(! Type_is_bare_typedef_name(participant) || ! List_truth(Type_list(participant_definition))){
@@ -1986,7 +1986,7 @@ static List Compiler__resolve_native_protocol_participant(Compiler c, Type base,
     List template;  List _x2c_macro_object_9 = templates;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_10)){
       template = Var_list(_x2c_macro_cursor_output_10); {
         List _x2c_destructure_2 = template;  String member_name = Var_string(List_getindex(_x2c_destructure_2, 0));  Type template_type = Var_type(List_getindex(_x2c_destructure_2, 1));  String native_name = Var_string(List_getindex(_x2c_destructure_2, 2));  List requirement = _native_requirement(member_name, native_name, template_type, binder, participant_definition, base);  if(List_truth(requirement)){
-          * failure = requirement;  Array_free(members);  Map_setindex(c -> conforms, List_var(key), int_var(0));  return NULL;
+          (* failure) = requirement;  Array_free(members);  Map_setindex(c -> conforms, List_var(key), int_var(0));  return NULL;
         }
         Type expected = _substitute_signature(template_type, variables, bindings);  Map native_bindings = Map_copy(bindings);  Map_setindex(native_bindings, String_var(binder), List_var(base));  Type native_signature = _substitute_signature(template_type, variables, native_bindings);  Type alias_signature = List_equal(Type_list(participant_definition), Type_list(base)) ? expected : native_signature;  Array_push(members, List_var(cons(String_var(member_name), cons(_325, cons(String_var(native_name), cons(List_var(expected), cons(_369, cons(List_var(alias_signature), NULL))))))));
       }
@@ -2036,7 +2036,7 @@ static List _resolve_members(Compiler compiler, Type base, String binder, List a
             if(List_truth(Type_list(actual))) selected = binding; {
               Type owner;  List _x2c_macro_object_11 =(base != _271 || List_truth(Type_list(representation))) && ! List_truth(Type_list(actual)) ? List_cdr(_ancestry(compiler, participant)) : NULL;  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_12)){
                 owner = Var_type(_x2c_macro_cursor_output_12); {
-                  if(List_equal(Type_list(owner), Type_list(base))) break;  if(base == _271 && ! List_equal(Type_list(owner), Type_list(representation))) continue;  actual = _method_signature(compiler, owner, participant, member_name, & selected);  if(List_truth(Type_list(actual)) || base == _271) break;
+                  if(List_equal(Type_list(owner), Type_list(base))) break;  if(base == _271 && ! List_equal(Type_list(owner), Type_list(representation))) continue;  actual = _method_signature(compiler, owner, participant, member_name, &(selected));  if(List_truth(Type_list(actual)) || base == _271) break;
                 }
 
               }
@@ -2100,7 +2100,7 @@ Array final = Array_new(); {
   }
 }
 }
-Array_free(resolved);  * variables_out = variables;  * bindings_out = bindings;  return Array_list_free(final);
+Array_free(resolved); (* variables_out) = variables; (* bindings_out) = bindings;  return Array_list_free(final);
 }
 
 static List _conversion_requirement(String binder, String member, Type template, Symbol adapter, String forward, String reverse){
@@ -2162,8 +2162,8 @@ return NULL;
 }
 
 static List Compiler__resolve_ordinary_protocol(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, List * failure){
-  * failure = NULL;  Var stored;  List key = cons(List_var(base), cons(List_var(participant), NULL));  if(Map_try_get(compiler -> conforms, List_var(key), & stored)) return Var_is_row(stored, 9, 7, 4) ? Var_list(stored) : NULL;  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) goto does_not_conform;  String forward = _forward_binding(compiler, base, participant);  String reverse = _reverse_binding(compiler, base, participant);  Map variables = NULL, bindings = NULL;  List rows = _resolve_members(compiler, base, binder, associations, templates, participant, & variables, & bindings);  List requirement = _ordinary_requirement(compiler, base, binder, rows, forward, reverse);  if(List_truth(requirement)){
-    * failure = requirement;  goto does_not_conform;
+  (* failure) = NULL;  Var stored;  List key = cons(List_var(base), cons(List_var(participant), NULL));  if(Map_try_get(compiler -> conforms, List_var(key), & stored)) return Var_is_row(stored, 9, 7, 4) ? Var_list(stored) : NULL;  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) goto does_not_conform;  String forward = _forward_binding(compiler, base, participant);  String reverse = _reverse_binding(compiler, base, participant);  Map variables = NULL, bindings = NULL;  List rows = _resolve_members(compiler, base, binder, associations, templates, participant, &(variables), &(bindings));  List requirement = _ordinary_requirement(compiler, base, binder, rows, forward, reverse);  if(List_truth(requirement)){
+    (* failure) = requirement;  goto does_not_conform;
   }
   List conformance = cons(_370, cons(List_var(base), cons(List_var(participant), cons(String_var(forward), cons(String_var(reverse), cons(Map_var(variables), cons(Map_var(bindings), cons(List_var(cons(_212, List_append(rows, NULL))), NULL))))))));  Map_setindex(compiler -> conforms, List_var(key), List_var(conformance));  return conformance;  does_not_conform : Map_setindex(compiler -> conforms, List_var(key), int_var(0));  return NULL;
 }
@@ -2317,9 +2317,9 @@ static String _requirement_detail(Type base, Type participant, List failure){
 
 static void _resolve_protocol_record(Compiler compiler, Type base, Type participant, List location, String binder, List associations, List templates){
   int native = _is_native(templates);  List conformance = NULL, failure = NULL;  if(native){
-    Type definition = _participant_definition(compiler, participant);  conformance = Compiler__resolve_native_protocol_participant(compiler, base, participant, binder, associations, templates, definition, & failure);
+    Type definition = _participant_definition(compiler, participant);  conformance = Compiler__resolve_native_protocol_participant(compiler, base, participant, binder, associations, templates, definition, &(failure));
   }
-  else conformance = Compiler__resolve_ordinary_protocol(compiler, base, participant, binder, associations, templates, & failure);  if(! List_truth(conformance)){
+  else conformance = Compiler__resolve_ordinary_protocol(compiler, base, participant, binder, associations, templates, &(failure));  if(! List_truth(conformance)){
     if(! List_truth(location)) return;  String base_repr = _type_spelling(base);  String participant_repr = _type_spelling(participant);  String owner = String_join(NULL, cons(String_var(base_repr), cons(String_var(_181), cons(String_var(participant_repr), cons(String_var(_182), NULL)))));  String prefix = String_join(NULL, cons(String_var(participant_repr), cons(String_var(_507), cons(String_var(owner), cons(String_var(_508), NULL))))), detail;  if(List_truth(failure)) detail = _requirement_detail(base, participant, failure);  else if(native) detail = String_join(NULL, cons(String_var(prefix), cons(String_var(_529), cons(String_var(base_repr), NULL))));  else{
       String base_name = _base_name(base);  String lowered = Type_is_bare_typedef_name(participant) ? String_lower(Var_str(List_car(Type_list(participant)))) : participant_repr;  String forward = String_truth(base_name) ? String_join(NULL, cons(String_var(participant_repr), cons(String_var(_515), cons(String_var(String_lower(base_name)), NULL)))) : NULL;  Type forward_type = String_truth(forward) && String_truth(base_name) ? _declared(compiler, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(participant)))), cons(String_var(_184), cons(String_var(String_lower(base_name)), NULL))))) : NULL;  if(String_truth(base_name) && ! _exact_conversion(forward_type, participant, base)) detail = String_join(NULL, cons(String_var(prefix), cons(String_var(_530), cons(String_var(forward), cons(String_var(_503), NULL)))));  else detail = String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_531), cons(String_var(base_repr), cons(String_var(_515), cons(String_var(lowered), cons(String_var(_532), NULL))))))), String_join(NULL, cons(String_var(_533), cons(String_var(base_repr), cons(String_var(_517), cons(String_var(lowered), cons(String_var(_503), NULL)))))));
     }

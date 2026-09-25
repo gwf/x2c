@@ -949,7 +949,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
                 continue;
               }
               int angle = 0, visibility = _visibility_pragma(token -> text);
-              String target = hidden ? NULL : preproc_include_target(token -> text, & angle);
+              String target = hidden ? NULL : preproc_include_target(token -> text, &(angle));
               if(! String_truth(target) && visibility < 0) continue;
               _flush_segment(c, path, text, String_getslice(text, segment_position, token -> pos, 1), segment_line, segment_position, globs, parts, definitions, dependencies, private, & linkage);
               if(String_truth(target)){

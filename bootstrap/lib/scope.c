@@ -142,13 +142,13 @@ static void * _raw_realloc(void * ptr, size_t size){
 
 static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   if(! items){
-    items = _raw_malloc(16 * size);  * capacity = 16;
+    items = _raw_malloc(16 * size); (* capacity) = 16;
   }
-  else if(count == * capacity){
-    if(* capacity > INT_MAX / 2){
+  else if(count ==(* capacity)){
+    if((* capacity) > INT_MAX / 2){
       static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/scope.x",.function = "_raw_grow",.line = 188};  x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 0);  __builtin_unreachable();
     }
-    items = _raw_realloc(items, * capacity * 2 * size);  * capacity *= 2;
+    items = _raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
   return items;
 }
@@ -204,7 +204,7 @@ static void _unregister_name(Scope scope){
 }
 
 static void _record_retain(Scope scope, Scope * slot){
-  ScopeThreadState state = _thread();  state -> retains = _raw_grow(state -> retains, state -> retain_count, & state -> retain_capacity, sizeof(* state -> retains));  state -> retains[state -> retain_count ++] =(ScopeRetain){
+  ScopeThreadState state = _thread();  state -> retains = _raw_grow(state -> retains, state -> retain_count, &(state -> retain_capacity), sizeof(* state -> retains));  state -> retains[state -> retain_count ++] =(ScopeRetain){
     .scope = scope, .slot = slot
   }
   ;
@@ -338,14 +338,14 @@ void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
     static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 589};  x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);  __builtin_unreachable();
   }
-  hooks = _raw_grow(hooks, hook_count, & hook_capacity, sizeof(* hooks));  hooks[hook_count ++] = hook;
+  hooks = _raw_grow(hooks, hook_count, &(hook_capacity), sizeof(* hooks));  hooks[hook_count ++] = hook;
 }
 
 void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! scope){
     static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 625};  x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 0);  __builtin_unreachable();
   }
-  ScopeThreadState state = _thread();  state -> stack = _raw_grow(state -> stack, state -> stack_size, & state -> stack_capacity, sizeof(* state -> stack));  state -> active = state -> stack[state -> stack_size ++] = scope;
+  ScopeThreadState state = _thread();  state -> stack = _raw_grow(state -> stack, state -> stack_size, &(state -> stack_capacity), sizeof(* state -> stack));  state -> active = state -> stack[state -> stack_size ++] = scope;
 }
 
 Scope * Scope_top(void){
