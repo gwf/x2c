@@ -62,6 +62,7 @@ execution.
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
+| [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
 Production promotion remains separately authorized under the release workflow.
