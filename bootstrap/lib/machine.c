@@ -4,6 +4,14 @@
 
 #include "error.h"
 
+#include "exception.h"
+
+static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
 #include <string.h>
 #include "scope.h"
 #include "exception.h"
@@ -13,6 +21,434 @@ static int MachineBuilder__grow_code(MachineBuilder b);
 
 static size_t _program_bytes(int length, int const_count, int binder_count);
 
+static inline String _x2c_proto_machinebuilder_str_0(Var a0);
+
+static inline String _x2c_proto_machinebuilder_repr_0(Var a0);
+
+static inline Buffer _x2c_proto_machinebuilder_write_str_0(Var a0, Buffer a1);
+
+static inline Buffer _x2c_proto_machinebuilder_write_repr_0(Var a0, Buffer a1);
+
+static inline unsigned _x2c_proto_machinebuilder_hash_0(Var a0);
+
+static inline int _x2c_proto_machinebuilder_equal_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+static inline String _x2c_proto_machineprogram_str_0(Var a0);
+
+static inline String _x2c_proto_machineprogram_repr_0(Var a0);
+
+static inline Buffer _x2c_proto_machineprogram_write_str_0(Var a0, Buffer a1);
+
+static inline Buffer _x2c_proto_machineprogram_write_repr_0(Var a0, Buffer a1);
+
+static inline unsigned _x2c_proto_machineprogram_hash_0(Var a0);
+
+static inline int _x2c_proto_machineprogram_equal_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_1;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_4;
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_5;
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c__x2c_protocol_methods_0 =(VarMethods){
+    .str = _x2c_proto_machinebuilder_str_0, .repr = _x2c_proto_machinebuilder_repr_0, .write_str = _x2c_proto_machinebuilder_write_str_0, .write_repr = _x2c_proto_machinebuilder_write_repr_0, .hash = _x2c_proto_machinebuilder_hash_0, .equal = _x2c_proto_machinebuilder_equal_0
+  }
+  ;
+  x2c_register_tagged_descriptor(254542554242, String_new("MachineBuilder"), _x2c__x2c_protocol_methods_0);
+  _x2c__x2c_protocol_methods_1 =(VarMethods){
+    .str = _x2c_proto_machineprogram_str_0, .repr = _x2c_proto_machineprogram_repr_0, .write_str = _x2c_proto_machineprogram_write_str_0, .write_repr = _x2c_proto_machineprogram_write_repr_0, .hash = _x2c_proto_machineprogram_hash_0, .equal = _x2c_proto_machineprogram_equal_0
+  }
+  ;
+  x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_1);
+  _0 = String_new("<MachineProgram: 0x%012lX>");
+  _1 = String_new("MachineProgram { ");
+  _2 = String_new("length: ");
+  _3 = String_new(", ");
+  _4 = String_new("const_count: ");
+  _5 = String_new("binder_count: ");
+  _6 = String_new("root: ");
+  _7 = String_new(" }");
+  _8 = String_new("<MachineBuilder: 0x%012lX>");
+  _9 = String_new("MachineBuilder { ");
+  _10 = String_new("code: ");
+  _11 = String_new("<opaque: 0x%012lX>");
+  _12 = String_new("consts: ");
+  _13 = String_new("binders: ");
+  _14 = String_new("code_capacity: ");
+  _15 = String_new("const_capacity: ");
+  _16 = String_new("status: ");
+  _17 = String_new("reason: ");
+}
+
+void * Scope_memdup(const void *, size_t);
+
+MachineProgram MachineProgram_new(int field_length, int field_const_count, int field_binder_count, int field_root){
+  struct MachineProgram value ={
+    field_length, field_const_count, field_binder_count, field_root
+  }
+  ;
+  return Scope_memdup(& value, sizeof(value));
+}
+
+void * Scope_calloc(size_t, size_t);
+
+MachineProgram MachineProgram_alloc(){
+  MachineProgram value = Scope_calloc(1, sizeof(* value));
+  return value;
+}
+
+void Scope_free(void *);
+
+void MachineProgram_free(MachineProgram value){
+  Scope_free(value);
+}
+
+void MachineProgram_cleanup(MachineProgram value){
+  MachineProgram_free(value);
+}
+
+Var Var_new(Symbol, ...);
+
+Var MachineProgram_var(MachineProgram value){
+  return Var_new(230845831880, value);
+}
+
+void * Var_pointer(Var);
+
+MachineProgram Var_machineprogram(Var value){
+  return(MachineProgram) Var_pointer(value);
+}
+
+int MachineProgram_equal(MachineProgram left, MachineProgram right){
+  return(void *) left ==(void *) right;
+}
+
+unsigned x2c_hash_word(unsigned long);
+
+unsigned MachineProgram_hash(MachineProgram value){
+  return x2c_hash_word((unsigned long) value);
+}
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+Buffer MachineProgram_write_str(MachineProgram value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  return Buffer_printf(out, _0, (long) value);
+}
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str(Buffer);
+
+String MachineProgram_str(MachineProgram value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_6
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    MachineProgram_write_str(value, out);
+    {
+      String _x2c_return_value_0 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+}
+
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Var_write_repr(Var, Buffer);
+
+Var int_var(int);
+
+Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  {
+  _x2c_defer_env_1 _x2c_defer_env_7 = {._x2c_defer_capture_1 =(const void *) & path};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_7
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    Buffer_write(out, _1);
+    Buffer_write(out, _2);
+    Var_write_repr(int_var(value -> length), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _4);
+    Var_write_repr(int_var(value -> const_count), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _5);
+    Var_write_repr(int_var(value -> binder_count), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _6);
+    Var_write_repr(int_var(value -> root), out);
+    {
+      Buffer _x2c_return_value_1 = Buffer_write(out, _7);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+}
+}
+
+String MachineProgram_repr(MachineProgram value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_2 _x2c_defer_env_8 = {._x2c_defer_capture_2 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_8
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    MachineProgram_write_repr(value, out);
+    {
+      String _x2c_return_value_2 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
+
+}
+}
+
+MachineBuilder MachineBuilder_new(){
+  MachineBuilder value = MachineBuilder_alloc();
+  MachineBuilder_init(value);
+  return value;
+}
+
+MachineBuilder MachineBuilder_alloc(){
+  MachineBuilder value = Scope_calloc(1, sizeof(* value));
+  return value;
+}
+
+void MachineBuilder_free(MachineBuilder value){
+  if(value) MachineBuilder_drop(value);
+  Scope_free(value);
+}
+
+void MachineBuilder_cleanup(MachineBuilder value){
+  MachineBuilder_free(value);
+}
+
+Var MachineBuilder_var(MachineBuilder value){
+  return Var_new(254542554242, value);
+}
+
+MachineBuilder Var_machinebuilder(Var value){
+  return(MachineBuilder) Var_pointer(value);
+}
+
+int MachineBuilder_equal(MachineBuilder left, MachineBuilder right){
+  return(void *) left ==(void *) right;
+}
+
+unsigned MachineBuilder_hash(MachineBuilder value){
+  return x2c_hash_word((unsigned long) value);
+}
+
+Buffer MachineBuilder_write_str(MachineBuilder value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  return Buffer_printf(out, _8, (long) value);
+}
+
+String MachineBuilder_str(MachineBuilder value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_3 _x2c_defer_env_9 = {._x2c_defer_capture_3 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_9
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+    MachineBuilder_write_str(value, out);
+    {
+      String _x2c_return_value_3 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_3;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
+
+}
+}
+
+Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _8, (long) value);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _8, (long) value);
+  {
+  _x2c_defer_env_4 _x2c_defer_env_10 = {._x2c_defer_capture_4 =(const void *) & path};
+
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = & _x2c_defer_env_10
+  };
+  x2c_cleanup_push(&_x2c_defer_record_4);
+  {
+    Buffer_write(out, _9);
+    Buffer_write(out, _10);
+    Buffer_printf(out, _11, (long) value -> code);
+    Buffer_write(out, _3);
+    Buffer_write(out, _12);
+    Buffer_printf(out, _11, (long) value -> consts);
+    Buffer_write(out, _3);
+    Buffer_write(out, _13);
+    Buffer_printf(out, _11, (long) value -> binders);
+    Buffer_write(out, _3);
+    Buffer_write(out, _2);
+    Var_write_repr(int_var(value -> length), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _14);
+    Var_write_repr(int_var(value -> code_capacity), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _4);
+    Var_write_repr(int_var(value -> const_count), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _15);
+    Var_write_repr(int_var(value -> const_capacity), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _5);
+    Var_write_repr(int_var(value -> binder_count), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _6);
+    Var_write_repr(int_var(value -> root), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _16);
+    Var_write_repr(Var_new(3453797, value -> status), out);
+    Buffer_write(out, _3);
+    Buffer_write(out, _17);
+    Buffer_printf(out, _11, (long) value -> reason);
+    {
+      Buffer _x2c_return_value_4 = Buffer_write(out, _7);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+        return _x2c_return_value_4;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
+
+}
+}
+
+String MachineBuilder_repr(MachineBuilder value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_5 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_5 = {
+    .fn = _x2c_defer_cleanup_5,
+    .env = & _x2c_defer_env_11
+  };
+  x2c_cleanup_push(&_x2c_defer_record_5);
+  {
+    MachineBuilder_write_repr(value, out);
+    {
+      String _x2c_return_value_5 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_5);
+        return _x2c_return_value_5;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
+
+}
+}
+
 static int MachineBuilder__fail(MachineBuilder b, const char * reason){
   if(b -> status == MACHINE_PREPARED){
     b -> status = MACHINE_INELIGIBLE;
@@ -21,23 +457,15 @@ static int MachineBuilder__fail(MachineBuilder b, const char * reason){
   return - 1;
 }
 
-void * Scope_calloc(size_t, size_t);
-
-MachineBuilder MachineBuilder_new(void){
-  MachineBuilder b = Scope_calloc(1, sizeof(struct MachineBuilder));
+void MachineBuilder_init(MachineBuilder b){
   b -> status = MACHINE_PREPARED;
   b -> reason = "prepared";
   b -> root = - 1;
-  return b;
 }
 
-void Scope_free(void *);
-
-void MachineBuilder_free(MachineBuilder b){
-  if(! b) return;
-  if(b -> code) Scope_free(b -> code);
-  if(b -> consts) Scope_free(b -> consts);
-  Scope_free(b);
+void MachineBuilder_drop(MachineBuilder b){
+  Scope_free(b -> code);
+  Scope_free(b -> consts);
 }
 
 void * Scope_realloc(void *, size_t);
@@ -91,11 +519,9 @@ Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-Var int_var(int);
-
 void MachineBuilder_set_target(MachineBuilder b, int site, int target){
   if(target < 0 || target >= MACHINE_CODE_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 475};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 469};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL))), Symbol_var(1345468776), int_var(target));
     __builtin_unreachable();
   }
@@ -153,11 +579,85 @@ MachineProgram MachineBuilder_freeze(MachineBuilder b){
   return program;
 }
 
-void MachineProgram_free(MachineProgram program){
-  if(program) Scope_free(program);
+static inline String _x2c_proto_machinebuilder_str_0(Var a0){
+  return MachineBuilder_str(Var_machinebuilder(a0));
 }
 
-void MachineBuilder_cleanup(MachineBuilder value){
-  MachineBuilder_free(value);
+static inline String _x2c_proto_machinebuilder_repr_0(Var a0){
+  return MachineBuilder_repr(Var_machinebuilder(a0));
+}
+
+static inline Buffer _x2c_proto_machinebuilder_write_str_0(Var a0, Buffer a1){
+  return MachineBuilder_write_str(Var_machinebuilder(a0), a1);
+}
+
+static inline Buffer _x2c_proto_machinebuilder_write_repr_0(Var a0, Buffer a1){
+  return MachineBuilder_write_repr(Var_machinebuilder(a0), a1);
+}
+
+static inline unsigned _x2c_proto_machinebuilder_hash_0(Var a0){
+  return MachineBuilder_hash(Var_machinebuilder(a0));
+}
+
+static inline int _x2c_proto_machinebuilder_equal_0(Var a0, Var a1){
+  return MachineBuilder_equal(Var_machinebuilder(a0), Var_machinebuilder(a1));
+}
+
+static inline String _x2c_proto_machineprogram_str_0(Var a0){
+  return MachineProgram_str(Var_machineprogram(a0));
+}
+
+static inline String _x2c_proto_machineprogram_repr_0(Var a0){
+  return MachineProgram_repr(Var_machineprogram(a0));
+}
+
+static inline Buffer _x2c_proto_machineprogram_write_str_0(Var a0, Buffer a1){
+  return MachineProgram_write_str(Var_machineprogram(a0), a1);
+}
+
+static inline Buffer _x2c_proto_machineprogram_write_repr_0(Var a0, Buffer a1){
+  return MachineProgram_write_repr(Var_machineprogram(a0), a1);
+}
+
+static inline unsigned _x2c_proto_machineprogram_hash_0(Var a0){
+  return MachineProgram_hash(Var_machineprogram(a0));
+}
+
+static inline int _x2c_proto_machineprogram_equal_0(Var a0, Var a1){
+  return MachineProgram_equal(Var_machineprogram(a0), Var_machineprogram(a1));
+}
+
+void Buffer_free(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+void RenderPath_leave(RenderPath *);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  Buffer_free((*(Buffer *) _x2c_defer_data_3->_x2c_defer_capture_3));
+}
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_4->_x2c_defer_capture_4)));
+}
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
+  Buffer_free((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 

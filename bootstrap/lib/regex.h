@@ -17,6 +17,8 @@ typedef struct Regex{
 }
 * Regex;
 
+Regex Regex_alloc();
+
 void Regex_free(Regex value);
 
 void Regex_cleanup(Regex value);
@@ -36,6 +38,8 @@ String Regex_str(Regex value);
 Buffer Regex_write_repr(Regex value, Buffer out);
 
 String Regex_repr(Regex value);
+
+Regex Var_regex(Var value);
 
 typedef List RegexCapture;
 

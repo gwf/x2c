@@ -13,22 +13,22 @@
 #pragma once
 #include "x2c.x"
 
-/* Holds one scope-owned, one-shot tokenization and its traversal cursor.
-   `text` is borrowed through `Tokenizer.scan`; tokens and modes remain live
-   until their owning Scope is released. A nonzero `layout` selects the
-   indentation syntax; `#pragma indent` before the first line of code sets
-   it during the scan. */
-typedef struct Tokenizer {
-  Bytes tokens, char *text, Array modes, struct Token *cursor;
-  Symbol scan_status, int line, col, pos, layout;
-} *Tokenizer;
-
 /* Describes one token in Tokenizer-owned contiguous storage.
    A Token pointer is borrowed and stable only after scanning finishes. Its
    text is a canonical copy whose String pool controls its lifetime. */
 typedef struct Token {
   String text, Symbol type, int line, col, len, pos;
 } *Token;
+
+/* Holds one scope-owned, one-shot tokenization and its traversal cursor.
+   `text` is borrowed through `Tokenizer.scan`; tokens and modes remain live
+   until their owning Scope is released. A nonzero `layout` selects the
+   indentation syntax; `#pragma indent` before the first line of code sets
+   it during the scan. */
+class Tokenizer struct {
+  Bytes tokens, char *text, Array modes, struct Token *cursor;
+  Symbol scan_status, int line, col, pos, layout;
+} *;
 
 #pragma private
 #include "exception.x"
@@ -68,30 +68,19 @@ String Token.repr(Token token) {
   return %"$head, $location, $extent}}";
 }
 
-/* Returns a scope-owned Tokenizer in x2c source mode.
-   It borrows `text` through `Tokenizer.scan`; null denotes empty input.
-   Raises: `<alloc-fail>` while creating internal storage. */
-Tokenizer Tokenizer.new(char *text) => Tokenizer.new_mode(text, <x2c>);
-
-/* Returns a scope-owned Tokenizer starting in `mode`.
+/* Prepares a scope-owned Tokenizer starting in `mode`.
    It borrows `text` through `Tokenizer.scan`; null denotes empty input. The
-   caller selects a mode understood by the scan driver.
+   caller selects a mode understood by the scan driver, such as `<x2c>`.
    Raises: `<alloc-fail>` while creating internal storage. */
-Tokenizer Tokenizer.new_mode(char *text, Symbol mode) {
-  Tokenizer tokenizer = Scope.malloc(sizeof(struct Tokenizer));
+void Tokenizer.init(Tokenizer tokenizer, char *text, Symbol mode) {
   /* Empty String is a null pointer, but scanning always dereferences text.
      Use an addressable empty buffer so the first step reaches end-of-file. */
   tokenizer.text = text ? text : "";
-  tokenizer.pos = 0;
   tokenizer.line = 1;
   tokenizer.col = 1;
-  tokenizer.cursor = NULL;
   tokenizer.scan_status = <ok>;
-  tokenizer.layout = 0;
-  tokenizer.modes = [];
-  tokenizer.modes.push(mode);
+  tokenizer.modes = [mode];
   tokenizer.tokens = Bytes.new(sizeof(struct Token));
-  return tokenizer;
 }
 
 // mode stack

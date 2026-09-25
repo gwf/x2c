@@ -2415,6 +2415,9 @@ List Compiler.bind_syntax(
                ?body ?construction): {
         if (context != AST_UNIT) goto construction_error;
         if (_.shallow) return input;
+        match (declarator) case %(bind ?binding *):
+          _.semantic_binding_facts()[
+            %(declaration-default ${binding_identity_spelling(binding)})] = 1;
         $let(_.macro_stack, _.thaw_declaration_syntax(construction)) {
           return _.bind_syntax(
             %(function $return_type $declarator $body),

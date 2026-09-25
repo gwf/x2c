@@ -17,6 +17,8 @@ typedef struct Job{
 }
 * Job;
 
+Job Job_alloc();
+
 void Job_free(Job value);
 
 Var Job_var(Job value);
@@ -34,6 +36,15 @@ String Job_str(Job value);
 Buffer Job_write_repr(Job value, Buffer out);
 
 String Job_repr(Job value);
+
+Job Var_job(Var value);
+
+Var Job_var(Job job);
+
+typedef enum Env{
+  ENV_NAMESPACE
+}
+Env;
 
 Job List_job(List command);
 

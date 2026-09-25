@@ -425,7 +425,7 @@ static void _file(
     /* Scanned tokens place directives outside strings and comments. A
        segment ends before an include or a visibility pragma, and the next
        begins after it. */
-    Tokenizer tokenizer = Tokenizer.new(text);
+    Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
     tokenizer.layout = x2c_layout_file(path);
     tokenizer.scan();
     /* Every segment parses in the syntax the whole file selected. */

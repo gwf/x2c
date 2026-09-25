@@ -14,6 +14,8 @@ typedef struct SourceView{
 
 SourceView SourceView_new();
 
+SourceView SourceView_alloc();
+
 void SourceView_free(SourceView value);
 
 void SourceView_cleanup(SourceView value);

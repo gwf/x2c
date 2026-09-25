@@ -20,7 +20,8 @@ A source file whose first line begins with `#!` is a
 `#pragma private` marks the start of implementation-only content. Declarations
 before it may be emitted to the generated header. A function definition also
 begins source-private output, except that a typedef after it still belongs
-to the header when a later public prototype names it. Every translated header
+to the header when a later public prototype names it. Functions that a class
+or another declaration producer generates do not begin it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
@@ -1906,8 +1907,11 @@ Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
 An aggregate class that defines `void T.init(T *, ...)` for a value or
-`void T.init(T, ...)` for a heap pointer gets a `new` taking the parameters
-after the receiver; it calls `init` on zero-initialized storage. Otherwise
+`void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer gets a `new`
+taking the parameters after the receiver; it calls `init` on zero-initialized
+storage, which a heap class obtains from its replaceable `T.alloc`. A zero
+result from an `int` initializer releases that storage and makes `new`
+return NULL. Otherwise
 flat value fields produce positional constructors in declaration order, with
 unnamed bitfield padding omitted, and non-flat or resource-containing
 aggregates require `init`. Heap defaults allocate through Scope and provide
@@ -1919,8 +1923,8 @@ operations, generated for supported value fields.
 
 `str` and `repr` are independently replaceable. Aggregate value str delegates
 to repr; heap str prints identity. Generated repr traverses printable fields
-and uses addresses for opaque pointers. Repeated identities on the active
-rendering path print their pointer form. Descriptor registration retains the
+and uses addresses for opaque pointers and fixed arrays. Repeated identities
+on the active rendering path print their pointer form. Descriptor registration retains the
 runtime's fixed capacity and worker-start freeze rules.
 
 ### Managed-initializer syntax

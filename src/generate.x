@@ -621,15 +621,18 @@ static List _header_and_source(Compiler compiler, List ast) {
       case %(function (!set ?type (*)) ?declarator
              (!set ?body (block *))): {
         Type function_type = type;
+        int generated = 0;
         match (declarator) case %(bind ?binding *): {
+          Map facts = compiler.semantic_binding_facts();
           Var attributes;
-          if (compiler.semantic_binding_facts().try_get(
-                %(attributes $binding), &attributes))
+          if (facts.try_get(%(attributes $binding), &attributes))
             function_type = %( @{attributes.list()} @function_type );
+          generated = facts.contains(
+            %(declaration-default ${binding_identity_spelling(binding)}));
         }
         _partition_function(
           header, source, function_type, declarator, body, forwarded);
-        private = 1;
+        if (!generated) private = 1;
         continue;
       }
       case %(!set ?declaration

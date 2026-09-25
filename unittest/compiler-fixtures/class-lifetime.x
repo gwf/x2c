@@ -1,6 +1,6 @@
 #include <assert.h>
 
-static int frees, inits, fail_init, drops;
+static int frees, inits, fail_init, drops, allocs;
 class Item struct { Array values; } *;
 Item Item.new(int value) {
   if (value < 0) raise %(make-fail);
@@ -28,6 +28,15 @@ void Sized.init(Sized sized, int limit, int first) {
 void Sized.drop(Sized sized) {
   drops++;
   sized.values.free();
+}
+class Guarded struct { int level; } *;
+Guarded Guarded.alloc(void) {
+  allocs++;
+  return Scope.calloc(1, sizeof(struct Guarded));
+}
+int Guarded.init(Guarded guarded, int level) {
+  guarded.level = level;
+  return level >= 0;
 }
 class Scaled { int x; int y; };
 void Scaled.init(Scaled *scaled, int x) {
@@ -79,6 +88,12 @@ int main(void) {
     none.free();
   }
   assert(drops == 1);
+  $scope() {
+    size_t live = Scope.stats().live_allocations;
+    assert(Guarded.new(-1) == NULL);
+    assert(Scope.stats().live_allocations == live);
+    assert(Guarded.new(5).level == 5 && allocs == 2);
+  }
   Scaled scaled = Scaled.new(3);
   assert(scaled.x == 3 && scaled.y == 6);
   fail_init = 1;

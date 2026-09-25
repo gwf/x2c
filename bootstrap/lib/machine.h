@@ -70,21 +70,6 @@ typedef struct MachineView{
 }
 MachineView;
 
-typedef struct MachineProgram{
-  int length, const_count, binder_count, root;
-}
-* MachineProgram;
-
-typedef struct MachineBuilder{
-  MachineWord * code;
-  Var * consts;
-  Atom binders[MACHINE_BINDER_MAX];
-  int length, code_capacity, const_count, const_capacity, binder_count, root;
-  MachinePrepare status;
-  const char * reason;
-}
-* MachineBuilder;
-
 typedef struct MachineSpan{
   List begin, end;
   int length;
@@ -175,6 +160,69 @@ typedef struct LispMachine{
 }
 * LispMachine;
 
+typedef struct MachineProgram{
+  int length, const_count, binder_count, root;
+}
+* MachineProgram;
+
+MachineProgram MachineProgram_new(int field_length, int field_const_count, int field_binder_count, int field_root);
+
+MachineProgram MachineProgram_alloc();
+
+void MachineProgram_free(MachineProgram value);
+
+void MachineProgram_cleanup(MachineProgram value);
+
+Var MachineProgram_var(MachineProgram value);
+
+MachineProgram Var_machineprogram(Var value);
+
+int MachineProgram_equal(MachineProgram left, MachineProgram right);
+
+unsigned MachineProgram_hash(MachineProgram value);
+
+Buffer MachineProgram_write_str(MachineProgram value, Buffer out);
+
+String MachineProgram_str(MachineProgram value);
+
+Buffer MachineProgram_write_repr(MachineProgram value, Buffer out);
+
+String MachineProgram_repr(MachineProgram value);
+
+typedef struct MachineBuilder{
+  MachineWord * code;
+  Var * consts;
+  Atom binders[MACHINE_BINDER_MAX];
+  int length, code_capacity, const_count, const_capacity, binder_count, root;
+  MachinePrepare status;
+  const char * reason;
+}
+* MachineBuilder;
+
+MachineBuilder MachineBuilder_new();
+
+MachineBuilder MachineBuilder_alloc();
+
+void MachineBuilder_free(MachineBuilder value);
+
+void MachineBuilder_cleanup(MachineBuilder value);
+
+Var MachineBuilder_var(MachineBuilder value);
+
+MachineBuilder Var_machinebuilder(Var value);
+
+int MachineBuilder_equal(MachineBuilder left, MachineBuilder right);
+
+unsigned MachineBuilder_hash(MachineBuilder value);
+
+Buffer MachineBuilder_write_str(MachineBuilder value, Buffer out);
+
+String MachineBuilder_str(MachineBuilder value);
+
+Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out);
+
+String MachineBuilder_repr(MachineBuilder value);
+
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
   List expected, end = NULL;
@@ -220,9 +268,9 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
   return length == slot -> span.length && List_equal(expected, slot -> span.end) && ! List_truth(candidate);
 }
 
-MachineBuilder MachineBuilder_new(void);
+void MachineBuilder_init(MachineBuilder b);
 
-void MachineBuilder_free(MachineBuilder b);
+void MachineBuilder_drop(MachineBuilder b);
 
 int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target);
 
@@ -241,10 +289,6 @@ MachineView MachineProgram_view(MachineProgram program);
 size_t MachineProgram_bytes(MachineProgram program);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder b);
-
-void MachineProgram_free(MachineProgram program);
-
-void MachineBuilder_cleanup(MachineBuilder value);
 
 
 #endif /* __GUARD_0x857C07E7__ */

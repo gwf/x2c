@@ -871,7 +871,7 @@ void Compiler_record_generated_symbol(Compiler c, String name, Type signature){
   if((void *) contribution == NULL) return;  List key = cons(String_var(name), NULL), marker_key = cons(_49, cons(String_var(name), NULL));  List marker = _51;  _require_retained(List_try_own(key));  _require_retained(List_try_own(marker_key));  _require_retained(List_try_own(marker));  _require_retained(List_try_own(Type_list(signature)));  Map_setindex(contribution, List_var(key), List_var(signature));  Map_setindex(contribution, List_var(marker_key), List_var(marker));
 }
 
-Tokenizer Tokenizer_new(char *);
+Tokenizer Tokenizer_new(char *, Symbol);
 int x2c_layout_file(String);
 void Tokenizer_scan(Tokenizer);
 Symbol preproc_conditional_kind(String);
@@ -908,7 +908,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
   {
           int hidden = 0;
           String content_hash = String_printf(_47, String_hash(text));
-          Tokenizer tokenizer = Tokenizer_new(text);
+          Tokenizer tokenizer = Tokenizer_new(text, 3945159);
           tokenizer -> layout = x2c_layout_file(path);
           Tokenizer_scan(tokenizer);
           int enclosing_layout = c -> layout;

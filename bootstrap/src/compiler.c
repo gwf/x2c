@@ -1441,7 +1441,7 @@ static int _never_defined(String name){
 
 }
 
-Tokenizer Tokenizer_new(char *);
+Tokenizer Tokenizer_new(char *, Symbol);
 
 String preproc_directive(String);
 
@@ -1457,7 +1457,7 @@ int String_contains(String, String);
 
 Symbol preproc_never_active_arm(String s){
   if(! _init_guard_) _file_init_();
-  Tokenizer scanned = Tokenizer_new(preproc_directive(s));
+  Tokenizer scanned = Tokenizer_new(preproc_directive(s), 3945159);
   Tokenizer_scan(scanned);
   Array words = Array_new();
   for(Token t = _skip_forward(scanned -> tokens);  t -> type != 11212;  t = _skip_forward(t + 1)) Array_push(words, _never_defined(t -> text) ? String_var(_700) : String_var(t -> text));
@@ -1511,7 +1511,7 @@ static Token _macro_directive(String content, int * undefined){
   String directive = preproc_directive(content);
   (* undefined) = String_startswith(directive, _705);
   if(!(* undefined) && ! String_startswith(directive, _706)) return NULL;
-  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _705 : _706));
+  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _705 : _706), 3945159);
   Tokenizer_scan(scanned);
   Token token = _skip_forward(scanned -> tokens);
   return token -> type == 19147688 ? token : NULL;
@@ -1694,7 +1694,7 @@ void Compiler_tokenize(Compiler c, char * text){
   if(c -> unit_script && String_truth(c -> filename) &&(String_equal(c -> filename, c -> unit_script -> path) || String_equal(Path_absolute(c -> filename), c -> unit_script -> path))) c -> script = c -> unit_script;
   c -> input_boundary = NULL;
   c -> text = String_new(text);
-  c -> tokenizer = Tokenizer_new(c -> text);
+  c -> tokenizer = Tokenizer_new(c -> text, 3945159);
   c -> tokenizer -> layout = c -> layout || x2c_layout_file(c -> filename);
   Tokenizer_scan(c -> tokenizer);
   c -> layout = c -> tokenizer -> layout;
@@ -3140,7 +3140,7 @@ if(! Map_len(locals)) return; {
 Bytes Bytes_new(size_t);
 Bytes Bytes_append(Bytes, const void *, size_t);
 static void _append_script_main(Compiler c, Array statements){
-  Token tokens = c -> tokenizer -> tokens, eof = c -> token;  long kept = _skip_backward(eof - 1, tokens) + 1 - tokens;  Token first = tokens + Var_integer(Array_getindex(statements, 0));  Bytes stream = Bytes_new(sizeof(struct Token));  stream = Bytes_append(stream, tokens, kept);  Tokenizer template = Tokenizer_new((char *) script_main);  Tokenizer_scan(template);  for(Token token = template -> tokens;  token -> type != 11212;  token ++){
+  Token tokens = c -> tokenizer -> tokens, eof = c -> token;  long kept = _skip_backward(eof - 1, tokens) + 1 - tokens;  Token first = tokens + Var_integer(Array_getindex(statements, 0));  Bytes stream = Bytes_new(sizeof(struct Token));  stream = Bytes_append(stream, tokens, kept);  Tokenizer template = Tokenizer_new((char *) script_main, 3945159);  Tokenizer_scan(template);  for(Token token = template -> tokens;  token -> type != 11212;  token ++){
     if(String_equal(token -> text, _418)){
       for(int i = 0;  i < Array_len(statements);  i += 2){
         long start = Var_long(Var_convert(Array_getindex(statements, i), 818062));  long end = Var_long(Var_convert(Array_getindex(statements, i + 1), 818062));  stream = Bytes_append(stream, tokens + start, end - start);

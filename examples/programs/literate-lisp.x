@@ -497,7 +497,7 @@ static Var Reader._form(Reader *self, Token token) {
 static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   Reader reader = { .source = source, .base = base };                           // Named struct initializers.
   $scope(storage) {                                                             // Redirect Scope; restore on exit.
-    reader.tokens = Tokenizer.new_mode(                                         // Ordinary runtime tokenizer.
+    reader.tokens = Tokenizer.new(                                              // Ordinary runtime tokenizer.
       source ? source + base : NULL, <lisp>);                                   // C pointer offset; Symbol mode.
     reader.tokens.scan();                                                       // Receiver-style function call.
   }

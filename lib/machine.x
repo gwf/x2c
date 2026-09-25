@@ -176,27 +176,6 @@ typedef struct MachineView {
   const Atom *binders, int length, const_count, binder_count, root;
 } MachineView;
 
-/* Owns an exact-sized immutable frozen wordcode program.
-
-    One allocation holds this header followed by aligned code, constant, and
-    binder sections. The copied Var and Atom bits do not own their pointees.
-    The program contains no execution state and never changes after freeze. */
-typedef struct MachineProgram {
-  int length, const_count, binder_count, root;
-} *MachineProgram;
-
-/* Accumulates a mutable program in the active Scope.
-
-    The first ineligibility reason is sticky. Constants and binders are
-    shallow values whose pointees must outlive any frozen program. */
-typedef struct MachineBuilder {
-  MachineWord *code;
-  Var *consts;
-  Atom binders[MACHINE_BINDER_MAX];
-  int length, code_capacity, const_count, const_capacity, binder_count, root;
-  MachinePrepare status, const char *reason;
-} *MachineBuilder;
-
 // execution state
 
 /* Borrows the half-open List range from begin to end with its cell count. */
@@ -312,6 +291,27 @@ typedef struct LispMachine {
   Var locals[MACHINE_LOCAL_MAX];
 } *LispMachine;
 
+/* Owns an exact-sized immutable frozen wordcode program.
+
+    One allocation holds this header followed by aligned code, constant, and
+    binder sections. The copied Var and Atom bits do not own their pointees.
+    The program contains no execution state and never changes after freeze. */
+class MachineProgram struct {
+  int length, const_count, binder_count, root;
+} *;
+
+/* Accumulates a mutable program in the active Scope.
+
+    The first ineligibility reason is sticky. Constants and binders are
+    shallow values whose pointees must outlive any frozen program. */
+class MachineBuilder struct {
+  MachineWord *code;
+  Var *consts;
+  Atom binders[MACHINE_BINDER_MAX];
+  int length, code_capacity, const_count, const_capacity, binder_count, root;
+  MachinePrepare status, const char *reason;
+} *;
+
 /* Compares a captured value or span with an exact List prefix.
 
     VALUE slots use language equality and require an exact-length List. SPAN
@@ -370,8 +370,6 @@ inline int MachineSlot.final_equal(
   return length == slot.span.length && expected == slot.span.end && !candidate;
 }
 
-protocol Cleanup(MachineBuilder);
-
 #pragma private
 
 #include <string.h>
@@ -388,22 +386,18 @@ static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
   return -1;
 }
 
-/* Allocate a prepared builder in the active Scope with no root selected. */
-MachineBuilder MachineBuilder.new(void) {
-  MachineBuilder b = Scope.calloc(1, sizeof(struct MachineBuilder));
+/* Prepare a builder in the active Scope with no root selected. */
+void MachineBuilder.init(MachineBuilder b) {
   b.status = MACHINE_PREPARED;
   b.reason = "prepared";
   b.root = -1;
-  return b;
 }
 
-/* Free the builder's mutable arrays and the builder itself. Any builder view
-   becomes invalid; constant and binder pointees are not freed. */
-void MachineBuilder.free(MachineBuilder b) {
-  if (!b) return;
-  if (b.code) Scope.free(b.code);
-  if (b.consts) Scope.free(b.consts);
-  Scope.free(b);
+/* Free the builder's mutable arrays when the builder is freed. Any builder
+   view becomes invalid; constant and binder pointees are not freed. */
+void MachineBuilder.drop(MachineBuilder b) {
+  Scope.free(b.code);
+  Scope.free(b.consts);
 }
 
 static int MachineBuilder._grow_code(MachineBuilder b) {
@@ -545,11 +539,3 @@ MachineProgram MachineBuilder.freeze(MachineBuilder b) {
     memcpy(binders, b.binders, sizeof(Atom) * b.binder_count);
   return program;
 }
-
-/* Free a frozen program and invalidate every view borrowed from it. */
-void MachineProgram.free(MachineProgram program) {
-  if (program) Scope.free(program);
-}
-
-/* Ends the owned lifetime when a managed local leaves its block. */
-void MachineBuilder.cleanup(MachineBuilder value) { value.free(); }

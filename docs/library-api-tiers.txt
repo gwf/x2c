@@ -65,7 +65,7 @@ lib/func.x|internal|x2c_func_declared_reference_argument,x2c_func_reference_type
 lib/func.x|internal|Func.signature
 lib/iter.x|advanced|Iter.init,Iter.unzip
 lib/iter.x|compatibility|Iter.accumulate,Iter.next
-lib/lib.x|advanced|DisjointSet.find,DisjointSet.free,DisjointSet.new
+lib/lib.x|advanced|DisjointSet.drop,DisjointSet.find,DisjointSet.init
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union
 lib/lisp.x|internal|Lisp.immediate,Lisp.expanded,Lisp.evaluate

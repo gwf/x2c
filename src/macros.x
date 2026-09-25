@@ -2177,7 +2177,7 @@ List Compiler.evaluate_meta_expression(Compiler c, List expression, Token site) 
 }
 
 static List _lisp_construction(Compiler compiler, String form) {
-  Tokenizer tokenizer = Tokenizer.new_mode(form, <macro-lisp>);
+  Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
   tokenizer.scan();
   Array construction = [];
   Map seen = {};
@@ -2258,7 +2258,7 @@ static Var _eval_template_form(
     references = cons(%($spelling $temporary), references);
   }
   if (references) {
-    Tokenizer tokenizer = Tokenizer.new_mode(form, <macro-lisp>);
+    Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
     tokenizer.scan();
     Buffer rewritten = $auto(Buffer.new(0));
     int copied = 0;

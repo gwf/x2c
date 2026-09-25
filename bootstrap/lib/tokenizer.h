@@ -6,6 +6,13 @@
 #define __GUARD_0xF0967937__
 
 #include "x2c.h"
+typedef struct Token{
+  String text;
+  Symbol type;
+  int line, col, len, pos;
+}
+* Token;
+
 typedef struct Tokenizer{
   Bytes tokens;
   char * text;
@@ -16,12 +23,29 @@ typedef struct Tokenizer{
 }
 * Tokenizer;
 
-typedef struct Token{
-  String text;
-  Symbol type;
-  int line, col, len, pos;
-}
-* Token;
+Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1);
+
+Tokenizer Tokenizer_alloc();
+
+void Tokenizer_free(Tokenizer value);
+
+void Tokenizer_cleanup(Tokenizer value);
+
+Var Tokenizer_var(Tokenizer value);
+
+Tokenizer Var_tokenizer(Var value);
+
+int Tokenizer_equal(Tokenizer left, Tokenizer right);
+
+unsigned Tokenizer_hash(Tokenizer value);
+
+Buffer Tokenizer_write_str(Tokenizer value, Buffer out);
+
+String Tokenizer_str(Tokenizer value);
+
+Buffer Tokenizer_write_repr(Tokenizer value, Buffer out);
+
+String Tokenizer_repr(Tokenizer value);
 
 static inline Token Var_token(Var x){
   return Var_pointer(x);
@@ -39,9 +63,7 @@ String Token_str(Token token);
 
 String Token_repr(Token token);
 
-Tokenizer Tokenizer_new(char * text);
-
-Tokenizer Tokenizer_new_mode(char * text, Symbol mode);
+void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode);
 
 int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
 

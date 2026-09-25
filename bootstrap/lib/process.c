@@ -12,15 +12,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-Job Var_job(Var value);
-
-Var Job_var(Job job);
-
-typedef enum Env{
-  ENV_NAMESPACE
-}
-Env;
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -184,6 +175,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _23 = String_new("Job.pipe");
   _24 = String_new("Job.output");
   _25 = String_new("Job.errors");
+}
+
+void * Scope_calloc(size_t, size_t);
+
+Job Job_alloc(){
+  Job value = Scope_calloc(1, sizeof(* value));
+  return value;
 }
 
 void Scope_free(void *);
@@ -391,8 +389,6 @@ int Map_contains(Map, Var);
 Var Array_push(Array, Var);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
-
-void * Scope_calloc(size_t, size_t);
 
 int Array_try_next(Array, int *, Var *);
 

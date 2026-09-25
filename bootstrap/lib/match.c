@@ -1701,7 +1701,7 @@ static int _plan_prepared(MatchPlan plan, const char * owner){
 
 void * Scope_malloc(size_t);
 
-MachineBuilder MachineBuilder_new(void);
+MachineBuilder MachineBuilder_new();
 
 MachineProgram MachineBuilder_freeze(MachineBuilder);
 

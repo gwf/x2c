@@ -9,14 +9,23 @@ Disjoint sets with union-find.
 
 | Function | Summary |
 | --- | --- |
+| [`DisjointSet.drop`](#DisjointSet.drop) | Releases the set's arrays when `DisjointSet.free` releases the set. |
 | [`DisjointSet.find`](#DisjointSet.find) | Returns the representative of `x` and compresses its traversed path. |
-| [`DisjointSet.free`](#DisjointSet.free) | Releases a live set and its arrays, invalidating every alias. |
-| [`DisjointSet.new`](#DisjointSet.new) | Creates a union-find over elements `0` through `n - 1`. |
+| [`DisjointSet.init`](#DisjointSet.init) | Creates a union-find over elements `0` through `n - 1`. |
 | [`DisjointSet.num_components`](#DisjointSet.num_components) | Returns the live set's current number of disjoint components. |
 | [`DisjointSet.sizes`](#DisjointSet.sizes) | Returns canonical `(size representative)` rows for the current roots. |
 | [`DisjointSet.union`](#DisjointSet.union) | Merges the components containing `a` and `b` by size. |
 
 ### `DisjointSet`
+
+<a id="DisjointSet.drop"></a>
+#### DisjointSet.drop
+
+`void DisjointSet.drop(DisjointSet set)`
+
+Releases the set's arrays when `DisjointSet.free` releases the set.
+
+Source: `lib/lib.x:43`
 
 <a id="DisjointSet.find"></a>
 #### DisjointSet.find
@@ -26,21 +35,12 @@ Disjoint sets with union-find.
 Returns the representative of `x` and compresses its traversed path.
 `set` must be live and `x` must be between zero and `set.length - 1`.
 
-Source: `lib/lib.x:54`
+Source: `lib/lib.x:51`
 
-<a id="DisjointSet.free"></a>
-#### DisjointSet.free
+<a id="DisjointSet.init"></a>
+#### DisjointSet.init
 
-`void DisjointSet.free(DisjointSet set)`
-
-Releases a live set and its arrays, invalidating every alias.
-
-Source: `lib/lib.x:45`
-
-<a id="DisjointSet.new"></a>
-#### DisjointSet.new
-
-`DisjointSet DisjointSet.new(int n)`
+`void DisjointSet.init(DisjointSet set, int n)`
 
 Creates a union-find over elements `0` through `n - 1`.
 `n` must be nonnegative. The result belongs to the active `Scope` and
@@ -59,7 +59,7 @@ Source: `lib/lib.x:31`
 
 Returns the live set's current number of disjoint components.
 
-Source: `lib/lib.x:96`
+Source: `lib/lib.x:93`
 
 <a id="DisjointSet.sizes"></a>
 #### DisjointSet.sizes
@@ -73,7 +73,7 @@ which may be an ancestor of the active pool.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while collecting or sorting rows.
 
-Source: `lib/lib.x:88`
+Source: `lib/lib.x:85`
 
 <a id="DisjointSet.union"></a>
 #### DisjointSet.union
@@ -85,18 +85,18 @@ Merges the components containing `a` and `b` by size.
 component's root wins unless the sizes tie, when the root of `a` wins.
 Merging an existing component is a no-op.
 
-Source: `lib/lib.x:70`
+Source: `lib/lib.x:67`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`DisjointSet`](#DisjointSet) | struct | Owns a mutable union-find forest over integer elements. |
+| [`DisjointSet`](#DisjointSet) | class | Owns a mutable union-find forest over integer elements. |
 
 <a id="DisjointSet"></a>
 ### DisjointSet
 
-`typedef struct DisjointSet { int *parent, *size, length, ncmpnts; } *DisjointSet`
+`class DisjointSet struct { int *parent, *size, length, ncmpnts; } *`
 
 Owns a mutable union-find forest over integer elements.
 

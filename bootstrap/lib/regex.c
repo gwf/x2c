@@ -16,8 +16,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-Regex Var_regex(Var value);
-
 #include <string.h>
 struct _RegexNode{
   Symbol kind;
@@ -238,6 +236,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _29 = String_new("unmatched closing parenthesis");
 }
 
+void * Scope_calloc(size_t, size_t);
+
+Regex Regex_alloc(){
+  Regex value = Scope_calloc(1, sizeof(* value));
+  return value;
+}
+
 void Scope_free(void *);
 
 void Regex_free(Regex value){
@@ -413,8 +418,6 @@ _Noreturn static void _fail(_Parser * p, String why){
 static int _peek(_Parser * p){
   return(* p).pos <(* p).len ?(unsigned char)(* p).text[(* p).pos] : - 1;
 }
-
-void * Scope_calloc(size_t, size_t);
 
 static _RegexNode _node(Symbol kind){
   _RegexNode node = Scope_calloc(1, sizeof(struct _RegexNode));

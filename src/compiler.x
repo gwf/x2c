@@ -596,7 +596,7 @@ static int _never_defined(String name) {
     or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. Each
     never-defined name reads as `<never>`, which no C token spells. */
 Symbol preproc_never_active_arm(String s) {
-  Tokenizer scanned = Tokenizer.new(preproc_directive(s));
+  Tokenizer scanned = Tokenizer.new(preproc_directive(s), <x2c>);
   scanned.scan();
   Array words = [];
   for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
@@ -663,7 +663,7 @@ static Token _macro_directive(String content, int &undefined) {
   undefined = directive.startswith("undef");
   if (!undefined && !directive.startswith("define")) return NULL;
   Tokenizer scanned = Tokenizer.new(
-    directive.remove_prefix(undefined ? "undef" : "define"));
+    directive.remove_prefix(undefined ? "undef" : "define"), <x2c>);
   scanned.scan();
   Token token = _skip_forward(scanned.tokens);
   return token.type == <ident> ? token : NULL;
@@ -834,7 +834,7 @@ void Compiler.tokenize(Compiler c, char *text) {
     c.script = c.unit_script;
   c.input_boundary = NULL;
   c.text = text;
-  c.tokenizer = Tokenizer.new(c.text);
+  c.tokenizer = Tokenizer.new(c.text, <x2c>);
   c.tokenizer.layout = c.layout || x2c_layout_file(c.filename);
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
@@ -2130,7 +2130,7 @@ static void _append_script_main(Compiler c, Array statements) {
   Token first = tokens + statements[0].integer();
   Bytes stream = Bytes.new(sizeof(struct Token));
   stream = stream.append(tokens, kept);
-  Tokenizer template = Tokenizer.new((char *) script_main);
+  Tokenizer template = Tokenizer.new((char *) script_main, <x2c>);
   template.scan();
   for (Token token = template.tokens; token.type != <eof>; token++) {
     if (token.text == "x2c_script_statements") {

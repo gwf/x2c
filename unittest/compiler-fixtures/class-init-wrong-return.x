@@ -1,3 +1,3 @@
 class Wrong struct { Array items; } *;
-int Wrong.init(Wrong value) { return 1; }
+char *Wrong.init(Wrong value) { return NULL; }
 int main(void) { return 0; }

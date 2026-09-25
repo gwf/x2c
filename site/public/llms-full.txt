@@ -424,7 +424,8 @@ every method.
 
 | Method | Default behavior and applicability |
 | --- | --- |
-| `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init` and calls it on zeroed storage. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
+| `T.alloc` | Returns zeroed Scope storage for a new pointer class with a record representation. Replace it when the object lives elsewhere. |
+| `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init`, calls it on storage from `alloc` (or a zeroed value), and returns the object. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
 | `T.free` | Releases a new pointer class's Scope allocation early. When the class defines `void T.drop(T)`, `free` first calls it on a non-NULL object. `free` accepts NULL. |
 | `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `$auto`. |
 | `T.var` | Converts a new class to `Var`: a scalar uses its underlying representation, a pointer boxes identity, and a value record boxes a Scope-owned copy. |
@@ -498,8 +499,9 @@ Positional fields include native numeric values and enums, Symbol, Var/Atom,
 String, List, and their aliases. Var slots are shallow copies.
 
 A class that defines `init` gets a constructor built from it. The
-constructor zeroes new storage, passes it to `init` with the constructor's
-arguments, and returns it. `init` receives the handle of a heap class, or the
+constructor obtains zeroed storage, passes it to `init` with the
+constructor's arguments, and returns it. A heap class obtains that storage
+from `alloc`, whose default is a zeroed Scope allocation. `init` receives the handle of a heap class, or the
 address of a value record, followed by any parameters it declares; `new`
 takes those parameters in the same order. A record containing a mutable
 handle such as Array, Map, Iter, or another heap class requires `init`, as do
@@ -525,6 +527,12 @@ history.items.push(42);
   return history.limit == 8 ? 0 : 1;
 }
 ```
+
+A heap class's `init` may return `int` instead of `void`. When it returns
+zero, `new` releases the storage with `Scope.free` and returns NULL; `drop` is
+not called, so an `init` that refuses releases whatever it acquired first. A
+class that replaces `alloc` so the object lives outside its Scope allocation
+also replaces `free`.
 
 An explicit `new` replaces the default and may take different arguments. It
 also replaces the default constructor's obligation to call `init`. An explicit
@@ -1151,7 +1159,8 @@ A source file whose first line begins with `#!` is a
 `#pragma private` marks the start of implementation-only content. Declarations
 before it may be emitted to the generated header. A function definition also
 begins source-private output, except that a typedef after it still belongs
-to the header when a later public prototype names it. Every translated header
+to the header when a later public prototype names it. Functions that a class
+or another declaration producer generates do not begin it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
@@ -3037,8 +3046,11 @@ Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
 An aggregate class that defines `void T.init(T *, ...)` for a value or
-`void T.init(T, ...)` for a heap pointer gets a `new` taking the parameters
-after the receiver; it calls `init` on zero-initialized storage. Otherwise
+`void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer gets a `new`
+taking the parameters after the receiver; it calls `init` on zero-initialized
+storage, which a heap class obtains from its replaceable `T.alloc`. A zero
+result from an `int` initializer releases that storage and makes `new`
+return NULL. Otherwise
 flat value fields produce positional constructors in declaration order, with
 unnamed bitfield padding omitted, and non-flat or resource-containing
 aggregates require `init`. Heap defaults allocate through Scope and provide
@@ -3050,8 +3062,8 @@ operations, generated for supported value fields.
 
 `str` and `repr` are independently replaceable. Aggregate value str delegates
 to repr; heap str prints identity. Generated repr traverses printable fields
-and uses addresses for opaque pointers. Repeated identities on the active
-rendering path print their pointer form. Descriptor registration retains the
+and uses addresses for opaque pointers and fixed arrays. Repeated identities
+on the active rendering path print their pointer form. Descriptor registration retains the
 runtime's fixed capacity and worker-start freeze rules.
 
 ### Managed-initializer syntax

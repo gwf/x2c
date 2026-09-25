@@ -303,13 +303,20 @@ List builtin_class_initializer(String owner, Var heap_value) {
     List function = x2c_syntax_type(method).car();
     List declared = function[1];
     List parameters = cons(receiver, declared.cdr());
-    if (x2c_syntax_type(method).equal(%((func $parameters) void))) {
+    int refusable = heap &&
+      x2c_syntax_type(method).equal(%((func $parameters) int));
+    if (refusable ||
+        x2c_syntax_type(method).equal(%((func $parameters) void))) {
       List arguments = %(${heap ? value : builtin_class_op(<&>, %($value))});
       foreach (List parameter, parameters.cdr())
         arguments = cons(builtin_class_ref(
           %"argument_${arguments.len() - 1}"), arguments);
-      return x2c_stmnt_make(builtin_class_call(
-        x2c_binding_spelling(method), arguments.reverse()));
+      List call = builtin_class_call(x2c_binding_spelling(method),
+                                     arguments.reverse());
+      if (!refusable) return x2c_stmnt_make(call);
+      return %(if ${builtin_class_op(<!>, %($call))} (block
+        ${x2c_stmnt_make(builtin_class_call("Scope_free", %($value)))}
+        ${x2c_stmnt_return(x2c_literal_int(0))}));
     }
   }
   String suffix = heap ? ")" : " *)";
@@ -353,9 +360,7 @@ List builtin_class_new(String owner, List representation, int heap,
   List declared = representation;
   if (heap && !positional && aggregate) {
     declared = type;
-    initializer = builtin_class_call("Scope_calloc",
-      %(${x2c_literal_int(1)}
-        ${builtin_class_size(builtin_class_op(<"*">, %($value)))}));
+    initializer = builtin_class_call(%"${owner}_alloc", %());
   }
   List body = %(${builtin_class_declaration(declared, "value", initializer)});
   if (aggregate && !positional) {
@@ -395,17 +400,19 @@ $builtin.emit()
 List builtin_class_field_write(List field) {
   List value = builtin_class_field_value(field);
   List type = field[1];
-  List writer = %();
-  if (builtin_class_pointer(type).equal(%()))
-    writer = x2c_method_resolve(type, "write_repr");
   List out = builtin_class_ref("out");
+  int array = 0;
+  match (type) case %((dim *) *): array = 1;
+  List writer = %();
+  if (!array && builtin_class_pointer(type).equal(%()))
+    writer = x2c_method_resolve(type, "write_repr");
   List expression;
   if (writer) expression = builtin_class_method(value, "write_repr", %($out));
-  else if (x2c_type_is_value(type))
+  else if (!array && x2c_type_is_value(type))
     expression = builtin_class_method(builtin_class_cast(%("Var"), value),
                                       "write_repr", %($out));
   else {
-    if (builtin_class_pointer(x2c_type_resolve(type)).equal(%()))
+    if (!array && builtin_class_pointer(x2c_type_resolve(type)).equal(%()))
       value = builtin_class_op(<&>, %($value));
     expression = builtin_class_pointer_output("opaque", value, out);
   }
@@ -619,6 +626,14 @@ List builtin_class_defaults(String owner, List type, List location) {
   if (drop)
     release = cons(%(if $value ${x2c_stmnt_make(builtin_class_call(
       x2c_binding_spelling(drop), %($value)))}), release);
+  if (heap && aggregate) {
+    List allocated = builtin_class_call("Scope_calloc",
+      %(${x2c_literal_int(1)}
+        ${builtin_class_size(builtin_class_op(<"*">, %($value)))}));
+    body = body.append(%(${builtin_class_default(owner, "alloc", %($owner),
+      %(), %(${builtin_class_declaration(%($owner), "value", allocated)}
+             ${x2c_stmnt_return(value)}))}));
+  }
   if (heap)
     body = body.append(%(
       ${builtin_class_default(owner, "free", %(void), %($parameter),

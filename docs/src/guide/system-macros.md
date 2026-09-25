@@ -53,7 +53,8 @@ every method.
 
 | Method | Default behavior and applicability |
 | --- | --- |
-| `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init` and calls it on zeroed storage. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
+| `T.alloc` | Returns zeroed Scope storage for a new pointer class with a record representation. Replace it when the object lives elsewhere. |
+| `T.new` | Constructs a scalar, value record, or pointer object. When the class defines `init`, `new` takes the remaining parameters of `init`, calls it on storage from `alloc` (or a zeroed value), and returns the object. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
 | `T.free` | Releases a new pointer class's Scope allocation early. When the class defines `void T.drop(T)`, `free` first calls it on a non-NULL object. `free` accepts NULL. |
 | `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `$auto`. |
 | `T.var` | Converts a new class to `Var`: a scalar uses its underlying representation, a pointer boxes identity, and a value record boxes a Scope-owned copy. |
@@ -127,8 +128,9 @@ Positional fields include native numeric values and enums, Symbol, Var/Atom,
 String, List, and their aliases. Var slots are shallow copies.
 
 A class that defines `init` gets a constructor built from it. The
-constructor zeroes new storage, passes it to `init` with the constructor's
-arguments, and returns it. `init` receives the handle of a heap class, or the
+constructor obtains zeroed storage, passes it to `init` with the
+constructor's arguments, and returns it. A heap class obtains that storage
+from `alloc`, whose default is a zeroed Scope allocation. `init` receives the handle of a heap class, or the
 address of a value record, followed by any parameters it declares; `new`
 takes those parameters in the same order. A record containing a mutable
 handle such as Array, Map, Iter, or another heap class requires `init`, as do
@@ -154,6 +156,12 @@ history.items.push(42);
 ~  return history.limit == 8 ? 0 : 1;
 ~}
 ```
+
+A heap class's `init` may return `int` instead of `void`. When it returns
+zero, `new` releases the storage with `Scope.free` and returns NULL; `drop` is
+not called, so an `init` that refuses releases whatever it acquired first. A
+class that replaces `alloc` so the object lives outside its Scope allocation
+also replaces `free`.
 
 An explicit `new` replaces the default and may take different arguments. It
 also replaces the default constructor's obligation to call `init`. An explicit

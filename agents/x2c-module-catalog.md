@@ -744,8 +744,8 @@ disjoint sets with union-find.
 
 Public functions:
 
-`DisjointSet.new`, `DisjointSet.free`, `DisjointSet.find`, `DisjointSet.union`,
-`DisjointSet.sizes`, `DisjointSet.num_components`
+`DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
+`DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
 
 ### [lib/lisp-machine.x](../lib/lisp-machine.x)
 
@@ -843,11 +843,11 @@ shared `Match` and Lisp wordcode and execution state.
 
 Public functions:
 
-`MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.new`,
-`MachineBuilder.free`, `MachineBuilder.emit`, `MachineBuilder.constant`,
+`MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.init`,
+`MachineBuilder.drop`, `MachineBuilder.emit`, `MachineBuilder.constant`,
 `MachineBuilder.binder`, `MachineBuilder.set_target`, `MachineBuilder.patch`,
 `MachineBuilder.view`, `MachineProgram.view`, `MachineProgram.bytes`,
-`MachineBuilder.freeze`, `MachineProgram.free`, `MachineBuilder.cleanup`
+`MachineBuilder.freeze`
 
 ### [lib/map.x](../lib/map.x)
 
@@ -1132,9 +1132,8 @@ shared tokenizer built on character-level scanners.
 Public functions:
 
 `Var.token`, `Token.var`, `Token.hash`, `Token.equal`, `Token.str`,
-`Token.repr`, `Tokenizer.new`, `Tokenizer.new_mode`, `Tokenizer.tokenize`,
-`Tokenizer.error`, `Tokenizer.do_scanner`, `Tokenizer.scan`, `Tokenizer.next`,
-`Tokenizer.status`
+`Token.repr`, `Tokenizer.init`, `Tokenizer.tokenize`, `Tokenizer.error`,
+`Tokenizer.do_scanner`, `Tokenizer.scan`, `Tokenizer.next`, `Tokenizer.status`
 
 ### [lib/typed-array.x](../lib/typed-array.x)
 

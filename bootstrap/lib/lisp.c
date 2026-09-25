@@ -169,7 +169,7 @@
 ), __builtin_choose_expr(((3ULL) -((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) == 0, __builtin_choose_expr(((3ULL) -((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) == 0, _x2c_initializer_value_3, (__typeof__(storage.slots)){\
   0\
 }\
-), __builtin_choose_expr(((3ULL) >=(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) &&(((3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) <(sizeof(storage.slot_names) /(sizeof(storage.slot_names[0])))),((void) sizeof(char[((3ULL) >=(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) &&(((3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) <(sizeof(storage.slot_names) /(sizeof(storage.slot_names[0])))) ? -1 : 1]),(__typeof__(storage.slot_names[(3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))])){\
+), __builtin_choose_expr(((3ULL) >=(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) &&(((3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) <(sizeof(storage.slot_names) /(sizeof(storage.slot_names[0])))), __builtin_choose_expr(((3ULL) >=(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) &&(((3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))) <(sizeof(storage.slot_names) /(sizeof(storage.slot_names[0])))), MachineBuilder_var(_x2c_initializer_value_3), (__typeof__(storage.slot_names[(3ULL) -(((((((1ULL) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL)) +(1ULL))])){\
   0\
 }\
 ), _x2c_initializer_value_3))))))))
@@ -2479,7 +2479,7 @@ static Symbol _read_tokenizer(Tokenizer tokenizer, String source, unsigned base,
 }
 
 void Scope_push(Scope *);
-Tokenizer Tokenizer_new_mode(char *, Symbol);
+Tokenizer Tokenizer_new(char *, Symbol);
 void Tokenizer_scan(Tokenizer);
 static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
   Tokenizer tokenizer = NULL; {
@@ -2493,7 +2493,7 @@ static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
         {
-          tokenizer = Tokenizer_new_mode(source, 806112);  Tokenizer_scan(tokenizer);
+          tokenizer = Tokenizer_new(source, 806112);  Tokenizer_scan(tokenizer);
         }
 
       }
@@ -5012,7 +5012,9 @@ static void _auto_discard(Lisp lisp, Lambda lambda){
   Scope_free(lambda);
 }
 
-MachineBuilder MachineBuilder_new(void);
+MachineBuilder MachineBuilder_new();
+
+Var MachineBuilder_var(MachineBuilder);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder);
 
