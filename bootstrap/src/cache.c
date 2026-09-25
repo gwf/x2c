@@ -768,7 +768,6 @@ static List _record_deferred_binding(List name, List mods, List assign, Array in
 
 Type Type_declared(Type);
 int Compiler_static_value_is_runtime(Compiler, List, Map);
-int ast_contains_head(Var, Symbol);
 static List _defer_one_binding(Compiler compiler, List decltype, Ast bound, Array initializers){
 
   {
@@ -782,7 +781,7 @@ case 992: ;  static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try
     if(! Compiler_static_value_is_runtime(compiler, Var_list(value), NULL)) return bound;  mods = List_var(_unqualify_const(Var_list(mods)));
   }
   Type declared = Type_canonicalize(object);  Type resolved = Sym_resolve_key(compiler -> sym, declared);  if(Type_is_array(resolved)){
-    if(! Compiler_static_value_is_runtime(compiler, Var_list(value), NULL) && ! ast_contains_head(value, 20287107160)) return bound;
+    if(! Compiler_static_value_is_runtime(compiler, Var_list(value), NULL)) return bound;
   {
     List _x2c_match_expr = Var_list(value);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };

@@ -25,7 +25,20 @@ static Map map_once(void) {
   return value;
 }
 
+typedef String (*Namer)(Var);
+typedef int (*Counter)(void);
+
+static Namer adapted_name(void) {
+  static Namer name = $x2c.callback.adapt(Namer, String.str);
+  static Counter counter = counted;
+  counter();
+  return name;
+}
+
 int main(void) {
+  Var named = %"named";
+  printf("%s %d\n", adapted_name()(named), calls);
+
   printf("%zu %zu %d %zu %u %zu %zu\n", file_width, fixed_width(),
     calls, array_once().len(), map_once().len(), first_vla_width(3),
     first_vla_width(5));

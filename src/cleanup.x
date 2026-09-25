@@ -280,9 +280,10 @@ static int _runtime_sizeof_dimensions(Compiler c, List operand, Map runtime) {
   return 0;
 }
 
-/** Reports whether an initializer expression has to run at runtime. File
-    scope passes no `runtime` map; local statics also account for automatic
-    objects and statics already known to run at runtime.
+/** Reports whether the static initializer `value` has to run at runtime,
+    because it calls, allocates, or reads an object other than a function
+    name. `runtime` holds the function-local statics already known to run
+    that way, or is `NULL` at file scope.
 */
 int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
   Array pending = $auto([]), modes = $auto([]);
@@ -291,9 +292,6 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
   while (pending.len()) {
     List node = pending.take_last();
     int address = modes.take_last();
-    if (runtime == NULL)
-      match (node)
-        case %(sizeof *): continue;
     if (address) {
       match (node) {
         case %(!or (expr ? ?inner) (parens ?inner)
@@ -303,7 +301,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
           continue;
         }
         case %(ident ?binding): {
-          if (binding in runtime ||
+          if ((runtime && binding in runtime) ||
               _automatic_static_input(c, binding)) return 1;
           continue;
         }
@@ -323,36 +321,34 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
       return 1;
     }
     match (node) {
-      case %((!or cache call varray vmap cons append) *): return 1;
-      case %((!or var array map initval) *):
-        if (runtime != NULL) return 1;
+      case %((!or cache call var array map varray vmap initval cons append) *):
+        return 1;
       case %(expr ?type (ident ?binding)): {
-        if (runtime != NULL && (binding in runtime ||
-            _automatic_static_input(c, binding))) return 1;
+        if ((runtime && binding in runtime) ||
+            _automatic_static_input(c, binding)) return 1;
+        if (%(function $binding) in c.semantic_binding_facts()) continue;
         Type native = type;
-        if (runtime != NULL && native && !native.is_enum() &&
-            !native.is_function() && !native.is_array() &&
+        if (native && !native.is_enum() && !native.is_function() &&
+            !native.is_array() &&
             (native.is_pointer() || !native.contains(<const>))) return 1;
         continue;
       }
       case %(expr ? (op & ?inner)): {
         pending.push(inner);
-        modes.push(runtime != NULL ? 1 : 0);
+        modes.push(1);
         continue;
       }
       case %(expr ?type (!set ?content (index *))): {
         Type native = type;
-        if (runtime != NULL && native.is_array()) {
+        if (native.is_array()) {
           pending.push(content);
           modes.push(1);
           continue;
         }
-        if (runtime &&
-            (native.is_pointer() || !native.contains(<const>))) return 1;
+        if (native.is_pointer() || !native.contains(<const>)) return 1;
       }
       case %(expr ? (sizeof ?operand)): {
-        if (runtime != NULL && _runtime_sizeof_dimensions(c, operand, runtime))
-          return 1;
+        if (_runtime_sizeof_dimensions(c, operand, runtime)) return 1;
         continue;
       }
     }

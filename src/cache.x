@@ -295,8 +295,7 @@ static List _defer_one_binding(
       Type declared = object.canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
-        if (!compiler.static_value_is_runtime(value, NULL) &&
-            !ast_contains_head(value, <initval>)) return bound;
+        if (!compiler.static_value_is_runtime(value, NULL)) return bound;
         match (value)
           case %(composite (commas *items)): {
             List target = %(expr $declared (ident $name));

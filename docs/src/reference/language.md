@@ -2258,7 +2258,8 @@ If initialization raises an Error, a later call retries; side effects already
 performed by the initializer remain. Recursive initialization, including a
 cycle between initializing threads, raises `bad-state` rather than waiting
 forever. A `static threaded` declaration follows the same rule separately in
-each thread. Native constant initializers retain native C static storage.
+each thread. Native constant initializers retain native C static storage;
+a function name, including a `$x2c.callback.adapt` result, is constant.
 
 Runtime-initialized local objects preserve their declared type, qualifiers,
 array shape, and address across calls. Their storage lasts until process

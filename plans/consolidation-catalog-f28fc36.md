@@ -36,7 +36,7 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | C05 | One graph direct/computed call recognizer | Done (70b23d6d) | Lifetime recognizer and flow forwarding wrapper removed |
 | C06 | One graph source-location formatter | Done (c6ac7841 + flows follow-up) | Five implementations reduced to one owner and calls |
 | C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |
-| C08 | One initializer evaluation policy, without recomputation | Done first slice (2026-09-24); no metadata follow-up | File/local callers share expression classification; emitter retains its later check |
+| C08 | One initializer evaluation policy, without recomputation | Done 2026-09-24: one rule for file and local statics; Gary decided a function name, including a callback adapter, is constant. Carrying per-binding decisions to emission declined: not a net deletion | File/local callers share expression classification; emitter retains its later check |
 | C09 | Docs consume compiler-selected definitions | Done 2026-09-24 in [x2c-lint-and-format](x2c-lint-and-format.md) Phase 2: the doc generators read `--dump-definitions` | Docs no longer re-expand source macros or independently recognize declaration families |
 | C10 | One primitive display-format policy | Declined by Gary 2026-09-24: saves ~15 lines but adds an allocation to primitive String rendering and changes NULL to a raise | One of the two tag-to-format switches removed without an unaccepted cost/behavior change |
 | C11 | Recover each Match arm's pattern value once | Done (8fd9c740) | The arm pipeline stops recovering the same graph up to four times |
