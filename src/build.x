@@ -93,26 +93,26 @@ static uint64_t _state_list(uint64_t hash, List values) {
   return x2c_fnv_bytes(hash, "\xfe", 1);
 }
 
-static uint64_t _state_file(uint64_t hash, String path, int *ok) =>
+static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
   x2c_fnv_file(_state_text(hash, path), path, ok);
 
-static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
+static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
   if (!tool) {
-    *ok = 0;
+    ok = 0;
     return hash;
   }
   String path = tool.contains("/") ? tool : x2c_find_program(tool);
   if (path) return _state_file(hash, path, ok);
-  *ok = 0;
+  ok = 0;
   return _state_text(hash, tool);
 }
 
-static uint64_t _state_base(CliRequest request, String tool, int *ok) {
+static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   String compiler = x2c_compiler_identity();
-  if (!compiler) *ok = 0;
+  if (!compiler) ok = 0;
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
   return hash;
@@ -127,10 +127,10 @@ static List _state_dep_inputs(String depfile) {
   return translation_depfile_parse(text);
 }
 
-static uint64_t _state_dependencies(uint64_t hash, String depfile, int *ok) {
+static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
   List inputs = _state_dep_inputs(depfile);
   if (!inputs) {
-    *ok = 0;
+    ok = 0;
     return hash;
   }
   foreach (String input, inputs) hash = _state_file(hash, input, ok);
@@ -308,7 +308,7 @@ String Build.generated_dir(Build state, String input) {
 }
 
 static uint64_t _translation_fingerprint(
-  Build state, String input, String directory, int *ok) {
+  Build state, String input, String directory, int &ok) {
   uint64_t hash = _state_base(state.request, state.toolchain.cc, ok);
   hash = _state_text(hash, "translate");
   hash = _state_text(hash, input);
@@ -339,7 +339,7 @@ int Build.translation_current(Build state, String input, String directory) {
   foreach (String suffix, %(".c" ".h" ".xi"))
     if (!Path.is_file(%"$directory/$stem$suffix")) return 0;
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
   String path = %"${state.state_root}/x-${_key(input)}";
   int current = ok && _state_matches(path, hash);
   if (current && state.request.verbose)
@@ -358,7 +358,7 @@ void Build.record_translation(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return;
   String depfile = %"$directory/${Path.stem(input)}.d";
   int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
+  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
   if (ok && _files_unchanged(state, _state_dep_inputs(depfile)))
     _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
@@ -507,7 +507,7 @@ typedef struct CcJob {
 } CcJob;
 
 static uint64_t _action_fingerprint(
-  Build state, ToolAction action, List inputs, int *ok) {
+  Build state, ToolAction action, List inputs, int &ok) {
   String tool = action.arguments ? action.arguments.car() : NULL;
   uint64_t hash = _state_base(state.request, tool, ok);
   hash = _state_text(hash, action.phase);
@@ -538,7 +538,7 @@ static int _same_file_bytes(String first, String second) {
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
 static uint64_t _compile_fingerprint(
-  Build state, ToolAction action, String preprocessed, int *ok) {
+  Build state, ToolAction action, String preprocessed, int &ok) {
   return x2c_fnv_file(
     _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
 }
@@ -554,7 +554,7 @@ static int _finish_compile(Build state, CcJob *pending) {
     String preprocessed = pending.preprocessed;
     if (!status)
       pending.fingerprint = _compile_fingerprint(
-        state, pending.action, preprocessed, &ok);
+        state, pending.action, preprocessed, ok);
     unlink(pending.preprocessed);
     pending.preprocessed = NULL;
     if (status) return 1;
@@ -797,7 +797,7 @@ int Build.finish(Build b) {
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
   if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, ok);
     if (ok && _state_matches(state_path, hash)) {
       if (b.request.verbose)
         fprintf(
@@ -866,7 +866,7 @@ int Build.finish(Build b) {
     report_now_us() - b.final_at);
   if (state_path) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, ok);
     if (ok) _state_write(state_path, hash);
   }
   return 0;
@@ -967,7 +967,7 @@ void Build.cleanup(Build b, int success) {
    recorded directory. A directory entry ends in `/`; a header or library
    added where a search would now find it changes that time. */
 static uint64_t _script_fingerprint(
-  CliRequest c, String cc, List prerequisites, int *ok) {
+  CliRequest c, String cc, List prerequisites, int &ok) {
   uint64_t hash = _state_base(c, cc, ok);
   hash = _state_text(hash, "script");
   hash = _state_list(hash, c.inputs);
@@ -1074,7 +1074,7 @@ void Build.publish_script(Build b, String executable) {
   List files = prerequisites.list_free();
   List paths = files.append(b._script_directories(files));
   int ok = 1;
-  uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, &ok);
+  uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
   if (ok && _files_unchanged(b, files))
     _state_write_lines(%"${b.state_root}/script", hash, paths);
 }
@@ -1091,6 +1091,6 @@ int CliRequest.script_current(CliRequest c, String directory) {
   Toolchain toolchain = toolchain_new(
     c.cc, c.ar, c.cpp_args, c.cc_args, c.ld_args, 0, 0);
   int ok = 1;
-  uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), &ok);
+  uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), ok);
   return ok && _state_matches(record, hash);
 }

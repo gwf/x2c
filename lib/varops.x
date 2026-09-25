@@ -256,15 +256,15 @@ static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value) {
   return unsigned_value ? Var.box_u32(raw) : Var.box_i32_bits(raw);
 }
 
-static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int *handled) {
+static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int &handled) {
   switch (op) {
     case <+>: case <->: case <*>: case </>: case <%>:
     case <&>: case <|>: case <^>: case <"<<">: case <">>">: break;
-    default: *handled = 0;
+    default: handled = 0;
       return void;
   }
   Symbol tag = _fast_numeric_tag(lhs, rhs);
-  *handled = 1;
+  handled = 1;
   switch (tag) {
     case <i32>:
       return _fast_i32(op, lhs.payload32(), rhs.payload32(), 0);
@@ -285,7 +285,7 @@ static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int *handled) {
       return Var.box_f64(value);
     }
   }
-  *handled = 0;
+  handled = 0;
   return void;
 }
 
@@ -368,7 +368,7 @@ int Var.truth(Var value) {
 
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   int fast_handled;
-  Var result = _fast_numeric(op, lhs, rhs, &fast_handled);
+  Var result = _fast_numeric(op, lhs, rhs, fast_handled);
   if (fast_handled) return result;
   if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;
@@ -493,7 +493,7 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
     case <@>: return lhs.matmul(rhs);
   }
   int fast_handled;
-  Var result = _fast_numeric(op, lhs, rhs, &fast_handled);
+  Var result = _fast_numeric(op, lhs, rhs, fast_handled);
   if (fast_handled) return result;
   if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;

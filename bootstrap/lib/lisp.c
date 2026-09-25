@@ -2301,11 +2301,11 @@ static Symbol _read_token_list(Tokenizer tokenizer, char * source, unsigned base
       status = 664344300629258;  break;
     }
     if(token -> type == 83){
-      * end = token -> pos + token -> len;  break;
+      (* end) = token -> pos + token -> len;  break;
     }
-    Var element =((void) 0, Void);  status = _read_token_form(tokenizer, token, source, base, end, & element, depth);  if(status != 46228810) break;  Array_push(elements, element);
+    Var element =((void) 0, Void);  status = _read_token_form(tokenizer, token, source, base, &((* end)), &(element), depth);  if(status != 46228810) break;  Array_push(elements, element);
   }
-  if(status == 46228810) * out = List_var(Array_list(elements));  Array_free(elements);  return status;
+  if(status == 46228810)(* out) = List_var(Array_list(elements));  Array_free(elements);  return status;
 }
 
 String String_unescape(String);
@@ -2317,16 +2317,16 @@ int String_truth(String);
 Symbol Symbol_new(const char *);
 static Symbol _read_token_atom(Token token, char * source, unsigned base, Var * out){
   String text = token -> text;  switch(token -> type){
-    case 27051791223990 : * out = String_var(String_unescape(String_new_len(text + 1, token -> len - 2)));  return 46228810;  case 26417777576 :{
-      long value;  String literal = String_new_len(text, token -> len);  if(! String_try_long(literal, & value)) return _malformed(String_new(source), base + token -> pos);  if(value ==(int) value) * out = int_var((int) value);  else * out = long_var(value);  return 46228810;
+    case 27051791223990 :(* out) = String_var(String_unescape(String_new_len(text + 1, token -> len - 2)));  return 46228810;  case 26417777576 :{
+      long value;  String literal = String_new_len(text, token -> len);  if(! String_try_long(literal, & value)) return _malformed(String_new(source), base + token -> pos);  if(value ==(int) value)(* out) = int_var((int) value);  else(* out) = long_var(value);  return 46228810;
     }
     case 27051797805160 :{
-      double value;  String literal = String_new_len(text, token -> len);  if(! String_try_double(literal, & value)) return _malformed(String_new(source), base + token -> pos);  * out = double_var(value);  return 46228810;
+      double value;  String literal = String_new_len(text, token -> len);  if(! String_try_double(literal, & value)) return _malformed(String_new(source), base + token -> pos); (* out) = double_var(value);  return 46228810;
     }
     case 865658429314008 :{
-      int n = token -> len;  String inner = String_getindex(text, 1) == '"' ? String_unescape(String_new_len(text + 2, n - 4)) : String_new_len(text + 1, n - 2);  if(! String_truth(inner)) return _malformed(String_new(source), base + token -> pos);  * out = Symbol_var(Symbol_new(inner));  return 46228810;
+      int n = token -> len;  String inner = String_getindex(text, 1) == '"' ? String_unescape(String_new_len(text + 2, n - 4)) : String_new_len(text + 1, n - 2);  if(! String_truth(inner)) return _malformed(String_new(source), base + token -> pos); (* out) = Symbol_var(Symbol_new(inner));  return 46228810;
     }
-    case 19147688 : * out = Atom_intern(String_unescape(text));  return 46228810;
+    case 19147688 :(* out) = Atom_intern(String_unescape(text));  return 46228810;
   }
   return _malformed(String_new(source), base + token -> pos);
 }
@@ -2335,12 +2335,12 @@ Symbol Tokenizer_status(Tokenizer);
 int Var_is_void(Var);
 static Symbol _read_token_form(Tokenizer tokenizer, Token token, char * source, unsigned base, unsigned * end, Var * out, int depth){
   if(! token || token -> type == 11212) return 664344300629258;  Var prefix =((void) 0, Void);  switch(token -> type){
-    case 11703268 : if(Tokenizer_status(tokenizer) == 664344300629258) return 664344300629258;  return _malformed(String_new(source), base + token -> pos);  case 83 : return _malformed(String_new(source), base + token -> pos);  case 81 : return _read_token_list(tokenizer, source, base, end, out, depth + 1);  case 79 : prefix = lsym_quote;  break;  case 193 : prefix = lsym_quasiquote;  break;  case 89 : prefix = lsym_unquote;  break;  case 11393 : prefix = lsym_splicing;  break;
+    case 11703268 : if(Tokenizer_status(tokenizer) == 664344300629258) return 664344300629258;  return _malformed(String_new(source), base + token -> pos);  case 83 : return _malformed(String_new(source), base + token -> pos);  case 81 : return _read_token_list(tokenizer, source, base, &((* end)), &((* out)), depth + 1);  case 79 : prefix = lsym_quote;  break;  case 193 : prefix = lsym_quasiquote;  break;  case 89 : prefix = lsym_unquote;  break;  case 11393 : prefix = lsym_splicing;  break;
   }
   if(! Var_is_void(prefix)){
-    Var inner =((void) 0, Void);  Symbol status = _read_token_form(tokenizer, Tokenizer_next(tokenizer), source, base, end, & inner, depth + 1);  if(status == 46228810) * out = List_var(cons(prefix, cons(inner, NULL)));  return status;
+    Var inner =((void) 0, Void);  Symbol status = _read_token_form(tokenizer, Tokenizer_next(tokenizer), source, base, &((* end)), &(inner), depth + 1);  if(status == 46228810)(* out) = List_var(cons(prefix, cons(inner, NULL)));  return status;
   }
-  * end = token -> pos + token -> len;  return _read_token_atom(token, source, base, out);
+  (* end) = token -> pos + token -> len;  return _read_token_atom(token, source, base, &((* out)));
 }
 
 int String_len(String);
@@ -2348,7 +2348,7 @@ static Symbol _read_tokenizer(Tokenizer tokenizer, String source, unsigned base,
   Token token = Tokenizer_next(tokenizer);  if(! token || token -> type == 11212){
     * cursor = String_len(source);  return 11212;
   }
-  unsigned start = base + token -> pos;  * cursor = start;  unsigned end = 0;  Var value =((void) 0, Void);  Symbol status = _read_token_form(tokenizer, token, source, base, & end, & value, 0);  if(status == 46228810){
+  unsigned start = base + token -> pos;  * cursor = start;  unsigned end = 0;  Var value =((void) 0, Void);  Symbol status = _read_token_form(tokenizer, token, source, base, &(end), &(value), 0);  if(status == 46228810){
     if(out) * out = value;  * cursor = base + end;
   }
   else if(status == 664344300629258){
@@ -4581,7 +4581,7 @@ static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expans
   x2c_cleanup_push(&_x2c_defer_record_22);
   {
       * _x2c_macro_address_0 = & trace;
-      * expansion = _call_lambda(l -> lisp, macro, args);
+      (* expansion) = _call_lambda(l -> lisp, macro, args);
     }
     x2c_cleanup_leave(& _x2c_defer_record_22);
 
@@ -4619,8 +4619,8 @@ x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
 }
-if(! _expansion_value(* expansion, 0)) return 0;
-* dependencies = trace.dependencies;
+if(! _expansion_value((* expansion), 0)) return 0;
+(* dependencies) = trace.dependencies;
 return 1;
 }
 
@@ -4748,7 +4748,7 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
   if(Var_equal(head, lsym_quote) || Var_equal(head, lsym_cond) || Var_equal(head, lsym_quasiquote)) return LispLower__auto_compile_special(l, form, tail);
   Var expansion;
   List dependencies;
-  if(LispLower__auto_expand(l, head, List_cdr(form), & expansion, & dependencies)){
+  if(LispLower__auto_expand(l, head, List_cdr(form), &(expansion), &(dependencies))){
     int * _x2c_macro_address_2 = & l -> depth;
     int _x2c_macro_previous_2 = * _x2c_macro_address_2;
     {

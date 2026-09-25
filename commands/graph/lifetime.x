@@ -464,16 +464,16 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
 }
 
 static int _lifetime_context_open(
-  Lifetime lifetime, Var value, int *isolated) {
+  Lifetime lifetime, Var value, int &isolated) {
   List arguments;
   String name;
   project_call_target(
     lifetime.compiler, lifetime.definitions, value, &name, &arguments
   );
   if (!name) return 0;
-  *isolated = name == "Context_open_isolated" ||
+  isolated = name == "Context_open_isolated" ||
               name == "Context_open_isolated_named";
-  return *isolated || name == "Context_open" ||
+  return isolated || name == "Context_open" ||
          name == "Context_open_named";
 }
 
@@ -493,7 +493,7 @@ static void _lifetime_bind(Lifetime lifetime, List binding, Var expression) {
   int previous_allocation = lifetime.bindings.contains(binding)
                           ? lifetime.bindings[binding].integer() : 0;
   int isolated = 0;
-  if (_lifetime_context_open(lifetime, expression, &isolated)) {
+  if (_lifetime_context_open(lifetime, expression, isolated)) {
     int id = ++lifetime.next_region;
     lifetime.regions[id] = %(
       region $id context $isolated 1 0 $binding none
@@ -831,7 +831,7 @@ static int _lifetime_combine_kind(Symbol &kind, Symbol next) {
 }
 
 static int _lifetime_resolve_summary(
-  List function, Map publics, Map summaries, Symbol *resolved) {
+  List function, Map publics, Map summaries, Symbol &resolved) {
   List self, facts;
   match (function)
     case %(
@@ -859,7 +859,7 @@ static int _lifetime_resolve_summary(
         if (!_lifetime_combine_kind(kind, next)) return 0;
       }
   if (!kind) return 0;
-  *resolved = kind;
+  resolved = kind;
   return 1;
 }
 
@@ -882,7 +882,7 @@ static Map _lifetime_summaries(List functions, Map publics) {
       if (summaries.contains(target)) continue;
       Symbol kind;
       if (_lifetime_resolve_summary(
-            function, publics, summaries, &kind
+            function, publics, summaries, kind
           )) {
         summaries[target] = kind;
         changed = 1;
