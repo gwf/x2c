@@ -84,8 +84,9 @@ reachability.
 
 The first case study selected `main` over hand-authored `src/*.x` and
 `lib/*.x` (excluding generated `lib/x2c.x`). It returned `incomplete`: no
-root-wide proof, no reported violation, no native assumptions, and 19,169
-obstacles. The report is retained locally in `debug/certify-compiler.out`.
+root-wide proof, no reported violation, no native assumptions, and more than
+19,000 obstacles. The report is retained locally in
+`debug/certify-compiler-final.out`.
 
 ## Not in this sequence
 
