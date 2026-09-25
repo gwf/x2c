@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
   if (!frontend.preload_macro_libraries()) return 1;
   Context command = Context.open_isolated_named("AST parity command");
   ParsedUnit parsed;
-  if (!frontend.open(String.new(argv[1]), &parsed)) {
+  if (!frontend.open(String.new(argv[1]), parsed)) {
     foreach (Var entry, parsed.compiler.diagnostics())
       parsed.compiler.print_diagnostic(entry);
     parsed.close();
