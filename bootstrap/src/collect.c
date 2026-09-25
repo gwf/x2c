@@ -653,8 +653,8 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _include_text(Compiler c, String target, String path){
   String text = NULL;
-  if(! Compiler_read_source(c, path, &(text))) Compiler_report_error(c, 306819428, _173, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
-  return text;
+  if(Compiler_read_source(c, path, &(text))) return text;
+  Compiler_report_error(c, 306819428, _173, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
 }
 
 Path Path_dirname(Path);
@@ -1055,7 +1055,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
 }
 
 static String _runtime_text(Compiler c, String runtime){
-  String text = NULL;  if(! Compiler_read_source(c, runtime, &(text))) Compiler_report_error(c, 306819428, _174, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));  return text;
+  String text = NULL;  if(Compiler_read_source(c, runtime, &(text))) return text;  Compiler_report_error(c, 306819428, _174, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
 }
 
 static List _prelude_entry(Compiler c, String runtime, String canonical){
@@ -1860,8 +1860,7 @@ String interface_text(Compiler compiler, List selected){
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
-    if(! _write_interface_entry(out, canonical, Var_list(cached), selected)) Compiler_report_error(compiler, 354920, _175, NULL, NULL);
-    {
+    if(_write_interface_entry(out, canonical, Var_list(cached), selected)){
       String _x2c_return_value_7 = Buffer_str(out);
       {
         x2c_cleanup_leave(& _x2c_defer_record_5);
@@ -1869,7 +1868,7 @@ String interface_text(Compiler compiler, List selected){
       }
 
     }
-
+    Compiler_report_error(compiler, 354920, _175, NULL, NULL);
   }
   x2c_cleanup_leave(& _x2c_defer_record_5);
 

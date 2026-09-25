@@ -2385,11 +2385,9 @@ default: break;
     }
   }
 List n = notes;  for(List p = params, a = arguments;  List_truth(p) && List_truth(a);  p = cdr(p), a = cdr(a), n = cdr(n)){
-  if(!(Var_is_row(car(p), 9, 7, 4)) || !(Var_is_row(car(a), 9, 7, 4))) continue;  List param = Var_list(car(p)), argument = Var_list(car(a));  Type expected = Var_equal(List_car(param), Symbol_var(33656922)) ? List_type_from_ast(param) : List_type(param);  _check_noted_converter(compiler, Var_list(car(n)), argument, expected, 0);
+  if(! Var_is_row(car(p), 9, 7, 4) || ! Var_is_row(car(a), 9, 7, 4)) continue;  List param = Var_list(car(p)), argument = Var_list(car(a));  Type expected = Var_equal(List_car(param), Symbol_var(33656922)) ? List_type_from_ast(param) : List_type(param);  _check_noted_converter(compiler, Var_list(car(n)), argument, expected, 0);
 }
-const PrintfFn * info = List_printf_family(callee);  int raw = 0;  if(! info || ! String_truth(Compiler_printf_static_format(compiler, List_getindex(supplied, info -> fmt_arg), &(raw)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)){
-  if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) _check_noted_converter(compiler, Var_list(car(n)), Var_list(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
-}
+const PrintfFn * info = List_printf_family(callee);  int raw = 0;  if(! info || ! String_truth(Compiler_printf_static_format(compiler, List_getindex(supplied, info -> fmt_arg), &(raw)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)) if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) _check_noted_converter(compiler, Var_list(car(n)), Var_list(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
 }
 
 List Compiler_try_parse_macro_slot(Compiler, Symbol);
@@ -2612,7 +2610,7 @@ int Array_try_next(Array, int *, Var *);
 
 int Lisp_try_get(Lisp, String, Var *);
 
-List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol access){
+List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access){
   if(! _init_guard_) _file_init_();
   Map seen = Map_new(), visited = Map_new();
   Array names = Array_new();
@@ -2626,12 +2624,12 @@ List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol acces
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     Array accepted = Array_new();
-    Type fields = Sym_resolve_key(compiler -> sym, receiver);
+    Type fields = Sym_resolve_key(c -> sym, receiver);
     if(Type_is_pointer(fields)) fields = Type_dereference(fields);
-    _completion_fields(compiler, fields, seen, names, Map_new());
+    _completion_fields(c, fields, seen, names, Map_new());
     if(access == 93){
-      _completion_methods(compiler, receiver, seen, names);
-      _completion_delegates(compiler, receiver, seen, names, visited);
+      _completion_methods(c, receiver, seen, names);
+      _completion_delegates(c, receiver, seen, names, visited);
     }
     Array_sort(names);
     {
@@ -2642,8 +2640,8 @@ List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol acces
       while(Array_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_11)){
         name = Var_string(_x2c_macro_cursor_output_11);
         {
-          List resolution = Compiler_resolve_postfix_member(compiler, receiver, cons(String_var(name), NULL), access, 1);
-          if(! List_truth(resolution) && access == 93) resolution = _resolve_delegate_method(compiler, receiver, name, compiler -> token);
+          List resolution = Compiler_resolve_postfix_member(c, receiver, cons(String_var(name), NULL), access, 1);
+          if(! List_truth(resolution) && access == 93) resolution = _resolve_delegate_method(c, receiver, name, c -> token);
 
   {
     List _x2c_match_expr = resolution;
@@ -2656,7 +2654,7 @@ List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol acces
           if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_274), &_x2c_match_capture)) {Array_push(accepted, String_var(name));  break;
         }
         case 884229064: ;  static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x2c_match_site_16, _x2c_match_expr, List_var(_276), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-          Var callable;  if(Lisp_try_get(compiler -> macro_lisp, binding_identity_spelling(Var_list(binding)), & callable)) Array_push(accepted, String_var(name));
+          Var callable;  String spelling = binding_identity_spelling(Var_list(binding));  if(Lisp_try_get(c -> macro_lisp, spelling, & callable)) Array_push(accepted, String_var(name));
         }
         break;
       }
@@ -2709,7 +2707,7 @@ int Compiler_at_completion(Compiler);
 static List _parse_postfix_dot(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 93);  if(Compiler_at_completion(compiler)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_154) : List_cadr(expr));  List rows = Compiler_postfix_completions(compiler, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 643};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 639};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2719,7 +2717,7 @@ static List _parse_postfix_dot(Compiler compiler, List expr){
 static List _parse_postfix_arrow(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 11645);  if(Compiler_at_completion(compiler)){
     List rows = Compiler_postfix_completions(compiler, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 659};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 655};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -3636,10 +3634,7 @@ static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, L
   List lowered = Compiler__protocol_operator_expression(c, operator, lhs, rhs);  if(List_truth(lowered)){
     if(! constant_string) return lowered;  List cached = Compiler_cache(c, cons(_179, cons(List_var(lowered), NULL)));  return cons(_0, cons(_170, cons(List_var(cached), NULL)));
   }
-  if(operator == 604){
-    Compiler_report_error(c, 1362954, _1742, origin, cons(String_var(String_join(NULL, cons(String_var(_861), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL));
-  }
-  {
+  if(operator == 604) Compiler_report_error(c, 1362954, _1742, origin, cons(String_var(String_join(NULL, cons(String_var(_861), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL)); {
     Symbol member = Compiler_operator_member(c, operator);  int lhs_known = lhs_type != NULL;  int rhs_known = rhs_type != NULL;  int arithmetic = member && operator != 15739 && operator != 8571;  if(arithmetic && lhs_known != rhs_known){
       Type participant = lhs_known ? lhs_type : rhs_type;  List other = lhs_known ? rhs : lhs;  if(_converts_operands(c, participant) && List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member))) && List_truth(({ static MatchCaptureSite _x2c_match_site_61;  x2c_match_site_match(& _x2c_match_site_61, other, List_var(_865)); }))) Compiler_report_error(c, 1362954, _1743, origin, _868);
     }

@@ -564,10 +564,7 @@ int Iter_any(Iter iter, Func pred){
     Var _x2c_macro_item_1;
     while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
       item = _x2c_macro_item_1;
-      {
-        if(Var_truth(_apply1(pred, item))) return 1;
-      }
-
+      if(Var_truth(_apply1(pred, item))) return 1;
     }
 
   }
@@ -578,9 +575,7 @@ int Iter_all(Iter iter, Func pred){
   Var item;
   if(! Iter_try_next(iter, & item)) return 1;
   if(! pred) return 0;
-  do{
-    if(! Var_truth(_apply1(pred, item))) return 0;
-  }
+  do if(! Var_truth(_apply1(pred, item))) return 0;
   while(Iter_try_next(iter, & item));
   ;
   return 1;
@@ -594,10 +589,7 @@ Var Iter_find(Iter iter, Func pred){
     Var _x2c_macro_item_2;
     while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
       item = _x2c_macro_item_2;
-      {
-        if(Var_truth(_apply1(pred, item))) return item;
-      }
-
+      if(Var_truth(_apply1(pred, item))) return item;
     }
 
   }

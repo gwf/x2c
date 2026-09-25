@@ -7,9 +7,9 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_lower_comptime(Compiler compiler, List fn);
+List Compiler_lower_comptime(Compiler c, List fn);
 
-List Compiler_lower_repl(Compiler compiler, List fn);
+List Compiler_lower_repl(Compiler c, List fn);
 
 String Compiler_lower_declined(Compiler compiler);
 
@@ -17,7 +17,7 @@ void Compiler_inherit_shared_meta(Compiler compiler);
 
 List Compiler_lowered_meta_regions(Compiler compiler, List fn);
 
-int Compiler_install_comptime(Compiler compiler, List fn);
+int Compiler_install_comptime(Compiler c, List fn);
 
 int Compiler_lower_reached_meta(Compiler compiler);
 
@@ -31,7 +31,7 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
-int Sym_is_bool_type(Sym sym, Type type);
+int Sym_is_bool_type(Sym s, Type type);
 
 List Compiler_meta_type_layout(Compiler c, Type type);
 

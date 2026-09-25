@@ -226,9 +226,7 @@ String MachineBuilder_repr(MachineBuilder value);
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
   List expected, end = NULL;
-  if(slot -> kind == MACHINE_SLOT_VALUE){
-    expected = Var_list(slot -> value);
-  }
+  if(slot -> kind == MACHINE_SLOT_VALUE) expected = Var_list(slot -> value);
   else{
     if(slot -> span.length != length) return 0;
     expected = slot -> span.begin;

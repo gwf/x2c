@@ -149,7 +149,7 @@ List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definitio
 
 List Compiler_peek_macro_hole(Compiler compiler);
 
-int Compiler_macro_lisp_starts_declaration(Compiler compiler);
+int Compiler_macro_lisp_starts_declaration(Compiler c);
 
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 

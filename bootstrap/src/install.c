@@ -585,7 +585,7 @@ x2c_error_catch_close(_x2c_error_handler_2);
 _x2c_error_handler_2 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_2);
 }
-if(!(Var_is(marker, 26720))) return NULL;
+if(! Var_is(marker, 26720)) return NULL;
 Var value = Var_getindex(marker, String_var(field));
 return Var_is_row(value, 11, 7, 1) ? Var_string(value) : NULL;
 }
