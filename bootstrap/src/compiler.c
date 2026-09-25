@@ -1477,7 +1477,7 @@ static int _layout_attribute(Token open, int * packed){
     String word = String_strip(t -> text, "_");
     if(String_equal(word, _20)){
       layout = 1;
-      * packed = 1;
+      (* packed) = 1;
     }
     else if(String_equal(word, _21) || String_equal(word, _22) || String_equal(word, _23)) layout = 1;
   }
@@ -1493,7 +1493,7 @@ static size_t _note_attribute(Compiler c, size_t index){
   Token inner = _skip_forward(open + 1), last = Token_group_close(open);
   if(last -> type == 11212) return index;
   int packed = 0;
-  if(inner -> type == 81 && _layout_attribute(inner, & packed)){
+  if(inner -> type == 81 && _layout_attribute(inner, &(packed))){
     Array_push(c -> layout_marks, long_var((long) index));
     Array_push(c -> layout_marks, long_var((long) index + 1));
     if(packed){
@@ -1509,9 +1509,9 @@ String String_remove_prefix(String, String);
 
 static Token _macro_directive(String content, int * undefined){
   String directive = preproc_directive(content);
-  * undefined = String_startswith(directive, _705);
-  if(! * undefined && ! String_startswith(directive, _706)) return NULL;
-  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, * undefined ? _705 : _706));
+  (* undefined) = String_startswith(directive, _705);
+  if(!(* undefined) && ! String_startswith(directive, _706)) return NULL;
+  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _705 : _706));
   Tokenizer_scan(scanned);
   Token token = _skip_forward(scanned -> tokens);
   return token -> type == 19147688 ? token : NULL;
@@ -1519,7 +1519,7 @@ static Token _macro_directive(String content, int * undefined){
 
 static void _note_layout_macro(String content, Map layout, int conditional){
   int undefined;
-  Token name = _macro_directive(content, & undefined);
+  Token name = _macro_directive(content, &(undefined));
   if(! name) return;
   if(! conditional) Map_del(layout, String_var(name -> text));
   if(undefined) return;
@@ -1532,7 +1532,7 @@ static void _note_layout_macro(String content, Map layout, int conditional){
       Token open = _skip_forward(token + 1);
       Token inner = open -> type == 81 ? _skip_forward(open + 1) : open;
       int packed = 0;
-      if(inner -> type == 81 && _layout_attribute(inner, & packed)) value = packed ? 2 : value ? value : 1;
+      if(inner -> type == 81 && _layout_attribute(inner, &(packed))) value = packed ? 2 : value ? value : 1;
     }
     else if(Map_contains(layout, String_var(token -> text))){
       int inherited = Var_int(Var_convert(Map_getindex(layout, String_var(token -> text)), 3453797));
@@ -2632,7 +2632,7 @@ Array_setindex(sources, index, List_var(cons(Map_var(declarations), cons(key, co
 }
 int remaining = Map_len(pending);  while(remaining){
   int previous = remaining;  remaining = 0;  for(size_t index = 0;  index < Array_len(sources);  index ++){
-    List _x2c_destructure_4 = Var_list(Array_getindex(sources, index));  Map declarations = Var_map(List_getindex(_x2c_destructure_4, 0));  Var key = List_getindex(_x2c_destructure_4, 1);  Var end = List_getindex(_x2c_destructure_4, 2);  List rows = Var_list(List_getindex(_x2c_destructure_4, 3));  rows = _select_declaration_forwards(shadow, rows, pending, & remaining);  Array_setindex(sources, index, List_var(cons(Map_var(declarations), cons(key, cons(end, cons(List_var(rows), NULL))))));
+    List _x2c_destructure_4 = Var_list(Array_getindex(sources, index));  Map declarations = Var_map(List_getindex(_x2c_destructure_4, 0));  Var key = List_getindex(_x2c_destructure_4, 1);  Var end = List_getindex(_x2c_destructure_4, 2);  List rows = Var_list(List_getindex(_x2c_destructure_4, 3));  rows = _select_declaration_forwards(shadow, rows, pending, &(remaining));  Array_setindex(sources, index, List_var(cons(Map_var(declarations), cons(key, cons(end, cons(List_var(rows), NULL))))));
   }
   if(remaining && remaining == previous) Compiler_report_error(shadow, 1362954, _715, shadow -> token, NULL);
 }
@@ -2817,7 +2817,7 @@ static int _prefix_rank(Var v){
 }
 
 static void _note_object_macro(Compiler c, String content){
-  int undefined;  Token token = _macro_directive(content, & undefined);  if(! token) return;  String name = token -> text;  if(undefined){
+  int undefined;  Token token = _macro_directive(content, &(undefined));  if(! token) return;  String name = token -> text;  if(undefined){
     Map_del(c -> object_macros, String_var(name));  return;
   }
   Token body = token + 1;  if(body -> type == 81){

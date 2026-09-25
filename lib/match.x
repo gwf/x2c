@@ -1886,7 +1886,7 @@ int MatchPlan.try_search(
   return plan._first(input, out_match, out_bindings);
 }
 
-static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
+static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
   $match.machine(machine, NULL);
   $match.walk_buffer(plan, machine, walk);
   List results = NULL;
@@ -1894,7 +1894,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
   walk.spine.free();
   machine.dispose();
   if (status < 0) return -1;
-  *out_results = results;
+  out_results = results;
   return 1;
 }
 
@@ -1909,7 +1909,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
 */
 int MatchPlan.search(MatchPlan plan, List input, List *out_results) {
   if (!_plan_prepared(plan, "MatchPlan.search") || !out_results) return -1;
-  return plan._all(input, out_results);
+  return plan._all(input, *out_results);
 }
 
 static int MatchPlan._replace(

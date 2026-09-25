@@ -1101,7 +1101,7 @@ static void _collect_cache_function_refs(Var value, Var caller, Map callers, int
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6363658: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_146), &_x2c_match_capture)) {{
-    * uses_cache = 1;  return;
+    (* uses_cache) = 1;  return;
   }
   break;
 }
@@ -1115,7 +1115,7 @@ default: break;
   }
 {
   Var child;  List _x2c_macro_object_4 = node;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
-    child = _x2c_macro_cursor_output_4;  _collect_cache_function_refs(child, caller, callers, uses_cache);
+    child = _x2c_macro_cursor_output_4;  _collect_cache_function_refs(child, caller, callers, &((* uses_cache)));
   }
 
 }
@@ -1131,7 +1131,7 @@ static Map _cache_reachable_functions(List source){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_169), &_x2c_match_capture)) {Var definition = _x2c_match_values[0];  Var spelling = _x2c_match_values[1]; {
-        int uses_cache = 0;  _collect_cache_function_refs(definition, spelling, callers, & uses_cache);  if(uses_cache) Array_push(queue, spelling);
+        int uses_cache = 0;  _collect_cache_function_refs(definition, spelling, callers, &(uses_cache));  if(uses_cache) Array_push(queue, spelling);
       }
       break;
     }
@@ -1338,7 +1338,7 @@ static void _partition_alias(Array header, Array source, List alias, Type type){
 
 int String_contains(String, String);
 static void _partition_preproc(Array header, Array source, List node, String content, int * private){
-  if(_is_pragma_once(content)) return;  if(String_contains(content, _719)) * private = 0;  else if(String_contains(content, _720)) * private = 1;  else Array_push((* private ? source : header), List_var(node));
+  if(_is_pragma_once(content)) return;  if(String_contains(content, _719))(* private) = 0;  else if(String_contains(content, _720))(* private) = 1;  else Array_push(((* private) ? source : header), List_var(node));
 }
 
 List List_cdr(List);
@@ -1669,7 +1669,7 @@ break;
   if(kind && Array_len(open)){
     List marker = cons(_318, cons(Array_getindex(open, Array_len(open) - 1), cons(Symbol_var(kind), cons(List_var(node), NULL))));  Array_push(header, List_var(marker));  Array_push(source, List_var(marker));  if(kind == 7109834) Array_take_last(open);  continue;
   }
-  _partition_preproc(header, source, node, Var_string(content), & private);  continue;
+  _partition_preproc(header, source, node, Var_string(content), &(private));  continue;
 }
 break; } }
     }

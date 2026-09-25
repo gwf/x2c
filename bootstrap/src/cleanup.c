@@ -660,7 +660,7 @@ static Var _finalizer_label(Var value, int origin, int * at){
 
     }
     break; } } case 25235800: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-      * at = here; {
+      (* at) = here; {
         Var _x2c_return_value_0 = name; {
           x2c_cleanup_leave(& _x2c_defer_record_1);  x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
         }
@@ -1520,7 +1520,7 @@ default: break;
 break;
 }
 case 42162: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761660594ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var body = _x2c_match_values[0];  Var clause = _x2c_match_values[1];  Var finalizer = _x2c_match_values[2]; {
-  walk -> compiler -> needs_exception = 1;  List frame = _region_binding(walk -> compiler, _388);  List handle = Var_truth(clause) ? _region_binding(walk -> compiler, _389) : NULL;  int labelled_at = walk -> origin;  Var labelled = _finalizer_label(finalizer, walk -> origin, & labelled_at);  if(Var_truth(labelled)){
+  walk -> compiler -> needs_exception = 1;  List frame = _region_binding(walk -> compiler, _388);  List handle = Var_truth(clause) ? _region_binding(walk -> compiler, _389) : NULL;  int labelled_at = walk -> origin;  Var labelled = _finalizer_label(finalizer, walk -> origin, &(labelled_at));  if(Var_truth(labelled)){
     String name = _label_spelling(labelled);  _report_at(walk, labelled_at, _390, cons(String_var(String_join(NULL, cons(String_var(_323), cons(String_var(String_truth(name) ? name : _324), cons(String_var(_325), NULL))))), NULL));
   }
   List cleanup = _try_cleanup(frame, handle, Var_list(_rewrite(walk, finalizer)), ! ! Var_truth(clause));  List body_out = Var_list(_inside(walk, cleanup, Var_list(body), body));  List clause_out = Var_list(clause);

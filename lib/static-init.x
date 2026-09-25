@@ -125,10 +125,10 @@ void x2c_static_abort(void *data) {
   _unlock();
 }
 
-static void _release(X2CStatic **values) {
-  while (*values) {
-    X2CStatic *guard = *values;
-    *values = guard.next;
+static void _release(X2CStatic *&values) {
+  while (values) {
+    X2CStatic *guard = values;
+    values = guard.next;
     free(guard.payload);
     guard.payload = NULL;
     guard.next = NULL;
@@ -138,10 +138,10 @@ static void _release(X2CStatic **values) {
 
 /* Releases this worker's reserved dynamic `threaded` storage. */
 void x2c_static_thread_release(void) {
-  _release(&static_thread.values);
+  _release(static_thread.values);
 }
 
 /* Releases reserved process storage after the runtime shutdown hooks. */
 void x2c_static_shutdown(void) {
-  _release(&static_values);
+  _release(static_values);
 }

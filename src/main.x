@@ -90,7 +90,7 @@ static void _translate_unit(
   Frontend frontend, String filename, String output_dir) {
   CliRequest request = frontend.request;
   ParsedUnit unit;
-  int ok = frontend.start(filename, unit);
+  int ok = frontend.start(filename, &unit);
   defer unit.close();
   Compiler compiler = unit.compiler;
   if (!ok) {
@@ -256,7 +256,7 @@ static int _translate_workers(
       running[running_count++] = pid;
     }
     if (!running_count) continue;
-    int status, slot = worker_wait_any(running, running_count, &status);
+    int status, slot = worker_wait_any(running, running_count, status);
     if (status) failed++;
     List slice = carried[slot];
     if (build && !status) build.end_translation(slice.car(), 0);

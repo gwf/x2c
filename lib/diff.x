@@ -32,18 +32,18 @@ typedef struct {
   List edits;
 } _Diff;
 
-static void _emit(_Diff *d, Symbol kind, String line) {
+static void _emit(_Diff &d, Symbol kind, String line) {
   d.edits = cons(%($kind $line), d.edits);
 }
 
-static int _same(_Diff *d, int i, int j) =>
+static int _same(_Diff &d, int i, int j) =>
   d.old[i].string() == d.new[j].string();
 
 /* Myers' greedy search over old[lo..old_hi) and new[lo..new_hi). Returns
    the edit count, or -1 past the limit, after emitting the edits. The
    frontier of step `s` has `2s + 1` entries indexed by `k + s`, so the
    frontiers of all steps fit one buffer with step `s` starting at `s * s`. */
-static int _myers(_Diff *d, int lo, int old_hi, int new_hi) {
+static int _myers(_Diff &d, int lo, int old_hi, int new_hi) {
   int n = old_hi - lo, m = new_hi - lo;
   int max = n + m < _LIMIT ? n + m : _LIMIT, found = -1;
   int *trace = Scope.calloc((max + 1) * (max + 1), sizeof(int));
@@ -98,7 +98,7 @@ static int _myers(_Diff *d, int lo, int old_hi, int new_hi) {
   return found;
 }
 
-static void _replace(_Diff *d, int lo, int old_hi, int new_hi) {
+static void _replace(_Diff &d, int lo, int old_hi, int new_hi) {
   for (int i = lo; i < old_hi; i++) _emit(d, <delete>, d.old[i]);
   for (int j = lo; j < new_hi; j++) _emit(d, <insert>, d.new[j]);
 }
@@ -121,16 +121,16 @@ static void _hunk(Buffer out, List lines, int old_start, int old_count,
 List Diff.lines(String old, String new) {
   _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
   int lo = 0, old_hi = d.old.len(), new_hi = d.new.len();
-  while (lo < old_hi && lo < new_hi && _same(&d, lo, lo)) {
-    _emit(&d, <same>, d.old[lo]);
+  while (lo < old_hi && lo < new_hi && _same(d, lo, lo)) {
+    _emit(d, <same>, d.old[lo]);
     lo++;
   }
   int tail = 0;
-  while (old_hi > lo && new_hi > lo && _same(&d, old_hi - 1, new_hi - 1)) {
+  while (old_hi > lo && new_hi > lo && _same(d, old_hi - 1, new_hi - 1)) {
     old_hi--, new_hi--, tail++;
   }
-  if (_myers(&d, lo, old_hi, new_hi) < 0) _replace(&d, lo, old_hi, new_hi);
-  for (int i = old_hi; i < old_hi + tail; i++) _emit(&d, <same>, d.old[i]);
+  if (_myers(d, lo, old_hi, new_hi) < 0) _replace(d, lo, old_hi, new_hi);
+  for (int i = old_hi; i < old_hi + tail; i++) _emit(d, <same>, d.old[i]);
   return d.edits.reverse();
 }
 

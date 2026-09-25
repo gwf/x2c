@@ -74,7 +74,7 @@ Var List_var(List);
 Var String_var(String);
 
 static void _emit(_Diff * d, Symbol kind, String line){
-  d -> edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), d -> edits);
+  (* d).edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), (* d).edits);
 }
 
 int String_equal(String, String);
@@ -84,7 +84,7 @@ String Var_string(Var);
 Var Array_getindex(Array, int);
 
 static int _same(_Diff * d, int i, int j){
-  return String_equal(Var_string(Array_getindex(d -> old, i)), Var_string(Array_getindex(d -> new, j)));
+  return String_equal(Var_string(Array_getindex((* d).old, i)), Var_string(Array_getindex((* d).new, j)));
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -120,7 +120,7 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
           x = k == - step ||(k != step && left < right) ? right : left + 1;
         }
         int y = x - k;
-        while(x < n && y < m && _same(d, lo + x, lo + y)) x ++, y ++;
+        while(x < n && y < m && _same(&((* d)), lo + x, lo + y)) x ++, y ++;
         frontier[k + step] = x;
         if(x >= n && y >= m){
           found = step;
@@ -172,7 +172,7 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
           Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
           int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
           int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
-          _emit(d, kind, Var_string(kind == 634596520 ? Array_getindex(d -> new, lo + j) : Array_getindex(d -> old, lo + i)));
+          _emit(&((* d)), kind, Var_string(kind == 634596520 ? Array_getindex((* d).new, lo + j) : Array_getindex((* d).old, lo + i)));
         }
 
       }
@@ -194,8 +194,8 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
 }
 
 static void _replace(_Diff * d, int lo, int old_hi, int new_hi){
-  for(int i = lo;  i < old_hi;  i ++) _emit(d, 279719178, Var_string(Array_getindex(d -> old, i)));
-  for(int j = lo;  j < new_hi;  j ++) _emit(d, 634596520, Var_string(Array_getindex(d -> new, j)));
+  for(int i = lo;  i < old_hi;  i ++) _emit(&((* d)), 279719178, Var_string(Array_getindex((* d).old, i)));
+  for(int j = lo;  j < new_hi;  j ++) _emit(&((* d)), 634596520, Var_string(Array_getindex((* d).new, j)));
 }
 
 Var List_car(List);
@@ -237,16 +237,16 @@ List Diff_lines(String old, String new){
   }
   ;
   int lo = 0, old_hi = Array_len(d.old), new_hi = Array_len(d.new);
-  while(lo < old_hi && lo < new_hi && _same(& d, lo, lo)){
-    _emit(& d, 1248074, Var_string(Array_getindex(d.old, lo)));
+  while(lo < old_hi && lo < new_hi && _same(&(d), lo, lo)){
+    _emit(&(d), 1248074, Var_string(Array_getindex(d.old, lo)));
     lo ++;
   }
   int tail = 0;
-  while(old_hi > lo && new_hi > lo && _same(& d, old_hi - 1, new_hi - 1)){
+  while(old_hi > lo && new_hi > lo && _same(&(d), old_hi - 1, new_hi - 1)){
     old_hi --, new_hi --, tail ++;
   }
-  if(_myers(& d, lo, old_hi, new_hi) < 0) _replace(& d, lo, old_hi, new_hi);
-  for(int i = old_hi;  i < old_hi + tail;  i ++) _emit(& d, 1248074, Var_string(Array_getindex(d.old, i)));
+  if(_myers(&(d), lo, old_hi, new_hi) < 0) _replace(&(d), lo, old_hi, new_hi);
+  for(int i = old_hi;  i < old_hi + tail;  i ++) _emit(&(d), 1248074, Var_string(Array_getindex(d.old, i)));
   return List_reverse(d.edits);
 }
 

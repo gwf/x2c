@@ -713,10 +713,10 @@ static List _make_catch_binders(List binders, String handle_name) {
    it takes `default:` and ends the labelling. A failed arm still falls into
    everything after it, so arm order is unchanged. */
 
-static List _match_arm_label(Symbol head, Array heads, int *labelling) {
-  if (!*labelling) return NULL;
+static List _match_arm_label(Symbol head, Array heads, int &labelling) {
+  if (!labelling) return NULL;
   if (!head) {
-    *labelling = 0;
+    labelling = 0;
     return %("default: ;");
   }
   if (head in heads) return NULL;
@@ -754,7 +754,7 @@ static List _flat_match_condition(Symbol head, List tags) {
    front of the conditional groups around its arm, so the switch still
    reaches later arms when the preprocessor removes that arm. */
 
-static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
+static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
   Array values = [], heads = [], int labelling = 1, opening = 0;
   List arms = NULL;
   foreach (List rec, ast) {
@@ -777,7 +777,7 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
     List pattern = e._emit(pattern_ast);
     List body = e._emit(body_ast);
     List label =
-      _match_arm_label(match_value_head(value), heads, &labelling);
+      _match_arm_label(match_value_head(value), heads, labelling);
     if (label) values.insert(arms ? opening++ : values.len(), label);
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
@@ -814,7 +814,7 @@ static List Emitter._match_if(Emitter e, List ast, int *dispatched) {
     }
   }
   if (labelling) values.push(%("default: break;"));
-  *dispatched = heads.len() != 0;
+  dispatched = heads.len() != 0;
   heads.free();
   return values.list_free();
 }
@@ -842,7 +842,7 @@ static List Emitter._match_cases(Emitter e, List ast) {
       "MatchCaptureBuffer _x2c_match_capture = { 0 };"
     );
   int dispatched;
-  List arms = e._match_if(cases, &dispatched);
+  List arms = e._match_if(cases, dispatched);
   // The subject's head symbol selects the first arm that can still match;
   // with no case labels every subject reaches the sole default arm.
   List selector = dispatched

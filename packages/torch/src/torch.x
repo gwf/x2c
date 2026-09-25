@@ -220,28 +220,28 @@ static xt_tensor *_handles(List tensors, int &count) {
   return handles;
 }
 
-static void _flatten(Var values, double *out, int64_t *count, int64_t limit) {
+static void _flatten(Var values, double *out, int64_t &count, int64_t limit) {
   if (values is <list>) {
     foreach (Var item, values.list()) _flatten(item, out, count, limit);
   }
   else {
-    if (*count >= limit) raise %(bad-arg (library "torch")
+    if (count >= limit) raise %(bad-arg (library "torch")
                                  (reason "more values than the shape holds"));
-    out[(*count)++] = values.convert(<f64>).double();
+    out[count++] = values.convert(<f64>).double();
   }
 }
 
-static void _flatten_integers(Var values, int64_t *out, int64_t *count,
+static void _flatten_integers(Var values, int64_t *out, int64_t &count,
                               int64_t limit) {
   if (values is <list>) {
     foreach (Var item, values.list())
       _flatten_integers(item, out, count, limit);
   }
   else {
-    if (*count >= limit) raise %(bad-arg (library "torch")
+    if (count >= limit) raise %(bad-arg (library "torch")
                                  (reason "more values than the shape holds"));
     long exact = values;
-    out[(*count)++] = exact;
+    out[count++] = exact;
   }
 }
 
@@ -280,12 +280,12 @@ Tensor Tensor.of(List values, List shape, int dtype) {
   for (int i = 0; i < rank; i++) total *= sizes[i];
   if (_integer_dtype(dtype)) {
     int64_t *whole = Scope.calloc(total ? total : 1, sizeof(int64_t));
-    _flatten_integers(values, whole, &count, total);
+    _flatten_integers(values, whole, count, total);
     _expect_filled(count, total);
     return _wrap(xt_from_int64s(whole, sizes, rank, dtype), "of");
   }
   double *data = Scope.calloc(total ? total : 1, sizeof(double));
-  _flatten(values, data, &count, total);
+  _flatten(values, data, count, total);
   _expect_filled(count, total);
   return _wrap(xt_from_doubles(data, sizes, rank, dtype), "of");
 }

@@ -494,7 +494,7 @@ int worker_wait_any(long * pids, int count, int * status){
       int raw;
       pid_t done = waitpid((pid_t) pids[i], & raw, WNOHANG);
       if(! done ||(done < 0 && errno == EINTR)) continue;
-      * status = done < 0 ? - 1 : WIFEXITED(raw) ? WEXITSTATUS(raw) : WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : - 1;
+      (* status) = done < 0 ? - 1 : WIFEXITED(raw) ? WEXITSTATUS(raw) : WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : - 1;
       return i;
     }
     usleep(1000);

@@ -185,12 +185,12 @@ static int _is_protocol_bootstrap_function(String spelling) =>
    the unit. Binding numbers do not: class defaults selected during
    macro-library preload are numbered apart from the unit's own walk. */
 static void _collect_cache_function_refs(
-  Var value, Var caller, Map callers, int *uses_cache) {
+  Var value, Var caller, Map callers, int &uses_cache) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(cache ?): {
-      *uses_cache = 1;
+      uses_cache = 1;
       return;
     }
     case %(ident (binding ? ?callee)): {
@@ -215,7 +215,7 @@ static Map _cache_reachable_functions(List source) {
              (function ? (bind (binding ? ?spelling) ?) ?)): {
         int uses_cache = 0;
         _collect_cache_function_refs(
-          definition, spelling, callers, &uses_cache);
+          definition, spelling, callers, uses_cache);
         if (uses_cache) queue.push(spelling);
       }
   for (int i = 0; i < queue.len(); i++) {
@@ -443,11 +443,11 @@ static void _partition_alias(
 }
 
 static void _partition_preproc(
-  Array header, Array source, List node, String content, int *private) {
+  Array header, Array source, List node, String content, int &private) {
   if (_is_pragma_once(content)) return;
-  if (content.contains("pragma public")) *private = 0;
-  else if (content.contains("pragma private")) *private = 1;
-  else (*private ? source : header).push(node);
+  if (content.contains("pragma public")) private = 0;
+  else if (content.contains("pragma private")) private = 1;
+  else (private ? source : header).push(node);
 }
 
 /* Partition a normalized unit without changing source order. Non-inline
@@ -671,7 +671,7 @@ static List _header_and_source(Compiler compiler, List ast) {
           if (kind == <close>) open.take_last();
           continue;
         }
-        _partition_preproc(header, source, node, content, &private);
+        _partition_preproc(header, source, node, content, private);
         continue;
       }
     }

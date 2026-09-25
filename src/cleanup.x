@@ -64,7 +64,7 @@ static List _defer_cleanup(List record) =>
 /* The first label a finalizer defines, or NULL. The statements that leave a
    region run on every path that leaves it, so a label among them would be
    defined once per path. */
-static Var _finalizer_label(Var value, int origin, int *at) {
+static Var _finalizer_label(Var value, int origin, int &at) {
   Array pending = $auto([value]), origins = $auto([origin]);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -80,7 +80,7 @@ static Var _finalizer_label(Var value, int origin, int *at) {
         continue;
       }
       case %(label ?name *): {
-        *at = here;
+        at = here;
         return name;
       }
     }
@@ -656,7 +656,7 @@ static Var _rewrite(Walk walk, Var value) {
       List handle = clause
         ? _region_binding(walk.compiler, "error_handler") : NULL;
       int labelled_at = walk.origin;
-      Var labelled = _finalizer_label(finalizer, walk.origin, &labelled_at);
+      Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
       if (labelled) {
         String name = _label_spelling(labelled);
         _report_at(
