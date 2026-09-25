@@ -15,6 +15,10 @@
 #include <limits.h>
 int Var_known_tag(Symbol tag);
 
+unsigned long Var_tag_top(Symbol tag);
+
+unsigned long Var_tag_bottom(Symbol tag);
+
 int x2c_var_descriptor_index(Var value);
 
 int Var_custom_descriptor_index(Var value);

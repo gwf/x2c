@@ -25,6 +25,8 @@ Variant type for dynamic typing.
 | [`Var.is_void`](#Var.is_void) | Reports whether `v` is the absence sentinel `void`. |
 | [`Var.new`](#Var.new) | Constructs a `Var` with `tag` from its tag-directed variadic payload. |
 | [`Var.null`](#Var.null) | Returns `Null`, the all-zero `Var` that stands for external `nil`. |
+| [`Var.tag_bottom`](#Var.tag_bottom) | Returns the bottom encoding field of built-in `tag`. |
+| [`Var.tag_top`](#Var.tag_top) | Returns the top encoding field of built-in `tag`. |
 
 ### Functions
 
@@ -34,7 +36,7 @@ Variant type for dynamic typing.
 
 Returns a boxed custom object's descriptor, or NULL for another value.
 
-Source: `lib/var.x:268`
+Source: `lib/var.x:284`
 
 #### x2c_var_declare
 
@@ -44,7 +46,7 @@ Returns the process-lifetime descriptor declared for custom `tag`,
 declaring it on first use. The caller holds the descriptor lock and has
 checked that registration is open and `tag` is not built in.
 
-Source: `lib/var.x:289`
+Source: `lib/var.x:305`
 
 #### x2c_var_descriptor_index
 
@@ -55,7 +57,7 @@ The row is the tag's offset from `<array>` and includes the `Symbol` row.
 Numbers, pointers, references, custom tags, and invalid encodings have no
 built-in row.
 
-Source: `lib/var.x:252`
+Source: `lib/var.x:268`
 
 #### x2c_var_tag_descriptor_index
 
@@ -63,7 +65,7 @@ Source: `lib/var.x:252`
 
 Returns a built-in object or `Symbol` tag's descriptor row, or `-1`.
 
-Source: `lib/var.x:307`
+Source: `lib/var.x:323`
 
 ### `Var`
 
@@ -79,7 +81,7 @@ are taken, the copy carries its descriptor in front of it.
 **Raises:** `<bad-target>` when `tag` names no declared class, or
 `<alloc-fail>` when the copy cannot be allocated.
 
-Source: `lib/var.x:829`
+Source: `lib/var.x:845`
 
 <a id="Var.is"></a>
 #### Var.is
@@ -93,7 +95,7 @@ This tests one family. A `Var` holding an `unsigned char` answers 0 for
 As with `Var.tag`, validate externally constructed bits first: an invalid
 encoding uses the `<f64>` fallback.
 
-Source: `lib/var.x:416`
+Source: `lib/var.x:432`
 
 <a id="Var.is_floating"></a>
 #### Var.is_floating
@@ -106,7 +108,7 @@ True for `<f32>`, `<f64>`, and `<ldouble>`, and for the discrete `<nan>`,
 with `Var.long_double_value` when the tag is `<ldouble>` and the extra
 precision matters.
 
-Source: `lib/var.x:441`
+Source: `lib/var.x:457`
 
 <a id="Var.is_integer"></a>
 #### Var.is_integer
@@ -119,7 +121,7 @@ True for every signed and unsigned integer family from `<u8>` through
 their own and answer 0 here, even though `Var.integer` returns a `Symbol`'s
 numeric value.
 
-Source: `lib/var.x:449`
+Source: `lib/var.x:465`
 
 <a id="Var.is_nil"></a>
 #### Var.is_nil
@@ -132,7 +134,7 @@ The empty `List` is a native null pointer carrying the `<list>` tag.
 every exhausted `List.cdr` yields this one value, so an identity test on
 the bits is a valid emptiness test.
 
-Source: `lib/var.x:514`
+Source: `lib/var.x:530`
 
 <a id="Var.is_null"></a>
 #### Var.is_null
@@ -148,7 +150,7 @@ dedicated null family for `Var.is` to match.
 Write `Null` as `(Var) { .u64 = 0 }`. An unresolved C `NULL` macro also
 converts to this value when its x2c target is `Var`.
 
-Source: `lib/var.x:497`
+Source: `lib/var.x:513`
 
 <a id="Var.is_object"></a>
 #### Var.is_object
@@ -162,7 +164,7 @@ True for the builtin classes such as `String`, `List`, `Array`, `Map`,
 pointer to a handle, such as `<string*>`, is `<reference>` instead and
 answers 0 here.
 
-Source: `lib/var.x:464`
+Source: `lib/var.x:480`
 
 <a id="Var.is_pointer"></a>
 #### Var.is_pointer
@@ -171,7 +173,7 @@ Source: `lib/var.x:464`
 
 Reports whether `v` holds a native pointer.
 
-Source: `lib/var.x:452`
+Source: `lib/var.x:468`
 
 <a id="Var.is_reference"></a>
 #### Var.is_reference
@@ -180,7 +182,7 @@ Source: `lib/var.x:452`
 
 Reports whether `v` holds a pointer to a boxed handle.
 
-Source: `lib/var.x:455`
+Source: `lib/var.x:471`
 
 <a id="Var.is_void"></a>
 #### Var.is_void
@@ -207,7 +209,7 @@ printf("void: void=%d null=%d\n", void is void, void.is_null());
 
 This is the test that accepts a `void` argument.
 
-Source: `lib/var.x:486`
+Source: `lib/var.x:502`
 
 <a id="Var.new"></a>
 #### Var.new
@@ -239,7 +241,7 @@ when a wide box cannot be allocated, and `<bad-enc>` when a box address
 cannot be represented or a custom object pointer is not 8-byte
 aligned.
 
-Source: `lib/var.x:768`
+Source: `lib/var.x:784`
 
 <a id="Var.null"></a>
 #### Var.null
@@ -249,7 +251,25 @@ Source: `lib/var.x:768`
 Returns `Null`, the all-zero `Var` that stands for external `nil`.
 Generated call adapters return it for a `void` target.
 
-Source: `lib/var.x:502`
+Source: `lib/var.x:518`
+
+<a id="Var.tag_bottom"></a>
+#### Var.tag_bottom
+
+`meta native unsigned long Var.tag_bottom(Symbol tag)`
+
+Returns the bottom encoding field of built-in `tag`.
+
+Source: `lib/var.x:109`
+
+<a id="Var.tag_top"></a>
+#### Var.tag_top
+
+`meta native unsigned long Var.tag_top(Symbol tag)`
+
+Returns the top encoding field of built-in `tag`.
+
+Source: `lib/var.x:101`
 
 ## Advanced and interop API
 
@@ -309,7 +329,7 @@ printf("equal=%d same=%d tag=%s\n", five == also, five === also,
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:599`
+Source: `lib/var.x:615`
 
 <a id="Var.box_long_double"></a>
 #### Var.box_long_double
@@ -326,7 +346,7 @@ extra precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:651`
+Source: `lib/var.x:667`
 
 <a id="Var.box_long_long"></a>
 #### Var.box_long_long
@@ -339,7 +359,7 @@ Boxes a native signed long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:625`
+Source: `lib/var.x:641`
 
 <a id="Var.box_ulong"></a>
 #### Var.box_ulong
@@ -356,7 +376,7 @@ bit pattern; `Var.wide_equal` requires matching tags. Read it back with
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:614`
+Source: `lib/var.x:630`
 
 <a id="Var.box_ulong_long"></a>
 #### Var.box_ulong_long
@@ -369,7 +389,7 @@ Boxes a native unsigned long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:636`
+Source: `lib/var.x:652`
 
 <a id="Var.encoding_valid"></a>
 #### Var.encoding_valid
@@ -380,7 +400,7 @@ Reports whether `value` has a valid structural `Var` encoding.
 An address-bearing encoding must still refer to live storage of the right
 type; wide encodings in particular require a readable `Scope`-owned box.
 
-Source: `lib/var.x:316`
+Source: `lib/var.x:332`
 
 <a id="Var.floating"></a>
 #### Var.floating
@@ -401,7 +421,7 @@ the scalar-named readers such as `Var.double` do this for you.
 
 An unhandled tag yields 0.0.
 
-Source: `lib/var.x:855`
+Source: `lib/var.x:871`
 
 <a id="Var.integer"></a>
 #### Var.integer
@@ -430,7 +450,7 @@ printf("small=%ld text=%ld\n", small.integer(), text.integer());
 
 An unhandled tag yields 0.
 
-Source: `lib/var.x:900`
+Source: `lib/var.x:916`
 
 <a id="Var.integer_compare"></a>
 #### Var.integer_compare
@@ -447,7 +467,7 @@ Both arguments are assumed to be integer-kinded. Another value is decoded
 by `Var.integer`, which reads it as 0. Confirm with `Var.is_integer` when
 the kinds are not known.
 
-Source: `lib/var.x:1086`
+Source: `lib/var.x:1102`
 
 <a id="Var.integer_floating_compare"></a>
 #### Var.integer_floating_compare
@@ -464,7 +484,7 @@ never equal to an integer.
 integer. NaN is not ordered and reports -1. Test the tag for `<nan>`
 first if that distinction matters.
 
-Source: `lib/var.x:1114`
+Source: `lib/var.x:1130`
 
 <a id="Var.kind"></a>
 #### Var.kind
@@ -482,7 +502,7 @@ integer widths answer `<integer>`, and every builtin class handle such as
 means a pointer to an object handle such as `<string*>`. NaN and the
 infinities are `<floating>`. Only `void` is `<void>`.
 
-Source: `lib/var.x:429`
+Source: `lib/var.x:445`
 
 <a id="Var.known_tag"></a>
 #### Var.known_tag
@@ -505,7 +525,7 @@ floating tag, `<f64>` included, yields 0.0 here instead of being widened.
 
 A tag mismatch yields 0.0.
 
-Source: `lib/var.x:973`
+Source: `lib/var.x:989`
 
 <a id="Var.long_long_value"></a>
 #### Var.long_long_value
@@ -514,7 +534,7 @@ Source: `lib/var.x:973`
 
 Returns an `<llong>` box's signed payload, or 0 for another tag.
 
-Source: `lib/var.x:959`
+Source: `lib/var.x:975`
 
 <a id="Var.long_value"></a>
 #### Var.long_value
@@ -528,7 +548,7 @@ use this one when the tag is known and the payload must survive intact.
 
 A tag mismatch yields 0.
 
-Source: `lib/var.x:943`
+Source: `lib/var.x:959`
 
 <a id="Var.parse"></a>
 #### Var.parse
@@ -564,7 +584,7 @@ printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
 **Raises:** `<alloc-fail>` while constructing `String` or quoted-`Symbol`
 output.
 
-Source: `lib/var.x:1217`
+Source: `lib/var.x:1233`
 
 <a id="Var.pointer"></a>
 #### Var.pointer
@@ -588,7 +608,7 @@ also accepts some reserved pointer-shaped bit patterns. Validate external
 bits with `Var.encoding_valid`, then confirm the family with `Var.tag` or
 `Var.is` before trusting the result.
 
-Source: `lib/var.x:1169`
+Source: `lib/var.x:1185`
 
 <a id="Var.register_object_tag"></a>
 #### Var.register_object_tag
@@ -602,7 +622,7 @@ changing the registry. Declaration must finish before the first successful
 `Thread.start`; afterward it raises `<bad-state>`. Native registry-mutex
 failure aborts.
 
-Source: `lib/var.x:325`
+Source: `lib/var.x:341`
 
 <a id="Var.tag"></a>
 #### Var.tag
@@ -625,7 +645,7 @@ as `<f64>`, since the shifted double range covers everything left over.
 printf("%s %s\n", raw.tag().str(), void.tag().str());
 ```
 
-Source: `lib/var.x:402`
+Source: `lib/var.x:418`
 
 <a id="Var.ulong_long_value"></a>
 #### Var.ulong_long_value
@@ -634,7 +654,7 @@ Source: `lib/var.x:402`
 
 Returns a `<ullong>` box's unsigned payload, or 0 for another tag.
 
-Source: `lib/var.x:963`
+Source: `lib/var.x:979`
 
 <a id="Var.ulong_value"></a>
 #### Var.ulong_value
@@ -650,7 +670,7 @@ doubt.
 
 A tag mismatch yields 0.
 
-Source: `lib/var.x:955`
+Source: `lib/var.x:971`
 
 <a id="Var.wide_compare"></a>
 #### Var.wide_compare
@@ -667,7 +687,7 @@ order deterministically.
 argument that is not a wide box. Check the tags first, or use the
 relational operators, which reach the runtime's full ordering.
 
-Source: `lib/var.x:1138`
+Source: `lib/var.x:1154`
 
 <a id="Var.wide_equal"></a>
 #### Var.wide_equal
@@ -686,7 +706,7 @@ that is not a wide box and a pair whose tags differ. For a general
 equality test use `==`, which reaches `Var.equal` and covers every
 family.
 
-Source: `lib/var.x:1021`
+Source: `lib/var.x:1037`
 
 <a id="Var.wide_hash"></a>
 #### Var.wide_hash
@@ -695,7 +715,7 @@ Source: `lib/var.x:1021`
 
 Returns a supported wide scalar box's content hash, or 0 otherwise.
 
-Source: `lib/var.x:983`
+Source: `lib/var.x:999`
 
 ## Runtime-internal callables
 
@@ -723,7 +743,7 @@ The clone compares equal but not identical to `value`. Returns `void` when
 **Raises:** `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>`
 if its address cannot be represented in a `Var`.
 
-Source: `lib/var.x:663`
+Source: `lib/var.x:679`
 
 <a id="Var.custom_descriptor_index"></a>
 #### Var.custom_descriptor_index
@@ -734,7 +754,7 @@ Returns a boxed custom object's row, or `-1` for another value.
 Rows below 30 belong to one class each; row 30 holds every overflow heap
 class and row 31 every overflow record.
 
-Source: `lib/var.x:262`
+Source: `lib/var.x:278`
 
 <a id="Var.move_wide_to"></a>
 #### Var.move_wide_to
@@ -750,7 +770,7 @@ For a wide value, raises `<bad-arg>` when `scope` is NULL, or
 Ownership
 is unchanged on failure.
 
-Source: `lib/var.x:688`
+Source: `lib/var.x:704`
 
 <a id="Var.wide_owner"></a>
 #### Var.wide_owner
@@ -759,7 +779,7 @@ Source: `lib/var.x:688`
 
 Returns the `Scope` owning a live wide numeric box, or NULL otherwise.
 
-Source: `lib/var.x:695`
+Source: `lib/var.x:711`
 
 ## Design notes
 

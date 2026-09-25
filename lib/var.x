@@ -97,6 +97,22 @@ static const SymbolSet tags = $var.tag.symbolset();
 
 static TagId _tag2id(Symbol tag) => (TagId) tags.index(tag);
 
+/** Returns the top encoding field of built-in `tag`. */
+meta native unsigned long Var.tag_top(Symbol tag) {
+  TagId id = _tag2id(tag);
+  if (id == _invalid_)
+    raise %(bad-target (owner "Var.tag_top") (target $tag));
+  return taginfo[id].top;
+}
+
+/** Returns the bottom encoding field of built-in `tag`. */
+meta native unsigned long Var.tag_bottom(Symbol tag) {
+  TagId id = _tag2id(tag);
+  if (id == _invalid_)
+    raise %(bad-target (owner "Var.tag_bottom") (target $tag));
+  return taginfo[id].bottom;
+}
+
 static inline unsigned long _bitmask(unsigned n) => (1ul << n)-1;
 
 static inline unsigned _top_bits(Var v) {
