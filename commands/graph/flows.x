@@ -11,9 +11,6 @@
 #include "compiler.x"
 #include "targets.x"
 
-List Flow_analyze_unit(Compiler compiler, List ast, String path);
-List Flow_finish(List functions, String producer, String consumer);
-
 #pragma private
 
 #include <string.h>
@@ -54,10 +51,6 @@ static List _flow_summary(
   }
   return %(value);
 }
-
-static List _flow_source(
-  Compiler compiler, Var value, String path, int origin, Map definitions,
-  Map parameters, Map locals);
 
 static List _flow_arguments(
   Compiler compiler, List values, String path, int origin, Map definitions,
@@ -727,11 +720,6 @@ static void _flow_record_result(
   else
     paths.push(%(path @steps));
 }
-
-static void _flow_trace(
-  List source, List current, Map environment, List suffix, String blocked,
-  List producer, Map by_target, Map publics, List functions, Map active,
-  Array paths, Array unresolved);
 
 static void _flow_trace_call_arguments(
   List arguments, List current, Map environment, List suffix, String reason,
