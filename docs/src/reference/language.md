@@ -20,7 +20,8 @@ A source file whose first line begins with `#!` is a
 `#pragma private` marks the start of implementation-only content. Declarations
 before it may be emitted to the generated header. A function definition also
 begins source-private output, except that a typedef after it still belongs
-to the header when a later public prototype names it. Every translated header
+to the header when a later public prototype names it. Functions that a class
+or another declaration producer generates do not begin it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
