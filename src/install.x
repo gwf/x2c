@@ -210,7 +210,7 @@ static void _build_source(String package, String name, String spec) {
           "--build-dir" "$builds/cc" ).append(inputs), "build");
   String row = %"native-meta \"${name}__";
   if (_files_with(builds, ".xi").any(
-        %!(String path) => Path.read_text(path).contains(row)))
+        %!(String path) => row in Path.read_text(path)))
     _run(%( $x2c "build" "--kind" "meta-module"
             "--output" "$builds/$name.module"
             "--build-dir" "$builds/module"

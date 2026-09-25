@@ -694,7 +694,7 @@ static void _note_layout_macro(
       if (inner.type == <(> && _layout_attribute(inner, packed))
         value = packed ? 2 : value ? value : 1;
     }
-    else if (layout.contains(token.text)) {
+    else if (token.text in layout) {
       int inherited = layout[token.text];
       if (inherited > value) value = inherited;
     }
@@ -731,7 +731,7 @@ static void _scan_conditionals(Compiler c) {
         token.type = <comment>;
       else if (token.type == <ident> && token.text == "__attribute__")
         i = _note_attribute(c, i);
-      else if (token.type == <ident> && layout.contains(token.text)) {
+      else if (token.type == <ident> && token.text in layout) {
         c.layout_marks.push((long) i);
         c.layout_marks.push((long) i + 1);
         if (layout[token.text] == 2) {
@@ -1373,12 +1373,12 @@ static int _declaration_default_taken(
   List key = %($spelling);
   Type declared = compiler.sym.get(key);
   if (!declared) return 0;
-  if (!declared.is_function() || definitions.contains(spelling) ||
-      compiler.fn_defs.contains(spelling) ||
-      compiler.sym.file_statics().contains(%(function $spelling)))
+  if (!declared.is_function() || spelling in definitions ||
+      spelling in compiler.fn_defs ||
+      %(function $spelling) in compiler.sym.file_statics())
     return 1;
   foreach (Var part, parts)
-    if (part is <map> && part.map().contains(key)) return 0;
+    if (part is <map> && key in part.map()) return 0;
   return 1;
 }
 
@@ -3395,7 +3395,7 @@ static void _validate_static_object_initializers(Compiler compiler) {
     List binding = key, dependencies = value;
     foreach (List reference, dependencies) {
       String name = binding_identity_spelling(reference);
-      if (!name || statics.contains(%($name))) continue;
+      if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
       Token token = NULL;
       Var token_index;
@@ -3417,7 +3417,7 @@ static void _record_object_definitions(Compiler c, List bindings) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
-      if (c.semantic_binding_facts().contains(key))
+      if (key in c.semantic_binding_facts())
         _report_redefinition(c, "variable", binding);
       c.semantic_binding_facts()[key] = 1;
       c.semantic_binding_facts()[%(arms $binding)] = c.arms;

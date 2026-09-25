@@ -508,7 +508,7 @@ static List _resolve_delegate_method(
 }
 
 static void _completion_add(Map seen, Array names, String name) {
-  if (!name || seen.contains(name)) return;
+  if (!name || name in seen) return;
   seen[name] = 1;
   names.push(name);
 }
@@ -516,7 +516,7 @@ static void _completion_add(Map seen, Array names, String name) {
 static void _completion_fields(
   Compiler compiler, Type type, Map seen, Array names, Map visited) {
   type = compiler.sym.resolve_key(type);
-  if (!type || !type.is_aggregate_tag() || visited.contains(type)) return;
+  if (!type || !type.is_aggregate_tag() || type in visited) return;
   visited[type] = 1;
   List order = compiler.sym.field_order(type);
   foreach (List row, order ? order.cdr() : NULL) {
@@ -559,7 +559,7 @@ static void _completion_methods(
 static void _completion_delegates(
   Compiler compiler, Type receiver, Map seen, Array names, Map visited) {
   Type aggregate = compiler.sym.delegate_aggregate(receiver);
-  if (!aggregate || visited.contains(aggregate)) return;
+  if (!aggregate || aggregate in visited) return;
   visited[aggregate] = 1;
   List order = compiler.sym.field_order(aggregate);
   foreach (List row, order ? order.cdr() : NULL) {
@@ -3339,9 +3339,8 @@ static List _initializer_named(
     Anonymous aggregate members remain explicit path frames, so consumers
     observe the same member promotion as native initializer conversion. */
 List Compiler.initializer_field_path(
-  Compiler c, Type type, List field) {
-  return _initializer_named(c, type, field.car(), NULL);
-}
+  Compiler c, Type type, List field) =>
+  _initializer_named(c, type, field.car(), NULL);
 
 static List _initializer_designated(
   Compiler c, Type root, List node, List &value, List &normalized) {

@@ -89,7 +89,7 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
   if (!lisp_binding_macros_marker)
     lisp_binding_macros_marker = "_x2c.lisp.bindings";
   int loaded =
-    !install || compiler.macros.contains(lisp_binding_macros_marker);
+    !install || lisp_binding_macros_marker in compiler.macros;
   if (!loaded) _ensure_lisp(compiler);
   _eval_library(
     compiler, loaded, "etc/lisp-bindings.xlisp",
@@ -527,7 +527,7 @@ static int _iterator_operation(List signature) {
 static int _declared_in(Var key, List paths) {
   match (key)
     case %("source-node" (declaration ?(String path) ?)):
-      return paths.contains(home_absolute_path(path));
+      return home_absolute_path(path) in paths;
   return 0;
 }
 
@@ -1008,7 +1008,7 @@ static int library_restartable = 0, static int library_settled = 0;
 static int _inherited_import(String path) {
   /* An empty `Map` is false, so the test is for the allocation. */
   return !library_filling && (void *) library_imports != NULL &&
-         library_imports.contains(path);
+         path in library_imports;
 }
 
 /* A home Lisp library is evaluated once, when `loaded` is zero, but every use
@@ -1215,7 +1215,7 @@ int Compiler.shared_definition(Compiler compiler, String key) {
   (void) compiler;
   /* An empty `Map` is false, so the test is for the allocation. */
   if ((void *) library_definitions == NULL) return 0;
-  int known = library_definitions.contains(key);
+  int known = key in library_definitions;
   if (library_filling) library_definitions[key] = 1;
   return known;
 }
@@ -1623,7 +1623,7 @@ static void _native_module_shutdown(void) {
 
 /** Reports whether the native module at absolute `path` is loaded. */
 int Compiler.native_module_loaded(String path) =>
-  (void *) native_modules && native_modules.contains(path);
+  (void *) native_modules && path in native_modules;
 
 /** Records the name-to-`Func` Map that the entry of the native module loaded
     from absolute `path` returns. The Funcs, names, signatures, and path last
@@ -1749,8 +1749,8 @@ void x2c_register_extension(const char *name, Map (*targets)(void)) {
 /** Reports whether package `name`'s compile-time part is linked into the
     compiler, so its import loads no module. */
 int Compiler.links_extension(String name) {
-  for (struct _Extension *e = extensions; e; e = e->next)
-    if (!strcmp(name, e->name)) return 1;
+  for (struct _Extension *e = extensions; e; e = e.next)
+    if (!strcmp(name, e.name)) return 1;
   return 0;
 }
 
@@ -1777,7 +1777,7 @@ void Compiler.select_package_module(
         %("module: $module"));
     _open_native_module(module);
   }
-  if (native_module_order.contains(module)) return;
+  if (module in native_module_order) return;
   Scope.push(&native_module_scope);
   native_module_order = native_module_order.append(%($module));
   Scope.pop();
@@ -1791,10 +1791,10 @@ void Compiler.select_native_modules(List paths) {
   if (!Compiler.native_module_loaded(compiler_supplier))
     Compiler.add_native_module(compiler_supplier, _compiler_targets);
   Array linked = [];
-  for (struct _Extension *e = extensions; e; e = e->next) {
-    String key = %"<${String.new(e->name)}>";
+  for (struct _Extension *e = extensions; e; e = e.next) {
+    String key = %"<${String.new(e.name)}>";
     if (!Compiler.native_module_loaded(key))
-      Compiler.add_native_module(key, e->targets);
+      Compiler.add_native_module(key, e.targets);
     linked.push(key);
   }
   paths = %($compiler_supplier @paths @{linked.list_free()});
@@ -1810,13 +1810,13 @@ int Compiler.supplies_native_meta(String name) {
   Var targets;
   return (void *) native_modules &&
          native_modules.try_get(compiler_supplier, &targets) &&
-         ((Map) targets).contains(name);
+         name in ((Map) targets);
 }
 
 /* The paths of the selected native modules that define `name`, in order. */
 static List _native_module_suppliers(String name) =>
   native_module_order.filter(
-    %!(String path) => ((Map) native_modules[path]).contains(name));
+    %!(String path) => name in ((Map) native_modules[path]));
 
 /* The native type a signature names: each parameter, reference target,
    and result with its aliases resolved. */
@@ -2956,7 +2956,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
     if (role == <block> && c.macro_lisp_starts_declaration()) return NULL;
     if (role == <statement>) return NULL;
     if (role == <expression>) return c.parse_macro_lisp_expression();
-    int allow_sequence = sequence_roles.contains(role);
+    int allow_sequence = role in sequence_roles;
     return _parse_lisp_slot(c, allow_sequence, role);
   }
   List hole = c.peek_macro_hole();
@@ -3058,7 +3058,7 @@ static Symbol _result_kind_token(Compiler compiler, Token token) {
   if (kind == <statement> || kind == <block>) return <block-item>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <decorator>) return kind;
-  if (direct_result_kinds.contains(kind)) return kind;
+  if (kind in direct_result_kinds) return kind;
   compiler.report_error(
     <parse>, %"unknown macro result kind '$spelling'",
     token, NULL);
@@ -3551,7 +3551,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
       Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
       List local = (void *) locals != NULL
                  ? c.sym.lookup(%($spelling), NULL) : NULL;
-      return local && locals.contains(local) ? local : spelling;
+      return local && local in locals ? local : spelling;
     }
     case <literal>:
       if (c.macro_holes && c.peek(0) == <$>) return c.parse_assignment();
