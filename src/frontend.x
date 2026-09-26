@@ -313,7 +313,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
       unit.compiler.print_diagnostic(diagnostic);
     return 0;
   }
-  foreach (String name, unit.compiler.meta_regions.keys()) {
+  foreach (String name, unit.compiler.meta_hashes.keys()) {
     Var function;
     if (name.startswith("x2c_") && shared.try_get(name, function))
       Compiler.bind_meta_operation(shared, name, function);

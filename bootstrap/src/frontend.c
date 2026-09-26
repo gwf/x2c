@@ -527,7 +527,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
     }
     {
       String name;
-      Iter _x2c_macro_iterator_3 = Map_keys(unit.compiler -> meta_regions, &(struct Iter){
+      Iter _x2c_macro_iterator_3 = Map_keys(unit.compiler -> meta_hashes, &(struct Iter){
         int_var(0)
       }
       );

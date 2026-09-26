@@ -2034,6 +2034,13 @@ List Compiler.parse_top_level(Compiler c) {
           function, decl.type_from_ast().canonicalize()))
       c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
+    /* Compile-time only describes a `meta` definition. An ordinary
+       definition of the same name, such as a copy the compiler links, is
+       callable at run time. */
+    if (!meta)
+      match (function)
+        case %(function ? (bind (binding ? ?(String name)) *) ?):
+          c.meta_comptime.del(name);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
     if (lowered && c.meta_is_comptime_only(function)) return NULL;

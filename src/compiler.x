@@ -359,7 +359,10 @@ static Compiler _new(Compiler owner) {
     _.meta_values = {};
     _.meta_layouts = {};
     _.native_meta = {};
-    if (!owner) _.inherit_shared_meta();
+    if (!owner) {
+      _.inherit_shared_meta();
+      _.inherit_library_comptime();
+    }
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -2031,6 +2034,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_layouts = {};
   c.native_meta = {};
   c.inherit_shared_meta();
+  c.inherit_library_comptime();
   c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};

@@ -7,6 +7,14 @@
 
 #include "x2c.h"
 #include "meta.h"
+List x2c_expr_field(List receiver, String name);
+
+List x2c_expr_cast(List type, List expression);
+
+List x2c_decl_make(List type, Var name, List initializer);
+
+List x2c_param_make(List type, Var name);
+
 Map linked_meta_targets(void);
 
 Map linked_meta_hashes(void);

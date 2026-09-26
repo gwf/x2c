@@ -1005,6 +1005,9 @@ static String _read_source(
    another include path is a different key and evaluates normally. */
 static Map library_imports = NULL, static int library_filling = 0;
 static Map library_definitions = NULL;
+/* The shared session's compile-time-only definitions, which have no
+   runtime form in any unit that reads them. */
+static Map library_comptime = NULL;
 static int library_restartable = 0, static int library_settled = 0;
 
 static int _inherited_import(String path) {
@@ -1035,6 +1038,7 @@ static void _library_shutdown(void) {
   library_session = NULL;
   library_imports = NULL;
   library_definitions = NULL;
+  library_comptime = NULL;
   library_scope.destroy();
   library_scope = NULL;
 }
@@ -1103,6 +1107,8 @@ void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
   lisp.set_global(dotted, function);
 }
 
+static Var _sdk_meta_stage(String name, List arguments);
+
 /* Native operations use the active expansion context, not the session
    that owns their callable. The shared parent therefore owns them once. */
 static void _install_native_operations(Compiler compiler) {
@@ -1138,6 +1144,7 @@ static void _install_native_operations(Compiler compiler) {
       _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
     $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
     $lisp.bind(_.macro_lisp, "_x2c.tpl-call", _sdk_template_call);
+    $lisp.bind(_.macro_lisp, "_x2c.meta.stage", _sdk_meta_stage);
     $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
@@ -1169,6 +1176,7 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
   Lisp shared = Lisp.kernel();
   library_imports = {};
   library_definitions = {};
+  library_comptime = {};
   Lisp was = compiler.macro_lisp;
   defer compiler.macro_lisp = was;
   compiler.macro_lisp = shared;
@@ -1195,6 +1203,7 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   if (!shared) {
     library_imports = NULL;
     library_definitions = NULL;
+    library_comptime = NULL;
     return;
   }
   Scope.push(&library_scope);
@@ -1220,6 +1229,25 @@ int Compiler.shared_definition(Compiler compiler, String key) {
   int known = key in library_definitions;
   if (library_filling) library_definitions[key] = 1;
   return known;
+}
+
+/* Records that `name` is compile-time only in `c`, and in the shared
+   session when it is being filled. */
+static void _record_comptime(Compiler c, String name) {
+  c.meta_comptime[name] = 1;
+  if (library_filling && (void *) library_comptime) {
+    Scope.push(&library_scope);
+    library_comptime[name] = 1;
+    Scope.pop();
+    name.try_own();
+  }
+}
+
+/** Marks the shared session's compile-time-only definitions in a fresh
+    compiler pass, which reads them without defining them. */
+void Compiler.inherit_library_comptime(Compiler c) {
+  if (library_filling || library_comptime == NULL) return;
+  foreach (String name, library_comptime.keys()) c.meta_comptime[name] = 1;
 }
 
 /** Answers whether the shared compile-time session is still being filled,
@@ -1886,19 +1914,24 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
     linked_hashes = linked_meta_hashes();
     Scope.pop();
   }
+  /* A row without a hash is the runtime library's own compiled definition
+     of a `lib/meta.x` builder, which has no copy to compare. */
   Var hash, function, bound;
-  if (!linked_hashes.try_get(name, hash) ||
-      !hash.equal(c.meta_hashes[name]) ||
-      !((Map) native_modules[linked_supplier]).try_get(name, function))
+  if (!((Map) native_modules[linked_supplier]).try_get(name, function))
+    return 0;
+  if (linked_hashes.try_get(name, hash)
+        ? !hash.equal(c.meta_hashes[name])
+        : !c.filename || Path.absolute(c.filename) !=
+                           %"${x2c_get_root()}/lib/meta.x")
     return 0;
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   if (!_native_meta_accepts(c, function, c.func_signature(type))) return 0;
   /* The shared session binds the copy once for every unit that imports the
      same file. */
-  if (!c.macro_lisp.try_get(name, bound))
+  if (!c.macro_lisp.try_get(name, bound) || bound.equal(%()))
     c.macro_lisp.set_global(name, function);
-  if (_reaches_compiler(c, fn)) c.meta_comptime[name] = 1;
+  if (_reaches_compiler(c, fn)) _record_comptime(c, name);
   return 1;
 }
 
@@ -2091,6 +2124,8 @@ int Compiler.bind_native_meta(Compiler c, String name) {
 }
 
 static int _groups_meta(Compiler c);
+static void _hold_group_function(Compiler c, String name);
+static int _shared_meta_definition(Compiler c, String name);
 static int _reaches_compile_time(Compiler c, Var node);
 static void _group_function(
   Compiler c, List fn, String declined, Token marker);
@@ -2145,9 +2180,13 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     case %(function ? (bind (binding ? ?(String name)) *) ?):
       if ((installed && c.lower_reached_meta()) ||
           _reaches_compile_time(c, fn))
-        c.meta_comptime[name] = 1;
-  if (grouped)
-    _group_function(c, fn, installed ? NULL : c.lower_declined(), marker);
+        _record_comptime(c, name);
+  if (!grouped) return;
+  _group_function(c, fn, installed ? NULL : c.lower_declined(), marker);
+  match (fn)
+    case %(function ? (bind (binding ? ?(String name)) *) ?):
+      if (!macro_library_filling() && !_shared_meta_definition(c, name))
+        _hold_group_function(c, name);
 }
 
 /** Imports immediate dependencies and queues other source Lisp effects.
@@ -2494,6 +2533,7 @@ static List _meta_group_code(Compiler c, String stamp, String &failure) {
     _.key_ids = saved.key_ids.copy();
     _.inits = [];
     _.early_decls = [];
+    _.origins = saved.origins.copy();
     _.fixed = {};
     _.init_tokens = {};
     _.static_init_deps = {};
@@ -2615,13 +2655,6 @@ static int _bind_meta_group(Compiler c, String name, Token site) {
         declined = reason is <string> ? reason : NULL;
       }
   if (!pending) return 0;
-  /* A `meta static` value that lowered code already changed lives in the
-     session, which staged code does not read, so such a group stays
-     lowered for the rest of the unit. */
-  if ("<lowered>" in c.meta_group_bound) {
-    foreach (List entry, c.meta_group)
-      match (entry) case %(static *): return 0;
-  }
   /* A group that did not stage is tried again only once it has grown. */
   String attempt = %"<failed ${c.meta_group.len()}>";
   String module = attempt in c.meta_group_bound ? NULL : _stage_meta_group(c);
@@ -2652,23 +2685,226 @@ static int _bind_meta_group(Compiler c, String name, Token site) {
   return name in c.meta_group_bound;
 }
 
+/* Calls the session value `function` with the evaluated `arguments`. */
+static Var _meta_apply(Compiler c, Var function, List arguments) {
+  Array quoted = [%(quote $function)];
+  foreach (Var argument, arguments) quoted.push(%(quote $argument));
+  return c.macro_lisp.eval(quoted.list_free());
+}
+
+/* Answers `_x2c.meta.stage`, which a group function's session name holds
+   until the group stages: it binds the group's native code under the name
+   and calls it with `arguments`. A group that does not stage leaves the
+   lowered form in its place. */
+static Var _sdk_meta_stage(String name, List arguments) {
+  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  if (!c) _sdk_reject(%"$name used outside compilation", NULL);
+  if (!_bind_meta_group(c, name, macro_import_invocation
+                                   ? macro_import_invocation : c.token)) {
+    Var lowered;
+    if (c.meta_group_bound.try_get(%"<lowered $name>", lowered))
+      c.macro_lisp.set_global(name, lowered);
+  }
+  Var function;
+  if (!c.macro_lisp.try_get(name, function) || function is <list>)
+    _sdk_reject(%"$name cannot run at compile time", NULL);
+  return _meta_apply(c, function, arguments);
+}
+
+/* Whether the published shared session already holds the definition of
+   `name` from this file, which a unit reading the file again leaves alone. */
+static int _shared_meta_definition(Compiler c, String name) {
+  if (library_filling || library_definitions == NULL || !c.filename)
+    return 0;
+  String key = %"${Path.absolute(c.filename)}#$name";
+  return key in library_definitions;
+}
+
+/* Holds the group function `name` in the session behind a stub that stages
+   the group at its first call from compile-time Lisp, keeping any lowered
+   form for a group that does not stage. */
+static void _hold_group_function(Compiler c, String name) {
+  Var lowered;
+  if (c.macro_lisp.try_get(name, lowered))
+    c.meta_group_bound[%"<lowered $name>"] = lowered;
+  c.macro_lisp.set_global(name, c.macro_lisp.eval(
+    %(lambda (. arguments) (_x2c.meta.stage $name arguments))));
+}
+
+/* --- the arguments of a `$` call ---------------------------------------- */
+
+static Var _meta_call_value(Compiler c, List expression, Token site);
+
+/* The last call a `$` expression made, as a failure reports it. */
+static String meta_call_form = NULL;
+
+/* A String or character literal's value from its source spelling, quotes
+   included: adjacent pieces are unescaped on their own and joined, as C
+   does, and a character is its code. */
+static Var _meta_text(String spelling) {
+  int len = spelling.len();
+  if (len >= 2 && spelling[0] == '"') {
+    String text = "";
+    for (int i = 0; i < len; i++) {
+      if (spelling[i] != '"') continue;
+      int start = ++i;
+      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
+      String piece = String.new_len(spelling + start, i - start).unescape();
+      text = %"$text$piece";
+    }
+    return text;
+  }
+  if (len >= 3 && spelling[0] == '\'') {
+    String body = String.new_len(spelling + 1, len - 2).unescape();
+    return (char) (body.len() ? body[0] : 0);
+  }
+  return spelling;
+}
+
+static Var _meta_constant(Compiler c, Var node);
+
+/* The value of one folded leaf, or void when it is only known at run
+   time. */
+static Var _meta_constant_leaf(Compiler c, List value) {
+  match (value) {
+    case %(expr ? (parens ?inner)): return _meta_constant_leaf(c, inner);
+    case %(expr ?type (cast ? ?inner)): {
+      Var constant = _meta_constant_leaf(c, inner);
+      if (constant is void) return void;
+      Symbol tag = ((Type) type).scalar_tag();
+      return tag ? constant.convert(tag) : constant;
+    }
+    case %(expr ? (!set ?node (cache ?))): return _meta_constant(c, node);
+    case %(expr ? (!set ?node (expr ? (cache ?)))):
+      return _meta_constant(c, node);
+    case %(expr ? (nil)):                       return %();
+    case %(expr ? (expr ? (nil))):              return %();
+    case %(expr ? (literal ? ? ?symbol)):       return symbol;
+    case %(expr ("String")
+      (call (expr ? (ident (binding ? "String_add")))
+            (args ?left ?right))): {
+      Var a = _meta_constant(c, left), b = _meta_constant(c, right);
+      if (a is void || b is void) return void;
+      return a.string().add(b);
+    }
+    case %(expr ("String") (call ? (args ?inner))):
+      return _meta_constant_leaf(c, inner);
+    case %(expr ("Var")
+      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
+      return _meta_constant_leaf(c, inner);
+    case %(expr ("String") (literal ? ?(String text))): return text;
+    case %(expr (* char) (literal ? ?(String text))): return _meta_text(text);
+    case %(expr ?type (literal ? ?(String text))):
+      return ((Type) type).numeric_literal_value(text);
+  }
+  if (value && value.car() == <expr>) return void;
+  return value;
+}
+
+/* Literal folding hoists a constant into the compiler cache and leaves
+   `(cache ID)`, a graph of ids over `cons`, `var` and `string` leaves. */
+static Var _meta_constant(Compiler c, Var node) {
+  match (node) {
+    case %(cache ?(int id)): {
+      List key = c.id_keys[id];
+      match (key) {
+        case %(cons ?head ?tail):
+          return cons(_meta_constant(c, head), _meta_constant(c, tail));
+        case %(var ?value):    return _meta_constant_leaf(c, value);
+        case %(string ?value): return _meta_constant_leaf(c, value);
+        case %(nil): return %();
+      }
+      return key;
+    }
+    case %(cons ?head ?tail):
+      return cons(_meta_constant(c, head), _meta_constant(c, tail));
+    case %(nil): return %();
+  }
+  return _meta_constant_leaf(c, node);
+}
+
+/* The binary operators a constant argument may apply. */
+static const SymbolSet meta_operators = %<<"+" "-" "*" "/" "%" "<<" ">>"
+  "&" "|" "^" "<" ">" "<=" ">=" "==" "!=">>;
+
+/* The value an argument expression passes to a parameter of type `want`,
+   or NULL for no declared type: a constant, captured syntax, or the result
+   of another `$` call. Captured literal syntax reaches a parameter that is
+   not syntax as the literal's value. */
+static Var _meta_argument(Compiler c, List node, Type want, Token site) {
+  Var value = void;
+  match (node) {
+    case %(expr ? (meta-cap ?captured)): {
+      value = captured;
+      if (want && !c.sym.is_var_type(want) &&
+          !c.sym.is_named_value_type(want, "List")) {
+        Var literal = captured is <list> ? _meta_constant_leaf(c, captured)
+                                         : void;
+        if (literal is not void && literal is not <list>) value = literal;
+      }
+    }
+    case %(expr ? (parens ?inner)):
+      return _meta_argument(c, inner, want, site);
+    case %(expr ? (meta-call *)): value = _meta_call_value(c, node, site);
+    /* Negation multiplies, so a negated zero keeps its sign. */
+    case %(expr ?type (op - ?operand)):
+      value = _meta_argument(c, operand, type, site).binary(<*>, -1);
+    case %(expr ?type (op ?operator ?left ?right)):
+      if (operator in meta_operators)
+        value = _meta_argument(c, left, NULL, site).binary(
+          operator, _meta_argument(c, right, NULL, site));
+    default: value = _meta_constant(c, node);
+  }
+  if (value is void)
+    c.report_error(
+      <macro>, "explicit meta call cannot be resolved", site,
+      %("an argument must be a constant, captured syntax, or a meta call"));
+  Type numeric = want ? c.sym.resolve_numeric_type(want) : NULL;
+  Symbol tag = numeric ? numeric.scalar_tag() : 0;
+  if (tag && (value.is_integer() || value.is_floating()))
+    value = value.convert(tag);
+  return value;
+}
+
+/* Calls a `meta` function named at a code boundary with its evaluated
+   arguments, staging its group first when it is pending. */
+static Var _meta_call_value(Compiler c, List expression, Token site) {
+  match (expression)
+    case %(expr ? (meta-call (expr ?callee (ident (binding ? ?(String name))))
+                             (args *arguments))): {
+      List params = NULL;
+      match (callee) case %((func ?declared) *): params = declared;
+      Array values = [];
+      foreach (List argument, arguments) {
+        Type want = NULL;
+        if (params) {
+          want = params.car();
+          params = params.cdr();
+        }
+        values.push(_meta_argument(c, argument, want, site));
+      }
+      _bind_meta_group(c, name, site);
+      Var function;
+      if (!c.macro_lisp.try_get(name, function) &&
+          c.bind_native_meta(name))
+        c.macro_lisp.try_get(name, function);
+      if (function is void)
+        c.report_error(
+          <macro>, "explicit meta call cannot be resolved", site,
+          %("no binding for $name"));
+      List applied = values.list_free();
+      meta_call_form = cons(Atom.intern(name), applied).repr();
+      meta_call_form.try_own();
+      return _meta_apply(c, function, applied);
+    }
+  c.report_error(
+    <macro>, "explicit meta call cannot be resolved", site,
+    %("only a call to a meta function runs at compile time"));
+}
+
 static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
-  /* A call inside a macro expansion can pass captured syntax, which the
-     lowering converts and a native signature does not, so only a call
-     without arguments stages there. */
-  match (expression)
-    case %(expr ? (meta-call (expr ? (ident (binding ? ?(String name))))
-                             (args *arguments))):
-      if (!c.macro_stack || !arguments) _bind_meta_group(c, name, site);
-      else if (!(name in c.meta_group_bound))
-        c.meta_group_bound["<lowered>"] = 1;
-  Var form = c.lower_meta_expression(expression);
-  if (form is void)
-    c.report_error(
-      <macro>, "explicit meta call cannot be resolved", site,
-      %(${c.lower_declined()}));
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? active.car().list().assoc(<file>) : c.filename;
@@ -2679,19 +2915,15 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   $let(macro_sdk_compiler, c)
   $let(macro_import_compiler, c)
   $let(macro_import_invocation, site) {
-    try value = c.macro_lisp.eval(form);
+    try value = _meta_call_value(c, expression, site);
     catch %(malformed (category ?category)):
       raise %(malformed (category $category));
-    catch %(call-stack * (why "steps") *):
-      c.report_error(
-        <macro>, "explicit meta call was stopped", site,
-        %("reason: its compile-time form made too many calls"));
     catch %(call-stack *):
       c.report_error(
         <macro>, "explicit meta call was stopped", site,
         %("reason: its compile-time form nested too deep"));
     catch %(?code *detail):
-      _report_lisp_failure(c, site, cons(code, detail), form.repr());
+      _report_lisp_failure(c, site, cons(code, detail), meta_call_form);
   }
   return value;
 }

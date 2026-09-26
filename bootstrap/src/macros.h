@@ -87,6 +87,8 @@ void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
 
 int Compiler_shared_definition(Compiler compiler, String key);
 
+void Compiler_inherit_library_comptime(Compiler c);
+
 int macro_library_filling(void);
 
 void macro_library_defer(void);
