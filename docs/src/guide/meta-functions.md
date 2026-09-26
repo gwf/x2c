@@ -1261,6 +1261,59 @@ The constructor returns one code node. The helper wraps it in a List because
 function declaration for the helper to inspect. Name, Type, parameter and
 statement captures still follow the source macro's declared hole kinds.
 
+A decorator can make that choice from the function it captures. Here the
+`meta` helper selects one of two named Statement templates, then the decorator
+inserts the selected invocation into the function body:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+static int calls = 0;
+
+macro Statement $counted(Block $body...) {
+  calls++;
+  $body...
+}
+
+macro Statement $plain(Block $body...) {
+  $body...
+}
+
+meta static List choose_body(List function) {
+  List body = x2c_function_body(function);
+  String name = x2c_function_name(function);
+  List node = name == "tracked" ? $counted(body) : $plain(body);
+  return %($node);
+}
+
+macro Decorator $count_if_tracked(Function $function) {
+  $choose_body($function)...
+}
+
+$count_if_tracked()
+static int tracked(void) { return 7; }
+
+$count_if_tracked()
+static int ordinary(void) { return 9; }
+
+int main(void) {
+  printf("%d %d %d\n", tracked(), ordinary(), calls);
+  return 0;
+}
+```
+
+```text
+7 9 1
+```
+
+`choose_body` runs while the compiler expands the decorator. It reads the
+captured function, computes the choice, and returns a deferred invocation.
+The chosen template expands when the returned code is inserted. Its body
+capture becomes the function's statements; `calls++` runs only when `tracked`
+is called at runtime. The template names are known in source, while `meta`
+chooses which one to use for each function.
+
 The reverse gradient generator in `lib/autodiff.xmacro` uses this pattern.
 Its `ad_reverse_function` returns an invocation of the `ad.gradient` source
 macro. The macro contains the generated function declaration, tape storage,
