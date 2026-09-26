@@ -282,3 +282,13 @@ copies); the compiled Match engine (the reference matcher alone measured
 - Withdrawing `x2c_comptime_lower` and the compile-time subset as a
   documented boundary.
 - Autodiff to `packages/`, and the small public-surface drops.
+
+## Decisions (2026-09-25, delegated by Gary to the spike)
+
+- REPL: stage submissions as modules; accept the per-submission `cc`
+  latency and drop the AUTO `:stats` fields.
+- `$f(x)` inside a meta body is a plain call.
+- Withdraw `x2c_comptime_lower` and the compile-time subset as a documented
+  boundary.
+- Autodiff moves to `packages/autodiff`; the small public-surface drops
+  proceed.
