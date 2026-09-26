@@ -163,7 +163,12 @@ static String _location_file(List location) {
 
 static String _canonical_file(Compiler compiler, List location) {
   String file = _location_file(location);
-  return _normalize_file(compiler, file);
+  List key = %(proto-file $file);
+  Var cached;
+  if (compiler.protocol_helpers.try_get(key, cached)) return cached;
+  String result = _normalize_file(compiler, file);
+  compiler.protocol_helpers[key] = result;
+  return result;
 }
 
 static String _location_string(List location) {

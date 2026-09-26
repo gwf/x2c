@@ -1983,18 +1983,19 @@ static void _bind_native_meta(
   c.macro_lisp.set_global(name, function);
 }
 
-static int _native_meta_effect_is_local(Compiler c, Var key) {
+static int _native_meta_effect_is_local(String unit, Var key) {
   match (key)
     case %("source-node" (declaration ?(String path) ?)):
-      return home_absolute_path(path).equal(Path.absolute(c.filename));
+      return home_absolute_path(path).equal(unit);
   return 0;
 }
 
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
+  String unit = Path.absolute(c.filename);
   foreach (Var (key, value), globs) {
-    if (_native_meta_effect_is_local(c, key)) continue;
+    if (_native_meta_effect_is_local(unit, key)) continue;
     foreach (List row, _native_meta_rows(c, value)) {
       (String name, List signature) = row;
       c.native_meta[name] = signature;
