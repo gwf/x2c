@@ -15,6 +15,8 @@ List x2c_decl_make(List type, Var name, List initializer);
 
 List x2c_param_make(List type, Var name);
 
+List x2c_type_members(List type);
+
 Map linked_meta_targets(void);
 
 Map linked_meta_hashes(void);

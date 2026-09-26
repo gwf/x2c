@@ -2013,6 +2013,10 @@ List Compiler.parse_top_level(Compiler c) {
     c.record_declaration_visibility(decl);
     if (meta)
       _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
+    else
+      match (decl)
+        case %(declare ? (bindings (bind (binding ? ?(String name)) *))):
+          if (decl.type_from_ast().is_function()) c.meta_comptime.del(name);
     return decl;
   }
   if (c.peek(0) == <"{"> || c._at_function_arrow()) {
@@ -2035,8 +2039,8 @@ List Compiler.parse_top_level(Compiler c) {
       c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
     /* Compile-time only describes a `meta` definition. An ordinary
-       definition of the same name, such as a copy the compiler links, is
-       callable at run time. */
+       declaration or definition of the same name, such as a copy the
+       compiler links, is callable at run time. */
     if (!meta)
       match (function)
         case %(function ? (bind (binding ? ?(String name)) *) ?):
