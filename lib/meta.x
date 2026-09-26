@@ -225,6 +225,7 @@ meta static List _meta_member(List node) {
     case %(?name): return %($name ());
   }
   _meta_fail("x2c.type.members found an unreadable member", node);
+  return %();
 }
 
 /** Returns enum members as `(name value)` rows in declaration order.

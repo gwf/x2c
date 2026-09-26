@@ -9,15 +9,72 @@
     `Compiler.bind_linked_meta` binds an imported definition to its copy only
     when the two texts hash the same, so an edited `.xmacro` is lowered as
     user code until this file follows it. A copy is left out when its body
-    expands a macro, makes a `$` call, or calls a `meta` function that has
-    no runtime form, such as the `lib/meta.x` builders that reach a compiler
-    operation.
+    expands a macro or makes a `$` call. The `lib/meta.x` builders that
+    reach a compiler operation are copied first, so later copies call them;
+    the builders with a run-time form bind to the runtime's own definitions.
 */
 
 #pragma once
 
 #include "x2c.x"
 #include "meta.x"
+
+/* --- meta.x, the syntax builders that reach the compiler --------------- */
+
+List x2c_expr_field(List receiver, String name) {
+  List checked = x2c_ident(name);
+  return %(expr () (op . $receiver (${checked[1]})));
+}
+
+List x2c_expr_cast(List type, List expression) {
+  List parts = x2c_type_parts(type);
+  return %(expr $type
+    (cast (decl ${parts[0]} (bindings (bind () ${parts[1]}))) $expression));
+}
+
+List x2c_decl_make(List type, Var name, List initializer) {
+  List parts = x2c_type_parts(type);
+  List binding = %(bind ($name) ${parts[1]});
+  if (initializer) binding = %(op = $binding $initializer);
+  return %(declare ${parts[0]} (bindings $binding));
+}
+
+List x2c_param_make(List type, Var name) {
+  List parts = x2c_type_parts(type);
+  return %(param ${parts[0]} (bind ($name) ${parts[1]}));
+}
+
+static Var _meta_initializer(List node) {
+  match (node) {
+    case %(expr ? (literal ? ?text)): return text;
+    case %(?text): return text;
+  }
+  return node;
+}
+
+static void _meta_fail(String message, Var value) {
+  x2c_diagnostic_fail(message, %("value: ${value.repr()}"));
+}
+
+static List _meta_member(List node) {
+  match (node) {
+    case %(op = (?name) ?value):
+      return %($name ${_meta_initializer(value)});
+    case %(?name): return %($name ());
+  }
+  _meta_fail("x2c.type.members found an unreadable member", node);
+  return %();
+}
+
+List x2c_type_members(List type) {
+  List resolved = x2c_type_resolve(type);
+  if (resolved.car() != <enum>)
+    _meta_fail("x2c.type.members requires an enum Type", type);
+  List members = resolved.reverse().car();
+  List rows = %();
+  foreach (List member, members) rows = cons(_meta_member(member), rows);
+  return rows.reverse();
+}
 
 /* --- var-tags.xmacro, the Var tag ledger ------------------------------ */
 
@@ -406,6 +463,22 @@ static List _update_cast_in(List id)  => _update_row(id)[4].car();
 
 static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
 
+static List _update_box(List id, List lhs) {
+  List value = x2c_expr_index(x2c_expr_ident(lhs), x2c_literal_int(0));
+  List into = _update_cast_in(id);
+  if (into) value = x2c_expr_cast(into, value);
+  return x2c_expr_call(
+    x2c_expr_ident(x2c_ident(_update_boxer(id))), %($value));
+}
+
+static List _update_decode(List id, List value) {
+  List decoded = x2c_expr_call(
+    x2c_expr_ident(x2c_ident(_update_decoder(id))), %($value));
+  List back = _update_cast_out(id);
+  if (back) return x2c_expr_cast(back, decoded);
+  return decoded;
+}
+
 /* --- native-scalar-types.xmacro, C scalars ---------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -451,6 +524,20 @@ static String _dedent_apply(String text) {
     lines.push(String.remove_prefix(line, prefix));
   if (lines.len() > 1 && _dedent_blank(lines[-1])) lines[-1] = "";
   return lines.join("\n");
+}
+
+static List _dedent_expand(List node) {
+  String source = x2c_source_text(node);
+  int length = source.len(), open = 0;
+  if (length >= 3 && source.startswith("%\""))
+    open = 2;
+  else if (length >= 2 && source.startswith("\""))
+    open = 1;
+  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
+      source.contains("$"))
+    return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
+  String body = source.getslice(open, length - 1, 1);
+  return x2c_literal_string(_dedent_apply(body));
 }
 
 static int _cases_label(List item) {
@@ -551,15 +638,40 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_zero", _update_zero);
   $linked.row(rows, "_update_cast_in", _update_cast_in);
   $linked.row(rows, "_update_cast_out", _update_cast_out);
+  $linked.row(rows, "_update_box", _update_box);
+  $linked.row(rows, "_update_decode", _update_decode);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_dedent_width", _dedent_width);
   $linked.row(rows, "_dedent_blank", _dedent_blank);
   $linked.row(rows, "_dedent_apply", _dedent_apply);
+  $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_cases_label", _cases_label);
   $linked.row(rows, "_cases_transfers", _cases_transfers);
   $linked.row(rows, "_cases_split", _cases_split);
   $linked.row(rows, "_cases_switch", _cases_switch);
   $linked.row(rows, "_macros_location", _macros_location);
+  $linked.row(rows, "x2c_expr_field", x2c_expr_field);
+  $linked.row(rows, "x2c_expr_cast", x2c_expr_cast);
+  $linked.row(rows, "x2c_decl_make", x2c_decl_make);
+  $linked.row(rows, "x2c_param_make", x2c_param_make);
+  $linked.row(rows, "_meta_initializer", _meta_initializer);
+  $linked.row(rows, "_meta_fail", _meta_fail);
+  $linked.row(rows, "_meta_member", _meta_member);
+  $linked.row(rows, "x2c_type_members", x2c_type_members);
+  /* The builders with a run-time form are the runtime's own definitions,
+     linked from `libx2c` with no copy and so bound without a hash. */
+  $linked.row(rows, "x2c_literal_string", x2c_literal_string);
+  $linked.row(rows, "x2c_literal_int", x2c_literal_int);
+  $linked.row(rows, "x2c_literal_symbol", x2c_literal_symbol);
+  $linked.row(rows, "x2c_expr_ident", x2c_expr_ident);
+  $linked.row(rows, "x2c_expr_index", x2c_expr_index);
+  $linked.row(rows, "x2c_expr_call", x2c_expr_call);
+  $linked.row(rows, "x2c_expr_composite", x2c_expr_composite);
+  $linked.row(rows, "x2c_stmnt_make", x2c_stmnt_make);
+  $linked.row(rows, "x2c_stmnt_return", x2c_stmnt_return);
+  $linked.row(rows, "x2c_block_make", x2c_block_make);
+  $linked.row(rows, "x2c_function_body", x2c_function_body);
+  $linked.row(rows, "x2c_parameters_arguments", x2c_parameters_arguments);
   return rows;
 }
 
