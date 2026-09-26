@@ -58,6 +58,16 @@ artifacts count only through the source that generates them.
 7. Decisions already measured and declined (map section 6) are not
    re-proposed without a new argument; a design that contradicts one says
    why the measurement no longer applies.
+8. The result is idiomatic x2c in the repository's own style
+   (agents/x2c-coding-style-guide.md, docs/src/guide/idioms.md): match
+   templates over canonical Lists, `Struct.method` operations, foreach,
+   Var where dynamism is wanted, 79 columns, separate `else`. Beauty is a
+   criterion beside size: fewer lines reached by density, golfing, or
+   C-style code that the idioms would write differently do not count, and
+   a component estimate anchored on a C library (chibicc, sds, stb_ds)
+   must say how the idiomatic x2c version differs from that anchor.
+   (Added 2026-09-26 after the greenfield round; the reconciliation and
+   the report apply it, the area designs did not have it.)
 
 ## Gary's hypotheses (to prove or refute, not to assume)
 
