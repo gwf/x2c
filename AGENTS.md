@@ -100,8 +100,9 @@ Direct destructive operations outside the requested change need approval.
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
   `frontend` (configured source units) -> `compiler` (translation state) ->
   shared runtime `lib/tokenizer.x` ->
-  `parse`/`expressions`/`statements`/`macros` (+ `comptime`, which
-  translates a compile-time function to Lisp)/
+  `parse`/`expressions`/`statements`/`macros` (+ `stage`, which carries
+  values across the compile-time boundary, and `builtins` and `linked-meta`,
+  the compile-time code compiled into the compiler)/
   `literals` -> `ast` -> `type` (+ `type-ledger`)/`protocol` -> `transform`
   (+ `lambda`, `cleanup`, `regions`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,

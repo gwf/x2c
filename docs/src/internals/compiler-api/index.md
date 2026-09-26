@@ -13,12 +13,12 @@ Functions and types exposed by each compiler module.
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
 | [`src/bootstrap.x`](bootstrap.md) | Source-bearing APE to native x2c transition. |
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
+| [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
 | [`src/cleanup.x`](cleanup.md) | what a cleanup region runs, and which exits run it. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
-| [`src/comptime.x`](comptime.md) | translating a compile-time x2c function into Lisp. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | structured compiler diagnostics collection. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
@@ -40,6 +40,7 @@ Functions and types exposed by each compiler module.
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
+| [`src/stage.x`](stage.md) | values crossing the compile-time boundary. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |

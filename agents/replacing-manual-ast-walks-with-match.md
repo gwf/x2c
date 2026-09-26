@@ -180,11 +180,11 @@ extra position costs nothing and the case body runs on the wrong node:
 
 Each one shipped a plausible-looking result before it was found. Match the
 arity the production really has, then compare the operator or type by value
-in the case body. `_lower_expr` in `src/comptime.x` matches
-`%(op ?operator ?operand)` and asks whether `operator` is `<"*">`. Where a
-pattern cannot separate two forms at all, the comparison moves one level
-down: `_lower_text` reads the literal's opening quote to decide whether the
-spelling is a string or a character code.
+in the case body: match `%(op ?operator ?operand)` and ask whether
+`operator` is `<"*">`. Where a pattern cannot separate two forms at all, the
+comparison moves one level down: `_meta_text` in `src/stage.x` reads the
+literal's opening quote to decide whether the spelling is a string or a
+character code.
 
 ### 3. Which matching form fits each job
 

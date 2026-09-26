@@ -1,21 +1,19 @@
 # Meta Functions
 
-x2c extends C. The subset that a `meta` function can execute during
-compilation cuts across both C features and x2c additions: integer loops,
-local pointer indirection, structs, collection literals and method calls
-can work; a union or an otherwise ordinary library call can stop it.
-There are three separate questions:
+x2c extends C. A `meta` function is compiled by the same backend as the
+rest of the program and runs as native code inside the compiler, so its
+body is ordinary x2c: anything the unit can compile, it can run during
+translation. Two questions remain, both at the boundary between the
+program and compile-time code:
 
-1. **Can the body execute?** Its syntax and values need compile-time
-   representations. This includes parameters, locals, mutation and returns.
-2. **Can each operation execute?** Every resolved call needs a compile-time
-   binding. Having a supported receiver type does not expose its entire API.
-3. **Can the answer become program code?** Returning a value to another
+1. **Can the arguments cross?** A `$helper(...)` call passes constants,
+   captured syntax, or the results of other `$` calls.
+2. **Can the answer become program code?** Returning a value to another
    meta function and inserting it with `$helper(...)` have different limits.
 
 `meta` is not a purity annotation. A body can mutate locals, arrays, maps
 and structs, and pass local addresses to other meta functions. Its
-compile-time objects belong to the evaluator; they are not the objects the
+compile-time objects belong to the compiler; they are not the objects the
 eventual program allocates.
 
 Start with an ordinary function. This one takes an integer and returns an
@@ -136,10 +134,8 @@ int main(void) {
 71
 ```
 
-This dispatches the compiled implementation. It does not select the
-interpreted body used during compilation. An embedding program can apply an
-interpreted callable through the Lisp evaluator API, but converting a meta
-function to `Func` does not export that interpreted callable automatically.
+This dispatches the program's compiled implementation, not the copy the
+compiler runs during translation.
 
 ## Typed Func calls during compilation
 
@@ -251,9 +247,6 @@ compile-time session owns, so taking its address and reading or writing through
 a correctly typed pointer has the same aliasing effect as in C. `const`
 prevents compile-time writes.
 
-A function-local `static` has no compile-time lowering, so a meta function
-that declares one declines like any other unsupported form.
-
 `meta` marks functions, values and protocol adoptions, not types.
 Compile-time code can use any type the compiler sees: scalars, typedefs,
 classes with a `Var` representation, and any complete struct, including an
@@ -334,8 +327,8 @@ meta native int bits(unsigned value) {
 ```
 
 This means the same as a bodyless `meta` prototype followed by the ordinary
-definition. The body is compiled only for the program, never lowered to
-Lisp, so it may use any C. Compile-time code that calls the function runs
+definition. The body is compiled for the program and never staged with the
+unit's `meta` group. Compile-time code that calls the function runs
 the compiler's native copy, and the signature must match that copy just as a
 prototype's must. `native` applies only to functions; before any other
 declaration it is an error:
@@ -420,8 +413,11 @@ write `$sin(1.0)` to compute the value during translation.
 
 ## Native modules
 
-A native module lets compile-time code call functions from your own
-project. Define each function with `meta native`:
+A bodied `meta` function is compiled into a module automatically, as
+[How a meta function runs](#how-a-meta-function-runs) describes. A native
+module built ahead of time lets compile-time code call functions from your
+own project without compiling them during translation, and share them
+between projects. Define each function with `meta native`:
 
 ```x2c
 meta native int triple(int x) { return 3 * x; }
@@ -543,32 +539,12 @@ functions come after the modules an option or a manifest names.
 
 ## C objects during compilation
 
-Compile-time code keeps C objects the way C does. Every struct local, and
-every local whose address is taken, lives in native bytes. C arrays use
-contiguous native element storage as well. The compiler lays
-out a struct in natural C layout, with the field order, sizes and alignment
-from its own type information. The bytes belong to the running function's
-frame and are released when that function returns, normally or by an error.
-
-Field reads and writes, `&x`, `&s.f`, `p->f`, `*p` and `p[i]` operate on
-those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
-or 1; it reads as the int C promotes it to. An enum field is an `int` when
-the enum is not packed and every enumerator initializer has an integer type
-no wider than `int`, or names the enum itself. Any other enum may be wider
-or narrower in C, so it has no compile-time layout. Compile-time code reads
-every enum value as a signed `int`. Clang and GCC make an enum with no
-negative enumerator an `unsigned int`, so a negative value stored in such an
-enum compares differently: at compile time it stays negative, and at run
-time it is a large unsigned value.
-An enum constant of an enum with that `int` layout has its C value: its
-initializer, or the previous constant plus one.
-A pointer parameter can also receive a local C array,
-which `p[i]` indexes the same way. A pointer compares with `NULL` by address
-and tests false at the null address.
-Struct assignment copies bytes into the destination's existing storage, so an
-address taken earlier stays valid. Passing a struct by value gives the callee
-its own copy. Returning a struct copies it into the caller's storage before
-the callee's storage ends:
+Compile-time code keeps C objects the way the program does, because it is
+the same C. Structs, unions, bitfields, arrays, enums of any width, local
+statics, pointers, and `goto` all behave as C defines them. Struct
+assignment copies bytes into the destination's existing storage, so an
+address taken earlier stays valid. Passing a struct by value gives the
+callee its own copy:
 
 ```x2c
 struct Pair { int x; int y; };
@@ -606,11 +582,6 @@ int main(void) {
 `ax` still points into `a` after the assignment, so `*ax` reads 15. `spare`
 changes its own copy and returns 6, and `a.x` is still 15.
 
-A pointer is a real address. Passing `&value` to a native function lets the
-native code fill the object in place. Only a struct defined in an x2c unit has
-a compile-time layout; a struct declared in a C header, such as
-`struct timespec`, is declined in compile-time code.
-
 A compile-time call frees its locals and parameters when it returns. A
 `meta` function whose body lets the address of one outlive the call is
 rejected where it is defined, with an error at the statement where the
@@ -639,55 +610,20 @@ address inside `box`.
 The check is the region check of ordinary code, and every finding it makes
 in a `meta` body is an error, including a value from a `Scope` region that
 outlives the region. In ordinary code the same findings are warnings; see
-[The Region Model](regions.md).
+[The Region Model](regions.md). As in C, an address the check does not
+follow, such as one computed with pointer arithmetic, is undefined behavior
+once its storage ends.
 
-The check does not yet follow every path an address can take. These still
-translate, and using the address after the call returns is undefined
-behavior, as in C:
-
-- an address stored in a field of a local struct that is then returned by
-  value or assigned to a `meta static` struct;
-- an address computed with pointer arithmetic or a cast;
-- an address passed to a native function that keeps it.
-
-A struct inside a `meta static` value, or in a value that persists across
-REPL submissions, lives in storage the compile-time session owns.
-
-A struct result stays inside compile-time code. Inserting one into the
-program with `$pair(3)` is diagnosed, because the compiler cannot write a
-struct value as code.
-
-These C shapes are not available at compile time:
-
-- Unions.
-- Structs with bitfields, array members, anonymous members, or an enum field
-  whose initializers do not all have `int`-range types. A meta function that
-  uses one reports `a compile-time struct with no host layout`.
-- Structs declared in C headers. A meta function that uses one reports
-  `a compile-time struct with no host layout`.
-- A `packed` attribute on a struct x2c parses is a compile error.
-  `#pragma pack` passes through to the C compiler, and an unused
-  packed-attribute macro does not fail translation. Layout attributes,
-  including `aligned`, `mode` and `vector_size`, leave a struct without a
-  provable compile-time layout. A meta function that uses such a struct
-  reports `a compile-time struct with no host layout`. A field whose typedef
-  has a layout attribute is also declined.
-- Structs with field alignment the compiler cannot prove, such as a field
-  declared `_Alignas`, have no compile-time layout. Do not pass one to a
-  native function from compile-time code.
-- Local arrays of structs, which a meta function reports as `an array of
-  structs`, and static arrays. An array of structs on the heap works; see
-  [Heap objects during compilation](#heap-objects-during-compilation).
-- `sizeof` of an array type, or of a type with no compile-time layout,
-  which a meta function reports as `sizeof a type with no layout`. The
-  parser does not accept `_Alignof`.
+A struct, a C `bool`, or a pointer stays inside compile-time code: another
+meta function can take it, but a `$` call cannot pass one in or insert one
+into the program. Such a call reports `this function cannot run at compile
+time` with the reason `a parameter or the result has no Var form`.
 
 ## Heap objects during compilation
 
 `Scope.malloc`, `Scope.calloc`, `Scope.memdup`, `Scope.realloc`, and
-`Scope.free` are bound for compile-time calls, and `sizeof` answers from
-the same layout the compiler gives each struct and scalar. A meta function
-can therefore build structs on the heap: a linked list, an array of
+`Scope.free` work as they do in the program, and `sizeof` is C's. A meta
+function can therefore build structs on the heap: a linked list, an array of
 structs, or a buffer that grows. `p->f`, `p.f`, `*p`, and `p[i]` read and
 write the heap bytes, and a pointer plus or minus an integer moves by whole
 elements, as in C.
@@ -736,8 +672,9 @@ int main(void) {
 
 The heap belongs to the compiler while it translates. A heap pointer can
 pass between meta functions, but it is not a value the program can hold:
-inserting one with `$make()` reports `compile-time result is a compiler
-address`. Return a value computed from the heap objects instead.
+inserting one with `$make()` reports that the function cannot run at
+compile time, because its result has no Var form. Return a value computed
+from the heap objects instead.
 
 The [region check](regions.md) treats `Scope.realloc` as the end of the
 pointer it is given, as `Scope.free` is. In a `meta` body, a read through a
@@ -745,243 +682,57 @@ pointer after `Scope.free` or `Scope.realloc` ended it is an error, and so
 is freeing or reallocating a literal, a local's address, or other storage
 no Scope allocator returned.
 
-## The compile-time subset
+## How a meta function runs
 
-The following tables separate supported values, available operations and
-current refusals. They catalog the implemented surface and known differences;
-untested combinations are identified explicitly rather than implied to work.
+The compiler keeps the bodied `meta` functions a unit has defined so far,
+and those its compile-time imports define, as the unit's pending group.
+The first `$` call, or compile-time Lisp call, that reaches one of them
+emits the whole group as one C unit through the ordinary backend, compiles
+it with the configured C compiler, loads it into the compiler, and calls
+the function. A later call that reaches a function defined after that
+point emits the group again with everything defined so far. A unit that
+defines `meta` functions and never calls one at compile time compiles
+nothing extra.
 
-### Values, declarations and mutation
+The compiled group is kept under the cache directory (`$X2C_CACHE_DIR`,
+`$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of its C, the
+compiler, the C compiler, and the runtime headers, so an unchanged group
+loads without compiling. The shipped meta code of the compiler's own
+`.xmacro` files and of `lib/meta.x` is linked into the compiler and binds
+without compiling; an edited copy of such a file is compiled like any
+other group.
 
-The table describes current support, not a promise that every C operation
-on a listed type works. The operation inventory below further limits calls.
+Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
+is an ordinary call of `f`. `$` keeps its meaning only where program code
+meets compile-time code, and says evaluate now and insert the result.
 
-| Value or construct | Construction, parameters and returns | Reads and changes during compilation |
-| --- | --- | --- |
-| Native integers, including `char`, narrow, unsigned and wide types | Numeric literals and typed locals; values can pass between meta functions and return from them. Width alone is not a prohibition. | Arithmetic, comparisons, casts, assignment and local compound updates. Source numeric literals use the shared scanner and type conversion rules, including integer base prefixes and `U`, `L` and `LL` suffixes. |
-| `float`, `double` | Literals, locals, parameters and returns work, including `f`/`F` floating suffixes. | Arithmetic and scalar conversions work. Floating results can also be inserted as typed expressions. |
-| `long double` | Typed parameters, returns and `L`-suffixed floating literals work. | Decimal and hexadecimal floating literals use the declared numeric precision. The focused checks do not establish parity for every extended-precision calculation. |
-| `void` return | A meta helper may return true no-value, including a helper writing through an out-parameter. Bare return and fallthrough preserve that result. | Raw evaluator slots, `Var` parameters and `Var` results transport `void` without changing it to an empty List. Concrete typed value parameters and ordinary collections still reject it. |
-| `String`, `Symbol` | String/symbol literals, computed strings and interpolation; parameters and returns. | String indexing reads character codes. Bound string methods work; indexed string writes do not. Symbols have the small method surface listed below. |
-| `List` | Templates, braced/list-compatible initialization, conversion from `Array`; parameters and returns. | Index/association reads, traversal, matching and bound methods. No indexed assignment; build a new List instead. A returned data List is not automatically an expression. |
-| `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
-| `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
-| `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
-| `Func` | Expression-bodied lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls retain the typed signature, convert value parameters and results, and alias reference arguments in place. Storage in collections works. Block-bodied lambdas have no compile-time lowering. This does not expose arbitrary native function-pointer calls. |
-| C-style array declarations | A literal-sized one-dimensional automatic array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. Static arrays have no compile-time lowering. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work, and a pointer plus or minus an integer moves by whole elements. |
-| Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
-| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the pure Json, Diff and Path operations, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. See [Native C functions](#native-c-functions). |
-| `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
+Each unit gets its own `meta static` values: a group's module
+reinitializes them for every unit that uses it.
 
-Collections hold values, not arbitrary native memory. Nested collections keep
-references to their contained objects; mutating a shared `Array` or `Map`
-changes that object.
+Running compile-time code needs what building the program needs: the C
+compiler and the runtime headers. A group that does not compile is
+reported at the call with the C compiler's message. Loading compiled code
+needs `dlopen`, so on a platform without it only the shipped meta code and
+[native modules](#native-modules) linked into the compiler run at compile
+time.
 
-Native array coverage is narrower than C's array model. Integer arrays have
-fixture coverage; focused probes also cover `double` and `String` elements.
-A dimension such as `1 + 1` is rejected even though C can compute it, and a
-nested braced initializer for `int a[2][2]` is rejected. The implementation
-stores a C-style array in a dynamic container, using its first declared
-dimension; this is not general multidimensional or native-layout support.
-Element initialization applies the declared scalar conversion. For example,
-`unsigned char a[1] = { n }; return a[0];` with 257 returns 1 both during
-compilation and at runtime. Signed-byte, float-rounding and floating-to-integer
-initialization also have differential checks. Other element types, array
-decay/alias combinations and every zero-initialization case remain coverage
-gaps.
+A raise inside a `meta` body becomes a diagnostic at the `$` call. Nothing
+limits how long or how deep a body runs: a runaway recursion or loop at
+compile time behaves as it would at run time.
 
-A null-pointer constant such as `NULL` or `(char *) 0` can supply the default
-character set for `String.strip`, and `true` and `false` are 1 and 0. Any
-other preprocessor name has no compile-time value; a meta function that uses
-one reports `a name with no declaration`.
+### Arguments and results
 
-These two functions demonstrate a supported address and a supported chain:
+A `$` call's arguments are evaluated before the call. Each is a numeric,
+character, or String literal, a `%(...)` syntax literal, arithmetic over
+constants, a Symbol, captured macro syntax, or another `$` call. A captured
+literal passed to a parameter that is not syntax, such as a `String`,
+arrives as the literal's value. Anything else, such as a program variable,
+reports `an argument must be a constant, captured syntax, or a meta call`.
 
-```x2c
-meta static void meta_set(int *out) { *out = 9; }
-
-meta static int meta_address(void) {
-  int n = 1;
-  meta_set(&n);
-  return n;
-}
-
-meta static int meta_parts(String path) => path.split(".").len();
-
-int main(void) {
-  printf("%d %d\n", $meta_address(), $meta_parts("a.b.c"));
-  return 0;
-}
-```
-
-```text
-9 3
-```
-
-The chain calls `String.split`, then `List.len`.
-
-### Which library operations are available
-
-A method uses its ordinary resolved call, so `text.len()` and
-`String.len(text)` reach the same operation. Chaining adds no separate
-restriction: every call in the chain must be available.
-
-The rest of this section lists the library operations meta functions can
-call. The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
-reuse those same operations. `String`, `List`, `Array` and `Map` expose their
-`str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
-`Var.kind` reports a value's kind. These calls use the existing value
-implementations rather than a separate formatting or comparison algorithm.
-`lib/protocols.x` marks the `Array` and `Map` Var adoptions `meta protocol`,
-so every `Var` member they implement is available: `str`, `repr`,
-`write_str`, `write_repr`, `equal`, `compare`, `contains`, `getindex`,
-`setindex`, `updateindex` and `postfixindex`, and `truth` for a Map.
-`write_str` and `write_repr` return the Buffer they were given, so their
-result belongs to that Buffer. The `Array` Block adoption is marked too, so
-`len`, `capacity`, `truth`, `clear`, `pop`, `truncate` and `free` are
-available.
-
-`Buffer.new` and the `Buffer` writers are `meta` prototypes beside their
-definitions in `lib/buffer.x`: `reserve`, `clear`, `write`, `write_len`,
-`write_char`, `write_repeat`, `unwrite`, `pad`, `newline`, `indent`,
-`newline_indent`, `push` and `pop`. The marked `Buffer` Var adoption adds
-`str`, `repr` and `truth`. A String argument supplies a writer's text. Each
-writer returns the Buffer it was given, so returning a local
-`struct Buffer`'s address through a writer is a region error. `printf` is
-not available.
-
-Iterator producers and functional collection operations are also available in
-x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`
-and `String` Iter adoptions `meta protocol`, so their `iter` methods are
-available. `range` and the `Iter` producers are `meta` prototypes in
-`lib/iter.x`; `Map.keys`, `Map.enumerate` and `Var.iter` are marked beside
-their definitions in `lib/map.x` and `lib/dispatch.x`. A `File` is not
-iterable at compile time. Omit the native destination argument when an
-iterator is consumed by the same expression; the call then allocates the
-iterator with `Iter.new`. Either way it uses the native lazy producer and
-borrows its source and any callback.
-
-```x2c
-meta int key_count(Map values) => values.keys().count();
-
-meta List shifted(int amount) {
-  List result = range(1, 3, 1)
-    .map(%!(Var value) => value + amount);
-  return result;
-}
-```
-
-`List`, `Array` and `String` mapping and filtering use the same native
-operations with an adapter for the interpreted callback. Lazy `Iter` mapping,
-filtering, pairing and collection work the same way. Calls made as Lisp treat
-nil and `void` as false; callbacks in x2c-style meta functions retain ordinary
-`Var` truth.
-
-A binding name alone is not proof of runtime-equivalent behavior. A missing
-binding also does not explain why it was omitted. Some operations need only an
-adapter over existing values; others need native pointer arguments or resource
-ownership. A local `struct Iter` passed as the destination lives in native
-bytes, as other compile-time C objects do, and ends with its function.
-`List`, `Array` and `Iter` folds preserve a true `void`
-no-seed argument. Empty or exhausted `Iter.next`, `find`, `min` and `max` calls
-return true runtime `void`, distinct from Lisp nil.
-
-Other installed meta functions and the compiler operations declared in
-`meta.x` extend this surface; including a normal function declaration does
-not install its body for compile-time execution.
-
-Missing List/Array/Map lookups and removals preserve runtime `void`; they no
-longer become an empty List in the evaluator. This covers List `getindex`,
-`last`, `assoc`, `get`, `caar`, `cadr` and `caddr`; Array `getindex`, `setindex`,
-`take_last`, `shift`, `remove` and `insert`; and Map `get`, `getindex` and `del`.
-`caar` stops when either selection is absent. Ordinary Lists, Arrays and Maps
-still reject `void` as an element, key or value, so a rest call cannot pack it
-into its argument List.
-
-Status operations with output parameters receive the addresses of
-compile-time locals. `String.try_long`, `String.try_double`,
-`String.try_next`, the three `List.try_*` match operations, `Map.try_get`,
-`Map.try_del` and `Symbol.try_new` are the native operations themselves,
-writing through those addresses as they do at run time. A failed call
-therefore leaves every output unchanged; `String.try_next` and
-`List.try_search` write their paired outputs together.
-
-`Array.heap_pop`, `Map.get_hashed`, `Var.getindex` and `Var.null` preserve
-their native `void`-versus-`Null` results. `Var.clone_wide` creates a fresh
-session-`Scope` box for a wide value and returns true `void` for a nonwide
-value.
-
-Lisp conditions treat `void` as false while the normal x2c `Var.truth` contract
-still raises `<void-op>`; compare explicitly with `void` when both forms must
-agree.
-The compiler loads several binding layers, including `etc/init.xlisp`,
-`etc/lisp-values.xlisp` and `etc/comptime.xlisp`; supported body forms live in
-`src/comptime.x`.
-
-### Control flow and current rejections
-
-`if`, conditional expressions, short-circuit boolean operations, `while`,
-`for`, `do`, `break`, `continue`, recursion, `foreach`, `match`, templates,
-lambdas and destructuring have compile-time support. A `switch` may share
-labels and its final arm may end normally; an earlier arm must not execute
-through to the next one. Recursive calculations remain subject to the
-compiler's evaluation limits.
-
-Some combinations still decline: `switch` with a subject needing a temporary
-binding on a loop path; destructuring a source needing such a binding on a
-loop path; and taking the address of a destructured local. Match patterns
-must fold at lowering time, so a pattern interpolating a local value is not
-generally supported. These are binding/lowering gaps, not fundamental
-restrictions on loops, destructuring or pattern matching.
-
-Mutation is position-sensitive. `n++` as a statement is supported, but
-`return n++;` is not. `a[i] = a[i] + 1;` and `*p = *p + 1;` are supported
-shapes; `a[i] += 1;` and `(*p)++;` are not. An assignment used as an
-expression is not a general substitute for a statement.
-
-The table separates present restrictions from design assessment. "Gap"
-means feasible in principle, not scheduled or promised support.
-
-| Currently unsupported | What would be needed; fundamental or gap? |
-| --- | --- |
-| `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
-| Postfix increment expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. Prefix increments on locals and reference arguments are supported. |
-| Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
-| Structs with bitfields, array members, anonymous members or layout attributes; arrays of structs | **Gap:** compute a layout for these shapes. A `packed` struct is a compile error. Other structs use native bytes in C layout. |
-| Unions | **Gap:** model overlapping storage in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
-| `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
-| Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
-| Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
-| Enum constants of an enum with no `int` layout | **Gap:** compute values for enums C may make wider or narrower than `int`. |
-| Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
-| Callable result insertion | **Gap:** preserve identity when constructing a runtime value. See the next section. |
-
-For example, these are rejected definitions:
-
-<!-- ignore: a union has no compile-time representation -->
-```x2c,ignore
-union Bits { int i; float f; };
-
-meta int meta_union(void) {
-  union Bits bits = { 1 };
-  return bits.i;
-}
-```
-
-<!-- ignore: compound update of an indexed destination is unsupported -->
-```x2c,ignore
-meta int meta_update(void) {
-  int values[2] = { 1, 2 };
-  values[0] += 1;
-  return values[0];
-}
-```
-
-Their diagnostic reasons identify the union and the unsupported indexed
-update respectively.
-The compiler checks the body when installing the meta definition, so an
-unused function or an untaken branch does not hide an unsupported construct.
+Compile-time Lisp calls a `meta` function by its name with Lisp values.
+The native function checks each argument against its declared type, so
+passing `0` where a `List` is declared is an error rather than an empty
+list.
 
 ### Lifetime and state
 
@@ -1058,45 +809,22 @@ int main(void) {
 (0 2 4 6)
 ```
 
-Meta code manages lifetimes with the same operations as native code.
-`$auto` works on an `Array`, a `Map`, or a `Scope`, and `Array.free`,
-`String.free`, `Scope.new`, `Scope.new_named`, `Scope.destroy`,
-`Context.open`, `Context.export`, `Context.close`, and `List.promote` are
-bound for compile-time calls. `Scope.retain`, `Scope.release`, `Scope.push`,
-`Scope.pop`, `Scope.move`, and `Context.export` act on the session's user
-allocations. Compile-time
-allocations belong to the evaluator session. The evaluator keeps its own
-bindings, automatic storage, and session state in a separate Scope, so a
-release in meta code frees only what meta code allocated. A returned
-collection can be consumed by another meta function while the session is
-alive; it does not become a pointer to the eventual program's heap. Struct
-locals and address-taken locals are released when their function returns,
-as described in [C objects during compilation](#c-objects-during-compilation).
-A local address is useful within the calculation, not a portable constant
-address to embed in C.
-A `Job` that meta code starts with `List.job` or `Job.start` belongs to
-the function that started it, even inside an inner `$scope` block. It ends
-when that function returns or raises: a job still running is terminated and
-reaped, so a meta function cannot return its `Job`.
-As in C, a value built inside a region must not be kept, in a meta global
-or a Lisp definition, after that region is released.
+Meta code manages lifetimes with the same operations as native code, and
+they mean the same thing: a compile-time call runs inside a Scope the
+compiler opens for it, and a returned collection belongs to the compiler,
+not to the eventual program's heap. As in C, a value built inside a region
+must not be kept, in a `meta static` or a Lisp definition, after that
+region is released.
 
-The emitted runtime function still follows the runtime's ownership rules.
-Evaluator cleanup does not add cleanup to that function. In particular,
-allocating scratch collections in a dual-form body does not by itself prove
-that repeated runtime calls have the desired lifetime behavior.
-
-Ordinary file-scope variables remain unavailable, directly or through another
-function. Mark one `meta static` when compile-time access is intended. Its
-evaluator instance uses a separate per-unit table and does not expose future
-runtime state. Compiler-only functions that reach compiler operations use the
-same isolated table.
+A file-scope variable a `meta` body reads is the compiled group's own copy,
+initialized as the declaration says; it does not expose future runtime
+state. Mark it `meta static` to say that compile-time code owns it.
 
 ## Results: compute or insert
 
-A meta function can pass and return numeric, collection and callable values
-inside the evaluator. Inserting a result into the program adds a separate
-requirement: the compiler must construct code representing that value.
+A meta function can pass and return any value to another meta function.
+Inserting a result into the program adds a separate requirement: the
+compiler must construct code representing that value.
 
 | Result | Explicit `$helper(...)` insertion |
 | --- | --- |
@@ -1107,8 +835,8 @@ requirement: the compiler must construct code representing that value.
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
-| Struct value | Diagnosed; the compiler cannot write a struct value as code. |
-| `Func` or arbitrary native address | No direct materialization of the evaluator object. |
+| Struct value, C `bool` or pointer | Diagnosed; the value has no Var form. |
+| `Func` | No direct materialization of the compiler's object. |
 
 An inserted Array or Map is a snapshot of the compile-time result. It becomes
 an ordinary `[...]` or `{...}` literal, so each runtime execution of the
@@ -1150,32 +878,19 @@ int main(void) {
 
 Floating constants retain their binary value using hexadecimal literals;
 nonfinite values use the native compiler's infinity/NaN expressions.
-The remaining container work must account for identity, shared references,
-mutation and ownership. A pointer into the evaluator is never a valid address
-to embed in the future program.
+A pointer into the compiler is never a valid address to embed in the future
+program.
 
 ## Compile-time arithmetic and evidence
 
-Native scalar conversions are applied at typed declarations, assignments,
-casts, arguments between meta functions and returns. Array/List and
-Symbol/String conversions also have explicit support. This does not make
-all casts meaningful: reinterpreting an address is not supported. A pointer
-plus or minus an integer moves by whole elements.
-
-The `meta-differential` compiler fixture checks selected narrow/unsigned
+Compile-time code is compiled by the same backend with the same C compiler
+as the program, so its arithmetic, conversions and casts are the program's.
+The `meta-differential` compiler fixture checks narrow and unsigned
 arithmetic, wide intermediate values, floating operations and conversions
-against runtime calls. The `comptime-lowering`, `meta-import` and
-`meta-cursors` fixtures cover collections, callable values, local addresses,
-method chaining and iteration. They do not prove every operation/type
-combination equivalent. The `meta-records` and `meta-record-*` fixtures
-cover struct layout, copies and addresses, `meta-heap-objects` covers
-`sizeof` and heap structs, and the `meta-native-*` fixtures
-cover native calls. The `meta-numeric-lowering` fixture checks numeric
-suffixes and array element conversions against runtime results. Other array
-conversions, extended-precision parity, all callback signatures and resource
-lifetimes are not covered. This catalog covers the installed operation
-surface and identified lowering boundaries, not an exhaustive proof of every
-combination of C and x2c syntax.
+against runtime calls. The `comptime-lowering`, `meta-native-constructs`,
+`meta-import` and `meta-cursors` fixtures cover collections, callable
+values, local addresses, C constructs, method chaining and iteration; the
+`meta-records` and `meta-heap-objects` fixtures cover structs and the heap.
 
 ## From values to code
 
@@ -1440,8 +1155,8 @@ corresponding Lisp functions. `x2c_expr_call` takes its arguments as one
 Compiler queries exist only inside a compiler. A `meta` function that
 calls one, directly or through another `meta` function, therefore has no
 valid runtime form, and the compiler emits no definition for it. A body
-containing an explicit dollar-prefixed meta call or a source-template
-constructor is also compile-time-only, as are its meta callers. A call to
+containing a source-template constructor is also compile-time-only, as are
+its meta callers. A call to
 one from a runtime body is diagnosed where it is written. Calling
 `field_count` from an earlier section at run time gives:
 
@@ -1564,12 +1279,9 @@ the one copy the program links, exported by the reaching unit's header.
 Use the x2c calls above for ordinary meta work. The following notes apply
 when importing or calling Lisp helpers, or working with the compiler session.
 
-The compiler loads Lisp support into an embedded evaluator. Some loaded files
-are generated output: `etc/builtin-macros.xlisp` comes from
-`etc/builtin-macros.x` and `etc/builtin-core.xlisp` through
-`tools/gen-lisp-init.py`. Seeing Lisp in that generated file does not mean the
-algorithms still need a separate handwritten Lisp implementation. The support
-layer and the generated functions have different source owners.
+The compiler loads Lisp support into an embedded evaluator. The built-in
+macros' algorithms are compiler functions (`src/builtins.x`); the Lisp in
+`etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` only names them.
 
 ### One table for compiled code and Lisp
 

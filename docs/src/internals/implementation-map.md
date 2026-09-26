@@ -50,7 +50,7 @@ Ask for the AST after parsing and macro expansion:
 ```
 
 The built-in source macro in `src/macros.x`, `etc/builtin-macros.xmacro`, and
-`etc/builtin-macros.xlisp` has replaced `foreach` with declarations and a
+`src/builtins.x` has replaced `foreach` with declarations and a
 `while` loop that call `List_iter` and `Iter_try_next`. The final `List_iter`
 argument is a zero-initialized compound literal whose block lifetime holds the
 iterator state. The later transform pass replaces `total += n` with the
@@ -212,8 +212,8 @@ inline-lisp example
 ### Foreach
 
 - Parse and expand: built-in source macro support in `src/macros.x` and
-  `etc/builtin-macros.xmacro`; private lowering in
-  `etc/builtin-macros.xlisp`
+  `etc/builtin-macros.xmacro`; the expansion algorithm in
+  `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform.x`, `src/emit.x`
 - Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` owns status
 - Tests: `foreach` fixture, `Iter` suite, and checked example
@@ -320,34 +320,23 @@ tests so you can follow its complete implementation.
 
 ## Shared Lisp initialization
 
-The compiler and `Lisp.new()` load the same generated `etc/init.xlisp`. Its
-handwritten primitives and evaluator macros live in `etc/init-core.xlisp`.
-List traversal, numeric wrappers, selectors, predicates, and pattern helpers
-live in `etc/init.x`. `tools/gen-lisp-init.py` uses the compiler's existing
-lowering to assemble their Lisp definitions between the core primitives and
-public aliases. The core retains evaluator macros, native bindings, four
-rest-argument adapters, and the identity conversion used by generated code.
+The compiler and `Lisp.new()` load the same `etc/init.xlisp`: the evaluator
+primitives, macros, native bindings, and the standard algorithms (list
+traversal, numeric wrappers, selectors, predicates, and pattern helpers).
+Those algorithms use fixed primitive operations internally; their public
+Lisp names remain replaceable. In particular, rebinding `car`, `cdr`, or
+`cons` does not change `filter`.
 
-`make bootstrap-refresh` regenerates this artifact with the current stage-0
-compiler and rebuilds its embedded runtime copy before refreshing bootstrap
-C. The artifact is checked in: installation and session startup do not need
-to translate the initial environment. Generated helpers use fixed primitive
-operations internally; their public Lisp names remain replaceable. In
-particular, rebinding `car`, `cdr`, or `cons` does not change `filter`.
+The compiler's built-in macro algorithms are compiler functions in
+`src/builtins.x`, bound into the shared compile-time session before
+`etc/builtin-core.xlisp`, which names them for the built-in macros. It
+loads at the compiler-only boundary after the SDK; it is not part of
+`Lisp.new()`. Scope expansion, foreach lowering, and deferred class defaults
+reuse the ordinary compiler queries and syntax builders.
 
-
-The compiler's built-in macro algorithms live in `etc/builtin-macros.x`.
-The same generator assembles their lowering and the thin forwarding wrappers
-in `etc/builtin-core.xlisp` into `etc/builtin-macros.xlisp`. This artifact
-loads at the existing compiler-only boundary after the compile-time runtime
-and SDK; it is not part of `Lisp.new()`. Scope expansion, foreach lowering,
-and deferred class defaults reuse the ordinary compiler queries and syntax
-builders. The wrappers defer native-operation lookup until expansion because
-native operations are registered after the libraries are loaded.
-
-Native Lisp signature and binding algorithms live in `etc/lisp-bindings.x`.
-The generator combines their lowering with the adapters in
-`etc/lisp-bindings-core.xlisp` to produce `etc/lisp-bindings.xlisp`. Importing
-that artifact loads only functions. The compiler initializes binding rows and
+Native Lisp signature and binding algorithms are compiler functions in
+`src/builtins.x` under `_x2c.binding_*`, and `etc/lisp-bindings.xlisp`
+defines the Lisp entry points over them. Importing that file loads only
+functions. The compiler initializes binding rows and
 sealed groups when it installs the binding macros for each translation unit,
 so signature preloading cannot put mutable group state in the shared parent.

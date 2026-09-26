@@ -1680,21 +1680,25 @@ not available.
 
 Marking a function `meta` has three consequences.
 
-- The compiler translates the body into a compile-time form and installs it in
-  the translation unit's macro session. It is then callable during translation,
-  by `$name(args)` from an x2c body or from another executing meta function.
-  Existing Lisp code can call the same function with `$(name args)`. A construct with no compile-time form is diagnosed at the
-  `meta` marker, with the reason.
+- The function joins the translation unit's `meta` group. The first
+  compile-time call that reaches it compiles the group with the ordinary
+  backend and the configured C compiler, loads it into the compiler, and
+  calls it as native code; see
+  [How a meta function runs](../guide/meta-functions.md#how-a-meta-function-runs).
+  It is callable during translation by `$name(args)` from an x2c body, and
+  Lisp code can call it with `$(name args)`. Inside a `meta` body, `$f(x)`
+  is an ordinary call of `f`, because the whole body runs at compile time.
 - The function is also emitted as C and behaves as an ordinary function at run
-  time, unless it reaches a compiler query, an explicit dollar-prefixed meta
-  call or a source-template constructor, directly or through another meta
-  function. Such a function has no runtime form and none is emitted for it.
+  time, unless it reaches a compiler query or a source-template constructor,
+  directly or through another meta function. Such a function has no runtime
+  form and none is emitted for it.
 - A call without `$` always calls the emitted function, even with constant
   arguments.
 
-A dollar-prefixed function call requires compile-time evaluation. Arguments
-may compute values from other resolvable values and meta calls; unresolved
-runtime inputs are diagnosed. Visible macros retain precedence over meta
+A dollar-prefixed function call requires compile-time evaluation. Each
+argument is a constant, arithmetic over constants, captured macro syntax, or
+another dollar call; any other expression, such as a program variable, is
+diagnosed. Visible macros retain precedence over meta
 functions with the same name. In a macro body, forwarding a captured hole
 directly passes its code rather than evaluating the future runtime expression.
 
@@ -1709,14 +1713,11 @@ positions construct deferred invocation Lists from computed arguments. Normal
 binding expands them when inserted into a program. Existing Expression macros
 still expand normally. See [source templates](../guide/meta-functions.md#source-templates-from-meta-functions).
 
-The compile-time subset cuts across C and x2c constructs. Local mutation,
-represented collections, struct locals, local address-taking/dereference,
-and resolved method calls are supported; unions and operations without
-compile-time bindings are not. Struct locals and address-taken locals live
-in native bytes with C layout; see
+A `meta` body is ordinary x2c compiled as C, so every construct the unit
+can compile runs at compile time with its C meaning; see
 [C objects during compilation](../guide/meta-functions.md#c-objects-during-compilation).
-A supported type does not expose all of its runtime methods. See the guide's
-[capability and operation inventory](../guide/meta-functions.md#the-compile-time-subset).
+A body that lets the address of its own storage outlive the call is
+rejected where the address leaves.
 
 Meta functions may pass and return represented values such as wide integers,
 floating values, Strings and collections during compile-time execution.
@@ -1724,17 +1725,16 @@ Explicit `$name(args)` insertion, and the optional `$(name args)` Lisp form,
 accept numeric values with their native Var family, computed strings as C
 string literals, Symbols, identifiers
 and nonempty expression-code Lists. It does not directly materialize mutable
-collections, callable values or evaluator addresses. This boundary does not limit internal
+collections, callable values or compiler addresses. A parameter or result
+with no Var form, such as a struct, a C `bool` or a pointer, cannot cross a
+dollar call. This boundary does not limit internal
 returns to `int`; see
 [results](../guide/meta-functions.md#results-compute-or-insert).
 
-Compile-time objects belong to the evaluator. Ordinary dual-form meta
-functions reject file-scope state because the program's initializers and
-future mutable state are not available to them. A `meta static` value is the
-exception: it gives compile-time code its own separate instance.
-Compiler-only functions reaching compiler operations are exempt from that
-rejection, but use separate per-unit compile-time state, not the program's
-variables.
+Compile-time objects belong to the compiler. A file-scope variable that a
+`meta` body reads is the compiled group's own instance, initialized from the
+same source initializer; it is never the program's variable. A `meta static`
+value says so explicitly, and each unit gets its own instance.
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
 every consuming unit; a `meta static` value gives each unit its own
@@ -1769,17 +1769,13 @@ The operations declared with a bodyless `meta` prototype are supplied by
 the compiler itself, which generates its table of them from those
 declarations.
 
-`x2c_comptime_lower(List fn)` returns the Lisp forms a function definition
-lowers to, or an empty `List` when it cannot be lowered. The generators
-under `etc/` use it to record their lowered algorithms.
-
 `x2c_meta_definition_hashes()` returns a `Map` from the name of each
 function the unit has defined so far to a hash of its definition's code
 tokens, from the first token after any `meta` marker to the end of its
 body. The compiler carries native copies of the `meta` functions in the
 `.xmacro` files it ships (`src/linked-meta.x`) and records their hashes
 with it. An imported `meta` definition whose hash matches a copy's runs as
-that copy; an edited one is lowered like any other.
+that copy; an edited one is compiled with the unit's group like any other.
 
 The code builders have `meta` bodies in `lib/meta.x`, shared by the x2c
 and Lisp functions. The literal builders, identifier, index, call and composite
@@ -2309,9 +2305,6 @@ Use an owner that outlives every use of the stored value. Failed initialization
 retains the reserved address; the next attempt starts with zeroed storage.
 Only successful initialization publishes the value, and retry does not change
 referent ownership.
-
-A function-local static has no compile-time lowering; a meta function that
-declares one declines.
 
 A `goto` or switch dispatch cannot bypass a runtime static declaration and
 enter its remaining block. Put the declaration before the switch, or put it

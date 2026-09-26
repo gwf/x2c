@@ -143,8 +143,8 @@ manifest, including the deterministic Lisp showcase.
 
 - Percent literals and lambdas: `src/literals.x`.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
-  source macro: `etc/builtin-macros.xmacro` and `etc/builtin-macros.xlisp`,
-  loaded by `src/macros.x`.
+  source macro: `etc/builtin-macros.xmacro` and `src/builtins.x`, loaded by
+  `src/macros.x`.
 - Type initialization: `src/parse.x`, `src/generate.x`, and `src/cache.x`.
 - Type conversion: `src/type.x`, `src/expressions.x`, `src/transform.x`,
   `lib/varconvert.x`, and `lib/varops.x`.

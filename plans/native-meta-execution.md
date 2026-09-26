@@ -13,6 +13,16 @@
 > `$X2C_CACHE_DIR/meta/<digest>`, bound over their lowered forms at the
 > first `$` call. The lowering still runs first and remains the fallback.
 
+> Status 2026-09-26, spike/native-only: steps 1-3 landed. Every bodied
+> `meta` function runs natively; `src/comptime.x`, `etc/comptime.xlisp`,
+> `x2c_comptime_lower`, the generated built-in and binding Lisp, their x2c
+> sources, and `tools/gen-lisp-init.py` are gone. `src/stage.x` carries
+> arguments and results; the staging itself stays in `src/macros.x`. The
+> built-in macro and Lisp binding algorithms are `src/builtins.x`;
+> `etc/init.xlisp` is now hand-maintained Lisp (its natives were not moved
+> to `lib/lisp-init.x`). Remaining: the REPL still calls the deleted
+> lowering (`commands/repl`, step 5), and step 4 (evaluator) is untouched.
+
 ## The result
 
 A bodied `meta` function has one execution model: it is compiled by the

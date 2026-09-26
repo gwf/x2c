@@ -261,10 +261,10 @@ forms, including initializer recognition and the function-body boundary,
 `src/expressions.x` for the C precedence ladder plus dotted method sugar,
 `src/statements.x` for control flow, `match`, `try`/`catch`, and `defer`, and
 `src/literals.x` for collection, interpolated `String`, and lambda literals.
-`src/comptime.x` translates a function marked for compile-time use into the
-Lisp the macro session evaluates, with `etc/comptime.xlisp` as its runtime.
-The built-in source macro in `src/macros.x`, `etc/builtin-macros.xmacro`, and
-`etc/builtin-macros.xlisp` expands `foreach` during this pass. `src/type.x`
+`src/macros.x` stages a unit's bodied `meta` functions as native code and
+`src/stage.x` carries values across that boundary. The built-in source macro
+in `src/macros.x`, `etc/builtin-macros.xmacro`, and the algorithms in
+`src/builtins.x` expand `foreach` during this pass. `src/type.x`
 owns the `List`-backed `Type` representation those modules consult; `src/ast.x`
 owns sequence placement and binding helpers; `src/compiler.x` itself owns
 lexical scopes, symbol lookup from inner to outer, generated names, and the
@@ -491,8 +491,10 @@ The modules under `src/` divide ownership as follows:
   grammar and AST construction;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
-- `src/comptime.x` -- translating a function marked for compile-time use into
-  the Lisp the macro session evaluates; `etc/comptime.xlisp` is its runtime;
+- `src/stage.x` -- the arguments and results that cross between program
+  code and a unit's staged compile-time functions;
+- `src/builtins.x`, `src/linked-meta.x` -- the built-in macro algorithms and
+  the shipped compile-time code compiled into the compiler;
 - `src/ast.x` -- AST sequence placement and binding helpers;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and generated adapters;

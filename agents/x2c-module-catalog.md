@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 36
+- Compiler modules: 37
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -50,6 +50,14 @@ Public functions:
 `Build.end_translation`, `compile_commands_write`, `Build.finish`,
 `Build.report_success`, `Build.run_program`, `Build.cleanup`,
 `Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
+
+### [src/builtins.x](../src/builtins.x)
+
+the built-in macros' compile-time algorithms.
+
+Public functions:
+
+`builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -99,32 +107,32 @@ Public functions:
 `Compiler.own_diagnostics`, `Compiler.borrow_diagnostics`,
 `Compiler.borrow_unit_semantics`, `Compiler.take_diagnostics`,
 `Compiler.close_child`, `Compiler.new`, `Compiler.new_shared`,
-`Compiler.take_unit_state`, `Compiler.return_unit_state`,
-`Compiler.read_source`, `Compiler.canonical_path`, `home_portable_path`,
-`home_absolute_path`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.semantic_binding_facts`,
-`Compiler.present_references`, `Compiler.mark_reference_present`,
-`Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
-`reference_guard_exits`, `Compiler.macro_definition_locals`,
-`Compiler.fresh_name`, `Compiler.emitted_binding_name`,
-`preproc_never_active_arm`, `Compiler.tokenize`, `Compiler.mark_completion`,
-`Compiler.at_completion`, `Compiler.__complete_here`,
-`Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
-`Token.after_group`, `Compiler.peek`, `Compiler.require_input`,
-`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.skip_script_statement`,
-`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
-`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
-`Compiler.select_declaration_defaults`, `Compiler.shallow_parse`,
-`Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `ast_collect_binding_references`,
-`Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
-`Compiler.cache_literal_var`, `Compiler.cache_literal_list`,
-`Compiler.match_pattern_value`, `match_value_is_static`,
-`Compiler.match_pattern_is_static`, `match_value_head`,
-`match_value_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.share_meta_group`, `Compiler.take_unit_state`,
+`Compiler.return_unit_state`, `Compiler.read_source`,
+`Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
+`Compiler.semantic_binding_facts`, `Compiler.present_references`,
+`Compiler.mark_reference_present`, `Compiler.restore_reference_presence`,
+`Compiler.optional_reference_test`, `reference_guard_exits`,
+`Compiler.macro_definition_locals`, `Compiler.fresh_name`,
+`Compiler.emitted_binding_name`, `preproc_never_active_arm`,
+`Compiler.tokenize`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`Compiler.__complete_here`, `Compiler.skip_trivia_from`, `Symbol.group_step`,
+`Token.group_close`, `Token.after_group`, `Compiler.peek`,
+`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
+`Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
+`Compiler.skip_script_statement`, `Compiler.freeze_declaration_syntax`,
+`Compiler.thaw_declaration_syntax`, `Compiler.queue_declaration_effect`,
+`Compiler.run_declaration_effects`, `Compiler.select_declaration_defaults`,
+`Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
+`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
+`ast_collect_binding_references`, `Compiler.full_parse`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
+`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
+`match_value_is_static`, `Compiler.match_pattern_is_static`,
+`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
 `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
@@ -146,19 +154,6 @@ Public functions:
 `Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
 `Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
 `Compiler.gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
-
-### [src/comptime.x](../src/comptime.x)
-
-translating a compile-time x2c function into Lisp.
-
-Public functions:
-
-`Compiler.lower_comptime`, `Compiler.lower_repl`, `Compiler.lower_declined`,
-`Compiler.inherit_shared_meta`, `Compiler.lowered_meta_regions`,
-`Compiler.install_comptime`, `Compiler.lower_reached_meta`,
-`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
-`Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
-`Compiler.check_meta_call`, `Sym.is_bool_type`, `Compiler.meta_type_layout`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -273,7 +268,8 @@ shipped `meta` code compiled into the compiler.
 
 Public functions:
 
-`linked_meta_targets`, `linked_meta_hashes`
+`x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
+`x2c_type_members`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -304,14 +300,18 @@ Public functions:
 `x2c_type_is_value`, `x2c_type_tag_name`, `x2c_type_fields`,
 `x2c_binding_spelling`, `x2c_source_text`, `x2c_diagnostic_fail`, `x2c_ident`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_method_resolve`, `x2c_function_name`, `x2c_function_parameter`,
-`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
+`x2c_method_resolve`, `x2c_function_name`, `builtin_foreach_reference`,
+`builtin_foreach_unique`, `builtin_foreach_complete`,
+`builtin_foreach_collection`, `builtin_foreach_bindings`,
+`builtin_class_location`, `binding_native_type`, `binding_literal_list`,
+`x2c_function_parameter`, `Compiler.macro_form_is_definition`,
+`Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.skip_macro_invocation`,
 `Compiler.macro_invocation_needs_shallow_expansion`,
 `Compiler.macro_starts_target_at`, `x2c_embed_text`, `x2c_literal_value`,
-`x2c_comptime_lower`, `x2c_diagnostic_warn`, `macro_library_reset`,
-`Compiler.bind_meta_operation`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.shared_definition`,
+`x2c_diagnostic_warn`, `macro_library_reset`, `Compiler.bind_meta_operation`,
+`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
+`Compiler.shared_definition`, `Compiler.inherit_library_comptime`,
 `macro_library_filling`, `macro_library_defer`, `macro_library_pending`,
 `Compiler.shared_definitions`, `Compiler.import_package_macros`,
 `Compiler.parse_macro_lisp_top_level`, `Compiler.evaluate_declaration_effect`,
@@ -325,18 +325,17 @@ Public functions:
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.use_meta_toolchain`, `Compiler.report_unstaged_meta`,
-`Compiler.record_meta_static`, `Compiler.record_meta_import`,
+`Compiler.use_meta_toolchain`, `Compiler.record_meta_import`,
 `Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
 `Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`x2c_template_call`, `Compiler.peek_macro_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -430,6 +429,15 @@ Public functions:
 
 `SourceView.init`, `SourceView.set`, `SourceView.is_changed`,
 `SourceView.exists`, `SourceView.read`
+
+### [src/stage.x](../src/stage.x)
+
+values crossing the compile-time boundary.
+
+Public functions:
+
+`Compiler.meta_argument`, `Compiler.meta_value_expression`,
+`Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`
 
 ### [src/statements.x](../src/statements.x)
 

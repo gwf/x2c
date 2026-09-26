@@ -14,6 +14,11 @@ Shipped `meta` code compiled into the compiler.
 | --- | --- |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns the hash of each linked copy's definition text by name. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies by name. |
+| [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer, as `lib/meta.x` does. |
+| [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, as `lib/meta.x` does. |
+| [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`, as `lib/meta.x` does. |
+| [`x2c_param_make`](#x2c_param_make) | Returns a parameter named `name` with `type`, as `lib/meta.x` does. |
+| [`x2c_type_members`](#x2c_type_members) | Returns enum members as `(name value)` rows, as `lib/meta.x` does. |
 
 ### Functions
 
@@ -23,7 +28,7 @@ Shipped `meta` code compiled into the compiler.
 
 Returns the hash of each linked copy's definition text by name.
 
-Source: `src/linked-meta.x:569`
+Source: `src/linked-meta.x:687`
 
 #### linked_meta_targets
 
@@ -31,7 +36,48 @@ Source: `src/linked-meta.x:569`
 
 Returns the linked copies by name.
 
-Source: `src/linked-meta.x:506`
+Source: `src/linked-meta.x:599`
+
+#### x2c_decl_make
+
+`List x2c_decl_make(List type, Var name, List initializer)`
+
+Declares `name` with `type` and an optional initializer, as `lib/meta.x`
+does.
+
+Source: `src/linked-meta.x:39`
+
+#### x2c_expr_cast
+
+`List x2c_expr_cast(List type, List expression)`
+
+Returns `expression` cast to `type`, as `lib/meta.x` does.
+
+Source: `src/linked-meta.x:31`
+
+#### x2c_expr_field
+
+`List x2c_expr_field(List receiver, String name)`
+
+Returns the expression `receiver.name`, as `lib/meta.x` does.
+
+Source: `src/linked-meta.x:25`
+
+#### x2c_param_make
+
+`List x2c_param_make(List type, Var name)`
+
+Returns a parameter named `name` with `type`, as `lib/meta.x` does.
+
+Source: `src/linked-meta.x:47`
+
+#### x2c_type_members
+
+`List x2c_type_members(List type)`
+
+Returns enum members as `(name value)` rows, as `lib/meta.x` does.
+
+Source: `src/linked-meta.x:75`
 
 ## Design notes
 
@@ -42,6 +88,6 @@ source text token for token after the `meta` marker.
 `Compiler.bind_linked_meta` binds an imported definition to its copy only
 when the two texts hash the same, so an edited `.xmacro` is lowered as
 user code until this file follows it. A copy is left out when its body
-expands a macro, makes a `$` call, or calls a `meta` function that has
-no runtime form, such as the `lib/meta.x` builders that reach a compiler
-operation.
+expands a macro or makes a `$` call. The `lib/meta.x` builders that
+reach a compiler operation are copied first, so later copies call them;
+the builders with a run-time form bind to the runtime's own definitions.

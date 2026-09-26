@@ -33,7 +33,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions.x:1263`
+Source: `src/regions.x:1257`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -47,10 +47,9 @@ into a static, a parameter's object, or an unknown pointer would read
 freed memory. The first finding is reported as an error. `fn` must be
 the bound and typed definition. The walk reads the summaries of the
 `meta` functions installed before `fn` and records the summary of `fn`
-in `meta_regions`; a definition whose lowering the process already
-cached takes the summary recorded with it.
+in `meta_regions`.
 
-Source: `src/regions.x:1237`
+Source: `src/regions.x:1236`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -72,7 +71,7 @@ Source: `src/regions.x:1212`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1277`
+Source: `src/regions.x:1271`
 
 <a id="Compiler.region_no_lifetime_effect"></a>
 #### Compiler.region_no_lifetime_effect
@@ -81,7 +80,7 @@ Source: `src/regions.x:1277`
 
 Reports a built-in call that neither creates nor retains tracked storage.
 
-Source: `src/regions.x:1280`
+Source: `src/regions.x:1274`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result

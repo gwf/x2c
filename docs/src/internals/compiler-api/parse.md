@@ -61,7 +61,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2364`
+Source: `src/parse.x:2372`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -108,7 +108,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2287`
+Source: `src/parse.x:2295`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -334,7 +334,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2061`
+Source: `src/parse.x:2069`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
