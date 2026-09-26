@@ -1778,7 +1778,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(compiler)) return;  List rows = Sym_visible_symbols(compiler -> sym); {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 959};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 964};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -1805,7 +1805,7 @@ Token Token_after_group(Token t){
 Symbol Compiler_peek(Compiler compiler, int steps){
   if(! _init_guard_) _file_init_();  Token token = compiler -> token;  if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1009};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1014};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -1820,7 +1820,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1027};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1032};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -2084,6 +2084,15 @@ Array rows = Array_new(); {
     }
   }
 return List_var(Array_list_free(rows));
+}
+
+unsigned long Pool_epoch(void);
+int List_equal(List, List);
+Var Compiler_freeze_macro_stack(Compiler c){
+  if(! _init_guard_) _file_init_();  unsigned long epoch = Pool_epoch();  if(! List_equal(c -> macro_stack, c -> frozen_stack_key) || epoch != c -> frozen_stack_epoch || Var_is_void(c -> frozen_stack)){
+    c -> frozen_stack = Compiler_freeze_declaration_syntax(c, List_var(c -> macro_stack));  c -> frozen_stack_key = c -> macro_stack;  c -> frozen_stack_epoch = epoch;
+  }
+  return c -> frozen_stack;
 }
 
 Atom Atom_intern(String);
@@ -3574,7 +3583,6 @@ int Sym_binding_is_local(Sym sym, List binding){
   return Sym_binding_is_local_before(sym, binding, Block_len(sym -> scopes));
 }
 
-int List_equal(List, List);
 int Sym_binding_is_local_before(Sym sym, List binding, int scope_count){
   if(scope_count >(int) Block_len(sym -> scopes)) scope_count = Block_len(sym -> scopes);  for(int i = scope_count - 1;  i >= sym -> base_scopes;  i --){
     Var _, candidate;  Map _x2c_macro_object_45 = _semantic_scope(sym, i) -> bindings;  unsigned _x2c_macro_cursor_45 = 0;  Var _x2c_macro_cursor_output_45;  Var _x2c_macro_cursor_output_46;  while(Map_try_next(_x2c_macro_object_45, &(_x2c_macro_cursor_45), &(_x2c_macro_cursor_output_45), &(_x2c_macro_cursor_output_46))){

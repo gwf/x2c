@@ -3379,7 +3379,7 @@ Token Var_token(Var);
 Var List_last(List);
 void Compiler_run_declaration_effects(Compiler);
 Var Compiler_evaluate_declaration_recipe(Compiler, Atom, List);
-Var Compiler_freeze_declaration_syntax(Compiler, Var);
+Var Compiler_freeze_macro_stack(Compiler);
 Var Compiler_thaw_declaration_syntax(Compiler, Var);
 int Type_is_bitfield(Type);
 void Sym_mark_static(Sym, List);
@@ -3538,7 +3538,7 @@ break;
 }
 static MatchCaptureSite _x2c_match_site_57;  if (x2c_match_site_try_capture(& _x2c_match_site_57, _x2c_match_expr, List_var(_573), &_x2c_match_capture)) {Var callback = _x2c_match_values[0];  Var arguments = _x2c_match_values[1]; {
   if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
-    List _x2c_return_value_17 = cons(_574, cons(callback, cons(arguments, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), cons(int_var((c) -> source_private), NULL))))); {
+    List _x2c_return_value_17 = cons(_574, cons(callback, cons(arguments, cons(Compiler_freeze_macro_stack((c)), cons(int_var((c) -> source_private), NULL))))); {
       x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_17;
     }
 
@@ -3566,7 +3566,7 @@ break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497945699789608ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var function = _x2c_match_values[0]; {
   if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
-    List _x2c_return_value_20 = cons(_587, cons(function, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), cons(int_var((c) -> source_private), NULL)))); {
+    List _x2c_return_value_20 = cons(_587, cons(function, cons(Compiler_freeze_macro_stack((c)), cons(int_var((c) -> source_private), NULL)))); {
       x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_20;
     }
 
@@ -3901,7 +3901,7 @@ default: break;
     }
   }
 {
-  List _x2c_return_value_35 = cons(_588, cons(List_var(declaration), cons(body, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), NULL)))); {
+  List _x2c_return_value_35 = cons(_588, cons(List_var(declaration), cons(body, cons(Compiler_freeze_macro_stack((c)), NULL)))); {
     x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_35;
   }
 

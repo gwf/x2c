@@ -46,6 +46,9 @@ typedef struct Compiler{
   Map deps;
   List aggregate_type, macro_stack, declaration_effects;
   Sym sym;
+  List frozen_stack_key;
+  Var frozen_stack;
+  unsigned long frozen_stack_epoch;
   SymScope params;
   Map key_ids, macros, kw_aliases;
   Map object_macros;
@@ -209,6 +212,8 @@ void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
 void Compiler_skip_script_statement(Compiler c);
 
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
+
+Var Compiler_freeze_macro_stack(Compiler c);
 
 Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 
