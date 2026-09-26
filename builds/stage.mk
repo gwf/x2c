@@ -36,14 +36,19 @@ ARFLAGS          ?= rv
 # compilation. Stage 0 stays lenient because the checked-in bootstrap
 # translates it, possibly warning about what the new source fixed, and
 # because source installs build it with whatever host C compiler they have.
+# Its compiler also links every shipped `meta` function the sources call
+# (src/linked-meta.x), so a call that would stage one with the C compiler
+# instead fails translation with "this function cannot run at compile time".
 ifneq ($(DIRECTORY),0)
 STRICT_CFLAGS    = -Werror
 STRICT_X2C_FLAGS = --fatal-warnings
+STRICT_X2C_ENV   = X2C_CC=false
 endif
 CFLAGS           += $(BUILD_CFLAGS) $(STRICT_CFLAGS)
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
-X2C_TRANSLATE    = $(X2C_COMPILER) translate $(STRICT_X2C_FLAGS) $(X2C_FLAGS)
+X2C_TRANSLATE    = $(STRICT_X2C_ENV) $(X2C_COMPILER) translate \
+	$(STRICT_X2C_FLAGS) $(X2C_FLAGS)
 # A native module binds to the compiler's own runtime, so the compiler links
 # the whole runtime archive, and a Linux executable exports its functions
 # only when asked.

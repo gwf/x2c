@@ -1773,8 +1773,8 @@ declarations.
 function the unit has defined so far to a hash of its definition's code
 tokens, from the first token after any `meta` marker to the end of its
 body. The compiler carries native copies of the `meta` functions in the
-`.xmacro` files it ships (`src/linked-meta.x`) and records their hashes
-with it. An imported `meta` definition whose hash matches a copy's runs as
+`.xmacro` files it ships (`src/linked-meta.x`, generated from them) and
+records their hashes with it. An imported `meta` definition whose hash matches a copy's runs as
 that copy; an edited one is compiled with the unit's group like any other.
 
 The code builders have `meta` bodies in `lib/meta.x`, shared by the x2c

@@ -79,6 +79,7 @@ configure-packages:					## Report package build prerequisites
 build: bootstrap-ready					## Build the runtime and compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
+	tools/gen-linked-meta.sh
 	$(PARALLEL_MAKE) -C builds x2c
 
 build-safe: configure					## Conservatively rebuild the compiler
@@ -87,6 +88,7 @@ build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C builds clean
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
+	tools/gen-linked-meta.sh
 	$(PARALLEL_MAKE) -C builds x2c
 
 commands: build					## Build checkout external commands
