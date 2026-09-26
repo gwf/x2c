@@ -232,22 +232,18 @@ static int _meta_immutable(Var value) {
     value.is_integer() || value.is_floating();
 }
 
-/* A pointer the evaluator holds names compiler memory, which the running
-   program does not have, so it never becomes a constant in code. */
-static void _meta_refuse_address(Compiler c, Var value, Token site) {
-  if (value.is_pointer() && value.u64)
-    c.report_error(
-      <macro>, "compile-time result is a compiler address", site,
-      %("return data built from the pointed-to values instead"));
+/* Reports at `site` a result that cannot become data in the program. */
+static void _meta_refuse(Compiler c, Var value, Token site) {
+  Map marks = $auto({});
+  List problem = datum_result_problem(value, marks);
+  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
-/* Builds the parser's form of one data value. Immutable values come from
-   the literal cache; each Array or Map becomes a literal that builds a fresh
-   collection every time it runs. `marks` holds 1 for a collection being
-   built and 2 for one already built, so a cycle or a shared collection is
-   reported at `site`. */
-static List _meta_data(Compiler c, Var value, Map marks, Token site) {
-  _meta_refuse_address(c, value, site);
+/* Builds the parser's form of one data value, which
+   `datum_result_problem` accepted. Immutable values come from the literal
+   cache; each Array or Map becomes a literal that builds a fresh
+   collection every time it runs. */
+static List _meta_data(Compiler c, Var value) {
   if (_meta_immutable(value)) {
     if (value is <list>) return c.cache_literal_list(value);
     return %(expr ("Var") ${c.cache_literal_var(value)});
@@ -255,48 +251,33 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
   if (value is <list>) {
     List result = %(nil);
     foreach (Var item, value.list().reverse()) {
-      List head = _meta_data(c, item, marks, site);
+      List head = _meta_data(c, item);
       if (!head) return NULL;
       result = %(expr ("List") (cons $head $result));
     }
     return result;
   }
-  if (value is not <array> && value is not <map>) return NULL;
-  ulong address = (ulong) value.u64;
-  if (address in marks)
-    c.report_error(
-      <macro>,
-      marks[address] == 1
-        ? "compile-time result contains itself"
-        : "compile-time result holds one collection twice",
-      site, %("each Array and Map in a result is built separately"));
-  marks[address] = 1;
-  List result = NULL;
   if (value is <array>) {
     Array items = $auto([]);
     foreach (Var item, value.array()) {
-      List code = _meta_data(c, item, marks, site);
+      List code = _meta_data(c, item);
       if (!code) return NULL;
       items.push(code);
     }
-    result = %(expr ("Array") (array @{items.list()}));
+    return %(expr ("Array") (array @{items.list()}));
   }
-  else {
-    Map map = value;
-    Array keys = $auto([]), entries = $auto([]);
-    foreach (Var (key, item), map) keys.push(key);
-    // Cache ids and emission must not depend on bucket layout.
-    foreach (Var key, keys.sort()) {
-      List key_code = _meta_data(c, key, marks, site);
-      List value_code =
-        key_code ? _meta_data(c, map[key], marks, site) : NULL;
-      if (!value_code) return NULL;
-      entries.push(%(map-entry $key_code $value_code));
-    }
-    result = %(expr ("Map") (map @{entries.sort().list()}));
+  if (value is not <map>) return NULL;
+  Map map = value;
+  Array keys = $auto([]), entries = $auto([]);
+  foreach (Var (key, item), map) keys.push(key);
+  // Cache ids and emission must not depend on bucket layout.
+  foreach (Var key, keys.sort()) {
+    List key_code = _meta_data(c, key);
+    List value_code = key_code ? _meta_data(c, map[key]) : NULL;
+    if (!value_code) return NULL;
+    entries.push(%(map-entry $key_code $value_code));
   }
-  marks[address] = 2;
-  return result;
+  return %(expr ("Map") (map @{entries.sort().list()}));
 }
 
 /** Returns literal code for a compile-time `value`, preserving `declared`
@@ -307,7 +288,7 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
 */
 List Compiler.meta_value_expression(
   Compiler c, Type declared, Var value, Token site) {
-  _meta_refuse_address(c, value, site);
+  if (value is not <list>) _meta_refuse(c, value, site);
   Type type = declared ? declared : _meta_value_type(value);
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, type);
@@ -350,8 +331,8 @@ List Compiler.meta_value_expression(
   // Without a declared type, a List result is code rather than data.
   if (declared ? type === %("Var") || type === kind
       : kind && kind !== %("List")) {
-    Map marks = $auto({});
-    List expression = _meta_data(c, value, marks, site);
+    _meta_refuse(c, value, site);
+    List expression = _meta_data(c, value);
     return expression && declared
       ? c.convert_expression(expression, declared) : expression;
   }

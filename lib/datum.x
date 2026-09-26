@@ -174,3 +174,41 @@ int datum_read(String text, unsigned &cursor, Var &out) {
   out = _datum_decode(value);
   return 1;
 }
+
+/** Returns why the compile-time result `value` cannot become data in the
+    program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
+    contains itself, or holds one Array or Map twice. `marks` holds 1 for
+    an Array or Map being checked and 2 for one already checked. */
+List datum_result_problem(Var value, Map marks) {
+  if (value.is_pointer() && value.u64)
+    return %("compile-time result is a compiler address"
+             ("return data built from the pointed-to values instead"));
+  if (value is <list>) {
+    foreach (Var item, value.list()) {
+      List problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+    return NULL;
+  }
+  if (value is not <array> && value is not <map>) return NULL;
+  ulong address = (ulong) value.u64;
+  if (address in marks)
+    return %(${marks[address] == 1
+                 ? "compile-time result contains itself"
+                 : "compile-time result holds one collection twice"}
+             ("each Array and Map in a result is built separately"));
+  marks[address] = 1;
+  if (value is <array>)
+    foreach (Var item, value.array()) {
+      List problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+  else
+    foreach (Var (key, item), (Map) value) {
+      List problem = datum_result_problem(key, marks);
+      if (!problem) problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+  marks[address] = 2;
+  return NULL;
+}

@@ -120,18 +120,12 @@ List x2c_param_make(List type, Var name) =>
   %("x2c.deferred" "x2c_param_make" $type $name);
 List x2c_type_members(List type) =>
   %("x2c.deferred" "x2c_type_members" $type);
-List x2c_type_parts(List value) =>
-  %("x2c.deferred" "x2c_type_parts" $value);
-List x2c_type_resolve(List value) =>
-  %("x2c.deferred" "x2c_type_resolve" $value);
-List x2c_type_element(List value) =>
-  %("x2c.deferred" "x2c_type_element" $value);
-List x2c_type_parameters(List value) =>
-  %("x2c.deferred" "x2c_type_parameters" $value);
-List x2c_type_return(List value) =>
-  %("x2c.deferred" "x2c_type_return" $value);
-List x2c_type_layout(List value) =>
-  %("x2c.deferred" "x2c_type_layout" $value);
+List x2c_type_parts(List v) => %("x2c.deferred" "x2c_type_parts" $v);
+List x2c_type_resolve(List v) => %("x2c.deferred" "x2c_type_resolve" $v);
+List x2c_type_element(List v) => %("x2c.deferred" "x2c_type_element" $v);
+List x2c_type_parameters(List v) => %("x2c.deferred" "x2c_type_parameters" $v);
+List x2c_type_return(List v) => %("x2c.deferred" "x2c_type_return" $v);
+List x2c_type_layout(List v) => %("x2c.deferred" "x2c_type_layout" $v);
 List x2c_method_resolve(List type, String name) =>
   %("x2c.deferred" "x2c_method_resolve" $type $name);
 List x2c_protocol_member(List participant, List base, String member) =>
@@ -141,61 +135,27 @@ List x2c_function_parameter(List function, String wanted) =>
 
 /* A `Source` parameter's description carries its text. */
 String x2c_source_text(Var syntax) {
-  match (syntax) case %((text ?(String text)) (file ?) (syntax ?)): return text;
+  match (syntax)
+    case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _unavailable("x2c.source.text");
 }
 
-List x2c_syntax_type(List value) {
-  (void) value;
-  _unavailable("x2c.syntax.type");
-}
-
-List x2c_type_fields(List value) {
-  (void) value;
-  _unavailable("x2c.type.fields");
-}
-
-Var x2c_literal_value(Var syntax) {
-  (void) syntax;
-  _unavailable("x2c.literal.value");
-}
-
-int x2c_type_is_value(List value) {
-  (void) value;
-  _unavailable("x2c.type.value?");
-}
-
-int x2c_type_is_integral(List value) {
-  (void) value;
-  _unavailable("x2c.type.integral?");
-}
-
-int x2c_type_is_pointer(List value) {
-  (void) value;
-  _unavailable("x2c.type.pointer?");
-}
-
-Symbol x2c_type_tag_name(String name) {
-  (void) name;
-  _unavailable("x2c.type.tag-name");
-}
-
-String x2c_type_reverse_name(String base, String participant) {
-  (void) base;
-  (void) participant;
+/* The operations that read compiler state have no answer here. */
+List x2c_syntax_type(List v) { _unavailable("x2c.syntax.type"); }
+List x2c_type_fields(List v) { _unavailable("x2c.type.fields"); }
+Var x2c_literal_value(Var v) { _unavailable("x2c.literal.value"); }
+int x2c_type_is_value(List v) { _unavailable("x2c.type.value?"); }
+int x2c_type_is_integral(List v) { _unavailable("x2c.type.integral?"); }
+int x2c_type_is_pointer(List v) { _unavailable("x2c.type.pointer?"); }
+Symbol x2c_type_tag_name(String v) { _unavailable("x2c.type.tag-name"); }
+String x2c_type_reverse_name(String v, String w) {
   _unavailable("x2c.type.reverse-name");
 }
-
-String x2c_invocation_file(void) {
-  _unavailable("x2c.invocation.file");
-}
-
-int x2c_invocation_line(void) {
-  _unavailable("x2c.invocation.line");
-}
-
-int x2c_invocation_column(void) {
-  _unavailable("x2c.invocation.column");
+String x2c_invocation_file(void) { _unavailable("x2c.invocation.file"); }
+int x2c_invocation_line(void) { _unavailable("x2c.invocation.line"); }
+int x2c_invocation_column(void) { _unavailable("x2c.invocation.column"); }
+Map x2c_meta_definition_hashes(void) {
+  _unavailable("x2c.meta.definition-hashes");
 }
 
 /* A `Source` holding a String literal is read beside its file; a String
@@ -229,10 +189,6 @@ String x2c_embed_text(Var path) {
   return text;
 }
 
-Map x2c_meta_definition_hashes(void) {
-  _unavailable("x2c.meta.definition-hashes");
-}
-
 /* --- the protocol ------------------------------------------------------- */
 
 /* The next frame on `in`, or NULL at its end. */
@@ -259,42 +215,6 @@ static void _reply(List message) {
   _frame_write(out);
 }
 
-/* Why `value` cannot return to the compiler, or NULL. `marks` holds 1 for
-   an Array or Map being checked and 2 for one already checked. */
-static List _result_problem(Var value, Map marks) {
-  if (value.is_pointer() && value.u64)
-    return %("compile-time result is a compiler address"
-             ("return data built from the pointed-to values instead"));
-  if (value is <list>) {
-    foreach (Var item, value.list()) {
-      List problem = _result_problem(item, marks);
-      if (problem) return problem;
-    }
-    return NULL;
-  }
-  if (value is not <array> && value is not <map>) return NULL;
-  ulong address = (ulong) value.u64;
-  if (address in marks)
-    return %(${marks[address] == 1
-                 ? "compile-time result contains itself"
-                 : "compile-time result holds one collection twice"}
-             ("each Array and Map in a result is built separately"));
-  marks[address] = 1;
-  if (value is <array>)
-    foreach (Var item, value.array()) {
-      List problem = _result_problem(item, marks);
-      if (problem) return problem;
-    }
-  else
-    foreach (Var (key, item), (Map) value) {
-      List problem = _result_problem(key, marks);
-      if (!problem) problem = _result_problem(item, marks);
-      if (problem) return problem;
-    }
-  marks[address] = 2;
-  return NULL;
-}
-
 static void _call(Map table, String name, List arguments) {
   helper_notices = [];
   Var target;
@@ -316,7 +236,7 @@ static void _call(Map table, String name, List arguments) {
     _reply(failure);
     return;
   }
-  List problem = _result_problem(result, {});
+  List problem = datum_result_problem(result, {});
   if (problem) {
     _reply(cons(<error>, problem));
     return;
