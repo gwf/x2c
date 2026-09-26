@@ -6,10 +6,10 @@
     Each handler sees the errors raised since it was registered and decides
     how to respond. The caller sets the policy for errors no handler accepts.
 
-    Each accumulated record owns an independent `Scope` and
-    canonical `List` and
-    `String` pools. A handler watermark bounds those regions, so closing the
-    handler reclaims its complete slice without touching application pools.
+    Each accumulated record owns an independent `Scope` and one canonical
+    `List` and `String` pool. A handler watermark bounds those regions, so
+    closing the handler reclaims its complete slice without touching
+    application pools.
     Raising while the error path is itself failing uses the error floor,
     which allocates nothing.
  */
@@ -18,6 +18,7 @@
 
 #include "common.x"
 #include "match.x"
+#include "mutex.x"
 
 #define ERROR_DEFAULT_BOUND 4096
 
@@ -77,31 +78,18 @@ static pthread_mutex_t catch_site_mutex;
 static pthread_once_t catch_site_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
-static void _catch_site_mutex_initialize(void) {
-  pthread_mutexattr_t attributes;
-  if (pthread_mutexattr_init(&attributes) ||
-      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
-      pthread_mutex_init(&catch_site_mutex, &attributes)) {
-    fprintf(stderr, "Error: could not initialize catch site mutex\n");
-    abort();
-  }
-  pthread_mutexattr_destroy(&attributes);
-}
+static void _catch_site_mutex_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &catch_site_mutex, "Error: could not initialize catch site mutex");
 
-static void _catch_site_lock(void) {
-  if (pthread_once(&catch_site_mutex_once, _catch_site_mutex_initialize) ||
-      pthread_mutex_lock(&catch_site_mutex)) {
-    fprintf(stderr, "Error: could not lock catch site\n");
-    abort();
-  }
-}
+static void _catch_site_lock(void) =>
+  x2c_mutex_recursive_lock(
+    &catch_site_mutex, &catch_site_mutex_once, _catch_site_mutex_initialize,
+    "Error: could not lock catch site");
 
-static void _catch_site_unlock(void) {
-  if (pthread_mutex_unlock(&catch_site_mutex)) {
-    fprintf(stderr, "Error: could not unlock catch site\n");
-    abort();
-  }
-}
+static void _catch_site_unlock(void) =>
+  x2c_mutex_recursive_unlock(
+    &catch_site_mutex, "Error: could not unlock catch site");
 
 /** Reports whether one catch site still needs its patterns at registration.
     A bound static site answers 0, so its caller can skip constructing them.
@@ -178,13 +166,9 @@ ErrorHandler x2c_error_catch_site_push(
     _floor(<invariant>, "could not register transferring catch");
   ErrorThreadState state = _thread();
   state.floor_only++;
-  ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
-  *h = (struct ErrorHandler) {
-      .prev = state.handler_top, .running = NULL, .fn = NULL, .data = void,
-      .watermark = Error.count(), .site = site, .target = target,
-      .selected = -1, .plans = NULL,
-      .capture_values = NULL, .retained = NULL, .detached = 0
-  };
+  ErrorHandler h = _handler_new(NULL, void);
+  h.site = site;
+  h.target = target;
   if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING)
     _catch_site_bind(site, patterns);
   const char *fenced = NULL, int fenced_arm = -1;
@@ -564,12 +548,10 @@ static ErrorRecord *_record_at(int index) {
   return &records[index];
 }
 
-/* Error Lists can contain Strings from the region's sibling String pool.
-   Release the borrowing List pool first, then String storage, then wide scalar
-   boxes in the Scope. No region value survives this operation. */
+/* Release canonical values before their borrowed wide scalar boxes.
+   No region value survives this operation. */
 static void _region_destroy(ErrorRegion *region) {
-  if (region.lists) region.lists = Pool.release(region.lists);
-  if (region.strings) region.strings = Pool.release(region.strings);
+  if (region.pool) region.pool = Pool.release(region.pool);
   if (region.values) {
     Scope.destroy(region.values);
     region.values = NULL;
@@ -579,41 +561,70 @@ static void _region_destroy(ErrorRegion *region) {
 static ErrorRegion _region_new(void) {
   ErrorRegion region = { 0 };
   region.values = Scope.new_named("Error record values");
-  region.strings = Pool.retain_named(NULL, "Error record Strings");
-  region.lists = Pool.retain_named(NULL, "Error record Lists");
+  region.pool = Pool.retain_named(NULL, "Error record canonical values");
   return region;
 }
 
 static List _cons(ErrorRegion *region, Var head, List tail) =>
-  List.cons_in(region.lists, head, tail);
+  List.cons_in(region.pool, head, tail);
 
+/* A wide box belongs to the outermost `Scope` of the caller's active slot, so
+   a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
+   allocate through the slot itself, which then owns the `Scope` the box
+   creates. */
+static Var _snapshot_wide(Var v) {
+  Scope owner = *Scope.top();
+  if (!owner) return v.clone_wide();
+  while (owner.down) owner = owner.down;
+  Scope.push(&owner);
+  Var copy = v.clone_wide();
+  Scope.pop();
+  return copy;
+}
+
+/* A NULL region requests an ordinary snapshot: construct in the active
+   canonical pool, then promote that same object. An explicit region copies
+   into its pool instead. Both policies traverse the same immutable shape. */
 static Var _copy_value(ErrorRegion *region, Var value) {
   if (value is void)
-    _floor(<bad-types>, "void is not an admissible error detail");
+    _floor(<bad-types>, region
+      ? "void is not an admissible error detail"
+      : "void is not an admissible error snapshot");
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
   if (value.is_wide()) {
+    if (!region) return _snapshot_wide(value);
     Scope.push(&region.values);
     Var owned = value.clone_wide();
     Scope.pop();
     return owned;
   }
   if (value.is_integer() || value.is_floating()) return value;
-  if (value is <string>) {
-    String source = value;
-    return String.new_in(region.strings, source, source.len());
-  }
-  if (value is <lsym>) {
-    String source = value.str();
-    String owned = String.new_in(region.strings, source, source.len());
-    return Var.new(<lsym>, owned);
+  if (value is <string> || value is <lsym>) {
+    String source = value is <lsym> ? value.str() : value.string();
+    String owned = region
+      ? String.new_in(region.pool, source, source.len())
+      : String.new_len(source, source.len());
+    if (region)
+      return value is <lsym> ? Var.new(<lsym>, owned) : owned;
+    if (value is <lsym>) {
+      Atom atom = Atom.intern(owned);
+      if (atom is <lsym>) String.try_own(atom.str());
+      return atom;
+    }
+    String.try_own(owned);
+    return owned;
   }
   if (value is <list>) {
     List source = value;
     Var head = _copy_value(region, source.car());
     List tail = _copy_value(region, source.cdr());
-    return _cons(region, head, tail);
+    List owned = region ? _cons(region, head, tail) : cons(head, tail);
+    if (!region) List.try_own(owned);
+    return owned;
   }
-  _floor(<bad-types>, "error detail contains an identity-bearing value");
+  _floor(<bad-types>, region
+    ? "error detail contains an identity-bearing value"
+    : "error snapshot contains an identity-bearing value");
 }
 
 static List _pair(ErrorRegion *region, Var key, Var value) =>
@@ -631,9 +642,9 @@ static List _location(ErrorRegion *region, const X2CErrorSite *site) {
   const char *file_source = site.file ? site.file : "<unknown>";
   const char *function_source = site.function ? site.function : "<unknown>";
   String file = String.new_in(
-    region.strings, file_source, strlen(file_source));
+    region.pool, file_source, strlen(file_source));
   String function = String.new_in(
-    region.strings, function_source, strlen(function_source));
+    region.pool, function_source, strlen(function_source));
   int line = site.line, List location = NULL;
   location = _field(region, <function>, function, location);
   location = _field(region, <line>, line, location);
@@ -723,48 +734,6 @@ int Error.count(void) => Error.ready() ? (int) _thread().stack.length : 0;
 */
 int Error.mark(void) => Error.count();
 
-/* A wide box belongs to the outermost `Scope` of the caller's active slot, so
-   a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
-   allocate through the slot itself, which then owns the `Scope` the box
-   creates. */
-static Var _snapshot_wide(Var v) {
-  Scope owner = *Scope.top();
-  if (!owner) return v.clone_wide();
-  while (owner.down) owner = owner.down;
-  Scope.push(&owner);
-  Var copy = v.clone_wide();
-  Scope.pop();
-  return copy;
-}
-
-static Var _snapshot_value(Var v) {
-  if (v is void)
-    _floor(<bad-types>, "void is not an admissible error snapshot");
-  if (v.is_null() || v.is_nil() || v is <symbol>) return v;
-  if (v.is_wide()) return _snapshot_wide(v);
-  if (v.is_integer() || v.is_floating()) return v;
-  if (v is <string>) {
-    String source = v, copy = String.new_len(source, source.len());
-    String.try_own(copy);
-    return copy;
-  }
-  if (v is <lsym>) {
-    String spelling = v.str();
-    Atom copy = Atom.intern(String.new_len(spelling, spelling.len()));
-    if (copy is <lsym>) String.try_own(copy.str());
-    return copy;
-  }
-  if (v is <list>) {
-    List source = v;
-    Var head = _snapshot_value(source.car());
-    List tail = _snapshot_value(source.cdr()), copy = cons(head, tail);
-    List.try_own(copy);
-    return copy;
-  }
-  _floor(
-    <bad-types>, "error snapshot contains an identity-bearing value");
-}
-
 /** Copies one admissible error value into the caller's ordinary owners.
     Handler slices and filtered-catch bindings are borrowed. Snapshot a value
     that must outlive its callback or selected arm; `String`s and `List`s enter
@@ -776,7 +745,7 @@ static Var _snapshot_value(Var v) {
 Var Error.snapshot(Var value) {
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var result = _snapshot_value(value);
+  Var result = _copy_value(NULL, value);
   state.floor_only--;
   return result;
 }
@@ -793,7 +762,7 @@ Var Error.snapshot_in(Var value, Scope *values, Pool pool) {
   if (!values || !pool)
     _floor(<bad-arg>, "error snapshot requires explicit owners");
   ErrorRegion region = {
-    .values = *values, .strings = pool, .lists = pool
+    .values = *values, .pool = pool
   };
   ErrorThreadState state = _thread();
   state.floor_only++;
@@ -817,7 +786,7 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
   if (!values || !pool)
     _floor(<bad-arg>, "error snapshot requires explicit owners");
   ErrorRegion region = {
-    .values = *values, .strings = pool, .lists = pool
+    .values = *values, .pool = pool
   };
   ErrorThreadState state = _thread();
   state.floor_only++;
@@ -827,13 +796,13 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
   return out;
 }
 
-/* Copies the errors at and after `mark` into one region, oldest first. */
+/* Copies errors oldest first, using an explicit region or active pools. */
 static List _view_since(ErrorRegion *region, int mark) {
   List out = NULL;
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
     Var entry = _copy_value(region, record.entry);
-    out = _cons(region, entry, out);
+    out = region ? _cons(region, entry, out) : cons(entry, out);
   }
   return out;
 }
@@ -850,12 +819,7 @@ List Error.since(int mark) {
   if (!Error.ready() || mark < 0) return NULL;
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List out = NULL;
-  for (int i = Error.count() - 1; i >= mark; i--) {
-    ErrorRecord *record = _record_at(i);
-    Var entry = _snapshot_value(record.entry);
-    out = cons(entry, out);
-  }
+  List out = _view_since(NULL, mark);
   List.try_own(out);
   state.floor_only--;
   return out;
@@ -1014,15 +978,18 @@ void Error.bound_set(int bound) {
 */
 ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   if (!Error.ready() || !fn) return NULL;
+  ErrorHandler h = _handler_new(fn, data);
+  _thread().handler_top = h;
+  return h;
+}
+
+static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data) {
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
-      .prev = state.handler_top, .running = NULL, .fn = fn, .data = data,
-      .watermark = Error.count(), .site = NULL, .target = NULL,
-      .selected = -1, .plans = NULL,
-      .capture_values = NULL, .retained = NULL, .detached = 0
+    .prev = state.handler_top, .fn = fn, .data = data,
+    .watermark = Error.count(), .selected = -1
   };
-  state.handler_top = h;
   return h;
 }
 

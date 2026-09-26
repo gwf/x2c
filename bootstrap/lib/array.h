@@ -8,6 +8,52 @@
 #include "common.h"
 typedef Block Array;
 
+Array Array_new(void);
+
+int Array_try_next(Array _x2c_macro_array_15, int * _x2c_macro_cursor_1, Var * _x2c_macro_out_4);
+
+Var Array_push(Array _x2c_macro_array_16, Var _x2c_macro_value_3);
+
+int Array_try_take_last(Array _x2c_macro_array_17, Var * _x2c_macro_out_5);
+
+Var Array_take_last(Array _x2c_macro_array_18);
+
+Var Array_shift(Array _x2c_macro_array_19);
+
+Var Array_unshift(Array _x2c_macro_array_20, Var _x2c_macro_value_6);
+
+Var Array_insert(Array _x2c_macro_array_21, int _x2c_macro_index_4, Var _x2c_macro_value_7);
+
+Var Array_remove(Array _x2c_macro_array_22, int _x2c_macro_index_5);
+
+Array Array_copy(Array _x2c_macro_array_23);
+
+Array Array_getslice(Array _x2c_macro_array_24, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_1);
+
+Array Array_setslice(Array _x2c_macro_array_25, int _x2c_macro_start_6, int _x2c_macro_end_5, Array _x2c_macro_values_2);
+
+Array Array_remslice(Array _x2c_macro_array_26, int _x2c_macro_start_7, int _x2c_macro_end_6);
+
+Array Array_splice(Array _x2c_macro_array_27, int _x2c_macro_index_6, int _x2c_macro_remove_count_1, Array _x2c_macro_values_3);
+
+int Array_find(Array _x2c_macro_array_28, Var _x2c_macro_value_9);
+
+int Array_contains(Array _x2c_macro_array_29, Var _x2c_macro_value_10);
+
+int Array_count(Array _x2c_macro_array_30, Var _x2c_macro_value_11);
+
+int Array_indexof(Array _x2c_macro_array_31, Var _x2c_macro_value_12);
+
+Array Array_concat(Array _x2c_macro_a_2, Array _x2c_macro_b_2);
+
+Array Array_reverse(Array _x2c_macro_array_32);
+
+int Array_equal(Array _x2c_macro_a_3, Array _x2c_macro_b_3);
+
+Var Array_getindex(Array _x2c_macro_array_33, int _x2c_macro_index_7);
+
+Var Array_setindex(Array _x2c_macro_array_34, int _x2c_macro_index_8, Var _x2c_macro_value_13);
+
 static inline Block Array_block(Array x){
   return(Block) x;
 }
@@ -16,53 +62,13 @@ static inline Array Block_array(Block x){
   return(Array) x;
 }
 
-Array Array_new(void);
-
 void Array_resize(Array arr, size_t size);
 
 Array Array_update_n(Array array, unsigned element_count, ...);
 
-Var Array_getindex(Array array, int index);
-
-Var Array_setindex(Array array, int index, Var elem);
-
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs);
 
 Var Array_postfixindex(Array array, int index, Symbol op);
-
-Var Array_push(Array array, Var elem);
-
-Var Array_take_last(Array array);
-
-Var Array_shift(Array array);
-
-Var Array_unshift(Array array, Var elem);
-
-Var Array_insert(Array array, int index, Var elem);
-
-Var Array_remove(Array array, int index);
-
-Array Array_copy(Array array);
-
-Array Array_getslice(Array array, int start, int end, int step);
-
-Array Array_setslice(Array array, int start, int end, Array values);
-
-Array Array_remslice(Array array, int start, int end);
-
-Array Array_splice(Array array, int index, int remove_count, Array values);
-
-int Array_find(Array array, Var value);
-
-int Array_contains(Array array, Var value);
-
-int Array_count(Array array, Var value);
-
-int Array_indexof(Array array, Var value);
-
-Array Array_concat(Array a, Array b);
-
-Array Array_reverse(Array array);
 
 Array Array_map(Array array, Func func);
 
@@ -70,7 +76,17 @@ Array Array_map2(Array a, Array b, Func func);
 
 Var Array_foldl(Array array, Var seed, Func fn);
 
-int Array_compare(Array a, Array b);
+int Array_compare(Array _x2c_macro_a_4, Array _x2c_macro_b_4);
+
+Buffer Array_write_repr(Array _x2c_macro_array_35, Buffer _x2c_macro_out_6);
+
+Buffer Array_write_str(Array _x2c_macro_array_36, Buffer _x2c_macro_out_7);
+
+String Array_str(Array _x2c_macro_array_37);
+
+String Array_repr(Array _x2c_macro_array_38);
+
+Iter Array_iter(Array _x2c_macro_array_41, Iter _x2c_macro_dest_0);
 
 Array Array_sort(Array array);
 
@@ -85,20 +101,6 @@ Var Array_heap_pop(Array heap);
 void Array_heapify(Array heap);
 
 String Array_join(Array array, String separator);
-
-int Array_equal(Array a, Array b);
-
-Buffer Array_write_repr(Array a, Buffer out);
-
-Buffer Array_write_str(Array a, Buffer out);
-
-String Array_str(Array array);
-
-String Array_repr(Array array);
-
-int Array_try_next(Array array, int * cursor, Var * out);
-
-Iter Array_iter(Array x, Iter dest);
 
 Array Iter_array(Iter iter);
 

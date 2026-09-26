@@ -386,8 +386,13 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
                    .flatten()} @{f.request.cc_args});
   foreach (Var (root, _), packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
+  /* The helper's own source is read at build time, not linked into the
+     compiler, so the stamp does not cover it. */
+  String helper = %"${x2c_get_root()}/etc/meta-helper.x";
   String identity = %"$stamp\n$compiler\n${_meta_flags().repr()}\n"
-                    + %"${flags.repr()}\n$include\n${t.runtime_lib}";
+                    + %"${flags.repr()}\n$include\n${t.runtime_lib}\n"
+                    + (Path.is_file(helper)
+                       ? Path.read_text(helper).sha256() : "");
   /* A changed source builds the same directory again, which keeps the
      helper when no group object changes. */
   Array key = [identity];

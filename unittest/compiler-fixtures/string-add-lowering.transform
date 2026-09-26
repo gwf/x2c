@@ -38,11 +38,13 @@
   (at 12 
    (stmnt 
     (expr ("String") 
-     (vcompound (expr ("String") (ident (binding 6 "joined"))) 
-      (expr ("Symbol") "56") 
-      (expr ("String") 
-       (call (expr ((func ((void))) "String") (ident (binding 1 "suffix"))) 
-        (args (expr (void) ())))) "_x2c_proto_string_add_update")))) 
+     (call "_x2c_proto_string_add_update" 
+      (args (expr (* "String") 
+             (op & (parens (expr ("String") (ident (binding 6 "joined")))))) 
+       (expr ("Symbol") "56") 
+       (expr ("String") 
+        (call (expr ((func ((void))) "String") (ident (binding 1 "suffix"))) 
+         (args (expr (void) ()))))))))) 
   (at 8 (stmnt 
          (expr () 
           (call (expr () (ident (binding 10 "printf"))) 

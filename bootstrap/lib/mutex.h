@@ -8,6 +8,12 @@
 #include "common.h"
 typedef struct Mutex * Mutex;
 
+void x2c_mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure);
+
+void x2c_mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, void(* initialize)(void), const char * failure);
+
+void x2c_mutex_recursive_unlock(pthread_mutex_t * mutex, const char * failure);
+
 Mutex Mutex_new(void);
 
 void Mutex_lock(Mutex mutex);

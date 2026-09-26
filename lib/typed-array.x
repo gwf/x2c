@@ -107,64 +107,78 @@ $array.typed.family(ArrayChar, char, 0, "ArrayChar");
 $array.typed.observe(
   ArrayChar, char, "ArrayChar", _array_compare_char,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayChar, char, "ArrayChar");
 $array.typed.update.integer(ArrayChar, char, uchar);
 $array.typed.publish(
   ArrayChar, char, arraychar, <arraychar>, _prepare_array_export);
+$array.typed.iterate(ArrayChar, char, arraychar);
 
 $array.core.family(ArrayShort, short);
 $array.typed.family(ArrayShort, short, 0, "ArrayShort");
 $array.typed.observe(
   ArrayShort, short, "ArrayShort", _array_compare_short,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayShort, short, "ArrayShort");
 $array.typed.update.integer(ArrayShort, short, ushort);
 $array.typed.publish(
   ArrayShort, short, arrayshort, <arrayshort>, _prepare_array_export);
+$array.typed.iterate(ArrayShort, short, arrayshort);
 
 $array.core.family(ArrayInt, int);
 $array.typed.family(ArrayInt, int, 0, "ArrayInt");
 $array.typed.observe(
   ArrayInt, int, "ArrayInt", _array_compare_int,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayInt, int, "ArrayInt");
 $array.typed.update.integer(ArrayInt, int, uint);
 $array.typed.publish(
   ArrayInt, int, arrayint, <arrayint>, _prepare_array_export);
+$array.typed.iterate(ArrayInt, int, arrayint);
 
 $array.core.family(ArrayLong, long);
 $array.typed.family(ArrayLong, long, 0L, "ArrayLong");
 $array.typed.observe(
   ArrayLong, long, "ArrayLong", _array_compare_long,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayLong, long, "ArrayLong");
 $array.typed.update.integer(ArrayLong, long, ulong);
 $array.typed.publish(
   ArrayLong, long, arraylong, <arraylong>, _prepare_array_export);
+$array.typed.iterate(ArrayLong, long, arraylong);
 
 $array.core.family(ArrayFloat, float);
 $array.typed.family(ArrayFloat, float, 0.0f, "ArrayFloat");
 $array.typed.observe(
   ArrayFloat, float, "ArrayFloat", _array_compare_float,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayFloat, float, "ArrayFloat");
 $array.typed.update.floating(ArrayFloat, float);
 $array.typed.publish(
   ArrayFloat, float, arrayfloat, <arrayfloat>, _prepare_array_export);
+$array.typed.iterate(ArrayFloat, float, arrayfloat);
 
 $array.core.family(ArrayDbl, double);
 $array.typed.family(ArrayDbl, double, 0.0, "ArrayDbl");
 $array.typed.observe(
   ArrayDbl, double, "ArrayDbl", _array_compare_double,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayDbl, double, "ArrayDbl");
 $array.typed.update.floating(ArrayDbl, double);
 $array.typed.publish(
   ArrayDbl, double, arraydbl, <arraydbl>, _prepare_array_export);
+$array.typed.iterate(ArrayDbl, double, arraydbl);
 
 $array.core.family(ArrayString, String);
 $array.typed.family(ArrayString, String, 0, "ArrayString");
 $array.typed.observe(
   ArrayString, String, "ArrayString", _array_compare_string,
   _array_new_buffer, _array_finish_buffer);
+$array.typed.box(ArrayString, String, "ArrayString");
 $array.typed.update.string(ArrayString);
 $array.typed.publish(
   ArrayString, String, arraystring, <arraystr>,
   _prepare_string_array_export);
+$array.typed.iterate(ArrayString, String, arraystring);
 
 /* Compile-time code reaches the typed-array conversions through these literal
    `meta` prototypes; a family macro cannot emit one. */

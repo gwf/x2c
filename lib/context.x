@@ -268,19 +268,14 @@ static Var _export_value(Var v, Context source) {
   if (v is <list>) return _export_list(v, source);
   if (v is <array>) return _export_array(v, source);
   if (v is <map>) return _export_map(v, source);
-  if (v is <block>) {
-    Block block = v;
-    if (source.owns(block)) block.move_to(source.destination_scope);
-    return v;
-  }
-  if (v is <bytes>) {
-    Bytes bytes = v, Block block = bytes;
-    if (source.owns(block)) block.move_to(source.destination_scope);
-    return v;
-  }
-  if (v is <buffer>) {
-    Buffer buffer = v;
-    if (source.owns(buffer)) buffer.move_to(source.destination_scope);
+  if (v is <block> || v is <bytes> || v is <buffer>) {
+    void *allocation = v is <bytes> ? v.bytes().block() : v.pointer();
+    if (source.owns(allocation)) {
+      if (v is <buffer>)
+        ((Buffer) allocation).move_to(source.destination_scope);
+      else
+        ((Block) allocation).move_to(source.destination_scope);
+    }
     return v;
   }
   Var custom;

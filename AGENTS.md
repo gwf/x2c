@@ -105,7 +105,7 @@ Direct destructive operations outside the requested change need approval.
   values across the compile-time boundary, and `builtins` and `linked-meta`,
   the compile-time code compiled into the compiler)/
   `literals` -> `ast` -> `type` (+ `type-ledger`)/`protocol` -> `transform`
-  (+ `lambda`, `cleanup`, `regions`) ->
+  (+ `regions`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,

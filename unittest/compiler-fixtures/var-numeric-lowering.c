@@ -84,7 +84,7 @@ int main(void){
   signed char signed_byte = 3;
   x2c_var_update_schar(&(signed_byte), 56, b);
   Var dynamic = int_var(5);
-  Var_update(&(dynamic), 54, b);
+  x2c_var_update_volatile(&(dynamic), 54, b);
   int values[] ={
     10, 20
   }
@@ -106,10 +106,10 @@ int main(void){
   Var loop = int_var(2);
   while(Var_truth(loop)){
     branch ++;
-    Var_update(&(loop), 62, int_var(1));
+    x2c_var_update_volatile(&(loop), 62, int_var(1));
   }
   Var for_cond = int_var(0);
-  for(for_cond = int_var(2);  Var_truth(for_cond);  Var_update(&(for_cond), 62, int_var(1))) branch ++;
+  for(for_cond = int_var(2);  Var_truth(for_cond);  x2c_var_update_volatile(&(for_cond), 62, int_var(1))) branch ++;
   Var do_cond = int_var(0);
   do{
     branch ++;
@@ -132,30 +132,57 @@ int main(void){
   ;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[1];
     Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    x2c_var_update_i32(&(preserved), 56, b);  x2c_var_update_i32(&(preserved_box.value), 56, b);  x2c_var_update_i32(&(preserved_values[0]), 56, b);  x2c_var_update_i32(&(*(& addressed)), 56, b);  x2c_var_update_i32(&((& addressed_box) -> value), 56, b); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);  __builtin_unreachable();
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
     }
-
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-       {{
-        branch ++;
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_0);
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      x2c_var_update_i32(&(preserved), 56, b);
+      x2c_var_update_i32(&(preserved_box.value), 56, b);
+      x2c_var_update_i32(&(preserved_values[0]), 56, b);
+      x2c_var_update_i32(&(*(& addressed)), 56, b);
+      x2c_var_update_i32(&((& addressed_box) -> value), 56, b);
+      {
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
+        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+        __builtin_unreachable();
       }
 
     }
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_0);
+        {
+          {
+            branch ++;
+          }
 
-  }
-  else{
+        }
+
+      }
+      else{
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          {
+            branch ++;
+          }
+
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
+
+    }
     if(x2c_exception_claim(& _x2c_exception_frame_0)){
       x2c_error_catch_close(_x2c_error_handler_0);
       _x2c_error_handler_0 = NULL;
@@ -165,25 +192,11 @@ int main(void){
 
     }
     x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
   }
-
-}
-}
-if(x2c_exception_claim(& _x2c_exception_frame_0)){
-  x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-  {
-    branch ++;
-  }
-
-}
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-printf("ops=%ld,%ld,%ld,%ld,%.1f converted=%.1f\n", Var_long(sum), Var_long(product), Var_long(shifted), Var_long(bits), Var_double(quotient), converted);
-printf("compound=%d,%d,%d,%ld indexed=%d boxed=%d calls=%d,%d,%d\n", native, compound_result, signed_byte, Var_long(dynamic), values[1], box.value, base_calls, index_calls, rhs_calls);
-printf("truth=%d,%d,%d,%d,%d branch=%d preserved=%d skipped=%d\n", logical, short_and, short_or, negated, choice, branch, preserved, skipped_calls);
-printf("special=%d,%d,%d preserved-roots=%d,%d,%d,%d\n", isinf(converted_infinity), isnan(converted_nan), isinf(compound_infinity), preserved_box.value, preserved_values[0], addressed, addressed_box.value);
-return 0;
+  printf("ops=%ld,%ld,%ld,%ld,%.1f converted=%.1f\n", Var_long(sum), Var_long(product), Var_long(shifted), Var_long(bits), Var_double(quotient), converted);
+  printf("compound=%d,%d,%d,%ld indexed=%d boxed=%d calls=%d,%d,%d\n", native, compound_result, signed_byte, Var_long(dynamic), values[1], box.value, base_calls, index_calls, rhs_calls);
+  printf("truth=%d,%d,%d,%d,%d branch=%d preserved=%d skipped=%d\n", logical, short_and, short_or, negated, choice, branch, preserved, skipped_calls);
+  printf("special=%d,%d,%d preserved-roots=%d,%d,%d,%d\n", isinf(converted_infinity), isnan(converted_nan), isinf(compound_infinity), preserved_box.value, preserved_values[0], addressed, addressed_box.value);
+  return 0;
 }
 

@@ -6,12 +6,37 @@
 #define __GUARD_0x00CB812B__
 
 #include "x2c.h"
+#ifndef X2C_TRANSFORM_SOURCE
+#ifdef X2CCPP
+#define X2C_TRANSFORM_SOURCE
+#endif
 #include "compiler.h"
+List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
+
+List Compiler_func_signature(Compiler compiler, Type type);
+
+List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
+
+List Compiler_lift_func_expression(Compiler c, List expression);
+
+List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type);
+
+void Compiler_check_lambda_captures(Compiler c, List ast);
+
+List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
+
+List Compiler_lambda_param_types(Compiler compiler, List entries);
+
+List Compiler_lower_lambda_expr(Compiler compiler, List expression);
+
+int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
+
 List transform_array_literal(Compiler compiler, List ast);
 
 List transform_map_literal(Compiler compiler, List ast);
 
 List Compiler_transform(Compiler compiler, List ast);
 
+#endif
 
 #endif /* __GUARD_0x00CB812B__ */

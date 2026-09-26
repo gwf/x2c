@@ -718,7 +718,6 @@ static List _meta_group_code(
     _.inits = [];
     _.early_decls = [];
     _.origins = saved.origins.copy();
-    _.fixed = {};
     _.init_tokens = {};
     _.static_init_deps = {};
     _.fn_defs = saved.fn_defs.copy();

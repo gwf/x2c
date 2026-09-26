@@ -41,17 +41,17 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
@@ -102,95 +102,97 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
   int max = n + m < _LIMIT ? n + m : _LIMIT, found = - 1;
   int * trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
   {
-  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & trace};
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & trace
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      for(int step = 0;  step <= max && found < 0;  step ++){
+        int * frontier = trace + step * step, * previous = frontier - 2 * step + 1;
+        for(int k = - step;  k <= step;  k += 2){
+          int x = 0;
+          if(step > 0){
+            int left = k > - step ? previous[k - 1 + step - 1] : - 1;
+            int right = k < step ? previous[k + 1 + step - 1] : - 1;
+            x = k == - step ||(k != step && left < right) ? right : left + 1;
+          }
+          int y = x - k;
+          while(x < n && y < m && _same(&((* d)), lo + x, lo + y)) x ++, y ++;
+          frontier[k + step] = x;
+          if(x >= n && y >= m){
+            found = step;
+            break;
+          }
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_3
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    for(int step = 0;  step <= max && found < 0;  step ++){
-      int * frontier = trace + step * step, * previous = frontier - 2 * step + 1;
-      for(int k = - step;  k <= step;  k += 2){
-        int x = 0;
-        if(step > 0){
-          int left = k > - step ? previous[k - 1 + step - 1] : - 1;
-          int right = k < step ? previous[k + 1 + step - 1] : - 1;
-          x = k == - step ||(k != step && left < right) ? right : left + 1;
-        }
-        int y = x - k;
-        while(x < n && y < m && _same(&((* d)), lo + x, lo + y)) x ++, y ++;
-        frontier[k + step] = x;
-        if(x >= n && y >= m){
-          found = step;
-          break;
         }
 
       }
+      if(found < 0){
+        int _x2c_return_value_0 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
 
-    }
-    if(found < 0){
-      int _x2c_return_value_0 = - 1;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
       }
-
-    }
-    List path = NULL;
-    int x = n, y = m;
-    for(int step = found;  step > 0;  step --){
-      int * previous = trace +(step - 1) *(step - 1), k = x - y;
-      int left = k > - step ? previous[k - 1 + step - 1] : - 1;
-      int right = k < step ? previous[k + 1 + step - 1] : - 1;
-      int inserted = k == - step ||(k != step && left < right);
-      int prev_k = inserted ? k + 1 : k - 1;
-      int prev_x = inserted ? right : left, prev_y = prev_x - prev_k;
-      int mid_x = inserted ? prev_x : prev_x + 1;
-      int mid_y = inserted ? prev_y + 1 : prev_y;
-      while(x > mid_x && y > mid_y){
+      List path = NULL;
+      int x = n, y = m;
+      for(int step = found;  step > 0;  step --){
+        int * previous = trace +(step - 1) *(step - 1), k = x - y;
+        int left = k > - step ? previous[k - 1 + step - 1] : - 1;
+        int right = k < step ? previous[k + 1 + step - 1] : - 1;
+        int inserted = k == - step ||(k != step && left < right);
+        int prev_k = inserted ? k + 1 : k - 1;
+        int prev_x = inserted ? right : left, prev_y = prev_x - prev_k;
+        int mid_x = inserted ? prev_x : prev_x + 1;
+        int mid_y = inserted ? prev_y + 1 : prev_y;
+        while(x > mid_x && y > mid_y){
+          path = cons(List_var(cons(_0, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
+          x --, y --;
+        }
+        path = cons(List_var(inserted ? cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_2, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
+        x = prev_x, y = prev_y;
+      }
+      while(x > 0 && y > 0){
         path = cons(List_var(cons(_0, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
         x --, y --;
       }
-      path = cons(List_var(inserted ? cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_2, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
-      x = prev_x, y = prev_y;
-    }
-    while(x > 0 && y > 0){
-      path = cons(List_var(cons(_0, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
-      x --, y --;
-    }
-    {
-      List step;
-      List _x2c_macro_object_0 = path;
-      List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-      Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-        step = Var_list(_x2c_macro_cursor_output_0);
+      {
+        List step;
+        List _x2c_macro_object_0 = path;
+        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+        Var _x2c_macro_cursor_output_0;
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+          step = Var_list(_x2c_macro_cursor_output_0);
+          {
+            List _x2c_destructure_0 = step;
+            Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
+            int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
+            int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
+            _emit(&((* d)), kind, Var_string(kind == 634596520 ? Array_getindex((* d).new, lo + j) : Array_getindex((* d).old, lo + i)));
+          }
+
+        }
+
+      }
+      {
+        int _x2c_return_value_1 = found;
         {
-          List _x2c_destructure_0 = step;
-          Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
-          int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
-          int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
-          _emit(&((* d)), kind, Var_string(kind == 634596520 ? Array_getindex((* d).new, lo + j) : Array_getindex((* d).old, lo + i)));
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_1;
         }
 
       }
 
     }
-    {
-      int _x2c_return_value_1 = found;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_1;
-      }
-
-    }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 static void _replace(_Diff * d, int lo, int old_hi, int new_hi){
@@ -260,70 +262,74 @@ String Diff_unified(String old, String new, String old_name, String new_name){
   if(! _init_guard_) _file_init_();
   Array edits = List_array(Diff_lines(old, new));
   {
-  _x2c_defer_env_2 _x2c_defer_env_4 = {._x2c_defer_capture_2 =(const void *) & edits};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_4
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    Buffer out = Buffer_new(0);
+    _x2c_defer_env_3 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & edits
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-  _x2c_defer_env_1 _x2c_defer_env_5 = {._x2c_defer_capture_1 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_5
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-      int count = Array_len(edits), at = 0, old_line = 0, new_line = 0;
-      while(at < count){
-        if(_kind(edits, at) == 1248074){
-          at ++, old_line ++, new_line ++;
-          continue;
-        }
-        if(! Buffer_len(out)) Buffer_printf(out, "--- %s\n+++ %s\n", old_name, new_name);
-        int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
-        int old_start = old_line - lead, new_start = new_line - lead;
-        int end = at, quiet = 0;
-        while(end < count && quiet <= 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
-        if(quiet > _CONTEXT) end -= quiet - _CONTEXT;
-        List lines = NULL;
-        int old_count = 0, new_count = 0;
-        for(int i = start;  i < end;  i ++){
-          List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
-          Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
-          String text = Var_string(List_getindex(_x2c_destructure_1, 1));
-          char mark = kind == 1248074 ? ' ' : kind == 279719178 ? '-' : '+';
-          lines = cons(String_var(String_join(NULL, cons(String_var(char_str(mark)), cons(String_var(text), cons(String_var(_3), NULL))))), lines);
-          if(kind != 634596520) old_count ++;
-          if(kind != 279719178) new_count ++;
-        }
-        _hunk(out, List_reverse(lines), old_start, old_count, new_start, new_count);
-        old_line = old_start + old_count;
-        new_line = new_start + new_count;
-        at = end;
-      }
+      Buffer out = Buffer_new(0);
       {
-        String _x2c_return_value_2 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
+        _x2c_defer_env_2 _x2c_defer_env_4 ={
+          ._x2c_defer_capture_1 =(const void *) & out
         }
+        ;
+        X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_4
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_2);
+        {
+          int count = Array_len(edits), at = 0, old_line = 0, new_line = 0;
+          while(at < count){
+            if(_kind(edits, at) == 1248074){
+              at ++, old_line ++, new_line ++;
+              continue;
+            }
+            if(! Buffer_len(out)) Buffer_printf(out, "--- %s\n+++ %s\n", old_name, new_name);
+            int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
+            int old_start = old_line - lead, new_start = new_line - lead;
+            int end = at, quiet = 0;
+            while(end < count && quiet <= 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
+            if(quiet > _CONTEXT) end -= quiet - _CONTEXT;
+            List lines = NULL;
+            int old_count = 0, new_count = 0;
+            for(int i = start;  i < end;  i ++){
+              List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
+              Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
+              String text = Var_string(List_getindex(_x2c_destructure_1, 1));
+              char mark = kind == 1248074 ? ' ' : kind == 279719178 ? '-' : '+';
+              lines = cons(String_var(String_join(NULL, cons(String_var(char_str(mark)), cons(String_var(text), cons(String_var(_3), NULL))))), lines);
+              if(kind != 634596520) old_count ++;
+              if(kind != 279719178) new_count ++;
+            }
+            _hunk(out, List_reverse(lines), old_start, old_count, new_start, new_count);
+            old_line = old_start + old_count;
+            new_line = new_start + new_count;
+            at = end;
+          }
+          {
+            String _x2c_return_value_2 = Buffer_str(out);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_2);
+              x2c_cleanup_leave(& _x2c_defer_record_1);
+              return _x2c_return_value_2;
+            }
 
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_2);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
-
-}
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 void Scope_free(void *);
@@ -336,14 +342,14 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_3 * _x2c_defer_data_2 =(_x2c_defer_env_3 *) _x2c_defer_opaque_2;
   Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 

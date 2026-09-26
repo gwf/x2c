@@ -61,7 +61,7 @@ source
   -> tokenizer
   -> shallow parse and global environment discovery
   -> full parse and type annotation
-  -> fixed-point transforms
+  -> node normalization and function cleanup
   -> generation and cache/initializer staging
   -> C token emission
   -> formatting and .c/.h output
@@ -316,13 +316,13 @@ constant and the AST refers to it by slot:
 0	==>	(string (expr ("String") (literal ("String") "hello, ")))
 ```
 
-### Fixed-point transforms
+### Lowering
 
 Consumes the parsed AST, produces a lowered AST that the emitter can walk
-without knowing about x2c. `src/transform.x` drives it, one pass over the whole
-translation unit at a time, repeated until the tree stops changing -- literally
-until the new tree is the same object as the old one, because lowering one
-construct routinely exposes another. `src/lambda.x` handles lambdas, which
+without knowing about x2c. `src/transform.x` normalizes each node until its
+identity stops changing, because lowering one construct can expose another.
+Functions complete their cleanup lowering within this shared driver. It also
+handles lambdas, which
 need additional declarations. A noncapturing lambda becomes a static helper
 function, plus an adapter when the receiving callback type differs from the
 helper's signature. When a `Func` is expected, a direct function or
@@ -337,11 +337,11 @@ and constructed capture rows resolve in the same lexical environment.
 A public inline function
 reaches these source-owned helpers through a generated bridge that also runs
 the owning unit's initializer. Those synthesized declarations go onto a
-compiler-owned early-declaration queue, are driven to a fixed point themselves,
+compiler-owned early-declaration queue, are normalized by the same driver,
 and are appended to the unit.
 
-`src/cleanup.x` runs once after that fixed point, over each function on its
-own. It assigns a name to the runtime record of every `defer` and `try`
+Cleanup lowering completes each function after its body is normalized. It
+assigns a name to the runtime record of every `defer` and `try`
 region, builds the statements that leave the region, and runs them wherever
 control leaves it:
 the region's own end, a `return` -- after saving the value, since cleanup may
@@ -350,8 +350,8 @@ construct that bounds it, and an outward `goto`. The pass rejects a jump into
 a region, including the region a static local's runtime initializer opens
 over the rest of its block. The pass also marks the locals
 and parameters a `try` writes as `volatile`, which C requires of automatic
-state changed across `sigsetjmp`. Because it rewrites transfers, it runs after
-the driver reaches its fixed point.
+state changed across `sigsetjmp`. Transfer rewriting follows expression and
+lambda normalization within the function.
 
 ```sh
 ./builds/0/x2c translate --dump-transforms greet.x
@@ -429,7 +429,7 @@ Consumes the lowered AST, produces a flat `List` of C tokens. `src/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds
 the current function's name and static objects. Emission is therefore
 reentrant, and a unit that fails cannot contaminate the next one.
-`src/cleanup.x` has already placed each region's cleanup statements on every
+`src/transform.x` has already placed each region's cleanup statements on every
 exit that leaves the region, so emission prints frames, records, and
 statements where the AST puts them. Preprocessor nodes are re-emitted here too, with `.x` include targets rewritten
 to the generated `.h` they correspond to.
@@ -505,7 +505,7 @@ The modules under `src/` divide ownership as follows:
 - `src/collect.x` -- global environment discovery and unit interfaces;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
-- `src/transform.x`, `src/lambda.x`, `src/cleanup.x` -- lowering to
+- `src/transform.x` -- lowering to
   emitter-ready AST, including which exits leave a cleanup region and which
   locals an error transfer preserves;
 - `src/regions.x` -- per-function region summaries and the warnings for a

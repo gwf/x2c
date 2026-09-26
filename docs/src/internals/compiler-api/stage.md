@@ -44,7 +44,7 @@ Meta groups, the project helper, and the values crossing.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/stage.x:927`
+Source: `src/stage.x:926`
 
 <a id="Compiler.bind_meta_group"></a>
 #### Compiler.bind_meta_group
@@ -54,7 +54,7 @@ Source: `src/stage.x:927`
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/stage.x:1219`
+Source: `src/stage.x:1218`
 
 <a id="Compiler.check_meta_call"></a>
 #### Compiler.check_meta_call
@@ -127,7 +127,7 @@ Source: `src/stage.x:414`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/stage.x:774`
+Source: `src/stage.x:773`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -138,7 +138,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/stage.x:806`
+Source: `src/stage.x:805`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -152,7 +152,7 @@ call's failure. A body that crashes, exits, or passes the deadline ends
 the helper, which is reported at `site` and started again for the next
 call.
 
-Source: `src/stage.x:1096`
+Source: `src/stage.x:1095`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -208,7 +208,7 @@ functions to `meta_group` itself: builds and loads it, and binds each
 group function in the session not yet bound. Returns the loaded module,
 or NULL with `failure` set when the group does not stage.
 
-Source: `src/stage.x:1193`
+Source: `src/stage.x:1192`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -228,7 +228,7 @@ Source: `src/stage.x:425`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/stage.x:898`
+Source: `src/stage.x:897`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -238,7 +238,7 @@ Source: `src/stage.x:898`
 Directs the group of each unit the project meta build parses into
 `directory`, or stops that when it is NULL.
 
-Source: `src/stage.x:850`
+Source: `src/stage.x:849`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -249,7 +249,7 @@ Uses the helper at `path`, or none when it is NULL, whose tables named
 in `failures` could not be built, each with why, and whose table for
 each input path is in `units`.
 
-Source: `src/stage.x:914`
+Source: `src/stage.x:913`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -272,7 +272,7 @@ directory as `group-K.c` and `group-K.h`, K being its table, with the
 x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. A unit without `meta` functions writes nothing.
 
-Source: `src/stage.x:858`
+Source: `src/stage.x:857`
 
 ## Design notes
 

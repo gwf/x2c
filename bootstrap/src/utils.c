@@ -392,24 +392,26 @@ void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
   String suffix = String_printf(_13, (long) getpid());
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & outputs, ._x2c_defer_capture_1 =(const void *) & suffix};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var(suffix), NULL))), Var_string(List_cadr(rest)));
-    for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
-      String target = Var_string(List_car(rest));
-      if(rename(String_join(NULL, cons(String_var(target), cons(String_var(suffix), NULL))), target)) File_path_error(Symbol_var(1219365706), target, errno);
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & outputs, ._x2c_defer_capture_1 =(const void *) & suffix
     }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var(suffix), NULL))), Var_string(List_cadr(rest)));
+      for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
+        String target = Var_string(List_car(rest));
+        if(rename(String_join(NULL, cons(String_var(target), cons(String_var(suffix), NULL))), target)) File_path_error(Symbol_var(1219365706), target, errno);
+      }
 
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int String_contains(String, String);

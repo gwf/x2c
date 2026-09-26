@@ -15,7 +15,6 @@ Functions and types exposed by each compiler module.
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
-| [`src/cleanup.x`](cleanup.md) | what a cleanup region runs, and which exits run it. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
@@ -28,7 +27,6 @@ Functions and types exposed by each compiler module.
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
-| [`src/lambda.x`](lambda.md) | lambda transformation helpers for the x2c compiler. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
 | [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
 | [`src/macros.x`](macros.md) | compile-time macro definitions and expression expansion. |

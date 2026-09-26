@@ -9,6 +9,7 @@ publishes prebuilt CPU libtorch for those two alone.
 
 | Package | What it provides |
 | --- | --- |
+| [Autodiff](autodiff/README.md) | Dual numbers, generated derivatives, and a runtime tape; no external dependency |
 | [PCRE2](pcre2/README.md) | Regular expressions, captures, and replacement |
 | [yyjson](yyjson/README.md) | JSON documents, parsing, and writing |
 | [SQLite](sqlite/README.md) | Databases, prepared parameters, and copied row Lists |

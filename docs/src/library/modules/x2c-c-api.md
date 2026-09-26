@@ -83,6 +83,9 @@ prefix.
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
+| [`x2c_mutex_recursive_initialize`](mutex.md#x2c_mutex_recursive_initialize) | `lib/mutex.x` | `void x2c_mutex_recursive_initialize( pthread_mutex_t *mutex, const char *failure)` |
+| [`x2c_mutex_recursive_lock`](mutex.md#x2c_mutex_recursive_lock) | `lib/mutex.x` | `void x2c_mutex_recursive_lock( pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)` |
+| [`x2c_mutex_recursive_unlock`](mutex.md#x2c_mutex_recursive_unlock) | `lib/mutex.x` | `void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
 | `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
@@ -104,6 +107,7 @@ prefix.
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
 | [`x2c_var_declare`](var.md#x2c_var_declare) | `lib/var.x` | `VarDescriptor *x2c_var_declare(Symbol tag)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var.x` | `int x2c_var_descriptor_index(Var value)` |
+| [`x2c_var_postfix_volatile`](varops.md#x2c_var_postfix_volatile) | `lib/varops.x` | `Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
 | [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_f64`](varops.md#x2c_var_update_f64) | `lib/varops.x` | `double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)` |
@@ -119,5 +123,6 @@ prefix.
 | [`x2c_var_update_u8`](varops.md#x2c_var_update_u8) | `lib/varops.x` | `uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 108 functions.
+Total: 113 functions.

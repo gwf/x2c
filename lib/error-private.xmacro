@@ -1,8 +1,7 @@
 macro Unit $error.private.types() {
   typedef struct $(x2c.ident "ErrorRegion") {
     Scope values;
-    Pool lists;
-    Pool strings;
+    Pool pool;
   } $(x2c.ident "ErrorRegion");
 
   typedef struct $(x2c.ident "ErrorRecord") {

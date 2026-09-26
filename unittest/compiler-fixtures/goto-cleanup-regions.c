@@ -19,10 +19,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -30,24 +30,26 @@ static int outward_defer(void){
   int value = 0;
   {
     {
-  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & value};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_2
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-      value = 1;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        goto done;
+      _x2c_defer_env_0 _x2c_defer_env_1 ={
+        ._x2c_defer_capture_0 =(const void *) & value
       }
+      ;
+      X2CCleanup _x2c_defer_record_0 ={
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_0);
+      {
+        value = 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          goto done;
+        }
 
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
   }
   done : return value;
 }
@@ -57,7 +59,7 @@ static int outward_finally(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
     x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       value = 1;
       {
         if(x2c_exception_claim(& _x2c_exception_frame_0)){
@@ -71,48 +73,51 @@ static int outward_finally(void){
       }
 
     }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if(x2c_exception_claim(& _x2c_exception_frame_0)){
-        {
-          value = value * 10 + 2;
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      {
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          {
+            value = value * 10 + 2;
+          }
+
         }
-
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
       }
-      x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
-    }
 
-  }
-  if(x2c_exception_claim(& _x2c_exception_frame_0)){
-    {
-      value = value * 10 + 2;
     }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+      {
+        value = value * 10 + 2;
+      }
 
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  x2c_exception_leave(& _x2c_exception_frame_0);
-}
-done : return value;
+  done : return value;
 }
 
 static int same_region(void){
   int value = 0;
   {
     {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & value};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_3
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-      again : value ++;
-      if(value < 2) goto again;
+      _x2c_defer_env_2 _x2c_defer_env_3 ={
+        ._x2c_defer_capture_1 =(const void *) & value
+      }
+      ;
+      X2CCleanup _x2c_defer_record_1 ={
+        .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_1);
+      {
+        again : value ++;
+        if(value < 2) goto again;
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_1);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
   }
   return value;
 }
@@ -124,44 +129,52 @@ int main(void){
   int volatile caught = 0;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[1];
     Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-    {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/goto-cleanup-regions.x",.function = "main",.line = 41};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);  __builtin_unreachable();
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
     }
-
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_1); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_1);
-       {caught = 1;
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
     }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_1);
+    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
+      {
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/goto-cleanup-regions.x",.function = "main",.line = 41};
+        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+        __builtin_unreachable();
+      }
 
-  }
-  else{
+    }
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_1);
+        {
+          caught = 1;
+        }
+
+      }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_1);
+        __builtin_unreachable();
+      }
+
+    }
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_1);
-    __builtin_unreachable();
   }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
-}
-int first = outward_defer();
-int second = outward_finally();
-int third = same_region();
-printf("%d %d %d %d\n", first, second, third, caught);
-return first == 12 && second == 12 && third == 23 && caught ? 0 : 1;
+  int first = outward_defer();
+  int second = outward_finally();
+  int third = same_region();
+  printf("%d %d %d %d\n", first, second, third, caught);
+  return first == 12 && second == 12 && third == 23 && caught ? 0 : 1;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
@@ -170,7 +183,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   (*(volatile int *) _x2c_defer_data_1->_x2c_defer_capture_1) =(*(volatile int *) _x2c_defer_data_1->_x2c_defer_capture_1) * 10 + 3;
 }
 

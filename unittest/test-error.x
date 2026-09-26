@@ -166,6 +166,29 @@ static void error_snapshot_wide_fills_an_empty_slot(void) {
   Scope.destroy(slot);
 }
 
+static void error_snapshot_preserves_nested_canonical_identity(void) {
+  Error.initialize();
+  Pool.open_named("snapshot identity prototype");
+  String string = String.new("snapshot identity prototype value");
+  Atom atom = Atom.intern(string);
+  List source = cons(string, cons(atom, NULL));
+  List kept = Error.snapshot(source);
+  EXPECT_PTR_EQ(kept, source);
+  EXPECT_PTR_EQ(kept.car().string(), string);
+  EXPECT_PTR_EQ(kept.cdr().car().str(), atom.str());
+  Pool.close();
+  EXPECT_STR_EQ(kept.car().string(), "snapshot identity prototype value");
+  Scope values = NULL;
+  Pool explicit_pool = Pool.retain_named(NULL, "explicit snapshot prototype");
+  List copied = Error.snapshot_in(kept, &values, explicit_pool);
+  EXPECT_TRUE(copied !== kept);
+  EXPECT_TRUE(copied.car().string() !== string);
+  EXPECT_STR_EQ(copied.car().string(), kept.car().string());
+  EXPECT_STR_EQ(copied.cdr().car().str(), kept.cdr().car().str());
+  explicit_pool = Pool.release(explicit_pool);
+  if (values) Scope.destroy(values);
+}
+
 static void error_decline_walks_outward(void) {
   Error.initialize();
   Symbol collect = <collect>, code = <error-prob>;
@@ -472,6 +495,7 @@ void error_suite(void) {
   $test.run(error_catch_arm_leaves_its_registration);
   $test.run(error_handler_transfer_runs_pending_cleanup);
   $test.run(error_snapshot_wide_fills_an_empty_slot);
+  $test.run(error_snapshot_preserves_nested_canonical_identity);
   $test.run(error_decline_walks_outward);
   $test.run(error_pop_truncates_declined_slice);
   $test.run(error_nested_pop_truncates_exact_watermark);

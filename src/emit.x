@@ -3,7 +3,7 @@
     Translates normalized ASTs into token `List`s for downstream flattening and
     formatting. One stack-local Emitter holds the current function's name,
     static objects, and native aliases, so emission is reentrant and a failed
-    translation cannot contaminate later units. `cleanup.x` has already placed
+    translation cannot contaminate later units. `transform.x` has already placed
     each cleanup region's statements on the exits that leave it.
 */
 
@@ -17,7 +17,7 @@
 #include "var.x"
 #include "ast.x"
 #include "format.x"
-#include "cleanup.x"
+#include "transform.x"
 
 // Per-emission state.
 typedef struct Emitter {
@@ -467,177 +467,6 @@ static List Emitter._match_site_call(
   return NULL;
 }
 
-/* Transform has converted every `vseqcall` operand to its parameter type.
-   C leaves call-argument evaluation order unspecified, so typed temporaries
-   materialize these operands left-to-right before the protocol member call. */
-static List Emitter._sequenced_call(Emitter e, Var callee, List arguments) {
-  List c_fn = e._emit(%($callee));
-  Array declarations = [], names = [];
-  foreach (List argument, arguments)
-    match (argument)
-      case %(expr ?argument_type ?): {
-        String name = e.fresh_name("protocol_arg");
-        List declaration = e._semantic_name(
-          argument_type, name);
-        List value = e._emit(%($argument));
-        declarations.push(%(@declaration "=" @value ";"));
-        names.push(name);
-      }
-  List c_args = e._commas(names.list_free());
-  return %("({" @{declarations.list_free()} @c_fn
-           "(" @c_args ");" "})");
-}
-
-static List Emitter._destructure_value(
-  Emitter e, Type type, List result, List source, List temporary,
-  List converted, List statements) {
-  /* The statement expression evaluates the source once, converts that saved
-     value once, performs the producer-ordered assignments, and yields the
-     original statically typed result. */
-  String result_name = binding_identity_spelling(result);
-  String temporary_name = binding_identity_spelling(temporary);
-  List result_decl = e._semantic_name(type, result_name);
-  List temporary_decl = e._semantic_name(%("List"), temporary_name);
-  List c_src = e._emit(%($source));
-  List c_repr = e._emit(%($converted));
-  List c_stmts = e._emit(statements);
-  return %("({" @result_decl "=" @c_src ";"
-           @temporary_decl "=" @c_repr ";"
-           @c_stmts $result_name ";" "})");
-}
-
-// Emit a callable defer region. The runtime record covers nonlocal transfer;
-// the cleanup pass placed `cleanup` on ordinary and structured exits.
-static List Emitter._defer(Emitter e, List ast) {
-  List (body, env_binding, callback, records, record, cleanup) = ast.cdr();
-  String cleanup_name = binding_identity_spelling(record);
-  String callback_name = binding_identity_spelling(callback);
-  List env_setup = NULL, env_arg = %("NULL");
-
-  if (env_binding) {
-    String env_type = binding_identity_spelling(env_binding);
-    String env_name = e.fresh_name("defer_env"), Array initializers = [];
-    foreach (List record, records) {
-      String source = binding_identity_spelling(record.car());
-      String field = binding_identity_spelling(record.caddr());
-      initializers.push(%("." $field "=" "(const void *)" "&" $source));
-    }
-    List values = e._commas(initializers.list_free());
-    env_setup = %("$env_type $env_name = {" @values "};");
-    env_arg = %("&" $env_name);
-  }
-
-  List leave = e._emit(%( $cleanup ));
-  List body_code = e._emit(%( $body ));
-  return %("{
-  "@env_setup"
-  X2CCleanup $cleanup_name = {
-    .fn = $callback_name,
-    .env = "@env_arg"
-  };
-  x2c_cleanup_push(&$cleanup_name);
-  "@body_code @leave"
-}");
-}
-
-// Emit the selected transferring arm after detaching its registration. The
-// retained error record stays borrowed through the arm and closes on every
-// arm exit through the region's cleanup statements.
-static List Emitter._filtered_catch(
-  Emitter emitter, List records, String frame_name, String handle_name) {
-  String selected_name = emitter.fresh_name("catch_selected");
-  Array arms = [], int index = 0, count = records.len();
-  foreach (List rec, records) {
-    List binders = rec.car(), body = rec.caddr();
-    List handler_body = emitter._emit(%( $body ));
-    List declarations = _make_catch_binders(binders, handle_name);
-    String branch = index == count - 1 ? (index ? "else" : "") :
-                    index ? %"else if ($selected_name == $index)" :
-                            %"if ($selected_name == $index)";
-    arms.push(%("$branch {" @declarations @handler_body "}"));
-    index++;
-  }
-  List selected = count > 1
-    ? %("int $selected_name = x2c_error_catch_selected($handle_name);")
-    : %();
-  return %("{"
-    @selected
-    "x2c_error_catch_detach($handle_name);"
-    "x2c_exception_mark_handled(&$frame_name);"
-    @{arms.list_free()}
-  "}");
-}
-
-static List Emitter._try(Emitter e, List ast) {
-  List (body, clause, frame, handle, cleanup) = ast.cdr();
-  String frame_name = binding_identity_spelling(frame);
-  String handle_name = handle ? binding_identity_spelling(handle) : NULL;
-  /* The pass built the statements that leave this region, including the
-     run-once claim around a finalizer. Every path that leaves emits them. */
-  List final_code = e._emit(%( $cleanup ));
-  List body_code = e._emit(%( $body ));
-  List catch_block = NULL;
-  if (clause)
-    catch_block = e._filtered_catch(clause.cadr(), frame_name, handle_name);
-  /* Normal and handled paths share a trailer. The unhandled landing must
-     remain visibly nonreturning to the native compiler. Avoid labels here:
-     an enclosing finalizer can copy this emitted block into several exits. */
-  List unhandled = %("{" @final_code "__builtin_unreachable();" "}");
-  catch_block = catch_block ? %("{"
-      "if (x2c_exception_is_error_target(&$frame_name))"
-        @catch_block
-      "else" @unhandled
-    "}") : unhandled;
-  /* Literal patterns retain one plan per arm. Interpolated patterns are
-     prepared on each registration because their values may change. */
-  List registration = %();
-  if (clause) {
-    String arms = e.fresh_name("catch_arms");
-    String site = e.fresh_name("catch_site");
-    String patterns = e.fresh_name("catch_patterns");
-    Array declarations = [];
-    int default_arm = -1, index = 0;
-    String state = "ERROR_CATCH_PENDING";
-    foreach (List rec, clause.cadr()) {
-      List pattern = rec.cadr();
-      if (pattern) {
-        if (!e.match_pattern_is_static(pattern))
-          state = "ERROR_CATCH_TRANSIENT";
-        String name = e.fresh_name("catch_pattern");
-        String slot = %"$patterns[$index]";
-        List emitted = e._emit(pattern);
-        declarations.push(
-          %("List $name = " @emitted ";" "$slot = List_var($name);"));
-      }
-      else default_arm = index;
-      index++;
-    }
-    String count = %"$index", String fallback = %"$default_arm";
-    registration = %(
-      "static MatchCaptureSite $arms[$count];"
-      "static ErrorCatchSite $site = {"
-      "  $arms, $fallback, $count, $state, -1 };"
-      "Var $patterns[$count];"
-      "if (x2c_error_catch_site_pending(&$site)) {"
-        @{declarations.list_free()}
-      "}"
-      "ErrorHandler volatile $handle_name = x2c_error_catch_site_push("
-        "&$frame_name, &$site, $patterns);"
-    );
-  }
-  return %("{"
-             "ExceptionFrame " $frame_name ";"
-             @registration
-             "x2c_exception_push(&" $frame_name ");"
-             "if (!sigsetjmp(" $frame_name ".env, 0))" @body_code
-             "else {"
-               "x2c_exception_landed(&" $frame_name ");"
-               @catch_block
-             "}"
-             @final_code
-           "}");
-}
-
 static String _c_string_literal(String value) {
   if (!value) value = "<unknown>";
   return %"\"${value.escape().replace("$$", "$")}\"";
@@ -684,20 +513,6 @@ static List _make_local_binders(List binders, String values_name) {
           ? %"List $bvar = Var_list($rhs);"
           : %"Var $bvar = $rhs;");
     }
-    index++;
-  }
-  return values.list_free();
-}
-
-static List _make_catch_binders(List binders, String handle_name) {
-  Array values = [], int index = 0;
-  foreach (Var binder, binders) {
-    String bvar = String.new(binder.str() + 1);
-    String rhs = %"x2c_error_catch_capture($handle_name, $index)";
-    values.push(
-      binder.is_list_binder()
-        ? %"List $bvar = Var_list($rhs);"
-        : %"Var $bvar = $rhs;");
     index++;
   }
   return values.list_free();
@@ -1113,7 +928,7 @@ static List Emitter._operand(Emitter e, Var node, int level) {
    Specialized forms choose their required construction order; for example,
    `_try` constructs the finalizer before the body and catch arms. This orders
    tokens, not C operand evaluation; only producer-marked forms such as
-   `vseqcall` introduce runtime sequencing. Parser, transform, and generation
+   statement-expression blocks introduce runtime sequencing. Parser, transform, and generation
    produce every recognized AST shape, so the fallback handles only already
    C-shaped nodes. */
 /* A left-leaning chain nests one (expr (op ...)) level per source term;
@@ -1307,25 +1122,6 @@ static List Emitter._emit(Emitter e, List ast) {
       List c_else = e._operand(onfalse, EMIT_CONDITIONAL);
       return %(@c_cond "?" @c_then ":" @c_else);
     }
-    // Dynamic updates emit the lvalue once.
-    case %(vcompound ?target ?operator ?value ?helper): {
-      List c_target = e._emit(%($target));
-      List c_op = e._emit(%($operator));
-      List c_value = e._emit(%($value));
-      return %($helper "(&(" @c_target "), " @c_op ", "
-               @c_value ")");
-    }
-    case %(vpostfix ?target ?operator ?helper): {
-      List c_target = e._emit(%($target));
-      List c_op = e._emit(%($operator));
-      return %($helper "(&(" @c_target "), " @c_op ")");
-    }
-    case %(vseqcall ? ?callee (args *arguments)):
-      return e._sequenced_call(callee, arguments);
-    case %(dstrvalue ?type ?result ?source ?temporary ?converted
-           *statements):
-      return e._destructure_value(
-        type, result, source, temporary, converted, statements);
     case %(break): return %("break;");
     case %(continue): return %("continue;");
     case %(if ?condition ?ontrue): {
@@ -1417,9 +1213,7 @@ static List Emitter._emit(Emitter e, List ast) {
     case <case>: return %("case" ${e._emit(ast.cdr())} ":");
     case <composite>: return %("{" @{e._emit(ast.cdr())} "}");
     case <default>:    return %("default:");
-    case <defer>:      return e._defer(ast);
     case <empty>:      return %(";");
-    case <try>:        return e._try(ast);
     case <stmnt>:      return %( @{e._emit(ast.cdr())} ";");
     case <matchcases>: return e._match_cases(ast);
     // Miscellaneous

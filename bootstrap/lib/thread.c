@@ -90,10 +90,10 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
@@ -264,76 +264,87 @@ static void * _run(void * argument){
   int mark = Error_mark();
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[2];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[2];
     Var _x2c_catch_patterns_0[2];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(23041356991064), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-    List _x2c_catch_pattern_1 = cons(Symbol_var(97614135954008), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread)); {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & observer};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_3
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-      ErrorHandler logger_handler = Error_push(Logger_error_handler, ((void) 0, Void));
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(23041356991064), cons(Symbol_var(54), NULL)));
+      _x2c_catch_patterns_0[1] = List_var(cons(Symbol_var(97614135954008), cons(Symbol_var(54), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_0);
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
       {
-  _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & logger_handler};
+        _x2c_defer_env_1 _x2c_defer_env_3 ={
+          ._x2c_defer_capture_1 =(const void *) & observer
+        }
+        ;
+        X2CCleanup _x2c_defer_record_0 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_0);
+        {
+          ErrorHandler logger_handler = Error_push(Logger_error_handler, ((void) 0, Void));
+          {
+            _x2c_defer_env_0 _x2c_defer_env_2 ={
+              ._x2c_defer_capture_0 =(const void *) & logger_handler
+            }
+            ;
+            X2CCleanup _x2c_defer_record_1 ={
+              .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_2
+            }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_1);
+            {
+              const void * input = thread -> input_size ? _input(thread) : NULL;
+              Var result = thread -> function(input, thread -> input_size);
+              thread -> result = Context_export(work, result);
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+          }
 
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_4
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-        const void * input = thread -> input_size ? _input(thread) : NULL;
-        Var result = thread -> function(input, thread -> input_size);
-        thread -> result = Context_export(work, result);
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_0);
+        if(_x2c_catch_selected_0 == 0){
+          _worker_failed(thread, mark);
+        }
+        else{
+          _worker_failed(thread, mark);
+        }
 
-}
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_0);
-  {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-      if (_x2c_catch_selected_0 == 0) {_worker_failed(thread, mark);
+      }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
+
     }
-    else {_worker_failed(thread, mark);
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
   }
-
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
-}
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-Context_close(work);
-thread -> result_pool = Pool_detach();
-Scope_pop();
-Error_shutdown_raw();
-x2c_thread_state_release();
-return NULL;
+  Context_close(work);
+  thread -> result_pool = Pool_detach();
+  Scope_pop();
+  Error_shutdown_raw();
+  x2c_thread_state_release();
+  return NULL;
 }
 
 void * Error_policy_capture(void);
@@ -425,35 +436,37 @@ Var Thread_join(Thread t){
   }
   __atomic_fetch_sub(& thread_live_count, 1, __ATOMIC_SEQ_CST);
   {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & t};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_5
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    Var result =((void) 0, Void), errors =((void) 0, Void);
-    if(! Var_is_void(t -> errors)) errors = Context_export_scope(t -> result_scope, t -> result_pool, t -> errors);
-    else result = Context_export_scope(t -> result_scope, t -> result_pool, t -> result);
-    if(! Var_is_void(errors)){
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 298};
-      x2c_error_raise_n(& _x2c_error_site_7, 23041356991064, 1, Symbol_var(374504614), errors);
-      __builtin_unreachable();
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & t
     }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      Var _x2c_return_value_0 = result;
+      Var result =((void) 0, Void), errors =((void) 0, Void);
+      if(! Var_is_void(t -> errors)) errors = Context_export_scope(t -> result_scope, t -> result_pool, t -> errors);
+      else result = Context_export_scope(t -> result_scope, t -> result_pool, t -> result);
+      if(! Var_is_void(errors)){
+        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 298};
+        x2c_error_raise_n(& _x2c_error_site_7, 23041356991064, 1, Symbol_var(374504614), errors);
+        __builtin_unreachable();
+      }
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_0;
+        Var _x2c_return_value_0 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 void Thread_free(Thread t){
@@ -479,7 +492,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   _finish_join((*(Thread *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 

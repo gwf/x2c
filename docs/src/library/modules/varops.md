@@ -9,6 +9,8 @@ Boxed `Var` operators, updates, and truthiness.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_var_postfix_volatile`](#x2c_var_postfix_volatile) | Applies `Var.postfix` semantics to a volatile destination in generated code. |
+| [`x2c_var_update_volatile`](#x2c_var_update_volatile) | Applies `Var.update` semantics to a volatile destination in generated code. |
 | [`Var.add`](#Var.add) | Adds dynamic values through numeric, `String`, or registered `add` behavior. |
 | [`Var.binary`](#Var.binary) | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. |
 | [`Var.div`](#Var.div) | Divides dynamic values through numeric or registered `div` behavior. |
@@ -21,6 +23,28 @@ Boxed `Var` operators, updates, and truthiness.
 | [`Var.sub`](#Var.sub) | Subtracts dynamic values through numeric or registered `sub` behavior. |
 | [`Var.truth`](#Var.truth) | Returns dynamic truthiness through registered dispatch or built-in rules. |
 | [`Var.update`](#Var.update) | Applies a failure-atomic dynamic compound update and returns the new value. |
+
+### Functions
+
+#### x2c_var_postfix_volatile
+
+`Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)`
+
+Applies `Var.postfix` semantics to a volatile destination in generated code.
+Volatile preserves accesses across exception transfer, without providing
+thread synchronization.
+
+Source: `lib/varops.x:580`
+
+#### x2c_var_update_volatile
+
+`Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)`
+
+Applies `Var.update` semantics to a volatile destination in generated code.
+Volatile preserves accesses across exception transfer, without providing
+thread synchronization.
+
+Source: `lib/varops.x:540`
 
 ### `Var`
 
@@ -149,7 +173,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:564`
+Source: `lib/varops.x:572`
 
 <a id="Var.sub"></a>
 #### Var.sub

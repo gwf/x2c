@@ -1022,43 +1022,44 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int List_equal(List, List);
 static int _collect_cache_ids(Compiler compiler, Var value, List * seen, Array ids){
   Array pending = Array_update_n(Array_new(), 1, value); {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & pending};
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    int count = 0;  while(Array_truth(pending)){
-      Var current = Array_take_last(pending);  if(! Var_is_row(current, 9, 7, 4)) continue;  List node = Var_list(current);  unsigned slot =((uintptr_t) node >> 4) & 4095;  if(List_equal(seen[slot], node)) continue;  seen[slot] = node;
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & pending
+    }
+    ;  X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;  x2c_cleanup_push(& _x2c_defer_record_0); {
+      int count = 0;  while(Array_truth(pending)){
+        Var current = Array_take_last(pending);  if(! Var_is_row(current, 9, 7, 4)) continue;  List node = Var_list(current);  unsigned slot =((uintptr_t) node >> 4) & 4095;  if(List_equal(seen[slot], node)) continue;  seen[slot] = node;
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6363658: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936767982090ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var captured_id = _x2c_match_values[0]; {
-        int id = Var_int(Var_convert(captured_id, 3453797));  if(! Var_is_null(Array_getindex(ids, id))) continue;  Array_setindex(ids, id, int_var(1));  count ++;  Array_push(pending, Array_getindex(compiler -> id_keys, id));  continue;
-      }
-      break; } } default: break;
+          int id = Var_int(Var_convert(captured_id, 3453797));  if(! Var_is_null(Array_getindex(ids, id))) continue;  Array_setindex(ids, id, int_var(1));  count ++;  Array_push(pending, Array_getindex(compiler -> id_keys, id));  continue;
+        }
+        break; } } default: break;
     }
   }
 {
-        Var child;  List _x2c_macro_object_16 = node;  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
-          child = _x2c_macro_cursor_output_16;  if(Var_is_row(child, 9, 7, 4)) Array_push(pending, child);
+          Var child;  List _x2c_macro_object_16 = node;  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
+            child = _x2c_macro_cursor_output_16;  if(Var_is_row(child, 9, 7, 4)) Array_push(pending, child);
+          }
+
+        }
+
+      }
+      {
+        int _x2c_return_value_0 = count; {
+          x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
         }
 
       }
 
     }
-    {
-      int _x2c_return_value_0 = count; {
-        x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
-      }
-
-    }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
-}
+
 }
 
 void Array_resize(Array, size_t);

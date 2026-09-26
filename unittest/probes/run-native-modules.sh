@@ -283,8 +283,17 @@ EOF
 grep -Fq "packages/tally/builds/tally.module" app/build/gen/*/main.d ||
   fail "package module in the depfile"
 
+# The first unit loads the module in its own Context. Its constructor's
+# cached Func must survive that Context and work in the second unit.
+cp app/main.x app/second.x
+"$X2C" translate -q --dump-code --package-dir packages \
+  app/main.x app/second.x >reuse.out
+[[ $(grep -Fc 'printf("%d\n", 10)' reuse.out) == 2 ]] ||
+  fail "module constructor values across units"
+
 # A rebuilt module retranslates its consumers.
-sed -i.bak 's|n \* (n + 1) / 2|n * (n + 1)|' packages/tally/src/tally.x
+sed -i.bak 's|value \* (value + 1) / 2|value * (value + 1)|' \
+  packages/tally/src/tally.x
 build_package
 "$X2C" build -v --package-dir packages --build-dir app/build \
   --output app/main app/main.x >rebuilt.out 2>&1
@@ -375,7 +384,14 @@ expect_error "package 'tally' was built by another compiler; rebuild it" \
 
 # A compiler that links the package's compile-time part in selects it
 # without a module: it never reads the stale one, nor needs one at all.
-"$X2C" build -q --extension packages/tally --build-dir linked \
+mkdir -p packages/sibling/src
+cat >packages/sibling/src/sibling.x <<'EOF'
+meta int increment(int);
+#pragma private
+int increment(int n) => n + 1;
+EOF
+"$X2C" build -q -j 2 --extension packages/tally \
+  --extension packages/sibling --build-dir linked \
   --output linked/x2c "$ROOT"/src/*.x
 "$X2C" translate -q --package-dir packages --out-dir out app/main.x \
   2>/dev/null && fail "stale module accepted"
@@ -385,5 +401,13 @@ for pass in stale absent; do
     fail "linked extension through import ($pass)"
   rm -f out/main.c packages/tally/builds/tally.module
 done
+
+cat >app/sibling.x <<'EOF'
+import "sibling";
+meta static int answer(void) => sibling.increment(41);
+int main(void) { return $answer(); }
+EOF
+linked/x2c translate -q --package-dir packages --out-dir out app/sibling.x
+grep -Fq 'return 42;' out/sibling.c || fail "second linked extension"
 
 echo "native module probes passed"

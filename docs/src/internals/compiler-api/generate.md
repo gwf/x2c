@@ -35,7 +35,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:1267`
+Source: `src/generate.x:1264`
 
 #### generate_code_text
 
@@ -45,7 +45,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `generate_code` does.
 
-Source: `src/generate.x:1253`
+Source: `src/generate.x:1250`
 
 ### `Compiler`
 
@@ -85,7 +85,7 @@ Source: `src/generate.x:839`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1286`
+Source: `src/generate.x:1283`
 
 ## Design notes
 

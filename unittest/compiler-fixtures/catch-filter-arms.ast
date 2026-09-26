@@ -61,10 +61,20 @@
                                   (ident (binding 3 "Symbol_var"))) 
                             (args (expr ("Symbol") (literal ("Symbol") "*" *))))) 
                      (nil)))))))))) 
-            (return (int) 
-             (expr (int) 
-              (call (expr ((func (("Var"))) (int)) (ident (binding 5 "Var_int"))) 
-               (args (expr ("Var") (ident (binding 6 "count")))))))) 
+            (block (declare ("Var") (bindings (bind (binding 5 "count") ()))) 
+             (stmnt 
+              (expr ("Var") 
+               (op = (expr ("Var") (ident (binding 5 "count"))) 
+                (expr ("Var") 
+                 (call "x2c_error_catch_capture" 
+                  (args (expr ("ErrorHandler") 
+                         (ident (binding 6 "_x2c_error_handler_0"))) 
+                   (expr (int) (literal (int) "0")))))))) 
+             (return (int) 
+              (expr (int) 
+               (call (expr ((func (("Var"))) (int)) 
+                      (ident (binding 7 "Var_int"))) 
+                (args (expr ("Var") (ident (binding 5 "count"))))))))) 
            ((expr ("List") 
              (expr ("List") 
               (cons (expr ("Var") 
@@ -78,14 +88,27 @@
                               (ident (binding 3 "Symbol_var"))) 
                         (args (expr ("Symbol") 
                                (literal ("Symbol") "*rest" *rest))))) (nil)))))) 
-            (block 
-             (at 3 (return (int) 
-                    (expr (int) 
-                     (call (expr ((func (("List"))) (int)) 
-                            (ident (binding 7 "List_len"))) 
-                      (args (expr ("List") (ident (binding 8 "rest")))))))))) 
-           (() (return (int) 
-                (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
+            (block (declare ("List") (bindings (bind (binding 8 "rest") ()))) 
+             (stmnt 
+              (expr ("List") 
+               (op = (expr ("List") (ident (binding 8 "rest"))) 
+                (expr ("List") 
+                 (call "Var_list" 
+                  (args (expr ("Var") 
+                         (call "x2c_error_catch_capture" 
+                          (args (expr ("ErrorHandler") 
+                                 (ident (binding 6 "_x2c_error_handler_0"))) 
+                           (expr (int) (literal (int) "0"))))))))))) 
+             (block 
+              (at 3 (return (int) 
+                     (expr (int) 
+                      (call (expr ((func (("List"))) (int)) 
+                             (ident (binding 9 "List_len"))) 
+                       (args (expr ("List") (ident (binding 8 "rest"))))))))))) 
+           (() (block 
+                (return (int) 
+                 (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
+          (binding 6 "_x2c_error_handler_0")) 
          (block 
           (at 4 (stmnt 
                  (expr (int) 

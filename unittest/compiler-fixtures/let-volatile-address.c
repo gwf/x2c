@@ -18,45 +18,48 @@ int main(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
     x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       outer = 2;
       {
         volatile int * _x2c_macro_address_0 = & outer;
         int _x2c_macro_previous_0 = * _x2c_macro_address_0;
         {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-          * _x2c_macro_address_0 = 5;
-          printf("inside %d\n", outer);
+          _x2c_defer_env_0 _x2c_defer_env_1 ={
+            ._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0
+          }
+          ;
+          X2CCleanup _x2c_defer_record_0 ={
+            .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+          }
+          ;
+          x2c_cleanup_push(& _x2c_defer_record_0);
+          {
+            * _x2c_macro_address_0 = 5;
+            printf("inside %d\n", outer);
+          }
+          x2c_cleanup_leave(& _x2c_defer_record_0);
         }
-        x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
       }
 
     }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if(x2c_exception_claim(& _x2c_exception_frame_0)){
-        printf("after %d\n", outer);
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      {
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          printf("after %d\n", outer);
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
       }
-      x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
-    }
 
+    }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+      printf("after %d\n", outer);
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  if(x2c_exception_claim(& _x2c_exception_frame_0)){
-    printf("after %d\n", outer);
-  }
-  x2c_exception_leave(& _x2c_exception_frame_0);
-}
-return 0;
+  return 0;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

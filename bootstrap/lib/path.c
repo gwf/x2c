@@ -57,24 +57,24 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_2;
 }
 _x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
@@ -531,26 +531,28 @@ static void _remove_tree(Path path, String * failed, int * failure){
         if(! strcmp(entry -> d_name, ".") || ! strcmp(entry -> d_name, "..")) continue;
         Context context = Context_open_isolated();
         {
-  _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & context};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_4
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-          String child_failed = NULL;
-          int child_failure = 0;
-          _remove_tree(Path_join(path, String_new(entry -> d_name)), &(child_failed), &(child_failure));
-          if(String_truth(child_failed) && ! String_truth((* failed))){
-            (* failed) = Var_string(Context_export(context, String_var(child_failed)));
-            (* failure) = child_failure;
+          _x2c_defer_env_0 _x2c_defer_env_1 ={
+            ._x2c_defer_capture_0 =(const void *) & context
           }
+          ;
+          X2CCleanup _x2c_defer_record_0 ={
+            .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+          }
+          ;
+          x2c_cleanup_push(& _x2c_defer_record_0);
+          {
+            String child_failed = NULL;
+            int child_failure = 0;
+            _remove_tree(Path_join(path, String_new(entry -> d_name)), &(child_failed), &(child_failure));
+            if(String_truth(child_failed) && ! String_truth((* failed))){
+              (* failed) = Var_string(Context_export(context, String_var(child_failed)));
+              (* failure) = child_failure;
+            }
 
+          }
+          x2c_cleanup_leave(& _x2c_defer_record_0);
         }
-        x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
       }
       closedir(directory);
     }
@@ -582,41 +584,45 @@ void Path_copy_file(Path source, Path target){
   if(! _init_guard_) _file_init_();
   File input = _open(_12, source, "rb");
   {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & input};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_5
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    struct stat info, existing;
-    if(File_stat(input, & info)) File_path_error(String_var(_12), source, errno);
-    if(! stat(target, & existing) && existing.st_dev == info.st_dev && existing.st_ino == info.st_ino){
-      x2c_cleanup_leave(& _x2c_defer_record_1);
-      return;
+    _x2c_defer_env_3 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & input
     }
-    File output = _open(_12, target, "wb");
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & output};
+      struct stat info, existing;
+      if(File_stat(input, & info)) File_path_error(String_var(_12), source, errno);
+      if(! stat(target, & existing) && existing.st_dev == info.st_dev && existing.st_ino == info.st_ino){
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return;
+      }
+      File output = _open(_12, target, "wb");
+      {
+        _x2c_defer_env_2 _x2c_defer_env_4 ={
+          ._x2c_defer_capture_1 =(const void *) & output
+        }
+        ;
+        X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_4
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_2);
+        {
+          File_copy_to(input, output, NULL);
+          if(File_flush(output)) File_path_error(String_var(_12), target, errno);
+          if(chmod(target, info.st_mode & 07777)) File_path_error(String_var(_12), target, errno);
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+      }
 
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-      File_copy_to(input, output, NULL);
-      if(File_flush(output)) File_path_error(String_var(_12), target, errno);
-      if(chmod(target, info.st_mode & 07777)) File_path_error(String_var(_12), target, errno);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
-
-}
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 static void _copy_tree(Path source, Path target){
@@ -680,20 +686,22 @@ void Path_write_text(Path path, String text){
   if(! _init_guard_) _file_init_();
   File output = _open(_17, path, "w");
   {
-  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_3 =(const void *) & output};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    File_write_all(output, text, String_len(text));
-    if(File_flush(output)) File_path_error(String_var(_17), path, errno);
+    _x2c_defer_env_6 _x2c_defer_env_7 ={
+      ._x2c_defer_capture_3 =(const void *) & output
+    }
+    ;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
+    {
+      File_write_all(output, text, String_len(text));
+      if(File_flush(output)) File_path_error(String_var(_17), path, errno);
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 void * Scope_memdup(const void *, size_t);
@@ -718,17 +726,17 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void File_cleanup(File);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   File_cleanup((*(File *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_3 * _x2c_defer_data_2 =(_x2c_defer_env_3 *) _x2c_defer_opaque_2;
   File_cleanup((*(File *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   File_cleanup((*(File *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 

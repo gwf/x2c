@@ -228,9 +228,11 @@ static void _call(Map table, String name, List arguments) {
   Var result = void;
   List failure = NULL;
   try result = ((Func) target.pointer()).apply(count, argv);
+  // Catch bindings are borrowed from the error record; keep copies.
   catch %(meta-fail (message ?message) (notes ?notes)):
-    failure = %(error $message $notes);
-  catch %(?code *detail): failure = %(failure ${cons(code, detail)});
+    failure = Error.snapshot(%(error $message $notes));
+  catch %(?code *detail):
+    failure = Error.snapshot(%(failure ${cons(code, detail)}));
   foreach (List notice, helper_notices) _reply(notice);
   if (failure) {
     _reply(failure);

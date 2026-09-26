@@ -55,55 +55,55 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_2;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_2;
 }
 _x2c_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_3;
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_5;
-  const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
+  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_4;
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_5;
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_4;
 }
 _x2c_defer_env_6;
 
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_8;
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_10{
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_10;
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
+
+typedef struct _x2c_defer_env_12{
+  const void * _x2c_defer_capture_7;
+  const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_12;
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
-typedef struct _x2c_defer_env_7{
+typedef struct _x2c_defer_env_14{
+  const void * _x2c_defer_capture_10;
   const void * _x2c_defer_capture_11;
 }
-_x2c_defer_env_7;
+_x2c_defer_env_14;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
@@ -223,7 +223,7 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
   {
     ExceptionFrame _x2c_exception_frame_0;
     x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       while(offset < size){
         size_t count = fwrite(bytes + offset, 1, size - offset, file);
         if(! count){
@@ -234,21 +234,23 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
       }
 
     }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if(x2c_exception_claim(& _x2c_exception_frame_0)){
-        if(written) * written += offset;
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      {
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          if(written) * written += offset;
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
       }
-      x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
-    }
 
+    }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+      if(written) * written += offset;
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  if(x2c_exception_claim(& _x2c_exception_frame_0)){
-    if(written) * written += offset;
-  }
-  x2c_exception_leave(& _x2c_exception_frame_0);
-}
+
 }
 
 void Block_append(Block, const void *, size_t);
@@ -278,101 +280,105 @@ static String _regular_text(File file, size_t requested){
   String first = String_malloc(allocation);
   Block content = NULL;
   {
-  _x2c_defer_env_0 _x2c_defer_env_8 = {._x2c_defer_capture_0 =(const void *) & first, ._x2c_defer_capture_1 =(const void *) & content};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_8
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    size_t count = fread(first, 1, requested, file);
-    _check_read(file);
-    if(count < requested){
-      String result = _finish_text(first, count);
-      first = NULL;
-      {
-        String _x2c_return_value_0 = result;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
-        }
-
-      }
-
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & first, ._x2c_defer_capture_1 =(const void *) & content
     }
-    int next = fgetc(file);
-    if(next == EOF){
-      _check_read(file);
-      String result = _finish_text(first, count);
-      first = NULL;
-      {
-        String _x2c_return_value_1 = result;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_1;
-        }
-
-      }
-
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
     }
-    content = Block_new(sizeof(char));
-    if(count >= INT_MAX - 1){
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 203};
-      x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));
-      __builtin_unreachable();
-    }
-    _append_text(content, first, count);
-    char * head = first;
-    head[count] = '\0';
-    String_free(first);
-    first = NULL;
-    _block_putc(content, (unsigned char) next);
-    unsigned char bytes[BUFSIZ];
-    while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
-    _check_read(file);
-    String result = _text(content -> bytes, content -> length);
-    Block_free(content);
-    content = NULL;
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      String _x2c_return_value_2 = result;
+      size_t count = fread(first, 1, requested, file);
+      _check_read(file);
+      if(count < requested){
+        String result = _finish_text(first, count);
+        first = NULL;
+        {
+          String _x2c_return_value_0 = result;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_0);
+            return _x2c_return_value_0;
+          }
+
+        }
+
+      }
+      int next = fgetc(file);
+      if(next == EOF){
+        _check_read(file);
+        String result = _finish_text(first, count);
+        first = NULL;
+        {
+          String _x2c_return_value_1 = result;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_0);
+            return _x2c_return_value_1;
+          }
+
+        }
+
+      }
+      content = Block_new(sizeof(char));
+      if(count >= INT_MAX - 1){
+        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 203};
+        x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));
+        __builtin_unreachable();
+      }
+      _append_text(content, first, count);
+      char * head = first;
+      head[count] = '\0';
+      String_free(first);
+      first = NULL;
+      _block_putc(content, (unsigned char) next);
+      unsigned char bytes[BUFSIZ];
+      while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
+      _check_read(file);
+      String result = _text(content -> bytes, content -> length);
+      Block_free(content);
+      content = NULL;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_2;
+        String _x2c_return_value_2 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 String File_string_close(File file){
   if(! _init_guard_) File_initialize();
   {
-  _x2c_defer_env_1 _x2c_defer_env_9 = {._x2c_defer_capture_2 =(const void *) & file};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_9
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_2 =(const void *) & file
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      String _x2c_return_value_3 = File_string(file);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_3;
+        String _x2c_return_value_3 = File_string(file);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_3;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 File String_open(String s, const char * mode){
@@ -459,31 +465,33 @@ String File_readblock(File file, long size){
   int allocation = _string_allocation(requested);
   String result = String_malloc(allocation), owned = result;
   {
-  _x2c_defer_env_2 _x2c_defer_env_10 = {._x2c_defer_capture_3 =(const void *) & owned};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_10
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    size_t count = File_read(file, result, 1, requested);
-    _check_read(file);
-    String output = _finish_text(result, count);
-    owned = NULL;
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_3 =(const void *) & owned
+    }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      String _x2c_return_value_4 = output;
+      size_t count = File_read(file, result, 1, requested);
+      _check_read(file);
+      String output = _finish_text(result, count);
+      owned = NULL;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_4;
+        String _x2c_return_value_4 = output;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_4;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 void Block_clear(Block);
@@ -496,25 +504,27 @@ FileReadStatus File_readline_into(File file, Block dest){
   {
     flockfile(file);
     {
-  _x2c_defer_env_3 _x2c_defer_env_11 = {._x2c_defer_capture_4 =(const void *) & file};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_11
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-      int c;
-      while((c = getc_unlocked(file)) != EOF){
-        _block_putc(dest, (unsigned char) c);
-        if(c == '\n') break;
+      _x2c_defer_env_6 _x2c_defer_env_7 ={
+        ._x2c_defer_capture_4 =(const void *) & file
       }
-      failed = ferror(file);
-      error = failed ? errno : 0;
+      ;
+      X2CCleanup _x2c_defer_record_3 ={
+        .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_3);
+      {
+        int c;
+        while((c = getc_unlocked(file)) != EOF){
+          _block_putc(dest, (unsigned char) c);
+          if(c == '\n') break;
+        }
+        failed = ferror(file);
+        error = failed ? errno : 0;
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_3);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
   }
   if(failed) _io_error(1189960, error);
   return dest -> length ? FILE_READ_DATA : FILE_READ_EOF;
@@ -553,29 +563,31 @@ String File_readline(File file){
   if(! _init_guard_) File_initialize();
   Block line = Block_new(sizeof(char));
   {
-  _x2c_defer_env_6 _x2c_defer_env_12 = {._x2c_defer_capture_10 =(const void *) & line};
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_6,
-    .env = & _x2c_defer_env_12
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
-    Block_reserve(line, BUFSIZ);
-    FileReadStatus status = File_readline_into(file, line);
+    _x2c_defer_env_8 _x2c_defer_env_9 ={
+      ._x2c_defer_capture_5 =(const void *) & line
+    }
+    ;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_defer_env_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
     {
-      String _x2c_return_value_5 = status == FILE_READ_DATA ? _text(line -> bytes, line -> length) : NULL;
+      Block_reserve(line, BUFSIZ);
+      FileReadStatus status = File_readline_into(file, line);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_4);
-        return _x2c_return_value_5;
+        String _x2c_return_value_5 = status == FILE_READ_DATA ? _text(line -> bytes, line -> length) : NULL;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_4);
+          return _x2c_return_value_5;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_4);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
 }
 
 String File_string(File file){
@@ -592,31 +604,33 @@ String File_string(File file){
   }
   Block content = Block_new(sizeof(char));
   {
-  _x2c_defer_env_7 _x2c_defer_env_13 = {._x2c_defer_capture_11 =(const void *) & content};
-
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_7,
-    .env = & _x2c_defer_env_13
-  };
-  x2c_cleanup_push(&_x2c_defer_record_5);
-  {
-    unsigned char bytes[BUFSIZ];
-    size_t count;
-    while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
-    _check_read(file);
+    _x2c_defer_env_10 _x2c_defer_env_11 ={
+      ._x2c_defer_capture_6 =(const void *) & content
+    }
+    ;
+    X2CCleanup _x2c_defer_record_5 ={
+      .fn = _x2c_defer_cleanup_5, .env = & _x2c_defer_env_11
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_5);
     {
-      String _x2c_return_value_6 = _text(content -> bytes, content -> length);
+      unsigned char bytes[BUFSIZ];
+      size_t count;
+      while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
+      _check_read(file);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_5);
-        return _x2c_return_value_6;
+        String _x2c_return_value_6 = _text(content -> bytes, content -> length);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          return _x2c_return_value_6;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_5);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-}
 }
 
 File Var_file(Var);
@@ -630,39 +644,41 @@ static int _next(Iter iter, Var * out){
   if(line == NULL) return 0;
   int keep = 0;
   {
-  _x2c_defer_env_4 _x2c_defer_env_14 = {._x2c_defer_capture_5 =(const void *) & keep, ._x2c_defer_capture_6 =(const void *) & line, ._x2c_defer_capture_7 =(const void *) & iter};
-
-  X2CCleanup _x2c_defer_record_6 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_14
-  };
-  x2c_cleanup_push(&_x2c_defer_record_6);
-  {
-    FileReadStatus status = File_readline_into(file, line);
-    if(status != FILE_READ_DATA){
-      int _x2c_return_value_7 = 0;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_6);
-        return _x2c_return_value_7;
-      }
-
+    _x2c_defer_env_12 _x2c_defer_env_13 ={
+      ._x2c_defer_capture_7 =(const void *) & keep, ._x2c_defer_capture_8 =(const void *) & line, ._x2c_defer_capture_9 =(const void *) & iter
     }
-    String text = _text(line -> bytes, line -> length);
-    * out = String_var(text);
-    keep = 1;
+    ;
+    X2CCleanup _x2c_defer_record_6 ={
+      .fn = _x2c_defer_cleanup_6, .env = & _x2c_defer_env_13
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_6);
     {
-      int _x2c_return_value_8 = 1;
+      FileReadStatus status = File_readline_into(file, line);
+      if(status != FILE_READ_DATA){
+        int _x2c_return_value_7 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_6);
+          return _x2c_return_value_7;
+        }
+
+      }
+      String text = _text(line -> bytes, line -> length);
+      * out = String_var(text);
+      keep = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_6);
-        return _x2c_return_value_8;
+        int _x2c_return_value_8 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_6);
+          return _x2c_return_value_8;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_6);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-}
 }
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
@@ -684,30 +700,32 @@ Iter File_iter(File file, Iter dest){
   Block line = Block_new(sizeof(char));
   int keep = 0;
   {
-  _x2c_defer_env_5 _x2c_defer_env_15 = {._x2c_defer_capture_8 =(const void *) & keep, ._x2c_defer_capture_9 =(const void *) & line};
-
-  X2CCleanup _x2c_defer_record_7 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_15
-  };
-  x2c_cleanup_push(&_x2c_defer_record_7);
-  {
-    Block_reserve(line, BUFSIZ);
-    Iter_init(dest, File_var(file), _next, Block_var(line));
-    keep = 1;
+    _x2c_defer_env_14 _x2c_defer_env_15 ={
+      ._x2c_defer_capture_10 =(const void *) & keep, ._x2c_defer_capture_11 =(const void *) & line
+    }
+    ;
+    X2CCleanup _x2c_defer_record_7 ={
+      .fn = _x2c_defer_cleanup_7, .env = & _x2c_defer_env_15
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_7);
     {
-      Iter _x2c_return_value_9 = dest;
+      Block_reserve(line, BUFSIZ);
+      Iter_init(dest, File_var(file), _next, Block_var(line));
+      keep = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_7);
-        return _x2c_return_value_9;
+        Iter _x2c_return_value_9 = dest;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_7);
+          return _x2c_return_value_9;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_7);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-}
 }
 
 unsigned Var_hash(Var);
@@ -773,43 +791,43 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   File_close((*(File *) _x2c_defer_data_1->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   if((*(String *) _x2c_defer_data_2->_x2c_defer_capture_3) != NULL) String_free((*(String *) _x2c_defer_data_2->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   funlockfile((*(File *) _x2c_defer_data_3->_x2c_defer_capture_4));
-}
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_5)){
-    Block_free((*(Block *) _x2c_defer_data_4->_x2c_defer_capture_6));
-    (*(Iter *) _x2c_defer_data_4->_x2c_defer_capture_7) -> state =((void) 0, Void);
-  }
-
-}
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  if(!(*(int *) _x2c_defer_data_5->_x2c_defer_capture_8)) Block_free((*(Block *) _x2c_defer_data_5->_x2c_defer_capture_9));
 }
 
 void Block_cleanup(Block);
 
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_8 * _x2c_defer_data_4 =(_x2c_defer_env_8 *) _x2c_defer_opaque_4;
+  Block_cleanup((*(Block *) _x2c_defer_data_4->_x2c_defer_capture_5));
+}
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
+  _x2c_defer_env_10 * _x2c_defer_data_5 =(_x2c_defer_env_10 *) _x2c_defer_opaque_5;
+  Block_cleanup((*(Block *) _x2c_defer_data_5->_x2c_defer_capture_6));
+}
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
-  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  Block_cleanup((*(Block *) _x2c_defer_data_6->_x2c_defer_capture_10));
+  _x2c_defer_env_12 * _x2c_defer_data_6 =(_x2c_defer_env_12 *) _x2c_defer_opaque_6;
+  if(!(*(int *) _x2c_defer_data_6->_x2c_defer_capture_7)){
+    Block_free((*(Block *) _x2c_defer_data_6->_x2c_defer_capture_8));
+    (*(Iter *) _x2c_defer_data_6->_x2c_defer_capture_9) -> state =((void) 0, Void);
+  }
+
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  Block_cleanup((*(Block *) _x2c_defer_data_7->_x2c_defer_capture_11));
+  _x2c_defer_env_14 * _x2c_defer_data_7 =(_x2c_defer_env_14 *) _x2c_defer_opaque_7;
+  if(!(*(int *) _x2c_defer_data_7->_x2c_defer_capture_10)) Block_free((*(Block *) _x2c_defer_data_7->_x2c_defer_capture_11));
 }
 

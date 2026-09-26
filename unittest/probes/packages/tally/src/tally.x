@@ -10,6 +10,7 @@ $(import "tally.xmacro")
 #pragma private
 
 int tally_sum(int n) {
-  Var boxed = Tally.new(n, n * (n + 1) / 2);
+  Func triangle = %!(int value) => value * (value + 1) / 2;
+  Var boxed = Tally.new(n, triangle(n));
   return boxed.tally().total;
 }

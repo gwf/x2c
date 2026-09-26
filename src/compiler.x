@@ -112,10 +112,6 @@ typedef struct Compiler {
   Token directives_taken;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
-  // Anchored statements whose transform returned them unchanged. The driver
-  // re-walks the unit until it stops changing, so without this every later
-  // pass re-derives the whole tree to learn it is already done.
-  Map fixed;
   Map protocols, conforms, protocol_helpers;
   // Answers derived from the occurrence and adoption tables. Publishing a
   // protocol or an adoption changes what these would say, so the whole map
@@ -1149,7 +1145,11 @@ List Compiler.anchor_origin(Compiler compiler, List node, Token token) {
   return %(at $occurrence $node);
 }
 
-static int _shallow_parse_compile_time_definition(Compiler c, int keyword) {
+/** Collects a macro or keyword definition while deferring its diagnostics.
+    Returns one on success; malformed syntax skips to end of file and returns
+    zero so the full parse can report it.
+*/
+int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
   int failed = 0;
   DiagnosticsHold hold = c.diagnostics.hold();
   $let(c.recovery_depth, c.recovery_depth + 1) {
@@ -1167,17 +1167,6 @@ static int _shallow_parse_compile_time_definition(Compiler c, int keyword) {
 /* Lexical privacy also marks a name in Sym.statics, so a static function is
    marked again as `(function name)`. File collection reads that key to keep
    the function out of what a private region publishes. */
-static List _shallow_parse_declaration(Compiler compiler) {
-  List declaration = compiler.parse_declaration_row();
-  compiler.record_declaration_visibility(declaration);
-  match (declaration)
-    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
-      if (type.type().is_static())
-        compiler.sym.mark_static(
-          %(function ${binding_identity_spelling(binding)}));
-  return declaration;
-}
-
 // Remember the spelling of one function body found while collecting `.x`.
 static void _shallow_record_function_definition(
   Compiler compiler, Type type, List binding) {
@@ -1228,14 +1217,33 @@ static void _report_script_statement(Compiler c) {
     %("move the statement into main, or remove main so the statements run"));
 }
 
-static void _shallow_finish_declaration(Compiler c) {
+/** Skips a collected script statement, or diagnoses one beside `main`.
+    Called after top-level directives establish source visibility.
+*/
+int Compiler.skip_collected_script_statement(Compiler c) {
+  if (!c.script) return 0;
+  if (!c.script.defines_main && c.script_statement_starts()) {
+    c.skip_script_statement();
+    return 1;
+  }
+  if (c.script.defines_main && c.script_statement_executes())
+    _report_script_statement(c);
+  return 0;
+}
+
+/** Records declaration visibility and meta facts, then skips its body.
+    The declaration is already bound by the shared top-level parser.
+*/
+void Compiler.finish_collected_declaration(
+  Compiler c, List declaration, Token meta, int native) {
   /* Collection records the runtime function a `meta` marker precedes, and
      the native binding a bodyless or `native` marker advertises; the
      compile-time form is installed by the full parse. */
-  Token meta = NULL;
-  int native = 0;
-  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
-  List declaration = _shallow_parse_declaration(c);
+  c.record_declaration_visibility(declaration);
+  match (declaration)
+    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
+      if (type.type().is_static())
+        c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
     if (native) c.record_native_meta_effect(declaration, meta);
@@ -1682,9 +1690,11 @@ static List _replay_declaration_bundle(Compiler compiler) {
   return NULL;
 }
 
-/* Expand an imported file-scope unit macro so later invocations can use its
-   private helpers and other units can see its public declarations. */
-static void _shallow_parse_unit_macro(Compiler compiler) {
+/** Expands a file-scope unit macro and retains its declarations for collection.
+    Its private helpers remain available to later invocations. Generated-name
+    counters are restored when the full parse must expand it again.
+*/
+void Compiler.collect_unit_macro(Compiler compiler) {
   with compiler.names {
     Map saved_counters = _.counters;
     _.counters = _.counters.copy();
@@ -1709,68 +1719,8 @@ static void _shallow_parse_loop(Compiler c) {
   c.shallow = 1;
   c.braces.clear();
   while (c.peek(0) != <eof>) {
-    c.update_source_visibility(c.leading_preproc());
-    if (c.skip_linkage_brace()) continue;
     Token start = c.token;
-    if (c.script && !c.script.defines_main && c.script_statement_starts()) {
-      c.skip_script_statement();
-      continue;
-    }
-    if (c.script && c.script.defines_main && c.script_statement_executes())
-      _report_script_statement(c);
-    if (c.test_static_assert()) {
-      c.parse_static_assert();
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (c.peek(0) == <"$(">) {
-      c.parse_macro_lisp_shallow();
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    // Collection performs the import: the package's names must reach the
-    // globs this segment contributes before any later segment names it.
-    if (c.peek(0) == <import>) {
-      c.parse_import_declaration();
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (c.protocol_form_starts()) {
-      c.parse_protocol_declaration();
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (c.keyword_form_is_definition()) {
-      _shallow_parse_compile_time_definition(c, 1);
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (c.macro_form_is_definition()) {
-      _shallow_parse_compile_time_definition(c, 0);
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (!c.collect_protocols && c.skip_named_type_declaration()) {
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    if (c.macro_starts_target_at(AST_UNIT)) {
-      if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion())
-        _shallow_parse_unit_macro(c);
-      else {
-        c.skip_macro_invocation();
-        if (!c.test(<;>)) {
-          while (c.macro_starts_target_at(AST_UNIT)) {
-            c.skip_macro_invocation();
-            if (c.test(<;>)) break;
-          }
-          if (c.peek(-1) != <;>) _shallow_finish_declaration(c);
-        }
-      }
-      _debug_tokens(c, start, c.token);
-      continue;
-    }
-    _shallow_finish_declaration(c);
+    (void) c.parse_top_level_mode(1);
     _debug_tokens(c, start, c.token);
   }
   /* Definitions after the last declaration, as before an include, still
@@ -2049,7 +1999,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_regions = {};
   c.native_meta = {};
   c.inherit_library_comptime();
-  c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};
   c.origin = 0;
@@ -2491,13 +2440,50 @@ List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible) {
   return definite;
 }
 
-/** Defines a typed `Match` pattern's definite binders in the current scope. */
-void Compiler.define_match_binders(Compiler compiler, List pattern) {
+/* Define once; catch lowering also retains the issued identities. */
+static void _define_match_binders(
+  Compiler compiler, List pattern, List &?bindings) {
+  Array rows = bindings ? [] : NULL;
   foreach (Var binder, compiler.match_pattern_binders(pattern, NULL)) {
     String name = binder.str()[1:];
     List type = binder.is_list_binder() ? %("List") : %("Var");
-    compiler.sym.define(%($name), type);
+    List binding = bindings
+      ? compiler.sym.declare(NULL, %($name), type)
+      : compiler.sym.define(%($name), type);
+    if (bindings) rows.push(%($binder $binding));
   }
+  if (bindings) bindings = rows.list_free();
+}
+
+/** Defines a typed `Match` pattern's definite binders in the current scope. */
+void Compiler.define_match_binders(Compiler compiler, List pattern) =>
+  _define_match_binders(compiler, pattern, NULL);
+
+/** Defines catch binders and returns their capture-token/binding pairs. */
+List Compiler.define_catch_binders(Compiler compiler, List pattern) {
+  List bindings = NULL;
+  _define_match_binders(compiler, pattern, bindings);
+  return bindings;
+}
+
+/** Builds ordinary declarations from a catch scope's issued bindings. */
+List Compiler.catch_binder_declarations(
+  Compiler compiler, List bindings, List handle) {
+  Array declarations = [];
+  int index = 0;
+  foreach (List row, bindings) {
+    Type type = row.car().is_list_binder() ? %("List") : %("Var");
+    List value = %(expr ("Var")
+      (call "x2c_error_catch_capture"
+        (args (expr ("ErrorHandler") (ident $handle))
+              (expr (int) (literal (int) ${%"${index++}"})))));
+    if (row.car().is_list_binder())
+      value = %(expr $type (call "Var_list" (args $value)));
+    declarations.push(%(declare $type (bindings (bind ${row.cadr()} ()))));
+    declarations.push(%(stmnt (expr $type
+      (op = (expr $type (ident ${row.cadr()})) $value))));
+  }
+  return declarations.list_free();
 }
 
 /** Appends a generated declaration to the early-declaration queue. */
@@ -3760,19 +3746,20 @@ static Type _typedef_target(Sym sym, Type key) {
   return NULL;
 }
 
+static Type _typedef_base_step(Sym sym, Type type) {
+  Type base = type.base_type();
+  if (!base || (!base.is_typedef_name() && !base.is_typedef())) return NULL;
+  Type next = _typedef_target(sym, base);
+  if (!next) next = _builtin_typedef_scalar(base);
+  return next ? _replace_type_base(type, base, next) : NULL;
+}
+
 static Type _normalize_declared_type(
   Sym sym, Type type, Type origin, int hops) {
   type = type.declared();
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(sym, origin);
-  Type base = type.base_type();
-  if (base && (base.is_typedef_name() || base.is_typedef())) {
-    Type next = _typedef_target(sym, base);
-    if (!next) next = _builtin_typedef_scalar(base);
-    if (next)
-      return _normalize_declared_type(
-        sym, _replace_type_base(type, base, next), origin, hops + 1);
-  }
-  return type;
+  Type next = _typedef_base_step(sym, type);
+  return next ? _normalize_declared_type(sym, next, origin, hops + 1) : type;
 }
 
 /** Resolves typedef bases while retaining every declarator qualifier. */
@@ -3788,16 +3775,9 @@ static Symbol _var_tag_for_type_helper(
     return tag;
   }
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(sym, origin);
-  Type base = type.base_type();
-  if (base && (base.is_typedef_name() || base.is_typedef())) {
-    Type next = _typedef_target(sym, base);
-    if (!next) next = _builtin_typedef_scalar(base);
-    if (next) {
-      Type replaced = _replace_type_base(type, base, next);
-      return _var_tag_for_type_helper(
-        sym, replaced, origin, resolved, hops + 1);
-    }
-  }
+  Type next = _typedef_base_step(sym, type);
+  if (next)
+    return _var_tag_for_type_helper(sym, next, origin, resolved, hops + 1);
   if (resolved) resolved = type;
   return 0;
 }

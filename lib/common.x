@@ -408,7 +408,9 @@ Var Var.updateindex(Var value, Var key, Symbol op, Var rhs);
 Var Var.postfixindex(Var value, Var key, Symbol op);
 Var Var.binary(Var lhs, Symbol op, Var rhs);
 Var Var.update(Var &?lhs, Symbol op, Var rhs);
+Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs);
 Var Var.postfix(Var &?lhs, Symbol op);
+Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op);
 
 /** Returns nonzero when `iter` is not null. */
 inline int Iter.truth(Iter iter) => iter != NULL;

@@ -70,6 +70,8 @@ int Compiler_skip_linkage_brace(Compiler c);
 
 String Compiler_definition_doc(Compiler c, Token start);
 
+List Compiler_parse_top_level_mode(Compiler c, int skip_body);
+
 List Compiler_parse_top_level(Compiler c);
 
 List Compiler_parse_submission(Compiler c, int end_position);

@@ -282,7 +282,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 14 "int_var"))) 
            (args (expr (int) (literal (int) "12")))))))))))) 
-  (at 56 
+  (at 36 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -396,7 +396,7 @@
                     (expr (int) (literal (int) "1")))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "5"))))) 
-  (at 57 
+  (at 41 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -721,7 +721,7 @@
                       (expr (int) (literal (int) "25")))))))) 
            (expr (int) (literal (int) "25")))))) 
     (return (expr (int) (literal (int) "13"))))) 
-  (at 58 
+  (at 49 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -741,7 +741,7 @@
                                           (literal ("Symbol") "<name>" name))))))))))) 
                  (expr ("String") (cache 3))))))) 
     (return (expr (int) (literal (int) "14"))))) 
-  (at 59 
+  (at 50 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -758,7 +758,7 @@
                              (literal ("Symbol") "<runtime>" runtime))))))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "15"))))) 
-  (at 60 
+  (at 51 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -775,7 +775,7 @@
                              (literal ("Symbol") "<computed>" computed))))))))))) 
          (expr (int) (literal (int) "9")))) 
     (return (expr (int) (literal (int) "16"))))) 
-  (at 61 
+  (at 52 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -805,7 +805,7 @@
                              (literal ("Symbol") "<depth>" depth))))))))))) 
          (expr (int) (literal (int) "8")))) 
     (return (expr (int) (literal (int) "17"))))) 
-  (at 62 
+  (at 53 
    (if (expr (int) 
         (op != 
          (expr (long) 
@@ -831,7 +831,7 @@
                     (expr (int) (literal (int) "1")))))))) 
          (expr (int) (literal (int) "7")))) 
     (return (expr (int) (literal (int) "18"))))) 
-  (at 63 
+  (at 54 
    (if (expr (int) 
         (op != 
          (expr (long) 

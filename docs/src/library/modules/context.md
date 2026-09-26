@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:370`
+Source: `lib/context.x:365`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -43,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:347`
+Source: `lib/context.x:342`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -76,7 +76,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:308`
+Source: `lib/context.x:303`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -235,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:329`
+Source: `lib/context.x:324`
 
 <a id="Context.initialize"></a>
 #### Context.initialize

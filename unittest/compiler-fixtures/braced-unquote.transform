@@ -378,7 +378,7 @@
                 (args (expr ("String") (ident (binding 20 "short_then_text"))) 
                  (expr ("String") (cache 29))))))) 
     (return (expr (int) (literal (int) "8"))))) 
-  (at 60 
+  (at 54 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -445,7 +445,7 @@
                   (args (expr ("List") (ident (binding 30 "ternary"))) 
                    (expr ("List") (expr ("List") (cache 17)))))))))) 
     (return (expr (int) (literal (int) "12"))))) 
-  (at 61 
+  (at 58 
    (if (expr (int) 
         (op || 
          (expr (int) 

@@ -213,55 +213,62 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     Var volatile converted =((void) 0, Void);
     {
       ExceptionFrame _x2c_exception_frame_0;
-      static MatchCaptureSite _x2c_catch_arms_0[1];
-      static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+      MatchCaptureSite static _x2c_catch_arms_0[1];
       Var _x2c_catch_patterns_0[1];
-      if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(61045002), cons(Symbol_var(4372507526), cons(Symbol_var(48270474208), cons(Symbol_var(143279306979688), cons(Symbol_var(245103016899018), cons(Symbol_var(1020285550996648), NULL)))))))), cons(Symbol_var(1818340554), NULL));
-      _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-    }
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      converted = Var_convert(value, want);
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0); {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {Var code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
-        List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
-        {
-          List lower = cons(code, cause);
+      ErrorCatchSite static _x2c_catch_site_0 ={
+        _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+      }
+      ;
+      if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+        _x2c_catch_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(61045002), cons(Symbol_var(4372507526), cons(Symbol_var(48270474208), cons(Symbol_var(143279306979688), cons(Symbol_var(245103016899018), cons(Symbol_var(1020285550996648), NULL)))))))), cons(Symbol_var(1818340554), NULL)));
+      }
+      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+      x2c_exception_push(& _x2c_exception_frame_0);
+      if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+        converted = Var_convert(value, want);
+      }
+      else{
+        x2c_exception_landed(& _x2c_exception_frame_0);
+        if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+          x2c_error_catch_detach(_x2c_error_handler_0);
+          x2c_exception_mark_handled(& _x2c_exception_frame_0);
           {
-            static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 190};
-            x2c_error_raise_n(& _x2c_error_site_4, Var_symbol(code), 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+            Var volatile code;
+            code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+            List volatile cause;
+            cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+            {
+              List lower = cons(code, cause);
+              {
+                static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 190};
+                x2c_error_raise_n(& _x2c_error_site_4, Var_symbol(code), 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+              }
+
+            }
+
           }
 
         }
+        else{
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          __builtin_unreachable();
+        }
 
       }
-
-    }
-    else{
       x2c_error_catch_close(_x2c_error_handler_0);
       _x2c_error_handler_0 = NULL;
       x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
     }
-
+    return converted;
   }
-
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-return converted;
-}
-if(! Var_is(value, want) && !(want == 806120 && Var_is_null(value))){
-  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 195};
-  x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(want));
-  __builtin_unreachable();
-}
-return value;
+  if(! Var_is(value, want) && !(want == 806120 && Var_is_null(value))){
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 195};
+    x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(want));
+    __builtin_unreachable();
+  }
+  return value;
 }
 
 static void * _reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
@@ -375,56 +382,40 @@ size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context
   static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/func.x",.function = "_new",.line = 306};  x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
 }
 int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));  size_t bytes = context_offset + context_size;  Func fn = Scope_calloc(1, bytes), result = NULL; {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & fn};
+  _x2c_defer_env_0 _x2c_defer_env_1 ={
+    ._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & fn
+  }
+  ;  X2CCleanup _x2c_defer_record_0 ={
+    .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+  }
+  ;  x2c_cleanup_push(& _x2c_defer_record_0); {
+    fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : List_len(params);  if(context_size) memcpy(_context(fn), context, context_size);  result = fn; {
+      Func _x2c_return_value_0 = result; {
+        x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
+      }
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-  fn -> sig = signature;
-  fn -> params = void_params ? NULL : params;
-  fn -> adapter = adapter;
-  fn -> rest = rest;
-  fn -> context_size = context_size;
-  fn -> nparams = void_params ? 0 : List_len(params);
-  if(context_size) memcpy(_context(fn), context, context_size);
-  result = fn;
-  {
-    Func _x2c_return_value_0 = result;
-    {
-      x2c_cleanup_leave(& _x2c_defer_record_0);
-      return _x2c_return_value_0;
     }
 
   }
-
-}
-x2c_cleanup_leave(& _x2c_defer_record_0);
-
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 
 Func Func_new(FuncAdapter adapter, List signature){
-  if(! _init_guard_) _file_init_();
-  return _new(adapter, signature, 0, NULL, 0);
+  if(! _init_guard_) _file_init_();  return _new(adapter, signature, 0, NULL, 0);
 }
 
 Func Func_new_rest(FuncAdapter adapter, List signature){
-  if(! _init_guard_) _file_init_();
-  return _new(adapter, signature, 1, NULL, 0);
+  if(! _init_guard_) _file_init_();  return _new(adapter, signature, 1, NULL, 0);
 }
 
 Func Func_new_context(FuncAdapter adapter, List signature, const void * context, size_t context_size){
-  if(! _init_guard_) _file_init_();
-  return _new(adapter, signature, 0, context, context_size);
+  if(! _init_guard_) _file_init_();  return _new(adapter, signature, 0, context, context_size);
 }
 
 List Func_signature(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 371};
-    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 371};  x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));
     __builtin_unreachable();
   }
   return function -> sig;

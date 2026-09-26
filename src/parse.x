@@ -1975,27 +1975,53 @@ static void _reject_expanded_meta(Compiler c, List decl, Token meta) {
     linkage brace, or compile-time-only `meta` function only updates compiler
     state, with the first following token current. A macro import whose
     `.xmacro` makes `meta` declarations retains their runtime forms, which
-    the unit emits where it reaches them.
+    the unit emits where it reaches them. With `skip_body`, collection uses
+    the same classifier and bound declarations but skips runtime bodies.
+    This continuation is independent of the compiler's shallow-parse state.
 */
-List Compiler.parse_top_level(Compiler c) {
+List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (!c.macro_holes) {
     c.update_source_visibility(c.leading_preproc());
-    _track_conditional_arms(c);
+    if (!skip_body) _track_conditional_arms(c);
   }
   if (c.skip_linkage_brace()) return NULL;
+  if (skip_body && c.skip_collected_script_statement()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
-  List slot = c.try_parse_macro_slot(<unit>);
+  List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) {
-    c.parse_keyword_definition();
+    if (skip_body) c.collect_compile_time_definition(1);
+    else c.parse_keyword_definition();
     return NULL;
   }
-  List macro = c.try_parse_macro_target_at(AST_UNIT);
+  if (skip_body) {
+    if (c.protocol_form_starts()) return c.parse_protocol_declaration();
+    if (c.macro_form_is_definition()) {
+      c.collect_compile_time_definition(0);
+      return NULL;
+    }
+    if (!c.collect_protocols && c.skip_named_type_declaration()) return NULL;
+    if (c.macro_starts_target_at(AST_UNIT)) {
+      if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion()) {
+        c.collect_unit_macro();
+        return NULL;
+      }
+      do {
+        c.skip_macro_invocation();
+        if (c.test(<;>)) return NULL;
+      } while (c.macro_starts_target_at(AST_UNIT));
+    }
+  }
+  List macro = skip_body ? NULL : c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
     case <"$(">: {
+      if (skip_body) {
+        c.parse_macro_lisp_shallow();
+        return NULL;
+      }
       List imported = c.parse_macro_lisp_top_level();
       if (imported) foreach (Var definition, imported.cdr())
         c.meta_defs.push(definition);
@@ -2013,6 +2039,10 @@ List Compiler.parse_top_level(Compiler c) {
   if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   Token definition_start = c.token;
   List decl = c.parse_declaration_row();
+  if (skip_body) {
+    c.finish_collected_declaration(decl, meta, native);
+    return NULL;
+  }
   if (native && !decl.type_from_ast().is_function())
     c.report_error(
       <parse>, "a native meta declaration must be a function", meta, NULL);
@@ -2073,6 +2103,9 @@ List Compiler.parse_top_level(Compiler c) {
     c.token,
     %("token:" ${c.token.text} "symbol:" ${unexpected.str()}));
 }
+
+/** Parses one full top-level form through the shared classifier. */
+List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
 
 /** Parses one submission from the current token stream. `end_position` is
     the byte offset after supplied input, before any synthetic closing text.
@@ -2783,22 +2816,26 @@ List Compiler.bind_syntax(
         return %(raise ${_.resolve_expression(code, _.token)}
                        (args @{bound.list_free()}));
       }
-      case %(catchcases ?arms): {
+      case %(catchcases ?arms *handler): {
         if (context != AST_STATEMENT) goto construction_error;
+        List handle = handler ? handler.car().list()
+          : _.sym.introduce(_.fresh_name("error_handler"));
         Array bound = [];
         foreach (List arm, arms.list()) {
           List pattern = arm.car();
-          _.begin_catch_arm(pattern, _.token);
+          List bindings = _.begin_catch_arm(pattern, _.token);
           {
             defer _.sym.pop_scope();
             bound.push(
               %(
                 $pattern
-                ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
+                (block
+                  @{_.catch_binder_declarations(bindings, handle)}
+                  ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)})
               ));
           }
         }
-        return %(catchcases ${bound.list_free()});
+        return %(catchcases ${bound.list_free()} $handle);
       }
       case %(try ?body ?catches ?cleanup): {
         if (!statement_position) goto construction_error;

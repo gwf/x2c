@@ -36,7 +36,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/list.x`](list.md) | linked list with `Var` elements. |
 | [`lib/logger.x`](logger.md) | owned structured event delivery. |
 | [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
-| [`lib/match-recursive.x`](match-recursive.md) | optional reference matcher. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
@@ -70,7 +69,6 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
-- [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Explicitly include `meta.x` where the functions are parsed.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.

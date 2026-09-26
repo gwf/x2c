@@ -625,7 +625,7 @@ failure, out-of-home includes, and batch-vs-solo output parity;
 
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
-`src/cleanup.x` owns the C rule that automatic state changed across that
+`src/transform.x` owns the C rule that automatic state changed across that
 boundary must be volatile. It qualifies directly modified named locals and
 parameters in the definition, and locals the body writes through a pointer it
 holds, along with that pointer's pointee type; a prototype drops the parameter

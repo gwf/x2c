@@ -983,6 +983,77 @@ static void lisp_deep_recursion_survives_stack(void) {
   lisp.destroy();
 }
 
+static void lisp_mutual_tail_calls_run_in_constant_stack(void) {
+  Lisp lisp = _boot_session();
+  _ev(lisp,
+    "(def even (lambda (n) "
+    "(cond ((= n 0) true) (true (odd (- n 1)))))) "
+    "(def odd (lambda (n) "
+    "(cond ((= n 0) nil) (true (even (- n 1))))))");
+  EXPECT_TRUE(_ev(lisp, "(even 10000)").truth());
+  EXPECT_TRUE(_ev(lisp, "(even 10001)").is_nil());
+  _ev(lisp,
+    "(def count (lambda (n) "
+    "(cond ((= n 0) 0) (true (+ 1 (count (- n 1)))))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(count 10)")), 10);
+
+  _ev(lisp,
+    "(def left (lambda (n . rest) "
+    "(cond ((= n 0) rest) (true (right (- n 1) 17))))) "
+    "(def right (lambda (n . rest) "
+    "(cond ((= n 0) rest) (true (left (- n 1) 17)))))");
+  EXPECT_VAR_EQ(_ev(lisp, "(left 10000)"), %(17).var());
+  EXPECT_VAR_EQ(_ev(lisp, "(left 10001)"), %(17).var());
+  lisp.call_budget(100);
+  EXPECT_INT_EQ(_raised_code(lisp, "(left 1000)"), <call-stack>);
+  EXPECT_VAR_EQ(_ev(lisp, "(left 10)"), %(17).var());
+  lisp.destroy();
+}
+
+static void lisp_tail_arguments_macros_and_captures(void) {
+  Lisp lisp = _session();
+  _ev(lisp,
+    "(def wrap (macro (e) e)) "
+    "(def last (lambda (a b . rest) b)) "
+    "(def start (lambda () (wrap (last (log! 1) (log! 2)))))");
+  order_log[0] = 0;
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(start)")), 2);
+  EXPECT_STR_EQ(String.new(order_log), "12");
+  _ev(lisp,
+    "(def handoff (lambda (f . rest) f)) "
+    "(def capture (lambda (value) (handoff (lambda () value)))) "
+    "(def kept (capture '(3 4 5)))");
+  EXPECT_VAR_EQ(_ev(lisp, "(kept)"), %(3 4 5).var());
+  EXPECT_INT_EQ(_raised_code(lisp,
+    "((lambda () (last (log! 3) missing)))"), <unbound>);
+  EXPECT_INT_EQ(_raised_code(lisp, "((lambda () (last 1)))"), <bad-arity>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(start)")), 2);
+  lisp.destroy();
+}
+
+static Lisp tail_reentry_session;
+
+static Var _native_tail_reenter(Var value) {
+  Var nested = _ev(tail_reentry_session,
+    "((lambda (x) ((lambda (y . rest) y) x)) 7)");
+  return _native_add2(value, nested);
+}
+
+static void lisp_tail_calls_allow_native_reentry(void) {
+  Lisp lisp = _session();
+  Lisp previous = tail_reentry_session;
+  tail_reentry_session = lisp;
+  defer tail_reentry_session = previous;
+  _install(lisp, "reenter", _native_tail_reenter,
+    %((func (("Var"))) "Var"));
+  _ev(lisp,
+    "(def finish (lambda (x . rest) x)) "
+    "(def start (lambda () (finish (reenter 5))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(start)")), 12);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(start)")), 12);
+  lisp.destroy();
+}
+
 /* The nine variadic arithmetic operators are native so compiled calls
    avoid evaluator dispatch for variadic lambdas. These Lisp definitions
    provide a reference implementation; compare every result and raised code. */
@@ -1580,6 +1651,9 @@ void lisp_suite(void) {
   $test.run(lisp_eval_file_rejects_embedded_nul);
   $test.run(lisp_bootstrap_arithmetic_and_strings);
   $test.run(lisp_deep_recursion_survives_stack);
+  $test.run(lisp_mutual_tail_calls_run_in_constant_stack);
+  $test.run(lisp_tail_arguments_macros_and_captures);
+  $test.run(lisp_tail_calls_allow_native_reentry);
   $test.run(lisp_native_operators_match_their_lisp_definitions);
   $test.run(lisp_generated_filter);
   $test.run(lisp_generated_algorithms);

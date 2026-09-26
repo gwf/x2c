@@ -245,7 +245,7 @@ struct MatchCache{
   Scope scope;
   MatchCacheEntry * entries;
   int * buckets;
-  int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
+  int capacity, bucket_count, size, lru_head, active_leases;
   unsigned long next_generation, pool_epoch;
   unsigned long admitted_memo[256], refused_memo[256];
 }
@@ -2070,15 +2070,11 @@ MatchCache MatchCache_new(int capacity){
   cache -> scope = owner;
   cache -> capacity = capacity;
   cache -> bucket_count = capacity * 2 + 1;
-  cache -> lru_head = cache -> lru_tail = - 1;
+  cache -> lru_head = - 1;
   cache -> pool_epoch = Pool_epoch();
   cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
   cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
-  for(int i = 0;  i < capacity;  i ++){
-    cache -> entries[i].bucket_next = - 1;
-    cache -> entries[i].lru_prev = - 1;
-    cache -> entries[i].lru_next = - 1;
-  }
+  for(int i = 0;  i < capacity;  i ++) cache -> entries[i].bucket_next = - 1;
   for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
   Scope_pop();
   return cache;
@@ -2086,24 +2082,28 @@ MatchCache MatchCache_new(int capacity){
 
 static void _cache_unlink_lru(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
-  if(entry -> lru_prev >= 0) cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
-  else cache -> lru_head = entry -> lru_next;
-  if(entry -> lru_next >= 0) cache -> entries[entry -> lru_next].lru_prev = entry -> lru_prev;
-  else cache -> lru_tail = entry -> lru_prev;
-  entry -> lru_prev = entry -> lru_next = - 1;
+  cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
+  cache -> entries[entry -> lru_next].lru_prev = entry -> lru_prev;
+  if(cache -> lru_head == slot) cache -> lru_head = entry -> lru_next == slot ? - 1 : entry -> lru_next;
 }
 
 static void _cache_link_mru(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
-  entry -> lru_prev = - 1;
-  entry -> lru_next = cache -> lru_head;
-  if(cache -> lru_head >= 0) cache -> entries[cache -> lru_head].lru_prev = slot;
-  else cache -> lru_tail = slot;
+  int head = cache -> lru_head;
+  entry -> lru_next = head < 0 ? slot : head;
+  entry -> lru_prev = head < 0 ? slot : cache -> entries[head].lru_prev;
+  cache -> entries[entry -> lru_prev].lru_next = slot;
+  cache -> entries[entry -> lru_next].lru_prev = slot;
   cache -> lru_head = slot;
 }
 
 static void _cache_touch(MatchCache cache, int slot){
-  if(cache -> lru_head == slot) return;
+  int head = cache -> lru_head;
+  if(head == slot) return;
+  if(cache -> entries[head].lru_prev == slot){
+    cache -> lru_head = slot;
+    return;
+  }
   _cache_unlink_lru(cache, slot);
   _cache_link_mru(cache, slot);
 }
@@ -2138,7 +2138,11 @@ static int _cache_free_slot(MatchCache cache){
 }
 
 static int _cache_victim(MatchCache cache){
-  for(int slot = cache -> lru_tail;  slot >= 0;  slot = cache -> entries[slot].lru_prev) if(! cache -> entries[slot].pin_count) return slot;
+  int slot = cache -> entries[cache -> lru_head].lru_prev;
+  for(int i = 0;  i < cache -> size;  i ++){
+    if(! cache -> entries[slot].pin_count) return slot;
+    slot = cache -> entries[slot].lru_prev;
+  }
   return - 1;
 }
 
@@ -2186,26 +2190,25 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
     Scope_push(& m -> scope);
     {
       {
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
+        X2CCleanup _x2c_defer_record_0 ={
+          .fn = _x2c_defer_cleanup_0, .env = NULL
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_0);
         {
-          plan = MatchPlan_prepare(pattern);
-          if(plan -> status == MACHINE_INELIGIBLE){
-            fenced = plan -> reason;
-            MatchPlan_free(plan);
+          {
+            plan = MatchPlan_prepare(pattern);
+            if(plan -> status == MACHINE_INELIGIBLE){
+              fenced = plan -> reason;
+              MatchPlan_free(plan);
+            }
+
           }
 
         }
-
+        x2c_cleanup_leave(& _x2c_defer_record_0);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
     }
 
   }
@@ -2247,14 +2250,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) _file_init_();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2287};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2290};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2291};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2294};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2266,7 +2269,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2301};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2304};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2281,7 +2284,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2317};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2320};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2399,7 +2402,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2505};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2508};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
@@ -2479,21 +2482,20 @@ static void _capture_sites_initialize(void){
     Scope_push(& match_capture_site_scope);
     {
       {
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-        {
-          match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_1, .env = NULL
         }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          {
+            match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
+          }
 
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
     }
 
   }
@@ -2513,22 +2515,21 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
     Scope_push(& match_capture_site_scope);
     {
       {
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-        {
-          plan = MatchPlan_prepare(pattern);
-          Block_push(match_capture_sites, & site);
+        X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_2, .env = NULL
         }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_2);
+        {
+          {
+            plan = MatchPlan_prepare(pattern);
+            Block_push(match_capture_sites, & site);
+          }
 
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_2);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
     }
 
   }
@@ -2547,27 +2548,26 @@ static MatchPlan _site_published(MatchCaptureSite * site, Var pattern){
 static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern){
   _site_lock();
   {
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    if(! site -> plan) _capture_site_prepare(site, pattern);
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = NULL
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      MatchPlan _x2c_return_value_0 = site -> plan;
+      if(! site -> plan) _capture_site_prepare(site, pattern);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-        return _x2c_return_value_0;
+        MatchPlan _x2c_return_value_0 = site -> plan;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 void MatchMachine_open(MatchMachine m){

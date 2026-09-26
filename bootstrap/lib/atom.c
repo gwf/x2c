@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _0;
+static String _1;
 
 static int _init_guard_ = 0;
 
@@ -178,14 +178,14 @@ Var String_var(String);
 void Atom_initialize(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("lsym");
+  _1 = String_new("lsym");
   static int initialized = 0;
   if(initialized) return;
   VarMethods methods ={
     .str =(VarStrFn) Atom_str, .repr = _repr, .hash = _hash, .equal = _equal, .compare = _compare, .truth = _truth, .write_str = Atom_write_str, .write_repr = Atom_write_repr
   }
   ;
-  if(! x2c_try_register_descriptor(_0, methods)){
+  if(! x2c_try_register_descriptor(_1, methods)){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 180};
     x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
     __builtin_unreachable();

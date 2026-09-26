@@ -23,7 +23,7 @@
     MALFORMED("binder-capacity"). Preparation reports every status, but no
     entry point can answer for an INELIGIBLE plan, so each one raises
     `<size-limit>` naming the fence instead of reporting no match. Core
-    matching executes only compiled plans; `match-recursive.x` is the
+    matching executes only compiled plans; `unittest/match-recursive.x` is the
     optional reference implementation used by the differential tests.
     A MatchPlan owns an immutable layout and program but borrows the canonical
     values embedded in its pattern. MatchCaptureSite owns its plan until
@@ -2028,7 +2028,7 @@ struct MatchCache {
   Scope scope;
   MatchCacheEntry *entries;
   int *buckets;
-  int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
+  int capacity, bucket_count, size, lru_head, active_leases;
   unsigned long next_generation, pool_epoch;
   unsigned long admitted_memo[256], refused_memo[256];
 };
@@ -2101,42 +2101,43 @@ MatchCache MatchCache.new(int capacity) {
   cache.scope = owner;
   cache.capacity = capacity;
   cache.bucket_count = capacity * 2 + 1;
-  cache.lru_head = cache.lru_tail = -1;
+  cache.lru_head = -1;
   cache.pool_epoch = Pool.epoch();
   cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
   cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
-  for (int i = 0; i < capacity; i++) {
+  for (int i = 0; i < capacity; i++)
     cache.entries[i].bucket_next = -1;
-    cache.entries[i].lru_prev = -1;
-    cache.entries[i].lru_next = -1;
-  }
   for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
   Scope.pop();
   return cache;
 }
 
+/* The ring's head is most recent; its predecessor is least recent. */
 static void _cache_unlink_lru(MatchCache cache, int slot) {
   MatchCacheEntry *entry = &cache.entries[slot];
-  if (entry.lru_prev >= 0)
-    cache.entries[entry.lru_prev].lru_next = entry.lru_next;
-  else cache.lru_head = entry.lru_next;
-  if (entry.lru_next >= 0)
-    cache.entries[entry.lru_next].lru_prev = entry.lru_prev;
-  else cache.lru_tail = entry.lru_prev;
-  entry.lru_prev = entry.lru_next = -1;
+  cache.entries[entry.lru_prev].lru_next = entry.lru_next;
+  cache.entries[entry.lru_next].lru_prev = entry.lru_prev;
+  if (cache.lru_head == slot)
+    cache.lru_head = entry.lru_next == slot ? -1 : entry.lru_next;
 }
 
 static void _cache_link_mru(MatchCache cache, int slot) {
   MatchCacheEntry *entry = &cache.entries[slot];
-  entry.lru_prev = -1;
-  entry.lru_next = cache.lru_head;
-  if (cache.lru_head >= 0) cache.entries[cache.lru_head].lru_prev = slot;
-  else cache.lru_tail = slot;
+  int head = cache.lru_head;
+  entry.lru_next = head < 0 ? slot : head;
+  entry.lru_prev = head < 0 ? slot : cache.entries[head].lru_prev;
+  cache.entries[entry.lru_prev].lru_next = slot;
+  cache.entries[entry.lru_next].lru_prev = slot;
   cache.lru_head = slot;
 }
 
 static void _cache_touch(MatchCache cache, int slot) {
-  if (cache.lru_head == slot) return;
+  int head = cache.lru_head;
+  if (head == slot) return;
+  if (cache.entries[head].lru_prev == slot) {
+    cache.lru_head = slot;
+    return;
+  }
   _cache_unlink_lru(cache, slot);
   _cache_link_mru(cache, slot);
 }
@@ -2174,9 +2175,11 @@ static int _cache_free_slot(MatchCache cache) {
 }
 
 static int _cache_victim(MatchCache cache) {
-  for (int slot = cache.lru_tail; slot >= 0;
-       slot = cache.entries[slot].lru_prev)
+  int slot = cache.entries[cache.lru_head].lru_prev;
+  for (int i = 0; i < cache.size; i++) {
     if (!cache.entries[slot].pin_count) return slot;
+    slot = cache.entries[slot].lru_prev;
+  }
   return -1;
 }
 

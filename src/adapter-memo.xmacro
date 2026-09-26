@@ -1,0 +1,9 @@
+macro Decorator $adapter.memo(
+  Block $create, Expr $compiler, Expr $key, Name $value) {
+  Var cached;
+  if ($compiler.names.adapters.try_get($key, cached)) $value = cached;
+  else {
+    $create;
+    $compiler.names.adapters[$key] = $value;
+  }
+}

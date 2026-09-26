@@ -26,7 +26,7 @@ a private `Scope` for sink state. An invalid level returns NULL.
 **Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
 allocated.
 
-Source: `lib/logger.x:644`
+Source: `lib/logger.x:632`
 
 ## Advanced and interop API
 
@@ -74,7 +74,7 @@ Source: `lib/logger.x:644`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:773`
+Source: `lib/logger.x:761`
 
 #### log_error
 
@@ -83,7 +83,7 @@ Source: `lib/logger.x:773`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:776`
+Source: `lib/logger.x:764`
 
 #### log_event
 
@@ -94,7 +94,7 @@ With no global `Logger` this is a no-op; otherwise delivery and failures
 are
 those of `Logger.log`.
 
-Source: `lib/logger.x:759`
+Source: `lib/logger.x:747`
 
 #### log_fatal
 
@@ -103,7 +103,7 @@ Source: `lib/logger.x:759`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:777`
+Source: `lib/logger.x:765`
 
 #### log_get_global_logger
 
@@ -111,7 +111,7 @@ Source: `lib/logger.x:777`
 
 Returns the borrowed current global `Logger`, or NULL when none is set.
 
-Source: `lib/logger.x:751`
+Source: `lib/logger.x:739`
 
 #### log_info
 
@@ -120,7 +120,7 @@ Source: `lib/logger.x:751`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:774`
+Source: `lib/logger.x:762`
 
 #### log_set_global_logger
 
@@ -131,7 +131,7 @@ value.
 Neither `Logger` is flushed, freed, or otherwise retained by this call; the
 installed `Logger` must remain live until it is replaced or shutdown runs.
 
-Source: `lib/logger.x:743`
+Source: `lib/logger.x:731`
 
 #### log_should_log
 
@@ -139,7 +139,7 @@ Source: `lib/logger.x:743`
 
 Reports whether the current global `Logger` would deliver this event.
 
-Source: `lib/logger.x:215`
+Source: `lib/logger.x:203`
 
 #### log_trace
 
@@ -148,7 +148,7 @@ Source: `lib/logger.x:215`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:772`
+Source: `lib/logger.x:760`
 
 #### log_warn
 
@@ -157,7 +157,7 @@ Source: `lib/logger.x:772`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:775`
+Source: `lib/logger.x:763`
 
 ### `Logger`
 
@@ -176,7 +176,7 @@ returns NULL.
 **Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
 represented.
 
-Source: `lib/logger.x:526`
+Source: `lib/logger.x:514`
 
 <a id="Logger.add_memory_sink"></a>
 #### Logger.add_memory_sink
@@ -195,7 +195,7 @@ Registration may raise `<alloc-fail>` or `<bad-enc>` while constructing
 sink state. Later event delivery may raise `<alloc-fail>`, `<size-limit>`,
 or `<bad-enc>` while retaining values.
 
-Source: `lib/logger.x:619`
+Source: `lib/logger.x:607`
 
 <a id="Logger.add_sink"></a>
 #### Logger.add_sink
@@ -212,7 +212,7 @@ remain live. Emitters run synchronously in registration order.
 **Raises:** `<bad-state>` during active sink delivery, or `<alloc-fail>` when
 the sink cannot be allocated.
 
-Source: `lib/logger.x:280`
+Source: `lib/logger.x:268`
 
 <a id="Logger.add_stderr_sink"></a>
 #### Logger.add_stderr_sink
@@ -227,7 +227,7 @@ after every event. A NULL `Logger` returns NULL.
 **Raises:** `<alloc-fail>` or `<bad-enc>` when sink state cannot be
 represented.
 
-Source: `lib/logger.x:513`
+Source: `lib/logger.x:501`
 
 <a id="Logger.clear_sinks"></a>
 #### Logger.clear_sinks
@@ -239,7 +239,7 @@ A NULL `Logger` does nothing.
 
 **Raises:** `<bad-state>` during active sink delivery.
 
-Source: `lib/logger.x:305`
+Source: `lib/logger.x:293`
 
 <a id="Logger.debug"></a>
 #### Logger.debug
@@ -249,7 +249,7 @@ Source: `lib/logger.x:305`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:731`
+Source: `lib/logger.x:719`
 
 <a id="Logger.error"></a>
 #### Logger.error
@@ -259,7 +259,7 @@ Source: `lib/logger.x:731`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:734`
+Source: `lib/logger.x:722`
 
 <a id="Logger.fatal"></a>
 #### Logger.fatal
@@ -269,7 +269,7 @@ Source: `lib/logger.x:734`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:735`
+Source: `lib/logger.x:723`
 
 <a id="Logger.flush"></a>
 #### Logger.flush
@@ -281,7 +281,7 @@ A NULL `Logger` does nothing. A cause raised by a flusher transfers
 immediately, so later sinks are not flushed. A flusher must not mutate the
 sink list or free its `Logger`.
 
-Source: `lib/logger.x:323`
+Source: `lib/logger.x:311`
 
 <a id="Logger.free"></a>
 #### Logger.free
@@ -297,7 +297,7 @@ nothing.
 Either failure leaves the `Logger` and all sinks live; earlier flushers may
 already have run.
 
-Source: `lib/logger.x:662`
+Source: `lib/logger.x:650`
 
 <a id="Logger.info"></a>
 #### Logger.info
@@ -307,7 +307,7 @@ Source: `lib/logger.x:662`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:732`
+Source: `lib/logger.x:720`
 
 <a id="Logger.initialize"></a>
 #### Logger.initialize
@@ -323,7 +323,7 @@ down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:852`
+Source: `lib/logger.x:840`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -333,7 +333,7 @@ Source: `lib/logger.x:852`
 Returns the ordering priority of a built-in level, or -1 when invalid.
 Priorities run from `<trace>` at zero through `<off>` at six.
 
-Source: `lib/logger.x:172`
+Source: `lib/logger.x:160`
 
 <a id="Logger.log"></a>
 #### Logger.log
@@ -349,7 +349,7 @@ events do nothing. Fatal delivery flushes all sinks afterward.
 **Raises:** any cause from an emitter or fatal-event flusher; later callbacks
 are then skipped.
 
-Source: `lib/logger.x:683`
+Source: `lib/logger.x:671`
 
 <a id="Logger.min_level"></a>
 #### Logger.min_level
@@ -358,7 +358,7 @@ Source: `lib/logger.x:683`
 
 Returns `logger`'s minimum enabled level, or the null `Symbol` for NULL.
 
-Source: `lib/logger.x:176`
+Source: `lib/logger.x:164`
 
 <a id="Logger.remove_sink"></a>
 #### Logger.remove_sink
@@ -371,7 +371,7 @@ returns zero.
 
 **Raises:** `<bad-state>` during active sink delivery.
 
-Source: `lib/logger.x:292`
+Source: `lib/logger.x:280`
 
 <a id="Logger.set_min_level"></a>
 #### Logger.set_min_level
@@ -381,7 +381,7 @@ Source: `lib/logger.x:292`
 Sets the minimum enabled level and returns one.
 A NULL `Logger` or invalid level returns zero without changing anything.
 
-Source: `lib/logger.x:182`
+Source: `lib/logger.x:170`
 
 <a id="Logger.should_log"></a>
 #### Logger.should_log
@@ -393,7 +393,7 @@ A category names an event rather than filtering it. A NULL `Logger` or
 category, no sinks, `<off>`, an invalid level, or a filtered level returns
 zero.
 
-Source: `lib/logger.x:210`
+Source: `lib/logger.x:198`
 
 <a id="Logger.shutdown"></a>
 #### Logger.shutdown
@@ -413,7 +413,7 @@ retired, and freed. A repeated call after shutdown is a no-op.
 event delivery or a sink flusher. The failure may interrupt the remaining
 cleanup.
 
-Source: `lib/logger.x:817`
+Source: `lib/logger.x:805`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -422,7 +422,7 @@ Source: `lib/logger.x:817`
 
 Returns the number of configured sinks, or zero for a NULL `Logger`.
 
-Source: `lib/logger.x:190`
+Source: `lib/logger.x:178`
 
 <a id="Logger.trace"></a>
 #### Logger.trace
@@ -432,7 +432,7 @@ Source: `lib/logger.x:190`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:730`
+Source: `lib/logger.x:718`
 
 <a id="Logger.warn"></a>
 #### Logger.warn
@@ -442,7 +442,7 @@ Source: `lib/logger.x:730`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:733`
+Source: `lib/logger.x:721`
 
 ## Runtime-internal callables
 
@@ -469,7 +469,7 @@ another handler.
 
 **Raises:** any cause from `Logger` delivery.
 
-Source: `lib/logger.x:788`
+Source: `lib/logger.x:776`
 
 ## Public types
 

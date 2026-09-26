@@ -161,24 +161,26 @@ static int governed(List items){
   int volatile total = 0;
   {
     {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & total};
+      _x2c_defer_env_0 _x2c_defer_env_1 ={
+        ._x2c_defer_capture_0 =(const void *) & total
+      }
+      ;
+      X2CCleanup _x2c_defer_record_0 ={
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_0);
+      {
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
   }
   {
     ExceptionFrame _x2c_exception_frame_0;
     x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0))
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0))
 #ifdef FAIL
     {
       static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 103};
@@ -187,64 +189,72 @@ static int governed(List items){
 #else
     total += 10;
 #endif
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if(x2c_exception_claim(& _x2c_exception_frame_0)){
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      {
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
 #ifndef QUIET
-        total += 100;
+          total += 100;
 #endif
+
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
+
+    }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+#ifndef QUIET
+      total += 100;
+#endif
+
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
+  }
+  {
+    ExceptionFrame _x2c_exception_frame_1;
+    MatchCaptureSite static _x2c_catch_arms_0[1];
+    Var _x2c_catch_patterns_0[1];
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(162778), NULL));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_1);
+    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 113};
+      x2c_error_raise_n(& _x2c_error_site_1, 162778, 0);
+    }
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_1);
+        {
+#ifdef QUIET
+          total = 0;
+#else
+          total += 1000;
+#endif
+
+        }
 
       }
-      x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_1);
+        __builtin_unreachable();
+      }
+
     }
-
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_1);
   }
-  if(x2c_exception_claim(& _x2c_exception_frame_0)){
-#ifndef QUIET
-    total += 100;
-#endif
-
-  }
-  x2c_exception_leave(& _x2c_exception_frame_0);
-}
-{
-  ExceptionFrame _x2c_exception_frame_1;
-  static MatchCaptureSite _x2c_catch_arms_0[1];
-  static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
-  Var _x2c_catch_patterns_0[1];
-  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(162778), NULL);
-  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-}
-ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-  static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 113};  x2c_error_raise_n(& _x2c_error_site_1, 162778, 0);
-}
-else {x2c_exception_landed(& _x2c_exception_frame_1); {
-  if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-    x2c_error_catch_detach(_x2c_error_handler_0);
-    x2c_exception_mark_handled(&_x2c_exception_frame_1);
-     {
-#ifdef QUIET
-    total = 0;
-#else
-    total += 1000;
-#endif
-
-  }
-
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_1);
-  __builtin_unreachable();
-}
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
-}
 
   {
     List _x2c_match_expr = items;
@@ -253,11 +263,11 @@ x2c_exception_leave(& _x2c_exception_frame_1);
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {
 #ifdef QUIET
-total = 0;
+  total = 0;
 #else
-total += 10000;
+  total += 10000;
 #endif
-break;
+  break;
 }
 total = - 1;  break;
     }

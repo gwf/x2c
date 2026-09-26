@@ -18,6 +18,8 @@
 typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
   List cc_args, ld_args, native_modules, extensions;
+  // Package roots for generated registration units during collection.
+  Map collection_packages;
   String out_dir, dep_file, dep_target;
   String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
@@ -44,6 +46,7 @@ $(import "../lib/system-macros.xmacro")
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,6 +81,8 @@ typedef struct CliOption {
   Symbol id, int commands, Symbol group, String spelling;
   const char *value, *description, int hidden;
   String alias, label, int prefix;
+  int apply, package_native;
+  size_t offset;
 } CliOption;
 
 typedef struct CliCommand {
@@ -101,6 +106,13 @@ static CliCommand cli_commands[] = {
   { 0 }
 };
 
+#define CLI_FIELD_FLAG(field) .apply = 1, \
+  .offset = offsetof(struct CliRequest, field)
+#define CLI_FIELD_TEXT(field) .apply = 2, \
+  .offset = offsetof(struct CliRequest, field)
+#define CLI_FIELD_LIST(field) .apply = 3, \
+  .offset = offsetof(struct CliRequest, field)
+
 static CliOption cli_options[] = {
   { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
     CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW,
@@ -110,110 +122,138 @@ static CliOption cli_options[] = {
     "Show the x2c version and exit", 0, .alias = "--version" },
   { <verbose>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "-v", NULL,
-    "Show commands as they are executed", 0, .alias = "--verbose" },
+    "Show commands as they are executed", 0, .alias = "--verbose",
+    CLI_FIELD_FLAG(verbose) },
   { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
-    <general>, "-###", NULL, "Show commands without executing them", 0 },
+    <general>, "-###", NULL, "Show commands without executing them", 0,
+    CLI_FIELD_FLAG(dry_run) },
   { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
     CLI_INSTALL | CLI_REMOVE | CLI_NEW,
     <general>, "-q", NULL,
-    "Suppress successful progress and receipts", 0, .alias = "--quiet" },
+    "Suppress successful progress and receipts", 0, .alias = "--quiet",
+    CLI_FIELD_FLAG(quiet) },
   { <plain>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--plain", NULL,
-    "Use stable output without terminal rendering", 0 },
+    "Use stable output without terminal rendering", 0, CLI_FIELD_FLAG(plain) },
   { <color>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, CLI_TRANSLATE | CLI_NATIVE,
-    <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
+    <general>, "--debug", NULL, "Enable compiler debug logging", 0,
+    CLI_FIELD_FLAG(debugging) },
   { <max-errors>, CLI_TRANSLATE | CLI_NATIVE, <general>, "--max-errors",
     "<count>", "Stop after <count> errors per unit (default: 20)", 0 },
   { <diag-file>, CLI_TRANSLATE | CLI_NATIVE, <general>,
     "--diagnostics-file", "<file>",
-    "Write compiler diagnostics to <file> as JSON Lines", 0 },
+    "Write compiler diagnostics to <file> as JSON Lines", 0,
+    CLI_FIELD_TEXT(diagnostics_file) },
   { <fatal-warn>, CLI_TRANSLATE, <general>, "--fatal-warnings", NULL,
-    "Fail a unit that reports a warning", 1 },
+    "Fail a unit that reports a warning", 1, CLI_FIELD_FLAG(fatal_warnings) },
   { <no-iface>, CLI_TRANSLATE, <source>, "--no-interfaces", NULL,
-    "Collect every unit cold without reading .xi interfaces", 1 },
+    "Collect every unit cold without reading .xi interfaces", 1,
+    CLI_FIELD_FLAG(no_interfaces) },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
-    "Write generated files under <dir> (default: .)", 0 },
+    "Write generated files under <dir> (default: .)", 0,
+    CLI_FIELD_TEXT(out_dir) },
   { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
-    NULL, "Map generated C locations to original x2c sources", 0 },
+    NULL, "Map generated C locations to original x2c sources", 0,
+    CLI_FIELD_FLAG(source_map) },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
-    "Do not write x2c dependency files", 0 },
+    "Do not write x2c dependency files", 0, CLI_FIELD_FLAG(no_deps) },
   { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
-    "Override the depfile path (one input only)", 0 },
+    "Override the depfile path (one input only)", 0,
+    CLI_FIELD_TEXT(dep_file) },
   { <dep-target>, CLI_TRANSLATE, <output>, "--dep-target",
-    "<target>", "Override the depfile target (one input only)", 0 },
+    "<target>", "Override the depfile target (one input only)", 0,
+    CLI_FIELD_TEXT(dep_target) },
   { <no-phony>, CLI_TRANSLATE, <output>,
-    "--no-phony-deps", NULL, "Omit phony rules for included files", 0 },
+    "--no-phony-deps", NULL, "Omit phony rules for included files", 0,
+    CLI_FIELD_FLAG(no_phony_deps) },
   { <manifest>, CLI_BUILD | CLI_RUN, <target>, "--manifest-path",
-    "<file>", "Use <file> instead of discovering x2c.toml", 0 },
+    "<file>", "Use <file> instead of discovering x2c.toml", 0,
+    CLI_FIELD_TEXT(manifest) },
   { <target>, CLI_BUILD | CLI_RUN, <target>, "--target", "<name>",
-    "Build the named manifest target", 0 },
+    "Build the named manifest target", 0, CLI_FIELD_TEXT(target) },
   { <profile>, CLI_BUILD | CLI_RUN, <target>, "--profile", "<name>",
-    "Apply the named manifest build profile", 0 },
+    "Apply the named manifest build profile", 0, CLI_FIELD_TEXT(profile) },
   { <kind>, CLI_BUILD, <target>, "--kind", "<kind>",
     "executable, static-library, or meta-module", 0 },
   { <compile>, CLI_BUILD, <target>, "-c",
     NULL, "Produce object files without linking", 0,
-    .alias = "--compile-only" },
+    .alias = "--compile-only", CLI_FIELD_FLAG(compile_only) },
   { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j",
     "<count>", "Maximum parallel translation and compilation jobs", 0,
     .alias = "--jobs" },
   { <output>, CLI_BUILD | CLI_RUN, <output>, "--output", "<file>",
-    "Name the executable, library, or single object", 0 },
+    "Name the executable, library, or single object", 0,
+    CLI_FIELD_TEXT(output) },
   { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
-    "Build the script even when its cached executable is current", 0 },
+    "Build the script even when its cached executable is current", 0,
+    CLI_FIELD_FLAG(rebuild) },
   { <clean>, CLI_SCRIPT, <output>, "--clean", NULL,
-    "Remove the script's cached build and exit without running it", 0 },
+    "Remove the script's cached build and exit without running it", 0,
+    CLI_FIELD_FLAG(clean) },
   { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
-    "<dir>", "Store generated C, objects, deps, and state here", 0 },
+    "<dir>", "Store generated C, objects, deps, and state here", 0,
+    CLI_FIELD_TEXT(build_dir) },
   { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
     "<file>", "Write native compile commands and retain generated files", 0 },
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
     "--save-temps", NULL,
     "Keep generated C and other intermediate files", 0,
-    .label = "--save-temps[=<dir>]" },
+    .label = "--save-temps[=<dir>]", CLI_FIELD_FLAG(save_temps) },
   { <sha256>, CLI_INSTALL, <package>, "--sha256", "<hex>",
-    "Require this digest of a downloaded or local archive", 0 },
+    "Require this digest of a downloaded or local archive", 0,
+    CLI_FIELD_TEXT(sha256) },
   { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <package>, "--index",
     "<url-or-path>",
-    "Resolve package names through this index", 0 },
+    "Resolve package names through this index", 0, CLI_FIELD_TEXT(index) },
   { <force>, CLI_INSTALL, <package>, "--force", NULL,
-    "Install a bundle built for another x2c version", 0 },
+    "Install a bundle built for another x2c version", 0,
+    CLI_FIELD_FLAG(force) },
   { <prefix>, CLI_BOOTSTRAP, <output>, "--prefix", "<dir>",
-    "Install native x2c and sources under <dir>", 0 },
+    "Install native x2c and sources under <dir>", 0, CLI_FIELD_TEXT(prefix) },
   { <include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
-    "-I", "<dir>", "Add a shared x2c/C include directory", 0 },
+    "-I", "<dir>", "Add a shared x2c/C include directory", 0,
+    .package_native = 1 },
   { <x-include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
     "--x-include-dir", "<dir>", "Add an x2c-only include directory", 0 },
   { <c-include>, CLI_NATIVE, <source>,
-    "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0 },
+    "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0,
+    .package_native = 1 },
   { <c-system>, CLI_NATIVE, <source>,
-    "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
+    "--c-system-dir", "<dir>", "Add a C-only system include directory", 0,
+    .package_native = 1 },
   { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
-    "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
+    "--package-dir", "<dir>", "Add a directory of x2c packages", 0,
+    CLI_FIELD_LIST(package_dirs) },
   { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--native-module", "<file>",
-    "Load a native module for compile-time calls", 0 },
+    "Load a native module for compile-time calls", 0,
+    CLI_FIELD_LIST(native_modules) },
   { <extension>, CLI_BUILD | CLI_BOOTSTRAP, <source>,
     "--extension", "<dir>",
-    "Link a package's compile-time part into a compiler", 0 },
+    "Link a package's compile-time part into a compiler", 0,
+    CLI_FIELD_LIST(extensions) },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
-    "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
+    "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0,
+    CLI_FIELD_FLAG(no_cpp) },
   { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--live-symbols", NULL,
-    "Collect symbols through the host preprocessor", 0 },
+    "Collect symbols through the host preprocessor", 0,
+    CLI_FIELD_FLAG(live_symbols) },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
-    "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
+    "--cpp-symbols", NULL, "Use CPP collection for this translation", 0,
+    CLI_FIELD_FLAG(cpp_symbols) },
   { <cc>, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
-    "Use <program> as the host C compiler", 0 },
+    "Use <program> as the host C compiler", 0, CLI_FIELD_TEXT(cc) },
   { <meta-cc>, CLI_TRANSLATE | CLI_NATIVE, <c-compiler>,
     "--meta-cc", "<program>",
-    "Use <program> to build meta code, whatever --cc is", 0 },
+    "Use <program> to build meta code, whatever --cc is", 0,
+    CLI_FIELD_TEXT(meta_cc) },
   { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
-    "Use <program> as the static-library archiver", 0 },
+    "Use <program> as the static-library archiver", 0, CLI_FIELD_TEXT(ar) },
   { <opt>, CLI_NATIVE | CLI_BOOTSTRAP,
     <c-compiler>,
     "-O", NULL, "Set C optimization", 0,
@@ -221,26 +261,29 @@ static CliOption cli_options[] = {
   { <g>, CLI_NATIVE, <c-compiler>, "-g", NULL,
     "Emit debug information", 0 },
   { <define>, CLI_NATIVE, <c-compiler>, "-D",
-    "<name>[=<value>]", "Define a C preprocessor macro", 0 },
+    "<name>[=<value>]", "Define a C preprocessor macro", 0,
+    .package_native = 1 },
   { <undefine>, CLI_NATIVE, <c-compiler>, "-U", "<name>",
-    "Undefine a C preprocessor macro", 0 },
+    "Undefine a C preprocessor macro", 0, .package_native = 1 },
   { <xcc>, CLI_NATIVE, <c-compiler>, "-Xcc", "<arg>",
     "Pass one argument only to C compilation", 0 },
   { <lib-dir>, CLI_NATIVE, <linker>, "-L", "<dir>",
-    "Add a library search directory", 0 },
+    "Add a library search directory", 0, .package_native = 1 },
   { <library>, CLI_NATIVE, <linker>, "-l", "<name>",
-    "Link library <name>", 0 },
+    "Link library <name>", 0, .package_native = 1 },
   { <rpath>, CLI_NATIVE, <linker>, "--rpath", "<dir>",
-    "Search <dir> for shared libraries when the program runs", 0 },
+    "Search <dir> for shared libraries when the program runs", 0,
+    .package_native = 1 },
   { <wl>, CLI_NATIVE, <linker>, "-Wl,",
     NULL, "Pass comma-separated arguments to the linker", 0,
-    .label = "-Wl,<arg>[,<arg>...]", .prefix = 1 },
+    .label = "-Wl,<arg>[,<arg>...]", .prefix = 1, .package_native = 1 },
   { <pthread>, CLI_NATIVE, <c-compiler>, "-pthread", NULL,
-    "Enable native threading for compilation and linking", 0 },
+    "Enable native threading for compilation and linking", 0,
+    .package_native = 1 },
   { <framework>, CLI_NATIVE, <linker>, "-framework", "<name>",
-    "Link a native framework on macOS", 0 },
+    "Link a native framework on macOS", 0, .package_native = 1 },
   { <xlinker>, CLI_NATIVE, <linker>, "-Xlinker", "<arg>",
-    "Pass one argument to the linker", 0 },
+    "Pass one argument to the linker", 0, .package_native = 1 },
   { <tokens>, CLI_TRANSLATE, <inspection>, "--dump-tokens",
     NULL, "Print source tokens and stop", 0 },
   { <dump-cpp>, CLI_TRANSLATE, <inspection>, "--dump-cpp", NULL,
@@ -897,14 +940,16 @@ static int _driver_count(String value, int minimum, String noun) {
 static void _apply_option(
   CliRequest c, CliOption *option, String spelling, String value,
   int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args) {
+  char *destination = (char *) c + option.offset;
+  switch (option.apply) {
+    case 1: *(int *) destination = 1; return;
+    case 2: *(String *) destination = value; return;
+    case 3: *(List *) destination = cons(value, *(List *) destination); return;
+  }
   $switch(option.id)
   {
     case <help>: _print_help(c.command);
       exit(0);
-    case <verbose>: c.verbose = 1;
-    case <dry-run>: c.dry_run = 1;
-    case <quiet>: c.quiet = 1;
-    case <plain>: c.plain = 1;
     case <color>:
       if (!value)
         x2c_driver_error("--color requires auto, always, or never");
@@ -912,56 +957,23 @@ static void _apply_option(
       else if (value == "always") c.color_mode = <always>;
       else if (value == "never") c.color_mode = <never>;
       else x2c_driver_error(%"invalid color mode '$value'");
-    case <debug>: c.debugging = 1;
-    case <out-dir>: c.out_dir = value;
-    case <src-map>: c.source_map = 1;
-    case <rebuild>: c.rebuild = 1;
-    case <clean>: c.clean = 1;
-    case <no-deps>: c.no_deps = 1;
-    case <dep-file>: c.dep_file = value;
-    case <dep-target>: c.dep_target = value;
-    case <no-phony>: c.no_phony_deps = 1;
     case <include>: x_paths.push(value);
       // build and run also hand the directory to the C compiler.
       if (c.command != <translate>) _push_pair(cc_args, "-I", value);
     case <x-include>: x_paths.push(value);
-    case <pkg-dir>:
-      c.package_dirs = cons(value, c.package_dirs);
-    case <native>: c.native_modules = cons(value, c.native_modules);
-    case <extension>: c.extensions = cons(value, c.extensions);
-    case <no-cpp>: c.no_cpp = 1;
-    case <live-syms>: c.live_symbols = 1;
-    case <cpp-syms>: c.cpp_symbols = 1;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
     case <dump-cache>: case <conform>: case <dump-defs>:
       c.dump = option.id;
-    case <prefix>: c.prefix = value;
-    case <sha256>: c.sha256 = value;
-    case <index>: c.index = value;
-    case <force>: c.force = 1;
-    case <manifest>: c.manifest = value;
-    case <target>: c.target = value;
-    case <profile>: c.profile = value;
     case <kind>: _driver_kind(c, value);
-    case <compile>: c.compile_only = 1;
     case <jobs>: c.jobs = _driver_count(value, 1, "job count");
     case <max-errors>:
       c.max_errors = _driver_count(value, 0, "error limit");
-    case <diag-file>: c.diagnostics_file = value;
-    case <fatal-warn>: c.fatal_warnings = 1;
-    case <no-iface>: c.no_interfaces = 1;
-    case <output>: c.output = value;
-    case <build-dir>: c.build_dir = value;
     case <cc-db>:
       c.compile_commands = value;
       c.save_temps = 1;
-    case <save-temp>: c.save_temps = 1;
     case <c-include>: _push_pair(cc_args, "-I", value);
     case <c-system>: _push_pair(cc_args, "-isystem", value);
-    case <cc>: c.cc = value;
-    case <meta-cc>: c.meta_cc = value;
-    case <ar>: c.ar = value;
     case <opt>: case <g>: cc_args.push(spelling);
     case <define>:
     case <undefine>:
@@ -1012,16 +1024,8 @@ CliRequest cli_package_options(String path, String package) {
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option = _take_option(
       words, i, CLI_BUILD, spelling, value, attached);
-    if (!option)
+    if (!option || !option.package_native)
       x2c_driver_error(%"unsupported package native argument '$argument'");
-    switch (option.id) {
-      case <include>: case <c-include>: case <c-system>:
-      case <define>: case <undefine>: case <lib-dir>: case <library>:
-      case <rpath>: case <pthread>: case <framework>:
-      case <wl>: case <xlinker>: break;
-      default:
-        x2c_driver_error(%"unsupported package native argument '$argument'");
-    }
     _apply_option(
       request, option, spelling, value, attached, includes, cpp, compile,
       link);

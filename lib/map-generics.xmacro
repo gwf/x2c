@@ -322,7 +322,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   }
 }
 
-macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
+macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update,
   Name $bad_arg,
   Name $bad_op,
   Name $capacity_valid,
@@ -331,11 +331,10 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   Literal $zero,
   Literal $one,
   Literal $postfix,
-  Literal $owner
+  Literal $owner, Literal $boxed
 ) {
   $map $map.new(void);
   $map $map.new_capacity(unsigned);
-  $map Map.$unbox(Map);
   unsigned $map.len($map);
   int $map.try_get($map map, $key key, $value &?out);
   $value $map.get($map, $key);
@@ -364,7 +363,11 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
       `<size-limit>` when storage cannot be created.
   */
   $map $map.new_capacity(unsigned capacity) {
-    if (!$capacity_valid(capacity)) (void) $bad_arg($owner);
+    if (!$capacity_valid(capacity)) {
+      if ($boxed) raise %(bad-arg (owner "Map.new_capacity")
+                         (capacity $capacity));
+      (void) $bad_arg($owner);
+    }
     $map map = 0;
     return map._core_new_capacity(capacity);
   }
@@ -376,23 +379,6 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   $map $map.new(void) {
     $map map = 0;
     return map._core_new_capacity(2);
-  }
-
-  /** Packs `entries` into a fresh typed map in the current `Scope`.
-      A null input returns NULL. Each key and value goes through its `Var`
-      conversion, and later entries in bucket order replace earlier equal keys.
-      The input `Map` is unchanged.
-      Raises: any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
-      `<invariant>` while inserting.
-  */
-  $map Map.$unbox(Map entries) {
-    if ((void *) entries == 0) return 0;
-    $map packed = 0;
-    packed = packed._core_new_capacity(2);
-    unsigned cursor = 0;
-    Var key, val;
-    while (entries.try_next(cursor, key, val)) packed.set(key, val);
-    return packed;
   }
 
   /** Returns the number of entries, or zero for a null map. */
@@ -408,18 +394,20 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   }
 
   /** Returns the value for `key`.
-      Raises: `<bad-arg>` for a null map or absent key.
+      Prefer `try_get` when absence is an ordinary outcome. Boxed families
+      return `void` for absence; native families raise `<bad-arg>`.
   */
   $value $map.get($map map, $key key) {
     $value out = $zero;
     if (map.try_get(key, out)) return out;
+    if ($boxed) return $zero;
     (void) $bad_arg($owner);
     return $zero;
   }
 
   /** Returns the value selected by bracket indexing.
       This is the bracket-facing form of `$map.get`, with the same failure
-      behavior.
+      behavior. Prefer bracket indexing in ordinary code.
   */
   $value $map.getindex($map map, $key key) {
     return map.get(key);
@@ -442,6 +430,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.setdefault($map map, $key key, $value defval) {
     if ((void *) map == 0) (void) $bad_arg($owner);
+    if ($boxed && (Var) key is void) raise %(void-op);
     int inserted;
     $value *stored = map._core_get_or_insert(&key, &defval, &inserted);
     return stored[0];
@@ -460,6 +449,8 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   void $map.set($map map, $key key, $value val) {
     if ((void *) map == 0) (void) $bad_arg($owner);
+    if ($boxed && ((Var) key is void || (Var) val is void))
+      raise %(void-op);
     map._core_set(&key, &val);
   }
 
@@ -469,6 +460,8 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.setindex($map map, $key key, $value val) {
     if ((void *) map == 0) (void) $bad_arg($owner);
+    if ($boxed && ((Var) key is void || (Var) val is void))
+      raise %(void-op);
     map._core_set(&key, &val);
     return val;
   }
@@ -483,15 +476,28 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.updateindex($map map, $key key, Symbol op, $value rhs) {
     if ((void *) map == 0) (void) $bad_arg($owner);
-    if (op == <+>) {
+    int insert = !$boxed;
+    if ($boxed) {
+      Var boxed_rhs = rhs;
+      X2CVarNumericInfo info;
+      insert = Var.encoding_valid(boxed_rhs) &&
+        Var.numeric_info(boxed_rhs.tag(), info);
+      if ((Var) key is void || boxed_rhs is void) raise %(void-op);
+    }
+    if (op == <+> && insert) {
       int inserted;
       $value *stored = map._core_get_or_insert(&key, &rhs, &inserted);
       if (inserted) return rhs;
       return $update(stored, op, rhs);
     }
+    if ($boxed && (Var) key is void) raise %(void-op);
     long index = map._core_find_index(&key);
-    if (index < 0) (void) $bad_arg($owner);
-    return $update($value_at(map, (unsigned) index), op, rhs);
+    if (index < 0) {
+      if ($boxed) raise %(bad-arg (key $key));
+      (void) $bad_arg($owner);
+    }
+    $value *stored = $value_at(map, (unsigned) index);
+    return $update(stored, op, rhs);
   }
 
   /** Applies postfix `++` or `--` and returns the previous value.
@@ -502,10 +508,20 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.postfixindex($map map, $key key, Symbol op) {
     if ((void *) map == 0) (void) $bad_arg($owner);
+    if ($boxed && (Var) key is void) raise %(void-op);
     long index = map._core_find_index(&key);
-    if (index < 0) (void) $bad_arg($owner);
+    if (index < 0) {
+      if ($boxed) raise %(bad-arg (key $key));
+      (void) $bad_arg($owner);
+    }
     $value *stored = $value_at(map, (unsigned) index);
     $value old = stored[0];
+    if ($boxed) {
+      Var boxed_value = old;
+      Var.postfix(boxed_value, op);
+      stored[0] = boxed_value;
+      return old;
+    }
     if (!$postfix) (void) $bad_op(op);
     if (op == <++>) $update(stored, <+>, $one);
     else if (op == <-->) $update(stored, <->, $one);
@@ -523,11 +539,13 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
 
   /** Removes `key` and returns its value.
       Successful removal invalidates live cursors and iterators.
-      Raises: `<bad-arg>` for a null map or absent key.
+      Prefer `try_del` when absence is an ordinary outcome. Boxed families
+      return `void` for absence; native families raise `<bad-arg>`.
   */
   $value $map.del($map map, $key key) {
     $value out = $zero;
     if (map.try_del(key, out)) return out;
+    if ($boxed) return $zero;
     (void) $bad_arg($owner);
   }
 
@@ -644,31 +662,15 @@ macro Unit $map.core.observe(
   }
 }
 
-macro Unit $map.typed.observe(
+macro Unit $map.typed.observation(
   Type $map, Type $key, Type $value,
   Name $box_key, Name $box_value
 ) {
-  Map $map.map($map);
   int $map.compare($map, $map);
   String $map.str($map);
   String $map.repr($map);
   Buffer $map.write_str($map, Buffer);
   Buffer $map.write_repr($map, Buffer);
-
-  /** Returns a fresh ordinary Map containing boxed keys and values.
-      A null input returns NULL. The typed Map and its storage are unchanged.
-      Raises: any cause from boxing or inserting an entry.
-  */
-  Map $map.map($map map) {
-    if (map == NULL) return NULL;
-    Map boxed = {};
-    unsigned cursor = 0;
-    $key key;
-    $value value;
-    while (map.try_next(cursor, key, value))
-      boxed.setindex($box_key(key), $box_value(value));
-    return boxed;
-  }
 
   /** Compares typed Maps by size and then sorted native key/value contents.
       Identical handles compare equal and NULL sorts first. Neither Map is
@@ -708,35 +710,11 @@ macro Unit $map.typed.observe(
 /* Gives a generated map family its Var boxing and its three iterators. Keep
    this macro current even while a family that omits it still compiles. A map
    that cannot be iterated is incomplete. */
-macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
-  Literal $tag,
-  Name $box_key,
-  Name $box_value,
-  Name $prepare_export
-) {
-  Var $map.var($map);
-  void $map.cleanup($map);
-  $map Var.$unbox(Var);
+macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
+  Name $unbox, Name $box_key, Name $box_value) {
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
-  static $map $map.export_context($map, Context);
-
-  /** Boxes `map` with its registered typed-map tag without copying it.
-      The typed pointer and `Var` share the same mutable map identity.
-  */
-  Var $map.var($map map) {
-    return Var_new($tag, map);
-  }
-
-  /** Returns the typed-map pointer carried by `value`.
-      `value` must carry this family's registered tag; the converter does
-      not validate the tag before reading its pointer payload.
-  */
-  $map Var.$unbox(Var value) {
-    return ($map) value.pointer();
-  }
-
   static int next(Iter iter, Var *out) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0 || !out) return 0;
@@ -823,9 +801,42 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     return Iter_init(dest, map, enumerate_next, 0);
   }
 
-  static $map $map.export_context($map map, Context source) {
+}
+
+macro Unit $map.typed.publish(Type $family, Type $key, Type $value, Name $unbox,
+  Literal $tag,
+  Name $box_key,
+  Name $box_value,
+  Name $prepare_export
+) {
+  Var $family.var($family);
+  void $family.cleanup($family);
+  $family Var.$unbox(Var);
+  Iter $family.iter($family, Iter);
+  Iter $family.keys($family, Iter);
+  Iter $family.enumerate($family, Iter);
+  static $family $family.export_context($family, Context);
+
+  /** Boxes `map` with its registered typed-map tag without copying it.
+      The typed pointer and `Var` share the same mutable map identity.
+  */
+  Var $family.var($family map) {
+    return Var_new($tag, map);
+  }
+
+  /** Returns the typed-map pointer carried by `value`.
+      `value` must carry this family's registered tag; the converter does
+      not validate the tag before reading its pointer payload.
+  */
+  $family Var.$unbox(Var value) {
+    return ($family) value.pointer();
+  }
+
+  $map.typed.iterate($family, $key, $value, $unbox, $box_key, $box_value);
+
+  static $family $family.export_context($family map, Context source) {
     if ((void *) map == 0 || !source.owns(map)) return map;
-    $map staged = $prepare_export(map, source), committed = NULL;
+    $family staged = $prepare_export(map, source), committed = NULL;
     defer if ((void *) staged != 0 && (void *) committed == 0)
       staged._core_free();
 
@@ -854,9 +865,66 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   }
 
   /** Releases the record and its backing Blocks, borrowing stored values. */
-  void $map.cleanup($map map) { map._core_free(); }
-  protocol Cleanup($map);
-  protocol Iter($map);
-  protocol Var($map) tag $tag;
+  void $family.cleanup($family map) { map._core_free(); }
+  protocol Cleanup($family);
+  protocol Iter($family);
+  protocol Var($family) tag $tag;
 
+}
+
+macro Unit $map.typed.convert(Type $map, Name $unbox) {
+  $map Map.$unbox(Map);
+  /** Packs `entries` into a fresh typed map in the current `Scope`.
+      A null input returns NULL. Each key and value goes through its `Var`
+      conversion, and later entries in bucket order replace earlier equal keys.
+      The input `Map` is unchanged.
+      Raises: any conversion cause, or `<alloc-fail>`, `<size-limit>`, or
+      `<invariant>` while inserting.
+  */
+  $map Map.$unbox(Map entries) {
+    if ((void *) entries == 0) return 0;
+    $map packed = 0;
+    packed = packed._core_new_capacity(2);
+    unsigned cursor = 0;
+    Var key, val;
+    while (entries.try_next(cursor, key, val)) packed.set(key, val);
+    return packed;
+  }
+
+}
+
+macro Unit $map.typed.box(Type $map, Type $key, Type $value,
+  Name $box_key, Name $box_value) {
+  Map $map.map($map);
+  /** Returns a fresh ordinary Map containing boxed keys and values.
+      A null input returns NULL. The typed Map and its storage are unchanged.
+      Raises: any cause from boxing or inserting an entry.
+  */
+  Map $map.map($map map) {
+    if (map == NULL) return NULL;
+    Map boxed = {};
+    unsigned cursor = 0;
+    $key key;
+    $value value;
+    while (map.try_next(cursor, key, value))
+      boxed.setindex($box_key(key), $box_value(value));
+    return boxed;
+  }
+
+}
+
+macro Unit $map.typed.family(Type $family, Type $key, Type $value,
+  Name $update, Name $bad_arg, Name $bad_op, Name $capacity_valid,
+  Name $value_at, Name $unbox, Literal $zero, Literal $one,
+  Literal $postfix, Literal $owner) {
+  $map.typed.operations(
+    $family, $key, $value, $update, $bad_arg, $bad_op, $capacity_valid,
+    $value_at, $unbox, $zero, $one, $postfix, $owner, 0);
+  $map.typed.convert($family, $unbox);
+}
+
+macro Unit $map.typed.observe(Type $family, Type $key, Type $value,
+  Name $box_key, Name $box_value) {
+  $map.typed.observation($family, $key, $value, $box_key, $box_value);
+  $map.typed.box($family, $key, $value, $box_key, $box_value);
 }

@@ -288,12 +288,22 @@
                                      (args (expr ("Symbol") 
                                             (literal ("Symbol") "?value" ?value))))) 
                               (nil))))))))) (nil)))))) 
-       (block 
-        (at 24 
-         (stmnt 
-          (expr ("Var") 
-           (op = (expr ("Var") (ident (binding 50 "caught"))) 
-            (expr ("Var") (ident (binding 53 "value"))))))))))) 
+       (block (declare ("Var") (bindings (bind (binding 53 "value") ()))) 
+        (stmnt 
+         (expr ("Var") 
+          (op = (expr ("Var") (ident (binding 53 "value"))) 
+           (expr ("Var") 
+            (call "x2c_error_catch_capture" 
+             (args (expr ("ErrorHandler") 
+                    (ident (binding 54 "_x2c_error_handler_0"))) 
+              (expr (int) (literal (int) "0")))))))) 
+        (block 
+         (at 24 
+          (stmnt 
+           (expr ("Var") 
+            (op = (expr ("Var") (ident (binding 50 "caught"))) 
+             (expr ("Var") (ident (binding 53 "value"))))))))))) 
+     (binding 54 "_x2c_error_handler_0")) 
     (block 
      (at 25 
       (stmnt 
@@ -302,17 +312,17 @@
   (at 27 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 54 "lambda_value") ()) 
+     (op = (bind (binding 55 "lambda_value") ()) 
       (expr ("Var") 
        (call (expr ((func (("Var"))) "Var") 
               (parens 
                (expr ((func (("Var"))) "Var") 
-                (lambda (params (param ("Var") (bind (binding 55 "value") ()))) 
+                (lambda (params (param ("Var") (bind (binding 56 "value") ()))) 
                  (expr (int) 
                   (op + (expr (int) 
                          (call (expr ((func (("Var"))) (int)) 
                                 (ident (binding 44 "Var_int"))) 
-                          (args (expr ("Var") (ident (binding 55 "value")))))) 
+                          (args (expr ("Var") (ident (binding 56 "value")))))) 
                    (expr (int) (literal (int) "1")))))))) 
         (args (expr (int) (literal (int) "2"))))))))) 
   (at 28 
@@ -338,5 +348,5 @@
    (stmnt 
     (expr (void) 
      (cast (decl (void) (bindings (bind () ()))) 
-      (expr ("Var") (ident (binding 54 "lambda_value"))))))) 
+      (expr ("Var") (ident (binding 55 "lambda_value"))))))) 
   (at 32 (return (int) (expr (int) (literal (int) "0"))))))

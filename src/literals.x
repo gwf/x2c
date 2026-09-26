@@ -14,7 +14,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "parse.x"
 #include "type.x"
 #include "expressions.x"
-#include "lambda.x"
+#include "transform.x"
 #include <stdint.h>
 #include <string.h>
 

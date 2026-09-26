@@ -5,7 +5,7 @@ SHELL := /bin/sh
 # Optional x2c system modules are built with the runtime but require an
 # explicit source include. They are not part of the implicit standard prelude.
 OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
-                    match-recursive.x meta.x path.x process.x regex.x \
+                    meta.x path.x process.x regex.x \
                     scripting.x typed-array.x typed-list.x typed-map.x \
                     var-ledger.x lisp-init.x
 SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(wildcard *.x)))

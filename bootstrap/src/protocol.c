@@ -3149,20 +3149,21 @@ int Compiler_test(Compiler, Symbol);
 static List _parse_protocol_member(Compiler c, String participant, Map members){
   List declaration = NULL; {
     int * _x2c_macro_address_0 = & c -> in_proto;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0};
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-      * _x2c_macro_address_0 = 1; {
-        declaration = Compiler_parse_simple_declaration(c);
+      _x2c_defer_env_0 _x2c_defer_env_1 ={
+        ._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0
       }
+      ;  X2CCleanup _x2c_defer_record_0 ={
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      }
+      ;  x2c_cleanup_push(& _x2c_defer_record_0); {
+        * _x2c_macro_address_0 = 1; {
+          declaration = Compiler_parse_simple_declaration(c);
+        }
 
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
-}
+
   }
   List binding = NULL, identity = NULL;
   {
