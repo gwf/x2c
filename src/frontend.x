@@ -266,6 +266,7 @@ static int _start(
     if (filename) {
       _configure_package(compiler, frontend.request, filename);
       _tokenize_input(frontend, unit, filename);
+      Compiler.begin_meta_unit(compiler.filename);
     }
     else {
       compiler.filename = "<repl>";
@@ -383,7 +384,7 @@ int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
     Preload macro libraries first. The caller must close the unit on either
     result; submissions and inspection results borrow its Context. */
 int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
-  _start(
+  (Compiler.stage_meta_in_process(), 1) && _start(
     frontend, NULL, unit, 0, "$(begin)\n"
     "void print(String text);\n"
     "void println(String text);\n") &&

@@ -113,6 +113,7 @@
   - [src/literals.x](internals/compiler-api/literals.md)
   - [src/macros.x](internals/compiler-api/macros.md)
   - [src/main.x](internals/compiler-api/main.md)
+  - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/parse.x](internals/compiler-api/parse.md)
   - [src/project.x](internals/compiler-api/project.md)
   - [src/protocol.x](internals/compiler-api/protocol.md)

@@ -372,6 +372,8 @@ void Type_begin_unit(void);
 
 Compiler Compiler_new(void);
 
+void Compiler_begin_meta_unit(String);
+
 int Compiler_error_count(Compiler);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values, String session_source){
@@ -406,7 +408,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
     if(String_truth(filename)){
-      _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, &((* unit)), filename);
+      _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, &((* unit)), filename);  Compiler_begin_meta_unit(compiler -> filename);
     }
     else{
       compiler -> filename = _30;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, String_truth(session_source) ? session_source : "$(begin)");
@@ -697,9 +699,11 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   return Frontend_start(f, filename, &((* unit))) && ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)));
 }
 
+void Compiler_stage_meta_in_process(void);
+
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, NULL, &((* unit)), 0, _66) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
+  return(Compiler_stage_meta_in_process(), 1) && _start(frontend, NULL, &((* unit)), 0, _66) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
 }
 
 void Compiler_free_lisp(Compiler);

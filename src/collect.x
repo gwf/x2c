@@ -14,6 +14,7 @@
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
 #include "buffer.x"
+#include "datum.x"
 #include "utils.x"
 
 #include <errno.h>
@@ -972,34 +973,6 @@ static List _renumber_bindings(List node, Map identities) {
     node, child, _renumber_bindings(child, identities));
 }
 
-/* An interface is data in part of the Lisp reader grammar: proper Lists,
-   bare Symbols and Atoms, Strings, integers, and floating-point values. A
-   loader never evaluates it. An atom that needs quoting, or any other value,
-   returns zero. */
-static int _write_datum(Buffer out, Var value) {
-  if (value is <list>) {
-    List list = value;
-    out.write_char('(');
-    for (List p = list; p; p = p.cdr()) {
-      if (p != list) out.write_char(' ');
-      if (!_write_datum(out, p.car())) return 0;
-    }
-    out.write_char(')');
-  }
-  else if (value.is_atom()) {
-    // lib/atom.x owns bare spelling and the reader's Symbol/Atom choice.
-    String text = value.str();
-    if (Atom.bare_spelling(text)) out.write(text);
-    else if (value is <symbol>) out.write(value.repr());  // `<"<<">`
-    else return 0;
-  }
-  else if (value is <string>) out.write(value.repr());
-  else if (value.is_integer()) out.printf("%ld", value.integer());
-  else if (value.is_floating()) out.printf("%.17g", value.floating());
-  else return 0;
-  return 1;
-}
-
 static int _write_interface_entry(
   Buffer out, String canonical, List entry, List selected) {
   (List cached_parts, Var hash, List definitions, Map cached_dependencies) =
@@ -1030,7 +1003,8 @@ static int _write_interface_entry(
     interface 4 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
     $hash $part_list $definitions $selected_rows $dependency_list
   );
-  if (!_write_datum(out, record)) return 0;
+  /* An interface is plain data, which a loader never evaluates. */
+  if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
   return 1;
 }

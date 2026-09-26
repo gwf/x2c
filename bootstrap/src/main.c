@@ -478,6 +478,8 @@ Var List_car(List);
 
 long worker_fork(void);
 
+void Compiler_stop_meta_helper(void);
+
 void worker_exit(int);
 
 void report_line(Symbol, String);
@@ -518,6 +520,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
           }
 
         }
+        Compiler_stop_meta_helper();
         worker_exit(0);
       }
       if(pid < 0){
@@ -761,6 +764,8 @@ Frontend Frontend_new(CliRequest);
 
 int Frontend_preload_macro_libraries(Frontend);
 
+void Frontend_prepare_meta(Frontend, List);
+
 unsigned long long report_file_bytes(String);
 
 String report_duration(unsigned long);
@@ -796,6 +801,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
   if(! Frontend_preload_macro_libraries(frontend)) return 1;
+  Frontend_prepare_meta(frontend, c -> inputs);
   if(parallel){
     _preload_package_modules(c, unit_dirs);
     Array chunks = _translation_chunks(c -> inputs, total, Map_truth(unit_dirs) ? total : c -> jobs);

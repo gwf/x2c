@@ -22,11 +22,11 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
 
-void Compiler_meta_watch_begin(Compiler c, String name, Token site);
-
-void Compiler_meta_watch_end(void);
-
 void Compiler_use_meta_toolchain(String cc, String include_dir);
+
+String Compiler_meta_cc(String * include_dir);
+
+void Compiler_stage_meta_in_process(void);
 
 int Compiler_groups_meta(Compiler c);
 
@@ -36,9 +36,25 @@ void Compiler_record_meta_import(Compiler c);
 
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
 
-int Compiler_bind_meta_group(Compiler c, String name, Token site);
+String Compiler_meta_cc_identity(String cc);
+
+String Compiler_meta_cc_error(String errors);
+
+void Compiler_use_meta_build_directory(String directory);
+
+void Compiler_write_meta_build(Compiler c);
+
+void Compiler_stop_meta_helper(void);
+
+void Compiler_use_meta_helper(String path, Map failures, Map units);
+
+void Compiler_begin_meta_unit(String filename);
+
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments);
 
 String Compiler_stage_meta_group(Compiler c, String * failure);
+
+int Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 
 #endif /* __GUARD_0x042BDEBD__ */

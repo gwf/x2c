@@ -691,45 +691,53 @@ no Scope allocator returned.
 
 ## How a meta function runs
 
-The compiler keeps the bodied `meta` functions a unit has defined so far,
-and those its compile-time imports define, as the unit's pending group.
-The first `$` call, or compile-time Lisp call, that reaches one of them
-emits the whole group as one C unit through the ordinary backend, compiles
-it with the configured C compiler, loads it into the compiler, and calls
-the function. A later call that reaches a function defined after that
-point emits the group again with everything defined so far. A unit that
-defines `meta` functions and never calls one at compile time compiles
-nothing extra.
+A translation runs in two phases. Before any unit is translated, the
+compiler gathers the bodied `meta` functions the inputs reach: those of
+each `.xmacro` file an input imports, directly, through an included
+header, or through a package, and those an input defines itself. It
+emits them, with the declarations they use, as C through the ordinary
+backend, compiles them with the host C compiler, and links them with the
+runtime into one helper program for the project. The translation then
+sends each `$` call, and each compile-time Lisp call, of one of those
+functions to the helper and inserts the reply. A project whose inputs
+reach no `meta` function builds nothing extra.
 
-The compiled group is kept under the cache directory (`$X2C_CACHE_DIR`,
-`$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of its C, the
-compiler, the C compiler, and the runtime headers, so an unchanged group
-loads without compiling. The shipped meta code of the compiler's own
-`.xmacro` files and of `lib/meta.x` is linked into the compiler and binds
-without compiling; an edited copy of such a file is compiled like any
-other group.
+The helper is kept under the cache directory (`$X2C_CACHE_DIR`,
+`$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of the meta
+sources, the compiler, the C compiler, and the flags, and it is built
+again when any file its build read changes, x2c source or C header. The
+shipped meta code of the compiler's own `.xmacro` files and of
+`lib/meta.x` is linked into the compiler and runs without a helper. The
+REPL compiles each submission's `meta` functions and loads them into the
+compiler instead.
 
 Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code
 meets compile-time code, and says evaluate now and insert the result.
 
-Each unit gets its own `meta static` values: a group's module
-reinitializes them for every unit that uses it.
+Each unit gets its own `meta static` values: the helper runs their
+initializers again before the first call a unit makes.
+
+A project `meta` function receives what it needs as arguments and returns
+a value; it does not query the compiler. The syntax builders of
+`lib/meta.x`, `x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail`,
+and `x2c_diagnostic_warn` work in the helper, and a builder that needs a
+type's parts is finished by the compiler when the call returns. The
+operations that read other compiler state, such as `x2c_source_text` and
+`x2c_type_fields`, report that they are not available to project meta
+code.
 
 Running compile-time code needs what building the program needs: the C
-compiler and the runtime headers. A group that does not compile is
+compiler and the runtime headers. A module that does not compile is
 reported at the call with the C compiler's first error and the directory
-that keeps the group's C. Loading compiled code
-needs `dlopen`, so on a platform without it only the shipped meta code and
-[native modules](#native-modules) linked into the compiler run at compile
-time.
+that keeps its C.
 
-A raise inside a `meta` body becomes a diagnostic at the `$` call. A `$`
-call that runs longer than 60 seconds stops the translation with a
-diagnostic at the call that names the function; `X2C_META_TIMEOUT` sets
-another limit in seconds, and `0` turns the limit off. Nothing limits how
-deep a body runs: a runaway recursion at compile time behaves as it would
-at run time.
+A raise inside a `meta` body becomes a diagnostic at the `$` call. A body
+that crashes, exits, or overflows the stack ends the helper; the call is
+reported with the function and the reason, and the next call starts a new
+helper. A `$` call that runs longer than 60 seconds is stopped the same
+way; `X2C_META_TIMEOUT` sets another limit in seconds, and `0` turns the
+limit off.
 
 ### Arguments and results
 

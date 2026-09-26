@@ -10,6 +10,7 @@
 #include "bootstrap.h"
 #include "project.h"
 #include "frontend.h"
+#include "meta-project.h"
 #include "editor.h"
 #include "install.h"
 #include "script.h"

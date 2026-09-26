@@ -60,6 +60,7 @@ lib/scripting.x|optional|The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.
 lib/args.x|optional|Argument parsing against a declarative spec; explicitly include `args.x` to use it.
 lib/diff.x|optional|Line differences between two texts; explicitly include `diff.x` to use them.
 lib/regex.x|optional|Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
+lib/datum.x|internal|Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.

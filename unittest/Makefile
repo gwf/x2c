@@ -23,7 +23,8 @@ SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 	varops-probes preprocessor-probes \
 	cli-probes package-install-probes \
 	symbol-snapshot-probes \
-	header-cache-probes protocol-probes lisp-reader-benchmark clean clobber \
+	header-cache-probes protocol-probes meta-helper-probes \
+	lisp-reader-benchmark clean clobber \
 	expression-bodied-function-probes \
 	FORCE
 
@@ -74,6 +75,9 @@ symbol-snapshot-probes:
 header-cache-probes:
 	./probes/run-header-cache.sh
 
+meta-helper-probes:
+	./probes/run-meta-helper.sh
+
 protocol-probes:
 	./probes/run-protocol-boundaries.sh
 
@@ -82,7 +86,7 @@ expression-bodied-function-probes:
 
 compiler-fixtures: cli-probes package-install-probes preprocessor-probes \
 		symbol-snapshot-probes header-cache-probes protocol-probes \
-		expression-bodied-function-probes
+		expression-bodied-function-probes meta-helper-probes
 	./compiler-fixtures/run.sh check
 
 update-compiler-fixtures:

@@ -150,16 +150,19 @@ typedef struct Compiler {
      holding each declared signature. A function binds into the macro
      session the first time compile-time code calls it. */
   Map native_meta;
-  /* The unit's top-level nodes parsed so far, and its pending `meta` group
-     in source order: each bodied `meta` function as `(function FN NAME
-     TYPE DECLINED)`, each `meta static` value as `(static DECLARATION)`,
-     and each compile-time import as `(import NODES META-DEFS)`, the counts
-     of `unit_nodes` and `meta_defs` after it. `meta_group_bound` holds the
-     names bound to staged native code and the modules reset for the unit. */
+  /* The unit's top-level nodes parsed so far, and its `meta` group in
+     source order: each bodied `meta` function as `(function FN NAME
+     TYPE)`, and while the project meta build parses the unit or the REPL
+     stages it, each `meta static` value as `(static DECLARATION)` and each
+     compile-time import as `(import NODES META-DEFS)`, the counts of
+     `unit_nodes` and `meta_defs` after it. `meta_group_bound` holds the
+     names the REPL bound to staged native code, the modules it reset, and
+     each bodyless `meta` prototype nothing supplies. */
   Array unit_nodes, meta_group;
   Map meta_group_bound;
-  /* Holds what the unit's staged `meta static` values allocate. */
-  Scope meta_scope;
+  /* One more than the helper table whose group the project meta build is
+     parsing this unit for, or zero for an ordinary parse. */
+  int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   /* Whether the source is in the indentation syntax whatever its name, as
      when collection parses a segment of a file whose pragma it saw. */
@@ -375,6 +378,7 @@ static Compiler _new(Compiler owner) {
       _.source_texts = owner.source_texts;
       _.unit_script = owner.unit_script;
       _.include_dirs = owner.include_dirs;
+      _.meta_build = owner.meta_build;
     }
     else {
       _.package_roots = {};
@@ -2138,6 +2142,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     c.token = conflict;
     _report_script_statement(c);
   }
+  if (c.meta_build) c.write_meta_build();
   _append_meta_definitions(c, nodes);
   c.unit_nodes = NULL;
   List ast = nodes.list_free();

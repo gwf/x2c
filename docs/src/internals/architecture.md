@@ -471,6 +471,8 @@ The modules under `src/` divide ownership as follows:
   the per-file translation loop, and output/exit policy;
 - `src/frontend.x` -- configured source stages, process translation support,
   and sequential unit Context/Type lifetimes;
+- `src/meta-project.x` -- the project meta build: the helper program that
+  runs a project's meta functions, built and cached before translation;
 - `commands/repl/` -- terminal interaction, inline editing and history,
   persistent submissions, and named inspection over the compiler session API;
 - `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
