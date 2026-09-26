@@ -24,7 +24,7 @@ typedef struct PrintfFn {
 #include "literals.x"
 #include "protocol.x"
 #include "lambda.x"
-#include "comptime.x"
+#include "stage.x"
 
 static List _iter_destination(void) => %(expr (* struct "Iter")
     (op & (expr (struct "Iter")

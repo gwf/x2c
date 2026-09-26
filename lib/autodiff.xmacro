@@ -225,7 +225,7 @@ meta static List ad_id(Var name) {
                         : %(expr () (ident ($name)));
 }
 
-meta static List ad_unbind(Var form) {
+meta static Var ad_unbind(Var form) {
   if (!form.is(<list>)) return form;
   List items = form;
   if (!items) return items;
@@ -242,7 +242,7 @@ meta static Var ad_var_name(List e) {
     case %(expr ? (ident (?n))):
       if (n.is(<string>)) return n;
   }
-  return void;
+  return %();
 }
 
 meta static List ad_assign(String name, List value) {
@@ -629,7 +629,7 @@ meta static List ad_forward(List fn) {
 /* The reverse derivation in progress. The gradient template's helpers
    expand after `ad_reverse_with` returns, so `ad_reverse_prepare` starts
    each derivation and `ad_reverse_finish` completes it. */
-meta static struct {
+meta static struct AdState {
   List checkpoint;  /* the checkpoint block size, or empty */
   List locals;      /* `(name type)` for each local, newest first */
   int counter;      /* numbers fresh names and exit codes */

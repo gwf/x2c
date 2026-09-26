@@ -311,9 +311,6 @@ meta void x2c_diagnostic_warn(String message, List notes);
 /* --- lowering -----------------------------------------------------------
    The generators under `etc/` record the Lisp a function lowers to. */
 
-/** Returns the compile-time Lisp forms the function definition `fn` lowers
-    to, or an empty `List` when it cannot be lowered. */
-meta List x2c_comptime_lower(List fn);
 
 /** Returns a `Map` from the name of each function the unit has defined so
     far to the hash of its definition text, from the first token after any

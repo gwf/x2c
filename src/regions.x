@@ -31,7 +31,7 @@
 #pragma private
 
 #include "ast.x"
-#include "comptime.x"
+#include "stage.x"
 #include "type.x"
 
 /* An open or closed region. `kind` is scope, pool, slot, auto, local: the
@@ -1231,16 +1231,10 @@ void Compiler.check_regions(Compiler c, List ast) {
     freed memory. The first finding is reported as an error. `fn` must be
     the bound and typed definition. The walk reads the summaries of the
     `meta` functions installed before `fn` and records the summary of `fn`
-    in `meta_regions`; a definition whose lowering the process already
-    cached takes the summary recorded with it.
+    in `meta_regions`.
 */
 void Compiler.check_meta_regions(Compiler c, List fn) {
   match (fn) case %(function ? (bind (binding ? ?(String name)) *) ?): {
-    List checked = c.lowered_meta_regions(fn);
-    if (checked) {
-      c.meta_regions[name] = checked;
-      return;
-    }
     /* A replaced definition starts again from an empty summary. */
     c.meta_regions[name] = %(0 ());
   }

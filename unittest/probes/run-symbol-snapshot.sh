@@ -99,6 +99,8 @@ mkdir -p "$cold_root/etc" "$cold_root/lib" "$cold_root/include" \
   "$cold_root/bin"
 cp "$X2C" "$cold_root/bin/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$cold_root/etc/"
+# Staging a meta group compiles it against the runtime headers.
+cp -RL "$ROOT/include/." "$cold_root/include/"
 copy_runtime_sources "$cold_root/lib/"
 [[ -z "$("$cold_root/bin/x2c" env prelude)" ]]
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"

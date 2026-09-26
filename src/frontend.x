@@ -91,7 +91,7 @@ Frontend Frontend.new(CliRequest request) {
     request.cc, request.ar, request.cpp_args, request.cc_args,
     request.ld_args, request.verbose, request.dry_run);
   Compiler.use_meta_toolchain(
-    frontend.toolchain.cc, frontend.toolchain.include_dir, request.verbose);
+    frontend.toolchain.cc, frontend.toolchain.include_dir);
   return frontend;
 }
 
@@ -219,6 +219,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   cppcompiler.imports = c.imports;
   cppcompiler.macro_lisp = c.macro_lisp;
   cppcompiler.borrowed_lisp = cppcompiler.macro_lisp != NULL;
+  cppcompiler.share_meta_group(c);
   Map saved_counters = NULL;
   if (!request.live_symbols) {
     saved_counters = c.names.counters;

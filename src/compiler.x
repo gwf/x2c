@@ -141,13 +141,6 @@ typedef struct Compiler {
      which a `meta` definition and its copy linked into the compiler must
      share. */
   Map meta_comptime, meta_regions, meta_hashes;
-  /* File-scope values and types explicitly advertised to the compile-time
-     evaluator. `meta_values` is keyed by binding id and stores
-     `(MUTABLE LAYOUT)` for the object. */
-  Map meta_values;
-  /* Canonical struct Type -> its compile-time byte layout, a cache that
-     semantic transactions roll back with the declarations it describes. */
-  Map meta_layouts;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro
      session the first time lowered code calls it. */
@@ -214,7 +207,7 @@ protocol Var(Compiler) as void *;
 #include "parse.x"
 #include "protocol.x"
 #include "macros.x"
-#include "comptime.x"
+#include "stage.x"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -310,8 +303,6 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.meta_comptime = owner.meta_comptime;
   compiler.meta_regions = owner.meta_regions;
   compiler.meta_hashes = owner.meta_hashes;
-  compiler.meta_values = owner.meta_values;
-  compiler.meta_layouts = owner.meta_layouts;
   compiler.native_meta = owner.native_meta;
 }
 
@@ -356,13 +347,8 @@ static Compiler _new(Compiler owner) {
     _.meta_comptime = {};
     _.meta_regions = {};
     _.meta_hashes = {};
-    _.meta_values = {};
-    _.meta_layouts = {};
     _.native_meta = {};
-    if (!owner) {
-      _.inherit_shared_meta();
-      _.inherit_library_comptime();
-    }
+    if (!owner) _.inherit_library_comptime();
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -429,6 +415,14 @@ Compiler Compiler.new_shared(Compiler owner) {
   return _new(owner);
 }
 
+/** Shares `owner`'s pending `meta` group and the definitions it reads, which
+    belong with the Lisp session that holds the group's stubs. */
+void Compiler.share_meta_group(Compiler compiler, Compiler owner) {
+  compiler.meta_group = owner.meta_group;
+  compiler.meta_group_bound = owner.meta_group_bound;
+  compiler.meta_defs = owner.meta_defs;
+}
+
 /** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
     Lisp state for one segment of a collected file. Segments are one
     translation unit, so a shadow uses the unit's Lisp environment rather
@@ -443,6 +437,7 @@ void Compiler.take_unit_state(Compiler compiler, Compiler owner) {
   compiler.macro_lisp = owner.macro_lisp;
   compiler.declaration_effects = owner.declaration_effects;
   compiler.borrowed_lisp = compiler.macro_lisp != NULL;
+  compiler.share_meta_group(owner);
 }
 
 /** Returns that state to `owner`, so the next segment starts where this one
@@ -1584,6 +1579,7 @@ Map Compiler.select_declaration_defaults(
   shadow.filename = path;
   shadow.macro_lisp = compiler.macro_lisp;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
+  shadow.share_meta_group(compiler);
   shadow.sym._reset_overlay(symbols, {});
   shadow.rebuild_protocols(symbols);
   shadow.conforms = {};
@@ -2030,10 +2026,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_defs.clear();
   c.meta_comptime = {};
   c.meta_regions = {};
-  c.meta_values = {};
-  c.meta_layouts = {};
   c.native_meta = {};
-  c.inherit_shared_meta();
   c.inherit_library_comptime();
   c.fixed = {};
   c.init_tokens = {};
@@ -2128,7 +2121,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     c.token = conflict;
     _report_script_statement(c);
   }
-  c.report_unstaged_meta();
   _append_meta_definitions(c, nodes);
   c.unit_nodes = NULL;
   List ast = nodes.list_free();
@@ -2561,7 +2553,6 @@ typedef struct SymTxn {
   int local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
-  Map meta_layouts;
   Map source_definitions;
   int source_occurrences;
 } *SymTxn;
@@ -2582,7 +2573,6 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction.counters = c.names.counters;
   transaction.statics = c.sym.statics;
   transaction.binding_facts = c.semantic_binding_facts();
-  transaction.meta_layouts = c.meta_layouts;
   transaction.next_binding = c.names.next_binding;
   transaction.local_macro_names = c.sym.local_macro_names;
   transaction.initializer_name = c.init_fn;
@@ -2604,7 +2594,6 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   c.sym.statics = c.sym.statics.copy();
   c.sym.binding_facts = c.semantic_binding_facts().copy();
   c.names.counters = c.names.counters.copy();
-  c.meta_layouts = c.meta_layouts.copy();
   transaction.active = 1;
   return transaction;
 }
@@ -2626,8 +2615,6 @@ void SymTxn.commit(SymTxn s) {
     if (scope.macros == NULL) scope.macros = {};
     scope.macros.merge(staged.macros);
   }
-  s.meta_layouts.merge(compiler.meta_layouts);
-  compiler.meta_layouts = s.meta_layouts;
   s.active = 0;
 }
 
@@ -2675,7 +2662,6 @@ void SymTxn.rollback(SymTxn transaction) {
     *scope = transaction.scope;
     _.sym.statics = transaction.statics;
     _.sym.binding_facts = transaction.binding_facts;
-    _.meta_layouts = transaction.meta_layouts;
     _.names.next_binding = transaction.next_binding;
     _.sym.local_macro_names = transaction.local_macro_names;
     _.names.counters = transaction.counters;

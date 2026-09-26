@@ -174,6 +174,8 @@ mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0"
 cp "$X2C" "$FAKE/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
+# Staging a meta group compiles it against the runtime headers.
+cp -RL "$ROOT/include/." "$FAKE/include/"
 copy_runtime_sources "$FAKE/lib/"
 cp "$BUILD/src/bar.x" "$BUILD/src/hdr.x" "$BUILD/src/anon.x" \
   "$BUILD/src/unit.x" "$FAKE/src/"

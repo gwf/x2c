@@ -2006,10 +2006,7 @@ List Compiler.parse_top_level(Compiler c) {
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
       c.install_native_meta_function(decl, meta);
-    else if (meta) {
-      c.install_meta_declaration(decl, meta);
-      c.record_meta_static(decl);
-    }
+    else if (meta) c.install_meta_declaration(decl, meta);
     c.record_declaration_visibility(decl);
     if (meta)
       _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
@@ -2036,7 +2033,7 @@ List Compiler.parse_top_level(Compiler c) {
     _record_meta_hash(c, function, definition_start);
     if (lowered && !c.bind_linked_meta(
           function, decl.type_from_ast().canonicalize()))
-      c.install_meta_function(function, lowered);
+      c.install_meta_function(function);
     c.record_declaration_visibility(function);
     /* Compile-time only describes a `meta` definition. An ordinary
        declaration or definition of the same name, such as a copy the
