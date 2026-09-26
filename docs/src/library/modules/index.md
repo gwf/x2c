@@ -17,7 +17,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/args.x`](args.md) | parse program arguments against a declarative spec. |
 | [`lib/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
 | [`lib/atom.x`](atom.md) | canonical exact names. |
-| [`lib/autodiff.x`](autodiff.md) | reverse-mode differentiation recorded on a runtime tape. |
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
 | [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
@@ -67,7 +66,6 @@ These modules ship with x2c but are not loaded by the standard
 prelude. Include one explicitly to use its declarations.
 
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
-- [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.

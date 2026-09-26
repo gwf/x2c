@@ -14,7 +14,7 @@
 #include <math.h>
 #include <time.h>
 #include <sys/resource.h>
-$(import "autodiff.xmacro")
+$(import "../src/autodiff.xmacro")
 
 $ad.reverse()
 static double full(double x, double y, int steps) {

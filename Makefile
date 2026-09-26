@@ -166,6 +166,7 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/libuv test run
 	$(MAKE) -C packages/raylib verify
 	$(MAKE) -C packages/torch test run
+	$(MAKE) -C packages/autodiff check
 
 check: build						## Run extended non-mutating checks
 	$(MAKE) check-after-precommit

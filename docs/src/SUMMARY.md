@@ -39,7 +39,6 @@
     - [lib/args.x](library/modules/args.md)
     - [lib/array.x](library/modules/array.md)
     - [lib/atom.x](library/modules/atom.md)
-    - [lib/autodiff.x](library/modules/autodiff.md)
     - [lib/block.x](library/modules/block.md)
     - [lib/buffer.x](library/modules/buffer.md)
     - [lib/common.x](library/modules/common.md)

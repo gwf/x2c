@@ -82,7 +82,7 @@ fit reaches approximately 0.9006 and 49.9922.
 The full program also compares the generated gradient with finite
 differences before fitting.
 
-[Full example](https://github.com/gwf/x2c/blob/main/examples/magic/autodiff-fit.x)
-/ <a href="https://github.com/gwf/x2c/blob/main/lib/autodiff.xmacro" data-example-action="source">Autodiff macros</a>
+[Full example](https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff-fit.x)
+/ <a href="https://github.com/gwf/x2c/blob/main/packages/autodiff/src/autodiff.xmacro" data-example-action="source">Autodiff macros</a>
 
 </section>

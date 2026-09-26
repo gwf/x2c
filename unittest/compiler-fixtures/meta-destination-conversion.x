@@ -1,5 +1,4 @@
 #include "x2c.x"
-#include "autodiff.x"
 
 typedef unsigned char Byte;
 
@@ -47,13 +46,6 @@ meta int file_round_trip(Var boxed) {
   return again == boxed;
 }
 
-/* A boxed <adnode> unboxes to the same node. */
-meta int adnode_round_trip(int n) {
-  struct AdNode node = {.value = 2.5};
-  Var boxed = AdNode.var(&node);
-  return (int) (boxed.adnode().value * 2) + n;
-}
-
 /* A declared converter applies wherever the compiled code converts. */
 typedef String Label;
 meta Label List.label(List items) => %"n${items.len()}";
@@ -94,8 +86,6 @@ int main(int argc, char **argv) {
     $constant_string_hash(), constant_string_hash(),
     "abc".hash() == ("a" + "bc").hash());
   printf("file %d\n", file_round_trip(File.var(stdout)));
-  printf("adnode %d %d %d\n",
-    $adnode_round_trip(0), adnode_round_trip(0), adnode_round_trip(one - 1));
   List items = %(a b c d e f g h i j);
   printf("converter %d %d %d %d %d %d\n",
     $label_init(%(a b c d e f g h i j)), label_init(items),
