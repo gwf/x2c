@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 37
-- Runtime modules: 57
+- Compiler modules: 38
+- Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -345,6 +345,14 @@ Public functions:
 
 `main`
 
+### [src/meta-project.x](../src/meta-project.x)
+
+the project meta build.
+
+Public functions:
+
+`Frontend.prepare_meta`
+
 ### [src/parse.x](../src/parse.x)
 
 x2c recursive-descent parser core.
@@ -432,17 +440,21 @@ Public functions:
 
 ### [src/stage.x](../src/stage.x)
 
-staged meta groups and the values crossing into them.
+meta groups, the project helper, and the values crossing.
 
 Public functions:
 
 `Compiler.meta_argument`, `Compiler.meta_value_expression`,
 `Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`,
-`Compiler.meta_watch_begin`, `Compiler.meta_watch_end`,
-`Compiler.use_meta_toolchain`, `Compiler.groups_meta`,
+`Compiler.use_meta_toolchain`, `Compiler.meta_cc`,
+`Compiler.stage_meta_in_process`, `Compiler.groups_meta`,
 `Compiler.group_meta_function`, `Compiler.record_meta_import`,
-`Compiler.meta_reaches_compile_time`, `Compiler.bind_meta_group`,
-`Compiler.stage_meta_group`
+`Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
+`Compiler.meta_cc_error`, `Compiler.use_meta_build_directory`,
+`Compiler.write_meta_build`, `Compiler.stop_meta_helper`,
+`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
+`Compiler.meta_helper_call`, `Compiler.stage_meta_group`,
+`Compiler.bind_meta_group`
 
 ### [src/statements.x](../src/statements.x)
 
@@ -640,6 +652,14 @@ Public functions:
 `Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
 `Context.export_nested`, `Context.export`, `Context.export_scope`,
 `Context.close`, `Context.cleanup`
+
+### [lib/datum.x](../lib/datum.x)
+
+values as Lisp reader text.
+
+Public functions:
+
+`datum_write`, `datum_read`
 
 ### [lib/diff.x](../lib/diff.x)
 

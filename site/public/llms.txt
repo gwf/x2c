@@ -119,6 +119,7 @@
 - [src/literals.x](https://x2c-lang.dev/docs/internals/compiler-api/literals.html)
 - [src/macros.x](https://x2c-lang.dev/docs/internals/compiler-api/macros.html)
 - [src/main.x](https://x2c-lang.dev/docs/internals/compiler-api/main.html)
+- [src/meta-project.x](https://x2c-lang.dev/docs/internals/compiler-api/meta-project.html)
 - [src/parse.x](https://x2c-lang.dev/docs/internals/compiler-api/parse.html)
 - [src/project.x](https://x2c-lang.dev/docs/internals/compiler-api/project.html)
 - [src/protocol.x](https://x2c-lang.dev/docs/internals/compiler-api/protocol.html)

@@ -644,12 +644,15 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 return ! Compiler_error_count(compiler);
 }
 
+void Compiler_begin_meta_unit(String);
+
 List Compiler_full_parse(Compiler, Map, int);
 
 int ParsedUnit_parse(ParsedUnit * p){
   if(! _init_guard_) _file_init_();
   Compiler compiler =(* p).compiler;
   if(Compiler_error_count(compiler)) return 0;
+  Compiler_begin_meta_unit(compiler -> filename);
   {
     ExceptionFrame _x2c_exception_frame_2;
     static MatchCaptureSite _x2c_catch_arms_2[1];
@@ -697,9 +700,11 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   return Frontend_start(f, filename, &((* unit))) && ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)));
 }
 
+void Compiler_stage_meta_in_process(void);
+
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, NULL, &((* unit)), 0, _66) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
+  return(Compiler_stage_meta_in_process(), 1) && _start(frontend, NULL, &((* unit)), 0, _66) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
 }
 
 void Compiler_free_lisp(Compiler);

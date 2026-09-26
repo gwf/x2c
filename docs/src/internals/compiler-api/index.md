@@ -33,6 +33,7 @@ Functions and types exposed by each compiler module.
 | [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
 | [`src/macros.x`](macros.md) | compile-time macro definitions and expression expansion. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
+| [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/parse.x`](parse.md) | x2c recursive-descent parser core. |
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
@@ -40,7 +41,7 @@ Functions and types exposed by each compiler module.
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
-| [`src/stage.x`](stage.md) | staged meta groups and the values crossing into them. |
+| [`src/stage.x`](stage.md) | meta groups, the project helper, and the values crossing. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |

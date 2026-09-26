@@ -54,7 +54,7 @@ Source: `src/frontend.x:84`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:379`
+Source: `src/frontend.x:380`
 
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
@@ -65,7 +65,7 @@ Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
-Source: `src/frontend.x:385`
+Source: `src/frontend.x:386`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -99,7 +99,7 @@ Source: `src/frontend.x:284`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:395`
+Source: `src/frontend.x:396`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect

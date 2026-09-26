@@ -2083,6 +2083,7 @@ int Compiler.bind_native_meta(Compiler c, String name) {
 }
 
 static void _hold_group_function(Compiler c, String name);
+static void _hold_helper_function(Compiler c, String name, Type type);
 static int _shared_meta_definition(Compiler c, String name);
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
@@ -2099,12 +2100,13 @@ void Compiler.install_native_meta_function(
   _bind_native_meta(c, name, signature, marker);
 }
 
-/** Installs a bodied `meta` function. It joins the unit's pending group,
-    whose staged native code binds under the function's own name at the
-    first call; until then the session holds a stub that stages the group.
-    A function whose body reaches a compiler operation, a template, or a
-    compile-time-only function has no runtime form. A body that lets its own
-    storage outlive a call is rejected where the storage leaves.
+/** Installs a bodied `meta` function. The project meta build compiled it
+    into the project's helper, so the session holds a stub that calls it
+    there; the REPL's stub stages the session's group at the first call
+    instead, and the project meta build's own parse only groups it. A
+    function whose body reaches a compiler operation, a template, or a
+    compile-time-only function has no runtime form. A body that lets its
+    own storage outlive a call is rejected where the storage leaves.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
@@ -2113,12 +2115,17 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) *) ?): {
       if (c.meta_reaches_compile_time(fn)) _record_comptime(c, name);
-      if (!c.groups_meta()) return;
+      if (c.macro_holes) return;
       c.group_meta_function(fn);
+      if (c.meta_build) return;
+      Type type = ((List) c.meta_group[-1]).last();
       /* A session refuses to replace a name an ancestor binds, which
          reaches the developer here, at the marker. */
       if (!macro_library_filling() && !_shared_meta_definition(c, name))
-        try _hold_group_function(c, name);
+        try {
+          if (c.groups_meta()) _hold_group_function(c, name);
+          else _hold_helper_function(c, name, type);
+        }
         catch %(?code *detail): {
           List cause = cons(code, detail);
           c.report_error(
@@ -2233,31 +2240,73 @@ static Map _source_captures(List bindings) {
   return captures;
 }
 
-/* Calls the session value `function`, the `meta` function `name` called at
-   `site`, with the evaluated `arguments`, under the call deadline. */
-static Var _meta_apply(
-  Compiler c, String name, Token site, Var function, List arguments) {
+/* Calls the session value `function` with the evaluated `arguments`. */
+static Var _meta_apply(Compiler c, Var function, List arguments) {
   Array quoted = [%(quote $function)];
   foreach (Var argument, arguments) quoted.push(%(quote $argument));
-  Var value;
-  c.meta_watch_begin(name, site);
-  try value = c.macro_lisp.eval(quoted.list_free());
-  finally Compiler.meta_watch_end();
-  return value;
+  return c.macro_lisp.eval(quoted.list_free());
 }
 
-/* Answers `_x2c.meta.stage`, which a group function's session name holds
-   until the group stages: it binds the group's native code under the name
-   and calls it with `arguments`. */
-static Var _sdk_meta_stage(String name, List arguments) {
+/* The compiler that runs a stub's call, and where the call stands. */
+static Compiler _stub_compiler(String name, Token &site) {
   Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
   if (!c) _sdk_reject(%"$name used outside compilation", NULL);
-  Token site = macro_import_invocation ? macro_import_invocation : c.token;
+  site = macro_import_invocation ? macro_import_invocation : c.token;
+  return c;
+}
+
+/* Answers `_x2c.meta.stage`, which a REPL group function's session name
+   holds until the group stages: it binds the group's native code under the
+   name and calls it with `arguments`. */
+static Var _sdk_meta_stage(String name, List arguments) {
+  Token site;
+  Compiler c = _stub_compiler(name, site);
   c.bind_meta_group(name, site);
   Var function;
-  if (!(name in c.meta_group_bound) || !c.macro_lisp.try_get(name, function))
+  if (!c.macro_lisp.try_get(name, function))
     _sdk_reject(%"$name cannot run at compile time", NULL);
-  return _meta_apply(c, name, site, function, arguments);
+  return _meta_apply(c, function, arguments);
+}
+
+/* A helper's result with each marker the helper left for the compiler
+   replaced: a template call by its invocation and a deferred builder by
+   the compiler's own answer. */
+static Var _helper_result(Compiler c, Var value) {
+  if (value is not <list> || value.is_nil()) return value;
+  Array parts = [];
+  foreach (Var part, (List) value) parts.push(_helper_result(c, part));
+  List resolved = parts.list_free();
+  match (resolved) {
+    case %("x2c.template" ?stored ?(List values)):
+      return _sdk_template_call(
+        stored is <string> ? Atom.intern(stored.str()) : stored, values);
+    case %("x2c.deferred" ?(String name) *arguments): {
+      Var function;
+      if (!c.macro_lisp.try_get(name, function))
+        _sdk_reject(%"$name is not available to project meta code", NULL);
+      return _meta_apply(c, function, arguments);
+    }
+  }
+  return resolved;
+}
+
+/* Calls the project `meta` function `name` in the project's helper. */
+static Var _sdk_meta_call(String name, List arguments) {
+  Token site;
+  Compiler c = _stub_compiler(name, site);
+  return _helper_result(c, c.meta_helper_call(name, site, arguments));
+}
+
+/* Adapts a call of a project `meta` function's session binding, whose
+   context holds the function's name, to a call in the helper. */
+static Var _helper_adapter(Func function, const FuncArg *argv) {
+  List parameters = Func.signature(function).car().list().cadr();
+  if (parameters.equal(%((void)))) parameters = NULL;
+  Array values = [];
+  for (int i = 0; i < parameters.len(); i++)
+    values.push(argv[i].data.value);
+  return _sdk_meta_call(
+    String.new((const char *) Func.context(function)), values.list_free());
 }
 
 /* Whether the published shared session already holds the definition of
@@ -2269,18 +2318,27 @@ static int _shared_meta_definition(Compiler c, String name) {
   return key in library_definitions;
 }
 
-/* Holds the group function `name` in the session behind a stub that stages
-   the group at its first call from compile-time Lisp. */
+/* Holds the REPL group function `name` in the session behind a stub that
+   stages the group at its first call from compile-time Lisp. */
 static void _hold_group_function(Compiler c, String name) {
   c.macro_lisp.set_global(name, c.macro_lisp.eval(
     %(lambda (. arguments) (_x2c.meta.stage $name arguments))));
+}
+
+/* Binds the project `meta` function `name` of type `type` in the session
+   to a native function that calls it in the helper. */
+static void _hold_helper_function(Compiler c, String name, Type type) {
+  Func function = Func.new_context(
+    _helper_adapter, c.func_signature(type), (char *) name, name.len() + 1);
+  c.macro_lisp.set_global(name, function);
 }
 
 /* The last call a `$` expression made, as a failure reports it. */
 static String meta_call_form = NULL;
 
 /* Calls a `meta` function named at a code boundary with its evaluated
-   arguments, staging its group first when it is pending. */
+   arguments. The project meta build's own parse has no helper yet, so a
+   call to a project function there is left for the translation. */
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
     case %(expr ? (meta-call (expr ?callee (ident (binding ? ?(String name))))
@@ -2296,11 +2354,12 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
         }
         values.push(c.meta_argument(argument, want, site, _meta_call_value));
       }
-      c.bind_meta_group(name, site);
       Var function;
       if (!c.macro_lisp.try_get(name, function) &&
           c.bind_native_meta(name))
         c.macro_lisp.try_get(name, function);
+      if (function is void && c.meta_build)
+        raise %(meta-later (name $name));
       if (function is void)
         c.report_error(
           <macro>, "explicit meta call cannot be resolved", site,
@@ -2308,7 +2367,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       List applied = values.list_free();
       meta_call_form = cons(Atom.intern(name), applied).repr();
       meta_call_form.try_own();
-      return _meta_apply(c, name, site, function, applied);
+      return _meta_apply(c, function, applied);
     }
   c.report_error(
     <macro>, "explicit meta call cannot be resolved", site,
@@ -2329,6 +2388,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   $let(macro_import_compiler, c)
   $let(macro_import_invocation, site) {
     try value = _meta_call_value(c, expression, site);
+    catch %(meta-later *): value = void;
     catch %(malformed (category ?category)):
       raise %(malformed (category $category));
     catch %(call-stack *):
@@ -2346,6 +2406,8 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) {
   Var value = _evaluate_meta_value(c, expression, site);
+  if (value is void && c.meta_build)
+    return %(expr (int) (literal (int) "0"));
   Type declared = expression.cadr();
   match (expression) case %(expr ? (meta-call (expr ?signature ?) ?)):
     declared = signature.cdr();

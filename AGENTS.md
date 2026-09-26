@@ -98,7 +98,8 @@ Direct destructive operations outside the requested change need approval.
 ## Repo Map
 
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
-  `frontend` (configured source units) -> `compiler` (translation state) ->
+  `frontend` (configured source units) -> `meta-project` (project meta
+  helper) -> `compiler` (translation state) ->
   shared runtime `lib/tokenizer.x` ->
   `parse`/`expressions`/`statements`/`macros` (+ `stage`, which carries
   values across the compile-time boundary, and `builtins` and `linked-meta`,

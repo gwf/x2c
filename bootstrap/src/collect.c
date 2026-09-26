@@ -39,6 +39,7 @@ static String _177, _176, _175, _174, _173, _172, _171, _170, _107, _106, _105, 
 static Var _166, _162, _160, _158, _156, _154, _152, _150, _139, _122, _120, _118, _116, _114, _112, _110, _109, _108, _94, _89, _87, _85, _83, _78, _75, _61, _60, _59, _58, _57, _52, _50, _49, _46, _43, _37, _32, _30, _28, _26, _23, _21, _16, _14, _11, _10, _8, _5;
 
 #include "buffer.h"
+#include "datum.h"
 #include "utils.h"
 #include <errno.h>
 #include <limits.h>
@@ -152,8 +153,6 @@ static List _interface_entry(Compiler c, String canonical, String hash, List sto
 static List _interface_read(Compiler c, String canonical);
 
 static List _renumber_bindings(List node, Map identities);
-
-static int _write_datum(Buffer out, Var value);
 
 static int _write_interface_entry(Buffer out, String canonical, List entry, List selected);
 
@@ -1706,28 +1705,8 @@ static List _renumber_bindings(List node, Map identities){
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
+int datum_write(Buffer, Var, int);
 Buffer Buffer_write_char(Buffer, char);
-int Var_is_atom(Var);
-String Var_str(Var);
-int Atom_bare_spelling(String);
-Buffer Buffer_write(Buffer, const char *);
-String Var_repr(Var);
-Buffer Buffer_printf(Buffer, const char *, ...);
-int Var_is_floating(Var);
-double Var_floating(Var);
-static int _write_datum(Buffer out, Var value){
-  if(Var_is_row(value, 9, 7, 4)){
-    List list = Var_list(value);  Buffer_write_char(out, '(');  for(List p = list;  List_truth(p);  p = List_cdr(p)){
-      if(! List_equal(p, list)) Buffer_write_char(out, ' ');  if(! _write_datum(out, List_car(p))) return 0;
-    }
-    Buffer_write_char(out, ')');
-  }
-  else if(Var_is_atom(value)){
-    String text = Var_str(value);  if(Atom_bare_spelling(text)) Buffer_write(out, text);  else if(Var_is(value, 1328354264)) Buffer_write(out, Var_repr(value));  else return 0;
-  }
-  else if(Var_is_row(value, 11, 7, 1)) Buffer_write(out, Var_repr(value));  else if(Var_is_integer(value)) Buffer_printf(out, "%ld", Var_integer(value));  else if(Var_is_floating(value)) Buffer_printf(out, "%.17g", Var_floating(value));  else return 0;  return 1;
-}
-
 static int _write_interface_entry(Buffer out, String canonical, List entry, List selected){
   List _x2c_destructure_2 = entry;  List cached_parts = Var_list(List_getindex(_x2c_destructure_2, 0));  Var hash = List_getindex(_x2c_destructure_2, 1);  List definitions = Var_list(List_getindex(_x2c_destructure_2, 2));  Map cached_dependencies = Var_map(List_getindex(_x2c_destructure_2, 3));  Array parts = Array_new();  Map identities = Map_new();
   {
@@ -1785,7 +1764,7 @@ static int _write_interface_entry(Buffer out, String canonical, List entry, List
   List part_list = Array_list_free(parts);
   List selected_rows = _renumber_bindings(selected, identities);
   List record = cons(_108, cons(_109, cons(String_var(x2c_compiler_identity()), cons(String_var(home_portable_path(canonical)), cons(hash, cons(List_var(part_list), cons(List_var(definitions), cons(List_var(selected_rows), cons(List_var(dependency_list), NULL)))))))));
-  if(! _write_datum(out, List_var(record))) return 0;
+  if(! datum_write(out, List_var(record), 0)) return 0;
   Buffer_write_char(out, '\n');
   return 1;
 }

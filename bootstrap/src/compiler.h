@@ -76,7 +76,7 @@ typedef struct Compiler{
   Map native_meta;
   Array unit_nodes, meta_group;
   Map meta_group_bound;
-  Scope meta_scope;
+  int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int layout;
   int meta_body;

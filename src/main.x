@@ -11,6 +11,7 @@
 #include "bootstrap.x"
 #include "project.x"
 #include "frontend.x"
+#include "meta-project.x"
 #include "editor.x"
 #include "install.x"
 #include "script.x"
@@ -225,6 +226,7 @@ static int _translate_workers(
         foreach (String input, slice)
           _translate_unit(
             frontend, input, _unit_output_dir(request, unit_dirs, input));
+        Compiler.stop_meta_helper();
         worker_exit(0);
       }
       if (pid < 0) {
@@ -350,6 +352,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   /* Each worker inherits what this process has already built, so the parent
      is built once here rather than in every worker. */
   if (!frontend.preload_macro_libraries()) return 1;
+  frontend.prepare_meta(c.inputs);
   if (parallel) {
     _preload_package_modules(c, unit_dirs);
     Array chunks =

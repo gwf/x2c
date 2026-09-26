@@ -1,20 +1,24 @@
-/*  stage.x -- staged meta groups and the values crossing into them
+/*  stage.x -- meta groups, the project helper, and the values crossing
 
     Copyright (c) 2026 Gary William Flake.
 
-    A bodied `meta` function runs as native code the compiler stages from
-    the unit's `meta` group. This file owns that group: what it reaches, its
-    emission through the ordinary backend, the cached module it builds, and
-    its binding into the unit's session. It also owns what crosses between
-    that code and the program: the arguments a `$` call passes, evaluated
-    from constants, captured syntax, and other `$` calls; the literal code a
-    result becomes; and the rule that a function reaching a compiler
-    operation has no runtime form.
+    A bodied `meta` function a project defines runs as native code in the
+    project's helper program, which the project meta build compiles from
+    each unit's `meta` group before translation. This file owns that group:
+    what it reaches and its emission through the ordinary backend. It owns
+    the helper's side in the compiler: starting it, one request and one
+    reply per call, and reporting a body that fails, crashes, or runs too
+    long. The REPL stages each submission's group in process instead. It
+    also owns what crosses between meta code and the program: the arguments
+    a `$` call passes, evaluated from constants, captured syntax, and other
+    `$` calls; the literal code a result becomes; and the rule that a
+    function reaching a compiler operation has no runtime form.
 */
 #pragma once
 #include "compiler.x"
 
-/* Staged groups load as native modules, which these platforms lack. */
+/* The REPL loads staged groups as native modules, which these platforms
+   lack. */
 #if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
@@ -31,11 +35,17 @@
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"
+#include "datum.x"
+#include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <math.h>
-#include <pthread.h>
+#include <poll.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -381,82 +391,14 @@ int Compiler.meta_is_comptime_only(Compiler c, List fn) {
   return 0;
 }
 
-/* --- the deadline of a running meta call -------------------------------- */
+/* --- a unit's meta group, emitted as C ---------------------------------- */
 
-/* The outermost running `$` call: its deadline in monotonic seconds, zero
-   when none runs, and where to report it. A watchdog thread, started in
-   each process at its first call, stops a call that passes its deadline.
-   The thread reads only these C values, so it touches no runtime state. */
-static volatile double watch_deadline = 0;
-static int watch_depth = 0, watch_line = 0, watch_col = 0;
-static char watch_file[512], watch_name[128];
-static double watch_limit = -1;
-static pid_t watch_pid = 0;
-
-static double _watch_now(void) {
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec + now.tv_nsec / 1e9;
-}
-
-static void *_watch_run(void *unused) {
-  (void) unused;
-  for (;;) {
-    usleep(100000);
-    double deadline = watch_deadline;
-    if (!deadline || _watch_now() < deadline) continue;
-    fprintf(stderr,
-      "%s:%d:%d: macro: this meta call ran longer than %g s\n"
-      "  note: function: %s\n"
-      "  note: set X2C_META_TIMEOUT to a larger limit in seconds, or 0 "
-      "for none\n",
-      watch_file, watch_line, watch_col, watch_limit, watch_name);
-    fflush(stderr);
-    _exit(1);
-  }
-  return NULL;
-}
-
-/* The limit from `X2C_META_TIMEOUT`, 60 seconds by default; zero or less
-   turns the watchdog off. */
-static double _watch_limit(void) {
-  String text = Env.get("X2C_META_TIMEOUT");
-  return text ? atof(text) : 60.0;
-}
-
-/** Starts the deadline of the `meta` function `name` called at `site`,
-    unless a call is already running. */
-void Compiler.meta_watch_begin(Compiler c, String name, Token site) {
-  if (watch_depth++) return;
-  if (watch_limit < 0) watch_limit = _watch_limit();
-  if (watch_limit <= 0) return;
-  if (watch_pid != getpid()) {
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, _watch_run, NULL)) return;
-    pthread_detach(thread);
-    watch_pid = getpid();
-  }
-  snprintf(watch_file, sizeof watch_file, "%s",
-           c.filename ? (char *) c.filename : "<input>");
-  snprintf(watch_name, sizeof watch_name, "%s", (char *) name);
-  watch_line = site ? site.line : 0;
-  watch_col = site ? site.col : 0;
-  watch_deadline = _watch_now() + watch_limit;
-}
-
-/** Ends the deadline `Compiler.meta_watch_begin` started. */
-void Compiler.meta_watch_end(void) {
-  if (--watch_depth == 0) watch_deadline = 0;
-}
-
-/* --- the unit's meta group, staged as native code ---------------------- */
-
-/* The C compiler and x2c include directory that stage meta groups. */
+/* The C compiler and x2c include directory that build meta code. */
 static String meta_cc = NULL, meta_include_dir = NULL;
 
-/* The runtime headers this compiler was built with, which a staged module
-   shares because it calls the compiler's own runtime: a built checkout
-   stage's `lib`, the checked-in bootstrap's, or else `include_dir`. */
+/* The runtime headers this compiler was built with, which meta code shares
+   because it calls the compiler's own runtime: a built checkout stage's
+   `lib`, the checked-in bootstrap's, or else `include_dir`. */
 static String _meta_headers(String include_dir) {
   String stage = x2c_stage_dir();
   if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
@@ -467,7 +409,7 @@ static String _meta_headers(String include_dir) {
   return include_dir;
 }
 
-/** Selects the C compiler `cc` that stages the `meta` groups of the units
+/** Selects the C compiler `cc` that builds the `meta` code of the units
     this process translates, with the runtime headers this compiler was
     built with, found from its installed headers in `include_dir`. */
 void Compiler.use_meta_toolchain(String cc, String include_dir) {
@@ -477,16 +419,28 @@ void Compiler.use_meta_toolchain(String cc, String include_dir) {
   meta_include_dir.try_own();
 }
 
-/** Answers whether a `meta` function or value belongs to the unit's pending
-    group: a parse meets it outside a macro definition. A `.xmacro` import,
-    and each compiler that collects a segment of the unit, shares the unit's
-    group. */
-int Compiler.groups_meta(Compiler c) =>
-  X2C_NATIVE_MODULES && meta_cc && !c.macro_holes && (void *) c.meta_group;
+/** Returns the C compiler and the runtime header directory that build
+    `meta` code, or NULL before `Compiler.use_meta_toolchain`. */
+String Compiler.meta_cc(String &include_dir) {
+  include_dir = meta_include_dir;
+  return meta_cc;
+}
 
-/* The C compiler flags of a staged module, besides its include
-   directories: position-independent code, lightly optimized. */
-static List _meta_flags(void) => %("-fsigned-char" "-fPIC" "-O1");
+/* Whether this process stages each unit's group in process, as the REPL
+   does for its submissions, rather than calling a project helper. */
+static int meta_in_process = 0;
+
+/** Stages the `meta` group of each unit this process parses in process and
+    loads it, as the REPL's submissions need. */
+void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
+
+/** Answers whether a `meta` function or value belongs to the unit's group:
+    a parse meets it outside a macro definition while the project meta build
+    parses the unit or the REPL stages it. A `.xmacro` import, and each
+    compiler that collects a segment of the unit, shares the unit's group. */
+int Compiler.groups_meta(Compiler c) =>
+  meta_cc && !c.macro_holes && (void *) c.meta_group &&
+  (c.meta_build || (X2C_NATIVE_MODULES && meta_in_process));
 
 static int _function_identity(List fn, Var &identity, String &name) {
   match (fn)
@@ -498,7 +452,7 @@ static int _function_identity(List fn, Var &identity, String &name) {
   return 0;
 }
 
-/** Records the bodied `meta` function `fn` in the pending group. */
+/** Records the bodied `meta` function `fn` in the unit's group. */
 void Compiler.group_meta_function(Compiler c, List fn) {
   match (fn)
     case %(function ?spec (!set ?declarator (bind (binding ? ?(String name))
@@ -510,7 +464,7 @@ void Compiler.group_meta_function(Compiler c, List fn) {
 }
 
 /** Records that a compile-time import has just added its `meta` definitions
-    to the unit, so a staged group places them where the import stands. */
+    to the unit, so the group places them where the import stands. */
 void Compiler.record_meta_import(Compiler c) {
   if (c.groups_meta())
     c.meta_group.push(%(import ${c.unit_nodes ? c.unit_nodes.len() : 0}
@@ -552,7 +506,7 @@ static int _meta_local_include(Var node, String lib) {
 static Array _meta_group_units(Compiler c) {
   Array ordered = [];
   /* The runtime prelude declares more than `x2c.h` includes, and a body
-     can name any of it, so the module includes each runtime unit the
+     can name any of it, so the group includes each runtime unit the
      translation read, and the prelude and the compile-time surface when a
      collection pass has read none. */
   String lib = %"${x2c_get_root()}/lib/";
@@ -609,7 +563,7 @@ static Array _meta_group_units(Compiler c) {
   }
   /* An unreached function keeps its prototype, which code generated for
      the unit's types, such as a protocol adapter, may name; the optimizer
-     drops what nothing staged calls. */
+     drops what nothing calls. */
   Array units = [];
   foreach (List item, ordered) {
     if (!_function_identity(item, identity, name) ||
@@ -633,11 +587,6 @@ static List _meta_entry_function(
 static List _meta_call(String name, List arguments) =>
   %(expr () (call (expr () (ident ("x2c.ident" $name))) (args @arguments)));
 
-/* The entry of the group's module in the shape `x2c build --kind
-   meta-module` writes: the stamp, `x2c_module_reset`, which reinitializes
-   each mutable `meta static` value, and `x2c_module_targets`, a Map from
-   the name of each group function and of the reset entry to a `Func` that
-   calls it. */
 /* Whether `node` holds a braced initializer. */
 static int _meta_braced(Var node) {
   if (node is not <list>) return 0;
@@ -675,7 +624,14 @@ static Map _meta_initial_copies(Compiler c, Array units) {
   return copies;
 }
 
-static List _meta_group_entry(Compiler c, String stamp, Map initials) {
+/* The group's entry in the shape `x2c build --kind meta-module` writes:
+   the stamp, `x2c_module_reset`, which reinitializes each mutable `meta
+   static` value, and `x2c_module_targets`, a Map from the name of each
+   group function and of the reset entry to a `Func` that calls it. The
+   exported names end in `suffix`, so several groups link into one
+   program. */
+static List _meta_group_entry(
+  Compiler c, String stamp, Map initials, String suffix) {
   Array resets = [];
   foreach (List entry, c.meta_group)
     match (entry)
@@ -691,7 +647,8 @@ static List _meta_group_entry(Compiler c, String stamp, Map initials) {
           (op = (expr $type (ident $binding)) $initializer))));
       }
   List reset = _meta_entry_function(
-    c, %(void), "x2c_module_reset", %(block @{resets.list_free()}));
+    c, %(void), %"x2c_module_reset$suffix",
+    %(block @{resets.list_free()}));
   Array targets = [];
   List named = %(("x2c_module_reset" ${reset.caddr().cadr()}
                   ((func ((void))) void)));
@@ -699,7 +656,7 @@ static List _meta_group_entry(Compiler c, String stamp, Map initials) {
     match (entry) case %(function ?fn ?(String name) ?(Type type) *):
       named = named.append(%(($name ${fn.caddr().cadr()} $type)));
   /* A function whose values have no Var form, such as C's `bool` or a
-     record pointer, is called only from other staged code. */
+     record pointer, is called only from other group code. */
   int count = 0;
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
@@ -715,7 +672,7 @@ static List _meta_group_entry(Compiler c, String stamp, Map initials) {
     _meta_call("Map_update_n", %(${_meta_call("Map_new", %())}
       ${x2c_literal_int(count)} @{targets.list_free()})),
     AST_EXPRESSION, NULL);
-  List stamp_binding = c.sym.introduce("x2c_module_stamp");
+  List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
   return %(
     (declare (const char)
@@ -723,7 +680,7 @@ static List _meta_group_entry(Compiler c, String stamp, Map initials) {
                      (expr (* char) (literal (* char) $literal)))))
     $reset
     ${_meta_entry_function(
-        c, %("Map"), "x2c_module_targets",
+        c, %("Map"), %"x2c_module_targets$suffix",
         %(block (return ("Map") $table)))});
 }
 
@@ -751,11 +708,13 @@ static Var _meta_template_calls(Compiler c, Var node, List callee) {
 }
 
 /* Emits the group through the ordinary backend as `(hfile htext cfile
-   ctext)`, or returns NULL with `failure` set when it does not lower. The
-   emission borrows the unit's bindings and types and leaves the unit as it
-   found it: generated names, literal caches, helpers, initializers, and
-   semantic rows are its own. */
-static List _meta_group_code(Compiler c, String stamp, String &failure) {
+   ctext)` named by `stem`, with exported names ending in `suffix`, or
+   returns NULL with `failure` set when it does not lower. The emission
+   borrows the unit's bindings and types and leaves the unit as it found
+   it: generated names, literal caches, helpers, initializers, and semantic
+   rows are its own. */
+static List _meta_group_code(
+  Compiler c, String stamp, String stem, String suffix, String &failure) {
   Array units = _meta_group_units(c);
   struct Compiler saved = *c;
   struct GenNames names = *c.names;
@@ -783,7 +742,7 @@ static List _meta_group_code(Compiler c, String stamp, String &failure) {
     _.lambda_scopes = NULL;
     _.source_facts = 0;
     _.recovery_depth = saved.recovery_depth + 1;
-    _.filename = "group.x";
+    _.filename = %"$stem.x";
     _.diagnostics = Diagnostics.new(NULL, 1);
   }
   List code = NULL;
@@ -801,12 +760,12 @@ static List _meta_group_code(Compiler c, String stamp, String &failure) {
       ((fnmod (params (param ("Var") (bind () ()))
                       (param ("List") (bind () ())))))))));
     Map initials = _meta_initial_copies(c, units);
-    foreach (Var unit, _meta_group_entry(c, stamp, initials))
+    foreach (Var unit, _meta_group_entry(c, stamp, initials, suffix))
       units.push(unit);
     /* The unit's protocol adapters and their registration belong to the
-       program; staged code reaches the runtime's own. */
+       program; group code reaches the runtime's own. */
     List ast = c.transform(units.list_free());
-    code = generate_code_text(c, ast, "group");
+    code = generate_code_text(c, ast, stem);
   }
   catch %(?kind *detail): {
     List entries = c.diagnostics.entries();
@@ -819,8 +778,9 @@ static List _meta_group_code(Compiler c, String stamp, String &failure) {
   return code;
 }
 
-/* The identity of the C compiler at `cc`: its path and content hash. */
-static String _meta_cc_identity(String cc) {
+/** Returns the identity of the C compiler at `cc`: its path and content
+    hash. */
+String Compiler.meta_cc_identity(String cc) {
   String path = cc.contains("/") ? cc : x2c_find_program(cc);
   int ok = path != NULL;
   uint64_t hash = UINT64_C(1469598103934665603);
@@ -828,9 +788,390 @@ static String _meta_cc_identity(String cc) {
   return ok ? "%s %016llx".printf(path, (unsigned long long) hash) : cc;
 }
 
-/* Whether the group stages for an interactive session, which favors
-   latency: unoptimized code and a precompiled runtime header. */
-static int meta_session = 0;
+/** Returns the C compiler's first located error in `errors`, or else its
+    first line, joined with the next when it ends in a colon, as a linker's
+    undefined-symbol report does. */
+String Compiler.meta_cc_error(String errors) {
+  Array lines = [];
+  foreach (String line, (errors ? errors : "").split("\n")) {
+    String text = line.strip(NULL);
+    if (!text) continue;
+    if (text.contains(": error: ") && !text.startswith("clang:") &&
+        !text.startswith("cc:") && !text.startswith("gcc:"))
+      return text;
+    lines.push(text);
+  }
+  if (!lines.len()) return "the C compiler failed";
+  String first = lines[0];
+  if (!first.endswith(":") || lines.len() < 2) return first;
+  String next = lines[1];
+  if (next.endswith(":")) next = next[:next.len() - 1];
+  return %"$first $next";
+}
+
+/* The first name `node` reads that is a bodyless `meta` prototype nothing
+   supplies, or NULL. */
+static String _meta_unbound_callee(Compiler c, Var node) {
+  if (node is not <list>) return NULL;
+  Var bound;
+  match (node) case %(ident (binding ? ?(String name))): {
+    String unbound = %"<unbound $name>";
+    return unbound in c.meta_group_bound ||
+           (name in c.native_meta && !c.macro_lisp.try_get(name, bound) &&
+            !c.bind_native_meta(name)) ? name : NULL;
+  }
+  foreach (Var child, (List) node) {
+    String name = _meta_unbound_callee(c, child);
+    if (name) return name;
+  }
+  return NULL;
+}
+
+/* Why the group cannot link, or NULL: a function it calls is a bodyless
+   `meta` prototype that nothing supplies. */
+static String _meta_group_unbound(Compiler c) {
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ?fn *): {
+      String name = _meta_unbound_callee(c, fn);
+      if (name) return %"no binding for $name";
+    }
+  return NULL;
+}
+
+/* --- the project meta build --------------------------------------------- */
+
+/* Where the project meta build writes each unit's group, while it runs. */
+static String meta_build_directory = NULL;
+
+/** Directs the group of each unit the project meta build parses into
+    `directory`, or stops that when it is NULL. */
+void Compiler.use_meta_build_directory(String directory) {
+  meta_build_directory = directory;
+}
+
+/** Writes the group of a unit the project meta build parsed into the build
+    directory as `group-K.c` and `group-K.h`, K being its table, with the
+    x2c sources it read in `group-K.deps`, or its failure in
+    `group-K.failure`. A unit without `meta` functions writes nothing. */
+void Compiler.write_meta_build(Compiler c) {
+  int index = c.meta_build - 1, functions = 0;
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function *): functions++;
+  if (!functions || !meta_build_directory) return;
+  String base = %"$meta_build_directory/group-$index";
+  String failure = _meta_group_unbound(c);
+  List code = failure ? NULL : _meta_group_code(
+    c, build_module_stamp(), %"meta_group_$index", %"_$index", failure);
+  Array sources = [];
+  foreach (Var (path, _), c.deps) sources.push(path);
+  Path.write_text(%"$base.deps", "\n".join(sources.list_free()));
+  if (!code) {
+    Path.write_text(%"$base.failure", failure);
+    return;
+  }
+  (String hfile, String header, String cfile, String source) = code;
+  Path.write_text(%"$meta_build_directory/$hfile", header);
+  Path.write_text(%"$base.c", source);
+}
+
+/* --- the helper that runs a project's meta functions ---------------------- */
+
+/* The project's helper, its tables' failures by index, and the table each
+   input calls, which last for the process; a forked translation worker
+   inherits them. */
+static String helper_path = NULL;
+static Map helper_failures = NULL, helper_units = NULL;
+static Scope helper_scope = NULL;
+
+/* The helper this process runs, its ends of the two pipes, the reply bytes
+   read so far, the table the unit being translated calls, and whether that
+   unit's reset is still to be sent. */
+static pid_t helper_pid = 0, helper_owner = 0;
+static int helper_to = -1, helper_from = -1, helper_table = 0;
+static int helper_reset = 0;
+static Buffer helper_input = NULL;
+
+/** Stops the helper this process runs, which a translation worker does
+    when its units are done and every process does as it ends. */
+void Compiler.stop_meta_helper(void) { _helper_stop(0); }
+
+static void _helper_stop(int signal);
+
+static void _helper_shutdown(void) {
+  _helper_stop(0);
+  helper_scope.destroy();
+  helper_scope = NULL;
+  helper_path = NULL;
+  helper_failures = helper_units = NULL;
+  helper_input = NULL;
+}
+
+/** Uses the helper at `path`, or none when it is NULL, whose tables named
+    in `failures` could not be built, each with why, and whose table for
+    each input path is in `units`. */
+void Compiler.use_meta_helper(String path, Map failures, Map units) {
+  if (!path && !failures) return;
+  if (!helper_scope) Scope.shutdown_hook(_helper_shutdown);
+  Scope.push(&helper_scope);
+  helper_path = path ? String.new(path) : NULL;
+  helper_failures = failures ? failures.copy() : NULL;
+  helper_units = units ? units.copy() : NULL;
+  helper_input = Buffer.new(0);
+  Scope.pop();
+}
+
+/** Selects the table of the unit at `filename` for the calls that follow,
+    and resets the unit's `meta static` values before the first one. */
+void Compiler.begin_meta_unit(String filename) {
+  Var table;
+  helper_table = helper_units && filename &&
+    helper_units.try_get(Path.absolute(filename), table) ? table.integer() : 0;
+  helper_reset = 1;
+}
+
+/* Ends the helper this process started, if any, and forgets it: asks it
+   to quit, or sends it `signal`, and reaps it. */
+static int _helper_send(List message);
+
+static void _helper_stop(int signal) {
+  if (helper_pid > 0 && helper_owner == getpid()) {
+    if (signal) kill(helper_pid, signal);
+    else _helper_send(%(quit));
+    close(helper_to);
+    close(helper_from);
+    int status;
+    waitpid(helper_pid, &status, 0);
+  }
+  helper_pid = 0;
+  helper_to = helper_from = -1;
+  if (helper_input) helper_input.clear();
+}
+
+/* Opens a pipe whose ends no program this process starts inherits. */
+static int _helper_pipe(int ends[2]) {
+  if (pipe(ends)) return 0;
+  fcntl(ends[0], F_SETFD, FD_CLOEXEC);
+  fcntl(ends[1], F_SETFD, FD_CLOEXEC);
+  return 1;
+}
+
+/* Starts the helper unless this process runs one. A worker forked from a
+   process that ran one starts its own. Every pipe end is close-on-exec,
+   and the helper keeps only its descriptors 3 and 4, so it reads the end
+   of its requests as soon as this process closes its end or ends. */
+static int _helper_start(void) {
+  if (helper_pid > 0 && helper_owner == getpid()) return 1;
+  helper_pid = 0;
+  int requests[2], replies[2];
+  if (!_helper_pipe(requests)) return 0;
+  if (!_helper_pipe(replies)) {
+    close(requests[0]);
+    close(requests[1]);
+    return 0;
+  }
+  pid_t pid = fork();
+  if (!pid) {
+    int in = fcntl(requests[0], F_DUPFD_CLOEXEC, 10);
+    int out = fcntl(replies[1], F_DUPFD_CLOEXEC, 10);
+    dup2(in, 3);
+    dup2(out, 4);
+    execl(helper_path, helper_path, (char *) NULL);
+    _exit(127);
+  }
+  close(requests[0]);
+  close(replies[1]);
+  if (pid < 0) {
+    close(requests[1]);
+    close(replies[0]);
+    return 0;
+  }
+  helper_pid = pid;
+  helper_owner = getpid();
+  helper_to = requests[1];
+  helper_from = replies[0];
+  if (helper_input) helper_input.clear();
+  helper_reset = 1;
+  return 1;
+}
+
+/* Sends one frame, or returns 0 when the helper has gone. A write to a
+   helper that has exited must not end the compiler with SIGPIPE. */
+static int _helper_send(List message) {
+  Buffer out = $auto(Buffer.new(0));
+  if (!datum_write(out, message, 1)) return 0;
+  String frame = %"${out.len()}\n$out";
+  void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
+  size_t done = 0, size = frame.len();
+  while (done < size) {
+    ssize_t n = write(helper_to, (char *) frame + done, size - done);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) break;
+    done += n;
+  }
+  signal(SIGPIPE, previous);
+  return done == size;
+}
+
+/* The limit on one call from `X2C_META_TIMEOUT` in seconds, 60 by default;
+   zero or less is none. */
+static double _helper_limit(void) {
+  String text = Env.get("X2C_META_TIMEOUT");
+  return text ? atof(text) : 60.0;
+}
+
+static double _helper_now(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+/* Reads the next reply frame into `reply`. Returns 1, 0 when the helper
+   ended, or -1 when `deadline` passed first. */
+static int _helper_receive(double deadline, Var &reply) {
+  for (;;) {
+    String input = helper_input;
+    int newline = input.find("\n");
+    if (newline > 0) {
+      size_t length = strtoul(input, NULL, 10);
+      if (input.len() >= newline + 1 + length) {
+        String frame = String.new_len(input + newline + 1, length);
+        String rest = input[newline + 1 + length:];
+        helper_input.clear();
+        if (rest) helper_input.write(rest);
+        unsigned cursor = 0;
+        reply = void;
+        try return datum_read(frame, cursor, reply);
+        catch %((!or incomplete malformed) *): return 0;
+      }
+    }
+    int wait = -1;
+    if (deadline > 0) {
+      double left = deadline - _helper_now();
+      if (left <= 0) return -1;
+      wait = (int) (left * 1000) + 1;
+    }
+    struct pollfd ready = { .fd = helper_from, .events = POLLIN };
+    int polled = poll(&ready, 1, wait);
+    if (polled < 0 && errno == EINTR) continue;
+    if (polled == 0) return -1;
+    char bytes[65536];
+    ssize_t n = read(helper_from, bytes, sizeof bytes);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) return 0;
+    helper_input.write(String.new_len(bytes, n));
+  }
+}
+
+/* Why the helper that answered no more ended: how it exited, or the signal
+   that stopped it, which is also how a body that overflows the stack
+   ends. */
+static String _helper_ending(void) {
+  int status = 0;
+  pid_t pid = helper_pid;
+  close(helper_to);
+  close(helper_from);
+  helper_pid = 0;
+  helper_to = helper_from = -1;
+  if (waitpid(pid, &status, 0) != pid) return "the helper ended";
+  if (WIFEXITED(status)) {
+    int code = WEXITSTATUS(status);
+    return %"the body exited with status $code";
+  }
+  if (WIFSIGNALED(status)) {
+    int signal = WTERMSIG(status);
+    String name = String.new(strsignal(signal));
+    return %"the body crashed or overflowed the stack (signal $signal: $name)";
+  }
+  return "the helper ended";
+}
+
+/* Why the group function `name` has no table entry, from its type. */
+static String _helper_missing(Compiler c, String name) {
+  Type type = NULL;
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ? ?(String target) ?(Type own)):
+      if (target == name) type = own;
+  Type result = type ? type.apply() : NULL;
+  if (result && !c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
+  if (result && result.is_aggregate())
+    return "a struct or union result has no compile-time value; return its "
+           "fields as a List or Map";
+  if (result && result.is_pointer())
+    return "an address result has no compile-time value; return data built "
+           "from the pointed-to values";
+  return "a parameter or the result has no Var form, such as C's bool; use "
+         "int, a String, a Symbol, or a List";
+}
+
+static void _helper_refuse(Compiler c, String name, Token site, String why) {
+  c.report_error(
+    <macro>, "this function cannot run at compile time", site,
+    %("function: $name" "reason: $why"));
+}
+
+/** Calls the project `meta` function `name` in the helper with the values
+    `arguments`, for the call at `site`, and returns its result. A warning
+    the body makes is reported at `site` and a failure it reports is the
+    call's failure. A body that crashes, exits, or passes the deadline ends
+    the helper, which is reported at `site` and started again for the next
+    call. */
+Var Compiler.meta_helper_call(
+  Compiler c, String name, Token site, List arguments) {
+  Var failure;
+  if (!helper_path)
+    _helper_refuse(
+      c, name, site,
+      helper_failures && helper_failures.try_get(-1, failure)
+        ? failure : "the project meta module was not built");
+  if (helper_failures && helper_failures.try_get(helper_table, failure))
+    _helper_refuse(c, name, site, failure);
+  String missing = _helper_missing(c, name);
+  if (missing.startswith("a struct")) _helper_refuse(c, name, site, missing);
+  if (!_helper_start())
+    _helper_refuse(c, name, site, "the compile-time helper did not start");
+  if (helper_reset) {
+    _helper_send(%(reset $helper_table));
+    helper_reset = 0;
+  }
+  _helper_send(%(call $name $arguments));
+  double limit = _helper_limit();
+  double deadline = limit > 0 ? _helper_now() + limit : 0;
+  for (;;) {
+    Var reply;
+    int status = _helper_receive(deadline, reply);
+    if (status < 0) {
+      _helper_stop(SIGKILL);
+      c.report_error(
+        <macro>, "%s%g s".printf("this meta call ran longer than ", limit),
+        site,
+        %("function: $name"
+          "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+    }
+    if (!status)
+      c.report_error(
+        <macro>, "this meta call stopped the compile-time helper", site,
+        %("function: $name" "reason: ${_helper_ending()}"));
+    match (reply) {
+      case %(warning ?(String message) ?(List notes)):
+        c.report_warning(<macro>, message, site, notes);
+      case %(value ?value): return value;
+      case %(void): return void;
+      case %(error ?(String message) ?(List notes)):
+        c.report_error(<macro>, message, site, notes);
+      case %(missing): _helper_refuse(c, name, site, _helper_missing(c, name));
+      case %(failure (?code *detail)): Error.raise(code, detail);
+      default:
+        c.report_error(
+          <macro>, "this meta call stopped the compile-time helper", site,
+          %("function: $name" "reason: the helper sent an unknown reply"));
+    }
+  }
+}
+
+/* --- a REPL submission, staged in process ------------------------------- */
+
+/* Holds what staged `meta static` values allocate. */
+static Scope session_meta_scope = NULL;
 
 /* The flags of a session module: `-O0`, with the runtime header
    precompiled once under `root` when the C compiler can. */
@@ -864,31 +1205,10 @@ static List _meta_session_flags(String root, String stamp, String compiler) {
   return %(@flags "-include" $header);
 }
 
-/* The C compiler's first located error in `errors`, or else its first
-   line, joined with the next when it ends in a colon, as a linker's
-   undefined-symbol report does. */
-static String _meta_cc_error(String errors) {
-  Array lines = [];
-  foreach (String line, (errors ? errors : "").split("\n")) {
-    String text = line.strip(NULL);
-    if (!text) continue;
-    if (text.contains(": error: ") && !text.startswith("clang:") &&
-        !text.startswith("cc:") && !text.startswith("gcc:"))
-      return text;
-    lines.push(text);
-  }
-  if (!lines.len()) return "the C compiler failed";
-  String first = lines[0];
-  if (!first.endswith(":") || lines.len() < 2) return first;
-  String next = lines[1];
-  if (next.endswith(":")) next = next[:next.len() - 1];
-  return %"$first $next";
-}
-
 /* Builds the group's native module under the cache root, named by the
    SHA-256 of its emitted C, the compiler stamp, the C compiler's identity,
    the flags, and the runtime headers' directory, or reuses the module an
-   earlier translation built. Returns its path, or NULL with `failure` set
+   earlier submission built. Returns its path, or NULL with `failure` set
    when there is no cache or the group does not build. */
 static String _stage_meta_group(Compiler c, String &failure) {
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -896,12 +1216,11 @@ static String _stage_meta_group(Compiler c, String &failure) {
     failure = "native modules need a cache directory and a known compiler";
     return NULL;
   }
-  List code = _meta_group_code(c, stamp, failure);
+  List code = _meta_group_code(c, stamp, "group", "", failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
-  String compiler = _meta_cc_identity(meta_cc);
-  List flags = meta_session
-    ? _meta_session_flags(%"$root/meta", stamp, compiler) : _meta_flags();
+  String compiler = Compiler.meta_cc_identity(meta_cc);
+  List flags = _meta_session_flags(%"$root/meta", stamp, compiler);
   String key = String.sha256(
     %"$header\n$source\n$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir");
   String directory = %"$root/meta/$key";
@@ -909,31 +1228,19 @@ static String _stage_meta_group(Compiler c, String &failure) {
   if (Path.is_file(module)) return module;
   String output = %"$module.${"%ld".printf((long) getpid())}";
   failure = %"cannot write the module under $directory";
-  try Path.make_dirs(directory);
-  catch %((!or not-found io-fail) *): return NULL;
-  /* Workers that reach the same group wait for the first to build it. */
-  int lock = file_lock(%"$directory/lock", 1);
-  defer close(lock);
-  if (Path.is_file(module)) return module;
   try {
+    Path.make_dirs(directory);
     Path.write_text(%"$directory/$hfile", header);
     Path.write_text(%"$directory/$cfile", source);
   }
   catch %((!or not-found io-fail) *): return NULL;
   Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
-  String unit = %"$directory/$cfile";
-  /* An imported package's header is in its builds, and a vendored foreign
-     header it publishes is in its src, as a consumer's build finds them. */
-  List packages = %();
-  foreach (Var (_, root), c.package_roots)
-    packages = %(@packages "-iquote" ${%"$root/builds"}
-                 "-iquote" ${%"$root/src"});
   ToolAction action = linker.module_action(
     output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir
-              @packages $unit));
+              ${%"$directory/$cfile"}));
   String printed = NULL, errors = NULL;
   if (tool_capture(action.arguments, printed, errors)) {
-    failure = _meta_cc_error(errors);
+    failure = Compiler.meta_cc_error(errors);
     if (!failure.contains(directory))
       failure = %"$failure; the group's C is in $directory";
     return NULL;
@@ -943,88 +1250,8 @@ static String _stage_meta_group(Compiler c, String &failure) {
   return module;
 }
 
-/* The first name `node` reads that is a bodyless `meta` prototype nothing
-   supplies, or NULL. */
-static String _meta_unbound_callee(Compiler c, Var node) {
-  if (node is not <list>) return NULL;
-  Var bound;
-  match (node) case %(ident (binding ? ?(String name))): {
-    String unbound = %"<unbound $name>";
-    return unbound in c.meta_group_bound ||
-           (name in c.native_meta && !c.macro_lisp.try_get(name, bound) &&
-            !c.bind_native_meta(name)) ? name : NULL;
-  }
-  foreach (Var child, (List) node) {
-    String name = _meta_unbound_callee(c, child);
-    if (name) return name;
-  }
-  return NULL;
-}
-
-/* Why the group cannot link, or NULL: a function it calls is a bodyless
-   `meta` prototype that nothing supplies. */
-static String _meta_group_unbound(Compiler c) {
-  foreach (List entry, c.meta_group)
-    match (entry) case %(function ?fn *): {
-      String name = _meta_unbound_callee(c, fn);
-      if (name) return %"no binding for $name";
-    }
-  return NULL;
-}
-
-static String _load_meta_group(Compiler c, String &failure);
-
-/** Binds each unbound function of the pending group to its staged native
-    code when `name` is pending, after reinitializing the module's `meta
-    static` values for this unit in the unit's meta Scope. Returns whether
-    `name` is now native; a function that cannot run is reported at
-    `site`. */
-int Compiler.bind_meta_group(Compiler c, String name, Token site) {
-  if (!c.groups_meta() || name in c.meta_group_bound) return 0;
-  Type type = NULL;
-  foreach (List entry, c.meta_group)
-    match (entry) case %(function ? ?(String target) ?(Type own)):
-      if (target == name) type = own;
-  if (!type) return 0;
-  /* A record returned by value has no Var form of its own; its Func form
-     would hand back the compiler's copy of it. */
-  Type result = type.apply();
-  if (!c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
-  String reason = result && result.is_aggregate()
-    ? "a struct or union result has no compile-time value; return its "
-      "fields as a List or Map"
-    : NULL;
-  String failure = NULL;
-  if (!reason && !_load_meta_group(c, failure)) reason = failure;
-  if (!reason && !(name in c.meta_group_bound))
-    reason = result && result.is_pointer()
-      ? "an address result has no compile-time value; return data built "
-        "from the pointed-to values"
-      : "a parameter or the result has no Var form, such as C's bool; use "
-        "int, a String, a Symbol, or a List";
-  if (reason)
-    c.report_error(
-      <macro>, "this function cannot run at compile time", site,
-      %("function: $name" "reason: $reason"));
-  return 1;
-}
-
-/** Stages the unit's pending `meta` group now, for a caller such as the
-    REPL that adds functions to `meta_group` itself, and binds each group
-    function in the session. Returns the loaded module, or NULL with
-    `failure` set when the group does not stage. */
-String Compiler.stage_meta_group(Compiler c, String &failure) {
-  if (!c.groups_meta()) {
-    failure = "native modules are unavailable";
-    return NULL;
-  }
-  meta_session = 1;
-  defer meta_session = 0;
-  return _load_meta_group(c, failure);
-}
-
-/* Stages and loads the pending group and binds each of its functions not
-   yet bound. Returns the module, or NULL with `failure` set. */
+/* Stages and loads the group and binds each of its functions not yet
+   bound. Returns the module, or NULL with `failure` set. */
 static String _load_meta_group(Compiler c, String &failure) {
   failure = _meta_group_unbound(c);
   String module = failure ? NULL : _stage_meta_group(c, failure);
@@ -1033,7 +1260,7 @@ static String _load_meta_group(Compiler c, String &failure) {
   Map targets = Compiler.native_module_targets(module);
   if (!(module in c.meta_group_bound)) {
     c.meta_group_bound[module] = 1;
-    Scope.push(&c.meta_scope);
+    Scope.push(&session_meta_scope);
     ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
     Scope.pop();
   }
@@ -1046,4 +1273,29 @@ static String _load_meta_group(Compiler c, String &failure) {
       c.meta_group_bound[target] = 1;
     }
   return module;
+}
+
+/** Stages the session's `meta` group now, for the REPL, which adds
+    functions to `meta_group` itself, and binds each group function in the
+    session. Returns the loaded module, or NULL with `failure` set when the
+    group does not stage. */
+String Compiler.stage_meta_group(Compiler c, String &failure) {
+  if (!c.groups_meta()) {
+    failure = "native modules are unavailable";
+    return NULL;
+  }
+  return _load_meta_group(c, failure);
+}
+
+/** Binds the session's group function `name` when it is not bound yet, by
+    staging the group, and reports at `site` a function that cannot run.
+    Returns whether `name` is now bound. */
+int Compiler.bind_meta_group(Compiler c, String name, Token site) {
+  if (name in c.meta_group_bound) return 1;
+  String failure = NULL;
+  if (!_load_meta_group(c, failure) && !(name in c.meta_group_bound))
+    _helper_refuse(c, name, site, failure);
+  if (!(name in c.meta_group_bound))
+    _helper_refuse(c, name, site, _helper_missing(c, name));
+  return 1;
 }
