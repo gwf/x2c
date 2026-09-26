@@ -46,8 +46,9 @@ meta static List ms_names(Type type) {
 meta static List ms_count(Type type) =>
   x2c_literal_int(ms_fields(type).len());
 
-/* The spelling the developer wrote, which only the source text answers. */
-meta static List ms_spelling(Var node) =>
+/* The spelling the developer wrote, which only the source text answers.
+   A `Source` argument carries that text with the captured syntax. */
+meta static List ms_spelling(Source node) =>
   x2c_literal_string(x2c_source_text(node));
 
 /* A `meta` function that reaches no `Meta` operation, so it keeps both of
@@ -62,4 +63,4 @@ macro Expression $probe.names(Expr $value) => $ms_names($value);
 
 macro Expression $probe.count(Expr $value) => $ms_count($value);
 
-macro Expression $probe.spelling(Expr $value) => $(ms_spelling $value);
+macro Expression $probe.spelling(Expr $value) => $ms_spelling($value);

@@ -1,3 +1,4 @@
-meta static String capture_notice(Var path) => x2c_embed_text(path);
+meta static String capture_notice(Source path) => x2c_embed_text(path);
+meta static String definition_notice(String path) => x2c_embed_text(path);
 macro Expression $capture.notice(Literal $path) => $capture_notice($path);
-macro Expression $capture.definition_notice() => $capture_notice("../macro-embed-text-data.txt");
+macro Expression $capture.definition_notice() => $definition_notice("../macro-embed-text-data.txt");

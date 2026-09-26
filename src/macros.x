@@ -422,6 +422,7 @@ String x2c_binding_spelling(Var syntax) {
 }
 
 static Var _sdk_source_text(Var value) {
+  match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _sdk_guard("x2c.source.text");
   Var stored = void;
   Var key = ((ulong) value.u64);
@@ -433,6 +434,15 @@ static Var _sdk_source_text(Var value) {
   List source = stored;
   int begin = source.caddr(), end = source.last();
   return String.new_len(macro_sdk_compiler.text + begin, end - begin);
+}
+
+/** Returns what a `meta` parameter declared `Source` receives for the
+    captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
+    is the text the developer wrote and `F` the file it is in. */
+List meta_source_description(Var value) {
+  String text = _sdk_source_text(value);
+  List source = macro_sdk_source_captures[((ulong) value.u64)];
+  return %((text $text) (file ${source.cadr()}) (syntax $value));
 }
 
 /** Answers `x2c.source.text`, declared in `lib/meta.x`. */
@@ -947,11 +957,15 @@ static Var _sdk_embed_text(Var requested) {
   String source_file = macro_sdk_source_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
   else {
-    Var stored = void;
-    Var key = ((ulong) requested.u64);
-    if (!macro_sdk_source_captures ||
-        !macro_sdk_source_captures.try_get(key, stored) ||
-        !_literal_string(requested, requested_path))
+    Var stored = void, syntax = requested;
+    match (requested)
+      case %((text ?) (file ?(String file)) (syntax ?carried)): {
+        syntax = carried;
+        stored = %(source $file);
+      }
+    if (stored is void && macro_sdk_source_captures)
+      macro_sdk_source_captures.try_get(((ulong) requested.u64), stored);
+    if (stored is void || !_literal_string(syntax, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
         %("value: ${requested.repr()}"));

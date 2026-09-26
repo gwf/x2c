@@ -138,15 +138,20 @@ static const SymbolSet meta_operators = %<<"+" "-" "*" "/" "%" "<<" ">>"
     a parameter of type `want`, or of no declared type when `want` is NULL:
     a constant, captured syntax, or the result of another `$` call, which
     `call` evaluates. Captured literal syntax reaches a parameter that is not
-    syntax as the literal's value, and a `Type` parameter as the
-    description of its type. Anything else is reported at `site`. */
+    syntax as the literal's value, a `Type` parameter as the description
+    of its type, and a `Source` parameter with its source text. Anything
+    else is reported at `site`. */
 Var Compiler.meta_argument(
   Compiler c, List node, Type want, Token site, MetaCall call) {
   Var value = void;
-  if (want && c.sym.is_named_value_type(want, "Type"))
+  if (want)
     match (node)
-      case %(expr ? (meta-cap ?captured)):
-        return meta_type_description(captured);
+      case %(expr ? (meta-cap ?captured)): {
+        if (c.sym.is_named_value_type(want, "Type"))
+          return meta_type_description(captured);
+        if (c.sym.is_named_value_type(want, "Source"))
+          return meta_source_description(captured);
+      }
   match (node) {
     case %(expr ? (meta-cap ?captured)): {
       value = captured;

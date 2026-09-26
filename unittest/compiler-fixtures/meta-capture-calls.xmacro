@@ -1,8 +1,8 @@
 /* meta-capture-calls.xmacro -- the meta functions
    meta-capture-calls.x imports. */
 
-meta static String capture_text(List code) {
-  List saved = code;
+meta static String capture_text(Source code) {
+  Source saved = code;
   return x2c_source_text(saved);
 }
 
