@@ -798,10 +798,10 @@ String Compiler.meta_cc_identity(String cc) {
   return ok ? "%s %016llx".printf(path, (unsigned long long) hash) : cc;
 }
 
-/** Returns the C compiler's first located error in `errors`, or else its
-    first line, joined with the next when it ends in a colon, as a linker's
-    undefined-symbol report does. */
-String Compiler.meta_cc_error(String errors) {
+/* The C compiler's first located error in `errors`, or else its first
+   line, joined with the next when it ends in a colon, as a linker's
+   undefined-symbol report does. */
+static String _meta_cc_error(String errors) {
   Array lines = [];
   foreach (String line, (errors ? errors : "").split("\n")) {
     String text = line.strip(NULL);
@@ -817,6 +817,17 @@ String Compiler.meta_cc_error(String errors) {
   String next = lines[1];
   if (next.endswith(":")) next = next[:next.len() - 1];
   return %"$first $next";
+}
+
+/** Runs `arguments`, a C compiler command building the group C in
+    `directory`, and returns NULL, or else its first error, which names
+    `directory` when a group's C is the cause. */
+String Compiler.meta_cc_run(List arguments, String directory) {
+  String printed = NULL, errors = NULL;
+  if (!tool_capture(arguments, printed, errors)) return NULL;
+  String failure = _meta_cc_error(errors);
+  return !directory || failure.contains(directory) ? failure
+    : %"$failure; the group's C is in $directory";
 }
 
 /* The first name `node` reads that is a bodyless `meta` prototype nothing
@@ -905,7 +916,7 @@ static Buffer helper_input = NULL;
     when its units are done and every process does as it ends. */
 void Compiler.stop_meta_helper(void) { _helper_stop(0); }
 
-static void _helper_stop(int signal);
+static int _helper_stop(int signal);
 
 static void _helper_shutdown(void) {
   _helper_stop(0);
@@ -940,29 +951,22 @@ void Compiler.begin_meta_unit(String filename) {
 }
 
 /* Ends the helper this process started, if any, and forgets it: asks it
-   to quit, or sends it `signal`, and reaps it. */
+   to quit, or sends it `signal`, and reaps it. Returns its wait status. */
 static int _helper_send(List message);
 
-static void _helper_stop(int signal) {
+static int _helper_stop(int signal) {
+  int status = 0;
   if (helper_pid > 0 && helper_owner == getpid()) {
     if (signal) kill(helper_pid, signal);
     else _helper_send(%(quit));
     close(helper_to);
     close(helper_from);
-    int status;
     waitpid(helper_pid, &status, 0);
   }
   helper_pid = 0;
   helper_to = helper_from = -1;
   if (helper_input) helper_input.clear();
-}
-
-/* Opens a pipe whose ends no program this process starts inherits. */
-static int _helper_pipe(int ends[2]) {
-  if (pipe(ends)) return 0;
-  fcntl(ends[0], F_SETFD, FD_CLOEXEC);
-  fcntl(ends[1], F_SETFD, FD_CLOEXEC);
-  return 1;
+  return status;
 }
 
 /* Starts the helper unless this process runs one. A worker forked from a
@@ -973,11 +977,10 @@ static int _helper_start(void) {
   if (helper_pid > 0 && helper_owner == getpid()) return 1;
   helper_pid = 0;
   int requests[2], replies[2];
-  if (!_helper_pipe(requests)) return 0;
-  if (!_helper_pipe(replies)) {
-    close(requests[0]);
-    close(requests[1]);
-    return 0;
+  if (pipe(requests) || pipe(replies)) return 0;
+  for (int i = 0; i < 2; i++) {
+    fcntl(requests[i], F_SETFD, FD_CLOEXEC);
+    fcntl(replies[i], F_SETFD, FD_CLOEXEC);
   }
   pid_t pid = fork();
   if (!pid) {
@@ -990,11 +993,6 @@ static int _helper_start(void) {
   }
   close(requests[0]);
   close(replies[1]);
-  if (pid < 0) {
-    close(requests[1]);
-    close(replies[0]);
-    return 0;
-  }
   helper_pid = pid;
   helper_owner = getpid();
   helper_to = requests[1];
@@ -1076,23 +1074,12 @@ static int _helper_receive(double deadline, Var &reply) {
    that stopped it, which is also how a body that overflows the stack
    ends. */
 static String _helper_ending(void) {
-  int status = 0;
-  pid_t pid = helper_pid;
-  close(helper_to);
-  close(helper_from);
-  helper_pid = 0;
-  helper_to = helper_from = -1;
-  if (waitpid(pid, &status, 0) != pid) return "the helper ended";
-  if (WIFEXITED(status)) {
-    int code = WEXITSTATUS(status);
-    return %"the body exited with status $code";
-  }
-  if (WIFSIGNALED(status)) {
-    int signal = WTERMSIG(status);
-    String name = String.new(strsignal(signal));
-    return %"the body crashed or overflowed the stack (signal $signal: $name)";
-  }
-  return "the helper ended";
+  int status = _helper_stop(0);
+  int code = WEXITSTATUS(status);
+  if (!WIFSIGNALED(status)) return %"the body exited with status $code";
+  int signal = WTERMSIG(status);
+  String name = String.new(strsignal(signal));
+  return %"the body crashed or overflowed the stack (signal $signal: $name)";
 }
 
 /* Why the group function `name` has no table entry, from its type. */
@@ -1185,46 +1172,11 @@ Var Compiler.meta_helper_call(
 /* Holds what staged `meta static` values allocate. */
 static Scope session_meta_scope = NULL;
 
-/* The flags of a session module without a precompiled header. */
-static List _meta_flags_plain(void) => %("-fsigned-char" "-fPIC" "-O0");
-
-/* The flags of a session module: `-O0`, with the runtime header
-   precompiled once under `root` when the C compiler can. */
-static List _meta_session_flags(String root, String stamp, String compiler) {
-  List flags = _meta_flags_plain();
-  /* The runtime header's text is part of the key: a precompiled header
-     refuses to load once the header it was built from changes. */
-  String runtime = NULL;
-  try runtime = Path.read_text(%"$meta_include_dir/x2c.h");
-  catch %((!or not-found io-fail) *): return flags;
-  String digest = runtime.sha256();
-  String key = String.sha256(
-    %"$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir\n$digest");
-  String directory = %"$root/prefix-$key", header = %"$directory/runtime.h";
-  String built = %"$header.gch";
-  if (!Path.is_file(built)) {
-    String output = %"$built.${"%ld".printf((long) getpid())}";
-    String printed = NULL, errors = NULL;
-    try {
-      Path.make_dirs(directory);
-      Path.write_text(header, "#include \"x2c.h\"\n");
-    }
-    catch %((!or not-found io-fail) *): return flags;
-    if (tool_capture(%($meta_cc @flags "-x" "c-header" "-iquote"
-                       $meta_include_dir $header "-o" $output),
-                     printed, errors))
-      return flags;
-    try Path.move_to(output, built);
-    catch %((!or not-found io-fail) *): return flags;
-  }
-  return %(@flags "-include" $header);
-}
-
 /* Builds the group's native module under the cache root, named by the
    SHA-256 of its emitted C, the compiler stamp, the C compiler's identity,
-   the flags, and the runtime headers' directory, or reuses the module an
-   earlier submission built. Returns its path, or NULL with `failure` set
-   when there is no cache or the group does not build. */
+   and the runtime headers' directory, or reuses the module an earlier
+   submission built. Returns its path, or NULL with `failure` set when
+   there is no cache or the group does not build. */
 static String _stage_meta_group(Compiler c, String &failure) {
   String root = script_cache_root(), stamp = build_module_stamp();
   if (!root || !stamp) {
@@ -1234,44 +1186,22 @@ static String _stage_meta_group(Compiler c, String &failure) {
   List code = _meta_group_code(c, stamp, "group", "", failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
-  String compiler = Compiler.meta_cc_identity(meta_cc);
-  List flags = _meta_session_flags(%"$root/meta", stamp, compiler);
-  String key = String.sha256(
-    %"$header\n$source\n$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir");
+  String key = String.sha256(%"$header\n$source\n$stamp\n"
+    + %"${Compiler.meta_cc_identity(meta_cc)}\n$meta_include_dir");
   String directory = %"$root/meta/$key";
   String module = %"$directory/group.module";
   if (Path.is_file(module)) return module;
   String output = %"$module.${"%ld".printf((long) getpid())}";
-  failure = %"cannot write the module under $directory";
-  try {
-    Path.make_dirs(directory);
-    Path.write_text(%"$directory/$hfile", header);
-    Path.write_text(%"$directory/$cfile", source);
-  }
-  catch %((!or not-found io-fail) *): return NULL;
+  Path.make_dirs(directory);
+  Path.write_text(%"$directory/$hfile", header);
+  Path.write_text(%"$directory/$cfile", source);
   Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
-  ToolAction action = linker.module_action(
-    output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir
-              ${%"$directory/$cfile"}));
-  String printed = NULL, errors = NULL;
-  int status = tool_capture(action.arguments, printed, errors);
-  /* A precompiled runtime header refuses to load once a header it read
-     changes, which its key does not see, so the module builds without
-     it. */
-  if (status && flags.len() > 3) {
-    action = linker.module_action(
-      output, %(@{_meta_flags_plain()} "-iquote" $directory
-                "-iquote" $meta_include_dir ${%"$directory/$cfile"}));
-    status = tool_capture(action.arguments, printed, errors);
-  }
-  if (status) {
-    failure = Compiler.meta_cc_error(errors);
-    if (!failure.contains(directory))
-      failure = %"$failure; the group's C is in $directory";
-    return NULL;
-  }
-  try Path.move_to(output, module);
-  catch %((!or not-found io-fail) *): return NULL;
+  failure = Compiler.meta_cc_run(linker.module_action(
+    output, %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
+              "-iquote" $meta_include_dir ${%"$directory/$cfile"}))
+    .arguments, directory);
+  if (failure) return NULL;
+  Path.move_to(output, module);
   return module;
 }
 
