@@ -720,6 +720,379 @@ commands/lint/x2c-lint.x:125; question lint `--fix` shelling out
 (commands/lint/x2c-lint.x:132-156). Whether graph's helpers duplicate
 src/regions.x is tracked in section 6 (C04-C06, C13).
 
+# x2c subsystem map addendum: types, protocols, translation state
+
+Read-only research for the rebuild spike. Every file:line citation below was
+read directly in current `dev` during this pass (line counts are `wc -l`,
+2026-09-26). Section 2.1-2.3 of `.context/rebuild/map.md` already covers
+`compiler.x`'s shallow-parse dispatch loop and declaration freeze/thaw in
+detail; this section cross-references those instead of repeating them, and
+treats `lib/var-tags.xmacro` only at the point where `type-ledger.x` projects
+it (the ledger itself is `.context/rebuild/map.md` section 2.8).
+
+### 2.13 Types, protocols, and translation state (src/type.x, src/type-ledger.x, src/protocol.x, src/compiler.x)
+
+#### Lines
+
+type.x 987, type-ledger.x 42, protocol.x 2558, compiler.x 3905 (total 7,492).
+`lib/var-tags.xmacro` (415 lines, mapped in section 2.8) supplies the two
+tables `type-ledger.x` projects; no line count is double-counted here.
+
+#### Purpose
+
+`type.x` defines `Type` as canonical `List` syntax (declarator modifiers plus
+a base) and gives it structural predicates, canonicalization, and the C
+declarator round-trip (`Type` <-> `(declare ...)` AST). `type-ledger.x` is a
+42-line adapter: the one compiler unit that imports the shared `Var` tag
+ledger, so every other unit that only needs `Type` predicates avoids that
+meta-time cost. `protocol.x` turns parsed protocol bodies and adoptions into
+per-unit registries, resolves each participant's members against a protocol's
+declared signatures, and generates the adapters, native aliases, and `Var`
+descriptor thunks those resolutions require. `compiler.x` declares the
+`Compiler` struct that every phase (tokenizer, parser, macro expander,
+comptime lowerer, protocol resolver, transform, generator) shares, plus the
+`Sym` symbol table, semantic transactions, and the freeze/thaw encoding that
+lets a declaration be parsed once and replayed from cache or a `.xi`
+interface. Together the four files are the compiler's one notion of "what a
+name means here and now": `type.x` says what a type is, `protocol.x` says
+which methods a type answers to, and `compiler.x` says where both are stored
+per translation unit and how that state is checkpointed.
+
+#### Key types
+
+| Name | File | Role |
+| --- | --- | --- |
+| `Type` (`typedef List`) | type.x:17 | canonical semantic type: modifiers + base |
+| `Compiler` (struct, ~110 fields) | compiler.x:71-184 | one translation unit's mutable state, shared via pointer |
+| `Sym` | compiler.x:231-236 | scope stack + globals + statics + binding_facts, owns a back-pointer to `Compiler` |
+| `SymScope` | compiler.x:56-58 | one lexical scope's three mutable maps (symbols, bindings, enumerators) plus local macros |
+| `SymTxn` | compiler.x:2526-2536 | reversible snapshot of one semantic scope plus counters/statics/facts/layouts |
+| `GenNames` | compiler.x:46-49 | unit-shared fresh-name counters and the live binding-number cursor |
+| `ScriptUnit` | compiler.x:29-32 | shebang-script identity shared by collection and full parse |
+| `protocol-record` (List) | protocol.x:387,2549 | `(base binder (associated ...) (members ...))`, one per declared protocol body |
+| `adopt` (List) | protocol.x:148-155 | `(adopt base participant storage [representation|tag] location)` |
+| `protocol-conformance` (List) | protocol.x:867-870,1075-1078 | resolved `(base participant forward reverse variables bindings (members rows))` |
+
+#### Entry points
+
+| Name | File:line | Called from | Role |
+| --- | --- | --- | --- |
+| `Type.canonicalize` / `Type.declared` | type.x:674,680 | expressions.x, protocol.x, comptime.x, transform.x | strip storage/qualifiers for identity vs. keep declared qualifiers |
+| `Type.var_tag` / `Type.fixed_var_tag` | type.x:608,597 | expressions.x:156, comptime.x (6 sites), compiler.x:3746 | unit-local then process-lifetime `Var` tag lookup |
+| `List.type_from_ast` | type.x:983 | protocol.x (member signatures), Sym.declare (compiler.x:3204) | AST declarator -> semantic `Type` |
+| `Type.declaration_ast` / `.parameter_ast` | type.x:72,188 | protocol.x adapter generation, generate.x | semantic `Type` -> synthesized declarator AST |
+| `Type.builtin_var_tags` / `Type.var_tag_rows` | type-ledger.x:39,42 | type.x:521,601,535 (forward-declared there) | process-lifetime ledger projections |
+| `Compiler.publish_protocol_node` | protocol.x:513 | parse_protocol_declaration (protocol.x:2483,2487) | validates+installs one parsed protocol/adopt node |
+| `Compiler.resolve_protocols` | protocol.x:1089 | Compiler.full_parse (compiler.x:2026) | resolves every visible adoption for the unit |
+| `Compiler.protocol_members_for` | protocol.x:1318 | resolve_protocol_member, dump_conformance, macros.x, comptime.x | cached per-(base,participant) conformance row, resolves on first ask |
+| `Compiler.resolve_protocol_member` | protocol.x:1723 | expressions.x (dot calls, punctuation), comptime.x | `(binding signature)` for one member name, or null |
+| `Compiler.generate_protocol_adapters` | protocol.x:2295 | main.x:148, before `_transform_ast` | emits adapters/thunks/native aliases into the AST |
+| `Compiler.rebuild_protocols` | protocol.x:261 | Compiler.full_parse (compiler.x:2016), `_install_import_protocols` (protocol.x:1310) | rebuilds protocols/adoptions/proto_cache from a symbol map |
+| `Compiler.full_parse` | compiler.x:1999 | frontend.x/main.x per unit | drives the whole parse; resets and rebuilds protocol/type unit state |
+| `Compiler.begin_semantic_transaction` / `SymTxn.commit` / `.rollback` | compiler.x:2545,2582,2639 | macros.x speculative expansion, comptime.x, parse.x recovery | reversible symbol/statics/facts/layout snapshot |
+| `Sym.declare` / `Sym.bind_identity` | compiler.x:3187,3244 | parse.x, statements.x, macros.x | install a new vs. an already-identified binding's type |
+| `Sym.resolve_key` / `Sym.next_typedef` | compiler.x:3572,3584 | expressions.x, transform.x, protocol.x indirectly | walk a typedef chain to its declared form |
+| `Sym.var_tag_for_type` | compiler.x:3771 | expressions.x:4283 (non-Var -> Var boxing) | walks typedefs to the first type with a registered `Var` tag |
+
+#### Data flow
+
+Per unit, `Compiler.full_parse` (compiler.x:1999-2110) resets `sym`, protocol
+maps, and meta caches to empty, then calls `rebuild_protocols(globs)`
+(compiler.x:2016) to install every protocol/adopt row already visible in the
+global symbol map (source-declared and replayed-from-cache alike), then
+`resolve_protocols()` (compiler.x:2026) to resolve every visible adoption
+before any body is parsed. The parse loop itself (parse.x/expressions.x/
+statements.x, cross-referenced in map.md 2.1-2.2) reads `Type`s off `Sym` and
+calls `Compiler.resolve_protocol_member` while resolving dot calls and
+operators; a declared `Var T.var(T)` signature is captured as a side effect
+of `Sym.define`/`Sym.declare` via `_seed_declared_var_tag`
+(compiler.x:2880-2892, 2898), populating `type.x`'s per-unit
+`declared_typetags` table with no separate protocol-adoption step. After
+`unit.parse()` returns, `main.x:148` calls `generate_protocol_adapters`
+once over the whole AST (adding early declarations/inits via
+`Compiler.add_early`/`add_init`) before the fixed-point `transform` pass
+begins; only then do lambda lowering, cleanup, and emission see the
+generated adapters as ordinary AST nodes.
+
+The `Compiler` struct's ~110 fields (compiler.x:71-184) group by owning
+phase:
+
+- **Session/unit identity** (frontend.x, shared with child compilers on
+  `_new(owner)`, compiler.x:348-369): `filename`, `text`, `root_dir`,
+  `package*` (5 fields), `include_dirs`, `names` (GenNames), `sources`,
+  `source_map`, `unit_script`, `script`.
+- **Token navigation** (parse.x/tokenizer.x): `token`, `input_boundary`,
+  `tokenizer`, `directives_taken`, `braces`.
+- **Preprocessor/collection** (collect.x, cross-ref map.md 2.1):
+  `object_macros`, `arms`, `arm_stacks`, `layout_marks`, `packed_marks`,
+  `kw_seen`, `open_linkage`, `layout`, `runtime_inc`, `runtime_hdrs`,
+  `collect_protocols`, `shallow`, `source_private`.
+- **Symbol/type state** (this section, compiler.x/type.x): `sym` (Sym),
+  `aggregate_type`, `params`, `key_ids`, `fixed` (transform fixed-point map,
+  owned by transform.x but stored here), `declaration_effects`.
+- **Protocol registries** (this section, protocol.x): `protocols`,
+  `conforms`, `protocol_helpers`, `proto_cache`, `adoptions`,
+  `import_protocols`, `in_proto`.
+- **Macro/comptime state** (map.md 2.3): `macros`, `kw_aliases`,
+  `macro_stack`, `macro_holes`, `local_macro_captures`,
+  `local_macro_capture_scopes`, `macro_count`, `imports`, `macro_lisp`,
+  `import_src`, `borrowed_lisp`, `inherited_lisp`, `builtin_defs`,
+  `meta_defs`, `meta_comptime`, `meta_regions`, `meta_values`,
+  `meta_layouts`, `native_meta`, `meta_body`, `declaration_projection`,
+  `declaration_produced`, `runtime_literals`.
+- **Lambda/match/region** (map.md 2.4-2.5): `lambda_scopes`, `match_types`,
+  `match_is`, `in_pattern`, `needs_exception`.
+- **Generation/init** (generate.x/cache.x): `init_tokens`,
+  `static_init_deps`, `fn_defs`, `id_keys`, `inits`, `init_fn`, `fini_fn`,
+  `early_decls`, `prelude`, `inline_header`.
+- **Diagnostics/origin** (diagnostics.x): `fn_name`, `diagnostics`,
+  `import_stack`, `origins`, `origin`, `recovery_depth`.
+- **Editor/source facts** (src/editor.x, sourceview.x): `source_facts`,
+  `source_primary`, `source_occurrences`, `source_definitions`,
+  `source_declarations`, `source_texts`.
+
+`Sym` (compiler.x:231-236) is the actual mutable symbol table underneath
+`compiler.sym`: a `Block` of `SymScope` plus `globals`/`statics`/
+`binding_facts` maps. `SymTxn` (compiler.x:2526-2536, `begin/commit/
+commit_transient/rollback` at 2545-2661) is the one reversible-write
+primitive that macro expansion trial, comptime lowering, and protocol
+adoption resolution during a speculative parse all build on; it snapshots
+the active scope's three maps, `sym.statics`, `sym.binding_facts`,
+`compiler.meta_layouts`, `names.counters`, `names.next_binding`,
+`sym.local_macro_names`, `init_fn`/`fini_fn`, and (conditionally)
+`source_definitions`/`source_occurrences` -- explicitly not parser position
+or any other compiler field (doc comment, compiler.x:2538-2543).
+
+#### Coupling
+
+`protocol.x` includes `compiler.x` (protocol.x:11) and is itself included by
+`compiler.x` (compiler.x:202), so the two are one mutual-recursion unit at
+build time; `type.x` sits below both (compiler.x:17, protocol.x transitively).
+`type-ledger.x` is the only unit that imports `lib/var-tags.xmacro`
+(type-ledger.x:12; comment at type.x:519 and lib/var-tags.xmacro:9-13), so
+`type.x`'s two forward-declared functions `Type.builtin_var_tags`/
+`Type.var_tag_rows` (type.x:520-521) are defined only where `type-ledger.x`
+is separately linked in; every other of the ~20 src/ units that `#include
+"type.x"` (expressions.x, cleanup.x, diagnostics.x, transform.x, cache.x,
+comptime.x, regions.x, parse.x, literals.x, lambda.x -- grepped list) pays
+only `type.x`'s cost. `macros.x` and `comptime.x` call
+`sym.resolve_key`/`field_order`/`protocol_members_for` (already noted in
+map.md 2.3's coupling); `cleanup.x` calls `type.x`'s `ast_direct_identifier`/
+`ast_indirect_identifier`/`ast_addressed_identifier` (type.x:78-150,
+consumers at cleanup.x:434-550) to find the single name an error-transfer
+`volatile` qualifier must reach. `main.x` is the only caller of
+`generate_protocol_adapters` and `dump_conformance` (protocol.x:2295,1437;
+main.x:145,148), making protocol-adapter generation a driver-level phase
+boundary rather than something `compiler.x`'s own pipeline sequences.
+
+#### Features implemented
+
+Protocol declaration and bodyless adoption, `static`/`meta` adoption
+modifiers, `as R` representation reuse and `tag <sym>` explicit `Var` tags
+(docs/src/guide/protocols.md "Declaration and adoption"); associated types
+with signature unification (protocol.x:588-650, doc "Associated types");
+member resolution order (participant method, then nearest inherited
+ancestor, then ordinary base default; doc "Member resolution", protocol.x:
+901-993 `_resolve_members`); native protocols mapping members straight to C
+functions with `_Generic`/`_Static_assert` checks (doc "Native protocols",
+protocol.x:812-873, 1998-2008); operator/punctuation dispatch tables
+(protocol.x:1378-1401, doc "Punctuation"); protocol-backed direct compound
+updates (`Compiler.protocol_update_helper`, protocol.x:1740, doc
+"Protocol-backed direct updates"); temporary-argument `discard` helpers
+(protocol.x:1818-1890, doc "Punctuation" discard paragraph); `Var` descriptor
+registration and boxed dispatch thunks (protocol.x:2051-2287); dynamic
+numeric conversion's compile-time half (`Type.numeric_literal`,
+`.numeric_literal_value`, type.x:411-497, doc "Dynamic numeric conversion");
+scalar canonicalization and usual-arithmetic-conversion selection
+(`Type.scalar`, `.promote`, `.widest`, type.x:292-335,787-831, doc "Types and
+conversions"); named-type substitution rules for `Var` aliases and typedef
+ancestry (doc "Types and conversions" paragraphs 3-4, `Sym.resolve_key`/
+`local_type`, compiler.x:3572-3683); function prototype/definition contract
+matching across conditional arms (`_function_completion_contract`,
+compiler.x:3286-3408, doc "Host preprocessing" conditional-arm rules).
+
+#### Interplay
+
+**Meta/comptime**: `comptime.x` calls `Type.scalar_tag`/`is_enum`/
+`fixed_var_tag` at 8+ sites to translate x2c numeric operations into Lisp
+with C's exact width/sign rules, and reads `compiler.meta_layouts` (a
+`Compiler` field, rolled back by `SymTxn`) as the compile-time struct-layout
+cache. **Macros**: a macro's expansion runs inside a `SymTxn`-guarded trial
+so a declined expansion (meta-only diagnosis, hygiene failure) leaves no
+protocol or type-tag residue in the committed scope; `_declaration_macro`/
+freeze/thaw (compiler.x:1218-1343, map.md 2.1) can retain a `(adopt ...)` or
+`(protocol ...)` node as portable data across a cached declaration bundle.
+**Lisp**: none of `type.x`/`protocol.x` calls into `lib/lisp.x` directly;
+the crossing is one level up, through `comptime.x`'s Lisp lowering, which is
+where `Type` facts become `C.*` runtime calls. **The machine**: no
+interplay -- the wordcode machine (map.md 2.4) serves match and Lisp AUTO,
+neither of which types are involved. **C**: native protocol adoption emits
+literal `#define`/`_Generic` aliases (protocol.x:1998-2008); ordinary
+adapters and `Var` thunks are synthesized function ASTs
+(`_generate_protocol_function`, protocol.x:1927-1971) that the ordinary
+emitter (map.md's `Compiler.emit`) lowers like any other function, so no
+special-cased C ever bypasses `generate.x`/`emit.x`. **Var/List**: `Type`
+*is* `List` (type.x:17); the `Var(T)` protocol is the compile-time mirror of
+the runtime `Var` tag/descriptor system from `lib/var-tags.xmacro`
+(map.md 2.8) and `lib/var.x`'s `VarMethods` descriptor struct -- a
+participant's adopted member becomes a `VarMethods` field
+(`_generate_descriptor_registration`, protocol.x:2051-2120) only when
+`compiler.sym.lookup_field(%(struct "VarMethods"), member)` says the runtime
+struct has that slot, so the boxed-dispatch surface is bounded by a single
+runtime declaration, not duplicated in the compiler.
+
+#### Parallel implementations
+
+| est lines | what | file:line evidence |
+| --- | --- | --- |
+| ~35 | four separate hop-budgeted typedef-chain walkers, each re-deriving "canonicalize, check typedef, fetch target via `_typedef_target`/`sym.get`, replace base, recurse, error past budget" | `_resolve_key_helper` compiler.x:3557-3569; `Sym.next_typedef` compiler.x:3584-3591; `_normalize_declared_type` compiler.x:3724-3737; `_var_tag_for_type_helper` compiler.x:3743-3764 |
+| ~20 | `Sym.declare` and `Sym.bind_identity` duplicate their typedef-binding-facts block (`ntype`/`emitted` local-typedef naming) and their automatic-local binding-facts block almost verbatim | compiler.x:3213-3229 vs 3250-3258; compiler.x:3230-3239 vs 3260-3263 |
+| ~10 | three public accessors (`Type.scalar_tag`, `.var_numeric_extractor`, `.var_numeric_update_helper`) each independently recompute `_scalar_row` (itself `type.scalar()` + a map lookup) for the same `type`, so a caller wanting two facts about one type pays the lookup twice (seen back-to-back at expressions.x:4224-4226) | type.x:356-378; caller expressions.x:4222-4227 |
+| ~15 | the freeze/thaw declaration-syntax encoding (compiler.x:1274-1343, already flagged in map.md 2.1 against collect.x's `.xi` encoding) also independently re-encodes the same `(adopt ...)`/`(protocol ...)` List shapes that `protocol.x` already treats as canonical data; no protocol-specific case exists in freeze/thaw, but every adoption/record shape must survive its generic List-and-token walk unchanged | protocol.x:148-155,387-395,2549-2553 (shapes) vs compiler.x:1286-1306 (generic walk) |
+
+None of these looks like dead machinery; each is a plausible single-helper
+consolidation, not a deletion candidate.
+
+#### Suspect abstractions
+
+| name | location | claimed purpose | consumers | why suspect | est lines |
+| --- | --- | --- | --- | --- | --- |
+| `declared_typetags` unit-local static map | type.x:526,547-556 | let a source `T_var` converter register a `Var` tag without a process-wide table entry | `Type.register_var_tag/_adoption`, `Type.var_converter/var_tag` (type.x:564-615) | lives outside `Compiler`/`Sym` entirely as a file-static, so it is invisible to `SymTxn` snapshot/rollback (compiler.x:2526-2661 does not mention it) even though `meta_layouts`, a peer per-unit cache, is explicitly rolled back; not confirmed to cause an observable bug (see Open questions) | ~30 |
+| `_adoption_row`/path-keyed static adoptions | protocol.x:177-220,292-320,464-504 | let a `static protocol` adoption stay invisible outside its declaring file even inside one multi-file collected unit | `_install_protocol_adoption`, `_publish_protocol_adoption`, `resolve_protocols` | every call site branches on `storage == <static>` to pick a 2- or 3-element map key, and `_adoption_visibility`/`_visible_adoption_row` (188-211) then re-derive which of up to two stored rows (external, local) is the effective one; workable but the two-key map plus separate visibility resolver is more moving parts than a single row carrying its own visibility, and I did not find a case needing more than the external/local pair | ~90 across the cited spans |
+
+Both are borderline: they implement a specific documented rule (translation-
+unit-local adoption privacy; unit-scoped `Var` tags) rather than solving a
+problem nobody asked for, so I would confirm the rule is still wanted before
+touching either in a rebuild, not delete them outright.
+
+#### Must preserve
+
+- Member resolution order -- participant method, then nearest inherited
+  ancestor, then ordinary base default, `Var(T)` normally exact except
+  `as R` -- docs/src/guide/protocols.md "Member resolution" and "`Var(T)`
+  normally remains exact" paragraph; implemented protocol.x:936-945,
+  273-278; pinned by `unittest/compiler-fixtures/relative-adoption*`,
+  `tag-scope-a/b.x` probes.
+- A generated method cannot have both local and external linkage, and two
+  ordinary defaults for one member is a hard error naming both protocols --
+  docs/src/guide/protocols.md lines 153-156, 371-378; implemented
+  `_generated_owner`/`_report_generated_collision` protocol.x:1563-1652;
+  pinned by the `*protocol-conflict*` and `macro-protocol-*` fixtures under
+  `unittest/compiler-fixtures/`.
+- `resolve_protocol_member` returns null for the member's own implementation
+  (guarded by `compiler.fn_name`, protocol.x:1723-1732) so a generated call
+  never dispatches back into the body currently being compiled; this is the
+  documented "the member's own body keeps the native operation" contract in
+  the same doc comment.
+- The forward converter is a total view; a default returning `T` needs the
+  reverse conversion; compound parameter/result types are rejected --
+  docs/src/guide/protocols.md "Conversions are demanded by adapters";
+  implemented `_conversion_requirement`/`_ordinary_requirement`/
+  `_descriptor_requirement` protocol.x:995-1049; pinned by
+  `macro-protocol-representation-non-var.x`, `converter-count.x` probes.
+- Semantic transactions snapshot exactly the fields listed in their own doc
+  comment (compiler.x:2538-2543) and nothing else; macro-expansion trial and
+  comptime speculative lowering rely on rollback leaving parser position
+  and untouched compiler fields alone.
+- `TagId` order matches the ledger's row order -- enforced by
+  `$var.tag.id.checks()`'s `_Static_assert` (lib/var-tags.xmacro:355-370,
+  emitted where lib/var.x uses it); `type-ledger.x`'s `varrows`/`typetags`
+  must stay derived from the same `_tag_rows()` the runtime decoder uses
+  (type-ledger.x:16-42) -- pinned by the `retired-var-tag-*` fixtures.
+- `unittest/test-protocols.x` pins base-default reach-through (`Block`
+  members reached via `Array`'s and `Bytes`'s storage-view converters) and
+  boxed-dispatch through a registered custom-tag descriptor
+  (`ArrayInt`/`<arrayint>`); both would silently regress if base-default
+  resolution or descriptor registration changed shape.
+
+#### Rebuild notes
+
+**Representation**: keep `Type` as canonical `List` syntax -- it is already
+the same representation as AST, macro templates, and Lisp data (map.md
+section 1), so a rebuild gains nothing by inventing a distinct type
+descriptor struct, and would lose the free structural `match` support
+`type.x` and `protocol.x` both lean on throughout (e.g. protocol.x's dozens
+of `match (row) case %(...)` member-row destructurings). Consolidate the
+four typedef-walkers (Parallel implementations, row 1) into one
+`_walk_typedef(sym, type, stop, origin, hops, on_hit)` continuation-style
+helper; `resolve_key`, `next_typedef`, `normalize_declared_type`, and
+`var_tag_for_type` each become a thin wrapper supplying their own stop
+predicate/hit callback. Fold `Sym.declare`/`Sym.bind_identity`'s duplicated
+binding-facts blocks into one `_install_local_typedef_facts`/
+`_install_automatic_binding_facts` pair (Parallel implementations, row 2).
+
+**Protocol resolution as data**: the member-resolution decision table in
+docs/src/guide/protocols.md ("Member resolution") is already exactly what
+`_resolve_members` computes row by row (protocol.x:901-993); a rebuild could
+make that table's five outcomes (`implemented`/`native`/`base-default`/
+`no-member`/`sig-conflict`) an explicit ranked list of match clauses over
+`(participant-has-member, ancestor-has-member, base-has-default)` rather
+than the current sequential `if`/`foreach`-with-`break` construction, which
+would read closer to the doc it implements. Native alias generation is
+already close to table-driven (`_native_requirement`, protocol.x:772-810,
+is one function of position/content checks); ordinary-adapter generation
+(`_generate_protocol_function`, protocol.x:1927-1971) is more naturally
+templated because it builds an AST from a signature triple
+(target/source/template) -- a rebuild could express it as one `match_replace`
+template parameterized by direction (forward/reverse/thunk) instead of the
+current three call sites (`_generate_ordinary_protocol_adapters`,
+`_generate_protocol_thunk`, `install_generated_protocol_symbols`) that each
+assemble the same three-way substitution by hand. Conversion requirement
+checking (`_conversion_requirement`, `_descriptor_requirement`,
+`_ordinary_requirement`, protocol.x:995-1049) is small enough that
+table-driving it would add a table-interpretation layer for little gain;
+leave it as direct code.
+
+**compiler.x, state vs. logic**: of 3905 lines, the struct declaration and
+pure lifecycle/plumbing (constructor at compiler.x:325-399, borrow/take/
+close helpers 246-322, add_early/add_init 2459-2469, freeze/thaw 1274-1343,
+semantic transactions 2545-2661) total roughly 350-400 lines -- under 10%.
+The remainder is algorithmic: the `Sym` symbol-table implementation
+(scopes, typedef resolution, binding identity, field order, package
+spelling -- roughly compiler.x:2470-3905, ~1400 lines) is a real, non-trivial
+piece of the type system that happens to live in the file named for shared
+state rather than in `type.x`. A rebuild should either (a) keep `compiler.x`
+as "the shared struct plus its own scope/lookup implementation" as now, or
+(b) split `Sym` (and its ~50 methods) into its own unit and let `compiler.x`
+hold only the struct, lifecycle, transactions, and the parse-loop dispatch
+that map.md 2.1 already describes. Given how much of `type.x`/`protocol.x`
+calls `Sym.resolve_key`/`local_type`/`var_tag_for_type` directly, (b) mostly
+just renames a file; it would not shrink total lines, but it would make "is
+this state or logic" answerable by filename rather than by reading 3905
+lines.
+
+**Ledger indirection**: `type-ledger.x`'s 42-line existence purely to keep
+one meta-time import (`lib/var-tags.xmacro`) out of every other unit
+(type-ledger.x:5-8) is a real and working cost-isolation pattern, not
+overhead to remove; a rebuild should keep a single ledger source with
+exactly this "one importer, two forward-declared consumer functions" shape.
+
+#### Open questions
+
+- Does a rolled-back `SymTxn` (e.g. a declined macro expansion or a comptime
+  lowering that raises) ever leave a stray row in `type.x`'s
+  `declared_typetags`, since that map is not part of the transaction
+  snapshot (compiler.x:2526-2536) even though `Type.register_var_tag`/
+  `register_var_adoption` (type.x:564-584) can be reached from code that
+  runs under a transaction? I did not find or construct a reproduction; the
+  asymmetry with `meta_layouts` (which *is* snapshotted) is the only
+  evidence, and it may be intentional because `declared_typetags` rows are
+  idempotent ("the first row for a canonical Type wins", type.x:561) so a
+  stray extra row would harmlessly lose a race rather than corrupt state.
+- Is the `(base participant path)` vs `(base participant)` two-shaped
+  adoption key (protocol.x:177-220) still needed for every caller, or would
+  a single row that carries its own `(storage, path)` pair and lets
+  `_adoption_visibility` scan a short list (rarely more than 2: one static,
+  one external) simplify every call site that currently branches on
+  `storage == <static>` to build the key? Not verified against a case with
+  more than two rows for one `(base, participant)` pair.
+- `install_generated_protocol_symbols` (protocol.x:1117-1147) and
+  `generate_protocol_adapters` (protocol.x:2295-2343) both iterate
+  `c.conforms` and re-derive "is this native, is this base-default, is it
+  externally visible"; whether they could share one classification pass was
+  not checked against why the driver calls them at different times
+  (`full_parse` for the symbols, `main.x` for the AST-mutating generation).
+
 ---
 
 ## 3. Parallel implementations and suspect abstractions
