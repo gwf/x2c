@@ -39,7 +39,7 @@ static` values for this unit in the unit's meta Scope. Returns whether
 `name` is now native; a function that cannot run is reported at
 `site`.
 
-Source: `src/stage.x:938`
+Source: `src/stage.x:969`
 
 <a id="Compiler.check_meta_call"></a>
 #### Compiler.check_meta_call
@@ -165,7 +165,7 @@ REPL that adds functions to `meta_group` itself, and binds each group
 function in the session. Returns the loaded module, or NULL with
 `failure` set when the group does not stage.
 
-Source: `src/stage.x:972`
+Source: `src/stage.x:1003`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
