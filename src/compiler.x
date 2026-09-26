@@ -149,6 +149,13 @@ typedef struct Compiler {
      holding each declared signature. A function binds into the macro
      session the first time lowered code calls it. */
   Map native_meta;
+  /* The unit's own bodied `meta` definitions in source order, each
+     `(name prototype definition function)`, and the names already bound to
+     their staged native code. */
+  Array meta_group;
+  Map meta_group_bound;
+  /* Holds what the unit's staged `meta static` values allocate. */
+  Scope meta_scope;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   /* Whether the source is in the indentation syntax whatever its name, as
      when collection parses a segment of a file whose pragma it saw. */
@@ -386,6 +393,8 @@ static Compiler _new(Compiler owner) {
     _.inits = [];
     _.early_decls = [];
     _.meta_defs = [];
+    _.meta_group = [];
+    _.meta_group_bound = {};
     _.collect_protocols = 1;
     _.diagnostics = Diagnostics.new(
       owner && owner.diagnostics.printer ? _ : NULL,

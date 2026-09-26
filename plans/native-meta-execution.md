@@ -5,6 +5,13 @@
 > order of work so it can proceed in the background. Estimates are
 > deliberate overestimates of what becomes removable; each removal is
 > gated by the validation named beside it.
+>
+> Step 1 prototype on spike/meta-staging: a unit's bodied `meta`
+> functions, `meta static` values, and type definitions (and those of an
+> imported `.xmacro`) stage as one module through `x2c build --kind
+> meta-module` in a child process, cached under
+> `$X2C_CACHE_DIR/meta/<digest>`, bound over their lowered forms at the
+> first `$` call. The lowering still runs first and remains the fallback.
 
 ## The result
 

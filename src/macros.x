@@ -17,8 +17,11 @@ $(import "../src/ast-rewrite.xmacro")
 #include "parse.x"
 #include "regions.x"
 #include "statements.x"
+#include "script.x"
 #include "utils.x"
+#include <ctype.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -1426,6 +1429,8 @@ static List _import(
         imported.kw_aliases = c.kw_aliases;
         imported.kw_seen = c.kw_seen;
         imported.macro_lisp = c.macro_lisp;
+        imported.meta_group = c.meta_group;
+        imported.meta_group_bound = c.meta_group_bound;
         imported.borrowed_lisp = 1;
         imported.import_src = path;
         imported.inherited_lisp = _inherited_import(path);
@@ -2032,6 +2037,7 @@ void Compiler.install_native_meta_function(
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   List signature = c.func_signature(type);
+  if ((void *) c.meta_group_bound) c.meta_group_bound[%"native:$name"] = 1;
   _bind_native_meta(c, name, signature, marker);
 }
 
@@ -2042,6 +2048,18 @@ void Compiler.install_native_meta_function(
     its own storage outlive a call is rejected where the storage leaves;
     lowering failures are reported at the marker.
 */
+static int _groups_meta(Compiler c);
+
+/* Whether a body makes an explicit meta call, which leaves it no runtime
+   form. */
+static int _reaches_meta_call(Var node) {
+  if (node is not <list>) return 0;
+  List list = node;
+  if (list && list.car() == <meta-call>) return 1;
+  foreach (Var part, list) if (_reaches_meta_call(part)) return 1;
+  return 0;
+}
+
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
@@ -2063,6 +2081,19 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       case %(function ? (bind (binding ? ?(String name)) *) ?):
         if (c.lower_reached_meta()) c.meta_comptime[name] = 1;
     return;
+  }
+  /* A call to a function the unit defines later binds when the group
+     stages natively, so that decline waits for a `$` call to need it. */
+  String missing = c.lower_declined();
+  if (X2C_NATIVE_MODULES && _groups_meta(c) &&
+      missing.startswith("no binding for ")) {
+    String key = "native:" + missing[15:];
+    if (!(key in c.meta_group_bound) && !(missing[15:] in c.native_meta)) {
+      match (fn)
+        case %(function ? (bind (binding ? ?(String name)) *) ?):
+          if (_reaches_meta_call(fn)) c.meta_comptime[name] = 1;
+      return;
+    }
   }
   c.report_error(
     <macro>, "this function cannot run at compile time", marker,
@@ -2170,9 +2201,229 @@ static Map _source_captures(List bindings) {
   return captures;
 }
 
+/* The end of the last code token before `token`. */
+static int _code_end(Token token) {
+  do token--;
+  while (token.type == <space> || token.type == <comment> ||
+         token.type == <preproc>);
+  return token.pos + token.len;
+}
+
+/* The source from the end of `start` to the last code token parsed. */
+static String _parsed_text(Compiler c, Token start) =>
+  String.new_len(
+    c.text + start.pos + start.len, _code_end(c.token) - start.pos
+                                      - start.len);
+
+/* Whether the current source can add to the unit's pending group: ordinary
+   syntax, parsed outside any macro. A `.xmacro` import shares the unit's
+   group, so its definitions stage with the unit's. */
+static int _groups_meta(Compiler c) =>
+  !c.macro_holes && !c.macro_stack && !c.layout && c.text &&
+  c.tokenizer.text == c.text && (void *) c.meta_group;
+
+static void _group_push(
+  Compiler c, Symbol kind, String name, String prototype, String definition,
+  Var type) {
+  foreach (List entry, c.meta_group)
+    if (entry.car() == kind && entry.cadr() == name) return;
+  String includes = "";
+  foreach (String line, String.new(c.text).split("\n"))
+    if (line.lstrip(" \t").startswith("#include"))
+      includes = %"$includes$line\n";
+  c.meta_group.push(
+    %($kind $name $prototype $definition $type $includes));
+}
+
+/** Records a bodied `meta` definition, from its `meta` marker `start` and
+    its body `body`, in the unit's pending group. */
+void Compiler.record_meta_definition(
+  Compiler c, List function, Type type, Token start, Token body) {
+  if (!_groups_meta(c)) return;
+  match (function)
+    case %(function ? (bind (binding ? ?(String name)) *) ?):
+      _group_push(
+        c, <function>, name,
+        String.new_len(c.text + start.pos + start.len,
+                       body.pos - start.pos - start.len),
+        _parsed_text(c, start), type);
+}
+
+/** Records a `meta static` value declaration, from its `meta` marker
+    `start`, in the unit's pending group. Its initializer is the reset
+    entry's assignment; a `const` value is never reset. */
+void Compiler.record_meta_static(Compiler c, List declaration, Token start) {
+  if (!_groups_meta(c)) return;
+  match (declaration)
+    case %(declare ?spec
+             (bindings (op = (!set ?bound (bind (binding ? ?(String name)) *))
+                            ?))): {
+      Type type =
+        %(declare $spec (bindings $bound)).type_from_ast().declared();
+      String text = _parsed_text(c, start);
+      int equals = text.find("=");
+      String reset = "";
+      if (!type.contains(<const>) && !type.is_array() && equals >= 0) {
+        String value = text[equals + 1:].strip(" \t\n;");
+        reset = value.startswith("{")
+          ? %"  $name = (__typeof__($name)) $value;\n"
+          : %"  $name = $value;\n";
+      }
+      _group_push(c, <static>, name, reset, text, %());
+    }
+}
+
+/** Records a top-level type definition starting at `start`, so staged meta
+    code can use the unit's types. */
+void Compiler.record_meta_type(Compiler c, Token start) {
+  if (!_groups_meta(c)) return;
+  String text = String.new_len(
+    c.text + start.pos, _code_end(c.token) - start.pos);
+  _group_push(c, <type>, text, "", text, %());
+}
+
+/* A meta body's `$f(` is the plain call `f(` in its native form. */
+static String _plain_calls(String text) {
+  String out = "";
+  int n = text.len(), from = 0;
+  for (int i = 0; i < n; i++) {
+    if (text[i] != '$') continue;
+    int j = i + 1;
+    while (j < n && (isalnum(text[j]) || text[j] == '_')) j++;
+    if (j == i + 1 || j >= n || text[j] != '(' || isdigit(text[i + 1]))
+      continue;
+    out = out + text[from:i];
+    from = i + 1;
+  }
+  return out + text[from:n];
+}
+
+/* A function's text without `static`: the module exports each one. */
+static String _exported(String text) {
+  text = text.strip(" \t\n");
+  return text.startswith("static ") ? text[7:] : text;
+}
+
+/* The unit that stages the whole group: the includes of its sources, its
+   types, a native prototype for each function and for the reset entry,
+   then its values and functions as plain code in source order, and the
+   reset entry, which reinitializes each mutable `meta static`. */
+static String _meta_group_source(Compiler c) {
+  String includes = "", types = "", prototypes = "", definitions = "";
+  String resets = "";
+  Map seen = {};
+  foreach (List entry, c.meta_group) {
+    (Symbol kind, String name, String prototype, String definition) = entry;
+    String lines = entry[5];
+    foreach (String line, lines.split("\n"))
+      if (line && !(line in seen)) {
+        seen[line] = 1;
+        includes = %"$includes$line\n";
+      }
+    if (kind == <function>) {
+      prototypes = %"${prototypes}meta ${_exported(prototype)};\n";
+      definition = _plain_calls(_exported(definition));
+    }
+    if (kind == <static>) resets = resets + prototype;
+    if (kind == <type>) types = %"$types${definition.strip(" \t\n")}\n";
+    else definitions = %"$definitions${definition.strip(" \t\n")}\n";
+  }
+  return %"$includes$types${prototypes}meta void x2c_module_reset(void);
+#pragma private
+${definitions}void x2c_module_reset(void) {
+$resets}
+";
+}
+
+/* Builds the group's native module under the cache root, named by the
+   digest of its source, the compiler stamp, and the C compiler, or reuses
+   the module an earlier translation built. Returns its path, or NULL when
+   there is no cache or the group does not build; a failed build leaves
+   its reason in `failed` beside the source and is not retried. */
+static String _stage_meta_group(Compiler c) {
+  String root = script_cache_root(), stamp = build_module_stamp();
+  if (!root || !stamp) return NULL;
+  String cc = Env.get("CC") ? Env.get("CC") : "cc";
+  String source = _meta_group_source(c);
+  String key = %"$source\n$stamp\n$cc";
+  String digest = "%08x%x".printf(String.hash(key), key.len());
+  String directory = %"$root/meta/$digest";
+  String module = %"$directory/group.module";
+  if (Path.is_file(module)) return module;
+  if (Path.is_file(%"$directory/failed")) return NULL;
+  String unit = %"$directory/group.x";
+  String pid = "%ld".printf((long) getpid());
+  String output = %"$module.$pid", errors = NULL, printed = NULL;
+  String work = %"$directory/build.$pid";
+  try {
+    Path.make_dirs(directory);
+    Path.write_text(unit, source);
+  }
+  catch %(io-fail *): return NULL;
+  String home = Path.dirname(Path.absolute(c.filename));
+  List command = %(${x2c_get_executable()} "build" "-q" "--kind"
+                   "meta-module" "-I" $home "--build-dir" $work
+                   "--output" $output $unit);
+  int status = tool_capture(command, printed, errors);
+  try Path.remove_tree(work);
+  catch %(io-fail *): {}
+  if (status) {
+    try Path.write_text(%"$directory/failed", errors ? errors : "");
+    catch %(io-fail *): {}
+    return NULL;
+  }
+  try Path.move_to(output, module);
+  catch %(io-fail *): return NULL;
+  return module;
+}
+
+/* Binds each unbound function of the pending group to its staged native
+   code when `name` is pending, after resetting the module's `meta static`
+   values for this unit in the unit's meta Scope. Returns whether `name` is
+   now native. A group that cannot be staged keeps its lowered forms. */
+static int _bind_meta_group(Compiler c, String name) {
+  if (!X2C_NATIVE_MODULES || !(void *) c.meta_group ||
+      name in c.meta_group_bound)
+    return 0;
+  int pending = 0;
+  foreach (List entry, c.meta_group)
+    if (entry.car() == <function> && entry.cadr() == name) pending = 1;
+  if (!pending) return 0;
+  String module = _stage_meta_group(c);
+  if (!module) return 0;
+  module = Compiler.load_native_module(module);
+  Map targets = native_modules[module];
+  if (!(module in c.meta_group_bound)) {
+    c.meta_group_bound[module] = 1;
+    Scope.push(&c.meta_scope);
+    ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
+    Scope.pop();
+  }
+  foreach (List entry, c.meta_group) {
+    Symbol kind = entry.car();
+    String target = entry.cadr();
+    Type type = entry[4];
+    if (kind != <function> || target in c.meta_group_bound ||
+        !(target in targets))
+      continue;
+    Var bound = targets[target];
+    if (!_native_meta_accepts(c, bound, c.func_signature(type))) continue;
+    c.macro_lisp.set_global(target, bound);
+    c.meta_group_bound[target] = 1;
+  }
+  return name in c.meta_group_bound;
+}
+
 static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
+  /* A call inside a macro expansion can pass captured syntax, which the
+     lowering converts and a native signature does not, so only a call
+     without arguments stages there. */
+  match (expression)
+    case %(expr ? (meta-call (expr ? (ident (binding ? ?(String name))))
+                             (args *arguments))):
+      if (!c.macro_stack || !arguments) _bind_meta_group(c, name);
   Var form = c.lower_meta_expression(expression);
   if (form is void)
     c.report_error(
