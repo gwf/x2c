@@ -1972,6 +1972,7 @@ List Compiler.parse_top_level(Compiler c) {
       List imported = c.parse_macro_lisp_top_level();
       if (imported) foreach (Var definition, imported.cdr())
         c.meta_defs.push(definition);
+      c.record_meta_import();
       return NULL;
     }
     case <@>:
@@ -1993,13 +1994,8 @@ List Compiler.parse_top_level(Compiler c) {
       c.install_native_meta_function(decl, meta);
     else if (meta) {
       c.install_meta_declaration(decl, meta);
-      c.record_meta_static(decl, meta);
+      c.record_meta_static(decl);
     }
-    else if (definition_start.type == <struct> ||
-             definition_start.type == <union> ||
-             definition_start.type == <enum> ||
-             definition_start.type == <typedef>)
-      c.record_meta_type(definition_start);
     c.record_declaration_visibility(decl);
     if (meta)
       _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
@@ -2019,12 +2015,7 @@ List Compiler.parse_top_level(Compiler c) {
     $let(c.meta_body, lowered != NULL) {
       function = _finish_function_definition(c, decl);
     }
-    if (lowered) {
-      c.install_meta_function(function, lowered);
-      c.record_meta_definition(
-        function, decl.type_from_ast().canonicalize(), tokens + start,
-        tokens + body);
-    }
+    if (lowered) c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */

@@ -149,10 +149,13 @@ typedef struct Compiler {
      holding each declared signature. A function binds into the macro
      session the first time lowered code calls it. */
   Map native_meta;
-  /* The unit's own bodied `meta` definitions in source order, each
-     `(name prototype definition function)`, and the names already bound to
-     their staged native code. */
-  Array meta_group;
+  /* The unit's top-level nodes parsed so far, and its pending `meta` group
+     in source order: each bodied `meta` function as `(function FN NAME
+     TYPE DECLINED)`, each `meta static` value as `(static DECLARATION)`,
+     and each compile-time import as `(import NODES META-DEFS)`, the counts
+     of `unit_nodes` and `meta_defs` after it. `meta_group_bound` holds the
+     names bound to staged native code and the modules reset for the unit. */
+  Array unit_nodes, meta_group;
   Map meta_group_bound;
   /* Holds what the unit's staged `meta static` values allocate. */
   Scope meta_scope;
@@ -1956,6 +1959,11 @@ static void _collect_binding_references(Var node, Map referenced) {
   foreach (Var child, syntax) _collect_binding_references(child, referenced);
 }
 
+/** Records in `referenced` the identity of every binding `node` names. */
+void ast_collect_binding_references(Var node, Map referenced) {
+  _collect_binding_references(node, referenced);
+}
+
 /* The binding an imported `meta` function or declaration introduces. */
 static Var _meta_identity(List definition) {
   match (definition) {
@@ -2007,6 +2015,9 @@ static void _append_meta_definitions(Compiler c, Array nodes) {
 */
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
+  c.unit_nodes = nodes;
+  c.meta_group.clear();
+  c.meta_group_bound = {};
   c.origins.clear();
   c.meta_defs.clear();
   c.meta_comptime = {};
@@ -2108,7 +2119,9 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     c.token = conflict;
     _report_script_statement(c);
   }
+  c.report_unstaged_meta();
   _append_meta_definitions(c, nodes);
+  c.unit_nodes = NULL;
   List ast = nodes.list_free();
   if (c.script && !c.script.defines_main && !c.error_count())
     _check_script_locals(c, ast);

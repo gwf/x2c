@@ -1214,21 +1214,12 @@ static List _modify_main(Compiler compiler, List source) {
 
 // public entry point
 
-/** Writes the generated C header and source for one lowered translation unit.
-    `ast` must be the normalized result of `transform_ast` for this compiler;
-    its filename, symbols, binding facts, cache keys, and initialization state
-    must still describe that same unit. `dir` must already exist. Generation
-    partitions the AST, materializes caches and once-only initialization, and
-    writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
-    of a collected unit through one `file_publish`, so a failed write
-    replaces none of them. It appends generated bindings and initialization
-    work to the compiler and is not idempotent. Failures are reported as
-    `emit` diagnostics.
-*/
-void generate_code(Compiler c, List ast, String dir) {
-  ast = ast.filter(
-    %!(unit) => !unit.list().match(%((!or space comment empty) *)));
+static List _without_trivia(List ast) =>
+  ast.filter(%!(unit) => !unit.list().match(%((!or space comment empty) *)));
 
+/* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
+   `basename`. */
+static List _generated_code(Compiler c, List ast, String basename) {
   List (header, source) = _header_and_source(c, ast);
   String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
@@ -1249,12 +1240,34 @@ void generate_code(Compiler c, List ast, String dir) {
   source = _modify_main(c, source);
   source = c.emit(source);
 
-  String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
-  List outputs = %(
+  return %(
     $hfile ${c.code_pretty_string(header, hfile)}
     $cfile ${c.code_pretty_string(source, cfile)}
   );
+}
+
+/** Returns the generated header and source of the lowered `ast` as `(hfile
+    htext cfile ctext)`, named from `basename`, without writing them. It
+    affects the compiler as `generate_code` does. */
+List generate_code_text(Compiler c, List ast, String basename) =>
+  _generated_code(c, _without_trivia(ast), basename);
+
+/** Writes the generated C header and source for one lowered translation unit.
+    `ast` must be the normalized result of `transform_ast` for this compiler;
+    its filename, symbols, binding facts, cache keys, and initialization state
+    must still describe that same unit. `dir` must already exist. Generation
+    partitions the AST, materializes caches and once-only initialization, and
+    writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
+    of a collected unit through one `file_publish`, so a failed write
+    replaces none of them. It appends generated bindings and initialization
+    work to the compiler and is not idempotent. Failures are reported as
+    `emit` diagnostics.
+*/
+void generate_code(Compiler c, List ast, String dir) {
+  ast = _without_trivia(ast);
+  String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
+  List outputs = _generated_code(c, ast, basename);
   String interface = c.source_facts ? NULL : interface_text(
     c, _public_definition_rows(c.definition_rows(ast)));
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
