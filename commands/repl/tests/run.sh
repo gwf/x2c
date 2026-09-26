@@ -4,7 +4,9 @@ set -eu
 cd "$(dirname "$0")/../../.."
 tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$
 mkdir -p "$tmp"
-trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+repl=
+trap 'test -z "$repl" || kill -9 "$repl" 2>/dev/null; rm -rf "$tmp"' EXIT
+trap 'exit 1' HUP INT TERM
 
 # Staged modules resolve the session's print and the runtime in this binary.
 export_flags=
@@ -67,26 +69,38 @@ cmp "$tmp/crash-expected" "$tmp/crash-out"
 test "$(grep -c '^evaluation failed: (crash (signal' "$tmp/crash-err")" -eq 3
 
 # The first Ctrl-C during a runaway loop only warns; the second stops it
-# and the session keeps its state.
+# and the session keeps its state. The REPL starts with SIGINT ignored, so
+# a Ctrl-C that arrives while the loop still compiles is lost; the harness
+# presses again until each step shows, and gives up after 30 seconds.
 mkfifo "$tmp/fifo"
-builds/0/libexec/x2c-repl <"$tmp/fifo" >"$tmp/int-out" 2>"$tmp/int-err" &
+(trap '' INT; exec builds/0/libexec/x2c-repl) \
+  <"$tmp/fifo" >"$tmp/int-out" 2>"$tmp/int-err" &
 repl=$!
 exec 3>"$tmp/fifo"
 printf 'int keep = 41;\nwhile (1) keep = 41;\n' >&3
-sleep 3
-kill -INT "$repl"
-sleep 1
-kill -INT "$repl"
+press_until() {
+  tries=0
+  until grep -q "$1" "$tmp/int-err"; do
+    tries=$((tries + 1))
+    if [ "$tries" -gt 60 ]; then
+      echo "REPL interrupt check timed out waiting for: $1" >&2
+      exit 1
+    fi
+    kill -INT "$repl"
+    sleep 0.5
+  done
+}
+press_until 'press Ctrl-C again'
+press_until '^evaluation failed: (interrupt (signal'
 printf 'keep + 1;\n' >&3
 exec 3>&-
 set +e
 wait "$repl"
 result=$?
 set -e
+repl=
 test "$result" -eq 1
 printf 'ok\n=> 42\n' >"$tmp/int-expected"
 cmp "$tmp/int-expected" "$tmp/int-out"
-grep -q 'press Ctrl-C again' "$tmp/int-err"
-grep -q '^evaluation failed: (interrupt (signal' "$tmp/int-err"
 
 echo "REPL command checks passed"
