@@ -56,38 +56,38 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_3;
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_2;
 }
 _x2c_defer_env_4;
 
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_6;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_8;
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-typedef struct _x2c_defer_env_5{
+typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_5;
 }
-_x2c_defer_env_5;
+_x2c_defer_env_10;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
@@ -189,28 +189,30 @@ String MachineProgram_str(MachineProgram value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    MachineProgram_write_str(value, out);
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      String _x2c_return_value_0 = Buffer_str(out);
+      MachineProgram_write_str(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
+        String _x2c_return_value_0 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int RenderPath_enter(RenderPath *, const void *);
@@ -227,67 +229,71 @@ Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
   RenderPath path;
   if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
   {
-  _x2c_defer_env_1 _x2c_defer_env_7 = {._x2c_defer_capture_1 =(const void *) & path};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    Buffer_write(out, _1);
-    Buffer_write(out, _2);
-    Var_write_repr(int_var(value -> length), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _4);
-    Var_write_repr(int_var(value -> const_count), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _5);
-    Var_write_repr(int_var(value -> binder_count), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _6);
-    Var_write_repr(int_var(value -> root), out);
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_1 =(const void *) & path
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer _x2c_return_value_1 = Buffer_write(out, _7);
+      Buffer_write(out, _1);
+      Buffer_write(out, _2);
+      Var_write_repr(int_var(value -> length), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _4);
+      Var_write_repr(int_var(value -> const_count), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _5);
+      Var_write_repr(int_var(value -> binder_count), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _6);
+      Var_write_repr(int_var(value -> root), out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_1;
+        Buffer _x2c_return_value_1 = Buffer_write(out, _7);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 String MachineProgram_repr(MachineProgram value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_2 _x2c_defer_env_8 = {._x2c_defer_capture_2 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_8
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    MachineProgram_write_repr(value, out);
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      String _x2c_return_value_2 = Buffer_str(out);
+      MachineProgram_write_repr(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_2;
+        String _x2c_return_value_2 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 MachineBuilder MachineBuilder_new(){
@@ -335,28 +341,30 @@ String MachineBuilder_str(MachineBuilder value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_3 _x2c_defer_env_9 = {._x2c_defer_capture_3 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_9
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    MachineBuilder_write_str(value, out);
+    _x2c_defer_env_6 _x2c_defer_env_7 ={
+      ._x2c_defer_capture_3 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      String _x2c_return_value_3 = Buffer_str(out);
+      MachineBuilder_write_str(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-        return _x2c_return_value_3;
+        String _x2c_return_value_3 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_3;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out){
@@ -365,88 +373,92 @@ Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out){
   RenderPath path;
   if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _8, (long) value);
   {
-  _x2c_defer_env_4 _x2c_defer_env_10 = {._x2c_defer_capture_4 =(const void *) & path};
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_10
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
-    Buffer_write(out, _9);
-    Buffer_write(out, _10);
-    Buffer_printf(out, _11, (long) value -> code);
-    Buffer_write(out, _3);
-    Buffer_write(out, _12);
-    Buffer_printf(out, _11, (long) value -> consts);
-    Buffer_write(out, _3);
-    Buffer_write(out, _13);
-    Buffer_printf(out, _11, (long) value -> binders);
-    Buffer_write(out, _3);
-    Buffer_write(out, _2);
-    Var_write_repr(int_var(value -> length), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _14);
-    Var_write_repr(int_var(value -> code_capacity), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _4);
-    Var_write_repr(int_var(value -> const_count), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _15);
-    Var_write_repr(int_var(value -> const_capacity), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _5);
-    Var_write_repr(int_var(value -> binder_count), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _6);
-    Var_write_repr(int_var(value -> root), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _16);
-    Var_write_repr(Var_new(3453797, value -> status), out);
-    Buffer_write(out, _3);
-    Buffer_write(out, _17);
-    Buffer_printf(out, _11, (long) value -> reason);
+    _x2c_defer_env_8 _x2c_defer_env_9 ={
+      ._x2c_defer_capture_4 =(const void *) & path
+    }
+    ;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_defer_env_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
     {
-      Buffer _x2c_return_value_4 = Buffer_write(out, _7);
+      Buffer_write(out, _9);
+      Buffer_write(out, _10);
+      Buffer_printf(out, _11, (long) value -> code);
+      Buffer_write(out, _3);
+      Buffer_write(out, _12);
+      Buffer_printf(out, _11, (long) value -> consts);
+      Buffer_write(out, _3);
+      Buffer_write(out, _13);
+      Buffer_printf(out, _11, (long) value -> binders);
+      Buffer_write(out, _3);
+      Buffer_write(out, _2);
+      Var_write_repr(int_var(value -> length), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _14);
+      Var_write_repr(int_var(value -> code_capacity), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _4);
+      Var_write_repr(int_var(value -> const_count), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _15);
+      Var_write_repr(int_var(value -> const_capacity), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _5);
+      Var_write_repr(int_var(value -> binder_count), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _6);
+      Var_write_repr(int_var(value -> root), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _16);
+      Var_write_repr(Var_new(3453797, value -> status), out);
+      Buffer_write(out, _3);
+      Buffer_write(out, _17);
+      Buffer_printf(out, _11, (long) value -> reason);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_4);
-        return _x2c_return_value_4;
+        Buffer _x2c_return_value_4 = Buffer_write(out, _7);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_4);
+          return _x2c_return_value_4;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_4);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
 }
 
 String MachineBuilder_repr(MachineBuilder value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_5 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_11
-  };
-  x2c_cleanup_push(&_x2c_defer_record_5);
-  {
-    MachineBuilder_write_repr(value, out);
+    _x2c_defer_env_10 _x2c_defer_env_11 ={
+      ._x2c_defer_capture_5 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_5 ={
+      .fn = _x2c_defer_cleanup_5, .env = & _x2c_defer_env_11
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_5);
     {
-      String _x2c_return_value_5 = Buffer_str(out);
+      MachineBuilder_write_repr(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_5);
-        return _x2c_return_value_5;
+        String _x2c_return_value_5 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          return _x2c_return_value_5;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_5);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-}
 }
 
 static int MachineBuilder__fail(MachineBuilder b, const char * reason){
@@ -637,27 +649,27 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   Buffer_free((*(Buffer *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  _x2c_defer_env_8 * _x2c_defer_data_4 =(_x2c_defer_env_8 *) _x2c_defer_opaque_4;
   RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_4->_x2c_defer_capture_4)));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
+  _x2c_defer_env_10 * _x2c_defer_data_5 =(_x2c_defer_env_10 *) _x2c_defer_opaque_5;
   Buffer_free((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 

@@ -331,25 +331,24 @@ VarDescriptor * x2c_var_declare(Symbol tag){
     Scope_push(& class_scope);
     {
       {
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-        {
-          if(declared == NULL) declared = Map_new();
-          descriptor = Scope_calloc(1, sizeof(VarDescriptor));
-          descriptor -> tag = tag;
-          descriptor -> row = - 1;
-          Map_setindex(declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+        X2CCleanup _x2c_defer_record_0 ={
+          .fn = _x2c_defer_cleanup_0, .env = NULL
         }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_0);
+        {
+          {
+            if(declared == NULL) declared = Map_new();
+            descriptor = Scope_calloc(1, sizeof(VarDescriptor));
+            descriptor -> tag = tag;
+            descriptor -> row = - 1;
+            Map_setindex(declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+          }
 
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
     }
 
   }
@@ -372,48 +371,47 @@ int x2c_descriptor_registration_frozen(void);
 int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    if(x2c_descriptor_registration_frozen()){
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 374};
-      x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
-      __builtin_unreachable();
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = NULL
     }
-    if(! tag){
-      int _x2c_return_value_0 = - 1;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_0;
-      }
-
-    }
-    if(_tag2id(tag) != _invalid_){
-      int _x2c_return_value_1 = - 1;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_1;
-      }
-
-    }
-    x2c_var_declare(tag);
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      int _x2c_return_value_2 = 0;
+      if(x2c_descriptor_registration_frozen()){
+        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 374};
+        x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
+        __builtin_unreachable();
+      }
+      if(! tag){
+        int _x2c_return_value_0 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_0;
+        }
+
+      }
+      if(_tag2id(tag) != _invalid_){
+        int _x2c_return_value_1 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
+      }
+      x2c_var_declare(tag);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_2;
+        int _x2c_return_value_2 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 static int _assign_row(VarDescriptor * descriptor){
@@ -421,42 +419,41 @@ static int _assign_row(VarDescriptor * descriptor){
   if(row >= 0) return row;
   x2c_descriptor_thread_start_begin();
   {
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    row = descriptor -> row;
-    if(row >= 0){
-      int _x2c_return_value_3 = row;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_3;
-      }
-
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = NULL
     }
-    unsigned count = row_count;
-    row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
-    if(count < VAR_DIRECT_ROWS){
-      rows[count] = descriptor;
-      __atomic_store_n(& row_count, count + 1, __ATOMIC_RELEASE);
-    }
-    __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      int _x2c_return_value_4 = row;
+      row = descriptor -> row;
+      if(row >= 0){
+        int _x2c_return_value_3 = row;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_3;
+        }
+
+      }
+      unsigned count = row_count;
+      row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
+      if(count < VAR_DIRECT_ROWS){
+        rows[count] = descriptor;
+        __atomic_store_n(& row_count, count + 1, __ATOMIC_RELEASE);
+      }
+      __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_4;
+        int _x2c_return_value_4 = row;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_4;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 void * Scope_malloc(size_t);
@@ -464,65 +461,63 @@ void * Scope_malloc(size_t);
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_descriptor_thread_start_begin();
   {
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    Var key ={
-      .p64 = pointer
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = NULL
     }
     ;
-    VarCell * cell = NULL;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      Scope_push(& class_scope);
+      Var key ={
+        .p64 = pointer
+      }
+      ;
+      VarCell * cell = NULL;
       {
+        Scope_push(& class_scope);
         {
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
           {
-            if(cells == NULL) cells = Map_new();
-            Var head = Map_getindex(cells, key);
-            cell = Var_is_void(head) ? NULL : Var_pointer(head);
-            while(cell && cell -> descriptor != descriptor) cell = cell -> next;
-            if(! cell){
-              cell = Scope_malloc(sizeof(VarCell));
-              * cell =(VarCell){
-                descriptor, pointer, Var_is_void(head) ? NULL : Var_pointer(head)
-              }
-              ;
-              Map_setindex(cells, key, Var_new(3683441, (void *) cell));
+            X2CCleanup _x2c_defer_record_4 ={
+              .fn = _x2c_defer_cleanup_4, .env = NULL
             }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_4);
+            {
+              {
+                if(cells == NULL) cells = Map_new();
+                Var head = Map_getindex(cells, key);
+                cell = Var_is_void(head) ? NULL : Var_pointer(head);
+                while(cell && cell -> descriptor != descriptor) cell = cell -> next;
+                if(! cell){
+                  cell = Scope_malloc(sizeof(VarCell));
+                  * cell =(VarCell){
+                    descriptor, pointer, Var_is_void(head) ? NULL : Var_pointer(head)
+                  }
+                  ;
+                  Map_setindex(cells, key, Var_new(3683441, (void *) cell));
+                }
 
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_4);
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
       }
-
-    }
-    {
-      VarCell * _x2c_return_value_5 = cell;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-        return _x2c_return_value_5;
+        VarCell * _x2c_return_value_5 = cell;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_5;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor){

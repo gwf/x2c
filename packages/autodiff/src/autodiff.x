@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    This optional module is included explicitly; it is not part of the
+    Import the autodiff package explicitly; it is not part of the
     implicit prelude. `AdTape` records every arithmetic operation on its
     `AdNode` values as a closure that propagates an adjoint back to the
     operands, so a data-dependent computation that `$ad.reverse()` cannot
@@ -12,10 +12,11 @@
 */
 
 #include "x2c.x"
+$(import "autodiff.xmacro")
 #include <math.h>
 
 /** A recording of `AdNode` operations; see the struct below.
-    The [Automatic Differentiation guide](../../guide/autodiff.md) explains
+    The [Automatic Differentiation guide](../../../docs/src/guide/autodiff.md) explains
     runtime tapes and the compile-time alternatives.
 */
 typedef struct AdTape *AdTape;
@@ -161,4 +162,4 @@ AdNode AdNode.tanh(AdNode a) {
   return _unary(a, value, 1.0 - value * value);
 }
 
-protocol Var(AdNode);
+protocol Var(AdNode) tag <adnode>;

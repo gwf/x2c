@@ -23,7 +23,7 @@ typedef struct PrintfFn {
 #include "parse.x"
 #include "literals.x"
 #include "protocol.x"
-#include "lambda.x"
+#include "transform.x"
 #include "comptime.x"
 
 static List _iter_destination(void) => %(expr (* struct "Iter")

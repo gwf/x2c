@@ -18,7 +18,7 @@
 #include "compiler.x"
 #pragma private
 #include "type.x"
-#include "cleanup.x"
+#include "transform.x"
 #include "var.x"
 #include "string.x"
 #include "lisp.x"

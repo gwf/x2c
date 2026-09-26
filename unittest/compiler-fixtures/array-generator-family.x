@@ -34,9 +34,11 @@ $array.typed.family(ProbeArrayInt, int, 0, "ProbeArrayInt");
 $array.typed.observe(
   ProbeArrayInt, int, "ProbeArrayInt", _compare_int,
   _new_buffer, _finish_buffer);
+$array.typed.box(ProbeArrayInt, int, "ProbeArrayInt");
 $array.typed.update.integer(ProbeArrayInt, int, uint);
 $array.typed.publish(
   ProbeArrayInt, int, probearrayint, <prbarr>, _prepare_probe_export);
+$array.typed.iterate(ProbeArrayInt, int, probearrayint);
 
 int main(void) {
   ProbeArrayInt values = ProbeArrayInt.new();

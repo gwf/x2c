@@ -26,6 +26,46 @@ protocol Cleanup(Mutex);
 
 #include <errno.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/** Initializes a process-lifetime recursive lock.
+    On pthread failure, prints `failure` to native stderr and aborts without
+    allocating. This boundary can run while Error or Scope is failing.
+*/
+void x2c_mutex_recursive_initialize(
+  pthread_mutex_t *mutex, const char *failure) {
+  pthread_mutexattr_t attributes;
+  if (pthread_mutexattr_init(&attributes) ||
+      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
+      pthread_mutex_init(mutex, &attributes)) {
+    fprintf(stderr, "%s\n", failure);
+    abort();
+  }
+  pthread_mutexattr_destroy(&attributes);
+}
+
+/** Initializes through `once`, then locks the recursive mutex.
+    On pthread failure, prints `failure` to native stderr and aborts.
+*/
+void x2c_mutex_recursive_lock(
+  pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void),
+  const char *failure) {
+  if (pthread_once(once, initialize) || pthread_mutex_lock(mutex)) {
+    fprintf(stderr, "%s\n", failure);
+    abort();
+  }
+}
+
+/** Unlocks the recursive mutex.
+    On pthread failure, prints `failure` to native stderr and aborts.
+*/
+void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure) {
+  if (pthread_mutex_unlock(mutex)) {
+    fprintf(stderr, "%s\n", failure);
+    abort();
+  }
+}
 
 struct Mutex {
   pthread_mutex_t native;

@@ -342,14 +342,11 @@ macro Unit $array.core.family(Type $array, Type $element) {
   }
 }
 
-macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
-  Literal $owner
+macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
+  Literal $owner, Literal $boxed
 ) {
   $array $array.new(void);
-  int $array.try_get($array array, int index, $element &?out);
   int $array.try_next($array array, int &?cursor, $element &?out);
-  inline $element $array.getindex($array, int);
-  inline $element $array.setindex($array, int, $element);
   $element $array.push($array, $element);
   int $array.try_take_last($array array, $element &?out);
   $element $array.take_last($array);
@@ -377,21 +374,6 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
     return ($array) Block_new(sizeof($element));
   }
 
-  /** Reads normalized `index` into `out` and reports whether it exists.
-      Negative indices count from the end. A null array, null `out`, or
-      out-of-range index returns zero without writing; success returns one.
-      Raises: `<size-limit>` when the length exceeds the integer index domain.
-  */
-  int $array.try_get($array array, int index, $element &?out) {
-    if (array == NULL) return 0;
-    if (!out) return 0;
-    if (array.length > INT_MAX) _size_limit($owner, array.length);
-    index = x2c_normalize_index(index, (int) array.length);
-    if (index < 0) return 0;
-    out = (($element *) array.bytes)[index];
-    return 1;
-  }
-
   /** Writes the next native element, advances `cursor`, and returns one.
       Initialize the caller-owned cursor to zero. A null argument, negative
       cursor, exhaustion, or an array outside the integer index domain returns
@@ -402,26 +384,14 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
     if (!cursor) return 0;
     if (!out) return 0;
     if (array == NULL || cursor < 0 || array.length > INT_MAX ||
-        cursor >= (int) array.length) return 0;
+        cursor >= (int) array.length) {
+      if ($boxed && array && cursor >= 0 && array.length > INT_MAX)
+        _size_limit($owner, array.length);
+      return 0;
+    }
     out = (($element *) array.bytes)[cursor];
     cursor += 1;
     return 1;
-  }
-
-  /** Returns the element at raw `index` with no bounds or null check.
-      Negative indices are not normalized, and an invalid index has the same
-      undefined behavior as indexing the equivalent C pointer.
-  */
-  inline $element $array.getindex($array array, int index) {
-    return (($element *) array.bytes)[index];
-  }
-
-  /** Stores and returns `value` at raw `index` with no bounds or null check.
-      Negative indices are not normalized, and an invalid index has the same
-      undefined behavior as indexing the equivalent C pointer.
-  */
-  inline $element $array.setindex($array array, int index, $element value) {
-    return (($element *) array.bytes)[index] = value;
   }
 
   /** Appends `value` and returns it.
@@ -429,7 +399,8 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.push($array array, $element value) {
-    if (array == NULL) _bad_operation($owner, <push>);
+    if ($boxed && (Var) value is void) raise %(void-op);
+    if (!$boxed && array == NULL) _bad_operation($owner, <push>);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
     return value;
@@ -450,6 +421,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
   $element $array.take_last($array array) {
     $element value = $zero;
     if (array.try_take_last(value)) return value;
+    if ($boxed) return $zero;
     _bad_operation($owner, <take-last>);
   }
 
@@ -464,6 +436,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       return value;
     if (array && array.length > INT_MAX)
       _size_limit($owner, array.length);
+    if ($boxed) return $zero;
     _bad_operation($owner, <shift>);
   }
 
@@ -473,7 +446,8 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
-    if (array == NULL) _bad_operation($owner, <unshift>);
+    if ($boxed && (Var) value is void) raise %(void-op);
+    if (!$boxed && array == NULL) _bad_operation($owner, <unshift>);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array._core_insert(0, value);
     return value;
@@ -487,6 +461,16 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
+    if ($boxed) {
+      if (array.length > INT_MAX) _size_limit($owner, array.length);
+      int n = (int) array.length;
+      if (index < 0) index += n + 1;
+      if (index < 0 || index > n) return $zero;
+      if (n == INT_MAX) _size_limit($owner, n);
+      if ((Var) value is void) raise %(void-op);
+      array._core_insert(index, value);
+      return value;
+    }
     if (array == NULL || array.length >= INT_MAX ||
         !array._core_insert(index, value)) {
       if (array && array.length >= INT_MAX)
@@ -508,6 +492,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       return value;
     if (array && array.length > INT_MAX)
       _size_limit($owner, array.length);
+    if ($boxed) return $zero;
     size_t size = array ? array.length : 0;
     _bad_index($owner, index, size);
   }
@@ -685,29 +670,11 @@ macro Unit $array.typed.observe(
   Name $new_buffer, Name $finish_buffer
 ) {
   $array.core.observe($family, $element, $compare_element);
-  Array $family.array($family);
   int $family.compare($family, $family);
   String $family.str($family);
   String $family.repr($family);
   Buffer $family.write_str($family, Buffer);
   Buffer $family.write_repr($family, Buffer);
-
-  /** Returns a fresh ordinary Array containing boxed elements in source order.
-      A null input returns NULL. The typed Array and its storage are unchanged.
-      Raises: any cause from boxing or appending an element.
-  */
-  Array $family.array($family array) {
-    if (array == NULL) return NULL;
-    if (array.length > INT_MAX) _size_limit($owner, array.length);
-    Array boxed = [], result = NULL;
-    defer if (result == NULL) Block_free((Block) boxed);
-    $element *data = ($element *) array.bytes;
-    for (size_t i = 0; i < array.length; i++) {
-      Var element = data[i];
-      Block_append((Block) boxed, &element, 1);
-    }
-    return result = boxed;
-  }
 
   /** Compares packed Arrays lexicographically with the element family's
       ordering. Identical handles compare equal and NULL sorts first.
@@ -739,6 +706,56 @@ macro Unit $array.typed.observe(
     array.write_repr(out);
     return $finish_buffer(out);
   }
+}
+
+macro Unit $array.typed.iterate(Type $array, Type $element, Name $unbox) {
+  Iter $array.iter($array, Iter);
+  static int next(Iter iter, Var *out) {
+    $array array = iter.obj.$unbox();
+    int index = iter.state.int();
+    $element element;
+    if (!array.try_next(index, element)) return 0;
+    *out = element;
+    iter.state = index;
+    return 1;
+  }
+
+  /** Initializes `dest` to lazily yield boxed elements in index order.
+      Returns `dest`, whose storage is caller-owned. The iterator borrows
+      `array` and reads its current storage on each step, so both must remain
+      live and mutation can change the remaining traversal. A null `dest`
+      returns NULL. A null array, or one longer than the integer index domain,
+      is exhausted. A boxed wide element is `Scope`-owned;
+      retaining one after a
+      pull requires its owning `Scope` to remain live.
+      Raises: any cause from boxing an element.
+  */
+  Iter $array.iter($array array, Iter dest) {
+    if (dest == NULL) return NULL;
+    return Iter_init(dest, array, next, 0);
+  }
+
+}
+
+macro Unit $array.typed.box(Type $family, Type $element, Literal $owner) {
+  Array $family.array($family);
+  /** Returns a fresh ordinary Array containing boxed elements in source order.
+      A null input returns NULL. The typed Array and its storage are unchanged.
+      Raises: any cause from boxing or appending an element.
+  */
+  Array $family.array($family array) {
+    if (array == NULL) return NULL;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    Array boxed = [], result = NULL;
+    defer if (result == NULL) Block_free((Block) boxed);
+    $element *data = ($element *) array.bytes;
+    for (size_t i = 0; i < array.length; i++) {
+      Var element = data[i];
+      Block_append((Block) boxed, &element, 1);
+    }
+    return result = boxed;
+  }
+
 }
 
 macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
@@ -784,31 +801,6 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     return result = packed;
   }
 
-  static int next(Iter iter, Var *out) {
-    $array array = iter.obj.$unbox();
-    int index = iter.state.int();
-    $element element;
-    if (!array.try_next(index, element)) return 0;
-    *out = element;
-    iter.state = index;
-    return 1;
-  }
-
-  /** Initializes `dest` to lazily yield boxed elements in index order.
-      Returns `dest`, whose storage is caller-owned. The iterator borrows
-      `array` and reads its current storage on each step, so both must remain
-      live and mutation can change the remaining traversal. A null `dest`
-      returns NULL. A null array, or one longer than the integer index domain,
-      is exhausted. A boxed wide element is `Scope`-owned;
-      retaining one after a
-      pull requires its owning `Scope` to remain live.
-      Raises: any cause from boxing an element.
-  */
-  Iter $array.iter($array array, Iter dest) {
-    if (dest == NULL) return NULL;
-    return Iter_init(dest, array, next, 0);
-  }
-
   static $array $array.export_context($array array, Context source) {
     if (array == NULL || !source.owns(array)) return array;
     $array staged = $prepare_export(array, source), committed = NULL;
@@ -839,4 +831,82 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
   protocol Block($array);
   protocol Iter($array);
   protocol Var($array) tag $tag;
+}
+
+macro Unit $array.typed.checked_reader(
+  Type $array, Type $element, Literal $owner
+) {
+  /** Reads normalized `index` into `out` and reports whether it exists.
+      Negative indices count from the end. A null array, null `out`, or
+      out-of-range index returns zero without writing; success returns one.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
+  */
+  int $array.try_get($array array, int index, $element &?out) {
+    if (array == NULL) return 0;
+    if (!out) return 0;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    index = x2c_normalize_index(index, (int) array.length);
+    if (index < 0) return 0;
+    out = (($element *) array.bytes)[index];
+    return 1;
+  }
+}
+
+macro Unit $array.typed.index(Type $array, Type $element) {
+  inline $element $array.getindex($array, int);
+  inline $element $array.setindex($array, int, $element);
+  /** Reads raw `index` with the bounds and null preconditions of a C pointer.
+      Negative indices are not normalized. Use `try_get` for a checked read.
+  */
+  inline $element $array.getindex($array array, int index) {
+    return (($element *) array.bytes)[index];
+  }
+  /** Stores and returns `value` at raw `index`, with C-pointer preconditions.
+      Negative indices are not normalized; the caller supplies a valid index.
+  */
+  inline $element $array.setindex($array array, int index, $element value) {
+    return (($element *) array.bytes)[index] = value;
+  }
+}
+
+macro Unit $array.boxed.index(Type $array, Type $element,
+  Literal $zero, Literal $owner, Literal $boxed) {
+  $element $array.getindex($array, int);
+  $element $array.setindex($array, int, $element);
+  /** Reads `index` from a non-null array, counting negatives from the end.
+      Returns `void` when the normalized index is outside the array.
+      Raises: `<size-limit>` outside the integer index domain.
+  */
+  $element $array.getindex($array array, int index) {
+    if ($boxed) {
+      if (array.length > INT_MAX) _size_limit($owner, array.length);
+      index = x2c_normalize_index(index, (int) array.length);
+      if (index < 0) return $zero;
+    }
+    return (($element *) array.bytes)[index];
+  }
+
+  /** Stores and returns `value`, counting negatives from the end.
+      Requires a non-null array. Returns `void` for an out-of-range index.
+      Raises: `<size-limit>` outside the index domain or `<void-op>` when
+      storing `void` at a valid index.
+  */
+  $element $array.setindex($array array, int index, $element value) {
+    if ($boxed) {
+      if (array.length > INT_MAX) _size_limit($owner, array.length);
+      index = x2c_normalize_index(index, (int) array.length);
+      if (index < 0) return $zero;
+      if ((Var) value is void) raise %(void-op);
+    }
+    return (($element *) array.bytes)[index] = value;
+  }
+
+}
+
+macro Unit $array.typed.family(Type $family, Type $element, Literal $zero,
+  Literal $owner
+) {
+  $array.typed.operations($family, $element, $zero, $owner, 0);
+  $array.typed.checked_reader($family, $element, $owner);
+  $array.typed.index($family, $element);
 }

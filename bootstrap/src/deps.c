@@ -142,105 +142,109 @@ int String_equal(String, String);
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
   Array paths = Array_new();
   {
-  _x2c_defer_env_1 _x2c_defer_env_2 = {._x2c_defer_capture_1 =(const void *) & paths};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_2
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    {
-      Var path, content_hash;
-      Map _x2c_macro_object_1 = compiler -> deps;
-      unsigned _x2c_macro_cursor_1 = 0;
-      Var _x2c_macro_cursor_output_1;
-      Var _x2c_macro_cursor_output_2;
-      while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
-        path = _x2c_macro_cursor_output_1;
-        content_hash = _x2c_macro_cursor_output_2;
-        Array_push(paths, path);
-      }
-
+    _x2c_defer_env_1 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_1 =(const void *) & paths
     }
-    if(! Array_len(paths)) Array_push(paths, String_var(input));
-    Array_sort(paths);
-    Buffer out = Buffer_new(0);
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_3
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-      String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
-      _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))));
-      if(! String_truth(request -> dep_target)){
-        Buffer_write_char(out, ' ');
-        _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
-      }
-      Buffer_write_char(out, ':');
       {
-        String path;
-        Array _x2c_macro_object_2 = paths;
-        int _x2c_macro_cursor_2 = 0;
-        Var _x2c_macro_cursor_output_3;
-        while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
-          path = Var_string(_x2c_macro_cursor_output_3);
-          {
-            Buffer_write_char(out, ' ');
-            _write_word(out, path);
-          }
-
+        Var path, content_hash;
+        Map _x2c_macro_object_1 = compiler -> deps;
+        unsigned _x2c_macro_cursor_1 = 0;
+        Var _x2c_macro_cursor_output_1;
+        Var _x2c_macro_cursor_output_2;
+        while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
+          path = _x2c_macro_cursor_output_1;
+          content_hash = _x2c_macro_cursor_output_2;
+          Array_push(paths, path);
         }
 
       }
-      Buffer_write_char(out, '\n');
-      String primary = Path_absolute(input);
-      if(! request -> no_phony_deps){
-        String path;
-        Array _x2c_macro_object_3 = paths;
-        int _x2c_macro_cursor_3 = 0;
-        Var _x2c_macro_cursor_output_4;
-        while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-          path = Var_string(_x2c_macro_cursor_output_4);
-          if(! String_equal(path, primary)){
-            _write_word(out, path);
-            Buffer_write(out, ":\n");
-          }
-
-        }
-
-      }
+      if(! Array_len(paths)) Array_push(paths, String_var(input));
+      Array_sort(paths);
+      Buffer out = Buffer_new(0);
       {
-        String _x2c_return_value_0 = Buffer_str(out);
+        _x2c_defer_env_0 _x2c_defer_env_2 ={
+          ._x2c_defer_capture_0 =(const void *) & out
+        }
+        ;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_2
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
-        }
+          String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
+          _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))));
+          if(! String_truth(request -> dep_target)){
+            Buffer_write_char(out, ' ');
+            _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
+          }
+          Buffer_write_char(out, ':');
+          {
+            String path;
+            Array _x2c_macro_object_2 = paths;
+            int _x2c_macro_cursor_2 = 0;
+            Var _x2c_macro_cursor_output_3;
+            while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
+              path = Var_string(_x2c_macro_cursor_output_3);
+              {
+                Buffer_write_char(out, ' ');
+                _write_word(out, path);
+              }
 
+            }
+
+          }
+          Buffer_write_char(out, '\n');
+          String primary = Path_absolute(input);
+          if(! request -> no_phony_deps){
+            String path;
+            Array _x2c_macro_object_3 = paths;
+            int _x2c_macro_cursor_3 = 0;
+            Var _x2c_macro_cursor_output_4;
+            while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
+              path = Var_string(_x2c_macro_cursor_output_4);
+              if(! String_equal(path, primary)){
+                _write_word(out, path);
+                Buffer_write(out, ":\n");
+              }
+
+            }
+
+          }
+          {
+            String _x2c_return_value_0 = Buffer_str(out);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_1);
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_0;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
-
-}
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int CliRequest_inspects(CliRequest);
 
-void file_publish(List);
-
 Var List_var(List);
 
 Var Symbol_var(Symbol);
+
+void file_publish(List);
 
 Var List_assoc(List, Var);
 
@@ -251,45 +255,57 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
   long volatile error = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[1];
     Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(1868397587594), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    file_publish(cons(String_var(path), cons(String_var(_contents(request, compiler, input, output_dir)), NULL))); {
-      int _x2c_return_value_1 = 1; {
-        x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  return _x2c_return_value_1;
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(1868397587594), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_0);
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      file_publish(cons(String_var(path), cons(String_var(_contents(request, compiler, input, output_dir)), NULL)));
+      {
+        int _x2c_return_value_1 = 1;
+        {
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          return _x2c_return_value_1;
+        }
+
       }
 
     }
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_0);
+        {
+          List volatile failure;
+          failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+          error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
+        }
 
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-       {List failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-      error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
+      }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
+
     }
-
-  }
-  else{
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
   }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-fprintf(stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path, strerror(error));
-return 0;
+  fprintf(stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path, strerror(error));
+  return 0;
 }
 
 void Buffer_cleanup(Buffer);

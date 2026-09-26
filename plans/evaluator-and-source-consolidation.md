@@ -1,11 +1,11 @@
 # Evaluator and source consolidation campaign
 
-> Status: active
-> Planned 2026-09-26; execution has not started. Gary requested an
-> orchestrated campaign covering the evaluator and all named cleanup
-> candidates, initially limited to the evaluator, strongest small cleanups,
-> and bounded prototypes. Later compatibility and distribution decisions
-> remain queued. The root session owns orchestration and integration.
+
+> Status: reference
+> The earlier first-wave scope and conclusions are historical. The current
+> implementation spike is [source consolidation research](source-consolidation-research.md).
+> Its working prototypes independently revisit the larger original targets;
+> publication is held for Gary's review.
 
 ## Result and scope
 
@@ -45,8 +45,10 @@ this baseline. An isolated replacement-object experiment established:
 | lisp_suite and lisp_auto_suite | 101 passed, 1,197 assertions | same |
 
 This proves relevance, not timing invariance or stack-bound portability.
-Current dev still has AUTO. Array/Map already instantiate shared core-family
-macros: lib/array.x:53 and lib/map.x:94; that row is already complete.
+Current dev still has AUTO. Array/Map instantiate shared core-family macros,
+but this does not establish typed-family wrapper consolidation. The earlier
+claim that the row was complete was incorrect; the current research record
+contains a working typed-family prototype including public wrappers.
 The original research logs and report are workspace evidence under debug/
 and .context/dev-cleanup-research-2026-09-26.md; the decisions needed to
 resume the campaign are recorded here.
@@ -226,7 +228,7 @@ results complete that investigation; they do not trigger an endless rewrite.
 | L7 | CLI metadata/setters | cli.x already has recognition/help metadata. First consolidate package eligibility; evaluate setter glue by net clarity/size, preserving response files and help output. |
 | L8 | Build identity hash | Consolidate exact duplicate mechanics only; translation/action/script identities cover different inputs. Preserve resolved-path versus content distinctions and cache invalidation. |
 | L9 | Project setter field table | Limit initial experiment to homogeneous target array fields. Retain kind/boolean/ignored-name/unknown-field policy. |
-| L10 | Array/Map typed families | Complete at baseline via shared core-family instantiations. Verify continued sharing when reached; no replacement rewrite queued. |
+| L10 | Array/Map typed families | Earlier completion claim corrected: core-family sharing is only a subset. Current research instantiates typed-family wrappers and measures all replacement templates and glue. |
 | L11 | Recursive Match oracle to tests | Decide shipped optional API and include migration; no performance claim from moving an already optional module. Preserve test/benchmark oracle availability. |
 | L12 | Autodiff to packages | Decide include/install migration, compiler/Lisp registration and coverage location. Preserve working examples and capabilities; removing tests from make check is a separate explicit choice. |
 | L13 | Small public API retirement | Decide each item individually: ScopeStats maxima, Var.parse, List.subseq, Array.indexof, Var.fallback_* and Var.wide_*. Distinguish aliases, real features, telemetry and active internal cross-module owners. |

@@ -15,8 +15,10 @@ All four are ordinary x2c: a macro file, an optional module, and the
 existing protocol and decorator machinery. Nothing in the compiler knows
 about derivatives.
 
-The [runtime module reference](../library/modules/autodiff.md) documents
-`AdTape` and `AdNode`. For other specialized capabilities, see
+The [Autodiff package](../../../packages/autodiff/README.md) supplies
+`AdTape`, `AdNode`, and the compile-time decorators. Build it with
+`make -C packages/autodiff build` and pass `--package-dir packages` when
+compiling a consumer from the repository root. For other specialized capabilities, see
 [Advanced Topics](../library/advanced-topics.md).
 
 ## Dual numbers
@@ -27,7 +29,7 @@ holes, so the same family nests:
 
 ```x2c
 ~#include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;
@@ -72,7 +74,7 @@ tangent parameter `p_dot`, and the result is the directional derivative:
 
 ```x2c
 ~#include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.forward()
 static double scale(double a, int k) => a * (double) k;
@@ -122,7 +124,7 @@ a tape on an `ArrayDbl`:
 ```x2c
 ~#include "typed-array.x"
 ~#include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.reverse()
 static double model(double x, double y, int n) {
@@ -184,7 +186,7 @@ before; a checkpointed loop cannot contain `return`.
 ```x2c
 ~#include "typed-array.x"
 ~#include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.checkpoint(64)
 static double relax(double x, double y, int steps) {
@@ -266,10 +268,10 @@ provides the subset its holes name, plus `fabs` and a `pow` computed as
 ## Runtime tape
 
 When the shape of the computation depends on data in ways the decorators
-reject, include `autodiff.x` and record it:
+reject, import the package types and record it:
 
 ```x2c
-~#include "autodiff.x"
+import "autodiff" with AdTape, AdNode;
 int main(void) {
   AdTape tape = AdTape.new();
   AdNode x = tape.input(1.5), y = tape.input(2.0);

@@ -131,10 +131,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -728,74 +728,76 @@ Var Map_getindex(Map, Var);
 static void _write_members(Buffer out, Map object, int pretty, int depth){
   Array names = Array_new();
   {
-  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & names};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_2
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & names
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      Var name, member;
-      Map _x2c_macro_object_1 = object;
-      unsigned _x2c_macro_cursor_1 = 0;
-      Var _x2c_macro_cursor_output_0;
-      Var _x2c_macro_cursor_output_1;
-      while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
-        name = _x2c_macro_cursor_output_0;
-        member = _x2c_macro_cursor_output_1;
-        {
-          if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
-            Symbol tag = Var_tag(name);
-            {
-              static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_members",.line = 495};
-              x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
+      {
+        Var name, member;
+        Map _x2c_macro_object_1 = object;
+        unsigned _x2c_macro_cursor_1 = 0;
+        Var _x2c_macro_cursor_output_0;
+        Var _x2c_macro_cursor_output_1;
+        while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
+          name = _x2c_macro_cursor_output_0;
+          member = _x2c_macro_cursor_output_1;
+          {
+            if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
+              Symbol tag = Var_tag(name);
+              {
+                static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_members",.line = 495};
+                x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
+                __builtin_unreachable();
+              }
+
+            }
+            Array_push(names, name);
+          }
+
+        }
+
+      }
+      Array_sort_by(names, _x2c_func_handle_0);
+      int count = 0;
+      String previous = NULL;
+      Buffer_write_char(out, '{');
+      {
+        Var name;
+        Array _x2c_macro_object_2 = names;
+        int _x2c_macro_cursor_2 = 0;
+        Var _x2c_macro_cursor_output_2;
+        while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+          name = _x2c_macro_cursor_output_2;
+          {
+            String text = Var_str(name);
+            if(count && String_equal(text, previous)){
+              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 507};
+              x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
               __builtin_unreachable();
             }
-
+            previous = text;
+            if(count ++) Buffer_write_char(out, ',');
+            _write_line(out, pretty, depth + 1);
+            _write_string(out, text);
+            Buffer_write(out, pretty ? ": " : ":");
+            _write(out, Map_getindex(object, name), pretty, depth + 1);
           }
-          Array_push(names, name);
+
         }
 
       }
-
+      if(count) _write_line(out, pretty, depth);
+      Buffer_write_char(out, '}');
     }
-    Array_sort_by(names, _x2c_func_handle_0);
-    int count = 0;
-    String previous = NULL;
-    Buffer_write_char(out, '{');
-    {
-      Var name;
-      Array _x2c_macro_object_2 = names;
-      int _x2c_macro_cursor_2 = 0;
-      Var _x2c_macro_cursor_output_2;
-      while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-        name = _x2c_macro_cursor_output_2;
-        {
-          String text = Var_str(name);
-          if(count && String_equal(text, previous)){
-            static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 507};
-            x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
-            __builtin_unreachable();
-          }
-          previous = text;
-          if(count ++) Buffer_write_char(out, ',');
-          _write_line(out, pretty, depth + 1);
-          _write_string(out, text);
-          Buffer_write(out, pretty ? ": " : ":");
-          _write(out, Map_getindex(object, name), pretty, depth + 1);
-        }
-
-      }
-
-    }
-    if(count) _write_line(out, pretty, depth);
-    Buffer_write_char(out, '}');
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int Var_is_null(Var);
@@ -838,28 +840,30 @@ String Buffer_str(Buffer);
 static String _json(Var value, int pretty){
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_3
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    _write(out, value, pretty, 0);
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_1 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      String _x2c_return_value_0 = Buffer_str(out);
+      _write(out, value, pretty, 0);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_0;
+        String _x2c_return_value_0 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 String Var_json(Var value){
@@ -914,7 +918,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

@@ -65,6 +65,7 @@ typedef void (*LogFlusher)(Logger logger, Var data);
 #include "block.x"
 #include "buffer.x"
 #include "exception.x"
+#include "mutex.x"
 #include "error.x"
 #include "error_init.x"
 #include "file.x"
@@ -110,31 +111,18 @@ static int logger_error_mark, static pthread_mutex_t logger_mutex;
 static pthread_once_t logger_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
-static void _mutex_initialize(void) {
-  pthread_mutexattr_t attributes;
-  if (pthread_mutexattr_init(&attributes) ||
-      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
-      pthread_mutex_init(&logger_mutex, &attributes)) {
-    fprintf(stderr, "Logger: could not initialize mutex\n");
-    abort();
-  }
-  pthread_mutexattr_destroy(&attributes);
-}
+static void _mutex_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &logger_mutex, "Logger: could not initialize mutex");
 
-static void _lock(void) {
-  if (pthread_once(&logger_mutex_once, _mutex_initialize) ||
-      pthread_mutex_lock(&logger_mutex)) {
-    fprintf(stderr, "Logger: could not lock mutex\n");
-    abort();
-  }
-}
+static void _lock(void) =>
+  x2c_mutex_recursive_lock(
+    &logger_mutex, &logger_mutex_once, _mutex_initialize,
+    "Logger: could not lock mutex");
 
-static void _unlock(void) {
-  if (pthread_mutex_unlock(&logger_mutex)) {
-    fprintf(stderr, "Logger: could not unlock mutex\n");
-    abort();
-  }
-}
+static void _unlock(void) =>
+  x2c_mutex_recursive_unlock(
+    &logger_mutex, "Logger: could not unlock mutex");
 
 macro Decorator $logger.synchronized(Function $function) {
   _lock();

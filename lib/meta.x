@@ -154,7 +154,7 @@ meta Var x2c_literal_value(Var syntax);
    A decorator receives a whole function, and these four take it apart: its
    name, one parameter by spelling, its body, and the argument list that
    forwards its parameters. A decorator that wraps or forwards a function
-   needs all four; `lib/autodiff.xmacro` uses this compiler surface. */
+   needs all four; `packages/autodiff/src/autodiff.xmacro` uses this compiler surface. */
 
 /** Returns the spelling of the function `function` defines. */
 meta String x2c_function_name(List function);

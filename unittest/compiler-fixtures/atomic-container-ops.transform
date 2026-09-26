@@ -354,18 +354,19 @@
     (bindings 
      (op = (bind (binding 37 "direct_prefix") ()) 
       (expr ("Var") 
-       (vcompound (expr ("Var") (ident (binding 36 "counter"))) 
-        (expr ("Symbol") "56") 
-        (expr ("Var") 
-         (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
-          (args (expr (int) (literal (int) "1"))))) 
-        "Var_update")))))) 
+       (call "x2c_var_update_volatile" 
+        (args (expr (* "Var") 
+               (op & (parens (expr ("Var") (ident (binding 36 "counter")))))) 
+         (expr ("Symbol") "56") 
+         (expr ("Var") 
+          (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
+           (args (expr (int) (literal (int) "1")))))))))))) 
   (at 62 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "direct_postfix") ()) 
       (expr ("Var") 
-       (call "Var_postfix" 
+       (call "x2c_var_postfix_volatile" 
         (args (expr (* "Var") 
                (op & (parens (expr ("Var") (ident (binding 36 "counter")))))) 
          (expr ("Symbol") "2046")))))))) 
@@ -391,20 +392,24 @@
   (at 65 
    (stmnt 
     (expr ("Var") 
-     (vcompound (expr ("Var") (ident (binding 39 "dynamic"))) 
-      (expr ("Symbol") "56") 
-      (expr ("Var") 
-       (call (expr ((func (("String"))) "Var") (ident (binding 15 "String_var"))) 
-        (args (expr ("String") (cache 4))))) "Var_update")))) 
+     (call "x2c_var_update_volatile" 
+      (args (expr (* "Var") 
+             (op & (parens (expr ("Var") (ident (binding 39 "dynamic")))))) 
+       (expr ("Symbol") "56") 
+       (expr ("Var") 
+        (call (expr ((func (("String"))) "Var") 
+               (ident (binding 15 "String_var"))) 
+         (args (expr ("String") (cache 4)))))))))) 
   (at 33 
    (declare ("Text") 
     (bindings (op = (bind (binding 42 "text") ()) (expr ("String") (cache 5)))))) 
   (at 66 
    (stmnt 
     (expr ("Text") 
-     (vcompound (expr ("Text") (ident (binding 42 "text"))) 
-      (expr ("Symbol") "56") (expr ("String") (cache 7)) 
-      "_x2c_proto_string_add_update")))) 
+     (call "_x2c_proto_string_add_update" 
+      (args (expr (* "Text") 
+             (op & (parens (expr ("Text") (ident (binding 42 "text")))))) 
+       (expr ("Symbol") "56") (expr ("String") (cache 7))))))) 
   (at 67 
    (declare (int) 
     (bindings 

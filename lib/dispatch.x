@@ -233,6 +233,7 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 #include "file.x"
 #include "iter.x"
 #include "exception.x"
+#include "mutex.x"
 #include <float.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -256,31 +257,18 @@ static pthread_once_t descriptor_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 static int descriptor_registration_frozen;
 
-static void _descriptor_mutex_initialize(void) {
-  pthread_mutexattr_t attributes;
-  if (pthread_mutexattr_init(&attributes) ||
-      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
-      pthread_mutex_init(&descriptor_mutex, &attributes)) {
-    fprintf(stderr, "Var descriptor: could not initialize mutex\n");
-    abort();
-  }
-  pthread_mutexattr_destroy(&attributes);
-}
+static void _descriptor_mutex_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &descriptor_mutex, "Var descriptor: could not initialize mutex");
 
-static void _descriptor_lock(void) {
-  if (pthread_once(&descriptor_mutex_once, _descriptor_mutex_initialize) ||
-      pthread_mutex_lock(&descriptor_mutex)) {
-    fprintf(stderr, "Var descriptor: could not lock mutex\n");
-    abort();
-  }
-}
+static void _descriptor_lock(void) =>
+  x2c_mutex_recursive_lock(
+    &descriptor_mutex, &descriptor_mutex_once, _descriptor_mutex_initialize,
+    "Var descriptor: could not lock mutex");
 
-static void _descriptor_unlock(void) {
-  if (pthread_mutex_unlock(&descriptor_mutex)) {
-    fprintf(stderr, "Var descriptor: could not unlock mutex\n");
-    abort();
-  }
-}
+static void _descriptor_unlock(void) =>
+  x2c_mutex_recursive_unlock(
+    &descriptor_mutex, "Var descriptor: could not unlock mutex");
 
 /** Locks descriptor registration while a native worker starts.
     The caller must pair this on the same thread with

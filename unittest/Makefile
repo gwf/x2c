@@ -3,7 +3,7 @@ BUILD = build
 
 include ../etc/x2c.mk
 
-X2CFLAGS +=
+X2CFLAGS += --package-dir ../packages
 # This is needed because diagnostics.h is not part of libx2c.a.
 CFLAGS += -iquote ../builds/0/src -Wno-invalid-pp-token
 
@@ -32,7 +32,11 @@ default: test-all compiler-fixtures scope-probes error-probes \
 all: test-all compiler-fixtures scope-probes error-probes \
 	varops-probes
 
-test-all: $(BUILD)/test-all.o $(SUITE_OBJECTS)
+$(BUILD)/test-autodiff.o: CFLAGS := \
+  -iquote ../packages/autodiff/builds $(CFLAGS)
+
+test-all: $(BUILD)/test-all.o $(SUITE_OBJECTS) \
+	../packages/autodiff/builds/libautodiff.a
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 test: test-all compiler-fixtures
@@ -134,3 +138,20 @@ $(BUILD)/test-all.o: $(BUILD)/test-support.h
 COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/diagnostics.o \
 	../builds/0/src/report.o ../builds/0/src/sourceview.o
 test-all: $(COMPILER_OBJECTS)
+
+# Keep the existing autodiff suite linked after moving its runtime to a package.
+../packages/autodiff/builds/libautodiff.a: \
+	../packages/autodiff/src/autodiff.x \
+	../packages/autodiff/src/autodiff.xmacro \
+	../builds/0/x2c ../builds/0/libx2c.a
+	$(MAKE) -C ../packages/autodiff build
+
+../packages/autodiff/builds/autodiff.module: \
+	../packages/autodiff/builds/libautodiff.a
+	$(MAKE) -C ../packages/autodiff build
+
+$(BUILD)/.translated: ../packages/autodiff/builds/libautodiff.a \
+	../packages/autodiff/builds/autodiff.module
+
+compiler-fixtures update-compiler-fixtures: | \
+	../packages/autodiff/builds/autodiff.module

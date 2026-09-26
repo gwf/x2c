@@ -1,0 +1,3 @@
+-iquote
+./packages/autodiff/builds
+./packages/autodiff/builds/libautodiff.a

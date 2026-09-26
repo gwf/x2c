@@ -64,7 +64,7 @@ check_case iter \
 check_case binary \
   $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "_protocol_arithmetic"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case update \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_update"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "x2c_var_update_volatile"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case postfix \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_postfix"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "x2c_var_postfix_volatile"))\nx2c error floor: <void-op>: non-returning error was not caught'
 echo "Var fatal probes passed"

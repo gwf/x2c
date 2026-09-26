@@ -2,11 +2,11 @@
 
 #include "x2c.x"
 #include "typed-array.x"
-#include "autodiff.x"
+import "autodiff" with AdTape, AdNode;
 #include <math.h>
 #include "test-support.x"
 $(import "test-macros.xmacro")
-$(import "autodiff.xmacro")
+
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;

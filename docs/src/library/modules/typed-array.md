@@ -25,7 +25,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.count`](#ArrayChar.count) | Returns how many native elements equal `value`. |
 | [`ArrayChar.equal`](#ArrayChar.equal) | Reports elementwise native equality. |
 | [`ArrayChar.find`](#ArrayChar.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayChar.getindex`](#ArrayChar.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayChar.getindex`](#ArrayChar.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -37,7 +37,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.remslice`](#ArrayChar.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayChar.repr`](#ArrayChar.repr) | Returns the readable packed-Array representation. |
 | [`ArrayChar.reverse`](#ArrayChar.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayChar.setindex`](#ArrayChar.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayChar.setindex`](#ArrayChar.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayChar.setslice`](#ArrayChar.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayChar.shift`](#ArrayChar.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayChar.splice`](#ArrayChar.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -60,7 +60,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.count`](#ArrayDbl.count) | Returns how many native elements equal `value`. |
 | [`ArrayDbl.equal`](#ArrayDbl.equal) | Reports elementwise native equality. |
 | [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -72,7 +72,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.remslice`](#ArrayDbl.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayDbl.repr`](#ArrayDbl.repr) | Returns the readable packed-Array representation. |
 | [`ArrayDbl.reverse`](#ArrayDbl.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayDbl.setindex`](#ArrayDbl.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayDbl.setindex`](#ArrayDbl.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayDbl.setslice`](#ArrayDbl.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayDbl.shift`](#ArrayDbl.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayDbl.splice`](#ArrayDbl.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -95,7 +95,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.count`](#ArrayFloat.count) | Returns how many native elements equal `value`. |
 | [`ArrayFloat.equal`](#ArrayFloat.equal) | Reports elementwise native equality. |
 | [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -107,7 +107,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.remslice`](#ArrayFloat.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayFloat.repr`](#ArrayFloat.repr) | Returns the readable packed-Array representation. |
 | [`ArrayFloat.reverse`](#ArrayFloat.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayFloat.setindex`](#ArrayFloat.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayFloat.setindex`](#ArrayFloat.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayFloat.setslice`](#ArrayFloat.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayFloat.shift`](#ArrayFloat.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayFloat.splice`](#ArrayFloat.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -130,7 +130,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.count`](#ArrayInt.count) | Returns how many native elements equal `value`. |
 | [`ArrayInt.equal`](#ArrayInt.equal) | Reports elementwise native equality. |
 | [`ArrayInt.find`](#ArrayInt.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayInt.getindex`](#ArrayInt.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayInt.getindex`](#ArrayInt.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -142,7 +142,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.remslice`](#ArrayInt.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayInt.repr`](#ArrayInt.repr) | Returns the readable packed-Array representation. |
 | [`ArrayInt.reverse`](#ArrayInt.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayInt.setindex`](#ArrayInt.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayInt.setindex`](#ArrayInt.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayInt.setslice`](#ArrayInt.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayInt.shift`](#ArrayInt.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayInt.splice`](#ArrayInt.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -165,7 +165,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.count`](#ArrayLong.count) | Returns how many native elements equal `value`. |
 | [`ArrayLong.equal`](#ArrayLong.equal) | Reports elementwise native equality. |
 | [`ArrayLong.find`](#ArrayLong.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayLong.getindex`](#ArrayLong.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayLong.getindex`](#ArrayLong.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -177,7 +177,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.remslice`](#ArrayLong.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayLong.repr`](#ArrayLong.repr) | Returns the readable packed-Array representation. |
 | [`ArrayLong.reverse`](#ArrayLong.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayLong.setindex`](#ArrayLong.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayLong.setindex`](#ArrayLong.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayLong.setslice`](#ArrayLong.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayLong.shift`](#ArrayLong.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayLong.splice`](#ArrayLong.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -200,7 +200,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.count`](#ArrayShort.count) | Returns how many native elements equal `value`. |
 | [`ArrayShort.equal`](#ArrayShort.equal) | Reports elementwise native equality. |
 | [`ArrayShort.find`](#ArrayShort.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayShort.getindex`](#ArrayShort.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayShort.getindex`](#ArrayShort.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -212,7 +212,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.remslice`](#ArrayShort.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayShort.repr`](#ArrayShort.repr) | Returns the readable packed-Array representation. |
 | [`ArrayShort.reverse`](#ArrayShort.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayShort.setindex`](#ArrayShort.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayShort.setindex`](#ArrayShort.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayShort.setslice`](#ArrayShort.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayShort.shift`](#ArrayShort.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayShort.splice`](#ArrayShort.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -235,7 +235,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.count`](#ArrayString.count) | Returns how many native elements equal `value`. |
 | [`ArrayString.equal`](#ArrayString.equal) | Reports elementwise native equality. |
 | [`ArrayString.find`](#ArrayString.find) | Returns the first index whose native element equals `value`, or -1. |
-| [`ArrayString.getindex`](#ArrayString.getindex) | Returns the element at raw `index` with no bounds or null check. |
+| [`ArrayString.getindex`](#ArrayString.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
 | [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
@@ -247,7 +247,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.remslice`](#ArrayString.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayString.repr`](#ArrayString.repr) | Returns the readable packed-Array representation. |
 | [`ArrayString.reverse`](#ArrayString.reverse) | Reverses `array` in place and returns that same array. |
-| [`ArrayString.setindex`](#ArrayString.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
+| [`ArrayString.setindex`](#ArrayString.setindex) | Stores and returns `value` at raw `index`, with C-pointer preconditions. |
 | [`ArrayString.setslice`](#ArrayString.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayString.shift`](#ArrayString.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayString.splice`](#ArrayString.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
@@ -281,7 +281,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:111`
+Source: `lib/typed-array.x:112`
 
 <a id="Array.arraydbl"></a>
 #### Array.arraydbl
@@ -293,7 +293,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:156`
+Source: `lib/typed-array.x:167`
 
 <a id="Array.arrayfloat"></a>
 #### Array.arrayfloat
@@ -305,7 +305,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:147`
+Source: `lib/typed-array.x:156`
 
 <a id="Array.arrayint"></a>
 #### Array.arrayint
@@ -317,7 +317,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:129`
+Source: `lib/typed-array.x:134`
 
 <a id="Array.arraylong"></a>
 #### Array.arraylong
@@ -329,7 +329,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:138`
+Source: `lib/typed-array.x:145`
 
 <a id="Array.arrayshort"></a>
 #### Array.arrayshort
@@ -341,7 +341,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:120`
+Source: `lib/typed-array.x:123`
 
 <a id="Array.arraystring"></a>
 #### Array.arraystring
@@ -353,7 +353,7 @@ A null input returns NULL. Each element goes through its `Var`
 conversion; the source is unchanged and a failing conversion or
 allocation releases the partial result before transferring its cause.
 
-Source: `lib/typed-array.x:165`
+Source: `lib/typed-array.x:178`
 
 ### `ArrayChar`
 
@@ -367,7 +367,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:107`
+Source: `lib/typed-array.x:110`
 
 <a id="ArrayChar.block"></a>
 #### ArrayChar.block
@@ -376,7 +376,7 @@ Source: `lib/typed-array.x:107`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:111`
+Source: `lib/typed-array.x:112`
 
 <a id="ArrayChar.compare"></a>
 #### ArrayChar.compare
@@ -467,9 +467,8 @@ Source: `lib/typed-array.x:106`
 
 `char ArrayChar.getindex(ArrayChar array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
 Source: `lib/typed-array.x:106`
 
@@ -526,7 +525,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:111`
+Source: `lib/typed-array.x:114`
 
 <a id="ArrayChar.new"></a>
 #### ArrayChar.new
@@ -549,7 +548,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:110`
+Source: `lib/typed-array.x:111`
 
 <a id="ArrayChar.push"></a>
 #### ArrayChar.push
@@ -614,9 +613,8 @@ Source: `lib/typed-array.x:106`
 
 `char ArrayChar.setindex(ArrayChar array, int index, char value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
 Source: `lib/typed-array.x:106`
 
@@ -747,7 +745,7 @@ result conversion. A failing operation leaves the element unchanged.
 **Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
 invalid operation.
 
-Source: `lib/typed-array.x:110`
+Source: `lib/typed-array.x:111`
 
 <a id="ArrayChar.var"></a>
 #### ArrayChar.var
@@ -757,7 +755,7 @@ Source: `lib/typed-array.x:110`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:111`
+Source: `lib/typed-array.x:112`
 
 <a id="ArrayChar.write_repr"></a>
 #### ArrayChar.write_repr
@@ -789,7 +787,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:165`
 
 <a id="ArrayDbl.block"></a>
 #### ArrayDbl.block
@@ -798,7 +796,7 @@ Source: `lib/typed-array.x:152`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:156`
+Source: `lib/typed-array.x:167`
 
 <a id="ArrayDbl.compare"></a>
 #### ArrayDbl.compare
@@ -808,7 +806,7 @@ Source: `lib/typed-array.x:156`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:162`
 
 <a id="ArrayDbl.concat"></a>
 #### ArrayDbl.concat
@@ -822,7 +820,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.contains"></a>
 #### ArrayDbl.contains
@@ -833,7 +831,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.copy"></a>
 #### ArrayDbl.copy
@@ -847,7 +845,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.count"></a>
 #### ArrayDbl.count
@@ -859,7 +857,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.equal"></a>
 #### ArrayDbl.equal
@@ -870,7 +868,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.find"></a>
 #### ArrayDbl.find
@@ -882,18 +880,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.getindex"></a>
 #### ArrayDbl.getindex
 
 `double ArrayDbl.getindex(ArrayDbl array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.getslice"></a>
 #### ArrayDbl.getslice
@@ -906,7 +903,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.indexof"></a>
 #### ArrayDbl.indexof
@@ -915,7 +912,7 @@ Source: `lib/typed-array.x:151`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.insert"></a>
 #### ArrayDbl.insert
@@ -930,7 +927,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.iter"></a>
 #### ArrayDbl.iter
@@ -948,7 +945,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:156`
+Source: `lib/typed-array.x:169`
 
 <a id="ArrayDbl.new"></a>
 #### ArrayDbl.new
@@ -959,7 +956,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.postfixindex"></a>
 #### ArrayDbl.postfixindex
@@ -971,7 +968,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:155`
+Source: `lib/typed-array.x:166`
 
 <a id="ArrayDbl.push"></a>
 #### ArrayDbl.push
@@ -983,7 +980,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.remove"></a>
 #### ArrayDbl.remove
@@ -996,7 +993,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.remslice"></a>
 #### ArrayDbl.remslice
@@ -1010,7 +1007,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.repr"></a>
 #### ArrayDbl.repr
@@ -1019,7 +1016,7 @@ Source: `lib/typed-array.x:151`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:162`
 
 <a id="ArrayDbl.reverse"></a>
 #### ArrayDbl.reverse
@@ -1029,18 +1026,17 @@ Source: `lib/typed-array.x:152`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.setindex"></a>
 #### ArrayDbl.setindex
 
 `double ArrayDbl.setindex(ArrayDbl array, int index, double value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.setslice"></a>
 #### ArrayDbl.setslice
@@ -1057,7 +1053,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.shift"></a>
 #### ArrayDbl.shift
@@ -1070,7 +1066,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.splice"></a>
 #### ArrayDbl.splice
@@ -1084,7 +1080,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.str"></a>
 #### ArrayDbl.str
@@ -1093,7 +1089,7 @@ Source: `lib/typed-array.x:151`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:162`
 
 <a id="ArrayDbl.take_last"></a>
 #### ArrayDbl.take_last
@@ -1104,7 +1100,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.try_get"></a>
 #### ArrayDbl.try_get
@@ -1117,7 +1113,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.try_next"></a>
 #### ArrayDbl.try_next
@@ -1130,7 +1126,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.try_take_last"></a>
 #### ArrayDbl.try_take_last
@@ -1141,7 +1137,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.unshift"></a>
 #### ArrayDbl.unshift
@@ -1154,7 +1150,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:151`
+Source: `lib/typed-array.x:161`
 
 <a id="ArrayDbl.updateindex"></a>
 #### ArrayDbl.updateindex
@@ -1167,7 +1163,7 @@ the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-types>` for another operator, before changing the element.
 
-Source: `lib/typed-array.x:155`
+Source: `lib/typed-array.x:166`
 
 <a id="ArrayDbl.var"></a>
 #### ArrayDbl.var
@@ -1177,7 +1173,7 @@ Source: `lib/typed-array.x:155`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:156`
+Source: `lib/typed-array.x:167`
 
 <a id="ArrayDbl.write_repr"></a>
 #### ArrayDbl.write_repr
@@ -1186,7 +1182,7 @@ Source: `lib/typed-array.x:156`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:162`
 
 <a id="ArrayDbl.write_str"></a>
 #### ArrayDbl.write_str
@@ -1195,7 +1191,7 @@ Source: `lib/typed-array.x:152`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:152`
+Source: `lib/typed-array.x:162`
 
 ### `ArrayFloat`
 
@@ -1209,7 +1205,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:154`
 
 <a id="ArrayFloat.block"></a>
 #### ArrayFloat.block
@@ -1218,7 +1214,7 @@ Source: `lib/typed-array.x:143`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:147`
+Source: `lib/typed-array.x:156`
 
 <a id="ArrayFloat.compare"></a>
 #### ArrayFloat.compare
@@ -1228,7 +1224,7 @@ Source: `lib/typed-array.x:147`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:151`
 
 <a id="ArrayFloat.concat"></a>
 #### ArrayFloat.concat
@@ -1242,7 +1238,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.contains"></a>
 #### ArrayFloat.contains
@@ -1253,7 +1249,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.copy"></a>
 #### ArrayFloat.copy
@@ -1267,7 +1263,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.count"></a>
 #### ArrayFloat.count
@@ -1279,7 +1275,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.equal"></a>
 #### ArrayFloat.equal
@@ -1290,7 +1286,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.find"></a>
 #### ArrayFloat.find
@@ -1302,18 +1298,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.getindex"></a>
 #### ArrayFloat.getindex
 
 `float ArrayFloat.getindex(ArrayFloat array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.getslice"></a>
 #### ArrayFloat.getslice
@@ -1326,7 +1321,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.indexof"></a>
 #### ArrayFloat.indexof
@@ -1335,7 +1330,7 @@ Source: `lib/typed-array.x:142`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.insert"></a>
 #### ArrayFloat.insert
@@ -1350,7 +1345,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.iter"></a>
 #### ArrayFloat.iter
@@ -1368,7 +1363,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:147`
+Source: `lib/typed-array.x:158`
 
 <a id="ArrayFloat.new"></a>
 #### ArrayFloat.new
@@ -1379,7 +1374,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.postfixindex"></a>
 #### ArrayFloat.postfixindex
@@ -1391,7 +1386,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:146`
+Source: `lib/typed-array.x:155`
 
 <a id="ArrayFloat.push"></a>
 #### ArrayFloat.push
@@ -1403,7 +1398,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.remove"></a>
 #### ArrayFloat.remove
@@ -1416,7 +1411,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.remslice"></a>
 #### ArrayFloat.remslice
@@ -1430,7 +1425,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.repr"></a>
 #### ArrayFloat.repr
@@ -1439,7 +1434,7 @@ Source: `lib/typed-array.x:142`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:151`
 
 <a id="ArrayFloat.reverse"></a>
 #### ArrayFloat.reverse
@@ -1449,18 +1444,17 @@ Source: `lib/typed-array.x:143`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.setindex"></a>
 #### ArrayFloat.setindex
 
 `float ArrayFloat.setindex(ArrayFloat array, int index, float value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.setslice"></a>
 #### ArrayFloat.setslice
@@ -1477,7 +1471,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.shift"></a>
 #### ArrayFloat.shift
@@ -1490,7 +1484,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.splice"></a>
 #### ArrayFloat.splice
@@ -1504,7 +1498,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.str"></a>
 #### ArrayFloat.str
@@ -1513,7 +1507,7 @@ Source: `lib/typed-array.x:142`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:151`
 
 <a id="ArrayFloat.take_last"></a>
 #### ArrayFloat.take_last
@@ -1524,7 +1518,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.try_get"></a>
 #### ArrayFloat.try_get
@@ -1537,7 +1531,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.try_next"></a>
 #### ArrayFloat.try_next
@@ -1550,7 +1544,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.try_take_last"></a>
 #### ArrayFloat.try_take_last
@@ -1561,7 +1555,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.unshift"></a>
 #### ArrayFloat.unshift
@@ -1574,7 +1568,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:142`
+Source: `lib/typed-array.x:150`
 
 <a id="ArrayFloat.updateindex"></a>
 #### ArrayFloat.updateindex
@@ -1587,7 +1581,7 @@ the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-types>` for another operator, before changing the element.
 
-Source: `lib/typed-array.x:146`
+Source: `lib/typed-array.x:155`
 
 <a id="ArrayFloat.var"></a>
 #### ArrayFloat.var
@@ -1597,7 +1591,7 @@ Source: `lib/typed-array.x:146`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:147`
+Source: `lib/typed-array.x:156`
 
 <a id="ArrayFloat.write_repr"></a>
 #### ArrayFloat.write_repr
@@ -1606,7 +1600,7 @@ Source: `lib/typed-array.x:147`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:151`
 
 <a id="ArrayFloat.write_str"></a>
 #### ArrayFloat.write_str
@@ -1615,7 +1609,7 @@ Source: `lib/typed-array.x:143`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:143`
+Source: `lib/typed-array.x:151`
 
 ### `ArrayInt`
 
@@ -1629,7 +1623,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:132`
 
 <a id="ArrayInt.block"></a>
 #### ArrayInt.block
@@ -1638,7 +1632,7 @@ Source: `lib/typed-array.x:125`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:129`
+Source: `lib/typed-array.x:134`
 
 <a id="ArrayInt.compare"></a>
 #### ArrayInt.compare
@@ -1648,7 +1642,7 @@ Source: `lib/typed-array.x:129`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:129`
 
 <a id="ArrayInt.concat"></a>
 #### ArrayInt.concat
@@ -1662,7 +1656,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.contains"></a>
 #### ArrayInt.contains
@@ -1673,7 +1667,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.copy"></a>
 #### ArrayInt.copy
@@ -1687,7 +1681,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.count"></a>
 #### ArrayInt.count
@@ -1699,7 +1693,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.equal"></a>
 #### ArrayInt.equal
@@ -1710,7 +1704,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.find"></a>
 #### ArrayInt.find
@@ -1722,18 +1716,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.getindex"></a>
 #### ArrayInt.getindex
 
 `int ArrayInt.getindex(ArrayInt array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.getslice"></a>
 #### ArrayInt.getslice
@@ -1746,7 +1739,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.indexof"></a>
 #### ArrayInt.indexof
@@ -1755,7 +1748,7 @@ Source: `lib/typed-array.x:124`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.insert"></a>
 #### ArrayInt.insert
@@ -1770,7 +1763,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.iter"></a>
 #### ArrayInt.iter
@@ -1788,7 +1781,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:129`
+Source: `lib/typed-array.x:136`
 
 <a id="ArrayInt.new"></a>
 #### ArrayInt.new
@@ -1799,7 +1792,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.postfixindex"></a>
 #### ArrayInt.postfixindex
@@ -1811,7 +1804,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:128`
+Source: `lib/typed-array.x:133`
 
 <a id="ArrayInt.push"></a>
 #### ArrayInt.push
@@ -1823,7 +1816,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.remove"></a>
 #### ArrayInt.remove
@@ -1836,7 +1829,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.remslice"></a>
 #### ArrayInt.remslice
@@ -1850,7 +1843,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.repr"></a>
 #### ArrayInt.repr
@@ -1859,7 +1852,7 @@ Source: `lib/typed-array.x:124`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:129`
 
 <a id="ArrayInt.reverse"></a>
 #### ArrayInt.reverse
@@ -1869,18 +1862,17 @@ Source: `lib/typed-array.x:125`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.setindex"></a>
 #### ArrayInt.setindex
 
 `int ArrayInt.setindex(ArrayInt array, int index, int value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.setslice"></a>
 #### ArrayInt.setslice
@@ -1897,7 +1889,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.shift"></a>
 #### ArrayInt.shift
@@ -1910,7 +1902,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.splice"></a>
 #### ArrayInt.splice
@@ -1924,7 +1916,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.str"></a>
 #### ArrayInt.str
@@ -1933,7 +1925,7 @@ Source: `lib/typed-array.x:124`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:129`
 
 <a id="ArrayInt.take_last"></a>
 #### ArrayInt.take_last
@@ -1944,7 +1936,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.try_get"></a>
 #### ArrayInt.try_get
@@ -1957,7 +1949,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.try_next"></a>
 #### ArrayInt.try_next
@@ -1970,7 +1962,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.try_take_last"></a>
 #### ArrayInt.try_take_last
@@ -1981,7 +1973,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.unshift"></a>
 #### ArrayInt.unshift
@@ -1994,7 +1986,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:124`
+Source: `lib/typed-array.x:128`
 
 <a id="ArrayInt.updateindex"></a>
 #### ArrayInt.updateindex
@@ -2009,7 +2001,7 @@ result conversion. A failing operation leaves the element unchanged.
 **Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
 invalid operation.
 
-Source: `lib/typed-array.x:128`
+Source: `lib/typed-array.x:133`
 
 <a id="ArrayInt.var"></a>
 #### ArrayInt.var
@@ -2019,7 +2011,7 @@ Source: `lib/typed-array.x:128`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:129`
+Source: `lib/typed-array.x:134`
 
 <a id="ArrayInt.write_repr"></a>
 #### ArrayInt.write_repr
@@ -2028,7 +2020,7 @@ Source: `lib/typed-array.x:129`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:129`
 
 <a id="ArrayInt.write_str"></a>
 #### ArrayInt.write_str
@@ -2037,7 +2029,7 @@ Source: `lib/typed-array.x:125`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:125`
+Source: `lib/typed-array.x:129`
 
 ### `ArrayLong`
 
@@ -2051,7 +2043,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:143`
 
 <a id="ArrayLong.block"></a>
 #### ArrayLong.block
@@ -2060,7 +2052,7 @@ Source: `lib/typed-array.x:134`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:138`
+Source: `lib/typed-array.x:145`
 
 <a id="ArrayLong.compare"></a>
 #### ArrayLong.compare
@@ -2070,7 +2062,7 @@ Source: `lib/typed-array.x:138`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:140`
 
 <a id="ArrayLong.concat"></a>
 #### ArrayLong.concat
@@ -2084,7 +2076,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.contains"></a>
 #### ArrayLong.contains
@@ -2095,7 +2087,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.copy"></a>
 #### ArrayLong.copy
@@ -2109,7 +2101,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.count"></a>
 #### ArrayLong.count
@@ -2121,7 +2113,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.equal"></a>
 #### ArrayLong.equal
@@ -2132,7 +2124,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.find"></a>
 #### ArrayLong.find
@@ -2144,18 +2136,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.getindex"></a>
 #### ArrayLong.getindex
 
 `long ArrayLong.getindex(ArrayLong array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.getslice"></a>
 #### ArrayLong.getslice
@@ -2168,7 +2159,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.indexof"></a>
 #### ArrayLong.indexof
@@ -2177,7 +2168,7 @@ Source: `lib/typed-array.x:133`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.insert"></a>
 #### ArrayLong.insert
@@ -2192,7 +2183,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.iter"></a>
 #### ArrayLong.iter
@@ -2210,7 +2201,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:138`
+Source: `lib/typed-array.x:147`
 
 <a id="ArrayLong.new"></a>
 #### ArrayLong.new
@@ -2221,7 +2212,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.postfixindex"></a>
 #### ArrayLong.postfixindex
@@ -2233,7 +2224,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:137`
+Source: `lib/typed-array.x:144`
 
 <a id="ArrayLong.push"></a>
 #### ArrayLong.push
@@ -2245,7 +2236,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.remove"></a>
 #### ArrayLong.remove
@@ -2258,7 +2249,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.remslice"></a>
 #### ArrayLong.remslice
@@ -2272,7 +2263,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.repr"></a>
 #### ArrayLong.repr
@@ -2281,7 +2272,7 @@ Source: `lib/typed-array.x:133`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:140`
 
 <a id="ArrayLong.reverse"></a>
 #### ArrayLong.reverse
@@ -2291,18 +2282,17 @@ Source: `lib/typed-array.x:134`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.setindex"></a>
 #### ArrayLong.setindex
 
 `long ArrayLong.setindex(ArrayLong array, int index, long value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.setslice"></a>
 #### ArrayLong.setslice
@@ -2319,7 +2309,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.shift"></a>
 #### ArrayLong.shift
@@ -2332,7 +2322,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.splice"></a>
 #### ArrayLong.splice
@@ -2346,7 +2336,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.str"></a>
 #### ArrayLong.str
@@ -2355,7 +2345,7 @@ Source: `lib/typed-array.x:133`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:140`
 
 <a id="ArrayLong.take_last"></a>
 #### ArrayLong.take_last
@@ -2366,7 +2356,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.try_get"></a>
 #### ArrayLong.try_get
@@ -2379,7 +2369,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.try_next"></a>
 #### ArrayLong.try_next
@@ -2392,7 +2382,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.try_take_last"></a>
 #### ArrayLong.try_take_last
@@ -2403,7 +2393,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.unshift"></a>
 #### ArrayLong.unshift
@@ -2416,7 +2406,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:133`
+Source: `lib/typed-array.x:139`
 
 <a id="ArrayLong.updateindex"></a>
 #### ArrayLong.updateindex
@@ -2431,7 +2421,7 @@ result conversion. A failing operation leaves the element unchanged.
 **Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
 invalid operation.
 
-Source: `lib/typed-array.x:137`
+Source: `lib/typed-array.x:144`
 
 <a id="ArrayLong.var"></a>
 #### ArrayLong.var
@@ -2441,7 +2431,7 @@ Source: `lib/typed-array.x:137`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:138`
+Source: `lib/typed-array.x:145`
 
 <a id="ArrayLong.write_repr"></a>
 #### ArrayLong.write_repr
@@ -2450,7 +2440,7 @@ Source: `lib/typed-array.x:138`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:140`
 
 <a id="ArrayLong.write_str"></a>
 #### ArrayLong.write_str
@@ -2459,7 +2449,7 @@ Source: `lib/typed-array.x:134`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:134`
+Source: `lib/typed-array.x:140`
 
 ### `ArrayShort`
 
@@ -2473,7 +2463,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:121`
 
 <a id="ArrayShort.block"></a>
 #### ArrayShort.block
@@ -2482,7 +2472,7 @@ Source: `lib/typed-array.x:116`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:120`
+Source: `lib/typed-array.x:123`
 
 <a id="ArrayShort.compare"></a>
 #### ArrayShort.compare
@@ -2492,7 +2482,7 @@ Source: `lib/typed-array.x:120`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:118`
 
 <a id="ArrayShort.concat"></a>
 #### ArrayShort.concat
@@ -2506,7 +2496,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.contains"></a>
 #### ArrayShort.contains
@@ -2517,7 +2507,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.copy"></a>
 #### ArrayShort.copy
@@ -2531,7 +2521,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.count"></a>
 #### ArrayShort.count
@@ -2543,7 +2533,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.equal"></a>
 #### ArrayShort.equal
@@ -2554,7 +2544,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.find"></a>
 #### ArrayShort.find
@@ -2566,18 +2556,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.getindex"></a>
 #### ArrayShort.getindex
 
 `short ArrayShort.getindex(ArrayShort array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.getslice"></a>
 #### ArrayShort.getslice
@@ -2590,7 +2579,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.indexof"></a>
 #### ArrayShort.indexof
@@ -2599,7 +2588,7 @@ Source: `lib/typed-array.x:115`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.insert"></a>
 #### ArrayShort.insert
@@ -2614,7 +2603,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.iter"></a>
 #### ArrayShort.iter
@@ -2632,7 +2621,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:120`
+Source: `lib/typed-array.x:125`
 
 <a id="ArrayShort.new"></a>
 #### ArrayShort.new
@@ -2643,7 +2632,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.postfixindex"></a>
 #### ArrayShort.postfixindex
@@ -2655,7 +2644,7 @@ The index has the unchecked C-pointer preconditions of bracket access.
 
 **Raises:** `<bad-op>` for another operator. The failure does not return.
 
-Source: `lib/typed-array.x:119`
+Source: `lib/typed-array.x:122`
 
 <a id="ArrayShort.push"></a>
 #### ArrayShort.push
@@ -2667,7 +2656,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.remove"></a>
 #### ArrayShort.remove
@@ -2680,7 +2669,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.remslice"></a>
 #### ArrayShort.remslice
@@ -2694,7 +2683,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.repr"></a>
 #### ArrayShort.repr
@@ -2703,7 +2692,7 @@ Source: `lib/typed-array.x:115`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:118`
 
 <a id="ArrayShort.reverse"></a>
 #### ArrayShort.reverse
@@ -2713,18 +2702,17 @@ Source: `lib/typed-array.x:116`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.setindex"></a>
 #### ArrayShort.setindex
 
 `short ArrayShort.setindex(ArrayShort array, int index, short value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.setslice"></a>
 #### ArrayShort.setslice
@@ -2741,7 +2729,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.shift"></a>
 #### ArrayShort.shift
@@ -2754,7 +2742,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.splice"></a>
 #### ArrayShort.splice
@@ -2768,7 +2756,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.str"></a>
 #### ArrayShort.str
@@ -2777,7 +2765,7 @@ Source: `lib/typed-array.x:115`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:118`
 
 <a id="ArrayShort.take_last"></a>
 #### ArrayShort.take_last
@@ -2788,7 +2776,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.try_get"></a>
 #### ArrayShort.try_get
@@ -2801,7 +2789,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.try_next"></a>
 #### ArrayShort.try_next
@@ -2814,7 +2802,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.try_take_last"></a>
 #### ArrayShort.try_take_last
@@ -2825,7 +2813,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.unshift"></a>
 #### ArrayShort.unshift
@@ -2838,7 +2826,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:115`
+Source: `lib/typed-array.x:117`
 
 <a id="ArrayShort.updateindex"></a>
 #### ArrayShort.updateindex
@@ -2853,7 +2841,7 @@ result conversion. A failing operation leaves the element unchanged.
 **Raises:** `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
 invalid operation.
 
-Source: `lib/typed-array.x:119`
+Source: `lib/typed-array.x:122`
 
 <a id="ArrayShort.var"></a>
 #### ArrayShort.var
@@ -2863,7 +2851,7 @@ Source: `lib/typed-array.x:119`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:120`
+Source: `lib/typed-array.x:123`
 
 <a id="ArrayShort.write_repr"></a>
 #### ArrayShort.write_repr
@@ -2872,7 +2860,7 @@ Source: `lib/typed-array.x:120`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:118`
 
 <a id="ArrayShort.write_str"></a>
 #### ArrayShort.write_str
@@ -2881,7 +2869,7 @@ Source: `lib/typed-array.x:116`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:116`
+Source: `lib/typed-array.x:118`
 
 ### `ArrayString`
 
@@ -2895,7 +2883,7 @@ A null input returns NULL. The typed Array and its storage are unchanged.
 
 **Raises:** any cause from boxing or appending an element.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:176`
 
 <a id="ArrayString.block"></a>
 #### ArrayString.block
@@ -2904,7 +2892,7 @@ Source: `lib/typed-array.x:161`
 
 Views `array` as the same underlying `Block` storage.
 
-Source: `lib/typed-array.x:165`
+Source: `lib/typed-array.x:178`
 
 <a id="ArrayString.compare"></a>
 #### ArrayString.compare
@@ -2914,7 +2902,7 @@ Source: `lib/typed-array.x:165`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:173`
 
 <a id="ArrayString.concat"></a>
 #### ArrayString.concat
@@ -2928,7 +2916,7 @@ produces an independent copy of `a`.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the result cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.contains"></a>
 #### ArrayString.contains
@@ -2939,7 +2927,7 @@ Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
 integer index domain.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.copy"></a>
 #### ArrayString.copy
@@ -2953,7 +2941,7 @@ values.
 **Raises:** `<size-limit>` or `<alloc-fail>` when the copy cannot be
 represented or allocated.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.count"></a>
 #### ArrayString.count
@@ -2965,7 +2953,7 @@ A null array returns zero; the scan is linear.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.equal"></a>
 #### ArrayString.equal
@@ -2976,7 +2964,7 @@ Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
 compare unequal.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.find"></a>
 #### ArrayString.find
@@ -2988,18 +2976,17 @@ A null array returns -1; the scan is linear and preserves source order.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.getindex"></a>
 #### ArrayString.getindex
 
 `String ArrayString.getindex(ArrayString array, int index)`
 
-Returns the element at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Reads raw `index` with the bounds and null preconditions of a C pointer.
+Negative indices are not normalized. Use `try_get` for a checked read.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.getslice"></a>
 #### ArrayString.getslice
@@ -3012,7 +2999,7 @@ Negative bounds count from the end and a negative step walks backward.
 **Raises:** `<bad-arg>` for a null array or zero step, `<size-limit>` outside
 the integer index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.indexof"></a>
 #### ArrayString.indexof
@@ -3021,7 +3008,7 @@ Source: `lib/typed-array.x:160`
 
 Returns the same first-match index as `$array.find`.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.insert"></a>
 #### ArrayString.insert
@@ -3036,7 +3023,7 @@ negative indices are normalized against that wider range.
 `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
 cannot grow.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.iter"></a>
 #### ArrayString.iter
@@ -3054,7 +3041,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/typed-array.x:165`
+Source: `lib/typed-array.x:181`
 
 <a id="ArrayString.new"></a>
 #### ArrayString.new
@@ -3065,7 +3052,7 @@ Returns a fresh empty packed array owned by the current `Scope`.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.postfixindex"></a>
 #### ArrayString.postfixindex
@@ -3074,7 +3061,7 @@ Source: `lib/typed-array.x:160`
 
 Raises `<bad-op>` because String elements have no postfix operation.
 
-Source: `lib/typed-array.x:164`
+Source: `lib/typed-array.x:177`
 
 <a id="ArrayString.push"></a>
 #### ArrayString.push
@@ -3086,7 +3073,7 @@ Appends `value` and returns it.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.remove"></a>
 #### ArrayString.remove
@@ -3099,7 +3086,7 @@ Negative indices count from the end; following elements shift left.
 **Raises:** `<bad-arg>` for a null array or out-of-range index, or
 `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.remslice"></a>
 #### ArrayString.remslice
@@ -3113,7 +3100,7 @@ Reversed bounds are swapped, and the removed values retain their order.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.repr"></a>
 #### ArrayString.repr
@@ -3122,7 +3109,7 @@ Source: `lib/typed-array.x:160`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:173`
 
 <a id="ArrayString.reverse"></a>
 #### ArrayString.reverse
@@ -3132,18 +3119,17 @@ Source: `lib/typed-array.x:161`
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.setindex"></a>
 #### ArrayString.setindex
 
 `String ArrayString.setindex(ArrayString array, int index, String value)`
 
-Stores and returns `value` at raw `index` with no bounds or null check.
-Negative indices are not normalized, and an invalid index has the same
-undefined behavior as indexing the equivalent C pointer.
+Stores and returns `value` at raw `index`, with C-pointer preconditions.
+Negative indices are not normalized; the caller supplies a valid index.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.setslice"></a>
 #### ArrayString.setslice
@@ -3160,7 +3146,7 @@ index domain, or `<alloc-fail>` while copying self-aliased values or
 growing storage for the replacement. These failures leave `array`
 unchanged.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.shift"></a>
 #### ArrayString.shift
@@ -3173,7 +3159,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
 length exceeds the integer index domain. These failures do not return.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.splice"></a>
 #### ArrayString.splice
@@ -3187,7 +3173,7 @@ null `values` performs deletion, and self-splicing is supported.
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.str"></a>
 #### ArrayString.str
@@ -3196,7 +3182,7 @@ Source: `lib/typed-array.x:160`
 
 Returns the packed-Array display String.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:173`
 
 <a id="ArrayString.take_last"></a>
 #### ArrayString.take_last
@@ -3207,7 +3193,7 @@ Removes and returns the last element.
 
 **Raises:** `<bad-arg>` for a null or empty array.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.try_get"></a>
 #### ArrayString.try_get
@@ -3220,7 +3206,7 @@ out-of-range index returns zero without writing; success returns one.
 
 **Raises:** `<size-limit>` when the length exceeds the integer index domain.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.try_next"></a>
 #### ArrayString.try_next
@@ -3233,7 +3219,7 @@ cursor, exhaustion, or an array outside the integer index domain returns
 zero without changing `cursor` or `out`. Structural mutation invalidates
 the cursor.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.try_take_last"></a>
 #### ArrayString.try_take_last
@@ -3244,7 +3230,7 @@ Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
 changing the array.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.unshift"></a>
 #### ArrayString.unshift
@@ -3257,7 +3243,7 @@ This operation is O(n).
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
 limit, or `<alloc-fail>` when storage cannot grow.
 
-Source: `lib/typed-array.x:160`
+Source: `lib/typed-array.x:172`
 
 <a id="ArrayString.updateindex"></a>
 #### ArrayString.updateindex
@@ -3269,7 +3255,7 @@ canonical String. The index has the unchecked C-pointer preconditions of
 bracket access. Raises: `<bad-op>` for any operation other than `+`.
 A failure leaves the element unchanged.
 
-Source: `lib/typed-array.x:164`
+Source: `lib/typed-array.x:177`
 
 <a id="ArrayString.var"></a>
 #### ArrayString.var
@@ -3279,7 +3265,7 @@ Source: `lib/typed-array.x:164`
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
 
-Source: `lib/typed-array.x:165`
+Source: `lib/typed-array.x:178`
 
 <a id="ArrayString.write_repr"></a>
 #### ArrayString.write_repr
@@ -3288,7 +3274,7 @@ Source: `lib/typed-array.x:165`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:173`
 
 <a id="ArrayString.write_str"></a>
 #### ArrayString.write_str
@@ -3297,7 +3283,7 @@ Source: `lib/typed-array.x:161`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/typed-array.x:161`
+Source: `lib/typed-array.x:173`
 
 ### `Var`
 
@@ -3310,7 +3296,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:111`
+Source: `lib/typed-array.x:112`
 
 <a id="Var.arraydbl"></a>
 #### Var.arraydbl
@@ -3321,7 +3307,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:156`
+Source: `lib/typed-array.x:167`
 
 <a id="Var.arrayfloat"></a>
 #### Var.arrayfloat
@@ -3332,7 +3318,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:147`
+Source: `lib/typed-array.x:156`
 
 <a id="Var.arrayint"></a>
 #### Var.arrayint
@@ -3343,7 +3329,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:129`
+Source: `lib/typed-array.x:134`
 
 <a id="Var.arraylong"></a>
 #### Var.arraylong
@@ -3354,7 +3340,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:138`
+Source: `lib/typed-array.x:145`
 
 <a id="Var.arrayshort"></a>
 #### Var.arrayshort
@@ -3365,7 +3351,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:120`
+Source: `lib/typed-array.x:123`
 
 <a id="Var.arraystring"></a>
 #### Var.arraystring
@@ -3376,7 +3362,7 @@ Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
 does not validate the tag before reading its pointer payload.
 
-Source: `lib/typed-array.x:165`
+Source: `lib/typed-array.x:178`
 
 ## Public types
 

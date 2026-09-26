@@ -1314,7 +1314,7 @@ capture becomes the function's statements; `calls++` runs only when `tracked`
 is called at runtime. The template names are known in source, while `meta`
 chooses which one to use for each function.
 
-The reverse gradient generator in `lib/autodiff.xmacro` uses this pattern.
+The reverse gradient generator in `packages/autodiff/src/autodiff.xmacro` uses this pattern.
 Its `ad_reverse_function` returns an invocation of the `ad.gradient` source
 macro. The macro contains the generated function declaration, tape storage,
 reverse-pass label and cleanup. Meta helpers compute the parameter and

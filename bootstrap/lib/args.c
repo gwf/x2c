@@ -392,87 +392,95 @@ String Args_usage(String program, List spec){
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = Buffer_new(0);
   {
-  _x2c_defer_env_3 _x2c_defer_env_4 = {._x2c_defer_capture_3 =(const void *) & synopsis};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_4
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    Buffer options = Buffer_new(0);
+    _x2c_defer_env_3 _x2c_defer_env_7 ={
+      ._x2c_defer_capture_3 =(const void *) & synopsis
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & options};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_5
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-      Buffer operands = Buffer_new(0);
+      Buffer options = Buffer_new(0);
       {
-  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & operands};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-        Buffer out = Buffer_new(0);
+        _x2c_defer_env_2 _x2c_defer_env_6 ={
+          ._x2c_defer_capture_2 =(const void *) & options
+        }
+        ;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_6
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
         {
-  _x2c_defer_env_0 _x2c_defer_env_7 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-          for(int i = 0;  i < parsed.count;  i ++){
-            _Option * option = & parsed.options[i];
-            String label = _label(option);
-            if(! option -> operand) _write_row(options, label, option -> help);
-            else{
-              Buffer_printf(synopsis, " %s", label);
-              if(String_truth(option -> help)) _write_row(operands, label, option -> help);
-            }
-
-          }
-          String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
-          String words = Buffer_str(synopsis);
-          Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
-          if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
-          if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+          Buffer operands = Buffer_new(0);
           {
-            String _x2c_return_value_0 = Buffer_str(out);
-            {
-              x2c_cleanup_leave(& _x2c_defer_record_3);
-              x2c_cleanup_leave(& _x2c_defer_record_2);
-              x2c_cleanup_leave(& _x2c_defer_record_1);
-              x2c_cleanup_leave(& _x2c_defer_record_0);
-              return _x2c_return_value_0;
+            _x2c_defer_env_1 _x2c_defer_env_5 ={
+              ._x2c_defer_capture_1 =(const void *) & operands
             }
+            ;
+            X2CCleanup _x2c_defer_record_2 ={
+              .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_5
+            }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_2);
+            {
+              Buffer out = Buffer_new(0);
+              {
+                _x2c_defer_env_0 _x2c_defer_env_4 ={
+                  ._x2c_defer_capture_0 =(const void *) & out
+                }
+                ;
+                X2CCleanup _x2c_defer_record_3 ={
+                  .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_4
+                }
+                ;
+                x2c_cleanup_push(& _x2c_defer_record_3);
+                {
+                  for(int i = 0;  i < parsed.count;  i ++){
+                    _Option * option = & parsed.options[i];
+                    String label = _label(option);
+                    if(! option -> operand) _write_row(options, label, option -> help);
+                    else{
+                      Buffer_printf(synopsis, " %s", label);
+                      if(String_truth(option -> help)) _write_row(operands, label, option -> help);
+                    }
 
+                  }
+                  String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
+                  String words = Buffer_str(synopsis);
+                  Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
+                  if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
+                  if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+                  {
+                    String _x2c_return_value_0 = Buffer_str(out);
+                    {
+                      x2c_cleanup_leave(& _x2c_defer_record_3);
+                      x2c_cleanup_leave(& _x2c_defer_record_2);
+                      x2c_cleanup_leave(& _x2c_defer_record_1);
+                      x2c_cleanup_leave(& _x2c_defer_record_0);
+                      return _x2c_return_value_0;
+                    }
+
+                  }
+
+                }
+                x2c_cleanup_leave(& _x2c_defer_record_3);
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_2);
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-
-}
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
-
-}
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 String String_new(const char *);

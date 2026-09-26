@@ -57,7 +57,6 @@ typedef struct Compiler{
   Array layout_marks, packed_marks;
   Token directives_taken;
   Map kw_seen;
-  Map fixed;
   Map protocols, conforms, protocol_helpers;
   Map proto_cache;
   Map adoptions;
@@ -205,11 +204,17 @@ int Compiler_record_origin(Compiler c, Token token);
 
 List Compiler_anchor_origin(Compiler compiler, List node, Token token);
 
+int Compiler_collect_compile_time_definition(Compiler c, int keyword);
+
 int Compiler__at_function_arrow(Compiler compiler);
 
 void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
 
 void Compiler_skip_script_statement(Compiler c);
+
+int Compiler_skip_collected_script_statement(Compiler c);
+
+void Compiler_finish_collected_declaration(Compiler c, List declaration, Token meta, int native);
 
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
 
@@ -222,6 +227,8 @@ void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Tok
 void Compiler_run_declaration_effects(Compiler c);
 
 Map Compiler_select_declaration_defaults(Compiler compiler, String path, Map symbols, Array parts, Map definitions);
+
+void Compiler_collect_unit_macro(Compiler compiler);
 
 void Compiler_shallow_parse(Compiler c, Map globals);
 
@@ -254,6 +261,10 @@ Symbol match_value_flat_head(Var value, List binders, List * tags);
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
 void Compiler_define_match_binders(Compiler compiler, List pattern);
+
+List Compiler_define_catch_binders(Compiler compiler, List pattern);
+
+List Compiler_catch_binder_declarations(Compiler compiler, List bindings, List handle);
 
 void Compiler_add_early(Compiler compiler, List decl);
 

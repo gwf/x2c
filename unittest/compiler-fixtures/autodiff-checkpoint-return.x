@@ -3,7 +3,7 @@
    carries no binding identity. */
 #include "x2c.x"
 #include "typed-array.x"
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.checkpoint(2)
 static double early(double x) {

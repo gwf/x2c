@@ -58,7 +58,11 @@ Var Var_binary(Var lhs, Symbol op, Var rhs);
 
 Var Var_update(Var * lhs, Symbol op, Var rhs);
 
+Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs);
+
 Var Var_postfix(Var * lhs, Symbol op);
+
+Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op);
 
 
 #endif /* __GUARD_0x8326F35F__ */

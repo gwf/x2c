@@ -204,7 +204,7 @@ inline-lisp example
 ### Lambdas
 
 - Parse: `src/literals.x`
-- Lower and direct `Func` calls: `src/lambda.x`, `src/transform.x`,
+- Lower and direct `Func` calls: `src/transform.x`,
   `src/expressions.x`
 - Runtime: `lib/func.x` and receiving callback APIs
 - Tests: captured-lambda and lambda-lowering fixtures, lambda and `Func` suites
@@ -253,7 +253,7 @@ inline-lisp example
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/cleanup.x` places cleanup on every
+- Lower/generate: `src/transform.x`; `src/transform.x` places cleanup on every
   exit from a region; `src/emit.x`
 - Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
   cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
@@ -294,9 +294,9 @@ The main translation steps are:
 3. `src/expressions.x`, `src/statements.x`, and `src/literals.x` construct
    typed AST forms; `src/ast.x` owns the shared node contracts they build to.
 4. `src/type.x` supplies type facts and canonical forms.
-5. `src/transform.x` lowers most extensions; `src/lambda.x` owns lambda
+5. `src/transform.x` lowers most extensions; `src/transform.x` owns lambda
    helper and adapter synthesis.
-6. `src/cleanup.x` names each `defer` and `try` region's runtime record and
+6. `src/transform.x` names each `defer` and `try` region's runtime record and
    places its cleanup statements on every exit that leaves the region.
 7. `src/generate.x` partitions the translation unit and installs init
    scaffolding; `src/cache.x` owns literal-cache initialization.

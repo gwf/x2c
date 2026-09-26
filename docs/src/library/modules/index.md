@@ -17,7 +17,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/args.x`](args.md) | parse program arguments against a declarative spec. |
 | [`lib/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
 | [`lib/atom.x`](atom.md) | canonical exact names. |
-| [`lib/autodiff.x`](autodiff.md) | reverse-mode differentiation recorded on a runtime tape. |
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
 | [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
@@ -37,7 +36,6 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/list.x`](list.md) | linked list with `Var` elements. |
 | [`lib/logger.x`](logger.md) | owned structured event delivery. |
 | [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
-| [`lib/match-recursive.x`](match-recursive.md) | optional reference matcher. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
@@ -67,12 +65,10 @@ These modules ship with x2c but are not loaded by the standard
 prelude. Include one explicitly to use its declarations.
 
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
-- [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
-- [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Explicitly include `meta.x` where the functions are parsed.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.

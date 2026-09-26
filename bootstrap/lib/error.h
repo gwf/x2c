@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "match.h"
+#include "mutex.h"
 #define ERROR_DEFAULT_BOUND 4096
 typedef struct Error * Error;
 

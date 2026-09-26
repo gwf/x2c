@@ -38,7 +38,8 @@ X2c recursive-descent parser core.
 | [`Compiler.parse_simple_declaration`](#Compiler.parse_simple_declaration) | Parses one declaration group and leaves its terminating token current. |
 | [`Compiler.parse_static_assert`](#Compiler.parse_static_assert) | Parses a C assertion declaration; native C owns constant-expression checks. |
 | [`Compiler.parse_submission`](#Compiler.parse_submission) | Parses one submission from the current token stream. |
-| [`Compiler.parse_top_level`](#Compiler.parse_top_level) | Parses one top-level form and applies its source-ordered compiler effects. |
+| [`Compiler.parse_top_level`](#Compiler.parse_top_level) | Parses one full top-level form through the shared classifier. |
+| [`Compiler.parse_top_level_mode`](#Compiler.parse_top_level_mode) | Parses one top-level form and applies its source-ordered compiler effects. |
 | [`Compiler.parse_type_name`](#Compiler.parse_type_name) | Parses a type specifier with qualifiers and pointer/reference modifiers. |
 | [`Compiler.protocol_form_starts`](#Compiler.protocol_form_starts) | Reports whether the cursor begins a protocol declaration or adoption, including its `meta` and `static` markers. |
 | [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
@@ -61,7 +62,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2343`
+Source: `src/parse.x:2376`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -108,7 +109,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2266`
+Source: `src/parse.x:2299`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -334,21 +335,32 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2040`
+Source: `src/parse.x:2073`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
 
 `List Compiler.parse_top_level(Compiler c)`
 
+Parses one full top-level form through the shared classifier.
+
+Source: `src/parse.x:2065`
+
+<a id="Compiler.parse_top_level_mode"></a>
+#### Compiler.parse_top_level_mode
+
+`List Compiler.parse_top_level_mode(Compiler c, int skip_body)`
+
 Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition, top-level Lisp form,
 linkage brace, or compile-time-only `meta` function only updates compiler
 state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
-the unit emits where it reaches them.
+the unit emits where it reaches them. With `skip_body`, collection uses
+the same classifier and bound declarations but skips runtime bodies.
+This continuation is independent of the compiler's shallow-parse state.
 
-Source: `src/parse.x:1953`
+Source: `src/parse.x:1955`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name

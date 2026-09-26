@@ -16,67 +16,67 @@ typedef struct Map{
 }
 * Map;
 
-Map Map_new_capacity(unsigned capacity);
+Map Map_new_capacity(unsigned _x2c_macro_capacity_2);
 
 Map Map_new(void);
 
-unsigned Map_len(Map map);
+unsigned Map_len(Map _x2c_macro_map_20);
 
-int Map_try_get(Map map, Var key, Var * out);
+int Map_try_get(Map _x2c_macro_map_21, Var _x2c_macro_key_13, Var * _x2c_macro_out_4);
 
-Var Map_get(Map map, Var key);
+Var Map_get(Map _x2c_macro_map_22, Var _x2c_macro_key_14);
 
-Var Map_getindex(Map map, Var key);
+Var Map_getindex(Map _x2c_macro_map_23, Var _x2c_macro_key_15);
+
+Var Map_getdefault(Map _x2c_macro_map_24, Var _x2c_macro_key_16, Var _x2c_macro_defval_0);
+
+Var Map_setdefault(Map _x2c_macro_map_25, Var _x2c_macro_key_17, Var _x2c_macro_defval_1);
+
+int Map_contains(Map _x2c_macro_map_26, Var _x2c_macro_key_18);
+
+void Map_set(Map _x2c_macro_map_27, Var _x2c_macro_key_19, Var _x2c_macro_val_5);
+
+Var Map_setindex(Map _x2c_macro_map_28, Var _x2c_macro_key_20, Var _x2c_macro_val_6);
+
+Var Map_updateindex(Map _x2c_macro_map_29, Var _x2c_macro_key_21, Symbol _x2c_macro_op_0, Var _x2c_macro_rhs_0);
+
+Var Map_postfixindex(Map _x2c_macro_map_30, Var _x2c_macro_key_22, Symbol _x2c_macro_op_1);
+
+int Map_try_del(Map _x2c_macro_map_31, Var _x2c_macro_key_23, Var * _x2c_macro_out_7);
+
+Var Map_del(Map _x2c_macro_map_32, Var _x2c_macro_key_24);
+
+Map Map_copy(Map _x2c_macro_map_33);
+
+Map Map_merge(Map _x2c_macro_map_34, Map _x2c_macro_other_2);
+
+int Map_try_next(Map _x2c_macro_map_35, unsigned * _x2c_macro_cursor_4, Var * _x2c_macro_key_25, Var * _x2c_macro_val_7);
+
+int Map_truth(Map _x2c_macro_map_36);
+
+int Map_equal(Map _x2c_macro_a_3, Map _x2c_macro_b_3);
 
 Var Map_get_hashed(Map map, Var key, unsigned key_hash);
 
-Var Map_getdefault(Map map, Var key, Var defval);
-
-Var Map_setdefault(Map map, Var key, Var defval);
-
-int Map_contains(Map m, Var key);
-
-void Map_set(Map map, Var key, Var val);
-
-Var Map_setindex(Map map, Var key, Var val);
-
-Var Map_updateindex(Map map, Var key, Symbol op, Var rhs);
-
-Var Map_postfixindex(Map map, Var key, Symbol op);
-
-int Map_try_del(Map map, Var key, Var * out);
-
-Var Map_del(Map map, Var key);
-
 Map Map_update_n(Map map, unsigned pair_count, ...);
-
-Map Map_copy(Map map);
 
 void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope);
 
-Map Map_merge(Map map, Map other);
+int Map_compare(Map _x2c_macro_a_6, Map _x2c_macro_b_6);
 
-int Map_try_next(Map map, unsigned * cursor, Var * key, Var * val);
+Buffer Map_write_repr(Map _x2c_macro_map_38, Buffer _x2c_macro_out_10);
 
-int Map_truth(Map map);
+Buffer Map_write_str(Map _x2c_macro_map_39, Buffer _x2c_macro_out_11);
 
-int Map_compare(Map a, Map b);
+String Map_str(Map _x2c_macro_map_40);
 
-Iter Map_iter(Map x, Iter dest);
+String Map_repr(Map _x2c_macro_map_41);
 
-Iter Map_keys(Map x, Iter dest);
+Iter Map_iter(Map _x2c_macro_map_45, Iter _x2c_macro_dest_0);
 
-Iter Map_enumerate(Map x, Iter dest);
+Iter Map_keys(Map _x2c_macro_map_46, Iter _x2c_macro_dest_1);
 
-int Map_equal(Map map1, Map map2);
-
-Buffer Map_write_repr(Map map, Buffer out);
-
-Buffer Map_write_str(Map map, Buffer out);
-
-String Map_str(Map map);
-
-String Map_repr(Map map);
+Iter Map_enumerate(Map _x2c_macro_map_47, Iter _x2c_macro_dest_2);
 
 void Map_cleanup(Map value);
 

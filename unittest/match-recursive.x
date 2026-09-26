@@ -1,11 +1,10 @@
-/*  match-recursive.x -- optional reference matcher
+/*  match-recursive.x -- test reference matcher
 
     Copyright (c) 2026 Gary William Flake
 
     This direct matcher is the readable reference for differential tests.
     The prelude's public `Match` operations run the compiled machine in
-    match.x; include this module only when an independent recursive oracle
-    is useful.
+    match.x; this test module supplies the independent recursive oracle.
 */
 
 #pragma once

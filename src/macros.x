@@ -1803,6 +1803,7 @@ void Compiler.select_package_module(
   if (module in native_module_order) return;
   Scope.push(&native_module_scope);
   native_module_order = native_module_order.append(%($module));
+  native_module_order.try_own();
   Scope.pop();
 }
 
@@ -2715,7 +2716,8 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
               (expression $source) (splice) $construction
     );
   }
-  if (hole.assoc(<kind>) != <expr>) return NULL;
+  if (hole.assoc(<kind>) != <expr> && hole.assoc(<kind>) != <name>)
+    return NULL;
   Var value = _replacement_binder(author, "value", sequence);
   Var expression = _replacement_binder(author, "expression", sequence);
   Var splice = _replacement_binder(author, "splice", 1);

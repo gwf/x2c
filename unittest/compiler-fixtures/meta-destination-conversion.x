@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "autodiff.x"
+import "autodiff" with AdTape, AdNode;
 
 typedef unsigned char Byte;
 
@@ -49,7 +49,7 @@ meta int file_round_trip(Var boxed) {
 
 /* A boxed <adnode> unboxes to the same node. */
 meta int adnode_round_trip(int n) {
-  struct AdNode node = {.value = 2.5};
+  struct autodiff__AdNode node = {.value = 2.5};
   Var boxed = AdNode.var(&node);
   return (int) (boxed.adnode().value * 2) + n;
 }

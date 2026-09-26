@@ -196,7 +196,7 @@
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 14 "next_index"))) 
            (args (expr (int) (literal (int) "3")))))))))))) 
-  (at 59 
+  (at 50 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "map_read") ()) 
@@ -213,7 +213,7 @@
                   (call (expr ((func (("Symbol"))) "Symbol") 
                          (ident (binding 16 "next_key"))) 
                    (args (expr ("Symbol") (literal ("Symbol") "<seed>" seed))))))))))))))) 
-  (at 60 
+  (at 51 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Array") (int) ("Var"))) "Var") 
@@ -227,7 +227,7 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 18 "next_value"))) 
          (args (expr (int) (literal (int) "90")))))))))) 
-  (at 63 
+  (at 52 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Map") ("Var") ("Var"))) "Var") 
@@ -298,7 +298,7 @@
         (args (expr ("String") (ident (binding 28 "text"))) 
          (expr (int) (literal (int) "1")) (literal (int) "-2147483648") 
          (literal (int) "1")))))))) 
-  (at 62 
+  (at 57 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 45 "printf"))) 

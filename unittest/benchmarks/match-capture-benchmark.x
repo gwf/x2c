@@ -1,7 +1,7 @@
 /*  match-capture-benchmark.x -- positional Match acceptance timings */
 
 
-#include "match-recursive.x"
+#include "../match-recursive.x"
 
 #include <stdint.h>
 #include <stdio.h>

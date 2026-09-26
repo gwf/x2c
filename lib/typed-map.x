@@ -326,7 +326,8 @@ $map.typed.family(
 $map.core.observe(
   MapStringString, String, String, struct MapStringStringRecord,
   _box_string, _box_string, _map_compare_string, _map_compare_string);
-$map.typed.observe(MapStringString, String, String, _box_string, _box_string);
+$map.typed.observe(
+ MapStringString, String, String, _box_string, _box_string);
 
 static MapStringString _prepare_string_export(
   MapStringString map, Context source) {

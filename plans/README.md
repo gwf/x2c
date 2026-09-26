@@ -44,9 +44,11 @@ execution.
 
 ### Current work
 
-- [Evaluator and source consolidation](evaluator-and-source-consolidation.md):
-  planned orchestration of evaluator tail calls, small runtime cleanups,
-  and bounded compiler/cache prototypes; later compatibility work is queued.
+- [Source consolidation research](source-consolidation-research.md): working
+  typed-family, lowering, runtime, transaction, and package prototypes, with
+  all original proposals tracked separately. Publication is held for review.
+  The earlier [first-wave record](evaluator-and-source-consolidation.md)
+  remains as corrected historical evidence.
 - [Public release workflow](public-release-workflow.md): staging is live at
   `staging.x2c-lang.dev`, with successful candidate and staging runs. Only
   production baseline recovery, candidate/version choice, and promotion to

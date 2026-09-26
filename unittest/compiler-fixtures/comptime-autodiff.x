@@ -1,13 +1,13 @@
 /*  comptime-autodiff.x -- production meta autodiff, finite-difference checks
 
-    The shared implementation is in lib/autodiff.xmacro. General lowering
+    The shared implementation is in packages/autodiff/src/autodiff.xmacro. General lowering
     coverage stays in comptime-lowering and meta-differential.
 */
 
 #include "x2c.x"
 #include "typed-array.x"
 #include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.forward()
 static double square(double x) {

@@ -101,11 +101,11 @@ int main(void){
   Var prefix = Array_updateindex(array_base(), next_index(5), 56, int_var(1));
   Var postfix = Array_postfixindex(array_base(), next_index(5), 2046);
   Var counter = int_var(7);
-  Var direct_prefix = Var_update(&(counter), 56, int_var(1));
-  Var direct_postfix = Var_postfix(&(counter), 2046);
+  Var direct_prefix = x2c_var_update_volatile(&(counter), 56, int_var(1));
+  Var direct_postfix = x2c_var_postfix_volatile(&(counter), 2046);
   Var dynamic = Var_new(1318210446, _3);
   Var sum = Var_binary(dynamic, 56, String_var(_6));
-  Var_update(&(dynamic), 56, String_var(_4));
+  x2c_var_update_volatile(&(dynamic), 56, String_var(_4));
   Text text = _5;
   _x2c_proto_string_add_update(&(text), 56, _7);
   int native[2] ={

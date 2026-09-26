@@ -12,8 +12,7 @@
 
 typedef struct ErrorRegion{
   Scope values;
-  Pool lists;
-  Pool strings;
+  Pool pool;
 }
 ErrorRegion;
 
@@ -127,6 +126,8 @@ static ErrorRegion _region_new(void);
 
 static List _cons(ErrorRegion * region, Var head, List tail);
 
+static Var _snapshot_wide(Var v);
+
 static Var _copy_value(ErrorRegion * region, Var value);
 
 static List _pair(ErrorRegion * region, Var key, Var value);
@@ -149,10 +150,6 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
 
 static void _truncate(int mark);
 
-static Var _snapshot_wide(Var v);
-
-static Var _snapshot_value(Var v);
-
 static List _view_since(ErrorRegion * region, int mark);
 
 typedef struct ErrorPolicyCapture{
@@ -164,6 +161,8 @@ typedef struct ErrorPolicyCapture{
 static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity);
 
 static int _policy_fill_contexts(ErrorContextState state, Symbol * pairs, int at, int capacity);
+
+static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data);
 
 static void _retained_destroy(Block retained);
 
@@ -205,29 +204,22 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
+void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+
 static void _catch_site_mutex_initialize(void){
-  pthread_mutexattr_t attributes;
-  if(pthread_mutexattr_init(& attributes) || pthread_mutexattr_settype(& attributes, PTHREAD_MUTEX_RECURSIVE) || pthread_mutex_init(& catch_site_mutex, & attributes)){
-    fprintf(stderr, "Error: could not initialize catch site mutex\n");
-    abort();
-  }
-  pthread_mutexattr_destroy(& attributes);
+  x2c_mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
 }
+
+void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
 
 static void _catch_site_lock(void){
-  if(pthread_once(& catch_site_mutex_once, _catch_site_mutex_initialize) || pthread_mutex_lock(& catch_site_mutex)){
-    fprintf(stderr, "Error: could not lock catch site\n");
-    abort();
-  }
-
+  x2c_mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _catch_site_mutex_initialize, "Error: could not lock catch site");
 }
 
-static void _catch_site_unlock(void){
-  if(pthread_mutex_unlock(& catch_site_mutex)){
-    fprintf(stderr, "Error: could not unlock catch site\n");
-    abort();
-  }
+void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
+static void _catch_site_unlock(void){
+  x2c_mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
 }
 
 int x2c_error_catch_site_pending(ErrorCatchSite * site){
@@ -246,29 +238,28 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
   _catch_site_lock();
   {
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_PENDING){
-      x2c_cleanup_leave(& _x2c_defer_record_0);
-      return;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = NULL
     }
-    int retainable = 1;
-    for(int i = 0;  retainable && i < site -> arm_count;  i ++) if(i != site -> default_arm) retainable = List_try_own(Var_list(patterns[i])) && x2c_match_pattern_retainable(patterns[i]);
-    if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
-      if(i == site -> default_arm) continue;
-      MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
-      if(plan -> status == MACHINE_INELIGIBLE && site -> fenced_arm < 0) site -> fenced_arm = i;
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_PENDING){
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+      int retainable = 1;
+      for(int i = 0;  retainable && i < site -> arm_count;  i ++) if(i != site -> default_arm) retainable = List_try_own(Var_list(patterns[i])) && x2c_match_pattern_retainable(patterns[i]);
+      if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
+        if(i == site -> default_arm) continue;
+        MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
+        if(plan -> status == MACHINE_INELIGIBLE && site -> fenced_arm < 0) site -> fenced_arm = i;
+      }
+      __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
     }
-    __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 Block Block_new(size_t);
@@ -299,8 +290,6 @@ static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * f
   return fenced;
 }
 
-void * Scope_malloc_in(Scope *, size_t);
-
 String String_new(const char *);
 
 Var String_var(String);
@@ -312,11 +301,9 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
   if(! Error_ready() || ! target || ! site || ! site -> arm_count) _floor(20800632064936, "could not register transferring catch");
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
-  * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .running = NULL, .fn = NULL, .data =((void) 0, Void), .watermark = Error_count(), .site = site, .target = target, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
-  }
-  ;
+  ErrorHandler h = _handler_new(NULL, ((void) 0, Void));
+  h -> site = site;
+  h -> target = target;
   if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
   const char * fenced = NULL;
   int fenced_arm = - 1;
@@ -330,7 +317,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     _handler_free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 204};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 188};
       x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(fenced_arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -339,6 +326,8 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
   state -> handler_top = h;
   return h;
 }
+
+void * Scope_malloc_in(Scope *, size_t);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   if(! _init_guard_) _file_init_();
@@ -603,8 +592,7 @@ static ErrorRecord * _record_at(int index){
 Pool Pool_release(Pool);
 
 static void _region_destroy(ErrorRegion * region){
-  if(region -> lists) region -> lists = Pool_release(region -> lists);
-  if(region -> strings) region -> strings = Pool_release(region -> strings);
+  if(region -> pool) region -> pool = Pool_release(region -> pool);
   if(region -> values){
     Scope_destroy(region -> values);
     region -> values = NULL;
@@ -620,15 +608,26 @@ static ErrorRegion _region_new(void){
   }
   ;
   region.values = Scope_new_named("Error record values");
-  region.strings = Pool_retain_named(NULL, "Error record Strings");
-  region.lists = Pool_retain_named(NULL, "Error record Lists");
+  region.pool = Pool_retain_named(NULL, "Error record canonical values");
   return region;
 }
 
 List List_cons_in(Pool, Var, List);
 
 static List _cons(ErrorRegion * region, Var head, List tail){
-  return List_cons_in(region -> lists, head, tail);
+  return List_cons_in(region -> pool, head, tail);
+}
+
+Var Var_clone_wide(Var);
+
+static Var _snapshot_wide(Var v){
+  Scope owner = * Scope_top();
+  if(! owner) return Var_clone_wide(v);
+  while(owner -> down) owner = owner -> down;
+  Scope_push(& owner);
+  Var copy = Var_clone_wide(v);
+  Scope_pop();
+  return copy;
 }
 
 int Var_is_void(Var);
@@ -641,13 +640,13 @@ int Var_is(Var, Symbol);
 
 int Var_is_wide(Var);
 
-Var Var_clone_wide(Var);
-
 int Var_is_integer(Var);
 
 int Var_is_floating(Var);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+String Var_str(Var);
 
 String Var_string(Var);
 
@@ -655,9 +654,11 @@ String String_new_in(Pool, const char *, int);
 
 int String_len(String);
 
-String Var_str(Var);
+String String_new_len(const char *, int);
 
 Var Var_new(Symbol, ...);
+
+int String_try_own(String);
 
 Var List_car(List);
 
@@ -665,32 +666,40 @@ Var List_var(List);
 
 List List_cdr(List);
 
+List cons(Var, List);
+
 static Var _copy_value(ErrorRegion * region, Var value){
-  if(Var_is_void(value)) _floor(4477479911782, "void is not an admissible error detail");
+  if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
   if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
   if(Var_is_wide(value)){
+    if(! region) return _snapshot_wide(value);
     Scope_push(& region -> values);
     Var owned = Var_clone_wide(value);
     Scope_pop();
     return owned;
   }
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is_row(value, 11, 7, 1)){
-    String source = Var_string(value);
-    return String_var(String_new_in(region -> strings, source, String_len(source)));
-  }
-  if(Var_is(value, 826970)){
-    String source = Var_str(value);
-    String owned = String_new_in(region -> strings, source, String_len(source));
-    return Var_new(826970, owned);
+  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)){
+    String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
+    String owned = region ? String_new_in(region -> pool, source, String_len(source)) : String_new_len(source, String_len(source));
+    if(region) return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);
+    if(Var_is(value, 826970)){
+      Atom atom = Atom_intern(owned);
+      if(Var_is(atom, 826970)) String_try_own(Atom_str(atom));
+      return atom;
+    }
+    String_try_own(owned);
+    return String_var(owned);
   }
   if(Var_is_row(value, 9, 7, 4)){
     List source = Var_list(value);
     Var head = _copy_value(region, List_car(source));
     List tail = Var_list(_copy_value(region, List_var(List_cdr(source))));
-    return List_var(_cons(region, head, tail));
+    List owned = region ? _cons(region, head, tail) : cons(head, tail);
+    if(! region) List_try_own(owned);
+    return List_var(owned);
   }
-  _floor(4477479911782, "error detail contains an identity-bearing value");
+  _floor(4477479911782, region ? "error detail contains an identity-bearing value" : "error snapshot contains an identity-bearing value");
 }
 
 static List _pair(ErrorRegion * region, Var key, Var value){
@@ -705,8 +714,8 @@ static List _location(ErrorRegion * region, const X2CErrorSite * site){
   if(! site) return NULL;
   const char * file_source = site -> file ? site -> file : "<unknown>";
   const char * function_source = site -> function ? site -> function : "<unknown>";
-  String file = String_new_in(region -> strings, file_source, strlen(file_source));
-  String function = String_new_in(region -> strings, function_source, strlen(function_source));
+  String file = String_new_in(region -> pool, file_source, strlen(file_source));
+  String function = String_new_in(region -> pool, function_source, strlen(function_source));
   int line = site -> line;
   List location = NULL;
   location = _field(region, Symbol_var(458361162716), String_var(function), location);
@@ -791,53 +800,11 @@ int Error_mark(void){
   return Error_count();
 }
 
-static Var _snapshot_wide(Var v){
-  Scope owner = * Scope_top();
-  if(! owner) return Var_clone_wide(v);
-  while(owner -> down) owner = owner -> down;
-  Scope_push(& owner);
-  Var copy = Var_clone_wide(v);
-  Scope_pop();
-  return copy;
-}
-
-String String_new_len(const char *, int);
-
-int String_try_own(String);
-
-List cons(Var, List);
-
-static Var _snapshot_value(Var v){
-  if(Var_is_void(v)) _floor(4477479911782, "void is not an admissible error snapshot");
-  if(Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
-  if(Var_is_wide(v)) return _snapshot_wide(v);
-  if(Var_is_integer(v) || Var_is_floating(v)) return v;
-  if(Var_is_row(v, 11, 7, 1)){
-    String source = Var_string(v), copy = String_new_len(source, String_len(source));
-    String_try_own(copy);
-    return String_var(copy);
-  }
-  if(Var_is(v, 826970)){
-    String spelling = Var_str(v);
-    Atom copy = Atom_intern(String_new_len(spelling, String_len(spelling)));
-    if(Var_is(copy, 826970)) String_try_own(Atom_str(copy));
-    return copy;
-  }
-  if(Var_is_row(v, 9, 7, 4)){
-    List source = Var_list(v);
-    Var head = _snapshot_value(List_car(source));
-    List tail = Var_list(_snapshot_value(List_var(List_cdr(source)))), copy = cons(head, tail);
-    List_try_own(copy);
-    return List_var(copy);
-  }
-  _floor(4477479911782, "error snapshot contains an identity-bearing value");
-}
-
 Var Error_snapshot(Var value){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  Var result = _snapshot_value(value);
+  Var result = _copy_value(NULL, value);
   state -> floor_only --;
   return result;
 }
@@ -846,7 +813,7 @@ Var Error_snapshot_in(Var value, Scope * values, Pool pool){
   if(! _init_guard_) _file_init_();
   if(! values || ! pool) _floor(4372499598, "error snapshot requires explicit owners");
   ErrorRegion region ={
-    .values = * values, .strings = pool, .lists = pool
+    .values = * values, .pool = pool
   }
   ;
   ErrorThreadState state = _thread();
@@ -862,7 +829,7 @@ List Error_since_in(int mark, Scope * values, Pool pool){
   if(! Error_ready() || mark < 0) return NULL;
   if(! values || ! pool) _floor(4372499598, "error snapshot requires explicit owners");
   ErrorRegion region ={
-    .values = * values, .strings = pool, .lists = pool
+    .values = * values, .pool = pool
   }
   ;
   ErrorThreadState state = _thread();
@@ -878,7 +845,7 @@ static List _view_since(ErrorRegion * region, int mark){
   for(int i = Error_count() - 1;  i >= mark;  i --){
     ErrorRecord * record = _record_at(i);
     Var entry = _copy_value(region, List_var(record -> entry));
-    out = _cons(region, entry, out);
+    out = region ? _cons(region, entry, out) : cons(entry, out);
   }
   return out;
 }
@@ -888,12 +855,7 @@ List Error_since(int mark){
   if(! Error_ready() || mark < 0) return NULL;
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List out = NULL;
-  for(int i = Error_count() - 1;  i >= mark;  i --){
-    ErrorRecord * record = _record_at(i);
-    Var entry = _snapshot_value(List_var(record -> entry));
-    out = cons(entry, out);
-  }
+  List out = _view_since(NULL, mark);
   List_try_own(out);
   state -> floor_only --;
   return out;
@@ -905,12 +867,12 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 874};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 838};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 877};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 841};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -968,7 +930,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 951};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 915};
     x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
@@ -1016,13 +978,18 @@ void Error_bound_set(int bound){
 ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
   if(! _init_guard_) _file_init_();
   if(! Error_ready() || ! fn) return NULL;
+  ErrorHandler h = _handler_new(fn, data);
+  _thread() -> handler_top = h;
+  return h;
+}
+
+static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data){
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
   * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .running = NULL, .fn = fn, .data = data, .watermark = Error_count(), .site = NULL, .target = NULL, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
+    .prev = state -> handler_top, .fn = fn, .data = data, .watermark = Error_count(), .selected = - 1
   }
   ;
-  state -> handler_top = h;
   return h;
 }
 
@@ -1215,23 +1182,25 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
     if(h -> site) disposition = _catch_match(h);
     else{
       {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & h};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-        state -> floor_only ++;
-        h -> view = _region_new();
-        List slice = _view_since(& h -> view, h -> watermark);
-        state -> floor_only --;
-        disposition = h -> fn(slice, h -> data);
+        _x2c_defer_env_0 _x2c_defer_env_1 ={
+          ._x2c_defer_capture_0 =(const void *) & h
+        }
+        ;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_1
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          state -> floor_only ++;
+          h -> view = _region_new();
+          List slice = _view_since(& h -> view, h -> watermark);
+          state -> floor_only --;
+          disposition = h -> fn(slice, h -> data);
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
-      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
     }
     if(disposition == 1440172936 || disposition == 12689496){
       state -> handler_top = state -> dispatch_saved;

@@ -30,7 +30,7 @@ X2c command-line parsing and presentation.
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:311`
+Source: `src/cli.x:351`
 
 #### cli_dependency_pass_through
 
@@ -40,7 +40,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:868`
+Source: `src/cli.x:908`
 
 #### cli_package_options
 
@@ -53,7 +53,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:995`
+Source: `src/cli.x:1005`
 
 #### cli_parse
 
@@ -68,7 +68,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1164`
+Source: `src/cli.x:1166`
 
 #### cli_request
 
@@ -76,7 +76,7 @@ Source: `src/cli.x:1164`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1042`
+Source: `src/cli.x:1044`
 
 #### cli_response_arguments
 
@@ -86,7 +86,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:770`
+Source: `src/cli.x:810`
 
 #### cli_version
 
@@ -94,7 +94,7 @@ Source: `src/cli.x:770`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1219`
+Source: `src/cli.x:1221`
 
 ### `CliRequest`
 
@@ -105,7 +105,7 @@ Source: `src/cli.x:1219`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1222`
+Source: `src/cli.x:1224`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -118,7 +118,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1230`
+Source: `src/cli.x:1232`
 
 ## Public types
 

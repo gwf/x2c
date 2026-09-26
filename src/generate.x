@@ -980,10 +980,7 @@ static void _collect_forward_dependencies(
           }
         }
       }
-      case %(vcompound ? ? ? ?name):
-        _forward_declaration(
-          compiler, %(native $name), locals, statics, seen, prototypes);
-      case %(vpostfix ? ? ?name):
+      case %(call ?(String name) *):
         _forward_declaration(
           compiler, %(native $name), locals, statics, seen, prototypes);
       case %((!or expr declare typedef function cast param) ?type *):

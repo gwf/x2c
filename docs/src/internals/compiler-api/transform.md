@@ -14,6 +14,16 @@ X2c AST transformation pipeline.
 | --- | --- |
 | [`transform_array_literal`](#transform_array_literal) | Converts an `(array ...)` or `(varray ...)` node to source-ordered `(varray ...)` form, converting every typed element to `Var`. |
 | [`transform_map_literal`](#transform_map_literal) | Converts a `(map ...)` or `(vmap ...)` node to source-ordered `(vmap (vpair ...))` form, converting every typed key and value to `Var`. |
+| [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
+| [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
+| [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
+| [`Compiler.lambda_param_types`](#Compiler.lambda_param_types) | The parameter types of a lambda's function signature, keeping typed declarators; a bare parameter is a `Var`. |
+| [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
+| [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression to emitter-ready helper references. |
+| [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
+| [`Compiler.maybe_adapt_func_arg`](#Compiler.maybe_adapt_func_arg) | Adapts a direct native function argument when `FuncAdapter` is expected. |
+| [`Compiler.prepare_lambda_cells`](#Compiler.prepare_lambda_cells) | Prepares one resolved function body for shared mutable lambda captures. |
+| [`Compiler.static_value_is_runtime`](#Compiler.static_value_is_runtime) | Reports whether the static initializer `value` has to run at runtime, because it calls, allocates, or reads an object other than a function name. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
 ### Functions
@@ -25,7 +35,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:1008`
+Source: `src/transform.x:3531`
 
 #### transform_map_literal
 
@@ -35,9 +45,143 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:1019`
+Source: `src/transform.x:3542`
 
 ### `Compiler`
+
+<a id="Compiler.adapt_lambda_arg"></a>
+#### Compiler.adapt_lambda_arg
+
+`List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type)`
+
+Adapts a lowered noncapturing lambda helper to a typed callback.
+`argument` must be a resolved helper reference produced by
+`Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
+`expected_type` must describe a fixed, nonvariadic function. Unless its
+parameters and result are already `Var`,
+a queued static helper converts callback arguments to the lowered lambda's
+original parameter types before calling it, then converts its `Var` result
+to the expected return type. Already compatible or unsupported shapes pass
+through unchanged.
+
+Source: `src/transform.x:909`
+
+<a id="Compiler.check_lambda_captures"></a>
+#### Compiler.check_lambda_captures
+
+`void Compiler.check_lambda_captures(Compiler c, List ast)`
+
+Rejects writes and reference access to read-only snapshot bindings.
+The body has already resolved identifiers and call arguments. Templates
+defer this check until expansion; nested lambdas check their own bodies.
+
+Source: `src/transform.x:1087`
+
+<a id="Compiler.func_signature"></a>
+#### Compiler.func_signature
+
+`List Compiler.func_signature(Compiler compiler, Type type)`
+
+Returns the canonical signature shared by native and meta Func adapters.
+
+Source: `src/transform.x:326`
+
+<a id="Compiler.lambda_param_types"></a>
+#### Compiler.lambda_param_types
+
+`List Compiler.lambda_param_types(Compiler compiler, List entries)`
+
+The parameter types of a lambda's function signature, keeping typed
+declarators; a bare parameter is a `Var`.
+
+Source: `src/transform.x:1606`
+
+<a id="Compiler.lift_func_expression"></a>
+#### Compiler.lift_func_expression
+
+`List Compiler.lift_func_expression(Compiler c, List expression)`
+
+Converts a resolved function-like expression to `Func` when supported.
+Existing `Func` values pass through. Direct fixed functions reuse a
+file-static handle; other function-typed and function-pointer expressions
+are evaluated once and copied into a new context-bound `Func`, with null
+pointers producing null `Func`. Lambda expressions are lowered first, and
+unrelated expressions pass through unchanged. Public inline functions
+reach the queued helpers through generated bridge functions.
+
+Source: `src/transform.x:860`
+
+<a id="Compiler.lower_lambda_expr"></a>
+#### Compiler.lower_lambda_expr
+
+`List Compiler.lower_lambda_expr(Compiler compiler, List expression)`
+
+Lowers a resolved lambda expression to emitter-ready helper references.
+`expression` must retain the resolved `expr`, `lambda`, `params`, and
+optional `captures` rows. A noncapturing lambda becomes a static
+`Var`-returning helper. A lambda with capture rows becomes a `FuncAdapter`
+helper and a `Func` whose copied context stores value snapshots and typed
+reference addresses; capture expressions run once from left to right.
+Nested lambdas lower inside out, block fallthrough and bare returns produce
+no value, and synthesized declarations enter the early queue. Parentheses
+remain around lowered helpers; other non-lambda expressions pass through.
+
+Source: `src/transform.x:1633`
+
+<a id="Compiler.lower_typed_adapter_expr"></a>
+#### Compiler.lower_typed_adapter_expr
+
+`List Compiler.lower_typed_adapter_expr(Compiler c, List expression)`
+
+Lowers a resolved `tadapt` expression to a typed callback helper.
+`expression` must have the resolved shape
+`(expr TARGET (tadapt ORIGIN (expr SOURCE (ident BINDING))))`.
+Compatible helpers are cached by source binding and target type, queued
+with `Compiler.add_early`, and returned as typed identifiers; other
+expressions pass through unchanged.
+
+Source: `src/transform.x:172`
+
+<a id="Compiler.maybe_adapt_func_arg"></a>
+#### Compiler.maybe_adapt_func_arg
+
+`List Compiler.maybe_adapt_func_arg( Compiler c, List argument, List expected_type)`
+
+Adapts a direct native function argument when `FuncAdapter` is expected.
+A noncapturing lambda is lowered to its direct function designator. Other
+arguments must be resolved direct designators, possibly parenthesized,
+cast, or addressed; an indirect function-pointer value is rejected.
+A function already having the adapter's pointee type passes through,
+and new helpers are cached and queued with `Compiler.add_early`.
+
+Source: `src/transform.x:547`
+
+<a id="Compiler.prepare_lambda_cells"></a>
+#### Compiler.prepare_lambda_cells
+
+`List Compiler.prepare_lambda_cells(Compiler c, List declarator, List body)`
+
+Prepares one resolved function body for shared mutable lambda captures.
+`declarator` must carry a resolved `bind` with `fnmod` parameters, and
+`body` must agree with the automatic-binding and type facts in `Compiler`.
+Before normal body transformation, the method rewrites explicitly shared
+parameters and locals to `Scope`-owned cells, prepares nested bodies,
+and returns the rewritten body with declaration and initializer order
+preserved.
+
+Source: `src/transform.x:1357`
+
+<a id="Compiler.static_value_is_runtime"></a>
+#### Compiler.static_value_is_runtime
+
+`int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime)`
+
+Reports whether the static initializer `value` has to run at runtime,
+because it calls, allocates, or reads an object other than a function
+name. `runtime` holds the function-local statics already known to run
+that way, or is `NULL` at file scope.
+
+Source: `src/transform.x:1940`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -46,17 +190,18 @@ Source: `src/transform.x:1019`
 
 Lowers a bound and typed top-level AST to the normalized form consumed by
 emission. `compiler` must own the AST's bindings, origins, and conversion
-state. The call drives the input and synthesized early declarations to
-identity fixed points, appends those declarations after the input units,
-and may add generated origins or diagnostics to `compiler`.
+state. Current-node rewrites finish before child traversal; containing
+blocks absorb cleanup markers produced by declaration rewrites. Early
+declarations are lowered and appended after the input units. The call
+may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:1776`
+Source: `src/transform.x:4310`
 
 ## Design notes
 
 Lowers typed expressions, literals, and control flow into the AST forms
 consumed by C emission.
 
-Each pass transforms a typed AST and returns an immutable `List` tree.
-The driver repeats the passes until the tree stops changing, using
-structural identity to detect changes. The active Compiler reports errors.
+One recursive normalizer owns expressions, lambda synthesis, and cleanup.
+Newly constructed nodes normalize locally; complete functions receive
+their transfer cleanup before emission. The active Compiler reports errors.

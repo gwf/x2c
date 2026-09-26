@@ -1,6 +1,6 @@
 #include "x2c.x"
 #include "typed-array.x"
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.reverse()
 static double jumps(double x) {

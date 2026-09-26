@@ -55,7 +55,7 @@ typedef struct {
   int failures;
 } TestStats;
 
-// The oracle is the optional recursive matcher in lib/match-recursive.x.
+// The oracle is the recursive matcher in unittest/match-recursive.x.
 int test_match_oracle_try_match(List input, Var pattern, List &?out_bindings) {
   return match_recursive_try_match(input, pattern, out_bindings);
 }

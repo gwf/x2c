@@ -343,44 +343,46 @@ static void Compiler__write_json(Compiler c, List entry){
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436))), notes = Var_list(List_assoc(entry, Symbol_var(30384486)));
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    Buffer_write(out, String_join(NULL, cons(String_var(_7), cons(String_var(Var_json(Symbol_var(code))), NULL))));
-    Buffer_write(out, String_join(NULL, cons(String_var(_8), cons(String_var(Var_json(List_assoc(entry, Symbol_var(28293925322)))), NULL))));
-    Buffer_write(out, String_join(NULL, cons(String_var(_9), cons(String_var(Var_json(List_assoc(entry, Symbol_var(1317895556402)))), NULL))));
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      Symbol key;
-      List _x2c_macro_object_0 = _19;
-      List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-      Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-        key = Var_symbol(_x2c_macro_cursor_output_0);
-        {
-          Var value = List_assoc(location, Symbol_var(key));
-          if(Var_is_void(value)) value = Var_null();
-          else if(Var_is_row(value, 11, 7, 1)) value = String_var(Compiler__json_path(c, Var_string(value)));
-          Buffer_write(out, String_join(NULL, cons(String_var(_20), cons(String_var(Var_json(Symbol_var(key))), cons(String_var(_21), cons(String_var(Var_json(value)), NULL))))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_7), cons(String_var(Var_json(Symbol_var(code))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_8), cons(String_var(Var_json(List_assoc(entry, Symbol_var(28293925322)))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_9), cons(String_var(Var_json(List_assoc(entry, Symbol_var(1317895556402)))), NULL))));
+      {
+        Symbol key;
+        List _x2c_macro_object_0 = _19;
+        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+        Var _x2c_macro_cursor_output_0;
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+          key = Var_symbol(_x2c_macro_cursor_output_0);
+          {
+            Var value = List_assoc(location, Symbol_var(key));
+            if(Var_is_void(value)) value = Var_null();
+            else if(Var_is_row(value, 11, 7, 1)) value = String_var(Compiler__json_path(c, Var_string(value)));
+            Buffer_write(out, String_join(NULL, cons(String_var(_20), cons(String_var(Var_json(Symbol_var(key))), cons(String_var(_21), cons(String_var(Var_json(value)), NULL))))));
+          }
+
         }
+
+      }
+      String note = _note_line(notes);
+      Buffer_write(out, String_join(NULL, cons(String_var(_22), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_23), NULL)))));
+      while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
 
       }
 
     }
-    String note = _note_line(notes);
-    Buffer_write(out, String_join(NULL, cons(String_var(_22), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_23), NULL)))));
-    while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
-
-    }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 String Symbol_str(Symbol);

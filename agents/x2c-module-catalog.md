@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 35
-- Runtime modules: 58
+- Compiler modules: 33
+- Runtime modules: 56
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -59,14 +59,6 @@ Public functions:
 
 `Compiler.setup_cache_init`
 
-### [src/cleanup.x](../src/cleanup.x)
-
-what a cleanup region runs, and which exits run it.
-
-Public functions:
-
-`Compiler.static_value_is_runtime`, `Compiler.mark_cleanup_regions`
-
 ### [src/cli.x](../src/cli.x)
 
 x2c command-line parsing and presentation.
@@ -113,11 +105,13 @@ Public functions:
 `Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
 `Token.after_group`, `Compiler.peek`, `Compiler.require_input`,
 `Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.skip_script_statement`,
-`Compiler.freeze_declaration_syntax`, `Compiler.freeze_macro_stack`,
-`Compiler.thaw_declaration_syntax`, `Compiler.queue_declaration_effect`,
-`Compiler.run_declaration_effects`, `Compiler.select_declaration_defaults`,
+`Compiler.anchor_origin`, `Compiler.collect_compile_time_definition`,
+`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
+`Compiler.skip_script_statement`, `Compiler.skip_collected_script_statement`,
+`Compiler.finish_collected_declaration`, `Compiler.freeze_declaration_syntax`,
+`Compiler.freeze_macro_stack`, `Compiler.thaw_declaration_syntax`,
+`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
+`Compiler.select_declaration_defaults`, `Compiler.collect_unit_macro`,
 `Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
 `Compiler.leading_preproc`, `Compiler.update_source_visibility`,
 `Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
@@ -125,8 +119,9 @@ Public functions:
 `Compiler.match_pattern_value`, `match_value_is_static`,
 `Compiler.match_pattern_is_static`, `match_value_head`,
 `match_value_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
-`Compiler.begin_semantic_transaction`, `SymTxn.commit`,
+`Compiler.define_match_binders`, `Compiler.define_catch_binders`,
+`Compiler.catch_binder_declarations`, `Compiler.add_early`,
+`Compiler.add_init`, `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
 `Sym.reset`, `Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
 `Sym.mark_static`, `Sym.current_symbols`, `Sym.visible_symbols`,
@@ -255,18 +250,6 @@ Public functions:
 `install_rows`, `install_command`, `install_version`, `install_require`,
 `remove_command`, `list_command`
 
-### [src/lambda.x](../src/lambda.x)
-
-lambda transformation helpers for the x2c compiler.
-
-Public functions:
-
-`Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
-`Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
-`Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
-`Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
-`Compiler.lower_lambda_expr`
-
 ### [src/literals.x](../src/literals.x)
 
 x2c literal and lambda parsing.
@@ -356,8 +339,9 @@ Public functions:
 `Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
 `Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
 `Compiler.skip_linkage_brace`, `Compiler.definition_doc`,
-`Compiler.parse_top_level`, `Compiler.parse_submission`,
-`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
+`Compiler.parse_top_level_mode`, `Compiler.parse_top_level`,
+`Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
+`Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -450,6 +434,11 @@ x2c AST transformation pipeline.
 
 Public functions:
 
+`Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
+`Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
+`Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
+`Compiler.lower_lambda_expr`, `Compiler.static_value_is_runtime`,
 `transform_array_literal`, `transform_map_literal`, `Compiler.transform`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
@@ -518,17 +507,17 @@ dynamic contiguous arrays of `Var` elements.
 
 Public functions:
 
-`Array.block`, `Block.array`, `Array.new`, `Array.free`, `Array.resize`,
-`Array.update_n`, `Array.getindex`, `Array.setindex`, `Array.updateindex`,
-`Array.postfixindex`, `Array.push`, `Array.take_last`, `Array.shift`,
-`Array.unshift`, `Array.insert`, `Array.remove`, `Array.copy`,
-`Array.getslice`, `Array.setslice`, `Array.remslice`, `Array.splice`,
-`Array.find`, `Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
-`Array.reverse`, `Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`,
-`Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
-`Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
-`Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`,
-`Array.try_next`, `Array.iter`, `Iter.array`, `Array.cleanup`
+`Array.new`, `Array.try_next`, `Array.push`, `Array.try_take_last`,
+`Array.take_last`, `Array.shift`, `Array.unshift`, `Array.insert`,
+`Array.remove`, `Array.copy`, `Array.getslice`, `Array.setslice`,
+`Array.remslice`, `Array.splice`, `Array.find`, `Array.contains`,
+`Array.count`, `Array.indexof`, `Array.concat`, `Array.reverse`, `Array.equal`,
+`Array.getindex`, `Array.setindex`, `Array.block`, `Block.array`, `Array.free`,
+`Array.resize`, `Array.update_n`, `Array.updateindex`, `Array.postfixindex`,
+`Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`, `Array.write_repr`,
+`Array.write_str`, `Array.str`, `Array.repr`, `Array.iter`, `Array.sort`,
+`Array.sort_with`, `Array.sort_by`, `Array.heap_push`, `Array.heap_pop`,
+`Array.heapify`, `Array.join`, `Iter.array`, `Array.cleanup`
 
 ### [lib/atom.x](../lib/atom.x)
 
@@ -538,17 +527,6 @@ Public functions:
 
 `Atom.promote`, `Atom.bare_spelling`, `Atom.write_str`, `Atom.write_repr`,
 `Var.is_atom`, `Atom.str`, `Atom.first`, `Atom.initialize`, `Atom.intern`
-
-### [lib/autodiff.x](../lib/autodiff.x)
-
-reverse-mode differentiation recorded on a runtime tape.
-
-Public functions:
-
-`AdNode.var`, `Var.adnode`, `AdTape.new`, `AdTape.input`, `AdTape.backward`,
-`AdNode.add`, `AdNode.sub`, `AdNode.mul`, `AdNode.div`, `AdNode.neg`,
-`AdNode.compare`, `AdNode.sin`, `AdNode.cos`, `AdNode.exp`, `AdNode.log`,
-`AdNode.sqrt`, `AdNode.tanh`
 
 ### [lib/block.x](../lib/block.x)
 
@@ -870,12 +848,12 @@ hash table mapping `Var` keys to `Var` values.
 Public functions:
 
 `Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`, `Map.get`,
-`Map.getindex`, `Map.get_hashed`, `Map.getdefault`, `Map.setdefault`,
-`Map.contains`, `Map.set`, `Map.setindex`, `Map.updateindex`,
-`Map.postfixindex`, `Map.try_del`, `Map.del`, `Map.update_n`, `Map.copy`,
-`Map.export_to`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.compare`,
-`Map.iter`, `Map.keys`, `Map.enumerate`, `Map.equal`, `Map.write_repr`,
-`Map.write_str`, `Map.str`, `Map.repr`, `Map.cleanup`
+`Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`, `Map.set`,
+`Map.setindex`, `Map.updateindex`, `Map.postfixindex`, `Map.try_del`,
+`Map.del`, `Map.copy`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.equal`,
+`Map.get_hashed`, `Map.update_n`, `Map.export_to`, `Map.compare`,
+`Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`,
+`Map.keys`, `Map.enumerate`, `Map.cleanup`
 
 ### [lib/match-machine.x](../lib/match-machine.x)
 
@@ -885,17 +863,6 @@ Public functions:
 
 `MatchMachine.begin`, `MatchMachine.step`, `MatchMachine.run`,
 `MatchMachine.materialize_span`, `MatchMachine.finish`, `MatchMachine.clean`
-
-### [lib/match-recursive.x](../lib/match-recursive.x)
-
-optional reference matcher.
-
-Public functions:
-
-`match_recursive_try_capture`, `match_recursive_try_value`,
-`match_recursive_try_match`, `match_recursive_try_match_replace`,
-`match_recursive_search`, `match_recursive_try_search`,
-`match_recursive_search_replace`
 
 ### [lib/match.x](../lib/match.x)
 
@@ -943,8 +910,9 @@ shared mutable-state coordination.
 
 Public functions:
 
-`Mutex.new`, `Mutex.lock`, `Mutex.try_lock`, `Mutex.unlock`, `Mutex.free`,
-`Mutex.cleanup`
+`x2c_mutex_recursive_initialize`, `x2c_mutex_recursive_lock`,
+`x2c_mutex_recursive_unlock`, `Mutex.new`, `Mutex.lock`, `Mutex.try_lock`,
+`Mutex.unlock`, `Mutex.free`, `Mutex.cleanup`
 
 ### [lib/path.x](../lib/path.x)
 
@@ -1155,83 +1123,82 @@ packed typed `Array`s generated from shared methods.
 
 Public functions:
 
-`ArrayChar.new`, `ArrayChar.try_get`, `ArrayChar.try_next`,
-`ArrayChar.getindex`, `ArrayChar.setindex`, `ArrayChar.push`,
+`ArrayChar.new`, `ArrayChar.try_next`, `ArrayChar.push`,
 `ArrayChar.try_take_last`, `ArrayChar.take_last`, `ArrayChar.shift`,
 `ArrayChar.unshift`, `ArrayChar.insert`, `ArrayChar.remove`, `ArrayChar.copy`,
 `ArrayChar.getslice`, `ArrayChar.setslice`, `ArrayChar.remslice`,
 `ArrayChar.splice`, `ArrayChar.find`, `ArrayChar.contains`, `ArrayChar.count`,
 `ArrayChar.indexof`, `ArrayChar.concat`, `ArrayChar.reverse`,
-`ArrayChar.equal`, `ArrayChar.array`, `ArrayChar.compare`,
-`ArrayChar.write_repr`, `ArrayChar.write_str`, `ArrayChar.str`,
-`ArrayChar.repr`, `ArrayChar.updateindex`, `ArrayChar.postfixindex`,
-`ArrayChar.var`, `ArrayChar.block`, `Var.arraychar`, `Array.arraychar`,
-`ArrayChar.iter`, `ArrayShort.new`, `ArrayShort.try_get`,
-`ArrayShort.try_next`, `ArrayShort.getindex`, `ArrayShort.setindex`,
-`ArrayShort.push`, `ArrayShort.try_take_last`, `ArrayShort.take_last`,
-`ArrayShort.shift`, `ArrayShort.unshift`, `ArrayShort.insert`,
-`ArrayShort.remove`, `ArrayShort.copy`, `ArrayShort.getslice`,
-`ArrayShort.setslice`, `ArrayShort.remslice`, `ArrayShort.splice`,
-`ArrayShort.find`, `ArrayShort.contains`, `ArrayShort.count`,
-`ArrayShort.indexof`, `ArrayShort.concat`, `ArrayShort.reverse`,
-`ArrayShort.equal`, `ArrayShort.array`, `ArrayShort.compare`,
-`ArrayShort.write_repr`, `ArrayShort.write_str`, `ArrayShort.str`,
-`ArrayShort.repr`, `ArrayShort.updateindex`, `ArrayShort.postfixindex`,
-`ArrayShort.var`, `ArrayShort.block`, `Var.arrayshort`, `Array.arrayshort`,
-`ArrayShort.iter`, `ArrayInt.new`, `ArrayInt.try_get`, `ArrayInt.try_next`,
-`ArrayInt.getindex`, `ArrayInt.setindex`, `ArrayInt.push`,
-`ArrayInt.try_take_last`, `ArrayInt.take_last`, `ArrayInt.shift`,
-`ArrayInt.unshift`, `ArrayInt.insert`, `ArrayInt.remove`, `ArrayInt.copy`,
-`ArrayInt.getslice`, `ArrayInt.setslice`, `ArrayInt.remslice`,
-`ArrayInt.splice`, `ArrayInt.find`, `ArrayInt.contains`, `ArrayInt.count`,
-`ArrayInt.indexof`, `ArrayInt.concat`, `ArrayInt.reverse`, `ArrayInt.equal`,
-`ArrayInt.array`, `ArrayInt.compare`, `ArrayInt.write_repr`,
-`ArrayInt.write_str`, `ArrayInt.str`, `ArrayInt.repr`, `ArrayInt.updateindex`,
+`ArrayChar.equal`, `ArrayChar.try_get`, `ArrayChar.getindex`,
+`ArrayChar.setindex`, `ArrayChar.compare`, `ArrayChar.write_repr`,
+`ArrayChar.write_str`, `ArrayChar.str`, `ArrayChar.repr`, `ArrayChar.array`,
+`ArrayChar.updateindex`, `ArrayChar.postfixindex`, `ArrayChar.var`,
+`ArrayChar.block`, `Var.arraychar`, `Array.arraychar`, `ArrayChar.iter`,
+`ArrayShort.new`, `ArrayShort.try_next`, `ArrayShort.push`,
+`ArrayShort.try_take_last`, `ArrayShort.take_last`, `ArrayShort.shift`,
+`ArrayShort.unshift`, `ArrayShort.insert`, `ArrayShort.remove`,
+`ArrayShort.copy`, `ArrayShort.getslice`, `ArrayShort.setslice`,
+`ArrayShort.remslice`, `ArrayShort.splice`, `ArrayShort.find`,
+`ArrayShort.contains`, `ArrayShort.count`, `ArrayShort.indexof`,
+`ArrayShort.concat`, `ArrayShort.reverse`, `ArrayShort.equal`,
+`ArrayShort.try_get`, `ArrayShort.getindex`, `ArrayShort.setindex`,
+`ArrayShort.compare`, `ArrayShort.write_repr`, `ArrayShort.write_str`,
+`ArrayShort.str`, `ArrayShort.repr`, `ArrayShort.array`,
+`ArrayShort.updateindex`, `ArrayShort.postfixindex`, `ArrayShort.var`,
+`ArrayShort.block`, `Var.arrayshort`, `Array.arrayshort`, `ArrayShort.iter`,
+`ArrayInt.new`, `ArrayInt.try_next`, `ArrayInt.push`, `ArrayInt.try_take_last`,
+`ArrayInt.take_last`, `ArrayInt.shift`, `ArrayInt.unshift`, `ArrayInt.insert`,
+`ArrayInt.remove`, `ArrayInt.copy`, `ArrayInt.getslice`, `ArrayInt.setslice`,
+`ArrayInt.remslice`, `ArrayInt.splice`, `ArrayInt.find`, `ArrayInt.contains`,
+`ArrayInt.count`, `ArrayInt.indexof`, `ArrayInt.concat`, `ArrayInt.reverse`,
+`ArrayInt.equal`, `ArrayInt.try_get`, `ArrayInt.getindex`, `ArrayInt.setindex`,
+`ArrayInt.compare`, `ArrayInt.write_repr`, `ArrayInt.write_str`,
+`ArrayInt.str`, `ArrayInt.repr`, `ArrayInt.array`, `ArrayInt.updateindex`,
 `ArrayInt.postfixindex`, `ArrayInt.var`, `ArrayInt.block`, `Var.arrayint`,
-`Array.arrayint`, `ArrayInt.iter`, `ArrayLong.new`, `ArrayLong.try_get`,
-`ArrayLong.try_next`, `ArrayLong.getindex`, `ArrayLong.setindex`,
+`Array.arrayint`, `ArrayInt.iter`, `ArrayLong.new`, `ArrayLong.try_next`,
 `ArrayLong.push`, `ArrayLong.try_take_last`, `ArrayLong.take_last`,
 `ArrayLong.shift`, `ArrayLong.unshift`, `ArrayLong.insert`, `ArrayLong.remove`,
 `ArrayLong.copy`, `ArrayLong.getslice`, `ArrayLong.setslice`,
 `ArrayLong.remslice`, `ArrayLong.splice`, `ArrayLong.find`,
 `ArrayLong.contains`, `ArrayLong.count`, `ArrayLong.indexof`,
-`ArrayLong.concat`, `ArrayLong.reverse`, `ArrayLong.equal`, `ArrayLong.array`,
+`ArrayLong.concat`, `ArrayLong.reverse`, `ArrayLong.equal`,
+`ArrayLong.try_get`, `ArrayLong.getindex`, `ArrayLong.setindex`,
 `ArrayLong.compare`, `ArrayLong.write_repr`, `ArrayLong.write_str`,
-`ArrayLong.str`, `ArrayLong.repr`, `ArrayLong.updateindex`,
+`ArrayLong.str`, `ArrayLong.repr`, `ArrayLong.array`, `ArrayLong.updateindex`,
 `ArrayLong.postfixindex`, `ArrayLong.var`, `ArrayLong.block`, `Var.arraylong`,
-`Array.arraylong`, `ArrayLong.iter`, `ArrayFloat.new`, `ArrayFloat.try_get`,
-`ArrayFloat.try_next`, `ArrayFloat.getindex`, `ArrayFloat.setindex`,
+`Array.arraylong`, `ArrayLong.iter`, `ArrayFloat.new`, `ArrayFloat.try_next`,
 `ArrayFloat.push`, `ArrayFloat.try_take_last`, `ArrayFloat.take_last`,
 `ArrayFloat.shift`, `ArrayFloat.unshift`, `ArrayFloat.insert`,
 `ArrayFloat.remove`, `ArrayFloat.copy`, `ArrayFloat.getslice`,
 `ArrayFloat.setslice`, `ArrayFloat.remslice`, `ArrayFloat.splice`,
 `ArrayFloat.find`, `ArrayFloat.contains`, `ArrayFloat.count`,
 `ArrayFloat.indexof`, `ArrayFloat.concat`, `ArrayFloat.reverse`,
-`ArrayFloat.equal`, `ArrayFloat.array`, `ArrayFloat.compare`,
-`ArrayFloat.write_repr`, `ArrayFloat.write_str`, `ArrayFloat.str`,
-`ArrayFloat.repr`, `ArrayFloat.updateindex`, `ArrayFloat.postfixindex`,
+`ArrayFloat.equal`, `ArrayFloat.try_get`, `ArrayFloat.getindex`,
+`ArrayFloat.setindex`, `ArrayFloat.compare`, `ArrayFloat.write_repr`,
+`ArrayFloat.write_str`, `ArrayFloat.str`, `ArrayFloat.repr`,
+`ArrayFloat.array`, `ArrayFloat.updateindex`, `ArrayFloat.postfixindex`,
 `ArrayFloat.var`, `ArrayFloat.block`, `Var.arrayfloat`, `Array.arrayfloat`,
-`ArrayFloat.iter`, `ArrayDbl.new`, `ArrayDbl.try_get`, `ArrayDbl.try_next`,
-`ArrayDbl.getindex`, `ArrayDbl.setindex`, `ArrayDbl.push`,
+`ArrayFloat.iter`, `ArrayDbl.new`, `ArrayDbl.try_next`, `ArrayDbl.push`,
 `ArrayDbl.try_take_last`, `ArrayDbl.take_last`, `ArrayDbl.shift`,
 `ArrayDbl.unshift`, `ArrayDbl.insert`, `ArrayDbl.remove`, `ArrayDbl.copy`,
 `ArrayDbl.getslice`, `ArrayDbl.setslice`, `ArrayDbl.remslice`,
 `ArrayDbl.splice`, `ArrayDbl.find`, `ArrayDbl.contains`, `ArrayDbl.count`,
 `ArrayDbl.indexof`, `ArrayDbl.concat`, `ArrayDbl.reverse`, `ArrayDbl.equal`,
-`ArrayDbl.array`, `ArrayDbl.compare`, `ArrayDbl.write_repr`,
-`ArrayDbl.write_str`, `ArrayDbl.str`, `ArrayDbl.repr`, `ArrayDbl.updateindex`,
+`ArrayDbl.try_get`, `ArrayDbl.getindex`, `ArrayDbl.setindex`,
+`ArrayDbl.compare`, `ArrayDbl.write_repr`, `ArrayDbl.write_str`,
+`ArrayDbl.str`, `ArrayDbl.repr`, `ArrayDbl.array`, `ArrayDbl.updateindex`,
 `ArrayDbl.postfixindex`, `ArrayDbl.var`, `ArrayDbl.block`, `Var.arraydbl`,
-`Array.arraydbl`, `ArrayDbl.iter`, `ArrayString.new`, `ArrayString.try_get`,
-`ArrayString.try_next`, `ArrayString.getindex`, `ArrayString.setindex`,
+`Array.arraydbl`, `ArrayDbl.iter`, `ArrayString.new`, `ArrayString.try_next`,
 `ArrayString.push`, `ArrayString.try_take_last`, `ArrayString.take_last`,
 `ArrayString.shift`, `ArrayString.unshift`, `ArrayString.insert`,
 `ArrayString.remove`, `ArrayString.copy`, `ArrayString.getslice`,
 `ArrayString.setslice`, `ArrayString.remslice`, `ArrayString.splice`,
 `ArrayString.find`, `ArrayString.contains`, `ArrayString.count`,
 `ArrayString.indexof`, `ArrayString.concat`, `ArrayString.reverse`,
-`ArrayString.equal`, `ArrayString.array`, `ArrayString.compare`,
-`ArrayString.write_repr`, `ArrayString.write_str`, `ArrayString.str`,
-`ArrayString.repr`, `ArrayString.updateindex`, `ArrayString.postfixindex`,
+`ArrayString.equal`, `ArrayString.try_get`, `ArrayString.getindex`,
+`ArrayString.setindex`, `ArrayString.compare`, `ArrayString.write_repr`,
+`ArrayString.write_str`, `ArrayString.str`, `ArrayString.repr`,
+`ArrayString.array`, `ArrayString.updateindex`, `ArrayString.postfixindex`,
 `ArrayString.var`, `ArrayString.block`, `Var.arraystring`, `Array.arraystring`,
 `ArrayString.iter`
 
@@ -1264,53 +1231,51 @@ typed `Map`s generated from shared storage.
 
 Public functions:
 
-`MapIntInt.new_capacity`, `MapIntInt.new`, `Map.mapintint`, `MapIntInt.len`,
+`MapIntInt.new_capacity`, `MapIntInt.new`, `MapIntInt.len`,
 `MapIntInt.try_get`, `MapIntInt.get`, `MapIntInt.getindex`,
 `MapIntInt.getdefault`, `MapIntInt.setdefault`, `MapIntInt.contains`,
 `MapIntInt.set`, `MapIntInt.setindex`, `MapIntInt.updateindex`,
 `MapIntInt.postfixindex`, `MapIntInt.try_del`, `MapIntInt.del`,
 `MapIntInt.copy`, `MapIntInt.merge`, `MapIntInt.try_next`, `MapIntInt.truth`,
-`MapIntInt.equal`, `MapIntInt.map`, `MapIntInt.compare`,
+`MapIntInt.equal`, `Map.mapintint`, `MapIntInt.compare`,
 `MapIntInt.write_repr`, `MapIntInt.write_str`, `MapIntInt.str`,
-`MapIntInt.repr`, `MapIntInt.var`, `Var.mapintint`, `MapIntInt.iter`,
-`MapIntInt.keys`, `MapIntInt.enumerate`, `MapIntInt.cleanup`,
-`MapLongDouble.new_capacity`, `MapLongDouble.new`, `Map.maplongdouble`,
-`MapLongDouble.len`, `MapLongDouble.try_get`, `MapLongDouble.get`,
-`MapLongDouble.getindex`, `MapLongDouble.getdefault`,
-`MapLongDouble.setdefault`, `MapLongDouble.contains`, `MapLongDouble.set`,
-`MapLongDouble.setindex`, `MapLongDouble.updateindex`,
-`MapLongDouble.postfixindex`, `MapLongDouble.try_del`, `MapLongDouble.del`,
-`MapLongDouble.copy`, `MapLongDouble.merge`, `MapLongDouble.try_next`,
-`MapLongDouble.truth`, `MapLongDouble.equal`, `MapLongDouble.map`,
-`MapLongDouble.compare`, `MapLongDouble.write_repr`, `MapLongDouble.write_str`,
-`MapLongDouble.str`, `MapLongDouble.repr`, `MapLongDouble.var`,
+`MapIntInt.repr`, `MapIntInt.map`, `MapIntInt.var`, `Var.mapintint`,
+`MapIntInt.iter`, `MapIntInt.keys`, `MapIntInt.enumerate`, `MapIntInt.cleanup`,
+`MapLongDouble.new_capacity`, `MapLongDouble.new`, `MapLongDouble.len`,
+`MapLongDouble.try_get`, `MapLongDouble.get`, `MapLongDouble.getindex`,
+`MapLongDouble.getdefault`, `MapLongDouble.setdefault`,
+`MapLongDouble.contains`, `MapLongDouble.set`, `MapLongDouble.setindex`,
+`MapLongDouble.updateindex`, `MapLongDouble.postfixindex`,
+`MapLongDouble.try_del`, `MapLongDouble.del`, `MapLongDouble.copy`,
+`MapLongDouble.merge`, `MapLongDouble.try_next`, `MapLongDouble.truth`,
+`MapLongDouble.equal`, `Map.maplongdouble`, `MapLongDouble.compare`,
+`MapLongDouble.write_repr`, `MapLongDouble.write_str`, `MapLongDouble.str`,
+`MapLongDouble.repr`, `MapLongDouble.map`, `MapLongDouble.var`,
 `Var.maplongdouble`, `MapLongDouble.iter`, `MapLongDouble.keys`,
 `MapLongDouble.enumerate`, `MapLongDouble.cleanup`,
-`MapStringString.new_capacity`, `MapStringString.new`, `Map.mapstringstring`,
-`MapStringString.len`, `MapStringString.try_get`, `MapStringString.get`,
-`MapStringString.getindex`, `MapStringString.getdefault`,
-`MapStringString.setdefault`, `MapStringString.contains`,
-`MapStringString.set`, `MapStringString.setindex`,
+`MapStringString.new_capacity`, `MapStringString.new`, `MapStringString.len`,
+`MapStringString.try_get`, `MapStringString.get`, `MapStringString.getindex`,
+`MapStringString.getdefault`, `MapStringString.setdefault`,
+`MapStringString.contains`, `MapStringString.set`, `MapStringString.setindex`,
 `MapStringString.updateindex`, `MapStringString.postfixindex`,
 `MapStringString.try_del`, `MapStringString.del`, `MapStringString.copy`,
 `MapStringString.merge`, `MapStringString.try_next`, `MapStringString.truth`,
-`MapStringString.equal`, `MapStringString.map`, `MapStringString.compare`,
+`MapStringString.equal`, `Map.mapstringstring`, `MapStringString.compare`,
 `MapStringString.write_repr`, `MapStringString.write_str`,
-`MapStringString.str`, `MapStringString.repr`, `MapStringString.var`,
-`Var.mapstringstring`, `MapStringString.iter`, `MapStringString.keys`,
-`MapStringString.enumerate`, `MapStringString.cleanup`,
-`MapStringInt.new_capacity`, `MapStringInt.new`, `Map.mapstringint`,
-`MapStringInt.len`, `MapStringInt.try_get`, `MapStringInt.get`,
-`MapStringInt.getindex`, `MapStringInt.getdefault`, `MapStringInt.setdefault`,
-`MapStringInt.contains`, `MapStringInt.set`, `MapStringInt.setindex`,
-`MapStringInt.updateindex`, `MapStringInt.postfixindex`,
-`MapStringInt.try_del`, `MapStringInt.del`, `MapStringInt.copy`,
-`MapStringInt.merge`, `MapStringInt.try_next`, `MapStringInt.truth`,
-`MapStringInt.equal`, `MapStringInt.map`, `MapStringInt.compare`,
-`MapStringInt.write_repr`, `MapStringInt.write_str`, `MapStringInt.str`,
-`MapStringInt.repr`, `MapStringInt.var`, `Var.mapstringint`,
-`MapStringInt.iter`, `MapStringInt.keys`, `MapStringInt.enumerate`,
-`MapStringInt.cleanup`
+`MapStringString.str`, `MapStringString.repr`, `MapStringString.map`,
+`MapStringString.var`, `Var.mapstringstring`, `MapStringString.iter`,
+`MapStringString.keys`, `MapStringString.enumerate`, `MapStringString.cleanup`,
+`MapStringInt.new_capacity`, `MapStringInt.new`, `MapStringInt.len`,
+`MapStringInt.try_get`, `MapStringInt.get`, `MapStringInt.getindex`,
+`MapStringInt.getdefault`, `MapStringInt.setdefault`, `MapStringInt.contains`,
+`MapStringInt.set`, `MapStringInt.setindex`, `MapStringInt.updateindex`,
+`MapStringInt.postfixindex`, `MapStringInt.try_del`, `MapStringInt.del`,
+`MapStringInt.copy`, `MapStringInt.merge`, `MapStringInt.try_next`,
+`MapStringInt.truth`, `MapStringInt.equal`, `Map.mapstringint`,
+`MapStringInt.compare`, `MapStringInt.write_repr`, `MapStringInt.write_str`,
+`MapStringInt.str`, `MapStringInt.repr`, `MapStringInt.map`,
+`MapStringInt.var`, `Var.mapstringint`, `MapStringInt.iter`,
+`MapStringInt.keys`, `MapStringInt.enumerate`, `MapStringInt.cleanup`
 
 ### [lib/var-ledger.x](../lib/var-ledger.x)
 
@@ -1361,4 +1326,5 @@ Public functions:
 `x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
 `x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.fallback_truth`,
 `Var.truth`, `Var.add`, `Var.sub`, `Var.mul`, `Var.matmul`, `Var.div`,
-`Var.mod`, `Var.neg`, `Var.binary`, `Var.update`, `Var.postfix`
+`Var.mod`, `Var.neg`, `Var.binary`, `Var.update`, `x2c_var_update_volatile`,
+`Var.postfix`, `x2c_var_postfix_volatile`

@@ -77,30 +77,30 @@ typedef struct _x2c_defer_env_0{
 }
 _x2c_defer_env_0;
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-typedef struct _x2c_defer_env_1{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;  const void * _x2c_defer_capture_3;
 }
-_x2c_defer_env_1;
+_x2c_defer_env_2;
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_4;  const void * _x2c_defer_capture_5;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_4;
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-typedef struct _x2c_defer_env_3{
+typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_6;  const void * _x2c_defer_capture_7;
 }
-_x2c_defer_env_3;
+_x2c_defer_env_6;
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-typedef struct _x2c_defer_env_4{
+typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_8;  const void * _x2c_defer_capture_9;
 }
-_x2c_defer_env_4;
+_x2c_defer_env_8;
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-typedef struct _x2c_defer_env_5{
+typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_10;
 }
-_x2c_defer_env_5;
+_x2c_defer_env_10;
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -626,31 +626,33 @@ String String_filter(String str, Func fn){
   String _x2c_macro_string_3 = String_malloc(_x2c_macro_length_3 + 1);
   int _x2c_macro_done_0 = 0;
   {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_done_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_string_3};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    char * _x2c_macro_dst_0 = _x2c_macro_string_3;
-    for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(_apply(fn, String_getindex(str, i)))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);
-    String _x2c_macro_result_0 = _finish(_x2c_macro_string_3, (int)(_x2c_macro_dst_0 - _x2c_macro_string_3));
-    _x2c_macro_done_0 = 1;
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & _x2c_macro_done_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_string_3
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      String _x2c_return_value_0 = _x2c_macro_result_0;
+      char * _x2c_macro_dst_0 = _x2c_macro_string_3;
+      for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(_apply(fn, String_getindex(str, i)))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);
+      String _x2c_macro_result_0 = _finish(_x2c_macro_string_3, (int)(_x2c_macro_dst_0 - _x2c_macro_string_3));
+      _x2c_macro_done_0 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
+        String _x2c_return_value_0 = _x2c_macro_result_0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 String String_map(String str, Func fn){
@@ -658,40 +660,42 @@ String String_map(String str, Func fn){
   int n = String_len(str), done = 0;
   String string = String_malloc(n + 1);
   {
-  _x2c_defer_env_1 _x2c_defer_env_7 = {._x2c_defer_capture_2 =(const void *) & done, ._x2c_defer_capture_3 =(const void *) & string};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    char * out = string;
-    const char * src = str;
-    for(int i = 0;  i < n;  i ++){
-      char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
-      if(! ch){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 850};
-        x2c_error_raise_n(& _x2c_error_site_4, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
-        __builtin_unreachable();
-      }
-      out[i] = ch;
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_2 =(const void *) & done, ._x2c_defer_capture_3 =(const void *) & string
     }
-    String result = _finish(string, n);
-    done = 1;
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      String _x2c_return_value_1 = result;
+      char * out = string;
+      const char * src = str;
+      for(int i = 0;  i < n;  i ++){
+        char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
+        if(! ch){
+          static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 850};
+          x2c_error_raise_n(& _x2c_error_site_4, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
+          __builtin_unreachable();
+        }
+        out[i] = ch;
+      }
+      String result = _finish(string, n);
+      done = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_1;
+        String _x2c_return_value_1 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 String String_keep(String str, String chars){
@@ -702,31 +706,33 @@ String String_keep(String str, String chars){
   String _x2c_macro_string_4 = String_malloc(_x2c_macro_length_4 + 1);
   int _x2c_macro_done_1 = 0;
   {
-  _x2c_defer_env_2 _x2c_defer_env_8 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_done_1, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_string_4};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_8
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    char * _x2c_macro_dst_1 = _x2c_macro_string_4;
-    for(int i = 0;  i < _x2c_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_1 ++ = String_getindex(str, i);
-    String _x2c_macro_result_1 = _finish(_x2c_macro_string_4, (int)(_x2c_macro_dst_1 - _x2c_macro_string_4));
-    _x2c_macro_done_1 = 1;
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_4 =(const void *) & _x2c_macro_done_1, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_string_4
+    }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      String _x2c_return_value_2 = _x2c_macro_result_1;
+      char * _x2c_macro_dst_1 = _x2c_macro_string_4;
+      for(int i = 0;  i < _x2c_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_1 ++ = String_getindex(str, i);
+      String _x2c_macro_result_1 = _finish(_x2c_macro_string_4, (int)(_x2c_macro_dst_1 - _x2c_macro_string_4));
+      _x2c_macro_done_1 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_2;
+        String _x2c_return_value_2 = _x2c_macro_result_1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 String String_reject(String str, String chars){
@@ -735,31 +741,33 @@ String String_reject(String str, String chars){
   String _x2c_macro_string_5 = String_malloc(_x2c_macro_length_5 + 1);
   int _x2c_macro_done_2 = 0;
   {
-  _x2c_defer_env_3 _x2c_defer_env_9 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_done_2, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_string_5};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_9
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    char * _x2c_macro_dst_2 = _x2c_macro_string_5;
-    for(int i = 0;  i < _x2c_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_2 ++ = String_getindex(str, i);
-    String _x2c_macro_result_2 = _finish(_x2c_macro_string_5, (int)(_x2c_macro_dst_2 - _x2c_macro_string_5));
-    _x2c_macro_done_2 = 1;
+    _x2c_defer_env_6 _x2c_defer_env_7 ={
+      ._x2c_defer_capture_6 =(const void *) & _x2c_macro_done_2, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_string_5
+    }
+    ;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      String _x2c_return_value_3 = _x2c_macro_result_2;
+      char * _x2c_macro_dst_2 = _x2c_macro_string_5;
+      for(int i = 0;  i < _x2c_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_2 ++ = String_getindex(str, i);
+      String _x2c_macro_result_2 = _finish(_x2c_macro_string_5, (int)(_x2c_macro_dst_2 - _x2c_macro_string_5));
+      _x2c_macro_done_2 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-        return _x2c_return_value_3;
+        String _x2c_return_value_3 = _x2c_macro_result_2;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_3;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 String String_squeeze(String str, String chars){
@@ -768,31 +776,33 @@ String String_squeeze(String str, String chars){
   String _x2c_macro_string_6 = String_malloc(_x2c_macro_length_6 + 1);
   int _x2c_macro_done_3 = 0;
   {
-  _x2c_defer_env_4 _x2c_defer_env_10 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_done_3, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_string_6};
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_10
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
-    char * _x2c_macro_dst_3 = _x2c_macro_string_6;
-    for(int i = 0;  i < _x2c_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_macro_dst_3 ++ = String_getindex(str, i);
-    String _x2c_macro_result_3 = _finish(_x2c_macro_string_6, (int)(_x2c_macro_dst_3 - _x2c_macro_string_6));
-    _x2c_macro_done_3 = 1;
+    _x2c_defer_env_8 _x2c_defer_env_9 ={
+      ._x2c_defer_capture_8 =(const void *) & _x2c_macro_done_3, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_string_6
+    }
+    ;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_defer_env_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
     {
-      String _x2c_return_value_4 = _x2c_macro_result_3;
+      char * _x2c_macro_dst_3 = _x2c_macro_string_6;
+      for(int i = 0;  i < _x2c_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_macro_dst_3 ++ = String_getindex(str, i);
+      String _x2c_macro_result_3 = _finish(_x2c_macro_string_6, (int)(_x2c_macro_dst_3 - _x2c_macro_string_6));
+      _x2c_macro_done_3 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_4);
-        return _x2c_return_value_4;
+        String _x2c_return_value_4 = _x2c_macro_result_3;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_4);
+          return _x2c_return_value_4;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_4);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
 }
 
 static String _pad(String str, int width, char fill, int left_padding){
@@ -1002,45 +1012,54 @@ static Var _format_convert(Var value, Symbol target, int offset){
   Var volatile converted =((void) 0, Void);
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[1];
     Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) converted = Var_convert(value, target);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-       {Var code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
-      List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
-      {
-        List cause = cons(code, details);
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_0);
+    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) converted = Var_convert(value, target);
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_0);
         {
-          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_format_convert",.line = 1163};
-          x2c_error_raise_n(& _x2c_error_site_8, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("value conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
-          __builtin_unreachable();
+          Var volatile code;
+          code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+          List volatile details;
+          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+          {
+            List cause = cons(code, details);
+            {
+              static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_format_convert",.line = 1163};
+              x2c_error_raise_n(& _x2c_error_site_8, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("value conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
+              __builtin_unreachable();
+            }
+
+          }
+
         }
 
       }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
 
     }
-
-  }
-  else{
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
   }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-return converted;
+  return converted;
 }
 
 String Var_str(Var);
@@ -1049,45 +1068,54 @@ static String _format_string(Var value, int offset){
   String volatile converted = NULL;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_catch_arms_1[1];
-    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_1[1];
     Var _x2c_catch_patterns_1[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL));
-    _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
-  }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) converted = Var_str(value);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      x2c_error_catch_detach(_x2c_error_handler_1);
-      x2c_exception_mark_handled(&_x2c_exception_frame_1);
-       {Var code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
-      List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
-      {
-        List cause = cons(code, details);
+    ErrorCatchSite static _x2c_catch_site_1 ={
+      _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_1)){
+      _x2c_catch_patterns_1[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_catch_site_1, _x2c_catch_patterns_1);
+    x2c_exception_push(& _x2c_exception_frame_1);
+    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) converted = Var_str(value);
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_1);
+        x2c_exception_mark_handled(& _x2c_exception_frame_1);
         {
-          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "_format_string",.line = 1174};
-          x2c_error_raise_n(& _x2c_error_site_9, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("string conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
-          __builtin_unreachable();
+          Var volatile code;
+          code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
+          List volatile details;
+          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
+          {
+            List cause = cons(code, details);
+            {
+              static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "_format_string",.line = 1174};
+              x2c_error_raise_n(& _x2c_error_site_9, 435316840, 3, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("string conversion failed")), NULL))), Symbol_var(6401226), List_var(cause));
+              __builtin_unreachable();
+            }
+
+          }
+
         }
 
       }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_1);
+        _x2c_error_handler_1 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_1);
+        __builtin_unreachable();
+      }
 
     }
-
-  }
-  else{
     x2c_error_catch_close(_x2c_error_handler_1);
     _x2c_error_handler_1 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_1);
-    __builtin_unreachable();
   }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_1);
-_x2c_error_handler_1 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
-}
-return converted;
+  return converted;
 }
 
 static int _format_decimal(String fmt, int length, int * cursor, String label){
@@ -1245,133 +1273,135 @@ String String_format(String fmt, List values){
   }
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_10 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_11
-  };
-  x2c_cleanup_push(&_x2c_defer_record_5);
-  {
-    int length = String_len(fmt), literal = 0, cursor = 0;
-    while(cursor < length){
-      if(String_getindex(fmt, cursor) != '%'){
-        cursor ++;
-        continue;
-      }
-      int offset = cursor;
-      Buffer_write_len(out, fmt + literal, (size_t)(cursor - literal));
-      cursor ++;
-      if(cursor == length) _format_error(offset, _10);
-      if(String_getindex(fmt, cursor) == '%'){
-        Buffer_write_char(out, '%');
-        cursor ++;
-        literal = cursor;
-        continue;
-      }
-      StringFormatSpec parsed ={
-        0
-      }
-      ;
-      for(; ; ){
-        switch(String_getindex(fmt, cursor)){
-          case '-' : parsed.flags |= STRING_FORMAT_LEFT;
-          break;
-          case '+' : parsed.flags |= STRING_FORMAT_PLUS;
-          break;
-          case ' ' : parsed.flags |= STRING_FORMAT_SPACE;
-          break;
-          case '#' : parsed.flags |= STRING_FORMAT_ALT;
-          break;
-          case '0' : parsed.flags |= STRING_FORMAT_ZERO;
-          break;
-          default: goto flags_done;
+    _x2c_defer_env_10 _x2c_defer_env_11 ={
+      ._x2c_defer_capture_10 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_5 ={
+      .fn = _x2c_defer_cleanup_5, .env = & _x2c_defer_env_11
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_5);
+    {
+      int length = String_len(fmt), literal = 0, cursor = 0;
+      while(cursor < length){
+        if(String_getindex(fmt, cursor) != '%'){
+          cursor ++;
+          continue;
         }
-        if(++ cursor == length) _format_error(offset, _10);
-      }
-      flags_done : if(String_getindex(fmt, cursor) == '*'){
-        int width = _format_star(&(values), offset);
-        if(width == INT_MIN) _format_error(offset, _11);
-        if(width < 0){
-          parsed.flags |= STRING_FORMAT_LEFT;
-          width = - width;
-        }
-        parsed.has_width = 1;
-        parsed.width = width;
-        cursor ++;
-      }
-      else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9'){
-        parsed.has_width = 1;
-        parsed.width = _format_decimal(fmt, length, &(cursor), _12);
-      }
-      if(cursor < length && String_getindex(fmt, cursor) == '.'){
-        parsed.has_precision = 1;
+        int offset = cursor;
+        Buffer_write_len(out, fmt + literal, (size_t)(cursor - literal));
         cursor ++;
         if(cursor == length) _format_error(offset, _10);
-        if(String_getindex(fmt, cursor) == '*'){
-          int precision = _format_star(&(values), offset);
-          if(precision < 0) parsed.has_precision = 0;
-          else parsed.precision = precision;
+        if(String_getindex(fmt, cursor) == '%'){
+          Buffer_write_char(out, '%');
+          cursor ++;
+          literal = cursor;
+          continue;
+        }
+        StringFormatSpec parsed ={
+          0
+        }
+        ;
+        for(; ; ){
+          switch(String_getindex(fmt, cursor)){
+            case '-' : parsed.flags |= STRING_FORMAT_LEFT;
+            break;
+            case '+' : parsed.flags |= STRING_FORMAT_PLUS;
+            break;
+            case ' ' : parsed.flags |= STRING_FORMAT_SPACE;
+            break;
+            case '#' : parsed.flags |= STRING_FORMAT_ALT;
+            break;
+            case '0' : parsed.flags |= STRING_FORMAT_ZERO;
+            break;
+            default: goto flags_done;
+          }
+          if(++ cursor == length) _format_error(offset, _10);
+        }
+        flags_done : if(String_getindex(fmt, cursor) == '*'){
+          int width = _format_star(&(values), offset);
+          if(width == INT_MIN) _format_error(offset, _11);
+          if(width < 0){
+            parsed.flags |= STRING_FORMAT_LEFT;
+            width = - width;
+          }
+          parsed.has_width = 1;
+          parsed.width = width;
           cursor ++;
         }
-        else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9') parsed.precision = _format_decimal(fmt, length, &(cursor), _13);
-      }
-      if(cursor == length) _format_error(offset, _10);
-      if(String_getindex(fmt, cursor) == 'h'){
-        parsed.length = STRING_FORMAT_H;
-        if(++ cursor < length && String_getindex(fmt, cursor) == 'h'){
-          parsed.length = STRING_FORMAT_HH;
-          cursor ++;
+        else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9'){
+          parsed.has_width = 1;
+          parsed.width = _format_decimal(fmt, length, &(cursor), _12);
         }
+        if(cursor < length && String_getindex(fmt, cursor) == '.'){
+          parsed.has_precision = 1;
+          cursor ++;
+          if(cursor == length) _format_error(offset, _10);
+          if(String_getindex(fmt, cursor) == '*'){
+            int precision = _format_star(&(values), offset);
+            if(precision < 0) parsed.has_precision = 0;
+            else parsed.precision = precision;
+            cursor ++;
+          }
+          else if(String_getindex(fmt, cursor) >= '0' && String_getindex(fmt, cursor) <= '9') parsed.precision = _format_decimal(fmt, length, &(cursor), _13);
+        }
+        if(cursor == length) _format_error(offset, _10);
+        if(String_getindex(fmt, cursor) == 'h'){
+          parsed.length = STRING_FORMAT_H;
+          if(++ cursor < length && String_getindex(fmt, cursor) == 'h'){
+            parsed.length = STRING_FORMAT_HH;
+            cursor ++;
+          }
 
-      }
-      else if(String_getindex(fmt, cursor) == 'l'){
-        parsed.length = STRING_FORMAT_L;
-        if(++ cursor < length && String_getindex(fmt, cursor) == 'l'){
-          parsed.length = STRING_FORMAT_LL;
+        }
+        else if(String_getindex(fmt, cursor) == 'l'){
+          parsed.length = STRING_FORMAT_L;
+          if(++ cursor < length && String_getindex(fmt, cursor) == 'l'){
+            parsed.length = STRING_FORMAT_LL;
+            cursor ++;
+          }
+
+        }
+        else if(String_getindex(fmt, cursor) == 'L'){
+          parsed.length = STRING_FORMAT_CAP_L;
           cursor ++;
         }
-
+        else if(String_getindex(fmt, cursor) == 'j' || String_getindex(fmt, cursor) == 'z' || String_getindex(fmt, cursor) == 't') _format_error(offset, _14);
+        if(cursor == length) _format_error(offset, _10);
+        parsed.conversion = String_getindex(fmt, cursor ++);
+        int integer = strchr("diouxX", parsed.conversion) != NULL;
+        int floating = strchr("fFeEgGaA", parsed.conversion) != NULL;
+        if(parsed.conversion == '$') _format_error(offset, _15);
+        if(! integer && ! floating && parsed.conversion != 'c' && parsed.conversion != 's') _format_error(offset, _8);
+        if(integer && parsed.length == STRING_FORMAT_CAP_L) _format_error(offset, _16);
+        if(floating && parsed.length != 0 && parsed.length != STRING_FORMAT_L && parsed.length != STRING_FORMAT_CAP_L) _format_error(offset, _17);
+        if((parsed.conversion == 'c' || parsed.conversion == 's') && parsed.length) _format_error(offset, _18);
+        if((parsed.conversion == 'c' || parsed.conversion == 's') &&(parsed.flags & ~ STRING_FORMAT_LEFT)) _format_error(offset, _19);
+        if(parsed.conversion == 'c' && parsed.has_precision) _format_error(offset, _20);
+        if(! List_truth(values)) _format_error(offset, _21);
+        Var value = List_car(values);
+        values = List_cdr(values);
+        char spec[48];
+        _format_specifier(spec, parsed);
+        _format_value(out, spec, parsed, value, offset);
+        literal = cursor;
       }
-      else if(String_getindex(fmt, cursor) == 'L'){
-        parsed.length = STRING_FORMAT_CAP_L;
-        cursor ++;
-      }
-      else if(String_getindex(fmt, cursor) == 'j' || String_getindex(fmt, cursor) == 'z' || String_getindex(fmt, cursor) == 't') _format_error(offset, _14);
-      if(cursor == length) _format_error(offset, _10);
-      parsed.conversion = String_getindex(fmt, cursor ++);
-      int integer = strchr("diouxX", parsed.conversion) != NULL;
-      int floating = strchr("fFeEgGaA", parsed.conversion) != NULL;
-      if(parsed.conversion == '$') _format_error(offset, _15);
-      if(! integer && ! floating && parsed.conversion != 'c' && parsed.conversion != 's') _format_error(offset, _8);
-      if(integer && parsed.length == STRING_FORMAT_CAP_L) _format_error(offset, _16);
-      if(floating && parsed.length != 0 && parsed.length != STRING_FORMAT_L && parsed.length != STRING_FORMAT_CAP_L) _format_error(offset, _17);
-      if((parsed.conversion == 'c' || parsed.conversion == 's') && parsed.length) _format_error(offset, _18);
-      if((parsed.conversion == 'c' || parsed.conversion == 's') &&(parsed.flags & ~ STRING_FORMAT_LEFT)) _format_error(offset, _19);
-      if(parsed.conversion == 'c' && parsed.has_precision) _format_error(offset, _20);
-      if(! List_truth(values)) _format_error(offset, _21);
-      Var value = List_car(values);
-      values = List_cdr(values);
-      char spec[48];
-      _format_specifier(spec, parsed);
-      _format_value(out, spec, parsed, value, offset);
-      literal = cursor;
-    }
-    Buffer_write_len(out, fmt + literal, (size_t)(length - literal));
-    if(List_truth(values)) _format_error(length, _9);
-    {
-      String _x2c_return_value_5 = Buffer_str(out);
+      Buffer_write_len(out, fmt + literal, (size_t)(length - literal));
+      if(List_truth(values)) _format_error(length, _9);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_5);
-        return _x2c_return_value_5;
+        String _x2c_return_value_5 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          return _x2c_return_value_5;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_5);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-}
 }
 
 static inline int _hex_digit(int ch){
@@ -1677,29 +1707,29 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2)) String_free((*(String *) _x2c_defer_data_1->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   if(!(*(int *) _x2c_defer_data_2->_x2c_defer_capture_4)) String_free((*(String *) _x2c_defer_data_2->_x2c_defer_capture_5));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_6)) String_free((*(String *) _x2c_defer_data_3->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  _x2c_defer_env_8 * _x2c_defer_data_4 =(_x2c_defer_env_8 *) _x2c_defer_opaque_4;
   if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_8)) String_free((*(String *) _x2c_defer_data_4->_x2c_defer_capture_9));
 }
 
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
+  _x2c_defer_env_10 * _x2c_defer_data_5 =(_x2c_defer_env_10 *) _x2c_defer_opaque_5;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_10));
 }
 

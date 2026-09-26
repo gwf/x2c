@@ -150,9 +150,14 @@ parameters and more parameters than the machine frame supports remain
 interpreted. Prepared calls use bounded frame, local, and operand storage;
 when a call cannot fit, it crosses to recursive evaluation. A lowered self
 call in tail position can reuse its frame when the runtime callee still
-matches. Other recursion, including recursion inside an interpreted form,
-can consume native stack. AUTO therefore does not prepare every Lambda or
-promise unbounded recursion.
+matches. Hand-written Lisp evaluator Lambdas also reuse the current frame for
+a direct Lambda call in the body result, a selected `cond` result, or a macro
+expansion in that position. This includes mutual calls and dotted rest parameters. The
+arguments still evaluate from left to right before the next activation.
+Lowered source functions and speculative AUTO expansion retain ordinary
+nesting. Non-tail evaluator calls retain the 1,024-call depth limit; tail
+calls still spend the entry's call budget. AUTO therefore does not prepare
+every Lambda or promise unbounded recursion.
 
 ## The showcase and comparison
 

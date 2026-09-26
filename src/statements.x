@@ -244,7 +244,8 @@ static List _default_statement(Compiler compiler) {
    ways a pattern can name one it does not reliably bind. `role` is the keyword
    the diagnostics name. */
 static void _define_pattern_binders(
-  Compiler compiler, List pattern, Token start, String role) {
+  Compiler compiler, List pattern, Token start, String role,
+  List &?bindings) {
   List possible = NULL;
   List definite = compiler.match_pattern_binders(pattern, possible);
   foreach (Var binder, possible) {
@@ -262,7 +263,8 @@ static void _define_pattern_binders(
         start, %( "binder:" $name "use either '?' or '*' consistently"));
     }
   }
-  compiler.define_match_binders(pattern);
+  if (bindings) bindings = compiler.define_catch_binders(pattern);
+  else compiler.define_match_binders(pattern);
 }
 
 /** Opens a `Sym` scope for one match arm and optionally defines its definite
@@ -272,16 +274,20 @@ static void _define_pattern_binders(
 void Compiler.begin_match_arm(
   Compiler compiler, List pattern, Token start, int binds) {
   compiler.sym.push_new_scope();
-  if (binds) _define_pattern_binders(compiler, pattern, start, "match");
+  if (binds) _define_pattern_binders(compiler, pattern, start, "match", NULL);
 }
 
 /** Opens a `Sym` scope for one catch arm and defines a nonempty filter's
-    definite pattern binders. The caller must pop the scope after parsing or
-    binding the arm body; binder diagnostics use `start`.
+    definite pattern binders. Returns their capture-token/binding pairs.
+    The caller must pop the scope after parsing or binding the arm body;
+    binder diagnostics use `start`.
 */
-void Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start) {
+List Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start) {
   compiler.sym.push_new_scope();
-  if (pattern) _define_pattern_binders(compiler, pattern, start, "catch");
+  List bindings = NULL;
+  if (pattern)
+    _define_pattern_binders(compiler, pattern, start, "catch", bindings);
+  return bindings;
 }
 
 static List _match_capture_declaration(
@@ -434,7 +440,7 @@ static List _block_completion_keywords(void) => %(
   "match" "switch" "default" "with"
 );
 
-static List _filtered_catch_arm(Compiler c, int &is_default) {
+static List _filtered_catch_arm(Compiler c, int &is_default, List handle) {
   Token start = c.token;
   List pattern = NULL;
   if (c.test(<:>)) is_default = 1;
@@ -446,20 +452,22 @@ static List _filtered_catch_arm(Compiler c, int &is_default) {
     pattern = c.parse_catch_pattern_literal();
     c.expect(<:>);
   }
-  c.begin_catch_arm(pattern, start);
+  List bindings = c.begin_catch_arm(pattern, start);
   List body = c.parse_governed(AST_STATEMENT);
   c.__complete_here(<continue>, %("catch" "finally"));
   if (c.peek(0) == <catch> || c.peek(0) == <finally>)
     body = _continued(c, body);
   c.sym.pop_scope();
-  return %($pattern $body);
+  return %($pattern (block
+    @{c.catch_binder_declarations(bindings, handle)} $body));
 }
 
 static List _filtered_catches(Compiler compiler) {
+  List handle = compiler.sym.introduce(compiler.fresh_name("error_handler"));
   Array arms = [], int saw_default = 0;
   loop {
     int is_default = 0;
-    List arm = _filtered_catch_arm(compiler, is_default);
+    List arm = _filtered_catch_arm(compiler, is_default, handle);
     arms.push(arm);
     if (is_default) saw_default = 1;
     if (!compiler.test(<catch>)) break;
@@ -468,7 +476,7 @@ static List _filtered_catches(Compiler compiler) {
         <parse>, "catch default arm must be last",
         compiler.token, %("move catch: after every filtered arm"));
   }
-  return %(catchcases ${arms.list_free()});
+  return %(catchcases ${arms.list_free()} $handle);
 }
 
 static List _try_statement(Compiler c) {

@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include <stdio.h>
 #include <math.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.forward()
 static double scale(double a, int k) => a * (double) k;

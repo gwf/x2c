@@ -85,12 +85,10 @@ int main(void){
     c = List_getindex(_x2c_destructure_4, 0);
   }
   List source = values();
-  List result =({List _x2c_destructure_result_0 = source;
-  List _x2c_destructure_5 = _x2c_destructure_result_0;
-  a = List_getindex(_x2c_destructure_5, 0);
-  b = List_getindex(_x2c_destructure_5, 1);
-  _x2c_destructure_result_0;
-  });
+  List result =({
+    List _x2c_destructure_result_0 = source;  List _x2c_destructure_5 = _x2c_destructure_result_0;  a = List_getindex(_x2c_destructure_5, 0);  b = List_getindex(_x2c_destructure_5, 1);  _x2c_destructure_result_0;
+  }
+  );
   printf("%ld %ld %ld %d %d %d %.1f %c %ld %d %d %d\n", Var_integer(a), Var_integer(b), Var_integer(c), x, y, mixed_i, mixed_x, mixed_c, Var_integer(first), Var_is_void(missing), result == source, calls);
   return user_destructure_0 == 9 && calls == 4 ? 0 : 1;
 }

@@ -101,42 +101,42 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_2;
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-typedef struct _x2c_defer_env_3{
+typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_3;
   const void * _x2c_defer_capture_4;
   const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
 }
-_x2c_defer_env_3;
+_x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
-typedef struct _x2c_defer_env_4{
+typedef struct _x2c_defer_env_7{
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
 }
-_x2c_defer_env_4;
+_x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_10;
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_9;
 }
-_x2c_defer_env_5;
+_x2c_defer_env_8;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
@@ -227,28 +227,30 @@ String Job_str(Job value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    Job_write_str(value, out);
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      String _x2c_return_value_0 = Buffer_str(out);
+      Job_write_str(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
+        String _x2c_return_value_0 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int RenderPath_enter(RenderPath *, const void *);
@@ -271,97 +273,101 @@ Buffer Job_write_repr(Job value, Buffer out){
   RenderPath path;
   if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _1, (long) value);
   {
-  _x2c_defer_env_1 _x2c_defer_env_7 = {._x2c_defer_capture_1 =(const void *) & path};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    Buffer_write(out, _2);
-    Buffer_write(out, _3);
-    List_write_repr(value -> stages, out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _5);
-    Buffer_printf(out, _6, (long) value -> launch);
-    Buffer_write(out, _4);
-    Buffer_write(out, _7);
-    Buffer_printf(out, _6, (long) value -> pids);
-    Buffer_write(out, _4);
-    Buffer_write(out, _8);
-    Buffer_printf(out, _6, (long) value -> statuses);
-    Buffer_write(out, _4);
-    Buffer_write(out, _9);
-    Var_write_repr(int_var(value -> count), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _10);
-    Var_write_repr(int_var(value -> started), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _11);
-    Var_write_repr(int_var(value -> finished), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _12);
-    Var_write_repr(int_var(value -> status), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _13);
-    Var_write_repr(int_var(value -> nul_output), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _14);
-    Var_write_repr(int_var(value -> nul_errors), out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _15);
-    File_write_repr(value -> output_file, out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _16);
-    File_write_repr(value -> errors_file, out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _17);
-    String_write_repr(value -> output_text, out);
-    Buffer_write(out, _4);
-    Buffer_write(out, _18);
-    String_write_repr(value -> errors_text, out);
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_1 =(const void *) & path
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer _x2c_return_value_1 = Buffer_write(out, _19);
+      Buffer_write(out, _2);
+      Buffer_write(out, _3);
+      List_write_repr(value -> stages, out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _5);
+      Buffer_printf(out, _6, (long) value -> launch);
+      Buffer_write(out, _4);
+      Buffer_write(out, _7);
+      Buffer_printf(out, _6, (long) value -> pids);
+      Buffer_write(out, _4);
+      Buffer_write(out, _8);
+      Buffer_printf(out, _6, (long) value -> statuses);
+      Buffer_write(out, _4);
+      Buffer_write(out, _9);
+      Var_write_repr(int_var(value -> count), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _10);
+      Var_write_repr(int_var(value -> started), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _11);
+      Var_write_repr(int_var(value -> finished), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _12);
+      Var_write_repr(int_var(value -> status), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _13);
+      Var_write_repr(int_var(value -> nul_output), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _14);
+      Var_write_repr(int_var(value -> nul_errors), out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _15);
+      File_write_repr(value -> output_file, out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _16);
+      File_write_repr(value -> errors_file, out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _17);
+      String_write_repr(value -> output_text, out);
+      Buffer_write(out, _4);
+      Buffer_write(out, _18);
+      String_write_repr(value -> errors_text, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_1;
+        Buffer _x2c_return_value_1 = Buffer_write(out, _19);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 String Job_repr(Job value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_2 _x2c_defer_env_8 = {._x2c_defer_capture_2 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_8
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    Job_write_repr(value, out);
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      String _x2c_return_value_2 = Buffer_str(out);
+      Job_write_repr(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_2;
+        String _x2c_return_value_2 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 static int _decoded_status(int status){
@@ -641,120 +647,127 @@ static void Job__start(Job job){
   for(int i = 0;  i < job -> count;  i ++) job -> statuses[i] = 127;
   int previous = - 1, output = - 1, errors = - 1, launched = 0;
   {
-  _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_7 =(const void *) & launched, ._x2c_defer_capture_8 =(const void *) & job};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_9
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
+    _x2c_defer_env_7 _x2c_defer_env_11 ={
+      ._x2c_defer_capture_7 =(const void *) & launched, ._x2c_defer_capture_8 =(const void *) & job
+    }
+    ;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_defer_env_11
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-  _x2c_defer_env_3 _x2c_defer_env_10 = {._x2c_defer_capture_3 =(const void *) & previous, ._x2c_defer_capture_4 =(const void *) & job, ._x2c_defer_capture_5 =(const void *) & output, ._x2c_defer_capture_6 =(const void *) & errors};
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_10
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
-      if(launch -> has_input){
-        File file = _capture_file();
-        {
-  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_10 =(const void *) & file};
-
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_11
-  };
-  x2c_cleanup_push(&_x2c_defer_record_5);
-  {
-          File_write_all(file, launch -> input, String_len(launch -> input));
-          File_rewind(file);
-          previous = dup(File_fileno(file));
-          _close_on_exec(previous);
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_5);
-
-}
-      }
-      if(launch -> capture_output){
-        job -> output_file = _capture_file();
-        output = File_fileno(job -> output_file);
-      }
-      else if(String_truth(launch -> stdout_path)) output = _open_output(launch -> stdout_path);
-      if(launch -> capture_errors){
-        job -> errors_file = _capture_file();
-        errors = File_fileno(job -> errors_file);
-      }
-      else if(String_truth(launch -> stderr_path)) errors = _open_output(launch -> stderr_path);
-      fflush(NULL);
-      int index = 0, last = job -> count - 1;
       {
-        List stage;
-        List _x2c_macro_object_4 = job -> stages;
-        List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-        Var _x2c_macro_cursor_output_4;
-        while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-          stage = Var_list(_x2c_macro_cursor_output_4);
-          {
-            int link[2] ={
-              - 1, - 1
-            }
-            ;
-            if(index < last) _pipe(link);
-            int volatile spawned = 0;
+        _x2c_defer_env_6 _x2c_defer_env_10 ={
+          ._x2c_defer_capture_3 =(const void *) & previous, ._x2c_defer_capture_4 =(const void *) & job, ._x2c_defer_capture_5 =(const void *) & output, ._x2c_defer_capture_6 =(const void *) & errors
+        }
+        ;
+        X2CCleanup _x2c_defer_record_4 ={
+          .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_10
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_4);
+        {
+          if(launch -> has_input){
+            File file = _capture_file();
             {
+              _x2c_defer_env_8 _x2c_defer_env_9 ={
+                ._x2c_defer_capture_9 =(const void *) & file
+              }
+              ;
+              X2CCleanup _x2c_defer_record_5 ={
+                .fn = _x2c_defer_cleanup_5, .env = & _x2c_defer_env_9
+              }
+              ;
+              x2c_cleanup_push(& _x2c_defer_record_5);
               {
-                ExceptionFrame _x2c_exception_frame_0;
-                x2c_exception_push(& _x2c_exception_frame_0);
-                if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-                  Job__spawn(job, index, stage, previous, index < last ? link[1] : output, errors);
-                  spawned = 1;
-                }
-                else {x2c_exception_landed(& _x2c_exception_frame_0);
-                {
-                  if(x2c_exception_claim(& _x2c_exception_frame_0)){
-                    if(! spawned){
-                      _close(link[0]);
-                      _close(link[1]);
-                    }
-
-                  }
-                  x2c_exception_leave(& _x2c_exception_frame_0);
-                  __builtin_unreachable();
-                }
-
+                File_write_all(file, launch -> input, String_len(launch -> input));
+                File_rewind(file);
+                previous = dup(File_fileno(file));
+                _close_on_exec(previous);
               }
-              if(x2c_exception_claim(& _x2c_exception_frame_0)){
-                if(! spawned){
-                  _close(link[0]);
-                  _close(link[1]);
-                }
-
-              }
-              x2c_exception_leave(& _x2c_exception_frame_0);
+              x2c_cleanup_leave(& _x2c_defer_record_5);
             }
 
           }
-          _close(link[1]);
-          _close(previous);
-          previous = link[0];
-          index ++;
-        }
+          if(launch -> capture_output){
+            job -> output_file = _capture_file();
+            output = File_fileno(job -> output_file);
+          }
+          else if(String_truth(launch -> stdout_path)) output = _open_output(launch -> stdout_path);
+          if(launch -> capture_errors){
+            job -> errors_file = _capture_file();
+            errors = File_fileno(job -> errors_file);
+          }
+          else if(String_truth(launch -> stderr_path)) errors = _open_output(launch -> stderr_path);
+          fflush(NULL);
+          int index = 0, last = job -> count - 1;
+          {
+            List stage;
+            List _x2c_macro_object_4 = job -> stages;
+            List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+            Var _x2c_macro_cursor_output_4;
+            while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+              stage = Var_list(_x2c_macro_cursor_output_4);
+              {
+                int link[2] ={
+                  - 1, - 1
+                }
+                ;
+                if(index < last) _pipe(link);
+                int volatile spawned = 0;
+                {
+                  {
+                    ExceptionFrame _x2c_exception_frame_0;
+                    x2c_exception_push(& _x2c_exception_frame_0);
+                    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+                      Job__spawn(job, index, stage, previous, index < last ? link[1] : output, errors);
+                      spawned = 1;
+                    }
+                    else{
+                      x2c_exception_landed(& _x2c_exception_frame_0);
+                      {
+                        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                          if(! spawned){
+                            _close(link[0]);
+                            _close(link[1]);
+                          }
 
+                        }
+                        x2c_exception_leave(& _x2c_exception_frame_0);
+                        __builtin_unreachable();
+                      }
+
+                    }
+                    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                      if(! spawned){
+                        _close(link[0]);
+                        _close(link[1]);
+                      }
+
+                    }
+                    x2c_exception_leave(& _x2c_exception_frame_0);
+                  }
+
+                }
+                _close(link[1]);
+                _close(previous);
+                previous = link[0];
+                index ++;
+              }
+
+            }
+
+          }
+          launched = 1;
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_4);
       }
 
     }
-    launched = 1;
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
-}
-x2c_cleanup_leave(& _x2c_defer_record_3);
-
-}
 }
 
 static void Job__reap(Job job, int index, int flags){
@@ -776,34 +789,41 @@ static String _captured(File file, int * nul){
   String volatile text = NULL;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    MatchCaptureSite static _x2c_catch_arms_0[1];
     Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = File_string_close(file);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_1);
-       {(* nul) = 1;
+    ErrorCatchSite static _x2c_catch_site_0 ={
+      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
     }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    x2c_exception_push(& _x2c_exception_frame_1);
+    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) text = File_string_close(file);
+    else{
+      x2c_exception_landed(& _x2c_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_exception_frame_1);
+        {
+          (* nul) = 1;
+        }
 
-  }
-  else{
+      }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_1);
+        __builtin_unreachable();
+      }
+
+    }
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_1);
-    __builtin_unreachable();
   }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
-}
-return text;
+  return text;
 }
 
 static int Job__running(Job job){
@@ -1096,17 +1116,17 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   {
     _close((*(int *) _x2c_defer_data_3->_x2c_defer_capture_3));
     if(!(*(Job *) _x2c_defer_data_3->_x2c_defer_capture_4) -> output_file) _close((*(int *) _x2c_defer_data_3->_x2c_defer_capture_5));
@@ -1116,14 +1136,14 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  _x2c_defer_env_7 * _x2c_defer_data_4 =(_x2c_defer_env_7 *) _x2c_defer_opaque_4;
   if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_7)) Job_cleanup((*(Job *) _x2c_defer_data_4->_x2c_defer_capture_8));
 }
 
 void File_cleanup(File);
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  File_cleanup((*(File *) _x2c_defer_data_5->_x2c_defer_capture_10));
+  _x2c_defer_env_8 * _x2c_defer_data_5 =(_x2c_defer_env_8 *) _x2c_defer_opaque_5;
+  File_cleanup((*(File *) _x2c_defer_data_5->_x2c_defer_capture_9));
 }
 

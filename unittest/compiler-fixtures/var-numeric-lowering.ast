@@ -402,9 +402,11 @@
                         (literal ("Symbol") "invariant" invariant))))) 
           (nil)))) 
        (block 
-        (at 71 
-         (stmnt 
-          (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))))) 
+        (block 
+         (at 71 
+          (stmnt 
+           (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))))) 
+     (binding 55 "_x2c_error_handler_0")) 
     (block 
      (at 72 
       (stmnt 
@@ -412,30 +414,30 @@
   (at 74 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 55 "printf"))) 
+     (call (expr () (ident (binding 56 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"ops=%ld,%ld,%ld,%ld,%.1f converted=%.1f\\n\"")) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 56 "Var_long"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_long"))) 
          (args (expr ("Var") (ident (binding 20 "sum")))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 56 "Var_long"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_long"))) 
          (args (expr ("Var") (ident (binding 21 "product")))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 56 "Var_long"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_long"))) 
          (args (expr ("Var") (ident (binding 22 "shifted")))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 56 "Var_long"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_long"))) 
          (args (expr ("Var") (ident (binding 23 "bits")))))) 
        (expr (double) 
         (call (expr ((func (("Var"))) (double)) 
-               (ident (binding 57 "Var_double"))) 
+               (ident (binding 58 "Var_double"))) 
          (args (expr ("Var") (ident (binding 24 "quotient")))))) 
        (expr (double) (ident (binding 25 "converted")))))))) 
   (at 75 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 55 "printf"))) 
+     (call (expr () (ident (binding 56 "printf"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"compound=%d,%d,%d,%ld indexed=%d boxed=%d calls=%d,%d,%d\\n\"")) 
@@ -443,7 +445,7 @@
        (expr (int) (ident (binding 32 "compound_result"))) 
        (expr (signed char) (ident (binding 33 "signed_byte"))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 56 "Var_long"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_long"))) 
          (args (expr ("Var") (ident (binding 34 "dynamic")))))) 
        (expr (int) 
         (index (expr ((dim) int) (ident (binding 35 "values"))) 
@@ -456,7 +458,7 @@
   (at 76 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 55 "printf"))) 
+     (call (expr () (ident (binding 56 "printf"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"truth=%d,%d,%d,%d,%d branch=%d preserved=%d skipped=%d\\n\"")) 
@@ -471,18 +473,18 @@
   (at 77 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 55 "printf"))) 
+     (call (expr () (ident (binding 56 "printf"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"special=%d,%d,%d preserved-roots=%d,%d,%d,%d\\n\"")) 
        (expr () 
-        (call (expr () (ident (binding 58 "isinf"))) 
+        (call (expr () (ident (binding 59 "isinf"))) 
          (args (expr (double) (ident (binding 28 "converted_infinity")))))) 
        (expr () 
-        (call (expr () (ident (binding 59 "isnan"))) 
+        (call (expr () (ident (binding 60 "isnan"))) 
          (args (expr (double) (ident (binding 29 "converted_nan")))))) 
        (expr () 
-        (call (expr () (ident (binding 58 "isinf"))) 
+        (call (expr () (ident (binding 59 "isinf"))) 
          (args (expr (double) (ident (binding 30 "compound_infinity")))))) 
        (expr (int) 
         (op . (expr ("NumericBox") (ident (binding 50 "preserved_box"))) 

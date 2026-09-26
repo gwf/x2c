@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include "typed-array.x"
 #include <assert.h>
-$(import "autodiff.xmacro")
+import "autodiff";
 
 $ad.both()
 static double post_inc(double x) { x++; return x * x; }

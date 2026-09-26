@@ -124,29 +124,29 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_2;
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-typedef struct _x2c_defer_env_3{
+typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_3;
   const void * _x2c_defer_capture_4;
 }
-_x2c_defer_env_3;
+_x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
-typedef struct _x2c_defer_env_4{
+typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
   const void * _x2c_defer_capture_7;
@@ -156,7 +156,7 @@ typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_11;
   const void * _x2c_defer_capture_12;
 }
-_x2c_defer_env_4;
+_x2c_defer_env_8;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
@@ -286,28 +286,30 @@ String Tokenizer_str(Tokenizer value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_5
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    Tokenizer_write_str(value, out);
+    _x2c_defer_env_0 _x2c_defer_env_1 ={
+      ._x2c_defer_capture_0 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      String _x2c_return_value_0 = Buffer_str(out);
+      Tokenizer_write_str(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
+        String _x2c_return_value_0 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
 }
 
 int RenderPath_enter(RenderPath *, const void *);
@@ -328,82 +330,86 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
   RenderPath path;
   if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _35, (long) value);
   {
-  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & path};
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_6
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-    Buffer_write(out, _36);
-    Buffer_write(out, _37);
-    Buffer_printf(out, _38, (long) value -> tokens);
-    Buffer_write(out, _6);
-    Buffer_write(out, _39);
-    Buffer_printf(out, _38, (long) value -> text);
-    Buffer_write(out, _6);
-    Buffer_write(out, _40);
-    Array_write_repr(value -> modes, out);
-    Buffer_write(out, _6);
-    Buffer_write(out, _41);
-    Buffer_printf(out, _38, (long) value -> cursor);
-    Buffer_write(out, _6);
-    Buffer_write(out, _42);
-    Symbol_write_repr(value -> scan_status, out);
-    Buffer_write(out, _6);
-    Buffer_write(out, _43);
-    Var_write_repr(int_var(value -> line), out);
-    Buffer_write(out, _6);
-    Buffer_write(out, _44);
-    Var_write_repr(int_var(value -> col), out);
-    Buffer_write(out, _6);
-    Buffer_write(out, _45);
-    Var_write_repr(int_var(value -> pos), out);
-    Buffer_write(out, _6);
-    Buffer_write(out, _46);
-    Var_write_repr(int_var(value -> layout), out);
+    _x2c_defer_env_2 _x2c_defer_env_3 ={
+      ._x2c_defer_capture_1 =(const void *) & path
+    }
+    ;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer _x2c_return_value_1 = Buffer_write(out, _47);
+      Buffer_write(out, _36);
+      Buffer_write(out, _37);
+      Buffer_printf(out, _38, (long) value -> tokens);
+      Buffer_write(out, _6);
+      Buffer_write(out, _39);
+      Buffer_printf(out, _38, (long) value -> text);
+      Buffer_write(out, _6);
+      Buffer_write(out, _40);
+      Array_write_repr(value -> modes, out);
+      Buffer_write(out, _6);
+      Buffer_write(out, _41);
+      Buffer_printf(out, _38, (long) value -> cursor);
+      Buffer_write(out, _6);
+      Buffer_write(out, _42);
+      Symbol_write_repr(value -> scan_status, out);
+      Buffer_write(out, _6);
+      Buffer_write(out, _43);
+      Var_write_repr(int_var(value -> line), out);
+      Buffer_write(out, _6);
+      Buffer_write(out, _44);
+      Var_write_repr(int_var(value -> col), out);
+      Buffer_write(out, _6);
+      Buffer_write(out, _45);
+      Var_write_repr(int_var(value -> pos), out);
+      Buffer_write(out, _6);
+      Buffer_write(out, _46);
+      Var_write_repr(int_var(value -> layout), out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_1;
+        Buffer _x2c_return_value_1 = Buffer_write(out, _47);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-}
 }
 
 String Tokenizer_repr(Tokenizer value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
   {
-  _x2c_defer_env_2 _x2c_defer_env_7 = {._x2c_defer_capture_2 =(const void *) & out};
-
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_7
-  };
-  x2c_cleanup_push(&_x2c_defer_record_2);
-  {
-    Tokenizer_write_repr(value, out);
+    _x2c_defer_env_4 _x2c_defer_env_5 ={
+      ._x2c_defer_capture_2 =(const void *) & out
+    }
+    ;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      String _x2c_return_value_2 = Buffer_str(out);
+      Tokenizer_write_repr(value, out);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-        return _x2c_return_value_2;
+        String _x2c_return_value_2 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-}
 }
 
 unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
@@ -590,30 +596,32 @@ static int Tokenizer__operator(Tokenizer t, int len){
   if(push) Tokenizer__push_mode(t, push);
   int mode_committed = ! push;
   {
-  _x2c_defer_env_3 _x2c_defer_env_8 = {._x2c_defer_capture_3 =(const void *) & mode_committed, ._x2c_defer_capture_4 =(const void *) & t};
-
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_8
-  };
-  x2c_cleanup_push(&_x2c_defer_record_3);
-  {
-    Tokenizer_tokenize(t, token_len, token_type);
-    mode_committed = 1;
-    if(pop) Tokenizer__pop_mode(t);
+    _x2c_defer_env_6 _x2c_defer_env_7 ={
+      ._x2c_defer_capture_3 =(const void *) & mode_committed, ._x2c_defer_capture_4 =(const void *) & t
+    }
+    ;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      int _x2c_return_value_3 = 1;
+      Tokenizer_tokenize(t, token_len, token_type);
+      mode_committed = 1;
+      if(pop) Tokenizer__pop_mode(t);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_3);
-        return _x2c_return_value_3;
+        int _x2c_return_value_3 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_3;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-}
 }
 
 int scan_ascii_alpha(int);
@@ -980,128 +988,130 @@ static void Tokenizer__layout(Tokenizer t){
   String * closers = calloc(count + 2, sizeof(String));
   char * enums = calloc(count + 2, 1), * ternary = calloc(count + 1, 1);
   {
-  _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_5 =(const void *) & sig, ._x2c_defer_capture_6 =(const void *) & depths, ._x2c_defer_capture_7 =(const void *) & lines, ._x2c_defer_capture_8 =(const void *) & edits, ._x2c_defer_capture_9 =(const void *) & indents, ._x2c_defer_capture_10 =(const void *) & closers, ._x2c_defer_capture_11 =(const void *) & enums, ._x2c_defer_capture_12 =(const void *) & ternary};
-
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_9
-  };
-  x2c_cleanup_push(&_x2c_defer_record_4);
-  {
-    Token error_at = NULL;
-    for(int i = 0;  i < count;  i ++) if(all[i].type != 40896714 && all[i].type != 7477210024) sig[nsig ++] = & all[i];
-    int end_line = 0, pending = 0;
-    for(int k = 0;  k < nsig;  k ++){
-      Token tok = sig[k];
-      int directive = tok -> type == 35579270086;
-      if(directive || ! nlines || lines[nlines - 1].directive ||(depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _18) &&(tok -> col <= lines[nlines - 1].indent ||(String_equal(sig[k - 1] -> text, _20) && ! ternary[k - 1])))){
-        Token space = tok > all ? tok - 1 : NULL;
-        char * newline = space && space -> type == 40896714 ? strrchr(space -> text, '\n') : NULL;
-        if(! directive && newline && strchr(newline, '\t') && ! error_at) error_at = tok;
-        lines[nlines ++] =(_LayoutLine){
-          k, k, tok -> col, directive
-        }
-        ;
-        pending = 0;
-      }
-      lines[nlines - 1].last = k;
-      if(_closes(tok)) depth --;
-      depths[k] = depth;
-      if(! depth && String_equal(tok -> text, _21)) pending ++;
-      else if(! depth && String_equal(tok -> text, _20) && pending){
-        ternary[k] = 1;
-        pending --;
-      }
-      if(_opens(tok)) depth ++;
-      end_line = tok -> line;
-      for(char * c = tok -> text;  c && * c;  c ++) end_line += * c == '\n';
+    _x2c_defer_env_8 _x2c_defer_env_9 ={
+      ._x2c_defer_capture_5 =(const void *) & sig, ._x2c_defer_capture_6 =(const void *) & depths, ._x2c_defer_capture_7 =(const void *) & lines, ._x2c_defer_capture_8 =(const void *) & edits, ._x2c_defer_capture_9 =(const void *) & indents, ._x2c_defer_capture_10 =(const void *) & closers, ._x2c_defer_capture_11 =(const void *) & enums, ._x2c_defer_capture_12 =(const void *) & ternary
     }
-    int top = 0;
-    for(int i = 0;  i < nlines;  i ++){
-      _LayoutLine line = lines[i];
-      Token first = sig[line.first], last = sig[line.last];
-      if(line.directive){
-        if(String_equal(String_strip(first -> text, " \t\r\n"), _11)) edits[sig[line.first] - all].type = 7477210024;
-        continue;
-      }
-      if(! top && ! indents[0]) indents[0] = line.indent;
-      int j = i + 1;
-      while(j < nlines && lines[j].directive) j ++;
-      int next = j < nlines ? lines[j].indent : indents[0];
-      _LayoutEdit * tail = & edits[sig[line.last] - all];
-      String suffix = NULL;
-      if(String_equal(last -> text, _20) && ! ternary[line.last] && next > line.indent){
-        int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
-        for(int m = line.first;  m < line.last;  m ++){
-          String word = sig[m] -> text;
-          aggregate |= String_equal(word, _22) || String_equal(word, _23) || String_equal(word, _24);
-          enumeration |= String_equal(word, _24);
-          parameters |= sig[m] -> type == 81;
-          labeled |= ! depths[m] &&(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27));
+    ;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_defer_env_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
+    {
+      Token error_at = NULL;
+      for(int i = 0;  i < count;  i ++) if(all[i].type != 40896714 && all[i].type != 7477210024) sig[nsig ++] = & all[i];
+      int end_line = 0, pending = 0;
+      for(int k = 0;  k < nsig;  k ++){
+        Token tok = sig[k];
+        int directive = tok -> type == 35579270086;
+        if(directive || ! nlines || lines[nlines - 1].directive ||(depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _18) &&(tok -> col <= lines[nlines - 1].indent ||(String_equal(sig[k - 1] -> text, _20) && ! ternary[k - 1])))){
+          Token space = tok > all ? tok - 1 : NULL;
+          char * newline = space && space -> type == 40896714 ? strrchr(space -> text, '\n') : NULL;
+          if(! directive && newline && strchr(newline, '\t') && ! error_at) error_at = tok;
+          lines[nlines ++] =(_LayoutLine){
+            k, k, tok -> col, directive
+          }
+          ;
+          pending = 0;
         }
-        aggregate &= ! parameters;
-        enumeration &= ! parameters;
-        if(labeled) tail -> after = _28;
-        else if(! _layout_condition(sig, depths, edits, all, line.first, line.last, _28)) tail -> type = 247;
-        if(String_equal(first -> text, _29) && line.last == line.first + 1){
-          int k = j;
-          while(k < nlines &&(lines[k].directive || lines[k].indent > line.indent)) k ++;
-          if(k == nlines || lines[k].indent != line.indent || ! String_equal(sig[lines[k].first] -> text, _13) || String_equal(sig[lines[k].last] -> text, _20)) edits[sig[line.first] - all].type = 40896714;
+        lines[nlines - 1].last = k;
+        if(_closes(tok)) depth --;
+        depths[k] = depth;
+        if(! depth && String_equal(tok -> text, _21)) pending ++;
+        else if(! depth && String_equal(tok -> text, _20) && pending){
+          ternary[k] = 1;
+          pending --;
         }
-        indents[++ top] = next;
-        enums[top] = enumeration;
-        closers[top] = aggregate && ! String_equal(first -> text, _30) ? _31 : _32;
+        if(_opens(tok)) depth ++;
+        end_line = tok -> line;
+        for(char * c = tok -> text;  c && * c;  c ++) end_line += * c == '\n';
       }
-      else{
-        for(int m = line.first + 1;  m < line.last;  m ++){
-          String word = sig[m] -> text;
-          if(depths[m]) continue;
-          if(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27)) break;
-          if(! String_equal(word, _20) || ternary[m]) continue;
-          if(! _layout_condition(sig, depths, edits, all, line.first, m, NULL) && String_equal(sig[m - 1] -> text, _33)) edits[sig[m] - all].type = 40896714;
+      int top = 0;
+      for(int i = 0;  i < nlines;  i ++){
+        _LayoutLine line = lines[i];
+        Token first = sig[line.first], last = sig[line.last];
+        if(line.directive){
+          if(String_equal(String_strip(first -> text, " \t\r\n"), _11)) edits[sig[line.first] - all].type = 7477210024;
+          continue;
+        }
+        if(! top && ! indents[0]) indents[0] = line.indent;
+        int j = i + 1;
+        while(j < nlines && lines[j].directive) j ++;
+        int next = j < nlines ? lines[j].indent : indents[0];
+        _LayoutEdit * tail = & edits[sig[line.last] - all];
+        String suffix = NULL;
+        if(String_equal(last -> text, _20) && ! ternary[line.last] && next > line.indent){
+          int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
+          for(int m = line.first;  m < line.last;  m ++){
+            String word = sig[m] -> text;
+            aggregate |= String_equal(word, _22) || String_equal(word, _23) || String_equal(word, _24);
+            enumeration |= String_equal(word, _24);
+            parameters |= sig[m] -> type == 81;
+            labeled |= ! depths[m] &&(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27));
+          }
+          aggregate &= ! parameters;
+          enumeration &= ! parameters;
+          if(labeled) tail -> after = _28;
+          else if(! _layout_condition(sig, depths, edits, all, line.first, line.last, _28)) tail -> type = 247;
+          if(String_equal(first -> text, _29) && line.last == line.first + 1){
+            int k = j;
+            while(k < nlines &&(lines[k].directive || lines[k].indent > line.indent)) k ++;
+            if(k == nlines || lines[k].indent != line.indent || ! String_equal(sig[lines[k].first] -> text, _13) || String_equal(sig[lines[k].last] -> text, _20)) edits[sig[line.first] - all].type = 40896714;
+          }
+          indents[++ top] = next;
+          enums[top] = enumeration;
+          closers[top] = aggregate && ! String_equal(first -> text, _30) ? _31 : _32;
+        }
+        else{
+          for(int m = line.first + 1;  m < line.last;  m ++){
+            String word = sig[m] -> text;
+            if(depths[m]) continue;
+            if(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27)) break;
+            if(! String_equal(word, _20) || ternary[m]) continue;
+            if(! _layout_condition(sig, depths, edits, all, line.first, m, NULL) && String_equal(sig[m - 1] -> text, _33)) edits[sig[m] - all].type = 40896714;
+            break;
+          }
+          int lisp = first -> type == 9297;
+          for(int m = line.first + 1;  lisp && m < line.last;  m ++) lisp = depths[m] > 0;
+          int hole = last -> type == 19147688 && line.last > line.first && sig[line.last - 1] -> type == 73 &&(line.last - 1 == line.first || sig[line.last - 2] -> type == 83);
+          if(first -> type == 129) edits[sig[line.first] - all].type = 40896714;
+          else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _34;
+        }
+        while(top && next < indents[top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(closers[top --]), NULL)));
+        if(next != indents[top] && ! error_at && j < nlines) error_at = sig[lines[j].first];
+        if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;
+      }
+      Bytes out = Bytes_new(sizeof(struct Token));
+      for(int i = 0;  i <= count;  i ++){
+        Token tok = & all[i];
+        if(Token_equal(tok, error_at)){
+          t -> scan_status = 633613224;
+          struct Token marks[2] ={
+            {
+              .text = NULL, .type = 11703268, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
+            }
+            , {
+              .text = NULL, .type = 11212, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
+            }
+
+          }
+          ;
+          out = Bytes_append(out, marks, 2);
           break;
         }
-        int lisp = first -> type == 9297;
-        for(int m = line.first + 1;  lisp && m < line.last;  m ++) lisp = depths[m] > 0;
-        int hole = last -> type == 19147688 && line.last > line.first && sig[line.last - 1] -> type == 73 &&(line.last - 1 == line.first || sig[line.last - 2] -> type == 83);
-        if(first -> type == 129) edits[sig[line.first] - all].type = 40896714;
-        else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _34;
+        _LayoutEdit edit = edits[i];
+        out = _layout_insert(out, edit.before, tok, 0);
+        struct Token copy = * tok;
+        if(edit.type && edit.type != 40896714 && edit.type != 7477210024) copy.text = Symbol_str(edit.type);
+        if(edit.type) copy.type = edit.type;
+        out = Bytes_append(out, & copy, 1);
+        out = _layout_insert(out, edit.after, tok, 1);
       }
-      while(top && next < indents[top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(closers[top --]), NULL)));
-      if(next != indents[top] && ! error_at && j < nlines) error_at = sig[lines[j].first];
-      if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;
+      t -> tokens = out;
     }
-    Bytes out = Bytes_new(sizeof(struct Token));
-    for(int i = 0;  i <= count;  i ++){
-      Token tok = & all[i];
-      if(Token_equal(tok, error_at)){
-        t -> scan_status = 633613224;
-        struct Token marks[2] ={
-          {
-            .text = NULL, .type = 11703268, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
-          }
-          , {
-            .text = NULL, .type = 11212, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
-          }
-
-        }
-        ;
-        out = Bytes_append(out, marks, 2);
-        break;
-      }
-      _LayoutEdit edit = edits[i];
-      out = _layout_insert(out, edit.before, tok, 0);
-      struct Token copy = * tok;
-      if(edit.type && edit.type != 40896714 && edit.type != 7477210024) copy.text = Symbol_str(edit.type);
-      if(edit.type) copy.type = edit.type;
-      out = Bytes_append(out, & copy, 1);
-      out = _layout_insert(out, edit.after, tok, 1);
-    }
-    t -> tokens = out;
+    x2c_cleanup_leave(& _x2c_defer_record_4);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-}
 }
 
 void Tokenizer_scan(Tokenizer t){
@@ -1195,22 +1205,22 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
   RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
   Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_3;
   if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_3)) Tokenizer__pop_mode((*(Tokenizer *) _x2c_defer_data_3->_x2c_defer_capture_4));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  _x2c_defer_env_8 * _x2c_defer_data_4 =(_x2c_defer_env_8 *) _x2c_defer_opaque_4;
   {
     free((*(Token * *) _x2c_defer_data_4->_x2c_defer_capture_5));
     free((*(int * *) _x2c_defer_data_4->_x2c_defer_capture_6));

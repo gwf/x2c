@@ -7,7 +7,6 @@
 
 #include "x2c.h"
 #include "machine.h"
-#include "autodiff.h"
 #include "process.h"
 typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
 

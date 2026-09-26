@@ -46,6 +46,9 @@ Use the [agent directory](../agents/README.md) for task routing and the
 - Fixtures and checked-in expectations are in `compiler-fixtures/`; generated
   actual artifacts are in `build/compiler-fixtures/`.
 - Each `.phases` file declares the exact sidecars owned by that fixture.
+- Optional `.native-flags` rows are single C compiler/linker arguments.
+  A path beginning `./` is relative to the repository root. Package fixtures
+  use these to put package headers before runtime headers and link archives.
 - A fixture that runs its program must compile it without a C compiler
   warning. A fixture whose generated C warns on purpose declares `cc-stderr`
   and owns the warnings in `<name>.cc-stderr`; every other fixture fails on

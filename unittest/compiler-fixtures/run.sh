@@ -268,9 +268,16 @@ run_fixture() {
   ((need_run)) || return 0
 
   program="$case_build/program"
-  if ! "$cc" "${build_cflags[@]}" \
+  native_flags=()
+  if [[ -f "$fixture_dir/$name.native-flags" ]]; then
+    while IFS= read -r flag; do
+      [[ "$flag" == ./* ]] && flag="$root/${flag#./}"
+      native_flags+=("$flag")
+    done <"$fixture_dir/$name.native-flags"
+  fi
+  if ! "$cc" "${build_cflags[@]}" "$output/$name.c" \
+      "${native_flags[@]}" \
       -iquote "$root/include/x2c" -iquote "$fixture_dir" \
-      "$output/$name.c" \
       -L"$root/builds/0" -lx2c -lm -o "$program" \
       >"$case_build/cc.stdout" 2>"$case_build/cc.stderr"; then
     cat "$case_build/cc.stderr" >&2

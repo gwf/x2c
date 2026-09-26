@@ -25,7 +25,7 @@ Shared mutable-state coordination.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/mutex.x:99`
+Source: `lib/mutex.x:139`
 
 <a id="Mutex.free"></a>
 #### Mutex.free
@@ -39,7 +39,7 @@ intact. No thread may retain the handle or be waiting on it.
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native destruction
 fails.
 
-Source: `lib/mutex.x:91`
+Source: `lib/mutex.x:131`
 
 <a id="Mutex.lock"></a>
 #### Mutex.lock
@@ -51,7 +51,7 @@ The `Mutex` is non-recursive; the caller must not already hold it.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
 
-Source: `lib/mutex.x:58`
+Source: `lib/mutex.x:98`
 
 <a id="Mutex.new"></a>
 #### Mutex.new
@@ -64,7 +64,7 @@ Creates an unlocked `Mutex` owned by the active `Scope`.
 when native mutex initialization fails. An initialization failure releases
 the allocated storage.
 
-Source: `lib/mutex.x:44`
+Source: `lib/mutex.x:84`
 
 <a id="Mutex.try_lock"></a>
 #### Mutex.try_lock
@@ -76,7 +76,7 @@ Returns one when acquired or zero when busy.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` for another native failure.
 
-Source: `lib/mutex.x:68`
+Source: `lib/mutex.x:108`
 
 <a id="Mutex.unlock"></a>
 #### Mutex.unlock
@@ -87,7 +87,48 @@ Unlocks a `Mutex` held by the calling thread.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
 
-Source: `lib/mutex.x:79`
+Source: `lib/mutex.x:119`
+
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`x2c_mutex_recursive_initialize`](#x2c_mutex_recursive_initialize) | Initializes a process-lifetime recursive lock. |
+| [`x2c_mutex_recursive_lock`](#x2c_mutex_recursive_lock) | Initializes through `once`, then locks the recursive mutex. |
+| [`x2c_mutex_recursive_unlock`](#x2c_mutex_recursive_unlock) | Unlocks the recursive mutex. |
+
+### Functions
+
+#### x2c_mutex_recursive_initialize
+
+`void x2c_mutex_recursive_initialize( pthread_mutex_t *mutex, const char *failure)`
+
+Initializes a process-lifetime recursive lock.
+On pthread failure, prints `failure` to native stderr and aborts without
+allocating. This boundary can run while Error or Scope is failing.
+
+Source: `lib/mutex.x:36`
+
+#### x2c_mutex_recursive_lock
+
+`void x2c_mutex_recursive_lock( pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)`
+
+Initializes through `once`, then locks the recursive mutex.
+On pthread failure, prints `failure` to native stderr and aborts.
+
+Source: `lib/mutex.x:51`
+
+#### x2c_mutex_recursive_unlock
+
+`void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure)`
+
+Unlocks the recursive mutex.
+On pthread failure, prints `failure` to native stderr and aborts.
+
+Source: `lib/mutex.x:63`
 
 ## Public types
 

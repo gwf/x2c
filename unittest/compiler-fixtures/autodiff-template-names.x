@@ -1,6 +1,6 @@
 #include "x2c.x"
 #include "typed-array.x"
-$(import "autodiff.xmacro")
+import "autodiff";
 $ad.reverse()
 static inline double collide(double _ad_result) {
   double _ad_seed = _ad_result * _ad_result;

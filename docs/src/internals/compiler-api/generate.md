@@ -34,7 +34,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:1228`
+Source: `src/generate.x:1225`
 
 ### `Compiler`
 
@@ -74,7 +74,7 @@ Source: `src/generate.x:839`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1273`
+Source: `src/generate.x:1270`
 
 ## Design notes
 

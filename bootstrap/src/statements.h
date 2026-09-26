@@ -13,7 +13,7 @@ List Compiler_finish_return_statement(Compiler compiler, List expression);
 
 void Compiler_begin_match_arm(Compiler compiler, List pattern, Token start, int binds);
 
-void Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
+List Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
 
 List Compiler_with_binding(Compiler c);
 

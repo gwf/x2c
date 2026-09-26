@@ -530,6 +530,14 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
     unchanged.
 */
 Var Var.update(Var &?lhs, Symbol op, Var rhs) {
+  return x2c_var_update_volatile(lhs, op, rhs);
+}
+
+/** Applies `Var.update` semantics to a volatile destination in generated code.
+    Volatile preserves accesses across exception transfer, without providing
+    thread synchronization.
+*/
+Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
   if (!lhs) raise %(bad-arg (owner "Var.update"));
   if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;
@@ -562,6 +570,14 @@ Var Var.update(Var &?lhs, Symbol op, Var rhs) {
     stored value unchanged.
 */
 Var Var.postfix(Var &?lhs, Symbol op) {
+  return x2c_var_postfix_volatile(lhs, op);
+}
+
+/** Applies `Var.postfix` semantics to a volatile destination in generated code.
+    Volatile preserves accesses across exception transfer, without providing
+    thread synchronization.
+*/
+Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op) {
   if (!lhs) raise %(bad-arg (owner "Var.postfix"));
   if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;
@@ -574,7 +590,7 @@ Var Var.postfix(Var &?lhs, Symbol op) {
   else
     raise %(bad-op (op $op));
   Var old = lhs, one = Var.box_i32_bits(1);
-  if (lhs.update(binary_op, one) is void) return void;
+  if (x2c_var_update_volatile(lhs, binary_op, one) is void) return void;
   return old;
 }
 
