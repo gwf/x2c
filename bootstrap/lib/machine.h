@@ -17,17 +17,13 @@
 #define MACHINE_UNDO_MAX      256
 #define MACHINE_CURSOR_REGS     3
 #define MACHINE_INT_REGS        2
-#define MACHINE_VALUE_MAX     256
-#define MACHINE_LOCAL_MAX     256
-#define MACHINE_LOCAL_RESERVE 32
-#define MACHINE_CALL_RESERVE   64
 typedef enum MachinePrepare{
   MACHINE_PREPARED, MACHINE_INELIGIBLE, MACHINE_MALFORMED
 }
 MachinePrepare;
 
 enum MachineOp{
-  MW_EQ_VALUE_CONST, MW_EQ_VALUE_BITS, MW_INPUT_LIST, MW_NONNIL, MW_NIL, MW_CALL, MW_BR_FAIL, MW_JUMP, MW_ADVANCE, MW_ADVANCE_OPTIONAL, MW_MOVE, MW_OFFSET, MW_DESCEND, MW_SCAN, MW_SET_ACTIVE, MW_REQUIRE_ACTIVE, MW_MARK, MW_ROLLBACK, MW_SLOT_VALID, MW_SLOT_IS_SPAN, MW_SLOT_SET_VALUE, MW_SLOT_SET_SPAN, MW_SLOT_EQ_VALUE, MW_SLOT_EQ_PREFIX, MW_SLOT_EQ_FINAL_IDENTITY, MW_CURSOR_VALUE, MW_EQ_HEAD_CONST, MW_BIND_HEAD, MW_SKIP_HEAD, MW_RET_SUCCESS, MW_RET_FAILURE, MW_TAG, MW_MATCH_KIND, MW_LCONST, MW_LLOCAL, MW_LCAPTURE, MW_LGLOBAL, MW_LBR_NIL, MW_LPRECALL, MW_LCALL, MW_LTAILCALL, MW_LQQ_WRAP, MW_LQQ_APPEND, MW_LDROP, MW_LRETURN, MW_LLAMBDA, MW_LEXPAND, MW_LEVAL, MW_LBIND, MW_LUNBIND
+  MW_EQ_VALUE_CONST, MW_EQ_VALUE_BITS, MW_INPUT_LIST, MW_NONNIL, MW_NIL, MW_CALL, MW_BR_FAIL, MW_JUMP, MW_ADVANCE, MW_ADVANCE_OPTIONAL, MW_MOVE, MW_OFFSET, MW_DESCEND, MW_SCAN, MW_SET_ACTIVE, MW_REQUIRE_ACTIVE, MW_MARK, MW_ROLLBACK, MW_SLOT_VALID, MW_SLOT_IS_SPAN, MW_SLOT_SET_VALUE, MW_SLOT_SET_SPAN, MW_SLOT_EQ_VALUE, MW_SLOT_EQ_PREFIX, MW_SLOT_EQ_FINAL_IDENTITY, MW_CURSOR_VALUE, MW_EQ_HEAD_CONST, MW_BIND_HEAD, MW_SKIP_HEAD, MW_RET_SUCCESS, MW_RET_FAILURE, MW_TAG, MW_MATCH_KIND
 }
 ;
 
@@ -100,14 +96,6 @@ typedef struct MatchFrame{
 }
 MatchFrame;
 
-typedef struct LispFrame{
-  int return_pc, caller_operand_base, caller_local_base;
-  int caller_value_count, caller_local_count;
-  Var caller_value;
-  MachineView caller_program;
-}
-LispFrame;
-
 typedef struct MachineRegs{
   List cursors[MACHINE_CURSOR_REGS];
   int distances[MACHINE_CURSOR_REGS], ints[MACHINE_INT_REGS];
@@ -121,9 +109,6 @@ typedef struct MachineStats{
   long span_descriptors, cons_requests;
   long materialization_requests, materialization_completions;
   long materializations_avoided, materialized_cells, direct_shares;
-  long local_loads, capture_loads, global_loads;
-  long nil_edges, nil_taken, prepared_calls, native_calls;
-  long lisp_returns;
   int max_frames;
 }
 MachineStats;
@@ -144,21 +129,6 @@ typedef struct MatchMachine{
   MachineUndo undo[MACHINE_UNDO_MAX];
 }
 * MatchMachine;
-
-typedef struct LispMachine{
-  MachineView program;
-  int pc;
-  Symbol status;
-  int running;
-  Var value, error;
-  int fp, value_count, local_count, operand_base, local_base;
-  void * lisp_context;
-  MachineStats * stats;
-  LispFrame frames[MACHINE_FRAME_MAX];
-  Var values[MACHINE_VALUE_MAX];
-  Var locals[MACHINE_LOCAL_MAX];
-}
-* LispMachine;
 
 typedef struct MachineProgram{
   int length, const_count, binder_count, root;

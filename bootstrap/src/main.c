@@ -43,8 +43,6 @@ static List _transform_ast(Compiler compiler, List ast);
 
 static void _translate_unit(Frontend frontend, String filename, String output_dir);
 
-static void _compile_file(Frontend frontend, String filename, String output_dir);
-
 static void _preflight_translation(CliRequest c, Map unit_dirs);
 
 static String _unit_output_dir(CliRequest c, Map unit_dirs, String input);
@@ -294,9 +292,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
       _report_diagnostics(compiler);
       exit(1);
     }
-    int macro_library_pending(void);
-    int deferred = macro_library_pending();
-    if(! deferred) Compiler_own_diagnostics(compiler);
+    Compiler_own_diagnostics(compiler);
     if(request -> dump == 1374366630){
       Compiler_dump_tokens(compiler);
       {
@@ -306,7 +302,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
 
     }
     ok = ParsedUnit_collect(&(unit), frontend);
-    if(! deferred || ! ok) _report_diagnostics(compiler);
+    _report_diagnostics(compiler);
     if(! ok) exit(1);
     switch(request -> dump){
       case 320883072032 : if(String_truth(unit.preprocessor_output)) printf("%s", unit.preprocessor_output);
@@ -401,49 +397,10 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
     }
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);
-    if(deferred) _report_diagnostics(compiler);
     if(request -> fatal_warnings && List_truth(Compiler_diagnostics(compiler))) exit(1);
   }
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
-}
-}
-
-int Frontend_preload_macro_libraries(Frontend);
-
-static void _compile_file(Frontend frontend, String filename, String output_dir){
-  {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_0[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(27048696089866), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) _translate_unit(frontend, filename, output_dir);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-       {{
-        if(! Frontend_preload_macro_libraries(frontend)) exit(1);
-        _translate_unit(frontend, filename, output_dir);
-      }
-
-    }
-
-  }
-  else{
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
-  }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 
@@ -557,7 +514,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
           Var _x2c_macro_cursor_output_4;
           while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
             input = Var_string(_x2c_macro_cursor_output_4);
-            _compile_file(frontend, input, _unit_output_dir(request, unit_dirs, input));
+            _translate_unit(frontend, input, _unit_output_dir(request, unit_dirs, input));
           }
 
         }
@@ -604,23 +561,23 @@ List Array_list_free(Array);
 static List _imported_packages(String path){
   String volatile text = NULL;
   {
-    ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_catch_arms_1[1];
-    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_1[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
+    ExceptionFrame _x2c_exception_frame_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = Path_read_text(path);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      x2c_error_catch_detach(_x2c_error_handler_1);
-      x2c_exception_mark_handled(&_x2c_exception_frame_1);
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) text = Path_read_text(path);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
        {{
         List _x2c_return_value_0 = NULL;
         {
-          x2c_error_catch_close(_x2c_error_handler_1);
-          _x2c_error_handler_1 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_1);
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
           return _x2c_return_value_0;
         }
 
@@ -630,17 +587,17 @@ static List _imported_packages(String path){
 
   }
   else{
-    x2c_error_catch_close(_x2c_error_handler_1);
-    _x2c_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
 }
 }
-x2c_error_catch_close(_x2c_error_handler_1);
-_x2c_error_handler_1 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
+x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_error_handler_0 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 Tokenizer tokens = Tokenizer_new(text, 3945159);
 Tokenizer_scan(tokens);
@@ -707,21 +664,21 @@ static void _preload_package_modules(CliRequest c, Map unit_dirs){
         String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_19), cons(String_var(Path_stem(input)), cons(String_var(_20), NULL)))));
         String volatile text = NULL;
         {
-          ExceptionFrame _x2c_exception_frame_2;
-          static MatchCaptureSite _x2c_catch_arms_2[1];
-          static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
-          Var _x2c_catch_patterns_2[1];
-          if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));
-          _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
+          ExceptionFrame _x2c_exception_frame_1;
+          static MatchCaptureSite _x2c_catch_arms_1[1];
+          static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+          Var _x2c_catch_patterns_1[1];
+          if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL));
+          _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
         }
-        ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) text = Path_read_text(depfile);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
-          if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
-            x2c_error_catch_detach(_x2c_error_handler_2);
-            x2c_exception_mark_handled(&_x2c_exception_frame_2);
+        ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = Path_read_text(depfile);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+          if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+            x2c_error_catch_detach(_x2c_error_handler_1);
+            x2c_exception_mark_handled(&_x2c_exception_frame_1);
              {{
-              x2c_error_catch_close(_x2c_error_handler_2);
-              _x2c_error_handler_2 = NULL;
-              x2c_exception_leave(& _x2c_exception_frame_2);
+              x2c_error_catch_close(_x2c_error_handler_1);
+              _x2c_error_handler_1 = NULL;
+              x2c_exception_leave(& _x2c_exception_frame_1);
               continue;
             }
 
@@ -729,18 +686,18 @@ static void _preload_package_modules(CliRequest c, Map unit_dirs){
 
         }
         else{
-          x2c_error_catch_close(_x2c_error_handler_2);
-          _x2c_error_handler_2 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_2);
+          x2c_error_catch_close(_x2c_error_handler_1);
+          _x2c_error_handler_1 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_1);
           __builtin_unreachable();
         }
 
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_2);
-    _x2c_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_2);
+    x2c_error_catch_close(_x2c_error_handler_1);
+    _x2c_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_1);
   }
   {
     String dependency;
@@ -802,6 +759,8 @@ unsigned long report_now_us(void);
 
 Frontend Frontend_new(CliRequest);
 
+int Frontend_preload_macro_libraries(Frontend);
+
 unsigned long long report_file_bytes(String);
 
 String report_duration(unsigned long);
@@ -836,11 +795,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
-  void macro_library_defer(void);
-  if(parallel || c -> dump){
-    if(! Frontend_preload_macro_libraries(frontend)) return 1;
-  }
-  else macro_library_defer();
+  if(! Frontend_preload_macro_libraries(frontend)) return 1;
   if(parallel){
     _preload_package_modules(c, unit_dirs);
     Array chunks = _translation_chunks(c -> inputs, total, Map_truth(unit_dirs) ? total : c -> jobs);
@@ -859,7 +814,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
       {
         if(! build) report_progress(45220543335690, completed, total, input);
         if(build) Build_begin_translation(build, input);
-        _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
+        _translate_unit(frontend, input, _unit_output_dir(c, unit_dirs, input));
         if(build) Build_end_translation(build, input, 0);
         completed ++;
         if(! build) report_progress(45220543335690, completed, total, input);

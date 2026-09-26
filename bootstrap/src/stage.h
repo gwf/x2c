@@ -7,6 +7,11 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#define X2C_NATIVE_MODULES 0
+#else
+#define X2C_NATIVE_MODULES 1
+#endif
 typedef Var(* MetaCall)(Compiler c, List expression, Token site);
 
 Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call);
@@ -16,6 +21,18 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
+
+void Compiler_use_meta_toolchain(String cc, String include_dir);
+
+int Compiler_groups_meta(Compiler c);
+
+void Compiler_group_meta_function(Compiler c, List fn);
+
+void Compiler_record_meta_import(Compiler c);
+
+int Compiler_meta_reaches_compile_time(Compiler c, Var node);
+
+int Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 
 #endif /* __GUARD_0x042BDEBD__ */

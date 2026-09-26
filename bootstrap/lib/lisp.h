@@ -6,7 +6,6 @@
 #define __GUARD_0xD09CF48E__
 
 #include "x2c.h"
-#include "machine.h"
 #include "autodiff.h"
 #include "process.h"
 typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
@@ -24,40 +23,6 @@ typedef struct NativeScalarAccess{
 NativeScalarAccess native_scalar_access(List exact_type);
 
 typedef struct Lisp * Lisp;
-
-typedef struct LispAutoStats{
-  long invocations, machine_entries, machine_errors;
-  long analyses, published, ineligible;
-  long guard_failures, remembered_fallbacks;
-  long inlined_scopes;
-  long inline_declines;
-  long program_bytes;
-}
-LispAutoStats;
-
-int Lisp_program(Var callable, MachineView * view, int * nparam, Var * body);
-
-int Lisp_resolve(void * storage, Var name, Var * value);
-
-void Lisp_enter(void * storage, Var callable, const Var * values, int count);
-
-void Lisp_leave(void * storage);
-
-void Lisp_retarget(void * storage, Var callable, const Var * values, int count);
-
-int Lisp_step(void * storage);
-
-void Lisp_reslot(void * storage, List params, int count);
-
-Var Lisp_apply_values(void * storage, Var callable, const Var * values, int count);
-
-int Lisp_precall(void * storage, Var callable, List raw, Var * value);
-
-Var Lisp_immediate(void * storage, Var callable);
-
-Var Lisp_evaluate(void * storage, Var form);
-
-int Lisp_expanded(void * storage, List site, Var * out);
 
 Lisp Lisp_kernel(void);
 
@@ -139,59 +104,7 @@ Var lisp_read_file(String path);
 
 Var lisp_write_file(String path, String text);
 
-Var lisp_void(void);
-
-Var lisp_cell(Var value);
-
-Var lisp_address(Var cell, Symbol tag);
-
-Var lisp_load(Var cell);
-
-Var lisp_store(Var cell, Var value);
-
-Var lisp_bytes(long size);
-
-Var lisp_at(Var base, Var offset, Symbol tag);
-
-Var lisp_zero(Var destination, Var size);
-
-Var lisp_copy(Var destination, Var source, long size);
-
-Var lisp_record_result(Var source, long size);
-
-Var lisp_session_copy(Var source, long size);
-
-Var lisp_box(Symbol tag, Var value);
-
-Var lisp_peek(Var pointer, Var offset, List layout);
-
-Var lisp_poke(Var pointer, Var offset, List layout, Var value);
-
-Var lisp_array(List layout, List values);
-
-Var lisp_source_function(Var callable);
-
-Var lisp_unwind(Var body, Var cleanup, List arguments);
-
-Func lisp_func_new(Var adapter, List signature);
-
-void * lisp_func_arguments(unsigned count);
-
-void * lisp_func_value(FuncArg * argv, unsigned index, Var value);
-
-void * lisp_func_reference(FuncArg * argv, unsigned index, Var address, List source);
-
-Var lisp_func_invalid(Func fn, unsigned index, List source);
-
-LispAutoStats Lisp_auto_stats(Lisp lisp);
-
-void Lisp_auto_instrument(Lisp lisp, MachineStats * stats);
-
 void Lisp_call_budget(Lisp lisp, long budget);
-
-void Lisp_auto_disable(Lisp lisp, int disabled);
-
-int Lisp_auto_prepare(Lisp lisp);
 
 Var Lisp_eval(Lisp lisp, Var expression);
 

@@ -105,10 +105,6 @@ void Compiler_inherit_library_comptime(Compiler c);
 
 int macro_library_filling(void);
 
-void macro_library_defer(void);
-
-int macro_library_pending(void);
-
 Map Compiler_shared_definitions(Compiler compiler);
 
 void Compiler_import_package_macros(Compiler c, String name, Token invocation);
@@ -122,6 +118,8 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
 
 int Compiler_native_module_loaded(String path);
+
+Map Compiler_native_module_targets(String path);
 
 void Compiler_add_native_module(String path, Map(* entry)(void));
 
@@ -143,6 +141,8 @@ Map x2c_meta_definition_hashes(void);
 
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
 
+int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
+
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
 
 int Compiler_bind_native_meta(Compiler c, String name);
@@ -156,10 +156,6 @@ void Compiler_parse_macro_lisp_shallow(Compiler compiler);
 List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
-
-void Compiler_use_meta_toolchain(String cc, String include_dir);
-
-void Compiler_record_meta_import(Compiler c);
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 

@@ -21,7 +21,6 @@
 #include "func.h"
 #include "iter.h"
 #include "lib.h"
-#include "lisp-machine.h"
 #include "lisp.h"
 #include "list.h"
 #include "logger.h"
