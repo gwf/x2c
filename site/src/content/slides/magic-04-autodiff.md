@@ -4,7 +4,7 @@ section: magic
 tab: autodiff
 links:
   - label: Three-mode example
-    href: https://github.com/gwf/x2c/blob/main/examples/magic/autodiff.x
+    href: https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff.x
 ---
 
 ```x2c

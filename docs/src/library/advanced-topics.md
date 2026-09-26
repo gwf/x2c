@@ -5,8 +5,8 @@ specialized task and explain the facilities and setup each one needs. The
 last explains a guarantee the compiler makes about the code you already
 write:
 
-- [Automatic Differentiation](../guide/autodiff.md) uses the shipped autodiff
-  library and compile-time macros to calculate derivatives.
+- [Automatic Differentiation](../guide/autodiff.md) uses the optional autodiff
+  package and its compile-time macros to calculate derivatives.
 - [Verifying Functions with C*](../guide/verification.md) uses the optional
   C* package and its external prover to check annotated functions.
 - [Training and Inference with torch](../guide/torch.md) uses the optional

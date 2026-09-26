@@ -5,9 +5,9 @@ order: 4
 slide: autodiff
 title: Differentiate a function.
 description: Generate derivatives with a compile-time Lisp decorator, then use them to fit a growth curve.
-source: examples/magic/autodiff-fit.x
-output: examples/expected/autodiff-fit.stdout
-run: ./x2c run examples/magic/autodiff-fit.x
+source: packages/autodiff/examples/autodiff-fit.x
+output: packages/autodiff/examples/expected/autodiff-fit.stdout
+run: make -C packages/autodiff run
 runIntro: Build x2c, then run the fitting example shown in the output above.
 guide: docs/guide/autodiff.html
 ---

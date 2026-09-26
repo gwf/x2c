@@ -11,12 +11,14 @@
 - **`autodiff.x`** records a runtime tape for code whose shape the
   decorators cannot see.
 
-All four are ordinary x2c: a macro file, an optional module, and the
-existing protocol and decorator machinery. Nothing in the compiler knows
-about derivatives.
-
-The [runtime module reference](../library/modules/autodiff.md) documents
-`AdTape` and `AdNode`. For other specialized capabilities, see
+All four are ordinary x2c: a macro file, a runtime unit, and the existing
+protocol and decorator machinery. Nothing in the compiler knows about
+derivatives. Both files belong to the optional `autodiff` package in
+`packages/autodiff`, which has no native dependency. A unit imports the
+macros by their path, as `$(import "../src/autodiff.xmacro")` does in the
+package's own examples; the listings below write the short name. The
+package's [README](https://github.com/gwf/x2c/blob/main/packages/autodiff/README.md)
+lists its files and checks. For other specialized capabilities, see
 [Advanced Topics](../library/advanced-topics.md).
 
 ## Dual numbers
@@ -25,7 +27,8 @@ Declare a struct with `value` and `tangent` fields and let `$ad.dual`
 generate its arithmetic. The scalar type and the primitives it lifts are
 holes, so the same family nests:
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~#include <math.h>
 $(import "autodiff.xmacro")
 
@@ -70,7 +73,8 @@ perturbation confusion silently.
 emits `NAME_dot` beside it. Every `double` parameter `p` is followed by a
 tangent parameter `p_dot`, and the result is the directional derivative:
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~#include <math.h>
 $(import "autodiff.xmacro")
 
@@ -119,7 +123,8 @@ value, and each slot receives the partial derivative of that result. The
 unit must include `typed-array.x` because the generated function records
 a tape on an `ArrayDbl`:
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~#include "typed-array.x"
 ~#include <math.h>
 $(import "autodiff.xmacro")
@@ -181,7 +186,8 @@ is one block's tape plus one snapshot per block, so it still grows with
 the trip count, divided by `K`. `break` and `continue` replay exactly as
 before; a checkpointed loop cannot contain `return`.
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~#include "typed-array.x"
 ~#include <math.h>
 $(import "autodiff.xmacro")
@@ -201,7 +207,7 @@ int main(void) {
 ```
 
 Measured on one 2,000,000-step relaxation loop (the benchmark
-`unittest/benchmarks/autodiff-checkpoint.x`, one process per variant,
+`packages/autodiff/benchmarks/autodiff-checkpoint.x`, one process per variant,
 Apple M-series, `-O2`):
 
 | Variant | Peak memory | Time |
@@ -226,7 +232,7 @@ in a caller that is itself decorated.
 
 ## A worked example
 
-`examples/magic/autodiff-fit.x` fits the rate and capacity of a logistic
+`packages/autodiff/examples/autodiff-fit.x` fits the rate and capacity of a logistic
 growth model to observations. The loss integrates the model with 4,000
 Euler steps and accumulates squared residuals at ten sample times inside
 the loop, so the gradient runs through a long loop with a branch in it.
@@ -266,10 +272,11 @@ provides the subset its holes name, plus `fabs` and a `pow` computed as
 ## Runtime tape
 
 When the shape of the computation depends on data in ways the decorators
-reject, include `autodiff.x` and record it:
+reject, import the package's runtime tape and record it:
 
-```x2c
-~#include "autodiff.x"
+<!-- ignore: an import needs the built autodiff package archive. -->
+```x2c,ignore
+import "autodiff" with AdTape, AdNode;
 int main(void) {
   AdTape tape = AdTape.new();
   AdNode x = tape.input(1.5), y = tape.input(2.0);

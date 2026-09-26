@@ -19,6 +19,7 @@ publishes prebuilt CPU libtorch for those two alone.
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 | [C*](cstar/README.md) | Function contracts and proofs checked by the C* symbolic executor |
 | [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
+| [autodiff](autodiff/README.md) | Dual numbers, forward and reverse derivative decorators, and a runtime tape; no native dependency |
 
 torch links libtorch dynamically, so its programs are not self-contained;
 its README explains the required runtime libraries. C* is a verification

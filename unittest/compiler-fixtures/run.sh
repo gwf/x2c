@@ -7,9 +7,11 @@ if [[ "$mode" != check && "$mode" != update ]]; then
   exit 2
 fi
 
-fixture_dir=$(cd "$(dirname "$0")" && pwd)
-root=$(cd "$fixture_dir/../.." && pwd)
-build="$root/unittest/build/compiler-fixtures"
+# FIXTURE_DIR and FIXTURE_BUILD let a package run its own fixtures here.
+script_dir=$(cd "$(dirname "$0")" && pwd)
+root=$(cd "$script_dir/../.." && pwd)
+fixture_dir=${FIXTURE_DIR:-$script_dir}
+build=${FIXTURE_BUILD:-"$root/unittest/build/compiler-fixtures"}
 x2c=${X2C:-"$root/builds/0/x2c"}
 cc=${CC:-cc}
 read -r -a build_cflags <<< "${BUILD_CFLAGS:-}"
@@ -339,7 +341,7 @@ fixture_count=${#names[@]}
 if ((fixture_count)); then
   printf '%s\n' "${names[@]}" | FIXTURE_TALLY_ONLY=1 \
     xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
-      "$fixture_dir/run.sh" "$mode" --fixture || true
+      "$script_dir/run.sh" "$mode" --fixture || true
 fi
 
 for name in "${names[@]}"; do

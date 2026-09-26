@@ -2,11 +2,11 @@
 
 #include "x2c.x"
 #include "typed-array.x"
-#include "autodiff.x"
+import "autodiff" with AdTape, AdNode;
 #include <math.h>
 #include "test-support.x"
-$(import "test-macros.xmacro")
-$(import "autodiff.xmacro")
+$(import "../../../unittest/test-macros.xmacro")
+$(import "../src/autodiff.xmacro")
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;
@@ -370,7 +370,7 @@ static void autodiff_forward_skips_partials_without_tangent(void) {
   EXPECT_TRUE(_near(_root_plus_dot(0.0, 0.0, 2.0, 1.0), y_grad));
 }
 
-void autodiff_suite(void) {
+static void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
   $test.run(autodiff_nested_family_gives_second_derivative);
@@ -386,4 +386,10 @@ void autodiff_suite(void) {
   $test.run(autodiff_tape_skips_inactive_adjoints);
   $test.run(autodiff_keeps_operand_grouping);
   $test.run(autodiff_forward_skips_partials_without_tangent);
+}
+
+int main(void) {
+  TestHarness_begin();
+  $test.suite(autodiff_suite);
+  return TestHarness_finish();
 }

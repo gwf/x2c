@@ -916,8 +916,15 @@ static String _stage_meta_group(Compiler c, String &failure) {
   catch %((!or not-found io-fail) *): return NULL;
   Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
   String unit = %"$directory/$cfile";
+  /* An imported package's header is in its builds, and a vendored foreign
+     header it publishes is in its src, as a consumer's build finds them. */
+  List packages = %();
+  foreach (Var (_, root), c.package_roots)
+    packages = %(@packages "-iquote" ${%"$root/builds"}
+                 "-iquote" ${%"$root/src"});
   ToolAction action = linker.module_action(
-    output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir $unit));
+    output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir
+              @packages $unit));
   String printed = NULL, errors = NULL;
   if (tool_capture(action.arguments, printed, errors)) {
     failure = _meta_cc_error(errors);

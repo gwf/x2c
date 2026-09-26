@@ -53,7 +53,6 @@
 - [lib/args.x](https://x2c-lang.dev/docs/library/modules/args.html)
 - [lib/array.x](https://x2c-lang.dev/docs/library/modules/array.html)
 - [lib/atom.x](https://x2c-lang.dev/docs/library/modules/atom.html)
-- [lib/autodiff.x](https://x2c-lang.dev/docs/library/modules/autodiff.html)
 - [lib/block.x](https://x2c-lang.dev/docs/library/modules/block.html)
 - [lib/buffer.x](https://x2c-lang.dev/docs/library/modules/buffer.html)
 - [lib/common.x](https://x2c-lang.dev/docs/library/modules/common.html)

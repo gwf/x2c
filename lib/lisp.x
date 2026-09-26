@@ -28,7 +28,6 @@
 
 $(import "private-keywords.xmacro")
 #include "x2c.x"
-#include "autodiff.x"
 #include "process.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in

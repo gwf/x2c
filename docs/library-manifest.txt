@@ -61,7 +61,6 @@ lib/diff.x|optional|Line differences between two texts; explicitly include `diff
 lib/regex.x|optional|Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
 lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
-lib/autodiff.x|optional|Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
