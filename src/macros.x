@@ -1046,7 +1046,6 @@ static Map library_definitions = NULL;
 /* The shared session's compile-time-only definitions, which have no
    runtime form in any unit that reads them. */
 static Map library_comptime = NULL;
-static int library_restartable = 0, static int library_settled = 0;
 
 static int _inherited_import(String path) {
   /* An empty `Map` is false, so the test is for the allocation. */
@@ -1086,8 +1085,6 @@ static void _library_shutdown(void) {
 void macro_library_reset(void) {
   _library_shutdown();
   library_filling = 0;
-  library_restartable = 0;
-  library_settled = 0;
 }
 
 /* The four libraries and the message each failure reports, in the order a
@@ -1228,7 +1225,8 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
 void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   (void) compiler;
   library_filling = 0;
-  library_settled = 1;
+  /* A second preload for the same target finds the session published. */
+  if (library_session) return;
   if (!shared) {
     library_imports = NULL;
     library_definitions = NULL;
@@ -1278,19 +1276,6 @@ void Compiler.inherit_library_comptime(Compiler c) {
     before `lib/meta.x` has defined the syntax builders. */
 int macro_library_filling(void) => library_filling;
 
-/** Records that this target builds the shared compile-time parent between
-    units rather than before the first one. A unit that needs a session
-    while the parent is still pending raises `<lisp-late>`; its driver must
-    catch that, call `Frontend.preload_macro_libraries`, and translate the
-    same unit again.
-*/
-void macro_library_defer(void) {
-  library_restartable = 1;
-}
-
-/** Answers whether a unit started now may still raise `<lisp-late>`. */
-int macro_library_pending(void) => library_restartable && !library_settled;
-
 /** Returns the published definition keys, or null before publication.
     The borrowed map is the shared session's source identity table.
 */
@@ -1302,11 +1287,6 @@ Map Compiler.shared_definitions(Compiler compiler) {
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
-  /* The parent's values must be interned while the target Context and pool
-     are current, and this runs inside a unit's isolated Context. Unwind to
-     the driver, which builds the parent and runs this unit again. The
-     filling itself reaches here with the parent's own session in hand. */
-  if (macro_library_pending() && !library_filling) raise %(lisp-late);
   with compiler {
     int loaded = _.macro_lisp != NULL;
     int shared = library_session != NULL;

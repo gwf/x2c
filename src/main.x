@@ -97,18 +97,13 @@ static void _translate_unit(
     _report_diagnostics(compiler);
     exit(1);
   }
-  /* While the shared compile-time parent is still pending, this unit may
-     unwind and run again, so its diagnostics are held until it finishes
-     rather than printed by the attempt that produced them. */
-  int macro_library_pending(void);
-  int deferred = macro_library_pending();
-  if (!deferred) compiler.own_diagnostics();
+  compiler.own_diagnostics();
   if (request.dump == <tokens>) {
     compiler.dump_tokens();
     return;
   }
   ok = unit.collect(frontend);
-  if (!deferred || !ok) _report_diagnostics(compiler);
+  _report_diagnostics(compiler);
   if (!ok) exit(1);
   switch (request.dump) {
     case <dump-cpp>:
@@ -161,23 +156,8 @@ static void _translate_unit(
   generate_code(compiler, ast, output_dir);
   if (!translation_depfile_write(request, compiler, filename, output_dir))
     exit(1);
-  if (deferred) _report_diagnostics(compiler);
   // A unit that reaches here has no errors, so any diagnostic is a warning.
   if (request.fatal_warnings && compiler.diagnostics()) exit(1);
-}
-
-/* Translates one unit, building the shared compile-time parent between
-   units when this one turns out to need it. The unit unwinds before it has
-   written anything, so the second attempt is its only visible one. A unit
-   restarts at most once: the parent is settled by then, either built or
-   recorded as unavailable. */
-static void _compile_file(
-  Frontend frontend, String filename, String output_dir) {
-  try _translate_unit(frontend, filename, output_dir);
-  catch %(lisp-late *): {
-    if (!frontend.preload_macro_libraries()) exit(1);
-    _translate_unit(frontend, filename, output_dir);
-  }
 }
 
 static void _preflight_translation(CliRequest c, Map unit_dirs) {
@@ -243,7 +223,7 @@ static int _translate_workers(
       long pid = worker_fork();
       if (!pid) {
         foreach (String input, slice)
-          _compile_file(
+          _translate_unit(
             frontend, input, _unit_output_dir(request, unit_dirs, input));
         worker_exit(0);
       }
@@ -368,15 +348,8 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   int parallel = c.jobs > 1 && total > 1 &&
                  !c.dump && !c.inspects();
   /* Each worker inherits what this process has already built, so the parent
-     is built once here rather than in every worker. A dump interleaves
-     diagnostics with its own stream, which a restart would reorder. A unit
-     translated in this process otherwise builds the parent only when it
-     needs one, which many small programs never do. */
-  void macro_library_defer(void);
-  if (parallel || c.dump) {
-    if (!frontend.preload_macro_libraries()) return 1;
-  }
-  else macro_library_defer();
+     is built once here rather than in every worker. */
+  if (!frontend.preload_macro_libraries()) return 1;
   if (parallel) {
     _preload_package_modules(c, unit_dirs);
     Array chunks =
@@ -389,7 +362,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   foreach (String input, parallel ? %() : c.inputs) {
     if (!build) report_progress(<translate>, completed, total, input);
     if (build) build.begin_translation(input);
-    _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
+    _translate_unit(frontend, input, _unit_output_dir(c, unit_dirs, input));
     if (build) build.end_translation(input, 0);
     completed++;
     if (!build) report_progress(<translate>, completed, total, input);
