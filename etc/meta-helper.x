@@ -15,7 +15,8 @@
       (quit)
 
     A call replies with a `(warning MESSAGE (NOTE ...))` frame for each
-    warning it made, then `(value V)`, `(void)` for no value, `(error
+    warning it made and a `(dependency PATH HASH)` frame for each file it
+    embedded, then `(value V)`, `(void)` for no value, `(error
     MESSAGE (NOTE ...))` for a
     failure the body reported or the compiler would report, or `(failure
     CAUSE)` for an Error the body raised, or `(missing)` when the table has
@@ -32,6 +33,7 @@
 #include "x2c.x"
 #include "meta.x"
 #include "datum.x"
+#include "path.x"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -41,7 +43,7 @@ Map x2c_meta_helper_table(int index);
 int x2c_meta_helper_count(void);
 
 static FILE *helper_out = NULL;
-static Array helper_warnings = NULL;
+static Array helper_notices = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
 static void _fail(String message, List notes) {
@@ -77,7 +79,7 @@ void x2c_diagnostic_fail(String message, List notes) {
 
 void x2c_diagnostic_warn(String message, List notes) {
   _check_notes("x2c.diagnostic.warn", notes);
-  helper_warnings.push(%(warning $message $notes));
+  helper_notices.push(%(warning $message $notes));
 }
 
 String x2c_binding_spelling(Var syntax) {
@@ -196,9 +198,35 @@ int x2c_invocation_column(void) {
   _unavailable("x2c.invocation.column");
 }
 
+/* A `Source` holding a String literal is read beside its file; a String
+   must be absolute, since the helper does not know the definition's file.
+   The compiler records each file read as a translation dependency. */
 String x2c_embed_text(Var path) {
-  (void) path;
-  _unavailable("x2c.embed.text");
+  String file = NULL, spelling = NULL;
+  if (path is <string>) {
+    if (((String) path).startswith("/")) spelling = path;
+  }
+  else
+    match (path)
+      case %((text ?) (file ?(String source))
+             (syntax (expr ? (literal ? ?(String literal))))):
+        if (literal.startswith("\"") || literal.startswith("%\"")) {
+          file = source;
+          spelling = literal.parse();
+        }
+  if (!spelling)
+    _fail("x2c.embed.text requires a captured String literal or an "
+          "absolute path", %("value: ${path.repr()}"));
+  if (!spelling.len())
+    _fail("x2c.embed.text requires a non-empty path", NULL);
+  if (file && !spelling.startswith("/"))
+    spelling = %"${Path.dirname(file)}/$spelling";
+  String target = Path.absolute(spelling), text = NULL;
+  try text = Path.read_text(target);
+  catch %((!or not-found io-fail) *):
+    _fail("cannot read embedded text", %("path: $target"));
+  helper_notices.push(%(dependency $target ${"%08x".printf(text.hash())}));
+  return text;
 }
 
 Map x2c_meta_definition_hashes(void) {
@@ -268,7 +296,7 @@ static List _result_problem(Var value, Map marks) {
 }
 
 static void _call(Map table, String name, List arguments) {
-  helper_warnings = [];
+  helper_notices = [];
   Var target;
   if (!table || !table.try_get(name, target)) {
     _reply(%(missing));
@@ -283,7 +311,7 @@ static void _call(Map table, String name, List arguments) {
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = %(error $message $notes);
   catch %(?code *detail): failure = %(failure ${cons(code, detail)});
-  foreach (List warning, helper_warnings) _reply(warning);
+  foreach (List notice, helper_notices) _reply(notice);
   if (failure) {
     _reply(failure);
     return;

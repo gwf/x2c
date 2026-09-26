@@ -1139,8 +1139,8 @@ captured hole together with the text the developer wrote for it:
 `((text T) (file F) (syntax S))`. `x2c_source_text` returns that text, and
 `x2c_embed_text` reads the file a captured `String` literal names beside
 the source that wrote it and records it as a translation dependency. Both
-read what the argument carries. `x2c_embed_text` also accepts a plain
-`String`, resolved against the file that defines the macro.
+read what the argument carries. `x2c_embed_text` also accepts an
+absolute `String` path.
 `x2c_binding_spelling` returns the name a binding was declared with.
 `x2c_invocation_file`, `x2c_invocation_line` and `x2c_invocation_column`
 give the site of the macro invocation.

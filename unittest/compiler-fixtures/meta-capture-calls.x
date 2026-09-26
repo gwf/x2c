@@ -32,6 +32,5 @@ int main(void) {
   printf("%d %d %d %d\n", a, b, READY, DONE);
   printf("%d\n", answer());
   printf("%s", $capture.notice("macro-embed-text-data.txt"));
-  printf("%s", $capture.definition_notice());
   return 0;
 }

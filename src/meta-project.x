@@ -270,7 +270,8 @@ static List _meta_build(
   Compiler.use_meta_build_directory(NULL);
 
   Map deps = {};
-  foreach (String path, %(@imports @owners)) deps[path] = 1;
+  String loop = %"${x2c_get_root()}/etc/meta-helper.x";
+  foreach (String path, %(@imports @owners $loop)) deps[path] = 1;
   Array groups = [], built = [], failures = [], objects = [];
   for (index = 0; index < count; index++) {
     String base = %"$directory/group-$index";

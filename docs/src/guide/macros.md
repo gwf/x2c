@@ -611,15 +611,15 @@ caller's file location for resolving a relative path:
 <!-- ignore: notice.txt is the external file being illustrated -->
 ```x2c,ignore
 #include "meta.x"
-meta static String project_notice(String path) => x2c_embed_text(path);
+meta static String project_notice(Source path) => x2c_embed_text(path);
 macro Expression $project.notice(Literal $path) => $project_notice($path);
 
 String notice = $project.notice("notice.txt");
 ```
 
 A captured path stays relative to its caller even when the macro is defined
-in an imported file. A computed String path instead resolves beside the
-macro definition, or beside the source file for a direct meta call.
+in an imported file. A project meta function also accepts an absolute
+String path; a relative one needs the `Source` that locates it.
 
 Empty files are valid. Directories, embedded NUL bytes, unreadable files and
 files too large for a String are rejected.

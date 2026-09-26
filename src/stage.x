@@ -1168,6 +1168,8 @@ Var Compiler.meta_helper_call(
       case %(void): return void;
       case %(error ?(String message) ?(List notes)):
         c.report_error(<macro>, message, site, notes);
+      case %(dependency ?(String path) ?(String hash)):
+        c.deps.merge_translation_dependency(path, hash);
       case %(missing): _helper_refuse(c, name, site, _helper_missing(c, name));
       case %(failure (?code *detail)): Error.raise(code, detail);
       default:
