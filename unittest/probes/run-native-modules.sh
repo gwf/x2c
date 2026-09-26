@@ -384,7 +384,14 @@ expect_error "package 'tally' was built by another compiler; rebuild it" \
 
 # A compiler that links the package's compile-time part in selects it
 # without a module: it never reads the stale one, nor needs one at all.
-"$X2C" build -q --extension packages/tally --build-dir linked \
+mkdir -p packages/sibling/src
+cat >packages/sibling/src/sibling.x <<'EOF'
+meta int increment(int);
+#pragma private
+int increment(int n) => n + 1;
+EOF
+"$X2C" build -q -j 2 --extension packages/tally \
+  --extension packages/sibling --build-dir linked \
   --output linked/x2c "$ROOT"/src/*.x
 "$X2C" translate -q --package-dir packages --out-dir out app/main.x \
   2>/dev/null && fail "stale module accepted"
@@ -394,5 +401,13 @@ for pass in stale absent; do
     fail "linked extension through import ($pass)"
   rm -f out/main.c packages/tally/builds/tally.module
 done
+
+cat >app/sibling.x <<'EOF'
+import "sibling";
+meta static int answer(void) => sibling.increment(41);
+int main(void) { return $answer(); }
+EOF
+linked/x2c translate -q --package-dir packages --out-dir out app/sibling.x
+grep -Fq 'return 42;' out/sibling.c || fail "second linked extension"
 
 echo "native module probes passed"

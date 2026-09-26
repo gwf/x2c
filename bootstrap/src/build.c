@@ -1069,9 +1069,12 @@ CliRequest Build_module_entry(Build b){
 
 Path Path_basename(Path);
 
+Var Map_setindex(Map, Var, Var);
+
 CliRequest Build_extension_entries(Build b){
   if(! _init_guard_) _file_init_();
   Array entries = Array_new();
+  Map packages = Map_new();
   {
     String package;
     List _x2c_macro_object_13 = b -> request -> extensions;
@@ -1084,12 +1087,15 @@ CliRequest Build_extension_entries(Build b){
         Path entry = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_51), cons(String_var(name), cons(String_var(_52), cons(String_var(name), cons(String_var(_53), NULL)))))));
         _write_entry(entry, Path_glob(String_join(NULL, cons(String_var(root), cons(String_var(_7), NULL)))), String_join(NULL, cons(String_var(_54), cons(String_var(name), cons(String_var(_55), NULL)))));
         Array_push(entries, String_var(entry));
+        Map_setindex(packages, String_var(Path_absolute(entry)), String_var(root));
       }
 
     }
 
   }
-  return Build__entry_request(b, Array_list_free(entries));
+  CliRequest request = Build__entry_request(b, Array_list_free(entries));
+  request -> collection_packages = packages;
+  return request;
 }
 
 void report_progress(Symbol, int, int, String);
@@ -1489,8 +1495,6 @@ static int _mapped_debug(Build state){
 #endif
 
 }
-
-Var Map_setindex(Map, Var, Var);
 
 String String_strip(String, char *);
 

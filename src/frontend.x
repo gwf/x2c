@@ -162,6 +162,20 @@ static void _configure_package(
   c.package_roots[name] = package;
 }
 
+static Map _collect_input(Frontend frontend, Compiler c, Map globs) {
+  String package = c.package;
+  defer c.package = package;
+  Map packages = frontend.request.collection_packages;
+  if (packages != NULL) {
+    Var root = packages[Path.absolute(c.filename)];
+    if (root is not void) {
+      c.package = Path.basename(root);
+      c.package_roots[c.package] = root;
+    }
+  }
+  return c.collect_symbols(globs);
+}
+
 static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   Compiler c = unit.compiler;
   CliRequest request = frontend.request;
@@ -171,7 +185,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   Map globs = NULL;
   int use_cpp = request.cpp_symbols || request.live_symbols ||
                 request.dump in cpp_dumps;
-  if (use_prelude && !use_cpp) return c.collect_symbols(NULL);
+  if (use_prelude && !use_cpp) return _collect_input(frontend, c, NULL);
   if (c.layout)
     c.report_error(
       <driver>, "indented units use the default symbol collection",
@@ -213,7 +227,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   cppcompiler.collect_protocols = 0;
   if (request.dump == <cpp-tokens>) return globs;
   if (request.live_symbols) c.runtime_hdrs = 1;
-  globs = c.collect_symbols(globs);
+  globs = _collect_input(frontend, c, globs);
   cppcompiler.imports = c.imports;
   cppcompiler.macro_lisp = c.macro_lisp;
   cppcompiler.borrowed_lisp = cppcompiler.macro_lisp != NULL;

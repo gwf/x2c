@@ -501,6 +501,7 @@ Map x2c_module_targets(void) => \$module.targets();
 */
 CliRequest Build.extension_entries(Build b) {
   Array entries = [];
+  Map packages = {};
   foreach (String package, b.request.extensions) {
     String root = Path.absolute(package), name = Path.basename(root);
     Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
@@ -513,8 +514,11 @@ __attribute__((constructor)) static void _register(void) {
 }
 ");
     entries.push(entry);
+    packages[Path.absolute(entry)] = root;
   }
-  return b._entry_request(entries.list_free());
+  CliRequest request = b._entry_request(entries.list_free());
+  request.collection_packages = packages;
+  return request;
 }
 
 /** Starts translation reporting for `input` and initializes timing when unset.

@@ -38,6 +38,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 
 static void _configure_package(Compiler c, CliRequest request, String filename);
 
+static Map _collect_input(Frontend frontend, Compiler c, Map globs);
+
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values, String session_source);
@@ -55,10 +57,18 @@ Func Func_new(FuncAdapter, List);
 _x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _57)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 Var String_var(String);
 
@@ -275,9 +285,50 @@ static void _configure_package(Compiler c, CliRequest request, String filename){
   Map_setindex(c -> package_roots, String_var(name), String_var(package));
 }
 
-int SymbolSet_contains(SymbolSet, Symbol);
+Var Map_getindex(Map, Var);
+
+int Var_is_void(Var);
+
+String Var_string(Var);
 
 Map Compiler_collect_symbols(Compiler, Map);
+
+static Map _collect_input(Frontend frontend, Compiler c, Map globs){
+  String package = c -> package;
+  {
+  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & package};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_2
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    Map packages = frontend -> request -> collection_packages;
+    if(packages != NULL){
+      Var root = Map_getindex(packages, String_var(Path_absolute(c -> filename)));
+      if(! Var_is_void(root)){
+        c -> package = Path_basename(Var_string(root));
+        Map_setindex(c -> package_roots, String_var(c -> package), root);
+      }
+
+    }
+    {
+      Map _x2c_return_value_0 = Compiler_collect_symbols(c, globs);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+}
+
+int SymbolSet_contains(SymbolSet, Symbol);
 
 Compiler Compiler_new_shared(Compiler);
 
@@ -288,8 +339,6 @@ String int_str(int);
 List translation_depfile_parse(String);
 
 int List_try_next(List, List *, Var *);
-
-String Var_string(Var);
 
 void Compiler_add_translation_dependency(Compiler, String);
 
@@ -308,7 +357,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   int use_prelude = ! request -> live_symbols;
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
-  if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
+  if(use_prelude && ! use_cpp) return _collect_input(frontend, c, NULL);
   if(c -> layout) Compiler_report_error(c, 306819428, _62, _first_preprocessor_token(c), _19);
   if(c -> script) Compiler_report_error(c, 306819428, _63, _first_preprocessor_token(c), _25);
   Compiler cppcompiler = Compiler_new_shared(c);
@@ -343,7 +392,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   cppcompiler -> collect_protocols = 0;
   if(request -> dump == 247458062609318) return globs;
   if(request -> live_symbols) c -> runtime_hdrs = 1;
-  globs = Compiler_collect_symbols(c, globs);
+  globs = _collect_input(frontend, c, globs);
   cppcompiler -> imports = c -> imports;
   cppcompiler -> macro_lisp = c -> macro_lisp;
   cppcompiler -> borrowed_lisp = cppcompiler -> macro_lisp != NULL;
@@ -412,12 +461,12 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
        {{
-        int _x2c_return_value_0 = 0;
+        int _x2c_return_value_1 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_0;
+          return _x2c_return_value_1;
         }
 
       }
@@ -477,13 +526,13 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & unit};
+  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_2 =(const void *) & unit};
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_3
   };
-  x2c_cleanup_push(&_x2c_defer_record_0);
+  x2c_cleanup_push(&_x2c_defer_record_1);
   {
     {
       String name;
@@ -513,10 +562,10 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
       }
       {
-        int _x2c_return_value_1 = 0;
+        int _x2c_return_value_2 = 0;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_1;
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_2;
         }
 
       }
@@ -540,16 +589,16 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
     }
     {
-      int _x2c_return_value_2 = 1;
+      int _x2c_return_value_3 = 1;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_2;
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_3;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
 }
 }
@@ -607,12 +656,12 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
           (* unit).preprocessor = NULL;
         }
         {
-          int _x2c_return_value_3 = 0;
+          int _x2c_return_value_4 = 0;
           {
             x2c_error_catch_close(_x2c_error_handler_1);
             _x2c_error_handler_1 = NULL;
             x2c_exception_leave(& _x2c_exception_frame_1);
-            return _x2c_return_value_3;
+            return _x2c_return_value_4;
           }
 
         }
@@ -657,12 +706,12 @@ int ParsedUnit_parse(ParsedUnit * p){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        int _x2c_return_value_4 = 0;
+        int _x2c_return_value_5 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_2);
           _x2c_error_handler_2 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_2);
-          return _x2c_return_value_4;
+          return _x2c_return_value_5;
         }
 
       }
@@ -733,7 +782,12 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
+  (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> package =(*(String *) _x2c_defer_data_0->_x2c_defer_capture_1);
+}
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_1->_x2c_defer_capture_2)));
 }
 
 #undef _x2c_initializer_choice_1A2A7247_0_expanded
