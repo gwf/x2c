@@ -1190,8 +1190,6 @@ void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
   lisp.set_global(dotted, function);
 }
 
-static Var _sdk_meta_stage(String name, List arguments);
-
 /* Native operations use the active expansion context, not the session
    that owns their callable. The shared parent therefore owns them once. */
 static void _install_native_operations(Compiler compiler) {
@@ -1226,7 +1224,6 @@ static void _install_native_operations(Compiler compiler) {
       _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
     $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
     $lisp.bind(_.macro_lisp, "_x2c.tpl-call", _sdk_template_call);
-    $lisp.bind(_.macro_lisp, "_x2c.meta.stage", _sdk_meta_stage);
     $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
@@ -2180,10 +2177,8 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       /* A session refuses to replace a name an ancestor binds, which
          reaches the developer here, at the marker. */
       if (!macro_library_filling() && !_shared_meta_definition(c, name))
-        try {
-          if (c.groups_meta()) _hold_group_function(c, name);
-          else _hold_helper_function(c, name, type);
-        }
+        try c.macro_lisp.set_global(name, Func.new_context(
+          _meta_stub, c.func_signature(type), (char *) name, name.len() + 1));
         catch %(?code *detail): {
           List cause = cons(code, detail);
           c.report_error(
@@ -2313,19 +2308,6 @@ static Compiler _stub_compiler(String name, Token &site) {
   return c;
 }
 
-/* Answers `_x2c.meta.stage`, which a REPL group function's session name
-   holds until the group stages: it binds the group's native code under the
-   name and calls it with `arguments`. */
-static Var _sdk_meta_stage(String name, List arguments) {
-  Token site;
-  Compiler c = _stub_compiler(name, site);
-  c.bind_meta_group(name, site);
-  Var function;
-  if (!c.macro_lisp.try_get(name, function))
-    _sdk_reject(%"$name cannot run at compile time", NULL);
-  return _meta_apply(c, function, arguments);
-}
-
 /* A helper's result with each marker the helper left for the compiler
    replaced: a template call by its invocation and a deferred builder by
    the compiler's own answer. */
@@ -2348,23 +2330,26 @@ static Var _helper_result(Compiler c, Var value) {
   return resolved;
 }
 
-/* Calls the project `meta` function `name` in the project's helper. */
-static Var _sdk_meta_call(String name, List arguments) {
-  Token site;
-  Compiler c = _stub_compiler(name, site);
-  return _helper_result(c, c.meta_helper_call(name, site, arguments));
-}
-
-/* Adapts a call of a project `meta` function's session binding, whose
-   context holds the function's name, to a call in the helper. */
-static Var _helper_adapter(Func function, const FuncArg *argv) {
+/* Adapts a call of a bodied `meta` function's session binding, whose
+   context holds the function's name, to a call in the project's helper,
+   or in the REPL to a call of the group's native code, which the first
+   call stages and binds under the name. */
+static Var _meta_stub(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
   if (parameters.equal(%((void)))) parameters = NULL;
   Array values = [];
   for (int i = 0; i < parameters.len(); i++)
     values.push(argv[i].data.value);
-  return _sdk_meta_call(
-    String.new((const char *) Func.context(function)), values.list_free());
+  String name = String.new((const char *) Func.context(function));
+  Token site;
+  Compiler c = _stub_compiler(name, site);
+  if (!c.groups_meta())
+    return _helper_result(
+      c, c.meta_helper_call(name, site, values.list_free()));
+  c.bind_meta_group(name, site);
+  Var bound;
+  c.macro_lisp.try_get(name, bound);
+  return _meta_apply(c, bound, values.list_free());
 }
 
 /* Whether the published shared session already holds the definition of
@@ -2376,20 +2361,6 @@ static int _shared_meta_definition(Compiler c, String name) {
   return key in library_definitions;
 }
 
-/* Holds the REPL group function `name` in the session behind a stub that
-   stages the group at its first call from compile-time Lisp. */
-static void _hold_group_function(Compiler c, String name) {
-  c.macro_lisp.set_global(name, c.macro_lisp.eval(
-    %(lambda (. arguments) (_x2c.meta.stage $name arguments))));
-}
-
-/* Binds the project `meta` function `name` of type `type` in the session
-   to a native function that calls it in the helper. */
-static void _hold_helper_function(Compiler c, String name, Type type) {
-  Func function = Func.new_context(
-    _helper_adapter, c.func_signature(type), (char *) name, name.len() + 1);
-  c.macro_lisp.set_global(name, function);
-}
 
 /* The last call a `$` expression made, as a failure reports it. */
 static String meta_call_form = NULL;

@@ -2,11 +2,11 @@
 
 #include "datum.h"
 
-static List _26, _25, _24, _23, _22, _21, _20, _19, _18;
+static List _48, _46, _43, _42, _40, _26, _25, _24, _23, _22, _21, _20, _19, _18;
 
-static String _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _16, _14, _12, _10, _8, _6, _4, _2, _0;
+static String _53, _52, _51, _50, _49, _44, _38, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _16, _14, _12, _10, _8, _6, _4, _2, _0;
 
-static Var _17, _15, _13, _11, _9, _7, _5, _3, _1;
+static Var _47, _45, _41, _39, _37, _17, _15, _13, _11, _9, _7, _5, _3, _1;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +27,8 @@ static Var _datum_decode(Var value);
 Var String_var(String);
 
 List cons(Var, List);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -68,9 +70,24 @@ __attribute__((constructor)) static void _file_init_(void){
   _33 = String_new("x2c.token");
   _34 = String_new("x2c.quote");
   _35 = String_new("x2c.array");
-  _36 = String_new("x2c.");
-  _37 = String_new("f");
-  _38 = String_new("u");
+  _36 = String_new("compile-time result is a compiler address");
+  _37 = String_var(_36);
+  _38 = String_new("return data built from the pointed-to values instead");
+  _39 = String_var(_38);
+  _40 = cons(_39, NULL);
+  _41 = List_var(_40);
+  _42 = cons(_41, NULL);
+  _43 = cons(_37, _42);
+  _44 = String_new("each Array and Map in a result is built separately");
+  _45 = String_var(_44);
+  _46 = cons(_45, NULL);
+  _47 = List_var(_46);
+  _48 = cons(_47, NULL);
+  _49 = String_new("compile-time result contains itself");
+  _50 = String_new("compile-time result holds one collection twice");
+  _51 = String_new("x2c.");
+  _52 = String_new("f");
+  _53 = String_new("u");
 }
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -96,7 +113,7 @@ static int _datum_tagged(Var value){
   Var head = Var_car(value);
   if(! Var_is_atom(head)) return 0;
   String text = Var_str(head);
-  if(! String_startswith(text, _36)) return 0;
+  if(! String_startswith(text, _51)) return 0;
   {
     String tag;
     List _x2c_macro_object_0 = _26;
@@ -135,13 +152,13 @@ static void _datum_number(Buffer out, Var value){
 
 List Var_list(Var);
 
-Buffer Buffer_write_char(Buffer, char);
-
 int List_truth(List);
 
 List List_cdr(List);
 
 int List_equal(List, List);
+
+Buffer Buffer_write_char(Buffer, char);
 
 Var List_car(List);
 
@@ -173,24 +190,15 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int datum_write(Buffer out, Var value, int tagged){
   if(! _init_guard_) _file_init_();
-  if(tagged && _datum_tagged(value)){
-    Buffer_write(out, "(x2c.quote ");
+  if(Var_is_row(value, 9, 7, 4)){
+    int quoted = tagged && _datum_tagged(value);
     List list = Var_list(value);
-    Buffer_write_char(out, '(');
+    Buffer_write(out, quoted ? "(x2c.quote (" : "(");
     for(List p = list;  List_truth(p);  p = List_cdr(p)){
       if(! List_equal(p, list)) Buffer_write_char(out, ' ');
       if(! datum_write(out, List_car(p), tagged)) return 0;
     }
-    Buffer_write(out, "))");
-  }
-  else if(Var_is_row(value, 9, 7, 4)){
-    List list = Var_list(value);
-    Buffer_write_char(out, '(');
-    for(List p = list;  List_truth(p);  p = List_cdr(p)){
-      if(! List_equal(p, list)) Buffer_write_char(out, ' ');
-      if(! datum_write(out, List_car(p), tagged)) return 0;
-    }
-    Buffer_write_char(out, ')');
+    Buffer_write(out, quoted ? "))" : ")");
   }
   else if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
   else if(tagged && Var_is(value, 1328354264) && ! Var_symbol(value)) Buffer_write(out, "(x2c.symbol0)");
@@ -259,11 +267,11 @@ Var Var_convert(Var, Symbol);
 
 static Var _datum_decode_number(String tag, String text){
   Symbol target = Symbol_new(tag);
-  if(String_startswith(tag, _37) || String_equal(tag, _27)){
+  if(String_startswith(tag, _52) || String_equal(tag, _27)){
     long double value = strtold(text, NULL);
     return Var_convert(Var_box_long_double(value), target);
   }
-  if(String_startswith(tag, _38)){
+  if(String_startswith(tag, _53)){
     unsigned long long value = strtoull(text, NULL, 10);
     return Var_convert(Var_box_ulong_long(value), target);
   }
@@ -291,8 +299,6 @@ static List _datum_decode_list(List list){
   return Array_list_free(items);
 }
 
-Var List_var(List);
-
 Var Symbol_var(Symbol);
 
 Atom Atom_intern(String);
@@ -304,6 +310,8 @@ Var List_caddr(List);
 Var Var_new(Symbol, ...);
 
 Var Array_var(Array);
+
+Array List_array(List);
 
 Var Map_setindex(Map, Var, Var);
 
@@ -319,31 +327,17 @@ static Var _datum_decode(Var value){
   if(String_equal(tag, _30)) return Atom_intern(Var_str(List_cadr(list)));
   if(String_equal(tag, _31)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
   if(String_equal(tag, _32)) return _datum_decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
-  if(String_equal(tag, _33)) return Var_new(42948956, (void *)(unsigned long long) Var_integer(List_cadr(list)));
+  if(String_equal(tag, _33)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
   if(String_equal(tag, _34)) return List_var(_datum_decode_list(Var_list(List_cadr(list))));
-  if(String_equal(tag, _35)){
-    Array items = Array_new();
-    {
-      Var item;
-      List _x2c_macro_object_4 = List_cdr(list);
-      List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-      Var _x2c_macro_cursor_output_5;
-      while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
-        item = _x2c_macro_cursor_output_5;
-        Array_push(items, _datum_decode(item));
-      }
-
-    }
-    return Array_var(items);
-  }
+  if(String_equal(tag, _35)) return Array_var(List_array(_datum_decode_list(List_cdr(list))));
   Map map = Map_new();
   {
     List entry;
-    List _x2c_macro_object_5 = List_cdr(list);
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
-      entry = Var_list(_x2c_macro_cursor_output_6);
+    List _x2c_macro_object_4 = List_cdr(list);
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
+      entry = Var_list(_x2c_macro_cursor_output_5);
       Map_setindex(map, _datum_decode(List_car(entry)), _datum_decode(List_cadr(entry)));
     }
 
@@ -359,5 +353,77 @@ int datum_read(String text, unsigned * cursor, Var * out){
   if(Lisp_read(NULL, text, &((* cursor)), &(value)) != 46228810) return 0;
   (* out) = _datum_decode(value);
   return 1;
+}
+
+int Var_is_pointer(Var);
+
+int Map_contains(Map, Var);
+
+Var ulong_var(ulong);
+
+Var Map_getindex(Map, Var);
+
+Var int_var(int);
+
+List datum_result_problem(Var value, Map marks){
+  if(! _init_guard_) _file_init_();
+  if(Var_is_pointer(value) && value.u64) return _43;
+  if(Var_is_row(value, 9, 7, 4)){
+    {
+      Var item;
+      List _x2c_macro_object_5 = Var_list(value);
+      List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+      Var _x2c_macro_cursor_output_6;
+      while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
+        item = _x2c_macro_cursor_output_6;
+        {
+          List problem = datum_result_problem(item, marks);
+          if(List_truth(problem)) return problem;
+        }
+
+      }
+
+    }
+    return NULL;
+  }
+  if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
+  ulong address =(ulong) value.u64;
+  if(Map_contains(marks, ulong_var(address))) return cons(String_var(Var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _49 : _50), _48);
+  Map_setindex(marks, ulong_var(address), int_var(1));
+  if(Var_is(value, 3313778)){
+    Var item;
+    Array _x2c_macro_object_6 = Var_array(value);
+    int _x2c_macro_cursor_6 = 0;
+    Var _x2c_macro_cursor_output_7;
+    while(Array_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7))){
+      item = _x2c_macro_cursor_output_7;
+      {
+        List problem = datum_result_problem(item, marks);
+        if(List_truth(problem)) return problem;
+      }
+
+    }
+
+  }
+  else{
+    Var key, item;
+    Map _x2c_macro_object_7 = Var_map(value);
+    unsigned _x2c_macro_cursor_7 = 0;
+    Var _x2c_macro_cursor_output_8;
+    Var _x2c_macro_cursor_output_9;
+    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_8), &(_x2c_macro_cursor_output_9))){
+      key = _x2c_macro_cursor_output_8;
+      item = _x2c_macro_cursor_output_9;
+      {
+        List problem = datum_result_problem(key, marks);
+        if(! List_truth(problem)) problem = datum_result_problem(item, marks);
+        if(List_truth(problem)) return problem;
+      }
+
+    }
+
+  }
+  Map_setindex(marks, ulong_var(address), int_var(2));
+  return NULL;
 }
 

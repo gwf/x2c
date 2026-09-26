@@ -133,11 +133,8 @@ static void _meta_unit(Frontend f, String path, int index) {
 
 /* Runs `arguments`, a C compiler command, and returns NULL, or its first
    error. */
-static String _meta_cc(List arguments) {
-  String printed = NULL, errors = NULL;
-  if (!tool_capture(arguments, printed, errors)) return NULL;
-  return Compiler.meta_cc_error(errors);
-}
+static String _meta_cc(List arguments) =>
+  Compiler.meta_cc_run(arguments, NULL);
 
 /* The object of `etc/meta-helper.x`, the helper's protocol loop, which
    this compiler translates once per `identity`, or NULL with `failure`
@@ -145,13 +142,12 @@ static String _meta_cc(List arguments) {
 static String _meta_support(
   Toolchain t, String include, String identity, String &failure) {
   String source = %"${x2c_get_root()}/etc/meta-helper.x";
-  String text = NULL;
-  try text = Path.read_text(source);
-  catch %((!or not-found io-fail) *): {
+  if (!Path.is_file(source)) {
     failure = %"cannot read $source";
     return NULL;
   }
-  String key = String.sha256(%"$identity\n${text.sha256()}");
+  String key = String.sha256(
+    %"$identity\n${Path.read_text(source).sha256()}");
   String directory = %"${script_cache_root()}/meta/support-$key";
   String object = %"$directory/meta-helper.o";
   if (Path.is_file(object)) return object;
@@ -213,19 +209,15 @@ static String _meta_localize(Toolchain t, String base, int index) {
 static String _meta_digest(String path) {
   File input = fopen(path, "rb");
   if (!input) return NULL;
-  String digest = NULL;
-  try digest = input.sha256();
-  catch %(io-fail *): digest = NULL;
-  input.close();
-  return digest;
+  defer input.close();
+  return input.sha256();
 }
 
 /* Adds each dependency of the depfile at `path` to `deps`. */
 static void _meta_depfile(String path, Map deps) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return;
-  foreach (String dependency, translation_depfile_parse(text))
+  if (!Path.is_file(path)) return;
+  foreach (String dependency,
+           translation_depfile_parse(Path.read_text(path)))
     deps[Path.absolute(dependency)] = 1;
 }
 
@@ -235,14 +227,6 @@ static void _meta_clear(String directory, int index) {
     String file = %"$directory/group-$index$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
-}
-
-/* The text of the file at `path`, or NULL. */
-static String _meta_text(String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): text = NULL;
-  return text;
 }
 
 /* Compiles the group a parse left for table `index`, adding the files it
@@ -256,14 +240,12 @@ static String _meta_compile(
   foreach (String path, Path.read_text(%"$base.deps").split("\n"))
     if (path) deps[path] = 1;
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
-  String failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
-                              "-iquote" ${Path.dirname(unit)}
-                              "-iquote" $include @flags
-                              "-MD" "-MF" ${%"$base.d"}
-                              "-c" ${%"$base.c"} "-o" ${%"$base.o"}));
+  String failure = Compiler.meta_cc_run(
+    %(${t.cc} @{_meta_flags()} "-iquote" $directory
+      "-iquote" ${Path.dirname(unit)} "-iquote" $include @flags
+      "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"}),
+    directory);
   if (!failure) failure = _meta_localize(t, base, index);
-  if (failure && !failure.contains(directory))
-    failure = %"$failure; the group's C is in $directory";
   _meta_depfile(%"$base.d", deps);
   return failure;
 }
@@ -326,7 +308,8 @@ static List _meta_build(
   String support = _meta_support(t, include, identity, failure);
   String tables = %"$directory/tables.c", table = _meta_tables(built, count);
   String helper = %"$directory/helper";
-  if (support && (changed || _meta_text(tables) != table ||
+  if (support && (changed || !Path.is_file(tables) ||
+                  Path.read_text(tables) != table ||
                   !Path.is_file(helper))) {
     Path.write_text(tables, table);
     String output = %"$directory/helper.${"%ld".printf((long) getpid())}";
@@ -355,9 +338,9 @@ static List _meta_build(
 /* The manifest a previous build left in `directory` when every file it
    read is unchanged, or NULL. */
 static List _meta_current(String directory) {
-  String text = NULL;
-  try text = Path.read_text(%"$directory/manifest");
-  catch %((!or not-found io-fail) *): return NULL;
+  String path = %"$directory/manifest";
+  if (!Path.is_file(path)) return NULL;
+  String text = Path.read_text(path);
   unsigned cursor = 0;
   Var manifest = void;
   try datum_read(text, cursor, manifest);

@@ -50,24 +50,15 @@ static void _datum_number(Buffer out, Var value) {
     value the grammar cannot spell. With `tagged`, the tagged spellings this
     file describes are written too; without it, only plain data is. */
 int datum_write(Buffer out, Var value, int tagged) {
-  if (tagged && _datum_tagged(value)) {
-    out.write("(x2c.quote ");
+  if (value is <list>) {
+    int quoted = tagged && _datum_tagged(value);
     List list = value;
-    out.write_char('(');
+    out.write(quoted ? "(x2c.quote (" : "(");
     for (List p = list; p; p = p.cdr()) {
       if (p != list) out.write_char(' ');
       if (!datum_write(out, p.car(), tagged)) return 0;
     }
-    out.write("))");
-  }
-  else if (value is <list>) {
-    List list = value;
-    out.write_char('(');
-    for (List p = list; p; p = p.cdr()) {
-      if (p != list) out.write_char(' ');
-      if (!datum_write(out, p.car(), tagged)) return 0;
-    }
-    out.write_char(')');
+    out.write(quoted ? "))" : ")");
   }
   else if (tagged && value is void) out.write("(x2c.void)");
   else if (tagged && value is <symbol> && !value.symbol())
@@ -150,13 +141,9 @@ static Var _datum_decode(Var value) {
   if (tag == "x2c.number")
     return _datum_decode_number(list.cadr().str(), list.caddr().str());
   if (tag == "x2c.token")
-    return Var.new(<token>, (void *) (unsigned long long) list.cadr().integer());
+    return Var.new(<token>, (void *) (ulong) list.cadr().integer());
   if (tag == "x2c.quote") return _datum_decode_list(list.cadr());
-  if (tag == "x2c.array") {
-    Array items = [];
-    foreach (Var item, list.cdr()) items.push(_datum_decode(item));
-    return items;
-  }
+  if (tag == "x2c.array") return _datum_decode_list(list.cdr()).array();
   Map map = {};
   foreach (List entry, list.cdr())
     map[_datum_decode(entry.car())] = _datum_decode(entry.cadr());
@@ -173,4 +160,42 @@ int datum_read(String text, unsigned &cursor, Var &out) {
   if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
   out = _datum_decode(value);
   return 1;
+}
+
+/* Returns why the compile-time result `value` cannot become data in the
+   program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
+   contains itself, or holds one Array or Map twice. `marks` holds 1 for
+   an Array or Map being checked and 2 for one already checked. */
+List datum_result_problem(Var value, Map marks) {
+  if (value.is_pointer() && value.u64)
+    return %("compile-time result is a compiler address"
+             ("return data built from the pointed-to values instead"));
+  if (value is <list>) {
+    foreach (Var item, value.list()) {
+      List problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+    return NULL;
+  }
+  if (value is not <array> && value is not <map>) return NULL;
+  ulong address = (ulong) value.u64;
+  if (address in marks)
+    return %(${marks[address] == 1
+                 ? "compile-time result contains itself"
+                 : "compile-time result holds one collection twice"}
+             ("each Array and Map in a result is built separately"));
+  marks[address] = 1;
+  if (value is <array>)
+    foreach (Var item, value.array()) {
+      List problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+  else
+    foreach (Var (key, item), (Map) value) {
+      List problem = datum_result_problem(key, marks);
+      if (!problem) problem = datum_result_problem(item, marks);
+      if (problem) return problem;
+    }
+  marks[address] = 2;
+  return NULL;
 }

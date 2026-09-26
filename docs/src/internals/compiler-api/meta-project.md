@@ -26,7 +26,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:377`
+Source: `src/meta-project.x:360`
 
 ## Design notes
 
