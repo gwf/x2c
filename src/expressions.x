@@ -4189,6 +4189,19 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (_integer_literal_kind(expr, NULL) == <zero> &&
       c.sym.resolve_key(target).is_pointer())
     return expr;
+  /* An object that is not itself a pointer, array, or function never
+     becomes one implicitly; its address is spelled `&value`. */
+  if (target.car() == <*> && !type_is_var) {
+    Type source = c.sym.resolve_key(type);
+    if (source && !source.is_pointer() && !source.is_array() &&
+        !source.is_function()) {
+      c.report_error(
+        <type>,
+        %"cannot pass ${type.repr()} where ${target.repr()} is expected",
+        NULL, %("write &value to pass its address"));
+      return expr;
+    }
+  }
   // pointers, references, and address-of/dereference conversions
   // T -> &T : pass address of LHS as ref w/ updated type
   if (type === cdr(target) &&
@@ -4233,6 +4246,14 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     }
     List reader = _var_checked_reader(c, expr, type, target);
     if (reader) return reader;
+    /* A Var reaching `Var *` almost always meant its address; unboxing a
+       stored Var pointer must be spelled. */
+    if (target.is_pointer() && c.sym.is_var_type(target.dereference())) {
+      c.report_error(
+        <type>, %"cannot convert Var to ${target.repr()}", NULL,
+        %("write &value for its address, or value.pointer() to unbox a stored pointer"));
+      return expr;
+    }
     if (target.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
     if (target.is_typedef_name()) {

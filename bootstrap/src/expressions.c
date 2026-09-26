@@ -6,11 +6,11 @@
 
 #include "exception.h"
 
-static List _1733, _1730, _1708, _1703, _1698, _1695, _1694, _1693, _1691, _1690, _1689, _1687, _1684, _1683, _1682, _1680, _1675, _1674, _1673, _1671, _1670, _1669, _1668, _1666, _1663, _1660, _1658, _1657, _1656, _1655, _1654, _1653, _1652, _1650, _1649, _1648, _1646, _1644, _1643, _1642, _1640, _1639, _1638, _1637, _1635, _1634, _1633, _1631, _1630, _1629, _1623, _1620, _1619, _1618, _1616, _1614, _1613, _1612, _1611, _1610, _1609, _1608, _1607, _1606, _1604, _1603, _1601, _1600, _1598, _1597, _1596, _1595, _1594, _1592, _1591, _1590, _1588, _1587, _1586, _1585, _1584, _1582, _1581, _1572, _1571, _1569, _1568, _1567, _1565, _1564, _1563, _1559, _1558, _1557, _1555, _1554, _1553, _1550, _1549, _1548, _1546, _1545, _1544, _1543, _1541, _1540, _1539, _1537, _1536, _1535, _1534, _1525, _1524, _1522, _1521, _1520, _1518, _1517, _1516, _1515, _1514, _1513, _1511, _1510, _1509, _1508, _1507, _1505, _1504, _1503, _1501, _1497, _1496, _1495, _1493, _1492, _1491, _1488, _1487, _1486, _1484, _1483, _1482, _1480, _1479, _1478, _1476, _1475, _1474, _1473, _1472, _1471, _1469, _1468, _1467, _1463, _1462, _1460, _1458, _1457, _1456, _1454, _1453, _1452, _1451, _1449, _1448, _1447, _1445, _1444, _1443, _1442, _1441, _1439, _1438, _1437, _1436, _1434, _1433, _1432, _1430, _1429, _1426, _1425, _1424, _1422, _1421, _1419, _1418, _1417, _1415, _1414, _1413, _1412, _1410, _1409, _1408, _1406, _1404, _1403, _1402, _1400, _1399, _1397, _1396, _1395, _1393, _1392, _1391, _1390, _1387, _1386, _1385, _1383, _1382, _1379, _1378, _1377, _1375, _1374, _1373, _1371, _1370, _1369, _1366, _1365, _1363, _1361, _1360, _1359, _1358, _1355, _1352, _1351, _1350, _1348, _1347, _1345, _1344, _1342, _1341, _1340, _1338, _1337, _1335, _1334, _1333, _1331, _1330, _1328, _1327, _1326, _1324, _1322, _1321, _1320, _1318, _1317, _1316, _1315, _1313, _1312, _1311, _1309, _1307, _1306, _1304, _1301, _1300, _1299, _1297, _1296, _1295, _1292, _1291, _1290, _1288, _1287, _1286, _1285, _1284, _1283, _1281, _1280, _1279, _1278, _1277, _1276, _1275, _1273, _1272, _1270, _1269, _1268, _1266, _1263, _1262, _1261, _1259, _1258, _1256, _1255, _1254, _1253, _1252, _1250, _1249, _1247, _1246, _1245, _1244, _1243, _1242, _1240, _1239, _1235, _1233, _1232, _1231, _1229, _1228, _1227, _1225, _1224, _1218, _1217, _1216, _1215, _1210, _1207, _1206, _1205, _1203, _1202, _1201, _1200, _1198, _1197, _1196, _1195, _1193, _1192, _1191, _1189, _1188, _1186, _1185, _1184, _1182, _1181, _1180, _1178, _1177, _1175, _1172, _1171, _1170, _1168, _1167, _1161, _1160, _1156, _1155, _1153, _1152, _1151, _1149, _1148, _1144, _1143, _1141, _1140, _1139, _1138, _1137, _1136, _1135, _1134, _1132, _1131, _1130, _1129, _1128, _1127, _1125, _1124, _1122, _1121, _1120, _1118, _1117, _1116, _1114, _1113, _1112, _1110, _1109, _1108, _1107, _1105, _1104, _1101, _1099, _1098, _1093, _1092, _1091, _1089, _1088, _1087, _1085, _1084, _1083, _1082, _1081, _1080, _1078, _1077, _1076, _1075, _1073, _1072, _1071, _1070, _1059, _1058, _1056, _1052, _1051, _1050, _1047, _1046, _1044, _1043, _1042, _1039, _1038, _1037, _1035, _1034, _1033, _1031, _1029, _1028, _1025, _1023, _1022, _1021, _1020, _1019, _1017, _1016, _1015, _1014, _1013, _1012, _1010, _1009, _1006, _1005, _1003, _1002, _1000, _999, _998, _996, _995, _994, _993, _992, _989, _987, _986, _984, _983, _981, _980, _972, _971, _969, _968, _964, _963, _962, _960, _959, _958, _957, _956, _950, _948, _947, _946, _942, _940, _939, _938, _936, _935, _934, _930, _929, _926, _925, _922, _921, _919, _918, _917, _916, _915, _914, _910, _908, _907, _906, _904, _903, _902, _901, _900, _899, _896, _895, _894, _892, _891, _890, _889, _888, _885, _884, _883, _879, _878, _874, _871, _870, _869, _866, _863, _861, _860, _859, _855, _854, _853, _850, _849, _848, _847, _845, _844, _843, _841, _840, _839, _837, _836, _833, _832, _830, _829, _828, _826, _824, _823, _818, _817, _816, _814, _813, _812, _811, _809, _808, _802, _797, _796, _795, _793, _792, _791, _790, _787, _786, _784, _783, _781, _780, _778, _777, _776, _774, _773, _772, _770, _769, _768, _766, _765, _764, _762, _761, _760, _758, _757, _731, _730, _729, _727, _726, _724, _723, _721, _720, _719, _717, _716, _715, _713, _712, _709, _708, _707, _705, _704, _702, _701, _700, _698, _697, _696, _695, _693, _692, _690, _689, _688, _686, _685, _684, _683, _680, _679, _677, _676, _675, _673, _672, _671, _670, _668, _667, _666, _664, _663, _662, _660, _659, _658, _654, _653, _652, _650, _649, _647, _646, _645, _644, _643, _641, _640, _638, _637, _636, _635, _633, _632, _630, _626, _625, _624, _623, _621, _620, _618, _617, _616, _614, _612, _608, _604, _601, _598, _595, _592, _586, _578, _576, _574, _573, _572, _571, _569, _568, _566, _565, _563, _560, _555, _554, _553, _551, _550, _549, _547, _546, _545, _543, _542, _540, _539, _538, _536, _535, _534, _533, _531, _530, _528, _527, _525, _524, _522, _520, _519, _516, _515, _514, _512, _511, _505, _503, _502, _501, _500, _498, _497, _496, _495, _486, _478, _477, _476, _474, _473, _471, _470, _469, _466, _462, _461, _460, _458, _457, _455, _454, _453, _451, _450, _448, _447, _445, _444, _443, _441, _440, _439, _438, _437, _434, _433, _432, _430, _429, _428, _427, _425, _423, _422, _421, _419, _416, _414, _411, _410, _408, _406, _405, _403, _398, _396, _395, _394, _393, _392, _387, _386, _383, _382, _380, _379, _378, _377, _375, _374, _372, _371, _370, _368, _367, _363, _362, _361, _359, _358, _356, _353, _352, _349, _346, _341, _340, _338, _336, _332, _331, _330, _328, _327, _326, _325, _323, _322, _319, _318, _315, _314, _313, _311, _310, _309, _308, _306, _304, _302, _301, _298, _297, _296, _294, _293, _284, _276, _275, _274, _273, _254, _253, _252, _250, _249, _248, _247, _245, _243, _241, _240, _239, _237, _236, _235, _234, _231, _230, _228, _226, _225, _223, _221, _220, _218, _217, _216, _214, _213, _212, _210, _209, _206, _205, _203, _202, _201, _199, _198, _197, _195, _194, _190, _189, _187, _186, _185, _183, _182, _181, _178, _177, _176, _174, _173, _169, _168, _167, _165, _164, _163, _160, _159, _157, _156, _154, _150, _149, _148, _146, _145, _144, _142, _139, _135, _131, _125, _124, _123, _121, _120, _119, _118, _116, _112, _111, _110, _108, _107, _106, _104, _103, _99, _98, _97, _95, _94, _93, _91, _90, _86, _85, _82, _81, _79, _78, _77, _75, _68, _67, _66, _64, _63, _62, _60, _59, _58, _56, _55, _54, _52, _51, _50, _48, _47, _45, _44, _42, _41, _40, _38, _37, _36, _31, _26, _25, _24, _22, _21, _19, _18, _17, _7, _6, _5;
+static List _1740, _1737, _1721, _1711, _1708, _1703, _1698, _1695, _1694, _1693, _1691, _1690, _1689, _1687, _1684, _1683, _1682, _1680, _1675, _1674, _1673, _1671, _1670, _1669, _1668, _1666, _1663, _1660, _1658, _1657, _1656, _1655, _1654, _1653, _1652, _1650, _1649, _1648, _1646, _1644, _1643, _1642, _1640, _1639, _1638, _1637, _1635, _1634, _1633, _1631, _1630, _1629, _1623, _1620, _1619, _1618, _1616, _1614, _1613, _1612, _1611, _1610, _1609, _1608, _1607, _1606, _1604, _1603, _1601, _1600, _1598, _1597, _1596, _1595, _1594, _1592, _1591, _1590, _1588, _1587, _1586, _1585, _1584, _1582, _1581, _1572, _1571, _1569, _1568, _1567, _1565, _1564, _1563, _1559, _1558, _1557, _1555, _1554, _1553, _1550, _1549, _1548, _1546, _1545, _1544, _1543, _1541, _1540, _1539, _1537, _1536, _1535, _1534, _1525, _1524, _1522, _1521, _1520, _1518, _1517, _1516, _1515, _1514, _1513, _1511, _1510, _1509, _1508, _1507, _1505, _1504, _1503, _1501, _1497, _1496, _1495, _1493, _1492, _1491, _1488, _1487, _1486, _1484, _1483, _1482, _1480, _1479, _1478, _1476, _1475, _1474, _1473, _1472, _1471, _1469, _1468, _1467, _1463, _1462, _1460, _1458, _1457, _1456, _1454, _1453, _1452, _1451, _1449, _1448, _1447, _1445, _1444, _1443, _1442, _1441, _1439, _1438, _1437, _1436, _1434, _1433, _1432, _1430, _1429, _1426, _1425, _1424, _1422, _1421, _1419, _1418, _1417, _1415, _1414, _1413, _1412, _1410, _1409, _1408, _1406, _1404, _1403, _1402, _1400, _1399, _1397, _1396, _1395, _1393, _1392, _1391, _1390, _1387, _1386, _1385, _1383, _1382, _1379, _1378, _1377, _1375, _1374, _1373, _1371, _1370, _1369, _1366, _1365, _1363, _1361, _1360, _1359, _1358, _1355, _1352, _1351, _1350, _1348, _1347, _1345, _1344, _1342, _1341, _1340, _1338, _1337, _1335, _1334, _1333, _1331, _1330, _1328, _1327, _1326, _1324, _1322, _1321, _1320, _1318, _1317, _1316, _1315, _1313, _1312, _1311, _1309, _1307, _1306, _1304, _1301, _1300, _1299, _1297, _1296, _1295, _1292, _1291, _1290, _1288, _1287, _1286, _1285, _1284, _1283, _1281, _1280, _1279, _1278, _1277, _1276, _1275, _1273, _1272, _1270, _1269, _1268, _1266, _1263, _1262, _1261, _1259, _1258, _1256, _1255, _1254, _1253, _1252, _1250, _1249, _1247, _1246, _1245, _1244, _1243, _1242, _1240, _1239, _1235, _1233, _1232, _1231, _1229, _1228, _1227, _1225, _1224, _1218, _1217, _1216, _1215, _1210, _1207, _1206, _1205, _1203, _1202, _1201, _1200, _1198, _1197, _1196, _1195, _1193, _1192, _1191, _1189, _1188, _1186, _1185, _1184, _1182, _1181, _1180, _1178, _1177, _1175, _1172, _1171, _1170, _1168, _1167, _1161, _1160, _1156, _1155, _1153, _1152, _1151, _1149, _1148, _1144, _1143, _1141, _1140, _1139, _1138, _1137, _1136, _1135, _1134, _1132, _1131, _1130, _1129, _1128, _1127, _1125, _1124, _1122, _1121, _1120, _1118, _1117, _1116, _1114, _1113, _1112, _1110, _1109, _1108, _1107, _1105, _1104, _1101, _1099, _1098, _1093, _1092, _1091, _1089, _1088, _1087, _1085, _1084, _1083, _1082, _1081, _1080, _1078, _1077, _1076, _1075, _1073, _1072, _1071, _1070, _1059, _1058, _1056, _1052, _1051, _1050, _1047, _1046, _1044, _1043, _1042, _1039, _1038, _1037, _1035, _1034, _1033, _1031, _1029, _1028, _1025, _1023, _1022, _1021, _1020, _1019, _1017, _1016, _1015, _1014, _1013, _1012, _1010, _1009, _1006, _1005, _1003, _1002, _1000, _999, _998, _996, _995, _994, _993, _992, _989, _987, _986, _984, _983, _981, _980, _972, _971, _969, _968, _964, _963, _962, _960, _959, _958, _957, _956, _950, _948, _947, _946, _942, _940, _939, _938, _936, _935, _934, _930, _929, _926, _925, _922, _921, _919, _918, _917, _916, _915, _914, _910, _908, _907, _906, _904, _903, _902, _901, _900, _899, _896, _895, _894, _892, _891, _890, _889, _888, _885, _884, _883, _879, _878, _874, _871, _870, _869, _866, _863, _861, _860, _859, _855, _854, _853, _850, _849, _848, _847, _845, _844, _843, _841, _840, _839, _837, _836, _833, _832, _830, _829, _828, _826, _824, _823, _818, _817, _816, _814, _813, _812, _811, _809, _808, _802, _797, _796, _795, _793, _792, _791, _790, _787, _786, _784, _783, _781, _780, _778, _777, _776, _774, _773, _772, _770, _769, _768, _766, _765, _764, _762, _761, _760, _758, _757, _731, _730, _729, _727, _726, _724, _723, _721, _720, _719, _717, _716, _715, _713, _712, _709, _708, _707, _705, _704, _702, _701, _700, _698, _697, _696, _695, _693, _692, _690, _689, _688, _686, _685, _684, _683, _680, _679, _677, _676, _675, _673, _672, _671, _670, _668, _667, _666, _664, _663, _662, _660, _659, _658, _654, _653, _652, _650, _649, _647, _646, _645, _644, _643, _641, _640, _638, _637, _636, _635, _633, _632, _630, _626, _625, _624, _623, _621, _620, _618, _617, _616, _614, _612, _608, _604, _601, _598, _595, _592, _586, _578, _576, _574, _573, _572, _571, _569, _568, _566, _565, _563, _560, _555, _554, _553, _551, _550, _549, _547, _546, _545, _543, _542, _540, _539, _538, _536, _535, _534, _533, _531, _530, _528, _527, _525, _524, _522, _520, _519, _516, _515, _514, _512, _511, _505, _503, _502, _501, _500, _498, _497, _496, _495, _486, _478, _477, _476, _474, _473, _471, _470, _469, _466, _462, _461, _460, _458, _457, _455, _454, _453, _451, _450, _448, _447, _445, _444, _443, _441, _440, _439, _438, _437, _434, _433, _432, _430, _429, _428, _427, _425, _423, _422, _421, _419, _416, _414, _411, _410, _408, _406, _405, _403, _398, _396, _395, _394, _393, _392, _387, _386, _383, _382, _380, _379, _378, _377, _375, _374, _372, _371, _370, _368, _367, _363, _362, _361, _359, _358, _356, _353, _352, _349, _346, _341, _340, _338, _336, _332, _331, _330, _328, _327, _326, _325, _323, _322, _319, _318, _315, _314, _313, _311, _310, _309, _308, _306, _304, _302, _301, _298, _297, _296, _294, _293, _284, _276, _275, _274, _273, _254, _253, _252, _250, _249, _248, _247, _245, _243, _241, _240, _239, _237, _236, _235, _234, _231, _230, _228, _226, _225, _223, _221, _220, _218, _217, _216, _214, _213, _212, _210, _209, _206, _205, _203, _202, _201, _199, _198, _197, _195, _194, _190, _189, _187, _186, _185, _183, _182, _181, _178, _177, _176, _174, _173, _169, _168, _167, _165, _164, _163, _160, _159, _157, _156, _154, _150, _149, _148, _146, _145, _144, _142, _139, _135, _131, _125, _124, _123, _121, _120, _119, _118, _116, _112, _111, _110, _108, _107, _106, _104, _103, _99, _98, _97, _95, _94, _93, _91, _90, _86, _85, _82, _81, _79, _78, _77, _75, _68, _67, _66, _64, _63, _62, _60, _59, _58, _56, _55, _54, _52, _51, _50, _48, _47, _45, _44, _42, _41, _40, _38, _37, _36, _31, _26, _25, _24, _22, _21, _19, _18, _17, _7, _6, _5;
 
-static String _1785, _1784, _1783, _1782, _1781, _1780, _1779, _1778, _1777, _1776, _1775, _1774, _1773, _1772, _1771, _1770, _1769, _1768, _1767, _1766, _1765, _1764, _1763, _1762, _1761, _1760, _1759, _1758, _1757, _1756, _1755, _1754, _1753, _1752, _1751, _1750, _1749, _1748, _1747, _1746, _1745, _1744, _1743, _1742, _1741, _1740, _1739, _1738, _1736, _1735, _1734, _1731, _1728, _1727, _1726, _1724, _1723, _1722, _1721, _1720, _1719, _1718, _1717, _1715, _1713, _1711, _1709, _1706, _1705, _1704, _1701, _1700, _1699, _1696, _1685, _1678, _1677, _1676, _1664, _1661, _1621, _1579, _1577, _1575, _1573, _1561, _1551, _1529, _1526, _1489, _1461, _1353, _1265, _1264, _1222, _1221, _1219, _1214, _1213, _1208, _1173, _1157, _1095, _1094, _1054, _1053, _951, _876, _875, _872, _867, _858, _857, _856, _820, _819, _805, _804, _803, _800, _799, _798, _628, _606, _602, _599, _596, _593, _590, _584, _583, _582, _581, _580, _579, _577, _561, _558, _557, _556, _508, _507, _489, _488, _484, _483, _482, _481, _479, _467, _464, _446, _350, _347, _344, _343, _342, _334, _333, _281, _279, _277, _272, _271, _270, _267, _266, _265, _264, _263, _262, _261, _260, _256, _191, _152, _151, _141, _136, _133, _132, _129, _128, _113, _34, _3;
+static String _1792, _1791, _1790, _1789, _1788, _1787, _1786, _1785, _1784, _1783, _1782, _1781, _1780, _1779, _1778, _1777, _1776, _1775, _1774, _1773, _1772, _1771, _1770, _1769, _1768, _1767, _1766, _1765, _1764, _1763, _1762, _1761, _1760, _1759, _1758, _1757, _1756, _1755, _1754, _1753, _1752, _1751, _1750, _1749, _1748, _1747, _1746, _1745, _1743, _1742, _1741, _1738, _1735, _1734, _1733, _1731, _1730, _1729, _1728, _1727, _1726, _1725, _1724, _1722, _1719, _1718, _1716, _1714, _1712, _1709, _1706, _1705, _1704, _1701, _1700, _1699, _1696, _1685, _1678, _1677, _1676, _1664, _1661, _1621, _1579, _1577, _1575, _1573, _1561, _1551, _1529, _1526, _1489, _1461, _1353, _1265, _1264, _1222, _1221, _1219, _1214, _1213, _1208, _1173, _1157, _1095, _1094, _1054, _1053, _951, _876, _875, _872, _867, _858, _857, _856, _820, _819, _805, _804, _803, _800, _799, _798, _628, _606, _602, _599, _596, _593, _590, _584, _583, _582, _581, _580, _579, _577, _561, _558, _557, _556, _508, _507, _489, _488, _484, _483, _482, _481, _479, _467, _464, _446, _350, _347, _344, _343, _342, _334, _333, _281, _279, _277, _272, _271, _270, _267, _266, _265, _264, _263, _262, _261, _260, _256, _191, _152, _151, _141, _136, _133, _132, _129, _128, _113, _34, _3;
 
-static Var _1737, _1732, _1729, _1725, _1716, _1714, _1712, _1710, _1707, _1702, _1697, _1692, _1688, _1686, _1681, _1679, _1672, _1667, _1665, _1662, _1659, _1651, _1647, _1645, _1641, _1636, _1632, _1628, _1627, _1626, _1625, _1624, _1622, _1617, _1615, _1605, _1602, _1599, _1593, _1589, _1583, _1580, _1578, _1576, _1574, _1570, _1566, _1562, _1560, _1556, _1552, _1547, _1542, _1538, _1533, _1532, _1531, _1530, _1528, _1527, _1523, _1519, _1512, _1506, _1502, _1500, _1499, _1498, _1494, _1490, _1485, _1481, _1477, _1470, _1466, _1465, _1464, _1459, _1455, _1450, _1446, _1440, _1435, _1431, _1428, _1427, _1423, _1420, _1416, _1411, _1407, _1405, _1401, _1398, _1394, _1389, _1388, _1384, _1381, _1380, _1376, _1372, _1368, _1367, _1364, _1362, _1357, _1356, _1354, _1349, _1346, _1343, _1339, _1336, _1332, _1329, _1325, _1323, _1319, _1314, _1310, _1308, _1305, _1303, _1302, _1298, _1294, _1293, _1289, _1282, _1274, _1271, _1267, _1260, _1257, _1251, _1248, _1241, _1238, _1237, _1236, _1234, _1230, _1226, _1223, _1220, _1212, _1211, _1209, _1204, _1199, _1194, _1190, _1187, _1183, _1179, _1176, _1174, _1169, _1162, _1159, _1158, _1154, _1150, _1147, _1146, _1145, _1142, _1133, _1126, _1123, _1119, _1115, _1111, _1106, _1100, _1097, _1090, _1086, _1079, _1074, _1069, _1057, _1055, _1049, _1048, _1045, _1041, _1040, _1036, _1032, _1030, _1027, _1026, _1024, _1018, _1011, _1008, _1007, _1004, _1001, _997, _991, _990, _985, _982, _973, _970, _967, _966, _965, _961, _955, _954, _953, _952, _949, _945, _944, _943, _941, _937, _933, _932, _931, _928, _927, _924, _923, _920, _913, _912, _911, _909, _905, _898, _897, _893, _887, _886, _882, _881, _880, _877, _873, _868, _865, _864, _862, _852, _851, _846, _842, _838, _835, _834, _831, _827, _825, _822, _821, _815, _810, _807, _806, _801, _794, _789, _788, _785, _782, _779, _775, _771, _767, _763, _759, _733, _732, _728, _725, _722, _718, _714, _711, _710, _706, _703, _699, _694, _691, _687, _682, _681, _678, _674, _669, _665, _661, _657, _656, _655, _651, _648, _642, _639, _634, _631, _629, _627, _622, _619, _615, _613, _611, _610, _609, _607, _605, _603, _600, _597, _594, _591, _589, _588, _587, _585, _575, _570, _567, _564, _562, _559, _552, _548, _544, _541, _537, _532, _529, _526, _523, _521, _518, _517, _513, _510, _509, _506, _504, _499, _491, _490, _487, _485, _480, _475, _472, _468, _465, _463, _459, _456, _452, _449, _442, _436, _435, _431, _426, _424, _420, _418, _417, _415, _413, _412, _409, _407, _404, _402, _397, _391, _390, _389, _388, _385, _384, _381, _376, _373, _369, _366, _365, _364, _360, _357, _355, _354, _351, _348, _345, _339, _337, _335, _329, _324, _321, _320, _317, _316, _312, _307, _305, _303, _300, _299, _295, _292, _291, _290, _289, _288, _287, _286, _285, _283, _282, _280, _278, _269, _268, _259, _258, _257, _255, _251, _246, _244, _242, _238, _233, _232, _229, _227, _224, _222, _219, _215, _211, _208, _207, _204, _200, _196, _193, _192, _188, _184, _180, _179, _175, _172, _171, _170, _166, _162, _161, _158, _155, _153, _147, _143, _140, _138, _137, _134, _130, _127, _126, _122, _117, _115, _114, _109, _105, _102, _101, _100, _96, _92, _89, _88, _87, _84, _83, _80, _76, _74, _73, _72, _71, _70, _69, _65, _61, _57, _53, _49, _46, _43, _39, _35, _33, _32, _30, _29, _28, _27, _23, _20, _16, _15, _14, _13, _12, _11, _10, _9, _8, _4, _2, _1, _0;
+static Var _1744, _1739, _1736, _1732, _1723, _1720, _1717, _1715, _1713, _1710, _1707, _1702, _1697, _1692, _1688, _1686, _1681, _1679, _1672, _1667, _1665, _1662, _1659, _1651, _1647, _1645, _1641, _1636, _1632, _1628, _1627, _1626, _1625, _1624, _1622, _1617, _1615, _1605, _1602, _1599, _1593, _1589, _1583, _1580, _1578, _1576, _1574, _1570, _1566, _1562, _1560, _1556, _1552, _1547, _1542, _1538, _1533, _1532, _1531, _1530, _1528, _1527, _1523, _1519, _1512, _1506, _1502, _1500, _1499, _1498, _1494, _1490, _1485, _1481, _1477, _1470, _1466, _1465, _1464, _1459, _1455, _1450, _1446, _1440, _1435, _1431, _1428, _1427, _1423, _1420, _1416, _1411, _1407, _1405, _1401, _1398, _1394, _1389, _1388, _1384, _1381, _1380, _1376, _1372, _1368, _1367, _1364, _1362, _1357, _1356, _1354, _1349, _1346, _1343, _1339, _1336, _1332, _1329, _1325, _1323, _1319, _1314, _1310, _1308, _1305, _1303, _1302, _1298, _1294, _1293, _1289, _1282, _1274, _1271, _1267, _1260, _1257, _1251, _1248, _1241, _1238, _1237, _1236, _1234, _1230, _1226, _1223, _1220, _1212, _1211, _1209, _1204, _1199, _1194, _1190, _1187, _1183, _1179, _1176, _1174, _1169, _1162, _1159, _1158, _1154, _1150, _1147, _1146, _1145, _1142, _1133, _1126, _1123, _1119, _1115, _1111, _1106, _1100, _1097, _1090, _1086, _1079, _1074, _1069, _1057, _1055, _1049, _1048, _1045, _1041, _1040, _1036, _1032, _1030, _1027, _1026, _1024, _1018, _1011, _1008, _1007, _1004, _1001, _997, _991, _990, _985, _982, _973, _970, _967, _966, _965, _961, _955, _954, _953, _952, _949, _945, _944, _943, _941, _937, _933, _932, _931, _928, _927, _924, _923, _920, _913, _912, _911, _909, _905, _898, _897, _893, _887, _886, _882, _881, _880, _877, _873, _868, _865, _864, _862, _852, _851, _846, _842, _838, _835, _834, _831, _827, _825, _822, _821, _815, _810, _807, _806, _801, _794, _789, _788, _785, _782, _779, _775, _771, _767, _763, _759, _733, _732, _728, _725, _722, _718, _714, _711, _710, _706, _703, _699, _694, _691, _687, _682, _681, _678, _674, _669, _665, _661, _657, _656, _655, _651, _648, _642, _639, _634, _631, _629, _627, _622, _619, _615, _613, _611, _610, _609, _607, _605, _603, _600, _597, _594, _591, _589, _588, _587, _585, _575, _570, _567, _564, _562, _559, _552, _548, _544, _541, _537, _532, _529, _526, _523, _521, _518, _517, _513, _510, _509, _506, _504, _499, _491, _490, _487, _485, _480, _475, _472, _468, _465, _463, _459, _456, _452, _449, _442, _436, _435, _431, _426, _424, _420, _418, _417, _415, _413, _412, _409, _407, _404, _402, _397, _391, _390, _389, _388, _385, _384, _381, _376, _373, _369, _366, _365, _364, _360, _357, _355, _354, _351, _348, _345, _339, _337, _335, _329, _324, _321, _320, _317, _316, _312, _307, _305, _303, _300, _299, _295, _292, _291, _290, _289, _288, _287, _286, _285, _283, _282, _280, _278, _269, _268, _259, _258, _257, _255, _251, _246, _244, _242, _238, _233, _232, _229, _227, _224, _222, _219, _215, _211, _208, _207, _204, _200, _196, _193, _192, _188, _184, _180, _179, _175, _172, _171, _170, _166, _162, _161, _158, _155, _153, _147, _143, _140, _138, _137, _134, _130, _127, _126, _122, _117, _115, _114, _109, _105, _102, _101, _100, _96, _92, _89, _88, _87, _84, _83, _80, _76, _74, _73, _72, _71, _70, _69, _65, _61, _57, _53, _49, _46, _43, _39, _35, _33, _32, _30, _29, _28, _27, _23, _20, _16, _15, _14, _13, _12, _11, _10, _9, _8, _4, _2, _1, _0;
 
 #include "parse.h"
 #include "literals.h"
@@ -2052,83 +2052,90 @@ __attribute__((constructor)) static void _file_init_(void){
   _1706 = String_new("pass an lvalue of the referenced type; write *p for a pointer");
   _1707 = String_var(_1706);
   _1708 = cons(_1707, NULL);
-  _1709 = String_new("String_var");
+  _1709 = String_new("write &value to pass its address");
   _1710 = String_var(_1709);
-  _1711 = String_new("Var_symbol");
-  _1712 = String_var(_1711);
-  _1713 = String_new("Var_convert");
-  _1714 = String_var(_1713);
-  _1715 = String_new("Var_pointer");
-  _1716 = String_var(_1715);
-  _1717 = String_new("cannot convert Var to type ");
-  _1718 = String_new(" to Var without loss");
-  _1719 = String_new("Var_box_long");
-  _1720 = String_new("Var_box_ulong");
-  _1721 = String_new("Var_box_long_long");
-  _1722 = String_new("Var_box_ulong_long");
-  _1723 = String_new("Var_box_long_double");
-  _1724 = String_new("Var_new");
-  _1725 = String_var(_1724);
-  _1726 = String_new("cannot convert the integer ");
-  _1727 = String_new(" to pointer type ");
-  _1728 = String_new("only a zero integer constant expression converts to a pointer");
-  _1729 = String_var(_1728);
-  _1730 = cons(_1729, NULL);
-  _1731 = String_new("the pointer types are unrelated: cast the expression to say so on purpose");
+  _1711 = cons(_1710, NULL);
+  _1712 = String_new("String_var");
+  _1713 = String_var(_1712);
+  _1714 = String_new("Var_symbol");
+  _1715 = String_var(_1714);
+  _1716 = String_new("Var_convert");
+  _1717 = String_var(_1716);
+  _1718 = String_new("cannot convert Var to ");
+  _1719 = String_new("write &value for its address, or value.pointer() to unbox a stored pointer");
+  _1720 = String_var(_1719);
+  _1721 = cons(_1720, NULL);
+  _1722 = String_new("Var_pointer");
+  _1723 = String_var(_1722);
+  _1724 = String_new("cannot convert Var to type ");
+  _1725 = String_new(" to Var without loss");
+  _1726 = String_new("Var_box_long");
+  _1727 = String_new("Var_box_ulong");
+  _1728 = String_new("Var_box_long_long");
+  _1729 = String_new("Var_box_ulong_long");
+  _1730 = String_new("Var_box_long_double");
+  _1731 = String_new("Var_new");
   _1732 = String_var(_1731);
-  _1733 = cons(_1732, NULL);
-  _1734 = String_new("the names share one C type but not one meaning: declare the converter ");
-  _1735 = String_new(", or cast the expression to say so on purpose");
-  _1736 = String_new("Var_str");
-  _1737 = String_var(_1736);
-  _1738 = String_new("slice step cannot be zero");
-  _1739 = String_new("Symbol");
-  _1740 = String_new("Symbol cannot be used as an integer bracket index");
-  _1741 = String_new("explicit-converter");
-  _1742 = String_new("check optional reference before accessing its value");
-  _1743 = String_new("array type cannot be used after operator 'is'");
-  _1744 = String_new("function type cannot be used after operator 'is'");
-  _1745 = String_new("pointer type after 'is' must be parenthesized");
-  _1746 = String_new("discard");
-  _1747 = String_new("check optional reference before using its value");
-  _1748 = String_new("identifier has an unknown binding identity");
-  _1749 = String_new("binding_shadow");
-  _1750 = String_new("method pointer receiver requires an addressable value");
-  _1751 = String_new("func_call");
-  _1752 = String_new("func_reference_type");
-  _1753 = String_new("func_argument");
-  _1754 = String_new("remove the call; the hole renders the value");
-  _1755 = String_new("remove the call; the format converts the value");
-  _1756 = String_new("remove the call; the destination converts the value");
-  _1757 = String_new("enum values box as the shared i32 family and retain no enum identity");
-  _1758 = String_new("Func");
-  _1759 = String_new("operator 'in' requires an implemented contains member");
-  _1760 = String_new("operand has no x2c type beside a protocol participant");
-  _1761 = String_new("operator '@' requires an implemented matmul member");
-  _1762 = String_new("Var_is_row");
-  _1763 = String_new("operator 'is' requires Var on the left");
-  _1764 = String_new("Var_is_void");
-  _1765 = String_new("Var_is");
-  _1766 = String_new("operator 'is' requires a type or Symbol on the right");
-  _1767 = String_new("check optional reference before indexing its value");
-  _1768 = String_new("unary '-' requires a numeric type or implemented neg");
-  _1769 = String_new("typed callback adapter target must name a function pointer");
-  _1770 = String_new("typed callback adapter target must be a typedef name");
-  _1771 = String_new("expected one Map entry");
-  _1772 = String_new("unsupported destructuring assignment target");
-  _1773 = String_new("check optional reference before assigning its value");
-  _1774 = String_new("sizeof");
-  _1775 = String_new("__");
-  _1776 = String_new("initializer_type");
-  _1777 = String_new("initializer_bound");
-  _1778 = String_new("initializer_index");
-  _1779 = String_new("initializer_value");
-  _1780 = String_new("initializer_arg");
-  _1781 = String_new("initializer_adapt");
-  _1782 = String_new("a brace outside an initializer needs a named destination type");
-  _1783 = String_new("cannot convert Func to a context-free callback");
-  _1784 = String_new("cannot convert an unresolved expression to Var");
-  _1785 = String_new("reference argument must name an addressable object");
+  _1733 = String_new("cannot convert the integer ");
+  _1734 = String_new(" to pointer type ");
+  _1735 = String_new("only a zero integer constant expression converts to a pointer");
+  _1736 = String_var(_1735);
+  _1737 = cons(_1736, NULL);
+  _1738 = String_new("the pointer types are unrelated: cast the expression to say so on purpose");
+  _1739 = String_var(_1738);
+  _1740 = cons(_1739, NULL);
+  _1741 = String_new("the names share one C type but not one meaning: declare the converter ");
+  _1742 = String_new(", or cast the expression to say so on purpose");
+  _1743 = String_new("Var_str");
+  _1744 = String_var(_1743);
+  _1745 = String_new("slice step cannot be zero");
+  _1746 = String_new("Symbol");
+  _1747 = String_new("Symbol cannot be used as an integer bracket index");
+  _1748 = String_new("explicit-converter");
+  _1749 = String_new("check optional reference before accessing its value");
+  _1750 = String_new("array type cannot be used after operator 'is'");
+  _1751 = String_new("function type cannot be used after operator 'is'");
+  _1752 = String_new("pointer type after 'is' must be parenthesized");
+  _1753 = String_new("discard");
+  _1754 = String_new("check optional reference before using its value");
+  _1755 = String_new("identifier has an unknown binding identity");
+  _1756 = String_new("binding_shadow");
+  _1757 = String_new("method pointer receiver requires an addressable value");
+  _1758 = String_new("func_call");
+  _1759 = String_new("func_reference_type");
+  _1760 = String_new("func_argument");
+  _1761 = String_new("remove the call; the hole renders the value");
+  _1762 = String_new("remove the call; the format converts the value");
+  _1763 = String_new("remove the call; the destination converts the value");
+  _1764 = String_new("enum values box as the shared i32 family and retain no enum identity");
+  _1765 = String_new("Func");
+  _1766 = String_new("operator 'in' requires an implemented contains member");
+  _1767 = String_new("operand has no x2c type beside a protocol participant");
+  _1768 = String_new("operator '@' requires an implemented matmul member");
+  _1769 = String_new("Var_is_row");
+  _1770 = String_new("operator 'is' requires Var on the left");
+  _1771 = String_new("Var_is_void");
+  _1772 = String_new("Var_is");
+  _1773 = String_new("operator 'is' requires a type or Symbol on the right");
+  _1774 = String_new("check optional reference before indexing its value");
+  _1775 = String_new("unary '-' requires a numeric type or implemented neg");
+  _1776 = String_new("typed callback adapter target must name a function pointer");
+  _1777 = String_new("typed callback adapter target must be a typedef name");
+  _1778 = String_new("expected one Map entry");
+  _1779 = String_new("unsupported destructuring assignment target");
+  _1780 = String_new("check optional reference before assigning its value");
+  _1781 = String_new("sizeof");
+  _1782 = String_new("__");
+  _1783 = String_new("initializer_type");
+  _1784 = String_new("initializer_bound");
+  _1785 = String_new("initializer_index");
+  _1786 = String_new("initializer_value");
+  _1787 = String_new("initializer_arg");
+  _1788 = String_new("initializer_adapt");
+  _1789 = String_new("a brace outside an initializer needs a named destination type");
+  _1790 = String_new("cannot convert Func to a context-free callback");
+  _1791 = String_new("cannot convert an unresolved expression to Var");
+  _1792 = String_new("reference argument must name an addressable object");
 }
 
 static List _iter_destination(void){
@@ -2248,7 +2255,7 @@ static List _parse_slice(Compiler c, List expr, List start){
   else if(Compiler_peek(c, 0) != 187){
     stop = Compiler_parse_expression(c);  if(Compiler_test(c, 117) && Compiler_peek(c, 0) != 187) step = Compiler_parse_expression(c);
   }
-  if(List_truth(step) && List_truth(({ static MatchCaptureSite _x2c_match_site_2;  x2c_match_site_match(& _x2c_match_site_2, step, List_var(_125)); }))) Compiler_report_error(c, 33658058, _1738, c -> token, NULL);  Compiler_expect(c, 187);  return cons(_0, cons(List_var(type), cons(List_var(cons(_126, cons(List_var(expr), cons(List_var(start), cons(List_var(stop), cons(List_var(step), NULL)))))), NULL)));
+  if(List_truth(step) && List_truth(({ static MatchCaptureSite _x2c_match_site_2;  x2c_match_site_match(& _x2c_match_site_2, step, List_var(_125)); }))) Compiler_report_error(c, 33658058, _1745, c -> token, NULL);  Compiler_expect(c, 187);  return cons(_0, cons(List_var(type), cons(List_var(cons(_126, cons(List_var(expr), cons(List_var(start), cons(List_var(stop), cons(List_var(step), NULL)))))), NULL)));
 }
 
 int Var_is(Var, Symbol);
@@ -2286,7 +2293,7 @@ static List Compiler__postfix_index_expression(Compiler c, List expr, List index
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(List_var(cons(_73, cons(List_var(cons(_71, cons(_137, cons(List_var(cons(List_var(receiver), _85)), NULL)))), NULL))), _139)), &_x2c_match_capture)) {Var params = _x2c_match_values[0];  Var rtype = _x2c_match_values[1]; {
-    Type key = Var_type(Var_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(c -> sym, supplied, _1739)) Compiler_report_error(c, 1362954, _1740, c -> token, NULL);  return cons(_0, cons(List_var(cons(rtype, NULL)), cons(List_var(cons(_140, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));
+    Type key = Var_type(Var_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(c -> sym, supplied, _1746)) Compiler_report_error(c, 1362954, _1747, c -> token, NULL);  return cons(_0, cons(List_var(cons(rtype, NULL)), cons(List_var(cons(_140, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));
   }
   break;
 }
@@ -2305,7 +2312,7 @@ String Var_str(Var);
 Var Map_setindex(Map, Var, Var);
 List Compiler_token_location(Compiler, Token);
 static void _note_explicit_converter(Compiler c, List call, String method, Token origin){
-  Type result = Var_type(List_cadr(call));  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, Type_list(result), List_var(_85)); })) || ! List_truth(({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_match(& _x2c_match_site_4, call, List_var(_150)); }))) return;  String spelled = String_lower(Var_str(List_car(Type_list(result))));  if(! String_equal(method, spelled) &&(! String_equal(method, _151) || result != _154)) return;  Map_setindex(c -> protocol_helpers, String_var(_1741), List_var(cons(List_var(call), cons(String_var(method), cons(List_var(Compiler_token_location(c, origin)), NULL)))));
+  Type result = Var_type(List_cadr(call));  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, Type_list(result), List_var(_85)); })) || ! List_truth(({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_match(& _x2c_match_site_4, call, List_var(_150)); }))) return;  String spelled = String_lower(Var_str(List_car(Type_list(result))));  if(! String_equal(method, spelled) &&(! String_equal(method, _151) || result != _154)) return;  Map_setindex(c -> protocol_helpers, String_var(_1748), List_var(cons(List_var(call), cons(String_var(method), cons(List_var(Compiler_token_location(c, origin)), NULL)))));
 }
 
 const PrintfFn * List_printf_family(List l){
@@ -2413,7 +2420,7 @@ List Compiler_try_parse_macro_slot(Compiler, Symbol);
 Var Map_getdefault(Map, Var, Var);
 static List _parse_postfix_apply(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 81);  Array arguments = Array_new(), notes = Array_new();  if(Compiler_peek(c, 0) == 83) Array_push(arguments, List_var(_231));  while(Compiler_peek(c, 0) != 83){
-    List argument = Compiler_try_parse_macro_slot(c, 107888847784);  Array_push(arguments, List_var(List_truth(argument) ? argument : Compiler_parse_assignment(c)));  Array_push(notes, Map_getdefault(c -> protocol_helpers, String_var(_1741), List_var(NULL)));  if(! Compiler_test(c, 89)) break;
+    List argument = Compiler_try_parse_macro_slot(c, 107888847784);  Array_push(arguments, List_var(List_truth(argument) ? argument : Compiler_parse_assignment(c)));  Array_push(notes, Map_getdefault(c -> protocol_helpers, String_var(_1748), List_var(NULL)));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  List supplied = Array_list_free(arguments);  List result = Compiler_resolve_expression(c, cons(_0, cons(_16, cons(List_var(cons(_70, cons(List_var(expr), cons(List_var(cons(_101, List_append(supplied, NULL))), NULL)))), NULL))), origin);  int method = ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_12;  x2c_match_site_match(& _x2c_match_site_12, expr, List_var(_241)); }));  _check_explicit_converter_arguments(c, result, method, Array_list_free(notes));  if(method && supplied == _243)
   {
@@ -2447,7 +2454,7 @@ int Compiler_protocol_rejects_direct_member(Compiler, Type, String);
 List Compiler_resolve_protocol_member(Compiler, Type, String);
 Type Sym_next_typedef(Sym, Type, int *);
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context){
-  if(! _init_guard_) _file_init_();  if(Var_equal(List_car(Type_list(receiver_type)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1742, c -> token, NULL);  Type type = Type_canonicalize(receiver_type);  int hops = 0;  if(access == 11645){
+  if(! _init_guard_) _file_init_();  if(Var_equal(List_car(Type_list(receiver_type)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1749, c -> token, NULL);  Type type = Type_canonicalize(receiver_type);  int hops = 0;  if(access == 11645){
     Type object_type = Sym_resolve_key(c -> sym, type);  object_type = Type_dereference(object_type);  Type field_type = Sym_lookup_field(c -> sym, object_type, field);  return List_truth(Type_list(field_type)) ? cons(_258, cons(_259, cons(List_var(field_type), NULL))) : NULL;
   }
   while(List_truth(Type_list(type))){
@@ -2757,7 +2764,7 @@ static int _postfix_operator(Symbol token){
 Var Map_del(Map, Var);
 static List _parse_postfix_tail(Compiler compiler, List expr){
   while(_postfix_operator(Compiler_peek(compiler, 0))){
-    Map_del(compiler -> protocol_helpers, String_var(_1741));  switch(Compiler_peek(compiler, 0)){
+    Map_del(compiler -> protocol_helpers, String_var(_1748));  switch(Compiler_peek(compiler, 0)){
       case 183 : expr = _parse_postfix_index(compiler, expr);  break;  case 81 : expr = _parse_postfix_apply(compiler, expr);  break;  case 11645 : expr = _parse_postfix_arrow(compiler, expr);  break;  case 93 : expr = _parse_postfix_dot(compiler, expr);  break;  default: expr = _parse_postfix_decinc(compiler, expr);  break;
     }
 
@@ -2916,9 +2923,9 @@ static int _is_type_selector_start(Compiler c){
 
 static Type _parse_is_type(Compiler c, Token origin){
   int parenthesized = Compiler_test(c, 81);  Type type = Compiler_parse_type_name(c);  if(parenthesized){
-    if(Compiler_peek(c, 0) == 183) Compiler_report_error(c, 1362954, _1743, origin, _346);  if(Compiler_peek(c, 0) == 81) Compiler_report_error(c, 1362954, _1744, origin, _349);  Compiler_expect(c, 83);
+    if(Compiler_peek(c, 0) == 183) Compiler_report_error(c, 1362954, _1750, origin, _346);  if(Compiler_peek(c, 0) == 81) Compiler_report_error(c, 1362954, _1751, origin, _349);  Compiler_expect(c, 83);
   }
-  else if(Type_is_pointer(type)) Compiler_report_error(c, 33658058, _1745, origin, _352);  return type;
+  else if(Type_is_pointer(type)) Compiler_report_error(c, 33658058, _1752, origin, _352);  return type;
 }
 
 Var Array_take_last(Array);
@@ -3161,7 +3168,7 @@ static List Compiler__protocol_operator_expression(Compiler c, Symbol op, List l
   else arguments = cons(_101, cons(List_var(lhs), cons(List_var(rhs), NULL)));  if(op != 604){
     if(_is_operator_temporary(c, lhs)) which |= 1;  if(List_truth(rhs) && _is_operator_temporary(c, rhs)) which |= 2;
   }
-  if(! derived && List_truth(Compiler_resolve_protocol_member(c, result, _1746))) _note_fresh_callee(c, binding);  if(which){
+  if(! derived && List_truth(Compiler_resolve_protocol_member(c, result, _1753))) _note_fresh_callee(c, binding);  if(which){
     Symbol member = List_truth(rhs) ? Compiler_operator_member(c, op) : 29006;  if(! member) member = Compiler_derived_member(c, op);  Type participant = Var_type(List_cadr(lhs));  participant = Type_canonicalize(participant);  List helper = Compiler_protocol_discard_helper(c, participant, Symbol_str(member), which);  if(List_truth(helper)){
       List _x2c_destructure_6 = helper;  binding = Var_list(List_getindex(_x2c_destructure_6, 0));  signature = Var_type(List_getindex(_x2c_destructure_6, 1));
     }
@@ -3188,7 +3195,7 @@ static List _binary_op_type_fallback(List lhs, List rhs){
 Type Type_promote(Type);
 static List Compiler__binary_op_type(Compiler compiler, Symbol op, List lhs, List rhs){
   Type ltype = Var_type(List_cadr(lhs)), rtype = Var_type(List_cadr(rhs));  if(Var_equal(List_car(Type_list(ltype)), Symbol_var(33330008396)) || Var_equal(List_car(Type_list(rtype)), Symbol_var(33330008396))){
-    int null_test =(_integer_literal_kind(lhs, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_36;  x2c_match_site_match(& _x2c_match_site_36, lhs, List_var(_478)); }))) ||(_integer_literal_kind(rhs, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_37;  x2c_match_site_match(& _x2c_match_site_37, rhs, List_var(_478)); })));  if(!((op == 15739 || op == 8571) && null_test) && op != 9805 && op != 31993) Compiler_report_error(compiler, 1362954, _1747, compiler -> token, NULL);
+    int null_test =(_integer_literal_kind(lhs, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_36;  x2c_match_site_match(& _x2c_match_site_36, lhs, List_var(_478)); }))) ||(_integer_literal_kind(rhs, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_37;  x2c_match_site_match(& _x2c_match_site_37, rhs, List_var(_478)); })));  if(!((op == 15739 || op == 8571) && null_test) && op != 9805 && op != 31993) Compiler_report_error(compiler, 1362954, _1754, compiler -> token, NULL);
   }
   if(op == 604) return NULL;  if(Sym_is_var_type(compiler -> sym, ltype) || Sym_is_var_type(compiler -> sym, rtype)){
     switch(op){
@@ -3229,7 +3236,7 @@ List Compiler_present_references(Compiler);
 static List _resolve_identifier(Compiler c, Var value, Type type, Token origin){
   int deferred = type == _116;  if(deferred) type = NULL;  int read_reference = ! List_truth(Type_list(type));  List binding = NULL;  int require_type = Var_is_row(value, 11, 7, 1);  if(Var_is_row(value, 11, 7, 1)) binding = Sym_reference(c -> sym, cons(value, NULL), &(type));  else if(Var_is_row(value, 9, 7, 4)){
     List name = Var_list(value);  int identity = 0;  String spelling = NULL;  if(binding_identity_try_parts(name, &(identity), &(spelling))){
-      Var issued;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_487, cons(int_var(identity), NULL))), &(issued)) || ! Var_is_row(issued, 11, 7, 1) || ! String_equal(Var_string(issued), spelling)) Compiler_report_error(c, 1362954, _1748, origin, cons(String_var(String_join(NULL, cons(String_var(_488), cons(String_var(List_repr(name)), NULL)))), NULL));  binding = name;
+      Var issued;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_487, cons(int_var(identity), NULL))), &(issued)) || ! Var_is_row(issued, 11, 7, 1) || ! String_equal(Var_string(issued), spelling)) Compiler_report_error(c, 1362954, _1755, origin, cons(String_var(String_join(NULL, cons(String_var(_488), cons(String_var(List_repr(name)), NULL)))), NULL));  binding = name;
     }
     else
   {
@@ -3259,9 +3266,9 @@ int macro_binder = Var_is_binder(value) ||(Var_is_row(value, 9, 7, 4) && ! Var_i
 if(String_truth(spelling)){
   Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(List_truth(visible) && ! List_equal(visible, binding)){
     if(Map_contains(binding_facts, List_var(cons(_413, cons(List_var(binding), NULL))))){
-      if(! Map_contains(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))))) Map_setindex(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1749)));
+      if(! Map_contains(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))))) Map_setindex(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1756)));
     }
-    else if(Sym_binding_is_local(c -> sym, binding) && ! Map_contains(binding_facts, List_var(cons(_376, cons(List_var(binding), NULL))))) binding = visible;  else if(List_truth(Type_list(visible_type)) &&(! List_truth(Type_list(type)) || List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL))) && ! Map_contains(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))))) Map_setindex(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1749)));
+    else if(Sym_binding_is_local(c -> sym, binding) && ! Map_contains(binding_facts, List_var(cons(_376, cons(List_var(binding), NULL))))) binding = visible;  else if(List_truth(Type_list(visible_type)) &&(! List_truth(Type_list(type)) || List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL))) && ! Map_contains(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))))) Map_setindex(binding_facts, List_var(cons(_506, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1756)));
   }
 
 }
@@ -3319,7 +3326,7 @@ static int _receiver_points_to(Type source, Type declared){
 
 Type Type_reference(Type);
 static List _method_bind(Compiler compiler, List receiver, Type type, Type declared, Token origin){
-  if(! List_truth(Type_list(declared)) || ! List_truth(Type_list(type))) return receiver;  Type target = Type_canonicalize(declared), source = Type_canonicalize(type);  if(_receiver_points_to(source, target)) Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(_556), cons(String_var(List_repr(Type_list(type))), cons(String_var(_557), cons(String_var(List_repr(Type_list(declared))), NULL))))), origin, _560);  if(! Var_equal(List_car(Type_list(target)), Symbol_var(54)) || cdr(Type_list(target)) != source) return receiver;  if(! _expression_is_addressable(compiler, receiver)) Compiler_report_error(compiler, 1362954, _1750, origin, _563);  List address = cons(_0, cons(List_var(Type_reference(type)), cons(List_var(cons(_9, cons(_10, cons(List_var(cons(_287, cons(List_var(receiver), NULL))), NULL)))), NULL)));  return Compiler_convert_expression(compiler, address, declared);
+  if(! List_truth(Type_list(declared)) || ! List_truth(Type_list(type))) return receiver;  Type target = Type_canonicalize(declared), source = Type_canonicalize(type);  if(_receiver_points_to(source, target)) Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(_556), cons(String_var(List_repr(Type_list(type))), cons(String_var(_557), cons(String_var(List_repr(Type_list(declared))), NULL))))), origin, _560);  if(! Var_equal(List_car(Type_list(target)), Symbol_var(54)) || cdr(Type_list(target)) != source) return receiver;  if(! _expression_is_addressable(compiler, receiver)) Compiler_report_error(compiler, 1362954, _1757, origin, _563);  List address = cons(_0, cons(List_var(Type_reference(type)), cons(List_var(cons(_9, cons(_10, cons(List_var(cons(_287, cons(List_var(receiver), NULL))), NULL)))), NULL)));  return Compiler_convert_expression(compiler, address, declared);
 }
 
 Var Compiler_evaluate_macro_slot(Compiler, Var);
@@ -3409,10 +3416,10 @@ static List _resolve_func_call(Compiler compiler, List callee, List supplied, To
     }
   }
 List storage = NULL;  Array locals = Array_new(), values = Array_new();  List invoked = callee;  String count_text = String_join(NULL, cons(String_var(int_str(List_len(arguments))), NULL));  List count = cons(_0, cons(_285, cons(List_var(cons(_33, cons(_285, cons(String_var(count_text), NULL)))), NULL)));  if(List_truth(arguments)){
-  String callee_name = Compiler_fresh_name(compiler, _1751);  List callee_binding = Sym_define(compiler -> sym, cons(String_var(callee_name), NULL), _586);  Array_push(locals, List_var(cons(_587, cons(_588, cons(List_var(cons(_14, cons(List_var(cons(_9, cons(_589, cons(List_var(cons(_15, cons(List_var(callee_binding), _17))), cons(List_var(callee), NULL))))), NULL))), NULL)))));  invoked = cons(_0, cons(_588, cons(List_var(cons(_88, cons(List_var(callee_binding), NULL))), NULL)));  Type query_type = NULL, value_type = NULL, reference_type = NULL;  Type unrepresentable_type = NULL;  List query = Sym_resolve_global(compiler -> sym, _592, &(query_type));  List value_constructor = Sym_resolve_global(compiler -> sym, _595, &(value_type));  List reference_constructor = Sym_resolve_global(compiler -> sym, _598, &(reference_type));  List unrepresentable = Sym_resolve_global(compiler -> sym, _601, &(unrepresentable_type));  List null_binding = Sym_reference(compiler -> sym, _469, NULL);  int index = 0; {
+  String callee_name = Compiler_fresh_name(compiler, _1758);  List callee_binding = Sym_define(compiler -> sym, cons(String_var(callee_name), NULL), _586);  Array_push(locals, List_var(cons(_587, cons(_588, cons(List_var(cons(_14, cons(List_var(cons(_9, cons(_589, cons(List_var(cons(_15, cons(List_var(callee_binding), _17))), cons(List_var(callee), NULL))))), NULL))), NULL)))));  invoked = cons(_0, cons(_588, cons(List_var(cons(_88, cons(List_var(callee_binding), NULL))), NULL)));  Type query_type = NULL, value_type = NULL, reference_type = NULL;  Type unrepresentable_type = NULL;  List query = Sym_resolve_global(compiler -> sym, _592, &(query_type));  List value_constructor = Sym_resolve_global(compiler -> sym, _595, &(value_type));  List reference_constructor = Sym_resolve_global(compiler -> sym, _598, &(reference_type));  List unrepresentable = Sym_resolve_global(compiler -> sym, _601, &(unrepresentable_type));  List null_binding = Sym_reference(compiler -> sym, _469, NULL);  int index = 0; {
     List argument;  List _x2c_macro_object_19 = arguments;  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_20))){
       argument = Var_list(_x2c_macro_cursor_output_20); {
-        Type source_type = Var_type(List_cadr(argument));  int null_reference = _integer_literal_kind(argument, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_48;  x2c_match_site_match(& _x2c_match_site_48, argument, List_var(_478)); }));  int forwarded_reference = Var_equal(List_car(Type_list(source_type)), Symbol_var(33330008396));  int addressable = _expression_is_addressable(compiler, argument);  List source_type_literal = Compiler_cache_literal_list(compiler, Type_list(Sym_normalize_declared_type(compiler -> sym, forwarded_reference ? List_cdr(source_type) : source_type)));  List index_expr = cons(_0, cons(_285, cons(List_var(cons(_33, cons(_285, cons(String_var(String_join(NULL, cons(String_var(int_str(index)), NULL))), NULL)))), NULL)));  List reference_name = Sym_define(compiler -> sym, cons(String_var(Compiler_fresh_name(compiler, _1752)), NULL), _604);  List queried = cons(_0, cons(_605, cons(List_var(cons(_70, cons(List_var(cons(_0, cons(List_var(query_type), cons(List_var(cons(_88, cons(List_var(query), NULL))), NULL)))), cons(List_var(cons(_101, cons(List_var(invoked), cons(List_var(count), cons(List_var(index_expr), NULL))))), NULL)))), NULL)));  Array_push(locals, List_var(cons(_587, cons(_605, cons(List_var(cons(_14, cons(List_var(cons(_9, cons(_589, cons(List_var(cons(_15, cons(List_var(reference_name), _17))), cons(List_var(queried), NULL))))), NULL))), NULL)))));  String argument_name = Compiler_fresh_name(compiler, _1753);  List binding = Sym_define(compiler -> sym, cons(String_var(argument_name), NULL), _608);  Array_push(locals, List_var(cons(_587, cons(_609, cons(List_var(cons(_14, cons(List_var(cons(_15, cons(List_var(binding), _17))), NULL))), NULL)))));  List address = cons(_0, cons(_16, cons(List_var(cons(_88, cons(List_var(null_binding), NULL))), NULL)));  if(forwarded_reference) address = argument;  else if(addressable && ! null_reference){
+        Type source_type = Var_type(List_cadr(argument));  int null_reference = _integer_literal_kind(argument, NULL) == 1715358 || List_truth(({ static MatchCaptureSite _x2c_match_site_48;  x2c_match_site_match(& _x2c_match_site_48, argument, List_var(_478)); }));  int forwarded_reference = Var_equal(List_car(Type_list(source_type)), Symbol_var(33330008396));  int addressable = _expression_is_addressable(compiler, argument);  List source_type_literal = Compiler_cache_literal_list(compiler, Type_list(Sym_normalize_declared_type(compiler -> sym, forwarded_reference ? List_cdr(source_type) : source_type)));  List index_expr = cons(_0, cons(_285, cons(List_var(cons(_33, cons(_285, cons(String_var(String_join(NULL, cons(String_var(int_str(index)), NULL))), NULL)))), NULL)));  List reference_name = Sym_define(compiler -> sym, cons(String_var(Compiler_fresh_name(compiler, _1759)), NULL), _604);  List queried = cons(_0, cons(_605, cons(List_var(cons(_70, cons(List_var(cons(_0, cons(List_var(query_type), cons(List_var(cons(_88, cons(List_var(query), NULL))), NULL)))), cons(List_var(cons(_101, cons(List_var(invoked), cons(List_var(count), cons(List_var(index_expr), NULL))))), NULL)))), NULL)));  Array_push(locals, List_var(cons(_587, cons(_605, cons(List_var(cons(_14, cons(List_var(cons(_9, cons(_589, cons(List_var(cons(_15, cons(List_var(reference_name), _17))), cons(List_var(queried), NULL))))), NULL))), NULL)))));  String argument_name = Compiler_fresh_name(compiler, _1760);  List binding = Sym_define(compiler -> sym, cons(String_var(argument_name), NULL), _608);  Array_push(locals, List_var(cons(_587, cons(_609, cons(List_var(cons(_14, cons(List_var(cons(_15, cons(List_var(binding), _17))), NULL))), NULL)))));  List address = cons(_0, cons(_16, cons(List_var(cons(_88, cons(List_var(null_binding), NULL))), NULL)));  if(forwarded_reference) address = argument;  else if(addressable && ! null_reference){
           Type pointer = Type_reference(source_type);  address = cons(_0, cons(List_var(pointer), cons(List_var(cons(_9, cons(_10, cons(List_var(cons(_287, cons(List_var(argument), NULL))), NULL)))), NULL)));
         }
         List carrier_type = null_reference ? cons(_0, cons(_605, cons(List_var(cons(_88, cons(List_var(reference_name), NULL))), NULL))) : ! forwarded_reference && ! addressable ? cons(_0, cons(_16, cons(List_var(cons(_88, cons(List_var(null_binding), NULL))), NULL))) : source_type_literal;  List reference_value = cons(_0, cons(_609, cons(List_var(cons(_70, cons(List_var(cons(_0, cons(List_var(reference_type), cons(List_var(cons(_88, cons(List_var(reference_constructor), NULL))), NULL)))), cons(List_var(cons(_101, cons(List_var(address), cons(List_var(carrier_type), NULL)))), NULL)))), NULL)));  List value_value = NULL;  if(Sym_var_tag_for_type(compiler -> sym, source_type, NULL)){
@@ -3551,13 +3558,13 @@ static int _defines_crossing(Compiler c, Type source, Type target){
 }
 
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context){
-  if(! _init_guard_) _file_init_();  _check_noted_converter(c, Var_list(Map_getdefault(c -> protocol_helpers, String_var(_1741), List_var(NULL))), parsed, target, context);
+  if(! _init_guard_) _file_init_();  _check_noted_converter(c, Var_list(Map_getdefault(c -> protocol_helpers, String_var(_1748), List_var(NULL))), parsed, target, context);
 }
 
 Var Var_caddr(Var);
 void Compiler_report_warning_at(Compiler, Symbol, String, List, List);
 static void _check_noted_converter(Compiler c, List noted, List parsed, Type target, int context){
-  if(! List_truth(noted) || ! List_truth(parsed) || ! List_truth(Type_list(target))) return;  List _x2c_destructure_8 = noted;  List call = Var_list(List_getindex(_x2c_destructure_8, 0));  String method = Var_string(List_getindex(_x2c_destructure_8, 1));  List location = Var_list(List_getindex(_x2c_destructure_8, 2));  if(! List_equal(call, parsed)) return;  if(! List_equal(Type_list(Type_declared(target)), Type_list(Type_canonicalize(target))) || ! List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(call)))), Type_list(Sym_resolve_key(c -> sym, target)))) return;  List receiver = Var_list(Var_cadr(Var_caddr(List_caddr(call))));  Type source = Var_type(List_cadr(receiver));  if(! List_truth(Type_list(source))) return;  int source_is_var = Sym_is_var_type(c -> sym, source);  if(source_is_var &&(String_equal(method, _151)) !=(context != 0)) return;  if(source_is_var && target != _802 && List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, target)))) return;  if(context == 2 && ! source_is_var) return;  if(! source_is_var && ! String_equal(method, _151) && Sym_is_string_type(c -> sym, target)) return;  int implicit = source_is_var || Sym_is_var_type(c -> sym, target) || List_equal(Type_list(Sym_resolve_key(c -> sym, source)), Type_list(Sym_resolve_key(c -> sym, target))) || ! ! List_truth(_converter_call(c, receiver, source, target));  if(! implicit || _defines_crossing(c, source, target)) return;  Map_del(c -> protocol_helpers, String_var(_1741));  String hint = context == 1 ? _1754 : context == 2 ? _1755 : _1756;  Compiler_report_warning_at(c, 245101273238492, String_join(NULL, cons(String_var(_803), cons(String_var(method), cons(String_var(_804), cons(String_var(List_repr(Type_list(target))), cons(String_var(_805), NULL)))))), location, cons(String_var(hint), NULL));
+  if(! List_truth(noted) || ! List_truth(parsed) || ! List_truth(Type_list(target))) return;  List _x2c_destructure_8 = noted;  List call = Var_list(List_getindex(_x2c_destructure_8, 0));  String method = Var_string(List_getindex(_x2c_destructure_8, 1));  List location = Var_list(List_getindex(_x2c_destructure_8, 2));  if(! List_equal(call, parsed)) return;  if(! List_equal(Type_list(Type_declared(target)), Type_list(Type_canonicalize(target))) || ! List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(call)))), Type_list(Sym_resolve_key(c -> sym, target)))) return;  List receiver = Var_list(Var_cadr(Var_caddr(List_caddr(call))));  Type source = Var_type(List_cadr(receiver));  if(! List_truth(Type_list(source))) return;  int source_is_var = Sym_is_var_type(c -> sym, source);  if(source_is_var &&(String_equal(method, _151)) !=(context != 0)) return;  if(source_is_var && target != _802 && List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, target)))) return;  if(context == 2 && ! source_is_var) return;  if(! source_is_var && ! String_equal(method, _151) && Sym_is_string_type(c -> sym, target)) return;  int implicit = source_is_var || Sym_is_var_type(c -> sym, target) || List_equal(Type_list(Sym_resolve_key(c -> sym, source)), Type_list(Sym_resolve_key(c -> sym, target))) || ! ! List_truth(_converter_call(c, receiver, source, target));  if(! implicit || _defines_crossing(c, source, target)) return;  Map_del(c -> protocol_helpers, String_var(_1748));  String hint = context == 1 ? _1761 : context == 2 ? _1762 : _1763;  Compiler_report_warning_at(c, 245101273238492, String_join(NULL, cons(String_var(_803), cons(String_var(method), cons(String_var(_804), cons(String_var(List_repr(Type_list(target))), cons(String_var(_805), NULL)))))), location, cons(String_var(hint), NULL));
 }
 
 static List _resolve_call(Compiler c, Type result_type, List function, List supplied, Token origin){
@@ -3607,7 +3614,7 @@ List resolved = Compiler_resolve_expression(c, function, origin);  Type type = V
 
 Symbol Compiler_require_var_tag(Compiler compiler, Type target, Token origin){
   if(! _init_guard_) _file_init_();  Type resolved = NULL;  Symbol vartag = Sym_var_tag_for_type(compiler -> sym, target, &(resolved));  if(List_truth(Type_list(resolved)) && Type_is_enum(resolved)){
-    String note = _1757;  Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(_856), cons(String_var(List_repr(Type_list(target))), cons(String_var(_857), NULL)))), origin, cons(String_var(note), NULL));
+    String note = _1764;  Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(_856), cons(String_var(List_repr(Type_list(target))), cons(String_var(_857), NULL)))), origin, cons(String_var(note), NULL));
   }
   if(! vartag) Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(_819), cons(String_var(List_repr(Type_list(target))), cons(String_var(_858), NULL)))), origin, NULL);  return vartag;
 }
@@ -3646,7 +3653,7 @@ List Compiler_cache(Compiler, List);
 List Compiler_anchor_origin(Compiler, List, Token);
 static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, List rhs, Token origin){
   Type lhs_type = Var_type(List_cadr(lhs)), rhs_type = Var_type(List_cadr(rhs));  if(lhs_type == _116 || rhs_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));  if(Symbol_is_assignment_op(operator)){
-    Type type = lhs_type;  if(operator == 123 && !(c -> meta_body && Sym_is_named_value_type(c -> sym, type, _1758))) rhs = Compiler_convert_expression(c, rhs, type);  return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));
+    Type type = lhs_type;  if(operator == 123 && !(c -> meta_body && Sym_is_named_value_type(c -> sym, type, _1765))) rhs = Compiler_convert_expression(c, rhs, type);  return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))))), NULL)));
   }
   if(operator == 15739 || operator == 8571 || operator == 121 || operator == 125 || operator == 15483 || operator == 15995){
     if(Sym_is_string_type(c -> sym, lhs_type) && _expr_is_raw_string_literal(rhs)) rhs = Compiler_convert_expression(c, rhs, lhs_type);  else if(Sym_is_string_type(c -> sym, rhs_type) && _expr_is_raw_string_literal(lhs)) lhs = Compiler_convert_expression(c, lhs, rhs_type);
@@ -3657,21 +3664,21 @@ static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, L
   List lowered = Compiler__protocol_operator_expression(c, operator, lhs, rhs);  if(List_truth(lowered)){
     if(! constant_string) return lowered;  List cached = Compiler_cache(c, cons(_179, cons(List_var(lowered), NULL)));  return cons(_0, cons(_170, cons(List_var(cached), NULL)));
   }
-  if(operator == 604) Compiler_report_error(c, 1362954, _1759, origin, cons(String_var(String_join(NULL, cons(String_var(_867), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL)); {
+  if(operator == 604) Compiler_report_error(c, 1362954, _1766, origin, cons(String_var(String_join(NULL, cons(String_var(_867), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL)); {
     Symbol member = Compiler_operator_member(c, operator);  int lhs_known = lhs_type != NULL;  int rhs_known = rhs_type != NULL;  int arithmetic = member && operator != 15739 && operator != 8571;  if(arithmetic && lhs_known != rhs_known){
-      Type participant = lhs_known ? lhs_type : rhs_type;  List other = lhs_known ? rhs : lhs;  if(_converts_operands(c, participant) && List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member))) && List_truth(({ static MatchCaptureSite _x2c_match_site_64;  x2c_match_site_match(& _x2c_match_site_64, other, List_var(_871)); }))) Compiler_report_error(c, 1362954, _1760, origin, _874);
+      Type participant = lhs_known ? lhs_type : rhs_type;  List other = lhs_known ? rhs : lhs;  if(_converts_operands(c, participant) && List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member))) && List_truth(({ static MatchCaptureSite _x2c_match_site_64;  x2c_match_site_match(& _x2c_match_site_64, other, List_var(_871)); }))) Compiler_report_error(c, 1362954, _1767, origin, _874);
     }
 
   }
   if(operator == 129 && ! Sym_is_var_type(c -> sym, lhs_type) && ! Sym_is_var_type(c -> sym, rhs_type)){
-    Compiler_report_error(c, 1362954, _1761, origin, cons(String_var(String_join(NULL, cons(String_var(_875), cons(String_var(List_repr(Type_list(lhs_type))), cons(String_var(_876), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))))), NULL));
+    Compiler_report_error(c, 1362954, _1768, origin, cons(String_var(String_join(NULL, cons(String_var(_875), cons(String_var(List_repr(Type_list(lhs_type))), cons(String_var(_876), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))))), NULL));
   }
   Type type = List_type(Compiler__binary_op_type(c, operator, lhs, rhs));  List operation = cons(_9, cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))));  if(Sym_is_var_type(c -> sym, lhs_type) || Sym_is_var_type(c -> sym, rhs_type)) operation = Compiler_anchor_origin(c, operation, origin);  return cons(_0, cons(List_var(type), cons(List_var(operation), NULL)));
 }
 
 int Type_var_tag_row(Symbol, unsigned long *, unsigned long *, unsigned long *);
 static List _constant_row_test(Compiler c, List lhs, Symbol tag, Token origin){
-  unsigned long top, mask, bottom;  if(! Type_var_tag_row(tag, &(top), &(mask), &(bottom))) return NULL;  List callee = _resolve_identifier(c, String_var(_1762), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(List_var(cons(_0, cons(_285, cons(List_var(cons(_33, cons(_285, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(top))), NULL))), NULL)))), NULL)))), cons(List_var(cons(_0, cons(_880, cons(List_var(cons(_33, cons(_880, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(mask))), NULL))), NULL)))), NULL)))), cons(List_var(cons(_0, cons(_880, cons(List_var(cons(_33, cons(_880, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(bottom))), NULL))), NULL)))), NULL)))), NULL)))))), NULL)))), NULL)));
+  unsigned long top, mask, bottom;  if(! Type_var_tag_row(tag, &(top), &(mask), &(bottom))) return NULL;  List callee = _resolve_identifier(c, String_var(_1769), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(List_var(cons(_0, cons(_285, cons(List_var(cons(_33, cons(_285, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(top))), NULL))), NULL)))), NULL)))), cons(List_var(cons(_0, cons(_880, cons(List_var(cons(_33, cons(_880, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(mask))), NULL))), NULL)))), NULL)))), cons(List_var(cons(_0, cons(_880, cons(List_var(cons(_33, cons(_880, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong(bottom))), NULL))), NULL)))), NULL)))), NULL)))))), NULL)))), NULL)));
 }
 
 static List _resolve_initializer(Compiler c, List node, Token origin){
@@ -3923,13 +3930,13 @@ static MatchCaptureSite _x2c_match_site_89;  if (x2c_match_site_try_capture(& _x
 break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224499365924544590ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var target = _x2c_match_values[0];  return Compiler_var_tag_expression(c, Var_type(target), origin);  break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497957430414346ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operand = _x2c_match_values[0];  Var target_syntax = _x2c_match_values[1]; {
-  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  Type lhs_type = Var_type(List_cadr(lhs));  Type target = Var_type(target_syntax);  if(_deferred_receiver(lhs) || _deferred_type_test(target)) return cons(_0, cons(_117, cons(List_var(cons(_1048, cons(List_var(lhs), cons(List_var(target), NULL)))), NULL)));  if(! Sym_is_var_type(c -> sym, lhs_type)) Compiler_report_error(c, 1362954, _1763, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(target == _228 || target == _1056){
-    List callee = _resolve_identifier(c, String_var(_1764), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), NULL))), NULL)))), NULL)));
+  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  Type lhs_type = Var_type(List_cadr(lhs));  Type target = Var_type(target_syntax);  if(_deferred_receiver(lhs) || _deferred_type_test(target)) return cons(_0, cons(_117, cons(List_var(cons(_1048, cons(List_var(lhs), cons(List_var(target), NULL)))), NULL)));  if(! Sym_is_var_type(c -> sym, lhs_type)) Compiler_report_error(c, 1362954, _1770, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(target == _228 || target == _1056){
+    List callee = _resolve_identifier(c, String_var(_1771), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), NULL))), NULL)))), NULL)));
   }
-  Symbol vartag = Compiler_require_var_tag(c, target, origin);  List direct = _constant_row_test(c, lhs, vartag, origin);  if(List_truth(direct)) return direct;  String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) vartag))), NULL));  List callee = _resolve_identifier(c, String_var(_1765), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(List_var(cons(_0, cons(_865, cons(String_var(tagsym), NULL)))), NULL)))), NULL)))), NULL)));
+  Symbol vartag = Compiler_require_var_tag(c, target, origin);  List direct = _constant_row_test(c, lhs, vartag, origin);  if(List_truth(direct)) return direct;  String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) vartag))), NULL));  List callee = _resolve_identifier(c, String_var(_1772), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(List_var(cons(_0, cons(_865, cons(String_var(tagsym), NULL)))), NULL)))), NULL)))), NULL)));
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224519101541323736ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operand = _x2c_match_values[0];  Var selector = _x2c_match_values[1]; {
-  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  selector = List_var(Compiler_resolve_expression(c, Var_list(selector), origin));  Type lhs_type = Var_type(List_cadr(lhs)), selector_type = Var_type(Var_cadr(selector));  if(_deferred_receiver(lhs) || _deferred_receiver(Var_list(selector))) return cons(_0, cons(_117, cons(List_var(cons(_1057, cons(List_var(lhs), cons(selector, NULL)))), NULL)));  if(! Sym_is_var_type(c -> sym, lhs_type)) Compiler_report_error(c, 1362954, _1763, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(! Sym_is_named_value_type(c -> sym, selector_type, _1739)) Compiler_report_error(c, 1362954, _1766, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(selector_type))), NULL)))), NULL));
+  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  selector = List_var(Compiler_resolve_expression(c, Var_list(selector), origin));  Type lhs_type = Var_type(List_cadr(lhs)), selector_type = Var_type(Var_cadr(selector));  if(_deferred_receiver(lhs) || _deferred_receiver(Var_list(selector))) return cons(_0, cons(_117, cons(List_var(cons(_1057, cons(List_var(lhs), cons(selector, NULL)))), NULL)));  if(! Sym_is_var_type(c -> sym, lhs_type)) Compiler_report_error(c, 1362954, _1770, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(! Sym_is_named_value_type(c -> sym, selector_type, _1746)) Compiler_report_error(c, 1362954, _1773, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(selector_type))), NULL)))), NULL));
   {
     List _x2c_match_expr = Var_list(selector);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3948,10 +3955,10 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
 default: break;
     }
   }
-List callee = _resolve_identifier(c, String_var(_1765), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(selector, NULL)))), NULL)))), NULL)));
+List callee = _resolve_identifier(c, String_var(_1772), NULL, origin);  return cons(_0, cons(_32, cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, cons(List_var(lhs), cons(selector, NULL)))), NULL)))), NULL)));
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936781418864ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var receiver = _x2c_match_values[0];  Var selector = _x2c_match_values[1]; {
-  receiver = List_var(Compiler_resolve_expression(c, Var_list(receiver), origin));  selector = List_var(Compiler_resolve_expression(c, Var_list(selector), origin));  if(Var_equal(Var_car(Var_cadr(receiver)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1767, origin, NULL);  if(_deferred_receiver(Var_list(receiver)) || _deferred_receiver(Var_list(selector))) return cons(_0, cons(_117, cons(List_var(cons(_127, cons(receiver, cons(selector, NULL)))), NULL)));  List resolved = Compiler__postfix_index_expression(c, Var_list(receiver), Var_list(selector));  if(List_truth(resolved)) return resolved;  Type receiver_type = Var_type(Var_cadr(receiver));  if(! List_truth(Type_list(receiver_type)) && List_truth(({ static MatchCaptureSite _x2c_match_site_91;  x2c_match_site_match(& _x2c_match_site_91, Var_list(receiver), List_var(_1093)); }))) return cons(_0, cons(_16, cons(List_var(cons(_127, cons(receiver, cons(selector, NULL)))), NULL)));  Compiler_report_error(c, 33658058, Type_is_typedef_name(receiver_type) ? String_join(NULL, cons(String_var(_819), cons(String_var(List_str(receiver_type)), cons(String_var(_1094), NULL)))) : String_join(NULL, cons(String_var(_819), cons(String_var(List_str(receiver_type)), cons(String_var(_1095), NULL)))), origin, NULL);
+  receiver = List_var(Compiler_resolve_expression(c, Var_list(receiver), origin));  selector = List_var(Compiler_resolve_expression(c, Var_list(selector), origin));  if(Var_equal(Var_car(Var_cadr(receiver)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1774, origin, NULL);  if(_deferred_receiver(Var_list(receiver)) || _deferred_receiver(Var_list(selector))) return cons(_0, cons(_117, cons(List_var(cons(_127, cons(receiver, cons(selector, NULL)))), NULL)));  List resolved = Compiler__postfix_index_expression(c, Var_list(receiver), Var_list(selector));  if(List_truth(resolved)) return resolved;  Type receiver_type = Var_type(Var_cadr(receiver));  if(! List_truth(Type_list(receiver_type)) && List_truth(({ static MatchCaptureSite _x2c_match_site_91;  x2c_match_site_match(& _x2c_match_site_91, Var_list(receiver), List_var(_1093)); }))) return cons(_0, cons(_16, cons(List_var(cons(_127, cons(receiver, cons(selector, NULL)))), NULL)));  Compiler_report_error(c, 33658058, Type_is_typedef_name(receiver_type) ? String_join(NULL, cons(String_var(_819), cons(String_var(List_str(receiver_type)), cons(String_var(_1094), NULL)))) : String_join(NULL, cons(String_var(_819), cons(String_var(List_str(receiver_type)), cons(String_var(_1095), NULL)))), origin, NULL);
 }
 break; } } static MatchCaptureSite _x2c_match_site_92;  if (x2c_match_site_try_capture(& _x2c_match_site_92, _x2c_match_expr, List_var(_1108), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  List supplied = Var_list(_x2c_match_values[1]); {
   Var _x2c_match_value_6 = callee; {
@@ -3980,12 +3987,12 @@ Type type = _deferred_receiver(Var_list(receiver)) ? List_type(_116) : NULL;  re
 break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];  Var operand = _x2c_match_values[1]; {
-  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  Type lhs_type = Var_type(List_cadr(lhs));  if(Var_equal(List_car(Type_list(lhs_type)), Symbol_var(33330008396)) && ! Var_equal(operator, Symbol_var(60))) Compiler_report_error(c, 1362954, _1747, origin, NULL);  if(Var_equal(operator, Symbol_var(54)) && Var_equal(Var_car(Var_cadr(operand)), Symbol_var(77)) && ! Var_equal(List_car(Type_list(lhs_type)), Symbol_var(77))) return lhs;  if(lhs_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(operator, cons(List_var(lhs), NULL)))), NULL)));  List lowered = Var_equal(operator, Symbol_var(62)) ? Compiler__protocol_operator_expression(c, Var_symbol(operator), lhs, NULL) : NULL;  if(List_truth(lowered)) return lowered;  Type type = lhs_type;  switch(Var_symbol(operator)){
+  List lhs = Compiler_resolve_expression(c, Var_list(operand), origin);  Type lhs_type = Var_type(List_cadr(lhs));  if(Var_equal(List_car(Type_list(lhs_type)), Symbol_var(33330008396)) && ! Var_equal(operator, Symbol_var(60))) Compiler_report_error(c, 1362954, _1754, origin, NULL);  if(Var_equal(operator, Symbol_var(54)) && Var_equal(Var_car(Var_cadr(operand)), Symbol_var(77)) && ! Var_equal(List_car(Type_list(lhs_type)), Symbol_var(77))) return lhs;  if(lhs_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(operator, cons(List_var(lhs), NULL)))), NULL)));  List lowered = Var_equal(operator, Symbol_var(62)) ? Compiler__protocol_operator_expression(c, Var_symbol(operator), lhs, NULL) : NULL;  if(List_truth(lowered)) return lowered;  Type type = lhs_type;  switch(Var_symbol(operator)){
     case 60 : type = List_type(_31);  break;  case 54 :{
       Type pointee = Type_dereference(type);  type = List_truth(Type_list(pointee)) ? pointee : Type_dereference(Sym_resolve_key(c -> sym, type));  break;
     }
     case 77 : type = Type_reference(type);  break;  case 253 : case 56 : case 62 :{
-      type = Sym_resolve_numeric_type(c -> sym, type);  if(List_truth(Type_list(type)) && Type_is_integral(type)) type = Type_promote(type);  if(! List_truth(Type_list(type)) && List_truth(Type_list(lhs_type)) && Var_equal(operator, Symbol_var(62))) Compiler_report_error(c, 1362954, _1768, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(! List_truth(Type_list(type))) type = lhs_type;  break;
+      type = Sym_resolve_numeric_type(c -> sym, type);  if(List_truth(Type_list(type)) && Type_is_integral(type)) type = Type_promote(type);  if(! List_truth(Type_list(type)) && List_truth(Type_list(lhs_type)) && Var_equal(operator, Symbol_var(62))) Compiler_report_error(c, 1362954, _1775, origin, cons(String_var(String_join(NULL, cons(String_var(_1053), cons(String_var(List_repr(Type_list(lhs_type))), NULL)))), NULL));  if(! List_truth(Type_list(type))) type = lhs_type;  break;
     }
 
   }
@@ -4004,7 +4011,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
   List lhs = Compiler_resolve_expression(c, Var_list(left), origin);  List rhs = Compiler_resolve_expression(c, Var_list(right), origin);  return Compiler__binary_expression(c, Var_symbol(operator), lhs, rhs, origin);
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972169159280ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];  Var operand = _x2c_match_values[1]; {
-  operand = List_var(Compiler_resolve_expression(c, Var_list(operand), origin));  Type operand_type = Var_type(Var_cadr(operand));  if(Var_equal(List_car(Type_list(operand_type)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1747, origin, NULL);  if(operand_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_282, cons(operator, cons(operand, NULL)))), NULL)));  return cons(_0, cons(List_var(operand_type), cons(List_var(cons(_282, cons(operator, cons(operand, NULL)))), NULL)));
+  operand = List_var(Compiler_resolve_expression(c, Var_list(operand), origin));  Type operand_type = Var_type(Var_cadr(operand));  if(Var_equal(List_car(Type_list(operand_type)), Symbol_var(33330008396))) Compiler_report_error(c, 1362954, _1754, origin, NULL);  if(operand_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_282, cons(operator, cons(operand, NULL)))), NULL)));  return cons(_0, cons(List_var(operand_type), cons(List_var(cons(_282, cons(operator, cons(operand, NULL)))), NULL)));
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497938106158120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var target = _x2c_match_values[0];  Var source = _x2c_match_values[1]; {
   target = List_var(Compiler_resolve_expression(c, Var_list(target), origin));  source = List_var(Compiler_resolve_expression(c, Var_list(source), origin));
@@ -4013,14 +4020,14 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_95;  if (x2c_match_site_try_capture(& _x2c_match_site_95, _x2c_match_expr, List_var(_1156), &_x2c_match_capture)) {Var syntax = _x2c_match_values[0];  Var target_type = _x2c_match_values[1]; {
-    Type type = Sym_resolve_key(c -> sym, Var_type(syntax));  if(! List_truth(Type_list(type)) || ! Type_is_pointer(type) || ! Type_is_function(Type_dereference(type))) Compiler_report_error(c, 27335838, _1769, origin, List_truth(Type_list(type)) ? cons(String_var(String_join(NULL, cons(String_var(_1157), cons(String_var(List_repr(Type_list(type))), NULL)))), NULL) : NULL);  return cons(_0, cons(List_var(cons(target_type, NULL)), cons(List_var(cons(_1142, cons(int_var(c -> origin), cons(source, NULL)))), NULL)));
+    Type type = Sym_resolve_key(c -> sym, Var_type(syntax));  if(! List_truth(Type_list(type)) || ! Type_is_pointer(type) || ! Type_is_function(Type_dereference(type))) Compiler_report_error(c, 27335838, _1776, origin, List_truth(Type_list(type)) ? cons(String_var(String_join(NULL, cons(String_var(_1157), cons(String_var(List_repr(Type_list(type))), NULL)))), NULL) : NULL);  return cons(_0, cons(List_var(cons(target_type, NULL)), cons(List_var(cons(_1142, cons(int_var(c -> origin), cons(source, NULL)))), NULL)));
   }
   break;
 }
 default: break;
     }
   }
-Compiler_report_error(c, 27335838, _1770, origin, NULL);
+Compiler_report_error(c, 27335838, _1777, origin, NULL);
 }
 break; } }
     }
@@ -4037,7 +4044,7 @@ List Compiler_resolve_map_entry(Compiler compiler, List input, Token origin){
       case 28692473357490: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224526629234975922ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var key = _x2c_match_values[0];  Var value = _x2c_match_values[1];  return cons(_1158, cons(List_var(Compiler_resolve_expression(compiler, Var_list(key), origin)), cons(List_var(Compiler_resolve_expression(compiler, Var_list(value), origin)), NULL)));  break; } } default: break;
     }
   }
-Compiler_report_error(compiler, 33658058, _1771, origin, NULL);
+Compiler_report_error(compiler, 33658058, _1778, origin, NULL);
 }
 
 List Compiler_resolve_expression(Compiler c, List input, Token origin){
@@ -4114,7 +4121,7 @@ static List _destructure_targets(Compiler compiler, List lhs){
       {
         List entry;  List _x2c_macro_object_31 = targets;  List _x2c_macro_cursor_31 = _x2c_macro_object_31;  Var _x2c_macro_cursor_output_31;  while(List_try_next(_x2c_macro_object_31, &(_x2c_macro_cursor_31), &(_x2c_macro_cursor_output_31))){
           entry = Var_list(_x2c_macro_cursor_output_31); {
-            if(_destructure_identifier(entry)) continue;  Compiler_report_error(compiler, 33658058, _1772, compiler -> token, _1210);
+            if(_destructure_identifier(entry)) continue;  Compiler_report_error(compiler, 33658058, _1779, compiler -> token, _1210);
           }
 
         }
@@ -4217,7 +4224,7 @@ List Compiler_parse_conditional(Compiler compiler){
 }
 
 static List _parse_assignment_tail(Compiler compiler, List lhs){
-  Symbol op = Compiler_peek(compiler, 0);  Token origin = compiler -> token;  if(! Symbol_is_assignment_op(op)) return lhs;  if(Var_equal(Var_car(List_cadr(lhs)), Symbol_var(33330008396))) Compiler_report_error(compiler, 1362954, _1773, origin, NULL);  List targets = op == 123 ? _destructure_targets(compiler, lhs) : NULL;  Compiler_next(compiler);  List rhs = Compiler_parse_assignment(compiler);  if(List_truth(targets))
+  Symbol op = Compiler_peek(compiler, 0);  Token origin = compiler -> token;  if(! Symbol_is_assignment_op(op)) return lhs;  if(Var_equal(Var_car(List_cadr(lhs)), Symbol_var(33330008396))) Compiler_report_error(compiler, 1362954, _1780, origin, NULL);  List targets = op == 123 ? _destructure_targets(compiler, lhs) : NULL;  Compiler_next(compiler);  List rhs = Compiler_parse_assignment(compiler);  if(List_truth(targets))
   {
     List _x2c_match_expr = rhs;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -4367,7 +4374,7 @@ static String _not_null_pointer_constant(Compiler compiler, List expr){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_107;  if (x2c_match_site_try_capture(& _x2c_match_site_107, _x2c_match_expr, List_var(_298), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  return _not_null_pointer_constant(compiler, Var_list(inner));  break;
 }
-static MatchCaptureSite _x2c_match_site_108;  if (x2c_match_site_try_capture(& _x2c_match_site_108, _x2c_match_expr, List_var(_1247), &_x2c_match_capture)) {return _1774;  break;
+static MatchCaptureSite _x2c_match_site_108;  if (x2c_match_site_try_capture(& _x2c_match_site_108, _x2c_match_expr, List_var(_1247), &_x2c_match_capture)) {return _1781;  break;
 }
 static MatchCaptureSite _x2c_match_site_109;  if (x2c_match_site_try_capture(& _x2c_match_site_109, _x2c_match_expr, List_var(_1254), &_x2c_match_capture)) {Var oper = _x2c_match_values[0];  Var operand = _x2c_match_values[1]; {
   Symbol op = Var_symbol(oper);  if(op != 62 && op != 56) return NULL;  String inner = NULL;  if(_integer_literal_kind(Var_list(operand), &(inner)) != 31102479518) return NULL;  return String_join(NULL, cons(String_var(Symbol_str(op)), cons(String_var(inner), NULL)));
@@ -4390,7 +4397,7 @@ static List _var_exact_reader(Compiler compiler, List expr, Type target){
 }
 
 static List _converted_temporary(Compiler compiler, List call, Type owner, Type target){
-  if(List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, owner))) && List_truth(Compiler_resolve_protocol_member(compiler, target, _1746))){
+  if(List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, owner))) && List_truth(Compiler_resolve_protocol_member(compiler, target, _1753))){
 
   {
     List _x2c_match_expr = call;
@@ -4407,7 +4414,7 @@ return call;
 
 int String_find(String, String);
 static List _converter_owned_call(Compiler compiler, List expr, Type owner, Type target, int * declared){
-  String typename = Var_str(List_car(Type_list(owner))), targetedname = Var_str(List_car(Type_list(target)));  String prefix = _581;  int split = String_find(targetedname, _1775);  if(split > 0){
+  String typename = Var_str(List_car(Type_list(owner))), targetedname = Var_str(List_car(Type_list(target)));  String prefix = _581;  int split = String_find(targetedname, _1782);  if(split > 0){
     prefix = String_getslice(targetedname, 0, split + 2, 1);  targetedname = String_getslice(targetedname, split + 2, -2147483648, 1);
   }
   String convfuncname = String_equal(targetedname, _1265) ? String_join(NULL, cons(String_var(prefix), cons(String_var(typename), cons(String_var(_798), NULL)))) : String_join(NULL, cons(String_var(prefix), cons(String_var(typename), cons(String_var(_260), cons(String_var(String_lower(targetedname)), NULL)))));  Type cvrtrtype = NULL;  List converter_binding = Sym_resolve_global(compiler -> sym, cons(String_var(convfuncname), NULL), &(cvrtrtype)); (* declared) = ! ! List_truth(converter_binding) || ! ! List_truth(Type_list(cvrtrtype));  List callee = cons(_0, cons(List_var(cvrtrtype), cons(List_var(cons(_88, cons(List_var(converter_binding), NULL))), NULL)));  List argument = Var_equal(List_cadr(expr), List_var(owner)) ? expr : cons(_0, cons(List_var(owner), cons(List_var(expr), NULL)));  if(List_truth(Type_list(cvrtrtype)) && Var_is_row(List_car(Type_list(cvrtrtype)), 9, 7, 4)){
@@ -4525,12 +4532,12 @@ List Compiler_initializer_native_types(Compiler c, Type type){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_120;  if (x2c_match_site_try_capture(& _x2c_match_site_120, _x2c_match_expr, List_var(_1307), &_x2c_match_capture)) {Var kind = _x2c_match_values[0];  Var body = _x2c_match_values[1]; {
-    String name = Compiler_fresh_name(c, _1776);  definition = List_type(cons(kind, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(kind, cons(String_var(name), NULL)));
+    String name = Compiler_fresh_name(c, _1783);  definition = List_type(cons(kind, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(kind, cons(String_var(name), NULL)));
   }
   break;
 }
 static MatchCaptureSite _x2c_match_site_121;  if (x2c_match_site_try_capture(& _x2c_match_site_121, _x2c_match_expr, List_var(_1316), &_x2c_match_capture)) {Var kind = _x2c_match_values[0];  Var body = _x2c_match_values[1]; {
-  String name = Compiler_fresh_name(c, _1776);  definition = List_type(cons(kind, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(kind, cons(String_var(name), NULL)));
+  String name = Compiler_fresh_name(c, _1783);  definition = List_type(cons(kind, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(kind, cons(String_var(name), NULL)));
 }
 break;
 }
@@ -4560,7 +4567,7 @@ Array definitions = Array_new(), references = Array_new();  for(List rest = Type
     }
   }
 if(List_truth(bound) && ! captured && ! _initializer_integer(bound, &(count))){
-    String name = Compiler_fresh_name(c, _1777);  Type bytes = List_type(cons(List_var(cons(_415, cons(List_var(bound), NULL))), _159));  List field = Type_declaration_ast(bytes, _1355);  Type declared = List_type(cons(_2, cons(String_var(name), cons(List_var(cons(_1308, cons(List_var(field), NULL))), NULL))));  List size = cons(_0, cons(_880, cons(List_var(cons(_288, cons(List_var(cons(_287, cons(List_var(declared), NULL))), NULL))), NULL)));  List prior = cons(_0, cons(_880, cons(List_var(cons(_288, cons(List_var(cons(_287, cons(List_var(cons(_2, cons(String_var(name), NULL))), NULL))), NULL))), NULL)));  modifier = List_var(cons(_415, cons(List_var(size), NULL)));  reused = List_var(cons(_415, cons(List_var(prior), NULL)));
+    String name = Compiler_fresh_name(c, _1784);  Type bytes = List_type(cons(List_var(cons(_415, cons(List_var(bound), NULL))), _159));  List field = Type_declaration_ast(bytes, _1355);  Type declared = List_type(cons(_2, cons(String_var(name), cons(List_var(cons(_1308, cons(List_var(field), NULL))), NULL))));  List size = cons(_0, cons(_880, cons(List_var(cons(_288, cons(List_var(cons(_287, cons(List_var(declared), NULL))), NULL))), NULL)));  List prior = cons(_0, cons(_880, cons(List_var(cons(_288, cons(List_var(cons(_287, cons(List_var(cons(_2, cons(String_var(name), NULL))), NULL))), NULL))), NULL)));  modifier = List_var(cons(_415, cons(List_var(size), NULL)));  reused = List_var(cons(_415, cons(List_var(prior), NULL)));
   }
 
 }
@@ -4591,7 +4598,7 @@ default: break;
 unsigned long long at;  if(_initializer_integer(index, &(at))){
   (* reference) = index;  return index;
 }
-Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1778));  Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(type, binding));  Type native = List_type(cons(_1356, cons(List_var(cons(List_var(cons(_9, cons(_589, cons(List_var(binding), cons(List_var(index), NULL))))), NULL)), NULL))); (* reference) = cons(_0, cons(List_var(type), cons(List_var(cons(_88, cons(List_var(binding), NULL))), NULL)));  return cons(_0, cons(List_var(type), cons(List_var(cons(_12, cons(List_var(native), cons(List_var((* reference)), NULL)))), NULL)));
+Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1785));  Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(type, binding));  Type native = List_type(cons(_1356, cons(List_var(cons(List_var(cons(_9, cons(_589, cons(List_var(binding), cons(List_var(index), NULL))))), NULL)), NULL))); (* reference) = cons(_0, cons(List_var(type), cons(List_var(cons(_88, cons(List_var(binding), NULL))), NULL)));  return cons(_0, cons(List_var(type), cons(List_var(cons(_12, cons(List_var(native), cons(List_var((* reference)), NULL)))), NULL)));
 }
 
 static void _initializer_position(List index, List * base, unsigned long long * offset){
@@ -5025,7 +5032,7 @@ static MatchCaptureSite _x2c_match_site_142;  if (x2c_match_site_try_capture(& _
 break;
 }
 static MatchCaptureSite _x2c_match_site_143;  if (x2c_match_site_try_capture(& _x2c_match_site_143, _x2c_match_expr, List_var(_1620), &_x2c_match_capture)) {Var type = _x2c_match_values[0]; {
-  if(! Sym_is_var_type(c -> sym, Var_type(type)) && ! List_truth(Type_list(Type_scalar(Sym_resolve_key(c -> sym, Var_type(type)))))) return value;  if(_initializer_literal(value)) return value;  String formal = Compiler_fresh_name(c, _1779);  Array_push(inputs, List_var(cons(String_var(formal), cons(List_var(value), NULL))));  return cons(_0, cons(type, cons(String_var(formal), NULL)));
+  if(! Sym_is_var_type(c -> sym, Var_type(type)) && ! List_truth(Type_list(Type_scalar(Sym_resolve_key(c -> sym, Var_type(type)))))) return value;  if(_initializer_literal(value)) return value;  String formal = Compiler_fresh_name(c, _1786);  Array_push(inputs, List_var(cons(String_var(formal), cons(List_var(value), NULL))));  return cons(_0, cons(type, cons(String_var(formal), NULL)));
 }
 break;
 }
@@ -5042,7 +5049,7 @@ static Type _initializer_value_type(Compiler c, Type type){
 List Type_parameter_ast(Type, List);
 void Compiler_add_early(Compiler, List);
 static List _initializer_adapter(Compiler c, List source, List converted){
-  Type from = _initializer_value_type(c, Var_type(List_cadr(source)));  Type result = _initializer_value_type(c, Var_type(List_cadr(converted)));  List formal = cons(_0, cons(List_cadr(source), _1623));  List body = List_search_replace(converted, List_var(cons(_418, cons(List_var(source), NULL))), List_var(formal));  List key = cons(_1624, cons(List_var(from), cons(List_var(result), cons(List_var(body), NULL))));  Var stored;  if(Map_try_get(c -> names -> adapters, List_var(key), &(stored))) return Var_list(stored);  List parameter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1780));  List input = cons(_0, cons(List_cadr(source), cons(List_var(cons(_88, cons(List_var(parameter), NULL))), NULL)));  body = List_search_replace(body, List_var(cons(_418, cons(List_var(formal), NULL))), List_var(input));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1781));  List params = cons(_1237, cons(List_var(Type_parameter_ast(from, parameter)), NULL));  List function = cons(_1625, cons(List_var(cons(_1626, cons(List_var(result), NULL))), cons(List_var(cons(_15, cons(List_var(binding), cons(List_var(cons(List_var(cons(_1627, cons(List_var(params), NULL))), NULL)), NULL)))), cons(List_var(cons(_355, cons(List_var(cons(_611, cons(List_var(cons(_1628, cons(List_var(body), NULL))), NULL))), NULL))), NULL))));  Type callable = List_type(cons(List_var(cons(_73, cons(List_var(cons(List_var(from), NULL)), NULL))), List_append(Type_list(result), NULL)));  List adapter = cons(_0, cons(List_var(callable), cons(List_var(cons(_88, cons(List_var(binding), NULL))), NULL)));  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter));  Compiler_add_early(c, function);  return adapter;
+  Type from = _initializer_value_type(c, Var_type(List_cadr(source)));  Type result = _initializer_value_type(c, Var_type(List_cadr(converted)));  List formal = cons(_0, cons(List_cadr(source), _1623));  List body = List_search_replace(converted, List_var(cons(_418, cons(List_var(source), NULL))), List_var(formal));  List key = cons(_1624, cons(List_var(from), cons(List_var(result), cons(List_var(body), NULL))));  Var stored;  if(Map_try_get(c -> names -> adapters, List_var(key), &(stored))) return Var_list(stored);  List parameter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1787));  List input = cons(_0, cons(List_cadr(source), cons(List_var(cons(_88, cons(List_var(parameter), NULL))), NULL)));  body = List_search_replace(body, List_var(cons(_418, cons(List_var(formal), NULL))), List_var(input));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1788));  List params = cons(_1237, cons(List_var(Type_parameter_ast(from, parameter)), NULL));  List function = cons(_1625, cons(List_var(cons(_1626, cons(List_var(result), NULL))), cons(List_var(cons(_15, cons(List_var(binding), cons(List_var(cons(List_var(cons(_1627, cons(List_var(params), NULL))), NULL)), NULL)))), cons(List_var(cons(_355, cons(List_var(cons(_611, cons(List_var(cons(_1628, cons(List_var(body), NULL))), NULL))), NULL))), NULL))));  Type callable = List_type(cons(List_var(cons(_73, cons(List_var(cons(List_var(from), NULL)), NULL))), List_append(Type_list(result), NULL)));  List adapter = cons(_0, cons(List_var(callable), cons(List_var(cons(_88, cons(List_var(binding), NULL))), NULL)));  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter));  Compiler_add_early(c, function);  return adapter;
 }
 
 int ast_contains_head(Var, Symbol);
@@ -5224,7 +5231,7 @@ if(! identity) native_identity = 0;  Array_push(converted, List_var(cons(List_va
         if(native_identity){
           Array_free(converted);  Array_free(captured);  Array_push(elements, List_var(original));  continue;
         }
-        String formal = Compiler_fresh_name(compiler, _1779);  List placeholder = cons(_0, cons(List_cadr(source), cons(String_var(formal), NULL)));  List values = Array_list_free(converted);  List adapted = _initializer_adapters(compiler, source, values, placeholder);  if(List_truth(adapted)) values = adapted;  Array replaced = Array_new();  List inputs = Array_list_free(captured);  int uses_input = ! ! List_truth(adapted); {
+        String formal = Compiler_fresh_name(compiler, _1786);  List placeholder = cons(_0, cons(List_cadr(source), cons(String_var(formal), NULL)));  List values = Array_list_free(converted);  List adapted = _initializer_adapters(compiler, source, values, placeholder);  if(List_truth(adapted)) values = adapted;  Array replaced = Array_new();  List inputs = Array_list_free(captured);  int uses_input = ! ! List_truth(adapted); {
           List choice;  List _x2c_macro_object_52 = values;  List _x2c_macro_cursor_52 = _x2c_macro_object_52;  Var _x2c_macro_cursor_output_52;  while(List_try_next(_x2c_macro_object_52, &(_x2c_macro_cursor_52), &(_x2c_macro_cursor_output_52))){
             choice = Var_list(_x2c_macro_cursor_output_52); {
               List _x2c_destructure_28 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_28, 0));  List path = Var_list(List_getindex(_x2c_destructure_28, 1));  Type destination = Var_type(List_getindex(_x2c_destructure_28, 2));  List result = Var_list(List_getindex(_x2c_destructure_28, 3));  List substituted = ! List_truth(Type_list(destination)) && List_truth(({ static MatchCaptureSite _x2c_match_site_148;  x2c_match_site_match(& _x2c_match_site_148, source, List_var(_1488)); })) ? result : List_search_replace(result, List_var(cons(_418, cons(List_var(source), NULL))), List_var(placeholder));  if(substituted != result) uses_input = 1;  Array_push(replaced, List_var(cons(List_var(condition), cons(List_var(path), cons(List_var(destination), cons(List_var(substituted), NULL))))));
@@ -5268,7 +5275,7 @@ static List _compound_literal(Compiler c, List composite, Type target){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_151;  if (x2c_match_site_try_capture(& _x2c_match_site_151, _x2c_match_expr, List_var(_1657), &_x2c_match_capture)) {Var type = _x2c_match_values[0]; {
-    if(List_truth(({ static MatchCaptureSite _x2c_match_site_150;  x2c_match_site_match(& _x2c_match_site_150, Type_tag(Var_type(type)), List_var(_1660)); }))) Compiler_report_error(c, 1362954, _1782, NULL, _1663);  return cons(_0, cons(type, cons(List_var(cons(_12, cons(type, cons(List_var(converted), NULL)))), NULL)));
+    if(List_truth(({ static MatchCaptureSite _x2c_match_site_150;  x2c_match_site_match(& _x2c_match_site_150, Type_tag(Var_type(type)), List_var(_1660)); }))) Compiler_report_error(c, 1362954, _1789, NULL, _1663);  return cons(_0, cons(type, cons(List_var(cons(_12, cons(type, cons(List_var(converted), NULL)))), NULL)));
   }
   break;
 }
@@ -5296,7 +5303,7 @@ List Compiler_convert_expression(Compiler c, List expr, Type target){
     List lifted = Compiler_lift_func_expression(c, expr);  if(! List_equal(lifted, expr)) return lifted;
   }
   if(List_truth(Type_list(type)) && List_equal(Type_list(Sym_resolve_key(c -> sym, type)), Type_list(func_type)) && Type_is_pointer(target) && Type_is_function(Type_dereference(target))){
-    String message = _1783;  List hint = _1666;  Compiler_report_error(c, 1362954, message, NULL, hint);
+    String message = _1790;  List hint = _1666;  Compiler_report_error(c, 1362954, message, NULL, hint);
   }
   if(List_truth(({ static MatchCaptureSite _x2c_match_site_152;  x2c_match_site_match(& _x2c_match_site_152, expr, List_var(_1550)); }))) return _compound_literal(c, expr, target);
   {
@@ -5347,7 +5354,7 @@ default: break;
     }
   }
 if(target_is_var && List_truth(({ static MatchCaptureSite _x2c_match_site_159;  x2c_match_site_match(& _x2c_match_site_159, expr, List_var(_1675)); }))){
-  List binding = Var_list(Var_cadr(List_caddr(expr)));  if(String_equal(binding_identity_spelling(binding), _1676)) return _1695;  String message = _1784;  Compiler_report_error(c, 1362954, message, NULL, _1698);
+  List binding = Var_list(Var_cadr(List_caddr(expr)));  if(String_equal(binding_identity_spelling(binding), _1676)) return _1695;  String message = _1791;  Compiler_report_error(c, 1362954, message, NULL, _1698);
 }
 return expr;
 }
@@ -5355,26 +5362,35 @@ int take_reference =(Var_equal(List_car(Type_list(target)), Symbol_var(77)) || V
   String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(declared_source))), cons(String_var(_1700), cons(String_var(List_repr(Type_list(declared_target))), NULL)))));  Compiler_report_error(c, 1362954, message, NULL, _1703);
 }
 if(List_equal(Type_list(type), Type_list(target)) ||(type_is_var && target_is_var)) return expr;  if(Var_equal(List_car(Type_list(type)), Symbol_var(33330008396)) && ! Var_equal(List_car(Type_list(target)), Symbol_var(77)) && ! Var_equal(List_car(Type_list(target)), Symbol_var(33330008396)) && ! Type_is_pointer(Sym_resolve_key(c -> sym, target))){
-  Compiler_report_error(c, 1362954, _1747, NULL, NULL);  return expr;
+  Compiler_report_error(c, 1362954, _1754, NULL, NULL);  return expr;
 }
 if((Var_equal(List_car(Type_list(target)), Symbol_var(77)) || Var_equal(List_car(Type_list(target)), Symbol_var(33330008396))) && ! Var_equal(List_car(Type_list(type)), Symbol_var(77)) && ! Var_equal(List_car(Type_list(type)), Symbol_var(33330008396)) && type != cdr(Type_list(target))){
   Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1704), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1705), cons(String_var(List_repr(Type_list(target))), cons(String_var(_805), NULL)))))), NULL, _1708);  return expr;
 }
-if(_integer_literal_kind(expr, NULL) == 1715358 && Type_is_pointer(Sym_resolve_key(c -> sym, target))) return expr;  if(type == cdr(Type_list(target)) &&(Var_equal(List_car(Type_list(target)), Symbol_var(77)) || Var_equal(List_car(Type_list(target)), Symbol_var(33330008396)))){
-  if(! _expression_is_addressable(c, expr)) Compiler_report_error(c, 1362954, _1785, NULL, NULL);  return cons(_0, cons(List_var(target), cons(List_var(cons(_9, cons(_10, cons(List_var(cons(_287, cons(List_var(expr), NULL))), NULL)))), NULL)));
+if(_integer_literal_kind(expr, NULL) == 1715358 && Type_is_pointer(Sym_resolve_key(c -> sym, target))) return expr;  if(Var_equal(List_car(Type_list(target)), Symbol_var(54)) && ! type_is_var){
+  Type source = Sym_resolve_key(c -> sym, type);  if(List_truth(Type_list(source)) && ! Type_is_pointer(source) && ! Type_is_array(source) && ! Type_is_function(source)){
+    Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1704), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1705), cons(String_var(List_repr(Type_list(target))), cons(String_var(_805), NULL)))))), NULL, _1711);  return expr;
+  }
+
+}
+if(type == cdr(Type_list(target)) &&(Var_equal(List_car(Type_list(target)), Symbol_var(77)) || Var_equal(List_car(Type_list(target)), Symbol_var(33330008396)))){
+  if(! _expression_is_addressable(c, expr)) Compiler_report_error(c, 1362954, _1792, NULL, NULL);  return cons(_0, cons(List_var(target), cons(List_var(cons(_9, cons(_10, cons(List_var(cons(_287, cons(List_var(expr), NULL))), NULL)))), NULL)));
 }
 if(Var_equal(List_car(Type_list(type)), Symbol_var(77)) && Var_equal(List_car(Type_list(target)), Symbol_var(33330008396)) && cdr(Type_list(type)) == cdr(Type_list(target))) return cons(_0, cons(List_var(target), cons(List_var(expr), NULL)));  if(List_equal(cdr(Type_list(type)), cdr(Type_list(target))) && Var_equal(List_car(Type_list(type)), Symbol_var(77)) && Var_equal(List_car(Type_list(target)), Symbol_var(54))) return cons(_0, cons(List_var(target), cons(List_var(expr), NULL)));  if(Var_equal(List_car(Type_list(type)), Symbol_var(77)) && cdr(Type_list(type)) == target) return cons(_0, cons(List_var(target), cons(List_var(cons(_9, cons(_1, cons(List_var(cons(_287, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(List_truth(({ static MatchCaptureSite _x2c_match_site_160;  x2c_match_site_match(& _x2c_match_site_160, Type_list(type), List_var(_425)); }))){
-  List string = _raw_string_to_string(c, expr);  if(Sym_is_string_type(c -> sym, target)) return cons(_0, cons(List_var(target), cons(List_caddr(string), NULL)));  if(target_is_var) return cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1710, cons(List_var(cons(_101, cons(List_var(string), NULL))), NULL)))), NULL)));
+  List string = _raw_string_to_string(c, expr);  if(Sym_is_string_type(c -> sym, target)) return cons(_0, cons(List_var(target), cons(List_caddr(string), NULL)));  if(target_is_var) return cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1713, cons(List_var(cons(_101, cons(List_var(string), NULL))), NULL)))), NULL)));
 }
 if(type_is_var && ! target_is_var){
-  if(target == _802) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1712, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  Type scalar_target = Sym_resolve_numeric_type(c -> sym, target);  if(List_truth(Type_list(scalar_target))){
+  if(target == _802) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1715, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  Type scalar_target = Sym_resolve_numeric_type(c -> sym, target);  if(List_truth(Type_list(scalar_target))){
     Symbol tag = Type_scalar_tag(scalar_target);  if(! tag && Type_is_enum(scalar_target)) tag = 3453797;  String extractor = Type_var_numeric_extractor(scalar_target);  if(String_truth(extractor)){
-      String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) tag))), NULL));  List converted = cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1714, cons(List_var(cons(_101, cons(List_var(expr), cons(List_var(cons(_0, cons(_865, cons(String_var(tagsym), NULL)))), NULL)))), NULL)))), NULL)));  return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(String_var(extractor), cons(List_var(cons(_101, cons(List_var(converted), NULL))), NULL)))), NULL)));
+      String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) tag))), NULL));  List converted = cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1717, cons(List_var(cons(_101, cons(List_var(expr), cons(List_var(cons(_0, cons(_865, cons(String_var(tagsym), NULL)))), NULL)))), NULL)))), NULL)));  return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(String_var(extractor), cons(List_var(cons(_101, cons(List_var(converted), NULL))), NULL)))), NULL)));
     }
 
   }
-  List reader = _var_checked_reader(c, expr, type, target);  if(List_truth(reader)) return reader;  if(Type_is_pointer(target)) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1716, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(Type_is_typedef_name(target)){
-    Type resolved = Sym_resolve_key(c -> sym, target);  if(Type_is_pointer(resolved)) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1716, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  String message = String_join(NULL, cons(String_var(_1717), cons(String_var(List_repr(Type_list(target))), NULL)));  Compiler_report_error(c, 1362954, message, NULL, NULL);
+  List reader = _var_checked_reader(c, expr, type, target);  if(List_truth(reader)) return reader;  if(Type_is_pointer(target) && Sym_is_var_type(c -> sym, Type_dereference(target))){
+    Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1718), cons(String_var(List_repr(Type_list(target))), NULL))), NULL, _1721);  return expr;
+  }
+  if(Type_is_pointer(target)) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1723, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(Type_is_typedef_name(target)){
+    Type resolved = Sym_resolve_key(c -> sym, target);  if(Type_is_pointer(resolved)) return cons(_0, cons(List_var(target), cons(List_var(cons(_70, cons(_1723, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  String message = String_join(NULL, cons(String_var(_1724), cons(String_var(List_repr(Type_list(target))), NULL)));  Compiler_report_error(c, 1362954, message, NULL, NULL);
   }
 
 }
@@ -5386,33 +5402,33 @@ if(! type_is_var && target_is_var){
     String typename = Var_str(List_car(Type_list(converter_type)));  Type cvrtrtype = NULL;  List converter_binding = Sym_resolve_global(c -> sym, cons(String_var(converter), NULL), &(cvrtrtype));  if(cvrtrtype == cons(List_var(cons(_73, cons(List_var(cons(List_var(cons(String_var(typename), NULL)), NULL)), NULL))), _466)){
       List argument = List_equal(Type_list(type), Type_list(converter_type)) ? expr : cons(_0, cons(List_var(converter_type), cons(List_var(expr), NULL)));  return cons(_0, cons(_631, cons(List_var(cons(_70, cons(List_var(cons(_0, cons(List_var(cvrtrtype), cons(List_var(cons(_88, cons(List_var(converter_binding), NULL))), NULL)))), cons(List_var(cons(_101, cons(List_var(argument), NULL))), NULL)))), NULL)));
     }
-    String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1718), NULL))));  Compiler_report_error(c, 1362954, message, NULL, NULL);
+    String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1725), NULL))));  Compiler_report_error(c, 1362954, message, NULL, NULL);
   }
 
 }
 List converted = _converter_call(c, expr, type, target);  if(List_truth(converted)) return converted;  if(! type_is_var && target_is_var){
   Type tagged_type = NULL;  Symbol tag = Sym_var_tag_for_type(c -> sym, type, &(tagged_type));  if(! tag && List_truth(Type_list(tagged_type)) && Type_is_enum(tagged_type)) tag = 3453797;  if(tag){
     String box = NULL;  switch(tag){
-      case 818062 : box = _1719;  break;  case 44858254 : box = _1720;  break;  case 25983886 : box = _1721;  break;  case 1435270030 : box = _1722;  break;  case 26071077642 : box = _1723;  break;
+      case 818062 : box = _1726;  break;  case 44858254 : box = _1727;  break;  case 25983886 : box = _1728;  break;  case 1435270030 : box = _1729;  break;  case 26071077642 : box = _1730;  break;
     }
-    if(String_truth(box)) return cons(_0, cons(_631, cons(List_var(cons(_70, cons(String_var(box), cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  String tagsymnumstr = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) tag))), NULL));  return cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1725, cons(List_var(cons(_101, cons(List_var(cons(_0, cons(_865, cons(String_var(tagsymnumstr), NULL)))), cons(List_var(expr), NULL)))), NULL)))), NULL)));
+    if(String_truth(box)) return cons(_0, cons(_631, cons(List_var(cons(_70, cons(String_var(box), cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  String tagsymnumstr = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) tag))), NULL));  return cons(_0, cons(_631, cons(List_var(cons(_70, cons(_1732, cons(List_var(cons(_101, cons(List_var(cons(_0, cons(_865, cons(String_var(tagsymnumstr), NULL)))), cons(List_var(expr), NULL)))), NULL)))), NULL)));
   }
-  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1718), NULL))));  Compiler_report_error(c, 1362954, message, NULL, NULL);
+  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(type))), cons(String_var(_1725), NULL))));  Compiler_report_error(c, 1362954, message, NULL, NULL);
 }
 if(List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, type))) && List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, target)))) return expr;  String integer = _not_null_pointer_constant(c, expr);  if(String_truth(integer) && Type_is_pointer(Sym_resolve_key(c -> sym, target))){
-  String message = String_join(NULL, cons(String_var(_1726), cons(String_var(integer), cons(String_var(_1727), cons(String_var(List_repr(Type_list(target))), NULL)))));  List hint = _1730;  Compiler_report_error(c, 1362954, message, NULL, hint);
+  String message = String_join(NULL, cons(String_var(_1733), cons(String_var(integer), cons(String_var(_1734), cons(String_var(List_repr(Type_list(target))), NULL)))));  List hint = _1737;  Compiler_report_error(c, 1362954, message, NULL, hint);
 }
 if(_unrelated_pointers(c, type, target)){
-  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(declared_source))), cons(String_var(_1700), cons(String_var(List_repr(Type_list(declared_target))), NULL)))));  Compiler_report_error(c, 1362954, message, NULL, _1733);
+  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(declared_source))), cons(String_var(_1700), cons(String_var(List_repr(Type_list(declared_target))), NULL)))));  Compiler_report_error(c, 1362954, message, NULL, _1740);
 }
 if(Type_is_bare_typedef_name(declared_source) && Type_is_bare_typedef_name(declared_target) && ! List_equal(Type_list(declared_source), Type_list(declared_target)) && Type_is_pointer(Sym_resolve_key(c -> sym, declared_target)) && Type_base_type(Sym_resolve_key(c -> sym, declared_source)) != _228 && ! Array_contains(_typedef_names(c, declared_source), List_var(declared_target)) && ! Array_contains(_typedef_names(c, declared_target), List_var(declared_source))){
-  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(declared_source))), cons(String_var(_1700), cons(String_var(List_repr(Type_list(declared_target))), NULL)))));  Compiler_report_error(c, 1362954, message, NULL, cons(String_var(String_join(NULL, cons(String_var(_1734), cons(String_var(Var_str(List_car(Type_list(declared_source)))), cons(String_var(_260), cons(String_var(String_lower(Var_str(List_car(Type_list(declared_target))))), cons(String_var(_1735), NULL))))))), NULL));
+  String message = String_join(NULL, cons(String_var(_1699), cons(String_var(List_repr(Type_list(declared_source))), cons(String_var(_1700), cons(String_var(List_repr(Type_list(declared_target))), NULL)))));  Compiler_report_error(c, 1362954, message, NULL, cons(String_var(String_join(NULL, cons(String_var(_1741), cons(String_var(Var_str(List_car(Type_list(declared_source)))), cons(String_var(_260), cons(String_var(String_lower(Var_str(List_car(Type_list(declared_target))))), cons(String_var(_1742), NULL))))))), NULL));
 }
 return expr;
 }
 
 List Compiler_convert_segment_to_string(Compiler compiler, List expr){
-  if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(Var_type(List_cadr(expr)));  if(Sym_is_var_type(compiler -> sym, type)) return cons(_0, cons(_170, cons(List_var(cons(_70, cons(_1737, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(! List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, type)))) return Compiler_convert_expression(compiler, expr, List_type(_154));  List converted = _converter_call(compiler, expr, type, List_type(_154));  if(List_truth(converted)) return converted;  List boxed = Compiler_convert_expression(compiler, expr, List_type(_466));  return cons(_0, cons(_170, cons(List_var(cons(_70, cons(_1737, cons(List_var(cons(_101, cons(List_var(boxed), NULL))), NULL)))), NULL)));
+  if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(Var_type(List_cadr(expr)));  if(Sym_is_var_type(compiler -> sym, type)) return cons(_0, cons(_170, cons(List_var(cons(_70, cons(_1744, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(! List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, type)))) return Compiler_convert_expression(compiler, expr, List_type(_154));  List converted = _converter_call(compiler, expr, type, List_type(_154));  if(List_truth(converted)) return converted;  List boxed = Compiler_convert_expression(compiler, expr, List_type(_466));  return cons(_0, cons(_170, cons(List_var(cons(_70, cons(_1744, cons(List_var(cons(_101, cons(List_var(boxed), NULL))), NULL)))), NULL)));
 }
 
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
