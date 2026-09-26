@@ -836,8 +836,14 @@ static int meta_session = 0;
    precompiled once under `root` when the C compiler can. */
 static List _meta_session_flags(String root, String stamp, String compiler) {
   List flags = %("-fsigned-char" "-fPIC" "-O0");
+  /* The runtime header's text is part of the key: a precompiled header
+     refuses to load once the header it was built from changes. */
+  String runtime = NULL;
+  try runtime = Path.read_text(%"$meta_include_dir/x2c.h");
+  catch %((!or not-found io-fail) *): return flags;
+  String digest = runtime.sha256();
   String key = String.sha256(
-    %"$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir");
+    %"$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir\n$digest");
   String directory = %"$root/prefix-$key", header = %"$directory/runtime.h";
   String built = %"$header.gch";
   if (!Path.is_file(built)) {
