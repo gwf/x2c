@@ -449,6 +449,10 @@ struct Lisp {
   LispExpansion *expansion;
   int machine_depth;    // machine invocations in progress on this session
   int call_depth;       // evaluator calls nested on this session
+  unsigned long stack_base; // C stack address at the outermost call
+  Lambda tail_lambda;   // a tail call waiting for its caller's frame
+  Var *tail_values;     // its evaluated arguments, owned by the session
+  int tail_count;
   long call_steps;      // calls made by the evaluation in progress, reset
                         // at each public entry so a long translation is a
                         // sequence of budgets rather than one
@@ -2096,20 +2100,17 @@ static void _bind_params(
   if (args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
 }
 
-static Var _call_lambda_slots(
+/* C stack evaluator calls may use below the outermost one. Threads get 8 MB
+   (lib/thread.x) and so does a default main thread; the rest is left for the
+   compiler and native calls, so a runaway ends in an error the compiler can
+   report instead of a crash. Tail calls use none. */
+#define LISP_STACK_BYTES_MAX (6L << 20)
+
+/* Runs one activation of `lambda`. In tail position it may leave a pending
+   call on `lisp` instead of making it; _call_lambda_slots runs that call
+   after this frame is gone. */
+static Var _run_frame(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
-  if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
-    lisp.call_exhausted = 1;
-    raise %(call-stack (operation "apply") (why "steps"));
-  }
-  if (++lisp.call_depth > LISP_CALL_DEPTH_MAX) {
-    lisp.call_depth--;
-    raise %(call-stack (operation "apply") (value ${lambda.body}));
-  }
-  defer lisp.call_depth--;
-  LispExpansion *trace = lisp.expansion;
-  if (trace && ++trace.calls >= MACHINE_FRAME_MAX) _expansion_decline();
-  defer if (trace) trace.calls--;
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = {}; }
   /* A lowered source function owns its automatic storage in this frame. A
@@ -2152,7 +2153,87 @@ static Var _call_lambda_slots(
     local.values = values;
     local.value_count = count;
   }
-  return _eval(lisp, lambda.body, &local);
+  /* A source function's frame owns storage its arguments may borrow, and
+     machine analysis counts every call, so both keep ordinary nesting. */
+  if (lambda.source_function || lisp.expansion)
+    return _eval(lisp, lambda.body, &local);
+  return _eval_tail(lisp, lambda.body, &local);
+}
+
+static void _spend_call(Lisp lisp) {
+  if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
+    lisp.call_exhausted = 1;
+    raise %(call-stack (operation "apply") (why "steps"));
+  }
+}
+
+/* Calls `lambda` and then each tail call its body leaves pending, in one
+   C frame. Nesting is bounded by the C stack it uses, not by a count. */
+static Var _call_lambda_slots(
+  Lisp lisp, Lambda lambda, const Var *values, int count) {
+  _spend_call(lisp);
+  unsigned long at = (unsigned long) __builtin_frame_address(0);
+  if (!lisp.call_depth) lisp.stack_base = at;
+  unsigned long used = lisp.stack_base > at ? lisp.stack_base - at
+                                            : at - lisp.stack_base;
+  if (used > LISP_STACK_BYTES_MAX)
+    raise %(call-stack (operation "apply") (value ${lambda.body}));
+  lisp.call_depth++;
+  defer lisp.call_depth--;
+  LispExpansion *trace = lisp.expansion;
+  if (trace && ++trace.calls >= MACHINE_FRAME_MAX) _expansion_decline();
+  defer if (trace) trace.calls--;
+  Var *owned = NULL;
+  defer if (owned) Scope.free(owned);
+  for (;;) {
+    Var result = _run_frame(lisp, lambda, values, count);
+    if (!lisp.tail_lambda) return result;
+    lambda = lisp.tail_lambda;
+    lisp.tail_lambda = NULL;
+    if (owned) Scope.free(owned);
+    values = owned = lisp.tail_values;
+    count = lisp.tail_count;
+    _spend_call(lisp);
+  }
+}
+
+/* Evaluates `expression` as the last act of the running frame. A call to an
+   evaluator lambda is not made here: its arguments are evaluated and left on
+   `lisp` for _call_lambda_slots, which runs it in place of this frame. */
+static Var _eval_tail(Lisp lisp, Var expression, LispEnv *env) {
+  for (;;) {
+    if (expression is not <list> || expression.is_nil())
+      return _eval(lisp, expression, env);
+    List form = expression;
+    Var callable = _eval(lisp, form.car(), env);
+    List raw = form.cdr();
+    if (callable is not <lambda>) {
+      if (callable is <func> &&
+          _special_id(lisp, (Func) callable.pointer()) == LISP_COND) {
+        if (!_cond_select(lisp, raw, env, &expression)) return %();
+        continue;
+      }
+      return _apply(lisp, callable, raw, env);
+    }
+    Lambda lambda = callable;
+    Var prepared;
+    if (_auto_apply(lisp, lambda, raw, env, &prepared)) return prepared;
+    if (lambda.macro) {
+      expression = _call_lambda(lisp, lambda, raw);
+      continue;
+    }
+    if (lambda.source_function) return _apply_lambda(lisp, lambda, raw, env);
+    int count = raw.len(), index = 0;
+    Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
+    int pending = 0;
+    defer if (!pending) Scope.free(values);
+    foreach (Var argument, raw) values[index++] = _eval(lisp, argument, env);
+    pending = 1;
+    lisp.tail_lambda = lambda;
+    lisp.tail_values = values;
+    lisp.tail_count = count;
+    return void;
+  }
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
@@ -2164,19 +2245,40 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
 }
 
 static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
+  if (lambda.macro) return _eval(lisp, _call_lambda(lisp, lambda, raw), env);
   int count = raw.len(), index = 0;
   Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
   foreach (Var form, raw)
-    values[index++] = lambda.macro ? form : _eval(lisp, form, env);
-  Var result = _call_lambda_slots(lisp, lambda, values, count);
-  return lambda.macro ? _eval(lisp, result, env) : result;
+    values[index++] = _eval(lisp, form, env);
+  return _call_lambda_slots(lisp, lambda, values, count);
 }
 
 static int _special_id(Lisp lisp, Func function) {
   for (int i = 0; i < LISP_SPECIAL_COUNT; i++)
     if (lisp.specials[i] == function) return i;
   return -1;
+}
+
+// Finds the result form of the first `cond` clause whose test holds.
+static int _cond_select(Lisp lisp, List args, LispEnv *env, Var *form) {
+  if (!args) raise %(bad-arity (operation "cond") (expected 1) (actual 0));
+  foreach (Var clause, args) {
+    if (clause is not <list>)
+      raise %(bad-types (operation "cond") (value $clause) (want "List"));
+    List pair = clause;
+    if (pair.len() != 2) {
+      int actual = pair.len();
+      raise %(bad-arity (operation "cond-clause") (expected 2)
+                         (actual $actual) (value $clause));
+    }
+    Var (condition_form, result_form) = pair;
+    if (lisp_truth(_eval(lisp, condition_form, env))) {
+      *form = result_form;
+      return 1;
+    }
+  }
+  return 0;
 }
 
 static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
@@ -2213,21 +2315,9 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       return value;
     }
     case LISP_COND: {
-      if (!args) raise %(bad-arity (operation "cond") (expected 1) (actual 0));
-      foreach (Var clause, args) {
-        if (clause is not <list>)
-          raise %(bad-types (operation "cond") (value $clause) (want "List"));
-        List pair = clause;
-        if (pair.len() != 2) {
-          int actual = pair.len();
-          raise %(bad-arity (operation "cond-clause") (expected 2)
-                             (actual $actual) (value $clause));
-        }
-        Var (condition_form, result_form) = pair;
-        Var condition = _eval(lisp, condition_form, env);
-        if (lisp_truth(condition)) return _eval(lisp, result_form, env);
-      }
-      return %();
+      Var form;
+      return _cond_select(lisp, args, env, &form) ? _eval(lisp, form, env)
+                                                    : %();
     }
     case LISP_LAMBDA:
     case LISP_MACRO:
@@ -2317,13 +2407,6 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
 // Macro expansions nested along one path before analysis stops. A macro
 // that expands to a call to itself would otherwise never terminate.
 #define LISP_AUTO_EXPAND_MAX 32
-/* Evaluator calls nested along one path. Each costs about 2 KB of C stack,
-   measured by running a compile-time loop nest until it died: an 8 MB stack
-   carries a little over 4,000. The deepest legitimate nesting anywhere in
-   this repository is 158, in the autodiff tests, so this leaves room for
-   code far deeper than any that exists while ending a runaway in an error
-   the compiler can report instead of a crash. */
-#define LISP_CALL_DEPTH_MAX 1024
 // Calls one compile-time evaluation may make before it is stopped. A loop
 // that never ends makes calls without nesting any, so the depth budget above
 // never sees it.
