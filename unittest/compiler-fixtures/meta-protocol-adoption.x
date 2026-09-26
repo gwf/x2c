@@ -24,13 +24,7 @@ macro Expression $target(Expr $name) =>
   $(repr (probe.row (x2c.literal.value $name)
                           (_x2c.native-meta.targets)));
 
-meta Var twice(Var value) => value * 2;
-
-meta int heads(int offset) {
-  struct Iter source, head;
-  return range(1, 9, 1).map(twice).head(2).sum().int() * 10 +
-         range(1, 9, 1, &source).head(3 + offset, &head).count();
-}
+$(import "meta-protocol-adoption.xmacro")
 
 int main(int argc, char **argv) {
   (void) argv;

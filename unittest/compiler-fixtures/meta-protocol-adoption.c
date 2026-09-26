@@ -61,6 +61,15 @@ Iter Box_iter(Box box, Iter dest){
   return List_iter(box -> items, dest);
 }
 
+int main(int argc, char * * argv){
+  x2c_initialize();
+  if(! _init_guard_) _file_init_();
+  (void) argv;
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"List_iter\" (as \"List_iter_into\"))", "()", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
+  printf("%d %d\n", 63, heads(argc - 1));
+  return 0;
+}
+
 Var int_var(int);
 
 Var twice(Var value){
@@ -93,15 +102,6 @@ int heads(int offset){
     int_var(0)
   }
   ))) * 10 + Iter_count(Iter_head(range(1, 9, 1, & source), 3 + offset, & head));
-}
-
-int main(int argc, char * * argv){
-  x2c_initialize();
-  if(! _init_guard_) _file_init_();
-  (void) argv;
-  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"List_iter\" (as \"List_iter_into\"))", "()", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
-  printf("%d %d\n", 63, heads(argc - 1));
-  return 0;
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

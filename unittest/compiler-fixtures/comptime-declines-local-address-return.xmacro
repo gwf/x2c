@@ -1,0 +1,7 @@
+/* comptime-declines-local-address-return.xmacro -- the meta functions
+   comptime-declines-local-address-return.x imports. */
+
+meta static int *dangling(int seed) {
+  int value = seed;
+  return &value;
+}

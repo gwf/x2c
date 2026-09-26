@@ -1,0 +1,8 @@
+/* meta-native-alias.xmacro -- the meta functions
+   meta-native-alias.x imports. */
+
+meta static Size resized(Size size) {
+  Array values = [];
+  values.resize(size);
+  return values.len();
+}

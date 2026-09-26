@@ -6,12 +6,7 @@ typedef long Total;
 
 static Count bump(Count value) => value + 1;
 static Total add(Total left, Total right) => left + right;
-meta static Count increase(Count &value) => ++value;
-
-meta static Count meta_increase(Count value) {
-  Func function = increase;
-  return function(value);
-}
+$(import "func-signature-alias.xmacro")
 
 int main(void) {
   Func first = bump, second = add, third = increase;

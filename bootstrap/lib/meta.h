@@ -10,6 +10,10 @@
 #include "match.h"
 #include "string.h"
 #include "symbol.h"
+typedef List Type;
+
+typedef List Source;
+
 List x2c_ident(String spelling);
 
 List x2c_literal_string(String value);

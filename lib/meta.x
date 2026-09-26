@@ -39,6 +39,16 @@
 #include "string.x"
 #include "symbol.x"
 
+/** A `meta` parameter declared `Type` receives, at a `$` call, the
+   description of its argument's type: `((name N) (kind K) (type T)
+   (fields F))`. Read a part with `List.assoc`. */
+typedef List Type;
+
+/** A `meta` parameter declared `Source` receives, at a `$` call, captured
+   syntax with the source text it came from: `((text T) (file F) (syntax
+   S))`. `x2c_source_text` and `x2c_embed_text` read it directly. */
+typedef List Source;
+
 /* --- identifiers and literals -------------------------------------------
    What a macro has to produce to return syntax at all: a checked identifier
    and the three literal expressions the compiler binds without further
@@ -134,8 +144,8 @@ meta List x2c_param_make(List type, Var name) {
    reaches compiler state the syntax only refers to. */
 
 /** Returns the source text the developer wrote for `syntax`, exactly as it
-    appears in the file. Fails the expansion when the captured syntax is
-    incomplete. */
+    appears in the file: the text a `Source` argument carries. Fails the
+    expansion when the captured syntax is incomplete. */
 meta String x2c_source_text(Var syntax);
 
 /** Returns the spelling of the binding `syntax` names. Fails the expansion
@@ -291,10 +301,10 @@ meta int x2c_invocation_line(void);
 /** Returns the column the macro invocation begins at. */
 meta int x2c_invocation_column(void);
 
-/** Returns the text of the file at `path`, a `String` or a captured
-    `String` literal, resolved against the source that named it, and records
-    it as a translation dependency. Fails the expansion when it cannot be
-    read. */
+/** Returns the text of the file at `path`, a `String` or a `Source`
+    holding a `String` literal, resolved against the source that named it,
+    and records it as a translation dependency. Fails the expansion when it
+    cannot be read. */
 meta String x2c_embed_text(Var path);
 
 /* --- failing ------------------------------------------------------------

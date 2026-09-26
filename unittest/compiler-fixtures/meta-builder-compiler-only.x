@@ -3,8 +3,7 @@
 #include "x2c.x"
 #include "meta.x"
 
-meta static List field(List receiver) => x2c_expr_field(receiver, "a");
-meta static List wrap(List receiver) => field(receiver);
+$(import "meta-builder-compiler-only.xmacro")
 
 int main(void) {
   return wrap(%()).len();

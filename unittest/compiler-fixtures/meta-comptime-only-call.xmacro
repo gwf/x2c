@@ -1,0 +1,6 @@
+/* meta-comptime-only-call.xmacro -- the meta functions
+   meta-comptime-only-call.x imports. */
+
+meta static List mc_name(String text) => x2c_literal_string(text);
+
+meta static List mc_wrap(String text) => mc_name(text);

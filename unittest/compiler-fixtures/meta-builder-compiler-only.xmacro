@@ -1,0 +1,6 @@
+/* meta-builder-compiler-only.xmacro -- the meta functions
+   meta-builder-compiler-only.x imports. */
+
+meta static List field(List receiver) => x2c_expr_field(receiver, "a");
+
+meta static List wrap(List receiver) => field(receiver);

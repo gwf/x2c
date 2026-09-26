@@ -10,16 +10,7 @@
 
 meta static int depth = 0;
 
-meta void fails(void) {
-  $let(depth, 5) {
-    x2c_diagnostic_fail("failed inside the cleanup block", %());
-  }
-}
-
-meta void report(void) {
-  if (depth == 0) x2c_diagnostic_fail("depth was restored", %());
-  x2c_diagnostic_fail("depth was not restored", %());
-}
+$(import "meta-cleanup-raise.xmacro")
 
 void first(void) { $fails(); }
 void second(void) { $report(); }

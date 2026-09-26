@@ -1,0 +1,9 @@
+/* meta-heap-address-result.xmacro -- the meta functions
+   meta-heap-address-result.x imports. */
+
+meta struct Node *make_node(int value) {
+  struct Node *node = Scope.malloc(sizeof *node);
+  node->value = value;
+  node->next = NULL;
+  return node;
+}

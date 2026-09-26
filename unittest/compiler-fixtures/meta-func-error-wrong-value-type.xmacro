@@ -1,0 +1,7 @@
+/* meta-func-error-wrong-value-type.xmacro -- the meta functions
+   meta-func-error-wrong-value-type.x imports. */
+
+meta int wrong_value_type(int n) {
+  Func f = %!(Array a) => a.len();
+  return f(n);
+}

@@ -37,6 +37,12 @@ The body has not changed. `meta` makes it available to the compiler during
 translation as well as to the finished program. You can use it for an
 ordinary calculation; it does not have to inspect types or generate code.
 
+A `meta` function with a body lives in a `.xmacro` file that the program
+imports, apart from the program's own code; see
+[Sharing a `meta` function between units](#sharing-a-meta-function-between-units).
+The samples in this chapter show the definition beside the code that calls
+it so that each fits in one block.
+
 ## Call it in the program
 
 An ordinary call uses parentheses and commas, just as before. Here the
@@ -929,8 +935,8 @@ for text and location queries; constructed subtrees do not acquire it.
 
 typedef struct Point { int x, y, z; } Point;
 
-meta static List field_count(List receiver) =>
-  x2c_literal_int(x2c_type_fields(x2c_syntax_type(receiver)).len());
+meta static List field_count(Type type) =>
+  x2c_literal_int(type.assoc(<fields>).len());
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
 
@@ -948,6 +954,22 @@ count 3
 The macro body is one call and nothing else. That is the usual shape: the
 macro declares the holes and the result kind, and the `meta` function does
 the work.
+
+`field_count` declares its parameter `Type`, so it receives a description
+of the argument's type rather than its code. The compiler computes that
+description at the `$` call:
+
+```text
+((name "Point") (kind struct) (type ("Point"))
+ (fields (("x" (int)) ("y" (int)) ("z" (int)))))
+```
+
+`name` is the type's name, or `""` when it has none. `kind` is `struct`,
+`union`, `enum`, `pointer`, `scalar` or `other`. `type` is the canonical
+type, and `fields` lists the `(name type)` rows of a struct or union's
+named fields in declaration order. Read a part with `List.assoc`. Pass the
+same hole twice when a function needs both the code and its type, as
+`shape_reads` does below.
 
 What the function returns decides what the expansion is. A `List` one of the
 compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
@@ -1100,21 +1122,28 @@ int main(void) {
 twice 42
 ```
 
-**Asking about types and fields.** `x2c_syntax_type` answers the canonical
-`Type` of an expression or binding. `x2c_type_fields` answers the named
-fields of a struct or union `Type`, each as a metadata row whose first
-element is the field name. `x2c_type_layout`, `x2c_type_parts`,
-`x2c_type_resolve` and `x2c_type_is_value` answer the remaining
-generated-code questions. `x2c_method_resolve` answers which operation a
-member call selects. These answers live in the compiler's symbol table, so
-a macro body cannot derive them from the code it captured.
+**Asking about types and fields.** A program's `meta` function receives a
+type as a `Type` parameter, described above, and asks the compiler
+nothing. The queries below answer the same questions for the compiler's
+own `meta` code in `lib/`. `x2c_syntax_type` answers the canonical `Type`
+of an expression or binding. `x2c_type_fields` answers the named fields
+of a struct or union `Type`, each as a metadata row whose first element is
+the field name. `x2c_type_layout`, `x2c_type_parts`, `x2c_type_resolve`
+and `x2c_type_is_value` answer the remaining generated-code questions.
+`x2c_method_resolve` answers which operation a member call selects. These
+answers live in the compiler's symbol table, so a macro body cannot derive
+them from the code it captured.
 
-**Source text and location.** `x2c_source_text` returns the text the
-developer wrote for a captured hole. `x2c_binding_spelling` returns the
-name a binding was declared with. `x2c_invocation_file`,
-`x2c_invocation_line` and `x2c_invocation_column` give the site of the
-macro invocation. `x2c_embed_text` reads a file beside the source and
-records it as a translation dependency.
+**Source text and location.** A parameter declared `Source` receives a
+captured hole together with the text the developer wrote for it:
+`((text T) (file F) (syntax S))`. `x2c_source_text` returns that text, and
+`x2c_embed_text` reads the file a captured `String` literal names beside
+the source that wrote it and records it as a translation dependency. Both
+read what the argument carries. `x2c_embed_text` also accepts a plain
+`String`, resolved against the file that defines the macro.
+`x2c_binding_spelling` returns the name a binding was declared with.
+`x2c_invocation_file`, `x2c_invocation_line` and `x2c_invocation_column`
+give the site of the macro invocation.
 
 **Failing with a diagnostic.** `x2c_diagnostic_fail` reports a message at
 the invocation and stops the expansion. It does not return. Use it when the
@@ -1124,7 +1153,7 @@ argument is wrong in a way the macro can see:
 #include "x2c.x"
 #include "meta.x"
 
-meta static List one_word(Var node) {
+meta static List one_word(Source node) {
   String text = x2c_source_text(node);
   if (text.contains(" "))
     x2c_diagnostic_fail("this argument must be one word", %());
@@ -1144,9 +1173,9 @@ int main(void) {
 word seconds
 ```
 
-The helper receives the complete capture, including the source information
-required by `x2c_source_text`. A computed subtree is code data, not a new
-source capture.
+The helper receives the complete capture with its source text, which
+`x2c_source_text` reads. A computed subtree is code data, not a new source
+capture, and cannot be passed as a `Source`.
 
 Writing `$probe.word(seconds * 2)` instead reports the message at that
 invocation:
@@ -1172,12 +1201,12 @@ valid runtime form, and the compiler emits no definition for it. A body
 containing a source-template constructor is also compile-time-only, as are
 its meta callers. A call to
 one from a runtime body is diagnosed where it is written. Calling
-`field_count` from an earlier section at run time gives:
+`one_word` from an earlier section at run time gives:
 
 ```text
-sample.x:19:22: macro: 'field_count' can only be called at compile time
-    int n = field_count(point);
-                       ^
+sample.x:19:22: macro: 'one_word' can only be called at compile time
+    List n = one_word(node);
+                     ^
   note: reason: it reaches a compiler operation, so no unit emits a
   definition for it; call it from a macro or another meta function
 ```
@@ -1191,33 +1220,32 @@ keeps both forms and is emitted normally.
 ## A complete example
 
 Two files. The first is a `.xmacro` holding the `meta` functions and the
-macros that call them. `shape_fields` asks the compiler what a struct holds.
-`shape_names` and `shape_reads` turn that answer into code.
+macros that call them. `shape_fields` reads the fields from the `Type` the
+compiler sends. `shape_names` and `shape_reads` turn them into code.
 
 <!-- ignore: shape.xmacro is the external file being illustrated -->
 ```x2c,ignore
 /* The named fields of a struct-typed expression, in declaration order. */
-meta static List shape_fields(List receiver) =>
-  x2c_type_fields(x2c_syntax_type(receiver));
+meta static List shape_fields(Type type) => type.assoc(<fields>);
 
 /* One `String` literal holding those field names, comma separated. */
-meta static List shape_names(List receiver) {
+meta static List shape_names(Type type) {
   Array names = [];
-  foreach (List field, shape_fields(receiver)) names.push(field.car());
+  foreach (List field, shape_fields(type)) names.push(field.car());
   return x2c_literal_string(String.join(", ", names));
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
-meta static List shape_reads(List receiver) {
+meta static List shape_reads(List receiver, Type type) {
   Array reads = [];
-  foreach (List field, shape_fields(receiver))
+  foreach (List field, shape_fields(type))
     reads.push(x2c_expr_field(receiver, field.car()));
   return x2c_expr_composite(reads);
 }
 
 macro Expression $shape.names(Expr $value) => $shape_names($value);
 
-macro Expression $shape.reads(Expr $value) => $shape_reads($value);
+macro Expression $shape.reads(Expr $value) => $shape_reads($value, $value);
 ```
 
 The second file imports it and uses the macros. Imports still use the
@@ -1252,12 +1280,25 @@ the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
 
 ## Sharing a `meta` function between units
 
-A `meta` function written in a `.x` file belongs to that unit. Including that
-file elsewhere shares its declaration, the way including any `.x` file does,
-and the declaration alone has no compile-time form: another unit can call it
-at run time, and cannot call it during translation.
+A `meta` function with a body lives in a `.xmacro` file, apart from program
+code. A bodied `meta` function in an ordinary program `.x` file is an
+error that names the function and asks to move it to an `.xmacro` file the
+unit imports:
 
-To share one, put it in a `.xmacro` that each unit imports. A `.xmacro` file
+```text
+sample.x:5:1: parse: meta function 'poly' is defined in a program file
+  meta int poly(int n) => n * n + 3 * n + 1;
+  ^^^^
+  note: move it to an .xmacro file this unit imports
+```
+
+A macro cannot produce one either: a `meta` function inside a macro
+template is reported where it is written. The compiler's own `lib/meta.x`
+and its `src/` units are the exceptions. A bodyless `meta` prototype, a
+`meta native` declaration and a `meta static` value may still appear in a
+`.x` file.
+
+Put a `meta` function in a `.xmacro` that each unit imports. A `.xmacro` file
 may hold `meta` functions beside the macros that call them, and importing it
 installs their compile-time forms in the importing unit. The unit that imports
 the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's

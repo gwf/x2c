@@ -1,26 +1,7 @@
 /* Value operations use the same native strings and interpreted callbacks. */
 #include "x2c.x"
 
-meta static String trim_chars(String text) => text.strip(" .");
-
-meta static String trim_space(String text) {
-  return text.strip((char *) 0);
-}
-
-meta static int mapped_values(int offset) {
-  Array input = [1, 2, 3];
-  Func add = %!(value) => value + offset;
-  Array output = input.map(add);
-  return (int) output[0] * 100 + (int) output[1] * 10 + (int) output[2];
-}
-
-meta static int mapped_empty(int n) {
-  Array input = [];
-  Func unused = %!(value) => value + n;
-  Array output = input.map(unused);
-  output.push(7);
-  return (int) input.len() * 10 + (int) output.len();
-}
+$(import "meta-value-operations.xmacro")
 
 int main(int argc, char **argv) {
   (void) argv;

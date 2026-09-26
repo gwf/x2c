@@ -8,9 +8,6 @@
 
 #include "x2c.x"
 
-meta static int *dangling(int seed) {
-  int value = seed;
-  return &value;
-}
+$(import "comptime-declines-local-address-return.xmacro")
 
 int main(void) { return 0; }

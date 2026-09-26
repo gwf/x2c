@@ -9,8 +9,7 @@ meta native int next_ticket(void) {
   return ++ticket;
 }
 
-/* Followed by no declaration, `native` after `meta` is a type name. */
-meta native twice(native x) => x * 2;
+$(import "meta-native-definition.xmacro")
 
 int main(void) {
   next_ticket();

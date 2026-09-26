@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/meta-container-cycle.x:8:18: macro: compile-time result contains itself
+unittest/compiler-fixtures/meta-container-cycle.x:5:18: macro: compile-time result contains itself
     Array result = $cyclic_result();
                    ^
   note: each Array and Map in a result is built separately

@@ -1,0 +1,663 @@
+/* comptime-lowering.xmacro -- the meta functions
+   comptime-lowering.x imports. */
+
+/* --- arithmetic and control flow ---------------------------------------- */
+
+meta int ct_gcd(int a, int b) {
+  while (b) {
+    int t = a % b;
+    a = b;
+    b = t;
+  }
+  return a;
+}
+
+meta int ct_sum(int n) {
+  int total = 0;
+  for (int i = 1; i <= n; i++) total += i;
+  return total;
+}
+
+meta int ct_fib(int n) {
+  if (n < 2) return n;
+  return ct_fib(n - 1) + ct_fib(n - 2);
+}
+
+meta int ct_even(int n) {
+  if (n == 0) return 1;
+  return ct_odd(n - 1);
+}
+
+meta int ct_odd(int n) {
+  if (n == 0) return 0;
+  return ct_even(n - 1);
+}
+
+meta int ct_bits(int n) => (n & 6) | (n << 2);
+
+meta int ct_pick(int n) => n > 3 ? n * 2 : -n;
+
+meta double ct_area(double r) => 3.141592653589793 * r * r;
+
+/* A loop's exit is a function over its live locals, so a `break` reaches it
+   with a call rather than a copy of the rest of the block. */
+meta int ct_break(int n) {
+  int s = 0;
+  int i = 0;
+  while (1) {
+    if (i >= n) break;
+    s = s + i;
+    i = i + 1;
+  }
+  return s;
+}
+
+/* A `for` carries its step as the continuation the body and every
+   `continue` reach, so nothing can skip it. */
+meta int ct_continue(int n) {
+  int s = 0;
+  for (int i = 0; i < n; i++) {
+    if (i % 2) continue;
+    s = s + i;
+  }
+  return s;
+}
+
+/* `do` runs its body before the first test, so this body runs once even
+   where the test is false from the start. */
+meta int ct_do(int n) {
+  int s = 0;
+  do {
+    s = s + n;
+    n = n - 1;
+  }
+  while (n > 0);
+  return s;
+}
+
+meta int ct_do_once(int n) {
+  int s = 0;
+  do { s = s + 1; }
+  while (n > 100);
+  return s;
+}
+
+/* A `continue` in a `do` reaches the test the same way the body's end does,
+   because the test is the loop's step. */
+meta int ct_do_continue(int n) {
+  int s = 0;
+  do {
+    n = n - 1;
+    if (n % 2) continue;
+    s = s + n;
+  }
+  while (n > 0);
+  return s;
+}
+
+/* A `switch` is a `cond` chain over its subject. An arm ends in `break` or
+   `return`; the last needs neither, since nothing follows it to fall into. */
+meta int ct_switch(int n) {
+  int s = 0;
+  switch (n) {
+    case 1:
+      s = 10;
+      break;
+    case 2: {
+      s = 20;
+      break;
+    }
+    case 3:
+      return 33;
+    default:
+      s = 99;
+  }
+  return s + 1;
+}
+
+/* Labels with no statements between them share one arm, and a `switch` with
+   no `default` falls out to the rest of the block. */
+meta int ct_switch_shared(int n) {
+  switch (n) {
+    case 1:
+    case 2:
+      return 12;
+    case 3:
+      return 3;
+  }
+  return 0;
+}
+
+/* A subject that cannot be repeated is bound once, and a `Symbol` compares
+   the way every other value does. */
+meta String ct_switch_symbol(Var form) {
+  switch (Var.tag(form)) {
+    case <list>:   return "a list";
+    case <symbol>: return "a symbol";
+  }
+  return "other";
+}
+
+/* A `break` inside a `switch` leaves the switch, and a `continue` inside one
+   still reaches the loop around it. */
+meta int ct_switch_in_loop(int n) {
+  int total = 0;
+  for (int i = 0; i < n; i++) {
+    switch (i) {
+      case 2:
+        break;
+      case 3:
+        continue;
+      default:
+        total = total + 1;
+        break;
+    }
+    total = total + 1000;
+  }
+  return total;
+}
+
+/* A `break` binds to the loop nearest it. */
+meta int ct_nested_break(int n) {
+  int s = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (j > 1) break;
+      s = s + 1;
+    }
+    s = s + 100;
+  }
+  return s;
+}
+
+/* `foreach` is an ordinary `while`, so a `break` leaves it too. */
+meta int ct_break_in_foreach(List xs) {
+  int n = 0;
+  foreach (Var item, xs) {
+    if (Var.equal(item, <stop>)) break;
+    n = n + 1;
+  }
+  return n;
+}
+
+/* --- cells: address-of, deref, and a loop-assigned local ----------------- */
+
+meta int ct_through_pointer(int a) {
+  int x = a;
+  int *p = &x;
+  *p = *p + 5;
+  return x;
+}
+
+meta void ct_void_bare(int *out) {
+  *out = 1;
+  return;
+  *out = 99;
+}
+
+meta void ct_void_fallthrough(int *out) {
+  *out = *out + 1;
+}
+
+meta int ct_void_calls(void) {
+  int result = 0;
+  ct_void_bare(&result);
+  ct_void_fallthrough(&result);
+  return result;
+}
+
+meta int ct_count(List xs) {
+  int n = 0;
+  foreach (Var item, xs) {
+    (void) item;
+    n = n + 1;
+  }
+  return n;
+}
+
+/* A cast to `void` discards the result, not the work. */
+meta int ct_discard(int n) {
+  Array values = [n];
+  (void) values.push(n + 1);
+  return n + values.len();
+}
+
+/* `[a, b]` is an array literal wherever it appears, so it lowers to an
+   `Array`; a `List` destination converts, the way the transform would. */
+meta int ct_array_len(int n) { Array xs = [n, n + 1, n + 2]; return (int) xs.len(); }
+
+meta int ct_array_grow(int n) {
+  Array xs = [];
+  xs.push(n);
+  xs.push(n);
+  return (int) xs.len();
+}
+
+/* `Var.tag` answers a `Symbol`, so returning one where a `String` is
+   declared needs the conversion the transform would otherwise insert. */
+meta String ct_array_kind(int n) { Array xs = [n]; return Var.tag(xs); }
+
+meta String ct_list_kind(int n) { List ys = [n]; return Var.tag(ys); }
+
+meta String ct_to_array_kind(List ys) { Array xs = ys; return Var.tag(xs); }
+
+meta String ct_to_list_kind(Array xs) { List ys = xs; return Var.tag(ys); }
+
+/* An array literal in an argument position has no destination to read, so
+   lowering it as a Lisp List would hand the callee the wrong container. */
+meta int ct_takes_array(Array a) => (int) a.len();
+
+meta int ct_array_argument(int n) => ct_takes_array([n, n, n]);
+
+/* A bare name left of `:` is a Symbol key, which is x2c's map literal. */
+meta int ct_map_symbol(int v) {
+  Map m = { one: v, two: v + 1 };
+  return Var.integer(m[<two>]);
+}
+
+meta int ct_map_string(int v) {
+  Map m = { "a": v, "b": v + 1 };
+  return Var.integer(m["b"]);
+}
+
+meta int ct_map_empty(void) { Map m = {}; return (int) m.len(); }
+
+meta int ct_map_store(int v) {
+  Map m = {};
+  m[<k>] = v;
+  return Var.integer(m[<k>]);
+}
+
+meta int ct_array_store(int n) {
+  Array xs = [n, n];
+  xs[1] = n + 5;
+  return Var.integer(xs[1]);
+}
+
+meta int ct_index_list(List ys) => Var.integer(ys[1]);
+
+meta int ct_index_string(String s) => s[1];
+
+/* A local C array is a cell holding an `Array`, zero-filled to its declared
+   size the way C fills one. */
+meta int ct_c_array(int n) {
+  int a[4] = { 1, 2, 3, 4 };
+  a[0] = a[3] + n;
+  return a[0];
+}
+
+meta int ct_c_array_padded(void) { int a[4] = { 7 }; return a[0] + a[3]; }
+
+/* An `Array` accumulated with `push` and returned where a `List` is
+   declared: the return converts, the way a declaration does. */
+meta List ct_accumulate(List items) {
+  Array out = [];
+  foreach (Var item, items) out.push(%($item $item));
+  return out;
+}
+
+/* One `Map` lookup in place of a chain of string comparisons. */
+meta Var ct_table(String name) {
+  Map table = { "sin": %(cos), "cos": %(neg sin) };
+  return table[name];
+}
+
+/* A `foreach` inside a `foreach`. The inner loop declares its output cell
+   with no initializer, so the enclosing loop must fill the box it already
+   allocated rather than bind a new one. */
+meta List ct_flatten(List rows) {
+  Array out = [];
+  foreach (Var row, rows) {
+    List cells = row;
+    foreach (Var cell, cells) out.push(cell);
+  }
+  return out;
+}
+
+/* A character literal is its code. The pattern that selects a C string is
+   `(* char)`, and `*` is a sequence binder, so it matches a plain `(char)`
+   too; without the spelling test a character lowered to its own text and
+   read as a different number on every run. `main` prints each answer beside
+   the same function's run-time answer, because agreement between the two is
+   what the defect broke. */
+meta int ct_letter(void) => 'A';
+
+meta int ct_newline(void) => '\n';
+
+meta int ct_is_dot(String s) => s[0] == '.' ? 1 : 0;
+
+/* A loop carries only the locals it names. `before` is read inside, `after`
+   only past the loop, and the `pad` locals nowhere after their own line, so
+   dropping a local that is still needed would decline as an unbound local
+   rather than answer wrongly. */
+meta int ct_live_set(List xs, int seed) {
+  int pad1 = seed + 1;
+  int pad2 = pad1 + 1;
+  int pad3 = pad2 + 1;
+  int before = pad3;
+  int after = 100;
+  int n = 0;
+  foreach (Var v, xs) {
+    (void) v;
+    n = n + before;
+  }
+  return n + after;
+}
+
+/* `Var (a, b) = pair` reads each name out of the source by position, which
+   is what the transform does with the same declaration. */
+meta int ct_pair(List pair) {
+  Var (a, b) = pair;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* The same declaration with a type on each name. Neither spelling lets the
+   type decide anything, because a Lisp value already is a `Var`. */
+meta int ct_pair_typed(List pair) {
+  (Var a, Var b) = pair;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* A source that is not duplicable is held in one binding, so the call
+   below runs once however many names read it. */
+meta int ct_pair_held(List xs) {
+  Var (a, b) = xs.cdr();
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* An `Array` source converts to a `List` first, the way the transform
+   converts it. */
+meta int ct_pair_array(Array xs) {
+  Var (a, b) = xs;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* `foreach` over an `Array` walks a counting cursor; over a `Map` the one
+   name is the value, and two names are the key and the value. */
+meta int ct_walk_array(Array xs) {
+  int total = 0;
+  foreach (Var x, xs) total = total + Var.integer(x);
+  return total;
+}
+
+meta int ct_walk_map(Map m) {
+  int total = 0;
+  foreach (Var v, m) total = total + Var.integer(v);
+  return total;
+}
+
+/* A sum, because a `Map` walks in bucket order and this has to report the
+   same number whatever that order is. */
+meta int ct_walk_map_pairs(Map m) {
+  int total = 0;
+  foreach (Var (k, v), m)
+    total = total + Var.integer(k) * 100 + Var.integer(v);
+  return total;
+}
+
+/* An empty container ends the walk on its first call. */
+meta int ct_walk_empty(Map m, Array xs) {
+  int n = 0;
+  foreach (Var v, m) { (void) v; n = n + 1; }
+  foreach (Var x, xs) { (void) x; n = n + 1; }
+  return n;
+}
+
+/* --- value types --------------------------------------------------------- */
+
+meta int ct_is_list(Var form) => form.is(<list>);
+
+meta Var ct_head(List items) => items.car();
+
+meta int ct_len(List items) => items.len();
+
+meta String ct_suffix(String name) => name + "_dot";
+
+meta int ct_same(List a, List b) => a.equal(b);
+
+meta String ct_label(String stem, int n) => %"$stem-${n}";
+
+meta List ct_doubled(List items) => items.map(%!(Var part) => %($part $part));
+
+/* --- match and literal templates ----------------------------------------- */
+
+meta List ct_rewrite(List form) {
+  match (form) {
+    case %(add ?a ?b): return %(sum $a $b);
+    case %(neg ?a): {
+      List zero = %(0);
+      return %(sub @zero $a);
+    }
+  }
+  return form;
+}
+
+meta Var ct_binding_name(List form) {
+  match (form) {
+    case %(expr ? (ident (binding ? ?name))): return name;
+  }
+  return void;
+}
+
+/* A typed capture is a tag test as well as a binder, so each of these
+   answers its fallback when the element has the wrong type. The pair of
+   results per function is what proves the test survived folding. */
+
+meta String ct_typed_string(List form) {
+  match (form) {
+    case %(call ?(String n)): return n;
+  }
+  return "none";
+}
+
+meta int ct_typed_int(List form) {
+  match (form) {
+    case %(call ?(int n)): return n;
+  }
+  return -1;
+}
+
+/* A typed capture inside a sublist folds with the cell around it. */
+meta String ct_typed_nested(List form) {
+  match (form) {
+    case %(call (arg ?(String n)) ?rest): return n;
+  }
+  return "none";
+}
+
+meta String ct_typed_mixed(List form) {
+  match (form) {
+    case %(op ?name ?(String text)): return text;
+  }
+  return "none";
+}
+
+meta int ct_typed_symbol(List form) {
+  match (form) {
+    case %(tag ?(Symbol s)): return 1;
+  }
+  return 0;
+}
+
+/* A call in a compile-time function resolves against a name in
+   `etc/comptime.xlisp`, and an operation with no binding there declines the
+   whole function. One function below per binding added for `String`,
+   `Array` and `Map`. */
+
+meta String ct_str_capitalize(String s) => s.capitalize();
+
+meta int ct_str_count(String s) => s.count("ab");
+
+meta String ct_str_escape(String s) => s.escape();
+
+meta String ct_str_unescape(String s) => s.unescape();
+
+meta int ct_str_find_all(String s) => s.find_all("a", 0, -1).len();
+
+meta String ct_str_partition(String s) => "/".join(s.partition("="));
+
+meta String ct_str_rpartition(String s) => "/".join(s.rpartition("="));
+
+meta String ct_str_prefix(String s) => s.remove_prefix("ct_");
+
+meta String ct_str_suffix(String s) => s.remove_suffix(".x");
+
+meta String ct_str_repeat(String s) => s.repeat(3);
+
+meta int ct_str_rfind(String s) => s.rfind("b");
+
+meta String ct_str_lines(String s) => "|".join(s.split_lines(0));
+
+meta int ct_arr_contains(int n) {
+  Array xs = [n, n + 1];
+  return xs.contains(n + 1);
+}
+
+meta int ct_arr_count(int n) {
+  Array xs = [n, n, n + 1];
+  return xs.count(n);
+}
+
+meta int ct_arr_find(int n) {
+  Array xs = [n, n + 1];
+  return xs.find(n + 1);
+}
+
+meta int ct_arr_unshift(int n) {
+  Array xs = [n];
+  xs.unshift(n + 1);
+  return Var.integer(xs[0]);
+}
+
+meta int ct_map_setdefault(int n) {
+  Map m = { "a": n };
+  m.setdefault("b", n + 1);
+  return Var.integer(m.setdefault("b", 0));
+}
+
+/* --- compile-time and runtime agreement --------------------------------- */
+
+meta int mt_poly(int n) => n * n + 3 * n + 1;
+
+/* `meta` composes with a storage class rather than replacing one: `static`
+   still says what it always said about the emitted function. */
+meta static String mt_label(String stem, int n) => %"$stem:$n";
+
+/* An argument names the parameter type it has to reach and carries no
+   conversion of its own, so an `Array` handed to a `List` parameter reached
+   the native adapter as an `Array`. The adapter refused it by raising with
+   the `Array` in the error detail, which is not an admissible detail value,
+   so the compile terminated at the error floor with no diagnostic at all. */
+meta static String mt_join_array(String a, String b) {
+  Array out = [a, b];
+  return "/".join(out);
+}
+
+/* A compound assignment to a local that lives in a cell reads through its
+   box, the way every other read of that local does. Reading the slot itself
+   handed `_binary` the box and answered `(no-member (tag array) (member
+   add))`. `x` is a cell because its address is taken; `score` is one because
+   a loop assigns it a call's result. */
+meta static int mt_cell_update(int a) {
+  int x = a;
+  int *p = &x;
+  x += 5;
+  x++;
+  return *p;
+}
+
+meta static int mt_loop_update(String text) {
+  int score = 0;
+  foreach (Var part, text.split(",")) {
+    String piece = part;
+    score += String.len(piece);
+  }
+  return score;
+}
+
+/* A hexadecimal literal carries `e` and `E` as digits, and the exponent test
+   read them as a floating spelling, so `0x000E` lowered to 14.0 and a switch
+   label built from one was rejected by the C compiler as a double. Every
+   answer below has to be an integer. */
+meta static int mt_hex(void) => 0x000E + 0x00E0 + 0xE + 0x1E;
+
+meta static int mt_hex_upper(void) => 0X00FE + 0XE1;
+
+/* The floating spellings the same test still has to accept. */
+meta static String mt_floats(void) =>
+  %"${1e3} ${2.5E-1} ${0.75}";
+
+/* `f(x)` is not a call in the AST. It expands to a stored callee, a
+   reference-carrier probe and a boxed `FuncArg` per argument, and
+   `Func.apply` last; a call with no arguments needs none of that and is the
+   bare `Func.apply`. A compile-time `Func` is the Lisp lambda this pass
+   lowered, so both spellings collapse back to the application they stand
+   for. One applier per arity, because `src/expressions.x` builds them
+   differently. */
+meta static Var mt_apply0(Func f) => f();
+
+meta static Var mt_apply1(Func f, Var v) => f(v);
+
+meta static Var mt_apply2(Func f, int a, String b) => f(a, b);
+
+meta static int mt_call_none(int bias) {
+  Func k = %!() => 5;
+  return bias + (int) mt_apply0(k);
+}
+
+meta static int mt_call_one(int n) {
+  Func bump = %!(Var x) => x + 10;
+  return mt_apply1(bump, n);
+}
+
+meta static String mt_call_two(int n, String tail) {
+  Func join = %!(Var a, Var b) => %"$a-$b";
+  return mt_apply2(join, n, tail);
+}
+
+/* A function named where a value is wanted is the definition this pass
+   installed, so it reaches a `Func` without a lambda around it. */
+meta static Var mt_bump(Var x) => x + 1;
+
+meta static int mt_named(int n) {
+  Func g = mt_bump;
+  return mt_apply1(g, n);
+}
+
+/* The three shapes `etc/init.xlisp` needs, each calling its procedure from
+   inside a loop. */
+meta static List mt_map(List values, Func fn) {
+  Array out = [];
+  foreach (Var v, values) out.push(fn(v));
+  return out;
+}
+
+meta static List mt_filter(List values, Func keep) {
+  Array out = [];
+  foreach (Var v, values) if (keep(v)) out.push(v);
+  return out;
+}
+
+meta static Var mt_foldl(Func step, Var seed, List values) {
+  Var total = seed;
+  foreach (Var v, values) total = step(total, v);
+  return total;
+}
+
+meta static int mt_higher(int seed) {
+  List doubled = mt_map(%(1 2 3), %!(Var x) => (int) x * 2);
+  List big = mt_filter(doubled, %!(Var x) => x > 2);
+  return mt_foldl(%!(Var a, Var b) => (int) a + (int) b, seed, big);
+}
+
+/* A `Func` stored in a `Map` and read back: boxing it and reading it back
+   are both the identity, because a Lisp lambda already is a value. */
+meta static int mt_thunk(String which) {
+  Func a = %!() => 1;
+  Func b = %!() => 2;
+  Map table = {};
+  table["a"] = a;
+  table["b"] = b;
+  Func chosen = table[which];
+  return chosen();
+}

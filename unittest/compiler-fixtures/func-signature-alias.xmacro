@@ -1,0 +1,9 @@
+/* func-signature-alias.xmacro -- the meta functions
+   func-signature-alias.x imports. */
+
+meta static Count increase(Count &value) => ++value;
+
+meta static Count meta_increase(Count value) {
+  Func function = increase;
+  return function(value);
+}

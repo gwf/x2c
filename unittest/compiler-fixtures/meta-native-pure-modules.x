@@ -4,14 +4,7 @@
 #include "json.x"
 #include "diff.x"
 
-meta String pure_results(void) {
-  Path path = "/usr/lib/notes.tar.gz";
-  List edits = Diff.lines("a\nb\n", "a\nc\n");
-  return %"${Json.parse("{\"a\": [1, 2.5, \"x\"]}").repr()}\n" +
-         %"${Path.join("usr", "lib")} ${path.dirname()} ${path.basename()} " +
-         %"${path.extension()} ${path.stem()}\n${edits.repr()}\n" +
-         %"${Diff.unified("a\nb\n", "a\nc\n", "old", "new")}";
-}
+$(import "meta-native-pure-modules.xmacro")
 
 int main(void) {
   String native = pure_results();

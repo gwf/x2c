@@ -2,34 +2,8 @@
    Absent selectors follow the existing meta lookup convention. */
 
 #include "x2c.x"
-meta int selectors(int offset) {
-  List xs = %((1 2) 3 4);
-  Var value = xs;
-  return offset + xs.caar().integer() + xs.cadr().integer() + xs.caddr().integer()
-    + xs.cddr().len() + value.caar().integer() + value.cadr().integer()
-    + value.caddr().integer() + value.cddr().len();
-}
-meta int inspect(int offset) {
-  Var value = 7;
-  return !offset && value.kind() == <integer> && <abc>.compare(<abd>) < 0;
-}
-meta String rendered(String text) {
-  List xs = %("a" <b>);
-  Array a = ["a", <b>];
-  Map m = {"a": 1};
-  return xs.str() + xs.repr() + a.str() + a.repr() + m.str() + m.repr()
-    + text.str() + text.repr() + <b>.repr();
-}
-meta int absent_selectors(int unused) {
-  (void) unused;
-  List empty = %();
-  List short_list = %(1);
-  List nested = %(());
-  Var value = empty;
-  return empty.caar() == void && short_list.cadr() == void
-    && short_list.caddr() == void && nested.caar() == void
-    && value.cadr() == void && value.cddr().len() == 0;
-}
+$(import "meta-value-aliases.xmacro")
+
 int main(void) {
   printf("%d %d\n", $(selectors 0), selectors(0));
   printf("%d %d\n", $(inspect 0), inspect(0));

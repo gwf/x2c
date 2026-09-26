@@ -341,6 +341,43 @@ List x2c_type_fields(List value) {
   return named.list_free();
 }
 
+/* Whether the type `type` is spelled by keywords alone, such as `(int)`. */
+static int _symbol_words(List type) {
+  foreach (Var word, type) if (word is not <symbol>) return 0;
+  return type != NULL;
+}
+
+/** Returns what a `meta` parameter declared `Type` receives for the captured
+    syntax `value`: `((name N) (kind K) (type T) (fields F))`. `T` is the
+    canonical type of `value` and `N` its name, or "" when it has none. `K`
+    is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`, and `F`
+    lists the `(name type)` rows of a struct or union's named fields. */
+List meta_type_description(Var value) {
+  Type type = x2c_syntax_type(value);
+  Type shape = x2c_type_resolve(type);
+  String name = "";
+  match (type) {
+    case %(?(String own)): name = own;
+    case %((!or struct union enum) ?(String own)): name = own;
+    default:
+      if (_symbol_words(type) && !type.is_pointer()) {
+        Array words = [];
+        foreach (Var word, type) words.push(word.str());
+        name = " ".join(words);
+      }
+  }
+  Var kind = <other>;
+  List fields = %();
+  match (shape) {
+    case %((!or struct union enum) *): kind = shape.car();
+    default:
+      if (shape.is_pointer()) kind = <pointer>;
+      else if (_symbol_words(shape)) kind = <scalar>;
+  }
+  if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
+  return %((name $name) (kind $kind) (type $type) (fields $fields));
+}
+
 /** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
 String x2c_binding_spelling(Var syntax) {
   _sdk_guard("x2c.binding.spelling");
@@ -385,6 +422,7 @@ String x2c_binding_spelling(Var syntax) {
 }
 
 static Var _sdk_source_text(Var value) {
+  match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _sdk_guard("x2c.source.text");
   Var stored = void;
   Var key = ((ulong) value.u64);
@@ -396,6 +434,15 @@ static Var _sdk_source_text(Var value) {
   List source = stored;
   int begin = source.caddr(), end = source.last();
   return String.new_len(macro_sdk_compiler.text + begin, end - begin);
+}
+
+/** Returns what a `meta` parameter declared `Source` receives for the
+    captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
+    is the text the developer wrote and `F` the file it is in. */
+List meta_source_description(Var value) {
+  String text = _sdk_source_text(value);
+  List source = macro_sdk_source_captures[((ulong) value.u64)];
+  return %((text $text) (file ${source.cadr()}) (syntax $value));
 }
 
 /** Answers `x2c.source.text`, declared in `lib/meta.x`. */
@@ -910,11 +957,15 @@ static Var _sdk_embed_text(Var requested) {
   String source_file = macro_sdk_source_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
   else {
-    Var stored = void;
-    Var key = ((ulong) requested.u64);
-    if (!macro_sdk_source_captures ||
-        !macro_sdk_source_captures.try_get(key, stored) ||
-        !_literal_string(requested, requested_path))
+    Var stored = void, syntax = requested;
+    match (requested)
+      case %((text ?) (file ?(String file)) (syntax ?carried)): {
+        syntax = carried;
+        stored = %(source $file);
+      }
+    if (stored is void && macro_sdk_source_captures)
+      macro_sdk_source_captures.try_get(((ulong) requested.u64), stored);
+    if (stored is void || !_literal_string(syntax, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
         %("value: ${requested.repr()}"));

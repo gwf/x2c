@@ -1,0 +1,10 @@
+/* meta-expression-effects.xmacro -- the meta functions
+   meta-expression-effects.x imports. */
+
+meta int discarded(int n) { (void) (n = n + 2); return n; }
+
+meta int branch(int n) { (void) (n ? (n += 2) : (n += 3)); return n; }
+
+meta int short_circuit(int n) { (void) (n && (n += 2)); return n; }
+
+meta int assign_return(int n) { return (n = n + 2); }

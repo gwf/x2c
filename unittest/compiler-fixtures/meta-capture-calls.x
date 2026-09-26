@@ -2,14 +2,7 @@
 #include "meta.x"
 $(import "meta-capture-definition/helpers.xmacro")
 
-meta static String capture_text(List code) {
-  List saved = code;
-  return x2c_source_text(saved);
-}
-meta static List capture_type(List code) => x2c_syntax_type(code);
-meta static List capture_name(String name) => x2c_ident(name);
-meta static String capture_function_name(List fn) => x2c_function_name(fn);
-meta static List capture_function_body(List fn) => x2c_function_body(fn);
+$(import "meta-capture-calls.xmacro")
 
 macro Expression $capture.text(Expr $value) => $capture_text($value);
 macro Expression $capture.forward($value) => $capture.text($value);

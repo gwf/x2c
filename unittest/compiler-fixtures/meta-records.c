@@ -2,6 +2,13 @@
 
 #include "meta-records.h"
 
+int main(int argc, char * * argv){
+  x2c_initialize();
+  (void) argv;
+  printf("%d %d\n", 3840, mr_probe(argc + 2));
+  return 0;
+}
+
 struct MetaPoint mr_make(int x, int y){
   struct MetaPoint result ={
     .x = x, .y = y
@@ -24,12 +31,5 @@ int mr_probe(int seed){
   struct MetaPoint * address = & copy;
   address -> y = 30;
   return original.x * 1000 + original.y * 100 + copy.x * 10 + copy.y + mr_sum(original);
-}
-
-int main(int argc, char * * argv){
-  x2c_initialize();
-  (void) argv;
-  printf("%d %d\n", 3840, mr_probe(argc + 2));
-  return 0;
 }
 

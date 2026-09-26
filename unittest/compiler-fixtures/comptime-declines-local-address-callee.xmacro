@@ -1,0 +1,11 @@
+/* comptime-declines-local-address-callee.xmacro -- the meta functions
+   comptime-declines-local-address-callee.x imports. */
+
+meta static int *field_of(struct Box *box) {
+  return &box->value;
+}
+
+meta static int *leak(int seed) {
+  struct Box box = { .value = seed };
+  return field_of(&box);
+}

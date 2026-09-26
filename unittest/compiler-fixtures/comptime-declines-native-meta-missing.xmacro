@@ -1,0 +1,4 @@
+/* comptime-declines-native-meta-missing.xmacro -- the meta functions
+   comptime-declines-native-meta-missing.x imports. */
+
+meta static double calls_missing_target(void) => not_compiler_target(1.0);
