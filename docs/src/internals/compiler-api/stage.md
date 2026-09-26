@@ -71,7 +71,7 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:363`
+Source: `src/stage.x:362`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -80,7 +80,7 @@ Source: `src/stage.x:363`
 
 Records the bodied `meta` function `fn` in the unit's group.
 
-Source: `src/stage.x:447`
+Source: `src/stage.x:446`
 
 <a id="Compiler.groups_meta"></a>
 #### Compiler.groups_meta
@@ -92,7 +92,7 @@ a parse meets it outside a macro definition while the project meta build
 parses the unit or the REPL stages it. A `.xmacro` import, and each
 compiler that collects a segment of the unit, shares the unit's group.
 
-Source: `src/stage.x:432`
+Source: `src/stage.x:431`
 
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument
@@ -107,7 +107,7 @@ syntax as the literal's value, a `Type` parameter as the description
 of its type, and a `Source` parameter with its source text. Anything
 else is reported at `site`.
 
-Source: `src/stage.x:154`
+Source: `src/stage.x:153`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -117,7 +117,7 @@ Source: `src/stage.x:154`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/stage.x:415`
+Source: `src/stage.x:414`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -162,7 +162,7 @@ Source: `src/stage.x:1096`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:378`
+Source: `src/stage.x:377`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -173,7 +173,7 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/stage.x:468`
+Source: `src/stage.x:467`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -186,7 +186,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/stage.x:289`
+Source: `src/stage.x:288`
 
 <a id="Compiler.record_meta_import"></a>
 #### Compiler.record_meta_import
@@ -196,7 +196,7 @@ Source: `src/stage.x:289`
 Records that a compile-time import has just added its `meta` definitions
 to the unit, so the group places them where the import stands.
 
-Source: `src/stage.x:459`
+Source: `src/stage.x:458`
 
 <a id="Compiler.stage_meta_group"></a>
 #### Compiler.stage_meta_group
@@ -218,7 +218,7 @@ Source: `src/stage.x:1193`
 Stages the `meta` group of each unit this process parses in process and
 loads it, as the REPL's submissions need.
 
-Source: `src/stage.x:426`
+Source: `src/stage.x:425`
 
 <a id="Compiler.stop_meta_helper"></a>
 #### Compiler.stop_meta_helper
@@ -260,7 +260,7 @@ Selects the C compiler `cc` that builds the `meta` code of the units
 this process translates, with the runtime headers this compiler was
 built with, found from its installed headers in `include_dir`.
 
-Source: `src/stage.x:406`
+Source: `src/stage.x:405`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
