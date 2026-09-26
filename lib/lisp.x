@@ -1803,7 +1803,7 @@ $(def lisp.native.target.rows (append '(
   (lisp_string_strip)
   (Var_is)
   (Symbol_str)
-) (filter (lambda (row) (not (C.true? (String.startswith (car row) "x2c_"))))
+) (filter (lambda (row) (eq? (String.startswith (car row) "x2c_") 0))
      (_x2c.native-meta.targets)) '(
   // Adapters that replace generated direct targets come last to win.
   (_lisp_List_job (as List_job))

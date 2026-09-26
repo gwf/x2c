@@ -1063,9 +1063,6 @@ static void _eval_library(
   compiler.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
   if (loaded || _inherited_import(path)) return;
-  /* Transitional: the lowered Lisp the generated `etc/lisp-bindings.xlisp`
-     holds needs this runtime until that file is written by hand. */
-  if (relative == "etc/comptime.xlisp" && !Path.is_file(path)) return;
   String text = _source_text(
     compiler, path, message, compiler.token, %("path:" $path));
   _eval_string(compiler, text, compiler.token);
@@ -1098,7 +1095,6 @@ void macro_library_reset(void) {
 static List _library_files(void) => %(
   ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
   ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
-  ("etc/comptime.xlisp" "cannot open the compile-time function runtime")
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-core.xlisp" "cannot open the built-in macro support"));
 
@@ -1107,7 +1103,7 @@ static List _library_files(void) => %(
    `compiler_supplier`, which every request selects first. */
 $(import "../etc/lisp-bindings.xlisp")
 macro Expression $compiler.targets() => $(lisp.native.targets
-  (filter (lambda (row) (C.true? (String.startswith (car row) "x2c_")))
+  (filter (lambda (row) (not (eq? (String.startswith (car row) "x2c_") 0)))
     (_x2c.native-meta.targets)));
 
 static String compiler_supplier = "<compiler>";
@@ -1136,7 +1132,7 @@ void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
   if (lisp.try_get(dotted, bound)) return;
   if (name.startswith("x2c_type_is_"))
     function = lisp.eval(
-      %(lambda (value) (if (C.true? ((quote $function) value)) true nil)));
+      %(lambda (value) (if (eq? ((quote $function) value) 0) nil true)));
   lisp.set_global(dotted, function);
 }
 
@@ -1330,9 +1326,6 @@ static void _ensure_lisp(Compiler compiler) {
     _eval_library(
       _, loaded || shared, "etc/lisp-values.xlisp",
       "cannot open the compile-time value operations");
-    _eval_library(
-      _, loaded || shared, "etc/comptime.xlisp",
-      "cannot open the compile-time function runtime");
     _eval_library(
       _, loaded || shared, "etc/compiler-sdk.xlisp",
       "cannot open the compile-time Lisp SDK");
@@ -2276,11 +2269,11 @@ static Map _source_captures(List bindings) {
 static String meta_cc = NULL, meta_include_dir = NULL;
 
 /* The runtime headers this compiler was built with, which a staged module
-   shares because it calls the compiler's own runtime: a checkout stage's
-   `lib`, the checked-in bootstrap's, or else the installed `include_dir`. */
+   shares because it calls the compiler's own runtime: a built checkout
+   stage's `lib`, the checked-in bootstrap's, or else `include_dir`. */
 static String _meta_headers(String include_dir) {
   String stage = x2c_stage_dir();
-  if (stage) return %"$stage/lib";
+  if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
   String executable = x2c_get_executable(), root = x2c_get_root();
   if (executable && root && Path.basename(executable) == "x2c-bootstrap" &&
       Path.dirname(executable) == %"$root/bin")

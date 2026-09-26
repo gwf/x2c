@@ -19,5 +19,8 @@
   (x2c_literal_symbol value)
   (_x2c.fail "x2c.literal.symbol requires a Symbol" value)))
 
+// The x2c spelling takes its arguments as one List; the Lisp one spreads them.
+(defun x2c.expr.call (callee . arguments) (x2c_expr_call callee arguments))
+
 (defun x2c.source.text (syntax) (_x2c.source.text syntax))
 (defun x2c.embed.text (path) (_x2c.embed.text path))

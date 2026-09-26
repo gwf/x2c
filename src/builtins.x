@@ -666,8 +666,8 @@ List binding_literal_list(List values);
 
 static List binding_reference(String name) =>
   builtin_foreach_reference(name);
-static Var binding_literal_value(List node) => x2c_literal_value(node);
-static void binding_fail(String message, List node) {
+static Var binding_literal_value(Var node) => x2c_literal_value(node);
+static void binding_fail(String message, Var node) {
   x2c_diagnostic_fail(message, %("value: ${node.repr()}"));
 }
 
@@ -677,7 +677,7 @@ static List binding_call(String name, List arguments) =>
 static List binding_name_signature(String name) =>
   binding_native_type(binding_reference(name));
 
-static String binding_name(List node) {
+static String binding_name(Var node) {
   Var value = binding_literal_value(node);
   if (!lisp_string(value).equal(%())) return value.str();
   binding_fail("native Lisp binding name requires a String literal", node);
@@ -691,8 +691,8 @@ static List binding_rows_for(String group, List rows) {
   return selected.reverse();
 }
 
-static List binding_record(List group, List name, List function, List all_rows,
-                    List sealed) {
+static List binding_record(Var group, Var name, List function, List all_rows,
+                           List sealed) {
   String group_name = x2c_binding_spelling(group);
   String lisp_name = binding_name(name);
   String function_name = x2c_function_name(function);

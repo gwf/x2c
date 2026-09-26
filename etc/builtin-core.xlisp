@@ -1,9 +1,6 @@
 // The algorithms are compiler functions (src/builtins.x); these are the
 // names the built-in macros call.
 
-// Transitional: the lowered binding algorithms read this name.
-(def lisp_string string?)
-
 (def scope.expand builtin_scope_expand)
 (def foreach.expand builtin_foreach_expand)
 
