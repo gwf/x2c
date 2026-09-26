@@ -928,13 +928,13 @@ static String _meta_group_unbound(Compiler c) {
   return NULL;
 }
 
+static String _load_meta_group(Compiler c, String &failure);
+
 /** Binds each unbound function of the pending group to its staged native
     code when `name` is pending, after reinitializing the module's `meta
     static` values for this unit in the unit's meta Scope. Returns whether
-    `name` is now native; a group that does not stage is reported at
+    `name` is now native; a function that cannot run is reported at
     `site`. */
-static String _load_meta_group(Compiler c, String &failure);
-
 int Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (!c.groups_meta() || name in c.meta_group_bound) return 0;
   Type type = NULL;

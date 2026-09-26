@@ -437,9 +437,11 @@ Public functions:
 
 `Compiler.meta_argument`, `Compiler.meta_value_expression`,
 `Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`,
+`Compiler.meta_watch_begin`, `Compiler.meta_watch_end`,
 `Compiler.use_meta_toolchain`, `Compiler.groups_meta`,
 `Compiler.group_meta_function`, `Compiler.record_meta_import`,
-`Compiler.meta_reaches_compile_time`, `Compiler.bind_meta_group`
+`Compiler.meta_reaches_compile_time`, `Compiler.bind_meta_group`,
+`Compiler.stage_meta_group`
 
 ### [src/statements.x](../src/statements.x)
 
