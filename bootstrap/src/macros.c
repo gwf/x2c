@@ -399,7 +399,7 @@ static Var _sdk_symbol_set(List values);
 
 static Map _source_captures(List bindings);
 
-static Var _meta_apply(Compiler c, Var function, List arguments);
+static Var _meta_apply(Compiler c, String name, Token site, Var function, List arguments);
 
 static Var _sdk_meta_stage(String name, List arguments);
 
@@ -3960,7 +3960,7 @@ static int _module_stamp(String path){
 }
 
 static void _open_native_module(String path){
-  void * handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);  if(! handle) x2c_driver_error(String_join(NULL, cons(String_var(_644), cons(String_var(path), cons(String_var(_643), cons(String_var(String_new(dlerror())), NULL))))));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) x2c_driver_error(String_join(NULL, cons(String_var(_645), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
+  Scope_push(& native_module_scope);  void * handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);  Scope_pop();  if(! handle) x2c_driver_error(String_join(NULL, cons(String_var(_644), cons(String_var(path), cons(String_var(_643), cons(String_var(String_new(dlerror())), NULL))))));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) x2c_driver_error(String_join(NULL, cons(String_var(_645), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
 }
 
 String Compiler_load_native_module(String path){
@@ -4435,19 +4435,35 @@ static Map _source_captures(List bindings){
   return captures;
 }
 
-static Var _meta_apply(Compiler c, Var function, List arguments){
+void Compiler_meta_watch_begin(Compiler, String, Token);
+void Compiler_meta_watch_end(void);
+static Var _meta_apply(Compiler c, String name, Token site, Var function, List arguments){
   Array quoted = Array_update_n(Array_new(), 1, List_var(cons(_481, cons(function, NULL)))); {
     Var argument;  List _x2c_macro_object_35 = arguments;  List _x2c_macro_cursor_35 = _x2c_macro_object_35;  Var _x2c_macro_cursor_output_43;  while(List_try_next(_x2c_macro_object_35, &(_x2c_macro_cursor_35), &(_x2c_macro_cursor_output_43))){
       argument = _x2c_macro_cursor_output_43;  Array_push(quoted, List_var(cons(_481, cons(argument, NULL))));
     }
 
   }
-  return Lisp_eval(c -> macro_lisp, List_var(Array_list_free(quoted)));
+  Var volatile value;  Compiler_meta_watch_begin(c, name, site); {
+    ExceptionFrame _x2c_exception_frame_6;  x2c_exception_push(& _x2c_exception_frame_6);  if (!sigsetjmp(_x2c_exception_frame_6.env, 0)) value = Lisp_eval(c -> macro_lisp, List_var(Array_list_free(quoted)));  else {x2c_exception_landed(& _x2c_exception_frame_6); {
+      if(x2c_exception_claim(& _x2c_exception_frame_6)){
+        Compiler_meta_watch_end();
+      }
+      x2c_exception_leave(& _x2c_exception_frame_6);  __builtin_unreachable();
+    }
+
+  }
+  if(x2c_exception_claim(& _x2c_exception_frame_6)){
+    Compiler_meta_watch_end();
+  }
+  x2c_exception_leave(& _x2c_exception_frame_6);
+}
+return value;
 }
 
 int Compiler_bind_meta_group(Compiler, String, Token);
 static Var _sdk_meta_stage(String name, List arguments){
-  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;  if(! c) _sdk_reject(String_join(NULL, cons(String_var(name), cons(String_var(_743), NULL))), NULL);  Compiler_bind_meta_group(c, name, macro_import_invocation ? macro_import_invocation : c -> token);  Var function;  if(!(Map_contains(c -> meta_group_bound, String_var(name))) || ! Lisp_try_get(c -> macro_lisp, name, &(function))) _sdk_reject(String_join(NULL, cons(String_var(name), cons(String_var(_744), NULL))), NULL);  return _meta_apply(c, function, arguments);
+  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;  if(! c) _sdk_reject(String_join(NULL, cons(String_var(name), cons(String_var(_743), NULL))), NULL);  Token site = macro_import_invocation ? macro_import_invocation : c -> token;  Compiler_bind_meta_group(c, name, site);  Var function;  if(!(Map_contains(c -> meta_group_bound, String_var(name))) || ! Lisp_try_get(c -> macro_lisp, name, &(function))) _sdk_reject(String_join(NULL, cons(String_var(name), cons(String_var(_744), NULL))), NULL);  return _meta_apply(c, name, site, function, arguments);
 }
 
 static int _shared_meta_definition(Compiler c, String name){
@@ -4490,7 +4506,7 @@ Array values = Array_new(); {
         }
 
       }
-      Compiler_bind_meta_group(c, name, site);  Var function;  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1270, site, cons(String_var(String_join(NULL, cons(String_var(_791), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
+      Compiler_bind_meta_group(c, name, site);  Var function;  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1270, site, cons(String_var(String_join(NULL, cons(String_var(_791), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, name, site, function, applied);
     }
 
   }
@@ -4571,7 +4587,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                           * _x2c_macro_address_4 = site;
                           {
                             {
-                              ExceptionFrame _x2c_exception_frame_6;
+                              ExceptionFrame _x2c_exception_frame_7;
                               static MatchCaptureSite _x2c_catch_arms_6[3];
                               static ErrorCatchSite _x2c_catch_site_6 = {  _x2c_catch_arms_6, -1, 3, ERROR_CATCH_PENDING, -1 };
                               Var _x2c_catch_patterns_6[3];
@@ -4582,14 +4598,14 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                               List _x2c_catch_pattern_11 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
                               _x2c_catch_patterns_6[2] = List_var(_x2c_catch_pattern_11);
                             }
-                            ErrorHandler volatile _x2c_error_handler_6 = x2c_error_catch_site_push(&_x2c_exception_frame_6, &_x2c_catch_site_6, _x2c_catch_patterns_6);  x2c_exception_push(& _x2c_exception_frame_6);  if (!sigsetjmp(_x2c_exception_frame_6.env, 0)) value = _meta_call_value(c, expression, site);  else {x2c_exception_landed(& _x2c_exception_frame_6); {
-                              if (x2c_exception_is_error_target(&_x2c_exception_frame_6)){
+                            ErrorHandler volatile _x2c_error_handler_6 = x2c_error_catch_site_push(&_x2c_exception_frame_7, &_x2c_catch_site_6, _x2c_catch_patterns_6);  x2c_exception_push(& _x2c_exception_frame_7);  if (!sigsetjmp(_x2c_exception_frame_7.env, 0)) value = _meta_call_value(c, expression, site);  else {x2c_exception_landed(& _x2c_exception_frame_7); {
+                              if (x2c_exception_is_error_target(&_x2c_exception_frame_7)){
                                 int _x2c_catch_selected_6 = x2c_error_catch_selected(_x2c_error_handler_6);
                                 x2c_error_catch_detach(_x2c_error_handler_6);
-                                x2c_exception_mark_handled(&_x2c_exception_frame_6);
+                                x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_6 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_6, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2320};
+                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2330};
                                   x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
@@ -4606,7 +4622,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                         else{
                           x2c_error_catch_close(_x2c_error_handler_6);
                           _x2c_error_handler_6 = NULL;
-                          x2c_exception_leave(& _x2c_exception_frame_6);
+                          x2c_exception_leave(& _x2c_exception_frame_7);
                           __builtin_unreachable();
                         }
 
@@ -4615,7 +4631,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                     }
                     x2c_error_catch_close(_x2c_error_handler_6);
                     _x2c_error_handler_6 = NULL;
-                    x2c_exception_leave(& _x2c_exception_frame_6);
+                    x2c_exception_leave(& _x2c_exception_frame_7);
                   }
 
                 }

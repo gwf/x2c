@@ -33,6 +33,10 @@
 #include "utils.x"
 #include <limits.h>
 #include <math.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 /* Evaluates a nested `$` call among a call's arguments. */
@@ -375,6 +379,74 @@ int Compiler.meta_is_comptime_only(Compiler c, List fn) {
     case %(function ? (bind (binding ? ?(String name)) *) ?):
       return name in c.meta_comptime;
   return 0;
+}
+
+/* --- the deadline of a running meta call -------------------------------- */
+
+/* The outermost running `$` call: its deadline in monotonic seconds, zero
+   when none runs, and where to report it. A watchdog thread, started in
+   each process at its first call, stops a call that passes its deadline.
+   The thread reads only these C values, so it touches no runtime state. */
+static volatile double watch_deadline = 0;
+static int watch_depth = 0, watch_line = 0, watch_col = 0;
+static char watch_file[512], watch_name[128];
+static double watch_limit = -1;
+static pid_t watch_pid = 0;
+
+static double _watch_now(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+static void *_watch_run(void *unused) {
+  (void) unused;
+  for (;;) {
+    usleep(100000);
+    double deadline = watch_deadline;
+    if (!deadline || _watch_now() < deadline) continue;
+    fprintf(stderr,
+      "%s:%d:%d: macro: this meta call ran longer than %g s\n"
+      "  note: function: %s\n"
+      "  note: set X2C_META_TIMEOUT to a larger limit in seconds, or 0 "
+      "for none\n",
+      watch_file, watch_line, watch_col, watch_limit, watch_name);
+    fflush(stderr);
+    _exit(1);
+  }
+  return NULL;
+}
+
+/* The limit from `X2C_META_TIMEOUT`, 60 seconds by default; zero or less
+   turns the watchdog off. */
+static double _watch_limit(void) {
+  String text = Env.get("X2C_META_TIMEOUT");
+  return text ? atof(text) : 60.0;
+}
+
+/** Starts the deadline of the `meta` function `name` called at `site`,
+    unless a call is already running. */
+void Compiler.meta_watch_begin(Compiler c, String name, Token site) {
+  if (watch_depth++) return;
+  if (watch_limit < 0) watch_limit = _watch_limit();
+  if (watch_limit <= 0) return;
+  if (watch_pid != getpid()) {
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, _watch_run, NULL)) return;
+    pthread_detach(thread);
+    watch_pid = getpid();
+  }
+  snprintf(watch_file, sizeof watch_file, "%s",
+           c.filename ? (char *) c.filename : "<input>");
+  snprintf(watch_name, sizeof watch_name, "%s", (char *) name);
+  watch_line = site ? site.line : 0;
+  watch_col = site ? site.col : 0;
+  watch_deadline = _watch_now() + watch_limit;
+}
+
+/** Ends the deadline `Compiler.meta_watch_begin` started. */
+void Compiler.meta_watch_end(void) {
+  if (--watch_depth == 0) watch_deadline = 0;
 }
 
 /* --- the unit's meta group, staged as native code ---------------------- */
@@ -786,6 +858,27 @@ static List _meta_session_flags(String root, String stamp, String compiler) {
   return %(@flags "-include" $header);
 }
 
+/* The C compiler's first located error in `errors`, or else its first
+   line, joined with the next when it ends in a colon, as a linker's
+   undefined-symbol report does. */
+static String _meta_cc_error(String errors) {
+  Array lines = [];
+  foreach (String line, (errors ? errors : "").split("\n")) {
+    String text = line.strip(NULL);
+    if (!text) continue;
+    if (text.contains(": error: ") && !text.startswith("clang:") &&
+        !text.startswith("cc:") && !text.startswith("gcc:"))
+      return text;
+    lines.push(text);
+  }
+  if (!lines.len()) return "the C compiler failed";
+  String first = lines[0];
+  if (!first.endswith(":") || lines.len() < 2) return first;
+  String next = lines[1];
+  if (next.endswith(":")) next = next[:next.len() - 1];
+  return %"$first $next";
+}
+
 /* Builds the group's native module under the cache root, named by the
    SHA-256 of its emitted C, the compiler stamp, the C compiler's identity,
    the flags, and the runtime headers' directory, or reuses the module an
@@ -810,8 +903,13 @@ static String _stage_meta_group(Compiler c, String &failure) {
   if (Path.is_file(module)) return module;
   String output = %"$module.${"%ld".printf((long) getpid())}";
   failure = %"cannot write the module under $directory";
+  try Path.make_dirs(directory);
+  catch %((!or not-found io-fail) *): return NULL;
+  /* Workers that reach the same group wait for the first to build it. */
+  int lock = file_lock(%"$directory/lock", 1);
+  defer close(lock);
+  if (Path.is_file(module)) return module;
   try {
-    Path.make_dirs(directory);
     Path.write_text(%"$directory/$hfile", header);
     Path.write_text(%"$directory/$cfile", source);
   }
@@ -822,7 +920,9 @@ static String _stage_meta_group(Compiler c, String &failure) {
     output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir $unit));
   String printed = NULL, errors = NULL;
   if (tool_capture(action.arguments, printed, errors)) {
-    failure = errors ? errors : "the C compiler failed";
+    failure = _meta_cc_error(errors);
+    if (!failure.contains(directory))
+      failure = %"$failure; the group's C is in $directory";
     return NULL;
   }
   try Path.move_to(output, module);
@@ -859,31 +959,40 @@ static String _meta_group_unbound(Compiler c) {
   return NULL;
 }
 
+static String _load_meta_group(Compiler c, String &failure);
+
 /** Binds each unbound function of the pending group to its staged native
     code when `name` is pending, after reinitializing the module's `meta
     static` values for this unit in the unit's meta Scope. Returns whether
-    `name` is now native; a group that does not stage is reported at
+    `name` is now native; a function that cannot run is reported at
     `site`. */
-static String _load_meta_group(Compiler c, String &failure);
-
 int Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (!c.groups_meta() || name in c.meta_group_bound) return 0;
-  int pending = 0;
+  Type type = NULL;
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ? ?(String target) ?):
-      if (target == name) pending = 1;
-  if (!pending) return 0;
+    match (entry) case %(function ? ?(String target) ?(Type own)):
+      if (target == name) type = own;
+  if (!type) return 0;
+  /* A record returned by value has no Var form of its own; its Func form
+     would hand back the compiler's copy of it. */
+  Type result = type.apply();
+  if (!c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
+  String reason = result && result.is_aggregate()
+    ? "a struct or union result has no compile-time value; return its "
+      "fields as a List or Map"
+    : NULL;
   String failure = NULL;
-  if (!_load_meta_group(c, failure))
+  if (!reason && !_load_meta_group(c, failure)) reason = failure;
+  if (!reason && !(name in c.meta_group_bound))
+    reason = result && result.is_pointer()
+      ? "an address result has no compile-time value; return data built "
+        "from the pointed-to values"
+      : "a parameter or the result has no Var form, such as C's bool; use "
+        "int, a String, a Symbol, or a List";
+  if (reason)
     c.report_error(
       <macro>, "this function cannot run at compile time", site,
-      %("function: $name" "reason: $failure"));
-  if (!(name in c.meta_group_bound))
-    c.report_error(
-      <macro>, "this function cannot run at compile time", site,
-      %("function: $name"
-        "reason: a parameter or the result has no Var form"
-        "return data built from the pointed-to values, not an address"));
+      %("function: $name" "reason: $reason"));
   return 1;
 }
 

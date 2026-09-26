@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-record-value-result.x:10:25: macro: this function cannot run at compile time
+  int main(void) { return $pair(1).a; }
+                          ^
+  note: function: pair reason: a struct or union result has no compile-time value; return its fields as a List or Map
+

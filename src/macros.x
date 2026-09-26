@@ -2232,11 +2232,17 @@ static Map _source_captures(List bindings) {
   return captures;
 }
 
-/* Calls the session value `function` with the evaluated `arguments`. */
-static Var _meta_apply(Compiler c, Var function, List arguments) {
+/* Calls the session value `function`, the `meta` function `name` called at
+   `site`, with the evaluated `arguments`, under the call deadline. */
+static Var _meta_apply(
+  Compiler c, String name, Token site, Var function, List arguments) {
   Array quoted = [%(quote $function)];
   foreach (Var argument, arguments) quoted.push(%(quote $argument));
-  return c.macro_lisp.eval(quoted.list_free());
+  Var value;
+  c.meta_watch_begin(name, site);
+  try value = c.macro_lisp.eval(quoted.list_free());
+  finally Compiler.meta_watch_end();
+  return value;
 }
 
 /* Answers `_x2c.meta.stage`, which a group function's session name holds
@@ -2245,12 +2251,12 @@ static Var _meta_apply(Compiler c, Var function, List arguments) {
 static Var _sdk_meta_stage(String name, List arguments) {
   Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
   if (!c) _sdk_reject(%"$name used outside compilation", NULL);
-  c.bind_meta_group(
-    name, macro_import_invocation ? macro_import_invocation : c.token);
+  Token site = macro_import_invocation ? macro_import_invocation : c.token;
+  c.bind_meta_group(name, site);
   Var function;
   if (!(name in c.meta_group_bound) || !c.macro_lisp.try_get(name, function))
     _sdk_reject(%"$name cannot run at compile time", NULL);
-  return _meta_apply(c, function, arguments);
+  return _meta_apply(c, name, site, function, arguments);
 }
 
 /* Whether the published shared session already holds the definition of
@@ -2301,7 +2307,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       List applied = values.list_free();
       meta_call_form = cons(Atom.intern(name), applied).repr();
       meta_call_form.try_own();
-      return _meta_apply(c, function, applied);
+      return _meta_apply(c, name, site, function, applied);
     }
   c.report_error(
     <macro>, "explicit meta call cannot be resolved", site,

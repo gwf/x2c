@@ -22,6 +22,10 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
 
+void Compiler_meta_watch_begin(Compiler c, String name, Token site);
+
+void Compiler_meta_watch_end(void);
+
 void Compiler_use_meta_toolchain(String cc, String include_dir);
 
 int Compiler_groups_meta(Compiler c);
@@ -33,6 +37,8 @@ void Compiler_record_meta_import(Compiler c);
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
 
 int Compiler_bind_meta_group(Compiler c, String name, Token site);
+
+String Compiler_stage_meta_group(Compiler c, String * failure);
 
 
 #endif /* __GUARD_0x042BDEBD__ */
