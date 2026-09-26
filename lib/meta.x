@@ -41,7 +41,7 @@
 
 /** A `meta` parameter declared `Type` receives, at a `$` call, the
    description of its argument's type: `((name N) (kind K) (type T)
-   (fields F))`. Read a part with `List.assoc`. */
+   (fields F) (methods M))`. Read a part with `List.assoc`. */
 typedef List Type;
 
 /** A `meta` parameter declared `Source` receives, at a `$` call, captured

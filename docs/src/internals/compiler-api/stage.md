@@ -55,7 +55,7 @@ Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 Returns whether `name` is now bound.
 
-Source: `src/stage.x:1316`
+Source: `src/stage.x:1318`
 
 <a id="Compiler.check_meta_call"></a>
 #### Compiler.check_meta_call
@@ -209,7 +209,7 @@ functions to `meta_group` itself, and binds each group function in the
 session. Returns the loaded module, or NULL with `failure` set when the
 group does not stage.
 
-Source: `src/stage.x:1305`
+Source: `src/stage.x:1307`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process

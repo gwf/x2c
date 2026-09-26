@@ -348,10 +348,11 @@ static int _symbol_words(List type) {
 }
 
 /** Returns what a `meta` parameter declared `Type` receives for the captured
-    syntax `value`: `((name N) (kind K) (type T) (fields F))`. `T` is the
-    canonical type of `value` and `N` its name, or "" when it has none. `K`
-    is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`, and `F`
-    lists the `(name type)` rows of a struct or union's named fields. */
+    syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`.
+    `T` is the canonical type of `value` and `N` its name, or "" when it has
+    none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
+    `F` lists the `(name type)` rows of a struct or union's named fields,
+    and `M` the names of its direct dotted methods. */
 List meta_type_description(Var value) {
   Type type = x2c_syntax_type(value);
   Type shape = x2c_type_resolve(type);
@@ -375,7 +376,13 @@ List meta_type_description(Var value) {
       else if (_symbol_words(shape)) kind = <scalar>;
   }
   if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
-  return %((name $name) (kind $kind) (type $type) (fields $fields));
+  Compiler c = macro_sdk_compiler;
+  Array methods = [];
+  foreach (String member, c.postfix_completions(type, <.>))
+    match (c.resolve_postfix_member(type, %($member), <.>, 1))
+      case %(method * *): methods.push(member);
+  return %((name $name) (kind $kind) (type $type) (fields $fields)
+           (methods ${methods.list_free()}));
 }
 
 /** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */

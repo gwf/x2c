@@ -568,20 +568,20 @@ macro Expression $project.fields(Expr $value) => $project_fields($value);
 ~}
 ```
 
-`x2c_method_resolve` optionally looks up a direct dotted method. A generator
-can inspect the callee's function type or build a call; a missing method
-returns an empty List:
+A `Type` parameter's `methods` part names the type's direct dotted methods.
+A generator can test for one and build the dotted call, which the compiler
+resolves as it would the same call in source:
 
 ```x2c
 #include "meta.x"
-meta static List project_write(List type, List receiver, List value) {
-  List callee = x2c_method_resolve(type, "write");
-  if (callee) return x2c_expr_call(callee, %($receiver $value));
-  return %();
+meta static List project_write(Type type, List receiver, List value) {
+  List methods = type.assoc(<methods>);
+  if (!methods.contains("write")) return %();
+  return x2c_expr_call(x2c_expr_field(receiver, "write"), %($value));
 }
 ```
 
-It does not search delegate fields. A delegated result would also need the
+The list does not search delegate fields. A delegated result would also need the
 field-projected receiver, which this operation does not return. Generated
 dotted calls still use delegation during ordinary expression resolution.
 

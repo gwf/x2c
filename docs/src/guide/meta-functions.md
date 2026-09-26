@@ -961,15 +961,15 @@ description at the `$` call:
 
 ```text
 ((name "Point") (kind struct) (type ("Point"))
- (fields (("x" (int)) ("y" (int)) ("z" (int)))))
+ (fields (("x" (int)) ("y" (int)) ("z" (int)))) (methods ()))
 ```
 
 `name` is the type's name, or `""` when it has none. `kind` is `struct`,
 `union`, `enum`, `pointer`, `scalar` or `other`. `type` is the canonical
 type, and `fields` lists the `(name type)` rows of a struct or union's
-named fields in declaration order. Read a part with `List.assoc`. Pass the
-same hole twice when a function needs both the code and its type, as
-`shape_reads` does below.
+named fields in declaration order. `methods` lists the names of the type's
+direct dotted methods. Read a part with `List.assoc`. Pass the same hole twice when a function needs both the code
+and its type, as `shape_reads` does below.
 
 What the function returns decides what the expansion is. A `List` one of the
 compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
