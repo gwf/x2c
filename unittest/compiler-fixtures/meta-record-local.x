@@ -5,7 +5,10 @@
 
 struct Point { int x, y; };
 
-$(import "meta-record-local.xmacro")
+meta int ct_struct(int n) {
+  struct Point p = { .x = n, .y = n + 1 };
+  return p.x + p.y;
+}
 
 int main(int argc, char **argv) {
   (void) argv;

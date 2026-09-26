@@ -21,7 +21,7 @@ typedef struct CliRequest {
   String out_dir, dep_file, dep_target;
   String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, ar, compile_commands, sha256, index, Symbol kind;
+  String prefix, cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind;
   String diagnostics_file;
   Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
@@ -208,6 +208,9 @@ static CliOption cli_options[] = {
   { <cc>, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
+  { <meta-cc>, CLI_TRANSLATE | CLI_NATIVE, <c-compiler>,
+    "--meta-cc", "<program>",
+    "Use <program> to build meta code, whatever --cc is", 0 },
   { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0 },
@@ -957,6 +960,7 @@ static void _apply_option(
     case <c-include>: _push_pair(cc_args, "-I", value);
     case <c-system>: _push_pair(cc_args, "-isystem", value);
     case <cc>: c.cc = value;
+    case <meta-cc>: c.meta_cc = value;
     case <ar>: c.ar = value;
     case <opt>: case <g>: cc_args.push(spelling);
     case <define>:

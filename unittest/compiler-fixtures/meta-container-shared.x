@@ -1,6 +1,11 @@
 #include "x2c.x"
-$(import "meta-container-shared.xmacro")
-
+meta static Map shared_result(void) {
+  Array row = [1];
+  Map result = {};
+  result[<first>] = row;
+  result[<second>] = row;
+  return result;
+}
 int main(void) {
   Map result = $shared_result();
   return result.len();

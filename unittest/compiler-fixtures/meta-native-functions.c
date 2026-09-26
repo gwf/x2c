@@ -4,6 +4,8 @@
 
 static double native_total(double value);
 
+static int class_value(MetaCount value);
+
 MetaCount MetaCount_new(int initial){
   int value = initial;
   return value;
@@ -19,18 +21,22 @@ MetaCount Var_metacount(Var value){
   return(MetaCount) Var_int(Var_convert(value, 3453797));
 }
 
-int main(int argc, char * * argv){
-  x2c_initialize();
-  (void) argv;
-  printf("%.1f %.1f %d\n", ((double) 0x1p+1L), native_total(argc - 1), 7);
-  return 0;
-}
-
 double sin(double);
 
 double sqrt(double);
 
 static double native_total(double value){
   return sin(value) + sqrt(4.0);
+}
+
+static int class_value(MetaCount value){
+  return value + 1;
+}
+
+int main(int argc, char * * argv){
+  x2c_initialize();
+  (void) argv;
+  printf("%.1f %.1f %d\n", ((double) 0x1p+1L), native_total(argc - 1), 7);
+  return 0;
 }
 

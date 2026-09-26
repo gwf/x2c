@@ -2,9 +2,64 @@
 
 typedef unsigned char Byte;
 
-typedef String Label;
+meta Byte byte_passthrough(Byte value) => value;
+meta int accepts_void_pointer(void *value) {
+  Var boxed = value;
+  return boxed.tag() == <p48>;
+}
 
-$(import "meta-destination-conversion.xmacro")
+meta int conditional_float(int n) =>
+  (int) ((n ? 1 : 2.5) / 2 * 10);
+meta int conditional_unsigned(int n) => (n ? -1 : 1U) < 0;
+
+meta int byte_update(int n) {
+  Byte value = n;
+  value += 256;
+  return byte_passthrough(value);
+}
+
+meta int pointer_tag(int n) {
+  void *value = &n;
+  value = (void *) &n;
+  Var boxed = value;
+  return boxed.tag() == <p48> && accepts_void_pointer(value);
+}
+
+meta int empty_symbol(int n) {
+  Symbol value = n - 1;
+  return value.first() == 0;
+}
+
+meta int conditional_symbol(int n) {
+  Symbol value = n ? <word> : 0;
+  return value == <word>;
+}
+
+meta int composed_hash(String value) => value.hash() != 0;
+meta int constant_string_hash(void) =>
+  "abc".hash() == ("a" + "bc").hash();
+
+/* No meta producer makes a File yet, so only the run-time call exercises
+   the round trip; the body still installs as a meta function. */
+meta int file_round_trip(Var boxed) {
+  Var again = boxed.file();
+  return again == boxed;
+}
+
+/* A declared converter applies wherever the compiled code converts. */
+typedef String Label;
+meta Label List.label(List items) => %"n${items.len()}";
+meta int label_len(Label value) => value.len();
+meta int label_init(List items) {
+  Label value = items;
+  return value.len();
+}
+meta int label_assign(List items) {
+  Label value = "";
+  value = items;
+  return value.len();
+}
+meta int label_argument(List items) => label_len(items);
 
 int main(int argc, char **argv) {
   (void) argv;

@@ -12,11 +12,11 @@
 
 #include "exception.h"
 
-static List _121, _119, _118, _116, _114, _99, _65, _64, _63, _62, _57, _54, _53, _52, _51, _50, _34, _33;
+static List _122, _120, _119, _117, _115, _99, _65, _64, _63, _62, _57, _54, _53, _52, _51, _50, _34, _33;
 
-static String _129, _128, _127, _126, _125, _124, _123, _122, _112, _110, _109, _108, _107, _106, _104, _102, _100, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _66, _60, _58, _55, _48, _46, _44, _42, _41, _40, _39, _37, _35, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _130, _129, _128, _127, _126, _125, _124, _123, _113, _111, _110, _109, _108, _107, _106, _104, _102, _100, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _66, _60, _58, _55, _48, _46, _44, _42, _41, _40, _39, _37, _35, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _120, _117, _115, _113, _111, _105, _103, _101, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _61, _59, _56, _49, _47, _45, _43, _38, _36, _32, _30, _28, _26, _24, _22, _20, _18, _16, _14, _12, _10, _8;
+static Var _121, _118, _116, _114, _112, _105, _103, _101, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _61, _59, _56, _49, _47, _45, _43, _38, _36, _32, _30, _28, _26, _24, _22, _20, _18, _16, _14, _12, _10, _8;
 
 #include <ctype.h>
 #include <errno.h>
@@ -56,14 +56,14 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _121)))
+_x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _122)))
 static Var _x2c_lambda_1(Var directory);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _121)))
+_x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _122)))
 Var String_var(String);
 
 List cons(Var, List);
@@ -187,25 +187,26 @@ __attribute__((constructor)) static void _file_init_(void){
   _108 = String_new("cc");
   _109 = String_new("AR");
   _110 = String_new("ar");
-  _111 = Symbol_var(437126);
-  _112 = String_new("Var");
-  _113 = String_var(_112);
-  _114 = cons(_113, NULL);
-  _115 = List_var(_114);
-  _116 = cons(_115, NULL);
-  _117 = List_var(_116);
-  _118 = cons(_117, NULL);
-  _119 = cons(_111, _118);
-  _120 = List_var(_119);
-  _121 = cons(_120, _114);
-  _122 = String_new("End of search list");
-  _123 = String_new("search starts here");
-  _124 = String_new(" (");
-  _125 = String_new("/include");
-  _126 = String_new("lib");
-  _127 = String_new("libraries: ");
-  _128 = String_new("=");
-  _129 = String_new(":");
+  _111 = String_new("META_CC");
+  _112 = Symbol_var(437126);
+  _113 = String_new("Var");
+  _114 = String_var(_113);
+  _115 = cons(_114, NULL);
+  _116 = List_var(_115);
+  _117 = cons(_116, NULL);
+  _118 = List_var(_117);
+  _119 = cons(_118, NULL);
+  _120 = cons(_112, _119);
+  _121 = List_var(_120);
+  _122 = cons(_121, _115);
+  _123 = String_new("End of search list");
+  _124 = String_new("search starts here");
+  _125 = String_new(" (");
+  _126 = String_new("/include");
+  _127 = String_new("lib");
+  _128 = String_new("libraries: ");
+  _129 = String_new("=");
+  _130 = String_new(":");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -321,6 +322,11 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
   t -> dry_run = dry_run;
   Toolchain__layout(t);
   return t;
+}
+
+String toolchain_meta_cc(String explicit){
+  if(! _init_guard_) _file_init_();
+  return _tool(explicit, _111, _108);
 }
 
 List List_flatten(List);
@@ -543,17 +549,17 @@ List Toolchain_search_directories(Toolchain t){
       while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
         line = Var_string(_x2c_macro_cursor_output_4);
         {
-          if(String_startswith(line, _122)) break;
-          if(String_contains(line, _123)){
+          if(String_startswith(line, _123)) break;
+          if(String_contains(line, _124)){
             listing = 1;
             continue;
           }
           if(! listing) continue;
           String directory = String_strip(line, " ");
-          int note = String_find(directory, _124);
+          int note = String_find(directory, _125);
           if(note >= 0) directory = String_getslice(directory, -2147483648, note, 1);
           Array_push(directories, String_var(directory));
-          if(String_endswith(directory, _125)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _126)));
+          if(String_endswith(directory, _126)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _127)));
         }
 
       }
@@ -569,11 +575,11 @@ List Toolchain_search_directories(Toolchain t){
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       line = Var_string(_x2c_macro_cursor_output_6);
       {
-        if(! String_startswith(line, _127)) continue;
-        String list = String_remove_prefix(String_remove_prefix(line, _127), _128);
+        if(! String_startswith(line, _128)) continue;
+        String list = String_remove_prefix(String_remove_prefix(line, _128), _129);
         {
           String directory;
-          List _x2c_macro_object_5 = String_split(list, _129);
+          List _x2c_macro_object_5 = String_split(list, _130);
           List _x2c_macro_cursor_5 = _x2c_macro_object_5;
           Var _x2c_macro_cursor_output_5;
           while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){

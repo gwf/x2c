@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/meta-definition-macro-template.x:5:27: parse: meta function 'made_meta' cannot be produced by a macro
   macro Unit $make_meta() { meta int made_meta(int x) { return x; } }
                             ^^^^
-  note: move it to an .xmacro file and call it from the macro
+  note: move it to a source file and call it from the macro
 

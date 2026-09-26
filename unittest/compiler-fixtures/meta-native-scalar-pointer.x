@@ -1,6 +1,10 @@
 #include "x2c.x"
 
-$(import "meta-native-scalar-pointer.xmacro")
+meta int native_scalar_pointer_probe(int offset) {
+  int exponent = 0;
+  double fraction = frexp(20.0, &exponent);
+  return (int) (fraction * 100.0) + exponent + offset;
+}
 
 int main(int argc, char **argv) {
   (void) argv;

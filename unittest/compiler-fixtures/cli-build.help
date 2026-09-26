@@ -40,6 +40,7 @@ Package options:
 
 C compiler options:
       --cc <program>          Use <program> as the host C compiler
+      --meta-cc <program>     Use <program> to build meta code, whatever --cc is
       --ar <program>          Use <program> as the static-library archiver
   -O0, -O1, -O2, -O3, -Os     Set C optimization
   -g                          Emit debug information

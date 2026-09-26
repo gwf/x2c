@@ -1,4 +1,0 @@
-/* meta-record-value-result.xmacro -- the meta functions
-   meta-record-value-result.x imports. */
-
-meta static Pair pair(int n) => (Pair) {n, n};

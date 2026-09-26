@@ -23,6 +23,9 @@ Source options:
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation
 
+C compiler options:
+      --meta-cc <program>     Use <program> to build meta code, whatever --cc is
+
 Inspection options:
       --dump-tokens           Print source tokens and stop
       --dump-cpp              Print host-preprocessed text and stop

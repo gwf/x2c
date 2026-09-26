@@ -2150,7 +2150,7 @@ matching position:
 
 ```x2c
 #include "meta.x"
-meta static List swap_type(List value) => x2c_syntax_type(value);
+meta static List swap_type(Type type) => type.assoc(<type>);
 
 macro Statement $swap(Expr $left, Expr $right) {
   $swap_type($left) temporary = $left;
@@ -2890,6 +2890,11 @@ Every public operation above is also declared in x2c, in the optional module
 `lib/meta.x`, so a `meta` function that includes it calls the compiler
 directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
+The queries that read the compiler's symbol table, such as
+`x2c_syntax_type` and `x2c_type_fields`, run only in the compiler's own
+`meta` code. A project `meta` function receives a type through a `Type`
+parameter and source text through a `Source` parameter; see
+[What the compiler answers](https://x2c-lang.dev/docs/guide/meta-functions.html#what-the-compiler-answers).
 
 The compiler binds each operation under its x2c name and derives the Lisp
 name from it: each `_` becomes `.`. `x2c_type_fields` is `x2c.type.fields`,
@@ -5212,7 +5217,10 @@ shared libraries when it runs; a package bundle may include it.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
-installed record, then `ar`. Omitted optimization, debug, define, and undefine
+installed record, then `ar`. Project `meta` code runs inside the compiler's
+host, so it is built by `--meta-cc`, `X2C_META_CC`, `META_CC`, the installed
+record's `META_CC`, then `cc`, never by the target `--cc`; `translate`
+accepts `--meta-cc` too. Omitted optimization, debug, define, and undefine
 options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
 implicitly consumed.
 

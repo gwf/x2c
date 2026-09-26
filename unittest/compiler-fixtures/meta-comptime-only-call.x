@@ -7,7 +7,9 @@
 #include "x2c.x"
 #include "meta.x"
 
-$(import "meta-comptime-only-call.xmacro")
+meta static List mc_name(String text) => x2c_literal_string(text);
+
+meta static List mc_wrap(String text) => mc_name(text);
 
 macro Expression $builder.aliases() =>$(x2c.literal.int (if (and
     (equal? (x2c_literal_string "hi")

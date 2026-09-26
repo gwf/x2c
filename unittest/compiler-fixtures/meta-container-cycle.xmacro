@@ -1,8 +1,0 @@
-/* meta-container-cycle.xmacro -- the meta functions
-   meta-container-cycle.x imports. */
-
-meta static Array cyclic_result(void) {
-  Array result = [];
-  result.push(result);
-  return result;
-}

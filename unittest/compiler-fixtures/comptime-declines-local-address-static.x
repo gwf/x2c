@@ -9,6 +9,10 @@
 
 meta static int *saved = NULL;
 
-$(import "comptime-declines-local-address-static.xmacro")
+meta static int remember(int seed) {
+  int value = seed;
+  saved = &value;
+  return *saved;
+}
 
 int main(void) { return 0; }

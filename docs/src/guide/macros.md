@@ -268,7 +268,7 @@ expansion:
 ```x2c
 ~
 #include "meta.x"
-meta static List project_type(List value) => x2c_syntax_type(value);
+meta static List project_type(Type type) => type.assoc(<type>);
 
 macro Statement $project.swap(
   Expr $left,
@@ -449,7 +449,7 @@ mandatory, even when they take no arguments:
 
 ```x2c
 #include "meta.x"
-meta static List project_type(List value) => x2c_syntax_type(value);
+meta static List project_type(Type type) => type.assoc(<type>);
 
 macro Statement $control.swap(
   Expr $left,
@@ -548,18 +548,21 @@ The [meta-function guide](meta-functions.md) introduces these operations;
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 specifies them.
 
-`x2c_type_fields` returns a struct or union's fields in declaration order.
-Pair their names with `x2c_expr_field` to build typed field reads:
+A `meta` parameter declared `Type` receives a description of the
+argument's type, including a struct or union's fields in declaration
+order. Pass the hole twice to receive both its code and its type, and pair
+the field names with `x2c_expr_field` to build typed field reads:
 
 ```x2c
 #include "meta.x"
-meta static List project_fields(List receiver) {
+meta static List project_fields(List receiver, Type type) {
   Array reads = [];
-  foreach (List field, x2c_type_fields(x2c_syntax_type(receiver)))
+  foreach (List field, type.assoc(<fields>))
     reads.push(x2c_expr_field(receiver, field.car()));
   return x2c_expr_composite(reads);
 }
-macro Expression $project.fields(Expr $value) => $project_fields($value);
+macro Expression $project.fields(Expr $value) =>
+  $project_fields($value, $value);
 ~typedef struct Point { int x, y; } Point;
 ~int main(void) {
 ~  Point p = { 2, 3 };
@@ -585,12 +588,12 @@ The list does not search delegate fields. A delegated result would also need the
 field-projected receiver, which this operation does not return. Generated
 dotted calls still use delegation during ordinary expression resolution.
 
-To read the exact source text of a complete captured argument, use
-`x2c_source_text`:
+To read the exact source text of a complete captured argument, declare
+the parameter `Source` and use `x2c_source_text`:
 
 ```x2c
 #include "meta.x"
-meta static String project_text(List value) => x2c_source_text(value);
+meta static String project_text(Source value) => x2c_source_text(value);
 macro Expression $project.source(Expr $value) => $project_text($value);
 
 int main(void) {
