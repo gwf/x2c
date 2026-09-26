@@ -6,45 +6,45 @@
     be written in compile-time Lisp, because `x2c.type.fields`,
     `x2c.expr.field` and the rest were reachable only from there.
 
-    Every `meta` function here reaches a `Meta` operation, directly or through
-    another one, so none of them has a valid runtime form and no unit emits a
-    definition for any of them. `ms_label` reaches none and is the contrast:
-    the consuming unit calls it at run time, so its definition is the only one
-    in the generated C. See `plans/meta-functions.md`.
+    A parameter declared `Type` receives the description of its argument's
+    type, which the compiler computes at the `$` call, so reading the fields
+    of a struct asks the compiler nothing. The consuming unit calls only
+    `ms_label` at run time, so its definition is the only one in the
+    generated C. See `plans/meta-functions.md`.
 */
 
 /* The named fields of a struct-typed expression, in declaration order. The
-   answer is in the symbol table, not in the syntax the macro received. */
-meta static List ms_fields(List receiver) =>
-  x2c_type_fields(x2c_syntax_type(receiver));
+   answer is in the symbol table, not in the syntax the macro received, so
+   the compiler sends it as the `Type` argument. */
+meta static List ms_fields(Type type) => type.assoc(<fields>);
 
 /* One field-read expression per field, through the receiver the caller
    wrote, so the generated code is ordinary typed access. */
-meta static List ms_field_reads(List receiver) {
+meta static List ms_field_reads(List receiver, Type type) {
   Array reads = [];
-  foreach (List field, ms_fields(receiver))
+  foreach (List field, ms_fields(type))
     reads.push(x2c_expr_field(receiver, field.car()));
   return reads;
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
-meta static List ms_reads(List receiver) =>
-  x2c_expr_composite(ms_field_reads(receiver));
+meta static List ms_reads(List receiver, Type type) =>
+  x2c_expr_composite(ms_field_reads(receiver, type));
 
 /* `ms_total(p.x, p.y, p.z)`, a call the unit defines the callee for. */
-meta static List ms_total_call(List receiver) =>
+meta static List ms_total_call(List receiver, Type type) =>
   x2c_expr_call(
-    x2c_expr_ident(x2c_ident("ms_total")), ms_field_reads(receiver));
+    x2c_expr_ident(x2c_ident("ms_total")), ms_field_reads(receiver, type));
 
 /* The field names as one comma-joined String literal. */
-meta static List ms_names(List receiver) {
+meta static List ms_names(Type type) {
   Array names = [];
-  foreach (List field, ms_fields(receiver)) names.push(field.car());
+  foreach (List field, ms_fields(type)) names.push(field.car());
   return x2c_literal_string(String.join(", ", names));
 }
 
-meta static List ms_count(List receiver) =>
-  x2c_literal_int(ms_fields(receiver).len());
+meta static List ms_count(Type type) =>
+  x2c_literal_int(ms_fields(type).len());
 
 /* The spelling the developer wrote, which only the source text answers. */
 meta static List ms_spelling(Var node) =>
@@ -54,12 +54,12 @@ meta static List ms_spelling(Var node) =>
    its forms the way M1 and M2 left it. */
 meta static String ms_label(String name, int n) => %"$name-$n";
 
-macro Expression $probe.reads(Expr $value) => $(ms_reads $value);
+macro Expression $probe.reads(Expr $value) => $ms_reads($value, $value);
 
-macro Expression $probe.total(Expr $value) => $(ms_total_call $value);
+macro Expression $probe.total(Expr $value) => $ms_total_call($value, $value);
 
-macro Expression $probe.names(Expr $value) => $(ms_names $value);
+macro Expression $probe.names(Expr $value) => $ms_names($value);
 
-macro Expression $probe.count(Expr $value) => $(ms_count $value);
+macro Expression $probe.count(Expr $value) => $ms_count($value);
 
 macro Expression $probe.spelling(Expr $value) => $(ms_spelling $value);

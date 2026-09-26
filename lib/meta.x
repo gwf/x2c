@@ -39,6 +39,11 @@
 #include "string.x"
 #include "symbol.x"
 
+/* A `meta` parameter declared `Type` receives, at a `$` call, the
+   description of its argument's type: `((name N) (kind K) (type T)
+   (fields F))`. Read a part with `List.assoc`. */
+typedef List Type;
+
 /* --- identifiers and literals -------------------------------------------
    What a macro has to produce to return syntax at all: a checked identifier
    and the three literal expressions the compiler binds without further

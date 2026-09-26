@@ -1,0 +1,5 @@
+/* meta-type-parameter.xmacro -- a meta function with a `Type` parameter. */
+
+meta static List describe(Type type) => x2c_literal_string(type.repr());
+
+macro Expression $type.describe(Expr $value) => $describe($value);

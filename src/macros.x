@@ -341,6 +341,43 @@ List x2c_type_fields(List value) {
   return named.list_free();
 }
 
+/* Whether the type `type` is spelled by keywords alone, such as `(int)`. */
+static int _symbol_words(List type) {
+  foreach (Var word, type) if (word is not <symbol>) return 0;
+  return type != NULL;
+}
+
+/** Returns what a `meta` parameter declared `Type` receives for the captured
+    syntax `value`: `((name N) (kind K) (type T) (fields F))`. `T` is the
+    canonical type of `value` and `N` its name, or "" when it has none. `K`
+    is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`, and `F`
+    lists the `(name type)` rows of a struct or union's named fields. */
+List meta_type_description(Var value) {
+  Type type = x2c_syntax_type(value);
+  Type shape = x2c_type_resolve(type);
+  String name = "";
+  match (type) {
+    case %(?(String own)): name = own;
+    case %((!or struct union enum) ?(String own)): name = own;
+    default:
+      if (_symbol_words(type) && !type.is_pointer()) {
+        Array words = [];
+        foreach (Var word, type) words.push(word.str());
+        name = " ".join(words);
+      }
+  }
+  Var kind = <other>;
+  List fields = %();
+  match (shape) {
+    case %((!or struct union enum) *): kind = shape.car();
+    default:
+      if (shape.is_pointer()) kind = <pointer>;
+      else if (_symbol_words(shape)) kind = <scalar>;
+  }
+  if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
+  return %((name $name) (kind $kind) (type $type) (fields $fields));
+}
+
 /** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
 String x2c_binding_spelling(Var syntax) {
   _sdk_guard("x2c.binding.spelling");
