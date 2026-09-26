@@ -143,7 +143,7 @@ typedef struct Compiler {
   Map meta_comptime, meta_regions, meta_hashes;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro
-     session the first time lowered code calls it. */
+     session the first time compile-time code calls it. */
   Map native_meta;
   /* The unit's top-level nodes parsed so far, and its pending `meta` group
      in source order: each bodied `meta` function as `(function FN NAME

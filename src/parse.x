@@ -2025,15 +2025,15 @@ List Compiler.parse_top_level(Compiler c) {
     Token tokens = c.tokenizer.tokens;
     int start = (meta ? meta : definition_start) - tokens;
     int body = c.token - tokens;
-    Token lowered = native ? NULL : meta;
+    Token staged = native ? NULL : meta;
     if (native) c.install_native_meta_function(decl, meta);
-    $let(c.meta_body, lowered != NULL) {
+    $let(c.meta_body, staged != NULL) {
       function = _finish_function_definition(c, decl);
     }
     _record_meta_hash(c, function, definition_start);
-    if (lowered && !c.bind_linked_meta(
+    if (staged && !c.bind_linked_meta(
           function, decl.type_from_ast().canonicalize()))
-      c.install_meta_function(function);
+      c.install_meta_function(function, staged);
     c.record_declaration_visibility(function);
     /* Compile-time only describes a `meta` definition. An ordinary
        declaration or definition of the same name, such as a copy the
@@ -2044,7 +2044,7 @@ List Compiler.parse_top_level(Compiler c) {
           c.meta_comptime.del(name);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (lowered && c.meta_is_comptime_only(function)) return NULL;
+    if (staged && c.meta_is_comptime_only(function)) return NULL;
     if (c.macro_holes)
       return %(api-source ${definition_start.line}
                ${c.definition_doc(definition_start)} $function);

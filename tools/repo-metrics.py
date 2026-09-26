@@ -40,13 +40,8 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
 MACRO_PATTERNS = ("src/*.xmacro", "lib/*.xmacro", "etc/*.xmacro")
-# tools/gen-lisp-init.py builds the compiler's Lisp environment from these
-# x2c sources, which count as compiler code; the generated Lisp is skipped.
-LISP_GENERATOR_SOURCES = (
-    "etc/init.x", "etc/builtin-macros.x", "etc/lisp-bindings.x",
-)
 SUMMARY_GROUPS = {
-    "src": ("src/*.x", *LISP_GENERATOR_SOURCES),
+    "src": "src/*.x",
     "lib": "lib/*.x",
     "xlisp": "**/*.xlisp",
     "xmacro": "**/*.xmacro",

@@ -1143,8 +1143,7 @@ static Var _sdk_meta_stage(String name, List arguments);
 static void _install_native_operations(Compiler compiler) {
   with compiler {
     /* Cold declaration collection needs literals before the meta surface is
-       parsed. These native forms have the same authored bodies; preload
-       replaces them with the lowered forms. */
+       parsed. These are the runtime's own compiled builders. */
     $lisp.bind(_.macro_lisp, "x2c_literal_string", x2c_literal_string);
     $lisp.bind(_.macro_lisp, "x2c_literal_int", x2c_literal_int);
     $lisp.bind(_.macro_lisp, "x2c_literal_symbol", x2c_literal_symbol);
@@ -1879,24 +1878,12 @@ static Map linked_hashes = NULL;
 
 static int _native_meta_accepts(Compiler c, Var function, List signature);
 
-/* Whether `node` calls or names a function that exists only inside the
-   compiler, which leaves a `meta` function no runtime form: the rule the
-   lowering applies to the calls it scans. */
-static int _reaches_compiler(Compiler c, Var node) {
-  if (node is <string>)
-    return node in c.meta_comptime || Compiler.supplies_native_meta(node);
-  if (node is not <list>) return 0;
-  List list = node;
-  if (list && (list.car() == <meta-call> || list.car() == <tpl-call>))
-    return 1;
-  foreach (Var part, list) if (_reaches_compiler(c, part)) return 1;
-  return 0;
-}
+static int _reaches_compile_time(Compiler c, Var node);
 
 /** Binds the bodied `meta` definition `fn`, of function type `type`, to the
     compiler's linked copy of it when the two definition texts hash the
-    same, instead of lowering it. Returns whether it did; an edited
-    definition is lowered as user code.
+    same, instead of staging it. Returns whether it did; an edited
+    definition is staged as user code.
 */
 int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   String name = NULL;
@@ -1926,7 +1913,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
      same file. */
   if (!c.macro_lisp.try_get(name, bound) || bound.equal(%()))
     c.macro_lisp.set_global(name, function);
-  if (_reaches_compiler(c, fn)) _record_comptime(c, name);
+  if (_reaches_compile_time(c, fn)) _record_comptime(c, name);
   return 1;
 }
 
@@ -2104,10 +2091,10 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   }
 }
 
-/** Binds an included native `meta` function the first time lowered code
-    calls `name`. Returns whether the macro session now binds it. A macro
-    import lowers its `meta` bodies during the caller's collection pass,
-    before the parse installs the advertisements, so the first lookup there
+/** Binds an included native `meta` function the first time compile-time
+    code calls `name`. Returns whether the macro session now binds it. A
+    macro import can call one during the caller's collection pass, before
+    the parse installs the advertisements, so the first lookup there
     installs the ones visible so far. */
 int Compiler.bind_native_meta(Compiler c, String name) {
   Var signature, bound;
@@ -2124,7 +2111,6 @@ int Compiler.bind_native_meta(Compiler c, String name) {
 
 static void _hold_group_function(Compiler c, String name);
 static int _shared_meta_definition(Compiler c, String name);
-static int _reaches_compile_time(Compiler c, Var node);
 static void _group_function(Compiler c, List fn);
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
@@ -2148,7 +2134,7 @@ void Compiler.install_native_meta_function(
     compile-time-only function has no runtime form. A body that lets its own
     storage outlive a call is rejected where the storage leaves.
 */
-void Compiler.install_meta_function(Compiler c, List fn) {
+void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   c.check_meta_regions(fn);
@@ -2157,8 +2143,16 @@ void Compiler.install_meta_function(Compiler c, List fn) {
       if (_reaches_compile_time(c, fn)) _record_comptime(c, name);
       if (!_groups_meta(c)) return;
       _group_function(c, fn);
+      /* A session refuses to replace a name an ancestor binds, which
+         reaches the developer here, at the marker. */
       if (!macro_library_filling() && !_shared_meta_definition(c, name))
-        _hold_group_function(c, name);
+        try _hold_group_function(c, name);
+        catch %(?code *detail): {
+          List cause = cons(code, detail);
+          c.report_error(
+            <macro>, "this meta function could not be installed", marker,
+            %("reason: ${cause.repr()}"));
+        }
     }
 }
 

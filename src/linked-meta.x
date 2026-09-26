@@ -21,17 +21,21 @@
 
 /* --- meta.x, the syntax builders that reach the compiler --------------- */
 
+/** Returns the expression `receiver.name`, as `lib/meta.x` does. */
 List x2c_expr_field(List receiver, String name) {
   List checked = x2c_ident(name);
   return %(expr () (op . $receiver (${checked[1]})));
 }
 
+/** Returns `expression` cast to `type`, as `lib/meta.x` does. */
 List x2c_expr_cast(List type, List expression) {
   List parts = x2c_type_parts(type);
   return %(expr $type
     (cast (decl ${parts[0]} (bindings (bind () ${parts[1]}))) $expression));
 }
 
+/** Declares `name` with `type` and an optional initializer, as `lib/meta.x`
+    does. */
 List x2c_decl_make(List type, Var name, List initializer) {
   List parts = x2c_type_parts(type);
   List binding = %(bind ($name) ${parts[1]});
@@ -39,6 +43,7 @@ List x2c_decl_make(List type, Var name, List initializer) {
   return %(declare ${parts[0]} (bindings $binding));
 }
 
+/** Returns a parameter named `name` with `type`, as `lib/meta.x` does. */
 List x2c_param_make(List type, Var name) {
   List parts = x2c_type_parts(type);
   return %(param ${parts[0]} (bind ($name) ${parts[1]}));
@@ -66,6 +71,7 @@ static List _meta_member(List node) {
   return %();
 }
 
+/** Returns enum members as `(name value)` rows, as `lib/meta.x` does. */
 List x2c_type_members(List type) {
   List resolved = x2c_type_resolve(type);
   if (resolved.car() != <enum>)
