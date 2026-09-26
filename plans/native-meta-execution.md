@@ -23,6 +23,149 @@
 > to `lib/lisp-init.x`). Remaining: the REPL still calls the deleted
 > lowering (`commands/repl`, step 5), and step 4 (evaluator) is untouched.
 
+## Revised architecture (2026-09-26 pivot)
+
+> Status: design recorded; step 3 of the pivot not started. This section
+> supersedes "The mechanism" below wherever they differ. The staging
+> mechanism below was built on this branch, measured, and stress-tested;
+> it works at volume but mid-translation staging must forward every
+> declaration source into each module build, a crashing body killed the
+> compiler, `meta static` state split across cumulative restages, and the
+> cache key ignored included headers. Gary directed this replacement.
+
+### Two phases per project
+
+1. **Build the project meta module.** Every meta function the project
+   defines, plus the ordinary declarations those bodies reference (types,
+   constants, library calls), is compiled once into one helper program
+   linked against `libx2c` and the builder operations. The existing
+   `x2c build --kind meta-module` entry (`src/build.x` `_write_entry`,
+   `Build.module_entry`) and the backend emission of a meta group are the
+   starting point. The build is cached under the x2c cache root, keyed by
+   the SHA-256 of the meta sources, every header in the C compiler's
+   dependency output (`-MD`), the compiler stamp, the meta flags, and the
+   host C compiler's identity.
+2. **Translate with the helper mounted.** The compiler registers the
+   helper's target table, skips meta definitions (already built), and
+   sends each `$` call to the helper.
+
+`x2c script` and `x2c build` run phase 1 automatically when the meta
+sources changed. The REPL stays a special case that stages each
+submission in process (current REPL work, unchanged).
+
+### Rule 1: meta functions do not query the compiler
+
+A user meta body receives everything it needs from the compiler as
+arguments at the call site and returns a value. Heap allocation, scopes,
+file I/O, and `meta static` state inside the helper are fine. Results
+cross back as copyable values: syntax, numbers, Strings, Symbols, Lists,
+Maps, Arrays. Addresses never cross (the existing rule, see
+`meta-heap-address-result`).
+
+The inventory (scratchpad `meta-inventory.md`) measured 32 compiler
+callbacks from user meta calls across every corpus, from 15 calls in 5
+fixture and example files; autodiff, the only heavy user, reaches only
+`x2c_diagnostic_fail`. Each operation user code reaches is handled
+without a callback channel:
+
+| operation | after the pivot |
+|---|---|
+| `x2c_diagnostic_fail`, `x2c_diagnostic_warn` | helper returns an error or warning record; the compiler reports it at the call site |
+| `x2c_ident`, `x2c_function_name` | helper-side library functions; `x2c_ident` returns the `("x2c.ident" spelling)` marker the compiler resolves later |
+| `x2c_syntax_type` | the compiler sends the argument's type with each typed syntax argument |
+| `x2c_source_text`, `x2c_embed_text` | captured syntax carries its source text with it |
+| `x2c_type_fields` | a parameter declared `Type` receives the type's description as data, fields included, computed by the compiler at the call site |
+| call-site, `x2c_type_resolve`, `x2c_type_parts` | compiler-owned code only; stays in process |
+
+### Rule 2: meta code lives apart from program code
+
+Meta functions live in `.xmacro` files (or a declared meta module of a
+package), like Rust proc-macro crates. A bodied `meta` function in an
+ordinary program `.x` file, or one produced by a macro expansion or a `$`
+call, is an error naming the file to move it to. The inventory found no
+meta function defined by expansion or by a `$` call; it found meta
+definitions in ordinary `.x` files in most fixtures, the example
+`examples/magic/meta-functions.x`, and `packages/autodiff`'s
+`autodiff-state.x`, which move to `.xmacro` files.
+
+### The helper protocol
+
+- One helper process per translation worker, started on the first `$`
+  call that needs it, restarted after a crash.
+- Messages over a pipe, one request and one reply, no nested callbacks:
+  `call name args` -> `value v` | `error record` | `warning record, then value`;
+  `reset` at each unit start re-runs the `meta static` initializers so
+  per-unit semantics hold; `quit`.
+- Values use the `.xi` datum writer (`src/collect.x` `_write_datum`) and
+  the reader, with two additions: spellings for Arrays and Maps, and
+  source text attached to captured syntax. Binding ids pass through
+  unchanged as opaque integers.
+- A body that crashes, exits, or overflows the stack ends the helper; the
+  compiler reports the call site, names the function, and restarts the
+  helper for the next call. A call past the deadline (`X2C_META_TIMEOUT`)
+  kills the helper with the same report.
+- Shared memory is considered only if measurement demands it. The largest
+  measured reply is 24 KB (autodiff); fixtures and examples stay under
+  1 KB per call.
+
+### The compiler's own meta code
+
+`lib/meta.x` builders and the `.xmacro` files the compiler uses stay in
+process. `src/linked-meta.x` is generated from them by
+`tools/gen-linked-meta.sh` at build time, so it cannot drift, and stages
+1 and later translate with `X2C_CC=false` so an unlinked shipped meta
+function fails the build. `src/builtins.x` stays a compiler unit.
+
+### Cross-compilation
+
+The meta build uses the host C compiler (`--meta-cc`, default the host
+`cc`), never the target `--cc`.
+
+### Deleted from the spike
+
+Per-unit pending groups, cumulative restaging, mid-translation module
+builds, in-process `dlopen` of user meta code, the per-unit reset plumbing
+tied to cumulative modules, the unit `meta_scope`, forwarding of package
+include directories into mid-translation builds, the watchdog thread (the
+deadline moves to the helper), and the group staging stubs in the Lisp
+session. What stays: deletion of the lowering, the AUTO tier,
+`lib/lisp-machine.x`, and the generated builtin Lisp; evaluator tail
+calls; backend emission of a meta group; generated linked compiler meta
+code; autodiff in `packages/autodiff`; REPL per-submission staging and
+its crash and Ctrl-C handling.
+
+### Revised removal list
+
+| what | how | gate |
+|---|---|---|
+| `src/stage.x` per-unit staging (grouping, cumulative emission, per-unit cache, lock, load, bind, reset, watchdog) | replaced by a project meta build (reusing the emission) and a helper client; target under 500 lines together | `make verify-fixtures`; meta-heavy project cold and warm |
+| staging stubs and group checks in `src/macros.x`, `src/parse.x` | `$` dispatch to the helper table | fixtures |
+| `x2c_source_text`/`x2c_embed_text` address lookup (`src/macros.x`) | source text carried with captured syntax | `meta-capture-calls`, `meta-sdk-defs` |
+| meta definitions in ordinary `.x` files (fixtures, example, autodiff state) | moved to `.xmacro` | fixtures; `make -C packages/autodiff check` |
+
+### Book
+
+`docs/src/guide/meta-functions.md`: rewrite "How a meta function runs"
+and its subsections for the two phases; turn "Native modules" into the
+project meta module; restrict "What the compiler answers" and "Functions
+that need the compiler" to compiler-owned meta code and document the
+`Type` parameter; state rule 2 under "Sharing a `meta` function between
+units"; add crash, timeout, and reset behavior; `meta native` and
+bodyless prototypes keep their pages.
+
+### Pivot order of work
+
+1. Inventory (done, 2026-09-26).
+2. This section.
+3. Implement behind the existing gates: project meta build and cache,
+   helper process and protocol, `$` dispatch, the `Type` parameter and
+   carried source text, rule 2 diagnostics and the file moves, deletion of
+   the per-unit staging. Measure translate time of `src/` and `lib/`,
+   `make stage-3`, a cold and warm meta-heavy project, and helper crash
+   handling.
+4. Host C compiler for the meta build; confirm the cache key covers every
+   header the meta module includes.
+
 ## The result
 
 A bodied `meta` function has one execution model: it is compiled by the
