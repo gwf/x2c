@@ -2444,7 +2444,7 @@ static Map _meta_initial_copies(Compiler c, Array units) {
             !_meta_braced(initializer))
           continue;
         List copy = c.sym.introduce(
-          %"${binding.list().last().str()}_x2c_initial");
+          %"${binding.list().last()}_x2c_initial");
         for (int i = 0; i < (int) units.len(); i++)
           if (units[i].equal(declaration))
             units[i] = %(declare $spec (bindings
