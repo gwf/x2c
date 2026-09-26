@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/var-to-var-pointer.x:8:3: type: cannot convert Var to (* "Var")
+    return take(item);
+    ^^^^^^
+  note: write &value for its address, or value.pointer() to unbox a stored pointer
+
