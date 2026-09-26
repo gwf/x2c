@@ -175,8 +175,10 @@ itself. The eager parent Lisp session (below) is built in
 `Frontend.open` before any unit starts.
 
 **REPL.** A submission defining meta code is a group staged per
-submission; later submissions' modules link against earlier ones or
-re-stage cumulatively. Latency per such submission is one `cc` run
+submission; later submissions' modules reach earlier functions and values
+at their addresses, so each submission stages only its own code
+(measured flat at ~150 ms from submission 1 to 100 on macOS, of which
+~100 ms is the host's first load of a new binary). Latency per such submission is one `cc` run
 (100-300 ms on a fast host, 2.6 s on the spike's container) against ~1 ms
 today; `:lowered` shows C instead of Lisp; `:stats` loses the AUTO
 fields. This is the one consumer regression and is Gary's decision.

@@ -13,8 +13,8 @@ typedef struct ReplSession {
   Map names;
   // Binding id of each published value -> the binding of its cell.
   Map cells;
-  // The module the last staged submission loaded, or NULL.
-  String module;
+  // Staged session function name -> the module that defines it.
+  Map modules;
   int serial;
 } *ReplSession;
 
@@ -44,7 +44,9 @@ typedef struct ReplCompletion {
 #include "diagnostics.x"
 #include "lisp.x"
 #include "scope.x"
+#include <dlfcn.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 
 static void _write_stdout(String text, int newline, Symbol operation) {
@@ -72,6 +74,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.compiler = compiler;
   session.names = {};
   session.cells = {};
+  session.modules = {};
   compiler.unit_nodes = [
     %(preproc "void print(String text);"),
     %(preproc "void println(String text);")
@@ -285,11 +288,47 @@ static String _thunk_name(List thunk) {
   return NULL;
 }
 
-/* Calls the staged thunk `thunk`. */
+static const int _trapped[] = { SIGINT, SIGSEGV, SIGBUS, SIGFPE, SIGILL };
+enum { _TRAPPED = sizeof(_trapped) / sizeof(_trapped[0]) };
+
+/* Raises an `Error` from the signal that stopped a submission, so the
+   submission unwinds to `_run`. The handler runs on its own stack, which
+   survives a submission that exhausts the native stack. */
+static void _stop(int number) {
+  if (number == SIGINT) raise %(interrupt (signal $number));
+  raise %(crash (signal $number)
+                (why "the session may be inconsistent after a crash"));
+}
+
+/* Clears the record that the handler's stack is in use, which leaving a
+   handler by a jump keeps on some hosts, by jumping with the state saved
+   here, off that stack. */
+static void _leave_signal_stack(void) {
+  sigjmp_buf here;
+  if (!sigsetjmp(here, 1)) siglongjmp(here, 1);
+}
+
+/* Calls the staged thunk `thunk`. Ctrl-C and a crash in the submission
+   raise, and the submission fails instead of ending the session. */
 static Var _run(Compiler c, List thunk) {
+  static char stack[1 << 17];
+  static int ready = 0;
   Var function;
   if (!c.macro_lisp.try_get(_thunk_name(thunk), function))
     _refuse("the result has no Var form");
+  if (!ready) {
+    stack_t alternate = { .ss_sp = stack, .ss_size = sizeof(stack) };
+    ready = !sigaltstack(&alternate, NULL);
+  }
+  else _leave_signal_stack();
+  struct sigaction action = {
+    .sa_handler = _stop, .sa_flags = SA_ONSTACK | SA_NODEFER };
+  struct sigaction saved[_TRAPPED];
+  sigemptyset(&action.sa_mask);
+  for (int i = 0; i < _TRAPPED; i++)
+    sigaction(_trapped[i], &action, &saved[i]);
+  defer for (int i = 0; i < _TRAPPED; i++)
+    sigaction(_trapped[i], &saved[i], NULL);
   return c.macro_lisp.apply(function, %());
 }
 
@@ -312,6 +351,28 @@ static void _publish_cells(
             cell, cell, (unsigned long) address)});
         session.cells[id] = %(binding $id $cell);
       }
+}
+
+/* Moves the function `fn`, just staged in `module`, out of the session's
+   group: later modules declare it and call it at its address in `module`
+   through a macro, so each submission stages only its own code. Returns
+   whether the function left the group. */
+static int _publish_function(ReplSession session, List fn, String module) {
+  match (fn)
+    case %(function ?spec (!set ?declarator (bind (binding ? ?(String name))
+                                                  *)) ?): {
+      void *handle = dlopen(module, RTLD_NOW | RTLD_NOLOAD);
+      void *address = handle ? dlsym(handle, name) : NULL;
+      if (!address) return 0;
+      Array nodes = session.compiler.unit_nodes;
+      nodes.push(%(declare $spec (bindings $declarator)));
+      nodes.push(%(preproc ${
+        "#define %s (*(__typeof__(%s) *) %#lx)".printf(
+          name, name, (unsigned long) address)}));
+      session.modules[name] = module;
+      return 1;
+    }
+  return 0;
 }
 
 static void _refuse(String why) { raise %(repl (why $why)); }
@@ -592,7 +653,6 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.message = failure;
     return result;
   }
-  session.module = module;
   Array addresses = $auto([]);
   try {
     foreach (List thunk, thunks) {
@@ -612,8 +672,11 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.cause = cons(cause, details);
     return result;
   }
-  if (fn) group_mark++;
   _publish_cells(session, node_mark, declarations, addresses);
+  if (fn && !_publish_function(session, fn, module)) {
+    group_mark++;
+    session.modules[function_name] = module;
+  }
   if (function_name || added.len()) {
     transaction.commit_transient();
     foreach (String name, added)
@@ -629,8 +692,11 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     `name`, or NULL when it is not a staged session function. */
 String ReplSession.lowered(ReplSession session, String name) {
   List entry = session.inspect(name);
-  if (!entry || entry.car() != <function> || !session.module) return NULL;
-  String code = Path.read_text(Path.dirname(session.module) + "/group.c");
+  Var module;
+  if (!entry || entry.car() != <function> ||
+      !session.modules.try_get(name, module))
+    return NULL;
+  String code = Path.read_text(Path.dirname(module.str()) + "/group.c");
   Array lines = $auto([]);
   int inside = 0;
   foreach (String line, code.lines()) {

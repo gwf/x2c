@@ -281,7 +281,7 @@ static int _inspect(
 
 /** Runs the experimental REPL on stdin. Piped input continues after errors
     and exits with status one if any submission or command failed. Interactive
-    errors leave the session usable; SIGINT retains its process-exit action. */
+    errors leave the session usable; SIGINT stops a running submission. */
 int repl_run(CliRequest request, ReplOptions options) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;

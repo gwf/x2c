@@ -2,9 +2,11 @@
 
 `x2c repl` is a shipped external command that evaluates a supported subset
 of x2c in a persistent session.
-Each submission that defines or runs code is compiled with the session's
-earlier definitions into a native module, loaded into the REPL process, and
-called. The C compiler runs once per new submission, typically 100-300 ms;
+Each submission that defines or runs code is compiled into its own native
+module, loaded into the REPL process, and called. The module reaches earlier
+functions and values at their addresses in the modules that define them, so
+its cost does not grow with the session. The C compiler runs once per new
+submission, typically 50-150 ms plus the host's first load of a new module;
 a submission identical to one compiled before loads from the module cache.
 
 ```sh
@@ -86,7 +88,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
-| `:lowered plus` | Show the C that the last staging emitted for `plus`. |
+| `:lowered plus` | Show the C that the staging of `plus` emitted. |
 | `:cancel` | Discard incomplete input. |
 | `:quit` | Exit, discarding incomplete input. |
 
@@ -177,9 +179,12 @@ remain, both for failed initialization and failed statements.
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
 Long sessions do not have a bounded-memory guarantee. Loaded modules stay
-loaded; each value lives in the module that initialized it. Submissions run
-as native code in the REPL process: a runaway loop hangs the session, and a
-crash ends it.
+loaded; each function and value lives in the module that defined it.
+Submissions run as native code in the REPL process. Ctrl-C during a
+submission, or a crash in it such as a null dereference or a runaway
+recursion, fails the submission with `interrupt` or `crash` and returns to
+the prompt. Effects the submission made before it stopped remain, and after a
+crash the session may be inconsistent.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
@@ -190,6 +195,5 @@ During interactive editing, Ctrl-C clears both the current edit buffer and any
 pending incomplete submission, then returns to the `x2c> ` prompt without a
 diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
 still makes that exit status 1. Terminal canonical mode is restored before a
-submission runs, so Ctrl-C during evaluation continues to terminate the
-process. Terminals without the required escape-sequence support use the basic
+submission runs, so Ctrl-C during evaluation interrupts the submission. Terminals without the required escape-sequence support use the basic
 line reader instead. Piped input retains the same output and exit behavior.

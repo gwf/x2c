@@ -756,6 +756,36 @@ static String _meta_cc_identity(String cc) {
   return ok ? "%s %016llx".printf(path, (unsigned long long) hash) : cc;
 }
 
+/* Whether the group stages for an interactive session, which favors
+   latency: unoptimized code and a precompiled runtime header. */
+static int meta_session = 0;
+
+/* The flags of a session module: `-O0`, with the runtime header
+   precompiled once under `root` when the C compiler can. */
+static List _meta_session_flags(String root, String stamp, String compiler) {
+  List flags = %("-fsigned-char" "-fPIC" "-O0");
+  String key = String.sha256(
+    %"$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir");
+  String directory = %"$root/prefix-$key", header = %"$directory/runtime.h";
+  String built = %"$header.gch";
+  if (!Path.is_file(built)) {
+    String output = %"$built.${"%ld".printf((long) getpid())}";
+    String printed = NULL, errors = NULL;
+    try {
+      Path.make_dirs(directory);
+      Path.write_text(header, "#include \"x2c.h\"\n");
+    }
+    catch %((!or not-found io-fail) *): return flags;
+    if (tool_capture(%($meta_cc @flags "-x" "c-header" "-iquote"
+                       $meta_include_dir $header "-o" $output),
+                     printed, errors))
+      return flags;
+    try Path.move_to(output, built);
+    catch %((!or not-found io-fail) *): return flags;
+  }
+  return %(@flags "-include" $header);
+}
+
 /* Builds the group's native module under the cache root, named by the
    SHA-256 of its emitted C, the compiler stamp, the C compiler's identity,
    the flags, and the runtime headers' directory, or reuses the module an
@@ -770,8 +800,9 @@ static String _stage_meta_group(Compiler c, String &failure) {
   List code = _meta_group_code(c, stamp, failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
-  List flags = _meta_flags();
   String compiler = _meta_cc_identity(meta_cc);
+  List flags = meta_session
+    ? _meta_session_flags(%"$root/meta", stamp, compiler) : _meta_flags();
   String key = String.sha256(
     %"$header\n$source\n$stamp\n$compiler\n${flags.repr()}\n$meta_include_dir");
   String directory = %"$root/meta/$key";
@@ -865,6 +896,8 @@ String Compiler.stage_meta_group(Compiler c, String &failure) {
     failure = "native modules are unavailable";
     return NULL;
   }
+  meta_session = 1;
+  defer meta_session = 0;
   return _load_meta_group(c, failure);
 }
 
