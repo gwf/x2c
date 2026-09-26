@@ -2970,16 +2970,15 @@ List Compiler_leading_preproc(Compiler);
 void Compiler_parse_keyword_definition(Compiler);
 List Compiler_parse_protocol_declaration(Compiler);
 List Compiler_parse_macro_lisp_top_level(Compiler);
+void Compiler_record_meta_import(Compiler);
 List Compiler_parse_macro_definition(Compiler);
 void Compiler_install_native_meta_function(Compiler, List, Token);
 void Compiler_install_meta_declaration(Compiler, List, Token);
-void Compiler_record_meta_static(Compiler, List, Token);
-void Compiler_record_meta_type(Compiler, Token);
+void Compiler_record_meta_static(Compiler, List);
 void Compiler_record_declaration_visibility(Compiler, List);
 int Compiler_bind_linked_meta(Compiler, List, Type);
 Type Type_canonicalize(Type);
 void Compiler_install_meta_function(Compiler, List, Token);
-void Compiler_record_meta_definition(Compiler, List, Type, Token, Token);
 int Compiler_meta_is_comptime_only(Compiler, List);
 List Compiler_parse_top_level(Compiler c){
   if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)){
@@ -2996,15 +2995,15 @@ List Compiler_parse_top_level(Compiler c){
         }
 
       }
-      return NULL;
+      Compiler_record_meta_import(c);  return NULL;
     }
     case 129 : Compiler_report_error(c, 33658058, _891, c -> token, _373);
   }
   if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, &(native));  Token definition_start = c -> token;  List decl = Compiler_parse_declaration_row(c);  if(native && ! Type_is_function(List_type_from_ast(decl))) Compiler_report_error(c, 33658058, _892, meta, NULL);  if(Compiler_test(c, 119)){
     if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta){
-      Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_meta_static(c, decl, meta);
+      Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_meta_static(c, decl);
     }
-    else if(definition_start -> type == 1318234344 || definition_start -> type == 44977116 || definition_start -> type == 357722 || definition_start -> type == 44661285196) Compiler_record_meta_type(c, definition_start);  Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  return decl;
+    Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  return decl;
   }
   if(Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c)){
 
@@ -3034,10 +3033,7 @@ List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? met
     x2c_cleanup_leave(& _x2c_defer_record_13);
 }
   }
-  _record_meta_hash(c, function, definition_start);  if(lowered){
-    if(! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function, lowered);  Compiler_record_meta_definition(c, function, Type_canonicalize(List_type_from_ast(decl)), tokens + start, tokens + body);
-  }
-  Compiler_record_declaration_visibility(c, function);  if(lowered && Compiler_meta_is_comptime_only(c, function)) return NULL;  if(Map_truth(c -> macro_holes)) return cons(_375, cons(int_var(definition_start -> line), cons(String_var(Compiler_definition_doc(c, definition_start)), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, NULL, cons(int_var(start), cons(int_var(body), NULL)));  return function;
+  _record_meta_hash(c, function, definition_start);  if(lowered && ! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function, lowered);  Compiler_record_declaration_visibility(c, function);  if(lowered && Compiler_meta_is_comptime_only(c, function)) return NULL;  if(Map_truth(c -> macro_holes)) return cons(_375, cons(int_var(definition_start -> line), cons(String_var(Compiler_definition_doc(c, definition_start)), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, NULL, cons(int_var(start), cons(int_var(body), NULL)));  return function;
 }
 Compiler_require_input(c);  Symbol unexpected = Compiler_peek(c, 0);  Compiler_report_error(c, 33658058, _894, c -> token, cons(_8, cons(String_var(c -> token -> text), cons(_189, cons(String_var(Symbol_str(unexpected)), NULL)))));
 }

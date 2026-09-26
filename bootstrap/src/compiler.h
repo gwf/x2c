@@ -73,7 +73,7 @@ typedef struct Compiler{
   Map meta_values;
   Map meta_layouts;
   Map native_meta;
-  Array meta_group;
+  Array unit_nodes, meta_group;
   Map meta_group_bound;
   Scope meta_scope;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
@@ -228,6 +228,8 @@ void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
 List Compiler_leading_preproc(Compiler compiler);
 
 void Compiler_update_source_visibility(Compiler c, List directives);
+
+void ast_collect_binding_references(Var node, Map referenced);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 

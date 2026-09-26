@@ -141,11 +141,13 @@ List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token inv
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
 
-void Compiler_record_meta_definition(Compiler c, List function, Type type, Token start, Token body);
+void Compiler_use_meta_toolchain(String cc, String include_dir, int verbose);
 
-void Compiler_record_meta_static(Compiler c, List declaration, Token start);
+void Compiler_report_unstaged_meta(Compiler c);
 
-void Compiler_record_meta_type(Compiler c, Token start);
+void Compiler_record_meta_static(Compiler c, List declaration);
+
+void Compiler_record_meta_import(Compiler c);
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 

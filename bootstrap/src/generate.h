@@ -11,6 +11,8 @@ List Compiler_definition_rows(Compiler c, List ast);
 
 void Compiler_dump_definitions(Compiler c, List ast);
 
+List generate_code_text(Compiler c, List ast, String basename);
+
 void generate_code(Compiler c, List ast, String dir);
 
 List Compiler_init_statements(Compiler compiler, Symbol phase);
