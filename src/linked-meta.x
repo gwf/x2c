@@ -395,6 +395,20 @@ static List _tag_decode_groups(void) {
   return _tag_composite(groups);
 }
 
+static List _tag_id_checks(void) {
+  Array checks = [];
+  int index = 0;
+  List message = %(expr (* char)
+    (literal (* char) "\"TagId matches the var tag ledger\""));
+  foreach (List row, _tag_rows()) {
+    List id = x2c_expr_ident(x2c_ident(_tag_id(row)));
+    List same = %(expr () (op == $id ${x2c_literal_int(index)}));
+    checks.push(%(c-assert $same $message));
+    index++;
+  }
+  return checks;
+}
+
 static Map _tag_types(List native) {
   Map types = {};
   foreach (List row, native) types[row[0]] = row[1];
@@ -633,6 +647,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
+  $linked.row(rows, "_tag_id_checks", _tag_id_checks);
   $linked.row(rows, "_tag_types", _tag_types);
   $linked.row(rows, "var_tag_top", var_tag_top);
   $linked.row(rows, "var_tag_bottom", var_tag_bottom);
@@ -681,7 +696,5 @@ Map linked_meta_targets(void) {
   return rows;
 }
 
-meta static Map _linked_hashes(void) => x2c_meta_definition_hashes();
-
 /** Returns the hash of each linked copy's definition text by name. */
-Map linked_meta_hashes(void) => $_linked_hashes();
+Map linked_meta_hashes(void) => $x2c_meta_definition_hashes();
