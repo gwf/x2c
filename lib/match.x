@@ -2624,6 +2624,9 @@ static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
     plan = MatchPlan.prepare(pattern);
     match_capture_sites.push(&site);
   }
+  /* Normalizing a guard allocates cells in the pool active at this first
+     call, and the layout keeps them for the life of the process. */
+  if (plan.layout.normalized is <list>) List.try_own(plan.layout.normalized);
   __atomic_store_n(&site.plan, plan, __ATOMIC_RELEASE);
 }
 
