@@ -872,8 +872,13 @@ static String _stage_meta_group(Compiler c, String &failure) {
   if (Path.is_file(module)) return module;
   String output = %"$module.${"%ld".printf((long) getpid())}";
   failure = %"cannot write the module under $directory";
+  try Path.make_dirs(directory);
+  catch %((!or not-found io-fail) *): return NULL;
+  /* Workers that reach the same group wait for the first to build it. */
+  int lock = file_lock(%"$directory/lock", 1);
+  defer close(lock);
+  if (Path.is_file(module)) return module;
   try {
-    Path.make_dirs(directory);
     Path.write_text(%"$directory/$hfile", header);
     Path.write_text(%"$directory/$cfile", source);
   }
