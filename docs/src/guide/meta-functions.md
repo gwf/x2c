@@ -716,9 +716,12 @@ needs `dlopen`, so on a platform without it only the shipped meta code and
 [native modules](#native-modules) linked into the compiler run at compile
 time.
 
-A raise inside a `meta` body becomes a diagnostic at the `$` call. Nothing
-limits how long or how deep a body runs: a runaway recursion or loop at
-compile time behaves as it would at run time.
+A raise inside a `meta` body becomes a diagnostic at the `$` call. A `$`
+call that runs longer than 60 seconds stops the translation with a
+diagnostic at the call that names the function; `X2C_META_TIMEOUT` sets
+another limit in seconds, and `0` turns the limit off. Nothing limits how
+deep a body runs: a runaway recursion at compile time behaves as it would
+at run time.
 
 ### Arguments and results
 

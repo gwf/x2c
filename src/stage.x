@@ -33,6 +33,10 @@
 #include "utils.x"
 #include <limits.h>
 #include <math.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 /* Evaluates a nested `$` call among a call's arguments. */
@@ -375,6 +379,74 @@ int Compiler.meta_is_comptime_only(Compiler c, List fn) {
     case %(function ? (bind (binding ? ?(String name)) *) ?):
       return name in c.meta_comptime;
   return 0;
+}
+
+/* --- the deadline of a running meta call -------------------------------- */
+
+/* The outermost running `$` call: its deadline in monotonic seconds, zero
+   when none runs, and where to report it. A watchdog thread, started in
+   each process at its first call, stops a call that passes its deadline.
+   The thread reads only these C values, so it touches no runtime state. */
+static volatile double watch_deadline = 0;
+static int watch_depth = 0, watch_line = 0, watch_col = 0;
+static char watch_file[512], watch_name[128];
+static double watch_limit = -1;
+static pid_t watch_pid = 0;
+
+static double _watch_now(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+static void *_watch_run(void *unused) {
+  (void) unused;
+  for (;;) {
+    usleep(100000);
+    double deadline = watch_deadline;
+    if (!deadline || _watch_now() < deadline) continue;
+    fprintf(stderr,
+      "%s:%d:%d: macro: this meta call ran longer than %g s\n"
+      "  note: function: %s\n"
+      "  note: set X2C_META_TIMEOUT to a larger limit in seconds, or 0 "
+      "for none\n",
+      watch_file, watch_line, watch_col, watch_limit, watch_name);
+    fflush(stderr);
+    _exit(1);
+  }
+  return NULL;
+}
+
+/* The limit from `X2C_META_TIMEOUT`, 60 seconds by default; zero or less
+   turns the watchdog off. */
+static double _watch_limit(void) {
+  String text = Env.get("X2C_META_TIMEOUT");
+  return text ? atof(text) : 60.0;
+}
+
+/** Starts the deadline of the `meta` function `name` called at `site`,
+    unless a call is already running. */
+void Compiler.meta_watch_begin(Compiler c, String name, Token site) {
+  if (watch_depth++) return;
+  if (watch_limit < 0) watch_limit = _watch_limit();
+  if (watch_limit <= 0) return;
+  if (watch_pid != getpid()) {
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, _watch_run, NULL)) return;
+    pthread_detach(thread);
+    watch_pid = getpid();
+  }
+  snprintf(watch_file, sizeof watch_file, "%s",
+           c.filename ? (char *) c.filename : "<input>");
+  snprintf(watch_name, sizeof watch_name, "%s", (char *) name);
+  watch_line = site ? site.line : 0;
+  watch_col = site ? site.col : 0;
+  watch_deadline = _watch_now() + watch_limit;
+}
+
+/** Ends the deadline `Compiler.meta_watch_begin` started. */
+void Compiler.meta_watch_end(void) {
+  if (--watch_depth == 0) watch_deadline = 0;
 }
 
 /* --- the unit's meta group, staged as native code ---------------------- */
