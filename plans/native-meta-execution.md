@@ -472,3 +472,16 @@ Checks at the tip: make stage-2 with identical generated stages,
 verify-fixtures 867 passed, commands-check passed. Not done: the
 independent consolidations table, autodiff to packages, hand target row
 generation (not clean; see evaluator notes), etc/init.xlisp to native.
+
+## Pivot status (2026-09-26, c6e219c4)
+
+Steps 1-4 of the pivot are on this branch: project meta helper process
+and protocol, `$` dispatch, `Type`/`Source` arguments (with methods),
+carried source text, relaxed rule 2, host `--meta-cc`, cache-key probe,
+Linux (aarch64 Docker) run, generated `src/linked-meta.x`. A REPL that
+runs submissions in a forked helper was prototyped on `spike/repl-helper`
+and not adopted: it deletes about 72 `src/` lines, adds about 245 to the
+REPL, keeps latency the same, adds replay-based crash recovery, and
+drops address results such as closures. The REPL keeps in-process
+staging. Open: stale autodiff references in `examples` and `site`; the
+independent consolidation table; `src/stage.x` size (1326 lines).
