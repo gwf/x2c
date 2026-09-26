@@ -45,11 +45,16 @@ translates its body to Lisp, `etc/comptime.xlisp` re-implements C
 semantics for that Lisp, `lib/lisp.x`'s AUTO tier and `lib/lisp-machine.x`
 word-compile it to win back speed, and the compiler's own built-in macro
 algorithms ship as a 12.7x generated Lisp artifact loaded by every process.
-In the rebuild a `meta` function is compiled by the C backend like any
-other function: linked into the compiler when it ships with it (`foreach`,
-`class`, `scope`, callback adapters, autodiff, the tag ledger), and built
-once into a content-hashed module and loaded through the existing
-native-module path when a user defines it. Lisp stays as the documented
+The native path already exists: `meta native` and bodyless `meta`
+prototypes make a compiled function available to compile-time code, and
+`--kind meta-module` builds and `--native-module` loads such code. What
+the rebuild changes is that this becomes the only path. Every bodied
+`meta` function is compiled by the C backend like any other function:
+linked into the compiler when it ships with it (`foreach`, `class`,
+`scope`, callback adapters, autodiff, the tag ledger), and built once
+into a content-hashed module and loaded through that native-module path,
+automatically, when a user defines it. The one new mechanism is that
+automatic staging step; everything else is deletion. Lisp stays as the documented
 feature (`$(...)`, imports, `defmacro`, `$lisp.bind`) on a reader and
 tree-walking evaluator of about 2,000 lines with a tail-call trampoline;
 the wordcode tier, the lowering, its runtime, and the generated artifacts
@@ -142,7 +147,7 @@ Three estimates on the 80,404 base (`ledger.md` section 6):
 
 | estimate | lines | change | assumes |
 |---|---:|---:|---|
-| verified-subtractive | ~73,150 | -9% | native meta execution licensed and settled (E1), AUTO off (E2), REPL latency accepted; without the language change the ceiling is ~77,700 (-3.4%) |
+| verified-subtractive | ~73,150 | -9% | the language change licensed, the staging prototype (step 1 below) working, AUTO off (measured 5-11%), REPL latency accepted; without the language change the ceiling is ~77,700 (-3.4%) |
 | greenfield-central | ~67,700 | -16% | the above plus every named fold with a file:line, Array/Map as family instantiations, the one-Pool error record and a frame chain that survives its prototype, frames for transactions, one classifier, one installer; unnamed folds at half; no comment compaction; no Match trade; 66,500 with autodiff moved to `packages/` |
 | greenfield-with-every-trade | ~58,500 | -27% | the five area designs as written, every rope trade taken and measured inside its own bound, every unnamed fold realized |
 
@@ -196,9 +201,35 @@ latent lifetime bug: a call-site plan retains its normalized pattern in a
 pool that is later released; harmless today because only the compiler
 reads it once, queued as a task.
 
-E1, the settling probe (row-lookup helpers of `lib/var-tags.xmacro` made
-native, the one prior measurement against native execution): see the
-addendum at the end of this file.
+E1 was misframed and is recorded as such. It moved the row helpers of
+`lib/var-tags.xmacro` into a compiled compiler unit and measured
+translation: parity (`lib/` in one process 11.6 s baseline, 11.7 s probe;
+the seven-file set 20.1 s and 20.0 s; the two units that import the
+ledger 3% faster). The plan-archive figure it was meant to answer (3.4x
+slower) was about meta x2c lowered to Lisp, not about native code, so E1
+tested nothing in dispute; native execution was never the question. What
+it did show is the cost of the linked route today: spelling the helpers
+`meta native` inside the imported `.xmacro` binds nothing, because an
+import emits no C and the compiler binds only what it already links, so
+the helpers became a new unit `src/var-tag-rows.x` (173 lines), an
+include and a filter change in `src/macros.x`, twelve bodyless prototypes
+in the `.xmacro`, and a bootstrap refresh between two builds. The
+rebuild's "linked when shipped" is that route made routine. One
+unexplained difference surfaced once in a warm output directory
+(`tokenizer.c` with `tok == error_at` for `Token_equal(tok, error_at)`)
+and did not reproduce in 72 further translations; it is noted, not
+resolved.
+
+The staging cost, the design's one new mechanism, measured with the
+existing path: `x2c build --kind meta-module` on a one-function module
+takes 2.6 s here (three runs), almost all of it fixed process cost
+(startup, prelude collection, `cc`), against about a millisecond to lower
+the same function to Lisp today. It is paid once per edit of a meta group
+and cached, so ordinary builds barely see it; the REPL would pay it per
+submission that defines meta code. A 118-function group could not be
+built as a module without the design's own staging logic, because the
+functions call each other at compile time during the module's own
+translation, which is the first thing that logic has to handle.
 
 ## The auto-research task
 
@@ -235,8 +266,13 @@ dynamism is wanted. A run that trades those for lines fails.
 Ordering (each step lands green on its own, in this order, each with its
 measurement from `ledger.md` section 4):
 
-1. E1 settling probe. If native execution of the ledger scan is not at
-   least as fast as today, stop: the design reduces to consolidation.
+1. The staging prototype: stage one user unit's bodied `meta` group
+   (functions that call each other at compile time, `meta static` values,
+   a raise reaching the call site) into a module and load it, on the
+   existing native-module path, without touching the lowering. Measure
+   the per-edit cost and REPL latency. If a group cannot be staged
+   without the lowering's help, stop: the design reduces to
+   consolidation.
 2. Native meta execution: `src/stage.x` replaces `src/comptime.x`; shipped
    expanders become `src/builtins.x`; user meta groups stage through the
    native-module path with a per-unit reset for `meta static`; the
