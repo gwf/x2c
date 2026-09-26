@@ -28,12 +28,11 @@ lib/file.x|api|
 lib/func.x|api|
 lib/iter.x|api|
 lib/lib.x|api|
-lib/lisp-machine.x|internal|Private compile-time Lisp wordcode decoder.
 lib/lisp.x|api|
 lib/list.x|api|
 lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 lib/logger.x|api|
-lib/machine.x|internal|Shared `Match` and Lisp wordcode, builder, and execution-state definitions.
+lib/machine.x|internal|`Match` wordcode, builder, and execution-state definitions.
 lib/map.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match.x|api|

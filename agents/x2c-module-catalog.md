@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 58
+- Runtime modules: 57
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -780,42 +780,24 @@ Public functions:
 `DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
 `DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
 
-### [lib/lisp-machine.x](../lib/lisp-machine.x)
-
-compile-time Lisp wordcode execution.
-
-Public functions:
-
-`LispMachine.open`, `LispMachine.begin`, `LispMachine.step`, `LispMachine.run`,
-`LispMachine.finish`, `LispMachine.clean`
-
 ### [lib/lisp.x](../lib/lisp.x)
 
 the Lisp runtime: reader, session, and evaluator.
 
 Public functions:
 
-`native_scalar_access`, `Lisp.program`, `Lisp.resolve`, `Lisp.enter`,
-`Lisp.leave`, `Lisp.retarget`, `Lisp.step`, `Lisp.reslot`, `Lisp.apply_values`,
-`Lisp.precall`, `Lisp.immediate`, `Lisp.evaluate`, `Lisp.expanded`,
-`Lisp.kernel`, `Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`,
-`Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`,
-`lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`, `lisp_symbol`,
-`lisp_procedure`, `lisp_compare`, `lisp_type`, `lisp_add`, `lisp_plus`,
-`lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`,
-`lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
-`lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
-`lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `lisp_void`,
-`lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `lisp_bytes`,
-`lisp_at`, `lisp_zero`, `lisp_copy`, `lisp_record_result`, `lisp_session_copy`,
-`lisp_box`, `lisp_peek`, `lisp_poke`, `lisp_array`, `lisp_source_function`,
-`lisp_unwind`, `lisp_func_new`, `lisp_func_arguments`, `lisp_func_value`,
-`lisp_func_reference`, `lisp_func_invalid`, `Lisp.auto_stats`,
-`Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
-`Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
-`Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,
-`Lisp.cleanup`
+`native_scalar_access`, `Lisp.kernel`, `Lisp.new`, `Lisp.destroy`,
+`Lisp.adopt`, `Lisp.freeze`, `Lisp.read`, `lisp_truth`, `lisp_atom`,
+`lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`,
+`lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_compare`, `lisp_type`,
+`lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`,
+`lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`,
+`lisp_ge_chain`, `lisp_str`, `lisp_repr`, `lisp_string_append`,
+`lisp_substring`, `lisp_string_downcase`, `lisp_string_strip`,
+`lisp_string_lstrip`, `lisp_string_rstrip`, `lisp_match_replace`,
+`lisp_read_file`, `lisp_write_file`, `Lisp.call_budget`, `Lisp.eval`,
+`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
+`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
@@ -872,7 +854,7 @@ Public functions:
 
 ### [lib/machine.x](../lib/machine.x)
 
-shared `Match` and Lisp wordcode and execution state.
+`Match` wordcode and execution state.
 
 Public functions:
 

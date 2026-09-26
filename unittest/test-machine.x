@@ -117,17 +117,6 @@ static void machine_public_preconditions_transfer(void) {
   EXPECT_INT_EQ(b.code[site].target, -1);
   b.free();
 
-  struct LispMachine lisp_storage;
-  LispMachine lisp = &lisp_storage;
-  lisp.open();
-  MachineView empty = {0};
-  try lisp.begin(empty, NULL, NULL, -1);
-  catch %(bad-arity *): caught++;
-  EXPECT_TRUE(lisp.clean());
-  try lisp.begin(empty, NULL, NULL, MACHINE_LOCAL_MAX + 1);
-  catch %(bad-arity *): caught++;
-  EXPECT_TRUE(lisp.clean());
-
   struct MatchMachine storage;
   MatchMachine m = &storage;
   m.open();
@@ -143,7 +132,7 @@ static void machine_public_preconditions_transfer(void) {
     program.free();
   }
   m.dispose();
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 3);
 }
 
 /* The wordcode equivalent of pattern (?x ?x): a root segment calling

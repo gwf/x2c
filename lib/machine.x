@@ -1,17 +1,15 @@
-/*  machine.x -- shared `Match` and Lisp wordcode and execution state
+/*  machine.x -- `Match` wordcode and execution state
 
     Copyright (c) 2026 Gary William Flake.
 
-    MachineProgram holds immutable 8-byte wordcode frozen from the shared
-    builder. This module also defines the separate `Match` and Lisp state and
-    frame layouts read by `match-machine.x` and `lisp-machine.x`. The decoders
-    share the <idle>, <running>, <ok>, <fail>, and <error> status names,
-    errors, and only `MW_JUMP`. No instruction may call the recursive matcher
-    or Lisp evaluator.
+    MachineProgram holds immutable 8-byte wordcode frozen from the
+    builder. This module also defines the `Match` state and frame layouts
+    read by `match-machine.x`. The decoder uses the <idle>, <running>,
+    <ok>, <fail>, and <error> status names. No instruction may call the
+    recursive matcher.
 
-    `Match` stack-allocates each invocation; Lisp reuses session-scoped
-    storage.
-    Nested calls each keep their own state. No process-global mutable machine
+    `Match` stack-allocates each invocation, so nested calls each keep
+    their own state. No process-global mutable machine
     exists. Builder storage grows in the active scope with checked capacity,
     and a frozen program is one exact-sized allocation with separately counted
     header, code, constants, and metadata. Emission checks every field range
@@ -35,18 +33,8 @@
 #define MACHINE_UNDO_MAX      256
 #define MACHINE_CURSOR_REGS     3
 #define MACHINE_INT_REGS        2
-#define MACHINE_VALUE_MAX     256
-#define MACHINE_LOCAL_MAX     256
-// Local slots one Lisp frame may hold above its parameters. A frame that
-// enters keeps this much room so an inlined scope always has slots.
-#define MACHINE_LOCAL_RESERVE 32
-/* Operand slots a Lisp call leaves for the callee before crossing to the
-   evaluator. A caller's live operands stay below the callee's operand base,
-   so recursion consumes the value stack along with frames and locals. The
-   value stack usually runs out first. */
-#define MACHINE_CALL_RESERVE   64
 
-// shared vocabulary
+// vocabulary
 
 /* Records the result of preparing a program.
 
@@ -58,7 +46,7 @@ typedef enum MachinePrepare {
   MACHINE_MALFORMED
 } MachinePrepare;
 
-/* Names the shared Match and Lisp wordcode operations.
+/* Names the Match wordcode operations.
 
     A star, guard, or alternative is a template composed from these; there
     is no STAR, OR, or NOT opcode. SCAN is the one fused list-search
@@ -97,29 +85,7 @@ enum MachineOp {
   MW_RET_SUCCESS,
   MW_RET_FAILURE,
   MW_TAG,
-  MW_MATCH_KIND,
-  MW_LCONST,
-  MW_LLOCAL,
-  MW_LCAPTURE,
-  MW_LGLOBAL,
-  MW_LBR_NIL,
-  MW_LPRECALL,
-  MW_LCALL,
-  MW_LTAILCALL,
-  MW_LQQ_WRAP,
-  MW_LQQ_APPEND,
-  MW_LDROP,
-  MW_LRETURN,
-  MW_LLAMBDA,
-  MW_LEXPAND,
-  MW_LEVAL,
-  /* An immediately applied lambda literal is lowered into the frame it
-     stands in: BIND moves `b` evaluated arguments off the value stack into
-     fresh local slots, and UNBIND drops them when the scope closes. Each
-     names the frame's live slots from the constant at `a`, so the evaluator
-     resolves the scope's bindings when a form crosses to it. */
-  MW_LBIND,
-  MW_LUNBIND
+  MW_MATCH_KIND
 };
 
 /* Selects the binder predicate applied by MW_MATCH_KIND. */
@@ -212,14 +178,6 @@ typedef struct MatchFrame {
   Var caller_value;
 } MatchFrame;
 
-/* Saves the program, stack bases, counts, and value of a Lisp caller. */
-typedef struct LispFrame {
-  int return_pc, caller_operand_base, caller_local_base;
-  int caller_value_count, caller_local_count;
-  Var caller_value;
-  MachineView caller_program;
-} LispFrame;
-
 /* Stores the cursors, integers, and journal mark for one frame depth.
 
     One register bank per depth means the frame pointer names the active bank
@@ -232,17 +190,14 @@ typedef struct MachineRegs {
 
 /* Collects optional, caller-owned execution counters.
 
-    Initialize the structure before use and keep it alive while a machine or
-    Lisp session retains its pointer. Updates are not synchronized. */
+    Initialize the structure before use and keep it alive while a machine
+    retains its pointer. Updates are not synchronized. */
 typedef struct MachineStats {
   long scan_cells, retries, calls, returns;
   long range_comparisons, final_range_comparisons;
   long span_descriptors, cons_requests;
   long materialization_requests, materialization_completions;
   long materializations_avoided, materialized_cells, direct_shares;
-  long local_loads, capture_loads, global_loads;
-  long nil_edges, nil_taken, prepared_calls, native_calls;
-  long lisp_returns;
   int max_frames;
 } MachineStats;
 
@@ -272,24 +227,6 @@ typedef struct MatchMachine {
   MachineSlot slots[MACHINE_BINDER_MAX];
   MachineUndo undo[MACHINE_UNDO_MAX];
 } *MatchMachine;
-
-/* Holds one caller-owned or Lisp-session-owned Lisp-machine invocation.
-
-    The program, Lisp context, Var pointees, and optional stats sink are
-    borrowed for execution; `begin` copies the argument array. A callback error
-    transfer can leave the machine running. The caller must clear that flag
-    before `finish` during unwinding. */
-typedef struct LispMachine {
-  MachineView program;
-  int pc, Symbol status, int running;
-  Var value, error;
-  int fp, value_count, local_count, operand_base, local_base;
-  void *lisp_context;
-  MachineStats *stats;
-  LispFrame frames[MACHINE_FRAME_MAX];
-  Var values[MACHINE_VALUE_MAX];
-  Var locals[MACHINE_LOCAL_MAX];
-} *LispMachine;
 
 /* Owns an exact-sized immutable frozen wordcode program.
 

@@ -566,11 +566,10 @@ divisions:
   storage;
 - `lib/iter.x` owns status-bearing traversal;
 - `lib/match.x` owns list-pattern matching and plan compilation;
-  `lib/match-machine.x` executes those plans over the shared wordcode and
-  state definitions in `lib/machine.x`;
-- `lib/lisp.x` owns the embedded Lisp reader, session, and evaluator, while
-  `lib/lisp-machine.x` executes eligible prepared Lisp programs; the compiler
-  uses it to read `.xi` interfaces and to run compile-time macros;
+  `lib/match-machine.x` executes those plans over the wordcode and state
+  definitions in `lib/machine.x`;
+- `lib/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
+  compiler uses it to read `.xi` interfaces and to run compile-time macros;
 - `lib/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;
@@ -580,13 +579,10 @@ divisions:
 - `lib/common.x` supplies shared representation and initialization support;
 - `lib/lib.x` contains the standalone `DisjointSet` utility.
 
-Prepared Lisp programs include eligible immediate lambda applications, such
-as the local bindings produced by `let` and `match-case`. Their bodies borrow
-the live caller environment. Macro preparation permits only bounded,
-effect-free evaluation; dependency guards at each expansion site check the
-bindings after preceding calls have run. Unsupported preparation or a changed
-binding uses the ordinary evaluator, preserving macro effects and rebinding.
-Pattern matching still executes compiled Match plans on MatchMachine.
+Lisp evaluation is a recursive evaluator with tail calls: a call in tail
+position reuses its caller's C frame, and other nesting is bounded by the C
+stack it uses. Pattern matching executes compiled Match plans on
+MatchMachine.
 
 `lib/x2c.x` is the generated source definition of the implicit runtime
 prelude. The generator leaves out the optional x2c system modules; they are

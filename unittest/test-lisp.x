@@ -307,12 +307,6 @@ static Var _lisp_bound_raise(Var value) {
   return void;
 }
 
-static Var _lisp_source_frame_cell(Var fail) {
-  lisp_bytes(16);
-  if (fail.truth()) raise %(bad-state (operation "source-frame-test"));
-  return 41;
-}
-
 static void _install(Lisp lisp, const char *name, FuncAdapter fn, List sig) {
   Func func = Func.new(fn, sig);
   lisp.set_global(String.new(name), Func.var(func));
@@ -883,31 +877,6 @@ static void lisp_binding_storage_belongs_to_session(void) {
   EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
 }
 
-static void lisp_source_function_reclaims_normal_and_error_frames(void) {
-  Lisp lisp = Lisp.kernel();
-  _install(lisp, "source-frame-cell", _lisp_source_frame_cell,
-           %((func (("Var"))) "Var"));
-  Var callable = lisp_source_function(
-    _ev(lisp, "(lambda (fail) (source-frame-cell fail))"));
-  lisp.set_global("source-frame", callable);
-  List normal = %(source-frame ()), failing = %(source-frame 1);
-
-  ScopeStats before = Scope.stats();
-  EXPECT_INT_EQ(Var.integer(lisp.eval(normal)), 41);
-  ScopeStats after_normal = Scope.stats();
-  EXPECT_INT_EQ((int) after_normal.live_scopes, (int) before.live_scopes);
-  EXPECT_INT_EQ(
-    (int) after_normal.live_allocations, (int) before.live_allocations);
-
-  int caught = 0;
-  try lisp.eval(failing);
-  catch %(bad-state *): caught = 1;
-  EXPECT_TRUE(caught);
-  ScopeStats after_error = Scope.stats();
-  EXPECT_INT_EQ((int) after_error.live_scopes, (int) before.live_scopes);
-  lisp.destroy();
-}
-
 static void lisp_eval_file_runs_forms(void) {
   Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
@@ -1369,6 +1338,193 @@ static void lisp_sessions_release_scopes(void) {
   EXPECT_INT_EQ((int) after.live_scopes, (int) before.live_scopes);
 }
 
+// Evaluator semantics: scoping, effect order, macro rebinding, tail calls.
+
+static Var _sem_add(Var a, Var b) => a.binary(<+>, b);
+
+static Lisp _sem_session(void) {
+  Lisp lisp = Lisp.kernel();
+  _install(lisp, "add", _sem_add, %((func (("Var") ("Var"))) "Var"));
+  _install(lisp, "log!", _native_log, %((func (("Var"))) "Var"));
+  _ev(lisp, "(def helper (lambda (x bias) (add x bias)))");
+  _ev(lisp, "(def make-brancher (lambda (bias)"
+            " (lambda (x) (cond (x (helper x bias)) (1 bias)))))");
+  _ev(lisp, "(def brancher (make-brancher 5))");
+  return lisp;
+}
+
+static void lisp_free_names_are_lexical(void) {
+  Lisp lisp = _sem_session();
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 7)")), 12);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 0)")), 5);
+  _ev(lisp, "(def wrapper (lambda (add) (brancher 7)))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrapper 99)")), 12);
+  _ev(lisp, "(def helper 42)");
+  EXPECT_INT_EQ(_raised_code(lisp, "(brancher 7)"), <not-call>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(brancher 1 2)"), <bad-arity>);
+  lisp.destroy();
+
+  lisp = Lisp.new();
+  _ev(lisp, "(def x 1)");
+  _ev(lisp, "(defun read-x () x)");
+  _ev(lisp, "(defun mid (x) (read-x))");
+  _ev(lisp, "(defun local-read (v) (let ((x v)) (read-x)))");
+  _ev(lisp, "(defun local-closure (v) (let ((x v)) (lambda () (+ x 0))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(mid 99)")), 1);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-read 9)")), 1);
+  _ev(lisp, "(def saved (local-closure 11))");
+  _ev(lisp, "(local-closure 22)");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(saved)")), 11);
+  lisp.destroy();
+}
+
+static void lisp_arguments_run_left_to_right(void) {
+  Lisp lisp = _sem_session();
+  order_log[0] = 0;
+  _ev(lisp, "(def observer (lambda (a b) b))");
+  _ev(lisp, "(def nested (lambda (x) (observer (log! 5) (log! 6))))");
+  _ev(lisp, "(observer (log! 1) (log! 2))");
+  _ev(lisp, "(nested 1)");
+  _ev(lisp, "(def ordered (lambda () ((lambda (a b) b) (log! 3) (log! 4))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(ordered)")), 4);
+  EXPECT_STR_EQ(String.new(order_log), "125634");
+  order_log[0] = 0;
+  _ev(lisp, "(def dotted (lambda () ((lambda (x . rest) x) (log! 1) 2)))");
+  _ev(lisp, "(def wrong (lambda () ((lambda (x) x) (log! 2) (log! 3))))");
+  _ev(lisp, "(def malformed (lambda () ((lambda 1 2) (log! 4))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(dotted)")), 1);
+  EXPECT_INT_EQ(_raised_code(lisp, "(wrong)"), <bad-arity>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(malformed)"), <bad-sig>);
+  EXPECT_STR_EQ(String.new(order_log), "123");
+  lisp.destroy();
+}
+
+static void lisp_local_bindings(void) {
+  Lisp lisp = Lisp.new();
+  _ev(lisp, "(defun parallel (x) (let ((x 2) (y x)) y))");
+  _ev(lisp, "(defun sequential (x) (let* ((x 2) (y x)) y))");
+  _ev(lisp, "(defun shadow (x) (let ((x 2)) (let ((x 3)) x)))");
+  _ev(lisp, "(defun duplicate () ((lambda (x x) x) 2 3))");
+  _ev(lisp, "(defun pick (e) (match-case e ((tag ?v) ?v) (else 0)))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(parallel 7)")), 7);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(sequential 7)")), 2);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(shadow 7)")), 3);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(duplicate)")), 3);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(tag 7))")), 7);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(other 7))")), 0);
+  _ev(lisp, "(defmacro match-case (e . cases) 31)");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(tag 7))")), 31);
+  _ev(lisp, "(defmacro let (bindings body) 41)");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(parallel 8)")), 41);
+  lisp.destroy();
+
+  lisp = Lisp.new();
+  _ev(lisp, "(defun count-local (n)"
+            " (let ((saved n))"
+            " (if (= saved 0) 0 (+ 1 (count-local (- saved 1))))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(count-local 140)")), 140);
+  lisp.destroy();
+}
+
+static void lisp_macros_expand_at_each_call(void) {
+  Lisp lisp = Lisp.new();
+  _ev(lisp, "(def y 1)");
+  _ev(lisp, "(def count 0)");
+  _ev(lisp, "(defmacro get-y () (list 'quote y))");
+  _ev(lisp, "(defun quoted-y () (list 'quote y))");
+  _ev(lisp, "(defmacro helper-y () (quoted-y))");
+  _ev(lisp, "(defmacro counted-y ()"
+            " (cond ((def count (+ count 1)) (list 'quote y))))");
+  _ev(lisp, "(defun direct (v) (let ((y v)) (get-y)))");
+  _ev(lisp, "(defun indirect (v) (let ((y v)) (helper-y)))");
+  _ev(lisp, "(defun counted () (let ((y 42)) (counted-y)))");
+  for (int i = 0; i < 3; i++) {
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 7)")), 1);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 9)")), 1);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(counted)")), 1);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "count")), i + 1);
+  }
+  _ev(lisp, "(defun pick (a b) (if a a b))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick 1 2)")), 1);
+  _ev(lisp, "(defmacro if (c x y) `(cond (,c ,y) (true ,x)))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick 1 2)")), 2);
+  _ev(lisp, "(def version 10)");
+  _ev(lisp, "(defmacro versioned () (list 'quote version))");
+  _ev(lisp, "(defun read-version (ignored) (versioned))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-version ())")), 10);
+  EXPECT_INT_EQ(
+    Var.integer(_ev(lisp, "(read-version (def version 40))")), 40);
+  _ev(lisp, "(defmacro fresh () (list 'quote (lambda () 7)))");
+  Var first = _ev(lisp, "(fresh)"), second = _ev(lisp, "(fresh)");
+  EXPECT_TRUE(first != second);
+  EXPECT_INT_EQ(Var.integer(lisp.apply(second, %())), 7);
+  lisp.destroy();
+
+  lisp = _sem_session();
+  order_log[0] = 0;
+  _ev(lisp, "(def effect (macro () (cond ((log! 1) 42))))");
+  _ev(lisp, "(def choose (lambda (flag)"
+            " ((lambda (x) (cond (flag (effect)) (1 x))) 7)))");
+  _ev(lisp, "(def forever (macro () (forever)))");
+  _ev(lisp, "(def skip (lambda (flag) (cond (flag (forever)) (1 9))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(choose ())")), 7);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(skip ())")), 9);
+  EXPECT_INT_EQ(order_log[0], 0);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(choose 1)")), 42);
+  EXPECT_STR_EQ(String.new(order_log), "1");
+  lisp.destroy();
+}
+
+static void lisp_rebound_specials_take_effect(void) {
+  const char *names[] = { "quote", "cond", "quasiquote" };
+  const char *forms[] = { "(quote 7)", "(cond (1 7))", "(quasiquote (7))" };
+  for (int special = 0; special < 3; special++) {
+    Lisp lisp = _sem_session();
+    String name = String.new(names[special]);
+    String form = String.new(forms[special]);
+    _ev(lisp, "(def replacement (macro (x) 99))");
+    _ev(lisp, %"(def f (lambda (x) ${form}))");
+    _ev(lisp, "(f 0)");
+    order_log[0] = 0;
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(f (cond ((log! 1) " +
+                                  %"(def ${name} replacement))))")), 99);
+    EXPECT_STR_EQ(String.new(order_log), "1");
+    lisp.destroy();
+  }
+
+  Lisp lisp = Lisp.kernel();
+  _ev(lisp, "(def replacement (macro (x) 99))");
+  _ev(lisp, "(def f (lambda (flag) (cond (flag (quasiquote "
+            "((unquote (cond ((def quote replacement) 5))) "
+            "(unquote (quote 7))))) (1 0))))");
+  EXPECT_TRUE(_ev(lisp, "(f 1)") == %(5 99));
+  lisp.destroy();
+
+  lisp = Lisp.kernel();
+  _ev(lisp, "(def side 0) (def f (lambda (flag) (cond (flag "
+            "(quasiquote ((unquote-splicing 7) "
+            "(unquote (def side 1))))) (1 0))))");
+  EXPECT_INT_EQ(_raised_code(lisp, "(f 1)"), <bad-types>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "side")), 0);
+  _ev(lisp, "(def g (lambda (x) (quasiquote ((unquote-splicing x)))))");
+  Var original = _ev(lisp, "(def xs (quote (1 2 3)))");
+  EXPECT_TRUE(_ev(lisp, "(g xs)").u64 == original.u64);
+  lisp.destroy();
+}
+
+static void lisp_tail_calls_stay_flat(void) {
+  Lisp lisp = Lisp.new();
+  _ev(lisp, "(defun cd (n a) (if (= n 0) a (cd (- n 1) (+ a 1))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(cd 100000 0)")), 100000);
+  _ev(lisp, "(defun seen (n) "
+            "(cond ((= n 0) 7) ((def last n) (seen (- n 1)))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(seen 100000)")), 7);
+  _ev(lisp, "(def old cd)");
+  _ev(lisp, "(def cd 5)");
+  EXPECT_INT_EQ(_raised_code(lisp, "(old 3 0)"), <not-call>);
+  lisp.destroy();
+}
+
 $(import "test-macros.xmacro")
 
 void lisp_suite(void) {
@@ -1419,7 +1575,6 @@ void lisp_suite(void) {
   $test.run(lisp_group_installs_into_separate_sessions);
   $test.run(lisp_inferred_binding_transfers_native_error);
   $test.run(lisp_binding_storage_belongs_to_session);
-  $test.run(lisp_source_function_reclaims_normal_and_error_frames);
   $test.run(lisp_eval_file_runs_forms);
   $test.run(lisp_eval_file_transfers_read_failure);
   $test.run(lisp_eval_file_rejects_embedded_nul);
@@ -1437,5 +1592,11 @@ void lisp_suite(void) {
   $test.run(lisp_iterator_storage_leaves_with_the_session);
   $test.run(lisp_bootstrap_import_uses_current_session);
   $test.run(lisp_sessions_release_scopes);
+  $test.run(lisp_free_names_are_lexical);
+  $test.run(lisp_arguments_run_left_to_right);
+  $test.run(lisp_local_bindings);
+  $test.run(lisp_macros_expand_at_each_call);
+  $test.run(lisp_rebound_specials_take_effect);
+  $test.run(lisp_tail_calls_stay_flat);
 }
 

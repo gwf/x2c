@@ -57,7 +57,6 @@ void ast_suite(void);
 void func_suite(void);
 void lisp_suite(void);
 void machine_suite(void);
-void lisp_auto_suite(void);
 void match_plan_suite(void);
 void match_cache_suite(void);
 
@@ -112,7 +111,6 @@ int main(int argc, char **argv) {
   // consumers ahead of var's dispatch-capacity saturation test.
   $test.suite(func_suite);
   $test.suite(lisp_suite);
-  $test.suite(lisp_auto_suite);
   $test.suite(var_suite);
   $test.suite(varops_suite);
   $test.suite(iter_suite);

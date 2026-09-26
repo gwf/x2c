@@ -1235,11 +1235,6 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
     library_comptime = NULL;
     return;
   }
-  Scope.push(&library_scope);
-  defer Scope.pop();
-  /* Still inside the target Context, so every program's constants belong to
-     it. After the freeze a unit only ever compiles its own lambdas. */
-  (void) shared.auto_prepare();
   shared.freeze();
   library_session = shared;
 }

@@ -74,8 +74,8 @@ them a publication gate. Establish regression thresholds only after at least
 one to two weeks of fixed-host observations. Confirm a suspected regression
 with a same-host rerun before treating it as real.
 
-Specialized full Map campaigns and the Match-cache and Lisp-AUTO acceptance
-benchmarks remain change-triggered. They are not part of the nightly snapshot.
+Specialized full Map campaigns and the Match-cache acceptance benchmarks
+remain change-triggered. They are not part of the nightly snapshot.
 
 Run snapshots in quiet windows. Do not benchmark while another agent is
 building or profiling in the same checkout or while the host is under an

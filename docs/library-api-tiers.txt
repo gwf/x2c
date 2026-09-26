@@ -68,8 +68,6 @@ lib/iter.x|compatibility|Iter.accumulate,Iter.next
 lib/lib.x|advanced|DisjointSet.drop,DisjointSet.find,DisjointSet.init
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union
-lib/lisp.x|internal|Lisp.immediate,Lisp.expanded,Lisp.evaluate
-lib/lisp.x|advanced|Lisp.auto_disable,Lisp.auto_instrument,Lisp.auto_stats
 lib/lisp.x|advanced|Lisp.cleanup
 lib/lisp.x|advanced|Lisp.destroy,Lisp.read,Lisp.set_global
 lib/lisp.x|internal|lisp_add,lisp_atom,lisp_compare,lisp_eq,lisp_list
@@ -168,8 +166,6 @@ lib/exception.x|advanced|x2c_cleanup_push,x2c_exception_claim
 lib/exception.x|advanced|x2c_exception_is_error_target,x2c_exception_landed
 lib/exception.x|advanced|x2c_exception_leave,x2c_exception_mark_handled
 lib/exception.x|advanced|x2c_exception_push
-lib/lisp.x|advanced|Lisp.apply_values,Lisp.enter,Lisp.leave,Lisp.precall
-lib/lisp.x|advanced|Lisp.program,Lisp.resolve,Lisp.retarget
 lib/list.x|advanced|List.cons_in
 lib/match.x|advanced|x2c_match_pattern_retainable,x2c_match_site_prepare
 lib/match.x|advanced|x2c_match_site_try_capture,x2c_match_try_capture

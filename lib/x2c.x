@@ -15,7 +15,6 @@
 #include "func.x"
 #include "iter.x"
 #include "lib.x"
-#include "lisp-machine.x"
 #include "lisp.x"
 #include "list.x"
 #include "logger.x"

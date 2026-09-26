@@ -120,39 +120,20 @@ Native calls use x2c's existing checked `Func` boundary. Deliberate Lisp
 signature and form errors remain in the evaluator. No additional syntax
 validation or compiler-specific protection of `x2c.*` names is introduced.
 
-The reference targets language behavior, not the embedding APIs, AUTO
-instrumentation, word-code introspection, or native stack capacity of the
-production runtime. Calls consume native stack: sufficiently deep recursion
+The reference targets language behavior, not the embedding APIs or native
+stack capacity of the production runtime. Calls consume native stack: sufficiently deep recursion
 can exhaust it. Callable addresses are process-specific, as they are in the
 production implementation. This is a tested reference, not a proof that every
 possible program behaves identically.
 
 ## Production execution
 
-The production evaluator can prepare repeated Lambda calls as word code.
-Preparation can mix lowered operations with ordinary evaluation: when a form
-has no lowering, its partial words are discarded and that form runs through
-the evaluator with the current parameters and captures. Free names then resolve
-through the session globals and reserved names, never through caller locals.
-For example, an interpreted `def` can sit inside a lowered `cond`; it does
-not prevent preparation of the whole body. This changes execution, not
-which Lisp forms are legal or when their effects occur.
-
-Lowered `quote`, `cond`, and `quasiquote` forms check their binding at the
-start of that form. Prepared macro expansions likewise check the bindings
-used during expansion. If a preceding effect changed a dependency, only the
-original form is evaluated, without replaying earlier effects. Rebinding
-inside a selected special form does not replace that operation midway
-through it; later forms resolve their own bindings.
-
-Preparation still has parameter and program-capacity limits: dotted rest
-parameters and more parameters than the machine frame supports remain
-interpreted. Prepared calls use bounded frame, local, and operand storage;
-when a call cannot fit, it crosses to recursive evaluation. A lowered self
-call in tail position can reuse its frame when the runtime callee still
-matches. Other recursion, including recursion inside an interpreted form,
-can consume native stack. AUTO therefore does not prepare every Lambda or
-promise unbounded recursion.
+The production evaluator runs each call recursively, except a call in tail
+position, which reuses the frame of the call it ends. A self-recursive loop
+written in tail position therefore runs in constant native stack. Other
+recursion consumes native stack, and the evaluator reports `<call-stack>`
+before it runs out. Free names resolve through the Lambda's captures and
+then the session globals and reserved names, never through caller locals.
 
 ## The showcase and comparison
 

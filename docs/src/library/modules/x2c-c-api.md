@@ -6,7 +6,7 @@
 The `x2c_*` prefix is reserved for stable C entry points used by
 generated code, native callers, or process-wide compiler setup.
 Typed operations use methods such as `Atom.promote`
-and `Lisp.program`; their generated C spellings are not part of this
+and `Lisp.eval`; their generated C spellings are not part of this
 prefix.
 
 | Function | Source | Signature |
