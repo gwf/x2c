@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/meta-bool-result.x:6:25: macro: this function cannot run at compile time
+unittest/compiler-fixtures/meta-bool-result.x:8:25: macro: this function cannot run at compile time
   int main(void) { return $positive(1); }
                           ^
   note: function: positive reason: a parameter or the result has no Var form, such as C's bool; use int, a String, a Symbol, or a List

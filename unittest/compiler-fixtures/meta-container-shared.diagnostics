@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/meta-container-shared.x:5:16: macro: compile-time result holds one collection twice
+unittest/compiler-fixtures/meta-container-shared.x:10:16: macro: compile-time result holds one collection twice
     Map result = $shared_result();
                  ^
   note: each Array and Map in a result is built separately

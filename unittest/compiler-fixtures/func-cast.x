@@ -1,6 +1,18 @@
 #include "x2c.x"
 
-$(import "func-cast.xmacro")
+/* A cast to Func converts a lambda, function, or function pointer to a Func
+   handle, at runtime and inside a meta function. */
+
+meta static int times13(int a) {
+  return a * 13;
+}
+
+meta static int lambda_cast(int n) => ((Func) (%!(int a) => a * 13))(n);
+meta static int named_cast(int n) => ((Func) times13)(n);
+meta static int var_cast(int n) {
+  Var v = (Func) (%!(int a) => a * 13);
+  return ((Func) v)(n);
+}
 
 int main(void) {
   int (*pointer)(int) = times13;

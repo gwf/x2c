@@ -11,7 +11,93 @@
 
 #include "x2c.x"
 
-$(import "meta-differential.xmacro")
+/* Conversion positions: a cast, a declaration, an assignment and a
+   return each narrow to the type that was written. */
+meta static int d_cast(int n) => (unsigned char) (n + 200);
+meta static int d_short(int n) { short s = n; return s; }
+meta static int d_char(int n) { char c = 200 + n; return c; }
+meta static int d_uchar(int n) { unsigned char c = 0; c = n + 200; return c; }
+meta static int d_wrap(int n) { short s = 1; s += 40000 + n; return s; }
+
+/* Unsignedness follows the operand types, so a difference wraps and a
+   comparison and a division read the wrapped value as unsigned. */
+meta static int d_unsigned(int n) { unsigned u = n; u = u - 5; return u > 100; }
+meta static int d_udiv(int n) { unsigned u = n - 5; return (int) (u / 3); }
+
+/* Signed division and remainder truncate toward zero, and a signed right
+   shift keeps the sign. */
+meta static int d_sdiv(int n) => (n - 7) / 2;
+meta static int d_smod(int n) => (n - 7) % 2;
+meta static int d_shift(int n) => (n - 8) >> 1;
+meta static int d_lshift(int n) => (n + 3) << 3;
+
+/* A product that does not fit an `int` is computed as a `long` and
+   truncated by the cast back. */
+meta static int d_wide(int n) {
+  long w = (long) (n + 100000) * 100000;
+  return (int) w;
+}
+
+/* A character literal is its code. */
+meta static int d_charlit(int n) => 'A' + n;
+meta static int d_escape(int n) => '\n' + n;
+
+/* Floating values: truth at zero, equality against an `int`, truncation
+   toward zero, and an `int` widening into a division. */
+meta static int d_dtruth(int n) { double d = n; if (d) return 1; return 0; }
+meta static int d_deq(int n) { double d = 1.0 + n; return d == 1; }
+meta static int d_dcmp(int n) { double d = n - 1; return d < 0; }
+meta static int d_trunc(int n) { double d = -7.9 + n; return (int) d; }
+meta static int d_widen(int n) { double d = n + 1; return (int) (d / 2.0 * 6); }
+meta static int d_fsuffix(int n) => (int) (3.0f + 2.0F + n);
+meta static int d_fhex(int n) => (int) (0x1.8p2f + n);
+meta static int d_fround(int n) => (int) ((double) 16777217.0f - 16777216 + n);
+
+/* Control flow: a conditional, the short-circuit operators, a loop with
+   both of its exits, and a switch. */
+meta static int d_ternary(int n) => n ? 10 : 20;
+meta static int d_and(int n) => (n + 1) && (n - 1);
+meta static int d_or(int n) => n || (n + 2);
+
+meta static int d_loop(int n) {
+  int total = 0;
+  for (int i = 0; i < 10 + n; i++) {
+    if (i == 3) continue;
+    if (i == 7) break;
+    total += i;
+  }
+  return total;
+}
+
+meta static int d_while(int n) {
+  int i = n, total = 0;
+  while (i < 5) {
+    total = total * 2 + i;
+    i++;
+  }
+  return total;
+}
+
+meta static int d_switch(int n) {
+  switch (n) {
+    case 0: return 100;
+    case 1: return 200;
+    default: return 300;
+  }
+}
+
+/* An integer key indexes the list and every other key is an association. */
+meta static int d_listget(int n) {
+  List xs = %(10 20 30 40);
+  List pairs = %((a 1) (b 2));
+  return (int) xs.get(2 + n) * 10 + (int) pairs.get(<b>);
+}
+
+/* A bare lambda parameter is a `Var` local in both forms. */
+meta static int d_lambda(int n) {
+  Func f = %!(x) => x + 1;
+  return (int) f(n + 41);
+}
 
 /* `runtime_zero` is zero, and `main` takes it from `argc` so the C
    compiler cannot fold it. Each row passes the compile-time answer and the

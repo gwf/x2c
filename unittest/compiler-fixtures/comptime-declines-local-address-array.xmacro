@@ -1,8 +1,0 @@
-/* comptime-declines-local-address-array.xmacro -- the meta functions
-   comptime-declines-local-address-array.x imports. */
-
-meta static int *numbers(int seed) {
-  int values[4];
-  values[0] = seed;
-  return values;
-}

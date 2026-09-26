@@ -1,3 +1,0 @@
-/* meta-call-depth.xmacro -- the meta functions meta-call-depth.x imports. */
-
-meta static int md_deep(int n) { return n <= 0 ? 0 : 1 + md_deep(n - 1); }

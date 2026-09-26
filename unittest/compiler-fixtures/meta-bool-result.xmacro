@@ -1,5 +1,0 @@
-/* meta-bool-result.xmacro -- the meta functions meta-bool-result.x imports. */
-
-/* C's bool has no Var form, so the call names the function and the fix. */
-
-meta static bool positive(int n) => n > 0;

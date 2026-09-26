@@ -37,11 +37,10 @@ The body has not changed. `meta` makes it available to the compiler during
 translation as well as to the finished program. You can use it for an
 ordinary calculation; it does not have to inspect types or generate code.
 
-A `meta` function with a body lives in a `.xmacro` file that the program
-imports, apart from the program's own code; see
+A `meta` function with a body may sit beside the code that calls it, as in
+the samples in this chapter, or in a `.xmacro` file that several units
+import; see
 [Sharing a `meta` function between units](#sharing-a-meta-function-between-units).
-The samples in this chapter show the definition beside the code that calls
-it so that each fits in one block.
 
 ## Call it in the program
 
@@ -1280,25 +1279,14 @@ the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
 
 ## Sharing a `meta` function between units
 
-A `meta` function with a body lives in a `.xmacro` file, apart from program
-code. A bodied `meta` function in an ordinary program `.x` file is an
-error that names the function and asks to move it to an `.xmacro` file the
-unit imports:
+A `meta` function with a body may live in an ordinary program `.x` file or
+in a `.xmacro` file. Either way, the build extracts it into the project's
+meta code. A macro cannot produce one: a `meta` function inside a macro
+template is an error reported where it is written, and asks to move the
+function to a source file and call it from the macro.
 
-```text
-sample.x:5:1: parse: meta function 'poly' is defined in a program file
-  meta int poly(int n) => n * n + 3 * n + 1;
-  ^^^^
-  note: move it to an .xmacro file this unit imports
-```
-
-A macro cannot produce one either: a `meta` function inside a macro
-template is reported where it is written. The compiler's own `lib/meta.x`
-and its `src/` units are the exceptions. A bodyless `meta` prototype, a
-`meta native` declaration and a `meta static` value may still appear in a
-`.x` file.
-
-Put a `meta` function in a `.xmacro` that each unit imports. A `.xmacro` file
+To share a `meta` function, put it in a `.xmacro` that each unit imports. A
+`.xmacro` file
 may hold `meta` functions beside the macros that call them, and importing it
 installs their compile-time forms in the importing unit. The unit that imports
 the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's

@@ -46,12 +46,6 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-int main(void){
-  x2c_initialize();
-  if(! _init_guard_) _file_init_();
-  return 50 != 50 || exercise(3) != 50;
-}
-
 int maybe(int * value){
   if(! _init_guard_) _file_init_();
   if(! value) return 0;
@@ -75,8 +69,8 @@ int forward(int * value){
   if(! _init_guard_) _file_init_();
   Func function = _x2c_func_handle_0;
   return Var_int(({
-    Func _x2c_mfunc_call_3 = function;  List _x2c_mfunc_reference_type_3 = x2c_func_reference_type(_x2c_mfunc_call_3, 1, 0);  FuncArg _x2c_mfunc_argument_3;  if(List_truth(_x2c_mfunc_reference_type_3)) _x2c_mfunc_argument_3 = FuncArg_reference(value, _1);  else _x2c_mfunc_argument_3 = x2c_func_unrepresentable_argument(_x2c_mfunc_call_3, 0, _1);  Func_apply(_x2c_mfunc_call_3, 1, (FuncArg[]){
-      _x2c_mfunc_argument_3
+    Func _x2c_func_call_0 = function;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(value, _1);  else _x2c_func_argument_0 = x2c_func_unrepresentable_argument(_x2c_func_call_0, 0, _1);  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
+      _x2c_func_argument_0
     }
     );
   }
@@ -92,20 +86,26 @@ int exercise(int n){
   int value = n;
   Func function = _x2c_func_handle_0;
   int result = Var_int(({
-    Func _x2c_mfunc_call_4 = function;  List _x2c_mfunc_reference_type_4 = x2c_func_reference_type(_x2c_mfunc_call_4, 1, 0);  FuncArg _x2c_mfunc_argument_4;  if(List_truth(_x2c_mfunc_reference_type_4)) _x2c_mfunc_argument_4 = FuncArg_reference(&(value), _1);  else _x2c_mfunc_argument_4 = FuncArg_value(int_var(value));  Func_apply(_x2c_mfunc_call_4, 1, (FuncArg[]){
-      _x2c_mfunc_argument_4
+    Func _x2c_func_call_1 = function;  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_1, 1, 0);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(&(value), _1);  else _x2c_func_argument_1 = FuncArg_value(int_var(value));  Func_apply(_x2c_func_call_1, 1, (FuncArg[]){
+      _x2c_func_argument_1
     }
     );
   }
   ));
   if(forward(NULL) != 0) return - 1;
   return result * 10 + Var_int(({
-    Func _x2c_mfunc_call_5 = function;  List _x2c_mfunc_reference_type_5 = x2c_func_reference_type(_x2c_mfunc_call_5, 1, 0);  FuncArg _x2c_mfunc_argument_5;  if(List_truth(_x2c_mfunc_reference_type_5)) _x2c_mfunc_argument_5 = FuncArg_reference(NULL, _x2c_mfunc_reference_type_5);  else _x2c_mfunc_argument_5 = x2c_func_unrepresentable_argument(_x2c_mfunc_call_5, 0, NULL);  Func_apply(_x2c_mfunc_call_5, 1, (FuncArg[]){
-      _x2c_mfunc_argument_5
+    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
+      _x2c_func_argument_2
     }
     );
   }
   ));
+}
+
+int main(void){
+  x2c_initialize();
+  if(! _init_guard_) _file_init_();
+  return 50 != 50;
 }
 
 void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
