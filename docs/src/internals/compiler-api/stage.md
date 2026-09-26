@@ -6,18 +6,37 @@
 
 # `src/stage.x`
 
-Values crossing the compile-time boundary.
+Staged meta groups and the values crossing into them.
 
 ## Functions
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.bind_meta_group`](#Compiler.bind_meta_group) | Binds each unbound function of the pending group to its staged native code when `name` is pending, after reinitializing the module's `meta static` values for this unit in the unit's meta Scope. |
 | [`Compiler.check_meta_call`](#Compiler.check_meta_call) | Refuses a run-time call to a `meta` function this compiler derived compile-time only. |
+| [`Compiler.group_meta_function`](#Compiler.group_meta_function) | Records the bodied `meta` function `fn` in the pending group. |
+| [`Compiler.groups_meta`](#Compiler.groups_meta) | Answers whether a `meta` function or value belongs to the unit's pending group: a parse meets it outside a macro definition. |
 | [`Compiler.meta_argument`](#Compiler.meta_argument) | Returns the value the argument expression `node` of a `$` call passes to a parameter of type `want`, or of no declared type when `want` is NULL: a constant, captured syntax, or the result of another `$` call, which `call` evaluates. |
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
+| [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Answers whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
 | [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns literal code for a compile-time `value`, preserving `declared` when supplied. |
+| [`Compiler.record_meta_import`](#Compiler.record_meta_import) | Records that a compile-time import has just added its `meta` definitions to the unit, so a staged group places them where the import stands. |
+| [`Compiler.use_meta_toolchain`](#Compiler.use_meta_toolchain) | Selects the C compiler `cc` that stages the `meta` groups of the units this process translates, with the runtime headers this compiler was built with, found from its installed headers in `include_dir`. |
 
 ### `Compiler`
+
+<a id="Compiler.bind_meta_group"></a>
+#### Compiler.bind_meta_group
+
+`int Compiler.bind_meta_group(Compiler c, String name, Token site)`
+
+Binds each unbound function of the pending group to its staged native
+code when `name` is pending, after reinitializing the module's `meta
+static` values for this unit in the unit's meta Scope. Returns whether
+`name` is now native; a group that does not stage is reported at
+`site`.
+
+Source: `src/stage.x:836`
 
 <a id="Compiler.check_meta_call"></a>
 #### Compiler.check_meta_call
@@ -34,7 +53,28 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:342`
+Source: `src/stage.x:358`
+
+<a id="Compiler.group_meta_function"></a>
+#### Compiler.group_meta_function
+
+`void Compiler.group_meta_function(Compiler c, List fn)`
+
+Records the bodied `meta` function `fn` in the pending group.
+
+Source: `src/stage.x:430`
+
+<a id="Compiler.groups_meta"></a>
+#### Compiler.groups_meta
+
+`int Compiler.groups_meta(Compiler c)`
+
+Answers whether a `meta` function or value belongs to the unit's pending
+group: a parse meets it outside a macro definition. A `.xmacro` import,
+and each compiler that collects a segment of the unit, shares the unit's
+group.
+
+Source: `src/stage.x:412`
 
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument
@@ -47,7 +87,7 @@ a constant, captured syntax, or the result of another `$` call, which
 `call` evaluates. Captured literal syntax reaches a parameter that is not
 syntax as the literal's value. Anything else is reported at `site`.
 
-Source: `src/stage.x:122`
+Source: `src/stage.x:138`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -57,7 +97,18 @@ Source: `src/stage.x:122`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:357`
+Source: `src/stage.x:373`
+
+<a id="Compiler.meta_reaches_compile_time"></a>
+#### Compiler.meta_reaches_compile_time
+
+`int Compiler.meta_reaches_compile_time(Compiler c, Var node)`
+
+Answers whether a `meta` body reaches the compiler itself: it names a
+compile-time-only function or a compiler operation, or constructs a
+template. Such a function has no runtime form.
+
+Source: `src/stage.x:451`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -70,13 +121,36 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/stage.x:268`
+Source: `src/stage.x:284`
+
+<a id="Compiler.record_meta_import"></a>
+#### Compiler.record_meta_import
+
+`void Compiler.record_meta_import(Compiler c)`
+
+Records that a compile-time import has just added its `meta` definitions
+to the unit, so a staged group places them where the import stands.
+
+Source: `src/stage.x:442`
+
+<a id="Compiler.use_meta_toolchain"></a>
+#### Compiler.use_meta_toolchain
+
+`void Compiler.use_meta_toolchain(String cc, String include_dir)`
+
+Selects the C compiler `cc` that stages the `meta` groups of the units
+this process translates, with the runtime headers this compiler was
+built with, found from its installed headers in `include_dir`.
+
+Source: `src/stage.x:401`
 
 ## Design notes
 
 A bodied `meta` function runs as native code the compiler stages from
-the unit's `meta` group (`src/macros.x`). This file owns what crosses
-between that code and the program: the arguments a `$` call passes,
-evaluated from constants, captured syntax, and other `$` calls; the
-literal code a result becomes; and the rule that a function reaching a
-compiler operation has no runtime form.
+the unit's `meta` group. This file owns that group: what it reaches, its
+emission through the ordinary backend, the cached module it builds, and
+its binding into the unit's session. It also owns what crosses between
+that code and the program: the arguments a `$` call passes, evaluated
+from constants, captured syntax, and other `$` calls; the literal code a
+result becomes; and the rule that a function reaching a compiler
+operation has no runtime form.

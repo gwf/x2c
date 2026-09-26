@@ -40,7 +40,7 @@ Functions and types exposed by each compiler module.
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
-| [`src/stage.x`](stage.md) | values crossing the compile-time boundary. |
+| [`src/stage.x`](stage.md) | staged meta groups and the values crossing into them. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |

@@ -316,16 +316,16 @@ Public functions:
 `Compiler.import_package_macros`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_declaration`,
 `Compiler.record_native_meta_effect`, `Compiler.native_module_loaded`,
-`Compiler.add_native_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `x2c_register_extension`,
-`Compiler.links_extension`, `Compiler.select_package_module`,
-`Compiler.select_native_modules`, `Compiler.supplies_native_meta`,
-`x2c_meta_definition_hashes`, `Compiler.bind_linked_meta`,
+`Compiler.native_module_targets`, `Compiler.add_native_module`,
+`Compiler.load_native_module`, `Compiler.preload_native_module`,
+`x2c_register_extension`, `Compiler.links_extension`,
+`Compiler.select_package_module`, `Compiler.select_native_modules`,
+`Compiler.supplies_native_meta`, `x2c_meta_definition_hashes`,
+`Compiler.bind_linked_meta`, `Compiler.native_meta_accepts`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.use_meta_toolchain`,
-`Compiler.record_meta_import`, `Compiler.evaluate_meta_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
 `Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
 `Compiler.macro_tag_name`, `x2c_template_call`, `Compiler.peek_macro_hole`,
@@ -431,12 +431,15 @@ Public functions:
 
 ### [src/stage.x](../src/stage.x)
 
-values crossing the compile-time boundary.
+staged meta groups and the values crossing into them.
 
 Public functions:
 
 `Compiler.meta_argument`, `Compiler.meta_value_expression`,
-`Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`
+`Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`,
+`Compiler.use_meta_toolchain`, `Compiler.groups_meta`,
+`Compiler.group_meta_function`, `Compiler.record_meta_import`,
+`Compiler.meta_reaches_compile_time`, `Compiler.bind_meta_group`
 
 ### [src/statements.x](../src/statements.x)
 
