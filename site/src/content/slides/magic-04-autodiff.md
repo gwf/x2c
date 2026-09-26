@@ -7,7 +7,8 @@ links:
     href: https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff.x
 ---
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~#include "typed-array.x"
 ~#include <assert.h>
 ~#include <math.h>

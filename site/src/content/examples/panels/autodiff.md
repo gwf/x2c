@@ -5,7 +5,8 @@ tab: autodiff
 title: Fit a growth curve.
 ---
 
-```x2c
+<!-- ignore: the macros import from the autodiff package path. -->
+```x2c,ignore
 ~// Fit the two parameters of a logistic growth model to observations by
 ~// gradient descent. The loss integrates the model with 4000 Euler steps and
 ~// compares it with the observed curve along the way, so its gradient runs
