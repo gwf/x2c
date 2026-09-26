@@ -72,7 +72,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       symbol = Var_symbol(_x2c_macro_item_0);
       iteration += SymbolSet_index(values, symbol) + 1;
     }

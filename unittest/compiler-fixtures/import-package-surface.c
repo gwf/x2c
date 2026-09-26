@@ -28,7 +28,7 @@ double first_component(double x, double y){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       part = _x2c_macro_item_0;
       total += Var_floating(part);
     }

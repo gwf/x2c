@@ -62,15 +62,15 @@ static void benchmark_unzip(
   Var value;
   uint64_t start = now_ns();
   if (lagged) {
-    while (first.try_next(&value)) *sink += value.integer();
+    while (first.try_next(value)) *sink += value.integer();
     printf("unzip-lagged-peak,%zu\n",
            shared.buffers[0].len() + shared.buffers[1].len());
-    while (second.try_next(&value)) *sink += value.integer();
+    while (second.try_next(value)) *sink += value.integer();
   }
   else {
-    while (first.try_next(&value)) {
+    while (first.try_next(value)) {
       *sink += value.integer();
-      if (!second.try_next(&value)) abort();
+      if (!second.try_next(value)) abort();
       *sink += value.integer();
     }
   }
@@ -92,7 +92,7 @@ int main(void) {
                          (Var) { .p64 = &bench_state },
                          bench_next, (Var) { .u64 = 0 });
   start = now_ns();
-  while (bench.try_next(&value)) sink += value.integer();
+  while (bench.try_next(value)) sink += value.integer();
   result("try-next", now_ns() - start, count);
 
   start = now_ns();
@@ -119,19 +119,19 @@ int main(void) {
   struct Iter up_storage;
   Iter up = range(0, count - 1, 1, &up_storage);
   start = now_ns();
-  while (up.try_next(&value)) sink += value.integer();
+  while (up.try_next(value)) sink += value.integer();
   result("range-up", now_ns() - start, count);
 
   struct Iter down_storage;
   Iter down = range(count - 1, 0, -1, &down_storage);
   start = now_ns();
-  while (down.try_next(&value)) sink += value.integer();
+  while (down.try_next(value)) sink += value.integer();
   result("range-down", now_ns() - start, count);
 
   struct Iter general_storage;
   Iter general = range(0, 2 * count - 2, 2, &general_storage);
   start = now_ns();
-  while (general.try_next(&value)) sink += value.integer();
+  while (general.try_next(value)) sink += value.integer();
   result("range-general", now_ns() - start, count);
 
   int width = 2048, repeats = count / width;
@@ -140,7 +140,7 @@ int main(void) {
   for (int r = 0; r < repeats; r++) {
     struct Iter storage;
     Iter iter = list.iter(&storage);
-    while (iter.try_next(&value)) sink += value.integer();
+    while (iter.try_next(value)) sink += value.integer();
   }
   result("list-iter", now_ns() - start, (long) width * repeats);
 
@@ -150,7 +150,7 @@ int main(void) {
   for (int r = 0; r < repeats; r++) {
     struct Iter storage;
     Iter iter = array.iter(&storage);
-    while (iter.try_next(&value)) sink += value.integer();
+    while (iter.try_next(value)) sink += value.integer();
   }
   result("array-iter", now_ns() - start, (long) width * repeats);
 
@@ -160,7 +160,7 @@ int main(void) {
   for (int r = 0; r < text_repeats; r++) {
     struct Iter storage;
     Iter iter = text.iter(&storage);
-    while (iter.try_next(&value)) sink += value.integer();
+    while (iter.try_next(value)) sink += value.integer();
   }
   result("string-iter", now_ns() - start, (long) text.len() * text_repeats);
 
@@ -179,7 +179,7 @@ int main(void) {
   for (int r = 0; r < word_repeats; r++) {
     int cursor = 0;
     String word;
-    while (words.try_next(&cursor, &word)) sink += word.len();
+    while (words.try_next(cursor, word)) sink += word.len();
   }
   result("split-try-next", now_ns() - start,
          (long) words_per_scan * word_repeats);
@@ -196,7 +196,7 @@ int main(void) {
   for (int r = 0; r < repeats; r++) {
     unsigned cursor = 0;
     Var key, map_value;
-    while (entries.try_next(&cursor, &key, &map_value))
+    while (entries.try_next(cursor, key, map_value))
       sink += map_value.integer();
   }
   result("map-try-next", now_ns() - start, (long) width * repeats);
@@ -207,7 +207,7 @@ int main(void) {
   for (int r = 0; r < repeats; r++) {
     unsigned cursor = 0;
     Var key, map_value;
-    while (entries.try_next(&cursor, &key, &map_value)) {
+    while (entries.try_next(cursor, key, map_value)) {
       List pair = %($key $map_value);
       sink += pair.cadr().integer();
     }
@@ -231,14 +231,14 @@ int main(void) {
   Iter map_source = range(0, count - 1, 1, &map_source_storage);
   Iter mapped = Iter.map(map_source, increment, &map_storage);
   start = now_ns();
-  while (mapped.try_next(&value)) sink += value.integer();
+  while (mapped.try_next(value)) sink += value.integer();
   result("map-pipeline", now_ns() - start, count);
 
   struct Iter filter_source_storage, filter_storage;
   Iter filter_source = range(0, 2 * count - 1, 1, &filter_source_storage);
   Iter filtered = Iter.filter(filter_source, is_even, &filter_storage);
   start = now_ns();
-  while (filtered.try_next(&value)) sink += value.integer();
+  while (filtered.try_next(value)) sink += value.integer();
   result("filter-pipeline", now_ns() - start, count);
 
   start = now_ns();

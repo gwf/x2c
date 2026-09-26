@@ -52,7 +52,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       value = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
       total += value;
     }

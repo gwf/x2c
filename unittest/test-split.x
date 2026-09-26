@@ -21,7 +21,7 @@ static List collect_try_next(Split cursor) {
   Array items = [];
   int position = 0;
   String item;
-  while (cursor.try_next(&position, &item)) items.push(item);
+  while (cursor.try_next(position, item)) items.push(item);
   List result = items.list_free();
   return result;
 }
@@ -127,39 +127,39 @@ static void split_typed_cursor_boundaries(void) {
   Split words = "one two".words();
   int position = 0;
   String item = "sentinel";
-  EXPECT_TRUE(words.try_next(&position, &item));
+  EXPECT_TRUE(words.try_next(position, item));
   EXPECT_TRUE(item == "one");
   int after_first = position;
-  EXPECT_TRUE(words.try_next(&position, &item));
+  EXPECT_TRUE(words.try_next(position, item));
   EXPECT_TRUE(item == "two");
   int after_last = position;
 
-  EXPECT_FALSE(words.try_next(&position, &item));
+  EXPECT_FALSE(words.try_next(position, item));
   EXPECT_INT_EQ(position, after_last);
   EXPECT_TRUE(item == "two");
-  EXPECT_FALSE(words.try_next(&position, &item));
+  EXPECT_FALSE(words.try_next(position, item));
   EXPECT_INT_EQ(position, after_last);
   EXPECT_TRUE(item == "two");
   EXPECT_TRUE(after_first < after_last);
 
   position = 0;
-  EXPECT_TRUE(words.try_next(&position, &item));
+  EXPECT_TRUE(words.try_next(position, item));
   EXPECT_TRUE(item == "one");
   EXPECT_INT_EQ(position, after_first);
 
   Split fields = ":".splits(":");
   position = 0;
-  EXPECT_TRUE(fields.try_next(&position, &item));
+  EXPECT_TRUE(fields.try_next(position, item));
   EXPECT_TRUE(item == "");
-  EXPECT_TRUE(fields.try_next(&position, &item));
+  EXPECT_TRUE(fields.try_next(position, item));
   EXPECT_TRUE(item == "");
-  EXPECT_FALSE(fields.try_next(&position, &item));
+  EXPECT_FALSE(fields.try_next(position, item));
 
   position = 0;
-  EXPECT_FALSE(String.words(NULL).try_next(&position, &item));
-  EXPECT_FALSE(Split.try_next(NULL, &position, &item));
-  EXPECT_FALSE(words.try_next(NULL, &item));
-  EXPECT_FALSE(words.try_next(&position, NULL));
+  EXPECT_FALSE(String.words(NULL).try_next(position, item));
+  EXPECT_FALSE(Split.try_next(NULL, position, item));
+  EXPECT_FALSE(words.try_next(NULL, item));
+  EXPECT_FALSE(words.try_next(position, NULL));
   EXPECT_INT_EQ(position, 0);
 }
 
@@ -168,38 +168,38 @@ static void split_typed_cursor_independence(void) {
   int first = 0, second = 0;
   String left, right;
 
-  EXPECT_TRUE(words.try_next(&first, &left));
+  EXPECT_TRUE(words.try_next(first, left));
   EXPECT_TRUE(left == "alpha");
-  EXPECT_TRUE(words.try_next(&second, &right));
+  EXPECT_TRUE(words.try_next(second, right));
   EXPECT_TRUE(right == "alpha");
-  EXPECT_TRUE(words.try_next(&first, &left));
+  EXPECT_TRUE(words.try_next(first, left));
   EXPECT_TRUE(left == "beta");
   EXPECT_TRUE(right == "alpha");
-  EXPECT_TRUE(words.try_next(&second, &right));
+  EXPECT_TRUE(words.try_next(second, right));
   EXPECT_TRUE(right == "beta");
 
   struct Iter storage;
   Iter boxed = words.iter(&storage);
   Var boxed_value;
-  EXPECT_TRUE(boxed.try_next(&boxed_value));
+  EXPECT_TRUE(boxed.try_next(boxed_value));
   EXPECT_TRUE(boxed_value.string() == "alpha");
-  EXPECT_TRUE(words.try_next(&first, &left));
+  EXPECT_TRUE(words.try_next(first, left));
   EXPECT_TRUE(left == "gamma");
-  EXPECT_TRUE(boxed.try_next(&boxed_value));
+  EXPECT_TRUE(boxed.try_next(boxed_value));
   EXPECT_TRUE(boxed_value.string() == "beta");
-  EXPECT_FALSE(words.try_next(&first, &left));
-  EXPECT_TRUE(boxed.try_next(&boxed_value));
+  EXPECT_FALSE(words.try_next(first, left));
+  EXPECT_TRUE(boxed.try_next(boxed_value));
   EXPECT_TRUE(boxed_value.string() == "gamma");
-  EXPECT_FALSE(boxed.try_next(&boxed_value));
+  EXPECT_FALSE(boxed.try_next(boxed_value));
 
   int pairs = 0;
   Split outer = "a b".words(), inner = "1 2 3".words();
   int outer_position = 0;
   String outer_item;
-  while (outer.try_next(&outer_position, &outer_item)) {
+  while (outer.try_next(outer_position, outer_item)) {
     int inner_position = 0;
     String inner_item;
-    while (inner.try_next(&inner_position, &inner_item))
+    while (inner.try_next(inner_position, inner_item))
       if (outer_item && inner_item) pairs++;
   }
   EXPECT_INT_EQ(pairs, 6);
@@ -228,13 +228,13 @@ static void split_cursor_allocation_and_nesting(void) {
   Iter first = cursor.iter(&first_storage);
   Iter second = cursor.iter(&second_storage);
   Var item;
-  EXPECT_TRUE(first.try_next(&item));
+  EXPECT_TRUE(first.try_next(item));
   EXPECT_TRUE(item.string() == "cursor_alpha");
-  EXPECT_TRUE(second.try_next(&item));
+  EXPECT_TRUE(second.try_next(item));
   EXPECT_TRUE(item.string() == "cursor_alpha");
-  EXPECT_TRUE(first.try_next(&item));
+  EXPECT_TRUE(first.try_next(item));
   EXPECT_TRUE(item.string() == "cursor_beta");
-  EXPECT_TRUE(second.try_next(&item));
+  EXPECT_TRUE(second.try_next(item));
   EXPECT_TRUE(item.string() == "cursor_beta");
 
   int pairs = 0;

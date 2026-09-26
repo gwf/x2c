@@ -986,10 +986,13 @@ static int _next(Iter iter, Var *out) {
 
     `foreach (Var item, lst)` compiles to this loop.
 */
-int List.try_next(List lst, List *cursor, Var *out) {
-  if (!cursor || !out || !*cursor) return 0;
-  *out = (*cursor).car();
-  *cursor = (*cursor).cdr;
+int List.try_next(List lst, List &?cursor, Var &?out) {
+  if (!cursor) return 0;
+  if (!out) return 0;
+  List rest = cursor;
+  if (!rest) return 0;
+  out = rest.car();
+  cursor = rest.cdr;
   return 1;
 }
 

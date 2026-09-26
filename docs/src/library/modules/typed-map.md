@@ -527,7 +527,7 @@ Source: `lib/typed-map.x:280`
 <a id="MapIntInt.try_next"></a>
 #### MapIntInt.try_next
 
-`int MapIntInt.try_next(MapIntInt map, unsigned *cursor, int *key, int *val)`
+`int MapIntInt.try_next(MapIntInt map, unsigned &?cursor, int &?key, int &?val)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -904,7 +904,7 @@ Source: `lib/typed-map.x:300`
 <a id="MapLongDouble.try_next"></a>
 #### MapLongDouble.try_next
 
-`int MapLongDouble.try_next(MapLongDouble map, unsigned *cursor, long *key, double *val)`
+`int MapLongDouble.try_next(MapLongDouble map, unsigned &?cursor, long &?key, double &?val)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -1281,7 +1281,7 @@ Source: `lib/typed-map.x:358`
 <a id="MapStringInt.try_next"></a>
 #### MapStringInt.try_next
 
-`int MapStringInt.try_next(MapStringInt map, unsigned *cursor, String *key, int *val)`
+`int MapStringInt.try_next(MapStringInt map, unsigned &?cursor, String &?key, int &?val)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -1658,7 +1658,7 @@ Source: `lib/typed-map.x:321`
 <a id="MapStringString.try_next"></a>
 #### MapStringString.try_next
 
-`int MapStringString.try_next(MapStringString map, unsigned *cursor, String *key, String *val)`
+`int MapStringString.try_next(MapStringString map, unsigned &?cursor, String &?key, String &?val)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or

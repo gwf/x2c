@@ -12,8 +12,8 @@ meta int user_kernel_probe(int offset) {
   struct Iter storage;
   Iter values = Iter.init(&storage, void, next_value, 1 + offset);
   Var first, second, third, extra;
-  if (!values.try_next(&first) || !values.try_next(&second) ||
-      !values.try_next(&third) || values.try_next(&extra)) return -1;
+  if (!values.try_next(first) || !values.try_next(second) ||
+      !values.try_next(third) || values.try_next(extra)) return -1;
   return first.int() * 100 + second.int() * 10 + third.int();
 }
 

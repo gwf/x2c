@@ -67,7 +67,7 @@ static void iterate_void(void) {
   struct Iter storage;
   Var out;
   Iter iter = Iter.init(&storage, nil, yield_void, nil);
-  iter.try_next(&out);
+  iter.try_next(out);
 }
 
 static void construct_zero_step_range(void) {

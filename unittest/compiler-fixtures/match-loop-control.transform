@@ -26,13 +26,15 @@
      (bindings (bind (binding 8 "_x2c_macro_cursor_output_0") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+      (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
              (ident (binding 9 "List_try_next"))) 
        (args (expr ("List") (ident (binding 6 "_x2c_macro_object_0"))) 
-        (expr (* "List") 
-         (op & (expr ("List") (ident (binding 7 "_x2c_macro_cursor_0"))))) 
-        (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 8 "_x2c_macro_cursor_output_0")))))))) 
+        (expr (opt-ref "List") 
+         (op & (parens 
+                (expr ("List") (ident (binding 7 "_x2c_macro_cursor_0")))))) 
+        (expr (opt-ref "Var") 
+         (op & (parens 
+                (expr ("Var") (ident (binding 8 "_x2c_macro_cursor_output_0"))))))))) 
      (block 
       (stmnt 
        (expr ("Var") 
@@ -81,13 +83,15 @@
      (bindings (bind (binding 18 "_x2c_macro_cursor_output_1") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+      (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
              (ident (binding 9 "List_try_next"))) 
        (args (expr ("List") (ident (binding 16 "_x2c_macro_object_1"))) 
-        (expr (* "List") 
-         (op & (expr ("List") (ident (binding 17 "_x2c_macro_cursor_1"))))) 
-        (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 18 "_x2c_macro_cursor_output_1")))))))) 
+        (expr (opt-ref "List") 
+         (op & (parens 
+                (expr ("List") (ident (binding 17 "_x2c_macro_cursor_1")))))) 
+        (expr (opt-ref "Var") 
+         (op & (parens 
+                (expr ("Var") (ident (binding 18 "_x2c_macro_cursor_output_1"))))))))) 
      (block 
       (stmnt 
        (expr ("Var") 

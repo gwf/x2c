@@ -138,8 +138,8 @@ and `File.copy_to`.
 
 Kept as pointers:
 
-- The `try_next` family. `foreach` expands to these calls, and compile-time
-  Lisp calls them with addresses.
+- The `try_next` family at first. It later moved to references in two
+  steps; see the next section.
 - `String.try_long`, `String.try_double`, and `Symbol.try_new`. A
   `meta native` declaration must match its native target.
 - `RenderPath.enter`, which links the caller's path into a chain.
@@ -151,4 +151,24 @@ to a value, for example as a declaration initializer, emitted the raw
 pointer and was not diagnosed. `convert_expression` now reports "check
 optional reference before using its value"; see fixture
 `optional-reference-initializer`.
+
+## The `try_next` family and `foreach`
+
+Delivered 2026-09-25 in two steps, because the build compiles `lib/` with
+the checked-in bootstrap compiler:
+
+1. `foreach` passes the cursor and outputs directly when `try_next` takes
+   references, and passes their addresses when it takes pointers. The
+   compile-time cursor-loop analysis in `comptime.x` accepts both argument
+   forms. This step landed with a bootstrap refresh, and the generated C was
+   unchanged.
+2. `List`, `Array`, `Map`, `String`, `Split`, and `Iter.try_next`, along
+   with the typed map and array versions, take `&?` cursors and outputs.
+   `Split_try_next` and `Iter_try_next` in `etc/comptime.xlisp` now bind
+   their natives directly, as the other `try_next` bindings do, so a meta
+   `foreach` passes reference carriers.
+   In `List.try_next`, the empty-list test (`!*cursor`) became a test of a
+   local copy of the checked cursor.
+
+User types that keep pointer-style `try_next` still work with `foreach`.
 

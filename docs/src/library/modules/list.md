@@ -130,7 +130,7 @@ never returns for an infinite source. Elements appear in iteration order.
 **Raises:** whatever the iterator's source raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:1012`
+Source: `lib/list.x:1015`
 
 ### `List`
 
@@ -226,7 +226,7 @@ invoking or checking `pred`.
 `<alloc-fail>` or `<size-limit>` while constructing the result. A null
 `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
-Source: `lib/list.x:1025`
+Source: `lib/list.x:1028`
 
 <a id="List.find"></a>
 #### List.find
@@ -329,7 +329,7 @@ The iterator borrows the immutable cells and yields their stored `Var` bits
 without retaining them, so the owning pool must outlive iteration. A null
 `dest` returns NULL; `nil` produces an exhausted iterator.
 
-Source: `lib/list.x:1001`
+Source: `lib/list.x:1004`
 
 <a id="List.last"></a>
 #### List.last
@@ -457,7 +457,7 @@ Source: `lib/list.x:678`
 <a id="List.try_next"></a>
 #### List.try_next
 
-`int List.try_next(List lst, List *cursor, Var *out)`
+`int List.try_next(List lst, List &?cursor, Var &?out)`
 
 Writes the next element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to `lst`. A null pointer or an

@@ -127,9 +127,9 @@
     (bindings 
      (op = (bind (binding 15 "caught") (volatile)) 
       (expr (int) (literal (int) "0")))))) 
-  (at 60 
+  (at 61 
    (try (block 
-         (at 23 
+         (at 60 
           (block 
            (declare ("Var") (bindings (bind (binding 16 "item") (volatile)))) 
            (declare ("List") 
@@ -144,14 +144,16 @@
             (bindings (bind (binding 19 "_x2c_macro_cursor_output_0") ()))) 
            (while 
             (expr (int) 
-             (call (expr ((func (("List") (* "List") (* "Var"))) int) 
-                    (ident (binding 20 "List_try_next"))) 
+             (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) 
+                          int) (ident (binding 20 "List_try_next"))) 
               (args (expr ("List") (ident (binding 17 "_x2c_macro_object_0"))) 
-               (expr (* "List") 
-                (op & (expr ("List") (ident (binding 18 "_x2c_macro_cursor_0"))))) 
-               (expr (* "Var") 
-                (op & (expr ("Var") 
-                       (ident (binding 19 "_x2c_macro_cursor_output_0")))))))) 
+               (expr (opt-ref "List") 
+                (op & (parens 
+                       (expr ("List") (ident (binding 18 "_x2c_macro_cursor_0")))))) 
+               (expr (opt-ref "Var") 
+                (op & (parens 
+                       (expr ("Var") 
+                        (ident (binding 19 "_x2c_macro_cursor_output_0"))))))))) 
             (block 
              (stmnt 
               (expr ("Var") 
@@ -209,7 +211,7 @@
         (args (expr (* ("ExceptionFrame")) 
                (op & (expr (("ExceptionFrame")) 
                       (ident (binding 22 "_x2c_exception_frame_1")))))))))))) 
-  (at 61 (return (expr (int) (ident (binding 15 "caught")))))))
+  (at 62 (return (expr (int) (ident (binding 15 "caught")))))))
 
 (function (static void) 
  (bind (binding 24 "loop_switch_boundaries") 
@@ -220,7 +222,7 @@
     (expr (int) 
      (op = (expr (int) (ident (binding 1 "order"))) 
       (expr (int) (literal (int) "0")))))) 
-  (at 62 
+  (at 63 
    (for (decl (int) 
          (bindings 
           (op = (bind (binding 25 "i") ()) (expr (int) (literal (int) "0"))))) 
@@ -271,10 +273,10 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 29 "selector") ()) (expr (int) (literal (int) "1")))))) 
-  (at 64 
+  (at 65 
    (switch (expr (int) (ident (binding 29 "selector"))) 
     (block (at 38 (case (expr (int) (literal (int) "1")))) 
-     (at 63 
+     (at 64 
       (block 
        (at 39 
         (defer 
@@ -369,7 +371,7 @@
        (expr (int) (ident (binding 35 "from_foreach"))) 
        (expr (int) (ident (binding 36 "from_loop_switch"))) 
        (expr (int) (ident (binding 37 "from_switch_loop")))))))) 
-  (at 65 
+  (at 66 
    (return 
     (expr (int) 
      (op ? (expr (int) 

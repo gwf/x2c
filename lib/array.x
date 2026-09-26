@@ -790,11 +790,13 @@ static int _next(Iter iter, Var *out) {
     `foreach (Var item, array)` compiles to this loop.
     Raises: `<size-limit>` for an `Array` outside the integer index domain.
 */
-int Array.try_next(Array array, int *cursor, Var *out) {
-  if (!array || !cursor || !out || *cursor < 0) return 0;
-  if (*cursor >= _int_length(array)) return 0;
-  *out = ((Var *) array.bytes)[*cursor];
-  *cursor += 1;
+int Array.try_next(Array array, int &?cursor, Var &?out) {
+  if (!cursor) return 0;
+  if (!out) return 0;
+  if (!array || cursor < 0) return 0;
+  if (cursor >= _int_length(array)) return 0;
+  out = ((Var *) array.bytes)[cursor];
+  cursor += 1;
   return 1;
 }
 

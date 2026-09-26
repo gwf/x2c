@@ -402,7 +402,7 @@ static void file_iterator_reads_lines(void) {
   EXPECT_STR_EQ(second.string(), "beta\n");
   EXPECT_TRUE(lines.next() is void);
   Var exhausted;
-  EXPECT_FALSE(lines.try_next(&exhausted));
+  EXPECT_FALSE(lines.try_next(exhausted));
   file.close();
 }
 

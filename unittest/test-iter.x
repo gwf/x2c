@@ -99,7 +99,7 @@ static void iter_rejects_void_from_source(void) {
   Var out = 1;
 
   int caught = 0;
-  try iter.try_next(&out);
+  try iter.try_next(out);
   catch %(void-op *): caught = 1;
   EXPECT_TRUE(caught);
   EXPECT_TRUE(iter.next != NULL);
@@ -111,12 +111,12 @@ static void iter_empty_and_unsupported_status(void) {
   Array empty = [];
   struct Iter empty_storage;
   Iter empty_iter = empty.iter(&empty_storage);
-  EXPECT_FALSE(empty_iter.try_next(&out));
+  EXPECT_FALSE(empty_iter.try_next(out));
 
   struct Iter unsupported_storage;
   Iter unsupported = (42).var().iter(&unsupported_storage);
   EXPECT_TRUE(unsupported != NULL);
-  EXPECT_FALSE(unsupported.try_next(&out));
+  EXPECT_FALSE(unsupported.try_next(out));
   EXPECT_TRUE(unsupported.next() is void);
 }
 
@@ -136,16 +136,16 @@ static void iter_exhaustion_is_terminal(void) {
   struct Iter storage;
   Iter iter = Iter.init(&storage, 2, counted_next, 0);
   Var out;
-  EXPECT_TRUE(iter.try_next(&out));
+  EXPECT_TRUE(iter.try_next(out));
   EXPECT_INT_EQ(out.int(), 0);
   EXPECT_INT_EQ(next_call_count, 1);
   EXPECT_INT_EQ(iter.next().int(), 1);
   EXPECT_INT_EQ(next_call_count, 2);
   EXPECT_INT_EQ(iter.next().int(), 2);
   EXPECT_INT_EQ(next_call_count, 3);
-  EXPECT_FALSE(iter.try_next(&out));
+  EXPECT_FALSE(iter.try_next(out));
   EXPECT_INT_EQ(next_call_count, 4);
-  EXPECT_FALSE(iter.try_next(&out));
+  EXPECT_FALSE(iter.try_next(out));
   EXPECT_TRUE(iter.next() is void);
   EXPECT_INT_EQ(next_call_count, 4);
 }
@@ -300,7 +300,7 @@ static void iter_func_lifetimes_and_allocations(void) {
   ScopeStats before = Scope.stats();
   Var value;
   int count = 0;
-  while (filtered.try_next(&value)) count++;
+  while (filtered.try_next(value)) count++;
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(count, 3);
   EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls);
@@ -368,7 +368,7 @@ static void iter_unzip_bounds_consumed_buffers(void) {
   Iter second = second_var.iter(&second_storage);
   Var value;
   int seen = 0;
-  while (first.try_next(&value)) {
+  while (first.try_next(value)) {
     EXPECT_INT_EQ(value.int(), seen);
     seen++;
   }
@@ -377,7 +377,7 @@ static void iter_unzip_bounds_consumed_buffers(void) {
   EXPECT_INT_EQ(shared.buffers[1].len(), count);
 
   seen = 0;
-  while (second.try_next(&value)) {
+  while (second.try_next(value)) {
     EXPECT_INT_EQ(value.int(), count + seen);
     seen++;
   }
@@ -724,54 +724,54 @@ static void iter_range_boundaries(void) {
   Var out;
   struct Iter max_storage;
   Iter max_values = range(INT_MAX - 1, INT_MAX, 1, &max_storage);
-  EXPECT_TRUE(max_values.try_next(&out));
+  EXPECT_TRUE(max_values.try_next(out));
   EXPECT_INT_EQ(out.int(), INT_MAX - 1);
-  EXPECT_TRUE(max_values.try_next(&out));
+  EXPECT_TRUE(max_values.try_next(out));
   EXPECT_INT_EQ(out.int(), INT_MAX);
-  EXPECT_FALSE(max_values.try_next(&out));
+  EXPECT_FALSE(max_values.try_next(out));
 
   struct Iter min_storage;
   Iter min_values = range(INT_MIN + 1, INT_MIN, -1, &min_storage);
-  EXPECT_TRUE(min_values.try_next(&out));
+  EXPECT_TRUE(min_values.try_next(out));
   EXPECT_INT_EQ(out.int(), INT_MIN + 1);
-  EXPECT_TRUE(min_values.try_next(&out));
+  EXPECT_TRUE(min_values.try_next(out));
   EXPECT_INT_EQ(out.int(), INT_MIN);
-  EXPECT_FALSE(min_values.try_next(&out));
+  EXPECT_FALSE(min_values.try_next(out));
 
   struct Iter crossing_storage;
   Iter crossing = range(0, 5, 2, &crossing_storage);
   EXPECT_INT_EQ(crossing.next().int(), 0);
   EXPECT_INT_EQ(crossing.next().int(), 2);
   EXPECT_INT_EQ(crossing.next().int(), 4);
-  EXPECT_FALSE(crossing.try_next(&out));
+  EXPECT_FALSE(crossing.try_next(out));
 
   struct Iter equal_storage;
   Iter equal = range(7, 7, 3, &equal_storage);
   EXPECT_INT_EQ(equal.next().int(), 7);
-  EXPECT_FALSE(equal.try_next(&out));
+  EXPECT_FALSE(equal.try_next(out));
 
   struct Iter max_step_storage;
   Iter max_step = range(INT_MIN, INT_MAX, INT_MAX, &max_step_storage);
   EXPECT_INT_EQ(max_step.next().int(), INT_MIN);
   EXPECT_INT_EQ(max_step.next().int(), -1);
   EXPECT_INT_EQ(max_step.next().int(), INT_MAX - 1);
-  EXPECT_FALSE(max_step.try_next(&out));
+  EXPECT_FALSE(max_step.try_next(out));
 
   struct Iter min_step_storage;
   Iter min_step = range(INT_MAX, INT_MIN, INT_MIN, &min_step_storage);
   EXPECT_INT_EQ(min_step.next().int(), INT_MAX);
   EXPECT_INT_EQ(min_step.next().int(), -1);
-  EXPECT_FALSE(min_step.try_next(&out));
+  EXPECT_FALSE(min_step.try_next(out));
 
   struct Iter max_endpoint_storage;
   Iter max_endpoint = range(INT_MAX, INT_MAX, 1, &max_endpoint_storage);
   EXPECT_INT_EQ(max_endpoint.next().int(), INT_MAX);
-  EXPECT_FALSE(max_endpoint.try_next(&out));
-  EXPECT_FALSE(max_endpoint.try_next(&out));
+  EXPECT_FALSE(max_endpoint.try_next(out));
+  EXPECT_FALSE(max_endpoint.try_next(out));
 
   struct Iter wrong_storage;
   Iter wrong = range(5, 1, 1, &wrong_storage);
-  EXPECT_FALSE(wrong.try_next(&out));
+  EXPECT_FALSE(wrong.try_next(out));
 }
 
 

@@ -156,10 +156,8 @@
 (def Array_try_next (bind "Array_try_next" nil))
 (def Map_try_next (bind "Map_try_next" nil))
 (def String_try_next (bind "String_try_next" nil))
-(defun Split_try_next (split cursor out)
-  ((bind "Split_try_next" nil) split cursor out))
-(defun Iter_try_next (iter out)
-  ((bind "Iter_try_next" nil) iter out))
+(def Split_try_next (bind "Split_try_next" nil))
+(def Iter_try_next (bind "Iter_try_next" nil))
 
 (def Array_new Array.new)
 (def Array_len Array.len)

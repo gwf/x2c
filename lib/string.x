@@ -1742,11 +1742,13 @@ static int _next(Iter iter, Var *out) {
     `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
     loop.
 */
-int String.try_next(String str, int *cursor, int *out) {
-  if (!str || !cursor || !out || *cursor < 0) return 0;
-  if (*cursor >= str.len()) return 0;
-  *out = str[*cursor];
-  *cursor += 1;
+int String.try_next(String str, int &?cursor, int &?out) {
+  if (!cursor) return 0;
+  if (!out) return 0;
+  if (!str || cursor < 0) return 0;
+  if (cursor >= str.len()) return 0;
+  out = str[cursor];
+  cursor += 1;
   return 1;
 }
 

@@ -7,7 +7,7 @@ int main(void){
     List _x2c_macro_object_0 = break_inputs;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       item = _x2c_macro_cursor_output_0;
       {
         List value = Var_list(item);
@@ -32,7 +32,7 @@ after ++;
 
 }
 List continue_inputs = _19;  int visited = 0, accepted = 0; {
-  Var item;  List _x2c_macro_object_1 = continue_inputs;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+  Var item;  List _x2c_macro_object_1 = continue_inputs;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
     item = _x2c_macro_cursor_output_1; {
       List value = Var_list(item);  visited ++;
   {

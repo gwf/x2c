@@ -12,8 +12,8 @@ meta int output_cells(int unused) {
       "bad".try_long(&integer) || integer != 42 ||
       !"1.25".try_double(&floating) || floating != 1.25 ||
       "bad".try_double(&floating) || floating != 1.25 ||
-      !"A".try_next(&cursor, &byte) || cursor != 1 || byte != 'A' ||
-      "A".try_next(&cursor, &byte) || cursor != 1 || byte != 'A')
+      !"A".try_next(cursor, byte) || cursor != 1 || byte != 'A' ||
+      "A".try_next(cursor, byte) || cursor != 1 || byte != 'A')
     return 0;
 
   List bindings = %(old);

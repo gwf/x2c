@@ -149,7 +149,7 @@ int main(void) {
   short key;
   long value, native_total = 0;
   int native_count = 0;
-  while (map.try_next(&cursor, &key, &value)) {
+  while (map.try_next(cursor, key, value)) {
     native_total += value;
     native_count++;
   }
@@ -159,7 +159,7 @@ int main(void) {
   Var element;
   long iter_total = 0;
   int iter_count = 0;
-  while (iter.try_next(&element)) {
+  while (iter.try_next(element)) {
     iter_total += element.long();
     iter_count++;
   }

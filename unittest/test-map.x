@@ -312,7 +312,7 @@ static void map_stable_traversal_visits_every_entry(void) {
   unsigned cursor = 0;
   int count = 0;
   Var key, val;
-  while (map.try_next(&cursor, &key, &val)) {
+  while (map.try_next(cursor, key, val)) {
     int index = key.integer();
     EXPECT_TRUE(index >= 0 && index < 64);
     if (index >= 0 && index < 64) {
@@ -528,34 +528,34 @@ static void map_null_pair_status_iteration(void) {
 
   unsigned cursor = 0;
   Var key = void, val = void;
-  EXPECT_TRUE(map.try_next(&cursor, &key, &val));
+  EXPECT_TRUE(map.try_next(cursor, key, val));
   EXPECT_INT_EQ(key.u64, 0);
   EXPECT_INT_EQ(val.u64, 0);
-  EXPECT_FALSE(map.try_next(&cursor, &key, &val));
+  EXPECT_FALSE(map.try_next(cursor, key, val));
 
   struct Iter storage;
   Iter iter = map.iter(&storage);
   Var yielded;
-  EXPECT_TRUE(iter.try_next(&yielded));
+  EXPECT_TRUE(iter.try_next(yielded));
   EXPECT_INT_EQ(yielded.u64, 0);
-  EXPECT_FALSE(iter.try_next(&yielded));
+  EXPECT_FALSE(iter.try_next(yielded));
 
   struct Iter key_storage;
   Iter map_keys = map.keys(&key_storage);
   Var yielded_key;
-  EXPECT_TRUE(map_keys.try_next(&yielded_key));
+  EXPECT_TRUE(map_keys.try_next(yielded_key));
   EXPECT_INT_EQ(yielded_key.u64, 0);
-  EXPECT_FALSE(map_keys.try_next(&yielded_key));
+  EXPECT_FALSE(map_keys.try_next(yielded_key));
 
   struct Iter pair_storage;
   Iter pairs = map.enumerate(&pair_storage);
   Var pair_var;
-  EXPECT_TRUE(pairs.try_next(&pair_var));
+  EXPECT_TRUE(pairs.try_next(pair_var));
   List pair = pair_var;
   Var (pair_key, pair_value) = pair;
   EXPECT_INT_EQ(pair_key.u64, 0);
   EXPECT_INT_EQ(pair_value.u64, 0);
-  EXPECT_FALSE(pairs.try_next(&pair_var));
+  EXPECT_FALSE(pairs.try_next(pair_var));
 
   Map copy = map.copy();
   EXPECT_INT_EQ(copy.len(), 1);

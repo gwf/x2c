@@ -1285,7 +1285,7 @@ static int _lisp_String_try_double(String str, Var out) {
 
 static int _lisp_String_try_next(String str, Var cursor, Var out) {
   int native_cursor = lisp_load(cursor).int(), value;
-  int status = str.try_next(&native_cursor, &value);
+  int status = str.try_next(native_cursor, value);
   if (status) {
     lisp_store(cursor, native_cursor);
     lisp_store(out, value);

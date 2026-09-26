@@ -112,7 +112,7 @@ protocol Var(UnzipSharedRef) as void *;
     struct Iter storage;
     Iter evens = Iter.init(&storage, 6, _evens_next, 0);
     Var value;
-    while (evens.try_next(&value)) printf("%d\n", value);
+    while (evens.try_next(value)) printf("%d\n", value);
     ~  return 0;
     ~}
     ```
@@ -173,7 +173,7 @@ static int _unzip_ensure(UnzipShared *shared, int column) {
   while (shared.heads[column] >= shared.buffers[column].len()) {
     if (shared.done) return 0;
     Var pair;
-    if (!shared.source.try_next(&pair)) {
+    if (!shared.source.try_next(pair)) {
       shared.done = 1;
       return 0;
     }
@@ -196,7 +196,7 @@ static int _unzip_ensure(UnzipShared *shared, int column) {
     struct Iter storage;
     Iter counts = range(3, 1, -1, &storage);
     Var value;
-    while (counts.try_next(&value)) printf("%d\n", value);
+    while (counts.try_next(value)) printf("%d\n", value);
     ~  return 0;
     ~}
     ```
@@ -204,15 +204,16 @@ static int _unzip_ensure(UnzipShared *shared, int column) {
     element, plus any cause raised by that callback. A null `iter` or `out`
     reads as exhausted without raising.
 */
-int Iter.try_next(Iter iter, Var *out) {
-  if (!iter || !out || !iter.next) return 0;
+int Iter.try_next(Iter iter, Var &?out) {
+  if (!out) return 0;
+  if (!iter || !iter.next) return 0;
   /* Arrow syntax calls the stored callback. A receiver call here would
      recursively select Iter.next. */
-  if (!iter->next(iter, out)) {
+  if (!iter->next(iter, &out)) {
     iter.next = NULL;
     return 0;
   }
-  if (out[0] is void) raise %(void-op (owner "Iter.try_next"));
+  if (out is void) raise %(void-op (owner "Iter.try_next"));
   return 1;
 }
 
@@ -225,7 +226,7 @@ int Iter.try_next(Iter iter, Var *out) {
 */
 meta native Var Iter.next(Iter iter) {
   Var out;
-  return iter.try_next(&out) ? out : void;
+  return iter.try_next(out) ? out : void;
 }
 
 static Var _range_raw_int(int value) =>
@@ -351,7 +352,7 @@ meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
 
 static int _map_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source || !source.try_next(out)) return 0;
+  if (!source || !source.try_next(*out)) return 0;
   if (iter.aux) *out = _apply1(iter.aux, *out);
   return 1;
 }
@@ -394,7 +395,7 @@ static int _zip_next(Iter iter, Var *out) {
   Iter left_iter = iter.obj, right_iter = iter.state;
   if (!left_iter || !right_iter) return 0;
   Var left, right;
-  if (!left_iter.try_next(&left) || !right_iter.try_next(&right)) return 0;
+  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
   *out = %($left $right);
   return 1;
 }
@@ -419,7 +420,7 @@ static int _zip_with_next(Iter iter, Var *out) {
   Iter left_iter = iter.obj, right_iter = iter.state;
   if (!left_iter || !right_iter) return 0;
   Var left, right;
-  if (!left_iter.try_next(&left) || !right_iter.try_next(&right)) return 0;
+  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
   if (iter.aux) *out = _apply2(iter.aux, left, right);
   else *out = %($left $right);
   return 1;
@@ -462,11 +463,11 @@ meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
 
 static int _chain_next(Iter iter, Var *out) {
   Iter current = iter.obj;
-  if (current && current.try_next(out)) return 1;
+  if (current && current.try_next(*out)) return 1;
   current = iter.state;
   iter.obj = current;
   iter.state = void;
-  return current && current.try_next(out);
+  return current && current.try_next(*out);
 }
 
 /** Returns a lazy iterator over `first` followed by `second`.
@@ -484,7 +485,7 @@ static int _enumerate_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   if (!source) return 0;
   Var value;
-  if (!source.try_next(&value)) return 0;
+  if (!source.try_next(value)) return 0;
   int index = iter.state;
   iter.state = index + 1;
   *out = %($index $value);
@@ -527,7 +528,7 @@ static int _head_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   int remaining = iter.state;
   if (!source || remaining <= 0) return 0;
-  if (!source.try_next(out)) return 0;
+  if (!source.try_next(*out)) return 0;
   iter.state = remaining - 1;
   return 1;
 }
@@ -548,7 +549,7 @@ static int _accumulate_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   if (!source) return 0;
   Var item;
-  if (!source.try_next(&item)) return 0;
+  if (!source.try_next(item)) return 0;
   iter.state = iter.state.binary(<+>, item);
   *out = iter.state;
   return 1;
@@ -575,7 +576,7 @@ static int _scan_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   if (!source || !iter.aux) return 0;
   Var item;
-  if (!source.try_next(&item)) return 0;
+  if (!source.try_next(item)) return 0;
   iter.state = _apply2(iter.aux, iter.state, item);
   *out = iter.state;
   return 1;
@@ -622,7 +623,7 @@ static int _unique_next(Iter iter, Var *out) {
   if (!source) return 0;
   loop {
     Var value;
-    if (!source.try_next(&value)) return 0;
+    if (!source.try_next(value)) return 0;
     if (!seen.contains(value)) {
       seen[value] = value;
       *out = value;
@@ -735,19 +736,19 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
 */
 Var Iter.foldl(Iter iter, Var seed, Func fn) {
   Var acc = seed, item;
-  int has_item = iter.try_next(&item);
+  int has_item = iter.try_next(item);
   if (acc is void) {
     if (!has_item) return void;
     acc = item;
-    has_item = iter.try_next(&item);
+    has_item = iter.try_next(item);
   }
   if (!fn) {
-    while (has_item) has_item = iter.try_next(&item);
+    while (has_item) has_item = iter.try_next(item);
     return acc;
   }
   while (has_item) {
     acc = _apply2(fn, acc, item);
-    has_item = iter.try_next(&item);
+    has_item = iter.try_next(item);
   }
   return acc;
 }
@@ -777,11 +778,11 @@ int Iter.any(Iter iter, Func pred) {
 */
 int Iter.all(Iter iter, Func pred) {
   Var item;
-  if (!iter.try_next(&item)) return 1;
+  if (!iter.try_next(item)) return 1;
   if (!pred) return 0;
   do
     if (!_apply1(pred, item)) return 0;
-  while (iter.try_next(&item));
+  while (iter.try_next(item));
   return 1;
 }
 
@@ -811,7 +812,7 @@ Var Iter.find(Iter iter, Func pred) {
 meta native int Iter.count(Iter iter) {
   int total = 0;
   Var item;
-  while (iter.try_next(&item)) total++;
+  while (iter.try_next(item)) total++;
   return total;
 }
 
@@ -850,7 +851,7 @@ meta native Var Iter.product(Iter iter) {
 */
 meta native Var Iter.max(Iter iter) {
   Var best;
-  if (!iter.try_next(&best)) return void;
+  if (!iter.try_next(best)) return void;
   foreach (Var item, iter) if (item > best) best = item;
   return best;
 }
@@ -864,7 +865,7 @@ meta native Var Iter.max(Iter iter) {
 */
 meta native Var Iter.min(Iter iter) {
   Var best;
-  if (!iter.try_next(&best)) return void;
+  if (!iter.try_next(best)) return void;
   foreach (Var item, iter) if (item < best) best = item;
   return best;
 }

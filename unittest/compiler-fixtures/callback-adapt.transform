@@ -121,15 +121,16 @@
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 33 "storage")))))))))))) 
   (at 16 (declare ("Var") (bindings (bind (binding 35 "item") ())))) 
-  (at 17 
+  (at 26 
    (declare (int) 
     (bindings 
      (op = (bind (binding 36 "advanced") ()) 
       (expr (int) 
-       (call (expr ((func (("Iter") (* "Var"))) (int)) 
+       (call (expr ((func (("Iter") (opt-ref "Var"))) (int)) 
               (ident (binding 37 "Iter_try_next"))) 
         (args (expr ("Iter") (ident (binding 34 "iter"))) 
-         (expr (* "Var") (op & (expr ("Var") (ident (binding 35 "item")))))))))))) 
+         (expr (opt-ref "Var") 
+          (op & (parens (expr ("Var") (ident (binding 35 "item"))))))))))))) 
   (at 18 
    (stmnt 
     (expr () 
@@ -188,7 +189,7 @@
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 40 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 26 (return (expr (int) (literal (int) "0"))))))
+  (at 27 (return (expr (int) (literal (int) "0"))))))
 
 (function (static ("String")) 
  (bind (binding 13 "_x2c_callback_adapt_0") 

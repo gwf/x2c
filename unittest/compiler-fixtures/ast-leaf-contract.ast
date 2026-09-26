@@ -208,13 +208,11 @@
      (bindings (bind (binding 48 "_x2c_macro_cursor_output_0") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+      (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
              (ident (binding 49 "List_try_next"))) 
        (args (expr ("List") (ident (binding 46 "_x2c_macro_object_0"))) 
-        (expr (* "List") 
-         (op & (expr ("List") (ident (binding 47 "_x2c_macro_cursor_0"))))) 
-        (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 48 "_x2c_macro_cursor_output_0")))))))) 
+        (expr ("List") (ident (binding 47 "_x2c_macro_cursor_0"))) 
+        (expr ("Var") (ident (binding 48 "_x2c_macro_cursor_output_0")))))) 
      (block 
       (stmnt 
        (expr ("Var") 

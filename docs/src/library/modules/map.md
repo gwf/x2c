@@ -388,7 +388,7 @@ Source: `lib/map.x:178`
 <a id="Map.try_next"></a>
 #### Map.try_next
 
-`int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)`
+`int Map.try_next(Map map, unsigned &?cursor, Var &?key, Var &?val)`
 
 Yields the next occupied entry at or after `cursor`, advances it, and
 returns nonzero while entries remain.
@@ -416,7 +416,7 @@ interleave with other work; for an `Iter` use `Map.iter`, `Map.keys`, or
 ~Map ages = {"ada": 36, "grace": 45};
 unsigned cursor = 0;
 Var key, val;
-while (ages.try_next(&cursor, &key, &val))
+while (ages.try_next(cursor, key, val))
   printf("%s -> %s\n", key, val.repr());
 ```
 

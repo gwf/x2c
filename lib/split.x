@@ -243,7 +243,7 @@ meta native Split String.splits(String str, String sep) =>
     Split words = "ada lovelace".words();
     int cursor = 0;
     String word;
-    while (words.try_next(&cursor, &word)) printf("%s\n", word);
+    while (words.try_next(cursor, word)) printf("%s\n", word);
     ```
 
     This is what `foreach(String word, split)` lowers to; `Split.iter` is the
@@ -251,14 +251,14 @@ meta native Split String.splits(String str, String sep) =>
     Raises: `<alloc-fail>` while canonicalizing a nonempty field. `Null`
     arguments produce exhaustion without raising.
 */
-int Split.try_next(Split split, int *cursor, String *out) {
+int Split.try_next(Split split, int &?cursor, String &?out) {
   if (!split || !cursor || !out || !split.next) return 0;
   return split.next(split, cursor, out);
 }
 
 static int _iter_next(Iter iter, Var *out) {
   Split split = iter.obj, int cursor = iter.state, String value;
-  if (!split.try_next(&cursor, &value)) return 0;
+  if (!split.try_next(cursor, value)) return 0;
   iter.state = cursor;
   *out = value;
   return 1;

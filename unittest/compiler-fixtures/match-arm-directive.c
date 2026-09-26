@@ -182,13 +182,13 @@ int List_try_next(List, List *, Var *);
 List Var_list(Var);
 int main(void){
   x2c_initialize();  if(! _init_guard_) _file_init_(); {
-    List subject;  List _x2c_macro_object_0 = _62;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    List subject;  List _x2c_macro_object_0 = _62;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       subject = Var_list(_x2c_macro_cursor_output_0);  arms(subject);
     }
 
   }
   {
-    Var item;  List _x2c_macro_object_1 = _64;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    Var item;  List _x2c_macro_object_1 = _64;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1;
   {
     List _x2c_match_expr = Var_list(item);
@@ -209,7 +209,7 @@ int main(void){
 }
 }
 {
-  List subject;  List _x2c_macro_object_2 = _66;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+  List subject;  List _x2c_macro_object_2 = _66;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
     subject = Var_list(_x2c_macro_cursor_output_2);  defaults(subject);
   }
 

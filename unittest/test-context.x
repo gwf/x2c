@@ -271,7 +271,7 @@ static void context_exports_all_packed_containers(void) {
   String stored_int_key = NULL;
   int stored_int_value = 0;
   EXPECT_TRUE(string_int_map.try_next(
-    &int_cursor, &stored_int_key, &stored_int_value));
+    int_cursor, stored_int_key, stored_int_value));
   EXPECT_PTR_EQ(stored_int_key, String.new("packed-int-key-705"));
 
   for (int i = 0; i < 80; i++) {

@@ -373,7 +373,7 @@ static MapStringInt _prepare_string_int_export(
   unsigned cursor = 0;
   String key;
   int value;
-  while (map.try_next(&cursor, &key, &value)) {
+  while (map.try_next(cursor, key, value)) {
     key = source.export_nested(key);
     staged.set(key, value);
   }

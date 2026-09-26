@@ -44,7 +44,7 @@
 ( ProbeMapShortLong_truth ) ==> (( func (( ProbeMapShortLong ))) int )
 ( ProbeMapShortLong_try_del ) ==> (( func (( ProbeMapShortLong ) ( short ) ( opt-ref long ))) int )
 ( ProbeMapShortLong_try_get ) ==> (( func (( ProbeMapShortLong ) ( short ) ( opt-ref long ))) int )
-( ProbeMapShortLong_try_next ) ==> (( func (( ProbeMapShortLong ) ( * unsigned ) ( * short ) ( * long ))) int )
+( ProbeMapShortLong_try_next ) ==> (( func (( ProbeMapShortLong ) ( opt-ref unsigned )           ( opt-ref short ) ( opt-ref long ))) int )
 ( ProbeMapShortLong_updateindex ) ==> (( func (( ProbeMapShortLong ) ( short ) ( Symbol ) ( long ))) long )
 ( ProbeMapShortLong_var ) ==> (( func (( ProbeMapShortLong ))) Var )
 ( ProbeMapShortLong_write_repr ) ==> (( func (( ProbeMapShortLong ) ( Buffer ))) Buffer )

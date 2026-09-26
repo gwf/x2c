@@ -700,7 +700,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.try_next"></a>
 #### ArrayChar.try_next
 
-`int ArrayChar.try_next(ArrayChar array, int *cursor, char *out)`
+`int ArrayChar.try_next(ArrayChar array, int &?cursor, char &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1122,7 +1122,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.try_next"></a>
 #### ArrayDbl.try_next
 
-`int ArrayDbl.try_next(ArrayDbl array, int *cursor, double *out)`
+`int ArrayDbl.try_next(ArrayDbl array, int &?cursor, double &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1542,7 +1542,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.try_next"></a>
 #### ArrayFloat.try_next
 
-`int ArrayFloat.try_next(ArrayFloat array, int *cursor, float *out)`
+`int ArrayFloat.try_next(ArrayFloat array, int &?cursor, float &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1962,7 +1962,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.try_next"></a>
 #### ArrayInt.try_next
 
-`int ArrayInt.try_next(ArrayInt array, int *cursor, int *out)`
+`int ArrayInt.try_next(ArrayInt array, int &?cursor, int &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -2384,7 +2384,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.try_next"></a>
 #### ArrayLong.try_next
 
-`int ArrayLong.try_next(ArrayLong array, int *cursor, long *out)`
+`int ArrayLong.try_next(ArrayLong array, int &?cursor, long &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -2806,7 +2806,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.try_next"></a>
 #### ArrayShort.try_next
 
-`int ArrayShort.try_next(ArrayShort array, int *cursor, short *out)`
+`int ArrayShort.try_next(ArrayShort array, int &?cursor, short &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -3225,7 +3225,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.try_next"></a>
 #### ArrayString.try_next
 
-`int ArrayString.try_next(ArrayString array, int *cursor, String *out)`
+`int ArrayString.try_next(ArrayString array, int &?cursor, String &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative

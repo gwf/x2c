@@ -351,7 +351,8 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   $value $map.del($map, $key);
   $map $map.copy($map);
   $map $map.merge($map, $map);
-  int $map.try_next($map, unsigned *, $key *, $value *);
+  int $map.try_next(
+    $map map, unsigned &?cursor, $key &?key, $value &?val);
   int $map.truth($map);
   int $map.equal($map, $map);
 
@@ -390,7 +391,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
     packed = packed._core_new_capacity(2);
     unsigned cursor = 0;
     Var key, val;
-    while (entries.try_next(&cursor, &key, &val)) packed.set(key, val);
+    while (entries.try_next(cursor, key, val)) packed.set(key, val);
     return packed;
   }
 
@@ -555,7 +556,8 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
       follows bucket order, not insertion order, and structural mutation
       invalidates the cursor.
   */
-  int $map.try_next($map map, unsigned *cursor, $key *key, $value *val) {
+  int $map.try_next(
+    $map map, unsigned &?cursor, $key &?key, $value &?val) {
     return map._core_try_next(cursor, key, val);
   }
 
@@ -597,11 +599,11 @@ macro Unit $map.core.observe(
     unsigned cursor = 0, index = 0;
     $key key;
     $value value;
-    while (a.try_next(&cursor, &key, &value))
+    while (a.try_next(cursor, key, value))
       arecs[index++] = ($entry) { .key = key, .val = value };
     cursor = 0;
     index = 0;
-    while (b.try_next(&cursor, &key, &value))
+    while (b.try_next(cursor, key, value))
       brecs[index++] = ($entry) { .key = key, .val = value };
 
     qsort(arecs, asz, sizeof($entry), record_compare);
@@ -623,7 +625,7 @@ macro Unit $map.core.observe(
     $key key;
     $value value;
     int first = 1;
-    while (map.try_next(&cursor, &key, &value)) {
+    while (map.try_next(cursor, key, value)) {
       if (!first) out.write(", ");
       Var boxed_key = $box_key(key), boxed_value = $box_value(value);
       if (mode == <str>) {
@@ -663,7 +665,7 @@ macro Unit $map.typed.observe(
     unsigned cursor = 0;
     $key key;
     $value value;
-    while (map.try_next(&cursor, &key, &value))
+    while (map.try_next(cursor, key, value))
       boxed.setindex($box_key(key), $box_value(value));
     return boxed;
   }
@@ -741,7 +743,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     unsigned cursor = iter.state;
     $key key;
     $value val;
-    if (!map.try_next(&cursor, &key, &val)) return 0;
+    if (!map.try_next(cursor, key, val)) return 0;
     iter.state = cursor;
     *out = $box_value(val);
     return 1;
@@ -753,7 +755,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     unsigned cursor = iter.state;
     $key key;
     $value val;
-    if (!map.try_next(&cursor, &key, &val)) return 0;
+    if (!map.try_next(cursor, key, val)) return 0;
     iter.state = cursor;
     *out = $box_key(key);
     return 1;
@@ -765,7 +767,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     unsigned cursor = iter.state;
     $key key;
     $value val;
-    if (!map.try_next(&cursor, &key, &val)) return 0;
+    if (!map.try_next(cursor, key, val)) return 0;
     iter.state = cursor;
     Var boxed_key = $box_key(key), boxed_value = $box_value(val);
     *out = List_var(cons(boxed_key, cons(boxed_value, NULL)));

@@ -119,11 +119,10 @@
     (declare ("Var") (bindings (bind (binding 22 "_x2c_macro_item_1") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("Iter") (* "Var"))) int) 
+      (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
              (ident (binding 23 "Iter_try_next"))) 
        (args (expr ("Iter") (ident (binding 21 "_x2c_macro_iterator_1"))) 
-        (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 22 "_x2c_macro_item_1")))))))) 
+        (expr ("Var") (ident (binding 22 "_x2c_macro_item_1")))))) 
      (block 
       (stmnt 
        (expr (int) 
@@ -162,11 +161,10 @@
        (declare ("Var") (bindings (bind (binding 27 "_x2c_macro_item_0") ()))) 
        (while 
         (expr (int) 
-         (call (expr ((func (("Iter") (* "Var"))) int) 
+         (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
                 (ident (binding 23 "Iter_try_next"))) 
           (args (expr ("Iter") (ident (binding 25 "_x2c_macro_iterator_0"))) 
-           (expr (* "Var") 
-            (op & (expr ("Var") (ident (binding 27 "_x2c_macro_item_0")))))))) 
+           (expr ("Var") (ident (binding 27 "_x2c_macro_item_0")))))) 
         (block 
          (stmnt 
           (expr (int) 

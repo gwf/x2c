@@ -7,8 +7,8 @@ meta int protocol_adoption_probe(int offset) {
   struct Iter storage;
   Iter values = Var.iter(input, &storage);
   Var first, second, third, extra;
-  if (!values.try_next(&first) || !values.try_next(&second) ||
-      !values.try_next(&third) || values.try_next(&extra)) return -1;
+  if (!values.try_next(first) || !values.try_next(second) ||
+      !values.try_next(third) || values.try_next(extra)) return -1;
   return first.int() + second.int() + third.int() + offset;
 }
 

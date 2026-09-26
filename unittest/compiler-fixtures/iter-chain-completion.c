@@ -159,7 +159,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
       left = Var_int(Var_convert(_x2c_macro_item_1, 3453797));
       {
         int right;
@@ -171,7 +171,7 @@ int main(void){
         }
         );
         Var _x2c_macro_item_0;
-        while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+        while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
           right = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
           nested += left + right;
         }

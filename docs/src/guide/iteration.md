@@ -165,7 +165,7 @@ exhaustion.
 
 You read an iterator two ways:
 
-- `iter.try_next(&out)` is the preferred form. It returns success separately
+- `iter.try_next(out)` is the preferred form. It returns success separately
   from the payload, and writes `out` only when it returns nonzero.
 - `iter.next()` returns the element directly
   and `void` at exhaustion. It is unambiguous because no iterator may yield
@@ -180,7 +180,7 @@ consume their input, so build a fresh iterator for a second traversal.
 struct Iter storage;
 Iter counts = range(1, 4, 1, &storage);
 Var value;
-while (counts.try_next(&value))
+while (counts.try_next(value))
   printf("%d\n", value.int());
 ```
 

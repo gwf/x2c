@@ -914,7 +914,7 @@ typedef struct ErrorPolicyCapture {
 static int _policy_fill(Map policy, Symbol *pairs, int at, int capacity) {
   unsigned cursor = 0;
   Var key = void, value = void;
-  while (policy.try_next(&cursor, &key, &value)) {
+  while (policy.try_next(cursor, key, value)) {
     if (at + 2 > capacity) break;
     pairs[at++] = key;
     pairs[at++] = value;

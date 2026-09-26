@@ -45,7 +45,7 @@ Source: `lib/split.x:280`
 <a id="Split.try_next"></a>
 #### Split.try_next
 
-`int Split.try_next(Split split, int *cursor, String *out)`
+`int Split.try_next(Split split, int &?cursor, String &?out)`
 
 Yields the next field and advances a caller-owned position on success.
 Position must start at zero and thereafter retain only values written by
@@ -60,7 +60,7 @@ canonical `String` remains live until its actual owning pool is released.
 Split words = "ada lovelace".words();
 int cursor = 0;
 String word;
-while (words.try_next(&cursor, &word)) printf("%s\n", word);
+while (words.try_next(cursor, word)) printf("%s\n", word);
 ```
 
 This is what `foreach(String word, split)` lowers to; `Split.iter` is the

@@ -537,11 +537,11 @@ meta native Self Map.merge(Self map, Self other) => map._core_merge(other);
     ~Map ages = {"ada": 36, "grace": 45};
     unsigned cursor = 0;
     Var key, val;
-    while (ages.try_next(&cursor, &key, &val))
+    while (ages.try_next(cursor, key, val))
       printf("%s -> %s\n", key, val.repr());
     ```
 */
-int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val) =>
+int Map.try_next(Map map, unsigned &?cursor, Var &?key, Var &?val) =>
   map._core_try_next(cursor, key, val);
 
 /** Returns nonzero when `map` contains at least one entry.
@@ -569,7 +569,7 @@ static int _next(Iter iter, Var *out) {
   if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
-  if (!map.try_next(&cursor, &key, &val)) return 0;
+  if (!map.try_next(cursor, key, val)) return 0;
   iter.state = cursor;
   *out = val;
   return 1;
@@ -580,7 +580,7 @@ static int _keys_next(Iter iter, Var *out) {
   if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
-  if (!map.try_next(&cursor, &key, &val)) return 0;
+  if (!map.try_next(cursor, key, val)) return 0;
   iter.state = cursor;
   *out = key;
   return 1;
@@ -591,7 +591,7 @@ static int _enumerate_next(Iter iter, Var *out) {
   if (map == NULL) return 0;
   unsigned cursor = iter.state;
   Var key, val;
-  if (!map.try_next(&cursor, &key, &val)) return 0;
+  if (!map.try_next(cursor, key, val)) return 0;
   iter.state = cursor;
   *out = %($key $val);
   return 1;

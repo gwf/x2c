@@ -45,21 +45,21 @@ meta int cursor_snapshot(Map values) {
 meta int cursor_after_array(Array values) {
   int cursor = 0;
   Var item = 0;
-  while (values.try_next(&cursor, &item)) { }
+  while (values.try_next(cursor, item)) { }
   return cursor * 10 + (int) item;
 }
 
 meta int cursor_after_map(Map values) {
   unsigned cursor = 0;
   Var key = 0, value = 0;
-  while (values.try_next(&cursor, &key, &value)) { }
+  while (values.try_next(cursor, key, value)) { }
   return (int) value;
 }
 
 meta int cursor_after_list(List values) {
   List cursor = values;
   Var item = 0;
-  while (values.try_next(&cursor, &item)) { }
+  while (values.try_next(cursor, item)) { }
   return (int) item;
 }
 
@@ -68,7 +68,7 @@ meta int cursor_address(Array values) {
   {
     int cursor = 0;
     Var item = 0;
-    while (values.try_next(&cursor, &item)) {
+    while (values.try_next(cursor, item)) {
       Var *output = &item;
       *output = 7;
       total += (int) item;

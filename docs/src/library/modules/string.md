@@ -287,7 +287,7 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1768`
+Source: `lib/string.x:1770`
 
 <a id="String.join"></a>
 #### String.join
@@ -639,7 +639,7 @@ Source: `lib/string.x:760`
 <a id="String.try_next"></a>
 #### String.try_next
 
-`int String.try_next(String str, int *cursor, int *out)`
+`int String.try_next(String str, int &?cursor, int &?out)`
 
 Writes the next byte, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null `String`, a null

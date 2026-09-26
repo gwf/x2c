@@ -347,7 +347,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
 ) {
   $array $array.new(void);
   int $array.try_get($array array, int index, $element &?out);
-  int $array.try_next($array, int *, $element *);
+  int $array.try_next($array array, int &?cursor, $element &?out);
   inline $element $array.getindex($array, int);
   inline $element $array.setindex($array, int, $element);
   $element $array.push($array, $element);
@@ -398,11 +398,13 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
       zero without changing `cursor` or `out`. Structural mutation invalidates
       the cursor.
   */
-  int $array.try_next($array array, int *cursor, $element *out) {
-    if (array == NULL || !cursor || !out || *cursor < 0 ||
-        array.length > INT_MAX || *cursor >= (int) array.length) return 0;
-    *out = (($element *) array.bytes)[*cursor];
-    *cursor += 1;
+  int $array.try_next($array array, int &?cursor, $element &?out) {
+    if (!cursor) return 0;
+    if (!out) return 0;
+    if (array == NULL || cursor < 0 || array.length > INT_MAX ||
+        cursor >= (int) array.length) return 0;
+    out = (($element *) array.bytes)[cursor];
+    cursor += 1;
     return 1;
   }
 
@@ -786,7 +788,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     $array array = iter.obj.$unbox();
     int index = iter.state.int();
     $element element;
-    if (!array.try_next(&index, &element)) return 0;
+    if (!array.try_next(index, element)) return 0;
     *out = element;
     iter.state = index;
     return 1;

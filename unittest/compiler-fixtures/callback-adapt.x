@@ -39,7 +39,7 @@ int main(void) {
   struct Iter storage;
   Iter iter = callbacks[0].iter(boxed_values, &storage);
   Var item;
-  int advanced = iter.try_next(&item);
+  int advanced = iter.try_next(item);
   printf("%d %s %s %d %d %d\n",
          callbacks[0].owner == duplicate,
          callbacks[0].owner(boxed_text),

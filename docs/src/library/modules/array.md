@@ -254,7 +254,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:817`
+Source: `lib/array.x:819`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -546,7 +546,7 @@ Source: `lib/array.x:234`
 <a id="Array.try_next"></a>
 #### Array.try_next
 
-`int Array.try_next(Array array, int *cursor, Var *out)`
+`int Array.try_next(Array array, int &?cursor, Var &?out)`
 
 Writes the next element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null `Array`, a null
@@ -624,7 +624,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:823`
+Source: `lib/array.x:825`
 
 ## Advanced and interop API
 
@@ -651,7 +651,7 @@ Source: `lib/array.x:823`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:831`
+Source: `lib/array.x:833`
 
 <a id="Array.compare"></a>
 #### Array.compare

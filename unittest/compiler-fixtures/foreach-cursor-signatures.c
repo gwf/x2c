@@ -238,7 +238,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+    while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
       value = Var_int(Var_convert(_x2c_macro_item_3, 3453797));
       fallback_total += value;
     }
@@ -251,7 +251,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
+    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
       value = Var_int(Var_convert(_x2c_macro_item_4, 3453797));
       fallback_total += value;
     }
@@ -264,7 +264,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
       value = Var_int(Var_convert(_x2c_macro_item_5, 3453797));
       fallback_total += value;
     }
@@ -277,7 +277,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
+    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
       value = Var_int(Var_convert(_x2c_macro_item_6, 3453797));
       fallback_total += value;
     }
@@ -290,7 +290,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
+    while(Iter_try_next(_x2c_macro_iterator_7, &(_x2c_macro_item_7))){
       value = Var_int(Var_convert(_x2c_macro_item_7, 3453797));
       fallback_total += value;
     }
@@ -303,7 +303,7 @@ int main(void){
     }
     );
     Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
+    while(Iter_try_next(_x2c_macro_iterator_8, &(_x2c_macro_item_8))){
       value = Var_int(Var_convert(_x2c_macro_item_8, 3453797));
       fallback_total += value;
     }

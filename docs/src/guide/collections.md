@@ -1109,7 +1109,7 @@ exhaustion.
 Map ages = {"ada": 36, "grace": 45};
 unsigned cursor = 0;
 Var key, value;
-while (ages.try_next(&cursor, &key, &value))
+while (ages.try_next(cursor, key, value))
   printf("%s -> %s\n", key, value.repr());
 ```
 
@@ -1181,7 +1181,7 @@ int main(void) {
 
   unsigned cursor = 0;
   int key, value, total = 0;
-  while (counts.try_next(&cursor, &key, &value)) total += value;
+  while (counts.try_next(cursor, key, value)) total += value;
   printf("entries=%u total=%d\n", counts.len(), total);
   printf("label=%s\n", label.get("name"));
   return 0;

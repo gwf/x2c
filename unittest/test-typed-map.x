@@ -203,7 +203,7 @@ static void typed_map_traversal_copy_merge_and_equal(void) {
 
   unsigned cursor = 0;
   int key, val, visited = 0;
-  while (map.try_next(&cursor, &key, &val)) {
+  while (map.try_next(cursor, key, val)) {
     EXPECT_TRUE(key >= 0 && key < 64);
     if (key >= 0 && key < 64) {
       EXPECT_FALSE(seen[key]);
@@ -245,10 +245,10 @@ static void typed_map_missing_and_null_status_paths(void) {
   EXPECT_FALSE(map.try_get(4, NULL));
   EXPECT_FALSE(missing.try_get(4, out));
   EXPECT_FALSE(missing.try_del(4, out));
-  EXPECT_FALSE(missing.try_next(&cursor, &key, &val));
-  EXPECT_FALSE(map.try_next(NULL, &key, &val));
-  EXPECT_FALSE(map.try_next(&cursor, NULL, &val));
-  EXPECT_FALSE(map.try_next(&cursor, &key, NULL));
+  EXPECT_FALSE(missing.try_next(cursor, key, val));
+  EXPECT_FALSE(map.try_next(NULL, key, val));
+  EXPECT_FALSE(map.try_next(cursor, NULL, val));
+  EXPECT_FALSE(map.try_next(cursor, key, NULL));
   EXPECT_INT_EQ(cursor, 0);
   EXPECT_INT_EQ(key, 61);
   EXPECT_INT_EQ(val, 62);
@@ -305,7 +305,7 @@ static void typed_map_independent_key_value_widths(void) {
   long key;
   double value, total = 0.0;
   int visited = 0;
-  while (map.try_next(&cursor, &key, &value)) {
+  while (map.try_next(cursor, key, value)) {
     total += value;
     visited++;
   }
@@ -373,7 +373,7 @@ static void typed_map_string_growth_traversal_and_errors(void) {
   unsigned cursor = 0;
   String key = NULL, val = NULL;
   int visited = 0;
-  while (map.try_next(&cursor, &key, &val)) {
+  while (map.try_next(cursor, key, val)) {
     EXPECT_TRUE(key.startswith("key-"));
     visited++;
   }

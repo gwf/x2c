@@ -131,10 +131,10 @@
     (bindings 
      (op = (bind (binding 31 "advanced") ()) 
       (expr (int) 
-       (call (expr ((func (("Iter") (* "Var"))) (int)) 
+       (call (expr ((func (("Iter") (opt-ref "Var"))) (int)) 
               (ident (binding 32 "Iter_try_next"))) 
         (args (expr ("Iter") (ident (binding 29 "iter"))) 
-         (expr (* "Var") (op & (expr ("Var") (ident (binding 30 "item")))))))))))) 
+         (expr ("Var") (ident (binding 30 "item")))))))))) 
   (at 18 
    (stmnt 
     (expr () 

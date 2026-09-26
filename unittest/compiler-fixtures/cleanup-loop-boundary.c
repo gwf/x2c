@@ -147,7 +147,7 @@ static int continue_inside_foreach(void){
   }
   ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
     {
-      Var volatile item;  List _x2c_macro_object_0 = _5;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      Var volatile item;  List _x2c_macro_object_0 = _5;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         item = _x2c_macro_cursor_output_0; {
           if(Var_int(item) == 1) continue;  if(Var_int(item) == 2){
             static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_foreach",.line = 49};  x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 0);  __builtin_unreachable();

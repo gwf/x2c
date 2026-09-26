@@ -470,7 +470,7 @@ allocating, so a loop can iterate without touching the allocator:
 struct Iter storage;
 Iter walk = items.iter(&storage);
 Var value;
-while (walk.try_next(&value)) printf("%ld\n", value.integer());
+while (walk.try_next(value)) printf("%ld\n", value.integer());
 ```
 
 `storage` is an automatic variable. Nothing here needs freeing or a scope;
