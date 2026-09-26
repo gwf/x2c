@@ -1,0 +1,8 @@
+/* meta-iterator-explicit-storage.xmacro -- the meta functions
+   meta-iterator-explicit-storage.x imports. */
+
+meta int explicit_storage(int offset) {
+  Map values = {"a": 1};
+  struct Iter storage;
+  return values.keys(&storage).count() + offset;
+}

@@ -5,27 +5,7 @@
 
 struct MetaPoint { int x; int y; };
 
-meta struct MetaPoint mr_make(int x, int y) {
-  struct MetaPoint result = { .x = x, .y = y };
-  return result;
-}
-
-meta int mr_sum(struct MetaPoint point) {
-  point.x += 1;
-  return point.x + point.y;
-}
-
-meta int mr_probe(int seed) {
-  struct MetaPoint original = mr_make(seed, seed + 1);
-  struct MetaPoint copy = original;
-  copy.x = 20;
-  int *field = &original.y;
-  *field += 2;
-  struct MetaPoint *address = &copy;
-  address->y = 30;
-  return original.x * 1000 + original.y * 100 + copy.x * 10 +
-         copy.y + mr_sum(original);
-}
+$(import "meta-records.xmacro")
 
 int main(int argc, char **argv) {
   (void) argv;

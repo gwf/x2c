@@ -1,0 +1,8 @@
+/* comptime-declines-static-initializer-address.xmacro -- the meta functions
+   comptime-declines-static-initializer-address.x imports. */
+
+meta int *remember(int seed) {
+  int value = seed;
+  static int *saved = &value;
+  return saved;
+}

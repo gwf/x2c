@@ -1,0 +1,6 @@
+/* meta-native-handle-result.xmacro -- the meta functions
+   meta-native-handle-result.x imports. */
+
+meta Widget leak(void) {
+  $scope() { return widget_new(3); }
+}

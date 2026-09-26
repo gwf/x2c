@@ -5,12 +5,7 @@
 
 struct Node { int value; struct Node *next; };
 
-meta struct Node *make_node(int value) {
-  struct Node *node = Scope.malloc(sizeof *node);
-  node->value = value;
-  node->next = NULL;
-  return node;
-}
+$(import "meta-heap-address-result.xmacro")
 
 int main(void) {
   struct Node *node = $make_node(3);

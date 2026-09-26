@@ -1,0 +1,8 @@
+/* comptime-declines-local-address-static.xmacro -- the meta functions
+   comptime-declines-local-address-static.x imports. */
+
+meta static int remember(int seed) {
+  int value = seed;
+  saved = &value;
+  return *saved;
+}

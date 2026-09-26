@@ -5,6 +5,6 @@
 
 typedef struct Pair { int a, b; } Pair;
 
-meta static Pair pair(int n) => (Pair) {n, n};
+$(import "meta-record-value-result.xmacro")
 
 int main(void) { return $pair(1).a; }

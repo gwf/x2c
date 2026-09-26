@@ -1,0 +1,10 @@
+/* meta-payload-readers.xmacro -- the meta functions
+   meta-payload-readers.x imports. */
+
+meta int payload_readers(int unused) {
+  (void) unused;
+  Var integer = 7, floating = 3.5, text = "x";
+  return integer.integer() == 7 && floating.floating() == 3.5
+    && floating.integer() == 0 && integer.floating() == 0.0
+    && text.integer() == 0 && text.floating() == 0.0;
+}

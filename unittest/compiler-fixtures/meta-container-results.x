@@ -7,38 +7,7 @@ typedef List Values;
 typedef String Text;
 typedef Symbol Key;
 
-meta static Items meta_items(void) {
-  return [(unsigned char) 255, "ready", <key>, %(3 4)];
-}
-meta static Entries meta_entries(void) {
-  Map values = {};
-  values[<name>] = "ready";
-  values["number"] = (short) -7;
-  values[%(1 2)] = 42;
-  return values;
-}
-meta static Array meta_empty_array(void) { return []; }
-meta static Map meta_empty_map(void) { return {}; }
-meta static Box meta_boxed(void) { return [9]; }
-meta static Array meta_keep(Array value) { return value; }
-
-meta static Map meta_nested(void) {
-  Map values = {};
-  values["rows"] = [[1, 2], [(unsigned char) 3, 2.5]];
-  values["index"] = {even: [0, 2], odd: [1]};
-  values["scalars"] = [0.25f, (short) -7, %(x [9])];
-  values["blank"] = (Map) {};
-  return values;
-}
-meta static Map meta_brace_entry(void) {
-  Map values = {};
-  values["k"] = {};
-  return values;
-}
-
-meta static Values meta_values(void) { return %(6 7); }
-meta static Text meta_text(void) { return "ready"; }
-meta static Key meta_key(void) { return <key>; }
+$(import "meta-container-results.xmacro")
 
 static Array items(void) { return $meta_items(); }
 static Map entries(void) { return $meta_entries(); }

@@ -7,9 +7,6 @@
 
 #include "x2c.x"
 
-meta static int *either(int flag, int *other) {
-  int value = flag;
-  return flag ? other : &value;
-}
+$(import "comptime-declines-local-address-conditional.xmacro")
 
 int main(void) { return 0; }

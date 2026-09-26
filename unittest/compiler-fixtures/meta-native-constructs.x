@@ -18,43 +18,7 @@ struct Bits { unsigned value : 3; };
 enum Wide { SMALL = 0, WIDE = 0x100000000 };
 struct Holder { enum Wide wide; int tail; };
 
-meta int jump(int n) {
-  if (n) goto done;
-  return 1;
-done:
-  return 2;
-}
-
-meta int fall(int n) {
-  int s = 0;
-  switch (n) {
-    case 1:
-      s = 1;
-    case 2:
-      s = s + 2;
-      break;
-  }
-  return s;
-}
-
-meta int offset(int x) => x + base;
-
-meta int limit(void) { return LIMIT; }
-
-meta int bits(void) {
-  struct Bits value = { .value = 2 };
-  return value.value;
-}
-
-meta int tail(void) {
-  struct Holder holder = {0, 9};
-  return holder.tail;
-}
-
-meta int first(void) {
-  static int values[2] = {1, 2};
-  return values[0];
-}
+$(import "meta-native-constructs.xmacro")
 
 int main(void) {
   printf("goto %d %d\n", $jump(0), $jump(1));

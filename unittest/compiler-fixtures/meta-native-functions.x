@@ -5,8 +5,7 @@
 
 class MetaCount int;
 
-meta static double native_total(double value) => sin(value) + sqrt(4.0);
-meta static int class_value(MetaCount value) => value + 1;
+$(import "meta-native-functions.xmacro")
 
 int main(int argc, char **argv) {
   (void) argv;

@@ -1,9 +1,5 @@
 #include "x2c.x"
 
-meta int *remember(int seed) {
-  int value = seed;
-  static int *saved = &value;
-  return saved;
-}
+$(import "comptime-declines-static-initializer-address.xmacro")
 
 int main(void) { return 0; }

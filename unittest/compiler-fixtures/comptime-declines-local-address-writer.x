@@ -8,28 +8,6 @@
 
 #include "x2c.x"
 
-meta static Buffer array_text(Array a, Buffer buffer) =>
-  a.write_repr(a.write_str(buffer));
-
-meta static Buffer map_text(Map m, Buffer buffer) =>
-  m.write_repr(m.write_str(buffer));
-
-meta static Buffer array_leak(Array a) {
-  struct Buffer buffer = {0};
-  return a.write_str(&buffer);
-}
-
-meta static Buffer map_leak(Map m) {
-  struct Buffer buffer = {0};
-  return m.write_repr(&buffer);
-}
-
-meta static Buffer buffer_text(Buffer buffer) =>
-  buffer.write("a").newline_indent();
-
-meta static Buffer buffer_leak(void) {
-  struct Buffer buffer = {0};
-  return Buffer.write(&buffer, "a");
-}
+$(import "comptime-declines-local-address-writer.xmacro")
 
 int main(void) { return 0; }

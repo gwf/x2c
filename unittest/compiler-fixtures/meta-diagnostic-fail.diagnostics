@@ -1,12 +1,12 @@
-unittest/compiler-fixtures/meta-diagnostic-fail.x:35:22: macro: this argument must be one word
+unittest/compiler-fixtures/meta-diagnostic-fail.x:16:22: macro: this argument must be one word
   String word(void) => $probe.word(seconds * 2);
                        ^
 
-unittest/compiler-fixtures/meta-diagnostic-fail.x:38:3: macro: this statement needs one word
+unittest/compiler-fixtures/meta-diagnostic-fail.x:19:3: macro: this statement needs one word
     $probe.check(seconds * 2);
     ^
 
-unittest/compiler-fixtures/meta-diagnostic-fail.x:41:24: macro: the nested helper failed
+unittest/compiler-fixtures/meta-diagnostic-fail.x:22:24: macro: the nested helper failed
   String nested(void) => $probe.nested(seconds);
                          ^
   note: text: seconds

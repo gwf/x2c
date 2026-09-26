@@ -11,17 +11,7 @@ meta static int mg_counter = 10;
 typedef int meta;
 meta ordinary_meta = 7;
 
-meta double mg_read_pi(void) => mg_pi;
-meta int mg_next(void) { mg_counter += 1; return mg_counter; }
-meta int mg_pointer_next(void) {
-  int *cell = &mg_counter;
-  *cell = *cell + 1;
-  return *cell;
-}
-meta double mg_pointer_pi(void) {
-  const double *cell = &mg_pi;
-  return *cell;
-}
+$(import "meta-globals.xmacro")
 
 int main(void) {
   printf("%.2f %d %d %d %.2f %d %d\n",

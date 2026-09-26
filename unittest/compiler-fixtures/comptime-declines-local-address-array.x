@@ -7,10 +7,6 @@
 
 #include "x2c.x"
 
-meta static int *numbers(int seed) {
-  int values[4];
-  values[0] = seed;
-  return values;
-}
+$(import "comptime-declines-local-address-array.xmacro")
 
 int main(void) { return 0; }

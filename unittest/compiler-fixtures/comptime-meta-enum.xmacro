@@ -1,0 +1,14 @@
+/* comptime-meta-enum.xmacro -- the meta functions
+   comptime-meta-enum.x imports. */
+
+meta int me_k(void) => K;
+
+meta int me_color(int which) {
+  switch (which) {
+    case 0: return RED;
+    case 1: return GREEN;
+    case 2: return BLUE;
+    case 3: return VIOLET;
+  }
+  return LAST;
+}
