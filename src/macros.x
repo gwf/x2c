@@ -2090,6 +2090,11 @@ int Compiler.bind_native_meta(Compiler c, String name) {
   return c.macro_lisp.try_get(name, bound);
 }
 
+static int _groups_meta(Compiler c);
+static int _reaches_compile_time(Compiler c, Var node);
+static void _group_function(
+  Compiler c, List fn, String declined, Token marker);
+
 /** Installs a prototype-only `meta` function from the compiler's trusted
     native target registry. The declaration keeps its ordinary runtime form.
 */
@@ -2103,11 +2108,6 @@ void Compiler.install_native_meta_function(
   List signature = c.func_signature(type);
   _bind_native_meta(c, name, signature, marker);
 }
-
-static int _groups_meta(Compiler c);
-static int _reaches_compile_time(Compiler c, Var node);
-static void _group_function(
-  Compiler c, List fn, String declined, Token marker);
 
 /** Installs a `meta` function in the macro session under its own name.
     A function that reaches a compiler operation has no runtime form, and
@@ -2615,6 +2615,13 @@ static int _bind_meta_group(Compiler c, String name, Token site) {
         declined = reason is <string> ? reason : NULL;
       }
   if (!pending) return 0;
+  /* A `meta static` value that lowered code already changed lives in the
+     session, which staged code does not read, so such a group stays
+     lowered for the rest of the unit. */
+  if ("<lowered>" in c.meta_group_bound) {
+    foreach (List entry, c.meta_group)
+      match (entry) case %(static *): return 0;
+  }
   /* A group that did not stage is tried again only once it has grown. */
   String attempt = %"<failed ${c.meta_group.len()}>";
   String module = attempt in c.meta_group_bound ? NULL : _stage_meta_group(c);
@@ -2655,6 +2662,8 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
     case %(expr ? (meta-call (expr ? (ident (binding ? ?(String name))))
                              (args *arguments))):
       if (!c.macro_stack || !arguments) _bind_meta_group(c, name, site);
+      else if (!(name in c.meta_group_bound))
+        c.meta_group_bound["<lowered>"] = 1;
   Var form = c.lower_meta_expression(expression);
   if (form is void)
     c.report_error(

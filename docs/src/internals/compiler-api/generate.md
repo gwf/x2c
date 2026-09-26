@@ -13,6 +13,7 @@ Generate C headers and source files.
 | Function | Summary |
 | --- | --- |
 | [`generate_code`](#generate_code) | Writes the generated C header and source for one lowered translation unit. |
+| [`generate_code_text`](#generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
@@ -34,7 +35,17 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:1228`
+Source: `src/generate.x:1267`
+
+#### generate_code_text
+
+`List generate_code_text(Compiler c, List ast, String basename)`
+
+Returns the generated header and source of the lowered `ast` as `(hfile
+htext cfile ctext)`, named from `basename`, without writing them. It
+affects the compiler as `generate_code` does.
+
+Source: `src/generate.x:1253`
 
 ### `Compiler`
 
@@ -74,7 +85,7 @@ Source: `src/generate.x:839`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1273`
+Source: `src/generate.x:1286`
 
 ## Design notes
 

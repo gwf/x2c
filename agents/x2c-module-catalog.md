@@ -119,11 +119,12 @@ Public functions:
 `Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
 `Compiler.select_declaration_defaults`, `Compiler.shallow_parse`,
 `Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.full_parse`, `Compiler.cache`,
-`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
-`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`match_value_is_static`, `Compiler.match_pattern_is_static`,
-`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.update_source_visibility`, `ast_collect_binding_references`,
+`Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
+`Compiler.cache_literal_var`, `Compiler.cache_literal_list`,
+`Compiler.match_pattern_value`, `match_value_is_static`,
+`Compiler.match_pattern_is_static`, `match_value_head`,
+`match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
 `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
@@ -242,8 +243,8 @@ generate C headers and source files.
 
 Public functions:
 
-`Compiler.definition_rows`, `Compiler.dump_definitions`, `generate_code`,
-`Compiler.init_statements`
+`Compiler.definition_rows`, `Compiler.dump_definitions`, `generate_code_text`,
+`generate_code`, `Compiler.init_statements`
 
 ### [src/install.x](../src/install.x)
 
@@ -324,17 +325,18 @@ Public functions:
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.record_meta_definition`, `Compiler.record_meta_static`,
-`Compiler.record_meta_type`, `Compiler.evaluate_meta_expression`,
-`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
-`Compiler.macro_tag_name`, `Compiler.peek_macro_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
-`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.use_meta_toolchain`, `Compiler.report_unstaged_meta`,
+`Compiler.record_meta_static`, `Compiler.record_meta_import`,
+`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
+`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
+`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
