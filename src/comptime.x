@@ -187,33 +187,32 @@ struct LowerCursor {
   int object, cursor, item, value;
 };
 
-static int _lower_cursor(Var test, struct LowerCursor &walk) {
-  match (test) {
-    case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
-          (args (expr ? (ident (binding ?(int object) ?)))
-            (expr ? (op & (expr ? (ident (binding ?(int cursor) ?)))))
-            (expr ? (op & (expr ? (ident (binding ?(int item) ?)))))))): {
-      if (name != "List_try_next" && name != "Array_try_next") return 0;
-      walk.kind = name == "List_try_next" ? <list> : <array>;
-      walk.object = object;
-      walk.cursor = cursor;
-      walk.item = item;
-      walk.value = 0;
-      return 1;
-    }
-    case %(expr ? (call (expr ? (ident (binding ? "Map_try_next")))
-          (args (expr ? (ident (binding ?(int object) ?)))
-            (expr ? (op & (expr ? (ident (binding ?(int cursor) ?)))))
-            (expr ? (op & (expr ? (ident (binding ?(int item) ?)))))
-            (expr ? (op & (expr ? (ident (binding ?(int value) ?)))))))): {
-      walk.kind = <map>;
-      walk.object = object;
-      walk.cursor = cursor;
-      walk.item = item;
-      walk.value = value;
-      return 1;
-    }
+/* A cursor argument names its local directly when the parameter is a
+   reference, or through `&` when it is a pointer. */
+static int _lower_cursor_local(Var argument) {
+  match (argument) {
+    case %(expr ? (op & ?inner)): return _lower_cursor_local(inner);
+    case %(expr ? (ident (binding ?(int id) ?))): return id;
   }
+  return 0;
+}
+
+static int _lower_cursor(Var test, struct LowerCursor &walk) {
+  match (test)
+    case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
+          (args (expr ? (ident (binding ?(int object) ?))) *rest))): {
+      if (name == "List_try_next" || name == "Array_try_next")
+        walk.kind = name == "List_try_next" ? <list> : <array>;
+      else if (name == "Map_try_next") walk.kind = <map>;
+      else return 0;
+      int arity = walk.kind == <map> ? 3 : 2;
+      if (rest.len() != arity) return 0;
+      walk.object = object;
+      walk.cursor = _lower_cursor_local(rest[0]);
+      walk.item = _lower_cursor_local(rest[1]);
+      walk.value = arity == 3 ? _lower_cursor_local(rest[2]) : 0;
+      return walk.cursor && walk.item && (arity == 2 || walk.value);
+    }
   return 0;
 }
 

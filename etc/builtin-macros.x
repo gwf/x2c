@@ -108,7 +108,10 @@ List builtin_foreach_cursor_spec(List collection_type) {
   if (!builtin_foreach_valid_outputs(outputs)) return %();
   List output_types = outputs.map(%!(Var output) =>
     builtin_foreach_element(output));
-  return %($function $cursor_type $output_types);
+  /* A fourth element marks reference parameters. */
+  if (cursor_parameter.car() == <*>)
+    return %($function $cursor_type $output_types);
+  return %($function $cursor_type $output_types reference);
 }
 
 $builtin.emit()
@@ -124,18 +127,22 @@ List builtin_foreach_cursor_loop(List declaration, List collection,
   List body, List targets, List collection_type, List spec, Var object,
   Var cursor) {
   List function = spec[0], cursor_type = spec[1], types = spec[2];
+  int by_reference = spec.len() > 3;
   List outputs = types.map(%!(Var type) =>
     %($type ${builtin_foreach_unique("cursor_output")}));
   List values = outputs.map(%!(List record) =>
     builtin_foreach_expr(record[0], record[1]));
-  List addresses = values.map(%!(List value) =>
+  /* A reference parameter takes the object itself; a pointer takes its
+     address. */
+  List addresses = by_reference ? values : values.map(%!(List value) =>
     builtin_foreach_address(value));
   List declarations = outputs.map(%!(List record) =>
     builtin_foreach_declare(record[0], record[1], %()));
   List object_expression = builtin_foreach_expr(collection_type, object);
   List cursor_expression = builtin_foreach_expr(cursor_type, cursor);
-  List arguments = %($object_expression
-    ${builtin_foreach_address(cursor_expression)} @addresses);
+  List cursor_argument = by_reference ? cursor_expression
+    : builtin_foreach_address(cursor_expression);
+  List arguments = %($object_expression $cursor_argument @addresses);
   List condition = x2c_expr_call(function, arguments);
   List assignments = builtin_foreach_cursor_assignments(targets, values);
   List loop_body = %(block @assignments $body);
@@ -177,8 +184,11 @@ List builtin_foreach_general_loop(List declaration, List collection,
   List initializer = builtin_foreach_complete(constructor
     ? builtin_foreach_iter_call(constructor, collection) : collection);
   List next = builtin_foreach_reference("Iter_try_next");
+  List output = builtin_foreach_parameters(x2c_syntax_type(next))[1];
+  List item_argument = output.car() == <*>
+    ? builtin_foreach_address(item_expression) : item_expression;
   List condition = x2c_expr_call(next, %($iterator_expression
-    ${builtin_foreach_address(item_expression)}));
+    $item_argument));
   List assignments = targets.len() == 1
     ? %(${builtin_foreach_assign(targets[0], item_expression)})
     : builtin_foreach_pair_assignments(targets, item_expression, pair);

@@ -292,13 +292,38 @@
                                                              hold-7)))
                                                           (quote ()))
                                                     (true ((lambda (hold-10)
-                                                            (cons (List_var
-                                                                   hold-3)
-                                                             (cons (List_var
-                                                                    hold-8)
-                                                              (cons (List_var
-                                                                     hold-10)
-                                                               (quote ())))))
+                                                            (cond ((C.true?
+                                                                    (_binary
+                                                                     (List_car
+                                                                      hold-6)
+                                                                     (quote ==)
+                                                                     (quote *)))
+                                                                   (cons (
+                                                                          List_var
+                                                                          hold-3)
+                                                                    (cons (
+                                                                           List_var
+
+                                                                           hold-8)
+                                                                     (cons (
+                                                                            List_var
+
+                                                                            hold-10)
+                                                                      (quote ())))))
+                                                             (true (cons (
+                                                                          List_var
+                                                                          hold-3)
+                                                                    (cons (
+                                                                           List_var
+
+                                                                           hold-8)
+                                                                     (cons (
+                                                                            List_var
+
+                                                                            hold-10)
+                                                                      (quote
+                                                                       (
+                                                                        reference))))))))
                                                            (List_map hold-7
                                                             (lambda (arg-9)
                                                              (
@@ -330,10 +355,10 @@
   ((lambda (hold-9)
     ((lambda (hold-10)
       ((lambda (hold-11)
-        ((lambda (hold-13)
-          ((lambda (hold-15)
-            ((lambda (hold-17)
-              ((lambda (hold-19)
+        ((lambda (hold-12)
+          ((lambda (hold-14)
+            ((lambda (hold-16)
+              ((lambda (hold-18)
                 ((lambda (hold-20)
                   ((lambda (hold-21)
                     ((lambda (hold-22)
@@ -341,50 +366,56 @@
                         ((lambda (hold-24)
                           ((lambda (hold-25)
                             ((lambda (hold-26)
-                              (cons (List_var
-                                     (cons (quote block)
-                                      (cons (List_var arg-1)
-                                       (cons (List_var
-                                              (builtin_foreach_declare arg-5
-                                               arg-7 arg-2))
-                                        (cons (List_var
-                                               (builtin_foreach_declare hold-10
-                                                arg-8 hold-26))
-                                         (append hold-19
-                                          (cons (List_var
-                                                 (cons (quote while)
-                                                  (cons (List_var hold-23)
-                                                   (cons (List_var hold-25)
-                                                    (quote ()))))) (quote ()))))))))
-                               (quote ())))
-                             (C.ternary (List_equal hold-10 arg-5) hold-20
-                              (x2c_literal_int 0))))
-                           (cons (quote block)
-                            (append hold-24 (cons (List_var arg-3) (quote ()))))))
-                         (builtin_foreach_cursor_assignments arg-4 hold-15)))
-                       (x2c_expr_call hold-9 hold-22)))
-                     (cons (List_var hold-20)
-                      (cons (List_var (builtin_foreach_address hold-21))
-                       (append hold-17 (quote ()))))))
-                   (builtin_foreach_expr hold-10 arg-8)))
-                 (builtin_foreach_expr arg-5 arg-7)))
-               (List_map hold-13
-                (lambda (arg-18)
-                 (builtin_foreach_declare (List_getindex arg-18 0)
-                  (List_getindex arg-18 1) (quote ()))))))
-             (List_map hold-15
-              (lambda (arg-16) (builtin_foreach_address arg-16)))))
-           (List_map hold-13
-            (lambda (arg-14)
-             (builtin_foreach_expr (List_getindex arg-14 0)
-              (List_getindex arg-14 1))))))
-         (List_map hold-11
-          (lambda (arg-12)
-           (cons arg-12
-            (cons (builtin_foreach_unique
-                   (C.address "cursor_output" (quote string)))
-             (quote ()))))))) (List_getindex arg-6 2)))
-     (List_getindex arg-6 1))) (List_getindex arg-6 0))))
+                              ((lambda (hold-27)
+                                ((lambda (hold-28)
+                                  (cons (List_var
+                                         (cons (quote block)
+                                          (cons (List_var arg-1)
+                                           (cons (List_var
+                                                  (builtin_foreach_declare arg-5
+                                                   arg-7 arg-2))
+                                            (cons (List_var
+                                                   (builtin_foreach_declare
+                                                    hold-10 arg-8 hold-28))
+                                             (append hold-20
+                                              (cons (List_var
+                                                     (cons (quote while)
+                                                      (cons (List_var hold-25)
+                                                       (cons (List_var hold-27)
+                                                        (quote ())))))
+                                               (quote ())))))))) (quote ())))
+                                 (C.ternary (List_equal hold-10 arg-5) hold-21
+                                  (x2c_literal_int 0))))
+                               (cons (quote block)
+                                (append hold-26
+                                 (cons (List_var arg-3) (quote ()))))))
+                             (builtin_foreach_cursor_assignments arg-4
+                              hold-16))) (x2c_expr_call hold-9 hold-24)))
+                         (cons (List_var hold-21)
+                          (cons (List_var hold-23) (append hold-18 (quote ()))))))
+                       (C.ternary hold-12 hold-22
+                        (builtin_foreach_address hold-22))))
+                     (builtin_foreach_expr hold-10 arg-8)))
+                   (builtin_foreach_expr arg-5 arg-7)))
+                 (List_map hold-14
+                  (lambda (arg-19)
+                   (builtin_foreach_declare (List_getindex arg-19 0)
+                    (List_getindex arg-19 1) (quote ()))))))
+               (C.ternary hold-12 hold-16
+                (List_map hold-16
+                 (lambda (arg-17) (builtin_foreach_address arg-17))))))
+             (List_map hold-14
+              (lambda (arg-15)
+               (builtin_foreach_expr (List_getindex arg-15 0)
+                (List_getindex arg-15 1))))))
+           (List_map hold-11
+            (lambda (arg-13)
+             (cons arg-13
+              (cons (builtin_foreach_unique
+                     (C.address "cursor_output" (quote string)))
+               (quote ()))))))) (_binary (List_len arg-6) (quote >) 3)))
+       (List_getindex arg-6 2))) (List_getindex arg-6 1)))
+   (List_getindex arg-6 0))))
 (def builtin_foreach_pair_assignments
  (lambda (arg-1 arg-2 arg-3)
   ((lambda (hold-4)
@@ -422,33 +453,43 @@
                        ((lambda (hold-17)
                          ((lambda (hold-18)
                            ((lambda (hold-19)
-                             (cons (List_var
-                                    (cons (quote block)
-                                     (cons (List_var arg-1)
-                                      (cons (List_var
-                                             (builtin_foreach_declare
-                                              (quote ("Iter")) arg-6 hold-15))
-                                       (cons (List_var
-                                              (builtin_foreach_declare
-                                               (quote ("Var")) arg-7 (quote ())))
-                                        (cons (List_var
-                                               (cons (quote while)
-                                                (cons (List_var hold-17)
-                                                 (cons (List_var hold-19)
-                                                  (quote ()))))) (quote ())))))))
-                              (quote ())))
-                            (cons (quote block)
-                             (append hold-18 (cons (List_var arg-3) (quote ()))))))
-                          (C.ternary (_binary (List_len arg-4) (quote ==) 1)
-                           (cons (List_var
-                                  (builtin_foreach_assign
-                                   (List_getindex arg-4 0) hold-14)) (quote ()))
-                           (builtin_foreach_pair_assignments arg-4 hold-14
-                            arg-8))))
-                        (x2c_expr_call hold-16
-                         (cons (List_var hold-13)
-                          (cons (List_var (builtin_foreach_address hold-14))
-                           (quote ()))))))
+                             ((lambda (hold-20)
+                               ((lambda (hold-21)
+                                 (cons (List_var
+                                        (cons (quote block)
+                                         (cons (List_var arg-1)
+                                          (cons (List_var
+                                                 (builtin_foreach_declare
+                                                  (quote ("Iter")) arg-6 hold-15))
+                                           (cons (List_var
+                                                  (builtin_foreach_declare
+                                                   (quote ("Var")) arg-7
+                                                   (quote ())))
+                                            (cons (List_var
+                                                   (cons (quote while)
+                                                    (cons (List_var hold-19)
+                                                     (cons (List_var hold-21)
+                                                      (quote ()))))) (quote ())))))))
+                                  (quote ())))
+                                (cons (quote block)
+                                 (append hold-20
+                                  (cons (List_var arg-3) (quote ()))))))
+                              (C.ternary (_binary (List_len arg-4) (quote ==) 1)
+                               (cons (List_var
+                                      (builtin_foreach_assign
+                                       (List_getindex arg-4 0) hold-14))
+                                (quote ()))
+                               (builtin_foreach_pair_assignments arg-4 hold-14
+                                arg-8))))
+                            (x2c_expr_call hold-16
+                             (cons (List_var hold-13)
+                              (cons (List_var hold-18) (quote ()))))))
+                          (C.ternary
+                           (_binary (List_car hold-17) (quote ==) (quote *))
+                           (builtin_foreach_address hold-14) hold-14)))
+                        (List_getindex
+                         (builtin_foreach_parameters (x2c_syntax_type hold-16))
+                         1)))
                       (builtin_foreach_reference
                        (C.address "Iter_try_next" (quote string)))))
                     (builtin_foreach_complete
@@ -459,40 +500,50 @@
                 (builtin_foreach_expr (quote ("Iter")) arg-6)))
               (builtin_foreach_reference
                (String_add hold-11 (quote "_enumerate")))))
-       (true ((lambda (hold-20)
-               ((lambda (hold-21)
-                 ((lambda (hold-22)
-                   ((lambda (hold-23)
-                     ((lambda (hold-24)
-                       ((lambda (hold-25)
-                         ((lambda (hold-26)
-                           (cons (List_var
-                                  (cons (quote block)
-                                   (cons (List_var arg-1)
-                                    (cons (List_var
-                                           (builtin_foreach_declare
-                                            (quote ("Iter")) arg-6 hold-22))
-                                     (cons (List_var
-                                            (builtin_foreach_declare
-                                             (quote ("Var")) arg-7 (quote ())))
-                                      (cons (List_var
-                                             (cons (quote while)
-                                              (cons (List_var hold-24)
-                                               (cons (List_var hold-26)
-                                                (quote ()))))) (quote ())))))))
-                            (quote ())))
-                          (cons (quote block)
-                           (append hold-25 (cons (List_var arg-3) (quote ()))))))
-                        (C.ternary (_binary (List_len arg-4) (quote ==) 1)
-                         (cons (List_var
-                                (builtin_foreach_assign (List_getindex arg-4 0)
-                                 hold-21)) (quote ()))
-                         (builtin_foreach_pair_assignments arg-4 hold-21
-                          arg-8))))
-                      (x2c_expr_call hold-23
-                       (cons (List_var hold-20)
-                        (cons (List_var (builtin_foreach_address hold-21))
-                         (quote ()))))))
+       (true ((lambda (hold-22)
+               ((lambda (hold-23)
+                 ((lambda (hold-24)
+                   ((lambda (hold-25)
+                     ((lambda (hold-26)
+                       ((lambda (hold-27)
+                         ((lambda (hold-28)
+                           ((lambda (hold-29)
+                             ((lambda (hold-30)
+                               (cons (List_var
+                                      (cons (quote block)
+                                       (cons (List_var arg-1)
+                                        (cons (List_var
+                                               (builtin_foreach_declare
+                                                (quote ("Iter")) arg-6 hold-24))
+                                         (cons (List_var
+                                                (builtin_foreach_declare
+                                                 (quote ("Var")) arg-7
+                                                 (quote ())))
+                                          (cons (List_var
+                                                 (cons (quote while)
+                                                  (cons (List_var hold-28)
+                                                   (cons (List_var hold-30)
+                                                    (quote ()))))) (quote ())))))))
+                                (quote ())))
+                              (cons (quote block)
+                               (append hold-29
+                                (cons (List_var arg-3) (quote ()))))))
+                            (C.ternary (_binary (List_len arg-4) (quote ==) 1)
+                             (cons (List_var
+                                    (builtin_foreach_assign
+                                     (List_getindex arg-4 0) hold-23))
+                              (quote ()))
+                             (builtin_foreach_pair_assignments arg-4 hold-23
+                              arg-8))))
+                          (x2c_expr_call hold-25
+                           (cons (List_var hold-22)
+                            (cons (List_var hold-27) (quote ()))))))
+                        (C.ternary
+                         (_binary (List_car hold-26) (quote ==) (quote *))
+                         (builtin_foreach_address hold-23) hold-23)))
+                      (List_getindex
+                       (builtin_foreach_parameters (x2c_syntax_type hold-25))
+                       1)))
                     (builtin_foreach_reference
                      (C.address "Iter_try_next" (quote string)))))
                   (builtin_foreach_complete
