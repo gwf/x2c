@@ -2500,6 +2500,8 @@ static void _capture_sites_initialize(void){
   x2c_match_initialize();
 }
 
+int List_try_own(List);
+
 static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
   if(! _pattern_admissible(pattern, 0)){
     __atomic_store_n(& site -> refused, 1, __ATOMIC_RELEASE);
@@ -2530,6 +2532,7 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
     }
 
   }
+  if(Var_is_row(plan -> layout -> normalized, 9, 7, 4)) List_try_own(Var_list(plan -> layout -> normalized));
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }
 

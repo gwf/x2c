@@ -860,6 +860,31 @@ static void source_site_owns_only_its_static_plan(void) {
   MatchCache.flush_default();
 }
 
+static MatchCaptureSite normalizing_site;
+
+/* A site keeps its plan for the process, and preparing a binder-first guard
+   rewrites it into cells of the pool active at that first call. The layout
+   must not keep those cells once that level is released, so the site
+   promotes them with the rest of the plan. */
+static void source_site_keeps_its_normalized_pattern(void) {
+  Var pattern = %(!and ?value (ok ?));
+  List input = %(ok 7);
+  Pool.open_named("match-site-first-use");
+  MatchPlan plan = x2c_match_site_prepare(&normalizing_site, pattern);
+  Pool.close();
+  if (!EXPECT_NOT_NULL(plan)) return;
+  EXPECT_INT_EQ(plan.status, MACHINE_PREPARED);
+  if (!EXPECT_TRUE(Pool.is_permanent(plan.layout.normalized))) return;
+  Var value = <old>;
+  MatchCaptureBuffer captures = { &value, 0, 1 };
+  EXPECT_INT_EQ(
+    match_recursive_try_capture(plan.layout, input, captures), 1);
+  EXPECT_TRUE(value.list() == input);
+  value = <old>;
+  EXPECT_INT_EQ(plan.try_capture(input, captures), 1);
+  EXPECT_TRUE(value.list() == input);
+}
+
 static MatchCaptureSite match_site, try_match_site, sentinel_site;
 static MatchCaptureSite search_site, try_search_site;
 static MatchCaptureSite match_replace_site, try_match_replace_site;
@@ -1014,6 +1039,7 @@ void match_plan_suite(void) {
   $test.run(capture_layout_refuses_past_the_binder_limit);
   $test.run(capture_presence_is_separate_from_void);
   $test.run(source_site_owns_only_its_static_plan);
+  $test.run(source_site_keeps_its_normalized_pattern);
   $test.run(source_sites_reproduce_the_runtime_operations);
   $test.run(source_site_reports_a_fence_like_the_operation);
   $test.run(plan_programs_stay_immutable);

@@ -693,7 +693,7 @@ Source: `lib/match.x:2286`
 Frees reusable materialization scratch. Finish active execution first;
 this does not clear invocation state.
 
-Source: `lib/match.x:2673`
+Source: `lib/match.x:2676`
 
 <a id="MatchMachine.open"></a>
 #### MatchMachine.open
@@ -703,7 +703,7 @@ Source: `lib/match.x:2673`
 Initializes fresh caller-owned storage without touching unused fixed
 arrays. The caller must eventually dispose any materialization scratch.
 
-Source: `lib/match.x:2654`
+Source: `lib/match.x:2657`
 
 ### `MatchPlan`
 
