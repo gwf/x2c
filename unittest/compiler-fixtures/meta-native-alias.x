@@ -9,7 +9,11 @@ typedef double Real;
 meta Real sqrt(Real value);
 meta void Array.resize(Array arr, Size size);
 
-$(import "meta-native-alias.xmacro")
+meta static Size resized(Size size) {
+  Array values = [];
+  values.resize(size);
+  return values.len();
+}
 
 int main(void) {
   printf("%.1f %d\n", $(sqrt 9.0), (int) $(resized 3));

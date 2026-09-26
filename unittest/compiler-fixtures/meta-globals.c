@@ -26,17 +26,35 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-int main(void){
-  x2c_initialize();
+double mg_read_pi(void){
   if(! _init_guard_) _file_init_();
-  printf("%.2f %d %d %d %.2f %d %d\n", ((double) 0x1.ap+1L), 11, 12, 13, ((double) 0x1.ap+1L), mg_next(), ordinary_meta);
-  return 0;
+  return mg_pi;
 }
 
 int mg_next(void){
   if(! _init_guard_) _file_init_();
   mg_counter += 1;
   return mg_counter;
+}
+
+int mg_pointer_next(void){
+  if(! _init_guard_) _file_init_();
+  int * cell = & mg_counter;
+  * cell = * cell + 1;
+  return * cell;
+}
+
+double mg_pointer_pi(void){
+  if(! _init_guard_) _file_init_();
+  const double * cell = & mg_pi;
+  return * cell;
+}
+
+int main(void){
+  x2c_initialize();
+  if(! _init_guard_) _file_init_();
+  printf("%.2f %d %d %d %.2f %d %d\n", ((double) 0x1.ap+1L), 11, 12, 13, ((double) 0x1.ap+1L), mg_next(), ordinary_meta);
+  return 0;
 }
 
 #undef _x2c_initializer_choice_F164D642_0_expanded

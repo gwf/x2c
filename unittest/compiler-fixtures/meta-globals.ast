@@ -17,12 +17,56 @@
   (op = (bind (binding 4 "ordinary_meta") ()) 
    (expr (int) (literal (int) "7")))))
 
-(function (int) 
- (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
+(function (double) 
+ (bind (binding 5 "mg_read_pi") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (stmnt 
+  (at 1 (return (double) (expr (const double) (ident (binding 1 "mg_pi")))))))
+
+(function (int) 
+ (bind (binding 6 "mg_next") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 2 (stmnt 
+         (expr (int) 
+          (op += (expr (int) (ident (binding 2 "mg_counter"))) 
+           (expr (int) (literal (int) "1")))))) 
+  (at 3 (return (int) (expr (int) (ident (binding 2 "mg_counter")))))))
+
+(function (int) 
+ (bind (binding 7 "mg_pointer_next") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 4 (declare (int) 
+         (bindings 
+          (op = (bind (binding 8 "cell") (*)) 
+           (expr (* int) (op & (expr (int) (ident (binding 2 "mg_counter"))))))))) 
+  (at 5 (stmnt 
+         (expr (int) 
+          (op = (expr (int) (op * (expr (* int) (ident (binding 8 "cell"))))) 
+           (expr (int) 
+            (op + (expr (int) (op * (expr (* int) (ident (binding 8 "cell"))))) 
+             (expr (int) (literal (int) "1")))))))) 
+  (at 6 (return (int) 
+         (expr (int) (op * (expr (* int) (ident (binding 8 "cell")))))))))
+
+(function (double) 
+ (bind (binding 9 "mg_pointer_pi") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 7 (declare (const double) 
+         (bindings 
+          (op = (bind (binding 10 "cell") (*)) 
+           (expr (* const double) 
+            (op & (expr (const double) (ident (binding 1 "mg_pi"))))))))) 
+  (at 8 (return (double) 
+         (expr (const double) 
+          (op * (expr (* const double) (ident (binding 10 "cell")))))))))
+
+(function (int) 
+ (bind (binding 11 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 9 (stmnt 
          (expr () 
-          (call (expr () (ident (binding 6 "printf"))) 
+          (call (expr () (ident (binding 12 "printf"))) 
            (args (expr (* char) 
                   (literal (* char) "\"%.2f %d %d %d %.2f %d %d\\n\"")) 
             (expr (double) 
@@ -38,16 +82,7 @@
                (cast (double) 
                 (expr (long double) (literal (long double) "0x1.ap+1L")))))) 
             (expr (int) 
-             (call (expr ((func ((void))) int) (ident (binding 7 "mg_next"))) 
+             (call (expr ((func ((void))) int) (ident (binding 6 "mg_next"))) 
               (args (expr (void) ())))) 
             (expr ("meta") (ident (binding 4 "ordinary_meta")))))))) 
-  (at 2 (return (int) (expr (int) (literal (int) "0"))))))
-
-(function (int) 
- (bind (binding 7 "mg_next") ((fnmod (params (param (void) (bind () ())))))) 
- (block 
-  (at 2 (stmnt 
-         (expr (int) 
-          (op += (expr (int) (ident (binding 2 "mg_counter"))) 
-           (expr (int) (literal (int) "1")))))) 
-  (at 3 (return (int) (expr (int) (ident (binding 2 "mg_counter")))))))
+  (at 10 (return (int) (expr (int) (literal (int) "0"))))))

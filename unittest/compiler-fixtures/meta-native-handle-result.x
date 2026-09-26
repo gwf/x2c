@@ -10,6 +10,8 @@ typedef struct Widget *Widget;
 meta Widget widget_new(int size);
 meta int widget_size(Widget widget);
 
-$(import "meta-native-handle-result.xmacro")
+meta Widget leak(void) {
+  $scope() { return widget_new(3); }
+}
 
 int main(void) { return 0; }

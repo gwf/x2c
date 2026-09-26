@@ -9,6 +9,13 @@
 
 struct Box { int value; };
 
-$(import "comptime-declines-local-address-callee.xmacro")
+meta static int *field_of(struct Box *box) {
+  return &box->value;
+}
+
+meta static int *leak(int seed) {
+  struct Box box = { .value = seed };
+  return field_of(&box);
+}
 
 int main(void) { return 0; }

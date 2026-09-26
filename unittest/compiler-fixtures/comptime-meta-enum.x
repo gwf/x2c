@@ -10,7 +10,17 @@
 enum { K = 10 };
 enum Color { RED, GREEN, BLUE = 1 << 3, VIOLET, LAST = VIOLET * 2 };
 
-$(import "comptime-meta-enum.xmacro")
+meta int me_k(void) => K;
+
+meta int me_color(int which) {
+  switch (which) {
+    case 0: return RED;
+    case 1: return GREEN;
+    case 2: return BLUE;
+    case 3: return VIOLET;
+  }
+  return LAST;
+}
 
 int main(void) {
   printf("K      %d\n", $(me_k));

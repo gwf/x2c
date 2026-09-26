@@ -28,7 +28,29 @@ static double reverse_user(double x) {
   return y;
 }
 
-$(import "autodiff-state.xmacro")
+/* One decorator returning two reverse derivations: each template expands
+   after both were built, so neither may take the other's checkpoint size
+   or locals. */
+meta static List ad_twin(List fn) {
+  match (fn) {
+    case %(function ?spec (bind (binding ?id ?name) ?rest) ?body):
+      return %(function $spec (bind (binding $id ${name + "_ck"}) $rest)
+                 $body);
+  }
+  return fn;
+}
+
+meta static List ad_both_ways(List fn) {
+  List checkpointed =
+    ad_checkpoint(ad_twin(fn), %(expr (int) (literal (int) "2")));
+  List recorded = ad_reverse(fn);
+  return %(@checkpointed @recorded);
+}
+
+macro Decorator $both_ways(Unit $fn) {
+  $fn
+  $ad_both_ways($fn)...
+}
 
 $both_ways()
 static double twice_looped(double x) {

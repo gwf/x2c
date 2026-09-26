@@ -1,6 +1,9 @@
 #include "x2c.x"
 
-$(import "meta-expression-effects.xmacro")
+meta int discarded(int n) { (void) (n = n + 2); return n; }
+meta int branch(int n) { (void) (n ? (n += 2) : (n += 3)); return n; }
+meta int short_circuit(int n) { (void) (n && (n += 2)); return n; }
+meta int assign_return(int n) { return (n = n + 2); }
 
 int main(int argc, char **argv) {
   (void) argv;

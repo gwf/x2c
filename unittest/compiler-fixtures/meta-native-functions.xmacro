@@ -1,6 +1,0 @@
-/* meta-native-functions.xmacro -- the meta functions
-   meta-native-functions.x imports. */
-
-meta static double native_total(double value) => sin(value) + sqrt(4.0);
-
-meta static int class_value(MetaCount value) => value + 1;

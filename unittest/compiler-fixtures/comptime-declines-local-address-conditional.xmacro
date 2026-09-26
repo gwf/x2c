@@ -1,7 +1,0 @@
-/* comptime-declines-local-address-conditional.xmacro -- the meta functions
-   comptime-declines-local-address-conditional.x imports. */
-
-meta static int *either(int flag, int *other) {
-  int value = flag;
-  return flag ? other : &value;
-}
