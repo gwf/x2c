@@ -38,7 +38,7 @@ int Compiler_meta_reaches_compile_time(Compiler c, Var node);
 
 String Compiler_meta_cc_identity(String cc);
 
-String Compiler_meta_cc_error(String errors);
+String Compiler_meta_cc_run(List arguments, String directory);
 
 void Compiler_use_meta_build_directory(String directory);
 
@@ -54,7 +54,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
 
 String Compiler_stage_meta_group(Compiler c, String * failure);
 
-int Compiler_bind_meta_group(Compiler c, String name, Token site);
+void Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 
 #endif /* __GUARD_0x042BDEBD__ */

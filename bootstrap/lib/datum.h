@@ -10,5 +10,7 @@ int datum_write(Buffer out, Var value, int tagged);
 
 int datum_read(String text, unsigned * cursor, Var * out);
 
+List datum_result_problem(Var value, Map marks);
+
 
 #endif /* __GUARD_0x8E3A3F8F__ */
