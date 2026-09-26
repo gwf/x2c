@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 57
+- Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -783,6 +783,19 @@ Public functions:
 
 `DisjointSet.init`, `DisjointSet.drop`, `DisjointSet.find`,
 `DisjointSet.union`, `DisjointSet.sizes`, `DisjointSet.num_components`
+
+### [lib/lisp-init.x](../lib/lisp-init.x)
+
+native standard algorithms for every Lisp session.
+
+Public functions:
+
+`lisp_last`, `lisp_begin`, `lisp_member`, `lisp_assoc`, `lisp_append`,
+`lisp_not`, `lisp_null`, `lisp_sub`, `lisp_mul`, `lisp_div`, `lisp_mod`,
+`lisp_caar`, `lisp_cadr`, `lisp_cdar`, `lisp_cddr`, `lisp_caaar`, `lisp_caadr`,
+`lisp_cadar`, `lisp_caddr`, `lisp_cdaar`, `lisp_cdadr`, `lisp_cddar`,
+`lisp_cdddr`, `lisp_match`, `lisp_bound`, `lisp_search_replace`, `lisp_binder`,
+`lisp_binders`, `lisp_binder_lets`, `lisp_string_append_all`
 
 ### [lib/lisp.x](../lib/lisp.x)
 

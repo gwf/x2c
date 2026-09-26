@@ -323,6 +323,8 @@ tests so you can follow its complete implementation.
 The compiler and `Lisp.new()` load the same `etc/init.xlisp`: the evaluator
 primitives, macros, native bindings, and the standard algorithms (list
 traversal, numeric wrappers, selectors, predicates, and pattern helpers).
+The algorithms without callbacks are x2c functions in `lib/lisp-init.x`,
+which that file binds by name; `map`, `filter`, and `foldl` stay in Lisp.
 Those algorithms use fixed primitive operations internally; their public
 Lisp names remain replaceable. In particular, rebinding `car`, `cdr`, or
 `cons` does not change `filter`.
