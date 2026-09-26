@@ -182,6 +182,8 @@ Toolchain toolchain_new(String, String, List, List, List, int, int);
 
 void Compiler_use_meta_toolchain(String, String);
 
+String toolchain_meta_cc(String);
+
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
   Frontend_load_support(request);
@@ -189,7 +191,7 @@ Frontend Frontend_new(CliRequest request){
   frontend -> request = request;
   frontend -> include_dirs = List_append(request -> include_dirs, x2c_default_include_dirs());
   frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
-  Compiler_use_meta_toolchain(frontend -> toolchain -> cc, frontend -> toolchain -> include_dir);
+  Compiler_use_meta_toolchain(toolchain_meta_cc(request -> meta_cc), frontend -> toolchain -> include_dir);
   return frontend;
 }
 

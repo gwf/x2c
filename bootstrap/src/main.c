@@ -972,6 +972,7 @@ static int _run_build_request(CliRequest c, Array commands){
   {
       Build state = CliRequest_prepare(c);
       c -> cc = Var_string(Context_export(target, String_var(c -> cc)));
+      c -> meta_cc = Var_string(Context_export(target, String_var(c -> meta_cc)));
       c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
       int result = _translate_units(c, state, c -> inputs);
       if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));

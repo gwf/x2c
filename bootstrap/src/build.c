@@ -829,6 +829,8 @@ String Build_generated_dir(Build state, String input){
 
 List CliRequest_package_roots(CliRequest);
 
+String toolchain_meta_cc(String);
+
 static uint64_t _translation_fingerprint(Build state, String input, String directory, int * ok){
   uint64_t hash = _state_base(state -> request, state -> toolchain -> cc, &((* ok)));
   hash = _state_text(hash, _146);
@@ -837,6 +839,8 @@ static uint64_t _translation_fingerprint(Build state, String input, String direc
   hash = _state_list(hash, request -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(request));
   hash = _state_list(hash, request -> cpp_args);
+  hash = _state_list(hash, request -> cc_args);
+  hash = _state_tool(hash, toolchain_meta_cc(request -> meta_cc), &((* ok)));
   hash = _state_text(hash, request -> no_cpp ? _147 : _148);
   hash = _state_text(hash, request -> live_symbols ? _149 : _150);
   hash = _state_text(hash, request -> cpp_symbols ? _151 : _152);

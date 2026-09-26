@@ -31,6 +31,8 @@ typedef struct ToolRun{
 
 Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run);
 
+String toolchain_meta_cc(String explicit);
+
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs);
 
 ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output, List gen_dirs);
