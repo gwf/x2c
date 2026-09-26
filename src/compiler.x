@@ -86,6 +86,11 @@ typedef struct Compiler {
   // or 1 for dependencies whose contents are not embedded in generated C.
   Map deps;
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
+  /* The last frozen `macro_stack`, reused while that List and every pool
+     level live; one expansion's declarations share one stack. */
+  List frozen_stack_key;
+  Var frozen_stack;
+  unsigned long frozen_stack_epoch;
   SymScope params;
   Map key_ids, macros, kw_aliases;
   /* `#define` names this unit has passed, for the literal warning and for
@@ -1303,6 +1308,18 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
                 declaration-token declaration-origin declaration-list) *):
       return %(declaration-list @{rows.list_free()});
   return rows.list_free();
+}
+
+/** Returns `freeze_declaration_syntax` of the active macro stack. */
+Var Compiler.freeze_macro_stack(Compiler c) {
+  unsigned long epoch = Pool.epoch();
+  if (c.macro_stack != c.frozen_stack_key || epoch != c.frozen_stack_epoch ||
+      c.frozen_stack is void) {
+    c.frozen_stack = c.freeze_declaration_syntax(c.macro_stack);
+    c.frozen_stack_key = c.macro_stack;
+    c.frozen_stack_epoch = epoch;
+  }
+  return c.frozen_stack;
 }
 
 /** Restores a retained declaration recipe in the current parsing lifetime. */

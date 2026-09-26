@@ -2438,7 +2438,7 @@ List Compiler.bind_syntax(
         if (context != AST_UNIT) goto construction_error;
         if (_.shallow)
           return %(declaration-pending $callback $arguments
-                    ${_.freeze_declaration_syntax(_.macro_stack)}
+                    ${_.freeze_macro_stack()}
                     ${_.source_private});
         Var result = _.evaluate_declaration_recipe(callback, arguments);
         return _.bind_syntax(result, context, _.return_type);
@@ -2452,7 +2452,7 @@ List Compiler.bind_syntax(
         if (context != AST_UNIT) goto construction_error;
         if (_.shallow)
           return %(declaration-default $function
-                    ${_.freeze_declaration_syntax(_.macro_stack)}
+                    ${_.freeze_macro_stack()}
                     ${_.source_private});
         return _.bind_syntax(function, context, _.return_type);
       }
@@ -2625,7 +2625,7 @@ List Compiler.bind_syntax(
               _.record_declaration_visibility(declaration);
             }
           return %(declaration-function $declaration $body
-                    ${_.freeze_declaration_syntax(_.macro_stack)});
+                    ${_.freeze_macro_stack()});
         }
         return _finish_function(_, declaration, body);
       }
