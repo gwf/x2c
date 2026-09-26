@@ -30,7 +30,7 @@ The compiler surface a `meta` function calls.
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:114`
+Source: `lib/meta.x:124`
 
 #### x2c_expr_call
 
@@ -39,7 +39,7 @@ Source: `lib/meta.x:114`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:88`
+Source: `lib/meta.x:98`
 
 #### x2c_expr_composite
 
@@ -48,7 +48,7 @@ Source: `lib/meta.x:88`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:93`
+Source: `lib/meta.x:103`
 
 #### x2c_expr_ident
 
@@ -57,7 +57,7 @@ Source: `lib/meta.x:93`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:74`
+Source: `lib/meta.x:84`
 
 #### x2c_expr_index
 
@@ -65,7 +65,7 @@ Source: `lib/meta.x:74`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:77`
+Source: `lib/meta.x:87`
 
 #### x2c_function_body
 
@@ -73,7 +73,7 @@ Source: `lib/meta.x:77`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:168`
+Source: `lib/meta.x:178`
 
 #### x2c_literal_int
 
@@ -81,7 +81,7 @@ Source: `lib/meta.x:168`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:59`
+Source: `lib/meta.x:69`
 
 #### x2c_literal_string
 
@@ -89,7 +89,7 @@ Source: `lib/meta.x:59`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:54`
+Source: `lib/meta.x:64`
 
 #### x2c_literal_symbol
 
@@ -97,7 +97,7 @@ Source: `lib/meta.x:54`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:63`
+Source: `lib/meta.x:73`
 
 #### x2c_parameters_arguments
 
@@ -107,7 +107,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:176`
+Source: `lib/meta.x:186`
 
 #### x2c_stmnt_make
 
@@ -115,7 +115,7 @@ Source: `lib/meta.x:176`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:108`
+Source: `lib/meta.x:118`
 
 #### x2c_stmnt_return
 
@@ -123,7 +123,36 @@ Source: `lib/meta.x:108`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:111`
+Source: `lib/meta.x:121`
+
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`Source`](#Source) | alias | A `meta` parameter declared `Source` receives, at a `$` call, captured syntax with the source text it came from: `((text T) (file F) (syntax S))`. |
+| [`Type`](#Type) | alias | A `meta` parameter declared `Type` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F))`. |
+
+<a id="Source"></a>
+### Source
+
+`typedef List Source`
+
+A `meta` parameter declared `Source` receives, at a `$` call, captured
+syntax with the source text it came from: `((text T) (file F) (syntax
+S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
+
+Source: `lib/meta.x:50`
+
+<a id="Type"></a>
+### Type
+
+`typedef List Type`
+
+A `meta` parameter declared `Type` receives, at a `$` call, the
+description of its argument's type: `((name N) (kind K) (type T)
+(fields F))`. Read a part with `List.assoc`.
+
+Source: `lib/meta.x:45`
 
 ## Design notes
 
