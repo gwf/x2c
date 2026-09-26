@@ -56,7 +56,7 @@ current grammar role filters that namespace: type positions offer types and
 type-producing macros, expression positions offer values and callable forms,
 and statement, block, and submission starts offer their legal union plus
 contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
-`finally` where each is legal. Fields and evaluator-callable methods remain
+`finally` where each is legal. Fields and methods remain
 available on a typed receiver. At a blank primary prompt completion also
 offers colon commands, grouped with keywords, session names, types, and other
 callables. Unsupported REPL declarations and imports are not suggested.

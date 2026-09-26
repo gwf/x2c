@@ -6,7 +6,13 @@ tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
-builds/0/x2c build --plain \
+# Staged modules resolve the session's print and the runtime in this binary.
+export_flags=
+case $(uname -s) in
+  Linux) export_flags="-Xlinker -export-dynamic" ;;
+esac
+# shellcheck disable=SC2086
+builds/0/x2c build --plain $export_flags \
   --build-dir "$tmp/api-cc" --output "$tmp/api-check" \
   --x-include-dir commands/repl --x-include-dir src \
   --c-include-dir builds/0/src \

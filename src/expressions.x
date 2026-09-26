@@ -576,8 +576,8 @@ static void _completion_delegates(
   }
 }
 
-/** Returns sorted visible postfix names whose selected method is callable in
-    the compiler's Lisp session. Fields remain eligible without a binding. */
+/** Returns sorted visible field and method names that resolve on `receiver`
+    through `access`. */
 List Compiler.postfix_completions(
   Compiler c, Type receiver, Symbol access) {
   Map seen = {}, visited = {};
@@ -595,12 +595,7 @@ List Compiler.postfix_completions(
     if (!resolution && access == <.>)
       resolution = _resolve_delegate_method(c, receiver, name, c.token);
     match (resolution) {
-      case %(field ? ?): accepted.push(name);
-      case %(method ?binding ?): {
-        Var callable;
-        String spelling = binding_identity_spelling(binding);
-        if (c.macro_lisp.try_get(spelling, callable)) accepted.push(name);
-      }
+      case %((!or field method) ? ?): accepted.push(name);
     }
   }
   return accepted.list_free();
