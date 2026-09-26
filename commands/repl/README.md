@@ -8,8 +8,11 @@ supported language subset, and limitations.
 `repl.x` owns the terminal loop and output. `repl-input.x` owns interactive
 editing and history; `repl-session.x` owns submissions, completion, and
 inspection over the compiler's session services. Those services stay in
-`src/` because they use the parser, semantic transactions, and compile-time
-lowering directly.
+`src/` because they use the parser, semantic transactions, and the unit's
+`meta` group staging (`Compiler.stage_meta_group`) directly. A submission
+joins the group as a thunk; a value's storage stays in the module that
+initialized it, and later modules read it through a cell macro at its
+address.
 
 After building checkout commands, run `make commands-check` to exercise a
 piped transcript and the direct session API. The transcript deliberately

@@ -1709,7 +1709,11 @@ static int _module_stamp(String path) {
    its targets. A module is never unloaded, because its Funcs borrow its
    code. */
 static void _open_native_module(String path) {
+  /* The module's constructors allocate its Funcs and literals, which last
+     as long as its code. */
+  Scope.push(&native_module_scope);
   void *handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+  Scope.pop();
   if (!handle)
     x2c_driver_error(
       %"cannot load native module '$path': ${String.new(dlerror())}");

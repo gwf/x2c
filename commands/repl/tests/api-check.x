@@ -128,7 +128,7 @@ static void _exercise(ReplSession s) {
   _expect(s, "int n=0;", <executed>, void);
   _expect(s, "int next(void) { n+=1; return n; }", <defined>, void);
   _completion(s, "ne", "next", NULL);
-  _expect(s, "int bad=next(), second=1/0;", <failed>, void);
+  _expect(s, "int bad=next(), second=[][3];", <failed>, void);
   _completion(s, "ba", NULL, "bad");
   _symbols(s, %((value "n") (function "next")));
   if (s.inspect("bad") || s.inspect("second") || s.inspect("f") ||
@@ -147,13 +147,13 @@ static void _exercise(ReplSession s) {
   _expect(s, "n;", <value>, 2);
   _expect(s, "n+=3;", <executed>, void);
   _expect(s, "n;", <value>, 5);
-  _expect(s, "int rejected(void) { goto end; end: return 0; }",
+  _expect(s, "int rejected(void) { return missing_c_function(); }",
           <rejected>, void);
   _expect(s, "int twice(int x) { return 99; }", <rejected>, void);
   _symbols(s, %((value "bad") (value "n") (function "next")
                (value "second") (function "twice")));
   if (s.inspect("rejected")) {
-    fputs("inspection published a function that failed lowering\n", stderr);
+    fputs("inspection published a function that failed staging\n", stderr);
     failures++;
   }
 }
@@ -164,14 +164,13 @@ static void _retained_results(ReplSession s) {
   String inspected = entry.repr(), published = symbols.repr();
   int matched = 0;
   match (entry) {
-    case %(function (typed ?syntax) (lowered ?forms)):
+    case %(function (typed ?syntax)):
       matched = definition.status == <defined> &&
                 syntax.repr() == definition.syntax.repr() &&
-                forms.repr() == definition.lowered.repr() &&
-                syntax.repr() != forms.repr();
+                s.lowered("wide").contains("wide(void)");
   }
   if (!matched) {
-    fputs("named inspection lost typed AST or lowered Lisp\n", stderr);
+    fputs("named inspection lost typed AST or staged C\n", stderr);
     failures++;
   }
   _expect(s, "Func capture(int x) { return %!(int y) => x+y; }",
@@ -185,7 +184,7 @@ static void _retained_results(ReplSession s) {
   _expect(s, "kept.push(17);", <value>, 17);
   array = s.submit("kept;");
   ReplResult bad = s.submit("int broken = ;");
-  String syntax = wide.syntax.repr(), lowered = wide.lowered.repr();
+  String syntax = wide.syntax.repr();
   String diagnostic = bad.diagnostics.repr();
   for (int i = 0; i < 200; i++) {
     _expect(s, "n+=1;", <executed>, void);
@@ -194,7 +193,7 @@ static void _retained_results(ReplSession s) {
   }
   _expect(s, "wide();", <value>, 5000000000L);
   if (wide.value != 5000000000L || wide.syntax.repr() != syntax ||
-      wide.lowered.repr() != lowered || bad.diagnostics.repr() != diagnostic ||
+      bad.diagnostics.repr() != diagnostic ||
       bad.source != "int broken = ;" || array.value.array()[0] != 17 ||
       s.compiler.macro_lisp.apply(closure.value, %(5)) != 12 ||
       s.inspect("wide").repr() != inspected || entry.repr() != inspected ||
@@ -242,9 +241,9 @@ static void _meta_records(ReplSession session) {
 
 static void _completion_does_not_publish_meta(ReplSession session) {
   Compiler compiler = session.compiler;
-  size_t values = compiler.meta_values.len();
+  size_t values = compiler.meta_group.len();
   (void) session.complete("meta static int completion_value = 41;", 38);
-  if (compiler.meta_values.len() != values) {
+  if (compiler.meta_group.len() != values) {
     fputs("completion published a meta declaration effect\n", stderr);
     failures++;
   }

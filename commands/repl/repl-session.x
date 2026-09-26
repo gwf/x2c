@@ -9,20 +9,24 @@
     this session are finished. Results borrow that Context's storage. */
 typedef struct ReplSession {
   Compiler compiler;
-  // Published name -> (value), (native), or
-  // (function (typed ...) (lowered ...)).
+  // Published name -> (value), (type), (native), or (function (typed ...)).
   Map names;
+  // Binding id of each published value -> the binding of its cell.
+  Map cells;
+  // The module the last staged submission loaded, or NULL.
+  String module;
+  int serial;
 } *ReplSession;
 
 /** status is incomplete, rejected, defined, executed, value, or failed.
     diagnostics are ordinary compiler reports; message/cause describe the
-    adapter or evaluator failure. source retains diagnostic source text;
-    syntax and lowered support optional tracing. */
+    staging or evaluation failure. source retains diagnostic source text;
+    syntax supports optional tracing. */
 typedef struct ReplResult {
   Symbol status;
   Var value;
   String name, message, source;
-  List diagnostics, cause, syntax, lowered;
+  List diagnostics, cause, syntax;
 } ReplResult;
 
 /** Byte range and sorted `(kind "spelling")` replacement candidates for one
@@ -34,7 +38,8 @@ typedef struct ReplCompletion {
 } ReplCompletion;
 
 #pragma private
-#include "comptime.x"
+#include "macros.x"
+#include "path.x"
 #include "parse.x"
 #include "diagnostics.x"
 #include "lisp.x"
@@ -51,12 +56,14 @@ static void _write_stdout(String text, int newline, Symbol operation) {
   }
 }
 
-static void _repl_print(String text) => _write_stdout(text, 0, <print>);
-static void _repl_println(String text) => _write_stdout(text, 1, <println>);
+/* The session's `print` and `println`, which staged submissions call. */
+void print(String text) => _write_stdout(text, 0, <print>);
+void println(String text) => _write_stdout(text, 1, <println>);
 
 /** Borrows an initialized submission compiler until its unit closes.
     Source-fact collection must be disabled because submission scratch maps
-    are reclaimed after each call. */
+    are reclaimed after each call. Each submission that runs or defines code
+    stages the session's definitions as one native module. */
 ReplSession ReplSession.new(Compiler compiler) {
   if (compiler.source_facts)
     raise %(bad-arg (operation "ReplSession.new")
@@ -64,8 +71,14 @@ ReplSession ReplSession.new(Compiler compiler) {
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
-  $lisp.bind(compiler.macro_lisp, "print", _repl_print);
-  $lisp.bind(compiler.macro_lisp, "println", _repl_println);
+  session.cells = {};
+  compiler.unit_nodes = [
+    %(preproc "void print(String text);"),
+    %(preproc "void println(String text);")
+  ];
+  // Completion offers callables the session binds.
+  $lisp.bind(compiler.macro_lisp, "print", print);
+  $lisp.bind(compiler.macro_lisp, "println", println);
   return session;
 }
 
@@ -81,8 +94,8 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (native), (function (typed AST) (lowered FORMS)), or
-    NULL if absent.
+/** Returns (value), (type), (native), (function (typed AST)), or NULL if
+    absent.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -234,10 +247,72 @@ static List _bare(List node) {
   return node;
 }
 
-static List _thunk(List items) =>
-  %(function (int)
-    (bind (binding -1 "__repl_eval") ((fnmod (params))))
+/* A parameterless function returning `result`, under a fresh name. */
+static List _thunk(ReplSession session, List result, List items) {
+  List binding = session.compiler.sym.introduce(
+    "__repl_eval_%d".printf(session.serial++));
+  return %(function $result
+    (bind $binding ((fnmod (params (param (void) (bind () ()))))))
     (block @items));
+}
+
+/* `node` with each reference to a published value read through its cell. */
+static Var _through_cells(Var node, Map cells) {
+  if (node is not <list>) return node;
+  Var cell;
+  match (node)
+    case %(binding ?id ?(String _)): return cells.try_get(id, cell) ? cell : node;
+  Array parts = [];
+  foreach (Var part, (List) node) parts.push(_through_cells(part, cells));
+  return parts.list_free();
+}
+
+/* Adds function `fn` to the session's meta group. */
+static void _group(ReplSession session, List fn) {
+  fn = _through_cells(fn, session.cells);
+  match (fn)
+    case %(function ?spec (!set ?declarator (bind (binding ? ?(String name))
+                                                  *)) ?): {
+      Type type = %(declare $spec (bindings $declarator)).type_from_ast()
+                    .canonicalize();
+      session.compiler.meta_group.push(%(function $fn $name $type));
+    }
+}
+
+static String _thunk_name(List thunk) {
+  match (thunk)
+    case %(function ? (bind (binding ? ?(String name)) *) ?): return name;
+  return NULL;
+}
+
+/* Calls the staged thunk `thunk`. */
+static Var _run(Compiler c, List thunk) {
+  Var function;
+  if (!c.macro_lisp.try_get(_thunk_name(thunk), function))
+    _refuse("the result has no Var form");
+  return c.macro_lisp.apply(function, %());
+}
+
+/* Replaces the declaration of each value in `declarations`, now defined
+   by the module just loaded at `addresses`, with a declaration that only
+   gives its cell a type and a macro that reads the cell at its address.
+   The macro's own name inside its expansion is not expanded again. */
+static void _publish_cells(
+  ReplSession session, int first, Array declarations, Array addresses) {
+  Array nodes = session.compiler.unit_nodes;
+  for (int i = 0; i < (int) declarations.len(); i++)
+    match (declarations[i])
+      case %(declare ?spec (bindings (bind (binding ?id ?) ?mods))): {
+        String cell = "__repl_cell_%d".printf(session.serial++);
+        long address = addresses[i];
+        nodes[first + 2 * i] =
+          %(declare (extern @spec) (bindings (bind (binding $id $cell) $mods)));
+        nodes[first + 2 * i + 1] = %(preproc ${
+          "#define %s (*(__typeof__(%s) *) %#lx)".printf(
+            cell, cell, (unsigned long) address)});
+        session.cells[id] = %(binding $id $cell);
+      }
+}
 
 static void _refuse(String why) { raise %(repl (why $why)); }
 
@@ -280,37 +355,49 @@ static void _require_evaluable(Var syntax) {
     _require_evaluable(child);
 }
 
-static List _initializers(List node, Map names, Array added, Array ids) {
-  Array statements = $auto([]);
+/* Declares each value of `node` in `declarations` and adds to `thunks`, in
+   order, a function that initializes it and returns its address. A braced
+   initializer has meaning only in its declaration, so each value is
+   initialized from a local declared the same way. */
+static void _initializers(
+  ReplSession session, List node, Array added, Array declarations,
+  Array thunks) {
+  Compiler c = session.compiler;
   match (node) {
     case %(declare ?spec (bindings *bindings)): {
       foreach (List item, bindings) {
         match (item) {
-          case %(op = (bind (binding ?id ?(String name)) ?mods) ?value): {
-            if (names.contains(name) || added.contains(name) ||
+          case %(op = (bind (!set ?binding (binding ? ?(String name))) ?mods)
+                    ?value): {
+            if (session.names.contains(name) || added.contains(name) ||
                 name.startswith("__repl_"))
               _refuse("redeclaration is disabled; use assignment");
+            Type type = %(declare $spec (bindings (bind $binding $mods)))
+                          .type_from_ast().canonicalize();
+            if (type.is_array())
+              _refuse("array values are outside the REPL subset");
             added.push(name);
-            ids.push(id);
-            /* Keep the declaration's declarator and initializer together.
-               Braced initialization has meaning only in that type context;
-               the compile-time lowering consumes this private wrapper with
-               the same initializer path used by ordinary declarations. */
-            statements.push(
-              %(repl-init $spec (bind (binding $id $name) $mods) $value));
+            List local = c.sym.introduce("__repl_value");
+            List cell = %(expr $type (ident $binding));
+            declarations.push(%(declare $spec (bindings (bind $binding $mods))));
+            thunks.push(_thunk(session, %(long), %(
+              (declare $spec (bindings (op = (bind $local $mods) $value)))
+              (stmnt (expr $type (op = $cell (expr $type (ident $local)))))
+              (return (long) (expr (long)
+                (cast (decl (long) (bindings (bind () ())))
+                  (expr (* @type) (op & $cell))))))));
             continue;
           }
         }
         _refuse("top-level values need an initializer and a simple binding");
       }
-      return _thunk(statements);
+      return;
     }
   }
   _refuse("this top-level form is outside the REPL subset");
-  return NULL;
 }
 
-static List _result_body(List fn, int &prints) {
+static List _result_body(ReplSession session, List fn, int &prints) {
   match (fn) {
     case %(function ? ? (block *body)): {
       Array items = $auto(body);
@@ -318,7 +405,7 @@ static List _result_body(List fn, int &prints) {
         List last = _bare(items[items.len() - 1]);
         match (last) {
           case %(stmnt (expr ?spec ?value)): {
-            if (spec === %(void)) return _thunk(items);
+            if (spec === %(void)) return _thunk(session, %(void), items);
             int effect = 0;
             match (value) {
               case %(op ?operator *):
@@ -327,13 +414,15 @@ static List _result_body(List fn, int &prints) {
               case %(postfix *): effect = 1;
             }
             if (!effect) {
-              items[items.len() - 1] = %(return $spec (expr $spec $value));
+              items[items.len() - 1] =
+                %(return ("Var") (expr $spec $value));
               prints = 1;
+              return _thunk(session, %("Var"), items);
             }
           }
         }
       }
-      return _thunk(items);
+      return _thunk(session, %(void), items);
     }
   }
   return fn;
@@ -384,11 +473,11 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     transaction = c.begin_semantic_transaction();
   }
   defer transaction.rollback();
-  Array added = [], ids = [];
-  defer { added.free(); ids.free(); }
+  Array added = [], declarations = [], thunks = [];
+  defer { added.free(); declarations.free(); thunks.free(); }
   List fn = NULL;
   String function_name = NULL;
-  int execute = 0, prints = 0, end = source.len();
+  int prints = 0, end = source.len();
   try {
     result.source = source;
     _tokenize(c, result.source, scratch);
@@ -444,6 +533,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         if (names.contains(name))
           _refuse("a type cannot be redefined; the session keeps its layout");
       transaction.commit_transient();
+      c.unit_nodes.push(node);
       foreach (String name, added) names[name] = %(type);
       result.syntax = node;
       result.name = added.len() ? added[0].str() : NULL;
@@ -451,8 +541,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     if (!declaration) {
-      fn = _result_body(node, prints);
-      execute = 1;
+      thunks.push(_result_body(session, node, prints));
     }
     else {
       match (node) {
@@ -466,10 +555,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
           fn = node;
         }
       }
-      if (!fn) {
-        fn = _initializers(node, names, added, ids);
-        execute = 1;
-      }
+      if (!fn) _initializers(session, node, added, declarations, thunks);
     }
     result.diagnostics = c.diagnostics();
   }
@@ -486,36 +572,74 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.message = why;
     return result;
   }
-  result.syntax = fn;
-  List forms = c.lower_repl(fn);
-  if (!forms) {
-    result.message = "unsupported: " + c.lower_declined();
+  result.syntax = fn ? fn : thunks.len() == 1 ? thunks[0].list() : NULL;
+  /* Stage the session's definitions with this submission's as one module.
+     Thunks leave the group once they run, and a submission that fails
+     leaves the group and the declarations as it found them. */
+  Array group = c.meta_group, nodes = c.unit_nodes;
+  size_t group_mark = group.len(), node_mark = nodes.len();
+  defer if (group.len() > group_mark) group.resize(group_mark);
+  foreach (List declaration, declarations) {
+    nodes.push(declaration);
+    nodes.push(%(preproc ""));
+  }
+  if (fn) _group(session, fn);
+  foreach (List thunk, thunks) _group(session, thunk);
+  String failure = NULL;
+  String module = c.stage_meta_group(failure);
+  if (!module) {
+    nodes.resize(node_mark);
+    result.message = failure;
     return result;
   }
-  result.lowered = forms;
+  session.module = module;
+  Array addresses = $auto([]);
   try {
-    foreach (Var form, forms) c.macro_lisp.eval(form);
-    if (execute) result.value = c.macro_lisp.eval(%(__repl_eval));
+    foreach (List thunk, thunks) {
+      Var value = _run(c, thunk);
+      if (declarations.len()) addresses.push(value);
+      else result.value = value;
+    }
+  }
+  catch %(repl (why ?why)): {
+    nodes.resize(node_mark);
+    result.message = why;
+    return result;
   }
   catch %(?cause *details): {
-    // Discard cells for unpublished bindings before rollback reuses their IDs.
-    Var storage;
-    if (c.macro_lisp.try_get("C._globals", storage)) {
-      Map globals = storage;
-      foreach (Var id, ids) globals.del(id);
-    }
+    nodes.resize(node_mark);
     result.status = <failed>;
     result.cause = cons(cause, details);
     return result;
   }
+  if (fn) group_mark++;
+  _publish_cells(session, node_mark, declarations, addresses);
   if (function_name || added.len()) {
     transaction.commit_transient();
     foreach (String name, added)
       names[name] = function_name
-        ? %(function (typed ${result.syntax}) (lowered ${result.lowered}))
-        : %(value);
+        ? %(function (typed ${result.syntax})) : %(value);
   }
   result.name = function_name;
   result.status = function_name ? <defined> : prints ? <value> : <executed>;
   return result;
+}
+
+/** Returns the C that the last staging emitted for session function
+    `name`, or NULL when it is not a staged session function. */
+String ReplSession.lowered(ReplSession session, String name) {
+  List entry = session.inspect(name);
+  if (!entry || entry.car() != <function> || !session.module) return NULL;
+  String code = Path.read_text(Path.dirname(session.module) + "/group.c");
+  Array lines = $auto([]);
+  int inside = 0;
+  foreach (String line, code.lines()) {
+    if (!inside && line.len() && line[0] != ' ' && line.contains(name + "(") &&
+        !line.endswith(";"))
+      inside = 1;
+    if (!inside) continue;
+    lines.push(line);
+    if (line == "}") break;
+  }
+  return lines.len() ? "\n".join(lines) : NULL;
 }

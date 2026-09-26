@@ -2,8 +2,10 @@
 
 `x2c repl` is a shipped external command that evaluates a supported subset
 of x2c in a persistent session.
-It uses the compiler's typed syntax and compile-time Lisp evaluator. It does
-not compile each submission to a native executable.
+Each submission that defines or runs code is compiled with the session's
+earlier definitions into a native module, loaded into the REPL process, and
+called. The C compiler runs once per new submission, typically 100-300 ms;
+a submission identical to one compiled before loads from the module cache.
 
 ```sh
 x2c repl
@@ -84,14 +86,13 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
-| `:lowered plus` | Show the Lisp forms used to execute `plus`. |
+| `:lowered plus` | Show the C that the last staging emitted for `plus`. |
 | `:cancel` | Discard incomplete input. |
 | `:quit` | Exit, discarding incomplete input. |
 
 For the example above, `:symbols` prints the list template
 `%((function "plus") (value "total"))`. Typed AST output begins with
-`typed: %(`; lowered Lisp is separately labeled `lowered:`. Inspection does
-not execute the function, and earlier functions remain inspectable after
+`typed: %(`; `:lowered` prints C. Inspection does not execute the function, and earlier functions remain inspectable after
 later submissions. Values have symbol entries but no function AST.
 
 Help and inspection commands preserve incomplete input, including when a
@@ -99,23 +100,20 @@ command reports an error. Colon commands are recognized on separate lines
 even inside an incomplete string or comment. Missing names, extra arguments,
 and unknown commands report errors.
 
-`--dump` prints each available typed AST and lowered Lisp form to standard
-error. `--stats` prints the concise runtime report at exit, to standard error.
+`--dump` prints each available typed AST to standard error. `--stats` prints the concise runtime report at exit, to standard error.
 `--verbose-stats` prints the detailed report and implies exit reporting; when
 both statistics options are present, one verbose report is printed. The
 options can be combined with `--dump`.
 
 The report separates absolute live or retained quantities from activity since
-the REPL opened. `live-program-bytes` is published evaluator program storage,
-not total evaluator memory. Scope allocation objects and live requested bytes
+the REPL opened. Scope allocation objects and live requested bytes
 are process-wide runtime values; requested bytes count public managed payload,
 not allocator metadata. `requested-traffic-bytes` remains cumulative activity.
 Pool active and depot bytes partition retained backing capacity; they are not
-reachable payload. Scope, Pool, and Lisp figures overlap and must not be
+reachable payload. Scope and Pool figures overlap and must not be
 summed. x2c has no garbage collector, so reuse and promotion counters are
-activity rather than collection counts. Verbose reports add all evaluator
-AUTO fields, Scope creation and peak data, Pool traffic and capacity detail,
-and machine execution counters collected since the REPL opened.
+activity rather than collection counts. Verbose reports add Scope creation
+and peak data and Pool traffic and capacity detail.
 
 ## Supported subset
 
@@ -125,7 +123,7 @@ definitions, integer arithmetic and narrowing, assignment, conditionals,
 and length, List literals and indexing, and Array construction, mutation,
 and indexing are exercised by the focused checks.
 
-The whole interpreter exposes the fixed-signature
+The runtime exposes the fixed-signature
 `String.format(String fmt, List values)` operation. Call it as
 `fmt.format(values)`:
 
@@ -157,19 +155,16 @@ Redefinition is disabled; assign to an existing variable to change its value.
 Function replacement and mutually recursive forward declarations are not
 supported. Names beginning `__repl_` are reserved.
 
-Native pointer and ABI operations, arbitrary C libraries, aggregate and type
-definitions, imports, protocols, user macro/meta definitions, preprocessor
+Arbitrary C libraries, unions, enums, arrays as values, imports, protocols, user macro/meta definitions, preprocessor
 directives, and direct Lisp input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with
-`--native-module`, callable in the session. Variables need
+`--native-module`, callable from compile-time Lisp in the session. Variables need
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
-Function-local `static`, `extern`, and `threaded` storage are also rejected:
-the evaluator cannot provide their native lifetime or linkage semantics.
-Other constructs depend on the existing lowering and may be declined. Full
-native execution and reference/lifecycle parity are not established; for
-example, the evaluator loses the distinction between `Var void` and an
-empty List.
+Function-local `static`, `extern`, and `threaded` storage are also rejected.
+A submission whose C does not compile is rejected with the C compiler's
+diagnostics. A final expression whose type has no `Var` form cannot be
+displayed.
 
 ## Failure and lifetime
 
@@ -181,9 +176,10 @@ remain, both for failed initialization and failed statements.
 
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
-Long sessions do not have a bounded-memory guarantee. A one-million-step
-Lisp call budget interrupts runaway interpreted evaluation; native callbacks
-are not a preemptible sandbox.
+Long sessions do not have a bounded-memory guarantee. Loaded modules stay
+loaded; each value lives in the module that initialized it. Submissions run
+as native code in the REPL process: a runaway loop hangs the session, and a
+crash ends it.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status

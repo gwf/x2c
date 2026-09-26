@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   List args = Args.from_argv(argc, argv);
   List spec = %(
     (-h --help (help "Show this help"))
-    (--dump (help "Print typed AST and lowered Lisp"))
+    (--dump (help "Print the typed AST"))
     (--stats (help "Print runtime statistics at exit"))
     (--verbose-stats (help "Print detailed statistics at exit"))
     (--native-module (value file) repeated
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   Map parsed = NULL;
   try parsed = Args.parse(args, spec);
   catch %(bad-arg (operation "Args.parse") (why ?why) *): {
-    Stderr.printf("x2c repl: %s\n", why.str());
+    Stderr.printf("x2c repl: %s\n", why);
     return 2;
   }
   CliRequest request = cli_request(<repl>);

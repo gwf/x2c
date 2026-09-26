@@ -833,6 +833,8 @@ static String _meta_group_unbound(Compiler c) {
     static` values for this unit in the unit's meta Scope. Returns whether
     `name` is now native; a group that does not stage is reported at
     `site`. */
+static String _load_meta_group(Compiler c, String &failure);
+
 int Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (!c.groups_meta() || name in c.meta_group_bound) return 0;
   int pending = 0;
@@ -840,12 +842,38 @@ int Compiler.bind_meta_group(Compiler c, String name, Token site) {
     match (entry) case %(function ? ?(String target) ?):
       if (target == name) pending = 1;
   if (!pending) return 0;
-  String failure = _meta_group_unbound(c);
-  String module = failure ? NULL : _stage_meta_group(c, failure);
-  if (!module)
+  String failure = NULL;
+  if (!_load_meta_group(c, failure))
     c.report_error(
       <macro>, "this function cannot run at compile time", site,
       %("function: $name" "reason: $failure"));
+  if (!(name in c.meta_group_bound))
+    c.report_error(
+      <macro>, "this function cannot run at compile time", site,
+      %("function: $name"
+        "reason: a parameter or the result has no Var form"
+        "return data built from the pointed-to values, not an address"));
+  return 1;
+}
+
+/** Stages the unit's pending `meta` group now, for a caller such as the
+    REPL that adds functions to `meta_group` itself, and binds each group
+    function in the session. Returns the loaded module, or NULL with
+    `failure` set when the group does not stage. */
+String Compiler.stage_meta_group(Compiler c, String &failure) {
+  if (!c.groups_meta()) {
+    failure = "native modules are unavailable";
+    return NULL;
+  }
+  return _load_meta_group(c, failure);
+}
+
+/* Stages and loads the pending group and binds each of its functions not
+   yet bound. Returns the module, or NULL with `failure` set. */
+static String _load_meta_group(Compiler c, String &failure) {
+  failure = _meta_group_unbound(c);
+  String module = failure ? NULL : _stage_meta_group(c, failure);
+  if (!module) return NULL;
   module = Compiler.load_native_module(module);
   Map targets = Compiler.native_module_targets(module);
   if (!(module in c.meta_group_bound)) {
@@ -862,11 +890,5 @@ int Compiler.bind_meta_group(Compiler c, String name, Token site) {
       c.macro_lisp.set_global(target, bound);
       c.meta_group_bound[target] = 1;
     }
-  if (!(name in c.meta_group_bound))
-    c.report_error(
-      <macro>, "this function cannot run at compile time", site,
-      %("function: $name"
-        "reason: a parameter or the result has no Var form"
-        "return data built from the pointed-to values, not an address"));
-  return 1;
+  return module;
 }

@@ -36,7 +36,7 @@ static const struct ReplCommand _commands[] = {
     <none>, <symbols> },
   { ":ast", ":ast NAME", "Show a session function's typed AST.",
     <function>, <ast> },
-  { ":lowered", ":lowered NAME", "Show a session function's lowered Lisp.",
+  { ":lowered", ":lowered NAME", "Show a session function's staged C.",
     <function>, <lowered> },
   { ":cancel", ":cancel", "Discard incomplete input.", <none>, <cancel> },
   { ":quit", ":quit", "Leave the session.", <none>, <quit> }
@@ -122,8 +122,6 @@ static ReplInputCompletion _complete_input(
 
 typedef struct ReplStatsSnapshot {
   unsigned definitions;
-  LispAutoStats evaluation;
-  MachineStats machine;
   ScopeStats scope;
   PoolStats pool;
 } ReplStatsSnapshot;
@@ -133,12 +131,9 @@ typedef struct ReplSizeDelta {
   size_t magnitude;
 } ReplSizeDelta;
 
-static ReplStatsSnapshot _stats_snapshot(
-  ReplSession session, Pool pool, MachineStats &machine) {
+static ReplStatsSnapshot _stats_snapshot(ReplSession session, Pool pool) {
   ReplStatsSnapshot stats;
   stats.definitions = session.names.len();
-  stats.evaluation = session.compiler.macro_lisp.auto_stats();
-  stats.machine = machine;
   stats.scope = Scope.stats();
   stats.pool = Pool.stats(pool);
   return stats;
@@ -151,14 +146,9 @@ static ReplSizeDelta _size_delta(size_t now, size_t before) {
 }
 
 static void _write_stats(
-  File out, ReplSession session, Pool pool, MachineStats &machine,
-  ReplStatsSnapshot baseline, int verbose) {
-  ReplStatsSnapshot now = _stats_snapshot(session, pool, machine);
-  long calls = now.evaluation.invocations - baseline.evaluation.invocations;
-  long entries =
-    now.evaluation.machine_entries - baseline.evaluation.machine_entries;
-  long errors =
-    now.evaluation.machine_errors - baseline.evaluation.machine_errors;
+  File out, ReplSession session, Pool pool, ReplStatsSnapshot baseline,
+  int verbose) {
+  ReplStatsSnapshot now = _stats_snapshot(session, pool);
   ReplSizeDelta live = _size_delta(
     now.scope.live_allocations, baseline.scope.live_allocations);
   ReplSizeDelta live_bytes = _size_delta(
@@ -178,12 +168,6 @@ static void _write_stats(
   size_t slot_reuses = now.pool.slot_reuses - baseline.pool.slot_reuses;
 
   out.printf("session: definitions=%u\n", now.definitions);
-  out.printf(
-    "evaluation (since REPL open): calls=%ld "
-    "machine-entries=%ld machine-errors=%ld\n", calls, entries, errors);
-  out.printf(
-    "evaluation: live-program-bytes=%ld\n",
-    now.evaluation.program_bytes);
   out.printf(
     "scope (process): live-allocation-objects=%zu "
     "delta-since-open=%c%zu live-requested-bytes=%zu "
@@ -208,18 +192,6 @@ static void _write_stats(
     block_allocations, block_reuses, slot_reuses);
   if (!verbose) return;
   out.printf(
-    "evaluation (verbose, since REPL open): analyses=%ld "
-    "published=%ld ineligible=%ld guard-failures=%ld "
-    "remembered-fallbacks=%ld inlined-scopes=%ld inline-declines=%ld\n",
-    now.evaluation.analyses - baseline.evaluation.analyses,
-    now.evaluation.published - baseline.evaluation.published,
-    now.evaluation.ineligible - baseline.evaluation.ineligible,
-    now.evaluation.guard_failures - baseline.evaluation.guard_failures,
-    now.evaluation.remembered_fallbacks -
-      baseline.evaluation.remembered_fallbacks,
-    now.evaluation.inlined_scopes - baseline.evaluation.inlined_scopes,
-    now.evaluation.inline_declines - baseline.evaluation.inline_declines);
-  out.printf(
     "scope (process, verbose): live-scopes=%zu "
     "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu "
     "peak-live-requested-bytes=%zu\n",
@@ -233,46 +205,6 @@ static void _write_stats(
     now.pool.allocation_calls - baseline.pool.allocation_calls,
     now.pool.free_calls - baseline.pool.free_calls,
     now.pool.requested_bytes - baseline.pool.requested_bytes);
-  out.printf(
-    "machine (since REPL open): scan-cells=%ld retries=%ld calls=%ld "
-    "returns=%ld max-frames=%d\n",
-    now.machine.scan_cells - baseline.machine.scan_cells,
-    now.machine.retries - baseline.machine.retries,
-    now.machine.calls - baseline.machine.calls,
-    now.machine.returns - baseline.machine.returns,
-    now.machine.max_frames);
-  out.printf(
-    "machine: range-comparisons=%ld final-range-comparisons=%ld "
-    "span-descriptors=%ld cons-requests=%ld\n",
-    now.machine.range_comparisons - baseline.machine.range_comparisons,
-    now.machine.final_range_comparisons -
-      baseline.machine.final_range_comparisons,
-    now.machine.span_descriptors - baseline.machine.span_descriptors,
-    now.machine.cons_requests - baseline.machine.cons_requests);
-  out.printf(
-    "machine: materialization-requests=%ld completions=%ld "
-    "avoided=%ld materialized-cells=%ld direct-shares=%ld\n",
-    now.machine.materialization_requests -
-      baseline.machine.materialization_requests,
-    now.machine.materialization_completions -
-      baseline.machine.materialization_completions,
-    now.machine.materializations_avoided -
-      baseline.machine.materializations_avoided,
-    now.machine.materialized_cells - baseline.machine.materialized_cells,
-    now.machine.direct_shares - baseline.machine.direct_shares);
-  out.printf(
-    "machine: local-loads=%ld capture-loads=%ld global-loads=%ld "
-    "nil-edges=%ld nil-taken=%ld\n",
-    now.machine.local_loads - baseline.machine.local_loads,
-    now.machine.capture_loads - baseline.machine.capture_loads,
-    now.machine.global_loads - baseline.machine.global_loads,
-    now.machine.nil_edges - baseline.machine.nil_edges,
-    now.machine.nil_taken - baseline.machine.nil_taken);
-  out.printf(
-    "machine: prepared-calls=%ld native-calls=%ld lisp-returns=%ld\n",
-    now.machine.prepared_calls - baseline.machine.prepared_calls,
-    now.machine.native_calls - baseline.machine.native_calls,
-    now.machine.lisp_returns - baseline.machine.lisp_returns);
 }
 
 static void _help_row(String synopsis, String description, size_t width) {
@@ -294,7 +226,7 @@ static void _help(void) {
   _help_row("Ctrl-C", "Cancel the current input.", width);
   _help_row("Ctrl-D", "Exit from an empty line.", width);
   puts("\nOptions");
-  _help_row("--dump", "Print typed AST and lowered Lisp.", width);
+  _help_row("--dump", "Print the typed AST.", width);
   _help_row("--stats", "Print runtime statistics at exit.", width);
   _help_row("--verbose-stats", "Print detailed statistics at exit.", width);
 }
@@ -333,10 +265,12 @@ static int _inspect(
     }
     String name = words[1];
     match (session.inspect(name)) {
-      case %(function (typed ?syntax) (lowered ?forms)): {
+      case %(function (typed ?syntax)): {
+        String code = session.lowered(name);
         if (descriptor->dispatch == <ast>)
           printf("typed: %%%s\n", syntax.repr());
-        else printf("lowered: %s\n", forms.repr());
+        else if (code) printf("%s\n", code);
+        else break;
         return 1;
       }
     }
@@ -365,13 +299,8 @@ int repl_run(CliRequest request, ReplOptions options) {
   String pending = "", line;
   struct ReplCompleteContext completion = { .session = session };
   int interactive = isatty(STDIN_FILENO), failed = 0;
-  unit.compiler.macro_lisp.call_budget(1000000);
-  MachineStats machine_stats = { 0 };
-  unit.compiler.macro_lisp.auto_instrument(&machine_stats);
-  defer unit.compiler.macro_lisp.auto_instrument(NULL);
   Pool stats_pool = Pool.current();
-  ReplStatsSnapshot stats_baseline =
-    _stats_snapshot(session, stats_pool, machine_stats);
+  ReplStatsSnapshot stats_baseline = _stats_snapshot(session, stats_pool);
   if (interactive) puts("x2c experimental REPL; :help for commands");
   while (1) {
     if (interactive) {
@@ -416,8 +345,7 @@ int repl_run(CliRequest request, ReplOptions options) {
           failed = 1;
         }
         else _write_stats(
-          Stdout, session, stats_pool, machine_stats,
-          stats_baseline, verbose);
+          Stdout, session, stats_pool, stats_baseline, verbose);
       }
       else if (!_inspect(session, descriptor, command)) failed = 1;
       fflush(stdout);
@@ -427,8 +355,6 @@ int repl_run(CliRequest request, ReplOptions options) {
     ReplResult result = session.submit(pending);
     if (options.dump && result.syntax)
       fprintf(stderr, "typed: %%%s\n", result.syntax.repr());
-    if (options.dump && result.lowered)
-      fprintf(stderr, "lowered: %s\n", result.lowered.repr());
     $let(unit.compiler.text, result.source) {
       foreach (Var entry, result.diagnostics)
         unit.compiler.print_diagnostic(entry);
@@ -454,8 +380,7 @@ int repl_run(CliRequest request, ReplOptions options) {
   }
   if (options.stats || options.verbose_stats)
     _write_stats(
-      Stderr, session, stats_pool, machine_stats, stats_baseline,
-      options.verbose_stats);
+      Stderr, session, stats_pool, stats_baseline, options.verbose_stats);
   if (pending.len()) { fputs("incomplete input at EOF\n", stderr); return 1; }
   return !interactive && failed;
 }
