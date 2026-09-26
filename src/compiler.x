@@ -136,8 +136,11 @@ typedef struct Compiler {
   /* `meta_comptime` names the `meta` functions that reach a `Meta`
      operation and so have no runtime form at all: no unit emits one.
      `meta_regions` maps each installed one to its region summary, which
-     the lifetime check of a later `meta` function reads at its calls. */
-  Map meta_comptime, meta_regions;
+     the lifetime check of a later `meta` function reads at its calls.
+     `meta_hashes` maps each function definition to the hash of its text,
+     which a `meta` definition and its copy linked into the compiler must
+     share. */
+  Map meta_comptime, meta_regions, meta_hashes;
   /* File-scope values and types explicitly advertised to the compile-time
      evaluator. `meta_values` is keyed by binding id and stores
      `(MUTABLE LAYOUT)` for the object. */
@@ -306,6 +309,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.proto_cache = owner.proto_cache;
   compiler.meta_comptime = owner.meta_comptime;
   compiler.meta_regions = owner.meta_regions;
+  compiler.meta_hashes = owner.meta_hashes;
   compiler.meta_values = owner.meta_values;
   compiler.meta_layouts = owner.meta_layouts;
   compiler.native_meta = owner.native_meta;
@@ -351,6 +355,7 @@ static Compiler _new(Compiler owner) {
     _.fn_defs = {};
     _.meta_comptime = {};
     _.meta_regions = {};
+    _.meta_hashes = {};
     _.meta_values = {};
     _.meta_layouts = {};
     _.native_meta = {};

@@ -313,3 +313,10 @@ meta void x2c_diagnostic_warn(String message, List notes);
 /** Returns the compile-time Lisp forms the function definition `fn` lowers
     to, or an empty `List` when it cannot be lowered. */
 meta List x2c_comptime_lower(List fn);
+
+/** Returns a `Map` from the name of each function the unit has defined so
+    far to the hash of its definition text, from the first token after any
+    `meta` marker to the end of its body. The compiler links copies of
+    shipped `meta` code and binds a definition to its copy only when these
+    hashes agree. */
+meta Map x2c_meta_definition_hashes(void);

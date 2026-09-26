@@ -1,0 +1,569 @@
+/*  linked-meta.x -- shipped `meta` code compiled into the compiler
+
+    Copyright (c) 2025 Gary William Flake
+
+    The bodied `meta` functions of the `.xmacro` files the compiler's own
+    sources import are copied here as ordinary functions, so they run as
+    native code instead of through the Lisp lowering. Each copy keeps its
+    source text token for token after the `meta` marker.
+    `Compiler.bind_linked_meta` binds an imported definition to its copy only
+    when the two texts hash the same, so an edited `.xmacro` is lowered as
+    user code until this file follows it. A copy is left out when its body
+    expands a macro, makes a `$` call, or calls a `meta` function that has
+    no runtime form, such as the `lib/meta.x` builders that reach a compiler
+    operation.
+*/
+
+#pragma once
+
+#include "x2c.x"
+#include "meta.x"
+
+/* --- var-tags.xmacro, the Var tag ledger ------------------------------ */
+
+static List _tag_groups(void) => %(
+  (
+    (<u8>  "_u8_"  <integer>  0x8002 0x0001 0x0 8 1)
+    (<i8>  "_i8_"  <integer>  0x8002 0x0002 0x0 8 1)
+    (<u16> "_u16_" <integer>  0x8002 0x0003 0x0 16 2)
+    (<i16> "_i16_" <integer>  0x8002 0x0004 0x0 16 2)
+    (<u32> "_u32_" <integer>  0x8002 0x0005 0x0 32 3)
+    (<i32> "_i32_" <integer>  0x8002 0x0006 0x0 32 3)
+    (<f32> "_f32_" <floating> 0x8002 0x0007 0x0 32 7)
+  )
+  (
+    (<u48> "_u48_" <integer>  0x8000 0x0000 0x0 48 4)
+    (<i48> "_i48_" <integer>  0x8001 0x0000 0x0 48 4)
+    (<p48> "_p48_" <pointer>  0x0000 0x0000 0x0)
+    (<f64> "_f64_" <floating> 0x0000 0x0000 0x0 64 8)
+  )
+  (
+    (<long>    "_long_"    <integer>  0x0005 0x0000 0x5 (long) 5)
+    (<ulong>   "_ulong_"   <integer>  0x0005 0x0000 0x6 (unsigned long) 5)
+    (<llong>   "_llong_"   <integer>  0x0005 0x0000 0x7 (long long) 6)
+    (<ullong>  "_ullong_"  <integer>  0x0007 0x0000 0x6 (unsigned long long) 6)
+    (<ldouble> "_ldouble_" <floating> 0x0007 0x0000 0x7 (long double) 9)
+  )
+  (
+    (<u8*>      "_u8_p_"      <pointer> 0x0001 0x0000 0x0)
+    (<i8*>      "_i8_p_"      <pointer> 0x0002 0x0000 0x0)
+    (<u16*>     "_u16_p_"     <pointer> 0x0003 0x0000 0x0)
+    (<i16*>     "_i16_p_"     <pointer> 0x0003 0x0000 0x1)
+    (<u32*>     "_u32_p_"     <pointer> 0x0004 0x0000 0x0)
+    (<i32*>     "_i32_p_"     <pointer> 0x0004 0x0000 0x1)
+    (<f32*>     "_f32_p_"     <pointer> 0x0004 0x0000 0x2)
+    (<ulong*>   "_ulong_p_"   <pointer> 0x0004 0x0000 0x3)
+    (<long*>    "_long_p_"    <pointer> 0x0005 0x0000 0x0)
+    (<f64*>     "_f64_p_"     <pointer> 0x0005 0x0000 0x1)
+    (<ullong*>  "_ullong_p_"  <pointer> 0x0005 0x0000 0x2)
+    (<llong*>   "_llong_p_"   <pointer> 0x0005 0x0000 0x3)
+    (<ldouble*> "_ldouble_p_" <pointer> 0x0005 0x0000 0x4)
+    (<p48*>     "_p48_p_"     <pointer> 0x0006 0x0000 0x0)
+  )
+  (
+    (<u8**>      "_u8_pp_"      <pointer> 0x0006 0x0000 0x1)
+    (<i8**>      "_i8_pp_"      <pointer> 0x0006 0x0000 0x2)
+    (<u16**>     "_u16_pp_"     <pointer> 0x0006 0x0000 0x3)
+    (<i16**>     "_i16_pp_"     <pointer> 0x0006 0x0000 0x4)
+    (<u32**>     "_u32_pp_"     <pointer> 0x0006 0x0000 0x5)
+    (<i32**>     "_i32_pp_"     <pointer> 0x0006 0x0000 0x6)
+    (<f32**>     "_f32_pp_"     <pointer> 0x0006 0x0000 0x7)
+    (<ulong**>   "_ulong_pp_"   <pointer> 0x0007 0x0000 0x0)
+    (<long**>    "_long_pp_"    <pointer> 0x0007 0x0000 0x1)
+    (<f64**>     "_f64_pp_"     <pointer> 0x0007 0x0000 0x2)
+    (<ullong**>  "_ullong_pp_"  <pointer> 0x0007 0x0000 0x3)
+    (<llong**>   "_llong_pp_"   <pointer> 0x0007 0x0000 0x4)
+    (<ldouble**> "_ldouble_pp_" <pointer> 0x0007 0x0000 0x5)
+  )
+  (
+    (<array>   "_array_"   <object> 0x0008 0x0000 0x0)
+    (<block>   "_block_"   <object> 0x0008 0x0000 0x1)
+    (<buffer>  "_buffer_"  <object> 0x0008 0x0000 0x2)
+    (<bytes>   "_bytes_"   <object> 0x0008 0x0000 0x3)
+    (<context> "_context_" <object> 0x0008 0x0000 0x5)
+    (<error>   "_error_"   <object> 0x0008 0x0000 0x7)
+    (<file>    "_file_"    <object> 0x0009 0x0000 0x0)
+    (<func>    "_func_"    <object> 0x0009 0x0000 0x1)
+    (<iter>    "_iter_"    <object> 0x0009 0x0000 0x2)
+    (<lambda>  "_lambda_"  <object> 0x0009 0x0000 0x3)
+    (<list>    "_list_"    <object> 0x0009 0x0000 0x4)
+    (<logger>  "_logger_"  <object> 0x0009 0x0000 0x5)
+    (<map>     "_map_"     <object> 0x0009 0x0000 0x6)
+  )
+  (
+    (<mutex>  "_mutex_"  <object> 0x000A 0x0000 0x0)
+    (<pipe>   "_pipe_"   <object> 0x000A 0x0000 0x1)
+    (<proc>   "_proc_"   <object> 0x000A 0x0000 0x2)
+    (<regexp> "_regexp_" <object> 0x000A 0x0000 0x3)
+    (<rope>   "_rope_"   <object> 0x000A 0x0000 0x4)
+    (<scope>  "_scope_"  <object> 0x000A 0x0000 0x5)
+    (<slice>  "_slice_"  <object> 0x000A 0x0000 0x6)
+    (<socket> "_socket_" <object> 0x000A 0x0000 0x7)
+    (<stream> "_stream_" <object> 0x000B 0x0000 0x0)
+    (<string> "_string_" <object> 0x000B 0x0000 0x1)
+    (<symbol> "_symbol_" <symbol> 0x8004 0x800C 0x0)
+    (<tensor> "_tensor_" <object> 0x000B 0x0000 0x3)
+    (<thread> "_thread_" <object> 0x000B 0x0000 0x4)
+    (<token>  "_token_"  <object> 0x000B 0x0000 0x5)
+    (<var>    "_var_"    <object> 0x000B 0x0000 0x6)
+  )
+  (
+    (<array*>   "_array_p_"   <reference> 0x000C 0x0000 0x0)
+    (<block*>   "_block_p_"   <reference> 0x000C 0x0000 0x1)
+    (<buffer*>  "_buffer_p_"  <reference> 0x000C 0x0000 0x2)
+    (<bytes*>   "_bytes_p_"   <reference> 0x000C 0x0000 0x3)
+    (<context*> "_context_p_" <reference> 0x000C 0x0000 0x5)
+    (<error*>   "_error_p_"   <reference> 0x000C 0x0000 0x7)
+    (<file*>    "_file_p_"    <reference> 0x000D 0x0000 0x0)
+    (<func*>    "_func_p_"    <reference> 0x000D 0x0000 0x1)
+    (<iter*>    "_iter_p_"    <reference> 0x000D 0x0000 0x2)
+    (<lambda*>  "_lambda_p_"  <reference> 0x000D 0x0000 0x3)
+    (<list*>    "_list_p_"    <reference> 0x000D 0x0000 0x4)
+    (<logger*>  "_logger_p_"  <reference> 0x000D 0x0000 0x5)
+    (<map*>     "_map_p_"     <reference> 0x000D 0x0000 0x6)
+  )
+  (
+    (<mutex*>  "_mutex_p_"  <reference> 0x000E 0x0000 0x0)
+    (<pipe*>   "_pipe_p_"   <reference> 0x000E 0x0000 0x1)
+    (<proc*>   "_proc_p_"   <reference> 0x000E 0x0000 0x2)
+    (<regexp*> "_regexp_p_" <reference> 0x000E 0x0000 0x3)
+    (<rope*>   "_rope_p_"   <reference> 0x000E 0x0000 0x4)
+    (<scope*>  "_scope_p_"  <reference> 0x000E 0x0000 0x5)
+    (<slice*>  "_slice_p_"  <reference> 0x000E 0x0000 0x6)
+    (<socket*> "_socket_p_" <reference> 0x000E 0x0000 0x7)
+    (<stream*> "_stream_p_" <reference> 0x000F 0x0000 0x0)
+    (<string*> "_string_p_" <reference> 0x000F 0x0000 0x1)
+    (<symbol*> "_symbol_p_" <reference> 0x000F 0x0000 0x2)
+    (<tensor*> "_tensor_p_" <reference> 0x000F 0x0000 0x3)
+    (<thread*> "_thread_p_" <reference> 0x000F 0x0000 0x4)
+    (<token*>  "_token_p_"  <reference> 0x000F 0x0000 0x5)
+    (<var*>    "_var_p_"    <reference> 0x000F 0x0000 0x6)
+  )
+  (
+    (<nan>  "_nan_"    <floating> 0x8003 0x0001 0x0)
+    (<-inf> "_neginf_" <floating> 0x8003 0x0002 0x0)
+    (<+inf> "_posinf_" <floating> 0x8003 0x0003 0x0)
+    (<void> "_void_"   <void>     0x8003 0xFFFF 0x0)
+  )
+);
+
+static List _tag_rows(void) {
+  Array rows = [];
+  foreach (List group, _tag_groups())
+    foreach (Var row, group) rows.push(row);
+  return rows;
+}
+
+static String _tag_id(List row)    => row[1];
+
+static Symbol _tag_kind(List row)  => row[2];
+
+static int _tag_top(List row)      => row[3];
+
+static int _tag_middle(List row)   => row[4];
+
+static int _tag_bottom(List row)   => row[5];
+
+static int _tag_numeric(List row)  => row.len() > 6;
+
+static Var _tag_bits(List row)     => row[6];
+
+static int _tag_rank(List row)     => row[7];
+
+static int _tag_floating(List row) => _tag_kind(row) == <floating>;
+
+static int _tag_unsigned(List row) => row[0].str().startswith("u");
+
+static List _tag_composite(List items) =>
+  %(expr () (composite (commas @items)));
+
+static List _tag_info_row(List row) =>
+  _tag_composite([
+    x2c_literal_symbol(row[0]),
+    x2c_literal_symbol(_tag_kind(row)),
+    x2c_literal_int(_tag_top(row)),
+    x2c_literal_int(_tag_middle(row)),
+    x2c_literal_int(_tag_bottom(row))]);
+
+static List _tag_info_sentinel(void) =>
+  _tag_composite([
+    x2c_literal_int(0),
+    x2c_literal_symbol(<void>),
+    x2c_literal_int(0x8000),
+    x2c_literal_int(0),
+    x2c_literal_int(0)]);
+
+static List _tag_info(void) {
+  Array cells = [];
+  foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
+  cells.push(_tag_info_sentinel());
+  return _tag_composite(cells);
+}
+
+static int _tag_descriptor(List row) =>
+  _tag_kind(row) == <object> || _tag_kind(row) == <symbol>;
+
+static List _tag_names(void) {
+  Array names = [];
+  foreach (List row, _tag_rows()) names.push(row[0]);
+  return names;
+}
+
+static List _tag_numeric_rows(void) {
+  Array rows = [];
+  foreach (List row, _tag_rows()) if (_tag_numeric(row)) rows.push(row);
+  return rows;
+}
+
+static List _tag_numeric_names(void) {
+  Array names = [];
+  foreach (List row, _tag_numeric_rows()) names.push(row[0]);
+  return names;
+}
+
+static List _tag_bits_expr(List row) {
+  Var bits = _tag_bits(row);
+  /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
+     no compile-time meaning, so the tag is read directly. */
+  if (bits.tag() == <list>)
+    return %(expr () (op *
+      (expr (unsigned)
+        (sizeof (parens (decl $bits (bindings (bind () ()))))))
+      ${x2c_expr_ident(%("CHAR_BIT"))}));
+  return x2c_literal_int(bits);
+}
+
+static List _tag_numeric_row(List row) =>
+  _tag_composite([
+    x2c_literal_symbol(row[0]),
+    x2c_literal_int(_tag_floating(row)),
+    x2c_literal_int(_tag_unsigned(row)),
+    _tag_bits_expr(row),
+    x2c_literal_int(_tag_rank(row))]);
+
+static List _tag_numeric_table(void) {
+  Array cells = [];
+  foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
+  return _tag_composite(cells);
+}
+
+static int _tag_decode_row(List row) {
+  Var tag = row[0];
+  return !(tag == <f64> || tag == <symbol> || tag == <void>);
+}
+
+static List _tag_decode_rows(void) {
+  Array rows = [];
+  foreach (List row, _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
+  return rows;
+}
+
+static int _tag_group_mask(int count) {
+  if (count == 1) return 0;
+  if (count == 2) return 1;
+  if (count == 4) return 3;
+  return 7;
+}
+
+static List _tag_validated_ids(void) => %(
+  "_long_" "_ulong_" "_llong_" "_ullong_" "_ldouble_" "_array_" "_map_"
+  "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
+
+static int _tag_constant_row(List row) {
+  if (_tag_validated_ids().contains(_tag_id(row))) return 0;
+  return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
+}
+
+static List _tag_list(List items) {
+  List built = %(expr ("List") (nil));
+  for (int i = items.len() - 1; i >= 0; i--)
+    built = %(expr ("List") (cons ${items[i]} $built));
+  return built;
+}
+
+static Map _tag_sibling_counts(List rows) {
+  Map counts = {};
+  foreach (List row, rows) {
+    Var top = _tag_top(row);
+    counts[top] = counts.getdefault(top, 0) + 1;
+  }
+  return counts;
+}
+
+static List _tag_row_entry(List row, Map counts) =>
+  %(map-entry ${x2c_literal_symbol(row[0])}
+    ${_tag_list([x2c_literal_int(_tag_top(row)),
+                 x2c_literal_int(_tag_group_mask(counts[_tag_top(row)])),
+                 x2c_literal_int(_tag_bottom(row))])});
+
+static List _tag_constant_rows(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array entries = [];
+  foreach (List row, rows)
+    if (_tag_constant_row(row)) entries.push(_tag_row_entry(row, counts));
+  return entries;
+}
+
+static int _tag_group_top(int slot) =>
+  slot % 2 == 0 ? slot / 2 : 0x8000 + slot / 2;
+
+static List _tag_decode_group(List rows, Map counts, int top) {
+  int immediate = top == 0x8002 || top == 0x8003;
+  int mask = _tag_group_mask(counts.getdefault(top, 0));
+  Array ids = [];
+  for (int i = 0; i < 8; i++)
+    ids.push(x2c_expr_ident(x2c_ident("_invalid_")));
+  foreach (List row, rows) {
+    if (_tag_top(row) != top) continue;
+    int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
+    ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
+  }
+  return _tag_composite(%(${x2c_literal_int(mask)}
+    ${x2c_literal_int(immediate)} ${_tag_composite(ids)}));
+}
+
+static List _tag_decode_groups(void) {
+  List rows = _tag_decode_rows();
+  Map counts = _tag_sibling_counts(rows);
+  Array groups = [];
+  for (int group = 0; group < 32; group++)
+    groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
+  return _tag_composite(groups);
+}
+
+static Map _tag_types(List native) {
+  Map types = {};
+  foreach (List row, native) types[row[0]] = row[1];
+  Symbol star = <*>;
+  foreach (List row, _tag_rows()) {
+    if (!_tag_descriptor(row)) continue;
+    String tag = row[0].str();
+    String name = tag.capitalize();
+    types[%($name)] = row[0];
+    Symbol pointer = tag + "*";
+    types[%($star $name)] = pointer;
+  }
+  return types;
+}
+
+/* --- var-unbox.xmacro, Var accessors ---------------------------------- */
+
+static int var_tag_top(List tag) =>
+  (int) Var_tag_top(List_last((List) List_last(tag)));
+
+static int var_tag_bottom(List tag) =>
+  (int) Var_tag_bottom(List_last((List) List_last(tag)));
+
+/* --- varops.xmacro, in-place update rows ------------------------------ */
+
+static List _update_rows(void) => %(
+  (char    (i8 "Var_box_i8" "Var_integer"
+            (expr (int) (literal (int) "0")) (() (char))))
+  (schar   (i8 "Var_box_i8" "Var_integer"
+            (expr (int) (literal (int) "0")) ((char) (signed char))))
+  (u8      (u8 "Var_box_u8" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("uchar"))))
+  (i16     (i16 "Var_box_i16" "Var_integer"
+            (expr (int) (literal (int) "0")) (() (short))))
+  (u16     (u16 "Var_box_u16" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("ushort"))))
+  (i32     (i32 "Var_box_i32_bits" "Var_integer"
+            (expr (int) (literal (int) "0")) ((unsigned) (int))))
+  (u32     (u32 "Var_box_u32" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("uint"))))
+  (long    (long "Var_box_long" "Var_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (ulong   (ulong "Var_box_ulong" "Var_ulong_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (llong   (llong "Var_box_long_long" "Var_long_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (f32     (f32 "Var_box_f32" "Var_decode_f32"
+            (expr (float) (literal (float) "0.0f")) (() ())))
+  (f64     (f64 "Var_box_f64" "Var_decode_f64"
+            (expr (double) (literal (double) "0.0")) (() ())))
+  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value"
+            (expr (long double) (literal (long double) "0.0L")) (() ())))
+);
+
+static List _update_row(List id) {
+  match (id)
+    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
+  return %();
+}
+
+static Symbol _update_tag(List id)     => _update_row(id)[0];
+
+static String _update_boxer(List id)   => _update_row(id)[1];
+
+static String _update_decoder(List id) => _update_row(id)[2];
+
+static List _update_zero(List id)      => _update_row(id)[3];
+
+static List _update_cast_in(List id)  => _update_row(id)[4].car();
+
+static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
+
+/* --- native-scalar-types.xmacro, C scalars ---------------------------- */
+
+static Map native_scalar_types(void) => {
+  %(char): %(i8 "Var_char" "x2c_var_update_i8"),
+  %(signed char): %(i8 "Var_char" "x2c_var_update_schar"),
+  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8"),
+  %(short): %(i16 "Var_short" "x2c_var_update_i16"),
+  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16"),
+  %(int): %(i32 "Var_int" "x2c_var_update_i32"),
+  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32"),
+  %(long): %(long "Var_long" "x2c_var_update_long"),
+  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong"),
+  %(long long): %(llong "Var_long_long" "x2c_var_update_long_long"),
+  %(unsigned long long):
+    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long"),
+  %(float): %(f32 "Var_float" "x2c_var_update_f32"),
+  %(double): %(f64 "Var_floating" "x2c_var_update_f64"),
+  %(long double):
+    %(ldouble "Var_long_double" "x2c_var_update_long_double"),
+};
+
+/* --- system-macros.xmacro, system macros ------------------------------ */
+
+static int _dedent_width(String line) {
+  int length = line.len(), width = 0;
+  while (width < length && (line[width] == ' ' || line[width] == '\t'))
+    width++;
+  return width;
+}
+
+static int _dedent_blank(String line) =>
+  _dedent_width(line) == line.len();
+
+static String _dedent_apply(String text) {
+  int width = _dedent_width(text);
+  if (width < text.len() && text[width] == '\n') {
+    text = text.getslice(width + 1, text.len(), 1);
+    width = _dedent_width(text);
+  }
+  String prefix = text.getslice(0, width, 1);
+  Array lines = [];
+  foreach (Var line, text.split("\n"))
+    lines.push(String.remove_prefix(line, prefix));
+  if (lines.len() > 1 && _dedent_blank(lines[-1])) lines[-1] = "";
+  return lines.join("\n");
+}
+
+static int _cases_label(List item) {
+  match (item) {
+    case %(at ? (case ?)): return 1;
+    case %(at ? (default)): return 1;
+  }
+  return 0;
+}
+
+static int _cases_transfers(List item) {
+  match (item) {
+    case %(at ? (break)): return 1;
+    case %(at ? (continue)): return 1;
+    case %(at ? (goto ?)): return 1;
+    case %(at ? (return ? ?)): return 1;
+    case %(at ? (return ?)): return 1;
+  }
+  return 0;
+}
+
+static List _cases_split(List items, int labelled) {
+  if (!items) return %();
+  List item = items.car();
+  if (_cases_label(item))
+    return %($item @{_cases_split(items.cdr(), 1)});
+  if (!labelled)
+    return %($item @{_cases_split(items.cdr(), 0)});
+  Array run = [];
+  while (items && !_cases_label(items.car())) {
+    run.push(items.car());
+    items = items.cdr();
+  }
+  if (!_cases_transfers(run[-1])) run.push(%(break));
+  return %((block @run) @{_cases_split(items, 0)});
+}
+
+static List _cases_switch(List condition, List body) =>
+  %((switch $condition (block @{_cases_split(body.cdr(), 0)})));
+
+static List _macros_location(void) =>
+  x2c_literal_string(
+    x2c_invocation_file() + ":" + x2c_invocation_line().str());
+
+/* --- the linked inventory ------------------------------------------------ */
+
+macro Statement $linked.row(Expr $rows, Expr $name, Expr $function) {
+  $rows[$name] = Func.new(
+    $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
+}
+
+/** Returns the linked copies by name. */
+Map linked_meta_targets(void) {
+  Map rows = {};
+  $linked.row(rows, "_tag_groups", _tag_groups);
+  $linked.row(rows, "_tag_rows", _tag_rows);
+  $linked.row(rows, "_tag_id", _tag_id);
+  $linked.row(rows, "_tag_kind", _tag_kind);
+  $linked.row(rows, "_tag_top", _tag_top);
+  $linked.row(rows, "_tag_middle", _tag_middle);
+  $linked.row(rows, "_tag_bottom", _tag_bottom);
+  $linked.row(rows, "_tag_numeric", _tag_numeric);
+  $linked.row(rows, "_tag_bits", _tag_bits);
+  $linked.row(rows, "_tag_rank", _tag_rank);
+  $linked.row(rows, "_tag_floating", _tag_floating);
+  $linked.row(rows, "_tag_unsigned", _tag_unsigned);
+  $linked.row(rows, "_tag_composite", _tag_composite);
+  $linked.row(rows, "_tag_info_row", _tag_info_row);
+  $linked.row(rows, "_tag_info_sentinel", _tag_info_sentinel);
+  $linked.row(rows, "_tag_info", _tag_info);
+  $linked.row(rows, "_tag_descriptor", _tag_descriptor);
+  $linked.row(rows, "_tag_names", _tag_names);
+  $linked.row(rows, "_tag_numeric_rows", _tag_numeric_rows);
+  $linked.row(rows, "_tag_numeric_names", _tag_numeric_names);
+  $linked.row(rows, "_tag_bits_expr", _tag_bits_expr);
+  $linked.row(rows, "_tag_numeric_row", _tag_numeric_row);
+  $linked.row(rows, "_tag_numeric_table", _tag_numeric_table);
+  $linked.row(rows, "_tag_decode_row", _tag_decode_row);
+  $linked.row(rows, "_tag_decode_rows", _tag_decode_rows);
+  $linked.row(rows, "_tag_group_mask", _tag_group_mask);
+  $linked.row(rows, "_tag_validated_ids", _tag_validated_ids);
+  $linked.row(rows, "_tag_constant_row", _tag_constant_row);
+  $linked.row(rows, "_tag_list", _tag_list);
+  $linked.row(rows, "_tag_sibling_counts", _tag_sibling_counts);
+  $linked.row(rows, "_tag_row_entry", _tag_row_entry);
+  $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
+  $linked.row(rows, "_tag_group_top", _tag_group_top);
+  $linked.row(rows, "_tag_decode_group", _tag_decode_group);
+  $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
+  $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "var_tag_top", var_tag_top);
+  $linked.row(rows, "var_tag_bottom", var_tag_bottom);
+  $linked.row(rows, "_update_rows", _update_rows);
+  $linked.row(rows, "_update_row", _update_row);
+  $linked.row(rows, "_update_tag", _update_tag);
+  $linked.row(rows, "_update_boxer", _update_boxer);
+  $linked.row(rows, "_update_decoder", _update_decoder);
+  $linked.row(rows, "_update_zero", _update_zero);
+  $linked.row(rows, "_update_cast_in", _update_cast_in);
+  $linked.row(rows, "_update_cast_out", _update_cast_out);
+  $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_dedent_width", _dedent_width);
+  $linked.row(rows, "_dedent_blank", _dedent_blank);
+  $linked.row(rows, "_dedent_apply", _dedent_apply);
+  $linked.row(rows, "_cases_label", _cases_label);
+  $linked.row(rows, "_cases_transfers", _cases_transfers);
+  $linked.row(rows, "_cases_split", _cases_split);
+  $linked.row(rows, "_cases_switch", _cases_switch);
+  $linked.row(rows, "_macros_location", _macros_location);
+  return rows;
+}
+
+meta static Map _linked_hashes(void) => x2c_meta_definition_hashes();
+
+/** Returns the hash of each linked copy's definition text by name. */
+Map linked_meta_hashes(void) => $_linked_hashes();

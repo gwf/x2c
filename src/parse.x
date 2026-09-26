@@ -1943,6 +1943,20 @@ static void _definition_source(
   }
 }
 
+/* Records the hash of a function definition's code tokens, from its first
+   token after any `meta` marker to the end of its body. A copy linked into
+   the compiler answers for a `meta` definition only when the hashes agree. */
+static void _record_meta_hash(Compiler c, List function, Token first) {
+  uint64_t hash = 0xcbf29ce484222325ULL;
+  for (Token token = first; token < c.token; token++)
+    if (token.type != <space> && token.type != <comment> && token.len)
+      hash = x2c_fnv_bytes(
+        x2c_fnv_bytes(hash, token.text, token.text.len()), " ", 1);
+  match (function)
+    case %(function ? (bind (binding ? ?(String name)) *) ?):
+      c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
@@ -2015,7 +2029,10 @@ List Compiler.parse_top_level(Compiler c) {
     $let(c.meta_body, lowered != NULL) {
       function = _finish_function_definition(c, decl);
     }
-    if (lowered) c.install_meta_function(function, lowered);
+    _record_meta_hash(c, function, definition_start);
+    if (lowered && !c.bind_linked_meta(
+          function, decl.type_from_ast().canonicalize()))
+      c.install_meta_function(function, lowered);
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */

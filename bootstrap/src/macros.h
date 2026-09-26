@@ -123,6 +123,10 @@ void Compiler_select_native_modules(List paths);
 
 int Compiler_supplies_native_meta(String name);
 
+Map x2c_meta_definition_hashes(void);
+
+int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
+
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
 
 int Compiler_bind_native_meta(Compiler c, String name);
@@ -136,6 +140,12 @@ void Compiler_parse_macro_lisp_shallow(Compiler compiler);
 List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
+
+void Compiler_record_meta_definition(Compiler c, List function, Type type, Token start, Token body);
+
+void Compiler_record_meta_static(Compiler c, List declaration, Token start);
+
+void Compiler_record_meta_type(Compiler c, Token start);
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 

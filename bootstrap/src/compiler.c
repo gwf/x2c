@@ -1194,6 +1194,7 @@ void Compiler_borrow_unit_semantics(Compiler compiler, Compiler owner){
   compiler -> proto_cache = owner -> proto_cache;
   compiler -> meta_comptime = owner -> meta_comptime;
   compiler -> meta_regions = owner -> meta_regions;
+  compiler -> meta_hashes = owner -> meta_hashes;
   compiler -> meta_values = owner -> meta_values;
   compiler -> meta_layouts = owner -> meta_layouts;
   compiler -> native_meta = owner -> native_meta;
@@ -1261,6 +1262,7 @@ static Compiler _new(Compiler owner){
     (compiler) -> fn_defs = Map_new();
     (compiler) -> meta_comptime = Map_new();
     (compiler) -> meta_regions = Map_new();
+    (compiler) -> meta_hashes = Map_new();
     (compiler) -> meta_values = Map_new();
     (compiler) -> meta_layouts = Map_new();
     (compiler) -> native_meta = Map_new();
@@ -1303,6 +1305,8 @@ static Compiler _new(Compiler owner){
     (compiler) -> inits = Array_new();
     (compiler) -> early_decls = Array_new();
     (compiler) -> meta_defs = Array_new();
+    (compiler) -> meta_group = Array_new();
+    (compiler) -> meta_group_bound = Map_new();
     (compiler) -> collect_protocols = 1;
     (compiler) -> diagnostics = Diagnostics_new(owner && owner -> diagnostics -> printer ?(compiler) : NULL, owner ? owner -> diagnostics -> limit : 1);
     (compiler) -> braces = Array_new();
@@ -1778,7 +1782,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(compiler)) return;  List rows = Sym_visible_symbols(compiler -> sym); {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 959};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 973};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -1805,7 +1809,7 @@ Token Token_after_group(Token t){
 Symbol Compiler_peek(Compiler compiler, int steps){
   if(! _init_guard_) _file_init_();  Token token = compiler -> token;  if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1009};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1023};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -1820,7 +1824,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1027};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1041};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }

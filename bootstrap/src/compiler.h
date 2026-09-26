@@ -69,10 +69,13 @@ typedef struct Compiler{
   Array early_decls;
   int prelude;
   Array meta_defs;
-  Map meta_comptime, meta_regions;
+  Map meta_comptime, meta_regions, meta_hashes;
   Map meta_values;
   Map meta_layouts;
   Map native_meta;
+  Array meta_group;
+  Map meta_group_bound;
+  Scope meta_scope;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int layout;
   int meta_body;

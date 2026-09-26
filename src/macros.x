@@ -11,6 +11,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
 #include "expressions.x"
+#include "linked-meta.x"
 #include "literals.x"
 #include "comptime.x"
 #include "meta.x"
@@ -1839,6 +1840,66 @@ int Compiler.supplies_native_meta(String name) {
   return (void *) native_modules &&
          native_modules.try_get(compiler_supplier, targets) &&
          name in ((Map) targets);
+}
+
+/** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
+Map x2c_meta_definition_hashes(void) {
+  _sdk_guard("x2c.meta.definition.hashes");
+  return macro_sdk_compiler.meta_hashes;
+}
+
+/* The shipped `meta` definitions compiled into the compiler
+   (`src/linked-meta.x`), kept as a native module no request selects, and
+   the hashes of the definition texts they were compiled from. */
+static String linked_supplier = "<linked>";
+static Map linked_hashes = NULL;
+
+static int _native_meta_accepts(Compiler c, Var function, List signature);
+
+/* Whether `node` calls or names a function that exists only inside the
+   compiler, which leaves a `meta` function no runtime form: the rule the
+   lowering applies to the calls it scans. */
+static int _reaches_compiler(Compiler c, Var node) {
+  if (node is <string>)
+    return node in c.meta_comptime || Compiler.supplies_native_meta(node);
+  if (node is not <list>) return 0;
+  List list = node;
+  if (list && (list.car() == <meta-call> || list.car() == <tpl-call>))
+    return 1;
+  foreach (Var part, list) if (_reaches_compiler(c, part)) return 1;
+  return 0;
+}
+
+/** Binds the bodied `meta` definition `fn`, of function type `type`, to the
+    compiler's linked copy of it when the two definition texts hash the
+    same, instead of lowering it. Returns whether it did; an edited
+    definition is lowered as user code.
+*/
+int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
+  String name = NULL;
+  match (fn)
+    case %(function ? (bind (binding ? ?(String own)) *) ?): name = own;
+  if (!name) return 0;
+  if (!Compiler.native_module_loaded(linked_supplier)) {
+    Compiler.add_native_module(linked_supplier, linked_meta_targets);
+    Scope.push(&native_module_scope);
+    linked_hashes = linked_meta_hashes();
+    Scope.pop();
+  }
+  Var hash, function, bound;
+  if (!linked_hashes.try_get(name, hash) ||
+      !hash.equal(c.meta_hashes[name]) ||
+      !((Map) native_modules[linked_supplier]).try_get(name, function))
+    return 0;
+  if (!c.collect_protocols) c.run_declaration_effects();
+  _ensure_lisp(c);
+  if (!_native_meta_accepts(c, function, c.func_signature(type))) return 0;
+  /* The shared session binds the copy once for every unit that imports the
+     same file. */
+  if (!c.macro_lisp.try_get(name, bound))
+    c.macro_lisp.set_global(name, function);
+  if (_reaches_compiler(c, fn)) c.meta_comptime[name] = 1;
+  return 1;
 }
 
 /* The paths of the selected native modules that define `name`, in order. */

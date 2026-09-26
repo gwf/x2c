@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 35
+- Compiler modules: 36
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -266,6 +266,14 @@ Public functions:
 `Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
 `Compiler.lower_lambda_expr`
 
+### [src/linked-meta.x](../src/linked-meta.x)
+
+shipped `meta` code compiled into the compiler.
+
+Public functions:
+
+`linked_meta_targets`, `linked_meta_hashes`
+
 ### [src/literals.x](../src/literals.x)
 
 x2c literal and lambda parsing.
@@ -311,20 +319,22 @@ Public functions:
 `Compiler.load_native_module`, `Compiler.preload_native_module`,
 `x2c_register_extension`, `Compiler.links_extension`,
 `Compiler.select_package_module`, `Compiler.select_native_modules`,
-`Compiler.supplies_native_meta`, `Compiler.install_native_meta_effects`,
+`Compiler.supplies_native_meta`, `x2c_meta_definition_hashes`,
+`Compiler.bind_linked_meta`, `Compiler.install_native_meta_effects`,
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.record_meta_definition`, `Compiler.record_meta_static`,
+`Compiler.record_meta_type`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.macro_tag_name`, `Compiler.peek_macro_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
