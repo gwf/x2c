@@ -1,5 +1,10 @@
 /* meta-type-parameter.xmacro -- a meta function with a `Type` parameter. */
 
-meta static List describe(Type type) => x2c_literal_string(type.repr());
+/* One line per part, so no part wraps. */
+meta static List describe(Type type) {
+  Array parts = [];
+  foreach (List part, type) parts.push(part.repr());
+  return x2c_literal_string(String.join("\n  ", parts));
+}
 
 macro Expression $type.describe(Expr $value) => $describe($value);
