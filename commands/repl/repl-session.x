@@ -47,6 +47,7 @@ typedef struct ReplCompletion {
 #include <dlfcn.h>
 #include <errno.h>
 #include <signal.h>
+#include <unistd.h>
 #include <stdio.h>
 
 static void _write_stdout(String text, int newline, Symbol operation) {
@@ -291,11 +292,25 @@ static String _thunk_name(List thunk) {
 static const int _trapped[] = { SIGINT, SIGSEGV, SIGBUS, SIGFPE, SIGILL };
 enum { _TRAPPED = sizeof(_trapped) / sizeof(_trapped[0]) };
 
+/* Counts the Ctrl-C presses during the current submission. */
+static volatile sig_atomic_t _interrupts;
+
 /* Raises an `Error` from the signal that stopped a submission, so the
    submission unwinds to `_run`. The handler runs on its own stack, which
-   survives a submission that exhausts the native stack. */
+   survives a submission that exhausts the native stack. A first Ctrl-C
+   only asks for a second one: the submission may be inside the allocator
+   or hold a runtime lock, and jumping out then could deadlock the session.
+   The second Ctrl-C forces the jump and marks the session unsafe. */
 static void _stop(int number) {
-  if (number == SIGINT) raise %(interrupt (signal $number));
+  if (number == SIGINT && !_interrupts++) {
+    static const char note[] =
+      "\ninterrupt: press Ctrl-C again to stop the submission\n";
+    (void) !write(STDERR_FILENO, note, sizeof(note) - 1);
+    return;
+  }
+  if (number == SIGINT)
+    raise %(interrupt (signal $number)
+                      (why "the session may be inconsistent now"));
   raise %(crash (signal $number)
                 (why "the session may be inconsistent after a crash"));
 }
@@ -308,8 +323,9 @@ static void _leave_signal_stack(void) {
   if (!sigsetjmp(here, 1)) siglongjmp(here, 1);
 }
 
-/* Calls the staged thunk `thunk`. Ctrl-C and a crash in the submission
-   raise, and the submission fails instead of ending the session. */
+/* Calls the staged thunk `thunk`. A second Ctrl-C and a crash in the
+   submission raise, and the submission fails instead of ending the
+   session. */
 static Var _run(Compiler c, List thunk) {
   static char stack[1 << 17];
   static int ready = 0;
@@ -321,6 +337,7 @@ static Var _run(Compiler c, List thunk) {
     ready = !sigaltstack(&alternate, NULL);
   }
   else _leave_signal_stack();
+  _interrupts = 0;
   struct sigaction action = {
     .sa_handler = _stop, .sa_flags = SA_ONSTACK | SA_NODEFER };
   struct sigaction saved[_TRAPPED];

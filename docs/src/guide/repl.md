@@ -180,11 +180,13 @@ Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
 Long sessions do not have a bounded-memory guarantee. Loaded modules stay
 loaded; each function and value lives in the module that defined it.
-Submissions run as native code in the REPL process. Ctrl-C during a
-submission, or a crash in it such as a null dereference or a runaway
-recursion, fails the submission with `interrupt` or `crash` and returns to
-the prompt. Effects the submission made before it stopped remain, and after a
-crash the session may be inconsistent.
+Submissions run as native code in the REPL process. A crash in a
+submission, such as a null dereference or a runaway recursion, fails the
+submission with `crash` and returns to the prompt. The first Ctrl-C during a
+submission only prints a note, because stopping code inside the allocator or
+a runtime lock could deadlock the session; a second Ctrl-C fails the
+submission with `interrupt`. Effects the submission made before it stopped
+remain, and after a crash or interrupt the session may be inconsistent.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
