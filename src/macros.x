@@ -2275,11 +2275,25 @@ static Map _source_captures(List bindings) {
 /* The C compiler and x2c include directory that stage meta groups. */
 static String meta_cc = NULL, meta_include_dir = NULL;
 
-/** Selects the C compiler `cc` and the x2c headers in `include_dir` that
-    stage the `meta` groups of the units this process translates. */
+/* The runtime headers this compiler was built with, which a staged module
+   shares because it calls the compiler's own runtime: a checkout stage's
+   `lib`, the checked-in bootstrap's, or else the installed `include_dir`. */
+static String _meta_headers(String include_dir) {
+  String stage = x2c_stage_dir();
+  if (stage) return %"$stage/lib";
+  String executable = x2c_get_executable(), root = x2c_get_root();
+  if (executable && root && Path.basename(executable) == "x2c-bootstrap" &&
+      Path.dirname(executable) == %"$root/bin")
+    return %"$root/bootstrap/lib";
+  return include_dir;
+}
+
+/** Selects the C compiler `cc` that stages the `meta` groups of the units
+    this process translates, with the runtime headers this compiler was
+    built with, found from its installed headers in `include_dir`. */
 void Compiler.use_meta_toolchain(String cc, String include_dir) {
   meta_cc = cc;
-  meta_include_dir = include_dir;
+  meta_include_dir = _meta_headers(include_dir);
   meta_cc.try_own();
   meta_include_dir.try_own();
 }
