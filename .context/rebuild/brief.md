@@ -68,6 +68,13 @@ artifacts count only through the source that generates them.
    must say how the idiomatic x2c version differs from that anchor.
    (Added 2026-09-26 after the greenfield round; the reconciliation and
    the report apply it, the area designs did not have it.)
+9. The tree stays self-contained: the compiler and runtime depend on a C
+   compiler and libc, nothing else, as today. A design that reaches its
+   line count by adopting a third-party library (a string library, a
+   container library, a Lisp, a parser generator, a regex engine) has not
+   done the job; those lines are still lines, now someone else's. A C
+   library may be an anchor for the size of a problem, never a component.
+   (Added 2026-09-26, same status as item 8.)
 
 ## Gary's hypotheses (to prove or refute, not to assume)
 
