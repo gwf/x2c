@@ -4189,6 +4189,19 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (_integer_literal_kind(expr, NULL) == <zero> &&
       c.sym.resolve_key(target).is_pointer())
     return expr;
+  /* An object that is not itself a pointer, array, or function never
+     becomes one implicitly; its address is spelled `&value`. */
+  if (target.car() == <*> && !type_is_var) {
+    Type source = c.sym.resolve_key(type);
+    if (source && !source.is_pointer() && !source.is_array() &&
+        !source.is_function()) {
+      c.report_error(
+        <type>,
+        %"cannot pass ${type.repr()} where ${target.repr()} is expected",
+        NULL, %("write &value to pass its address"));
+      return expr;
+    }
+  }
   // pointers, references, and address-of/dereference conversions
   // T -> &T : pass address of LHS as ref w/ updated type
   if (type === cdr(target) &&

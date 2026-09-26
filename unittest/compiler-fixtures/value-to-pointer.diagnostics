@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/value-to-pointer.x:8:3: type: cannot pass ("Box") where (* "Box") is expected
+    bump(box);
+    ^^^^
+  note: write &value to pass its address
+
