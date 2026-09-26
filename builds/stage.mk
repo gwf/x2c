@@ -108,7 +108,7 @@ $(LIB_BUILD):
 # produces lib/x2c.xi, which later batches and stages replay as the prelude.
 X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
-		$(ROOT)/etc/builtin-macros.xlisp \
+		$(ROOT)/etc/builtin-core.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp \
 		$(ROOT)/etc/lisp-values.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \

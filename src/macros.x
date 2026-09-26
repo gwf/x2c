@@ -621,10 +621,15 @@ List binding_native_type(List function) =>
 List binding_literal_list(List values) => _sdk_literal_list(values);
 
 /* Binds the built-in macro algorithms into `lisp` under the names its
-   compile-time Lisp calls. */
+   compile-time Lisp calls; the native Lisp binding algorithms carry the
+   `_x2c.` prefix of internal primitives. */
 static void _install_builtins(Lisp lisp) {
-  foreach (Var (name, function), builtin_targets())
-    if (!name.str().startswith("binding_")) lisp.set_global(name, function);
+  foreach (Var (name, function), builtin_targets()) {
+    String spelling = name;
+    lisp.set_global(
+      spelling.startswith("binding_") ? %"_x2c.$spelling" : spelling,
+      function);
+  }
 }
 
 /** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
