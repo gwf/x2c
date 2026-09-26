@@ -20,7 +20,6 @@ $(import "../src/ast-rewrite.xmacro")
 #include "regions.x"
 #include "statements.x"
 #include "digest.x"
-#include "generate.x"
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"

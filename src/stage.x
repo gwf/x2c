@@ -31,7 +31,6 @@
 #include "string.x"
 #include "varconvert.x"
 #include "macros.x"
-#include "generate.x"
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"
@@ -676,6 +675,7 @@ static List _meta_group_entry(
 }
 
 List Compiler.transform(Compiler compiler, List ast);
+List generate_code_text(Compiler c, List ast, String basename);
 
 /* `node` with each template call replaced by a call of `x2c_template_call`,
    named by `callee`, on its template and its arguments as Vars. */
