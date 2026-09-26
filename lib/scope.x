@@ -66,11 +66,16 @@ protocol Cleanup(Scope);
    head, `prev` stores the owning Scope with that bit set; every other `prev`
    is the untagged preceding ScopeAlloc. Free, move, realloc, and owner lookup
    all rely on relinking without losing this one in-band ownership marker. */
-#define PTR_ALLOC(p) ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
-#define ALLOC_PTR(a) ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
-#define TAG_POINTER(p) ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
-#define UNTAG_POINTER(p) ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
-#define IS_TAGGED(p) ((uintptr_t) (p) & (uintptr_t) 1)
+macro Expression $scope.ptr_alloc(Expr $p) =>
+  ((ScopeAlloc) ((char *) ($p) - sizeof(struct ScopeAlloc)));
+macro Expression $scope.alloc_ptr(Expr $a) =>
+  ((void *) ((char *) ($a) + sizeof(struct ScopeAlloc)));
+macro Expression $scope.tag_pointer(Expr $p) =>
+  ((void *) ((uintptr_t) ($p) | (uintptr_t) 1));
+macro Expression $scope.untag_pointer(Expr $p) =>
+  ((void *) ((uintptr_t) ($p) & ~((uintptr_t) 1)));
+macro Expression $scope.is_tagged(Expr $p) =>
+  ((uintptr_t) ($p) & (uintptr_t) 1);
 
 /* Every allocation keeps its requested payload size and optional destructor
    before the public header. ScopeAlloc remains immediately before the payload
@@ -85,7 +90,8 @@ _Static_assert(
     _Alignof(max_align_t) == 0,
   "Scope allocation prefix must preserve payload alignment");
 
-#define ALLOC_META(a) (((ScopeMetadata *) (a)) - 1)
+macro Expression $scope.alloc_meta(Expr $a) =>
+  (((ScopeMetadata *) ($a)) - 1);
 
 typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
@@ -319,13 +325,13 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
   meta.drop = drop;
   ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
   alloc.next = scope.first;
-  alloc.prev = TAG_POINTER(scope);
+  alloc.prev = $scope.tag_pointer(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
   atomic_fetch_add(&scope_allocation_calls, 1);
   _record_request(size);
   _record_live_add(size);
-  return ALLOC_PTR(alloc);
+  return $scope.alloc_ptr(alloc);
 }
 
 static void *_calloc_in(Scope *slot, size_t count, size_t size) {
@@ -348,19 +354,19 @@ static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
 static void _release_alloc(ScopeAlloc alloc) {
-  ScopeMetadata *meta = ALLOC_META(alloc);
+  ScopeMetadata *meta = $scope.alloc_meta(alloc);
   size_t size = meta.requested_size;
   void (*drop)(void *) = meta.drop;
   atomic_fetch_add(&scope_free_calls, 1);
   _record_live_remove(size);
-  if (drop) drop(ALLOC_PTR(alloc));
+  if (drop) drop($scope.alloc_ptr(alloc));
   free(meta);
 }
 
 static void _free_alloc(ScopeAlloc old) {
   ScopeAlloc next = old.next, prev = old.prev;
-  if (IS_TAGGED(prev)) {
-    Scope scope = UNTAG_POINTER(prev);
+  if ($scope.is_tagged(prev)) {
+    Scope scope = $scope.untag_pointer(prev);
     scope.first = next;
   }
   else if (prev) prev.next = next;
@@ -376,7 +382,7 @@ static void _destroy_chain(Scope scope) {
     ScopeAlloc alloc;
     while ((alloc = scope.first)) {
       scope.first = alloc.next;
-      if (scope.first) scope.first.prev = TAG_POINTER(scope);
+      if (scope.first) scope.first.prev = $scope.tag_pointer(scope);
       _release_alloc(alloc);
     }
     _unregister_name(scope);
@@ -885,7 +891,7 @@ void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
 meta native void Scope.free(void *ptr) {
   _require_running();
   if (!ptr) return;
-  _free_alloc(PTR_ALLOC(ptr));
+  _free_alloc($scope.ptr_alloc(ptr));
 }
 
 /** Returns the `Scope` that currently owns `ptr`.
@@ -899,9 +905,9 @@ meta native void Scope.free(void *ptr) {
 Scope Scope.owner(void *ptr) {
   _require_running();
   if (!ptr) return NULL;
-  ScopeAlloc alloc = PTR_ALLOC(ptr);
-  while (alloc && !IS_TAGGED(alloc.prev)) alloc = alloc.prev;
-  return alloc ? UNTAG_POINTER(alloc.prev) : NULL;
+  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  while (alloc && !$scope.is_tagged(alloc.prev)) alloc = alloc.prev;
+  return alloc ? $scope.untag_pointer(alloc.prev) : NULL;
 }
 
 /** Relinks one allocation onto the scope held by `slot`.
@@ -936,15 +942,16 @@ meta native void Scope.move(void *ptr, Scope *slot) {
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
   Scope scope = *slot;
-  ScopeAlloc alloc = PTR_ALLOC(ptr), next = alloc.next, prev = alloc.prev;
-  if (IS_TAGGED(prev)) {
-    Scope owner = UNTAG_POINTER(prev);
+  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  ScopeAlloc next = alloc.next, prev = alloc.prev;
+  if ($scope.is_tagged(prev)) {
+    Scope owner = $scope.untag_pointer(prev);
     owner.first = next;
   }
   else prev.next = next;
   if (next) next.prev = prev;
   alloc.next = scope.first;
-  alloc.prev = TAG_POINTER(scope);
+  alloc.prev = $scope.tag_pointer(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
 }
@@ -965,11 +972,11 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   _require_running();
   if (!ptr) return _malloc_in(_thread().active, size, NULL);
   if (!size) {
-    _free_alloc(PTR_ALLOC(ptr));
+    _free_alloc($scope.ptr_alloc(ptr));
     return NULL;
   }
-  ScopeAlloc old = PTR_ALLOC(ptr), next = old.next, prev = old.prev;
-  ScopeMetadata *old_meta = ALLOC_META(old);
+  ScopeAlloc old = $scope.ptr_alloc(ptr), next = old.next, prev = old.prev;
+  ScopeMetadata *old_meta = $scope.alloc_meta(old);
   size_t old_size = old_meta.requested_size;
   if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
     raise %(size-limit);
@@ -980,8 +987,8 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   replacement.next = next;
   replacement.prev = prev;
   if (next) next.prev = replacement;
-  if (IS_TAGGED(prev)) {
-    Scope scope = UNTAG_POINTER(prev);
+  if ($scope.is_tagged(prev)) {
+    Scope scope = $scope.untag_pointer(prev);
     scope.first = replacement;
   }
   else prev.next = replacement;
@@ -989,7 +996,7 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   _record_request(size);
   if (size >= old_size) _record_live_add(size - old_size);
   else _record_live_remove(old_size - size);
-  return ALLOC_PTR(replacement);
+  return $scope.alloc_ptr(replacement);
 }
 /** Releases resources owned by `Scope`.
     `Scope` groups managed allocations by lifetime; balanced
