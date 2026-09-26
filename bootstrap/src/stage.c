@@ -79,7 +79,6 @@ static Var _679, _677, _675, _673, _665, _661, _658, _657, _656, _654, _651, _64
 #include "string.h"
 #include "varconvert.h"
 #include "macros.h"
-#include "generate.h"
 #include "script.h"
 #include "toolchain.h"
 #include "utils.h"
@@ -142,6 +141,8 @@ static Map _meta_initial_copies(Compiler c, Array units);
 static List _meta_group_entry(Compiler c, String stamp, Map initials, String suffix);
 
 List Compiler_transform(Compiler compiler, List ast);
+
+List generate_code_text(Compiler c, List ast, String basename);
 
 static Var _meta_template_calls(Compiler c, Var node, List callee);
 
@@ -1739,7 +1740,6 @@ Map Map_copy(Map);
 Array Array_copy(Array);
 Diagnostics Diagnostics_new(Compiler, int);
 Var Array_insert(Array, int, Var);
-List generate_code_text(Compiler, List, String);
 List Diagnostics_entries(Diagnostics);
 String List_repr(List);
 void SymTxn_rollback(SymTxn);

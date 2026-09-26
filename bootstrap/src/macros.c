@@ -130,7 +130,6 @@ static Var _1195, _1194, _1192, _1189, _1184, _1181, _1176, _1169, _1165, _1162,
 #include "regions.h"
 #include "statements.h"
 #include "digest.h"
-#include "generate.h"
 #include "script.h"
 #include "toolchain.h"
 #include "utils.h"
@@ -2281,7 +2280,7 @@ _Noreturn static void _sdk_reject(String message, List notes){
   Compiler compiler = macro_import_compiler;
   if(compiler) Compiler_report_error(compiler, 27335838, message, macro_import_invocation, notes);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_sdk_reject",.line = 139};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_sdk_reject",.line = 138};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))), Symbol_var(47666), String_var(message));
     __builtin_unreachable();
   }
@@ -2406,7 +2405,7 @@ List Sym_lookup(Sym, List, Type *);
 int Type_is_function(Type);
 static Var _sdk_function_reference(String name){
   Compiler compiler = macro_import_compiler;  if(! compiler){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_sdk_function_reference",.line = 215};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_sdk_function_reference",.line = 214};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
   }
   Type type = NULL;  List binding = Sym_lookup(compiler -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(binding) || ! List_truth(Type_list(type)) || ! Type_is_function(type)) return List_var(NULL);  return List_var(cons(_19, cons(List_var(type), cons(List_var(cons(_38, cons(List_var(binding), NULL))), NULL))));
 }
@@ -3062,7 +3061,7 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
             ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) result = Lisp_eval_string(compiler -> macro_lisp, source);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
               if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
                 int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  if (_x2c_catch_selected_0 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                  static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 721};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                  static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 720};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                 }
 
               }
@@ -3095,7 +3094,7 @@ return result;
 
 static Var _lisp_import_hook(String path){
   Compiler compiler = macro_import_compiler;  if(! compiler){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 732};  x2c_error_raise_n(& _x2c_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 731};  x2c_error_raise_n(& _x2c_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   _import(compiler, path, macro_import_invocation);  return List_var(NULL);
 }
@@ -4571,7 +4570,7 @@ Array values = Array_new(); {
 
       }
       Var function;  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2390};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2389};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
       }
       if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1333, site, cons(String_var(String_join(NULL, cons(String_var(_866), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
     }
@@ -4672,7 +4671,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                               }
                               else if (_x2c_catch_selected_6 == 1) {Var category = x2c_error_catch_capture(_x2c_error_handler_6, 0);
                               {
-                                static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2419};
+                                static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2418};
                                 x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                 __builtin_unreachable();
                               }
