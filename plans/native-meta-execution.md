@@ -309,3 +309,13 @@ copies); the compiled Match engine (the reference matcher alone measured
   boundary.
 - Autodiff moves to `packages/autodiff`; the small public-surface drops
   proceed.
+
+## Spike status (2026-09-26, 44674ca2)
+
+Steps 1-4 and the REPL part of step 5 are done on this branch. Every
+bodied meta function runs as staged native code; src/comptime.x, the
+AUTO tier, lib/lisp-machine.x, and the generated builtin Lisp are gone.
+Checks at the tip: make stage-2 with identical generated stages,
+verify-fixtures 867 passed, commands-check passed. Not done: the
+independent consolidations table, autodiff to packages, hand target row
+generation (not clean; see evaluator notes), etc/init.xlisp to native.
