@@ -142,6 +142,10 @@ static String _meta_cc(List arguments) =>
 static String _meta_support(
   Toolchain t, String include, String identity, String &failure) {
   String source = %"${x2c_get_root()}/etc/meta-helper.x";
+  if (!Path.is_file(source)) {
+    failure = %"cannot read $source";
+    return NULL;
+  }
   String key = String.sha256(
     %"$identity\n${Path.read_text(source).sha256()}");
   String directory = %"${script_cache_root()}/meta/support-$key";

@@ -1186,10 +1186,13 @@ static String _stage_meta_group(Compiler c, String &failure) {
   return module;
 }
 
-/* Stages and loads the group and binds each of its functions not yet
-   bound. Returns the module, or NULL with `failure` set. */
-static String _load_meta_group(Compiler c, String &failure) {
-  failure = _meta_group_unbound(c);
+/** Stages the session's `meta` group now, for the REPL, which adds
+    functions to `meta_group` itself: builds and loads it, and binds each
+    group function in the session not yet bound. Returns the loaded module,
+    or NULL with `failure` set when the group does not stage. */
+String Compiler.stage_meta_group(Compiler c, String &failure) {
+  failure = c.groups_meta() ? _meta_group_unbound(c)
+                            : "native modules are unavailable";
   String module = failure ? NULL : _stage_meta_group(c, failure);
   if (!module) return NULL;
   module = Compiler.load_native_module(module);
@@ -1211,27 +1214,12 @@ static String _load_meta_group(Compiler c, String &failure) {
   return module;
 }
 
-/** Stages the session's `meta` group now, for the REPL, which adds
-    functions to `meta_group` itself, and binds each group function in the
-    session. Returns the loaded module, or NULL with `failure` set when the
-    group does not stage. */
-String Compiler.stage_meta_group(Compiler c, String &failure) {
-  if (!c.groups_meta()) {
-    failure = "native modules are unavailable";
-    return NULL;
-  }
-  return _load_meta_group(c, failure);
-}
-
 /** Binds the session's group function `name` when it is not bound yet, by
-    staging the group, and reports at `site` a function that cannot run.
-    Returns whether `name` is now bound. */
-int Compiler.bind_meta_group(Compiler c, String name, Token site) {
-  if (name in c.meta_group_bound) return 1;
+    staging the group, and reports at `site` a function that cannot run. */
+void Compiler.bind_meta_group(Compiler c, String name, Token site) {
+  if (name in c.meta_group_bound) return;
   String failure = NULL;
-  if (!_load_meta_group(c, failure) && !(name in c.meta_group_bound))
-    _helper_refuse(c, name, site, failure);
+  if (!c.stage_meta_group(failure)) _helper_refuse(c, name, site, failure);
   if (!(name in c.meta_group_bound))
     _helper_refuse(c, name, site, _helper_missing(c, name));
-  return 1;
 }

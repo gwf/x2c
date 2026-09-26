@@ -50,24 +50,15 @@ static void _datum_number(Buffer out, Var value) {
     value the grammar cannot spell. With `tagged`, the tagged spellings this
     file describes are written too; without it, only plain data is. */
 int datum_write(Buffer out, Var value, int tagged) {
-  if (tagged && _datum_tagged(value)) {
-    out.write("(x2c.quote ");
+  if (value is <list>) {
+    int quoted = tagged && _datum_tagged(value);
     List list = value;
-    out.write_char('(');
+    out.write(quoted ? "(x2c.quote (" : "(");
     for (List p = list; p; p = p.cdr()) {
       if (p != list) out.write_char(' ');
       if (!datum_write(out, p.car(), tagged)) return 0;
     }
-    out.write("))");
-  }
-  else if (value is <list>) {
-    List list = value;
-    out.write_char('(');
-    for (List p = list; p; p = p.cdr()) {
-      if (p != list) out.write_char(' ');
-      if (!datum_write(out, p.car(), tagged)) return 0;
-    }
-    out.write_char(')');
+    out.write(quoted ? "))" : ")");
   }
   else if (tagged && value is void) out.write("(x2c.void)");
   else if (tagged && value is <symbol> && !value.symbol())
@@ -150,13 +141,9 @@ static Var _datum_decode(Var value) {
   if (tag == "x2c.number")
     return _datum_decode_number(list.cadr().str(), list.caddr().str());
   if (tag == "x2c.token")
-    return Var.new(<token>, (void *) (unsigned long long) list.cadr().integer());
+    return Var.new(<token>, (void *) (ulong) list.cadr().integer());
   if (tag == "x2c.quote") return _datum_decode_list(list.cadr());
-  if (tag == "x2c.array") {
-    Array items = [];
-    foreach (Var item, list.cdr()) items.push(_datum_decode(item));
-    return items;
-  }
+  if (tag == "x2c.array") return _datum_decode_list(list.cdr()).array();
   Map map = {};
   foreach (List entry, list.cdr())
     map[_datum_decode(entry.car())] = _datum_decode(entry.cadr());
