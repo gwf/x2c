@@ -474,11 +474,12 @@ Host preprocessing, compilation, archive, and link actions.
 
 Public functions:
 
-`toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
-`Toolchain.archive_action`, `Toolchain.link_action`, `Toolchain.module_action`,
-`tool_action_new`, `ToolAction.as_program`, `tool_capture`,
-`Toolchain.search_directories`, `ToolAction.start`, `ToolRun.ready`,
-`ToolRun.wait`, `ToolAction.run`, `Toolchain.preprocess`
+`toolchain_new`, `toolchain_meta_cc`, `Toolchain.compile_action`,
+`Toolchain.preprocess_action`, `Toolchain.archive_action`,
+`Toolchain.link_action`, `Toolchain.module_action`, `tool_action_new`,
+`ToolAction.as_program`, `tool_capture`, `Toolchain.search_directories`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
+`Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 

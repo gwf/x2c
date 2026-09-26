@@ -696,16 +696,20 @@ compiler gathers the bodied `meta` functions the inputs reach: those of
 each `.xmacro` file an input imports, directly, through an included
 header, or through a package, and those an input defines itself. It
 emits them, with the declarations they use, as C through the ordinary
-backend, compiles them with the host C compiler, and links them with the
-runtime into one helper program for the project. The translation then
+backend, compiles them with the host C compiler (`--meta-cc`, default
+`cc`, never the target `--cc`), and links them with the host runtime into
+one helper program for the project. A group sees the headers its unit
+includes, found from the unit's directory and the `-I` directories. The translation then
 sends each `$` call, and each compile-time Lisp call, of one of those
 functions to the helper and inserts the reply. A project whose inputs
 reach no `meta` function builds nothing extra.
 
 The helper is kept under the cache directory (`$X2C_CACHE_DIR`,
 `$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of the meta
-sources, the compiler, the C compiler, and the flags, and it is built
-again when any file its build read changes, x2c source or C header. The
+source paths, the compiler, the C compiler, and the flags, including `-D`
+and `-U`. It is built again when any file its build read changes, x2c
+source or C header; a change to program code alone recompiles the groups
+but keeps the helper when no group object changes. The
 shipped meta code of the compiler's own `.xmacro` files and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
 REPL compiles each submission's `meta` functions and loads them into the

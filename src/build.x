@@ -321,6 +321,9 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.include_dirs);
   hash = _state_list(hash, request.package_roots());
   hash = _state_list(hash, request.cpp_args);
+  // The project meta build compiles with these and its own C compiler.
+  hash = _state_list(hash, request.cc_args);
+  hash = _state_tool(hash, toolchain_meta_cc(request.meta_cc), ok);
   hash = _state_text(hash, request.no_cpp ? "no-cpp" : "cpp");
   hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");

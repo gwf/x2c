@@ -443,6 +443,7 @@ static int _run_build_request(CliRequest c, Array commands) {
   defer macro_library_reset();
   Build state = c.prepare();
   c.cc = target.export(c.cc);
+  c.meta_cc = target.export(c.meta_cc);
   c.ar = target.export(c.ar);
   int result = _translate_units(c, state, c.inputs);
   /* A script's local `.x` includes are units of its program too; their

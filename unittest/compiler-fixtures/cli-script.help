@@ -22,6 +22,7 @@ Translation options:
 
 C compiler options:
       --cc <program>          Use <program> as the host C compiler
+      --meta-cc <program>     Use <program> to build meta code, whatever --cc is
   -O0, -O1, -O2, -O3, -Os     Set C optimization
   -g                          Emit debug information
   -D <name>[=<value>]         Define a C preprocessor macro

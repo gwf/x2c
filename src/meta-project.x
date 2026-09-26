@@ -229,24 +229,38 @@ static void _meta_depfile(String path, Map deps) {
     deps[Path.absolute(dependency)] = 1;
 }
 
-/* Parses each source into its group, compiles the groups, and links the
-   helper in `directory` with the runtime. Returns the manifest: `(groups
-   (K ...))` for each table that has a group, `(failures ((K WHY) ...))`
-   for those that do not build, `(failure WHY)`, empty unless the helper
-   does not link, and `(deps ((PATH DIGEST) ...))` for every file the
-   build read. */
+/* Removes what a parse of table `index` in `directory` left. */
 static void _meta_clear(String directory, int index) {
-  foreach (String suffix, %(".c" ".h" ".o" ".d" ".deps" ".failure")) {
+  foreach (String suffix, %(".c" ".deps" ".failure")) {
     String file = %"$directory/group-$index$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
 }
 
+/* The text of the file at `path`, or NULL. */
+static String _meta_text(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %((!or not-found io-fail) *): text = NULL;
+  return text;
+}
+
+/* Parses each source into its group, compiles the groups, and links the
+   helper in `directory` with the runtime when an object or the table
+   changed, so a change to program code alone keeps the helper. Returns
+   the manifest: `(groups (K ...))` for each table that has a group,
+   `(failures ((K WHY) ...))` for those that do not build, `(failure WHY)`,
+   empty unless the helper does not link, and `(deps ((PATH DIGEST) ...))`
+   for every file the build read. */
 static List _meta_build(
   Frontend f, String directory, List imports, List owners, Map reaches,
   List flags, Toolchain t, String include, String identity) {
   int count = owners.len() + 1;
-  for (int index = 0; index < count; index++) _meta_clear(directory, index);
+  Map before = {};
+  for (int index = 0; index < count; index++) {
+    before[index] = _meta_digest(%"$directory/group-$index.o");
+    _meta_clear(directory, index);
+  }
   Compiler.use_meta_build_directory(directory);
   int index = 1;
   foreach (String owner, owners) {
@@ -272,6 +286,7 @@ static List _meta_build(
   Map deps = {};
   foreach (String path, %(@imports @owners)) deps[path] = 1;
   Array groups = [], built = [], failures = [], objects = [];
+  int changed = 0;
   for (index = 0; index < count; index++) {
     String base = %"$directory/group-$index";
     if (!Path.is_file(%"$base.deps")) continue;
@@ -282,11 +297,16 @@ static List _meta_build(
     if (Path.is_file(%"$base.failure"))
       failure = Path.read_text(%"$base.failure");
     else {
+      /* A quoted include of the unit resolves from the unit's directory. */
+      String unit = index ? owners[index - 1] : directory;
       failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
+                           "-iquote" ${Path.dirname(unit)}
                            "-iquote" $include @flags
                            "-MD" "-MF" ${%"$base.d"}
                            "-c" ${%"$base.c"} "-o" ${%"$base.o"}));
       if (!failure) failure = _meta_localize(t, base, index);
+      if (!failure && _meta_digest(%"$base.o") != before[index])
+        changed = 1;
       if (failure && !failure.contains(directory))
         failure = %"$failure; the group's C is in $directory";
       _meta_depfile(%"$base.d", deps);
@@ -299,14 +319,19 @@ static List _meta_build(
   }
   String failure = NULL;
   String support = _meta_support(t, include, identity, failure);
-  if (support) {
-    String tables = %"$directory/tables.c";
-    Path.write_text(tables, _meta_tables(built, count));
+  String tables = %"$directory/tables.c", table = _meta_tables(built, count);
+  String helper = %"$directory/helper";
+  if (support && (changed || _meta_text(tables) != table ||
+                  !Path.is_file(helper))) {
+    Path.write_text(tables, table);
     String output = %"$directory/helper.${"%ld".printf((long) getpid())}";
     ToolAction link = t.link_action(
       output, %(@{objects.list()} $tables $support));
-    failure = _meta_cc(%(@{link.arguments} "-iquote" $include));
-    if (!failure) Path.move_to(output, %"$directory/helper");
+    /* The link compiles the table, which includes the runtime headers. */
+    failure = _meta_cc(
+      %(@{link.arguments} @{_meta_flags()} "-iquote" $include));
+    if (!failure) Path.move_to(output, helper);
+    else if (Path.exists(helper)) Path.remove_file(helper);
   }
   Array rows = [];
   foreach (Var (path, _), deps) {
@@ -369,15 +394,16 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   String compiler = Compiler.meta_cc_identity(cc);
   /* A unit's group includes what the unit includes: the request's C
      directories and each imported package's headers. */
-  List flags = f.request.cc_args;
+  List flags = %(@{f.request.include_dirs.map(%!(dir) => %("-I" $dir))
+                   .flatten()} @{f.request.cc_args});
   foreach (Var (root, _), packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
   String identity = %"$stamp\n$compiler\n${_meta_flags().repr()}\n"
                     + %"${flags.repr()}\n$include\n${t.runtime_lib}";
+  /* A changed source builds the same directory again, which keeps the
+     helper when no group object changes. */
   Array key = [identity];
-  foreach (String path, %(@imports "--" @owners)) {
-    key.push(%"$path ${_meta_digest(path)}");
-  }
+  foreach (String path, %(@imports "--" @owners)) key.push(path);
   String directory =
     %"$root/meta/project-${String.sha256("\n".join(key))}";
   Path.make_dirs(directory);

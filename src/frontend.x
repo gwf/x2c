@@ -91,7 +91,7 @@ Frontend Frontend.new(CliRequest request) {
     request.cc, request.ar, request.cpp_args, request.cc_args,
     request.ld_args, request.verbose, request.dry_run);
   Compiler.use_meta_toolchain(
-    frontend.toolchain.cc, frontend.toolchain.include_dir);
+    toolchain_meta_cc(request.meta_cc), frontend.toolchain.include_dir);
   return frontend;
 }
 
