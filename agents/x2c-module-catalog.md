@@ -450,7 +450,7 @@ Public functions:
 `Compiler.stage_meta_in_process`, `Compiler.groups_meta`,
 `Compiler.group_meta_function`, `Compiler.record_meta_import`,
 `Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
-`Compiler.meta_cc_error`, `Compiler.use_meta_build_directory`,
+`Compiler.meta_cc_run`, `Compiler.use_meta_build_directory`,
 `Compiler.write_meta_build`, `Compiler.stop_meta_helper`,
 `Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
 `Compiler.meta_helper_call`, `Compiler.stage_meta_group`,
@@ -660,7 +660,7 @@ values as Lisp reader text.
 
 Public functions:
 
-`datum_write`, `datum_read`
+`datum_write`, `datum_read`, `datum_result_problem`
 
 ### [lib/diff.x](../lib/diff.x)
 

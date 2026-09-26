@@ -162,10 +162,10 @@ int datum_read(String text, unsigned &cursor, Var &out) {
   return 1;
 }
 
-/** Returns why the compile-time result `value` cannot become data in the
-    program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
-    contains itself, or holds one Array or Map twice. `marks` holds 1 for
-    an Array or Map being checked and 2 for one already checked. */
+/* Returns why the compile-time result `value` cannot become data in the
+   program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
+   contains itself, or holds one Array or Map twice. `marks` holds 1 for
+   an Array or Map being checked and 2 for one already checked. */
 List datum_result_problem(Var value, Map marks) {
   if (value.is_pointer() && value.u64)
     return %("compile-time result is a compiler address"
