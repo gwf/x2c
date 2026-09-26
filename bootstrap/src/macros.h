@@ -37,7 +37,11 @@ Symbol x2c_type_tag_name(String name);
 
 List x2c_type_fields(List value);
 
+List meta_type_description(Var value);
+
 String x2c_binding_spelling(Var syntax);
+
+List meta_source_description(Var value);
 
 String x2c_source_text(Var syntax);
 
