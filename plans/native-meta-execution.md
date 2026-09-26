@@ -77,7 +77,15 @@ without a callback channel:
 | `x2c_type_fields` | a parameter declared `Type` receives the type's description as data, fields included, computed by the compiler at the call site |
 | call-site, `x2c_type_resolve`, `x2c_type_parts` | compiler-owned code only; stays in process |
 
-### Rule 2: meta code lives apart from program code
+### Rule 2 (relaxed 2026-09-26 by Gary): meta code may share a file
+
+Gary relaxed rule 2. A bodied meta function may live in an ordinary
+program `.x` file; the project meta build extracts it into the helper
+with the file's other meta code. Only a meta function produced by a macro
+expansion or a `$` call is an error. The text below records the strict
+form that was first implemented and then withdrawn.
+
+#### Strict form (withdrawn)
 
 Meta functions live in `.xmacro` files (or a declared meta module of a
 package), like Rust proc-macro crates. A bodied `meta` function in an
