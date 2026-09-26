@@ -6,9 +6,9 @@
 
 static List _72, _71, _70, _69, _68, _67, _14, _13, _12, _5, _4;
 
-static String _100, _99, _98, _97, _96, _95, _94, _92, _91, _90, _89, _87, _83, _82, _81, _80, _78, _76, _75, _74, _73, _65, _63, _61, _58, _56, _55, _53, _52, _50, _48, _47, _46, _45, _43, _42, _40, _38, _37, _36, _35, _34, _32, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _10, _8, _6, _2, _0;
+static String _101, _100, _99, _98, _97, _96, _95, _94, _92, _91, _90, _89, _87, _83, _82, _81, _80, _79, _78, _76, _74, _73, _65, _63, _61, _58, _56, _55, _53, _52, _50, _48, _47, _46, _45, _43, _42, _40, _38, _37, _36, _35, _34, _32, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _10, _8, _6, _2, _0;
 
-static Var _93, _88, _86, _85, _84, _79, _77, _66, _64, _62, _60, _59, _57, _54, _51, _49, _44, _41, _39, _33, _31, _11, _9, _7, _3, _1;
+static Var _93, _88, _86, _85, _84, _77, _75, _66, _64, _62, _60, _59, _57, _54, _51, _49, _44, _41, _39, _33, _31, _11, _9, _7, _3, _1;
 
 #include "datum.h"
 #include "digest.h"
@@ -46,6 +46,8 @@ static String _meta_digest(String path);
 static void _meta_depfile(String path, Map deps);
 
 static void _meta_clear(String directory, int index);
+
+static String _meta_compile(String directory, int index, List flags, Toolchain t, String include, Map deps);
 
 static List _meta_build(Frontend f, String directory, List imports, List owners, Map reaches, List flags, Toolchain t, String include, String identity);
 
@@ -163,13 +165,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _71 = cons(_59, _70);
   _72 = cons(_57, _71);
   _73 = String_new("/group-");
-  _74 = String_new("-imports.x");
-  _75 = String_new("\n");
-  _76 = String_new("-MD");
+  _74 = String_new("-MD");
+  _75 = String_var(_74);
+  _76 = String_new("-MF");
   _77 = String_var(_76);
-  _78 = String_new("-MF");
-  _79 = String_var(_78);
-  _80 = String_new("; the group\'s C is in ");
+  _78 = String_new("; the group\'s C is in ");
+  _79 = String_new("-imports.x");
+  _80 = String_new("\n");
   _81 = String_new("/tables.c");
   _82 = String_new("/helper.");
   _83 = String_new("/helper");
@@ -189,7 +191,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _97 = String_new(".xmacro");
   _98 = String_new("#include \"");
   _99 = String_new(".x\"");
-  _100 = String_new(")");
+  _100 = String_new("the unit has no group");
+  _101 = String_new(")");
 }
 
 static List _meta_flags(void){
@@ -692,6 +695,32 @@ static void _meta_clear(String directory, int index){
 
 }
 
+List String_split(String, String);
+
+int String_contains(String, String);
+
+static String _meta_compile(String directory, int index, List flags, Toolchain t, String include, Map deps){
+  String base = String_join(NULL, cons(String_var(directory), cons(String_var(_73), cons(String_var(int_str(index)), NULL))));
+  if(! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL))))) return _100;
+  {
+    String path;
+    List _x2c_macro_object_5 = String_split(Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL)))), _80);
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
+      path = Var_string(_x2c_macro_cursor_output_5);
+      if(String_truth(path)) Map_setindex(deps, String_var(path), int_var(1));
+    }
+
+  }
+  if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_65), NULL))))) return Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_65), NULL))));
+  String failure = _meta_cc(cons(String_var(t -> cc), List_append(_meta_flags(), cons(_39, cons(String_var(directory), cons(_39, cons(String_var(include), List_append(flags, cons(_75, cons(_77, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL)))), cons(_41, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_56), NULL)))), cons(_44, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))), NULL)))))))))))))));
+  if(! String_truth(failure)) failure = _meta_localize(t, base, index);
+  if(String_truth(failure) && ! String_contains(failure, directory)) failure = String_join(NULL, cons(String_var(failure), cons(String_var(_78), cons(String_var(directory), NULL))));
+  _meta_depfile(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL))), deps);
+  return failure;
+}
+
 int List_len(List);
 
 void Compiler_use_meta_build_directory(String);
@@ -714,10 +743,6 @@ String String_join(String, List);
 
 List Array_list_free(Array);
 
-List String_split(String, String);
-
-int String_contains(String, String);
-
 List Array_list(Array);
 
 ToolAction Toolchain_link_action(Toolchain, String, List);
@@ -731,36 +756,61 @@ int datum_write(Buffer, Var, int);
 static List _meta_build(Frontend f, String directory, List imports, List owners, Map reaches, List flags, Toolchain t, String include, String identity){
   int count = List_len(owners) + 1;
   for(int index = 0;  index < count;  index ++) _meta_clear(directory, index);
+  Map deps = Map_new();
+  String loop = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_24), NULL)));
+  {
+    String path;
+    List _x2c_macro_object_6 = List_append(imports, List_append(owners, cons(String_var(loop), NULL)));
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
+      path = Var_string(_x2c_macro_cursor_output_6);
+      Map_setindex(deps, String_var(path), int_var(1));
+    }
+
+  }
+  Array groups = Array_new(), built = Array_new(), failures = Array_new(), objects = Array_new();
   Compiler_use_meta_build_directory(directory);
   int index = 1;
   {
     String owner;
-    List _x2c_macro_object_6 = owners;
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      owner = Var_string(_x2c_macro_cursor_output_6);
+    List _x2c_macro_object_8 = owners;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
+      owner = Var_string(_x2c_macro_cursor_output_8);
       {
         _meta_unit(f, owner, index);
+        String failure = _meta_compile(directory, index, flags, t, include, deps);
         List reached = Var_list(Map_getindex(reaches, String_var(owner)));
         String base = String_join(NULL, cons(String_var(directory), cons(String_var(_73), cons(String_var(int_str(index)), NULL))));
-        if(List_truth(reached) &&(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_65), NULL)))) || ! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL)))))){
+        if(List_truth(reached) && String_truth(failure)){
           _meta_clear(directory, index);
           Array lines = Array_new();
           {
             String path;
-            List _x2c_macro_object_5 = reached;
-            List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-            Var _x2c_macro_cursor_output_5;
-            while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-              path = Var_string(_x2c_macro_cursor_output_5);
-              Array_push(lines, String_var(String_add(String_add(String_new("$(import "), String_repr(path)), _100)));
+            List _x2c_macro_object_7 = reached;
+            List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+            Var _x2c_macro_cursor_output_7;
+            while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
+              path = Var_string(_x2c_macro_cursor_output_7);
+              Array_push(lines, String_var(String_add(String_add(String_new("$(import "), String_repr(path)), _101)));
             }
 
           }
-          String source = String_join(NULL, cons(String_var(base), cons(String_var(_74), NULL)));
-          Path_write_text(source, String_add(String_join(_75, Array_list_free(lines)), _75));
+          String source = String_join(NULL, cons(String_var(base), cons(String_var(_79), NULL)));
+          Path_write_text(source, String_add(String_join(_80, Array_list_free(lines)), _80));
           _meta_unit(f, source, index);
+          failure = _meta_compile(directory, index, flags, t, include, deps);
+        }
+        if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL))))){
+          Array_push(groups, int_var(index));
+          if(String_truth(failure)) Array_push(failures, List_var(cons(int_var(index), cons(String_var(failure), NULL))));
+          else{
+            Array_push(built, int_var(index));
+            Array_push(objects, String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))));
+          }
+
         }
         index ++;
       }
@@ -769,49 +819,6 @@ static List _meta_build(Frontend f, String directory, List imports, List owners,
 
   }
   Compiler_use_meta_build_directory(NULL);
-  Map deps = Map_new();
-  {
-    String path;
-    List _x2c_macro_object_7 = List_append(imports, List_append(owners, NULL));
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      path = Var_string(_x2c_macro_cursor_output_7);
-      Map_setindex(deps, String_var(path), int_var(1));
-    }
-
-  }
-  Array groups = Array_new(), built = Array_new(), failures = Array_new(), objects = Array_new();
-  for(index = 0;  index < count;  index ++){
-    String base = String_join(NULL, cons(String_var(directory), cons(String_var(_73), cons(String_var(int_str(index)), NULL))));
-    if(! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL))))) continue;
-    Array_push(groups, int_var(index));
-    {
-      String path;
-      List _x2c_macro_object_8 = String_split(Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_63), NULL)))), _75);
-      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-      Var _x2c_macro_cursor_output_8;
-      while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-        path = Var_string(_x2c_macro_cursor_output_8);
-        if(String_truth(path)) Map_setindex(deps, String_var(path), int_var(1));
-      }
-
-    }
-    String failure = NULL;
-    if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_65), NULL))))) failure = Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_65), NULL))));
-    else{
-      failure = _meta_cc(cons(String_var(t -> cc), List_append(_meta_flags(), cons(_39, cons(String_var(directory), cons(_39, cons(String_var(include), List_append(flags, cons(_77, cons(_79, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL)))), cons(_41, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_56), NULL)))), cons(_44, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))), NULL)))))))))))))));
-      if(! String_truth(failure)) failure = _meta_localize(t, base, index);
-      if(String_truth(failure) && ! String_contains(failure, directory)) failure = String_join(NULL, cons(String_var(failure), cons(String_var(_80), cons(String_var(directory), NULL))));
-      _meta_depfile(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL))), deps);
-    }
-    if(String_truth(failure)) Array_push(failures, List_var(cons(int_var(index), cons(String_var(failure), NULL))));
-    else{
-      Array_push(built, int_var(index));
-      Array_push(objects, String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))));
-    }
-
-  }
   String failure = NULL;
   String support = _meta_support(t, include, identity, &(failure));
   if(String_truth(support)){
@@ -1080,7 +1087,7 @@ void Frontend_prepare_meta(Frontend f, List inputs){
     }
 
   }
-  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_95), cons(String_var(String_sha256(String_join(_75, Array_list(key)))), NULL))));
+  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_95), cons(String_var(String_sha256(String_join(_80, Array_list(key)))), NULL))));
   Path_make_dirs(directory);
   List manifest = NULL;
   {

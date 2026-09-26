@@ -305,6 +305,8 @@ Frontend Frontend_new(CliRequest);
 
 int Frontend_preload_macro_libraries(Frontend);
 
+void Frontend_prepare_meta(Frontend, List);
+
 Context Context_open_isolated_named(const char *);
 
 int Frontend_open(Frontend, String, ParsedUnit *);
@@ -339,6 +341,7 @@ int editor_request(int argc, char * * argv){
   CliRequest request = _configure(argc - boundary, argv + boundary, sources, source);
   Frontend frontend = Frontend_new(request);
   if(! Frontend_preload_macro_libraries(frontend)) return 2;
+  Frontend_prepare_meta(frontend, cons(String_var(source), NULL));
   Context command = Context_open_isolated_named("editor request");
   ParsedUnit unit;
   int parsed = Frontend_open(frontend, source, &(unit));

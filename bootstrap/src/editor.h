@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "frontend.h"
+#include "meta-project.h"
 #include "project.h"
 #include "sourceview.h"
 #include "emit.h"
