@@ -66,8 +66,6 @@ void x2c_diagnostic_fail(String message, List notes);
 
 void x2c_diagnostic_warn(String message, List notes);
 
-List x2c_comptime_lower(List fn);
-
 Map x2c_meta_definition_hashes(void);
 
 Var Symbol_var(Symbol);

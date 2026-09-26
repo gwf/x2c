@@ -2980,11 +2980,10 @@ void Compiler_record_meta_import(Compiler);
 List Compiler_parse_macro_definition(Compiler);
 void Compiler_install_native_meta_function(Compiler, List, Token);
 void Compiler_install_meta_declaration(Compiler, List, Token);
-void Compiler_record_meta_static(Compiler, List);
 void Compiler_record_declaration_visibility(Compiler, List);
 int Compiler_bind_linked_meta(Compiler, List, Type);
 Type Type_canonicalize(Type);
-void Compiler_install_meta_function(Compiler, List, Token);
+void Compiler_install_meta_function(Compiler, List);
 int Compiler_meta_is_comptime_only(Compiler, List);
 List Compiler_parse_top_level(Compiler c){
   if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)){
@@ -3006,10 +3005,7 @@ List Compiler_parse_top_level(Compiler c){
     case 129 : Compiler_report_error(c, 33658058, _903, c -> token, _373);
   }
   if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  Token meta = NULL;  int native = 0;  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, &(native));  Token definition_start = c -> token;  List decl = Compiler_parse_declaration_row(c);  if(native && ! Type_is_function(List_type_from_ast(decl))) Compiler_report_error(c, 33658058, _904, meta, NULL);  if(Compiler_test(c, 119)){
-    if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta){
-      Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_meta_static(c, decl);
-    }
-    Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  else
+    if(meta && Type_is_function(List_type_from_ast(decl))) Compiler_install_native_meta_function(c, decl, meta);  else if(meta) Compiler_install_meta_declaration(c, decl, meta);  Compiler_record_declaration_visibility(c, decl);  if(meta) _definition_source(c, decl, meta -> line, Compiler_definition_doc(c, meta), NULL);  else
   {
     List _x2c_match_expr = decl;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3055,7 +3051,7 @@ List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? met
   x2c_cleanup_leave(& _x2c_defer_record_13);
 }
 }
-_record_meta_hash(c, function, definition_start);  if(lowered && ! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function, lowered);  Compiler_record_declaration_visibility(c, function);  if(! meta)
+_record_meta_hash(c, function, definition_start);  if(lowered && ! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function);  Compiler_record_declaration_visibility(c, function);  if(! meta)
   {
     List _x2c_match_expr = function;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };

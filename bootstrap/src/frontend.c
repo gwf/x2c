@@ -180,7 +180,7 @@ List x2c_default_include_dirs(void);
 
 Toolchain toolchain_new(String, String, List, List, List, int, int);
 
-void Compiler_use_meta_toolchain(String, String, int);
+void Compiler_use_meta_toolchain(String, String);
 
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -189,7 +189,7 @@ Frontend Frontend_new(CliRequest request){
   frontend -> request = request;
   frontend -> include_dirs = List_append(request -> include_dirs, x2c_default_include_dirs());
   frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
-  Compiler_use_meta_toolchain(frontend -> toolchain -> cc, frontend -> toolchain -> include_dir, request -> verbose);
+  Compiler_use_meta_toolchain(frontend -> toolchain -> cc, frontend -> toolchain -> include_dir);
   return frontend;
 }
 
@@ -296,6 +296,8 @@ String Var_string(Var);
 
 void Compiler_add_translation_dependency(Compiler, String);
 
+void Compiler_share_meta_group(Compiler, Compiler);
+
 Map Map_copy(Map);
 
 void Compiler_shallow_parse(Compiler, Map);
@@ -350,6 +352,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   cppcompiler -> imports = c -> imports;
   cppcompiler -> macro_lisp = c -> macro_lisp;
   cppcompiler -> borrowed_lisp = cppcompiler -> macro_lisp != NULL;
+  Compiler_share_meta_group(cppcompiler, c);
   Map saved_counters = NULL;
   if(! request -> live_symbols){
     saved_counters = c -> names -> counters;

@@ -20,7 +20,7 @@ __attribute__((constructor)) static void _file_init_(void);
 #include "parse.h"
 #include "protocol.h"
 #include "macros.h"
-#include "comptime.h"
+#include "stage.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -154,7 +154,6 @@ typedef struct SymTxn{
   int local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
-  Map meta_layouts;
   Map source_definitions;
   int source_occurrences;
 }
@@ -1195,8 +1194,6 @@ void Compiler_borrow_unit_semantics(Compiler compiler, Compiler owner){
   compiler -> meta_comptime = owner -> meta_comptime;
   compiler -> meta_regions = owner -> meta_regions;
   compiler -> meta_hashes = owner -> meta_hashes;
-  compiler -> meta_values = owner -> meta_values;
-  compiler -> meta_layouts = owner -> meta_layouts;
   compiler -> native_meta = owner -> native_meta;
 }
 
@@ -1234,8 +1231,6 @@ void Compiler_close_child(Compiler compiler, Compiler child){
 
 void * Scope_malloc_finalized(size_t, void(*)(void *));
 
-void Compiler_inherit_shared_meta(Compiler);
-
 void Compiler_inherit_library_comptime(Compiler);
 
 void * Scope_calloc(size_t, size_t);
@@ -1265,13 +1260,8 @@ static Compiler _new(Compiler owner){
     (compiler) -> meta_comptime = Map_new();
     (compiler) -> meta_regions = Map_new();
     (compiler) -> meta_hashes = Map_new();
-    (compiler) -> meta_values = Map_new();
-    (compiler) -> meta_layouts = Map_new();
     (compiler) -> native_meta = Map_new();
-    if(! owner){
-      Compiler_inherit_shared_meta((compiler));
-      Compiler_inherit_library_comptime((compiler));
-    }
+    if(! owner) Compiler_inherit_library_comptime((compiler));
     if(owner){
       (compiler) -> package = owner -> package;
       (compiler) -> package_dirs = owner -> package_dirs;
@@ -1331,6 +1321,12 @@ Compiler Compiler_new_shared(Compiler owner){
   return _new(owner);
 }
 
+void Compiler_share_meta_group(Compiler compiler, Compiler owner){
+  compiler -> meta_group = owner -> meta_group;
+  compiler -> meta_group_bound = owner -> meta_group_bound;
+  compiler -> meta_defs = owner -> meta_defs;
+}
+
 void Compiler_take_unit_state(Compiler compiler, Compiler owner){
   compiler -> macros = owner -> macros;
   compiler -> object_macros = owner -> object_macros;
@@ -1340,6 +1336,7 @@ void Compiler_take_unit_state(Compiler compiler, Compiler owner){
   compiler -> macro_lisp = owner -> macro_lisp;
   compiler -> declaration_effects = owner -> declaration_effects;
   compiler -> borrowed_lisp = compiler -> macro_lisp != NULL;
+  Compiler_share_meta_group(compiler, owner);
 }
 
 void Compiler_return_unit_state(Compiler compiler, Compiler owner){
@@ -1787,7 +1784,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(compiler)) return;  List rows = Sym_visible_symbols(compiler -> sym); {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 979};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 974};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -1814,7 +1811,7 @@ Token Token_after_group(Token t){
 Symbol Compiler_peek(Compiler compiler, int steps){
   if(! _init_guard_) _file_init_();  Token token = compiler -> token;  if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1029};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1024};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -1829,7 +1826,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1047};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1042};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -2498,7 +2495,7 @@ Map Compiler_select_declaration_defaults(Compiler compiler, String path, Map sym
   };
   x2c_cleanup_push(&_x2c_defer_record_9);
   {
-    shadow -> filename = path;  shadow -> macro_lisp = compiler -> macro_lisp;  shadow -> borrowed_lisp = shadow -> macro_lisp != NULL;  Sym__reset_overlay(shadow -> sym, symbols, Map_new());  Compiler_rebuild_protocols(shadow, symbols);  shadow -> conforms = Map_new();  shadow -> shallow = 1;  shadow -> declaration_projection = 1;  Array sources = Array_new();  Map pending = Map_new(); {
+    shadow -> filename = path;  shadow -> macro_lisp = compiler -> macro_lisp;  shadow -> borrowed_lisp = shadow -> macro_lisp != NULL;  Compiler_share_meta_group(shadow, compiler);  Sym__reset_overlay(shadow -> sym, symbols, Map_new());  Compiler_rebuild_protocols(shadow, symbols);  shadow -> conforms = Map_new();  shadow -> shallow = 1;  shadow -> declaration_projection = 1;  Array sources = Array_new();  Map pending = Map_new(); {
       Var part;  Array _x2c_macro_object_17 = parts;  int _x2c_macro_cursor_17 = 0;  Var _x2c_macro_cursor_output_18;  while(Array_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_18))){
         part = _x2c_macro_cursor_output_18; {
           if(! Var_is(part, 26720)) continue;  Map declarations = Var_map(part);  Array ordered = Array_new(); {
@@ -2873,10 +2870,9 @@ void Compiler_install_native_meta_effects(Compiler, Map);
 Iter List_iter(List, Iter);
 List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
-void Compiler_report_unstaged_meta(Compiler);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
-  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  c -> unit_nodes = nodes;  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> meta_values = Map_new();  c -> meta_layouts = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_shared_meta(c);  Compiler_inherit_library_comptime(c);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Token conflict = NULL; {
+  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  c -> unit_nodes = nodes;  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_library_comptime(c);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Token conflict = NULL; {
     int * _x2c_macro_address_6 = & c -> recovery_depth;  int _x2c_macro_previous_6 = * _x2c_macro_address_6; {
   _x2c_defer_env_8 _x2c_defer_env_23 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_address_6, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_previous_6};
   X2CCleanup _x2c_defer_record_10 = {
@@ -2961,7 +2957,7 @@ x2c_cleanup_leave(& _x2c_defer_record_10);
 if(conflict){
   c -> token = conflict;  _report_script_statement(c);
 }
-Compiler_report_unstaged_meta(c);  _append_meta_definitions(c, nodes);  c -> unit_nodes = NULL;  List ast = Array_list_free(nodes);  if(c -> script && ! c -> script -> defines_main && ! Compiler_error_count(c)) _check_script_locals(c, ast);  _check_unmatched_braces(c);  if(! Compiler_error_count(c)) _validate_static_object_initializers(c);  return ast;
+_append_meta_definitions(c, nodes);  c -> unit_nodes = NULL;  List ast = Array_list_free(nodes);  if(c -> script && ! c -> script -> defines_main && ! Compiler_error_count(c)) _check_script_locals(c, ast);  _check_unmatched_braces(c);  if(! Compiler_error_count(c)) _validate_static_object_initializers(c);  return ast;
 }
 
 static void _push_script_conditionals(Compiler c, Array statements, int first, int end){
@@ -3262,17 +3258,17 @@ static SymScope * _semantic_scope(Sym sym, int index){
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c){
-  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> meta_layouts = c -> meta_layouts;  transaction -> next_binding = c -> names -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
+  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> next_binding = c -> names -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
     transaction -> source_definitions = Map_copy(c -> source_definitions);  transaction -> source_occurrences = Array_len(c -> source_occurrences);
   }
-  scope -> symbols = Map_copy(transaction -> scope.symbols);  Compiler_merge_source_declarations(c, scope -> symbols, transaction -> scope.symbols);  scope -> bindings = Map_copy(transaction -> scope.bindings);  scope -> enumerators = Map_copy(transaction -> scope.enumerators);  scope -> macros = transaction -> scope.macros != NULL ? Map_copy(transaction -> scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);  c -> meta_layouts = Map_copy(c -> meta_layouts);  transaction -> active = 1;  return transaction;
+  scope -> symbols = Map_copy(transaction -> scope.symbols);  Compiler_merge_source_declarations(c, scope -> symbols, transaction -> scope.symbols);  scope -> bindings = Map_copy(transaction -> scope.bindings);  scope -> enumerators = Map_copy(transaction -> scope.enumerators);  scope -> macros = transaction -> scope.macros != NULL ? Map_copy(transaction -> scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);  transaction -> active = 1;  return transaction;
 }
 
 void SymTxn_commit(SymTxn s){
   if(! s || ! s -> active) return;  Compiler compiler = s -> compiler;  SymScope * scope = _semantic_scope(compiler -> sym, s -> scope_index);  SymScope staged = * scope;  * scope = s -> scope;  Map_merge(scope -> symbols, staged.symbols);  Compiler_merge_source_declarations(compiler, scope -> symbols, staged.symbols);  Map_merge(scope -> bindings, staged.bindings);  Map_merge(scope -> enumerators, staged.enumerators);  if(staged.macros != NULL){
     if(scope -> macros == NULL) scope -> macros = Map_new();  Map_merge(scope -> macros, staged.macros);
   }
-  Map_merge(s -> meta_layouts, compiler -> meta_layouts);  compiler -> meta_layouts = s -> meta_layouts;  s -> active = 0;
+  s -> active = 0;
 }
 
 Array Iter_array(Iter);
@@ -3312,7 +3308,7 @@ int SymTxn_local_macros_changed(SymTxn s){
 List Iter_list(Iter);
 void SymTxn_rollback(SymTxn transaction){
   if(! transaction || ! transaction -> active) return;  Compiler compiler = transaction -> compiler; {
-    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> meta_layouts = transaction -> meta_layouts; (compiler) -> names -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
+    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> names -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
       Array_resize((compiler) -> source_occurrences, transaction -> source_occurrences); {
         Var key;  List _x2c_macro_object_40 = Iter_list(Map_keys((compiler) -> source_definitions, &(struct Iter){
           int_var(0)
@@ -3373,24 +3369,13 @@ Map Sym_current_symbols(Sym sym){
 }
 
 List Sym_visible_symbols(Sym sym){
-  if(! _init_guard_) _file_init_();  Map seen = Map_new();  Array rows = Array_new();
-  for(int i =(int) Block_len(sym -> scopes) - 1;  i >= 0;  i --){
-    SymScope * scope = _semantic_scope(sym, i);
-    {
-      Var key, value;
-      Map _x2c_macro_object_41 = scope -> symbols;
-      unsigned _x2c_macro_cursor_41 = 0;
-      Var _x2c_macro_cursor_output_38;
-      Var _x2c_macro_cursor_output_39;
-      while(Map_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_38), &(_x2c_macro_cursor_output_39))){
-        key = _x2c_macro_cursor_output_38;
-        value = _x2c_macro_cursor_output_39;
-
+  if(! _init_guard_) _file_init_();  Map seen = Map_new();  Array rows = Array_new();  for(int i =(int) Block_len(sym -> scopes) - 1;  i >= 0;  i --){
+    SymScope * scope = _semantic_scope(sym, i); {
+      Var key, value;  Map _x2c_macro_object_41 = scope -> symbols;  unsigned _x2c_macro_cursor_41 = 0;  Var _x2c_macro_cursor_output_38;  Var _x2c_macro_cursor_output_39;  while(Map_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_38), &(_x2c_macro_cursor_output_39))){
+        key = _x2c_macro_cursor_output_38;  value = _x2c_macro_cursor_output_39;
   {
     List _x2c_match_expr = Var_list(key);
-    Var _x2c_match_values[1];
-        MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_443), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
           Var _x2c_match_value_6 = name; {
@@ -3631,24 +3616,15 @@ static void _check_package_binding(Compiler c, String kind, String local, Token 
   Var alias = Map_getindex(c -> package_aliases, String_var(local));  Var member = Map_getindex(c -> package_members, String_var(local));  String bound = Var_is_void(alias) ? NULL : Var_string(alias);  if(! String_truth(bound) && ! Var_is_void(member)){
     List pair = Var_list(member);  List _x2c_destructure_10 = pair;  String package = Var_string(List_getindex(_x2c_destructure_10, 0));  String member_name = Var_string(List_getindex(_x2c_destructure_10, 1));  bound = String_join(NULL, cons(String_var(package), cons(String_var(_614), cons(String_var(member_name), NULL))));
   }
-  if(String_truth(bound)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_615), cons(String_var(kind), cons(String_var(_616), cons(String_var(local), cons(String_var(_617), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_618), cons(String_var(bound), NULL)))), NULL));
-  if(List_truth(Sym_get_exact(c -> sym, cons(String_var(local), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_615), cons(String_var(kind), cons(String_var(_616), cons(String_var(local), cons(String_var(_619), NULL)))))), token, NULL);
+  if(String_truth(bound)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_615), cons(String_var(kind), cons(String_var(_616), cons(String_var(local), cons(String_var(_617), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_618), cons(String_var(bound), NULL)))), NULL));  if(List_truth(Sym_get_exact(c -> sym, cons(String_var(local), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_615), cons(String_var(kind), cons(String_var(_616), cons(String_var(local), cons(String_var(_619), NULL)))))), token, NULL);
 }
 
 void Compiler_register_package_alias(Compiler compiler, String name, String alias, Token token){
-  if(! _init_guard_) _file_init_();
-  Var bound = Map_getindex(compiler -> package_aliases, String_var(alias));
-  if(! Var_is_void(bound) && Var_equal(bound, String_var(name))) return;
-  _check_package_binding(compiler, _789, alias, token);
-  Map_setindex(compiler -> package_aliases, String_var(alias), String_var(name));
+  if(! _init_guard_) _file_init_();  Var bound = Map_getindex(compiler -> package_aliases, String_var(alias));  if(! Var_is_void(bound) && Var_equal(bound, String_var(name))) return;  _check_package_binding(compiler, _789, alias, token);  Map_setindex(compiler -> package_aliases, String_var(alias), String_var(name));
 }
 
 void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token){
-  if(! _init_guard_) _file_init_();
-  List binding = cons(String_var(name), cons(String_var(member), NULL));
-  Var bound = Map_getindex(c -> package_members, String_var(local));
-  if(! Var_is_void(bound) && Var_list(bound) == binding) return;
-  String spelling = String_join(NULL, cons(String_var(name), cons(String_var(_613), cons(String_var(member), NULL))));
+  if(! _init_guard_) _file_init_();  List binding = cons(String_var(name), cons(String_var(member), NULL));  Var bound = Map_getindex(c -> package_members, String_var(local));  if(! Var_is_void(bound) && Var_list(bound) == binding) return;  String spelling = String_join(NULL, cons(String_var(name), cons(String_var(_613), cons(String_var(member), NULL))));
   if(! List_truth(Sym_get_exact(c -> sym, cons(String_var(spelling), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_620), cons(String_var(name), cons(String_var(_621), cons(String_var(member), cons(String_var(_120), NULL)))))), member_token, NULL);
   _check_package_binding(c, _790, local, local_token);
   Map_setindex(c -> package_members, String_var(local), List_var(binding));

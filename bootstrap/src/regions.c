@@ -19,7 +19,7 @@ static String _772, _771, _770, _769, _768, _767, _766, _564, _563, _558, _556, 
 static Var _763, _762, _758, _755, _751, _749, _731, _728, _723, _719, _717, _714, _712, _711, _710, _706, _703, _701, _696, _693, _692, _690, _678, _677, _676, _675, _674, _673, _672, _671, _670, _669, _664, _660, _659, _655, _652, _651, _649, _646, _643, _642, _638, _630, _629, _625, _622, _619, _614, _613, _610, _609, _605, _603, _599, _598, _594, _591, _590, _589, _588, _584, _583, _581, _575, _570, _569, _568, _565, _559, _557, _552, _549, _546, _543, _541, _538, _537, _529, _525, _524, _520, _519, _513, _510, _506, _505, _502, _494, _482, _480, _472, _471, _467, _464, _463, _462, _460, _453, _452, _451, _446, _445, _442, _439, _437, _434, _425, _422, _421, _417, _415, _413, _408, _407, _406, _405, _401, _400, _399, _397, _391, _388, _387, _386, _385, _381, _380, _377, _376, _375, _372, _368, _365, _364, _363, _362, _358, _356, _352, _351, _350, _346, _345, _344, _341, _331, _327, _325, _323, _320, _308, _298, _294, _292, _290, _287, _280, _278, _276, _265, _263, _260, _257, _222, _217, _214, _207, _205, _202, _197, _155, _152, _141, _138, _134, _130, _117, _99, _96, _94, _87, _81, _79, _76, _49, _48, _47, _43, _33, _23, _11, _7, _1;
 
 #include "ast.h"
-#include "comptime.h"
+#include "stage.h"
 #include "type.h"
 typedef struct Fact{
   int depth, origin, param, born;
@@ -2014,7 +2014,6 @@ void Compiler_check_regions(Compiler c, List ast){
 }
 }
 
-List Compiler_lowered_meta_regions(Compiler, List);
 Var Array_getindex(Array, int);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 void Compiler_check_meta_regions(Compiler c, List fn){
@@ -2026,9 +2025,6 @@ void Compiler_check_meta_regions(Compiler c, List fn){
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x2c_match_site_71, _x2c_match_expr, List_var(_761), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
     Var _x2c_match_value_0 = name; {
       String name = Var_string(_x2c_match_value_0); {
-        List checked = Compiler_lowered_meta_regions(c, fn);  if(List_truth(checked)){
-          Map_setindex(c -> meta_regions, String_var(name), List_var(checked));  return;
-        }
         Map_setindex(c -> meta_regions, String_var(name), List_var(_51));
       }
 

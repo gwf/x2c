@@ -55,6 +55,22 @@ List x2c_method_resolve(List type_value, String name);
 
 String x2c_function_name(List function);
 
+List builtin_foreach_reference(String name);
+
+Var builtin_foreach_unique(String name);
+
+List builtin_foreach_complete(List expression);
+
+List builtin_foreach_collection(List expression);
+
+List builtin_foreach_bindings(List declaration);
+
+List builtin_class_location(void);
+
+List binding_native_type(List function);
+
+List binding_literal_list(List values);
+
 List x2c_function_parameter(List function, String wanted);
 
 int Compiler_macro_form_is_definition(Compiler compiler);
@@ -72,8 +88,6 @@ int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 String x2c_embed_text(Var path);
 
 Var x2c_literal_value(Var syntax);
-
-List x2c_comptime_lower(List fn);
 
 void x2c_diagnostic_warn(String message, List notes);
 
@@ -135,7 +149,7 @@ int Compiler_bind_native_meta(Compiler c, String name);
 
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
 
-void Compiler_install_meta_function(Compiler c, List fn, Token marker);
+void Compiler_install_meta_function(Compiler c, List fn);
 
 void Compiler_parse_macro_lisp_shallow(Compiler compiler);
 
@@ -143,11 +157,7 @@ List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token inv
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
 
-void Compiler_use_meta_toolchain(String cc, String include_dir, int verbose);
-
-void Compiler_report_unstaged_meta(Compiler c);
-
-void Compiler_record_meta_static(Compiler c, List declaration);
+void Compiler_use_meta_toolchain(String cc, String include_dir);
 
 void Compiler_record_meta_import(Compiler c);
 
@@ -162,6 +172,8 @@ List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
 List Compiler_macro_introduced_name(Compiler compiler, String spelling);
 
 List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
+
+List x2c_template_call(Var stored, List values);
 
 List Compiler_peek_macro_hole(Compiler compiler);
 

@@ -16,7 +16,7 @@ static Var _1737, _1732, _1729, _1725, _1716, _1714, _1712, _1710, _1707, _1702,
 #include "literals.h"
 #include "protocol.h"
 #include "lambda.h"
-#include "comptime.h"
+#include "stage.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);

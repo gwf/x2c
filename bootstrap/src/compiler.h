@@ -70,8 +70,6 @@ typedef struct Compiler{
   int prelude;
   Array meta_defs;
   Map meta_comptime, meta_regions, meta_hashes;
-  Map meta_values;
-  Map meta_layouts;
   Map native_meta;
   Array unit_nodes, meta_group;
   Map meta_group_bound;
@@ -130,6 +128,8 @@ void Compiler_close_child(Compiler compiler, Compiler child);
 Compiler Compiler_new(void);
 
 Compiler Compiler_new_shared(Compiler owner);
+
+void Compiler_share_meta_group(Compiler compiler, Compiler owner);
 
 void Compiler_take_unit_state(Compiler compiler, Compiler owner);
 
