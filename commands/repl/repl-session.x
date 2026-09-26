@@ -38,7 +38,7 @@ typedef struct ReplCompletion {
 } ReplCompletion;
 
 #pragma private
-#include "macros.x"
+#include "stage.x"
 #include "path.x"
 #include "parse.x"
 #include "diagnostics.x"
