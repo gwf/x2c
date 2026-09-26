@@ -2132,7 +2132,12 @@ static void _cache_link_mru(MatchCache cache, int slot) {
 }
 
 static void _cache_touch(MatchCache cache, int slot) {
-  if (cache.lru_head == slot) return;
+  int head = cache.lru_head;
+  if (head == slot) return;
+  if (cache.entries[head].lru_prev == slot) {
+    cache.lru_head = slot;
+    return;
+  }
   _cache_unlink_lru(cache, slot);
   _cache_link_mru(cache, slot);
 }

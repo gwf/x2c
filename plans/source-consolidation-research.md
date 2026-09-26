@@ -538,8 +538,8 @@ Two nine-pair diagnostic runs found capacity1024 timestamp-cache churn used
 .context/readiness-performance. A circular ring replaces that implementation:
 one head owns ordering, its predecessor is least recent, and pinned entries
 alone require traversal. No overflow ranking or full-capacity victim scan
-remains. Against dev this is +18/-20, two lines removed, rather than the
-stamp prototype's eight. It is a small bookkeeping simplification. Eleven
+remains. After the hit-path correction below, this is +24/-21 against dev,
+three lines added, rather than the stamp prototype's eight lines removed. It is a small bookkeeping simplification. Eleven
 cache tests /338 assertions and debug, optimized and sanitized benchmark
 correctness pass in the worker.
 
@@ -552,10 +552,10 @@ host load: small deltas do not establish parity or regressions, and this is
 not a quiet-host performance snapshot. Final root gate and committed-candidate
 measurements are recorded in .context/readiness; publication remains held.
 
-At this revision authored production totals +5126/-6322,1196 fewer lines,
-including445 moved into tests:751 actual production lines removed. Tests and
+At this revision authored production totals +5132/-6323,1191 fewer lines,
+including445 moved into tests:746 actual production lines removed. Tests and
 harness total +636/-23, including that move; examples +4/-4. Whole-repository
-authored source removes583 lines. The six Array/Map production files remove
+authored source removes578 lines. The six Array/Map production files remove
 720 net lines. Generated bootstrap output, fixture expectations and derived
 documentation are measured separately, not credited as authored deletion.
 Original unattempted proposals and partial hypotheses retain their dispositions.
@@ -576,8 +576,69 @@ Final gate results after this correction remain recorded separately.
 The guarded tree then passes all638 raw/CPP comparisons,875 fixtures and950
 unit tests. The gate stops only at generated API source-link offsets changed
 by the guard. Authoritative doc generation refreshes those links; the final
-recheck is recorded in debug/readiness-agent-pr-check-doc-final.log. Current
-separate deltas are authored docs +668/-45, derived docs +1651/-2346,
+recheck is recorded in debug/readiness-agent-pr-check-doc-final.log. Before the runtime follow-up,
+separate deltas were authored docs +668/-45, derived docs +1651/-2346,
 bootstrap output +26666/-27731, and fixture output +4460/-2691. Together with
-source categories above, all measured files grow49 lines overall;583 fewer
-authored source lines is not a claim of deletion across all repository text.
+then-current source categories, all measured files grew49 lines overall;
+583 fewer authored source lines is not a claim of deletion across all repository text.
+
+
+## Runtime performance follow-up
+
+The committed candidate passes the complete correctness gate. Two additional
+paired runs nevertheless show roughly 6% more CPU for boxed Array workloads.
+Removing only their four find/count scans restores parity for push, reads,
+writes and compound updates. Swapping Array objects between archives also
+removes the slowdown in either direction. Matching hot instruction sequences
+do not prove matching performance: function placement, register allocation
+and equality dispatch remain under investigation. Actual disassembly and
+samples are preserved in .context/readiness-performance/array-diagnosis.
+
+Match hit measurements identify unnecessary ring neighbor updates when its
+least-recent entry becomes most recent. Rotating the head preserves exact LRU
+order without those updates. The correction passes 11 cache tests /338
+assertions and a 10,000-touch independent ordering model in the worker. Root
+builds it successfully. Longer nine-pair cyclic tests measure hit CPU ratios
+0.949,1.038,0.996 at capacities32,128,1024, and eviction ratios
+0.999,1.011,0.992. General random-hit tests measure 1.009x and1.008x at capacities128 and1024.
+A hot-eight subset initially appears 12-17% slower at1024. Scratch counters
+show its median bucket comparisons rise15.4% between processes because
+pointer-key distributions differ; unchanged hashing and near-matched
+comparison-count samples do not establish a ring regression. Counter patches
+and raw observations are preserved separately. Root validation follows.
+This cache representation has a modest ownership benefit but no net deletion.
+
+All these timings remain diagnostic under unrelated sustained host load.
+Neither correctness nor isolated favorable samples establish a completed
+quiet-host performance checkpoint. Publication remains held.
+
+
+The bounded Array follow-up tries a remaining-count pointer walk, then a
+corrected pointer-range loop in the shared core template. Both preserve
+comparison order, first-match stopping and ordinary Var equality. The range
+initially reaches baseline timing but does not retain it on repeat; the full
+workload slows roughly5% for ordinary updates and10% for compound updates.
+Both actual patches and correction evidence are preserved; neither is
+integrated. Temporary function alignment likewise has mixed results and is
+not retained as a production flag. This rejects those implementations, not
+typed-family consolidation.
+
+The exact root runtime after the cache correction measures boxed Array
+96.960ms dev versus94.308ms candidate median user CPU across nine paired
+samples; compound updates measure107.409ms versus107.582ms. A newly linked
+search-only probe measures find+0.7%,count+3.3%,direct equality+3.3%. Swapping
+objects, changing alignment and relinking probes change these deltas even
+without changing equality instructions. The earlier mixed-workload slowdown
+is therefore sensitive to compiled placement and surrounding runtime code,
+not an established added algorithmic cost in the template. Its precise
+microarchitectural mechanism remains unproved. The candidate retains its
+original shared search loop. A scratch String equality override verifies
+ordered callbacks, first-match stopping, complete counting and no callbacks
+for empty/null arrays. Numeric descriptor rows reject this registration API,
+correcting the preliminary assumption that those callbacks were replaceable.
+
+These observations are recorded in .context/readiness/scan-isolation and
+.context/readiness/cache-hit-analysis. No production debug counters, arbitrary
+alignment flags or specialized numeric equality implementation are retained.
+Final correctness validation is separate from a pending quiet-machine
+performance snapshot; no merge or push is authorized by favorable diagnostics.
