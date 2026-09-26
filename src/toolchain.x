@@ -112,6 +112,11 @@ Toolchain toolchain_new(
   return t;
 }
 
+/** Returns the host C compiler that builds meta code, which runs in this
+    process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
+    the target compiler. */
+String toolchain_meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
+
 static List _compile_arguments(Toolchain t, List gen_dirs) => %(
   ${t.cc} "-fsigned-char"
   @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}

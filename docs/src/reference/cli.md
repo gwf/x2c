@@ -651,7 +651,10 @@ shared libraries when it runs; a package bundle may include it.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
-installed record, then `ar`. Omitted optimization, debug, define, and undefine
+installed record, then `ar`. Project `meta` code runs inside the compiler's
+host, so it is built by `--meta-cc`, `X2C_META_CC`, `META_CC`, the installed
+record's `META_CC`, then `cc`, never by the target `--cc`; `translate`
+accepts `--meta-cc` too. Omitted optimization, debug, define, and undefine
 options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
 implicitly consumed.
 

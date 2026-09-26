@@ -270,7 +270,7 @@ run_fixture() {
   ((need_run)) || return 0
 
   program="$case_build/program"
-  if ! "$cc" "${build_cflags[@]}" \
+  if ! "$cc" -fsigned-char "${build_cflags[@]}" \
       -iquote "$root/include/x2c" -iquote "$fixture_dir" \
       "$output/$name.c" \
       -L"$root/builds/0" -lx2c -lm -o "$program" \
