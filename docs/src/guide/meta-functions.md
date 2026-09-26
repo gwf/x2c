@@ -617,7 +617,8 @@ once its storage ends.
 A struct, a C `bool`, or a pointer stays inside compile-time code: another
 meta function can take it, but a `$` call cannot pass one in or insert one
 into the program. Such a call reports `this function cannot run at compile
-time` with the reason `a parameter or the result has no Var form`.
+time` with a reason that names the kind of value: a struct or union
+result, an address result, or a parameter or result with no Var form.
 
 ## Heap objects during compilation
 
@@ -711,7 +712,8 @@ reinitializes them for every unit that uses it.
 
 Running compile-time code needs what building the program needs: the C
 compiler and the runtime headers. A group that does not compile is
-reported at the call with the C compiler's message. Loading compiled code
+reported at the call with the C compiler's first error and the directory
+that keeps the group's C. Loading compiled code
 needs `dlopen`, so on a platform without it only the shipped meta code and
 [native modules](#native-modules) linked into the compiler run at compile
 time.

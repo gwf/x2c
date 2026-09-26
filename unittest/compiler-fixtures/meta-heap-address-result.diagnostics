@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/meta-heap-address-result.x:16:23: macro: this function cannot run at compile time
     struct Node *node = $make_node(3);
                         ^
-  note: function: make_node reason: a parameter or the result has no Var form return data built from the pointed-to values, not an address
+  note: function: make_node reason: an address result has no compile-time value; return data built from the pointed-to values
 

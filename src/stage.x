@@ -828,6 +828,27 @@ static String _meta_cc_identity(String cc) {
   return ok ? "%s %016llx".printf(path, (unsigned long long) hash) : cc;
 }
 
+/* The C compiler's first located error in `errors`, or else its first
+   line, joined with the next when it ends in a colon, as a linker's
+   undefined-symbol report does. */
+static String _meta_cc_error(String errors) {
+  Array lines = [];
+  foreach (String line, (errors ? errors : "").split("\n")) {
+    String text = line.strip(NULL);
+    if (!text) continue;
+    if (text.contains(": error: ") && !text.startswith("clang:") &&
+        !text.startswith("cc:") && !text.startswith("gcc:"))
+      return text;
+    lines.push(text);
+  }
+  if (!lines.len()) return "the C compiler failed";
+  String first = lines[0];
+  if (!first.endswith(":") || lines.len() < 2) return first;
+  String next = lines[1];
+  if (next.endswith(":")) next = next[:next.len() - 1];
+  return %"$first $next";
+}
+
 /* Builds the group's native module under the cache root, named by the
    SHA-256 of its emitted C, the compiler stamp, the C compiler's identity,
    the flags, and the runtime headers' directory, or reuses the module an
@@ -863,7 +884,9 @@ static String _stage_meta_group(Compiler c, String &failure) {
     output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir $unit));
   String printed = NULL, errors = NULL;
   if (tool_capture(action.arguments, printed, errors)) {
-    failure = errors ? errors : "the C compiler failed";
+    failure = _meta_cc_error(errors);
+    if (!failure.contains(directory))
+      failure = %"$failure; the group's C is in $directory";
     return NULL;
   }
   try Path.move_to(output, module);
@@ -909,22 +932,31 @@ static String _load_meta_group(Compiler c, String &failure);
 
 int Compiler.bind_meta_group(Compiler c, String name, Token site) {
   if (!c.groups_meta() || name in c.meta_group_bound) return 0;
-  int pending = 0;
+  Type type = NULL;
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ? ?(String target) ?):
-      if (target == name) pending = 1;
-  if (!pending) return 0;
+    match (entry) case %(function ? ?(String target) ?(Type own)):
+      if (target == name) type = own;
+  if (!type) return 0;
+  /* A record returned by value has no Var form of its own; its Func form
+     would hand back the compiler's copy of it. */
+  Type result = type.apply();
+  if (!c.sym.is_var_type(result)) result = c.sym.resolve_key(result);
+  String reason = result && result.is_aggregate()
+    ? "a struct or union result has no compile-time value; return its "
+      "fields as a List or Map"
+    : NULL;
   String failure = NULL;
-  if (!_load_meta_group(c, failure))
+  if (!reason && !_load_meta_group(c, failure)) reason = failure;
+  if (!reason && !(name in c.meta_group_bound))
+    reason = result && result.is_pointer()
+      ? "an address result has no compile-time value; return data built "
+        "from the pointed-to values"
+      : "a parameter or the result has no Var form, such as C's bool; use "
+        "int, a String, a Symbol, or a List";
+  if (reason)
     c.report_error(
       <macro>, "this function cannot run at compile time", site,
-      %("function: $name" "reason: $failure"));
-  if (!(name in c.meta_group_bound))
-    c.report_error(
-      <macro>, "this function cannot run at compile time", site,
-      %("function: $name"
-        "reason: a parameter or the result has no Var form"
-        "return data built from the pointed-to values, not an address"));
+      %("function: $name" "reason: $reason"));
   return 1;
 }
 
