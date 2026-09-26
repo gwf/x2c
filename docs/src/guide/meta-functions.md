@@ -1142,8 +1142,10 @@ nothing. The queries below answer the same questions for the compiler's
 own `meta` code in `lib/`. `x2c_syntax_type` answers the canonical `Type`
 of an expression or binding. `x2c_type_fields` answers the named fields
 of a struct or union `Type`, each as a metadata row whose first element is
-the field name. `x2c_type_layout`, `x2c_type_parts`, `x2c_type_resolve`
-and `x2c_type_is_value` answer the remaining generated-code questions.
+the field name. `x2c_type_layout`, `x2c_type_resolve` and
+`x2c_type_is_value` answer the remaining generated-code questions.
+`x2c_type_parts` reads only the `Type` it receives, so it also works in a
+project `meta` function.
 `x2c_method_resolve` answers which operation a member call selects. These
 answers live in the compiler's symbol table, so a macro body cannot derive
 them from the code it captured.

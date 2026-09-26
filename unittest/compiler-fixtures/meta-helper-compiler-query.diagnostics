@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-helper-compiler-query.x:12:18: macro: x2c.type.members is not available to project meta code
+    printf("%d\n", $members());
+                   ^
+  note: reason: it reads compiler state; pass what it answers as an argument
+
