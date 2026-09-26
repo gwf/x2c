@@ -4233,6 +4233,14 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     }
     List reader = _var_checked_reader(c, expr, type, target);
     if (reader) return reader;
+    /* A Var reaching `Var *` almost always meant its address; unboxing a
+       stored Var pointer must be spelled. */
+    if (target.is_pointer() && c.sym.is_var_type(target.dereference())) {
+      c.report_error(
+        <type>, %"cannot convert Var to ${target.repr()}", NULL,
+        %("write &value for its address, or value.pointer() to unbox a stored pointer"));
+      return expr;
+    }
     if (target.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
     if (target.is_typedef_name()) {
