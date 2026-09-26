@@ -5,6 +5,7 @@
 #include "repl-session.x"
 #include "lisp.x"
 #include "scope.x"
+#include "macros.x"
 #include <stdio.h>
 
 static int failures;
@@ -257,6 +258,13 @@ int main(int argc, char **argv) {
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
+  Compiler compiler = Compiler.new();
+  Map definitions = compiler.shared_definitions();
+  if (!frontend.preload_macro_libraries() || definitions == NULL ||
+      (void *) definitions != (void *) compiler.shared_definitions()) {
+    fputs("second preload discarded shared definitions\n", stderr);
+    return 1;
+  }
   size_t baseline = 0, growth = 0;
   size_t scopes = Scope.stats().live_scopes;
   for (int phase = 0; phase < 2; phase++) {

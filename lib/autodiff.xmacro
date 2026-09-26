@@ -225,7 +225,7 @@ meta static List ad_id(Var name) {
                         : %(expr () (ident ($name)));
 }
 
-meta static List ad_unbind(Var form) {
+meta static Var ad_unbind(Var form) {
   if (!form.is(<list>)) return form;
   List items = form;
   if (!items) return items;

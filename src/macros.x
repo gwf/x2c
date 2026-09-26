@@ -1184,6 +1184,7 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
 */
 void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   (void) compiler;
+  if (!shared && library_session) return;
   library_filling = 0;
   library_settled = 1;
   if (!shared) {
@@ -1700,6 +1701,8 @@ static int _module_stamp(String path) {
    its targets. A module is never unloaded, because its Funcs borrow its
    code. */
 static void _open_native_module(String path) {
+  Scope.push(&native_module_scope);
+  defer Scope.pop();
   void *handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
     x2c_driver_error(

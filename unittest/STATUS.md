@@ -2,6 +2,8 @@
 
 ## Coverage
 
+- Native module probes reuse a constructor's cached Func across isolated
+  units. REPL API checks preserve shared definitions through a second preload.
 - Lisp AUTO cases cover interpreted forms inside prepared bodies, release
   of private programs discarded during partial lowering, and special-form
   rebinding after earlier effects or call arguments. Quasiquote cases retain
