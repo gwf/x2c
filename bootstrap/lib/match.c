@@ -616,7 +616,7 @@ static void _layout_analyze_sequence(MatchCaptureLayout layout, List patterns, u
     List _x2c_macro_object_0 = patterns;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       pattern = _x2c_macro_cursor_output_0;
       {
         unsigned long part_definite, part_possible;
@@ -638,7 +638,7 @@ static void _layout_analyze_alternatives(MatchCaptureLayout layout, List pattern
     List _x2c_macro_object_1 = patterns;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       pattern = _x2c_macro_cursor_output_1;
       {
         unsigned long part_definite, part_possible;
@@ -794,7 +794,7 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
     List _x2c_macro_object_2 = pat;
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       part = _x2c_macro_cursor_output_2;
       {
         if(Var_is_list_binder(part)) return 0;
@@ -818,7 +818,7 @@ static int _pattern_contains_binder(List pat, Var binder){
     List _x2c_macro_object_3 = pat;
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       part = _x2c_macro_cursor_output_3;
       {
         if(Var_equal(part, binder)) return 1;
@@ -1149,7 +1149,7 @@ static int _bits_unique(Var value){
         List _x2c_macro_object_4 =(List) Var_pointer(value);
         List _x2c_macro_cursor_4 = _x2c_macro_object_4;
         Var _x2c_macro_cursor_output_4;
-        while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+        while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
           part = _x2c_macro_cursor_output_4;
           if(! _bits_unique(part)) return 0;
         }
@@ -1240,7 +1240,7 @@ static int MatchLower__collect_guard_args(MatchLower l, List args, Var * element
     List _x2c_macro_object_5 = args;
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       part = _x2c_macro_cursor_output_5;
       {
         if(count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "guard-width");
@@ -1502,7 +1502,7 @@ static int _inline_descend_ok(List child, int reg){
     List _x2c_macro_object_6 = child;
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       part = _x2c_macro_cursor_output_6;
       if(Var_is_list_binder(part)) return 0;
     }
@@ -1517,7 +1517,7 @@ static int MatchLower__plan_inline_segment(MatchLower l, List pattern, int reg, 
     List _x2c_macro_object_7 = pattern;
     List _x2c_macro_cursor_7 = _x2c_macro_object_7;
     Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
       part = _x2c_macro_cursor_output_7;
       {
         if(! Var_is_row(part, 9, 7, 4)) continue;
@@ -1558,7 +1558,7 @@ static int MatchLower__emit_inline_segment(MatchLower l, List pattern, int reg, 
     List _x2c_macro_object_8 = pattern;
     List _x2c_macro_cursor_8 = _x2c_macro_object_8;
     Var _x2c_macro_cursor_output_8;
-    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       part = _x2c_macro_cursor_output_8;
       {
         if(! Var_is_row(part, 9, 7, 4)){
@@ -1981,7 +1981,7 @@ static int _pattern_borrowable(Var value, int depth, int permanent_lists){
         List _x2c_macro_object_9 =(List) Var_pointer(value);
         List _x2c_macro_cursor_9 = _x2c_macro_object_9;
         Var _x2c_macro_cursor_output_9;
-        while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+        while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
           part = _x2c_macro_cursor_output_9;
           if(! _pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
         }

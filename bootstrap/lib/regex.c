@@ -1108,7 +1108,7 @@ List Regex_split(Regex regex, String subject){
       List _x2c_macro_object_0 = Regex_find_all(regex, subject);
       List _x2c_macro_cursor_0 = _x2c_macro_object_0;
       Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         found = Var_regexmatch(_x2c_macro_cursor_output_0);
         {
           Array_push(parts, String_var(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1)));
@@ -1167,7 +1167,7 @@ RegexCapture RegexMatch_capture(RegexMatch found, Var key){
     }
     );
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
       capture = Var_regexcapture(_x2c_macro_item_1);
       {
         if(numbered && RegexCapture_index(capture) == number) return capture;

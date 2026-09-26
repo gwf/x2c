@@ -197,7 +197,7 @@ static int _all(RecursiveMatchState state, Var input, List patterns){
     List _x2c_macro_object_0 = patterns;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       pattern = _x2c_macro_cursor_output_0;
       if(! _match(state, input, pattern)) return 0;
     }
@@ -212,7 +212,7 @@ static int _any(RecursiveMatchState state, Var input, List patterns){
     List _x2c_macro_object_1 = patterns;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       pattern = _x2c_macro_cursor_output_1;
       {
         struct RecursiveMatchState snapshot = * state;
@@ -232,7 +232,7 @@ static int _none(RecursiveMatchState state, Var input, List patterns){
     List _x2c_macro_object_2 = patterns;
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       pattern = _x2c_macro_cursor_output_2;
       {
         struct RecursiveMatchState snapshot = * state;

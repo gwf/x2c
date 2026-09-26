@@ -636,7 +636,7 @@ Array Array_map(Array array, Func func){
       Array _x2c_macro_object_0 = array;
       int _x2c_macro_cursor_0 = 0;
       Var _x2c_macro_cursor_output_0;
-      while(Array_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         item = _x2c_macro_cursor_output_0;
         {
           FuncArg arguments[1] ={
@@ -1063,10 +1063,12 @@ static int _next(Iter iter, Var * out){
 }
 
 int Array_try_next(Array array, int * cursor, Var * out){
-  if(! Array_truth(array) || ! cursor || ! out || * cursor < 0) return 0;
-  if(* cursor >= _int_length(array)) return 0;
-  * out =((Var *) array -> bytes)[* cursor];
-  * cursor += 1;
+  if(! cursor) return 0;
+  if(! out) return 0;
+  if(! Array_truth(array) ||(* cursor) < 0) return 0;
+  if((* cursor) >= _int_length(array)) return 0;
+  (* out) =((Var *) array -> bytes)[(* cursor)];
+  (* cursor) += 1;
   return 1;
 }
 
@@ -1098,7 +1100,7 @@ Array Iter_array(Iter iter){
       Var item;
       Iter _x2c_macro_iterator_1 = iter;
       Var _x2c_macro_item_1;
-      while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+      while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
         item = _x2c_macro_item_1;
         Array_push(output, item);
       }

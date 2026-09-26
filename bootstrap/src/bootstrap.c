@@ -334,7 +334,7 @@ static void Bootstrap__verify(Bootstrap b, List records, String root){
     List _x2c_macro_object_0 = records;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       record = Var_string(_x2c_macro_cursor_output_0);
       {
         unsigned long long expected_hash = 0;
@@ -501,7 +501,7 @@ void bootstrap_write_interfaces(Bootstrap b){
     List _x2c_macro_object_1 = b -> runtime_srcs;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       source = Var_string(_x2c_macro_cursor_output_1);
       Array_push(sources, String_var(String_remove_prefix(source, String_join(NULL, cons(String_var(prefix), cons(String_var(_5), NULL))))));
     }
@@ -548,7 +548,7 @@ Array outputs = Array_new();
   List _x2c_macro_object_2 = b -> runtime_srcs;
   List _x2c_macro_cursor_2 = _x2c_macro_object_2;
   Var _x2c_macro_cursor_output_2;
-  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
     source = Var_string(_x2c_macro_cursor_output_2);
     {
       String name = String_join(NULL, cons(String_var(Path_stem(source)), cons(String_var(_29), NULL)));
@@ -638,7 +638,7 @@ void bootstrap_build_commands(Bootstrap b){
       List _x2c_macro_object_3 = String_split_lines(Path_read_text(String_join(NULL, cons(String_var(prefix), cons(String_var(_32), NULL)))), 0);
       List _x2c_macro_cursor_3 = _x2c_macro_object_3;
       Var _x2c_macro_cursor_output_3;
-      while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
         row = Var_string(_x2c_macro_cursor_output_3);
         {
           if(! String_truth(row)) continue;
@@ -669,7 +669,7 @@ void bootstrap_build_commands(Bootstrap b){
       List _x2c_macro_object_4 = Path_glob(String_join(NULL, cons(String_var(prefix), cons(String_var(_45), NULL))));
       List _x2c_macro_cursor_4 = _x2c_macro_object_4;
       Var _x2c_macro_cursor_output_4;
-      while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
         object = Var_string(_x2c_macro_cursor_output_4);
         if(! String_startswith(Path_basename(object), _98)) Array_push(objects, String_var(object));
       }
@@ -686,7 +686,7 @@ void bootstrap_build_commands(Bootstrap b){
       List _x2c_macro_object_5 = Path_glob(String_join(NULL, cons(String_var(prefix), cons(String_var(_59), NULL))));
       List _x2c_macro_cursor_5 = _x2c_macro_object_5;
       Var _x2c_macro_cursor_output_5;
-      while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
         source = Var_string(_x2c_macro_cursor_output_5);
         Path_copy_file(source, Path_join(headers, Path_basename(source)));
       }
@@ -698,7 +698,7 @@ void bootstrap_build_commands(Bootstrap b){
       Array _x2c_macro_object_7 = names;
       int _x2c_macro_cursor_7 = 0;
       Var _x2c_macro_cursor_output_7;
-      while(Array_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+      while(Array_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
         name = Var_string(_x2c_macro_cursor_output_7);
         {
           List sources = Path_glob(String_join(NULL, cons(String_var(prefix), cons(String_var(_60), cons(String_var(name), cons(String_var(_61), NULL))))));
@@ -712,7 +712,7 @@ void bootstrap_build_commands(Bootstrap b){
             List _x2c_macro_object_6 = sources;
             List _x2c_macro_cursor_6 = _x2c_macro_object_6;
             Var _x2c_macro_cursor_output_6;
-            while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+            while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
               source = Var_string(_x2c_macro_cursor_output_6);
               Array_push(arguments, String_var(source));
             }

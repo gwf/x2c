@@ -1149,7 +1149,7 @@ static int _response_on_stack(List stack, String path){
     List _x2c_macro_object_0 = stack;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       entry = Var_string(_x2c_macro_cursor_output_0);
       if(String_equal(entry, path)) return 1;
     }
@@ -1283,7 +1283,7 @@ static void _expand_argument(Array output, String argument, List stack){
     List _x2c_macro_object_1 = cli_response_arguments(path);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       word = Var_string(_x2c_macro_cursor_output_1);
       _expand_argument(output, word, nested);
     }
@@ -1632,7 +1632,7 @@ CliRequest cli_package_options(String path, String package){
       List _x2c_macro_object_2 = cli_response_arguments(path);
       List _x2c_macro_cursor_2 = _x2c_macro_object_2;
       Var _x2c_macro_cursor_output_2;
-      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
         word = Var_string(_x2c_macro_cursor_output_2);
         Array_push(words, String_var(String_replace(word, _212, package)));
       }

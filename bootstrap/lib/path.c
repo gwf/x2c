@@ -198,7 +198,7 @@ Path Path_absolute(Path path){
     List _x2c_macro_object_0 = String_split(path, _1);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       part = Var_string(_x2c_macro_cursor_output_0);
       {
         if(! String_truth(part) || String_equal(part, _2)) continue;
@@ -305,7 +305,7 @@ static void _push_children(Array pending, Path directory){
     List _x2c_macro_object_1 = children;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       name = Var_string(_x2c_macro_cursor_output_1);
       Array_push(pending, String_var(Path_join(directory, name)));
     }
@@ -347,7 +347,7 @@ static void _walk(Path directory, int depth, int hidden, Array paths){
     List _x2c_macro_object_2 = Path_list_dir(directory);
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       name = Var_string(_x2c_macro_cursor_output_2);
       {
         Path child = Path_join(directory, name);
@@ -466,7 +466,7 @@ List Path_glob(Path pattern){
     List _x2c_macro_object_3 = String_split(String_getslice(text, cut, -2147483648, 1), _1);
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       part = Var_string(_x2c_macro_cursor_output_3);
       {
         if(! String_truth(part)) continue;
@@ -484,7 +484,7 @@ List Path_glob(Path pattern){
     Array _x2c_macro_object_4 = paths;
     int _x2c_macro_cursor_4 = 0;
     Var _x2c_macro_cursor_output_4;
-    while(Array_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+    while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       path = Var_string(_x2c_macro_cursor_output_4);
       {
         String candidate = String_truth(base) ? path : String_getslice(path, 2, -2147483648, 1);
@@ -636,7 +636,7 @@ static void _copy_tree(Path source, Path target){
       List _x2c_macro_object_5 = Path_list_dir(source);
       List _x2c_macro_cursor_5 = _x2c_macro_object_5;
       Var _x2c_macro_cursor_output_5;
-      while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
         name = Var_string(_x2c_macro_cursor_output_5);
         _copy_tree(Path_join(source, name), Path_join(target, name));
       }

@@ -410,7 +410,7 @@ static int _name_ok(String name){
     String _x2c_macro_object_0 = name;
     int _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(String_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       raw = _x2c_macro_cursor_output_0;
       {
         unsigned char ch = raw;
@@ -644,7 +644,7 @@ static void _parse_manifest(Project p){
     List _x2c_macro_object_1 = lines;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       owned = Var_string(_x2c_macro_cursor_output_1);
       {
         line_number ++;
@@ -773,7 +773,7 @@ static Array _expand_pattern(Project p, String pattern, String owner){
       List _x2c_macro_object_2 = found;
       List _x2c_macro_cursor_2 = _x2c_macro_object_2;
       Var _x2c_macro_cursor_output_2;
-      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
         path = Var_string(_x2c_macro_cursor_output_2);
         if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_32), NULL))))) && SourceView_exists(p -> sources, path) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
       }
@@ -801,7 +801,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
     List _x2c_macro_object_4 = target -> sources;
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       pattern = Var_string(_x2c_macro_cursor_output_4);
       {
         Array expanded = _expand_pattern(project, pattern, _96);
@@ -810,7 +810,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
           Array _x2c_macro_object_3 = expanded;
           int _x2c_macro_cursor_3 = 0;
           Var _x2c_macro_cursor_output_3;
-          while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+          while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
             value = _x2c_macro_cursor_output_3;
             if(! Array_contains(sources, value)) Array_push(sources, value);
           }
@@ -828,7 +828,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
     List _x2c_macro_object_6 = target -> exclude;
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       pattern = Var_string(_x2c_macro_cursor_output_6);
       {
         Array expanded = _expand_pattern(project, pattern, _16);
@@ -837,7 +837,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
           Array _x2c_macro_object_5 = expanded;
           int _x2c_macro_cursor_5 = 0;
           Var _x2c_macro_cursor_output_5;
-          while(Array_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+          while(Array_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
             value = _x2c_macro_cursor_output_5;
             if(! Array_contains(excluded, value)) Array_push(excluded, value);
           }
@@ -855,7 +855,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
     Array _x2c_macro_object_7 = sources;
     int _x2c_macro_cursor_7 = 0;
     Var _x2c_macro_cursor_output_7;
-    while(Array_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+    while(Array_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
       value = _x2c_macro_cursor_output_7;
       {
         if(Array_contains(excluded, value)){
@@ -875,7 +875,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
     Array _x2c_macro_object_8 = kept;
     int _x2c_macro_cursor_8 = 0;
     Var _x2c_macro_cursor_output_8;
-    while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+    while(Array_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       path = Var_string(_x2c_macro_cursor_output_8);
       if(!(x2c_source_file(path) || String_endswith(path, _97))) _error_name(project, 0, _98, path);
     }
@@ -904,7 +904,7 @@ static void _validate_target(Project project, ProjectTarget target){
     List _x2c_macro_object_9 = _prerequisites(target);
     List _x2c_macro_cursor_9 = _x2c_macro_object_9;
     Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       name = Var_string(_x2c_macro_cursor_output_9);
       {
         ProjectTarget dependency = _target(project, name, 0);
@@ -927,7 +927,7 @@ static List _c_flags(Project p, List values){
     List _x2c_macro_object_10 = values;
     List _x2c_macro_cursor_10 = _x2c_macro_object_10;
     Var _x2c_macro_cursor_output_10;
-    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
+    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
       value = Var_string(_x2c_macro_cursor_output_10);
       if(cli_dependency_pass_through(value)) _error_name(p, 0, _102, value);
     }
@@ -998,7 +998,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     List _x2c_macro_object_11 = target -> dependencies;
     List _x2c_macro_cursor_11 = _x2c_macro_object_11;
     Var _x2c_macro_cursor_output_11;
-    while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
       name = Var_string(_x2c_macro_cursor_output_11);
       {
         ProjectTarget dependency = _target(p, name, 0);
@@ -1016,7 +1016,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     List _x2c_macro_object_12 = target -> native_modules;
     List _x2c_macro_cursor_12 = _x2c_macro_object_12;
     Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
+    while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
       name = Var_string(_x2c_macro_cursor_output_12);
       {
         ProjectTarget loaded = _target(p, name, 0);
@@ -1063,7 +1063,7 @@ static void _plan_target(Project project, ProjectTarget target, CliRequest comma
     List _x2c_macro_object_13 = _prerequisites(target);
     List _x2c_macro_cursor_13 = _x2c_macro_object_13;
     Var _x2c_macro_cursor_output_13;
-    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       dependency = Var_string(_x2c_macro_cursor_output_13);
       _plan_target(project, _target(project, dependency, 0), command, selected, build_root);
     }
@@ -1134,7 +1134,7 @@ static List _locked_row(List rows, ProjectDependency entry){
     List _x2c_macro_object_14 = rows;
     List _x2c_macro_cursor_14 = _x2c_macro_object_14;
     Var _x2c_macro_cursor_output_14;
-    while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_14)){
+    while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
       row = Var_list(_x2c_macro_cursor_output_14);
       if(Var_equal(List_car(row), String_var(entry -> name)) && Var_equal(List_car(List_cdr(row)), String_var(entry -> version))) found = row;
     }
@@ -1167,7 +1167,7 @@ static void _write_lock(String path, List rows){
     List _x2c_macro_object_15 = rows;
     List _x2c_macro_cursor_15 = _x2c_macro_object_15;
     Var _x2c_macro_cursor_output_15;
-    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_15)){
+    while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
       row = Var_list(_x2c_macro_cursor_output_15);
       text = String_join(NULL, cons(String_var(text), cons(String_var(String_join(_48, row)), cons(String_var(_45), NULL))));
     }

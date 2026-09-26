@@ -842,7 +842,7 @@ static void _render_text(Buffer out, const LogEvent * event, int color){
     List _x2c_macro_object_0 = event -> fields;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       field = Var_list(_x2c_macro_cursor_output_0);
       {
         if(! List_truth(field)) continue;
@@ -1613,7 +1613,7 @@ void Logger_shutdown(void){
           List _x2c_macro_object_1 = pending;
           List _x2c_macro_cursor_1 = _x2c_macro_object_1;
           Var _x2c_macro_cursor_output_1;
-          while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+          while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
             entry = Var_list(_x2c_macro_cursor_output_1);
             Logger_log(active, 11703268, 392730881588392, entry);
           }

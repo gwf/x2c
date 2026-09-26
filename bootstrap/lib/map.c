@@ -784,7 +784,7 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
         unsigned _x2c_macro_cursor_3 = 0;
         Var _x2c_macro_cursor_output_0;
         Var _x2c_macro_cursor_output_1;
-        while(Map_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
+        while(Map_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
           key = _x2c_macro_cursor_output_0;
           val = _x2c_macro_cursor_output_1;
           {
@@ -872,13 +872,13 @@ static int Map__core_compare(Map _x2c_macro_a_4, Map _x2c_macro_b_4){
     unsigned _x2c_macro_cursor_4 = 0, _x2c_macro_index_6 = 0;
     Var _x2c_macro_key_10;
     Var _x2c_macro_value_1;
-    while(Map_try_next(_x2c_macro_a_4, & _x2c_macro_cursor_4, & _x2c_macro_key_10, & _x2c_macro_value_1)) _x2c_macro_arecs_0[_x2c_macro_index_6 ++] =(struct MapRecord){
+    while(Map_try_next(_x2c_macro_a_4, &(_x2c_macro_cursor_4), &(_x2c_macro_key_10), &(_x2c_macro_value_1))) _x2c_macro_arecs_0[_x2c_macro_index_6 ++] =(struct MapRecord){
       .key = _x2c_macro_key_10, .val = _x2c_macro_value_1
     }
     ;
     _x2c_macro_cursor_4 = 0;
     _x2c_macro_index_6 = 0;
-    while(Map_try_next(_x2c_macro_b_4, & _x2c_macro_cursor_4, & _x2c_macro_key_10, & _x2c_macro_value_1)) _x2c_macro_brecs_0[_x2c_macro_index_6 ++] =(struct MapRecord){
+    while(Map_try_next(_x2c_macro_b_4, &(_x2c_macro_cursor_4), &(_x2c_macro_key_10), &(_x2c_macro_value_1))) _x2c_macro_brecs_0[_x2c_macro_index_6 ++] =(struct MapRecord){
       .key = _x2c_macro_key_10, .val = _x2c_macro_value_1
     }
     ;
@@ -938,7 +938,7 @@ static Buffer Map__core_write(Map _x2c_macro_map_15, Buffer _x2c_macro_out_2, Sy
     Var _x2c_macro_key_11;
     Var _x2c_macro_value_2;
     int _x2c_macro_first_0 = 1;
-    while(Map_try_next(_x2c_macro_map_15, & _x2c_macro_cursor_5, & _x2c_macro_key_11, & _x2c_macro_value_2)){
+    while(Map_try_next(_x2c_macro_map_15, &(_x2c_macro_cursor_5), &(_x2c_macro_key_11), &(_x2c_macro_value_2))){
       if(! _x2c_macro_first_0) Buffer_write(_x2c_macro_out_2, ", ");
       Var _x2c_macro_boxed_key_0 = _box_var(_x2c_macro_key_11), _x2c_macro_boxed_value_0 = _box_var(_x2c_macro_value_2);
       if(_x2c_macro_mode_0 == 40228){
@@ -979,7 +979,7 @@ static int _next(Iter iter, Var * out){
   if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
-  if(! Map_try_next(map, & cursor, & key, & val)) return 0;
+  if(! Map_try_next(map, &(cursor), &(key), &(val))) return 0;
   iter -> state = unsigned_var(cursor);
   * out = val;
   return 1;
@@ -990,7 +990,7 @@ static int _keys_next(Iter iter, Var * out){
   if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
-  if(! Map_try_next(map, & cursor, & key, & val)) return 0;
+  if(! Map_try_next(map, &(cursor), &(key), &(val))) return 0;
   iter -> state = unsigned_var(cursor);
   * out = key;
   return 1;
@@ -1003,7 +1003,7 @@ static int _enumerate_next(Iter iter, Var * out){
   if(map == NULL) return 0;
   unsigned cursor = Var_uint(Var_convert(iter -> state, 3847013));
   Var key, val;
-  if(! Map_try_next(map, & cursor, & key, & val)) return 0;
+  if(! Map_try_next(map, &(cursor), &(key), &(val))) return 0;
   iter -> state = unsigned_var(cursor);
   * out = List_var(cons(key, cons(val, NULL)));
   return 1;

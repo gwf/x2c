@@ -403,7 +403,7 @@ static char * * _environment(Map env){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       name = _x2c_macro_item_0;
       Map_setindex(names, String_var(Var_str(name)), int_var(1));
     }
@@ -421,7 +421,7 @@ static char * * _environment(Map env){
     unsigned _x2c_macro_cursor_1 = 0;
     Var _x2c_macro_cursor_output_0;
     Var _x2c_macro_cursor_output_1;
-    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
+    while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
       name = _x2c_macro_cursor_output_0;
       value = _x2c_macro_cursor_output_1;
       Array_push(entries, String_var(String_join(NULL, cons(String_var(Var_str(name)), cons(String_var(_0), cons(String_var(Var_str(value)), NULL))))));
@@ -435,7 +435,7 @@ static char * * _environment(Map env){
     Array _x2c_macro_object_2 = entries;
     int _x2c_macro_cursor_2 = 0;
     Var _x2c_macro_cursor_output_2;
-    while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       entry = Var_string(_x2c_macro_cursor_output_2);
       result[index ++] = entry;
     }
@@ -535,7 +535,7 @@ static char * * _argv(List stage){
     List _x2c_macro_object_3 = stage;
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       word = _x2c_macro_cursor_output_3;
       {
         String text = Var_str(word);
@@ -695,7 +695,7 @@ static void Job__start(Job job){
         List _x2c_macro_object_4 = job -> stages;
         List _x2c_macro_cursor_4 = _x2c_macro_object_4;
         Var _x2c_macro_cursor_output_4;
-        while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+        while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
           stage = Var_list(_x2c_macro_cursor_output_4);
           {
             int link[2] ={
@@ -881,7 +881,7 @@ Job Job_options(Job job, Map options){
     unsigned _x2c_macro_cursor_5 = 0;
     Var _x2c_macro_cursor_output_5;
     Var _x2c_macro_cursor_output_6;
-    while(Map_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5, & _x2c_macro_cursor_output_6)){
+    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
       key = _x2c_macro_cursor_output_5;
       value = _x2c_macro_cursor_output_6;
       {
@@ -1036,7 +1036,7 @@ Job Job_wait_any(Array jobs){
     Array _x2c_macro_object_6 = jobs;
     int _x2c_macro_cursor_6 = 0;
     Var _x2c_macro_cursor_output_7;
-    while(Array_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_7)){
+    while(Array_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7))){
       job = Var_job(_x2c_macro_cursor_output_7);
       if(! job -> started){
         static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 557};

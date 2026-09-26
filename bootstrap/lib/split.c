@@ -205,7 +205,7 @@ static int _iter_next(Iter iter, Var * out){
   Split split = Var_split(iter -> obj);
   int cursor = Var_int(Var_convert(iter -> state, 3453797));
   String value;
-  if(! Split_try_next(split, & cursor, & value)) return 0;
+  if(! Split_try_next(split, &(cursor), &(value))) return 0;
   iter -> state = int_var(cursor);
   * out = String_var(value);
   return 1;

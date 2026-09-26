@@ -361,7 +361,7 @@ List List_append(List a, List b){
       List _x2c_macro_object_0 = a;
       List _x2c_macro_cursor_0 = _x2c_macro_object_0;
       Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         value = _x2c_macro_cursor_output_0;
         Array_push(values, value);
       }
@@ -485,7 +485,7 @@ List List_reverse(List lst){
     List _x2c_macro_object_1 = lst;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       value = _x2c_macro_cursor_output_1;
       rev = cons(value, rev);
     }
@@ -539,7 +539,7 @@ List List_map(List lst, Func fn){
       List _x2c_macro_object_2 = lst;
       List _x2c_macro_cursor_2 = _x2c_macro_object_2;
       Var _x2c_macro_cursor_output_2;
-      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
         value = _x2c_macro_cursor_output_2;
         {
           FuncArg arguments[1] ={
@@ -581,7 +581,7 @@ Var List_foldl(List lst, Var seed, Func fn){
     List _x2c_macro_object_3 = cur;
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       value = _x2c_macro_cursor_output_3;
       {
         FuncArg arguments[2] ={
@@ -606,7 +606,7 @@ Var List_find(List lst, Func pred){
     List _x2c_macro_object_4 = lst;
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       value = _x2c_macro_cursor_output_4;
       {
         FuncArg arguments[1] ={
@@ -629,7 +629,7 @@ int List_any(List lst, Func pred){
     List _x2c_macro_object_5 = lst;
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       value = _x2c_macro_cursor_output_5;
       {
         FuncArg arguments[1] ={
@@ -653,7 +653,7 @@ int List_all(List lst, Func pred){
     List _x2c_macro_object_6 = lst;
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       value = _x2c_macro_cursor_output_6;
       {
         FuncArg arguments[1] ={
@@ -688,7 +688,7 @@ List List_sort(List lst){
       List _x2c_macro_object_7 = lst;
       List _x2c_macro_cursor_7 = _x2c_macro_object_7;
       Var _x2c_macro_cursor_output_7;
-      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+      while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
         value = _x2c_macro_cursor_output_7;
         Array_push(values, value);
       }
@@ -729,7 +729,7 @@ List List_sort_with(List lst, Func compare){
       List _x2c_macro_object_8 = lst;
       List _x2c_macro_cursor_8 = _x2c_macro_object_8;
       Var _x2c_macro_cursor_output_8;
-      while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+      while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
         value = _x2c_macro_cursor_output_8;
         Array_push(values, value);
       }
@@ -770,7 +770,7 @@ List List_sort_by(List lst, Func key){
       List _x2c_macro_object_9 = lst;
       List _x2c_macro_cursor_9 = _x2c_macro_object_9;
       Var _x2c_macro_cursor_output_9;
-      while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+      while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
         value = _x2c_macro_cursor_output_9;
         Array_push(values, value);
       }
@@ -831,7 +831,7 @@ List Map_list(Map map){
     unsigned _x2c_macro_cursor_10 = 0;
     Var _x2c_macro_cursor_output_10;
     Var _x2c_macro_cursor_output_11;
-    while(Map_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10, & _x2c_macro_cursor_output_11)){
+    while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10), &(_x2c_macro_cursor_output_11))){
       key = _x2c_macro_cursor_output_10;
       value = _x2c_macro_cursor_output_11;
       Array_push(pairs, List_var(cons(key, cons(value, NULL))));
@@ -848,7 +848,7 @@ Array List_array(List lst){
     List _x2c_macro_object_11 = lst;
     List _x2c_macro_cursor_11 = _x2c_macro_object_11;
     Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_12)){
+    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_12))){
       value = _x2c_macro_cursor_output_12;
       Array_push(array, value);
     }
@@ -964,7 +964,7 @@ static Var _sublis_node(List alist, Var node){
       List _x2c_macro_object_12 = list;
       List _x2c_macro_cursor_12 = _x2c_macro_object_12;
       Var _x2c_macro_cursor_output_13;
-      while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_13)){
+      while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_13))){
         source = _x2c_macro_cursor_output_13;
         Array_push(items, _sublis_node(alist, source));
       }
@@ -1007,7 +1007,7 @@ List List_flatten(List lst){
       List _x2c_macro_object_14 = lst;
       List _x2c_macro_cursor_14 = _x2c_macro_object_14;
       Var _x2c_macro_cursor_output_15;
-      while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_15)){
+      while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_15))){
         head = _x2c_macro_cursor_output_15;
         {
           if(Var_is_row(head, 9, 7, 4)){
@@ -1017,7 +1017,7 @@ List List_flatten(List lst){
               List _x2c_macro_object_13 = inner;
               List _x2c_macro_cursor_13 = _x2c_macro_object_13;
               Var _x2c_macro_cursor_output_14;
-              while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_14)){
+              while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_14))){
                 item = _x2c_macro_cursor_output_14;
                 Array_push(values, item);
               }
@@ -1052,7 +1052,7 @@ static void _flatten_all_collect(Array values, List lst){
     List _x2c_macro_object_15 = lst;
     List _x2c_macro_cursor_15 = _x2c_macro_object_15;
     Var _x2c_macro_cursor_output_16;
-    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_16)){
+    while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_16))){
       head = _x2c_macro_cursor_output_16;
       {
         if(Var_is_row(head, 9, 7, 4)) _flatten_all_collect(values, Var_list(head));
@@ -1123,7 +1123,7 @@ Var List_assoc(List list, Var key){
     List _x2c_macro_object_16 = list;
     List _x2c_macro_cursor_16 = _x2c_macro_object_16;
     Var _x2c_macro_cursor_output_17;
-    while(List_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_17)){
+    while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_17))){
       pair = Var_list(_x2c_macro_cursor_output_17);
       {
         if(! List_truth(pair)) continue;
@@ -1614,9 +1614,12 @@ static int _next(Iter iter, Var * out){
 }
 
 int List_try_next(List lst, List * cursor, Var * out){
-  if(! cursor || ! out || ! List_truth(* cursor)) return 0;
-  * out = List_car((* cursor));
-  * cursor =(* cursor) -> cdr;
+  if(! cursor) return 0;
+  if(! out) return 0;
+  List rest =(* cursor);
+  if(! List_truth(rest)) return 0;
+  (* out) = List_car(rest);
+  (* cursor) = rest -> cdr;
   return 1;
 }
 
@@ -1646,7 +1649,7 @@ List Iter_list(Iter iter){
       Var item;
       Iter _x2c_macro_iterator_17 = iter;
       Var _x2c_macro_item_17;
-      while(Iter_try_next(_x2c_macro_iterator_17, & _x2c_macro_item_17)){
+      while(Iter_try_next(_x2c_macro_iterator_17, &(_x2c_macro_item_17))){
         item = _x2c_macro_item_17;
         Array_push(values, item);
       }
@@ -1684,7 +1687,7 @@ List List_filter(List lst, Func pred){
       List _x2c_macro_object_18 = lst;
       List _x2c_macro_cursor_18 = _x2c_macro_object_18;
       Var _x2c_macro_cursor_output_18;
-      while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_18)){
+      while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_18))){
         value = _x2c_macro_cursor_output_18;
         {
           FuncArg arguments[1] ={

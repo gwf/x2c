@@ -250,7 +250,7 @@ default: break;
     }
   }
 List arguments = NULL; {
-  List parameter;  List _x2c_macro_object_0 = value;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+  List parameter;  List _x2c_macro_object_0 = value;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
     parameter = Var_list(_x2c_macro_cursor_output_0);
   {
     List _x2c_match_expr = parameter;

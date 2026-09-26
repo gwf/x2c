@@ -329,7 +329,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
     List _x2c_macro_object_0 = translation_depfile_parse(dependency_text);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       dependency = Var_string(_x2c_macro_cursor_output_0);
       Compiler_add_translation_dependency(c, dependency);
     }
@@ -490,7 +490,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
       List _x2c_macro_object_1 = _43;
       List _x2c_macro_cursor_1 = _x2c_macro_object_1;
       Var _x2c_macro_cursor_output_1;
-      while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
         name = Var_string(_x2c_macro_cursor_output_1);
         {
           Lisp_set_global(shared, name, List_var(NULL));
@@ -506,7 +506,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
         List _x2c_macro_object_2 = Compiler_diagnostics(unit.compiler);
         List _x2c_macro_cursor_2 = _x2c_macro_object_2;
         Var _x2c_macro_cursor_output_2;
-        while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+        while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
           diagnostic = Var_list(_x2c_macro_cursor_output_2);
           Compiler_print_diagnostic(unit.compiler, diagnostic);
         }
@@ -529,7 +529,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
       }
       );
       Var _x2c_macro_item_3;
-      while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+      while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
         name = Var_string(_x2c_macro_item_3);
         {
           Var function;

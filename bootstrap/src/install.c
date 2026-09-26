@@ -384,7 +384,7 @@ static List _files_with(String directory, String suffix){
     List _x2c_macro_object_0 = _entries(directory);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       name = Var_string(_x2c_macro_cursor_output_0);
       if(String_endswith(name, suffix)) Array_push(paths, String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(name), NULL))))));
     }
@@ -444,7 +444,7 @@ List install_rows(String text){
     List _x2c_macro_object_1 = String_split_lines(text, 0);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       line = Var_string(_x2c_macro_cursor_output_1);
       {
         List fields = List_filter(String_split(line, _106), _x2c_func_handle_1);
@@ -505,7 +505,7 @@ x2c_exception_leave(& _x2c_exception_frame_1);
   List _x2c_macro_object_2 = install_rows(text);
   List _x2c_macro_cursor_2 = _x2c_macro_object_2;
   Var _x2c_macro_cursor_output_2;
-  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
     row = Var_list(_x2c_macro_cursor_output_2);
     {
       if(! Var_equal(List_car(row), String_var(name))) continue;
@@ -660,7 +660,7 @@ if(! List_contains(units, String_var(String_join(NULL, cons(String_var(package),
   List _x2c_macro_object_3 = _files_with(package, _113);
   List _x2c_macro_cursor_3 = _x2c_macro_object_3;
   Var _x2c_macro_cursor_output_3;
-  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
     manifest = Var_string(_x2c_macro_cursor_output_3);
     if(String_endswith(manifest, _114) || String_startswith(Path_stem(manifest), _115)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_44), NULL))));
   }
@@ -789,7 +789,7 @@ static String _work_directory(String packages){
     List _x2c_macro_object_4 = Path_list_dir(packages);
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       name = Var_string(_x2c_macro_cursor_output_4);
       if(String_startswith(name, _120)) Path_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL)))));
     }
@@ -1022,7 +1022,7 @@ int list_command(CliRequest request){
     List _x2c_macro_object_5 = Path_is_dir(packages) ? _entries(packages) : NULL;
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       name = Var_string(_x2c_macro_cursor_output_5);
       {
         String package = String_join(NULL, cons(String_var(packages), cons(String_var(_5), cons(String_var(name), NULL)))), kind = _installed_kind(package);

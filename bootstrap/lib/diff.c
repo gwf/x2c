@@ -165,7 +165,7 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
       List _x2c_macro_object_0 = path;
       List _x2c_macro_cursor_0 = _x2c_macro_object_0;
       Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         step = Var_list(_x2c_macro_cursor_output_0);
         {
           List _x2c_destructure_0 = step;
@@ -215,7 +215,7 @@ static void _hunk(Buffer out, List lines, int old_start, int old_count, int new_
     List _x2c_macro_object_1 = lines;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       line = Var_string(_x2c_macro_cursor_output_1);
       Buffer_write(out, line);
     }

@@ -204,7 +204,7 @@ static Symbol _exact_7bit(String spelling){
     String _x2c_macro_object_0 = spelling;
     int _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(String_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       byte = _x2c_macro_cursor_output_0;
       {
         unsigned char ch = byte;

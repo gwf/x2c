@@ -24,70 +24,70 @@ typedef Block ArrayString;
 
 ArrayChar ArrayChar_new(void);
 
-int ArrayChar_try_get(ArrayChar _x2c_macro_array_15, int _x2c_macro_index_5, char * _x2c_macro_out_4);
+int ArrayChar_try_get(ArrayChar _x2c_macro_array_16, int _x2c_macro_index_5, char * _x2c_macro_out_5);
 
-int ArrayChar_try_next(ArrayChar _x2c_macro_array_16, int * _x2c_macro_cursor_0, char * _x2c_macro_out_5);
+int ArrayChar_try_next(ArrayChar _x2c_macro_array_17, int * _x2c_macro_cursor_1, char * _x2c_macro_out_6);
 
-static inline char ArrayChar_getindex(ArrayChar _x2c_macro_array_17, int _x2c_macro_index_6){
-  return((char *) _x2c_macro_array_17 -> bytes)[_x2c_macro_index_6];
+static inline char ArrayChar_getindex(ArrayChar _x2c_macro_array_18, int _x2c_macro_index_6){
+  return((char *) _x2c_macro_array_18 -> bytes)[_x2c_macro_index_6];
 }
 
-static inline char ArrayChar_setindex(ArrayChar _x2c_macro_array_18, int _x2c_macro_index_7, char _x2c_macro_value_3){
-  return((char *) _x2c_macro_array_18 -> bytes)[_x2c_macro_index_7] = _x2c_macro_value_3;
+static inline char ArrayChar_setindex(ArrayChar _x2c_macro_array_19, int _x2c_macro_index_7, char _x2c_macro_value_3){
+  return((char *) _x2c_macro_array_19 -> bytes)[_x2c_macro_index_7] = _x2c_macro_value_3;
 }
 
-char ArrayChar_push(ArrayChar _x2c_macro_array_19, char _x2c_macro_value_4);
+char ArrayChar_push(ArrayChar _x2c_macro_array_20, char _x2c_macro_value_4);
 
-int ArrayChar_try_take_last(ArrayChar _x2c_macro_array_20, char * _x2c_macro_out_6);
+int ArrayChar_try_take_last(ArrayChar _x2c_macro_array_21, char * _x2c_macro_out_7);
 
-char ArrayChar_take_last(ArrayChar _x2c_macro_array_21);
+char ArrayChar_take_last(ArrayChar _x2c_macro_array_22);
 
-char ArrayChar_shift(ArrayChar _x2c_macro_array_22);
+char ArrayChar_shift(ArrayChar _x2c_macro_array_23);
 
-char ArrayChar_unshift(ArrayChar _x2c_macro_array_23, char _x2c_macro_value_7);
+char ArrayChar_unshift(ArrayChar _x2c_macro_array_24, char _x2c_macro_value_7);
 
-char ArrayChar_insert(ArrayChar _x2c_macro_array_24, int _x2c_macro_index_8, char _x2c_macro_value_8);
+char ArrayChar_insert(ArrayChar _x2c_macro_array_25, int _x2c_macro_index_8, char _x2c_macro_value_8);
 
-char ArrayChar_remove(ArrayChar _x2c_macro_array_25, int _x2c_macro_index_9);
+char ArrayChar_remove(ArrayChar _x2c_macro_array_26, int _x2c_macro_index_9);
 
-ArrayChar ArrayChar_copy(ArrayChar _x2c_macro_array_26);
+ArrayChar ArrayChar_copy(ArrayChar _x2c_macro_array_27);
 
-ArrayChar ArrayChar_getslice(ArrayChar _x2c_macro_array_27, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_1);
+ArrayChar ArrayChar_getslice(ArrayChar _x2c_macro_array_28, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_1);
 
-ArrayChar ArrayChar_setslice(ArrayChar _x2c_macro_array_28, int _x2c_macro_start_6, int _x2c_macro_end_5, ArrayChar _x2c_macro_values_2);
+ArrayChar ArrayChar_setslice(ArrayChar _x2c_macro_array_29, int _x2c_macro_start_6, int _x2c_macro_end_5, ArrayChar _x2c_macro_values_2);
 
-ArrayChar ArrayChar_remslice(ArrayChar _x2c_macro_array_29, int _x2c_macro_start_7, int _x2c_macro_end_6);
+ArrayChar ArrayChar_remslice(ArrayChar _x2c_macro_array_30, int _x2c_macro_start_7, int _x2c_macro_end_6);
 
-ArrayChar ArrayChar_splice(ArrayChar _x2c_macro_array_30, int _x2c_macro_index_10, int _x2c_macro_remove_count_1, ArrayChar _x2c_macro_values_3);
+ArrayChar ArrayChar_splice(ArrayChar _x2c_macro_array_31, int _x2c_macro_index_10, int _x2c_macro_remove_count_1, ArrayChar _x2c_macro_values_3);
 
-int ArrayChar_find(ArrayChar _x2c_macro_array_31, char _x2c_macro_value_10);
+int ArrayChar_find(ArrayChar _x2c_macro_array_32, char _x2c_macro_value_10);
 
-int ArrayChar_contains(ArrayChar _x2c_macro_array_32, char _x2c_macro_value_11);
+int ArrayChar_contains(ArrayChar _x2c_macro_array_33, char _x2c_macro_value_11);
 
-int ArrayChar_count(ArrayChar _x2c_macro_array_33, char _x2c_macro_value_12);
+int ArrayChar_count(ArrayChar _x2c_macro_array_34, char _x2c_macro_value_12);
 
-int ArrayChar_indexof(ArrayChar _x2c_macro_array_34, char _x2c_macro_value_13);
+int ArrayChar_indexof(ArrayChar _x2c_macro_array_35, char _x2c_macro_value_13);
 
 ArrayChar ArrayChar_concat(ArrayChar _x2c_macro_a_2, ArrayChar _x2c_macro_b_2);
 
-ArrayChar ArrayChar_reverse(ArrayChar _x2c_macro_array_35);
+ArrayChar ArrayChar_reverse(ArrayChar _x2c_macro_array_36);
 
 int ArrayChar_equal(ArrayChar _x2c_macro_a_3, ArrayChar _x2c_macro_b_3);
 
-Array ArrayChar_array(ArrayChar _x2c_macro_array_36);
+Array ArrayChar_array(ArrayChar _x2c_macro_array_37);
 
 int ArrayChar_compare(ArrayChar _x2c_macro_a_4, ArrayChar _x2c_macro_b_4);
 
-Buffer ArrayChar_write_repr(ArrayChar _x2c_macro_array_37, Buffer _x2c_macro_out_7);
+Buffer ArrayChar_write_repr(ArrayChar _x2c_macro_array_38, Buffer _x2c_macro_out_8);
 
-Buffer ArrayChar_write_str(ArrayChar _x2c_macro_array_38, Buffer _x2c_macro_out_8);
+Buffer ArrayChar_write_str(ArrayChar _x2c_macro_array_39, Buffer _x2c_macro_out_9);
 
-String ArrayChar_str(ArrayChar _x2c_macro_array_39);
+String ArrayChar_str(ArrayChar _x2c_macro_array_40);
 
-String ArrayChar_repr(ArrayChar _x2c_macro_array_40);
+String ArrayChar_repr(ArrayChar _x2c_macro_array_41);
 
-static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c_macro_index_11, Symbol _x2c_macro_op_0, char _x2c_macro_rhs_0){
-  char * _x2c_macro_slot_0 =((char *) _x2c_macro_array_42 -> bytes) + _x2c_macro_index_11;
+static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_43, int _x2c_macro_index_11, Symbol _x2c_macro_op_0, char _x2c_macro_rhs_0){
+  char * _x2c_macro_slot_0 =((char *) _x2c_macro_array_43 -> bytes) + _x2c_macro_index_11;
   char _x2c_macro_lhs_0 = * _x2c_macro_slot_0;
   uchar _x2c_macro_a_6 =(uchar) _x2c_macro_lhs_0, _x2c_macro_b_6 =(uchar) _x2c_macro_rhs_0, _x2c_macro_raw_0;
   switch(_x2c_macro_op_0){
@@ -138,10 +138,10 @@ static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c
   return * _x2c_macro_slot_0 =(char) _x2c_macro_raw_0;
 }
 
-static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_43, int _x2c_macro_index_12, Symbol _x2c_macro_op_1){
-  char _x2c_macro_old_0 = ArrayChar_getindex(_x2c_macro_array_43, _x2c_macro_index_12);
-  if(_x2c_macro_op_1 == 1848) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_12, 56, 1);
-  else if(_x2c_macro_op_1 == 2046) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_12, 62, 1);
+static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_44, int _x2c_macro_index_12, Symbol _x2c_macro_op_1){
+  char _x2c_macro_old_0 = ArrayChar_getindex(_x2c_macro_array_44, _x2c_macro_index_12);
+  if(_x2c_macro_op_1 == 1848) ArrayChar_updateindex(_x2c_macro_array_44, _x2c_macro_index_12, 56, 1);
+  else if(_x2c_macro_op_1 == 2046) ArrayChar_updateindex(_x2c_macro_array_44, _x2c_macro_index_12, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_postfixindex",.line = 110};
     x2c_error_raise_n(& _x2c_error_site_3, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_1));
@@ -150,12 +150,12 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_43, int _x2
   return _x2c_macro_old_0;
 }
 
-static inline Var ArrayChar_var(ArrayChar _x2c_macro_array_44){
-  return Var_new(3474748293220, _x2c_macro_array_44);
+static inline Var ArrayChar_var(ArrayChar _x2c_macro_array_45){
+  return Var_new(3474748293220, _x2c_macro_array_45);
 }
 
-static inline Block ArrayChar_block(ArrayChar _x2c_macro_array_45){
-  return(Block) _x2c_macro_array_45;
+static inline Block ArrayChar_block(ArrayChar _x2c_macro_array_46){
+  return(Block) _x2c_macro_array_46;
 }
 
 static inline ArrayChar Var_arraychar(Var _x2c_macro_value_14){
@@ -164,74 +164,74 @@ static inline ArrayChar Var_arraychar(Var _x2c_macro_value_14){
 
 ArrayChar Array_arraychar(Array _x2c_macro_values_4);
 
-Iter ArrayChar_iter(ArrayChar _x2c_macro_array_47, Iter _x2c_macro_dest_0);
+Iter ArrayChar_iter(ArrayChar _x2c_macro_array_48, Iter _x2c_macro_dest_0);
 
 ArrayShort ArrayShort_new(void);
 
-int ArrayShort_try_get(ArrayShort _x2c_macro_array_64, int _x2c_macro_index_19, short * _x2c_macro_out_17);
+int ArrayShort_try_get(ArrayShort _x2c_macro_array_66, int _x2c_macro_index_19, short * _x2c_macro_out_19);
 
-int ArrayShort_try_next(ArrayShort _x2c_macro_array_65, int * _x2c_macro_cursor_1, short * _x2c_macro_out_18);
+int ArrayShort_try_next(ArrayShort _x2c_macro_array_67, int * _x2c_macro_cursor_3, short * _x2c_macro_out_20);
 
-static inline short ArrayShort_getindex(ArrayShort _x2c_macro_array_66, int _x2c_macro_index_20){
-  return((short *) _x2c_macro_array_66 -> bytes)[_x2c_macro_index_20];
+static inline short ArrayShort_getindex(ArrayShort _x2c_macro_array_68, int _x2c_macro_index_20){
+  return((short *) _x2c_macro_array_68 -> bytes)[_x2c_macro_index_20];
 }
 
-static inline short ArrayShort_setindex(ArrayShort _x2c_macro_array_67, int _x2c_macro_index_21, short _x2c_macro_value_18){
-  return((short *) _x2c_macro_array_67 -> bytes)[_x2c_macro_index_21] = _x2c_macro_value_18;
+static inline short ArrayShort_setindex(ArrayShort _x2c_macro_array_69, int _x2c_macro_index_21, short _x2c_macro_value_18){
+  return((short *) _x2c_macro_array_69 -> bytes)[_x2c_macro_index_21] = _x2c_macro_value_18;
 }
 
-short ArrayShort_push(ArrayShort _x2c_macro_array_68, short _x2c_macro_value_19);
+short ArrayShort_push(ArrayShort _x2c_macro_array_70, short _x2c_macro_value_19);
 
-int ArrayShort_try_take_last(ArrayShort _x2c_macro_array_69, short * _x2c_macro_out_19);
+int ArrayShort_try_take_last(ArrayShort _x2c_macro_array_71, short * _x2c_macro_out_21);
 
-short ArrayShort_take_last(ArrayShort _x2c_macro_array_70);
+short ArrayShort_take_last(ArrayShort _x2c_macro_array_72);
 
-short ArrayShort_shift(ArrayShort _x2c_macro_array_71);
+short ArrayShort_shift(ArrayShort _x2c_macro_array_73);
 
-short ArrayShort_unshift(ArrayShort _x2c_macro_array_72, short _x2c_macro_value_22);
+short ArrayShort_unshift(ArrayShort _x2c_macro_array_74, short _x2c_macro_value_22);
 
-short ArrayShort_insert(ArrayShort _x2c_macro_array_73, int _x2c_macro_index_22, short _x2c_macro_value_23);
+short ArrayShort_insert(ArrayShort _x2c_macro_array_75, int _x2c_macro_index_22, short _x2c_macro_value_23);
 
-short ArrayShort_remove(ArrayShort _x2c_macro_array_74, int _x2c_macro_index_23);
+short ArrayShort_remove(ArrayShort _x2c_macro_array_76, int _x2c_macro_index_23);
 
-ArrayShort ArrayShort_copy(ArrayShort _x2c_macro_array_75);
+ArrayShort ArrayShort_copy(ArrayShort _x2c_macro_array_77);
 
-ArrayShort ArrayShort_getslice(ArrayShort _x2c_macro_array_76, int _x2c_macro_start_13, int _x2c_macro_end_11, int _x2c_macro_step_3);
+ArrayShort ArrayShort_getslice(ArrayShort _x2c_macro_array_78, int _x2c_macro_start_13, int _x2c_macro_end_11, int _x2c_macro_step_3);
 
-ArrayShort ArrayShort_setslice(ArrayShort _x2c_macro_array_77, int _x2c_macro_start_14, int _x2c_macro_end_12, ArrayShort _x2c_macro_values_7);
+ArrayShort ArrayShort_setslice(ArrayShort _x2c_macro_array_79, int _x2c_macro_start_14, int _x2c_macro_end_12, ArrayShort _x2c_macro_values_7);
 
-ArrayShort ArrayShort_remslice(ArrayShort _x2c_macro_array_78, int _x2c_macro_start_15, int _x2c_macro_end_13);
+ArrayShort ArrayShort_remslice(ArrayShort _x2c_macro_array_80, int _x2c_macro_start_15, int _x2c_macro_end_13);
 
-ArrayShort ArrayShort_splice(ArrayShort _x2c_macro_array_79, int _x2c_macro_index_24, int _x2c_macro_remove_count_3, ArrayShort _x2c_macro_values_8);
+ArrayShort ArrayShort_splice(ArrayShort _x2c_macro_array_81, int _x2c_macro_index_24, int _x2c_macro_remove_count_3, ArrayShort _x2c_macro_values_8);
 
-int ArrayShort_find(ArrayShort _x2c_macro_array_80, short _x2c_macro_value_25);
+int ArrayShort_find(ArrayShort _x2c_macro_array_82, short _x2c_macro_value_25);
 
-int ArrayShort_contains(ArrayShort _x2c_macro_array_81, short _x2c_macro_value_26);
+int ArrayShort_contains(ArrayShort _x2c_macro_array_83, short _x2c_macro_value_26);
 
-int ArrayShort_count(ArrayShort _x2c_macro_array_82, short _x2c_macro_value_27);
+int ArrayShort_count(ArrayShort _x2c_macro_array_84, short _x2c_macro_value_27);
 
-int ArrayShort_indexof(ArrayShort _x2c_macro_array_83, short _x2c_macro_value_28);
+int ArrayShort_indexof(ArrayShort _x2c_macro_array_85, short _x2c_macro_value_28);
 
 ArrayShort ArrayShort_concat(ArrayShort _x2c_macro_a_9, ArrayShort _x2c_macro_b_9);
 
-ArrayShort ArrayShort_reverse(ArrayShort _x2c_macro_array_84);
+ArrayShort ArrayShort_reverse(ArrayShort _x2c_macro_array_86);
 
 int ArrayShort_equal(ArrayShort _x2c_macro_a_10, ArrayShort _x2c_macro_b_10);
 
-Array ArrayShort_array(ArrayShort _x2c_macro_array_85);
+Array ArrayShort_array(ArrayShort _x2c_macro_array_87);
 
 int ArrayShort_compare(ArrayShort _x2c_macro_a_11, ArrayShort _x2c_macro_b_11);
 
-Buffer ArrayShort_write_repr(ArrayShort _x2c_macro_array_86, Buffer _x2c_macro_out_20);
+Buffer ArrayShort_write_repr(ArrayShort _x2c_macro_array_88, Buffer _x2c_macro_out_22);
 
-Buffer ArrayShort_write_str(ArrayShort _x2c_macro_array_87, Buffer _x2c_macro_out_21);
+Buffer ArrayShort_write_str(ArrayShort _x2c_macro_array_89, Buffer _x2c_macro_out_23);
 
-String ArrayShort_str(ArrayShort _x2c_macro_array_88);
+String ArrayShort_str(ArrayShort _x2c_macro_array_90);
 
-String ArrayShort_repr(ArrayShort _x2c_macro_array_89);
+String ArrayShort_repr(ArrayShort _x2c_macro_array_91);
 
-static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _x2c_macro_index_25, Symbol _x2c_macro_op_2, short _x2c_macro_rhs_1){
-  short * _x2c_macro_slot_1 =((short *) _x2c_macro_array_91 -> bytes) + _x2c_macro_index_25;
+static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_93, int _x2c_macro_index_25, Symbol _x2c_macro_op_2, short _x2c_macro_rhs_1){
+  short * _x2c_macro_slot_1 =((short *) _x2c_macro_array_93 -> bytes) + _x2c_macro_index_25;
   short _x2c_macro_lhs_1 = * _x2c_macro_slot_1;
   ushort _x2c_macro_a_13 =(ushort) _x2c_macro_lhs_1, _x2c_macro_b_13 =(ushort) _x2c_macro_rhs_1, _x2c_macro_raw_1;
   switch(_x2c_macro_op_2){
@@ -282,10 +282,10 @@ static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _
   return * _x2c_macro_slot_1 =(short) _x2c_macro_raw_1;
 }
 
-static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_92, int _x2c_macro_index_26, Symbol _x2c_macro_op_3){
-  short _x2c_macro_old_1 = ArrayShort_getindex(_x2c_macro_array_92, _x2c_macro_index_26);
-  if(_x2c_macro_op_3 == 1848) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_26, 56, 1);
-  else if(_x2c_macro_op_3 == 2046) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_26, 62, 1);
+static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_94, int _x2c_macro_index_26, Symbol _x2c_macro_op_3){
+  short _x2c_macro_old_1 = ArrayShort_getindex(_x2c_macro_array_94, _x2c_macro_index_26);
+  if(_x2c_macro_op_3 == 1848) ArrayShort_updateindex(_x2c_macro_array_94, _x2c_macro_index_26, 56, 1);
+  else if(_x2c_macro_op_3 == 2046) ArrayShort_updateindex(_x2c_macro_array_94, _x2c_macro_index_26, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_postfixindex",.line = 119};
     x2c_error_raise_n(& _x2c_error_site_7, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_3));
@@ -294,12 +294,12 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_92, int 
   return _x2c_macro_old_1;
 }
 
-static inline Var ArrayShort_var(ArrayShort _x2c_macro_array_93){
-  return Var_new(111191978966184, _x2c_macro_array_93);
+static inline Var ArrayShort_var(ArrayShort _x2c_macro_array_95){
+  return Var_new(111191978966184, _x2c_macro_array_95);
 }
 
-static inline Block ArrayShort_block(ArrayShort _x2c_macro_array_94){
-  return(Block) _x2c_macro_array_94;
+static inline Block ArrayShort_block(ArrayShort _x2c_macro_array_96){
+  return(Block) _x2c_macro_array_96;
 }
 
 static inline ArrayShort Var_arrayshort(Var _x2c_macro_value_29){
@@ -308,74 +308,74 @@ static inline ArrayShort Var_arrayshort(Var _x2c_macro_value_29){
 
 ArrayShort Array_arrayshort(Array _x2c_macro_values_9);
 
-Iter ArrayShort_iter(ArrayShort _x2c_macro_array_96, Iter _x2c_macro_dest_1);
+Iter ArrayShort_iter(ArrayShort _x2c_macro_array_98, Iter _x2c_macro_dest_1);
 
 ArrayInt ArrayInt_new(void);
 
-int ArrayInt_try_get(ArrayInt _x2c_macro_array_113, int _x2c_macro_index_33, int * _x2c_macro_out_30);
+int ArrayInt_try_get(ArrayInt _x2c_macro_array_116, int _x2c_macro_index_33, int * _x2c_macro_out_33);
 
-int ArrayInt_try_next(ArrayInt _x2c_macro_array_114, int * _x2c_macro_cursor_2, int * _x2c_macro_out_31);
+int ArrayInt_try_next(ArrayInt _x2c_macro_array_117, int * _x2c_macro_cursor_5, int * _x2c_macro_out_34);
 
-static inline int ArrayInt_getindex(ArrayInt _x2c_macro_array_115, int _x2c_macro_index_34){
-  return((int *) _x2c_macro_array_115 -> bytes)[_x2c_macro_index_34];
+static inline int ArrayInt_getindex(ArrayInt _x2c_macro_array_118, int _x2c_macro_index_34){
+  return((int *) _x2c_macro_array_118 -> bytes)[_x2c_macro_index_34];
 }
 
-static inline int ArrayInt_setindex(ArrayInt _x2c_macro_array_116, int _x2c_macro_index_35, int _x2c_macro_value_33){
-  return((int *) _x2c_macro_array_116 -> bytes)[_x2c_macro_index_35] = _x2c_macro_value_33;
+static inline int ArrayInt_setindex(ArrayInt _x2c_macro_array_119, int _x2c_macro_index_35, int _x2c_macro_value_33){
+  return((int *) _x2c_macro_array_119 -> bytes)[_x2c_macro_index_35] = _x2c_macro_value_33;
 }
 
-int ArrayInt_push(ArrayInt _x2c_macro_array_117, int _x2c_macro_value_34);
+int ArrayInt_push(ArrayInt _x2c_macro_array_120, int _x2c_macro_value_34);
 
-int ArrayInt_try_take_last(ArrayInt _x2c_macro_array_118, int * _x2c_macro_out_32);
+int ArrayInt_try_take_last(ArrayInt _x2c_macro_array_121, int * _x2c_macro_out_35);
 
-int ArrayInt_take_last(ArrayInt _x2c_macro_array_119);
+int ArrayInt_take_last(ArrayInt _x2c_macro_array_122);
 
-int ArrayInt_shift(ArrayInt _x2c_macro_array_120);
+int ArrayInt_shift(ArrayInt _x2c_macro_array_123);
 
-int ArrayInt_unshift(ArrayInt _x2c_macro_array_121, int _x2c_macro_value_37);
+int ArrayInt_unshift(ArrayInt _x2c_macro_array_124, int _x2c_macro_value_37);
 
-int ArrayInt_insert(ArrayInt _x2c_macro_array_122, int _x2c_macro_index_36, int _x2c_macro_value_38);
+int ArrayInt_insert(ArrayInt _x2c_macro_array_125, int _x2c_macro_index_36, int _x2c_macro_value_38);
 
-int ArrayInt_remove(ArrayInt _x2c_macro_array_123, int _x2c_macro_index_37);
+int ArrayInt_remove(ArrayInt _x2c_macro_array_126, int _x2c_macro_index_37);
 
-ArrayInt ArrayInt_copy(ArrayInt _x2c_macro_array_124);
+ArrayInt ArrayInt_copy(ArrayInt _x2c_macro_array_127);
 
-ArrayInt ArrayInt_getslice(ArrayInt _x2c_macro_array_125, int _x2c_macro_start_21, int _x2c_macro_end_18, int _x2c_macro_step_5);
+ArrayInt ArrayInt_getslice(ArrayInt _x2c_macro_array_128, int _x2c_macro_start_21, int _x2c_macro_end_18, int _x2c_macro_step_5);
 
-ArrayInt ArrayInt_setslice(ArrayInt _x2c_macro_array_126, int _x2c_macro_start_22, int _x2c_macro_end_19, ArrayInt _x2c_macro_values_12);
+ArrayInt ArrayInt_setslice(ArrayInt _x2c_macro_array_129, int _x2c_macro_start_22, int _x2c_macro_end_19, ArrayInt _x2c_macro_values_12);
 
-ArrayInt ArrayInt_remslice(ArrayInt _x2c_macro_array_127, int _x2c_macro_start_23, int _x2c_macro_end_20);
+ArrayInt ArrayInt_remslice(ArrayInt _x2c_macro_array_130, int _x2c_macro_start_23, int _x2c_macro_end_20);
 
-ArrayInt ArrayInt_splice(ArrayInt _x2c_macro_array_128, int _x2c_macro_index_38, int _x2c_macro_remove_count_5, ArrayInt _x2c_macro_values_13);
+ArrayInt ArrayInt_splice(ArrayInt _x2c_macro_array_131, int _x2c_macro_index_38, int _x2c_macro_remove_count_5, ArrayInt _x2c_macro_values_13);
 
-int ArrayInt_find(ArrayInt _x2c_macro_array_129, int _x2c_macro_value_40);
+int ArrayInt_find(ArrayInt _x2c_macro_array_132, int _x2c_macro_value_40);
 
-int ArrayInt_contains(ArrayInt _x2c_macro_array_130, int _x2c_macro_value_41);
+int ArrayInt_contains(ArrayInt _x2c_macro_array_133, int _x2c_macro_value_41);
 
-int ArrayInt_count(ArrayInt _x2c_macro_array_131, int _x2c_macro_value_42);
+int ArrayInt_count(ArrayInt _x2c_macro_array_134, int _x2c_macro_value_42);
 
-int ArrayInt_indexof(ArrayInt _x2c_macro_array_132, int _x2c_macro_value_43);
+int ArrayInt_indexof(ArrayInt _x2c_macro_array_135, int _x2c_macro_value_43);
 
 ArrayInt ArrayInt_concat(ArrayInt _x2c_macro_a_16, ArrayInt _x2c_macro_b_16);
 
-ArrayInt ArrayInt_reverse(ArrayInt _x2c_macro_array_133);
+ArrayInt ArrayInt_reverse(ArrayInt _x2c_macro_array_136);
 
 int ArrayInt_equal(ArrayInt _x2c_macro_a_17, ArrayInt _x2c_macro_b_17);
 
-Array ArrayInt_array(ArrayInt _x2c_macro_array_134);
+Array ArrayInt_array(ArrayInt _x2c_macro_array_137);
 
 int ArrayInt_compare(ArrayInt _x2c_macro_a_18, ArrayInt _x2c_macro_b_18);
 
-Buffer ArrayInt_write_repr(ArrayInt _x2c_macro_array_135, Buffer _x2c_macro_out_33);
+Buffer ArrayInt_write_repr(ArrayInt _x2c_macro_array_138, Buffer _x2c_macro_out_36);
 
-Buffer ArrayInt_write_str(ArrayInt _x2c_macro_array_136, Buffer _x2c_macro_out_34);
+Buffer ArrayInt_write_str(ArrayInt _x2c_macro_array_139, Buffer _x2c_macro_out_37);
 
-String ArrayInt_str(ArrayInt _x2c_macro_array_137);
+String ArrayInt_str(ArrayInt _x2c_macro_array_140);
 
-String ArrayInt_repr(ArrayInt _x2c_macro_array_138);
+String ArrayInt_repr(ArrayInt _x2c_macro_array_141);
 
-static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_macro_index_39, Symbol _x2c_macro_op_4, int _x2c_macro_rhs_2){
-  int * _x2c_macro_slot_2 =((int *) _x2c_macro_array_140 -> bytes) + _x2c_macro_index_39;
+static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_143, int _x2c_macro_index_39, Symbol _x2c_macro_op_4, int _x2c_macro_rhs_2){
+  int * _x2c_macro_slot_2 =((int *) _x2c_macro_array_143 -> bytes) + _x2c_macro_index_39;
   int _x2c_macro_lhs_2 = * _x2c_macro_slot_2;
   uint _x2c_macro_a_20 =(uint) _x2c_macro_lhs_2, _x2c_macro_b_20 =(uint) _x2c_macro_rhs_2, _x2c_macro_raw_2;
   switch(_x2c_macro_op_4){
@@ -426,10 +426,10 @@ static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_m
   return * _x2c_macro_slot_2 =(int) _x2c_macro_raw_2;
 }
 
-static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_macro_index_40, Symbol _x2c_macro_op_5){
-  int _x2c_macro_old_2 = ArrayInt_getindex(_x2c_macro_array_141, _x2c_macro_index_40);
-  if(_x2c_macro_op_5 == 1848) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_40, 56, 1);
-  else if(_x2c_macro_op_5 == 2046) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_40, 62, 1);
+static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_144, int _x2c_macro_index_40, Symbol _x2c_macro_op_5){
+  int _x2c_macro_old_2 = ArrayInt_getindex(_x2c_macro_array_144, _x2c_macro_index_40);
+  if(_x2c_macro_op_5 == 1848) ArrayInt_updateindex(_x2c_macro_array_144, _x2c_macro_index_40, 56, 1);
+  else if(_x2c_macro_op_5 == 2046) ArrayInt_updateindex(_x2c_macro_array_144, _x2c_macro_index_40, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_postfixindex",.line = 128};
     x2c_error_raise_n(& _x2c_error_site_11, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_5));
@@ -438,12 +438,12 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_
   return _x2c_macro_old_2;
 }
 
-static inline Var ArrayInt_var(ArrayInt _x2c_macro_array_142){
-  return Var_new(108585896872, _x2c_macro_array_142);
+static inline Var ArrayInt_var(ArrayInt _x2c_macro_array_145){
+  return Var_new(108585896872, _x2c_macro_array_145);
 }
 
-static inline Block ArrayInt_block(ArrayInt _x2c_macro_array_143){
-  return(Block) _x2c_macro_array_143;
+static inline Block ArrayInt_block(ArrayInt _x2c_macro_array_146){
+  return(Block) _x2c_macro_array_146;
 }
 
 static inline ArrayInt Var_arrayint(Var _x2c_macro_value_44){
@@ -452,74 +452,74 @@ static inline ArrayInt Var_arrayint(Var _x2c_macro_value_44){
 
 ArrayInt Array_arrayint(Array _x2c_macro_values_14);
 
-Iter ArrayInt_iter(ArrayInt _x2c_macro_array_145, Iter _x2c_macro_dest_2);
+Iter ArrayInt_iter(ArrayInt _x2c_macro_array_148, Iter _x2c_macro_dest_2);
 
 ArrayLong ArrayLong_new(void);
 
-int ArrayLong_try_get(ArrayLong _x2c_macro_array_162, int _x2c_macro_index_47, long * _x2c_macro_out_43);
+int ArrayLong_try_get(ArrayLong _x2c_macro_array_166, int _x2c_macro_index_47, long * _x2c_macro_out_47);
 
-int ArrayLong_try_next(ArrayLong _x2c_macro_array_163, int * _x2c_macro_cursor_3, long * _x2c_macro_out_44);
+int ArrayLong_try_next(ArrayLong _x2c_macro_array_167, int * _x2c_macro_cursor_7, long * _x2c_macro_out_48);
 
-static inline long ArrayLong_getindex(ArrayLong _x2c_macro_array_164, int _x2c_macro_index_48){
-  return((long *) _x2c_macro_array_164 -> bytes)[_x2c_macro_index_48];
+static inline long ArrayLong_getindex(ArrayLong _x2c_macro_array_168, int _x2c_macro_index_48){
+  return((long *) _x2c_macro_array_168 -> bytes)[_x2c_macro_index_48];
 }
 
-static inline long ArrayLong_setindex(ArrayLong _x2c_macro_array_165, int _x2c_macro_index_49, long _x2c_macro_value_48){
-  return((long *) _x2c_macro_array_165 -> bytes)[_x2c_macro_index_49] = _x2c_macro_value_48;
+static inline long ArrayLong_setindex(ArrayLong _x2c_macro_array_169, int _x2c_macro_index_49, long _x2c_macro_value_48){
+  return((long *) _x2c_macro_array_169 -> bytes)[_x2c_macro_index_49] = _x2c_macro_value_48;
 }
 
-long ArrayLong_push(ArrayLong _x2c_macro_array_166, long _x2c_macro_value_49);
+long ArrayLong_push(ArrayLong _x2c_macro_array_170, long _x2c_macro_value_49);
 
-int ArrayLong_try_take_last(ArrayLong _x2c_macro_array_167, long * _x2c_macro_out_45);
+int ArrayLong_try_take_last(ArrayLong _x2c_macro_array_171, long * _x2c_macro_out_49);
 
-long ArrayLong_take_last(ArrayLong _x2c_macro_array_168);
+long ArrayLong_take_last(ArrayLong _x2c_macro_array_172);
 
-long ArrayLong_shift(ArrayLong _x2c_macro_array_169);
+long ArrayLong_shift(ArrayLong _x2c_macro_array_173);
 
-long ArrayLong_unshift(ArrayLong _x2c_macro_array_170, long _x2c_macro_value_52);
+long ArrayLong_unshift(ArrayLong _x2c_macro_array_174, long _x2c_macro_value_52);
 
-long ArrayLong_insert(ArrayLong _x2c_macro_array_171, int _x2c_macro_index_50, long _x2c_macro_value_53);
+long ArrayLong_insert(ArrayLong _x2c_macro_array_175, int _x2c_macro_index_50, long _x2c_macro_value_53);
 
-long ArrayLong_remove(ArrayLong _x2c_macro_array_172, int _x2c_macro_index_51);
+long ArrayLong_remove(ArrayLong _x2c_macro_array_176, int _x2c_macro_index_51);
 
-ArrayLong ArrayLong_copy(ArrayLong _x2c_macro_array_173);
+ArrayLong ArrayLong_copy(ArrayLong _x2c_macro_array_177);
 
-ArrayLong ArrayLong_getslice(ArrayLong _x2c_macro_array_174, int _x2c_macro_start_29, int _x2c_macro_end_25, int _x2c_macro_step_7);
+ArrayLong ArrayLong_getslice(ArrayLong _x2c_macro_array_178, int _x2c_macro_start_29, int _x2c_macro_end_25, int _x2c_macro_step_7);
 
-ArrayLong ArrayLong_setslice(ArrayLong _x2c_macro_array_175, int _x2c_macro_start_30, int _x2c_macro_end_26, ArrayLong _x2c_macro_values_17);
+ArrayLong ArrayLong_setslice(ArrayLong _x2c_macro_array_179, int _x2c_macro_start_30, int _x2c_macro_end_26, ArrayLong _x2c_macro_values_17);
 
-ArrayLong ArrayLong_remslice(ArrayLong _x2c_macro_array_176, int _x2c_macro_start_31, int _x2c_macro_end_27);
+ArrayLong ArrayLong_remslice(ArrayLong _x2c_macro_array_180, int _x2c_macro_start_31, int _x2c_macro_end_27);
 
-ArrayLong ArrayLong_splice(ArrayLong _x2c_macro_array_177, int _x2c_macro_index_52, int _x2c_macro_remove_count_7, ArrayLong _x2c_macro_values_18);
+ArrayLong ArrayLong_splice(ArrayLong _x2c_macro_array_181, int _x2c_macro_index_52, int _x2c_macro_remove_count_7, ArrayLong _x2c_macro_values_18);
 
-int ArrayLong_find(ArrayLong _x2c_macro_array_178, long _x2c_macro_value_55);
+int ArrayLong_find(ArrayLong _x2c_macro_array_182, long _x2c_macro_value_55);
 
-int ArrayLong_contains(ArrayLong _x2c_macro_array_179, long _x2c_macro_value_56);
+int ArrayLong_contains(ArrayLong _x2c_macro_array_183, long _x2c_macro_value_56);
 
-int ArrayLong_count(ArrayLong _x2c_macro_array_180, long _x2c_macro_value_57);
+int ArrayLong_count(ArrayLong _x2c_macro_array_184, long _x2c_macro_value_57);
 
-int ArrayLong_indexof(ArrayLong _x2c_macro_array_181, long _x2c_macro_value_58);
+int ArrayLong_indexof(ArrayLong _x2c_macro_array_185, long _x2c_macro_value_58);
 
 ArrayLong ArrayLong_concat(ArrayLong _x2c_macro_a_23, ArrayLong _x2c_macro_b_23);
 
-ArrayLong ArrayLong_reverse(ArrayLong _x2c_macro_array_182);
+ArrayLong ArrayLong_reverse(ArrayLong _x2c_macro_array_186);
 
 int ArrayLong_equal(ArrayLong _x2c_macro_a_24, ArrayLong _x2c_macro_b_24);
 
-Array ArrayLong_array(ArrayLong _x2c_macro_array_183);
+Array ArrayLong_array(ArrayLong _x2c_macro_array_187);
 
 int ArrayLong_compare(ArrayLong _x2c_macro_a_25, ArrayLong _x2c_macro_b_25);
 
-Buffer ArrayLong_write_repr(ArrayLong _x2c_macro_array_184, Buffer _x2c_macro_out_46);
+Buffer ArrayLong_write_repr(ArrayLong _x2c_macro_array_188, Buffer _x2c_macro_out_50);
 
-Buffer ArrayLong_write_str(ArrayLong _x2c_macro_array_185, Buffer _x2c_macro_out_47);
+Buffer ArrayLong_write_str(ArrayLong _x2c_macro_array_189, Buffer _x2c_macro_out_51);
 
-String ArrayLong_str(ArrayLong _x2c_macro_array_186);
+String ArrayLong_str(ArrayLong _x2c_macro_array_190);
 
-String ArrayLong_repr(ArrayLong _x2c_macro_array_187);
+String ArrayLong_repr(ArrayLong _x2c_macro_array_191);
 
-static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2c_macro_index_53, Symbol _x2c_macro_op_6, long _x2c_macro_rhs_3){
-  long * _x2c_macro_slot_3 =((long *) _x2c_macro_array_189 -> bytes) + _x2c_macro_index_53;
+static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_193, int _x2c_macro_index_53, Symbol _x2c_macro_op_6, long _x2c_macro_rhs_3){
+  long * _x2c_macro_slot_3 =((long *) _x2c_macro_array_193 -> bytes) + _x2c_macro_index_53;
   long _x2c_macro_lhs_3 = * _x2c_macro_slot_3;
   ulong _x2c_macro_a_27 =(ulong) _x2c_macro_lhs_3, _x2c_macro_b_27 =(ulong) _x2c_macro_rhs_3, _x2c_macro_raw_3;
   switch(_x2c_macro_op_6){
@@ -570,10 +570,10 @@ static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2
   return * _x2c_macro_slot_3 =(long) _x2c_macro_raw_3;
 }
 
-static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_190, int _x2c_macro_index_54, Symbol _x2c_macro_op_7){
-  long _x2c_macro_old_3 = ArrayLong_getindex(_x2c_macro_array_190, _x2c_macro_index_54);
-  if(_x2c_macro_op_7 == 1848) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_54, 56, 1);
-  else if(_x2c_macro_op_7 == 2046) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_54, 62, 1);
+static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_194, int _x2c_macro_index_54, Symbol _x2c_macro_op_7){
+  long _x2c_macro_old_3 = ArrayLong_getindex(_x2c_macro_array_194, _x2c_macro_index_54);
+  if(_x2c_macro_op_7 == 1848) ArrayLong_updateindex(_x2c_macro_array_194, _x2c_macro_index_54, 56, 1);
+  else if(_x2c_macro_op_7 == 2046) ArrayLong_updateindex(_x2c_macro_array_194, _x2c_macro_index_54, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_postfixindex",.line = 137};
     x2c_error_raise_n(& _x2c_error_site_15, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_7));
@@ -582,12 +582,12 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_190, int _x
   return _x2c_macro_old_3;
 }
 
-static inline Var ArrayLong_var(ArrayLong _x2c_macro_array_191){
-  return Var_new(3474748898190, _x2c_macro_array_191);
+static inline Var ArrayLong_var(ArrayLong _x2c_macro_array_195){
+  return Var_new(3474748898190, _x2c_macro_array_195);
 }
 
-static inline Block ArrayLong_block(ArrayLong _x2c_macro_array_192){
-  return(Block) _x2c_macro_array_192;
+static inline Block ArrayLong_block(ArrayLong _x2c_macro_array_196){
+  return(Block) _x2c_macro_array_196;
 }
 
 static inline ArrayLong Var_arraylong(Var _x2c_macro_value_59){
@@ -596,74 +596,74 @@ static inline ArrayLong Var_arraylong(Var _x2c_macro_value_59){
 
 ArrayLong Array_arraylong(Array _x2c_macro_values_19);
 
-Iter ArrayLong_iter(ArrayLong _x2c_macro_array_194, Iter _x2c_macro_dest_3);
+Iter ArrayLong_iter(ArrayLong _x2c_macro_array_198, Iter _x2c_macro_dest_3);
 
 ArrayFloat ArrayFloat_new(void);
 
-int ArrayFloat_try_get(ArrayFloat _x2c_macro_array_211, int _x2c_macro_index_61, float * _x2c_macro_out_56);
+int ArrayFloat_try_get(ArrayFloat _x2c_macro_array_216, int _x2c_macro_index_61, float * _x2c_macro_out_61);
 
-int ArrayFloat_try_next(ArrayFloat _x2c_macro_array_212, int * _x2c_macro_cursor_4, float * _x2c_macro_out_57);
+int ArrayFloat_try_next(ArrayFloat _x2c_macro_array_217, int * _x2c_macro_cursor_9, float * _x2c_macro_out_62);
 
-static inline float ArrayFloat_getindex(ArrayFloat _x2c_macro_array_213, int _x2c_macro_index_62){
-  return((float *) _x2c_macro_array_213 -> bytes)[_x2c_macro_index_62];
+static inline float ArrayFloat_getindex(ArrayFloat _x2c_macro_array_218, int _x2c_macro_index_62){
+  return((float *) _x2c_macro_array_218 -> bytes)[_x2c_macro_index_62];
 }
 
-static inline float ArrayFloat_setindex(ArrayFloat _x2c_macro_array_214, int _x2c_macro_index_63, float _x2c_macro_value_63){
-  return((float *) _x2c_macro_array_214 -> bytes)[_x2c_macro_index_63] = _x2c_macro_value_63;
+static inline float ArrayFloat_setindex(ArrayFloat _x2c_macro_array_219, int _x2c_macro_index_63, float _x2c_macro_value_63){
+  return((float *) _x2c_macro_array_219 -> bytes)[_x2c_macro_index_63] = _x2c_macro_value_63;
 }
 
-float ArrayFloat_push(ArrayFloat _x2c_macro_array_215, float _x2c_macro_value_64);
+float ArrayFloat_push(ArrayFloat _x2c_macro_array_220, float _x2c_macro_value_64);
 
-int ArrayFloat_try_take_last(ArrayFloat _x2c_macro_array_216, float * _x2c_macro_out_58);
+int ArrayFloat_try_take_last(ArrayFloat _x2c_macro_array_221, float * _x2c_macro_out_63);
 
-float ArrayFloat_take_last(ArrayFloat _x2c_macro_array_217);
+float ArrayFloat_take_last(ArrayFloat _x2c_macro_array_222);
 
-float ArrayFloat_shift(ArrayFloat _x2c_macro_array_218);
+float ArrayFloat_shift(ArrayFloat _x2c_macro_array_223);
 
-float ArrayFloat_unshift(ArrayFloat _x2c_macro_array_219, float _x2c_macro_value_67);
+float ArrayFloat_unshift(ArrayFloat _x2c_macro_array_224, float _x2c_macro_value_67);
 
-float ArrayFloat_insert(ArrayFloat _x2c_macro_array_220, int _x2c_macro_index_64, float _x2c_macro_value_68);
+float ArrayFloat_insert(ArrayFloat _x2c_macro_array_225, int _x2c_macro_index_64, float _x2c_macro_value_68);
 
-float ArrayFloat_remove(ArrayFloat _x2c_macro_array_221, int _x2c_macro_index_65);
+float ArrayFloat_remove(ArrayFloat _x2c_macro_array_226, int _x2c_macro_index_65);
 
-ArrayFloat ArrayFloat_copy(ArrayFloat _x2c_macro_array_222);
+ArrayFloat ArrayFloat_copy(ArrayFloat _x2c_macro_array_227);
 
-ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_macro_array_223, int _x2c_macro_start_37, int _x2c_macro_end_32, int _x2c_macro_step_9);
+ArrayFloat ArrayFloat_getslice(ArrayFloat _x2c_macro_array_228, int _x2c_macro_start_37, int _x2c_macro_end_32, int _x2c_macro_step_9);
 
-ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_macro_array_224, int _x2c_macro_start_38, int _x2c_macro_end_33, ArrayFloat _x2c_macro_values_22);
+ArrayFloat ArrayFloat_setslice(ArrayFloat _x2c_macro_array_229, int _x2c_macro_start_38, int _x2c_macro_end_33, ArrayFloat _x2c_macro_values_22);
 
-ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_macro_array_225, int _x2c_macro_start_39, int _x2c_macro_end_34);
+ArrayFloat ArrayFloat_remslice(ArrayFloat _x2c_macro_array_230, int _x2c_macro_start_39, int _x2c_macro_end_34);
 
-ArrayFloat ArrayFloat_splice(ArrayFloat _x2c_macro_array_226, int _x2c_macro_index_66, int _x2c_macro_remove_count_9, ArrayFloat _x2c_macro_values_23);
+ArrayFloat ArrayFloat_splice(ArrayFloat _x2c_macro_array_231, int _x2c_macro_index_66, int _x2c_macro_remove_count_9, ArrayFloat _x2c_macro_values_23);
 
-int ArrayFloat_find(ArrayFloat _x2c_macro_array_227, float _x2c_macro_value_70);
+int ArrayFloat_find(ArrayFloat _x2c_macro_array_232, float _x2c_macro_value_70);
 
-int ArrayFloat_contains(ArrayFloat _x2c_macro_array_228, float _x2c_macro_value_71);
+int ArrayFloat_contains(ArrayFloat _x2c_macro_array_233, float _x2c_macro_value_71);
 
-int ArrayFloat_count(ArrayFloat _x2c_macro_array_229, float _x2c_macro_value_72);
+int ArrayFloat_count(ArrayFloat _x2c_macro_array_234, float _x2c_macro_value_72);
 
-int ArrayFloat_indexof(ArrayFloat _x2c_macro_array_230, float _x2c_macro_value_73);
+int ArrayFloat_indexof(ArrayFloat _x2c_macro_array_235, float _x2c_macro_value_73);
 
 ArrayFloat ArrayFloat_concat(ArrayFloat _x2c_macro_a_30, ArrayFloat _x2c_macro_b_30);
 
-ArrayFloat ArrayFloat_reverse(ArrayFloat _x2c_macro_array_231);
+ArrayFloat ArrayFloat_reverse(ArrayFloat _x2c_macro_array_236);
 
 int ArrayFloat_equal(ArrayFloat _x2c_macro_a_31, ArrayFloat _x2c_macro_b_31);
 
-Array ArrayFloat_array(ArrayFloat _x2c_macro_array_232);
+Array ArrayFloat_array(ArrayFloat _x2c_macro_array_237);
 
 int ArrayFloat_compare(ArrayFloat _x2c_macro_a_32, ArrayFloat _x2c_macro_b_32);
 
-Buffer ArrayFloat_write_repr(ArrayFloat _x2c_macro_array_233, Buffer _x2c_macro_out_59);
+Buffer ArrayFloat_write_repr(ArrayFloat _x2c_macro_array_238, Buffer _x2c_macro_out_64);
 
-Buffer ArrayFloat_write_str(ArrayFloat _x2c_macro_array_234, Buffer _x2c_macro_out_60);
+Buffer ArrayFloat_write_str(ArrayFloat _x2c_macro_array_239, Buffer _x2c_macro_out_65);
 
-String ArrayFloat_str(ArrayFloat _x2c_macro_array_235);
+String ArrayFloat_str(ArrayFloat _x2c_macro_array_240);
 
-String ArrayFloat_repr(ArrayFloat _x2c_macro_array_236);
+String ArrayFloat_repr(ArrayFloat _x2c_macro_array_241);
 
-static inline float ArrayFloat_updateindex(ArrayFloat _x2c_macro_array_238, int _x2c_macro_index_67, Symbol _x2c_macro_op_8, float _x2c_macro_rhs_4){
-  float * _x2c_macro_slot_4 =((float *) _x2c_macro_array_238 -> bytes) + _x2c_macro_index_67;
+static inline float ArrayFloat_updateindex(ArrayFloat _x2c_macro_array_243, int _x2c_macro_index_67, Symbol _x2c_macro_op_8, float _x2c_macro_rhs_4){
+  float * _x2c_macro_slot_4 =((float *) _x2c_macro_array_243 -> bytes) + _x2c_macro_index_67;
   switch(_x2c_macro_op_8){
     case 56 : return * _x2c_macro_slot_4 += _x2c_macro_rhs_4;
     case 62 : return * _x2c_macro_slot_4 -= _x2c_macro_rhs_4;
@@ -678,10 +678,10 @@ static inline float ArrayFloat_updateindex(ArrayFloat _x2c_macro_array_238, int 
 
 }
 
-static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_239, int _x2c_macro_index_68, Symbol _x2c_macro_op_9){
-  float _x2c_macro_old_4 = ArrayFloat_getindex(_x2c_macro_array_239, _x2c_macro_index_68);
-  if(_x2c_macro_op_9 == 1848) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_68, 56, 1);
-  else if(_x2c_macro_op_9 == 2046) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_68, 62, 1);
+static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_244, int _x2c_macro_index_68, Symbol _x2c_macro_op_9){
+  float _x2c_macro_old_4 = ArrayFloat_getindex(_x2c_macro_array_244, _x2c_macro_index_68);
+  if(_x2c_macro_op_9 == 1848) ArrayFloat_updateindex(_x2c_macro_array_244, _x2c_macro_index_68, 56, 1);
+  else if(_x2c_macro_op_9 == 2046) ArrayFloat_updateindex(_x2c_macro_array_244, _x2c_macro_index_68, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_postfixindex",.line = 146};
     x2c_error_raise_n(& _x2c_error_site_17, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_9));
@@ -690,12 +690,12 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_239, int
   return _x2c_macro_old_4;
 }
 
-static inline Var ArrayFloat_var(ArrayFloat _x2c_macro_array_240){
-  return Var_new(111191951964264, _x2c_macro_array_240);
+static inline Var ArrayFloat_var(ArrayFloat _x2c_macro_array_245){
+  return Var_new(111191951964264, _x2c_macro_array_245);
 }
 
-static inline Block ArrayFloat_block(ArrayFloat _x2c_macro_array_241){
-  return(Block) _x2c_macro_array_241;
+static inline Block ArrayFloat_block(ArrayFloat _x2c_macro_array_246){
+  return(Block) _x2c_macro_array_246;
 }
 
 static inline ArrayFloat Var_arrayfloat(Var _x2c_macro_value_74){
@@ -704,74 +704,74 @@ static inline ArrayFloat Var_arrayfloat(Var _x2c_macro_value_74){
 
 ArrayFloat Array_arrayfloat(Array _x2c_macro_values_24);
 
-Iter ArrayFloat_iter(ArrayFloat _x2c_macro_array_243, Iter _x2c_macro_dest_4);
+Iter ArrayFloat_iter(ArrayFloat _x2c_macro_array_248, Iter _x2c_macro_dest_4);
 
 ArrayDbl ArrayDbl_new(void);
 
-int ArrayDbl_try_get(ArrayDbl _x2c_macro_array_260, int _x2c_macro_index_75, double * _x2c_macro_out_69);
+int ArrayDbl_try_get(ArrayDbl _x2c_macro_array_266, int _x2c_macro_index_75, double * _x2c_macro_out_75);
 
-int ArrayDbl_try_next(ArrayDbl _x2c_macro_array_261, int * _x2c_macro_cursor_5, double * _x2c_macro_out_70);
+int ArrayDbl_try_next(ArrayDbl _x2c_macro_array_267, int * _x2c_macro_cursor_11, double * _x2c_macro_out_76);
 
-static inline double ArrayDbl_getindex(ArrayDbl _x2c_macro_array_262, int _x2c_macro_index_76){
-  return((double *) _x2c_macro_array_262 -> bytes)[_x2c_macro_index_76];
+static inline double ArrayDbl_getindex(ArrayDbl _x2c_macro_array_268, int _x2c_macro_index_76){
+  return((double *) _x2c_macro_array_268 -> bytes)[_x2c_macro_index_76];
 }
 
-static inline double ArrayDbl_setindex(ArrayDbl _x2c_macro_array_263, int _x2c_macro_index_77, double _x2c_macro_value_78){
-  return((double *) _x2c_macro_array_263 -> bytes)[_x2c_macro_index_77] = _x2c_macro_value_78;
+static inline double ArrayDbl_setindex(ArrayDbl _x2c_macro_array_269, int _x2c_macro_index_77, double _x2c_macro_value_78){
+  return((double *) _x2c_macro_array_269 -> bytes)[_x2c_macro_index_77] = _x2c_macro_value_78;
 }
 
-double ArrayDbl_push(ArrayDbl _x2c_macro_array_264, double _x2c_macro_value_79);
+double ArrayDbl_push(ArrayDbl _x2c_macro_array_270, double _x2c_macro_value_79);
 
-int ArrayDbl_try_take_last(ArrayDbl _x2c_macro_array_265, double * _x2c_macro_out_71);
+int ArrayDbl_try_take_last(ArrayDbl _x2c_macro_array_271, double * _x2c_macro_out_77);
 
-double ArrayDbl_take_last(ArrayDbl _x2c_macro_array_266);
+double ArrayDbl_take_last(ArrayDbl _x2c_macro_array_272);
 
-double ArrayDbl_shift(ArrayDbl _x2c_macro_array_267);
+double ArrayDbl_shift(ArrayDbl _x2c_macro_array_273);
 
-double ArrayDbl_unshift(ArrayDbl _x2c_macro_array_268, double _x2c_macro_value_82);
+double ArrayDbl_unshift(ArrayDbl _x2c_macro_array_274, double _x2c_macro_value_82);
 
-double ArrayDbl_insert(ArrayDbl _x2c_macro_array_269, int _x2c_macro_index_78, double _x2c_macro_value_83);
+double ArrayDbl_insert(ArrayDbl _x2c_macro_array_275, int _x2c_macro_index_78, double _x2c_macro_value_83);
 
-double ArrayDbl_remove(ArrayDbl _x2c_macro_array_270, int _x2c_macro_index_79);
+double ArrayDbl_remove(ArrayDbl _x2c_macro_array_276, int _x2c_macro_index_79);
 
-ArrayDbl ArrayDbl_copy(ArrayDbl _x2c_macro_array_271);
+ArrayDbl ArrayDbl_copy(ArrayDbl _x2c_macro_array_277);
 
-ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_macro_array_272, int _x2c_macro_start_45, int _x2c_macro_end_39, int _x2c_macro_step_11);
+ArrayDbl ArrayDbl_getslice(ArrayDbl _x2c_macro_array_278, int _x2c_macro_start_45, int _x2c_macro_end_39, int _x2c_macro_step_11);
 
-ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_macro_array_273, int _x2c_macro_start_46, int _x2c_macro_end_40, ArrayDbl _x2c_macro_values_27);
+ArrayDbl ArrayDbl_setslice(ArrayDbl _x2c_macro_array_279, int _x2c_macro_start_46, int _x2c_macro_end_40, ArrayDbl _x2c_macro_values_27);
 
-ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_macro_array_274, int _x2c_macro_start_47, int _x2c_macro_end_41);
+ArrayDbl ArrayDbl_remslice(ArrayDbl _x2c_macro_array_280, int _x2c_macro_start_47, int _x2c_macro_end_41);
 
-ArrayDbl ArrayDbl_splice(ArrayDbl _x2c_macro_array_275, int _x2c_macro_index_80, int _x2c_macro_remove_count_11, ArrayDbl _x2c_macro_values_28);
+ArrayDbl ArrayDbl_splice(ArrayDbl _x2c_macro_array_281, int _x2c_macro_index_80, int _x2c_macro_remove_count_11, ArrayDbl _x2c_macro_values_28);
 
-int ArrayDbl_find(ArrayDbl _x2c_macro_array_276, double _x2c_macro_value_85);
+int ArrayDbl_find(ArrayDbl _x2c_macro_array_282, double _x2c_macro_value_85);
 
-int ArrayDbl_contains(ArrayDbl _x2c_macro_array_277, double _x2c_macro_value_86);
+int ArrayDbl_contains(ArrayDbl _x2c_macro_array_283, double _x2c_macro_value_86);
 
-int ArrayDbl_count(ArrayDbl _x2c_macro_array_278, double _x2c_macro_value_87);
+int ArrayDbl_count(ArrayDbl _x2c_macro_array_284, double _x2c_macro_value_87);
 
-int ArrayDbl_indexof(ArrayDbl _x2c_macro_array_279, double _x2c_macro_value_88);
+int ArrayDbl_indexof(ArrayDbl _x2c_macro_array_285, double _x2c_macro_value_88);
 
 ArrayDbl ArrayDbl_concat(ArrayDbl _x2c_macro_a_36, ArrayDbl _x2c_macro_b_36);
 
-ArrayDbl ArrayDbl_reverse(ArrayDbl _x2c_macro_array_280);
+ArrayDbl ArrayDbl_reverse(ArrayDbl _x2c_macro_array_286);
 
 int ArrayDbl_equal(ArrayDbl _x2c_macro_a_37, ArrayDbl _x2c_macro_b_37);
 
-Array ArrayDbl_array(ArrayDbl _x2c_macro_array_281);
+Array ArrayDbl_array(ArrayDbl _x2c_macro_array_287);
 
 int ArrayDbl_compare(ArrayDbl _x2c_macro_a_38, ArrayDbl _x2c_macro_b_38);
 
-Buffer ArrayDbl_write_repr(ArrayDbl _x2c_macro_array_282, Buffer _x2c_macro_out_72);
+Buffer ArrayDbl_write_repr(ArrayDbl _x2c_macro_array_288, Buffer _x2c_macro_out_78);
 
-Buffer ArrayDbl_write_str(ArrayDbl _x2c_macro_array_283, Buffer _x2c_macro_out_73);
+Buffer ArrayDbl_write_str(ArrayDbl _x2c_macro_array_289, Buffer _x2c_macro_out_79);
 
-String ArrayDbl_str(ArrayDbl _x2c_macro_array_284);
+String ArrayDbl_str(ArrayDbl _x2c_macro_array_290);
 
-String ArrayDbl_repr(ArrayDbl _x2c_macro_array_285);
+String ArrayDbl_repr(ArrayDbl _x2c_macro_array_291);
 
-static inline double ArrayDbl_updateindex(ArrayDbl _x2c_macro_array_287, int _x2c_macro_index_81, Symbol _x2c_macro_op_10, double _x2c_macro_rhs_5){
-  double * _x2c_macro_slot_5 =((double *) _x2c_macro_array_287 -> bytes) + _x2c_macro_index_81;
+static inline double ArrayDbl_updateindex(ArrayDbl _x2c_macro_array_293, int _x2c_macro_index_81, Symbol _x2c_macro_op_10, double _x2c_macro_rhs_5){
+  double * _x2c_macro_slot_5 =((double *) _x2c_macro_array_293 -> bytes) + _x2c_macro_index_81;
   switch(_x2c_macro_op_10){
     case 56 : return * _x2c_macro_slot_5 += _x2c_macro_rhs_5;
     case 62 : return * _x2c_macro_slot_5 -= _x2c_macro_rhs_5;
@@ -786,10 +786,10 @@ static inline double ArrayDbl_updateindex(ArrayDbl _x2c_macro_array_287, int _x2
 
 }
 
-static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_288, int _x2c_macro_index_82, Symbol _x2c_macro_op_11){
-  double _x2c_macro_old_5 = ArrayDbl_getindex(_x2c_macro_array_288, _x2c_macro_index_82);
-  if(_x2c_macro_op_11 == 1848) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_82, 56, 1);
-  else if(_x2c_macro_op_11 == 2046) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_82, 62, 1);
+static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_294, int _x2c_macro_index_82, Symbol _x2c_macro_op_11){
+  double _x2c_macro_old_5 = ArrayDbl_getindex(_x2c_macro_array_294, _x2c_macro_index_82);
+  if(_x2c_macro_op_11 == 1848) ArrayDbl_updateindex(_x2c_macro_array_294, _x2c_macro_index_82, 56, 1);
+  else if(_x2c_macro_op_11 == 2046) ArrayDbl_updateindex(_x2c_macro_array_294, _x2c_macro_index_82, 62, 1);
   else{
     static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_postfixindex",.line = 155};
     x2c_error_raise_n(& _x2c_error_site_19, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_11));
@@ -798,12 +798,12 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_288, int _x
   return _x2c_macro_old_5;
 }
 
-static inline Var ArrayDbl_var(ArrayDbl _x2c_macro_array_289){
-  return Var_new(108585885848, _x2c_macro_array_289);
+static inline Var ArrayDbl_var(ArrayDbl _x2c_macro_array_295){
+  return Var_new(108585885848, _x2c_macro_array_295);
 }
 
-static inline Block ArrayDbl_block(ArrayDbl _x2c_macro_array_290){
-  return(Block) _x2c_macro_array_290;
+static inline Block ArrayDbl_block(ArrayDbl _x2c_macro_array_296){
+  return(Block) _x2c_macro_array_296;
 }
 
 static inline ArrayDbl Var_arraydbl(Var _x2c_macro_value_89){
@@ -812,85 +812,85 @@ static inline ArrayDbl Var_arraydbl(Var _x2c_macro_value_89){
 
 ArrayDbl Array_arraydbl(Array _x2c_macro_values_29);
 
-Iter ArrayDbl_iter(ArrayDbl _x2c_macro_array_292, Iter _x2c_macro_dest_5);
+Iter ArrayDbl_iter(ArrayDbl _x2c_macro_array_298, Iter _x2c_macro_dest_5);
 
 ArrayString ArrayString_new(void);
 
-int ArrayString_try_get(ArrayString _x2c_macro_array_309, int _x2c_macro_index_89, String * _x2c_macro_out_82);
+int ArrayString_try_get(ArrayString _x2c_macro_array_316, int _x2c_macro_index_89, String * _x2c_macro_out_89);
 
-int ArrayString_try_next(ArrayString _x2c_macro_array_310, int * _x2c_macro_cursor_6, String * _x2c_macro_out_83);
+int ArrayString_try_next(ArrayString _x2c_macro_array_317, int * _x2c_macro_cursor_13, String * _x2c_macro_out_90);
 
-static inline String ArrayString_getindex(ArrayString _x2c_macro_array_311, int _x2c_macro_index_90){
-  return((String *) _x2c_macro_array_311 -> bytes)[_x2c_macro_index_90];
+static inline String ArrayString_getindex(ArrayString _x2c_macro_array_318, int _x2c_macro_index_90){
+  return((String *) _x2c_macro_array_318 -> bytes)[_x2c_macro_index_90];
 }
 
-static inline String ArrayString_setindex(ArrayString _x2c_macro_array_312, int _x2c_macro_index_91, String _x2c_macro_value_93){
-  return((String *) _x2c_macro_array_312 -> bytes)[_x2c_macro_index_91] = _x2c_macro_value_93;
+static inline String ArrayString_setindex(ArrayString _x2c_macro_array_319, int _x2c_macro_index_91, String _x2c_macro_value_93){
+  return((String *) _x2c_macro_array_319 -> bytes)[_x2c_macro_index_91] = _x2c_macro_value_93;
 }
 
-String ArrayString_push(ArrayString _x2c_macro_array_313, String _x2c_macro_value_94);
+String ArrayString_push(ArrayString _x2c_macro_array_320, String _x2c_macro_value_94);
 
-int ArrayString_try_take_last(ArrayString _x2c_macro_array_314, String * _x2c_macro_out_84);
+int ArrayString_try_take_last(ArrayString _x2c_macro_array_321, String * _x2c_macro_out_91);
 
-String ArrayString_take_last(ArrayString _x2c_macro_array_315);
+String ArrayString_take_last(ArrayString _x2c_macro_array_322);
 
-String ArrayString_shift(ArrayString _x2c_macro_array_316);
+String ArrayString_shift(ArrayString _x2c_macro_array_323);
 
-String ArrayString_unshift(ArrayString _x2c_macro_array_317, String _x2c_macro_value_97);
+String ArrayString_unshift(ArrayString _x2c_macro_array_324, String _x2c_macro_value_97);
 
-String ArrayString_insert(ArrayString _x2c_macro_array_318, int _x2c_macro_index_92, String _x2c_macro_value_98);
+String ArrayString_insert(ArrayString _x2c_macro_array_325, int _x2c_macro_index_92, String _x2c_macro_value_98);
 
-String ArrayString_remove(ArrayString _x2c_macro_array_319, int _x2c_macro_index_93);
+String ArrayString_remove(ArrayString _x2c_macro_array_326, int _x2c_macro_index_93);
 
-ArrayString ArrayString_copy(ArrayString _x2c_macro_array_320);
+ArrayString ArrayString_copy(ArrayString _x2c_macro_array_327);
 
-ArrayString ArrayString_getslice(ArrayString _x2c_macro_array_321, int _x2c_macro_start_53, int _x2c_macro_end_46, int _x2c_macro_step_13);
+ArrayString ArrayString_getslice(ArrayString _x2c_macro_array_328, int _x2c_macro_start_53, int _x2c_macro_end_46, int _x2c_macro_step_13);
 
-ArrayString ArrayString_setslice(ArrayString _x2c_macro_array_322, int _x2c_macro_start_54, int _x2c_macro_end_47, ArrayString _x2c_macro_values_32);
+ArrayString ArrayString_setslice(ArrayString _x2c_macro_array_329, int _x2c_macro_start_54, int _x2c_macro_end_47, ArrayString _x2c_macro_values_32);
 
-ArrayString ArrayString_remslice(ArrayString _x2c_macro_array_323, int _x2c_macro_start_55, int _x2c_macro_end_48);
+ArrayString ArrayString_remslice(ArrayString _x2c_macro_array_330, int _x2c_macro_start_55, int _x2c_macro_end_48);
 
-ArrayString ArrayString_splice(ArrayString _x2c_macro_array_324, int _x2c_macro_index_94, int _x2c_macro_remove_count_13, ArrayString _x2c_macro_values_33);
+ArrayString ArrayString_splice(ArrayString _x2c_macro_array_331, int _x2c_macro_index_94, int _x2c_macro_remove_count_13, ArrayString _x2c_macro_values_33);
 
-int ArrayString_find(ArrayString _x2c_macro_array_325, String _x2c_macro_value_100);
+int ArrayString_find(ArrayString _x2c_macro_array_332, String _x2c_macro_value_100);
 
-int ArrayString_contains(ArrayString _x2c_macro_array_326, String _x2c_macro_value_101);
+int ArrayString_contains(ArrayString _x2c_macro_array_333, String _x2c_macro_value_101);
 
-int ArrayString_count(ArrayString _x2c_macro_array_327, String _x2c_macro_value_102);
+int ArrayString_count(ArrayString _x2c_macro_array_334, String _x2c_macro_value_102);
 
-int ArrayString_indexof(ArrayString _x2c_macro_array_328, String _x2c_macro_value_103);
+int ArrayString_indexof(ArrayString _x2c_macro_array_335, String _x2c_macro_value_103);
 
 ArrayString ArrayString_concat(ArrayString _x2c_macro_a_42, ArrayString _x2c_macro_b_42);
 
-ArrayString ArrayString_reverse(ArrayString _x2c_macro_array_329);
+ArrayString ArrayString_reverse(ArrayString _x2c_macro_array_336);
 
 int ArrayString_equal(ArrayString _x2c_macro_a_43, ArrayString _x2c_macro_b_43);
 
-Array ArrayString_array(ArrayString _x2c_macro_array_330);
+Array ArrayString_array(ArrayString _x2c_macro_array_337);
 
 int ArrayString_compare(ArrayString _x2c_macro_a_44, ArrayString _x2c_macro_b_44);
 
-Buffer ArrayString_write_repr(ArrayString _x2c_macro_array_331, Buffer _x2c_macro_out_85);
+Buffer ArrayString_write_repr(ArrayString _x2c_macro_array_338, Buffer _x2c_macro_out_92);
 
-Buffer ArrayString_write_str(ArrayString _x2c_macro_array_332, Buffer _x2c_macro_out_86);
+Buffer ArrayString_write_str(ArrayString _x2c_macro_array_339, Buffer _x2c_macro_out_93);
 
-String ArrayString_str(ArrayString _x2c_macro_array_333);
+String ArrayString_str(ArrayString _x2c_macro_array_340);
 
-String ArrayString_repr(ArrayString _x2c_macro_array_334);
+String ArrayString_repr(ArrayString _x2c_macro_array_341);
 
-static inline String ArrayString_updateindex(ArrayString _x2c_macro_array_336, int _x2c_macro_index_95, Symbol _x2c_macro_op_12, String _x2c_macro_rhs_6){
+static inline String ArrayString_updateindex(ArrayString _x2c_macro_array_343, int _x2c_macro_index_95, Symbol _x2c_macro_op_12, String _x2c_macro_rhs_6){
   if(_x2c_macro_op_12 != 56){
     static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/typed-array.x",.function = "ArrayString_updateindex",.line = 164};
     x2c_error_raise_n(& _x2c_error_site_20, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_12));
     __builtin_unreachable();
   }
-  String * _x2c_macro_slot_6 =((String *) _x2c_macro_array_336 -> bytes) + _x2c_macro_index_95;
+  String * _x2c_macro_slot_6 =((String *) _x2c_macro_array_343 -> bytes) + _x2c_macro_index_95;
   String _x2c_macro_result_13 = String_add(_x2c_macro_slot_6[0], _x2c_macro_rhs_6);
   return _x2c_macro_slot_6[0] = _x2c_macro_result_13;
 }
 
-static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_macro_array_337, int _x2c_macro_index_96, Symbol _x2c_macro_op_13){
-  (void) _x2c_macro_array_337;
+static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_macro_array_344, int _x2c_macro_index_96, Symbol _x2c_macro_op_13){
+  (void) _x2c_macro_array_344;
   (void) _x2c_macro_index_96;
   {
     static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/typed-array.x",.function = "ArrayString_postfixindex",.line = 164};
@@ -900,12 +900,12 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_macro_a
 
 }
 
-static inline Var ArrayString_var(ArrayString _x2c_macro_array_338){
-  return Var_new(108585917732, _x2c_macro_array_338);
+static inline Var ArrayString_var(ArrayString _x2c_macro_array_345){
+  return Var_new(108585917732, _x2c_macro_array_345);
 }
 
-static inline Block ArrayString_block(ArrayString _x2c_macro_array_339){
-  return(Block) _x2c_macro_array_339;
+static inline Block ArrayString_block(ArrayString _x2c_macro_array_346){
+  return(Block) _x2c_macro_array_346;
 }
 
 static inline ArrayString Var_arraystring(Var _x2c_macro_value_104){
@@ -914,7 +914,7 @@ static inline ArrayString Var_arraystring(Var _x2c_macro_value_104){
 
 ArrayString Array_arraystring(Array _x2c_macro_values_34);
 
-Iter ArrayString_iter(ArrayString _x2c_macro_array_341, Iter _x2c_macro_dest_6);
+Iter ArrayString_iter(ArrayString _x2c_macro_array_348, Iter _x2c_macro_dest_6);
 
 void ArrayChar_clear(ArrayChar a0);
 

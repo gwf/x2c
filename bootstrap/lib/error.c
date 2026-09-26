@@ -534,7 +534,7 @@ static void _initialize_policies(void){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       code = Var_symbol(_x2c_macro_item_0);
       Error_policy_set(code, 2260136);
     }
@@ -943,7 +943,7 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity){
   unsigned cursor = 0;
   Var key =((void) 0, Void), value =((void) 0, Void);
-  while(Map_try_next(policy, & cursor, & key, & value)){
+  while(Map_try_next(policy, &(cursor), &(key), &(value))){
     if(at + 2 > capacity) break;
     pairs[at ++] = Var_symbol(key);
     pairs[at ++] = Var_symbol(value);

@@ -1079,7 +1079,7 @@ static List Emitter__commas(Emitter emitter, List lst){
     List _x2c_macro_object_0 = lst;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       item = _x2c_macro_cursor_output_0;
       {
         if(! first) Array_push(result, String_var(_790));
@@ -1199,7 +1199,7 @@ static List Emitter__args(Emitter emitter, List ast){
     List _x2c_macro_object_1 = List_cdr(ast);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       argument = Var_list(_x2c_macro_cursor_output_1);
       {
         List emitted = Emitter__emit(emitter, argument);
@@ -1342,7 +1342,7 @@ static List Emitter__typedef(Emitter e, List ast){
     List _x2c_macro_object_2 = Var_cdr(List_caddr(ast));
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       declarator = Var_list(_x2c_macro_cursor_output_2);
       {
         List binding = Var_list(List_cadr(declarator));
@@ -1478,7 +1478,7 @@ static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2
     }
   }
 {
-  Var child;  List _x2c_macro_object_3 = node;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+  Var child;  List _x2c_macro_object_3 = node;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
     child = _x2c_macro_cursor_output_3;  if(Var_is_row(child, 9, 7, 4) && _static_case_entry(Var_list(child))) return 1;
   }
 
@@ -1503,7 +1503,7 @@ static List Emitter__local_static(Emitter e, List ast){
     e -> compiler -> origin = e -> origin;  String note = _143;  Compiler_report_error(e -> compiler, 354920, _796, NULL, cons(String_var(note), NULL));
   }
   List base, bindings;  List _x2c_destructure_7 = List_cdr(declaration);  base = Var_list(List_getindex(_x2c_destructure_7, 0));  bindings = Var_list(List_getindex(_x2c_destructure_7, 1));  Type declared_base = List_type(base);  String base_name = Compiler_fresh_name(e -> compiler, _797);  List base_decl = Emitter__semantic_name(e, Type_declared(declared_base), base_name);  Array output = Array_new();  Array_push(output, List_var(cons(_50, List_append(base_decl, _53))));  String storage = Type_is_threaded(declared_base) ? _798 : _799; {
-    List binding;  List _x2c_macro_object_4 = List_cdr(bindings);  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+    List binding;  List _x2c_macro_object_4 = List_cdr(bindings);  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       binding = Var_list(_x2c_macro_cursor_output_4); {
         List name, mods, initial = NULL;
   {
@@ -1582,7 +1582,7 @@ return NULL;
 
 static List Emitter__sequenced_call(Emitter e, Var callee, List arguments){
   List c_fn = Emitter__emit(e, cons(callee, NULL));  Array declarations = Array_new(), names = Array_new(); {
-    List argument;  List _x2c_macro_object_5 = arguments;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+    List argument;  List _x2c_macro_object_5 = arguments;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       argument = Var_list(_x2c_macro_cursor_output_5);
   {
     List _x2c_match_expr = argument;
@@ -1609,7 +1609,7 @@ static List Emitter__destructure_value(Emitter e, Type type, List result, List s
 static List Emitter__defer(Emitter e, List ast){
   List body, env_binding, callback, records, record, cleanup;  List _x2c_destructure_8 = List_cdr(ast);  body = Var_list(List_getindex(_x2c_destructure_8, 0));  env_binding = Var_list(List_getindex(_x2c_destructure_8, 1));  callback = Var_list(List_getindex(_x2c_destructure_8, 2));  records = Var_list(List_getindex(_x2c_destructure_8, 3));  record = Var_list(List_getindex(_x2c_destructure_8, 4));  cleanup = Var_list(List_getindex(_x2c_destructure_8, 5));  String cleanup_name = binding_identity_spelling(record);  String callback_name = binding_identity_spelling(callback);  List env_setup = NULL, env_arg = _261;  if(List_truth(env_binding)){
     String env_type = binding_identity_spelling(env_binding);  String env_name = Compiler_fresh_name(e -> compiler, _840);  Array initializers = Array_new(); {
-      List record;  List _x2c_macro_object_6 = records;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+      List record;  List _x2c_macro_object_6 = records;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
         record = Var_list(_x2c_macro_cursor_output_6); {
           String source = binding_identity_spelling(Var_list(List_car(record)));  String field = binding_identity_spelling(Var_list(List_caddr(record)));  Array_push(initializers, List_var(cons(_263, cons(String_var(field), cons(_109, cons(_265, cons(_165, cons(String_var(source), NULL))))))));
         }
@@ -1624,7 +1624,7 @@ static List Emitter__defer(Emitter e, List ast){
 
 static List Emitter__filtered_catch(Emitter emitter, List records, String frame_name, String handle_name){
   String selected_name = Compiler_fresh_name(emitter -> compiler, _816);  Array arms = Array_new();  int index = 0, count = List_len(records); {
-    List rec;  List _x2c_macro_object_7 = records;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+    List rec;  List _x2c_macro_object_7 = records;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
       rec = Var_list(_x2c_macro_cursor_output_7); {
         List binders = Var_list(List_car(rec)), body = Var_list(List_caddr(rec));  List handler_body = Emitter__emit(emitter, cons(List_var(body), NULL));  List declarations = _make_catch_binders(binders, handle_name);  String branch = index == count - 1 ?(index ? _817 : _818) : index ? String_join(NULL, cons(String_var(_278), cons(String_var(selected_name), cons(String_var(_279), cons(String_var(int_str(index)), cons(String_var(_2), NULL)))))) : String_join(NULL, cons(String_var(_280), cons(String_var(selected_name), cons(String_var(_279), cons(String_var(int_str(index)), cons(String_var(_2), NULL))))));  Array_push(arms, List_var(cons(String_var(String_join(NULL, cons(String_var(branch), cons(String_var(_281), NULL)))), List_append(declarations, List_append(handler_body, _48)))));  index ++;
       }
@@ -1673,7 +1673,7 @@ static List Emitter__try(Emitter e, List ast){
       }
       );
       Var _x2c_macro_item_8;
-      while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
+      while(Iter_try_next(_x2c_macro_iterator_8, &(_x2c_macro_item_8))){
         rec = Var_list(_x2c_macro_item_8);
         {
           List pattern = Var_list(List_cadr(rec));
@@ -1734,7 +1734,7 @@ static List _make_local_binders(List binders, String values_name){
     List _x2c_macro_object_9 = binders;
     List _x2c_macro_cursor_9 = _x2c_macro_object_9;
     Var _x2c_macro_cursor_output_8;
-    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_8)){
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_8))){
       binder = _x2c_macro_cursor_output_8;
       {
         if(! Var_equal(binder, Symbol_var(58)) && ! Var_equal(binder, Symbol_var(54))){
@@ -1759,7 +1759,7 @@ static List _make_catch_binders(List binders, String handle_name){
     List _x2c_macro_object_10 = binders;
     List _x2c_macro_cursor_10 = _x2c_macro_object_10;
     Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_9)){
+    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_9))){
       binder = _x2c_macro_cursor_output_9;
       {
         String bvar = String_new(Var_str(binder) + 1);
@@ -1801,7 +1801,7 @@ static List _flat_match_condition(Symbol head, List tags){
     List _x2c_macro_object_11 = tags;
     List _x2c_macro_cursor_11 = _x2c_macro_object_11;
     Var _x2c_macro_cursor_output_10;
-    while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_10)){
+    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_10))){
       tag = _x2c_macro_cursor_output_10;
       {
         Array_push(condition, String_var(_825));
@@ -1838,7 +1838,7 @@ static List Emitter__match_if(Emitter e, List ast, int * dispatched){
     List _x2c_macro_object_12 = ast;
     List _x2c_macro_cursor_12 = _x2c_macro_object_12;
     Var _x2c_macro_cursor_output_11;
-    while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_11)){
+    while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_11))){
       rec = Var_list(_x2c_macro_cursor_output_11);
       {
         if(Var_equal(List_car(rec), Symbol_var(35579270086))){
@@ -1917,7 +1917,7 @@ static List Emitter__match_cases(Emitter e, List ast){
     List _x2c_macro_object_13 = cases;
     List _x2c_macro_cursor_13 = _x2c_macro_object_13;
     Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_12)){
+    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_12))){
       rec = Var_list(_x2c_macro_cursor_output_12);
       {
         int count = Var_equal(List_car(rec), Symbol_var(35579270086)) ? 0 : List_len(Var_list(List_car(rec)));
@@ -1972,7 +1972,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 String String_rstrip(String, char *);
 static List Emitter__initializer_macro(Emitter e, List input, List body){
   Buffer parameters = Buffer_new(0); {
-    List argument;  List _x2c_macro_object_14 = List_cdr(input);  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_13)){
+    List argument;  List _x2c_macro_object_14 = List_cdr(input);  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_13))){
       argument = Var_list(_x2c_macro_cursor_output_13); {
         if(Buffer_len(parameters)) Buffer_write_char(parameters, ',');  Buffer_write(parameters, Var_str(List_car(argument)));
       }
@@ -2012,7 +2012,7 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
     List _x2c_macro_object_15 = List_cdr(input);
     List _x2c_macro_cursor_15 = _x2c_macro_object_15;
     Var _x2c_macro_cursor_output_14;
-    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_14)){
+    while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_14))){
       argument = Var_list(_x2c_macro_cursor_output_14);
       {
         List emitted = Emitter__emit(e, Var_list(List_cadr(argument)));
@@ -2083,7 +2083,7 @@ break;
     }
   }
 {
-  Var child;  List _x2c_macro_object_16 = node;  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_15)){
+  Var child;  List _x2c_macro_object_16 = node;  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_15))){
     child = _x2c_macro_cursor_output_15;  if(Var_is_row(child, 9, 7, 4)) Array_push(pending, child);
   }
 
@@ -2155,7 +2155,7 @@ Array children = Array_new(); {
   Var child;  Iter _x2c_macro_iterator_17 = List_iter(Type_list(definition), &(struct Iter){
     int_var(0)
   }
-  );  Var _x2c_macro_item_17;  while(Iter_try_next(_x2c_macro_iterator_17, & _x2c_macro_item_17)){
+  );  Var _x2c_macro_item_17;  while(Iter_try_next(_x2c_macro_iterator_17, &(_x2c_macro_item_17))){
     child = _x2c_macro_item_17; {
       if(Var_is_row(child, 9, 7, 4)) Array_push(children, List_var(Emitter__capture_source(e, Var_list(child), inputs, declarations)));  else Array_push(children, child);
     }
@@ -2174,7 +2174,7 @@ break; } }
     }
   }
 Array children = Array_new(); {
-  Var child;  List _x2c_macro_object_18 = node;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_16)){
+  Var child;  List _x2c_macro_object_18 = node;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_16))){
     child = _x2c_macro_cursor_output_16; {
       if(Var_is_row(child, 9, 7, 4)) Array_push(children, List_var(Emitter__capture_source(e, Var_list(child), inputs, declarations)));  else Array_push(children, child);
     }
@@ -2194,7 +2194,7 @@ List Ast_initializer_cases(Ast, List *);
 List List_reverse(List);
 static List Emitter__initializer_value(Emitter e, List ast){
   List source = NULL;  List functions = Ast_initializer_functions(ast, &(source));  if(List_truth(functions)) return Emitter__emit(e, cons(_465, cons(List_var(cons(_15, cons(_486, cons(List_var(cons(_431, List_append(functions, NULL))), NULL)))), cons(List_var(cons(_233, cons(List_var(source), NULL))), NULL))));  List input = NULL;  List cases = Ast_initializer_cases(ast, &(input));  if(List_truth(input)) return Emitter__initializer_macro(e, input, cons(_431, List_append(cases, NULL)));  List result = NULL; {
-    List choice;  List _x2c_macro_object_19 = List_reverse(cases);  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_17)){
+    List choice;  List _x2c_macro_object_19 = List_reverse(cases);  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_17))){
       choice = Var_list(_x2c_macro_cursor_output_17); {
         List _x2c_destructure_14 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_14, 0));  List path = Var_list(List_getindex(_x2c_destructure_14, 1));  Type type = Var_type(List_getindex(_x2c_destructure_14, 2));  List value = Var_list(List_getindex(_x2c_destructure_14, 3));  if(List_truth(({ static MatchCaptureSite _x2c_match_site_19;  x2c_match_site_match(& _x2c_match_site_19, value, List_var(_501)); }))) value = List_truth(Type_list(type)) ? cons(_15, cons(List_var(type), cons(List_var(cons(_208, cons(List_var(type), cons(List_var(value), NULL)))), NULL))) : _511;  List emitted = Emitter__emit(e, cons(List_var(value), NULL));  if(! List_truth(result) || ! List_truth(condition)) result = emitted;  else{
           List test = Emitter__emit(e, cons(List_var(condition), NULL));  result = cons(_513, List_append(test, cons(_135, List_append(emitted, cons(_135, List_append(result, _4))))));
@@ -2411,7 +2411,7 @@ case 35407540848: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match
 }
 break; } } case 15397655110: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_615), &_x2c_match_capture)) {Var control = _x2c_match_values[0];  List associations = Var_list(_x2c_match_values[1]); {
   List c_control = Emitter__emit(e, cons(control, NULL));  Array rows = Array_new(); {
-    List association;  List _x2c_macro_object_20 = associations;  List _x2c_macro_cursor_20 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_18)){
+    List association;  List _x2c_macro_object_20 = associations;  List _x2c_macro_cursor_20 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_18))){
       association = Var_list(_x2c_macro_cursor_output_18);
   {
     List _x2c_match_expr = association;
@@ -2588,7 +2588,7 @@ List Compiler_emit(Compiler compiler, List ast){
     List _x2c_macro_object_21 = Array_list_free(state.native_macros);
     List _x2c_macro_cursor_21 = _x2c_macro_object_21;
     Var _x2c_macro_cursor_output_19;
-    while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_19)){
+    while(List_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_19))){
       entry = Var_list(_x2c_macro_cursor_output_19);
       {
         List _x2c_destructure_15 = entry;

@@ -191,7 +191,7 @@ static void _read_row(_Option * option, List row, Map index, int position){
     List _x2c_macro_object_0 = row;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       word = _x2c_macro_cursor_output_0;
       {
         if(Var_is_row(word, 9, 7, 4)){
@@ -239,7 +239,7 @@ static _Spec _read_spec(List spec){
     List _x2c_macro_object_1 = spec;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       row = Var_list(_x2c_macro_cursor_output_1);
       {
         _read_row(& result.options[position], row, result.index, position);

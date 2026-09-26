@@ -85,7 +85,7 @@ static void _exec(CliRequest c){
     List _x2c_macro_object_0 = c -> run_args;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       argument = Var_string(_x2c_macro_cursor_output_0);
       argv[index ++] = String_truth(argument) ? argument : "";
     }
@@ -116,7 +116,7 @@ static void _prune(String scripts){
     List _x2c_macro_object_1 = Path_list_dir(scripts);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       name = Var_string(_x2c_macro_cursor_output_1);
       {
         String directory = Path_join(scripts, name);

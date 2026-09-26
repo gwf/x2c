@@ -359,7 +359,7 @@ static void Compiler__write_json(Compiler c, List entry){
       List _x2c_macro_object_0 = _19;
       List _x2c_macro_cursor_0 = _x2c_macro_object_0;
       Var _x2c_macro_cursor_output_0;
-      while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
         key = Var_symbol(_x2c_macro_cursor_output_0);
         {
           Var value = List_assoc(location, Symbol_var(key));
@@ -498,7 +498,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
     List _x2c_macro_object_1 = Diagnostics_entries(diag);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       held = _x2c_macro_cursor_output_1;
       Compiler_print_diagnostic(compiler, Var_list(held));
     }
@@ -618,7 +618,7 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
     unsigned _x2c_macro_cursor_2 = 0;
     Var _x2c_macro_cursor_output_2;
     Var _x2c_macro_cursor_output_3;
-    while(Map_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
+    while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
       key = _x2c_macro_cursor_output_2;
       value = _x2c_macro_cursor_output_3;
       printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
@@ -638,7 +638,7 @@ void Compiler_dump_cache(Compiler compiler){
     unsigned _x2c_macro_cursor_3 = 0;
     Var _x2c_macro_cursor_output_4;
     Var _x2c_macro_cursor_output_5;
-    while(Map_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
+    while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
       key = _x2c_macro_cursor_output_4;
       value = _x2c_macro_cursor_output_5;
       printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));

@@ -694,7 +694,7 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth){
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       element = _x2c_macro_item_0;
       {
         if(count ++) Buffer_write_char(out, ',');
@@ -742,7 +742,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
       unsigned _x2c_macro_cursor_1 = 0;
       Var _x2c_macro_cursor_output_0;
       Var _x2c_macro_cursor_output_1;
-      while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
+      while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
         name = _x2c_macro_cursor_output_0;
         member = _x2c_macro_cursor_output_1;
         {
@@ -770,7 +770,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
       Array _x2c_macro_object_2 = names;
       int _x2c_macro_cursor_2 = 0;
       Var _x2c_macro_cursor_output_2;
-      while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
         name = _x2c_macro_cursor_output_2;
         {
           String text = Var_str(name);

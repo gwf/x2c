@@ -209,7 +209,7 @@ String x2c_package_directory(List roots, String path){
     List _x2c_macro_object_0 = roots;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       root = Var_string(_x2c_macro_cursor_output_0);
       {
         String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_3), NULL)));
@@ -233,7 +233,7 @@ String x2c_package_entry(SourceView sources, List roots, String name, String * d
     List _x2c_macro_object_1 = roots;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       package_dir = Var_string(_x2c_macro_cursor_output_1);
       {
         String root = String_join(NULL, cons(String_var(Path_absolute(package_dir)), cons(String_var(_3), cons(String_var(name), NULL))));
@@ -327,7 +327,7 @@ String x2c_find_program(String name){
     List _x2c_macro_object_2 = String_split(Env_get(_33), _32);
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       directory = Var_string(_x2c_macro_cursor_output_2);
       {
         Path candidate = Path_join(directory, name);
@@ -538,7 +538,7 @@ String x2c_filename_hash(String filename){
     String _x2c_macro_object_3 = filename;
     int _x2c_macro_cursor_3 = 0;
     int _x2c_macro_cursor_output_3;
-    while(String_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(String_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       byte = _x2c_macro_cursor_output_3;
       hash = hash * 31 +(unsigned char) byte;
     }

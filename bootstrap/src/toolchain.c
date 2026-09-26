@@ -275,7 +275,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
   List _x2c_macro_object_0 = String_split_lines(record, 0);
   List _x2c_macro_cursor_0 = _x2c_macro_object_0;
   Var _x2c_macro_cursor_output_0;
-  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
     line = Var_string(_x2c_macro_cursor_output_0);
     if(String_startswith(line, String_join(NULL, cons(String_var(name), cons(String_var(_2), NULL))))){
       value = String_remove_prefix(line, String_join(NULL, cons(String_var(name), cons(String_var(_2), NULL))));
@@ -387,7 +387,7 @@ static int _shell_safe(String argument){
     String _x2c_macro_object_1 = argument;
     int _x2c_macro_cursor_1 = 0;
     int _x2c_macro_cursor_output_1;
-    while(String_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(String_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       raw = _x2c_macro_cursor_output_1;
       {
         unsigned char ch = raw;
@@ -411,7 +411,7 @@ static void _print_argument(String argument){
     String _x2c_macro_object_2 = argument;
     int _x2c_macro_cursor_2 = 0;
     int _x2c_macro_cursor_output_2;
-    while(String_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(String_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       ch = _x2c_macro_cursor_output_2;
       {
         if(ch == '\'') fputs("'\\''", stderr);
@@ -433,7 +433,7 @@ static void _print_action(Symbol phase, List arguments){
     List _x2c_macro_object_3 = arguments;
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       argument = Var_string(_x2c_macro_cursor_output_3);
       {
         fputc(' ', stderr);
@@ -540,7 +540,7 @@ List Toolchain_search_directories(Toolchain t){
       List _x2c_macro_object_4 = String_split_lines(errors, 0);
       List _x2c_macro_cursor_4 = _x2c_macro_object_4;
       Var _x2c_macro_cursor_output_4;
-      while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
         line = Var_string(_x2c_macro_cursor_output_4);
         {
           if(String_startswith(line, _122)) break;
@@ -566,7 +566,7 @@ List Toolchain_search_directories(Toolchain t){
     List _x2c_macro_object_6 = String_split_lines(output, 0);
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       line = Var_string(_x2c_macro_cursor_output_6);
       {
         if(! String_startswith(line, _127)) continue;
@@ -576,7 +576,7 @@ List Toolchain_search_directories(Toolchain t){
           List _x2c_macro_object_5 = String_split(list, _129);
           List _x2c_macro_cursor_5 = _x2c_macro_object_5;
           Var _x2c_macro_cursor_output_5;
-          while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+          while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
             directory = Var_string(_x2c_macro_cursor_output_5);
             if(String_truth(directory)) Array_push(directories, String_var(directory));
           }

@@ -882,7 +882,7 @@ String String_join(String sep, List strings){
     List _x2c_macro_object_0 = strings;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       str = Var_string(_x2c_macro_cursor_output_0);
       {
         int length = String_len(str);
@@ -1523,7 +1523,7 @@ String String_escape(String str){
     String _x2c_macro_object_1 = str;
     int _x2c_macro_cursor_1 = 0;
     int _x2c_macro_cursor_output_1;
-    while(String_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(String_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       byte = _x2c_macro_cursor_output_1;
       {
         int width = _escape_byte((unsigned char) byte, NULL);
@@ -1541,7 +1541,7 @@ String String_escape(String str){
     String _x2c_macro_object_2 = str;
     int _x2c_macro_cursor_2 = 0;
     int _x2c_macro_cursor_output_2;
-    while(String_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(String_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       byte = _x2c_macro_cursor_output_2;
       dst += _escape_byte((unsigned char) byte, dst);
     }
@@ -1573,7 +1573,7 @@ Buffer String_write_repr(String str, Buffer out){
     String _x2c_macro_object_3 = str;
     int _x2c_macro_cursor_3 = 0;
     int _x2c_macro_cursor_output_3;
-    while(String_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+    while(String_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       byte = _x2c_macro_cursor_output_3;
       {
         char escaped[4];
@@ -1653,10 +1653,12 @@ static int _next(Iter iter, Var * out){
 }
 
 int String_try_next(String str, int * cursor, int * out){
-  if(! String_truth(str) || ! cursor || ! out || * cursor < 0) return 0;
-  if(* cursor >= String_len(str)) return 0;
-  * out = String_getindex(str, * cursor);
-  * cursor += 1;
+  if(! cursor) return 0;
+  if(! out) return 0;
+  if(! String_truth(str) ||(* cursor) < 0) return 0;
+  if((* cursor) >= String_len(str)) return 0;
+  (* out) = String_getindex(str, (* cursor));
+  (* cursor) += 1;
   return 1;
 }
 

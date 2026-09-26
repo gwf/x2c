@@ -72,7 +72,7 @@ static Array _diagnostics(Compiler compiler, Map needed){
     List _x2c_macro_object_0 = Compiler_diagnostics(compiler);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       entry = Var_list(_x2c_macro_cursor_output_0);
       {
         List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
@@ -114,7 +114,7 @@ static List _occurrence(Compiler compiler, String path, int offset){
     Array _x2c_macro_object_1 = compiler -> source_occurrences;
     int _x2c_macro_cursor_1 = 0;
     Var _x2c_macro_cursor_output_1;
-    while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       row = Var_list(_x2c_macro_cursor_output_1);
       {
         String file = Var_string(List_getindex(row, 0));
@@ -182,7 +182,7 @@ static Array _sources(Compiler compiler, Map needed){
     }
     );
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+    while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
       key = _x2c_macro_item_2;
       {
         Var text;
@@ -228,7 +228,7 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
           List _x2c_macro_object_3 = node -> request -> inputs;
           List _x2c_macro_cursor_3 = _x2c_macro_object_3;
           Var _x2c_macro_cursor_output_2;
-          while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_2)){
+          while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_2))){
             input = Var_string(_x2c_macro_cursor_output_2);
             {
               if(! String_equal(Path_absolute(input), source)) continue;
@@ -269,7 +269,7 @@ static int _changed_dependency(Compiler compiler, SourceView sources){
     }
     );
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
+    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
       path = _x2c_macro_item_4;
       if(SourceView_is_changed(sources, Var_string(path))) return 1;
     }
@@ -282,7 +282,7 @@ static int _changed_dependency(Compiler compiler, SourceView sources){
     }
     );
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
       path = _x2c_macro_item_5;
       if(SourceView_is_changed(sources, Var_string(path))) return 1;
     }

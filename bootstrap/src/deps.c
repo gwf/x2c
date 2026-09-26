@@ -109,7 +109,7 @@ static void _write_word(Buffer out, String word){
     String _x2c_macro_object_0 = word;
     int _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+    while(String_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       ch = _x2c_macro_cursor_output_0;
       {
         if(ch == '$') Buffer_write_char(out, '$');
@@ -156,7 +156,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
       unsigned _x2c_macro_cursor_1 = 0;
       Var _x2c_macro_cursor_output_1;
       Var _x2c_macro_cursor_output_2;
-      while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
+      while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
         path = _x2c_macro_cursor_output_1;
         content_hash = _x2c_macro_cursor_output_2;
         Array_push(paths, path);
@@ -187,7 +187,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
         Array _x2c_macro_object_2 = paths;
         int _x2c_macro_cursor_2 = 0;
         Var _x2c_macro_cursor_output_3;
-        while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3)){
+        while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
           path = Var_string(_x2c_macro_cursor_output_3);
           {
             Buffer_write_char(out, ' ');
@@ -204,7 +204,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
         Array _x2c_macro_object_3 = paths;
         int _x2c_macro_cursor_3 = 0;
         Var _x2c_macro_cursor_output_4;
-        while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+        while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
           path = Var_string(_x2c_macro_cursor_output_4);
           if(! String_equal(path, primary)){
             _write_word(out, path);

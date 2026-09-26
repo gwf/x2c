@@ -304,14 +304,14 @@ List preproc_within_arms(List arms, List items){
     List _x2c_macro_object_1 = List_reverse(arms);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       group = Var_list(_x2c_macro_cursor_output_1);
       {
         List directive;
         List _x2c_macro_object_0 = group;
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
           directive = Var_list(_x2c_macro_cursor_output_0);
           Array_push(output, List_var(directive));
         }
@@ -326,7 +326,7 @@ List preproc_within_arms(List arms, List items){
     List _x2c_macro_object_2 = items;
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       item = _x2c_macro_cursor_output_2;
       Array_push(output, item);
     }
@@ -516,7 +516,7 @@ static int _contains_return(Ast node){
     Var head;  Iter _x2c_macro_iterator_3 = List_iter(node, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_4)){
+    );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_4))){
       head = _x2c_macro_item_4;  if(Var_is_row(head, 9, 7, 4) && _contains_return(Var_list(head))) return 1;
     }
 
@@ -558,7 +558,7 @@ List Ast_initializer_functions(Ast ast, List * source){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     {
-      List choice;  List _x2c_macro_object_4 = cases;  List _x2c_macro_cursor_5 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_3)){
+      List choice;  List _x2c_macro_object_4 = cases;  List _x2c_macro_cursor_5 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_3))){
         choice = Var_list(_x2c_macro_cursor_output_3); {
           List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  List destination = Var_list(List_getindex(_x2c_destructure_0, 2));  List expression = Var_list(List_getindex(_x2c_destructure_0, 3));
   {

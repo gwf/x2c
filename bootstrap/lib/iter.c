@@ -165,7 +165,7 @@ static int _unzip_ensure(UnzipShared * shared, int column){
   while(shared -> heads[column] >= Array_len(shared -> buffers[column])){
     if(shared -> done) return 0;
     Var pair;
-    if(! Iter_try_next(shared -> source, & pair)){
+    if(! Iter_try_next(shared -> source, &(pair))){
       shared -> done = 1;
       return 0;
     }
@@ -177,13 +177,14 @@ static int _unzip_ensure(UnzipShared * shared, int column){
 int Var_is_void(Var);
 
 int Iter_try_next(Iter iter, Var * out){
-  if(! Iter_truth(iter) || ! out || ! iter -> next) return 0;
-  if(! iter -> next(iter, out)){
+  if(! out) return 0;
+  if(! Iter_truth(iter) || ! iter -> next) return 0;
+  if(! iter -> next(iter, &(* out))){
     iter -> next = NULL;
     return 0;
   }
-  if(Var_is_void(out[0])){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 215};
+  if(Var_is_void((* out))){
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 216};
     x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
     __builtin_unreachable();
   }
@@ -192,7 +193,7 @@ int Iter_try_next(Iter iter, Var * out){
 
 Var Iter_next(Iter iter){
   Var out;
-  return Iter_try_next(iter, & out) ? out :((void) 0, Void);
+  return Iter_try_next(iter, &(out)) ? out :((void) 0, Void);
 }
 
 static Var _range_raw_int(int value){
@@ -255,7 +256,7 @@ static int _range_general_next(Iter iter, Var * out){
 Iter range(int start, int end, int step, Iter iter){
   if(! Iter_truth(iter)) return NULL;
   if(! step){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "range",.line = 297};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "range",.line = 298};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("range")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -294,7 +295,7 @@ static int _filter_next(Iter iter, Var * out){
     Var value;
     Iter _x2c_macro_iterator_0 = source;
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       value = _x2c_macro_item_0;
       {
         if(Var_truth(_apply1(func, value))){
@@ -321,7 +322,7 @@ Iter Iter_filter(Iter iter, Func func, Iter dest){
 
 static int _map_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
-  if(! Iter_truth(source) || ! Iter_try_next(source, out)) return 0;
+  if(! Iter_truth(source) || ! Iter_try_next(source, &(* out))) return 0;
   if(iter -> aux) * out = _apply1(iter -> aux, * out);
   return 1;
 }
@@ -339,7 +340,7 @@ static int _zip_next(Iter iter, Var * out){
   Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
   if(! Iter_truth(left_iter) || ! Iter_truth(right_iter)) return 0;
   Var left, right;
-  if(! Iter_try_next(left_iter, & left) || ! Iter_try_next(right_iter, & right)) return 0;
+  if(! Iter_try_next(left_iter, &(left)) || ! Iter_try_next(right_iter, &(right))) return 0;
   * out = List_var(cons(left, cons(right, NULL)));
   return 1;
 }
@@ -353,7 +354,7 @@ static int _zip_with_next(Iter iter, Var * out){
   Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
   if(! Iter_truth(left_iter) || ! Iter_truth(right_iter)) return 0;
   Var left, right;
-  if(! Iter_try_next(left_iter, & left) || ! Iter_try_next(right_iter, & right)) return 0;
+  if(! Iter_try_next(left_iter, &(left)) || ! Iter_try_next(right_iter, &(right))) return 0;
   if(iter -> aux) * out = _apply2(iter -> aux, left, right);
   else * out = List_var(cons(left, cons(right, NULL)));
   return 1;
@@ -373,11 +374,11 @@ Iter Iter_map2(Iter left, Iter right, Func fn, Iter dest){
 
 static int _chain_next(Iter iter, Var * out){
   Iter current = Var_pointer(iter -> obj);
-  if(Iter_truth(current) && Iter_try_next(current, out)) return 1;
+  if(Iter_truth(current) && Iter_try_next(current, &(* out))) return 1;
   current = Var_pointer(iter -> state);
   iter -> obj = Iter_var(current);
   iter -> state =((void) 0, Void);
-  return Iter_truth(current) && Iter_try_next(current, out);
+  return Iter_truth(current) && Iter_try_next(current, &(* out));
 }
 
 Iter Iter_chain(Iter first, Iter second, Iter dest){
@@ -389,7 +390,7 @@ static int _enumerate_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_truth(source)) return 0;
   Var value;
-  if(! Iter_try_next(source, & value)) return 0;
+  if(! Iter_try_next(source, &(value))) return 0;
   int index = Var_int(Var_convert(iter -> state, 3453797));
   iter -> state = int_var(index + 1);
   * out = List_var(cons(int_var(index), cons(value, NULL)));
@@ -418,7 +419,7 @@ static int _head_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   int remaining = Var_int(Var_convert(iter -> state, 3453797));
   if(! Iter_truth(source) || remaining <= 0) return 0;
-  if(! Iter_try_next(source, out)) return 0;
+  if(! Iter_try_next(source, &(* out))) return 0;
   iter -> state = int_var(remaining - 1);
   return 1;
 }
@@ -434,7 +435,7 @@ static int _accumulate_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_truth(source)) return 0;
   Var item;
-  if(! Iter_try_next(source, & item)) return 0;
+  if(! Iter_try_next(source, &(item))) return 0;
   iter -> state = Var_binary(iter -> state, 56, item);
   * out = iter -> state;
   return 1;
@@ -449,7 +450,7 @@ static int _scan_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_truth(source) || ! iter -> aux) return 0;
   Var item;
-  if(! Iter_try_next(source, & item)) return 0;
+  if(! Iter_try_next(source, &(item))) return 0;
   iter -> state = _apply2(iter -> aux, iter -> state, item);
   * out = iter -> state;
   return 1;
@@ -474,7 +475,7 @@ static int _unique_next(Iter iter, Var * out){
   if(! Iter_truth(source)) return 0;
   while(1){
     Var value;
-    if(! Iter_try_next(source, & value)) return 0;
+    if(! Iter_try_next(source, &(value))) return 0;
     if(! Map_contains(seen, value)){
       Map_setindex(seen, value, value);
       * out = value;
@@ -539,19 +540,19 @@ Iter Iter_unzip(Iter iter, UnzipShared * shared, Iter dest){
 
 Var Iter_foldl(Iter iter, Var seed, Func fn){
   Var acc = seed, item;
-  int has_item = Iter_try_next(iter, & item);
+  int has_item = Iter_try_next(iter, &(item));
   if(Var_is_void(acc)){
     if(! has_item) return((void) 0, Void);
     acc = item;
-    has_item = Iter_try_next(iter, & item);
+    has_item = Iter_try_next(iter, &(item));
   }
   if(! fn){
-    while(has_item) has_item = Iter_try_next(iter, & item);
+    while(has_item) has_item = Iter_try_next(iter, &(item));
     return acc;
   }
   while(has_item){
     acc = _apply2(fn, acc, item);
-    has_item = Iter_try_next(iter, & item);
+    has_item = Iter_try_next(iter, &(item));
   }
   return acc;
 }
@@ -562,7 +563,7 @@ int Iter_any(Iter iter, Func pred){
     Var item;
     Iter _x2c_macro_iterator_1 = iter;
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
       item = _x2c_macro_item_1;
       if(Var_truth(_apply1(pred, item))) return 1;
     }
@@ -573,10 +574,10 @@ int Iter_any(Iter iter, Func pred){
 
 int Iter_all(Iter iter, Func pred){
   Var item;
-  if(! Iter_try_next(iter, & item)) return 1;
+  if(! Iter_try_next(iter, &(item))) return 1;
   if(! pred) return 0;
   do if(! Var_truth(_apply1(pred, item))) return 0;
-  while(Iter_try_next(iter, & item));
+  while(Iter_try_next(iter, &(item)));
   ;
   return 1;
 }
@@ -587,7 +588,7 @@ Var Iter_find(Iter iter, Func pred){
     Var item;
     Iter _x2c_macro_iterator_2 = iter;
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+    while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
       item = _x2c_macro_item_2;
       if(Var_truth(_apply1(pred, item))) return item;
     }
@@ -599,7 +600,7 @@ Var Iter_find(Iter iter, Func pred){
 int Iter_count(Iter iter){
   int total = 0;
   Var item;
-  while(Iter_try_next(iter, & item)) total ++;
+  while(Iter_try_next(iter, &(item))) total ++;
   return total;
 }
 
@@ -609,7 +610,7 @@ Var Iter_sum(Iter iter){
     Var item;
     Iter _x2c_macro_iterator_3 = iter;
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+    while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
       item = _x2c_macro_item_3;
       total = Var_binary(total, 56, item);
     }
@@ -624,7 +625,7 @@ Var Iter_product(Iter iter){
     Var item;
     Iter _x2c_macro_iterator_4 = iter;
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
+    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
       item = _x2c_macro_item_4;
       total = Var_binary(total, 54, item);
     }
@@ -637,12 +638,12 @@ int Var_compare(Var, Var);
 
 Var Iter_max(Iter iter){
   Var best;
-  if(! Iter_try_next(iter, & best)) return((void) 0, Void);
+  if(! Iter_try_next(iter, &(best))) return((void) 0, Void);
   {
     Var item;
     Iter _x2c_macro_iterator_5 = iter;
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
       item = _x2c_macro_item_5;
       if(Var_compare(item, best) > 0) best = item;
     }
@@ -653,12 +654,12 @@ Var Iter_max(Iter iter){
 
 Var Iter_min(Iter iter){
   Var best;
-  if(! Iter_try_next(iter, & best)) return((void) 0, Void);
+  if(! Iter_try_next(iter, &(best))) return((void) 0, Void);
   {
     Var item;
     Iter _x2c_macro_iterator_6 = iter;
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
+    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
       item = _x2c_macro_item_6;
       if(Var_compare(item, best) < 0) best = item;
     }
