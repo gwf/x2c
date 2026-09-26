@@ -378,7 +378,7 @@ static void _certify_native_meta(Compiler c, String name, List signature, Token 
 
 static void _bind_native_meta(Compiler c, String name, List signature, Token marker);
 
-static int _native_meta_effect_is_local(Compiler c, Var key);
+static int _native_meta_effect_is_local(String unit, Var key);
 
 static Var _sdk_identifier_result(Var value);
 
@@ -4187,7 +4187,7 @@ if(! _native_meta_accepts(c, function, signature)) Compiler_report_error(c, 1362
 Lisp_set_global(c -> macro_lisp, name, function);
 }
 
-static int _native_meta_effect_is_local(Compiler c, Var key){
+static int _native_meta_effect_is_local(String unit, Var key){
 
   {
     List _x2c_match_expr = Var_list(key);
@@ -4195,7 +4195,7 @@ static int _native_meta_effect_is_local(Compiler c, Var key){
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_249), &_x2c_match_capture)) {Var path = _x2c_match_values[0]; {
     Var _x2c_match_value_23 = path; {
-      String path = Var_string(_x2c_match_value_23);  return String_equal(home_absolute_path(path), Path_absolute(c -> filename));
+      String path = Var_string(_x2c_match_value_23);  return String_equal(home_absolute_path(path), unit);
     }
 
   }
@@ -4208,10 +4208,10 @@ return 0;
 }
 
 void Compiler_install_native_meta_effects(Compiler c, Map globs){
-  if(! _init_guard_) _file_init_(); {
+  if(! _init_guard_) _file_init_();  String unit = Path_absolute(c -> filename); {
     Var key, value;  Map _x2c_macro_object_29 = globs;  unsigned _x2c_macro_cursor_29 = 0;  Var _x2c_macro_cursor_output_36;  Var _x2c_macro_cursor_output_37;  while(Map_try_next(_x2c_macro_object_29, &(_x2c_macro_cursor_29), &(_x2c_macro_cursor_output_36), &(_x2c_macro_cursor_output_37))){
       key = _x2c_macro_cursor_output_36;  value = _x2c_macro_cursor_output_37; {
-        if(_native_meta_effect_is_local(c, key)) continue; {
+        if(_native_meta_effect_is_local(unit, key)) continue; {
           List row;  List _x2c_macro_object_28 = _native_meta_rows(c, value);  List _x2c_macro_cursor_28 = _x2c_macro_object_28;  Var _x2c_macro_cursor_output_35;  while(List_try_next(_x2c_macro_object_28, &(_x2c_macro_cursor_28), &(_x2c_macro_cursor_output_35))){
             row = Var_list(_x2c_macro_cursor_output_35); {
               List _x2c_destructure_2 = row;  String name = Var_string(List_getindex(_x2c_destructure_2, 0));  List signature = Var_list(List_getindex(_x2c_destructure_2, 1));  Map_setindex(c -> native_meta, String_var(name), List_var(signature));  _certify_native_meta(c, name, signature, NULL);
@@ -4435,7 +4435,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2191};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2192};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
