@@ -1957,6 +1957,26 @@ static void _record_meta_hash(Compiler c, List function, Token first) {
       c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
 }
 
+/* A bodied `meta` function lives in an `.xmacro` import, apart from program
+   code. The compiler's own `lib/meta.x` and `src/` units keep theirs. */
+static void _require_meta_import(Compiler c, List decl, Token meta) {
+  if (c.import_src && !c.macro_holes) return;
+  String name = "";
+  match (decl)
+    case %(declare ? (bindings (bind (binding ? ?(String own)) *))):
+      name = own;
+  if (c.macro_holes)
+    c.report_error(
+      <parse>, %"meta function '$name' cannot be produced by a macro",
+      meta, %( "move it to an .xmacro file and call it from the macro" ));
+  String root = x2c_get_root();
+  String path = c.filename ? Path.absolute(c.filename) : "";
+  if (path == %"$root/lib/meta.x" || path.startswith(%"$root/src/")) return;
+  c.report_error(
+    <parse>, %"meta function '$name' is defined in a program file",
+    meta, %( "move it to an .xmacro file this unit imports" ));
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
@@ -2026,7 +2046,8 @@ List Compiler.parse_top_level(Compiler c) {
     int start = (meta ? meta : definition_start) - tokens;
     int body = c.token - tokens;
     Token staged = native ? NULL : meta;
-    if (native) c.install_native_meta_function(decl, meta);
+    if (staged) _require_meta_import(c, decl, meta);
+    if (native)c.install_native_meta_function(decl, meta);
     $let(c.meta_body, staged != NULL) {
       function = _finish_function_definition(c, decl);
     }

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-definition-program-file.x:5:1: parse: meta function 'program_meta' is defined in a program file
+  meta int program_meta(int x) => x + 1;
+  ^^^^
+  note: move it to an .xmacro file this unit imports
+
