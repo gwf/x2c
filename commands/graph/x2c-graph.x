@@ -5,6 +5,7 @@
 */
 
 #include "frontend.x"
+#include "meta-project.x"
 #include "flows.x"
 #include "lifetime.x"
 #include "loop-allocations.x"
@@ -3171,6 +3172,7 @@ int main(int argc, char **argv) {
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
   if (!frontend.preload_macro_libraries()) return 1;
+  frontend.prepare_meta(inputs.list());
   Context command = Context.open_isolated_named("x2c graph command");
   int status = 0;
   try {

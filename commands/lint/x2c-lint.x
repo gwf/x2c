@@ -26,6 +26,7 @@
     `make commands-check` checks its findings on `tests/`.
 */
 #include "frontend.x"
+#include "meta-project.x"
 #include "lint.x"
 #include "tokens.x"
 #include "declarations.x"
@@ -128,6 +129,7 @@ int main(int argc, char **argv):
   Frontend frontend = Frontend.new(request)
   frontend.preprocessor_errors = _preprocessor_errors
   if !frontend.preload_macro_libraries(): return 1
+  frontend.prepare_meta(inputs.list())
   Path x2c = Path.dirname(Path.dirname(x2c_get_executable())).join("x2c")
   Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
   foreach String dir in request.include_dirs:

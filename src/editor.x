@@ -8,6 +8,7 @@
 
 #pragma once
 #include "frontend.x"
+#include "meta-project.x"
 #include "project.x"
 #include "sourceview.x"
 #include "emit.x"
@@ -180,6 +181,7 @@ int editor_request(int argc, char **argv) {
     argc - boundary, argv + boundary, sources, source);
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 2;
+  frontend.prepare_meta(%($source));
   Context command = Context.open_isolated_named("editor request");
   ParsedUnit unit;
   int parsed = frontend.open(source, unit);

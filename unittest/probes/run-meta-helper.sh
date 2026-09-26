@@ -92,4 +92,12 @@ done
 grep -q "return 24;" out/u12.c || fail "parallel result missing"
 [ -z "$(helpers)" ] || fail "helper left running after -j 8"
 
+# An editor request mounts the helper as a translation does.
+"$X2C" editor "$BUILD/editor.json" "$BUILD/jobs/u1.x" hover 0 0 -- \
+  translate "$BUILD/jobs/u1.x" >editor.out 2>&1 ||
+  fail "editor request failed: $(cat editor.out)"
+grep -q '"diagnostics":\[\]' editor.json ||
+  fail "editor request reported: $(cat editor.json)"
+[ -z "$(helpers)" ] || fail "helper left running after an editor request"
+
 echo "meta helper probes passed"
