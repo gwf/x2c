@@ -2983,7 +2983,7 @@ void Compiler_install_meta_declaration(Compiler, List, Token);
 void Compiler_record_declaration_visibility(Compiler, List);
 int Compiler_bind_linked_meta(Compiler, List, Type);
 Type Type_canonicalize(Type);
-void Compiler_install_meta_function(Compiler, List);
+void Compiler_install_meta_function(Compiler, List, Token);
 int Compiler_meta_is_comptime_only(Compiler, List);
 List Compiler_parse_top_level(Compiler c){
   if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)){
@@ -3034,7 +3034,7 @@ if(Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c)){
 default: break;
     }
   }
-List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? meta : definition_start) - tokens;  int body = c -> token - tokens;  Token lowered = native ? NULL : meta;  if(native) Compiler_install_native_meta_function(c, decl, meta); {
+List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? meta : definition_start) - tokens;  int body = c -> token - tokens;  Token staged = native ? NULL : meta;  if(native) Compiler_install_native_meta_function(c, decl, meta); {
   int * _x2c_macro_address_2 = & c -> meta_body;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
   _x2c_defer_env_9 _x2c_defer_env_39 = {._x2c_defer_capture_19 =(const void *) & _x2c_macro_address_2, ._x2c_defer_capture_20 =(const void *) & _x2c_macro_previous_2};
   X2CCleanup _x2c_defer_record_13 = {
@@ -3043,7 +3043,7 @@ List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? met
   };
   x2c_cleanup_push(&_x2c_defer_record_13);
   {
-    * _x2c_macro_address_2 = lowered != NULL; {
+    * _x2c_macro_address_2 = staged != NULL; {
       function = _finish_function_definition(c, decl);
     }
 
@@ -3051,7 +3051,7 @@ List function;  Token tokens = c -> tokenizer -> tokens;  int start =(meta ? met
   x2c_cleanup_leave(& _x2c_defer_record_13);
 }
 }
-_record_meta_hash(c, function, definition_start);  if(lowered && ! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function);  Compiler_record_declaration_visibility(c, function);  if(! meta)
+_record_meta_hash(c, function, definition_start);  if(staged && ! Compiler_bind_linked_meta(c, function, Type_canonicalize(List_type_from_ast(decl)))) Compiler_install_meta_function(c, function, staged);  Compiler_record_declaration_visibility(c, function);  if(! meta)
   {
     List _x2c_match_expr = function;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3067,7 +3067,7 @@ break;
 default: break;
     }
   }
-if(lowered && Compiler_meta_is_comptime_only(c, function)) return NULL;  if(Map_truth(c -> macro_holes)) return cons(_387, cons(int_var(definition_start -> line), cons(String_var(Compiler_definition_doc(c, definition_start)), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, NULL, cons(int_var(start), cons(int_var(body), NULL)));  return function;
+if(staged && Compiler_meta_is_comptime_only(c, function)) return NULL;  if(Map_truth(c -> macro_holes)) return cons(_387, cons(int_var(definition_start -> line), cons(String_var(Compiler_definition_doc(c, definition_start)), cons(List_var(function), NULL))));  _definition_source(c, function, definition_start -> line, NULL, cons(int_var(start), cons(int_var(body), NULL)));  return function;
 }
 Compiler_require_input(c);  Symbol unexpected = Compiler_peek(c, 0);  Compiler_report_error(c, 33658058, _906, c -> token, cons(_8, cons(String_var(c -> token -> text), cons(_189, cons(String_var(Symbol_str(unexpected)), NULL)))));
 }
