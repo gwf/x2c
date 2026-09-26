@@ -31,11 +31,8 @@ map-store    9
 array-store  6
 index-list   8
 index-string 98
-index-absent 0
 c-array      14
 c-array-pad  7
-c-array-bare 4
-scalar-zero  0
 live-set     112
 character    65 65  10 10  1 1
 flatten      (a b c d e)
@@ -44,7 +41,6 @@ table        (neg sin) void
 pair         34
 pair-typed   34
 pair-held    34
-pair-short   7
 pair-array   56
 walk-array   15
 walk-map     6
@@ -82,11 +78,6 @@ arr-contains 1
 arr-count    2
 arr-find     1
 arr-unshift  5
-arr-shift    4
-arr-take     4
-arr-remove   5
-arr-insert   5
-map-del      4
 map-default  5
 meta-poly    71 71
 meta-static  slot:4 slot:4

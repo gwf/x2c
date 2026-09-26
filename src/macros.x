@@ -2057,7 +2057,11 @@ static void _bind_native_meta(
           marker, %("name: $name"));
     }
     catch %(no-symbol *): {
-      if (!suppliers) return;
+      /* Staged code that calls it cannot link; the call reports why. */
+      if (!suppliers) {
+        c.meta_group_bound[%"<unbound $name>"] = 1;
+        return;
+      }
       String first = suppliers.car();
       function = ((Map) native_modules[first])[target];
       if (suppliers.cdr())
@@ -2345,6 +2349,18 @@ static int _reaches_compile_time(Compiler c, Var node) {
   return 0;
 }
 
+/* Whether `node` includes an x2c unit outside the runtime in `lib`, whose
+   header its own translation writes: a group compiles without it. */
+static int _meta_local_include(Var node, String lib) {
+  match (node)
+    case %(preproc ?(String text)):
+      if (text.startswith("#include \"") && text.endswith(".x\"")) {
+        String name = text[10:text.len() - 1];
+        return !Path.is_file(%"$lib$name");
+      }
+  return 0;
+}
+
 /* The unit's definitions so far that the group can reach, in source order:
    every directive and declaration, the imported `meta` definitions where
    their import stands, each function the group reaches, and the group's
@@ -2374,7 +2390,8 @@ static Array _meta_group_units(Compiler c) {
           if (at == i)
             for (; flushed < end; flushed++)
               ordered.push(c.meta_defs[flushed]);
-    if (i < count) ordered.push(c.unit_nodes[i]);
+    if (i < count && !_meta_local_include(c.unit_nodes[i], lib))
+      ordered.push(c.unit_nodes[i]);
   }
   for (; flushed < (int) c.meta_defs.len(); flushed++)
     ordered.push(c.meta_defs[flushed]);
@@ -2406,11 +2423,18 @@ static Array _meta_group_units(Compiler c) {
         grew = 1;
       }
   }
+  /* An unreached function keeps its prototype, which code generated for
+     the unit's types, such as a protocol adapter, may name; the optimizer
+     drops what nothing staged calls. */
   Array units = [];
-  foreach (List item, ordered)
+  foreach (List item, ordered) {
     if (!_function_identity(item, identity, name) ||
         (identity in reached && name != "main"))
       units.push(item);
+    else if (name != "main")
+      match (item) case %(function ?spec ?declarator ?):
+        units.push(%(declare $spec (bindings $declarator)));
+  }
   return units;
 }
 
@@ -2595,8 +2619,9 @@ static List _meta_group_code(Compiler c, String stamp, String &failure) {
     Map initials = _meta_initial_copies(c, units);
     foreach (Var unit, _meta_group_entry(c, stamp, initials))
       units.push(unit);
-    List ast = c.generate_protocol_adapters(units.list_free());
-    ast = c.transform(ast);
+    /* The unit's protocol adapters and their registration belong to the
+       program; staged code reaches the runtime's own. */
+    List ast = c.transform(units.list_free());
     code = generate_code_text(c, ast, "group");
   }
   catch %(?kind *detail): {
@@ -2662,6 +2687,35 @@ static String _stage_meta_group(Compiler c, String &failure) {
   return module;
 }
 
+/* The first name `node` reads that is a bodyless `meta` prototype nothing
+   supplies, or NULL. */
+static String _meta_unbound_callee(Compiler c, Var node) {
+  if (node is not <list>) return NULL;
+  Var bound;
+  match (node) case %(ident (binding ? ?(String name))): {
+    String unbound = %"<unbound $name>";
+    return unbound in c.meta_group_bound ||
+           (name in c.native_meta && !c.macro_lisp.try_get(name, bound) &&
+            !c.bind_native_meta(name)) ? name : NULL;
+  }
+  foreach (Var child, (List) node) {
+    String name = _meta_unbound_callee(c, child);
+    if (name) return name;
+  }
+  return NULL;
+}
+
+/* Why the group cannot link, or NULL: a function it calls is a bodyless
+   `meta` prototype that nothing supplies. */
+static String _meta_group_unbound(Compiler c) {
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ?fn *): {
+      String name = _meta_unbound_callee(c, fn);
+      if (name) return %"no binding for $name";
+    }
+  return NULL;
+}
+
 /* Binds each unbound function of the pending group to its staged native
    code when `name` is pending, after reinitializing the module's `meta
    static` values for this unit in the unit's meta Scope. Returns whether
@@ -2674,8 +2728,8 @@ static int _bind_meta_group(Compiler c, String name, Token site) {
     match (entry) case %(function ? ?(String target) ?):
       if (target == name) pending = 1;
   if (!pending) return 0;
-  String failure = NULL;
-  String module = _stage_meta_group(c, failure);
+  String failure = _meta_group_unbound(c);
+  String module = failure ? NULL : _stage_meta_group(c, failure);
   if (!module)
     c.report_error(
       <macro>, "this function cannot run at compile time", site,

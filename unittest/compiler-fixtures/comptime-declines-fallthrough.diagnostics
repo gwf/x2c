@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/comptime-declines-fallthrough.x:13:1: macro: this function cannot run at compile time
-  meta int ct_fallthrough(int n) {
-  ^^^^
-  note: reason: a switch arm that falls through into the next
-

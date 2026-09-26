@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/meta-call-depth.x:11:18: macro: explicit meta call was stopped
-    printf("%d\n", $md_deep(4000));
-                   ^
-  note: reason: its compile-time form nested too deep
-

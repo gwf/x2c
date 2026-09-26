@@ -1,0 +1,7 @@
+goto 1 2
+fallthrough 3 2
+static 15
+macro 5
+bitfield 2
+wide enum 9
+local static 1

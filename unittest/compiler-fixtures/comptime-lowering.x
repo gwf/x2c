@@ -1,14 +1,19 @@
-/*  comptime-lowering.x -- every construct the comptime lowering pass carries
+/*  comptime-lowering.x -- the constructs compile-time code has used
 
-    Each `meta` function is lowered to Lisp by `Compiler.lower_comptime`
-    and installed in the macro session. `main` calls each one in expression
-    position, so the printed value is what the lowered Lisp produced during
-    translation. A construct the pass declines is absent from this fixture
-    until the phase that adds it; see
-    `plans/comptime-x2c-generalization.md`.
+    Each `meta` function once went through the retired Lisp lowering; it now
+    runs as the native code the unit's staged `meta` group compiles. `main`
+    calls each one in expression position, so the printed value is what the
+    function computed during translation. Compile-time Lisp calls reach the
+    same native functions by name.
 */
 
 #include "x2c.x"
+
+/* A Map from alternating keys and values. */
+$(defun ct_map_of (flat)
+  (if (null? flat) (Map.new)
+    (let ((map (ct_map_of (cddr flat))))
+      (begin (Map.setindex map (car flat) (cadr flat)) map))))
 
 /* Mutual recursion needs the names before the definitions, the way a C
    prototype does. */
@@ -295,10 +300,6 @@ meta int ct_index_list(List ys) => Var.integer(ys[1]);
 
 meta int ct_index_string(String s) => s[1];
 
-/* An absent element has no Lisp value, so it reads as nil rather than
-   aborting the session the way a `void` crossing would. */
-meta int ct_index_absent(List ys) => ys[9] ? 1 : 0;
-
 /* A local C array is a cell holding an `Array`, zero-filled to its declared
    size the way C fills one. */
 meta int ct_c_array(int n) {
@@ -308,12 +309,6 @@ meta int ct_c_array(int n) {
 }
 
 meta int ct_c_array_padded(void) { int a[4] = { 7 }; return a[0] + a[3]; }
-
-meta int ct_c_array_bare(int n) {
-  int a[3];
-  a[1] = n;
-  return a[1] + a[2];
-}
 
 /* An `Array` accumulated with `push` and returned where a `List` is
    declared: the return converts, the way a declaration does. */
@@ -371,9 +366,6 @@ meta int ct_live_set(List xs, int seed) {
   return n + after;
 }
 
-/* An uninitialized local keeps its own type's zero. */
-meta int ct_scalar_zero(void) { int z; return z; }
-
 /* --- destructuring and iteration over every container -------------------- */
 
 /* `Var (a, b) = pair` reads each name out of the source by position, which
@@ -395,13 +387,6 @@ meta int ct_pair_typed(List pair) {
 meta int ct_pair_held(List xs) {
   Var (a, b) = xs.cdr();
   return Var.integer(a) * 10 + Var.integer(b);
-}
-
-/* Fewer values than names is the absent element again: nil, not a `void`
-   crossing that would end the session. */
-meta int ct_pair_short(List one) {
-  Var (a, b) = one;
-  return Var.integer(a) + (b ? 100 : 0);
 }
 
 /* An `Array` source converts to a `List` first, the way the transform
@@ -570,42 +555,6 @@ meta int ct_arr_unshift(int n) {
   Array xs = [n];
   xs.unshift(n + 1);
   return Var.integer(xs[0]);
-}
-
-/* `Array.shift`, `Array.take_last`, `Array.remove`, `Array.insert` and
-   `Map.del` answer `void` where there is no element, and `void` has no Lisp
-   value, so each is wrapped rather than aliased. Each function below reads a
-   present element and then an absent one, which is where an alias would
-   fail. */
-
-meta int ct_arr_shift(int n) {
-  Array xs = [n];
-  int first = Var.integer(xs.shift());
-  return xs.shift() ? -1 : first;
-}
-
-meta int ct_arr_take_last(int n) {
-  Array xs = [n];
-  int last = Var.integer(xs.take_last());
-  return xs.take_last() ? -1 : last;
-}
-
-meta int ct_arr_remove(int n) {
-  Array xs = [n, n + 1];
-  int gone = Var.integer(xs.remove(-1));
-  return xs.remove(9) ? -1 : gone;
-}
-
-meta int ct_arr_insert(int n) {
-  Array xs = [n];
-  xs.insert(0, n + 1);
-  return xs.insert(9, n) ? -1 : Var.integer(xs[0]);
-}
-
-meta int ct_map_del(int n) {
-  Map m = { "a": n };
-  int gone = Var.integer(m.del("a"));
-  return m.del("a") ? -1 : gone;
 }
 
 meta int ct_map_setdefault(int n) {
@@ -794,11 +743,8 @@ int main(void) {
   printf("array-store  %d\n", $(ct_array_store 1));
   printf("index-list   %d\n", $(ct_index_list '(7 8 9)));
   printf("index-string %d\n", $(ct_index_string "abc"));
-  printf("index-absent %d\n", $(ct_index_absent '(1 2)));
   printf("c-array      %d\n", $(ct_c_array 10));
   printf("c-array-pad  %d\n", $(ct_c_array_padded));
-  printf("c-array-bare %d\n", $(ct_c_array_bare 4));
-  printf("scalar-zero  %d\n", $(ct_scalar_zero));
   printf("live-set     %d\n", $(ct_live_set '(a b c) 1));
   printf("character    %d %d  %d %d  %d %d\n",
          $(ct_letter), ct_letter(),
@@ -811,11 +757,10 @@ int main(void) {
   printf("pair         %d\n", $(ct_pair '(3 4)));
   printf("pair-typed   %d\n", $(ct_pair_typed '(3 4)));
   printf("pair-held    %d\n", $(ct_pair_held '(9 3 4)));
-  printf("pair-short   %d\n", $(ct_pair_short '(7)));
   printf("pair-array   %d\n", $(ct_pair_array (List.array '(5 6))));
   printf("walk-array   %d\n", $(ct_walk_array (List.array '(4 5 6))));
-  printf("walk-map     %d\n", $(ct_walk_map (Map_of '(1 2 3 4))));
-  printf("walk-pairs   %d\n", $(ct_walk_map_pairs (Map_of '(1 2 3 4))));
+  printf("walk-map     %d\n", $(ct_walk_map (ct_map_of '(1 2 3 4))));
+  printf("walk-pairs   %d\n", $(ct_walk_map_pairs (ct_map_of '(1 2 3 4))));
   printf("walk-empty   %d\n", $(ct_walk_empty (Map.new) (List.array '())));
   printf("is-list      %d\n", $(ct_is_list '(a b)));
   printf("head         %s\n", $(str (ct_head '(a b))));
@@ -860,11 +805,6 @@ int main(void) {
   printf("arr-count    %d\n", $(ct_arr_count 4));
   printf("arr-find     %d\n", $(ct_arr_find 4));
   printf("arr-unshift  %d\n", $(ct_arr_unshift 4));
-  printf("arr-shift    %d\n", $(ct_arr_shift 4));
-  printf("arr-take     %d\n", $(ct_arr_take_last 4));
-  printf("arr-remove   %d\n", $(ct_arr_remove 4));
-  printf("arr-insert   %d\n", $(ct_arr_insert 4));
-  printf("map-del      %d\n", $(ct_map_del 4));
   printf("map-default  %d\n", $(ct_map_setdefault 4));
   printf("meta-poly    %d %d\n", $(mt_poly 7), mt_poly(7));
   printf("meta-static  %s %s\n",
