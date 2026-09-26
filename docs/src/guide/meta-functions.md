@@ -942,7 +942,7 @@ for text and location queries; constructed subtrees do not acquire it.
 typedef struct Point { int x, y, z; } Point;
 
 meta static List field_count(Type type) =>
-  x2c_literal_int(type.assoc(<fields>).len());
+  x2c_literal_int(((List) type.assoc(<fields>)).len());
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
 
