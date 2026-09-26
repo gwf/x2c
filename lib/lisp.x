@@ -90,6 +90,7 @@ protocol Cleanup(Lisp);
 #include "regex.x"
 #include "typed-array.x"
 #include "typed-map.x"
+#include "lisp-init.x"
 
 /* Optional modules stay outside the implicit prelude.  The compiler links
    their runtime units, so private checked aliases can install their pure
@@ -1118,6 +1119,38 @@ $(def lisp.native.target.rows (append '(
   (lisp_read_file)
   (lisp_write_file)
   (List_sort)
+
+  // The standard algorithms `etc/init.xlisp` binds.
+  (lisp_last)
+  (lisp_begin rest)
+  (lisp_member)
+  (lisp_assoc)
+  (lisp_append rest)
+  (lisp_not)
+  (lisp_null)
+  (lisp_sub)
+  (lisp_mul)
+  (lisp_div)
+  (lisp_mod)
+  (lisp_caar)
+  (lisp_cadr)
+  (lisp_cdar)
+  (lisp_cddr)
+  (lisp_caaar)
+  (lisp_caadr)
+  (lisp_cadar)
+  (lisp_caddr)
+  (lisp_cdaar)
+  (lisp_cdadr)
+  (lisp_cddar)
+  (lisp_cdddr)
+  (lisp_match)
+  (lisp_bound)
+  (lisp_search_replace)
+  (lisp_binder)
+  (lisp_binders)
+  (lisp_binder_lets)
+  (lisp_string_append_all rest)
 
   // Interpreted callbacks run through a session-bound Func.
   (_lisp_List_map (as List_map))
