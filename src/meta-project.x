@@ -229,12 +229,6 @@ static void _meta_depfile(String path, Map deps) {
     deps[Path.absolute(dependency)] = 1;
 }
 
-/* Parses each source into its group, compiles the groups, and links the
-   helper in `directory` with the runtime. Returns the manifest: `(groups
-   (K ...))` for each table that has a group, `(failures ((K WHY) ...))`
-   for those that do not build, `(failure WHY)`, empty unless the helper
-   does not link, and `(deps ((PATH DIGEST) ...))` for every file the
-   build read. */
 static void _meta_clear(String directory, int index) {
   foreach (String suffix, %(".c" ".h" ".o" ".d" ".deps" ".failure")) {
     String file = %"$directory/group-$index$suffix";
@@ -242,21 +236,53 @@ static void _meta_clear(String directory, int index) {
   }
 }
 
+/* Compiles the group a parse left for table `index`, adding the files it
+   read to `deps`. Returns NULL when its object is built, or else why
+   not. */
+static String _meta_compile(
+  String directory, int index, List flags, Toolchain t, String include,
+  Map deps) {
+  String base = %"$directory/group-$index";
+  if (!Path.is_file(%"$base.deps")) return "the unit has no group";
+  foreach (String path, Path.read_text(%"$base.deps").split("\n"))
+    if (path) deps[path] = 1;
+  if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
+  String failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
+                              "-iquote" $include @flags
+                              "-MD" "-MF" ${%"$base.d"}
+                              "-c" ${%"$base.c"} "-o" ${%"$base.o"}));
+  if (!failure) failure = _meta_localize(t, base, index);
+  if (failure && !failure.contains(directory))
+    failure = %"$failure; the group's C is in $directory";
+  _meta_depfile(%"$base.d", deps);
+  return failure;
+}
+
+/* Parses each source into its group, compiles the groups, and links the
+   helper in `directory` with the runtime. Returns the manifest: `(groups
+   (K ...))` for each table that has a group, `(failures ((K WHY) ...))`
+   for those that do not build, `(failure WHY)`, empty unless the helper
+   does not link, and `(deps ((PATH DIGEST) ...))` for every file the
+   build read. */
 static List _meta_build(
   Frontend f, String directory, List imports, List owners, Map reaches,
   List flags, Toolchain t, String include, String identity) {
   int count = owners.len() + 1;
   for (int index = 0; index < count; index++) _meta_clear(directory, index);
+  Map deps = {};
+  String loop = %"${x2c_get_root()}/etc/meta-helper.x";
+  foreach (String path, %(@imports @owners $loop)) deps[path] = 1;
+  Array groups = [], built = [], failures = [], objects = [];
   Compiler.use_meta_build_directory(directory);
   int index = 1;
   foreach (String owner, owners) {
     _meta_unit(f, owner, index);
-    /* An input that only imports its meta code, and whose own parse does
-       not give a group that builds, gets the group of its imports alone. */
+    String failure = _meta_compile(directory, index, flags, t, include, deps);
+    /* An input that only imports its meta code, and whose own group does
+       not build, gets the group of its imports alone. */
     List reached = reaches[owner];
     String base = %"$directory/group-$index";
-    if (reached && (Path.is_file(%"$base.failure") ||
-                    !Path.is_file(%"$base.deps"))) {
+    if (reached && failure) {
       _meta_clear(directory, index);
       Array lines = [];
       foreach (String path, reached)
@@ -264,40 +290,19 @@ static List _meta_build(
       String source = %"$base-imports.x";
       Path.write_text(source, "\n".join(lines.list_free()).add("\n"));
       _meta_unit(f, source, index);
+      failure = _meta_compile(directory, index, flags, t, include, deps);
+    }
+    if (Path.is_file(%"$base.deps")) {
+      groups.push(index);
+      if (failure) failures.push(%($index $failure));
+      else {
+        built.push(index);
+        objects.push(%"$base.o");
+      }
     }
     index++;
   }
   Compiler.use_meta_build_directory(NULL);
-
-  Map deps = {};
-  String loop = %"${x2c_get_root()}/etc/meta-helper.x";
-  foreach (String path, %(@imports @owners $loop)) deps[path] = 1;
-  Array groups = [], built = [], failures = [], objects = [];
-  for (index = 0; index < count; index++) {
-    String base = %"$directory/group-$index";
-    if (!Path.is_file(%"$base.deps")) continue;
-    groups.push(index);
-    foreach (String path, Path.read_text(%"$base.deps").split("\n"))
-      if (path) deps[path] = 1;
-    String failure = NULL;
-    if (Path.is_file(%"$base.failure"))
-      failure = Path.read_text(%"$base.failure");
-    else {
-      failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
-                           "-iquote" $include @flags
-                           "-MD" "-MF" ${%"$base.d"}
-                           "-c" ${%"$base.c"} "-o" ${%"$base.o"}));
-      if (!failure) failure = _meta_localize(t, base, index);
-      if (failure && !failure.contains(directory))
-        failure = %"$failure; the group's C is in $directory";
-      _meta_depfile(%"$base.d", deps);
-    }
-    if (failure) failures.push(%($index $failure));
-    else {
-      built.push(index);
-      objects.push(%"$base.o");
-    }
-  }
   String failure = NULL;
   String support = _meta_support(t, include, identity, failure);
   if (support) {

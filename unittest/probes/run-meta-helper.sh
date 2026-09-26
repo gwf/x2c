@@ -92,6 +92,18 @@ done
 grep -q "return 24;" out/u12.c || fail "parallel result missing"
 [ -z "$(helpers)" ] || fail "helper left running after -j 8"
 
+# An input whose own group does not compile falls back to the group of its
+# imports alone.
+cat > clash.x <<'EOF'
+#include <stdio.h>
+$(import "calls.xmacro")
+static int List_len(int a) { return a; }
+int v = $twice(3) + List_len(0);
+EOF
+"$X2C" translate --out-dir out clash.x >clash.out 2>&1 ||
+  fail "an input's failing group did not fall back: $(cat clash.out)"
+grep -q "v = 6 + List_len(0)" out/clash.c || fail "fallback result missing"
+
 # An editor request mounts the helper as a translation does.
 "$X2C" editor "$BUILD/editor.json" "$BUILD/jobs/u1.x" hover 0 0 -- \
   translate "$BUILD/jobs/u1.x" >editor.out 2>&1 ||
