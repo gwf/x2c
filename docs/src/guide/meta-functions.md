@@ -37,11 +37,10 @@ The body has not changed. `meta` makes it available to the compiler during
 translation as well as to the finished program. You can use it for an
 ordinary calculation; it does not have to inspect types or generate code.
 
-A `meta` function with a body lives in a `.xmacro` file that the program
-imports, apart from the program's own code; see
+A `meta` function with a body can sit beside the code that calls it, as
+in the samples of this chapter, or in a `.xmacro` file that several units
+import; see
 [Sharing a `meta` function between units](#sharing-a-meta-function-between-units).
-The samples in this chapter show the definition beside the code that calls
-it so that each fits in one block.
 
 ## Call it in the program
 
@@ -419,11 +418,13 @@ write `$sin(1.0)` to compute the value during translation.
 
 ## Native modules
 
-A bodied `meta` function is compiled into a module automatically, as
+The project's bodied `meta` functions need no module of your own: the
+compiler builds the project meta module from them and caches it, as
 [How a meta function runs](#how-a-meta-function-runs) describes. A native
-module built ahead of time lets compile-time code call functions from your
-own project without compiling them during translation, and share them
-between projects. Define each function with `meta native`:
+module is built ahead of time instead, by you or by a package. It lets
+compile-time code call functions that are not part of the project meta
+module, and it can be shared between projects. Define each function with
+`meta native`:
 
 ```x2c
 meta native int triple(int x) { return 3 * x; }
@@ -697,7 +698,8 @@ each `.xmacro` file an input imports, directly, through an included
 header, or through a package, and those an input defines itself. It
 emits them, with the declarations they use, as C through the ordinary
 backend, compiles them with the host C compiler, and links them with the
-runtime into one helper program for the project. The translation then
+runtime into one helper program, the project meta module. The translation
+then
 sends each `$` call, and each compile-time Lisp call, of one of those
 functions to the helper and inserts the reply. A project whose inputs
 reach no `meta` function builds nothing extra.
@@ -728,9 +730,9 @@ operations that read other compiler state, such as `x2c_source_text` and
 code.
 
 Running compile-time code needs what building the program needs: the C
-compiler and the runtime headers. A module that does not compile is
-reported at the call with the C compiler's first error and the directory
-that keeps its C.
+compiler and the runtime headers. A project meta module that does not
+compile is reported at the call with the C compiler's first error and the
+directory that keeps its C.
 
 A raise inside a `meta` body becomes a diagnostic at the `$` call. A body
 that crashes, exits, or overflows the stack ends the helper; the call is
@@ -1075,8 +1077,16 @@ intended function scope.
 
 ## What the compiler answers
 
-`lib/meta.x` declares the compiler operations a `meta` function can call.
-Each is a plain function whose name is the compile-time Lisp name with `_`
+`lib/meta.x` declares the compiler operations. The code builders and
+`x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail` and
+`x2c_diagnostic_warn` work in every `meta` function. The queries that read
+the compiler's symbol table, such as `x2c_syntax_type`,
+`x2c_type_fields` and `x2c_type_resolve`, run only in the compiler's own
+`meta` code: the `.xmacro` files and `lib/meta.x` that are linked into
+the compiler. A project `meta` function receives those answers as `Type`
+and `Source` parameters instead; calling such a query from the project
+meta module reports that it is not available to project meta code. Each
+operation is a plain function whose name is the compile-time Lisp name with `_`
 for `.`, so `x2c.type.fields` is `x2c_type_fields` from x2c. They are grouped
 here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
@@ -1217,6 +1227,10 @@ In the complete shape example below, the generated C mentions none of `shape_fie
 A `meta` function that needs no compiler query, like `poly` above,
 keeps both forms and is emitted normally.
 
+The queries themselves belong to the compiler's own `meta` code. A project
+`meta` function reaches the compiler only through what a call passes it:
+constants, captured syntax, a `Type`, or a `Source`.
+
 ## A complete example
 
 Two files. The first is a `.xmacro` holding the `meta` functions and the
@@ -1280,25 +1294,14 @@ the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
 
 ## Sharing a `meta` function between units
 
-A `meta` function with a body lives in a `.xmacro` file, apart from program
-code. A bodied `meta` function in an ordinary program `.x` file is an
-error that names the function and asks to move it to an `.xmacro` file the
-unit imports:
+A bodied `meta` function may be defined in an ordinary `.x` file or in a
+`.xmacro` file. Either way the project meta build copies it into the
+project meta module. It must be written in a source file: a `meta`
+function inside a macro template, or one produced by a `$` call, is
+reported where it is written.
 
-```text
-sample.x:5:1: parse: meta function 'poly' is defined in a program file
-  meta int poly(int n) => n * n + 3 * n + 1;
-  ^^^^
-  note: move it to an .xmacro file this unit imports
-```
-
-A macro cannot produce one either: a `meta` function inside a macro
-template is reported where it is written. The compiler's own `lib/meta.x`
-and its `src/` units are the exceptions. A bodyless `meta` prototype, a
-`meta native` declaration and a `meta static` value may still appear in a
-`.x` file.
-
-Put a `meta` function in a `.xmacro` that each unit imports. A `.xmacro` file
+To share a `meta` function between units, put it in a `.xmacro` that each
+unit imports. A `.xmacro` file
 may hold `meta` functions beside the macros that call them, and importing it
 installs their compile-time forms in the importing unit. The unit that imports
 the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's
