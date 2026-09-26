@@ -26,7 +26,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:299`
+Source: `src/meta-project.x:347`
 
 ## Design notes
 
@@ -38,9 +38,10 @@ header, or through a package, and from an input that defines its own
 until those move to `.xmacro` files. Meta code under the x2c root's
 `lib`, `src`, and `etc` is the compiler's own, linked into it.
 
-Table 0 holds the functions of every imported `.xmacro` file, parsed as
-one unit that imports them all. An input that defines its own gets a
-table of its own, which holds its imports as well. The helper is cached
+Each input that reaches any gets a table of its own, parsed from the
+input itself so its imports see the declarations they are used with.
+Each table's object keeps only its entry global, so copies of one
+import in several tables link together. The helper is cached
 under the x2c cache root, keyed by the SHA-256 of those sources, the
 compiler stamp, the C compiler's identity, and the flags, and is built
 again when a file its build read, x2c source or C header, changes.

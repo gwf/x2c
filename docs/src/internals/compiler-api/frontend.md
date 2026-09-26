@@ -77,7 +77,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:330`
+Source: `src/frontend.x:331`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -87,7 +87,7 @@ Source: `src/frontend.x:330`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:284`
+Source: `src/frontend.x:285`
 
 ### `ParsedUnit`
 
@@ -109,7 +109,7 @@ Source: `src/frontend.x:396`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:347`
+Source: `src/frontend.x:348`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -119,7 +119,7 @@ Source: `src/frontend.x:347`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:368`
+Source: `src/frontend.x:369`
 
 ## Public types
 

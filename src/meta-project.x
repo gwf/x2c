@@ -10,9 +10,10 @@
     until those move to `.xmacro` files. Meta code under the x2c root's
     `lib`, `src`, and `etc` is the compiler's own, linked into it.
 
-    Table 0 holds the functions of every imported `.xmacro` file, parsed as
-    one unit that imports them all. An input that defines its own gets a
-    table of its own, which holds its imports as well. The helper is cached
+    Each input that reaches any gets a table of its own, parsed from the
+    input itself so its imports see the declarations they are used with.
+    Each table's object keeps only its entry global, so copies of one
+    import in several tables link together. The helper is cached
     under the x2c cache root, keyed by the SHA-256 of those sources, the
     compiler stamp, the C compiler's identity, and the flags, and is built
     again when a file its build read, x2c source or C header, changes.
@@ -24,6 +25,7 @@
 #pragma private
 
 #include "datum.x"
+#include "digest.x"
 #include "deps.x"
 #include "script.x"
 #include "toolchain.x"
@@ -63,7 +65,7 @@ static String _meta_quoted(Token token) =>
    imports; a quoted include of a project `.x` file and an imported
    package's entry are read for imports the same way. */
 static int _meta_scan(
-  CliRequest request, String path, Array imports, Map seen) {
+  CliRequest request, String path, Array imports, Map seen, Map packages) {
   if (path in seen) return 0;
   seen[path] = 1;
   String text = NULL;
@@ -92,20 +94,21 @@ static int _meta_scan(
       String spelling = _meta_quoted(tokens.next());
       String file = spelling ? _meta_resolve(directory, spelling) : NULL;
       if (file && file.endswith(".xmacro") && !_meta_owned(file) &&
-          _meta_scan(request, file, imports, seen))
+          _meta_scan(request, file, imports, seen, packages))
         imports.push(file);
     }
     else if (word == "import") {
       String name = _meta_quoted(tokens.next()), root = NULL;
       String entry = name ? x2c_package_entry(
         request.sources, request.package_roots(), name, root) : NULL;
-      if (entry) _meta_scan(request, entry, imports, seen);
+      if (entry) packages[root] = 1;
+      if (entry) _meta_scan(request, entry, imports, seen, packages);
     }
     else if (token.type == <preproc> && word.startswith("#include \"") &&
              word.endswith(".x\"")) {
       String file = %"$directory/${word[10:word.len() - 1]}";
       if (Path.is_file(file) && !_meta_owned(Path.absolute(file)))
-        _meta_scan(request, Path.absolute(file), imports, seen);
+        _meta_scan(request, Path.absolute(file), imports, seen, packages);
     }
   }
   return meta;
@@ -120,7 +123,12 @@ static void _meta_unit(Frontend f, String path, int index) {
   defer unit.close();
   unit.compiler.meta_build = index + 1;
   unit.compiler.diagnostics.limit = 0;
-  if (started && unit.collect(f)) unit.parse();
+  if (!started) return;
+  /* A call of a project function the collection meets fails before the
+     helper exists; the parse still reaches every definition. */
+  unit.collect(f);
+  unit.compiler.diagnostics.reset();
+  unit.parse();
 }
 
 /* Runs `arguments`, a C compiler command, and returns NULL, or its first
@@ -181,6 +189,37 @@ static String _meta_tables(List built, int count) {
   return out;
 }
 
+/* Leaves `x2c_module_targets_K` the only global symbol of the object
+   `base.o` of table K, so the groups of several units, each holding its own
+   copy of what it imports, link into one program. */
+static String _meta_localize(Toolchain t, String base, int index) {
+  String entry = %"x2c_module_targets_$index", object = %"$base.o";
+  String merged = %"$base.r.o";
+#ifdef __APPLE__
+  String failure = _meta_cc(%(${t.cc} "-r" "-nostdlib"
+    ${%"-Wl,-exported_symbol,_$entry"} $object "-o" $merged));
+#else
+  String failure = _meta_cc(%(${t.cc} "-r" "-nostdlib" $object "-o" $merged));
+  if (!failure)
+    failure = _meta_cc(%("objcopy" ${%"--keep-global-symbol=$entry"}
+                         $merged));
+#endif
+  if (!failure) Path.move_to(merged, object);
+  return failure;
+}
+
+/* The SHA-256 of the bytes of the file at `path`, or NULL when it cannot
+   be read. */
+static String _meta_digest(String path) {
+  File input = fopen(path, "rb");
+  if (!input) return NULL;
+  String digest = NULL;
+  try digest = input.sha256();
+  catch %(io-fail *): digest = NULL;
+  input.close();
+  return digest;
+}
+
 /* Adds each dependency of the depfile at `path` to `deps`. */
 static void _meta_depfile(String path, Map deps) {
   String text = NULL;
@@ -196,26 +235,38 @@ static void _meta_depfile(String path, Map deps) {
    for those that do not build, `(failure WHY)`, empty unless the helper
    does not link, and `(deps ((PATH DIGEST) ...))` for every file the
    build read. */
-static List _meta_build(
-  Frontend f, String directory, List imports, List owners, Toolchain t,
-  String include, String identity) {
-  int count = owners.len() + 1;
-  for (int index = 0; index < count; index++)
-    foreach (String suffix, %(".c" ".h" ".o" ".d" ".deps" ".failure")) {
-      String file = %"$directory/group-$index$suffix";
-      if (Path.exists(file)) Path.remove_file(file);
-    }
-  Compiler.use_meta_build_directory(directory);
-  if (imports) {
-    Array lines = [];
-    foreach (String path, imports)
-      lines.push(String.new("$(import ").add(path.repr()).add(")"));
-    String source = %"$directory/meta-imports.x";
-    Path.write_text(source, "\n".join(lines.list_free()).add("\n"));
-    _meta_unit(f, source, 0);
+static void _meta_clear(String directory, int index) {
+  foreach (String suffix, %(".c" ".h" ".o" ".d" ".deps" ".failure")) {
+    String file = %"$directory/group-$index$suffix";
+    if (Path.exists(file)) Path.remove_file(file);
   }
+}
+
+static List _meta_build(
+  Frontend f, String directory, List imports, List owners, Map reaches,
+  List flags, Toolchain t, String include, String identity) {
+  int count = owners.len() + 1;
+  for (int index = 0; index < count; index++) _meta_clear(directory, index);
+  Compiler.use_meta_build_directory(directory);
   int index = 1;
-  foreach (String owner, owners) _meta_unit(f, owner, index++);
+  foreach (String owner, owners) {
+    _meta_unit(f, owner, index);
+    /* An input that only imports its meta code, and whose own parse does
+       not give a group that builds, gets the group of its imports alone. */
+    List reached = reaches[owner];
+    String base = %"$directory/group-$index";
+    if (reached && (Path.is_file(%"$base.failure") ||
+                    !Path.is_file(%"$base.deps"))) {
+      _meta_clear(directory, index);
+      Array lines = [];
+      foreach (String path, reached)
+        lines.push(String.new("$(import ").add(path.repr()).add(")"));
+      String source = %"$base-imports.x";
+      Path.write_text(source, "\n".join(lines.list_free()).add("\n"));
+      _meta_unit(f, source, index);
+    }
+    index++;
+  }
   Compiler.use_meta_build_directory(NULL);
 
   Map deps = {};
@@ -232,8 +283,10 @@ static List _meta_build(
       failure = Path.read_text(%"$base.failure");
     else {
       failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
-                           "-iquote" $include "-MD" "-MF" ${%"$base.d"}
+                           "-iquote" $include @flags
+                           "-MD" "-MF" ${%"$base.d"}
                            "-c" ${%"$base.c"} "-o" ${%"$base.o"}));
+      if (!failure) failure = _meta_localize(t, base, index);
       if (failure && !failure.contains(directory))
         failure = %"$failure; the group's C is in $directory";
       _meta_depfile(%"$base.d", deps);
@@ -257,10 +310,8 @@ static List _meta_build(
   }
   Array rows = [];
   foreach (Var (path, _), deps) {
-    String text = NULL;
-    try text = Path.read_text(path);
-    catch %((!or not-found io-fail) *): continue;
-    rows.push(%($path ${text.sha256()}));
+    String digest = _meta_digest(path);
+    if (digest) rows.push(%($path $digest));
   }
   List manifest = %((groups ${groups.list()}) (failures ${failures.list()})
                     (failure ${failure ? failure : ""})
@@ -284,10 +335,7 @@ static List _meta_current(String directory) {
   if (manifest is not <list>) return NULL;
   foreach (List row, ((List) manifest).assoc(<deps>)) {
     (String path, String digest) = row;
-    String current = NULL;
-    try current = Path.read_text(path);
-    catch %((!or not-found io-fail) *): return NULL;
-    if (current.sha256() != digest) return NULL;
+    if (_meta_digest(path) != digest) return NULL;
   }
   return manifest;
 }
@@ -298,10 +346,18 @@ static List _meta_current(String directory) {
     does not build is reported at the first call that needs it. */
 void Frontend.prepare_meta(Frontend f, List inputs) {
   Array imports = [], owners = [];
-  Map seen = {};
+  Map known = {}, reaches = {}, packages = {};
   foreach (String input, inputs) {
     String path = Path.absolute(input);
-    if (_meta_scan(f.request, path, imports, seen)) owners.push(path);
+    Array reached = [];
+    int own = _meta_scan(f.request, path, reached, {}, packages);
+    if (own || reached.len()) owners.push(path);
+    if (!own && reached.len()) reaches[path] = reached.list();
+    foreach (String file, reached)
+      if (!(file in known)) {
+        known[file] = 1;
+        imports.push(file);
+      }
   }
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -311,15 +367,16 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   }
   Toolchain t = toolchain_new(cc, NULL, NULL, NULL, NULL, 0, 0);
   String compiler = Compiler.meta_cc_identity(cc);
-  String flags = _meta_flags().repr();
-  String identity =
-    %"$stamp\n$compiler\n$flags\n$include\n${t.runtime_lib}";
+  /* A unit's group includes what the unit includes: the request's C
+     directories and each imported package's headers. */
+  List flags = f.request.cc_args;
+  foreach (Var (root, _), packages)
+    flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
+  String identity = %"$stamp\n$compiler\n${_meta_flags().repr()}\n"
+                    + %"${flags.repr()}\n$include\n${t.runtime_lib}";
   Array key = [identity];
   foreach (String path, %(@imports "--" @owners)) {
-    String text = NULL;
-    try text = Path.read_text(path);
-    catch %((!or not-found io-fail) *): text = "";
-    key.push(%"$path ${text.sha256()}");
+    key.push(%"$path ${_meta_digest(path)}");
   }
   String directory =
     %"$root/meta/project-${String.sha256("\n".join(key))}";
@@ -331,7 +388,8 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     manifest = _meta_current(directory);
     if (!manifest)
       manifest = _meta_build(
-        f, directory, imports, owners, t, include, identity);
+        f, directory, imports, owners, reaches, flags, t, include,
+        identity);
   }
   Map failures = {}, units = {}, groups = {};
   foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;

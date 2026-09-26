@@ -1183,10 +1183,13 @@ Var Compiler.meta_helper_call(
 /* Holds what staged `meta static` values allocate. */
 static Scope session_meta_scope = NULL;
 
+/* The flags of a session module without a precompiled header. */
+static List _meta_flags_plain(void) => %("-fsigned-char" "-fPIC" "-O0");
+
 /* The flags of a session module: `-O0`, with the runtime header
    precompiled once under `root` when the C compiler can. */
 static List _meta_session_flags(String root, String stamp, String compiler) {
-  List flags = %("-fsigned-char" "-fPIC" "-O0");
+  List flags = _meta_flags_plain();
   /* The runtime header's text is part of the key: a precompiled header
      refuses to load once the header it was built from changes. */
   String runtime = NULL;
@@ -1249,7 +1252,17 @@ static String _stage_meta_group(Compiler c, String &failure) {
     output, %(@flags "-iquote" $directory "-iquote" $meta_include_dir
               ${%"$directory/$cfile"}));
   String printed = NULL, errors = NULL;
-  if (tool_capture(action.arguments, printed, errors)) {
+  int status = tool_capture(action.arguments, printed, errors);
+  /* A precompiled runtime header refuses to load once a header it read
+     changes, which its key does not see, so the module builds without
+     it. */
+  if (status && flags.len() > 3) {
+    action = linker.module_action(
+      output, %(@{_meta_flags_plain()} "-iquote" $directory
+                "-iquote" $meta_include_dir ${%"$directory/$cfile"}));
+    status = tool_capture(action.arguments, printed, errors);
+  }
+  if (status) {
     failure = Compiler.meta_cc_error(errors);
     if (!failure.contains(directory))
       failure = %"$failure; the group's C is in $directory";

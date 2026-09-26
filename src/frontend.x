@@ -266,6 +266,7 @@ static int _start(
     if (filename) {
       _configure_package(compiler, frontend.request, filename);
       _tokenize_input(frontend, unit, filename);
+      Compiler.begin_meta_unit(compiler.filename);
     }
     else {
       compiler.filename = "<repl>";
@@ -368,7 +369,6 @@ int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
 int ParsedUnit.parse(ParsedUnit &p) {
   Compiler compiler = p.compiler;
   if (compiler.error_count()) return 0;
-  Compiler.begin_meta_unit(compiler.filename);
   try p.ast = compiler.full_parse(p.globals, p.generated_symbols);
   catch %(malformed *): return 0;
   return !compiler.error_count();

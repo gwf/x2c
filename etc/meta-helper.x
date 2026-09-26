@@ -137,8 +137,9 @@ List x2c_protocol_member(List participant, List base, String member) =>
 List x2c_function_parameter(List function, String wanted) =>
   %("x2c.deferred" "x2c_function_parameter" $function $wanted);
 
+/* A `Source` parameter's description carries its text. */
 String x2c_source_text(Var syntax) {
-  (void) syntax;
+  match (syntax) case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _unavailable("x2c.source.text");
 }
 
