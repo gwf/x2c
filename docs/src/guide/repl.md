@@ -185,11 +185,15 @@ remain, both for failed initialization and failed statements.
 
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
-Long sessions do not have a bounded-memory guarantee. A one-million-step
-Lisp call budget interrupts runaway interpreted evaluation; once exhausted,
-no further interpreted code runs, including pending `defer` bodies. Ordinary
-evaluation failures still run those cleanups. The next submission gets a fresh
-budget. Native callbacks are not a preemptible sandbox.
+Long sessions do not have a bounded-memory guarantee. Each submission may
+make 40 million interpreted Lisp calls, the evaluator's default budget.
+SIGINT (Ctrl-C) during evaluation stops the submission with an
+`(interrupt ...)` evaluation error. Once the budget is exhausted or the
+submission is interrupted, no further interpreted code runs, including
+pending `defer` bodies. Ordinary evaluation failures
+still run those cleanups. The next submission gets a fresh budget. Native
+callbacks are not a preemptible sandbox: an interrupt takes effect at the
+next interpreted call.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
@@ -200,6 +204,6 @@ During interactive editing, Ctrl-C clears both the current edit buffer and any
 pending incomplete submission, then returns to the `x2c> ` prompt without a
 diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
 still makes that exit status 1. Terminal canonical mode is restored before a
-submission runs, so Ctrl-C during evaluation continues to terminate the
-process. Terminals without the required escape-sequence support use the basic
-line reader instead. Piped input retains the same output and exit behavior.
+submission runs, and Ctrl-C during evaluation stops only that submission.
+Terminals without the required escape-sequence support use the basic line
+reader instead. Piped input retains the same output and exit behavior.

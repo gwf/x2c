@@ -162,7 +162,6 @@ static Var _lower_name(Lowering l, String stem) {
   if (stem != "loop" && stem != "after" && stem != "static" &&
       stem != "body" && stem != "undo")
     return Atom.intern(%"$stem-$count");
-  if (!l.own) return Atom.intern(%"$stem$count");
   return Atom.intern(%"$stem$count-${l.own}");
 }
 
@@ -435,14 +434,7 @@ static void _lower_scan(Lowering l, Var form) {
   if (head == <bind>) _lower_scan_bind(l, items);
   else if (head == <targets>) _lower_scan_targets(l, items.cdr());
   else if (head == <op>) _lower_scan_op(l, items);
-  else if (head == <call> || head == <meta-call>) {
-    _lower_scan_call(l, cons(<call>, items.cdr()));
-  }
-  else if (head == <tpl-call>) {
-    _lower_scan_each(l, items.caddr().cdr());
-    return;
-  }
-  else if (head == <meta-cap>) return;
+  else if (head == <call>) _lower_scan_call(l, items);
   else if (head == <expr>) _lower_scan_function_value(l, items);
   else if (head == <goto>) l.rejected = 1;
   _lower_scan_each(l, items);
@@ -490,103 +482,6 @@ static Var _lower_number(Lowering l, List type, String text) {
   Var value = ((Type) type).numeric_literal_value(text);
   if (value is not void) return value;
   return _lower_decline(l, "unreadable numeric literal");
-}
-
-/* A String literal arrives as its source spelling, quotes included. */
-/* `*` is a sequence binder in a pattern, so the `(* char)` that selects a C
-   string also matches a plain `(char)`. The spelling settles it: a string
-   carries its double quote and a character literal its single quote, and a
-   character is its code, not its text. Adjacent string literals share one
-   spelling; each piece is unescaped on its own, as C does, and joined. */
-static Var _lower_text(String spelling) {
-  int len = spelling.len();
-  if (len >= 2 && spelling[0] == '"') {
-    String text = "";
-    for (int i = 0; i < len; i++) {
-      if (spelling[i] != '"') continue;
-      int start = ++i;
-      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
-      String piece = String.new_len(spelling + start, i - start).unescape();
-      text = %"$text$piece";
-    }
-    return text;
-  }
-  if (len >= 3 && spelling[0] == '\'') {
-    String body = String.new_len(spelling + 1, len - 2).unescape();
-    return (char) (body.len() ? body[0] : 0);
-  }
-  return spelling;
-}
-
-/* --- folded constants --------------------------------------------------- */
-
-/* Literal folding hoists a constant `List`, `String` or `Var` into the
-   compiler cache and leaves `(cache ID)` behind, so a `match` pattern and a
-   template's constant head are not visible in the syntax. The cache is a
-   graph of ids over `cons`, `var` and `string` leaves. */
-
-static Var _lower_constant_leaf(Lowering l, List value) {
-  match (value) {
-    case %(expr ? (parens ?inner)):
-      return _lower_constant_leaf(l, inner);
-    case %(expr ?type (cast ? ?inner)): {
-      Var constant = _lower_constant_leaf(l, inner);
-      if (constant is void) return void;
-      Symbol tag = ((Type) type).scalar_tag();
-      return tag ? constant.convert(tag) : constant;
-    }
-    case %(expr ? (!set ?node (cache ?))):
-      return _lower_constant(l, node);
-    case %(expr ? (!set ?node (expr ? (cache ?)))):
-      return _lower_constant(l, node);
-    case %(expr ? (nil)):                       return %();
-    case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? (literal ? ? ?symbol)): return symbol;
-    case %(expr ("String") (call ? (args ?inner))):
-      return _lower_constant_leaf(l, inner);
-    /* A constant String addition is cached as its resolved protocol call. */
-    case %(expr ("String")
-      (call (expr ? (ident (binding ? "String_add")))
-            (args ?left ?right))): {
-      Var a = _lower_constant(l, left), b = _lower_constant(l, right);
-      if (a is void || b is void) return void;
-      return a.string().add(b);
-    }
-    /* Canonical type literals can contain a struct's binding id. */
-    case %(expr ("Var")
-      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
-      return _lower_constant_leaf(l, inner);
-    case %(expr ("String") (literal ? ?(String text))): return text;
-    case %(expr (* char) (literal ? ?(String text))): return _lower_text(text);
-    case %(expr ?type (literal ? ?(String text))):
-      return _lower_number(l, type, text);
-  }
-  /* Folding leaves an expression in place when the value is only known at
-     run time, as a pattern that interpolates a local does. There is no
-     compile-time value to read back, so the caller declines rather than
-     treating the unfolded node as data. */
-  if (value && value.car() == <expr>) return void;
-  return value;
-}
-
-static Var _lower_constant(Lowering l, Var node) {
-  match (node) {
-    case %(cache ?(int id)): {
-      List key = l.compiler.id_keys[id];
-      match (key) {
-        case %(cons ?head ?tail):
-          return cons(_lower_constant(l, head), _lower_constant(l, tail));
-        case %(var ?value):    return _lower_constant_leaf(l, value);
-        case %(string ?value): return _lower_constant_leaf(l, value);
-        case %(nil): return %();
-      }
-      return key;
-    }
-    case %(cons ?head ?tail):
-      return cons(_lower_constant(l, head), _lower_constant(l, tail));
-    case %(nil): return %();
-  }
-  return _lower_constant_leaf(l, node);
 }
 
 /* The slot holding a local's storage. */
@@ -643,7 +538,7 @@ static Var _lower_segments(Lowering l, List parts) {
 
 /* A folded constant used as a value. */
 static Var _lower_quoted(Lowering l, Var node) {
-  Var value = _lower_constant(l, node);
+  Var value = l.compiler.folded_constant(node);
   if (value is void) return _lower_decline(l, "a constant did not fold");
   return %(quote $value);
 }
@@ -1324,7 +1219,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
     case %(literal ("Var") "void"): return %(C.void);
     case %(literal (* char) ?(String text)):
-      return _lower_text(text);
+      return literal_text_value(text);
     case %(literal ("String") ?(String text)): return text;
     case %(literal ?ltype ?(String text)):
       return _lower_number(l, ltype, text);
@@ -1427,14 +1322,6 @@ static Var _lower_content(Lowering l, List type, Var content) {
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
       return _lower_application(l, content);
-    case %(meta-cap ?captured): return %(quote $captured);
-    case %(tpl-call ?definition (args *arguments)): {
-      List values = _lower_args(l, NULL, arguments, NULL);
-      return %(_x2c.tpl-call (quote $definition) (list @values));
-    }
-    case %(meta-call (expr ?callee (ident (binding ? ?(String name))))
-                    (args *args)):
-      return _lower_call(l, callee, name, args);
     case %(call (expr ?callee (ident (binding ? ?(String name))))
                 (args *args)):
       return _lower_native_call(l, callee, name, args);
@@ -1660,7 +1547,7 @@ static Var _lower_arms(
   Lowering l, Var subject, List arms, List rest, List k) {
   if (!arms) return _lower_block(l, rest, k);
   List arm = arms.car();
-  Var pattern = _lower_constant(l, arm.car());
+  Var pattern = l.compiler.folded_constant(arm.car());
   if (pattern is void) return _lower_decline(l, "case pattern is not folded");
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
@@ -2166,12 +2053,10 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
           (from_tag ? from_tag : source.scalar_tag()))
         return _lower_to_type(l, target, value);
       /* A declared converter, `Job List.job(List)`, is the call the
-         compiled path inserts; a `Var` boxes and unboxes as it is, and
-         captured syntax stays syntax, as the parser leaves it. */
+         compiled path inserts; a `Var` boxes and unboxes as it is. */
       if (l.compiler.sym.is_var_type(want) ||
           l.compiler.sym.is_var_type(from))
         return value;
-      match (node) case %(expr ? (meta-cap ?)): return value;
       List call = l.compiler.converter_call(node, from, want);
       match (call)
         case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
@@ -2451,20 +2336,11 @@ static Var _lower_update(
   return _lower_bind_value(l, id, combined, rest, k);
 }
 
-/* The operator a compound assignment applies, or the zero Symbol. */
+/* The operator a compound assignment applies, or the zero Symbol. `@=`
+   has no scalar evaluation, so it stays unlowered. */
 static Symbol _lower_compound(Var operator) {
-  Symbol zero = 0;
-  if (operator == <"+=">) return <+>;
-  if (operator == <"-=">) return <->;
-  if (operator == <"*=">) return <*>;
-  if (operator == <"/=">) return </>;
-  if (operator == <"%=">) return <%>;
-  if (operator == <"&=">) return <&>;
-  if (operator == <"|=">) return <|>;
-  if (operator == <"^=">) return <^>;
-  if (operator == <"<<=">) return <"<<">;
-  if (operator == <">>=">) return <">>">;
-  return zero;
+  Symbol applied = ((Symbol) operator).compound_operator();
+  return applied == <@> ? (Symbol) 0 : applied;
 }
 
 /* A step of one in the target's own type: an `int` counter must not become
@@ -2688,8 +2564,6 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     }
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
-    /* Phase 3 owns these two cases; the rest of the statement grammar is
-       Phase 2's. */
     case %(dstrdecl ? (targets *targets) ?init):
       return _lower_destructure(l, targets, init, rest, k);
     case %(dstrdecl (params *params) ?init):
@@ -2772,10 +2646,7 @@ List ReplLower.lower(ReplLower self, List fn) {
     .records = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
     .cursors = _lower_scratch_map(scratch),
-    .definitions = [],
-    .declined = 0,
-    .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
-    .rejected = 0, .uncallable = 0
+    .definitions = []
   };
   Lowering l = &state;
   self.reason = NULL;
@@ -2785,7 +2656,6 @@ List ReplLower.lower(ReplLower self, List fn) {
            (bind (binding ? ?(String name))
                  ((fnmod (params *params)) *)) (block *items)): {
       (void) spec;
-      l.owner.reason = NULL;
       l.own = name;
       _lower_scan(l, fn);
       _lower_scan_nested_writes(l, fn, 0);
@@ -2926,8 +2796,7 @@ static List _repl_type_layout(Sym sym, Type type, Map cache) {
   NativeScalarAccess scalar = exact ? native_scalar_access(exact) : NULL;
   if (scalar)
     return _repl_scalar_layout(declared, exact, scalar, tag, tagged);
-  if (!tag && (sym.is_named_value_type(declared, "bool") ||
-               sym.is_named_value_type(declared, "_Bool")))
+  if (!tag && _lower_bool_type(sym, declared))
     return _repl_int_layout(declared, %(unsigned char));
   if (!tag && native.is_enum())
     return sym.get(%(@native "int-range"))

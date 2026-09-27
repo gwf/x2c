@@ -53,10 +53,10 @@ typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 /* --- the arguments of a `$` call ---------------------------------------- */
 
 
-/* A String or character literal's value from its source spelling, quotes
-   included: adjacent pieces are unescaped on their own and joined, as C
-   does, and a character is its code. */
-static Var _meta_text(String spelling) {
+/** Returns the value of a String or character literal from its source
+    `spelling`, quotes included: adjacent pieces are unescaped on their own
+    and joined, as C does, and a character is its code. */
+Var literal_text_value(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"') {
     String text = "";
@@ -76,7 +76,7 @@ static Var _meta_text(String spelling) {
   return spelling;
 }
 
-static Var _meta_constant(Compiler c, Var node);
+Var Compiler.folded_constant(Compiler c, Var node);
 
 /* The value of one folded leaf, or void when it is only known at run
    time. */
@@ -89,16 +89,16 @@ static Var _meta_constant_leaf(Compiler c, List value) {
       Symbol tag = ((Type) type).scalar_tag();
       return tag ? constant.convert(tag) : constant;
     }
-    case %(expr ? (!set ?node (cache ?))): return _meta_constant(c, node);
+    case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
-      return _meta_constant(c, node);
+      return c.folded_constant(node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
     case %(expr ? (literal ? ? ?symbol)):       return symbol;
     case %(expr ("String")
       (call (expr ? (ident (binding ? "String_add")))
             (args ?left ?right))): {
-      Var a = _meta_constant(c, left), b = _meta_constant(c, right);
+      Var a = c.folded_constant(left), b = c.folded_constant(right);
       if (a is void || b is void) return void;
       return a.string().add(b);
     }
@@ -108,7 +108,8 @@ static Var _meta_constant_leaf(Compiler c, List value) {
       (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
       return _meta_constant_leaf(c, inner);
     case %(expr ("String") (literal ? ?(String text))): return text;
-    case %(expr (* char) (literal ? ?(String text))): return _meta_text(text);
+    case %(expr (* char) (literal ? ?(String text))):
+      return literal_text_value(text);
     case %(expr ?type (literal ? ?(String text))):
       return ((Type) type).numeric_literal_value(text);
   }
@@ -116,15 +117,17 @@ static Var _meta_constant_leaf(Compiler c, List value) {
   return value;
 }
 
-/* Literal folding hoists a constant into the compiler cache and leaves
-   `(cache ID)`, a graph of ids over `cons`, `var` and `string` leaves. */
-static Var _meta_constant(Compiler c, Var node) {
+/** Returns the value of the folded constant `node`, or void when part of it
+    is only known at run time. Literal folding hoists a constant into the
+    compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
+    `var` and `string` leaves. */
+Var Compiler.folded_constant(Compiler c, Var node) {
   match (node) {
     case %(cache ?(int id)): {
       List key = c.id_keys[id];
       match (key) {
         case %(cons ?head ?tail):
-          return cons(_meta_constant(c, head), _meta_constant(c, tail));
+          return cons(c.folded_constant(head), c.folded_constant(tail));
         case %(var ?value):    return _meta_constant_leaf(c, value);
         case %(string ?value): return _meta_constant_leaf(c, value);
         case %(nil): return %();
@@ -132,7 +135,7 @@ static Var _meta_constant(Compiler c, Var node) {
       return key;
     }
     case %(cons ?head ?tail):
-      return cons(_meta_constant(c, head), _meta_constant(c, tail));
+      return cons(c.folded_constant(head), c.folded_constant(tail));
     case %(nil): return %();
   }
   return _meta_constant_leaf(c, node);
@@ -180,7 +183,7 @@ Var Compiler.meta_argument(
       if (operator in meta_operators)
         value = c.meta_argument(left, NULL, site, call).binary(
           operator, c.meta_argument(right, NULL, site, call));
-    default: value = _meta_constant(c, node);
+    default: value = c.folded_constant(node);
   }
   if (value is void)
     c.report_error(

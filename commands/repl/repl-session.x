@@ -43,6 +43,7 @@ typedef struct ReplCompletion {
 #include "lisp.x"
 #include "scope.x"
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 
 static void _write_stdout(String text, int newline, Symbol operation) {
@@ -57,6 +58,14 @@ static void _write_stdout(String text, int newline, Symbol operation) {
 static void _repl_print(String text) => _write_stdout(text, 0, <print>);
 static void _repl_println(String text) => _write_stdout(text, 1, <println>);
 
+/* The evaluator a SIGINT interrupts while a submission runs. */
+static Lisp _running;
+
+static void _interrupt(int signal) {
+  (void) signal;
+  _running.set_interrupted(1);
+}
+
 /** Borrows an initialized submission compiler until its unit closes.
     Source-fact collection must be disabled because submission scratch maps
     are reclaimed after each call. */
@@ -70,7 +79,6 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
   session.lowering = ReplLower.new(compiler, session.evaluator);
-  session.evaluator.call_budget(1000000);
   $lisp.bind(session.evaluator, "print", _repl_print);
   $lisp.bind(session.evaluator, "println", _repl_println);
   return session;
@@ -94,6 +102,39 @@ List ReplSession.symbols(ReplSession session) {
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
   return session.names.try_get(name, entry) ? entry.list() : NULL;
+}
+
+/* The compiler's input state, which a submission or completion replaces
+   with its own text and restores on every exit. The caller restores
+   `braces` in its own `defer`, where the region check sees the scratch
+   Array it installs put back. */
+struct _ParserInput {
+  Tokenizer tokenizer;
+  Token token, boundary, directives;
+  String text;
+  Map arms;
+  Array layout_marks, packed_marks;
+};
+
+static struct _ParserInput _parser_input(Compiler c) {
+  struct _ParserInput input = {
+    .tokenizer = c.tokenizer, .token = c.token,
+    .boundary = c.input_boundary, .directives = c.directives_taken,
+    .text = c.text, .arms = c.arm_stacks, .layout_marks = c.layout_marks,
+    .packed_marks = c.packed_marks
+  };
+  return input;
+}
+
+static void _restore_parser_input(Compiler c, struct _ParserInput input) {
+  c.tokenizer = input.tokenizer;
+  c.token = input.token;
+  c.input_boundary = input.boundary;
+  c.directives_taken = input.directives;
+  c.text = input.text;
+  c.arm_stacks = input.arms;
+  c.layout_marks = input.layout_marks;
+  c.packed_marks = input.packed_marks;
 }
 
 static List _completion_filter(
@@ -173,24 +214,10 @@ ReplCompletion ReplSession.complete(
   DiagnosticsHold diagnostics = c.diagnostics.hold();
   defer c.diagnostics.release(diagnostics, 0);
   Scope scratch = $auto(Scope.new());
-  Tokenizer tokenizer = c.tokenizer;
-  Token token = c.token, boundary = c.input_boundary;
-  Token directives = c.directives_taken;
-  String text = c.text;
-  Map arms = c.arm_stacks;
-  Array braces = c.braces, layout_marks = c.layout_marks;
-  Array packed_marks = c.packed_marks;
-  defer {
-    c.tokenizer = tokenizer;
-    c.token = token;
-    c.input_boundary = boundary;
-    c.directives_taken = directives;
-    c.text = text;
-    c.arm_stacks = arms;
-    c.layout_marks = layout_marks;
-    c.packed_marks = packed_marks;
-    c.braces = braces;
-  }
+  struct _ParserInput input = _parser_input(c);
+  defer _restore_parser_input(c, input);
+  Array braces = c.braces;
+  defer c.braces = braces;
   c.directives_taken = NULL;
   SymTxn transaction;
   $scope(&scratch) {
@@ -359,31 +386,19 @@ static int _native_prototype(Compiler c) {
 
 /** Submits one complete candidate without printing or retaining a pending
     prefix. Only successfully initialized declarations publish new bindings;
-    evaluation effects on previously published values survive failure. */
+    evaluation effects on previously published values survive failure.
+    While the submission is evaluated, SIGINT fails it with `<interrupt>`;
+    the previous SIGINT disposition returns afterward. */
 ReplResult ReplSession.submit(ReplSession session, String source) {
   Compiler c = session.compiler;
   Map names = session.names;
   ReplResult result = { .status = <rejected>, .value = void };
   c.diagnostics.reset();
   Scope scratch = $auto(Scope.new());
-  Tokenizer tokenizer = c.tokenizer;
-  Token token = c.token, boundary = c.input_boundary;
-  Token directives = c.directives_taken;
-  String text = c.text;
-  Map arms = c.arm_stacks;
-  Array braces = c.braces, layout_marks = c.layout_marks;
-  Array packed_marks = c.packed_marks;
-  defer {
-    c.tokenizer = tokenizer;
-    c.token = token;
-    c.input_boundary = boundary;
-    c.directives_taken = directives;
-    c.text = text;
-    c.arm_stacks = arms;
-    c.layout_marks = layout_marks;
-    c.packed_marks = packed_marks;
-    c.braces = braces;
-  }
+  struct _ParserInput input = _parser_input(c);
+  defer _restore_parser_input(c, input);
+  Array braces = c.braces;
+  defer c.braces = braces;
   c.directives_taken = NULL;
   SymTxn transaction;
   $scope(&scratch) {
@@ -501,6 +516,12 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     return result;
   }
   result.lowered = forms;
+  _running = session.evaluator;
+  _running.set_interrupted(0);
+  struct sigaction stop = { .sa_handler = _interrupt }, previous;
+  sigemptyset(&stop.sa_mask);
+  sigaction(SIGINT, &stop, &previous);
+  defer sigaction(SIGINT, &previous, NULL);
   try {
     foreach (Var form, forms) session.evaluator.eval(form);
     if (execute) result.value = session.evaluator.eval(%(__repl_eval));

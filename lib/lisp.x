@@ -87,6 +87,7 @@ protocol Cleanup(Lisp);
 #include "typed-array.x"
 #include "typed-map.x"
 #include "lisp-init.x"
+#include <signal.h>
 
 /* Optional modules stay outside the implicit prelude.  The compiler links
    their runtime units, so private checked aliases can install their pure
@@ -209,9 +210,12 @@ struct Lisp {
   long call_steps;      // calls made by the evaluation in progress, reset
                         // at each outer entry so a long translation is a
                         // sequence of budgets rather than one
-  int call_exhausted;   // the budget ran out and no call may renew it until
-                        // the public entry that opened it returns
+  // The budget ran out or evaluation was interrupted, and no call may renew
+  // it until the public entry that opened it returns. `Lisp.set_interrupted`
+  // may set it from a signal handler.
+  volatile sig_atomic_t call_exhausted;
   long call_step_max;   // calls one evaluation may make
+  volatile sig_atomic_t interrupted; // stops every call until cleared
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
 
@@ -1571,6 +1575,7 @@ static Var _run_frame(
 
 static void _spend_call(Lisp lisp) {
   if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
+    if (lisp.interrupted) raise %(interrupt (operation "apply"));
     lisp.call_exhausted = 1;
     raise %(call-stack (operation "apply") (why "steps"));
   }
@@ -1815,6 +1820,16 @@ void Lisp.call_budget(Lisp lisp, long budget) {
   if (lisp && budget > 0) lisp.call_step_max = budget;
 }
 
+/** Sets whether evaluation in `lisp` is interrupted. While `interrupted` is
+    nonzero, every interpreted call raises `<interrupt>`, including calls
+    made after a catch. The store is async-signal-safe, so a signal handler
+    may interrupt a running evaluation; the owner clears the flag before the
+    next one. `lisp` must be a live session. */
+void Lisp.set_interrupted(Lisp lisp, int interrupted) {
+  lisp.interrupted = interrupted;
+  if (interrupted) lisp.call_exhausted = 1;
+}
+
 static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   if (callable is <lambda>) return _apply_lambda(lisp, callable, raw, env);
   if (callable is not <func>) raise %(not-call (actual ${callable.kind()}));
@@ -1897,7 +1912,7 @@ static void _install_specials(Lisp lisp) {
 static void _open_call_budget(Lisp lisp) {
   if (lisp.call_depth) return;
   lisp.call_steps = 0;
-  lisp.call_exhausted = 0;
+  lisp.call_exhausted = lisp.interrupted;
 }
 
 /** Evaluates one Lisp form in `lisp`.

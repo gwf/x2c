@@ -435,14 +435,6 @@ static size_t _display_width(const char *s, size_t len) {
   return width;
 }
 
-/* Return the display width of a single UTF-8 character at position 's'. */
-static int _single_char_width(const char *s, size_t len) {
-  if (len == 0) return 0;
-  size_t clen;
-  uint32_t cp = _utf8_decode(s, len, clen);
-  return _codepoint_width(cp);
-}
-
 enum KEY_ACTION {
   KEY_NULL = 0,
   CTRL_A = 1,
@@ -992,12 +984,8 @@ static void _render(struct EditState *l, int flags) {
   _write_bytes(fd, ab.b, ab.len);
 }
 
-static void _refresh_with_flags(struct EditState *l, int flags) {
-  _render(l,flags);
-}
-
 static void _refresh_line(struct EditState *l) {
-  _refresh_with_flags(l,REFRESH_ALL);
+  _render(l,REFRESH_ALL);
 }
 
 /* Stops at the configured interactive-input limit. */
@@ -1019,7 +1007,6 @@ static int _grow(struct EditState *l, size_t needed) {
     }
     newlen *= 2;
   }
-  if (newlen < needed || newlen == SIZE_MAX) return -1;
 
   /* Allocate one extra byte for the nul terminator. */
   newbuf = Scope.realloc(l.buf, newlen + 1);
@@ -1034,8 +1021,7 @@ static int _grow(struct EditState *l, size_t needed) {
 static int _insert_raw(struct EditState *l, const char *c, size_t clen) {
   size_t insert_pos = l.pos;
 
-  if (clen > SIZE_MAX-l.len || _grow(l,l.len+clen) == -1)
-    return -1;
+  if (_grow(l,l.len+clen) == -1) return -1;
 
   if (l.len == l.pos) memcpy(l.buf+l.pos,c,clen);
   else {
@@ -1247,9 +1233,7 @@ static int _append_paste(
   size_t needed;
 
   if (*len > maxlen || slen > maxlen-*len) return -1;
-  if (*len > SIZE_MAX-slen) return -1;
   needed = *len+slen;
-  if (l.len > SIZE_MAX-needed) return -1;
   if (_grow(l,l.len+needed) == -1) return -1;
   if (_reserve_paste(buf,cap,*len,slen) == -1) return -1;
   memcpy(*buf+*len,s,slen);
@@ -1405,7 +1389,7 @@ static int _show_completion_group(
 }
 
 static void _show_completions(struct EditState *l, List candidates) {
-  _refresh_with_flags(l, REFRESH_CLEAN);
+  _render(l, REFRESH_CLEAN);
   _write_bytes(l.input.ofd, "\r", 1);
   _show_completion_group(l, candidates, <command>, "Commands");
   _show_completion_group(l, candidates, <keyword>, "Keywords");
@@ -1660,21 +1644,7 @@ ReplInputResult ReplInput.read(
     text = text.remove_suffix("\n").remove_suffix("\r");
     return (ReplInputResult) { .status = <line>, .text = text };
   }
-  try { return _read_interactive(
-    r, prompt, complete, completion_context); }
-  catch %(alloc-fail *details): {
-    _restore(r);
-    Error.raise(<alloc-fail>, details);
-  }
-  catch %(size-limit *details): {
-    _restore(r);
-    Error.raise(<size-limit>, details);
-  }
-  catch %(io-fail *details): {
-    _restore(r);
-    Error.raise(<io-fail>, details);
-  }
-  return (ReplInputResult) { .status = <eof> };
+  return _read_interactive(r, prompt, complete, completion_context);
 }
 
 /** Remembers one nonempty entry, suppressing an adjacent duplicate and
