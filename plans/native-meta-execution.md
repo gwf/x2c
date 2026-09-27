@@ -485,3 +485,5 @@ REPL, keeps latency the same, adds replay-based crash recovery, and
 drops address results such as closures. The REPL keeps in-process
 staging. Open: stale autodiff references in `examples` and `site`; the
 independent consolidation table; `src/stage.x` size (1326 lines).
+
+Open for landing on dev: make project-meta template results opaque so inspecting one errors (today they are placeholder Lists, documented as not for inspection; no current code inspects them).
