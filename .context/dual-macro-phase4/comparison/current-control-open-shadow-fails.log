@@ -1,0 +1,9 @@
+  Translate 1 x2c file in 72 ms
+  Compile 1 C file in 71 ms
+  Link 1 input in 36 ms
+Built executable /tmp/dual-native-shadow/open-shadow-fails/current-control/probe in 682 ms
+  Generated 1 C file and 1 header (1.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-native-shadow/open-shadow-fails/current-control/build (retained)
+  Output /tmp/dual-native-shadow/open-shadow-fails/current-control/probe (422.4 KiB)

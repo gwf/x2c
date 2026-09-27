@@ -1,0 +1,291 @@
+{
+  "x2c_home": "/Users/gary/.codex/worktrees/agent-dual-transport/x2c",
+  "source_root": "/Users/gary/.codex/worktrees/agent-dual-transport/x2c",
+  "effect_probe_unset": true,
+  "checksums": {
+    "baseline": "b0d9b1812930c7b7c9f38ab2c2347987510fa472060b3a88635a4055d9632c83",
+    "candidate": "fa2fd1f67c31f07c486fb68acc6d1edcb9fdc2d7b23250d812935f28c00c1148"
+  },
+  "samples": [
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 6.1753159170039
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 6.174341666977853
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 6.1608587498776615
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 6.621979875024408
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 6.514591832878068
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 6.5519370418041945
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 6.347238999791443
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 6.263449292164296
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 6.221029207808897
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 6.405742124887183
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 9.810613499954343
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 10.752837792038918
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 10.335577792022377
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 8.10298520908691
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 7.434623749926686
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 7.562352707842365
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 7.487035874975845
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 7.157945791026577
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 7.8637710409238935
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 7.611477207858115
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 0.5672724999021739
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 0.5794145839754492
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 0.5703122077975422
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 0.5770856670569628
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 0.5741542920004576
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 0.5762622079346329
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 0.5810999579261988
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 0.573784708045423
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 0.5738327919971198
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 0.5746385420206934
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 0.6296382090076804
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 0.6357060829177499
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 0.6343147079460323
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 0.6396524170413613
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 0.6395530002191663
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 0.6413938750047237
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 0.6367987501434982
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 0.6472965411376208
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 0.6390211249236017
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 0.6324682498816401
+    }
+  ]
+}

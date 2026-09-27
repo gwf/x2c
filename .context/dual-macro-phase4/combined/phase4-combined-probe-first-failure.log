@@ -1,0 +1,8 @@
+/tmp/x2c-dual-bound-control translate   --out-dir src \
+		../../src/ast.x ../../src/bootstrap.x ../../src/build.x ../../src/builtins.x ../../src/cache.x ../../src/cli.x ../../src/collect.x ../../src/compiler.x ../../src/deps.x ../../src/diagnostics.x ../../src/editor.x ../../src/emit.x ../../src/expressions.x ../../src/format.x ../../src/frontend.x ../../src/generate.x ../../src/install.x ../../src/linked-meta.x ../../src/literals.x ../../src/macros.x ../../src/main.x ../../src/meta-project.x ../../src/parse.x ../../src/project.x ../../src/protocol.x ../../src/prototype-slots.x ../../src/regions.x ../../src/report.x ../../src/script.x ../../src/sourceview.x ../../src/stage.x ../../src/statements.x ../../src/toolchain.x ../../src/transform.x ../../src/type-ledger.x ../../src/type.x ../../src/utils.x
+../../src/transform.x:2405:13: parse: catch filter requires a %() pattern literal
+        catch %malformed { caught = 1; }
+              ^
+  note: use catch %(code (key pattern)...):
+
+make: *** [src/.translated] Error 1

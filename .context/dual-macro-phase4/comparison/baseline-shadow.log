@@ -1,0 +1,6 @@
+  Translate 1 x2c file in 71 ms
+/tmp/dual-native-shadow/baseline/build/gen/native-helper-shadow-cdb18ed0/native-helper-shadow.c:12:23: error: called object type 'int' is not a function or function pointer
+   12 |     x2c_exception_push(& _x2c_exception_frame_0);
+      |     ~~~~~~~~~~~~~~~~~~^
+1 error generated.
+x2c: compile failed with status 1

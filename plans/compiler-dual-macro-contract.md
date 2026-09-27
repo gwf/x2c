@@ -1,10 +1,10 @@
-> Status: active -- contract research; production rewrite is not ready.
-> The decisions below are recommendations for the stable compiler contract.
-> The compiled-in bound-hole try control now has 62-case raw C/H parity
-> and paired timing. The revised slot-call/effect-record contract, open names,
-> explicit stage carriers and rollback still need combined integration evidence.
-> Open target-value lookup works; late lexical shadowing currently fails.
-> Investigation only: no production edits, bootstrap refresh, commit or push.
+> Status: active -- narrowed compiler contract demonstrated in isolation.
+> The combined try template/slot/effect/stage candidate passes 62-case raw
+> C/H and outcome comparison. The failing-skeleton rollback probe also passes.
+> Five paired timing samples are complete on the same frozen candidate;
+> ranges overlap and live-mode results are noisy.
+> Inserted-name shadowing is baseline parity and remains a follow-up.
+> Production implementation is not authorized by this research record.
 
 # Compiler contract for dual-purpose macros
 
@@ -25,20 +25,21 @@ The prototypes remain in `.context/dual-macro-phase3/` and managed isolated
 worktrees. Nothing in this plan claims that its proposed semantics already
 ship in x2c.
 
-The complete production rewrite is **not ready**. The simple forms remain
-viable; the missing proofs concern insertion context and result/effect
-integration, not additional public descriptor APIs.
+The narrowed combined try path is demonstrated. First production work remains
+the independent capture-role consolidation; later lowering migrations integrate
+the proved common result/effect path into ordinary compiler owners. Prototype
+wrappers and native dispatch are scaffolding, not additional public APIs.
 
 | Requested decision/proof | Result in this spike | Evidence |
 | --- | --- | --- |
 | Four forms plus meta slot calls | Recommended client contract; open modifier and common slot adapter still proposed | parser3, capture and stage patches; sections 1/8 |
-| Internal-node producers | Named owner/producer policy; no raw internal builds in clients | grammar-producer-policy.md; appendix |
-| Effects with rollback | Existing rollback demonstrably incomplete; extension specified, not proved | compiler-use/effects.md and executable failure probe |
-| Source/bound/lowered insertion | Bound/lowered control preserves holes; complete stage ABI and slot-effect try path missing | compiler-use/bound-hole-control.patch; 62-case manifests |
-| Open versus closed names | Compiled-in target value signature and primitive cast Type lookup succeed; caller-local value collision fails; closed regression passes | compiler-use/open-policy.md and logs |
+| Internal-node producers | Demand-driven owner/producer inventory; no raw internal builds in clients | grammar-producer-policy.md; appendix |
+| Effects with rollback | Extended existing transaction passes real early/memo writes, failing skeleton, nested rollback and borrowed-map commit | phase4/combined and root-final-probe.log |
+| Source/bound/lowered insertion | Combined compiled-in template, parsed meta slots and carriers pass 62-case raw comparison | phase4/combined; phase4/comparison/final-comparison.json |
+| Open versus closed names | Compiled-in target value signature and primitive cast Type lookup succeed; caller-local native-helper failure is baseline parity/follow-up; closed regression passes | compiler-use/open-policy.md and logs |
 | Tree rules | One bounded return-normalization rule works with nested traversal and pruning | stages/driver.x |
 | Field grammar | Source/derived layouts and 215-head census recorded; dynamic-head reconciliation incomplete | grammar-fields.md, grammar-head-census.md |
-| Cost | Five paired warm samples for bound-hole control; full meta/effects path unmeasured | stages/cost/paired-summary.json |
+| Cost | Combined five-pair medians: compiler +1.34% default, -3.21% noisy live; ranges overlap | phase4/comparison/results.md |
 | Name/origin/sequence | Bounded role/origin/sequence probes; general combined coverage remains limited | grammar-mixed-name.x, hygiene/source-case.x, stages/sequence-cases.x |
 
 ## 1. Surface contract
@@ -89,6 +90,26 @@ The required additions beyond those four forms are:
   stage-marker method, descriptor API or new x2c-prefixed API family. `%()`
   is confined to those producers and their private canonical helpers.
 
+### Complete compiler-client freeze list
+
+1. `Macro m = $name;` selects; `m(args)` constructs;
+   `case m(?a, ?b):` recognizes; `macro Kind(...) => ...` is anonymous.
+2. `macro open Kind ...` explicitly selects target-global free-name policy;
+   default user definitions remain closed.
+3. `$producer(args)` and sequence slot insertion return ordinary canonical
+   values plus ordered effects, consumed by the one common application owner.
+   Effects are applied by the caller's existing Compiler transaction.
+4. Producer values carry `source`, `bound` or `lowered`. The binder binds source
+   skeletons and stops at prepared bound/lowered boundaries; parent conversions
+   retain ordinary ownership. Clients do not branch on stage fields.
+5. The producer table names canonical owners and required facts. Only producers
+   demanded by a migration are built. The first try proof needs frame-declaration
+   and cleanup-placement producers, with new-name, early and cleanup effects.
+
+This freezes semantics, not public descriptor fields or a new API family.
+The current try proof uses prepared native/free-reference holes; future hygiene
+improvement must preserve these forms, not add another client calling convention.
+
 No new `Params` kind is needed: `Param $parameters...` already exists.
 The wrapper probe `grammar-param-sequence.x` executes 6. Substituting `Decl`
 for `Param` in that slot fails kind inference; the two are not aliases.
@@ -123,7 +144,11 @@ typedef `ExceptionFrame` must not capture the generated skeleton. Template
 locals still use structural lexical binding and freshening. Hole values are
 never subjected to this global resolution policy.
 
-This must apply to value, typedef and tag roles, not member labels. Existing
+This applies to program value, typedef and tag roles, not member labels.
+A meta function called in a template slot remains a definition-environment
+computation: `open` does not redirect that producer call into the target program.
+Program references within its returned code follow the supplied stage/free-name
+contract. The common adapter must distinguish these grammatical roles. Existing
 `Sym.resolve_global`/`reference_global` are the value lookup owners.
 Existing Type/declarator binding owns global type resolution, but needs an
 explicit global projection: retaining a String Type name is insufficient.
@@ -158,22 +183,28 @@ Root independently reproduced it. This proves one cast Type role resolving to
 an existing primitive, not aggregate/tag coverage or preservation of typedef
 labels in emitted C. See `compiler-use/open-type-*` and `open-policy.md`.
 
-A caller-local integer with that function's name makes the generated C fail:
-`called object type int is not a function or function pointer`. Global lookup
-selected the right identity, but `_try_block` runs after the parser popped the
-caller scope. Ordinary hygiene cannot see the local to rename its emitted name.
-Target global lookup alone is therefore insufficient.
+### Shadowing is baseline behavior, not a rewrite blocker
 
-The recommended insertion context includes the parser-owned lexical scope
-stack, return context and origin, retained for the unit's lifetime. The existing
-traversal/application owner re-enters these scopes through `Sym.push_scope`
-and restores them afterward. Existing binding/hygiene remains the owner of
-local aliases; hole contents are not rebound. Scope-map ownership, effects
-on those retained maps and nested traversal require a positive prototype.
-Reconstructing another resolver from arbitrary ASTs is not recommended.
-The same requirement applies to local typedef/tag shadows. Until proved,
-passing existing typed native calls as holes remains a viable migration control,
-but does not satisfy the chosen complete open-template contract.
+The original open probe injected a call to `_compiler_open_target`; the baseline
+has no such injected call, so running its unchanged fixture cannot establish
+equivalent native compilation failure. The comparable control is the existing
+runtime helper `x2c_exception_push`, shadowed by a caller-local int around try.
+Root reran Gary's exact program against the unmodified baseline and bound-hole
+control, with common home and identical source path. Both native builds fail
+at the generated helper call with `called object type int is not a function or
+function pointer`; generated C is byte-identical. Logs and source are in
+`.context/dual-macro-phase4/`. This is current lowering behavior, not a regression
+introduced by templates. The open-template control is at parity on this case.
+
+There is no recommendation to retain per-unit parser scope stacks. If hygiene
+for compiler-inserted free names is pursued later, resolve an open definition's
+free references once where its enclosing construct is parsed and scopes are
+live, then pass the resulting bound values as holes to lowering. Reuse ordinary
+binding/hygiene there, without rebinding completed hole contents. The 62-case
+control already takes prepared bound native calls and target Type values; it
+proves that transfer, not an implemented parse-time hygienic resolver. This
+follow-up is explicitly outside the next prototype. General value/typedef/tag
+hygiene does not block the parity rewrite.
 
 Native runtime functions create another boundary. `_catch_call` presently
 builds a native callee String and supplies its result Type; some declarations
@@ -237,39 +268,43 @@ The intended try template uses meta producers for semantic pieces and effects.
 For example, this is an interface sketch, not a probe that already works:
 
 ```x2c
-macro open Statement $try_region(Name $frame, Statement $body,
-  Statement $landing, Statement $cleanup...) {
-  $frame_declaration($frame)
-  x2c_exception_push(&$frame);
-  if (!sigsetjmp($frame.env, 0)) $body
-  else {
-    x2c_exception_landed(&$frame);
-    $landing
+macro open Statement $try_region(Name $frame, Statement $declarations,
+  Statement $push, Expr $condition, Statement $body, Statement $landed,
+  Statement $landing, Statement $cleanup) {
+  {
+    $frame_declaration($frame)...
+    $declarations
+    $push
+    if (!$condition) $body
+    else { $landed $landing }
+    $place_cleanup($cleanup)...
   }
-  $place_cleanup($cleanup...)
 }
 ```
 
+The runtime push/landed calls and setjmp condition are already bound inputs;
+the first proof does not resolve those native/free references during lowering.
 `frame_declaration` receives prepared target Type/name facts and returns
-canonical declaration code plus support effects. `place_cleanup` receives the
+canonical declaration code plus ordered effects. `place_cleanup` receives the
 prepared region/exit decision; it does not discover placement from code.
 Their exact signatures must include these facts (omitted above for readability).
 Pure template shape does not decide cleanup ancestry, staticness or conversion.
-The actual parity prototype supplies declarations, runtime calls, condition,
-body, landing and cleanup as bound/lowered holes; its source skeleton is the
-conditional. It does not implement those slot calls or their effects. Do not
-rewrite `_try_block` against the illustrative interface until the combined
-path demonstrates it.
+The earlier phase3 parity control supplied declarations, runtime calls,
+condition, body, landing and cleanup as bound/lowered holes; it did not
+implement slot calls or effects. The phase4 combined candidate now uses actual
+meta slot calls for the frame declaration and cleanup, carries stages on slot
+results, and applies the three effects under the extended transaction. Its
+62 outcomes and raw C/H files match the baseline, as detailed below.
 
-Required evidence before using this contract in src/: compiled-in descriptor
-applied to a target unit, local shadows of value and Type globals, lowered
-returns/declarations surviving hole insertion, unchanged IDs, unchanged
-conversion count, and byte-identical C/H on the try/defer/catch fixture corpus.
-The repaired compiled-in control now matches all 62 outcomes and raw C/H
-bytes: 46 lexical-try fixtures, the seven-file compiler/tokenizer corpus, and
-exception-hot-paths in default/live modes. Its fixed runtime calls remain
-typed holes, so it does not prove open free resolution or meta slot effects.
-The initial invalid `seq{`, wrong Expr/Statement categories and lost origins
+The evidence required for this narrowed proof is a compiled-in template
+applied to a target unit with prepared free references, retained bound/lowered
+holes, transaction rollback, and byte-identical C/H on the corpus. That proof
+passes. Successful matching under local shadows is a hygiene follow-up:
+current baseline behavior also fails for the shadowed native helper. Generic
+open resolution, Type-shadow coverage and conversion-count instrumentation
+remain unproved. The corpus covers 46 lexical-try fixtures, the seven-file
+compiler/tokenizer corpus, and exception-hot-paths in default/live modes.
+The earlier invalid `seq{`, wrong Expr/Statement categories and lost origins
 were fixed in the construction/binding path, without output normalization.
 Alpha-equivalent C was not substituted for the requested byte comparison.
 
@@ -368,26 +403,46 @@ resolution and Match/cache owners rather than a new cross-unit cache. Anonymous
 values with different captures are distinct preparations unless the existing
 canonical cache establishes equality. No new recurring checkpoint is proposed.
 
-The repaired compiled-in bound-hole control has five alternating paired
-samples after warmup, identical source paths and explicit common `X2C_HOME`.
-All 62 comparison cases and final timed C/H outputs match without normalization.
-The comparator checks exit status and raw generated files, not diagnostic text;
-negative cases do not establish byte-identical diagnostics.
-Seven-file medians: default 6.113 -> 6.146 seconds (+0.54%); live 7.501 ->
-7.496 (-0.07%). Exception translation: default 0.591 -> 0.589 (-0.37%);
-live 0.652 -> 0.679 (+4.25%), with overlapping noisy ranges. These support
-feasibility of this control, not a precise overhead claim or a performance
-improvement. They do not measure meta slot calls, effect plans, full open
-resolution, additional fresh declarations, runtime exception performance or
-cold helper build. Those costs remain unmeasured. The
-existing translation corpus is transform, emit, expressions, generate, parse,
-type and tokenizer (`unittest/benchmarks/run-compiler-translation.sh`);
-`exception-hot-paths.x` supplies exception-heavy language code. The paired
-measurement used the same source paths, flags, process settings and host,
-compared C/H bytes first, then measured repeated quiet-host warm translations.
-Report cold preparation separately and count applications/typed-hole visits.
-Do not promise that a preparation strategy keeps the checkpoint quiet before
-those samples exist.
+The final combined candidate has five alternating paired samples after warmup,
+using the same source paths, home, flags and binary throughout. All 62 comparison
+outcomes/raw C/H outputs and all 32 final timed C/H files match baseline without
+normalization; binary hashes are unchanged before/after. Root independently
+reran the manifest comparator and recomputed all four group medians.
+
+| Translation workload | Baseline median s | Combined median s | Change |
+| --- | ---: | ---: | ---: |
+| Seven compiler/tokenizer files, default | 6.263 | 6.347 | +1.34% |
+| Same corpus, live | 7.864 | 7.611 | -3.21% |
+| Exception-heavy translation, default | 0.574 | 0.576 | +0.42% |
+| Exception-heavy translation, live | 0.640 | 0.636 | -0.60% |
+
+The ranges overlap. Compiler live-mode samples are particularly noisy:
+baseline 7.158-9.811 s, candidate 7.487-10.753 s. A transient `../1/x2c`
+process was observed, but its owner could not be established. Session builds
+were stopped; strict host isolation is not claimed. Negative deltas are not
+proved speedups, and these samples do not establish precise overhead. They
+measure actual construction, existing invocation Match/capture extraction,
+substitution, allocation, source binding and meta slot/effect work, not a
+substitution proxy. Diagnostic text, runtime exception execution, cold
+preparation and allocation counts were not measured. No recurring checkpoint
+or new target is proposed.
+
+Prepare the immutable body/role layout, existing Match program, introduced
+binding layout and compiler-native producer bindings once per process. Keep
+unit-specific references/origins/types and transaction deltas per Compiler.
+The proof deliberately reuses legacy invocation Match extraction; indexed
+construction projections are a later optimization of that same role owner,
+not a second implementation or a prerequisite for capture-table consolidation.
+Do not walk already bound/lowered payloads to rediscover facts. Prototype stage
+constructors, string-tag dispatch and per-call origin stripping must be replaced
+by the common prepared owner before production lowering clients use them.
+The current cost evidence supports proceeding with the narrow design; it does
+not promise that all migrations will keep performance unchanged.
+
+Earlier phase-3 bound-hole control samples are preserved under
+`stages/cost/`; current combined evidence is
+`.context/dual-macro-phase4/comparison/results.md`, with parameterized scripts,
+samples, ranges, hashes and comparison manifests.
 
 ## 7. Name, positions and sequences
 
@@ -444,9 +499,13 @@ these public forms.
 
 Meta functions return ordinary data: code, ordered effects and logical result
 references. They never receive a Compiler handle or query one through a hidden
-callback. The canonical result is a private `(code-value STAGE KIND NODE
-ORIGIN EFFECTS)` envelope, not a second AST: NODE is the existing canonical
-List, and Name/Type/scalar slot values use their ordinary canonical values.
+callback. The canonical result is a private `(code-value STAGE VALUE EFFECTS)`
+envelope, not a second AST: VALUE is the existing canonical code/List or
+Name/Type/scalar value. Kind/position comes from the existing formal role and
+AstPos; origin comes from ordinary caller context and retained `at` wrappers.
+Do not duplicate those derived facts as mandatory envelope fields. The isolated
+prototype uses a temporary string head `"x2c.slot"` for this same four-field
+layout; this tag is not a public API or a new program AST production.
 Lowering clients never unpack it. Ordinary bare List returns retain legacy
 binding behavior; explicit marks distinguish compiler slots where trust matters.
 
@@ -464,17 +523,25 @@ Proposed effects are canonical data records, private to meta producers and the
 ordinary compiler application owner. A result reference is a transaction-local
 logical token, not a forged program binding or cache ID.
 
-| Effect record | Producer intent | Compiler application point / owner |
-| --- | --- | --- |
-| `(new-name REF STEM)` | Allocate one requested binding/name shared by later code. | Ordinary fresh_name + sym.introduce in original allocation order, before dependent binding; existing counters/IDs remain transaction-owned. |
-| `(global REF NAMESPACE NAME)` | Resolve an open fixed reference. | Ordinary target base-scope value/Type/tag lookup before dependent skeleton binding; global scope changes must join the transaction. |
-| `(early CODE SITE)` | Register an adapter/helper declaration. | Pending early-declaration overlay; publish through add_early only after successful insertion. Existing transform drains it in order. |
-| `(memo KEY REF)` | Associate an adapter with its generated binding. | Pending names.adapters overlay visible to later planning in the same expansion, committed once insertion succeeds. Supplied prior hit remains authoritative. |
-| `(constant REF VALUE)` | Intern canonical immutable constant data. | Existing constant/cache owner before code references REF; cache/name writes must be transactional or postponed until success. |
-| `(initializer CODE DEPENDENCIES SITE)` | Schedule source/static initialization. | Existing init/dependency owner, buffered until successful insertion, preserving its order. |
-| `(location SITE)` | Attribute newly constructed shape/diagnostics. | Dynamically scoped origin during construction/binding, restored on success or failure; original hole wrappers remain unchanged. |
-| `(cleanup REGION EXIT CODE)` | Place cleanup at a particular region/exit. | Existing region/transfer owner at the named insertion, not a global append. Order includes unhandled branch, normal completion and transfer exits. |
-| `(require FEATURE)` | Request current generated runtime/header support such as exception support. | Existing needs_exception/emission owner, staged until successful insertion. |
+For the first combined try proof the effect vocabulary is **new-name, early,
+cleanup**. The transaction extension covers `early_decls`, `names.adapters`,
+`needs_exception` and origin, while proving preservation of scope/global
+bindings, counters and `inits`. Broader queue/cache/global effect implementation
+is not a prerequisite. The existing records below are an inventory: all records
+other than those three are added only by a migration that needs them. Likewise,
+no producer family is implemented in advance of its first consumer.
+
+| Effect record | Producer intent | Compiler application point / owner | Phase |
+| --- | --- | --- | --- |
+| `(new-name REF STEM)` | Allocate one requested binding/name shared by later code. | Ordinary fresh_name + sym.introduce in original allocation order, before dependent binding; existing counters/IDs remain transaction-owned. | First try proof |
+| `(global REF NAMESPACE NAME)` | Resolve an open fixed reference. | Ordinary target base-scope value/Type/tag lookup before dependent skeleton binding; global scope changes must join the transaction. | Inventory; add when first demanded |
+| `(early CODE SITE)` | Register an adapter/helper declaration. | Pending early-declaration overlay; publish through add_early only after successful insertion. Existing transform drains it in order. | First try proof |
+| `(memo KEY REF)` | Associate an adapter with its generated binding. | Pending names.adapters overlay visible to later planning in the same expansion, committed once insertion succeeds. Supplied prior hit remains authoritative. | Inventory; add when first demanded |
+| `(constant REF VALUE)` | Intern canonical immutable constant data. | Existing constant/cache owner before code references REF; cache/name writes must be transactional or postponed until success. | Inventory; add when first demanded |
+| `(initializer CODE DEPENDENCIES SITE)` | Schedule source/static initialization. | Existing init/dependency owner, buffered until successful insertion, preserving its order. | Inventory; add when first demanded |
+| `(location SITE)` | Attribute newly constructed shape/diagnostics. | Dynamically scoped origin during construction/binding, restored on success or failure; original hole wrappers remain unchanged. | Inventory; add when first demanded |
+| `(cleanup REGION EXIT CODE)` | Place cleanup at a particular region/exit. | Existing region/transfer owner at the named insertion, not a global append. Order includes unhandled branch, normal completion and transfer exits. | First try proof |
+| `(require FEATURE)` | Request current generated runtime/header support such as exception support. | Existing needs_exception/emission owner, staged until successful insertion. | Inventory; add when first demanded |
 
 Each REF is scoped to one application result bundle, including nested slot
 results. A nested result remaps its local references on aggregation; unrelated
@@ -487,7 +554,11 @@ not every binding record in borrowed hole code. A value still containing such
 placeholders is pending preparation, not yet an already-bound trust boundary.
 No user-supplied positive binding IDs are authenticated or rewritten merely
 because they resemble the private token. The common adapter and its role
-coverage are specified here but not implemented by the control probe.
+coverage beyond the narrow new-name/cleanup/early path remains unproved.
+In particular, repeated early slots use the same binding/key; this proves
+deduplication and read-your-writes, not relocation from a different requested
+binding. Production memo keys include producer/template identity and relevant
+arguments, using existing memo ownership rather than a fixed probe key.
 
 Effects execute in declared dependency order. Template traversal order must not
 silently move a frame allocation after nested regions: `_region_binding`
@@ -506,11 +577,14 @@ or `needs_exception`. Global reference creation can touch base scope while
 a transaction snapshots a local scope. Failure can therefore leak proposed
 effects under the current implementation.
 
-Extend the **existing caller-owned transaction**, with pending queues/memo
-writes and coverage of every scope/name/cache store actually mutated. Preserve
+Extend the **existing caller-owned transaction** for the narrow try path:
+cover early-declaration writes, adapter memo state, exception support and origin.
+Preserve existing scope/counter ownership and verify unchanged global maps and
+initializer queues. Broader cache/global mutation coverage follows its first
+actual migration, not this proof. Preserve
 read-your-writes within that transaction. No parallel transaction framework or
-helper-side state mirrors are proposed. Apply provisional name/global effects
-inside it; bind the result; commit queues/memo/support only on success; rollback
+helper-side state mirrors are proposed. Apply provisional new-name effects
+inside it; bind the result; commit early/cleanup/memo/support only on success; rollback
 all provisional compiler state on failure. Nested insertions share the caller's
 ordering/ownership and must not publish effects the outer transaction can lose.
 Existing macro invocation creates its transaction in `_invoke_definition`,
@@ -522,13 +596,19 @@ The executable current-transaction probe reports
 where 1 means restored. Root reproduced these results using the ordinary
 transaction methods. The probe cleans leaked state afterward; that cleanup
 is not transaction coverage. See `compiler-use/effects.md` and its fixture/log.
-No positive extension of rollback was implemented.
+That was the phase-3 result. The narrowed phase-4 extension now passes the
+requested rollback proof; see the combined proof below.
 
-A focused failure probe must compare scope/global bindings, counters, cache
-entries, queues, memo maps, feature flags and origins before/after a deliberately
-failing skeleton. A second probe must observe an adapter created earlier in the
-same expansion. **These effects/rollback properties are not established by the
-62-case shape control.** They remain an implementation-blocking proof gap.
+The narrowed failure probe compares scope/global bindings, counters,
+`early_decls`, `inits`, `names.adapters`, `needs_exception` and origin before
+and after a deliberately failing skeleton. A successful effect probe observes
+its provisional early/memo state before commit and confirms publication once.
+Cache/global mutation effects are inventory for later migrations, not a
+requirement of this proof. The phase-3 shape control did not establish these properties. Phase 4 tests
+real early/memo writes, a nested committed base reference/init/origin mutation,
+a parsed source-slot failure and outer rollback. It compares every requested
+store and checks borrowed adapter ownership on rollback and commit. These
+narrow properties now pass; broader effects remain migration inventory.
 
 Queries not already passed by current callers: per-catch pattern staticness;
 resolved runtime callee signatures; adapter memo hit; alias/protocol/layout
@@ -541,11 +621,59 @@ ordinary skeleton binding stay there. A complete dependency plan for cases
 whose queries depend on a newly produced Type remains unprototyped.
 
 
+## Combined proof: phase 4
+
+Final compiler: `/tmp/x2c-dual-combined-final`, SHA256
+`fa2fd1f67c31f07c486fb68acc6d1edcb9fdc2d7b23250d812935f28c00c1148`.
+Sources, incremental patch, reproduction commands and failures are in
+`.context/dual-macro-phase4/combined/`; comparison/timing evidence is in
+`.context/dual-macro-phase4/comparison/`.
+
+The compiled-in template is selected as `Macro shape = $compiler_try_shape`
+and applied through `shape(args)`, then ordinary `bind_syntax`. The Macro call
+owner creates a pending application using existing SDK capture rows, expansion
+and binding. Actual parsed `$Prototype_frame($frame)...` and
+`$Prototype_cleanup($cleanup)...` calls travel through the ordinary macro-slot
+and explicit-meta evaluator. The producer result remains marked until the
+common slot consumer applies effects and preserves bound/lowered payloads.
+Native runtime calls are prepared bound inputs; no new hygiene work is done.
+
+New-name allocation runs at the old pre-body point and delegates to ordinary
+fresh_name/introduce. Cleanup uses the existing region decision and code.
+A separate opt-in macro exercises two real early slots with one memo/queue row:
+ordinary try has no new file early declaration. A nested transaction mutates
+base bindings, inits, origin and support state and commits. A later source slot
+returns an invalid skeleton; ordinary binding raises malformed. Recovery catches
+it, then outer rollback compares all scoped symbol/binding/enumerator maps,
+global binding maps, counters/next binding, early_decls, inits, adapters,
+origins/scalar origin and needs_exception. Copied Map contents are compared
+structurally; borrowed adapter owner identity is checked separately.
+
+Root independently reproduced the final opt-in probe and native fixture:
+`phase4 effects: early-read-write rollback-all borrowed-map-commit`, followed
+by successful build and runtime `17 1 1 23`. With the opt-in flag removed, all
+62 baseline/candidate statuses and raw C/H hashes match without normalization.
+Diagnostic text is not compared. The same binary completed five paired timing samples; section 6 records them.
+
+Remaining implementation detail is explicit: private stage constructors and
+four-callee native producer dispatch demonstrate plumbing, not a public API
+family or generic helper ABI. Production reuses the ordinary native-meta owner
+for compiler-owned producer execution and marks values at producing boundaries.
+No new parallel dispatcher, descriptor reader or stage getter is frozen for
+lowering clients. The probe's successful early row is removed before fixture
+emission, so separate emitted early-declaration C is not demonstrated.
+Append-only queue restoration is proved; arbitrary clears/edits and mutations
+inside shared map values are not. Bound and lowered payloads both bypass binding
+in this prototype; correctness relies on this caller supplying owner-produced
+values at the proper position. General category/conversion behavior is not
+inferred from that success. Template-origin masking preserves supplied hole
+origins for C parity, but precise failed-skeleton diagnostic attribution is thin.
+
 ## Alternatives and recommendation
 
 | Alternative | Strength | Cost or limit | Decision |
 | --- | --- | --- | --- |
-| Shared Macro body/role table, ordinary AST, meta producers and caller effects | Same forms construct and recognize; ordinary compiler owns semantics; clients hide IR detail | Needs late lexical context and common stage/effect adapter | Recommended; prove integration before src/ migration |
+| Shared Macro body/role table, ordinary AST, meta producers and caller effects | Same forms construct and recognize; ordinary compiler owns semantics; clients hide IR detail | Needs common stage/effect adapter; inserted-name hygiene is a follow-up | Recommended; prove integration before src/ migration |
 | All runtime callees/declarations supplied as typed holes | Actual byte-identical try control; avoids unresolved native signatures | Makes compiler source carry plumbing and does not establish open templates | Keep as baseline/control, not final surface |
 | Rebind the fully substituted tree | Reuses binder without explicit hole boundary | Reinterprets lowered returns and typed holes; can change scope/type/conversion behavior | Reject this implementation; preserve ordinary binding only for skeleton |
 | Canonical raw builders everywhere | Works today, direct construction cost | Exposes IR fields and repeats construction/recognition logic across clients | Confine to meta producers; retain ordinary canonical contract |
@@ -553,16 +681,21 @@ whose queries depend on a newly produced Type remains unprototyped.
 
 ## Remaining decisions and limits of this spike
 
-The four forms remain the client contract. The proposed `open` modifier,
-slot-result ABI and meta producer signatures are additions that must be settled
-before freezing compiler consumer source. In particular:
+The freeze includes the four forms, the explicit `open` modifier, common
+slot-call result semantics, `source`/`bound`/`lowered` stage marks and the
+producer table below. The stage marks belong to producer/application values;
+compiler lowering clients do not inspect them. Producers are implemented by
+the migration first needing them, not as an up-front family. In particular:
 
-* Positive late insertion scope restoration, including local value shadows and general typedef/tag
-  roles, is missing. The primitive cast Type shadow control passes. The failure and an ordinary-owner alternative are known.
-* The complete try/defer/catch path with meta slot calls, effect aggregation,
-  explicit stages and rollback is not implemented or timed. The 62-case proof
-  covers its bound-hole control only. Parent conversion count and failed
-  skeleton diagnostic attribution need dedicated combined probes.
+* Compiler-inserted value shadowing is reproduced baseline behavior and is a
+  follow-up, not a blocking integration question. Parse-time resolution into
+  bound holes is the follow-up design; per-unit scope retention is dropped.
+  The primitive cast Type shadow control passes; broader roles remain thin.
+* The narrowed compiled-in try path with parsed meta slots, three effects and
+  stage carriers passes its transaction probe and 62-case comparison. Generic
+  producer dispatch/argument-marking integration still uses private scaffolding.
+  Parent conversion counts across broader categories and diagnostic attribution
+  outside this bounded fixture remain thin.
 * Mixed Name role projection works through a private constraint adapter; its
   automatic public Macro-case integration is not demonstrated. Expr sequences
   work through retained/expanded cases; broader category combinations are thin.
@@ -583,18 +716,53 @@ before freezing compiler consumer source. In particular:
   expansion may report its diagnostic; it must not publish generated code or
   compiler mutations. Helper transport and REPL isolation stay separate.
 
-These are specific integration questions, not evidence that simple Macro forms
-cannot express the complete design. They prevent declaring the production
-rewrite ready. No self-host comparison of the revised complete path was run;
-no production consumer, bootstrap output, commit or remote ref was changed.
+These are bounded integration limits, not evidence against the frozen forms.
+The two narrowed proof blockers now have executable evidence; general feature
+coverage is not claimed. No full self-host comparison of the combined path was
+run. This work changes research records and isolated prototypes, not production
+consumers or bootstrap outputs.
+
+## First independent production change: shared capture roles
+
+Scope only, for a separate production branch and later ordinary dev delivery.
+`src/macros.x:_capture_pattern` and `_capture_row` share the current capture
+projection schema; `_forwarded_capture` and `_forwarded_prefix_list` consume
+that same policy. A compact private static role table owns projection names,
+scalar/sequence cardinality and storage location. Keep the two direction-specific
+entry points thin, with ordinary explicit Function, Unit and Name branches.
+Delete duplicated key/row assembly, not their different responsibilities.
+
+Preserve exact canonical rows: scalar source/value/expression/splice order;
+sequence source/value rows with expression/splice aliased from value by `!and`;
+Function return/declarator virtual subfields; Unit construction suffix and its
+current activation condition; Name member labels as separate direct projection.
+Reuse `_replacement_binder`, source unwrap/capture, Match, List replacement and
+ordinary freshening. Do not change inference, Type capture semantics, source
+access authority or member/binding correlation in this refactor.
+
+Existing macro-argument-kinds, sequence/source-forwarding, Function decorator,
+Unit-obligation, Name member/hygiene and meta-template fixtures cover its owners.
+Use exact canonical row/pattern and generated-C comparison on current inputs,
+then the ordinary existing production gate. This needs no language-transition
+bootstrap stage: the schema uses existing static constructs. Normal generated
+bootstrap publication still follows existing rules when implementation is
+separately authorized. No new gate or recurring test target is proposed.
+Details and source consumers are in
+`.context/dual-macro-phase4/capture-scope.md`. Open resolution, slot stages and
+transaction effects are not prerequisites; subsequent migrations reuse this
+owner instead of delaying it behind their proof work.
 
 ## Rewrite and bootstrap order
 
-1. Establish the runtime Macro application/recognition owner behind the four
-   forms, open definition policy, explicit target binding, typed-hole boundary,
-   original capture origins and role-specific Name projections. Consolidate
-   `_capture_pattern`/`_capture_row` behind the same role table. The phase 3
-   callbacks are prototypes, not parallel permanent implementations.
+1. Consolidate `_capture_pattern` and `_capture_row` behind one shared role
+   table as the first independent production change, on a separate branch.
+   It does not depend on open names, stage envelopes or effect integration.
+   Preserve current capture/forwarding semantics, then use the ordinary source
+   review, gate and dev delivery rules in its later authorized implementation.
+   This research branch only scopes it; no production change is made here.
+   After that consolidation, establish runtime Macro application/recognition
+   behind the frozen forms and common result adapter. Reuse the role table;
+   do not keep the phase-3 callbacks as parallel permanent implementations.
 2. Produce an intermediate compiler that parses the forms and their modifier
    while src/ still uses the old builders. Only after that compiler is available
    can src/ consume the new forms. Separate anonymous capture/registration
@@ -967,14 +1135,21 @@ semantic validator.
 
 ### Named meta producers for internal productions
 
+This is a migration inventory, not an up-front implementation requirement.
+The migration first using a production implements its producer. For the first
+try proof only frame-declaration and cleanup-placement producers are required;
+all other entries remain deferred until demanded.
 
-Each function receives ordinary supplied syntax/data arguments. Stage marks and
+
+Each function receives ordinary supplied code/data arguments. Stage marks and
 effects are conveyed by the common private result adapter; client source never
 opens that envelope. `%()` appears only inside the named producer (or its
 private structural helper), not at lowering call sites.
 
 | Canonical production | Proposed producer and argument facts | Current authoritative owner / client use |
 | --- | --- | --- |
+| frame declaration | `_frame_declaration(frame, frame_type)`; issued Name and prepared target Type; returns canonical declaration code with stage | First try proof. Existing `_value_declaration` semantics; no new declaration binder. |
+| placed cleanup | `_place_cleanup(cleanup, placement_facts)`; already lowered cleanup and existing region/exit decision; returns cleanup effect/reference | First try proof. Existing region driver remains placement owner; no inferred ancestry or new control-flow analysis. |
 | cache constant graph reference | `_constant_syntax(value)`; receives immutable value, returns code plus intern-constant effect instead of inventing process-local ID | compiler.x:2248-2326; stage.x:119-136. Template slot calls it for constant data. Compiler applies interning and supplies the cache reference. |
 | localinit declaration/body | `_local_static_region(declaration, body)`; already bound declaration and remainder body, lower-stage result | transform.x:2037-2057,1836; emitter local-static. Static planner passes both; template contains only slot call. |
 | sourceinit helper function | `_source_initializer(function, order)`; function syntax plus caller-supplied initializer order/dependency facts | cache.x:451-468; emit.x:1060. File-initializer producer owns wrapper and effect scheduling. |

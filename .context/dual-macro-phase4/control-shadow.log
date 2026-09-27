@@ -1,0 +1,6 @@
+  Translate 1 x2c file in 74 ms
+/tmp/dual-phase4-shadow-control-build/gen/native-shadow-cc98f67f/native-shadow.c:12:23: error: called object type 'int' is not a function or function pointer
+   12 |     x2c_exception_push(& _x2c_exception_frame_0);
+      |     ~~~~~~~~~~~~~~~~~~^
+1 error generated.
+x2c: compile failed with status 1

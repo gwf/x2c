@@ -1,0 +1,9 @@
+  Translate 1 x2c file in 77 ms
+  Compile 1 C file in 74 ms
+  Link 1 input in 36 ms
+Built executable /tmp/dual-combined-smoke in 688 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-combined-native (retained)
+  Output /tmp/dual-combined-smoke (423.1 KiB)

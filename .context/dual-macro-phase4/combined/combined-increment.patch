@@ -1,0 +1,458 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -122,6 +122,7 @@
+   Map macro_holes;
+   Map local_macro_captures;
+   Map prototype_bound_slots;
++  int prototype_combined, prototype_slot_calls;
+   List lambda_scopes;
+   Array match_types;
+   // Import path -> declared alias map, or 1 when no aliases need replay.
+@@ -2580,6 +2581,9 @@
+   Map statics, binding_facts;
+   Map source_definitions;
+   int source_occurrences;
++  Map adapters;
++  Array base_bindings;
++  int early_count, init_count, origin_count, origin, needs_exception;
+ } *SymTxn;
+ 
+ /** Begins a reversible transaction over the current semantic scope.
+@@ -2602,6 +2606,20 @@
+   transaction.local_macro_names = c.sym.local_macro_names;
+   transaction.initializer_name = c.init_fn;
+   transaction.shutdown_name = c.fini_fn;
++  transaction.adapters = c.names.adapters;
++  transaction.base_bindings = [];
++  transaction.early_count = c.early_decls.len();
++  transaction.init_count = c.inits.len();
++  transaction.origin_count = c.origins.len();
++  transaction.origin = c.origin;
++  transaction.needs_exception = c.needs_exception;
++  c.names.adapters = c.names.adapters.copy();
++  for (int i = 0; i < c.sym.base_scopes; i++) {
++    if (i == transaction.scope_index) continue;
++    SymScope *base = _semantic_scope(c.sym, i);
++    transaction.base_bindings.push(%($i ${base.bindings}));
++    base.bindings = base.bindings.copy();
++  }
+   if (c.source_facts && c.source_primary) {
+     transaction.source_definitions = c.source_definitions.copy();
+     transaction.source_occurrences = c.source_occurrences.len();
+@@ -2640,6 +2658,15 @@
+     if (scope.macros == NULL) scope.macros = {};
+     scope.macros.merge(staged.macros);
+   }
++  Map adapters = compiler.names.adapters;
++  compiler.names.adapters = s.adapters;
++  s.adapters.merge(adapters);
++  foreach (List row, s.base_bindings.list()) {
++    SymScope *base = _semantic_scope(compiler.sym, row.car());
++    Map staged = base.bindings, original = row.cadr();
++    base.bindings = original;
++    original.merge(staged);
++  }
+   s.active = 0;
+ }
+ 
+@@ -2667,6 +2694,35 @@
+   _replace_transaction_map(s.statics, statics);
+   _replace_transaction_map(s.binding_facts, facts);
+   _replace_transaction_map(s.counters, counters);
++}
++
++int Compiler.prototype_equal(Compiler c, Var left, Var right) {
++  if (left is <map> && right is <map>) {
++    Map a = left, b = right;
++    return a.equal(b);
++  }
++  if (left is <list> && right is <list>) {
++    List a = left, b = right;
++    while (a && b) {
++      if (!c.prototype_equal(a.car(), b.car())) return 0;
++      a = a.cdr(); b = b.cdr();
++    }
++    return !a && !b;
++  }
++  return left === right;
++}
++
++List Compiler.prototype_snapshot(Compiler c) {
++  Array scopes = [];
++  for (int i = 0; i < c.sym.scopes.len(); i++) {
++    SymScope *scope = _semantic_scope(c.sym, i);
++    scopes.push(%(${scope.symbols.copy()} ${scope.bindings.copy()}
++      ${scope.enumerators.copy()}));
++  }
++  return %(${scopes.list()} ${c.names.counters.copy()}
++    ${c.names.adapters.copy()} ${c.names.next_binding}
++    ${c.early_decls.list()} ${c.inits.list()} ${c.origins.list()}
++    ${c.origin} ${c.needs_exception});
+ }
+ 
+ /** Returns whether the transaction's active scope changed its macro map. */
+@@ -2692,6 +2748,14 @@
+     _.names.counters = transaction.counters;
+     _.init_fn = transaction.initializer_name;
+     _.fini_fn = transaction.shutdown_name;
++    _.names.adapters = transaction.adapters;
++    foreach (List row, transaction.base_bindings.list())
++      _semantic_scope(_.sym, row.car()).bindings = row.cadr();
++    _.early_decls.resize(transaction.early_count);
++    _.inits.resize(transaction.init_count);
++    _.origins.resize(transaction.origin_count);
++    _.origin = transaction.origin;
++    _.needs_exception = transaction.needs_exception;
+     if (_.source_facts && _.source_primary) {
+       _.source_occurrences.resize(transaction.source_occurrences);
+       foreach (Var key, _.source_definitions.keys().list())
+--- a/src/parse.x
++++ b/src/parse.x
+@@ -2430,7 +2430,23 @@
+   Var retained;
+   if (c.prototype_bound_slots &&
+       c.prototype_bound_slots.try_get(syntax, retained)) return retained;
++  Var staged;
++  int retained_stage;
++  if (c.prototype_take_slot(syntax, staged, retained_stage)) {
++    if (retained_stage) return staged;
++    syntax = staged;
++  }
+   Var value = c.evaluate_macro_slot(syntax);
++  if (c.prototype_take_slot(value, staged, retained_stage)) {
++    if (retained_stage) return staged;
++    value = staged;
++  }
++  match (value) case %("x2c.template" ?stored ?arguments): {
++    List invocation = c.prototype_pending(stored, arguments);
++    List bound = c.bind_syntax(invocation, context, return_type);
++    match (bound) case %(seq ?only): return only;
++    return bound;
++  }
+   if (value is not <list>)
+     c.report_error(<parse>, "expected syntax", c.token, NULL);
+   List input = value;
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -6,6 +6,7 @@
+ */
+ 
+ #pragma once
++#include "prototype-slots.x"
+ $(import "../lib/private-keywords.xmacro")
+ $(import "../src/ast-rewrite.xmacro")
+ #include "compiler.x"
+@@ -2399,11 +2400,19 @@
+         c.macro_lisp.try_get(name, function);
+       if (function is void && c.meta_build)
+         raise %(meta-later (name $name));
++      List applied = values.list_free();
++      if (c.prototype_combined) {
++        c.prototype_slot_calls++;
++        if (name == "Prototype_frame") return Prototype_frame(applied.car());
++        if (name == "Prototype_cleanup")
++          return Prototype_cleanup(applied.car());
++        if (name == "Prototype_early") return Prototype_early(applied.car());
++        if (name == "Prototype_fail") return Prototype_fail(applied.car());
++      }
+       if (function is void)
+         c.report_error(
+           <macro>, "explicit meta call cannot be resolved", site,
+           %("no binding for $name"));
+-      List applied = values.list_free();
+       meta_call_form = cons(Atom.intern(name), applied).repr();
+       meta_call_form.try_own();
+       return _meta_apply(c, function, applied);
+@@ -2653,6 +2662,8 @@
+         exact = spelling;
+     if (exact) result = %($construction $exact);
+   }
++  match (result)
++    case %("x2c.slot" ?stage ?code ?effects): return result;
+   return splice && result is <list>
+     ? %(seq @{result}) : result;
+ }
+@@ -3008,6 +3019,42 @@
+             (expression $expression)
+             (splice @values)
+   );
++}
++
++static List _sdk_template_call(Var stored, List values);
++
++int Compiler.prototype_take_slot(Compiler c, Var input,
++                                 Var &value, int &retained) {
++  match (input) case %("x2c.slot" ?stage ?code ?effects): {
++    Map replacements = {};
++    foreach (List effect, effects) {
++      match (effect) {
++        case %(new-name ?token ?(String role)):
++          replacements[token] = c.sym.introduce(c.fresh_name(role));
++        case %(cleanup ?token ?placed): {
++          replacements[token] = placed;
++          c.needs_exception = 1;
++        }
++        case %(early ?key ?binding ?declaration): {
++          Var cached;
++          if (c.names.adapters.try_get(key, cached))
++            replacements[binding] = cached;
++          else {
++            c.add_early(declaration);
++            c.names.adapters[key] = binding;
++          }
++        }
++      }
++    }
++    value = _replace_definition_bindings(code, replacements);
++    retained = stage != "source";
++    return 1;
++  }
++  return 0;
++}
++
++List Compiler.prototype_pending(Compiler c, Var stored, List values) {
++  $let(macro_sdk_compiler, c) return _sdk_template_call(stored, values);
+ }
+ 
+ static List _sdk_template_call(Var stored, List values) {
+@@ -4056,6 +4103,8 @@
+       $let(_.macro_stack, _.macro_stack) {
+         List old_stack = _.macro_stack;
+         List template = definition.assoc(<template>);
++        if (_.prototype_combined)
++          template = template.search_replace(%(at m-origin ?node), <?node>);
+         Map file_locals = {};
+         // The outermost active row's fourth field is its invocation token.
+         Token root = old_stack ? old_stack.last().list()[3] : invocation;
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2351,50 +2351,88 @@
+     $choice);
+ }
+ 
+-macro Statement $compiler_try_shape(Statement $declarations, Statement $push,
+-    Expr $condition, Statement $body, Statement $landed, Statement $landing,
+-    Statement $cleanup) {
++#include "prototype-slots.x"
++
++macro Statement $compiler_try_shape(Name $frame, Statement $declarations,
++    Statement $push, Expr $condition, Statement $body, Statement $landed,
++    Statement $landing, Statement $cleanup) {
+   {
++    $Prototype_frame($frame)...
+     $declarations
+     $push
+     if (!$condition) $body
+     else { $landed $landing }
+-    $cleanup
+-  }
+-}
+-
+-static List _compiler_try_shape(Compiler c, List values) {
+-  Macro shape = $compiler_try_shape;
+-  Map retained = {};
+-  List rows = NULL;
+-  List parameters = shape.assoc(<parameters>);
+-  foreach (List parameter, parameters) {
+-    String name = parameter.assoc(<binder>).str()[1:];
+-    Var value = values.car();
+-    values = values.cdr();
+-    List slot = %(macro-slot 0 ${Atom.intern(name)});
+-    retained[slot] = value;
+-    retained[%(expr (<macro-expr>) $slot)] = value;
+-    foreach (String projection, %("expression" "source" "value")) {
+-      Atom binder = Atom.intern(%"?__macro_${projection}_$name");
+-      rows = cons(%($binder $slot), rows);
+-    }
+-  }
+-  List code = shape.assoc(<template>);
+-  code = code.search_replace(%(at m-origin ?node), <?node>);
+-  $let(c.prototype_bound_slots, retained) {
+-    List bound = c.bind_syntax(code.replace(rows), AST_BLOCK, c.return_type);
+-    match (bound) case %(seq ?only): return only;
+-    return bound;
+-  }
++    $Prototype_cleanup($cleanup)...
++  }
++}
++
++macro Statement $compiler_effect_success(Name $name) {
++  { $Prototype_early($name)... $Prototype_early($name)... }
++}
++macro Statement $compiler_effect_failure(Name $name, Statement $code) {
++  { $Prototype_early($name)... $Prototype_fail($code)... }
++}
++
++static void _prototype_effect_probe(Compiler c) {
++  static int done;
++  if (done++ || !getenv("X2C_DUAL_EFFECT_PROBE")) return;
++  c.sym.push_new_scope();
++  defer c.sym.pop_scope();
++  List before = c.prototype_snapshot();
++  Map owner = c.names.adapters;
++  SymTxn outer = c.begin_semantic_transaction();
++  Var issued; int retained;
++  c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
++  List name = issued;
++  int early = c.early_decls.len();
++  Macro success = $compiler_effect_success;
++  $let(c.prototype_combined, 1) {
++    c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
++    assert(c.early_decls.len() == early + 1);
++    assert(c.names.adapters.contains("phase4.helper"));
++    SymTxn inner = c.begin_semantic_transaction();
++    c.sym.reference_global(%(__phase4_global));
++    c.add_init(<early>, %(seq));
++    c.origin = c.record_origin(c.token);
++    c.needs_exception = 1;
++    inner.commit();
++    int caught = 0;
++    Macro failure = $compiler_effect_failure;
++    $let(c.diagnostics, Diagnostics.new(NULL, 0))
++    $let(c.recovery_depth, c.recovery_depth + 1) {
++      try {
++        c.bind_syntax(failure(Prototype_bound(name),
++          Prototype_lowered(%(seq))), AST_BLOCK, c.return_type);
++      }
++      catch %(malformed *): { caught = 1; }
++    }
++    assert(caught);
++  }
++  outer.rollback();
++  assert(c.prototype_equal(before, c.prototype_snapshot()));
++  assert((void *) owner == (void *) c.names.adapters);
++  outer = c.begin_semantic_transaction();
++  c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
++  name = issued;
++  $let(c.prototype_combined, 1)
++    c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
++  assert(c.early_decls.len() == early + 1);
++  outer.commit();
++  assert((void *) owner == (void *) c.names.adapters);
++  assert(owner.contains("phase4.helper"));
++  /* Keep the dedicated probe's successful rows outside fixture emission. */
++  c.early_decls.resize(early);
++  owner.del("phase4.helper");
++  puts("phase4 effects: early-read-write rollback-all borrowed-map-commit");
+ }
+ 
+ static List _try_block(Walk walk, List body, List clause, List frame,
+                        List handle, List cleanup, List bodies) {
+   Compiler c = walk.compiler;
++  _prototype_effect_probe(c);
+   List address = _address_of(_frame_type, frame);
+   Array declarations = [];
+-  declarations.push(_value_declaration(%("ExceptionFrame"), frame, NULL));
++
+   if (clause) {
+     List records = clause.cadr();
+     int count = records.len(), fallback = -1, index = 0;
+@@ -2445,12 +2483,15 @@
+   List setjmp = _catch_call(%(int), "sigsetjmp", %(
+     (expr () (op . ${_catch_value(%("ExceptionFrame"), frame)} ("env")))
+     ${_integer_expression(0)}));
+-  return _compiler_try_shape(c, %(
+-    (seq @{declarations.list_free()})
+-    ${_region_call("x2c_exception_push", _frame_type, frame)}
+-    $setjmp $body
+-    ${_region_call("x2c_exception_landed", _frame_type, frame)}
+-    $landing (seq @cleanup)));
++  Macro shape = $compiler_try_shape;
++  $let(c.prototype_combined, 1)
++    return c.bind_syntax(shape(
++      Prototype_bound(frame), Prototype_sequence(declarations.list_free()),
++      Prototype_bound(_region_call("x2c_exception_push", _frame_type, frame)),
++      Prototype_bound(setjmp), Prototype_lowered(body),
++      Prototype_bound(_region_call("x2c_exception_landed", _frame_type, frame)),
++      Prototype_lowered(landing), Prototype_sequence(cleanup)),
++      AST_BLOCK, c.return_type);
+ }
+ 
+ static Var _rewrite(Walk walk, Var value) {
+@@ -2468,8 +2509,14 @@
+                           env, callback, records, record, cleanup);
+     }
+     case %(try ?body ?clause ?finalizer): {
+-      walk.compiler.needs_exception = 1;
+-      List frame = _region_binding(walk.compiler, "exception_frame");
++      Compiler c = walk.compiler;
++      SymTxn transaction = c.begin_semantic_transaction();
++      defer transaction.rollback();
++      Var frame_value;
++      int retained;
++      (void) c.prototype_take_slot(
++        Prototype_name("exception_frame"), frame_value, retained);
++      List frame = frame_value;
+       List handle = clause ? clause.caddr().list() : NULL;
+       int labelled_at = walk.origin;
+       Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
+@@ -2491,8 +2538,10 @@
+         List arm = record.cadr();
+         bodies.push(_inside(walk, cleanup, arm, arm));
+       }
+-      return _try_block(
++      List lowered = _try_block(
+         walk, body_out, clause, frame, handle, cleanup, bodies.list_free());
++      transaction.commit();
++      return lowered;
+     }
+     /* A function-static initializer leaves its own record at the end of its
+        block. No exit runs that record, but a jump still may not enter the
+--- a/src/expressions.x
++++ b/src/expressions.x
+@@ -2461,6 +2461,14 @@
+     retain source position.
+ */
+ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
++  Var staged;
++  int retained_stage;
++  Var carrier = input;
++  match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
++  if (c.prototype_take_slot(carrier, staged, retained_stage)) {
++    if (retained_stage) return staged;
++    return c.resolve_expression(staged, origin);
++  }
+   Var retained;
+   if (c.prototype_bound_slots &&
+       c.prototype_bound_slots.try_get(input, retained))
+--- /dev/null
++++ b/src/prototype-slots.x
+@@ -0,0 +1,38 @@
++#pragma once
++#include "x2c.x"
++#include "meta.x"
++
++meta List Prototype_bound(List code) =>
++  %("x2c.slot" "bound" $code ());
++meta List Prototype_lowered(List code) =>
++  %("x2c.slot" "lowered" $code ());
++meta List Prototype_source(List code) =>
++  %("x2c.slot" "source" $code ());
++meta List Prototype_sequence(List code) =>
++  %("x2c.slot" "lowered" (seq @code) ());
++meta List Prototype_name(String role) {
++  Atom token = Atom.intern("?__effect_name");
++  return %("x2c.slot" "bound" $token ((new-name $token $role)));
++}
++meta List Prototype_frame(List captured) {
++  List frame = captured[2];
++  return %("x2c.slot" "lowered"
++    (declare ("ExceptionFrame") (bindings (bind $frame ()))) ());
++}
++meta List Prototype_cleanup(List captured) {
++  Var token = Atom.intern("?__effect_cleanup");
++  List code = captured[2];
++  return %("x2c.slot" "lowered" $token ((cleanup $token $code)));
++}
++meta List Prototype_early(List captured) {
++  List binding = captured[2];
++  return %("x2c.slot" "lowered" (seq)
++    ((early "phase4.helper" $binding
++       (declare (static int) (bindings (bind $binding ()))))));
++}
++meta List Prototype_fail(List captured) {
++  (void) captured;
++  return %("x2c.slot" "source" (not-an-ast) ());
++}
++List Macro_apply(Macro value, List arguments) =>
++  %("x2c.slot" "source" ("x2c.template" $value $arguments) ());

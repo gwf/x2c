@@ -1,0 +1,1 @@
+Assertion failed: (List_equal(before, Compiler_prototype_snapshot(c))), function _prototype_effect_probe, file transform.c, line 5421.

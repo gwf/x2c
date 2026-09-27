@@ -35,6 +35,23 @@ build inputs, installed code, new tests or recurring validation requirements.
 - `dual-macro-phase3/grammar*.md`: observed canonical productions, field roles,
   owner census and producer policy. Completeness limits are in the current plan.
 
+## Narrowed combined proof (phase 4)
+
+`dual-macro-phase4/` records the later baseline shadow check, the combined
+compiled-in template/meta-slot/effect/stage candidate, rollback probe, final
+62-case comparison and five paired timing samples. The unchanged native-helper
+shadow case fails identically and is a follow-up; per-unit scope-stack retention
+is not recommended. The first proof supports new-name, early and cleanup only.
+Other producers/effects are built when a migration first needs them.
+
+Final candidate SHA256:
+`fa2fd1f67c31f07c486fb68acc6d1edcb9fdc2d7b23250d812935f28c00c1148`.
+The combined patch is incremental on the preserved phase-3 bound-hole control.
+Its README records private adapter scaffolding and coverage limits. Timing
+ranges overlap; noisy live-mode medians are not evidence of a speedup.
+`capture-scope.md` scopes the first independent production consolidation for
+another branch; it is not implemented here.
+
 ## Reproduction limits
 
 The integrated value prototype used `relation.patch`, `parser3.patch`,

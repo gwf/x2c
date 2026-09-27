@@ -1,0 +1,42 @@
+/tmp/x2c-dual-bound-control translate   --out-dir src \
+		../../src/ast.x ../../src/bootstrap.x ../../src/build.x ../../src/builtins.x ../../src/cache.x ../../src/cli.x ../../src/collect.x ../../src/compiler.x ../../src/deps.x ../../src/diagnostics.x ../../src/editor.x ../../src/emit.x ../../src/expressions.x ../../src/format.x ../../src/frontend.x ../../src/generate.x ../../src/install.x ../../src/linked-meta.x ../../src/literals.x ../../src/macros.x ../../src/main.x ../../src/meta-project.x ../../src/parse.x ../../src/project.x ../../src/protocol.x ../../src/prototype-slots.x ../../src/regions.x ../../src/report.x ../../src/script.x ../../src/sourceview.x ../../src/stage.x ../../src/statements.x ../../src/toolchain.x ../../src/transform.x ../../src/type-ledger.x ../../src/type.x ../../src/utils.x
+../../src/transform.x:1538:15: type: '_node' is a static function private to its unit
+    rewritten = _node(compiler, rewritten);
+                ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:2361:5: parse: expected ';'
+      $declarations
+      ^
+
+../../src/transform.x:4026:38: type: '_node' is a static function private to its unit
+          transformed.push(%(@prefix ${_node(compiler, body)}));
+                                       ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:4039:17: type: '_node' is a static function private to its unit
+        ? value : _node(compiler, value);
+                  ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:4072:37: type: '_node' is a static function private to its unit
+    $ast.rewrite_children(ast, child, _node(compiler, child));
+                                      ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:4082:26: type: '_node' is a static function private to its unit
+        List new_subject = _node(compiler, subject);
+                           ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:4116:32: type: '_node' is a static function private to its unit
+      if (type is <list>) type = _node(compiler, type);
+                                 ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+../../src/transform.x:4163:23: type: '_node' is a static function private to its unit
+          transformed = _node(c, inner);
+                        ^^^^^
+  note: it is defined in 'lib/regex.x'; remove 'static' so other units can call it
+
+make: *** [src/.translated] Error 1

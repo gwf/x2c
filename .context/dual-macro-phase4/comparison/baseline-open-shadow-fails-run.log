@@ -1,0 +1,1 @@
+Assertion failed: (calls == 1), function main, file open-shadow-fails.c, line 45.

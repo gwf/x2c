@@ -1,0 +1,10 @@
+  Translate 1 x2c file in 78 ms
+phase4 effects: early-read-write rollback-all borrowed-map-commit
+  Compile 1 C file in 74 ms
+  Link 1 input in 38 ms
+Built executable /tmp/dual-phase4-root-probe in 690 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-phase4-root-probe-build (retained)
+  Output /tmp/dual-phase4-root-probe (423.1 KiB)

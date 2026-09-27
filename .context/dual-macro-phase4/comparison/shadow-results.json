@@ -1,0 +1,28 @@
+[
+  {
+    "fixture": "/Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase4/comparison/native-helper-shadow.x",
+    "label": "baseline",
+    "binary_sha256": "b0d9b1812930c7b7c9f38ab2c2347987510fa472060b3a88635a4055d9632c83",
+    "build_exit": 1
+  },
+  {
+    "fixture": "/Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase4/comparison/native-helper-shadow.x",
+    "label": "current-control",
+    "binary_sha256": "2b71c790cf8e0585a4e96ab4ffe098da7a689a17fde48eb9ea9fc610ce844b95",
+    "build_exit": 1
+  },
+  {
+    "fixture": "/Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase3/compiler-use/open-shadow-fails.x",
+    "label": "baseline",
+    "binary_sha256": "b0d9b1812930c7b7c9f38ab2c2347987510fa472060b3a88635a4055d9632c83",
+    "build_exit": 0,
+    "run_exit": -6
+  },
+  {
+    "fixture": "/Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase3/compiler-use/open-shadow-fails.x",
+    "label": "current-control",
+    "binary_sha256": "2b71c790cf8e0585a4e96ab4ffe098da7a689a17fde48eb9ea9fc610ce844b95",
+    "build_exit": 0,
+    "run_exit": -6
+  }
+]
