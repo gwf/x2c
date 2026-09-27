@@ -9,6 +9,10 @@
 #include "compiler.h"
 void collect_forget_preload_entries(void);
 
+void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, int included_only);
+
+void Compiler_replay_included_package_imports(Compiler c, Map globs, String path, Map visited);
+
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);

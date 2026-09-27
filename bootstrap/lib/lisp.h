@@ -119,6 +119,16 @@ void Lisp_set_global(Lisp lisp, String name, Var value);
 
 void Lisp_bind(Lisp lisp, String name, Func function);
 
+Lisp Lisp_active(void);
+
+Scope * Lisp_storage(Lisp lisp);
+
+Scope * Lisp_automatic_storage(Lisp lisp);
+
+Scope * Lisp_result_storage(Lisp lisp);
+
+Var lisp_source_function(Var callable);
+
 void Lisp_cleanup(Lisp value);
 
 

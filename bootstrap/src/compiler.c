@@ -2851,13 +2851,14 @@ static void _append_meta_definitions(Compiler c, Array nodes){
 void Compiler_resolve_protocols(Compiler);
 void Compiler_install_generated_protocol_symbols(Compiler);
 void Compiler_install_native_meta_effects(Compiler, Map);
+void Compiler_replay_included_package_imports(Compiler, Map, String, Map);
 Iter List_iter(List, Iter);
 List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
 void Compiler_write_meta_build(Compiler);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
-  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  c -> unit_nodes = nodes;  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_library_comptime(c);  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Token conflict = NULL; {
+  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  c -> unit_nodes = nodes;  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_library_comptime(c);  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Compiler_replay_included_package_imports(c, globs, c -> filename, Map_new());  Token conflict = NULL; {
     int * _x2c_macro_address_6 = & c -> recovery_depth;  int _x2c_macro_previous_6 = * _x2c_macro_address_6; {
       _x2c_defer_env_20 _x2c_defer_env_21 ={
         ._x2c_defer_capture_18 =(const void *) & _x2c_macro_address_6, ._x2c_defer_capture_19 =(const void *) & _x2c_macro_previous_6

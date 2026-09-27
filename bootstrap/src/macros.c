@@ -4075,6 +4075,10 @@ static List _native_module_suppliers(String name){
   ));
 }
 
+String Compiler_native_meta_module(Compiler c, String name, Type * type){
+  if(! _init_guard_) _file_init_();  if(! Compiler_bind_native_meta(c, name)) return NULL;  List suppliers = _native_module_suppliers(name);  if(! List_truth(suppliers)) return NULL;  String path = Var_string(List_car(suppliers));  if(! String_startswith(path, _1310)) return NULL;  Var target = Map_getindex((Var_map(Map_getindex(native_modules, String_var(path)))), String_var(name));  Var bound;  if(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! Var_equal(bound, target)) return NULL; (* type) = List_type(Func_signature((Var_pointer(target))));  return path;
+}
+
 Type Sym_normalize_declared_type(Sym, Type);
 static List _native_signature_type(Compiler c, List signature){
 
@@ -4215,8 +4219,8 @@ static void _certify_native_meta(Compiler c, String name, List signature, Token 
 
 int List_len(List);
 static void _bind_native_meta(Compiler c, String name, List signature, Token marker){
-  _certify_native_meta(c, name, signature, marker);  int iterator = _iterator_operation(signature);  Var bound;  Var volatile function;  int present = Lisp_try_get(c -> macro_lisp, name, &(bound));  if(present && ! iterator) function = bound;  else{
-    String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_297), NULL))) : name;  List suppliers = _native_module_suppliers(target); {
+  _certify_native_meta(c, name, signature, marker);  int iterator = _iterator_operation(signature);  Var bound;  Var volatile function;  String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_297), NULL))) : name;  List suppliers = _native_module_suppliers(target);  int present = Lisp_try_get(c -> macro_lisp, name, &(bound));  if(present && ! iterator) function = bound;  else{
+    {
       ExceptionFrame _x2c_exception_frame_4;  MatchCaptureSite static _x2c_catch_arms_4[1];  Var _x2c_catch_patterns_4[1];  ErrorCatchSite static _x2c_catch_site_4 ={
         _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1
       }
@@ -4236,7 +4240,7 @@ static void _bind_native_meta(Compiler c, String name, List signature, Token mar
                 }
 
               }
-              String first = Var_string(List_car(suppliers));  function = Map_getindex((Var_map(Map_getindex(native_modules, String_var(first)))), String_var(target));  if(List_truth(List_cdr(suppliers))) Compiler_report_warning(c, 942951818, _1320, marker, cons(String_var(String_join(NULL, cons(String_var(_778), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_784), cons(String_var(first), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_785), cons(String_var(String_join(_786, List_cdr(suppliers))), NULL)))), NULL))));
+              String first = Var_string(List_car(suppliers));  function = Map_getindex((Var_map(Map_getindex(native_modules, String_var(first)))), String_var(target));
             }
 
           }
@@ -4251,7 +4255,7 @@ static void _bind_native_meta(Compiler c, String name, List signature, Token mar
     }
 
   }
-  if(! Compiler_native_meta_accepts(c, function, signature)) Compiler_report_error(c, 1362954, _1321, marker, cons(String_var(String_join(NULL, cons(String_var(_778), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_779), cons(String_var(List_repr(signature)), NULL)))), NULL)));  if(present) return;  if(iterator){
+  if(List_truth(List_cdr(suppliers)) && Var_equal(function, Map_getindex((Var_map(Map_getindex(native_modules, List_car(suppliers)))), String_var(target)))) Compiler_report_warning(c, 942951818, _1320, marker, cons(String_var(String_join(NULL, cons(String_var(_778), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_784), cons(String_var(Var_str(List_car(suppliers))), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_785), cons(String_var(String_join(_786, List_cdr(suppliers))), NULL)))), NULL))));  if(! Compiler_native_meta_accepts(c, function, signature)) Compiler_report_error(c, 1362954, _1321, marker, cons(String_var(String_join(NULL, cons(String_var(_778), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_779), cons(String_var(List_repr(signature)), NULL)))), NULL)));  if(present) return;  if(iterator){
     int arity = List_len(Var_list(List_cadr(Var_list(List_car(signature))))) - 1;  function = Lisp_eval(c -> macro_lisp, List_var(cons(_787, cons(List_var(cons(_551, cons(function, NULL))), cons(int_var(arity), NULL)))));
   }
   Lisp_set_global(c -> macro_lisp, name, function);
@@ -4307,7 +4311,7 @@ int Compiler_bind_native_meta(Compiler c, String name){
 }
 
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker){
-  if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(List_type_from_ast(declaration));  String name = _native_meta_name(c, declaration, marker);  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  _ensure_lisp(c);  List signature = Compiler_func_signature(c, type);  _bind_native_meta(c, name, signature, marker);
+  if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(List_type_from_ast(declaration));  String name = _native_meta_name(c, declaration, marker);  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  _ensure_lisp(c);  List signature = Compiler_func_signature(c, type);  Map_setindex(c -> native_meta, String_var(name), List_var(signature));  _bind_native_meta(c, name, signature, marker);
 }
 
 void Compiler_check_meta_regions(Compiler, List);
@@ -4510,7 +4514,7 @@ Array values = Array_new(); {
 
       }
       Var function;  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2383};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2400};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
       }
       if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1326, site, cons(String_var(String_join(NULL, cons(String_var(_859), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
     }
@@ -4620,7 +4624,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
-                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2412};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2429};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                                                             }
 
                                                           }

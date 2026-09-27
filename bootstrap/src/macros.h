@@ -145,6 +145,8 @@ Map x2c_meta_definition_hashes(void);
 
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
 
+String Compiler_native_meta_module(Compiler c, String name, Type * type);
+
 int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
 
 void Compiler_install_native_meta_effects(Compiler c, Map globs);

@@ -1108,6 +1108,10 @@ void Block_append(Block, const void *, size_t);
 int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
 
 static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
+  if(handle -> capture_values != NULL){
+    Block_free(handle -> capture_values);
+    handle -> capture_values = NULL;
+  }
   if(! layout || ! layout -> binder_count) return;
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch captures");
   handle -> capture_values = Block_new(sizeof(Var));
