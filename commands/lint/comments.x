@@ -220,7 +220,8 @@ static void _comment(Lint l, Comment c, Array lines, int next):
     int verb = _among(first, verbs) && first in function
     if !reason && count <= 12 && (verb || shared >= (size < 2 ? size : 2)):
       l.add("restates-name", c.start, %"restates the name $name")
-  if c.kind != <doc> && !name && count <= 12 && code:
+  // A comment followed by another comment has no statement to restate.
+  if c.kind != <doc> && !name && count <= 12 && code && code[0] != '/':
     Map prose = _content(text)
     int size = prose.len()
     if !reason && size >= 2 && _shared(prose, _content(code)) * 4 >= size * 3:

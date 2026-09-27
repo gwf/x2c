@@ -1109,6 +1109,11 @@ static int _inherited_import(String path) {
          path in library_imports;
 }
 
+/** Whether the shared session evaluated the file at `path`. A unit that is
+    that file, as when a library is linted, inherits its Lisp forms.
+*/
+int Compiler.inherits_import(String path) => _inherited_import(path);
+
 /* A home Lisp library is evaluated once, when `loaded` is zero, but every use
    records it, so a file's dependencies do not depend on whether an earlier
    file loaded it. */

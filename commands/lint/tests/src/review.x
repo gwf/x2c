@@ -106,3 +106,10 @@ int Checker.check_text(Checker c, String text) {
   if (!text) c.report_error("none");
   return 1;
 }
+
+static int _item_failure(List node) => printf("not an item\n") < 0;
+
+int require_item(List node) {
+  if (node.car() != <item>) return _item_failure(node);
+  return 1;
+}

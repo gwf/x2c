@@ -343,6 +343,10 @@ static String _action(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
     int value = l.next(at), semi = _semicolon(l, at, to)
     if !_is(l, at, "return") || semi >= to || value == semi: continue
+    // A returned failure report is not silent.
+    int reports = 0
+    for (int k = value; k < semi; k = l.next(k)): reports |= _report(l, k)
+    if reports: continue
     if l.next(value) == semi && lint_word(l.at(value)):
       return %"return ${l.tokens[value].text}"
     return "return fallback"

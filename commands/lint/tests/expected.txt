@@ -82,6 +82,10 @@ commands/lint/tests/src/review.x:62: candidate repeated-accessor: node.car() rep
 commands/lint/tests/src/review.x:68: candidate repeated-routes: 3 functions share at least 80% of control and call tokens: route_one, route_two, route_three
 commands/lint/tests/src/review.x:89: candidate silent-shape-guard: impossible shape can silently continue in skip_other
 exit 0
+# a script unit
+exit 0
+# a preloaded macro library
+exit 0
 # reference parameters
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `count` aliases one caller variable; declare it as a `&` reference parameter
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `pair` aliases one caller variable; declare it as a `&` reference parameter

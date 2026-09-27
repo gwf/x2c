@@ -280,6 +280,8 @@ static int _start(
     if (filename) {
       _configure_package(compiler, frontend.request, filename);
       _tokenize_input(frontend, unit, filename);
+      compiler.inherited_lisp =
+        Compiler.inherits_import(Path.absolute(filename));
       Compiler.begin_meta_unit(compiler.filename);
     }
     else {

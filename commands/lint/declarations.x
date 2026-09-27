@@ -335,7 +335,8 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast):
     match row:
       case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))
              (? ?(int end) *)):
-        if l.layout: continue
+        // A script unit's generated entry points span tokens past the file.
+        if l.layout || end >= l.count: continue
         l.functions.push(%($name $start $body $end))
         if l.selected.contains("subject-parameter-name"):
           _subject(l, start, body, end)

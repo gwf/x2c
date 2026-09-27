@@ -37,6 +37,10 @@ run() {
   run --all "$tests/src/comments.x"
   echo "# structure and validation rules"
   run --all "$tests/src/review.x"
+  echo "# a script unit"
+  run --all "$tests/src/script.x"
+  echo "# a preloaded macro library"
+  run --rule negated-is lib/error-macros.xmacro
   echo "# reference parameters"
   run --rule reference-parameter "$tests/src/references.x"
   echo "# spacing that formatting changes"

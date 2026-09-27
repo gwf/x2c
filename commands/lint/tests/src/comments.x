@@ -47,3 +47,8 @@ int first(int value) => value;
 
 /* The cursor must stay on the opening token of the current form. */
 int second(int value) => value;
+
+/* the reader state */
+
+/* The reader state that the next call reads. */
+static int _state;
