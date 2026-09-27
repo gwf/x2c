@@ -230,6 +230,26 @@ static int _meta_immutable(Var value) {
     value.is_integer() || value.is_floating();
 }
 
+/* Spells finite `n` exactly as a normalized hex literal. Printf's %La
+   layout depends on the host's long double. */
+static String _meta_hex_float(long double n) {
+  const char *sign = signbit(n) ? "-" : "";
+  if (n == 0) return "%s0x0p+0L".printf(sign);
+  int exponent;
+  long double fraction = frexpl(fabsl(n), &exponent) * 2 - 1;
+  char digits[32];
+  int count = 0;
+  for (; fraction != 0; count++) {
+    fraction *= 16;
+    int digit = (int) fraction;
+    fraction -= digit;
+    digits[count] = "0123456789abcdef"[digit];
+  }
+  digits[count] = 0;
+  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits,
+    exponent - 1);
+}
+
 /* Reports at `site` a result that cannot become data in the program. */
 static void _meta_refuse(Compiler c, Var value, Token site) {
   Map marks = $auto({});
@@ -314,7 +334,7 @@ List Compiler.meta_value_expression(
       if (isnan(n)) text = "__builtin_nanl(\"\")";
       else if (isinf(n))
         text = n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
-      else text = "%LaL".printf(n);
+      else text = _meta_hex_float(n);
     }
     else {
       literal_type = %(unsigned long long);
