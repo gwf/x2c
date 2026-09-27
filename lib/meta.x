@@ -33,11 +33,14 @@
 
 #pragma once
 
+#include "array.x"
+#include "atom.x"
 #include "common.x"
 #include "list.x"
 #include "match.x"
 #include "string.x"
 #include "symbol.x"
+#include "symbolset.x"
 
 /** A `meta` parameter declared `Type` receives, at a `$` call, the
    description of its argument's type: `((name N) (kind K) (type T)
@@ -48,6 +51,55 @@ typedef List Type;
    syntax with the source text it came from: `((text T) (file F) (syntax
    S))`. `x2c_source_text` and `x2c_embed_text` read it directly. */
 typedef List Source;
+
+/* --- declaration parts --------------------------------------------------
+   The compiler and a project's helper both spell a Type as declaration
+   syntax, so the one implementation lives here. */
+
+static const SymbolSet _base_keywords = %<<typedef struct union enum int
+  long short char signed unsigned void float double>>;
+static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
+
+/** Returns the suffix of `type` that begins at its typedef name or base
+    keyword, sharing `type`, or `NULL` when it has none. */
+List type_base_suffix(List type) {
+  for (; type; type = type.cdr()) {
+    Var head = type.car();
+    if (head is <string> || (head is <symbol> && head in _base_keywords))
+      return type;
+  }
+  return NULL;
+}
+
+/** Returns `(base modifiers)` for reconstructing a declaration of `type`.
+    Function modifiers hold parameter syntax, and modifier order retains C
+    declarator precedence. */
+List type_declaration_parts(List type) {
+  List base = type_base_suffix(type);
+  if (!base) return %($type ());
+  List reversed = %(), qualifiers = %();
+  for (List rest = type; rest !== base; rest = rest.cdr())
+    reversed = cons(rest.car(), reversed);
+  while (reversed && reversed.car() is <symbol> &&
+         reversed.car() in _type_qualifiers) {
+    qualifiers = cons(reversed.car(), qualifiers);
+    reversed = reversed.cdr();
+  }
+  Array syntax = [];
+  foreach (Var item, reversed.reverse()) {
+    match (item)
+      case %(func ?(List parameters)): {
+        Array params = [];
+        foreach (List parameter, parameters) {
+          List (b, m) = type_declaration_parts(parameter);
+          params.push(%(param $b (bind () $m)));
+        }
+        item = %(fnmod (params @{params.list_free()}));
+      }
+    syntax.push(item);
+  }
+  return %(${qualifiers.append(base)} (@{syntax.list_free()}));
+}
 
 /* --- identifiers and literals -------------------------------------------
    What a macro has to produce to return syntax at all: a checked identifier

@@ -43,9 +43,6 @@ Map x2c_meta_helper_table(int index);
 int x2c_meta_helper_count(void);
 
 static FILE *helper_out = NULL;
-static const SymbolSet base_keywords = %<<typedef struct union enum int long
-  short char signed unsigned void float double>>;
-static const SymbolSet type_qualifiers = %<<const restrict volatile>>;
 static Array helper_notices = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
@@ -115,65 +112,24 @@ List x2c_expr_field(List receiver, String name) {
   return %(expr () (op . $receiver (${checked[1]})));
 }
 
-/* The base of `type`, where `Type.base_type` in `src/type.x` finds it: the
-   first typedef name or base keyword, or NULL. */
-static List _base_type(List type) {
-  for (; type; type = type.cdr()) {
-    Var head = type.car();
-    if (head is <string> || (head is <symbol> && head in base_keywords))
-      return type;
-  }
-  return NULL;
-}
-
-/* `(base modifiers)` spelling `type` in source, as
-   `Type.declaration_parts` in `src/type.x` computes it. It reads only the
-   Type, so the helper answers it without the compiler. */
-static List _declaration_parts(List type) {
-  List base = _base_type(type);
-  if (!base) return %($type ());
-  List reversed = %(), qualifiers = %();
-  for (List rest = type; rest !== base; rest = rest.cdr())
-    reversed = cons(rest.car(), reversed);
-  while (reversed && reversed.car() is <symbol> &&
-         reversed.car() in type_qualifiers) {
-    qualifiers = cons(reversed.car(), qualifiers);
-    reversed = reversed.cdr();
-  }
-  Array syntax = [];
-  foreach (Var item, reversed.reverse()) {
-    match (item)
-      case %(func ?(List parameters)): {
-        Array params = [];
-        foreach (List parameter, parameters) {
-          List (b, m) = _declaration_parts(parameter);
-          params.push(%(param $b (bind () $m)));
-        }
-        item = %(fnmod (params @{params.list_free()}));
-      }
-    syntax.push(item);
-  }
-  return %(${qualifiers.append(base)} (@{syntax.list_free()}));
-}
-
-List x2c_type_parts(List type) => _declaration_parts(type);
+List x2c_type_parts(List type) => type_declaration_parts(type);
 
 /* The three builders below are the bodies in `lib/meta.x`. */
 List x2c_expr_cast(List type, List expression) {
-  List (base, mods) = _declaration_parts(type);
+  List (base, mods) = type_declaration_parts(type);
   return %(expr $type
     (cast (decl $base (bindings (bind () $mods))) $expression));
 }
 
 List x2c_decl_make(List type, Var name, List initializer) {
-  List (base, mods) = _declaration_parts(type);
+  List (base, mods) = type_declaration_parts(type);
   List binding = %(bind ($name) $mods);
   if (initializer) binding = %(op = $binding $initializer);
   return %(declare $base (bindings $binding));
 }
 
 List x2c_param_make(List type, Var name) {
-  List (base, mods) = _declaration_parts(type);
+  List (base, mods) = type_declaration_parts(type);
   return %(param $base (bind ($name) $mods));
 }
 

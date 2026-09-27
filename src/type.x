@@ -10,6 +10,7 @@
 
 #pragma once
 #include "ast.x"
+#include "meta.x"
 /** Represents a semantic type as a canonical `List` of declarator modifiers
     followed by its base type. `NULL` denotes no type, and nonempty values have
     the canonical `List`-pool lifetime.
@@ -27,44 +28,10 @@ $(import "../lib/native-scalar-types.xmacro")
 // compiler declarations go through here so pointer, array, qualifier, and
 // function-pointer precedence matches parsed source.
 
-static Type _declarator_parts(Type type, List &modifiers) {
-  Type base = type.base_type();
-  if (!base) {
-    modifiers = NULL;
-    return type;
-  }
-  List reversed = %(), qualifiers = %();
-  for (List rest = type; rest !== base; rest = rest.cdr())
-    reversed = cons(rest.car(), reversed);
-  while (reversed && reversed.car() is <symbol> &&
-         Symbol.is_type_qualifier(reversed.car())) {
-    qualifiers = cons(reversed.car(), qualifiers);
-    reversed = reversed.cdr();
-  }
-  modifiers = reversed.reverse();
-  return qualifiers.append(base);
-}
-
-static Var _modifier_declaration_ast(Var value) {
-  if (value is not <list>) return value;
-  List modifier = value;
-  if (!modifier || modifier.car() != <func>) return value;
-  List parameters = modifier.cadr().list().map(
-    %!(Type parameter) => parameter.parameter_ast(NULL));
-  return %(fnmod (params @parameters));
-}
-
-/** Returns `(base modifiers)` for reconstructing a declaration of `type`.
-    Function modifiers contain parameter AST nodes, and modifier order retains
-    C declarator precedence.
-*/
-List Type.declaration_parts(Type type) {
-  List modifiers = NULL;
-  Type base = _declarator_parts(type, modifiers), Array syntax = [];
-  foreach (Var item, modifiers)
-    syntax.push(_modifier_declaration_ast(item));
-  return %($base (@{syntax.list_free()}));
-}
+/** Returns `(base modifiers)` for reconstructing a declaration of `type`,
+    through `type_declaration_parts` in `lib/meta.x`, which a project's
+    helper shares. */
+List Type.declaration_parts(Type type) => type_declaration_parts(type);
 
 /** Returns a complete `(declare ...)` AST for `type` and `binding`.
     A `NULL` binding produces an abstract declaration.
@@ -620,31 +587,7 @@ Symbol Type.var_tag(Type type) {
     The result shares the original `List` and is `NULL` when no base is
     present.
 */
-Type Type.base_type(Type type) {
-  while (type) {
-    Var head = type.car();
-    // The only strings in types are identifiers, and if we find one
-    // before hitting a builtin type, then it must be a typedef name.
-    if (head is <string>) return type;
-    // Possibly a builtin type
-    if (head is <symbol>) {
-      switch (type.car().symbol()) {
-        case <typedef>:
-          return type;
-        case <struct>: case <union>: case <enum>: case <int>: case <long>:
-        case <short>: case <char>: case <signed>: case <unsigned>: case <void>:
-        case <float>: case <double>:
-          return type;
-        case <const>: case <restrict>: case <volatile>: case <auto>:
-        case <static>: case <extern>: case <inline>:
-        case <*>: case <&>: case <opt-ref>: case <^>:
-          break;
-      }
-    }
-    type = type.cdr();
-  }
-  return NULL;
-}
+Type Type.base_type(Type type) => type_base_suffix(type);
 
 static int _omit_specifier(Symbol first, int keep_qualifiers) =>
   (first.is_storage_class() ||
