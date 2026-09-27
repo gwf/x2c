@@ -6,6 +6,19 @@
 > branch into `dev` waits for this plan, a final-tree gate, and a quiet
 > performance checkpoint. Opacity enforcement of project-meta results is
 > withdrawn by Gary and is not part of this work.
+>
+> Delivered 2026-09-27: R1-R12 and G are on `origin/meta-integration` at
+> 057349e9 with `agent-pr-check` green. Performance checkpoint on a loaded
+> host (load average about 10): against `dev`, compiler benchmarks are
+> 10-17% faster and stage 3 is about 15% slower; the stage 3 cost was
+> already present at 1b23aaa7. Build cost scores (dev 101.1, 1b23aaa7
+> 94.5, candidate 109.8 and 106.6) disagreed, so translator and C compiler
+> cycles were counted directly in alternating builds: 25.8G/3.7G at
+> 1b23aaa7 and 25.7G/3.7G at the candidate. The batch adds no measurable
+> build cost. Open before merging into `dev`: Gary's decision on the
+> stage 3 cost. Follow-ups outside this plan: two units including one
+> header that imports meta definitions, `meta` definitions shared through
+> an included `.x` header, and retiring `meta native`.
 
 ## Goal
 
