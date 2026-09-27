@@ -179,6 +179,15 @@ static void _retained_results(ReplSession s) {
           <defined>, void);
   _expect(s, "Func captured = capture(7);", <executed>, void);
   ReplResult closure = s.submit("captured;");
+  _expect(s, "captured(5);", <value>, 12);
+  _expect(s, "capture(19)(4);", <value>, 23);
+  _expect(s, "int apply_capture(Func fn, int x) { return fn(x); }",
+          <defined>, void);
+  _expect(s, "apply_capture(captured, 9);", <value>, 16);
+  _expect(s, "captured();", <failed>, void);
+  _expect(s, "captured(6);", <value>, 13);
+  _expect(s, "Func no_args = %!(void) => 37;", <executed>, void);
+  _expect(s, "no_args();", <value>, 37);
   ReplResult wide = s.submit("wide();");
   ReplResult array = s.submit("Array kept = [];");
   _completion(s, "kept.pu", "push", "free");
@@ -193,6 +202,8 @@ static void _retained_results(ReplSession s) {
     _expect(s, "int incomplete(int x,", <incomplete>, void);
     _expect(s, "int invalid = ;", <rejected>, void);
   }
+  _expect(s, "captured(8);", <value>, 15);
+  _expect(s, "no_args();", <value>, 37);
   _expect(s, "wide();", <value>, 5000000000L);
   if (wide.value != 5000000000L || wide.syntax.repr() != syntax ||
       wide.lowered.repr() != lowered || bad.diagnostics.repr() != diagnostic ||

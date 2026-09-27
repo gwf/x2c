@@ -15,6 +15,11 @@ builds/0/x2c build --plain \
   builds/0/libx2c-dev.a
 "$tmp/api-check"
 
+builds/0/x2c build --plain \
+  --build-dir "$tmp/func-cc" --output "$tmp/func-call" \
+  commands/repl/tests/func-call.x
+"$tmp/func-call"
+
 if builds/0/libexec/x2c-repl < commands/repl/tests/demo.txt \
      >"$tmp/out" 2>"$tmp/err"; then
   echo "rejected REPL submission unexpectedly succeeded" >&2

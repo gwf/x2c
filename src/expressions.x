@@ -1582,6 +1582,7 @@ static List _resolve_func_call(
   match (arguments)
     case %((expr (void) ())): arguments = NULL;
   List storage = NULL;
+  List zero = %(expr (int) (literal (int) "0"));
   Array locals = [], values = [];
   List invoked = callee;
   String count_text = %"${arguments.len()}";
@@ -1605,7 +1606,6 @@ static List _resolve_func_call(
       %("FuncArg_reference"), reference_type);
     List unrepresentable = compiler.sym.resolve_global(
       %("x2c_func_unrepresentable_argument"), unrepresentable_type);
-    List null_binding = compiler.sym.reference(%("NULL"), NULL);
     int index = 0;
     foreach (List argument, arguments) {
       Type source_type = argument.cadr();
@@ -1632,7 +1632,7 @@ static List _resolve_func_call(
       List binding = compiler.sym.define(%($argument_name), %("FuncArg"));
       locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
 
-      List address = %(expr () (ident $null_binding));
+      List address = zero;
       if (forwarded_reference) address = argument;
       else if (addressable && !null_reference) {
         Type pointer = source_type.reference();
@@ -1643,7 +1643,7 @@ static List _resolve_func_call(
       List carrier_type = null_reference
                         ? %(expr ("List") (ident $reference_name))
                         : !forwarded_reference && !addressable
-                          ? %(expr () (ident $null_binding))
+                          ? zero
                         : source_type_literal;
       List reference_value = %(
         expr ("FuncArg")
@@ -1681,10 +1681,7 @@ static List _resolve_func_call(
             (composite (commas @{values.list_free()}))))
     );
   }
-  else {
-    List null_binding = compiler.sym.reference(%("NULL"), NULL);
-    storage = %(expr () (ident $null_binding));
-  }
+  else storage = zero;
   Type apply_type = NULL;
   List apply = compiler.sym.resolve_global(%("Func_apply"), apply_type);
   List call = %(
@@ -1742,6 +1739,10 @@ static List _func_call_arguments(List body) {
 List Compiler.func_call_parts(Compiler compiler, Var content) {
   match (content) {
     case %(parens (block *body)): return _func_call_arguments(body);
+    case %(call (expr ? (ident (binding ? "Func_apply")))
+                (args ?callee (expr ? (literal ? "0"))
+                      (expr ? (literal ? "0")))):
+      return %($callee);
     case %(call (expr ? (ident (binding ? "Func_apply")))
                 (args ?callee (expr ? (literal ? "0"))
                       (expr ? (ident (binding ? "NULL"))))):
