@@ -6,7 +6,6 @@
 #define __GUARD_0xD09CF48E__
 
 #include "x2c.h"
-#include "process.h"
 typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
 
 typedef void(* NativeScalarStore)(void * bytes, Var value);
