@@ -388,7 +388,7 @@ static List _meta_host_args(List cc_args) {
              !arg.startswith("-m"))
       kept.push(arg);
   }
-  return kept.list();
+  return kept;
 }
 
 /** Builds the helper that runs the project `meta` functions `inputs`
