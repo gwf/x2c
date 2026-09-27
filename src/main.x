@@ -8,7 +8,6 @@
 
 #pragma once
 #include "build.x"
-#include "bootstrap.x"
 #include "project.x"
 #include "frontend.x"
 #include "meta-project.x"
@@ -547,39 +546,6 @@ static int _run_env(CliRequest request) {
   return 0;
 }
 
-static int _run_bootstrap(CliRequest command) {
-  Bootstrap payload = bootstrap_materialize(command);
-  if (payload.complete) {
-    printf(
-      "x2c: native compiler is already installed at %s/bin/x2c\n",
-      payload.prefix);
-    return 0;
-  }
-  x2c_set_root(payload.prefix);
-  _configure_logging(command.debugging);
-  Frontend.load_support(bootstrap_build_request(command, payload, <runtime>));
-  /* A source-bearing APE is one-shot: the runtime builds, then the compiler
-     that links it, and either status closes build state and flushes stdio
-     before `_Exit`. */
-  Context build = Context.open_isolated_named("bootstrap build");
-  int result = 0, CliRequest request = NULL;
-  foreach (Symbol component, %(runtime compiler)) {
-    request = bootstrap_build_request(command, payload, component);
-    request.label = component;
-    result = _run_build_request(request, NULL);
-    if (result) break;
-  }
-  if (!result) {
-    bootstrap_write_interfaces(payload);
-    bootstrap_build_commands(payload);
-    bootstrap_record_install(payload, request.cc, request.ar);
-    printf("x2c: installed native compiler at %s/bin/x2c\n", payload.prefix);
-  }
-  build.close();
-  fflush(NULL);
-  _Exit(result);
-}
-
 static int _external_name(const char *name) {
   if (!name || !((*name >= 'a' && *name <= 'z') ||
                  (*name >= 'A' && *name <= 'Z'))) return 0;
@@ -611,7 +577,7 @@ static void _run_external(String path, char **args) {
 
 /** Initializes x2c and dispatches one command from `argv`.
     `argv[0]` locates the installation. The process status is zero for a
-    successful translation, build, or bootstrap, one for compiler or tool
+    successful translation or build, one for compiler or tool
     failure, and the executed program's status for `run`. Help and version exit
     with zero, while invalid CLI and preflight input exit with status two.
     An external command replaces this process and returns its own status.
@@ -642,7 +608,6 @@ int main(int argc, char **argv) {
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,
     request.dry_run, request.inspects());
-  if (request.command == <bootstrap>) return _run_bootstrap(request);
   if (request.command == <env>) return _run_env(request);
   if (request.command == <install>) return install_command(request);
   if (request.command == <remove>) return remove_command(request);
@@ -658,9 +623,5 @@ int main(int argc, char **argv) {
     ? _run_translation(request, NULL, NULL) : _run_build(request);
   command.close();
   if (request.command == <script> && !result) result = script_run(request);
-#ifdef __COSMOPOLITAN__
-  fflush(NULL);
-  _Exit(result);
-#endif
   return result;
 }

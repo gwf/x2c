@@ -218,7 +218,6 @@ probes still copy their prelude by hand.
 | `run-protocol-boundaries.sh`, `run-header-cache.sh`, `run-cli-boundary.sh` | 536-1344 | the probe module; volume, and nine inline Python snippets in the CLI probe |
 | `unittest/benchmarks/run-*.sh` (8) | 28-122 | clock, median |
 | `tools/harness-metrics.py`, `tools/agent-failure.py` | 509, 503 | date formatting |
-| `etc/cosmopolitan/verify-ape.sh`, `build-ape.sh` | 82, 60 | nothing; low value alone |
 | `tools/x2c-graph/tests/run.sh` | 1001 | volume only |
 
 ## Post-survey tools

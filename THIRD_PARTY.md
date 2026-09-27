@@ -19,13 +19,6 @@ Dependency terms are governed by
 [`packages/LICENSE-POLICY.md`](packages/LICENSE-POLICY.md) and each
 package's README.
 
-## Optional release toolchain
-
-The optional Cosmopolitan release process downloads a checksum-pinned
-Cosmopolitan distribution. It is not stored in this repository. Its own
-license governs that component, and the x2c release builder copies its
-license files into each source-bearing APE release.
-
 ## Optional website toolchain
 
 The public website under `site/` is rendered by an npm toolchain pinned in

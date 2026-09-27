@@ -323,11 +323,9 @@ fields. This is the one consumer regression and is Gary's decision.
 keyed by the hash, so keystrokes outside meta bodies hit the cache and an
 edit inside one pays one staging.
 
-**Platforms.** Native modules are compiled out under `__COSMOPOLITAN__`,
-`_WIN32`, `__CYGWIN__` (`src/macros.x:1712-1716`). Shipped meta code is
-linked, so every documented build path (the APE seed delegates every
-translation to the installed native compiler; Windows is WSL2) keeps
-working; a user-defined bodied meta function on a host without `dlopen`
+**Platforms.** Native modules are compiled out under `_WIN32` and
+`__CYGWIN__`. Shipped meta code is linked, so every documented build path
+(Windows is WSL2) keeps working; a user-defined bodied meta function on a host without `dlopen`
 is the one new limitation.
 
 ## The evaluator without the machine

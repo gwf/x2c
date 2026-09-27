@@ -96,7 +96,6 @@
 - [lib/varops.x](https://x2c-lang.dev/docs/library/modules/varops.html)
 - [Compiler API (provisional)](https://x2c-lang.dev/docs/internals/compiler-api/index.html)
 - [src/ast.x](https://x2c-lang.dev/docs/internals/compiler-api/ast.html)
-- [src/bootstrap.x](https://x2c-lang.dev/docs/internals/compiler-api/bootstrap.html)
 - [src/build.x](https://x2c-lang.dev/docs/internals/compiler-api/build.html)
 - [src/builtins.x](https://x2c-lang.dev/docs/internals/compiler-api/builtins.html)
 - [src/cache.x](https://x2c-lang.dev/docs/internals/compiler-api/cache.html)

@@ -18,7 +18,7 @@
 #include "compiler.x"
 
 /* In-process staging loads native modules, which these platforms lack. */
-#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
 #define X2C_NATIVE_MODULES 1

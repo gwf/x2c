@@ -2,4 +2,4 @@ Usage:
   x2c help [command]
 
 Show top-level help, or help for translate, build, run, new, script, repl,
-bootstrap, env, install, remove, or list.
+env, install, remove, or list.

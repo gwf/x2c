@@ -677,7 +677,7 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
    Windows never targets it. */
 static int _never_defined(String name) {
   if (name == "__cplusplus" || name == "_MSC_VER") return 1;
-#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__)
   return 0;
 #else
   return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";

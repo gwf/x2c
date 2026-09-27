@@ -14,7 +14,6 @@ The generated help is the short option reference:
 ./x2c build --help
 ./x2c run --help
 ./x2c script --help
-./x2c bootstrap --help
 ```
 
 ## Translate to C
@@ -306,44 +305,6 @@ response formats are not a public compiler API.
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
 initialization rules.
-
-## Bootstrap a native installation
-
-The Cosmopolitan APE executable is an experiment for fun only. It can
-bootstrap a minimal native compiler and runtime without a repository checkout,
-but includes no examples, book, or optional packages. Use the full repository
-for normal development; this experiment is no substitute for it. Releases do
-not publish the APE; `make ape-build` in a checkout produces it.
-
-To try the experiment:
-
-```sh
-./x2c.com bootstrap --prefix "$HOME/.local/x2c"
-```
-
-The command verifies and extracts the source distribution stored in the APE
-ZIP, builds a native runtime archive first, then builds and installs the
-matching native compiler, which then writes the runtime unit interfaces. The
-result includes the compiler, its runtime archive, headers, sources, unit
-interfaces, licenses, and a toolchain record.
-A running bootstrap locks `<prefix>/.x2c-bootstrap.lock`, and a second
-bootstrap into the same prefix stops with an error. The operating system
-releases the lock when the process exits, and the empty file stays in the
-prefix.
-
-Bootstrap selects tools in the same order as ordinary builds: `--cc`, `X2C_CC`,
-`CC`, then `cc`; and `--ar`, `X2C_AR`, `AR`, then `ar`. It uses `-O2` unless
-another supported optimization is explicit. The installed compiler and runtime
-are native to the host and do not depend on Cosmopolitan. For every C
-compilation it runs, x2c selects signed plain `char`. The runtime requires an
-eight-bit signed `char`, even on hosts whose C compiler defaults to unsigned
-plain `char`. Compile-time Lisp bindings keep working in the native result.
-They resolve against compiler-generated targets.
-
-`--extension <dir>` links a package's compile-time part into the
-installed compiler, and repeats. It is the route to a package's `meta`
-functions on the APE seed's hosts that load no native module; see
-[packages with compile-time parts](../guide/packages.md#packages-with-compile-time-parts).
 
 ## Build and run
 
@@ -660,6 +621,9 @@ limit. A call past the limit stops the helper and is reported at the
 call. Omitted optimization, debug, define, and undefine
 options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
 implicitly consumed.
+For every C compilation it runs, x2c selects signed plain `char`. The
+runtime requires an eight-bit signed `char`, even on hosts whose C compiler
+defaults to unsigned plain `char`.
 
 ## Commands
 

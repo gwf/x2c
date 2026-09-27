@@ -325,8 +325,8 @@ implements them; the book documents it under
   so a runtime function the compiler lacks fails the module's link and names
   the symbol, and `-fPIC -shared -Wl,-Bsymbolic-functions` on Linux, where
   such a function fails at load instead. The compiler links with
-  `-rdynamic` on Linux (`builds/stage.mk`, `bootstrap/src/Makefile`, and the
-  `x2c bootstrap` compiler request). The build writes a generated entry unit
+  `-rdynamic` on Linux (`builds/stage.mk` and `bootstrap/src/Makefile`).
+  The build writes a generated entry unit
   that includes the module's x2c sources and defines `x2c_module_targets`,
   the name-to-`Func` Map that `lisp.native.targets` generates from the
   prototypes those sources declare (`_x2c.native-meta.declared`), and
@@ -343,11 +343,8 @@ implements them; the book documents it under
   and leaves out `autodiff`, `regex`, `typed-array`, `typed-map`, `mutex`,
   `thread`, `scripting`, `list-selectors` and `match-recursive`. It runs one
   `nm` over all objects, about 50 ms per compiler link, and a failing `nm`
-  fails the link. The Makefile links run it on macOS and Linux; the APE
-  seed and MSYS2 link the runtime as before. The APE payload records the
-  selection as `etc/runtime-objects.txt`, by object stem, and a compiler
-  that `x2c bootstrap` installs links those runtime objects too, without
-  running `nm` on the installing machine.
+  fails the link. The Makefile links run it on macOS and Linux; MSYS2
+  links the runtime as before.
 - **Lifetime and trust.** `Frontend.load_support` checks the stamp in the
   module file's bytes before `dlopen`, so a stale module's code never runs,
   then loads each requested module once per process and never closes it.
@@ -367,7 +364,7 @@ implements them; the book documents it under
   whose sources declare no `meta` prototype fails to build. On Linux the
   module links with `-Wl,-Bsymbolic-functions`, so its own functions are not
   interposed by same-named compiler exports.
-- **Platforms.** macOS, Linux and WSL. The APE seed, MSYS2 and native Windows
+- **Platforms.** macOS, Linux and WSL. MSYS2 and native Windows
   compile the loader but report that native modules are not supported.
 
 Consumer translations fingerprint each loaded module's contents. A module

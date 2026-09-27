@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 36
+- Compiler modules: 35
 - Runtime modules: 57
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -27,16 +27,6 @@ Public functions:
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `ast_contains_head`,
 `Ast.rewrite_children`, `Ast.never_returns`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
-
-### [src/bootstrap.x](../src/bootstrap.x)
-
-Source-bearing APE to native x2c transition.
-
-Public functions:
-
-`bootstrap_materialize`, `bootstrap_build_request`,
-`bootstrap_write_interfaces`, `bootstrap_build_commands`,
-`bootstrap_record_install`
 
 ### [src/build.x](../src/build.x)
 

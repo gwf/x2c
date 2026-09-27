@@ -531,16 +531,15 @@ declare none fails to build.
 
 A module can call any runtime function, because the compiler links the
 whole runtime. This holds for a compiler built from a checkout and for one
-`x2c bootstrap` installs. A loaded module stays loaded until the compiler
+`make install` installs. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.
 
 A package's compile-time part can instead be linked into the compiler
 itself, which is the only route where modules do not load.
-`x2c build --extension <dir>`, given the compiler's sources, and
-`x2c bootstrap --extension <dir>` each translate the package's
-sources into the compiler and register its `meta` functions under the
-package's name. Any number of packages can be linked this way. Importing
+`x2c build --extension <dir>`, given the compiler's sources, translates
+the package's sources into the compiler and registers its `meta` functions
+under the package's name. Any number of packages can be linked this way. Importing
 such a package loads no module and needs no `builds/<name>.module`; its
 functions come after the modules an option or a manifest names.
 

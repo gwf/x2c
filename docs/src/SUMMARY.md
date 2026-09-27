@@ -90,7 +90,6 @@
 
 - [Compiler API (provisional)](internals/compiler-api/index.md)
   - [src/ast.x](internals/compiler-api/ast.md)
-  - [src/bootstrap.x](internals/compiler-api/bootstrap.md)
   - [src/build.x](internals/compiler-api/build.md)
   - [src/builtins.x](internals/compiler-api/builtins.md)
   - [src/cache.x](internals/compiler-api/cache.md)

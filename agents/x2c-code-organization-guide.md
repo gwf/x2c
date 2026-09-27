@@ -58,8 +58,7 @@ The compiler is consolidated by phase rather than filename prefixes:
 - semantic representation and lowering: `type.x`, `protocol.x`,
   `transform.x`, `lambda.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
-- native and project driver: `build.x`, `project.x`, `toolchain.x`,
-  `bootstrap.x`.
+- native and project driver: `build.x`, `project.x`, `toolchain.x`.
 
 Runtime modules never depend on compiler modules. Parser modules produce the
 annotated AST consumed by transforms; transforms produce the normalized AST

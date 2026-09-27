@@ -22,12 +22,12 @@ X2c command dispatch.
 
 Initializes x2c and dispatches one command from `argv`.
 `argv[0]` locates the installation. The process status is zero for a
-successful translation, build, or bootstrap, one for compiler or tool
+successful translation or build, one for compiler or tool
 failure, and the executed program's status for `run`. Help and version exit
 with zero, while invalid CLI and preflight input exit with status two.
 An external command replaces this process and returns its own status.
 
-Source: `src/main.x:619`
+Source: `src/main.x:585`
 
 ## Design notes
 

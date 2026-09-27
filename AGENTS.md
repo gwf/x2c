@@ -109,10 +109,10 @@ Direct destructive operations outside the requested change need approval.
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,
-  `report` owns progress and receipts, `bootstrap` owns the APE-to-native
-  transition, `install` owns packages under the x2c home, `script` owns
-  build-once script execution, `editor` owns the one-request semantic
-  adapter, and `utils` owns environment discovery and translation workers.
+  `report` owns progress and receipts, `install` owns packages under the x2c
+  home, `script` owns build-once script execution, `editor` owns the
+  one-request semantic adapter, and `utils` owns environment discovery and
+  translation workers.
 - `lib/` - representative runtime modules include string, list, array, map,
   var, varconvert, varops, iter, match, scope, block, buffer, error,
   exception, file, logger, scan, tokenizer, symbol, symbolset, atom, pool,

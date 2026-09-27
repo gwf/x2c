@@ -30,7 +30,6 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler bm-build-scaling \
 	bm-match-cache performance-snapshot performance-runtime
 SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
-APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
 INSTALL_TARGETS = install uninstall dist
@@ -39,7 +38,7 @@ COMPAT_TARGETS = unittest docs bootstrap debug
 .PHONY: $(CORE_TARGETS) $(BUILD_TARGETS) $(VERIFY_TARGETS) \
 	$(DIFF_TARGETS) $(DOC_TARGETS) \
 	$(SITE_TARGETS) \
-	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) $(APE_TARGETS) \
+	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) \
 	$(CONFIG_TARGETS) $(INSTALL_TARGETS) $(COMPAT_TARGETS) \
 	bootstrap-ready \
 	check-after-precommit
@@ -474,15 +473,6 @@ shoot-update: build					## Refresh the tracked shootout table
 
 shoot-calibrate: build					## Recalibrate all shootout data
 	python3 examples/shootout/tools/shootout.py calibrate
-
-ape-toolchain:						## Prepare the pinned APE toolchain
-	./etc/cosmopolitan/setup-toolchain.sh
-
-ape-build:						## Build the source-bearing APE
-	./etc/cosmopolitan/build.sh
-
-ape-verify:						## Verify the APE-to-native rebuild
-	./etc/cosmopolitan/verify-ape.sh
 
 ##@ Configuration and maintenance
 config-debug:						## Switch to debug build mode

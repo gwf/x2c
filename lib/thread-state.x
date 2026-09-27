@@ -22,8 +22,8 @@ threaded int x2c_error_runtime_ready;
     Every thread that reaches this storage releases it itself: a worker at the
     end of its entry function and the process at the end of Scope shutdown.
     A pthread-key destructor cannot do this. It runs at an unspecified point
-    relative to atexit handlers, and on Cosmopolitan it freed the process
-    thread's state before Scope shutdown read it.
+    relative to atexit handlers, so it could free the process thread's state
+    before Scope shutdown read it.
 */
 void x2c_thread_state_release(void) {
   x2c_static_thread_release();

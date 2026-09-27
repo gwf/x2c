@@ -11,7 +11,6 @@ Functions and types exposed by each compiler module.
 | Module | Description |
 | --- | --- |
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
-| [`src/bootstrap.x`](bootstrap.md) | Source-bearing APE to native x2c transition. |
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |

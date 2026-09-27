@@ -480,8 +480,6 @@ The modules under `src/` divide ownership as follows:
   and host compile/archive/link actions;
 - `src/report.x` -- dependency-free terminal progress and stable completion
   receipts on standard error;
-- `src/bootstrap.x` -- source-bearing APE extraction and the one-time
-  transition to a matched host-native compiler and runtime;
 - `src/install.x` -- package installation, removal, and listing under the
   x2c home, with fetch, digest, and extraction as host child processes;
 - `src/script.x` -- `x2c script`: the per-user executable cache, its lock,

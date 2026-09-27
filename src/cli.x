@@ -23,7 +23,7 @@ typedef struct CliRequest {
   String out_dir, dep_file, dep_target;
   String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind;
+  String cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind;
   String diagnostics_file;
   Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
@@ -64,7 +64,6 @@ enum {
   CLI_BUILD     = 4,
   CLI_RUN       = 8,
   CLI_SCRIPT    = 16,
-  CLI_BOOTSTRAP = 32,
   CLI_ENV       = 64,
   CLI_INSTALL   = 128,
   CLI_REMOVE    = 256,
@@ -97,7 +96,6 @@ static CliCommand cli_commands[] = {
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <new>,       CLI_NEW,       "Create a project that builds and runs" },
   { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
-  { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from an APE binary" },
   { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
   { <install>,   CLI_INSTALL,   "Install a package into the home" },
   { <remove>,    CLI_REMOVE,    "Remove an installed package" },
@@ -114,28 +112,28 @@ static CliCommand cli_commands[] = {
   .offset = offsetof(struct CliRequest, field)
 
 static CliOption cli_options[] = {
-  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
+  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE |
     CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW,
     <general>,
     "-h", NULL, "Show help and exit", 0, .alias = "--help" },
   { <version>, CLI_TOP, <global>, "-V", NULL,
     "Show the x2c version and exit", 0, .alias = "--version" },
-  { <verbose>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <verbose>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-v", NULL,
     "Show commands as they are executed", 0, .alias = "--verbose",
     CLI_FIELD_FLAG(verbose) },
   { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0,
     CLI_FIELD_FLAG(dry_run) },
-  { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+  { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN |
     CLI_INSTALL | CLI_REMOVE | CLI_NEW,
     <general>, "-q", NULL,
     "Suppress successful progress and receipts", 0, .alias = "--quiet",
     CLI_FIELD_FLAG(quiet) },
-  { <plain>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <plain>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--plain", NULL,
     "Use stable output without terminal rendering", 0, CLI_FIELD_FLAG(plain) },
-  { <color>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <color>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0,
@@ -210,8 +208,6 @@ static CliOption cli_options[] = {
   { <force>, CLI_INSTALL, <package>, "--force", NULL,
     "Install a bundle built for another x2c version", 0,
     CLI_FIELD_FLAG(force) },
-  { <prefix>, CLI_BOOTSTRAP, <output>, "--prefix", "<dir>",
-    "Install native x2c and sources under <dir>", 0, CLI_FIELD_TEXT(prefix) },
   { <include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
     "-I", "<dir>", "Add a shared x2c/C include directory", 0,
     .package_native = 1 },
@@ -230,7 +226,7 @@ static CliOption cli_options[] = {
     "--native-module", "<file>",
     "Load a native module for compile-time calls", 0,
     CLI_FIELD_LIST(native_modules) },
-  { <extension>, CLI_BUILD | CLI_BOOTSTRAP, <source>,
+  { <extension>, CLI_BUILD, <source>,
     "--extension", "<dir>",
     "Link a package's compile-time part into a compiler", 0,
     CLI_FIELD_LIST(extensions) },
@@ -244,17 +240,17 @@ static CliOption cli_options[] = {
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0,
     CLI_FIELD_FLAG(cpp_symbols) },
-  { <cc>, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
+  { <cc>, CLI_NATIVE | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0, CLI_FIELD_TEXT(cc) },
   { <meta-cc>, CLI_TRANSLATE | CLI_NATIVE, <c-compiler>,
     "--meta-cc", "<program>",
     "Use <program> to build meta code, whatever --cc is", 0,
     CLI_FIELD_TEXT(meta_cc) },
-  { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
+  { <ar>, CLI_BUILD | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0, CLI_FIELD_TEXT(ar) },
-  { <opt>, CLI_NATIVE | CLI_BOOTSTRAP,
+  { <opt>, CLI_NATIVE,
     <c-compiler>,
     "-O", NULL, "Set C optimization", 0,
     .label = "-O0, -O1, -O2, -O3, -Os", .prefix = 1 },
@@ -524,24 +520,6 @@ static void _print_driver_help(Symbol command) {
         x2c returns the program's exit status."));
 }
 
-static void _print_bootstrap_help(void) {
-  puts(
-    $dedent(%"
-      Usage:
-        x2c bootstrap --prefix <dir> [options]
-
-      Extract the source distribution carried by this APE and use the host
-      C compiler and archiver to install a native x2c under <dir>."));
-  _print_options(<bootstrap>);
-  _print_help_row(
-    "@<file>", "Read additional arguments from a response file", 2);
-  puts("");
-  puts(
-    $dedent(%"
-      The seed supplies x2c sources and headers. A GCC- or Clang-compatible
-      C compiler and a compatible archiver must be installed."));
-}
-
 static void _print_env_help(void) {
   puts(
     $dedent(%"
@@ -648,7 +626,6 @@ static void _print_help(Symbol command) {
     case <run>:        _print_driver_help(command);
     case <new>:        _print_new_help();
     case <script>:     _print_script_help();
-    case <bootstrap>:  _print_bootstrap_help();
     case <env>:        _print_env_help();
     case <install>:
     case <remove>:
@@ -659,7 +636,7 @@ static void _print_help(Symbol command) {
         "  x2c help [command]\n"
         "\n"
         "Show top-level help, or help for translate, build, run, new, script, "
-        "repl,\nbootstrap, env, install, remove, or list.");
+        "repl,\nenv, install, remove, or list.");
     default: x2c_driver_error(%"unknown help command '${command}'");
   }
 }
@@ -1077,15 +1054,10 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   int expanded_end = 0;
   for (int i = 1; i < args.len(); i++) {
     String arg = args[i], int dashed = arg && arg[0] == '-';
-    /* bootstrap has no operand syntax, so `--`, `-o`, and a bare word are
-       all unknown to it where the other commands accept them. */
-    if (mask != CLI_BOOTSTRAP && !operands && dashed &&
-        arg == "--") {
+    if (!operands && dashed && arg == "--") {
       operands = 1;
       continue;
     }
-    if (mask == CLI_BOOTSTRAP && !dashed)
-      x2c_driver_error(%"unexpected bootstrap operand '$arg'");
     // Expanded words are parsed next but never expanded again.
     if (mask == CLI_SCRIPT && !operands && i >= expanded_end &&
         arg.startswith("@")) {
@@ -1104,7 +1076,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
         while (++i < args.len()) run_args.push(args[i]);
       continue;
     }
-    if (mask != CLI_BOOTSTRAP && arg == "-o") _removed_output();
+    if (arg == "-o") _removed_output();
     if ((mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
       request.save_temps = 1;
       request.temps_dir = arg.remove_prefix("--save-temps=");
@@ -1128,7 +1100,6 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   request.run_args = run_args.list_free();
   request.include_dirs = x_paths.list_free();
   request.cpp_args = cpp_args.list_free();
-  if (mask == CLI_BOOTSTRAP && !cc_args.len()) cc_args.push("-O2");
   request.cc_args = cc_args.list_free();
   request.ld_args = ld_args.list_free();
   if (request.package_dirs)
@@ -1144,8 +1115,6 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error("--no-deps conflicts with dependency output options");
   if (request.compile_only && request.kind != <executable>)
     x2c_driver_error("--compile-only conflicts with a library target kind");
-  if (mask == CLI_BOOTSTRAP && !request.prefix)
-    x2c_driver_error("bootstrap requires --prefix <dir>");
   if (mask == CLI_ENV && request.inputs.cdr())
     x2c_driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&

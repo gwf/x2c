@@ -188,18 +188,18 @@ main.x:1:1: driver: package 'tally' was built by another compiler; rebuild it
 
 Modules load on macOS, Linux and WSL. On other platforms, importing a
 package that has a module reports that native modules are not supported.
-There, link the package's compile-time part into the compiler instead:
+There, link the package's compile-time part into a compiler built from a
+checkout's `src/*.x` instead:
 
 ```sh
-./x2c.com bootstrap --prefix "$HOME/.local/x2c" --extension packages/tally
+./x2c build --extension packages/tally --output /tmp/x2c src/*.x
 ```
 
-The installed compiler then calls `tally`'s `meta` functions through
+That compiler then calls `tally`'s `meta` functions through
 `import "tally"` alone, never loads a module, and needs no
-`builds/tally.module`. The bootstrap translates the package's `src/*.x`
+`builds/tally.module`. The build translates the package's `src/*.x`
 and compiles its `src/*.c` with the compiler, so only a package without a
-native dependency links in this way. `x2c build --extension` does the same
-for a compiler built from a checkout's `src/*.x`.
+native dependency links in this way.
 
 A package can publish macros with its compile-time functions. Put a direct
 `.xmacro` import in the public part of its entry source:

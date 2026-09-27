@@ -191,10 +191,14 @@ if [ -n "$target" ]; then
     fail "a target flag reached the helper: $(cat out.log)"
 fi
 
-# An installed support payload carries the helper's protocol loop.
-"$X2C" script "$ROOT/etc/x2c-payload.x" support home >out.log 2>&1 ||
-  fail "support payload: $(cat out.log)"
-mkdir -p home/bin
+# A home laid out as `make install` lays it out carries the helper's
+# protocol loop.
+mkdir -p home/bin home/lib home/include/x2c home/etc
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro home/lib/
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$(dirname "$X2C")"/lib/*.h \
+  home/include/x2c/
+cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.xmacro "$ROOT/etc/meta-helper.x" \
+  home/etc/
 cp "$X2C" home/bin/x2c
 cp "$(dirname "$X2C")/libx2c.a" home/lib/
 mkdir -p installed

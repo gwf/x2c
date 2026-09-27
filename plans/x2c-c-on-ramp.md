@@ -216,9 +216,6 @@ maps slide markdown to a standalone example and
 lands first as an example under `examples/`, with a row in
 `examples/manifest.txt`, and the page references it.
 
-Also fix `site/src/pages/index.astro:201`, which links a v0.12.0 Cosmopolitan
-asset while the site ships 0.13.0.
-
 ## Validation
 
 4a: `make verify`, then `tools/gate-state.py ensure agent-pr-check` at

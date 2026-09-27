@@ -1,10 +1,8 @@
 #!/usr/bin/env -S x2c script
-/*  x2c-payload.x -- materialize compiler support; install or remove a
-    native dedicated prefix
+/*  x2c-payload.x -- install or remove a native dedicated prefix
 
     An installed prefix is an x2c home: bin, include, lib, etc, packages,
-    examples, and licenses. The APE support payload also carries src so the
-    bootstrap can rebuild the compiler; an application install does not.
+    examples, and licenses.
     Copies keep their source's permission bits and times, and each tree is
     inventoried in a manifest of FNV-1a digests.
 */
@@ -71,14 +69,13 @@ static void copy(Path source, Path target) {
   utimensat(AT_FDCWD, target, times, 0);
 }
 
-static void copy_support(Path destination, int sources) {
+static void copy_support(Path destination) {
   List rows = %(
     ("lib" ("*.x" "*.xmacro") ("lib" "include/x2c"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("etc" ("*.xlisp" "*.xmacro" "meta-helper.x") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))
     ("." ("LICENSE") ("licenses")));
-  if (sources) rows = %(("src" ("*.x" "*.xmacro") ("src")) @rows);
   foreach (List row, rows) {
     String folder = row.car();
     foreach (Var pattern, row.cadr()) {
@@ -148,20 +145,6 @@ static void copy_shipped_commands(Path destination) {
     shipped.printf("%s\n", row.str());
   }
   libexec.join("commands.txt").write_text(shipped);
-}
-
-/* The APE carries command source as well as compiler source. Bootstrap builds
-   shipped commands from this verified tree after it builds the compiler. */
-static void copy_command_sources(Path destination) {
-  Path commands = root.join("commands");
-  copy(commands.join("manifest.txt"),
-       destination.join("commands/manifest.txt"));
-  foreach (Path source, commands.walk()) {
-    String relative = source.remove_prefix(%"$commands/");
-    if (source.is_file() && !relative.split("/").contains("tests") &&
-        (source.endswith(".x") || source.endswith(".xmacro")))
-      copy(source, destination.join("commands").join(relative));
-  }
 }
 
 static String write_manifest(Path destination, String name, String kind) {
@@ -235,7 +218,7 @@ static void install(Path prefix, Path destdir) {
   {
     Path stage = make_stage(target.dirname());
     defer stage.remove_tree();
-    copy_support(stage, 0);
+    copy_support(stage);
     copy_examples(stage);
     copy_shipped_commands(stage);
     stage.join("packages").make_dirs();
@@ -295,21 +278,9 @@ static void uninstall(Path prefix) {
   else printf("x2c: removed the compiler; %s keeps unowned files\n", prefix);
 }
 
-static void support(Path destination, Path licenses) {
-  copy_support(destination, 1);
-  copy_command_sources(destination);
-  if (licenses)
-    foreach (Path source, licenses.join("LICENSE.*").glob())
-      copy(source, destination.join("licenses")
-                     .join(%"cosmopolitan-${source.basename()}"));
-  printf("%s\n", write_manifest(destination, ".x2c-bootstrap-manifest",
-                                "x2c-bootstrap-v1"));
-}
-
 root = Path.absolute(argv[0]).dirname().dirname();
 String program = Path.basename(argv[0]);
 List commands = %(
-  (support (destination required) (--licenses (value dir)))
   (install (--prefix (value path) required) (--destdir (value dir)))
   (uninstall (--prefix (value path) required)));
 String command = args ? args.car().str() : NULL;
@@ -333,10 +304,7 @@ catch %(bad-arg *detail): {
 }
 
 try {
-  if (command == "support")
-    support(normal(options["destination"]),
-            options["licenses"] ? normal(options["licenses"]) : NULL);
-  else if (command == "install")
+  if (command == "install")
     install(normal(options["prefix"]), options["destdir"]);
   else uninstall(normal(options["prefix"]));
 }

@@ -140,13 +140,6 @@ conclusions. Run the x2c comparisons from the repository root with:
 make shoot-run
 ```
 
-## For fun: a portable bootstrap
-
-The Cosmopolitan executable is an experiment for fun only: a minimal compiler
-bootstrap, not a substitute for the full repository. It omits the examples,
-book, and optional packages. Use the full repository for normal development.
-See the [experiment's instructions](etc/cosmopolitan/README.md) to try it.
-
 ## Repository map
 
 - `src/` - the translator and native compiler driver.

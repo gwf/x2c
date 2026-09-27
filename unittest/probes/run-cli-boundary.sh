@@ -17,7 +17,6 @@ cp "$ROOT/commands/manifest.txt" "$ROOT/builds/0/libexec/commands.txt"
 "$X2C" build --help >"$BUILD/build.help"
 "$X2C" run --help >"$BUILD/run.help"
 "$X2C" script --help >"$BUILD/script.help"
-"$X2C" bootstrap --help >"$BUILD/bootstrap.help"
 "$X2C" env --help >"$BUILD/env.help"
 "$X2C" install --help >"$BUILD/install.help"
 "$X2C" remove --help >"$BUILD/remove.help"
@@ -30,14 +29,12 @@ cp "$ROOT/commands/manifest.txt" "$ROOT/builds/0/libexec/commands.txt"
 "$X2C" build -h >"$BUILD/build-short.help"
 "$X2C" run -h >"$BUILD/run-short.help"
 "$X2C" script -h >"$BUILD/script-short.help"
-"$X2C" bootstrap -h >"$BUILD/bootstrap-short.help"
 "$X2C" help -h >"$BUILD/help-short.help"
 diff -u "$FIXTURES/cli-top.help" "$BUILD/top.help"
 diff -u "$FIXTURES/cli-translate.help" "$BUILD/translate.help"
 diff -u "$FIXTURES/cli-build.help" "$BUILD/build.help"
 diff -u "$FIXTURES/cli-run.help" "$BUILD/run.help"
 diff -u "$FIXTURES/cli-script.help" "$BUILD/script.help"
-diff -u "$FIXTURES/cli-bootstrap.help" "$BUILD/bootstrap.help"
 diff -u "$FIXTURES/cli-env.help" "$BUILD/env.help"
 diff -u "$FIXTURES/cli-install.help" "$BUILD/install.help"
 diff -u "$FIXTURES/cli-remove.help" "$BUILD/remove.help"
@@ -50,7 +47,6 @@ cmp "$BUILD/translate.help" "$BUILD/translate-short.help"
 cmp "$BUILD/build.help" "$BUILD/build-short.help"
 cmp "$BUILD/run.help" "$BUILD/run-short.help"
 cmp "$BUILD/script.help" "$BUILD/script-short.help"
-cmp "$BUILD/bootstrap.help" "$BUILD/bootstrap-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
 [[ $("$X2C" --version) == "x2c 0.14.0" ]]
 [[ $("$X2C" -V) == "x2c 0.14.0" ]]
@@ -62,14 +58,6 @@ cmp "$BUILD/build.help" "$BUILD/build-short-quiet.help"
 cmp "$BUILD/build.help" "$BUILD/build-long-compile.help"
 cmp "$BUILD/build.help" "$BUILD/build-short-jobs.help"
 cmp "$BUILD/build.help" "$BUILD/build-long-jobs.help"
-
-set +e
-"$X2C" bootstrap --prefix "$BUILD/not-an-ape" \
-  >"$BUILD/bootstrap.stdout" 2>"$BUILD/bootstrap.stderr"
-bootstrap_status=$?
-set -e
-[[ $bootstrap_status == 2 ]]
-grep -Fq "has no embedded source payload" "$BUILD/bootstrap.stderr"
 
 printf '#include "x2c.x"\nint quoted(void) { return 7; }\n' \
   >"$BUILD/space dir/quoted.x"
@@ -433,7 +421,7 @@ printf '#include "x2c.x"\nint library_value(void) { return 9; }\n' \
 [[ $(grep -c '\.o$' "$BUILD/direct/archive.list") == 1 ]]
 
 # A static-library build does not link x2c and must not require a matching
-# runtime beside the invoking compiler. This is the APE bootstrap seam.
+# runtime beside the invoking compiler.
 mkdir -p "$BUILD/standalone/bin"
 cp "$X2C" "$BUILD/standalone/bin/x2c"
 (

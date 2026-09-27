@@ -17,7 +17,7 @@ its current owner before moving a tool or adding rules to a command.
 2. Add `name|maturity|summary` to [the manifest](../commands/manifest.txt).
    Choose `experimental` unless shipping the command is already decided.
    Both maturities build in a checkout. Only `shipped` commands are
-   installed and built as command binaries by APE bootstrap. Promotion
+   installed by `make install`. Promotion
    changes the manifest after its release and compatibility implications
    are decided.
 3. Initialize the command environment with the embedded compiler identity,
