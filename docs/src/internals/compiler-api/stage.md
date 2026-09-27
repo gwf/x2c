@@ -12,9 +12,11 @@ Meta groups, the project helper, and the values crossing.
 
 | Function | Summary |
 | --- | --- |
+| [`literal_text_value`](#literal_text_value) | Returns the value of a String or character literal from its source `spelling`, quotes included: adjacent pieces are unescaped on their own and joined, as C does, and a character is its code. |
 | [`Compiler.begin_meta_unit`](#Compiler.begin_meta_unit) | Selects the table of the unit at `filename` for the calls that follow, and resets the unit's `meta static` values before the first one. |
 | [`Compiler.bind_meta_group`](#Compiler.bind_meta_group) | Binds the session's group function `name` when it is not bound yet, by staging the group, and reports at `site` a function that cannot run. |
 | [`Compiler.check_meta_call`](#Compiler.check_meta_call) | Refuses a run-time call to a `meta` function this compiler derived compile-time only. |
+| [`Compiler.folded_constant`](#Compiler.folded_constant) | Returns the value of the folded constant `node`, or void when part of it is only known at run time. |
 | [`Compiler.group_meta_function`](#Compiler.group_meta_function) | Records the bodied `meta` function `fn` in the unit's group. |
 | [`Compiler.groups_meta`](#Compiler.groups_meta) | Answers whether a `meta` function or value belongs to the unit's group: a parse meets it outside a macro definition while the project meta build parses the unit or a session stages it. |
 | [`Compiler.meta_argument`](#Compiler.meta_argument) | Returns the value the argument expression `node` of a `$` call passes to a parameter of type `want`, or of no declared type when `want` is NULL: a constant, captured syntax, or the result of another `$` call, which `call` evaluates. |
@@ -34,6 +36,18 @@ Meta groups, the project helper, and the values crossing.
 | [`Compiler.use_meta_toolchain`](#Compiler.use_meta_toolchain) | Selects the C compiler `cc` that builds the `meta` code of the units this process translates, with the runtime headers this compiler was built with, found from its installed headers in `include_dir`. |
 | [`Compiler.write_meta_build`](#Compiler.write_meta_build) | Writes the group of a unit the project meta build parsed into the build directory as `group-K.c` and `group-K.h`, K being its table, with the x2c sources it read in `group-K.deps`, or its failure in `group-K.failure`. |
 
+### Functions
+
+#### literal_text_value
+
+`Var literal_text_value(String spelling)`
+
+Returns the value of a String or character literal from its source
+`spelling`, quotes included: adjacent pieces are unescaped on their own
+and joined, as C does, and a character is its code.
+
+Source: `src/stage.x:59`
+
 ### `Compiler`
 
 <a id="Compiler.begin_meta_unit"></a>
@@ -44,7 +58,7 @@ Meta groups, the project helper, and the values crossing.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/stage.x:1011`
+Source: `src/stage.x:1014`
 
 <a id="Compiler.bind_meta_group"></a>
 #### Compiler.bind_meta_group
@@ -54,7 +68,7 @@ Source: `src/stage.x:1011`
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/stage.x:1302`
+Source: `src/stage.x:1305`
 
 <a id="Compiler.check_meta_call"></a>
 #### Compiler.check_meta_call
@@ -71,7 +85,19 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:381`
+Source: `src/stage.x:384`
+
+<a id="Compiler.folded_constant"></a>
+#### Compiler.folded_constant
+
+`Var Compiler.folded_constant(Compiler c, Var node)`
+
+Returns the value of the folded constant `node`, or void when part of it
+is only known at run time. Literal folding hoists a constant into the
+compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
+`var` and `string` leaves.
+
+Source: `src/stage.x:124`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -80,7 +106,7 @@ Source: `src/stage.x:381`
 
 Records the bodied `meta` function `fn` in the unit's group.
 
-Source: `src/stage.x:464`
+Source: `src/stage.x:467`
 
 <a id="Compiler.groups_meta"></a>
 #### Compiler.groups_meta
@@ -92,7 +118,7 @@ a parse meets it outside a macro definition while the project meta build
 parses the unit or a session stages it. A `.xmacro` import, and each
 compiler that collects a segment of the unit, shares the unit's group.
 
-Source: `src/stage.x:449`
+Source: `src/stage.x:452`
 
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument
@@ -107,7 +133,7 @@ syntax as the literal's value, a `Type` parameter as the description
 of its type, and a `Source` parameter with its source text. Anything
 else is reported at `site`.
 
-Source: `src/stage.x:152`
+Source: `src/stage.x:155`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -117,7 +143,7 @@ Source: `src/stage.x:152`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/stage.x:433`
+Source: `src/stage.x:436`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -127,7 +153,7 @@ Source: `src/stage.x:433`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/stage.x:858`
+Source: `src/stage.x:861`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -138,7 +164,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/stage.x:890`
+Source: `src/stage.x:893`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -152,7 +178,7 @@ call's failure. A body that crashes, exits, or passes the deadline ends
 the helper, which is reported at `site` and started again for the next
 call.
 
-Source: `src/stage.x:1180`
+Source: `src/stage.x:1183`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -162,7 +188,7 @@ Source: `src/stage.x:1180`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:396`
+Source: `src/stage.x:399`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -173,7 +199,7 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/stage.x:485`
+Source: `src/stage.x:488`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -186,7 +212,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/stage.x:307`
+Source: `src/stage.x:310`
 
 <a id="Compiler.record_meta_import"></a>
 #### Compiler.record_meta_import
@@ -196,7 +222,7 @@ Source: `src/stage.x:307`
 Records that a compile-time import has just added its `meta` definitions
 to the unit, so the group places them where the import stands.
 
-Source: `src/stage.x:476`
+Source: `src/stage.x:479`
 
 <a id="Compiler.stage_meta_group"></a>
 #### Compiler.stage_meta_group
@@ -207,7 +233,7 @@ Builds and loads the session's `meta` group, then binds each
 group function in the session not yet bound. Returns the loaded module,
 or NULL with `failure` set when the group does not stage.
 
-Source: `src/stage.x:1276`
+Source: `src/stage.x:1279`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -216,7 +242,7 @@ Source: `src/stage.x:1276`
 
 Enables in-process staging of `meta` groups for compiler sessions.
 
-Source: `src/stage.x:443`
+Source: `src/stage.x:446`
 
 <a id="Compiler.stop_meta_helper"></a>
 #### Compiler.stop_meta_helper
@@ -226,7 +252,7 @@ Source: `src/stage.x:443`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/stage.x:982`
+Source: `src/stage.x:985`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -236,7 +262,7 @@ Source: `src/stage.x:982`
 Directs the group of each unit the project meta build parses into
 `directory`, or stops that when it is NULL.
 
-Source: `src/stage.x:934`
+Source: `src/stage.x:937`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -247,7 +273,7 @@ Uses the helper at `path`, or none when it is NULL, whose tables named
 in `failures` could not be built, each with why, and whose table for
 each input path is in `units`.
 
-Source: `src/stage.x:998`
+Source: `src/stage.x:1001`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -258,7 +284,7 @@ Selects the C compiler `cc` that builds the `meta` code of the units
 this process translates, with the runtime headers this compiler was
 built with, found from its installed headers in `include_dir`.
 
-Source: `src/stage.x:424`
+Source: `src/stage.x:427`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
@@ -270,7 +296,7 @@ directory as `group-K.c` and `group-K.h`, K being its table, with the
 x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. A unit without `meta` functions writes nothing.
 
-Source: `src/stage.x:942`
+Source: `src/stage.x:945`
 
 ## Design notes
 
