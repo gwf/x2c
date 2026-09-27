@@ -82,11 +82,7 @@ protocol Cleanup(Lisp);
 
 #pragma private
 
-// Their `meta` prototypes join the target table; a public include would
-// make x2c.h include path.h before path.h defines `Path`.
-#include "json.x"
 #include "process.x"
-#include "diff.x"
 #include "regex.x"
 #include "typed-array.x"
 #include "typed-map.x"
@@ -115,7 +111,8 @@ macro Unit $lisp.optional.native.declarations() {
     (preproc "extern List Var_listsymbol(Var);")
     (preproc "extern String String_sha256(String);")
     (preproc "extern String Var_json(Var);")
-    (preproc "extern String Var_pretty_json(Var);")))...
+    (preproc "extern String Var_pretty_json(Var);")
+    (preproc "extern Map lisp_optional_native_targets(void);")))...
 }
 
 $lisp.optional.native.declarations();
@@ -154,6 +151,8 @@ $x2c.foreign.alias(Var_json)
 static String _lisp_var_json(Var value);
 $x2c.foreign.alias(Var_pretty_json)
 static String _lisp_var_pretty_json(Var value);
+$x2c.foreign.alias(lisp_optional_native_targets)
+static Map _lisp_optional_targets(void);
 
 static List _lisp_list_cdddr(List value) => value.cdr().cdr().cdr();
 static List _lisp_list_cddddr(List value) => value.cdr().cdr().cdr().cdr();
@@ -1272,7 +1271,8 @@ static Map lisp_native_targets = $lisp.native.target.map();
 
 static Func _native_target(String name) {
   Var target;
-  if (!lisp_native_targets.try_get(name, target)) return NULL;
+  if (!lisp_native_targets.try_get(name, target) &&
+      !_lisp_optional_targets().try_get(name, target)) return NULL;
   return (Func) target.pointer();
 }
 

@@ -10,6 +10,7 @@
     comments compared without trailing space, or it is not used.
 */
 #include "lint.x"
+#include "diff.x"
 #include <string.h>
 
 #pragma private

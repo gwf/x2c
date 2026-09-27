@@ -29,6 +29,7 @@ lib/func.x|api|
 lib/iter.x|api|
 lib/lib.x|api|
 lib/lisp-init.x|internal|The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
+lib/lisp-targets.x|internal|The evaluator targets of the pure Json, Diff, and Path operations, kept out of the implicit prelude.
 lib/lisp.x|api|
 lib/list.x|api|
 lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
