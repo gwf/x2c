@@ -425,6 +425,8 @@ void Type_begin_unit(void);
 
 Compiler Compiler_new(void);
 
+int Compiler_inherits_import(String);
+
 void Compiler_begin_meta_unit(String);
 
 int Compiler_error_count(Compiler);
@@ -468,6 +470,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
       if(String_truth(filename)){
         _configure_package(compiler, frontend -> request, filename);
         _tokenize_input(frontend, &((* unit)), filename);
+        compiler -> inherited_lisp = Compiler_inherits_import(Path_absolute(filename));
         Compiler_begin_meta_unit(compiler -> filename);
       }
       else{

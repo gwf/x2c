@@ -95,6 +95,8 @@ Var x2c_literal_value(Var syntax);
 
 void x2c_diagnostic_warn(String message, List notes);
 
+int Compiler_inherits_import(String path);
+
 void macro_library_reset(void);
 
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);

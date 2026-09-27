@@ -3408,6 +3408,10 @@ static int _inherited_import(String path){
   return ! library_filling && library_imports != NULL && Map_contains(library_imports, String_var(path));
 }
 
+int Compiler_inherits_import(String path){
+  if(! _init_guard_) _file_init_();  return _inherited_import(path);
+}
+
 void Compiler_add_translation_dependency(Compiler, String);
 static void _eval_library(Compiler compiler, int loaded, String relative, String message){
   String path = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_347), cons(String_var(relative), NULL))));  Compiler_add_translation_dependency(compiler, path);  if(library_filling) Map_setindex(library_imports, String_var(path), int_var(1));  if(loaded || _inherited_import(path)) return;  String text = _source_text(compiler, path, message, compiler -> token, cons(_443, cons(String_var(path), NULL)));  _eval_string(compiler, text, compiler -> token);
@@ -4570,7 +4574,7 @@ Array values = Array_new(); {
 
       }
       Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2426};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2431};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
       }
       if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1328, site, cons(String_var(String_join(NULL, cons(String_var(_861), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
     }
@@ -4683,7 +4687,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site, int slo
                                                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
-                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2460};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2465};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                                                             }
 
                                                           }

@@ -104,6 +104,8 @@ Var lisp_write_file(String path, String text);
 
 void Lisp_call_budget(Lisp lisp, long budget);
 
+void Lisp_set_interrupted(Lisp lisp, int interrupted);
+
 Var Lisp_eval(Lisp lisp, Var expression);
 
 Var Lisp_apply(Lisp lisp, Var callable, List values);
