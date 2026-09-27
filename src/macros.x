@@ -2308,9 +2308,8 @@ static Compiler _stub_compiler(String name, Token &site) {
   return c;
 }
 
-/* A helper's result with each marker the helper left for the compiler
-   replaced: a template call by its invocation and a deferred builder by
-   the compiler's own answer. */
+/* A helper's result with each template call the helper left for the
+   compiler replaced by its invocation. */
 static Var _helper_result(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   Array parts = [];
@@ -2320,12 +2319,6 @@ static Var _helper_result(Compiler c, Var value) {
     case %("x2c.template" ?stored ?(List values)):
       return _sdk_template_call(
         stored is <string> ? Atom.intern(stored.str()) : stored, values);
-    case %("x2c.deferred" ?(String name) *arguments): {
-      Var function;
-      if (!c.macro_lisp.try_get(name, function))
-        _sdk_reject(%"$name is not available to project meta code", NULL);
-      return _meta_apply(c, function, arguments);
-    }
   }
   return resolved;
 }
