@@ -1,8 +1,8 @@
 > Status: active -- narrowed compiler contract demonstrated in isolation.
 > The combined try template/slot/effect/stage candidate passes 62-case raw
 > C/H and outcome comparison. The failing-skeleton rollback probe also passes.
-> Five paired timing samples are complete on the same frozen candidate;
-> ranges overlap and live-mode results are noisy.
+> Five paired timing samples on phase5 show +1.40% default compiler translation
+> and +1.94% live; the default ranges do not overlap in this window.
 > Inserted-name shadowing is baseline parity and remains a follow-up.
 > Production implementation is not authorized by this research record.
 
@@ -21,25 +21,30 @@ The requested survey was found at
 `/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/.context/dual-macro-compiler-opportunities.md`.
 Its original survey baseline is `553429f`; current source, rather than its
 line numbers or capability assumptions, is authoritative here.
-The prototypes remain in `.context/dual-macro-phase3/` and managed isolated
-worktrees. Nothing in this plan claims that its proposed semantics already
-ship in x2c.
+The prototypes remain in `.context/dual-macro-phase3/` through phase5 and
+managed isolated worktrees. Nothing in this plan claims that its proposed
+semantics already ship in x2c. **Do not merge this research branch as is.**
+`.context/dual-macro-phase4/combined/` tracks full copies of five compiler
+sources (compiler, expressions, macros, parse and transform), alongside a
+prototype module. They are research snapshots, not production owners.
+Production changes must be authored separately against current dev.
 
-The narrowed combined try path is demonstrated. First production work remains
+The narrowed combined try path, including open native calls and producer-attached
+stages, is demonstrated. First production work remains
 the independent capture-role consolidation; later lowering migrations integrate
 the proved common result/effect path into ordinary compiler owners. Prototype
 wrappers and native dispatch are scaffolding, not additional public APIs.
 
 | Requested decision/proof | Result in this spike | Evidence |
 | --- | --- | --- |
-| Four forms plus meta slot calls | Recommended client contract; open modifier and common slot adapter still proposed | parser3, capture and stage patches; sections 1/8 |
+| Four forms plus meta slot calls | Frozen client semantics, including open native roles and producer-attached stages; implementation still isolated | parser3/capture; phase5 incremental patch; sections 1/8 |
 | Internal-node producers | Demand-driven owner/producer inventory; no raw internal builds in clients | grammar-producer-policy.md; appendix |
 | Effects with rollback | Extended existing transaction passes real early/memo writes, failing skeleton, nested rollback and borrowed-map commit | phase4/combined and root-final-probe.log |
 | Source/bound/lowered insertion | Combined compiled-in template, parsed meta slots and carriers pass 62-case raw comparison | phase4/combined; phase4/comparison/final-comparison.json |
 | Open versus closed names | Compiled-in target value signature and primitive cast Type lookup succeed; caller-local native-helper failure is baseline parity/follow-up; closed regression passes | compiler-use/open-policy.md and logs |
 | Tree rules | One bounded return-normalization rule works with nested traversal and pruning | stages/driver.x |
 | Field grammar | Source/derived layouts and 215-head census recorded; dynamic-head reconciliation incomplete | grammar-fields.md, grammar-head-census.md |
-| Cost | Combined five-pair medians: compiler +1.34% default, -3.21% noisy live; ranges overlap | phase4/comparison/results.md |
+| Cost | Phase5 five-pair compiler medians +1.40% default, +1.94% live; phase4 +1.34% retained as history | phase5/paired-summary.json; phase4/comparison/results.md |
 | Name/origin/sequence | Bounded role/origin/sequence probes; general combined coverage remains limited | grammar-mixed-name.x, hygiene/source-case.x, stages/sequence-cases.x |
 
 ## 1. Surface contract
@@ -80,7 +85,7 @@ The required additions beyond those four forms are:
   `macro open Statement(...) => { ... }`. This is one real resolution rule,
   not a getter, contextual pattern introducer or API family. Default is
   closed; explicit `closed` syntax is unnecessary. This modifier is a proposed
-  addition, not a phase 3 parser capability.
+  addition to production, implemented in the isolated phase5 parser.
 * Existing `Compiler.bind_syntax(value, AstPos, return_type)` for consuming
   constructed code in a specified target compiler. Callers also retain
   ordinary compiler origin context. A runtime Macro call cannot guess which
@@ -99,16 +104,22 @@ The required additions beyond those four forms are:
 3. `$producer(args)` and sequence slot insertion return ordinary canonical
    values plus ordered effects, consumed by the one common application owner.
    Effects are applied by the caller's existing Compiler transaction.
-4. Producer values carry `source`, `bound` or `lowered`. The binder binds source
-   skeletons and stops at prepared bound/lowered boundaries; parent conversions
-   retain ordinary ownership. Clients do not branch on stage fields.
+4. **The producing operation attaches its stage** when it finishes: parsed or
+   newly assembled unbound code is source; resolved references/typed expressions
+   are bound; completed transform/region output is lowered. An ordinary List
+   with no carrier defaults to source, never to bound/lowered by shape. The
+   binder binds source skeletons and stops at prepared bound/lowered boundaries;
+   parent conversions retain ordinary ownership. A client passes the producer
+   result directly, with no stage wrapper calls or stage-field inspection.
 5. The producer table names canonical owners and required facts. Only producers
    demanded by a migration are built. The first try proof needs frame-declaration
    and cleanup-placement producers, with new-name, early and cleanup effects.
 
 This freezes semantics, not public descriptor fields or a new API family.
-The current try proof uses prepared native/free-reference holes; future hygiene
-improvement must preserve these forms, not add another client calling convention.
+The current try body contains native calls directly. Its prepared free-reference
+inputs and producing-operation stages are supplied by ordinary owners behind
+the common adapter. Future hygiene improvements must preserve these forms, not
+add another client calling convention.
 
 No new `Params` kind is needed: `Param $parameters...` already exists.
 The wrapper probe `grammar-param-sequence.x` executes 6. Substituting `Decl`
@@ -196,23 +207,46 @@ function pointer`; generated C is byte-identical. Logs and source are in
 `.context/dual-macro-phase4/`. This is current lowering behavior, not a regression
 introduced by templates. The open-template control is at parity on this case.
 
-There is no recommendation to retain per-unit parser scope stacks. If hygiene
-for compiler-inserted free names is pursued later, resolve an open definition's
-free references once where its enclosing construct is parsed and scopes are
-live, then pass the resulting bound values as holes to lowering. Reuse ordinary
-binding/hygiene there, without rebinding completed hole contents. The 62-case
-control already takes prepared bound native calls and target Type values; it
-proves that transfer, not an implemented parse-time hygienic resolver. This
-follow-up is explicitly outside the next prototype. General value/typedef/tag
-hygiene does not block the parity rewrite.
+There is no recommendation to retain per-unit parser scope stacks. The
+phase5 proof prepares the open definition's free-reference inputs once per
+target unit at the enclosing try/defer parse or ordinary binding operation,
+with live scopes. Managed-initializer cleanup also prepares them when its
+producing declaration is bound: its later defer can become a synthetic try.
+The lowering receives prepared inputs through the common application owner;
+it never resolves free references late or reads the preparation map.
+The cache is private per Compiler, not global across target units.
 
-Native runtime functions create another boundary. `_catch_call` presently
-builds a native callee String and supplies its result Type; some declarations
-come from generated `exception.h` (`src/generate.x:1178`). Open resolution
-must preserve ordinary compiler treatment of native declarations and include
-placement. It cannot invent a binding/type or require a declaration earlier
-than the present pipeline does. A source-built call and today's explicitly
-typed native call are not yet proved interchangeable.
+Native runtime references require an explicit distinction from ordinary open
+source-function references. `_catch_call` currently constructs native String
+callees and supplies result Types. `lib/exception.x` declares push/landed with
+`ExceptionFrame *`; its generated `exception.h` includes `<setjmp.h>` and defines
+the frame's `env` field. `generate._primary_include` adds that header only when
+`needs_exception` is set. The isolated resolver preserves these existing native
+callee/result facts: void for push/landed and int for sigsetjmp, plus the native
+frame Type in the prepared frame reference. It does not parse exception.h,
+create substitute source declarations, issue fabricated program binding IDs,
+move includes, or introduce a second type checker. The C compiler still sees
+those declarations at the existing generated-header boundary.
+
+The phase5 adapter records `Sym.resolve_global` facts while scopes are live,
+but these three known native roles retain the String-call projection even when
+an x2c declaration is visible. Projecting a typed source callee instead emitted
+extra push/landed forward declarations, breaking raw C parity. Ordinary open
+source references should retain resolved binding/Type holes and ordinary call
+conversion; the earlier value/primitive Type probes establish that separate
+case. Native roles must be identified by the authoritative producer table,
+not by failure to find a Type or by a guessed function signature. The current
+three-name adapter is a bounded implementation of that rule, not a general
+value/Type/tag resolver. Its extra resolved-fact rows are audit scaffolding;
+the production owner should keep only facts its projection or recognition uses.
+
+Preparation applies to definition free roles before parameter substitution;
+it does not reinterpret retained hole code. Compile-time producer callees
+remain closed. The native String projection preserves baseline shadow behavior:
+fully hygienic emission under caller-local helper names remains a follow-up.
+First-use visibility, later declarations, aggregate/tag roles and arbitrary
+open recognition need further implementation evidence; they are not silently
+settled by these three native roles.
 
 Rejected defaults: infer open from being in src/, make all macros open, or
 silently replace unresolved closed identities by same-named globals.
@@ -269,26 +303,56 @@ For example, this is an interface sketch, not a probe that already works:
 
 ```x2c
 macro open Statement $try_region(Name $frame, Statement $declarations,
-  Statement $push, Expr $condition, Statement $body, Statement $landed,
-  Statement $landing, Statement $cleanup) {
+  Statement $body, Statement $landing, Statement $cleanup) {
   {
     $frame_declaration($frame)...
     $declarations
-    $push
-    if (!$condition) $body
-    else { $landed $landing }
+    x2c_exception_push(&$frame);
+    if (!sigsetjmp($frame.env, 0)) $body
+    else { x2c_exception_landed(&$frame); $landing }
     $place_cleanup($cleanup)...
   }
 }
 ```
 
-The runtime push/landed calls and setjmp condition are already bound inputs;
-the first proof does not resolve those native/free references during lowering.
-`frame_declaration` receives prepared target Type/name facts and returns
-canonical declaration code plus ordered effects. `place_cleanup` receives the
-prepared region/exit decision; it does not discover placement from code.
-Their exact signatures must include these facts (omitted above for readability).
-Pure template shape does not decide cleanup ancestry, staticness or conversion.
+The phase5 body writes the three runtime calls directly. The common owner
+supplies prepared native free-reference projections; they are not whole call
+holes built by `_region_call` or `_catch_call`. The frame declaration and
+cleanup placement remain meta slots. Pure shape does not decide cleanup
+ancestry, staticness or conversion.
+
+### Stage attachment at the producer
+
+| Try producer | Result stage | Established fact / retained responsibility |
+| --- | --- | --- |
+| Literal parsing or canonical unmarked List | source | Ordinary binder still resolves and types it. No stage guessed from its head. |
+| Frame/new-name consumer | bound | Allocates the original fresh binding, returns its typed native frame reference; declaration producer extracts the same binding. |
+| Catch declaration assembly | lowered sequence | Completes existing typed declarations, filtering and preparation code before returning. |
+| Region body driver | lowered | Runs the existing `_inside` walk and exit rewriting before returning. |
+| Landing assembly | lowered | Builds the existing catch choice and unhandled cleanup after their children are lowered. |
+| Cleanup computation | lowered sequence | Computes placement/exit code with existing region owners; also retains raw code internally for unwind bookkeeping. |
+| Frame declaration meta slot | lowered | Returns canonical native declaration for the supplied binding. |
+| Cleanup meta slot | lowered plus cleanup effect | Returns prepared cleanup placement data; consumer sets needs_exception. |
+| Macro application / skeleton | source | Common application evaluates slots/effects then uses ordinary binding. |
+
+The isolated client's actual application is:
+
+```x2c
+Macro shape = $compiler_try_shape;
+return c.bind_syntax(shape(frame_code, declarations, body, landing,
+  cleanup_code), AST_BLOCK, c.return_type);
+```
+
+`frame_code` and `cleanup_code` are already producer results; clients need no
+`Prototype_bound`, `Prototype_lowered` or `Prototype_sequence` calls. Their
+raw counterparts remain inside ordinary region bookkeeping. Private helpers
+such as `_region_call` still return raw Lists where raw canonical consumers
+need them; a boundary producer must attach the stage before supplying that
+result to a Macro. No global change to List meaning or unrelated callers is
+needed. Probe-only explicit wrapper calls remain disposable test scaffolding.
+The specific typed frame reference demonstrates address/member use and the
+same declaration binding; generic mixed Name projections remain limited.
+
 The earlier phase3 parity control supplied declarations, runtime calls,
 condition, body, landing and cleanup as bound/lowered holes; it did not
 implement slot calls or effects. The phase4 combined candidate now uses actual
@@ -403,7 +467,7 @@ resolution and Match/cache owners rather than a new cross-unit cache. Anonymous
 values with different captures are distinct preparations unless the existing
 canonical cache establishes equality. No new recurring checkpoint is proposed.
 
-The final combined candidate has five alternating paired samples after warmup,
+The historical phase4 combined candidate has five alternating paired samples after warmup,
 using the same source paths, home, flags and binary throughout. All 62 comparison
 outcomes/raw C/H outputs and all 32 final timed C/H files match baseline without
 normalization; binary hashes are unchanged before/after. Root independently
@@ -443,6 +507,74 @@ Earlier phase-3 bound-hole control samples are preserved under
 `stages/cost/`; current combined evidence is
 `.context/dual-macro-phase4/comparison/results.md`, with parameterized scripts,
 samples, ranges, hashes and comparison manifests.
+
+### Phase5 cost on the final open-body candidate
+
+The same runner repeats five alternating pairs after warmup, with common
+absolute source paths/home/flags, no effect probe, and unchanged binary hashes.
+All 32 timed C/H files are identical between labels. Session builds were held
+throughout timing; unrelated host activity is not fully controlled.
+
+| Translation workload | Baseline median s | Phase5 median s | Change |
+| --- | ---: | ---: | ---: |
+| Seven compiler/tokenizer files, default | 6.061 | 6.146 | +1.40% |
+| Same corpus, live | 7.178 | 7.317 | +1.94% |
+| Exception-heavy translation, default | 0.565 | 0.572 | +1.37% |
+| Exception-heavy translation, live | 0.625 | 0.648 | +3.69% |
+
+Default compiler ranges are 6.018-6.084 s versus 6.116-6.168 s: they do not
+overlap, and every paired candidate observation is slower. Report this as
+observed modest overhead, not zero cost or a proved noise-only change. Live
+compiler ranges overlap (7.151-7.416 versus 7.283-7.345 s); exception live
+ranges do not (0.610-0.637 versus 0.642-0.652 s). Five samples in one window
+do not establish a stable long-run distribution. No runtime exception execution,
+full build timing, cold preparation, allocation counts or application counts
+were measured. This is the total cost of the one migrated lowering plus its
+supporting path, not an isolated transaction microbenchmark.
+
+Evidence: `.context/dual-macro-phase5/samples.json`, `paired-summary.json`,
+`timed-artifact-digests.json` and `checksums-after.json`. The immutable body,
+formal projections, native free-role plan and producer bindings should be
+prepared once per process; target reference facts/projections once per unit.
+The prototype still scans/clones the open body per application and uses legacy
+invocation Match extraction. Those are concrete preparation opportunities,
+not evidence of an already achieved saving.
+
+### Running migration cost and recommended budget
+
+Keep one ledger row per migrated lowering, with the candidate and baseline,
+corpus, number of applications, transaction count, paired median/range and
+observed incremental delta. Replacing a prior candidate replaces its ledger
+row: do not count successive versions of try twice. The current entry is:
+
+| Lowering | Candidate | Default compiler corpus delta | Transaction cost | Status |
+| --- | --- | ---: | --- | --- |
+| try/defer/catch region skeleton | phase4 final (historical) | +1.34% | One per try; application/total transaction counts unmeasured | Five paired samples; overlapping ranges |
+| Same lowering, open body / producer stages | phase5 final | +1.40% | Same one per try; counts unmeasured | Current total; replaces phase4 row |
+| Later lowerings | Not migrated | Not measured | Not measured | Add when migrated |
+
+The current observed total is **+1.40% default** and **+1.94% live** for the
+phase5 try candidate. The earlier +1.34% row is historical, not an additional
+lowering cost. This is an
+accounting observation, not a confirmed regression or a prediction of the
+whole rewrite. Record each cumulative candidate/original-baseline ratio; derive a migration
+increment by subtracting successive cumulative ratios measured on that same
+baseline and workload. Maintain their planning sum, and measure the combined
+compiler against the original baseline at the existing performance checkpoint.
+Interactions, corpus weights and noise mean adding independent medians cannot
+establish actual cumulative cost. Different timing windows need paired original
+baseline reruns, not subtraction of their elapsed times.
+
+Recommend a **5% cumulative translation-overhead planning budget** for the
+whole migration on the representative default compiler corpus, with no
+sustained regression above that budget accepted without an explicit design
+choice. Aim for 2% or less through prepared templates and transaction reuse
+where the existing owner already establishes an enclosing transaction. These
+numbers are recommendations, not approved policy or new gates. A repeatable
+increase should first trigger preparation/profiling and simplification, not a
+new recurring test requirement. Preserve the current advisory checkpoint and
+report live-mode/build/runtime observations independently; do not offset a
+repeatable default slowdown with a noisy negative live delta.
 
 ## 7. Name, positions and sequences
 
@@ -669,6 +801,59 @@ values at the proper position. General category/conversion behavior is not
 inferred from that success. Template-origin masking preserves supplied hole
 origins for C parity, but precise failed-skeleton diagnostic attribution is thin.
 
+## Combined proof: phase 5
+
+The final isolated binary `/tmp/x2c-dual-phase5-final` has SHA256
+`ed6eb83bfb2e8977554ade3b95baaa75df123f58e3d76e9f6b646322e56252c5`.
+The true `macro open` descriptor retains its policy on both provisional and
+completed parser outputs; no name-based bootstrap bypass remains in the final
+source. The template contains runtime calls, the client has no stage wrappers,
+and frame/cleanup remain parsed meta slots using the same three-effect,
+stage-carrier and transaction path as phase4.
+
+All 62 outcomes and raw C/H files match the unmodified baseline, without
+normalization. The same binary passes the failing-skeleton rollback probe and
+then builds/runs defer-try-cleanup with `17 1 1 23`. Closed macro lexical hygiene
+also builds/runs with `28 28`. The native-helper shadow check still fails
+identically; its raw C matches the preserved baseline output. Evidence, source
+checksums and the incremental
+six-owner patch are in `.context/dual-macro-phase5/`; no further full source
+copies were added. Paired timing is complete on this same binary; the running
+ledger reports this candidate instead of adding it to the older try version.
+
+The new preparation points are ordinary literal/canonical try and defer
+owners, plus declaration binding that creates managed-initializer cleanup.
+They prepare once per target Compiler while scopes are live. This matters:
+defer lowering's lexical-transfer and unsupported-capture paths synthesize try
+later; a resolver hooked only to literal try misses them. There is no late
+resolution fallback and no scope-stack retention.
+
+The earlier typed-global callee attempt emitted extra push/landed declarations.
+The corrected native-role projection reuses the existing String-call branch,
+so generated exception.h and normal C binding retain declaration/ABI ownership.
+Program free roles are projected before hole substitution. Definition-site
+meta callees and hole identities are preserved. The specific frame producer
+returns a bound typed reference; its declaration producer extracts that same
+binding, and ordinary address/member binding builds the native call arguments.
+
+Failed attempts are preserved, not generalized into design rejection: an
+unsupported long Symbol literal; my bootstrap condition edit failing to apply;
+a resolver missing synthetic tries; native typed-callee declaration drift;
+and the parser's final descriptor reconstruction dropping its open flag.
+The successful intermediate sequence uses the older phase4 compiler to build
+new parser/owners with a temporary runtime open policy on the named proof
+shape, then that binary compiles the true open definition. This is disposable
+bootstrap scaffolding, not a production convention or checked-in refresh.
+Diagnostic-only instrumentation of generated C was used to inspect one body
+and an absent preparation map; the final clean build regenerates that C and
+contains no instrumentation.
+
+The narrowed client semantics can now be frozen. General open value/Type/tag
+role preparation, later-declaration visibility, recognition of computed slots,
+full helper transport and arbitrary producer composition remain unproved;
+these limits neither change the client forms nor justify a parallel validator.
+Native String emission still has baseline caller-local shadow limitations.
+
 ## Alternatives and recommendation
 
 | Alternative | Strength | Cost or limit | Decision |
@@ -682,18 +867,19 @@ origins for C parity, but precise failed-skeleton diagnostic attribution is thin
 ## Remaining decisions and limits of this spike
 
 The freeze includes the four forms, the explicit `open` modifier, common
-slot-call result semantics, `source`/`bound`/`lowered` stage marks and the
-producer table below. The stage marks belong to producer/application values;
+slot-call result semantics, producer-attached `source`/`bound`/`lowered` stages
+and the producer table below. The stage marks belong to producer/application values;
 compiler lowering clients do not inspect them. Producers are implemented by
 the migration first needing them, not as an up-front family. In particular:
 
 * Compiler-inserted value shadowing is reproduced baseline behavior and is a
-  follow-up, not a blocking integration question. Parse-time resolution into
-  bound holes is the follow-up design; per-unit scope retention is dropped.
+  follow-up, not a blocking integration question. Parse-time preparation now
+  covers the three native roles; general hygienic emission remains a follow-up.
+  Per-unit scope retention is dropped.
   The primitive cast Type shadow control passes; broader roles remain thin.
 * The narrowed compiled-in try path with parsed meta slots, three effects and
-  stage carriers passes its transaction probe and 62-case comparison. Generic
-  producer dispatch/argument-marking integration still uses private scaffolding.
+  stage carriers passes its transaction probe and 62-case comparison. The client
+  now has no wrapper calls; generic producer dispatch still uses private scaffolding.
   Parent conversion counts across broader categories and diagnostic attribution
   outside this bounded fixture remain thin.
 * Mixed Name role projection works through a private constraint adapter; its
@@ -717,14 +903,16 @@ the migration first needing them, not as an up-front family. In particular:
   compiler mutations. Helper transport and REPL isolation stay separate.
 
 These are bounded integration limits, not evidence against the frozen forms.
-The two narrowed proof blockers now have executable evidence; general feature
+Both phase5 contract gaps now have executable evidence; general feature
 coverage is not claimed. No full self-host comparison of the combined path was
 run. This work changes research records and isolated prototypes, not production
 consumers or bootstrap outputs.
 
 ## First independent production change: shared capture roles
 
-Scope only, for a separate production branch and later ordinary dev delivery.
+Independent production work is authorized separately and can proceed now on
+its own branch under the ordinary dev rules. It does not depend on phase5.
+It is scoped here and is not implemented by this research prototype.
 `src/macros.x:_capture_pattern` and `_capture_row` share the current capture
 projection schema; `_forwarded_capture` and `_forwarded_prefix_list` consume
 that same policy. A compact private static role table owns projection names,

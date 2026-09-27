@@ -1,0 +1,8 @@
+PHASE5 project x2c_exception_push map: <absent>
+PHASE5 project sigsetjmp map: <absent>
+PHASE5 project x2c_exception_landed map: <absent>
+/Users/gary/.codex/worktrees/agent-dual-transport/x2c/lib/file.x:1:1: type: identifier has an unknown binding identity
+  /*  file.x -- `File` I/O operations and stream handling
+  ^
+  note: binding: (binding 2262 "x2c_exception_push")
+

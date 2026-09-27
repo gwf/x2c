@@ -1,0 +1,8 @@
+/tmp/x2c-dual-phase5-intermediate2 translate   --out-dir lib \
+		../../lib/args.x ../../lib/array.x ../../lib/atom.x ../../lib/block.x ../../lib/buffer.x ../../lib/clibc.x ../../lib/cmath.x ../../lib/common.x ../../lib/context.x ../../lib/datum.x ../../lib/diff.x ../../lib/digest.x ../../lib/dispatch.x ../../lib/error.x ../../lib/error_init.x ../../lib/exception.x ../../lib/file.x ../../lib/func.x ../../lib/iter.x ../../lib/json.x ../../lib/lib.x ../../lib/lisp-init.x ../../lib/lisp.x ../../lib/list-selectors.x ../../lib/list.x ../../lib/logger.x ../../lib/machine.x ../../lib/map.x ../../lib/match-machine.x ../../lib/match.x ../../lib/meta.x ../../lib/mutex.x ../../lib/path.x ../../lib/pool.x ../../lib/process.x ../../lib/protocols.x ../../lib/regex.x ../../lib/scan.x ../../lib/scope.x ../../lib/scripting.x ../../lib/split.x ../../lib/static-init.x ../../lib/string-classify.x ../../lib/string-number.x ../../lib/string.x ../../lib/symbol.x ../../lib/symbolset.x ../../lib/thread-state.x ../../lib/thread.x ../../lib/tokenizer.x ../../lib/typed-array.x ../../lib/typed-list.x ../../lib/typed-map.x ../../lib/var-ledger.x ../../lib/var.x ../../lib/varconvert.x ../../lib/varops.x ../../lib/x2c.x
+../../lib/file.x:1:1: type: identifier has an unknown binding identity
+  /*  file.x -- `File` I/O operations and stream handling
+  ^
+  note: binding: (binding 2262 "x2c_exception_push")
+
+make: *** [lib/.translated] Error 1

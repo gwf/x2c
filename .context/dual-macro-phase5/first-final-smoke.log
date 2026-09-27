@@ -1,0 +1,5 @@
+/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/compiler-fixtures/defer-try-cleanup.x:1:1: type: identifier has an unknown binding identity
+  #include "x2c.x"
+  ^
+  note: binding: (binding 886 "x2c_exception_push")
+

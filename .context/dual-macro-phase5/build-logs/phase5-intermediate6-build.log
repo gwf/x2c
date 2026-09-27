@@ -1,0 +1,79 @@
+/tmp/x2c-dual-combined-final translate   --out-dir src \
+		../../src/ast.x ../../src/bootstrap.x ../../src/build.x ../../src/builtins.x ../../src/cache.x ../../src/cli.x ../../src/collect.x ../../src/compiler.x ../../src/deps.x ../../src/diagnostics.x ../../src/editor.x ../../src/emit.x ../../src/expressions.x ../../src/format.x ../../src/frontend.x ../../src/generate.x ../../src/install.x ../../src/linked-meta.x ../../src/literals.x ../../src/macros.x ../../src/main.x ../../src/meta-project.x ../../src/parse.x ../../src/project.x ../../src/protocol.x ../../src/prototype-slots.x ../../src/regions.x ../../src/report.x ../../src/script.x ../../src/sourceview.x ../../src/stage.x ../../src/statements.x ../../src/toolchain.x ../../src/transform.x ../../src/type-ledger.x ../../src/type.x ../../src/utils.x
+Translated 37 x2c files to src in 4.97 s
+  Generated 37 C files and 37 headers (3.4 MiB)
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/ast.c.d -MT src/ast.o -c src/ast.c -o src/ast.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/bootstrap.c.d -MT src/bootstrap.o -c src/bootstrap.c -o src/bootstrap.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/build.c.d -MT src/build.o -c src/build.c -o src/build.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/builtins.c.d -MT src/builtins.o -c src/builtins.c -o src/builtins.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/cache.c.d -MT src/cache.o -c src/cache.c -o src/cache.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/cli.c.d -MT src/cli.o -c src/cli.c -o src/cli.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/collect.c.d -MT src/collect.o -c src/collect.c -o src/collect.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/compiler.c.d -MT src/compiler.o -c src/compiler.c -o src/compiler.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/deps.c.d -MT src/deps.o -c src/deps.c -o src/deps.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/diagnostics.c.d -MT src/diagnostics.o -c src/diagnostics.c -o src/diagnostics.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/editor.c.d -MT src/editor.o -c src/editor.c -o src/editor.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/emit.c.d -MT src/emit.o -c src/emit.c -o src/emit.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/expressions.c.d -MT src/expressions.o -c src/expressions.c -o src/expressions.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/format.c.d -MT src/format.o -c src/format.c -o src/format.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/frontend.c.d -MT src/frontend.o -c src/frontend.c -o src/frontend.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/generate.c.d -MT src/generate.o -c src/generate.c -o src/generate.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/install.c.d -MT src/install.o -c src/install.c -o src/install.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/linked-meta.c.d -MT src/linked-meta.o -c src/linked-meta.c -o src/linked-meta.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/literals.c.d -MT src/literals.o -c src/literals.c -o src/literals.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/macros.c.d -MT src/macros.o -c src/macros.c -o src/macros.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/main.c.d -MT src/main.o -c src/main.c -o src/main.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/meta-project.c.d -MT src/meta-project.o -c src/meta-project.c -o src/meta-project.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/parse.c.d -MT src/parse.o -c src/parse.c -o src/parse.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/project.c.d -MT src/project.o -c src/project.c -o src/project.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/protocol.c.d -MT src/protocol.o -c src/protocol.c -o src/protocol.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/prototype-slots.c.d -MT src/prototype-slots.o -c src/prototype-slots.c -o src/prototype-slots.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/regions.c.d -MT src/regions.o -c src/regions.c -o src/regions.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/report.c.d -MT src/report.o -c src/report.c -o src/report.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/script.c.d -MT src/script.o -c src/script.c -o src/script.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/sourceview.c.d -MT src/sourceview.o -c src/sourceview.c -o src/sourceview.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/stage.c.d -MT src/stage.o -c src/stage.c -o src/stage.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/statements.c.d -MT src/statements.o -c src/statements.c -o src/statements.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/toolchain.c.d -MT src/toolchain.o -c src/toolchain.c -o src/toolchain.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/transform.c.d -MT src/transform.o -c src/transform.c -o src/transform.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/type-ledger.c.d -MT src/type-ledger.o -c src/type-ledger.c -o src/type-ledger.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/type.c.d -MT src/type.o -c src/type.c -o src/type.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/utils.c.d -MT src/utils.o -c src/utils.c -o src/utils.o
+cc src/ast.o src/bootstrap.o src/build.o src/builtins.o src/cache.o src/cli.o src/collect.o src/compiler.o src/deps.o src/diagnostics.o src/editor.o src/emit.o src/expressions.o src/format.o src/frontend.o src/generate.o src/install.o src/linked-meta.o src/literals.o src/macros.o src/main.o src/meta-project.o src/parse.o src/project.o src/protocol.o src/prototype-slots.o src/regions.o src/report.o src/script.o src/sourceview.o src/stage.o src/statements.o src/toolchain.o src/transform.o src/type-ledger.o src/type.o src/utils.o -L. -Wl,-force_load,libx2c.a -pthread  -lm -o x2c

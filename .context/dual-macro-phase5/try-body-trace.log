@@ -1,0 +1,40 @@
+(seq (block 
+      (macro-slot 1 
+       (expr (macro-expr) 
+        (meta-call 
+         (expr ((func (("List"))) "List") 
+          (ident (binding 2261 "Prototype_frame"))) 
+         (args (expr ("List") (meta-cap ?__macro_value_frame)))))) 
+      ?__macro_value_declarations 
+      (at m-origin 
+       (stmnt 
+        (expr (macro-expr) 
+         (call (expr ((func ((* "ExceptionFrame"))) void) 
+                (ident (binding 2262 "x2c_exception_push"))) 
+          (args (expr (macro-expr) 
+                 (op & (expr (macro-expr) ?__macro_expression_frame)))))))) 
+      (at m-origin 
+       (if (expr (macro-expr) 
+            (op ! (expr (macro-expr) 
+                   (call (expr () (ident (binding 2263 "sigsetjmp"))) 
+                    (args (expr (macro-expr) 
+                           (op . (expr (macro-expr) ?__macro_expression_frame) 
+                            ("env"))) (expr (int) (literal (int) "0"))))))) 
+        ?__macro_value_body 
+        (block 
+         (at m-origin 
+          (stmnt 
+           (expr (macro-expr) 
+            (call (expr ((func ((* "ExceptionFrame"))) void) 
+                   (ident (binding 2264 "x2c_exception_landed"))) 
+             (args (expr (macro-expr) 
+                    (op & (expr (macro-expr) ?__macro_expression_frame)))))))) 
+         ?__macro_value_landing))) 
+      (macro-slot 1 
+       (expr (macro-expr) 
+        (meta-call 
+         (expr ((func (("List"))) "List") 
+          (ident (binding 2265 "Prototype_cleanup"))) 
+         (args (expr ("List") (meta-cap ?__macro_value_cleanup))))))))
+Translated 1 x2c file to /tmp/phase5-debug-out in 1.05 s
+  Generated 1 C file and 1 header (7.3 KiB)

@@ -52,6 +52,20 @@ ranges overlap; noisy live-mode medians are not evidence of a speedup.
 `capture-scope.md` scopes the first independent production consolidation for
 another branch; it is not implemented here.
 
+## Open body and producer-stage proof (phase 5)
+
+`dual-macro-phase5/` records the true-open try body, wrapper-free client,
+parse/bind preparation including synthetic-try origins, same-binary rollback
+and 62-case raw C/H comparison, and paired timings. The current observed
+compiler cost total is +1.40% default and +1.94% live; it replaces the older try
+candidate's ledger row. The plan freezes stage attachment at producing owners.
+Its README includes the native declaration boundary and failed attempts.
+
+**This research branch must not be merged as is.** Phase4 tracks full copies of
+five compiler sources. Phase5 adds an incremental patch and source hashes,
+not production implementation. Capture-role consolidation remains independent
+and authorized for a separate ordinary production branch.
+
 ## Reproduction limits
 
 The integrated value prototype used `relation.patch`, `parser3.patch`,

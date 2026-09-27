@@ -1,0 +1,9 @@
+  Translate 1 x2c file in 78 ms
+  Compile 1 C file in 81 ms
+  Link 1 input in 39 ms
+Built executable /tmp/phase5-closed in 706 ms
+  Generated 1 C file and 1 header (2.9 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/phase5-closed-build (retained)
+  Output /tmp/phase5-closed (422.5 KiB)

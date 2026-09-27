@@ -1,0 +1,336 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -121,7 +121,7 @@
+   Map adoptions;
+   Map macro_holes;
+   Map local_macro_captures;
+-  Map prototype_bound_slots;
++  Map prototype_bound_slots, prototype_open_names;
+   int prototype_combined, prototype_slot_calls;
+   List lambda_scopes;
+   Array match_types;
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -740,7 +740,9 @@
+ int Compiler.macro_form_is_definition(Compiler compiler) {
+   if (compiler.peek(0) != <ident> || compiler.token.text != "macro") return 0;
+   if (compiler.peek(1) == <$>) return 1;
+-  return compiler.peek(1) == <ident> && compiler.peek(2) == <$>;
++  return compiler.peek(1) == <ident> &&
++    (compiler.peek(2) == <$> ||
++     (compiler.peek(2) == <ident> && compiler.peek(3) == <$>));
+ }
+ 
+ /* The `<(>` literal keeps this body braced: the API reference generator
+@@ -3438,6 +3440,44 @@
+ static const SymbolSet decorator_target_kinds =
+   %<<expr function block field unit named-type>>;
+ 
++/* Isolated open proof. The three runtime helpers use the generated native
++   header's declaration contract even when an x2c declaration is also visible.
++   Ordinary target bindings are retained as resolution facts, not emitted as
++   source-call declarations. */
++void Compiler.prototype_prepare_open_try(Compiler c) {
++  if (c.prototype_open_names) return;
++  c.prototype_open_names = {};
++  foreach (String name, %("x2c_exception_push" "sigsetjmp"
++                          "x2c_exception_landed")) {
++    Type type = NULL;
++    List binding = c.sym.resolve_global(%($name), type);
++    c.prototype_open_names[name] = %(native $name
++      ${name == "sigsetjmp" ? %(int) : %(void)});
++    c.prototype_open_names[%($name "resolved")] = %($binding $type);
++  }
++}
++
++static Var _prototype_open_code(Compiler c, Var input) {
++  if (input is not <list> || input.is_nil()) return input;
++  match (input) case %(expr ? (call
++      (expr ? (ident (binding ? ?(String name)))) (args *arguments))): {
++    Var target;
++    if (c.prototype_open_names &&
++        c.prototype_open_names.try_get(name, target)) {
++      List args = _prototype_open_code(c, arguments);
++      match (target) {
++        case %(native ?callee ?type):
++          return %(expr $type (call $callee (args @args)));
++        case %(bound ?callee):
++          return %(expr () (call $callee (args @args)));
++      }
++    }
++  }
++  Array children = [];
++  foreach (Var child, input.list()) children.push(_prototype_open_code(c, child));
++  return children.list_free();
++}
++
+ /** Parses the macro definition at the current token into a `macrodef` `List`.
+     A source-level definition is published immediately; a definition inside a
+     template remains syntax for later binding at its expansion site.
+@@ -3445,6 +3485,8 @@
+ List Compiler.parse_macro_definition(Compiler c) {
+   Token start = c.token;
+   c.expect(<ident>);
++  int prototype_open = c.token.text == "open";
++  if (prototype_open) c.next();
+   if (c.peek(0) == <$>)
+     c.report_error(
+       <parse>, "macro definition requires a result kind before '$'",
+@@ -3609,6 +3651,8 @@
+     name, result_kind, target_kind,
+     target_hole, parameters, NULL, NULL,
+     NULL, NULL, origin, source_file, imported, builtin, local);
++  if (prototype_open)
++    definition = definition.append(%((free-policy target-global)));
+   if (local && !anonymous) c.sym.define_macro(name, definition);
+   else if (!local && !old_holes)
+     c.macros[name] = definition;
+@@ -3738,6 +3782,8 @@
+     name, result_kind, target_kind, target_hole, parameters,
+     fresh_rows, captures,
+     pattern, replacement, origin, source_file, imported, builtin, local);
++  if (prototype_open)
++    definition = definition.append(%((free-policy target-global)));
+   if (local && !anonymous) c.sym.define_macro(name, definition);
+   else if (!local && !old_holes)
+     c.publish_macro_definition_node(definition);
+@@ -4105,6 +4151,9 @@
+         List template = definition.assoc(<template>);
+         if (_.prototype_combined)
+           template = template.search_replace(%(at m-origin ?node), <?node>);
++        if (definition.assoc(Atom.intern("free-policy")) ==
++            Atom.intern("target-global"))
++          template = _prototype_open_code(_, template);
+         Map file_locals = {};
+         // The outermost active row's fourth field is its invocation token.
+         Token root = old_stack ? old_stack.last().list()[3] : invocation;
+--- a/src/parse.x
++++ b/src/parse.x
+@@ -1486,6 +1486,7 @@
+         List cleanup = c.resolve_expression(
+           %(expr () (call (expr () (op . $receiver ("cleanup")))
+                           (args))), c.token);
++        if (!c.macro_holes) c.prototype_prepare_open_try();
+         output.push(%(defer (stmnt $cleanup)));
+       }
+       if (ordinary.len())
+@@ -2775,9 +2776,11 @@
+         if (statement_position)
+           return %(stmnt ${_.resolve_expression(expression, _.token)});
+       case %(defer ?body):
+-        if (statement_position)
++        if (statement_position) {
++          if (!_.macro_holes) _.prototype_prepare_open_try();
+           return %(defer ${_.bind_syntax(
+             body, AST_STATEMENT, _.return_type)});
++        }
+       case %(do ?body ?condition):
+         if (statement_position)
+           return %(do
+@@ -2867,6 +2870,7 @@
+       }
+       case %(try ?body ?catches ?cleanup): {
+         if (!statement_position) goto construction_error;
++        if (!_.macro_holes) _.prototype_prepare_open_try();
+         if (catches is <list> && catches.list())
+           catches = _.bind_syntax(
+             catches, AST_STATEMENT, _.return_type);
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -19,6 +19,7 @@
+ 
+ $(import "../lib/error-macros.xmacro")
+ #include "compiler.x"
++#include "prototype-slots.x"
+ #pragma private
+ 
+ $(import "../src/ast-rewrite.xmacro")
+@@ -1735,7 +1736,7 @@
+    retires the landing, so a `raise` from the finalizer reaches the enclosing
+    frame instead of re-entering this one and looping. */
+ static List _try_cleanup(
+-  List frame, List handle, List finalizer, int has_clause) {
++  List frame, List handle, List finalizer, int has_clause, List &raw) {
+   Array body = [];
+   if (has_clause) {
+     Type handler = %(($_handler_type));
+@@ -1753,8 +1754,9 @@
+     statements = %((if (expr (int)
+       (call "x2c_exception_claim" (args ${_address_of(_frame_type, frame)})))
+       (block @statements)));
+-  return statements.append(
++  raw = statements.append(
+     %(${_region_call("x2c_exception_leave", _frame_type, frame)}));
++  return Prototype_sequence(raw);
+ }
+ 
+ /* The statements that leave every region down to `stop`, innermost first.
+@@ -2351,17 +2353,14 @@
+     $choice);
+ }
+ 
+-#include "prototype-slots.x"
+-
+-macro Statement $compiler_try_shape(Name $frame, Statement $declarations,
+-    Statement $push, Expr $condition, Statement $body, Statement $landed,
+-    Statement $landing, Statement $cleanup) {
++macro open Statement $compiler_try_shape(Name $frame, Statement $declarations,
++    Statement $body, Statement $landing, Statement $cleanup) {
+   {
+     $Prototype_frame($frame)...
+     $declarations
+-    $push
+-    if (!$condition) $body
+-    else { $landed $landing }
++    x2c_exception_push(&$frame);
++    if (!sigsetjmp($frame.env, 0)) $body
++    else { x2c_exception_landed(&$frame); $landing }
+     $Prototype_cleanup($cleanup)...
+   }
+ }
+@@ -2426,13 +2425,10 @@
+   puts("phase4 effects: early-read-write rollback-all borrowed-map-commit");
+ }
+ 
+-static List _try_block(Walk walk, List body, List clause, List frame,
+-                       List handle, List cleanup, List bodies) {
+-  Compiler c = walk.compiler;
+-  _prototype_effect_probe(c);
++static List _try_declarations(Compiler c, List clause, List frame,
++                              List handle) {
+   List address = _address_of(_frame_type, frame);
+   Array declarations = [];
+-
+   if (clause) {
+     List records = clause.cadr();
+     int count = records.len(), fallback = -1, index = 0;
+@@ -2474,24 +2470,43 @@
+       _catch_call(%("ErrorHandler"), "x2c_error_catch_site_push",
+         %($address $site_address ${_catch_value(patterns_type, patterns)}))));
+   }
++  return Prototype_sequence(declarations.list_free());
++}
++
++static List _try_landing(Compiler c, List clause, List frame,
++                         List handle, List cleanup, List bodies) {
++  List address = _address_of(_frame_type, frame);
+   List unhandled = %(block @cleanup
+     ${_catch_statement("__builtin_unreachable", NULL)});
+   List landing = clause
+     ? %(if ${_catch_call(%(int), "x2c_exception_is_error_target", %($address))}
+         ${_catch_arms(c, bodies, frame, handle)} $unhandled)
+     : unhandled;
+-  List setjmp = _catch_call(%(int), "sigsetjmp", %(
+-    (expr () (op . ${_catch_value(%("ExceptionFrame"), frame)} ("env")))
+-    ${_integer_expression(0)}));
++  return Prototype_lowered(landing);
++}
++
++static List _try_region(Walk walk, List cleanup, List marker, List body) {
++  return Prototype_lowered(_inside(walk, cleanup, marker, body));
++}
++
++static List _try_frame(Compiler c, List &binding) {
++  Var value; int retained;
++  c.prototype_take_slot(Prototype_name("exception_frame"), value, retained);
++  binding = value;
++  return Prototype_bound(_catch_value(%("ExceptionFrame"), binding));
++}
++
++static List _try_block(Walk walk, List body, List clause, List frame,
++                       List frame_code, List handle, List cleanup,
++                       List cleanup_code, List bodies) {
++  Compiler c = walk.compiler;
++  _prototype_effect_probe(c);
++  List declarations = _try_declarations(c, clause, frame, handle);
++  List landing = _try_landing(c, clause, frame, handle, cleanup, bodies);
+   Macro shape = $compiler_try_shape;
+   $let(c.prototype_combined, 1)
+-    return c.bind_syntax(shape(
+-      Prototype_bound(frame), Prototype_sequence(declarations.list_free()),
+-      Prototype_bound(_region_call("x2c_exception_push", _frame_type, frame)),
+-      Prototype_bound(setjmp), Prototype_lowered(body),
+-      Prototype_bound(_region_call("x2c_exception_landed", _frame_type, frame)),
+-      Prototype_lowered(landing), Prototype_sequence(cleanup)),
+-      AST_BLOCK, c.return_type);
++    return c.bind_syntax(shape(frame_code, declarations, body, landing,
++      cleanup_code), AST_BLOCK, c.return_type);
+ }
+ 
+ static Var _rewrite(Walk walk, Var value) {
+@@ -2512,11 +2527,8 @@
+       Compiler c = walk.compiler;
+       SymTxn transaction = c.begin_semantic_transaction();
+       defer transaction.rollback();
+-      Var frame_value;
+-      int retained;
+-      (void) c.prototype_take_slot(
+-        Prototype_name("exception_frame"), frame_value, retained);
+-      List frame = frame_value;
++      List frame;
++      List frame_code = _try_frame(c, frame);
+       List handle = clause ? clause.caddr().list() : NULL;
+       int labelled_at = walk.origin;
+       Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
+@@ -2527,9 +2539,10 @@
+           %("a finalizer runs on every path that leaves its region, so '${
+             name ? name : "this label"}' would be defined once for each"));
+       }
+-      List cleanup = _try_cleanup(
+-        frame, handle, _rewrite(walk, finalizer), !!clause);
+-      List body_out = _inside(walk, cleanup, body, body);
++      List cleanup;
++      List cleanup_code = _try_cleanup(
++        frame, handle, _rewrite(walk, finalizer), !!clause, cleanup);
++      List body_out = _try_region(walk, cleanup, body, body);
+       /* A catch arm runs inside the region it handles, so it leaves the
+          same statements behind on its own exits. Each arm is its own
+          region, which a jump from the body may not enter. */
+@@ -2539,7 +2552,8 @@
+         bodies.push(_inside(walk, cleanup, arm, arm));
+       }
+       List lowered = _try_block(
+-        walk, body_out, clause, frame, handle, cleanup, bodies.list_free());
++        walk, body_out, clause, frame, frame_code, handle, cleanup,
++        cleanup_code, bodies.list_free());
+       transaction.commit();
+       return lowered;
+     }
+--- a/src/prototype-slots.x
++++ b/src/prototype-slots.x
+@@ -16,6 +16,7 @@
+ }
+ meta List Prototype_frame(List captured) {
+   List frame = captured[2];
++  match (frame) case %(expr ? (ident ?name)): frame = name;
+   return %("x2c.slot" "lowered"
+     (declare ("ExceptionFrame") (bindings (bind $frame ()))) ());
+ }
+--- a/src/statements.x
++++ b/src/statements.x
+@@ -175,6 +175,7 @@
+ }
+ 
+ static List _defer_statement(Compiler c) {
++  if (!c.macro_holes) c.prototype_prepare_open_try();
+   c.expect(<defer>);
+   return %(defer ${c.parse_governed(AST_STATEMENT)});
+ }
+@@ -339,7 +340,8 @@
+       Array captures = $auto([]);
+       $let(c.in_pattern, 1)
+       $let(c.match_types, captures) {
+-        pattern = c.parse_expression();
++        pattern = c.try_parse_macro_pattern();
++        if (!pattern) pattern = c.parse_expression();
+         types = captures;
+       }
+     }
+@@ -480,6 +482,7 @@
+ }
+ 
+ static List _try_statement(Compiler c) {
++  if (!c.macro_holes) c.prototype_prepare_open_try();
+   c.expect(<try>);
+   List body = _continued(c, c.parse_governed(AST_STATEMENT)), ctch = NULL;
+   c.__complete_here(<continue>, %("catch" "finally"));
