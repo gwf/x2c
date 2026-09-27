@@ -15,7 +15,7 @@ typedef struct CliRequest{
   String out_dir, dep_file, dep_target;
   String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, meta_cc, ar, compile_commands, sha256, index;
+  String cc, meta_cc, ar, compile_commands, sha256, index;
   Symbol kind;
   String diagnostics_file;
   Symbol color_mode;

@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _64, _63, _9, _8, _7, _4, _3;
+static List _9, _8, _7, _4, _3;
 
-static String _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _60, _59, _57, _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
+static String _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _57, _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
 
-static Var _62, _61, _58, _56, _54, _52, _50, _48, _46, _44, _42, _40, _38, _6, _5, _2, _1, _0;
+static Var _58, _56, _54, _52, _50, _48, _46, _44, _42, _40, _38, _6, _5, _2, _1, _0;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,8 +64,6 @@ static int _run_build_request(CliRequest c, Array commands);
 static int _run_build(CliRequest request);
 
 static int _run_env(CliRequest request);
-
-static int _run_bootstrap(CliRequest command);
 
 static int _external_name(const char * name);
 
@@ -162,21 +160,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _58 = String_var(_57);
   _59 = String_new("unknown env name \'");
   _60 = String_new("\'");
-  _61 = Symbol_var(40094681930);
-  _62 = Symbol_var(239277269348);
-  _63 = cons(_62, NULL);
-  _64 = cons(_61, _63);
-  _65 = String_new("/x2c-");
-  _66 = String_new("cannot run external command \'");
-  _67 = String_new("\': ");
-  _68 = String_new("cannot open diagnostics file \'");
-  _69 = String_new("could not start a translation worker");
-  _70 = String_new("file");
-  _71 = String_new("files");
-  _72 = String_new("C file");
-  _73 = String_new("C files");
-  _74 = String_new("header");
-  _75 = String_new("headers");
+  _61 = String_new("/x2c-");
+  _62 = String_new("cannot run external command \'");
+  _63 = String_new("\': ");
+  _64 = String_new("cannot open diagnostics file \'");
+  _65 = String_new("could not start a translation worker");
+  _66 = String_new("file");
+  _67 = String_new("files");
+  _68 = String_new("C file");
+  _69 = String_new("C files");
+  _70 = String_new("header");
+  _71 = String_new("headers");
 }
 
 Logger log_get_global_logger(void);
@@ -465,7 +459,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
         worker_exit(0);
       }
       if(pid < 0){
-        report_line(11703268, _69);
+        report_line(11703268, _65);
         failed ++;
         continue;
       }
@@ -807,11 +801,11 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   }
   if(! build && ! CliRequest_inspects(c)){
     String duration = report_duration(report_now_us() - started_at);
-    String noun = total == 1 ? _70 : _71;
+    String noun = total == 1 ? _66 : _67;
     report_line(42217975014, String_join(NULL, cons(String_var(_26), cons(String_var(int_str(total)), cons(String_var(_27), cons(String_var(noun), cons(String_var(_28), cons(String_var(c -> out_dir), cons(String_var(_29), cons(String_var(duration), NULL))))))))));
     String size = report_size(gen_bytes);
-    String c_noun = total == 1 ? _72 : _73;
-    String h_noun = total == 1 ? _74 : _75;
+    String c_noun = total == 1 ? _68 : _69;
+    String h_noun = total == 1 ? _70 : _71;
     report_line(28680520, String_join(NULL, cons(String_var(_30), cons(String_var(int_str(total)), cons(String_var(_31), cons(String_var(c_noun), cons(String_var(_32), cons(String_var(int_str(total)), cons(String_var(_31), cons(String_var(h_noun), cons(String_var(_33), cons(String_var(size), cons(String_var(_34), NULL)))))))))))));
   }
   return 0;
@@ -1096,64 +1090,6 @@ static int _run_env(CliRequest request){
   return 0;
 }
 
-Bootstrap bootstrap_materialize(CliRequest);
-
-void x2c_set_root(String);
-
-void Frontend_load_support(CliRequest);
-
-CliRequest bootstrap_build_request(CliRequest, Bootstrap, Symbol);
-
-String Symbol_str(Symbol);
-
-void bootstrap_write_interfaces(Bootstrap);
-
-void bootstrap_build_commands(Bootstrap);
-
-void bootstrap_record_install(Bootstrap, String, String);
-
-void Context_close(Context);
-
-static int _run_bootstrap(CliRequest command){
-  Bootstrap payload = bootstrap_materialize(command);
-  if(payload -> complete){
-    printf("x2c: native compiler is already installed at %s/bin/x2c\n", payload -> prefix);
-    return 0;
-  }
-  x2c_set_root(payload -> prefix);
-  _configure_logging(command -> debugging);
-  Frontend_load_support(bootstrap_build_request(command, payload, 40094681930));
-  Context build = Context_open_isolated_named("bootstrap build");
-  int result = 0;
-  CliRequest request = NULL;
-  {
-    Symbol component;
-    List _x2c_macro_object_16 = _64;
-    List _x2c_macro_cursor_16 = _x2c_macro_object_16;
-    Var _x2c_macro_cursor_output_15;
-    while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_15))){
-      component = Var_symbol(_x2c_macro_cursor_output_15);
-      {
-        request = bootstrap_build_request(command, payload, component);
-        request -> label = Symbol_str(component);
-        result = _run_build_request(request, NULL);
-        if(result) break;
-      }
-
-    }
-
-  }
-  if(! result){
-    bootstrap_write_interfaces(payload);
-    bootstrap_build_commands(payload);
-    bootstrap_record_install(payload, request -> cc, request -> ar);
-    printf("x2c: installed native compiler at %s/bin/x2c\n", payload -> prefix);
-  }
-  Context_close(build);
-  fflush(NULL);
-  _Exit(result);
-}
-
 static int _external_name(const char * name){
   if(! name || !((* name >= 'a' && * name <= 'z') ||(* name >= 'A' && * name <= 'Z'))) return 0;
   for(const char * p = name + 1;  * p;  p ++) if(!((* p >= 'a' && * p <= 'z') ||(* p >= 'A' && * p <= 'Z') ||(* p >= '0' && * p <= '9') || * p == '-' || * p == '_')) return 0;
@@ -1168,7 +1104,7 @@ static String _external_path(const char * name){
   if(! _external_name(name) || cli_builtin_command(name)) return NULL;
   String libexec = x2c_home_libexec();
   if(! String_truth(libexec)) return NULL;
-  String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_65), cons(String_var(String_new(name)), NULL))));
+  String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_61), cons(String_var(String_new(name)), NULL))));
   return Path_is_executable(path) ? path : NULL;
 }
 
@@ -1184,7 +1120,7 @@ static void _run_external(String path, char * * args){
   if(String_truth(identity)) setenv("X2C_IDENTITY", identity, 1);
   args[0] = path;
   execv(path, args);
-  x2c_driver_error(String_join(NULL, cons(String_var(_66), cons(String_var(path), cons(String_var(_67), cons(String_var(String_new(strerror(errno))), NULL))))));
+  x2c_driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(path), cons(String_var(_63), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
 void x2c_initialize_environment(const char *);
@@ -1208,6 +1144,10 @@ int remove_command(CliRequest);
 int list_command(CliRequest);
 
 int new_command(CliRequest);
+
+void Frontend_load_support(CliRequest);
+
+void Context_close(Context);
 
 int script_run(CliRequest);
 
@@ -1237,10 +1177,9 @@ int main(int argc, char * * argv){
   }
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_68), cons(String_var(diagnostics), cons(String_var(_60), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_64), cons(String_var(diagnostics), cons(String_var(_60), NULL)))));
   if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
-  if(request -> command == 5462434287712) return _run_bootstrap(request);
   if(request -> command == 11180) return _run_env(request);
   if(request -> command == 20308036376) return install_command(request);
   if(request -> command == 1219329418) return remove_command(request);
@@ -1252,10 +1191,6 @@ int main(int argc, char * * argv){
   int result = request -> command == 45220543335690 ? _run_translation(request, NULL, NULL) : _run_build(request);
   Context_close(command);
   if(request -> command == 1282559016 && ! result) result = script_run(request);
-#ifdef __COSMOPOLITAN__
-  fflush(NULL);
-  _Exit(result);
-#endif
   return result;
 }
 

@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
 #define X2C_NATIVE_MODULES 1

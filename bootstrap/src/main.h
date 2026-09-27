@@ -7,7 +7,6 @@
 
 #include "x2c.h"
 #include "build.h"
-#include "bootstrap.h"
 #include "project.h"
 #include "frontend.h"
 #include "meta-project.h"

@@ -1605,7 +1605,7 @@ String Compiler_emitted_binding_name(Compiler compiler, List binding){
 int String_equal(String, String);
 static int _never_defined(String name){
   if(String_equal(name, _101) || String_equal(name, _102)) return 1;
-#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__)
   return 0;
 #else
   return String_equal(name, _103) || String_equal(name, _104) || String_equal(name, _105);
