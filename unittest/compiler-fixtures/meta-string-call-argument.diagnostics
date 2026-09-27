@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-string-call-argument.x:8:18: macro: explicit meta call cannot be resolved
+    printf("%s\n", $identity(change("original")));
+                   ^
+  note: an argument must be a constant, captured syntax, or a meta call
+

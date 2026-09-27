@@ -102,7 +102,7 @@ static Var _meta_constant_leaf(Compiler c, List value) {
       if (a is void || b is void) return void;
       return a.string().add(b);
     }
-    case %(expr ("String") (call ? (args ?inner))):
+    case %(expr ("String") (call "String_new" (args ?inner))):
       return _meta_constant_leaf(c, inner);
     case %(expr ("Var")
       (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
