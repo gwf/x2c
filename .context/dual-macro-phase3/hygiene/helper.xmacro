@@ -1,0 +1,23 @@
+meta static Var hygiene_view(Var value) {
+  if (value is not <list>) return value;
+  match (value) {
+    case %(at ? ?body): return hygiene_view(body);
+    case %(src ? ?body): return hygiene_view(body);
+    case %(literal *): return value;
+  }
+  Array parts = [];
+  foreach (Var child, value.list()) parts.push(hygiene_view(child));
+  return parts.list_free();
+}
+meta static List hygiene_pattern(Macro t, List names) {
+  List pattern = Macro_pattern(t, names), replacements = NULL;
+  int ordinal = 0;
+  foreach (List row, t.assoc(<fresh>).list()) {
+    Atom binder = row.car();
+    Atom identity = Atom.intern(%"?__identity_${ordinal++}");
+    replacements = cons(%($binder (binding $identity ?)), replacements);
+  }
+  pattern = hygiene_view(pattern.replace(replacements));
+  match (pattern) case %(seq *parts): return %(!or (seq @parts) (block @parts));
+  return pattern;
+}

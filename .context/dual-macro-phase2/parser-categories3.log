@@ -1,0 +1,17 @@
+  Translate 1 x2c file in 171 ms
+  Compile 1 C file in 93 ms
+  Link 1 input in 37 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-50KYDl/run in 1.23 s
+  Generated 1 C file and 1 header (39.1 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-50KYDl (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-50KYDl/run (472.7 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-50KYDl/run
+repeated 1 0
+sequence 0 3 rebuild 0 3
+source Type 1
+Type 1 1 body (expr (unsigned) 
+ (sizeof (parens (decl (*__macro_splice_type) (bindings (bind () ())))))) built (expr (unsigned) (sizeof (parens (decl (int) (bindings (bind () ()))))))
+Name 1 1
+Statement 1 1

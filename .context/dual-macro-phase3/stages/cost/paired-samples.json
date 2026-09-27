@@ -1,0 +1,289 @@
+{
+  "x2c_home": "/Users/gary/.codex/worktrees/agent-dual-transport/x2c",
+  "checksums": {
+    "baseline": "b0d9b1812930c7b7c9f38ab2c2347987510fa472060b3a88635a4055d9632c83",
+    "candidate": "134b9bfa1a55283b9871a79d63b2a3292c2d32a8a93004de0ab146f5963b792e"
+  },
+  "samples": [
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 6.0889372089877725
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 6.08062925003469
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 6.073997166007757
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 6.112989166984335
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 6.066435415996239
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 6.145773625001311
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 6.312641124939546
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 6.333873459137976
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 6.254680291051045
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 6.203300708904862
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 7.30962829105556
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 7.495766083011404
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 7.735307042021304
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 7.3593902920838445
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 7.591053333133459
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 7.513330457964912
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 7.407743625110015
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 7.500661832978949
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 7.539767874870449
+    },
+    {
+      "group": "compiler-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 7.328328666044399
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 0.5820427918806672
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 0.5717593331355602
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 0.5879611249547452
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 0.6017554579302669
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 0.588952167192474
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 0.5885355409700423
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 0.5998974170070142
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 0.5907183331437409
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 0.6056191250681877
+    },
+    {
+      "group": "exception-translation",
+      "mode": "default",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 0.610998832853511
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 1,
+      "seconds": 0.6737047920469195
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 1,
+      "seconds": 0.7395659158937633
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 2,
+      "seconds": 0.6819796659983695
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 2,
+      "seconds": 0.6525208328384906
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 3,
+      "seconds": 0.64428750006482
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 3,
+      "seconds": 0.6372415418736637
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 4,
+      "seconds": 0.6196176668163389
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 4,
+      "seconds": 0.6453239580150694
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "baseline",
+      "sample": 5,
+      "seconds": 0.6515860829968005
+    },
+    {
+      "group": "exception-translation",
+      "mode": "live",
+      "label": "candidate",
+      "sample": 5,
+      "seconds": 0.6792737911455333
+    }
+  ]
+}

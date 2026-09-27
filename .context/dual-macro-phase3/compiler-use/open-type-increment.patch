@@ -1,0 +1,79 @@
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -3401,17 +3401,29 @@
+       effects.push(%(resolve-global $reference $name));
+     }
+   }
++  match (value) case %(decl ?base ?): {
++    if (base is <list> && base.type().is_bare_typedef_name() &&
++        !(base in seen)) {
++      seen[base] = 1;
++      effects.push(%(resolve-global-type $base ${base.car()}));
++    }
++  }
+   foreach (Var child, value.list()) _prototype_open_roles(child, seen, effects);
+ }
+ 
+-static Var _prototype_open_types(Var value) {
++static Var _prototype_open_types(Var value, Map types) {
+   if (value is not <list> || value.is_nil()) return value;
+   match (value) case %(expr ?type ?content): {
+     if (content.is_binder()) return value;
+-    return %(expr () ${_prototype_open_types(content)});
++    return %(expr () ${_prototype_open_types(content, types)});
++  }
++  match (value) case %(decl ?base ?declarators): {
++    Var resolved;
++    if (types.try_get(base, resolved))
++      return %(decl $resolved ${_prototype_open_types(declarators, types)});
+   }
+   Array items = $auto([]);
+-  foreach (Var child, value.list()) items.push(_prototype_open_types(child));
++  foreach (Var child, value.list()) items.push(_prototype_open_types(child, types));
+   return items.list();
+ }
+ 
+@@ -3419,14 +3431,16 @@
+                                         List argument) {
+   SymTxn transaction = c.begin_semantic_transaction();
+   defer transaction.rollback();
+-  Map replacements = {};
++  Map replacements = {}, types = {};
+   foreach (List effect, template.assoc(<effects>).list()) {
+-    Var (_, source, name) = effect;
+-    replacements[source] = c.sym.reference_global(%($name));
++    Var (operation, source, name) = effect;
++    if (operation == Atom.intern("resolve-global-type"))
++      types[source] = c.sym.resolve_key(source);
++    else replacements[source] = c.sym.reference_global(%($name));
+   }
+   List code = template.assoc(<template>);
+   code = _replace_definition_bindings(code, replacements);
+-  code = _prototype_open_types(code);
++  code = _prototype_open_types(code, types);
+   code = code.search_replace(%(at m-origin ?node), <?node>);
+   List parameters = template.assoc(<parameters>);
+   List parameter = parameters.car();
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2352,6 +2352,9 @@
+ }
+ 
+ static int _compiler_open_target(int value) => value;
++typedef int CompilerOpenType;
++macro open Expression $compiler_open_type(Expr $argument) =>
++  ((CompilerOpenType) $argument);
+ macro open Expression $compiler_open_target(Expr $argument) =>
+   _compiler_open_target($argument);
+ 
+@@ -2453,6 +2456,10 @@
+   if (Env.get("X2C_PROTOTYPE_OPEN")) {
+     Macro open_shape = $compiler_open_target;
+     setjmp = c.prototype_open_expression(open_shape, setjmp);
++  }
++  if (Env.get("X2C_PROTOTYPE_OPEN_TYPE")) {
++    Macro open_type = $compiler_open_type;
++    setjmp = c.prototype_open_expression(open_type, setjmp);
+   }
+   return _compiler_try_shape(c, %(
+     (seq @{declarations.list_free()})

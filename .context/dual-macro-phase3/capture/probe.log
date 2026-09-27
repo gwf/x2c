@@ -1,0 +1,30 @@
+.context/capture-spike/probe.x:179:55: conversion: unnecessary conversion: .list() where ("List") is expected
+      case pattern(?type): return List.compare(type.list(), %(int)) == 0;
+                                                        ^
+  note: remove the call; the destination converts the value
+
+.context/capture-spike/probe.x:198:55: conversion: unnecessary conversion: .list() where ("List") is expected
+      case pattern(?type): return List.compare(type.list(), %(int)) == 0;
+                                                        ^
+  note: remove the call; the destination converts the value
+
+  Translate 1 x2c file in 186 ms
+  Compile 1 C file in 112 ms
+  Link 1 input in 39 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-6ZPxUz/run in 1.30 s
+  Generated 1 C file and 1 header (51.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-6ZPxUz (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-6ZPxUz/run (476.4 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-6ZPxUz/run
+repeated 1 0
+sequence 0 3 rebuild 0 3
+source Type 1
+Type 1 1 body (expr (unsigned) 
+ (sizeof (parens (decl (*__macro_splice_type) (bindings (bind () ())))))) built (expr (unsigned) (sizeof (parens (decl (int) (bindings (bind () ()))))))
+Name 1 1
+Statement 1 1
+logical 4 1 1
+Name correlation 1 0
+Type formal order 7

@@ -1,0 +1,82 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdio.h>")
+
+(typedef (long double) (bindings (bind (binding 3 "CompilerOpenType") ())))
+
+(function (int) 
+ (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 1 (typedef (int) (bindings (bind (binding 5 "CompilerOpenType") ())))) 
+  (at 2 (declare (int) 
+         (bindings 
+          (op = (bind (binding 6 "value") ()) (expr (int) (literal (int) "33")))))) 
+  (at 4 (block 
+         (declare ("ExceptionFrame") 
+          (bindings (bind (binding 54 "_x2c_exception_frame_0") ()))) 
+         (stmnt 
+          (expr (void) 
+           (call "x2c_exception_push" 
+            (args (expr (* ("ExceptionFrame")) 
+                   (op & (expr (("ExceptionFrame")) 
+                          (ident (binding 54 "_x2c_exception_frame_0"))))))))) 
+         (if (expr (int) 
+              (op ! (expr (long double) 
+                     (parens 
+                      (expr (long double) 
+                       (cast (decl (long double) (bindings (bind () ()))) 
+                        (expr (int) 
+                         (call "sigsetjmp" 
+                          (args (expr () 
+                                 (op . (expr ("ExceptionFrame") 
+                                        (ident 
+                                         (binding 54 "_x2c_exception_frame_0"))) 
+                                  ("env"))) (expr (int) (literal (int) "0"))))))))))) 
+          (block 
+           (at 3 (stmnt 
+                  (expr () 
+                   (call (expr () (ident (binding 7 "assert"))) 
+                    (args (expr (int) 
+                           (op == (expr (int) (ident (binding 6 "value"))) 
+                            (expr (int) (literal (int) "33")))))))))) 
+          (block 
+           (stmnt 
+            (expr (void) 
+             (call "x2c_exception_landed" 
+              (args (expr (* ("ExceptionFrame")) 
+                     (op & (expr (("ExceptionFrame")) 
+                            (ident (binding 54 "_x2c_exception_frame_0"))))))))) 
+           (block 
+            (if (expr (int) 
+                 (call "x2c_exception_claim" 
+                  (args (expr (* ("ExceptionFrame")) 
+                         (op & (expr (("ExceptionFrame")) 
+                                (ident (binding 54 "_x2c_exception_frame_0")))))))) 
+             (block (block))) 
+            (stmnt 
+             (expr (void) 
+              (call "x2c_exception_leave" 
+               (args (expr (* ("ExceptionFrame")) 
+                      (op & (expr (("ExceptionFrame")) 
+                             (ident (binding 54 "_x2c_exception_frame_0"))))))))) 
+            (stmnt (expr (void) (call "__builtin_unreachable" (args))))))) 
+         (if (expr (int) 
+              (call "x2c_exception_claim" 
+               (args (expr (* ("ExceptionFrame")) 
+                      (op & (expr (("ExceptionFrame")) 
+                             (ident (binding 54 "_x2c_exception_frame_0")))))))) 
+          (block (block))) 
+         (stmnt 
+          (expr (void) 
+           (call "x2c_exception_leave" 
+            (args (expr (* ("ExceptionFrame")) 
+                   (op & (expr (("ExceptionFrame")) 
+                          (ident (binding 54 "_x2c_exception_frame_0"))))))))))) 
+  (at 5 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 8 "puts"))) 
+           (args (expr (* char) 
+                  (literal (* char) 
+                   "\"compiled open global Type cast with caller typedef preserved PASS\""))))))) 
+  (at 7 (return (expr (int) (literal (int) "0"))))))

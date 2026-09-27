@@ -1,0 +1,4 @@
+.context/parser-spike/complete.x:1:1: parse: syntax cannot be constructed at this position
+  #pragma once
+  ^
+

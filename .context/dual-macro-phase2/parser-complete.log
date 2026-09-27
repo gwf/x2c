@@ -1,0 +1,22 @@
+  Translate 1 x2c file in 163 ms
+  Compile 1 C file in 66 ms
+  Link 1 input in 35 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-B9he90/run in 1.97 s
+  Generated 1 C file and 1 header (27.4 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-B9he90 (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-B9he90/run (451.9 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-B9he90/run
+collision 103 23 3 103 103
+bound 7 7 7
+dynamic 1 0
+anonymous composed 1
+runtime constructed (expr (macro-expr) 
+ (op + (expr (macro-expr) 
+        (expr (int) 
+         (op + (expr (int) (literal (int) "9")) 
+          (expr (int) (literal (int) "10"))))) 
+  (expr (macro-expr) 
+   (expr (int) 
+    (op + (expr (int) (literal (int) "9")) (expr (int) (literal (int) "10")))))))

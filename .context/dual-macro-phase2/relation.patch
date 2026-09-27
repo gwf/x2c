@@ -1,0 +1,89 @@
+diff --git a/lib/machine.x b/lib/machine.x
+index ce922f0f..d7c366a5 100644
+--- a/lib/machine.x
++++ b/lib/machine.x
+@@ -220,6 +220,8 @@ typedef struct MatchMachine {
+   Var value, error;
+   int fp, current_entry_undo, undo_count, slot_count;
+   MachineStats *stats;
++  int (*relation)(void *, int, Var, Var, void *);
++  void *relation_context;
+   Var *scratch;
+   int scratch_capacity;
+   MatchFrame frames[MACHINE_FRAME_MAX];
+diff --git a/lib/match-machine.x b/lib/match-machine.x
+index 7755c123..883460f2 100644
+--- a/lib/match-machine.x
++++ b/lib/match-machine.x
+@@ -17,6 +17,7 @@
+ #include <assert.h>
+ #include <string.h>
+ #include "scope.x"
++#include "array.x"
+ #include "exception.x"
+ #include "match.x"
+ 
+@@ -108,9 +109,32 @@ static void MatchMachine._set_span(
+ static int MatchMachine._slot_value_equal(
+   MatchMachine m, MachineSlot *slot, Var value) {
+   if (slot.kind != MACHINE_SLOT_VALUE) return 0;
++  if (m.relation)
++    return m.relation(m, (int) (slot - m.slots), slot.value, value,
++                      m.relation_context);
+   return slot.value == value;
+ }
+ 
++static int MatchMachine._slot_sequence_equal(
++  MatchMachine m, int index, List input, int length, int final) {
++  MachineSlot *slot = &m.slots[index];
++  if (!m.relation) return final ? slot.final_equal(input, m.stats)
++                               : slot.prefix_equal(input, length, m.stats);
++  List expected = slot.kind == MACHINE_SLOT_SPAN
++    ? m.materialize_span(slot.span) : slot.value.list();
++  if (m.status == <error>) return 0;
++  List candidate = input;
++  if (!final) {
++    Array items = [];
++    for (int n = 0; n < length; n++) {
++      if (!input) return 0;
++      items.push(input.car()); input = input.cdr();
++    }
++    candidate = items.list_free();
++  }
++  return m.relation(m, index, expected, candidate, m.relation_context);
++}
++
+ static int MatchMachine._push_frame(MatchMachine m) {
+   if (m.fp + 1 >= MACHINE_FRAME_MAX) {
+     m._error(<frame-max>);
+@@ -350,14 +374,15 @@ int MatchMachine.step(MatchMachine m) {
+     case MW_SLOT_EQ_PREFIX: {
+       int length = *m._distance(w.c) - *m._distance(w.b);
+       MachineSlot *slot = &m.slots[w.a];
+-      if (!slot.prefix_equal(*m._cursor(w.b), length, m.stats))
++      if (!m._slot_sequence_equal(w.a, *m._cursor(w.b), length, 0))
+         m.pc = w.target;
+       break;
+     }
+ 
+     case MW_SLOT_EQ_FINAL_IDENTITY: {
+       MachineSlot *slot = &m.slots[w.a];
+-      if (!slot.final_equal(*m._cursor(w.b), m.stats)) m.pc = w.target;
++      if (!m._slot_sequence_equal(w.a, *m._cursor(w.b), 0, 1))
++        m.pc = w.target;
+       break;
+     }
+ 
+diff --git a/lib/match.x b/lib/match.x
+index 2e3b3aba..dac5fe20 100644
+--- a/lib/match.x
++++ b/lib/match.x
+@@ -2669,6 +2669,8 @@ void MatchMachine.open(MatchMachine m) {
+   m.undo_count = 0;
+   m.slot_count = 0;
+   m.stats = NULL;
++  m.relation = NULL;
++  m.relation_context = NULL;
+   m.scratch = NULL;
+   m.scratch_capacity = 0;
+ }

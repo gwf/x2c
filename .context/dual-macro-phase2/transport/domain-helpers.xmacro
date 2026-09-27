@@ -1,0 +1,66 @@
+meta static List domain_hydrate(List rigid) {
+  return %(syntax-template
+    (body (expr ?result (call $rigid (args ?argument))))
+    (rigid $rigid));
+}
+
+meta static List domain_relay(List template) => template;
+
+meta static List domain_pipeline(List rigid, List subject) {
+  List template = domain_relay(domain_hydrate(rigid));
+  List body = template.assoc(<body>), bindings;
+  x2c_diagnostic_warn("domain hydration", %(${rigid.repr()}));
+  if (!subject.try_match(body, bindings))
+    return %(expr (int) (literal (int) "0"));
+  List result = body.replace(bindings);
+  if (!result.equal(subject))
+    x2c_diagnostic_fail("domain roundtrip changed syntax", NULL);
+  return result;
+}
+
+meta static List domain_types(Type wanted, Var name, List statement) {
+  x2c_diagnostic_warn("typed transport",
+    %(${wanted.repr()} ${name.repr()} ${statement.repr()}));
+  if (!wanted.assoc(<type>).list().equal(%(int)))
+    x2c_diagnostic_fail("Type transport lost int", NULL);
+  if (name is not <string> || name.str() != "price")
+    x2c_diagnostic_fail("Name transport lost spelling", NULL);
+  return %($statement);
+}
+
+macro Expression $domain(Expr $rigid, Expr $subject) =>
+  $domain_pipeline($rigid, $subject);
+macro Expression $bridge(Expr $subject) => $domain(helper, $subject);
+macro Statement $typed(Type $wanted, Name $name, Statement $statement) {
+  $domain_types($wanted, $name, $statement)...
+}
+
+meta static List domain_anonymous(List bias) {
+  return %(syntax-template
+    (body (expr ?argument_type (op + ?left $bias)))
+    (captures $bias));
+}
+
+meta static List domain_compose(List outer, List inner) {
+  List child = inner.assoc(<body>);
+  List body = outer.assoc(<body>);
+  List combined = body.replace(%((?argument $child)));
+  return %(syntax-template (body $combined)
+    (captures ${outer.assoc(<rigid>)} ${inner.assoc(<captures>)}));
+}
+
+meta static List domain_composed(List rigid, List bias, List subject) {
+  List closure = domain_anonymous(bias);
+  List body = domain_relay(domain_compose(domain_hydrate(rigid), closure))
+    .assoc(<body>);
+  List bindings;
+  if (!subject.try_match(body, bindings))
+    return %(expr (int) (literal (int) "0"));
+  List result = body.replace(bindings);
+  if (!result.equal(subject))
+    x2c_diagnostic_fail("composed roundtrip changed syntax", NULL);
+  return result;
+}
+
+macro Expression $composed(Expr $rigid, Expr $bias, Expr $subject) =>
+  $domain_composed($rigid, $bias, $subject);

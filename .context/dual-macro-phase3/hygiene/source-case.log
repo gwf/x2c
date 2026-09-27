@@ -1,0 +1,11 @@
+  Translate 1 x2c file in 81 ms
+  Compile 1 C file in 181 ms
+  Link 1 input in 39 ms
+Built executable /tmp/x2c-dual-hygiene-adapter/run in 1.23 s
+  Generated 1 C file and 1 header (58.0 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/x2c-dual-hygiene-adapter (retained)
+  Output /tmp/x2c-dual-hygiene-adapter/run (497.5 KiB)
+Running /tmp/x2c-dual-hygiene-adapter/run
+source-case-hygiene: actual derived fresh slots, renamed locals, nested shadow/free mismatch, raw binding captures, injectivity checkpoint PASS

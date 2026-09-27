@@ -1,0 +1,11 @@
+  Translate 1 x2c file in 210 ms
+  Compile 1 C file in 80 ms
+  Link 1 input in 39 ms
+Built executable /tmp/x2c-dual-hygiene-audit/run in 1.34 s
+  Generated 1 C file and 1 header (24.7 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/x2c-dual-hygiene-audit (retained)
+  Output /tmp/x2c-dual-hygiene-audit/run (425.7 KiB)
+Running /tmp/x2c-dual-hygiene-audit/run
+hygiene: parsed body alpha scopes, rigid frees, ordinary audit freshening, source transform, cross-hole joint freshening and independent copies PASS

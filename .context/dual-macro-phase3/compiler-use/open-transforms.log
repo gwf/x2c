@@ -1,0 +1,97 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdio.h>")
+
+(declare (static int) (bindings (bind (binding 5 "calls") ())))
+
+(function (double) 
+ (bind (binding 7 "_compiler_open_target") 
+  ((fnmod (params (param (double) (bind (binding 6 "value") ())))))) 
+ (block 
+  (at 1 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 5 "calls"))))))) 
+  (at 9 (return (expr (double) (ident (binding 6 "value")))))))
+
+(function (int) 
+ (bind (binding 8 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (declare (int) 
+         (bindings 
+          (op = (bind (binding 9 "caller_value") ()) 
+           (expr (int) (literal (int) "33")))))) 
+  (at 5 (block 
+         (declare ("ExceptionFrame") 
+          (bindings (bind (binding 58 "_x2c_exception_frame_0") ()))) 
+         (stmnt 
+          (expr (void) 
+           (call "x2c_exception_push" 
+            (args (expr (* ("ExceptionFrame")) 
+                   (op & (expr (("ExceptionFrame")) 
+                          (ident (binding 58 "_x2c_exception_frame_0"))))))))) 
+         (if (expr (int) 
+              (op ! (expr (double) 
+                     (call (expr ((func ((double))) double) 
+                            (ident (binding 7 "_compiler_open_target"))) 
+                      (args (expr (int) 
+                             (call "sigsetjmp" 
+                              (args (expr () 
+                                     (op . (expr ("ExceptionFrame") 
+                                            (ident 
+                                             (binding 58 
+                                              "_x2c_exception_frame_0"))) 
+                                      ("env"))) (expr (int) (literal (int) "0")))))))))) 
+          (block 
+           (at 4 (stmnt 
+                  (expr () 
+                   (call (expr () (ident (binding 10 "assert"))) 
+                    (args (expr (int) 
+                           (op == 
+                            (expr (int) (ident (binding 9 "caller_value"))) 
+                            (expr (int) (literal (int) "33")))))))))) 
+          (block 
+           (stmnt 
+            (expr (void) 
+             (call "x2c_exception_landed" 
+              (args (expr (* ("ExceptionFrame")) 
+                     (op & (expr (("ExceptionFrame")) 
+                            (ident (binding 58 "_x2c_exception_frame_0"))))))))) 
+           (block 
+            (if (expr (int) 
+                 (call "x2c_exception_claim" 
+                  (args (expr (* ("ExceptionFrame")) 
+                         (op & (expr (("ExceptionFrame")) 
+                                (ident (binding 58 "_x2c_exception_frame_0")))))))) 
+             (block (block))) 
+            (stmnt 
+             (expr (void) 
+              (call "x2c_exception_leave" 
+               (args (expr (* ("ExceptionFrame")) 
+                      (op & (expr (("ExceptionFrame")) 
+                             (ident (binding 58 "_x2c_exception_frame_0"))))))))) 
+            (stmnt (expr (void) (call "__builtin_unreachable" (args))))))) 
+         (if (expr (int) 
+              (call "x2c_exception_claim" 
+               (args (expr (* ("ExceptionFrame")) 
+                      (op & (expr (("ExceptionFrame")) 
+                             (ident (binding 58 "_x2c_exception_frame_0")))))))) 
+          (block (block))) 
+         (stmnt 
+          (expr (void) 
+           (call "x2c_exception_leave" 
+            (args (expr (* ("ExceptionFrame")) 
+                   (op & (expr (("ExceptionFrame")) 
+                          (ident (binding 58 "_x2c_exception_frame_0"))))))))))) 
+  (at 6 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 11 "assert"))) 
+           (args (expr (int) 
+                  (op == (expr (int) (ident (binding 5 "calls"))) 
+                   (expr (int) (literal (int) "1"))))))))) 
+  (at 7 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 12 "puts"))) 
+           (args (expr (* char) 
+                  (literal (* char) 
+                   "\"compiled open target call and preserved caller local PASS\""))))))) 
+  (at 10 (return (expr (int) (literal (int) "0"))))))

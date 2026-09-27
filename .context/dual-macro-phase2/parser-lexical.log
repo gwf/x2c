@@ -1,0 +1,28 @@
+.context/parser-spike/complete.x:51:40: conversion: unnecessary conversion: .list() where ("List") is expected
+          if (List.compare(row.car().list(), binding) == 0) {
+                                         ^
+  note: remove the call; the destination converts the value
+
+  Translate 1 x2c file in 176 ms
+  Compile 1 C file in 85 ms
+  Link 1 input in 38 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-0DqLzV/run in 2.09 s
+  Generated 1 C file and 1 header (33.9 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-0DqLzV (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-0DqLzV/run (470.8 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-0DqLzV/run
+collision 103 23 3 103 103
+bound 7 7 7
+dynamic 1 0
+lexical composed 1 7
+anonymous composed 1
+runtime constructed (expr (macro-expr) 
+ (op + (expr (macro-expr) 
+        (expr (int) 
+         (op + (expr (int) (literal (int) "9")) 
+          (expr (int) (literal (int) "10"))))) 
+  (expr (macro-expr) 
+   (expr (int) 
+    (op + (expr (int) (literal (int) "9")) (expr (int) (literal (int) "10")))))))

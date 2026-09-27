@@ -1,0 +1,11 @@
+  Translate 1 x2c file in 192 ms
+  Compile 1 C file in 144 ms
+  Link 1 input in 35 ms
+Built executable /tmp/x2c-dual-hygiene-context/run in 1.36 s
+  Generated 1 C file and 1 header (54.1 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/x2c-dual-hygiene-context (retained)
+  Output /tmp/x2c-dual-hygiene-context/run (479.3 KiB)
+Running /tmp/x2c-dual-hygiene-context/run
+hygiene-context: actual parsed repeated+nested bodies, actual captured local identities, contextual retry PASS

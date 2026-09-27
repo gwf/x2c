@@ -1,0 +1,9 @@
+  Translate 1 x2c file in 69 ms
+  Compile 1 C file in 175 ms
+  Link 1 input in 37 ms
+Built executable /tmp/dual-open-closed-regression in 1.74 s
+  Generated 1 C file and 1 header (58.0 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-open-closed-regression-build (retained)
+  Output /tmp/dual-open-closed-regression (497.5 KiB)

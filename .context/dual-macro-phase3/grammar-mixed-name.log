@@ -1,0 +1,51 @@
+Name code (block 
+ (declare (int) 
+  (bindings 
+   (op = (bind (binding 45 "value") ()) (expr (int) (literal (int) "1"))))) 
+ (stmnt 
+  (expr (int) 
+   (op += (expr (int) (ident (binding 45 "value"))) 
+    (expr (int) 
+     (op . (expr (struct "Obj") (ident (binding 42 "obj"))) 
+      ("value")))))))
+Name code (block 
+ (declare (int) 
+  (bindings 
+   (op = (bind (binding 47 "value") ()) (expr (int) (literal (int) "1"))))) 
+ (stmnt 
+  (expr (int) 
+   (op += (expr (int) (ident (binding 47 "value"))) 
+    (expr (int) 
+     (op . (expr (struct "Obj") (ident (binding 42 "obj"))) 
+      ("other")))))))
+Name code (block 
+ (declare (int) 
+  (bindings 
+   (op = (bind (binding 49 "other") ()) (expr (int) (literal (int) "1"))))) 
+ (stmnt 
+  (expr (int) 
+   (op += (expr (int) (ident (binding 49 "other"))) 
+    (expr (int) 
+     (op . (expr (struct "Obj") (ident (binding 42 "obj"))) 
+      ("other")))))))
+Name code (block 
+ (declare (int) 
+  (bindings 
+   (op = (bind (binding 51 "other") ()) (expr (int) (literal (int) "1"))))) 
+ (stmnt 
+  (expr (int) 
+   (op += (expr (int) (ident (binding 43 "value"))) 
+    (expr (int) 
+     (op . (expr (struct "Obj") (ident (binding 42 "obj"))) 
+      ("other")))))))
+  Translate 1 x2c file in 24 ms
+  Compile 1 C file in 41 ms
+  Link 1 input in 39 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-o7nB16/run in 944 ms
+  Generated 1 C file and 1 header (2.6 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-o7nB16 (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-o7nB16/run (422.8 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-o7nB16/run
+mixed Name 1 0 1 0

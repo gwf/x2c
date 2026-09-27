@@ -1,0 +1,13 @@
+  Translate 1 x2c file in 140 ms
+  Compile 1 C file in 38 ms
+  Link 1 input in 37 ms
+Built executable /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-u03MCA/run in 1.13 s
+  Generated 1 C file and 1 header (1.8 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-u03MCA (temporary; removed after run)
+  Output /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-u03MCA/run (422.6 KiB)
+Running /var/folders/ys/92c9nxl16ds47h6mhvb9w_cm0000gt/T/x2c-u03MCA/run
+14 8 11
+91 2 91
+42 42 3 2

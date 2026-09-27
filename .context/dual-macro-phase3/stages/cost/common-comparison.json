@@ -1,0 +1,108 @@
+{
+  "source_root_equal": true,
+  "case_count": 62,
+  "changed_cases": [
+    {
+      "key": [
+        "unittest/compiler-fixtures/c-body-directive.x",
+        "fixture"
+      ],
+      "baseline": {
+        "source": "unittest/compiler-fixtures/c-body-directive.x",
+        "exit": 0,
+        "files": {
+          "c-body-directive.c": {
+            "bytes": 6137,
+            "sha256": "5787834713f343ebda622c64f5cbf38ee81d1654f14357dbec6f435dd489d3b1"
+          },
+          "c-body-directive.h": {
+            "bytes": 225,
+            "sha256": "f48422e1bd0d0da2ea5e12ae99c2d30a5fda0b042234ce8ccfdc1ee24cdf515d"
+          }
+        }
+      },
+      "candidate": {
+        "source": "unittest/compiler-fixtures/c-body-directive.x",
+        "exit": 0,
+        "files": {
+          "c-body-directive.c": {
+            "bytes": 6241,
+            "sha256": "93a4acbb0c252d8ed566661bfa42bb3cbb3cc693e0513f110645b179dc992d68"
+          },
+          "c-body-directive.h": {
+            "bytes": 225,
+            "sha256": "f48422e1bd0d0da2ea5e12ae99c2d30a5fda0b042234ce8ccfdc1ee24cdf515d"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "unittest/compiler-fixtures/catch-filter-runtime-init.x",
+        "fixture"
+      ],
+      "baseline": {
+        "source": "unittest/compiler-fixtures/catch-filter-runtime-init.x",
+        "exit": 0,
+        "files": {
+          "catch-filter-runtime-init.c": {
+            "bytes": 3596,
+            "sha256": "6c7762d53883cce642f0a0e0d23fbb1f844ffcff1699926f8279f7285dadb9f9"
+          },
+          "catch-filter-runtime-init.h": {
+            "bytes": 205,
+            "sha256": "a142d3ce23cb83a61081f5032fd94d73bdb823d13be51d601c65256b3535cadb"
+          }
+        }
+      },
+      "candidate": {
+        "source": "unittest/compiler-fixtures/catch-filter-runtime-init.x",
+        "exit": 0,
+        "files": {
+          "catch-filter-runtime-init.c": {
+            "bytes": 3649,
+            "sha256": "c61afd4cdb9b180c16936c979c4173d682dd293eacfc219e73f6f909720e0f00"
+          },
+          "catch-filter-runtime-init.h": {
+            "bytes": 205,
+            "sha256": "a142d3ce23cb83a61081f5032fd94d73bdb823d13be51d601c65256b3535cadb"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "unittest/compiler-fixtures/literal-string-positions.x",
+        "fixture"
+      ],
+      "baseline": {
+        "source": "unittest/compiler-fixtures/literal-string-positions.x",
+        "exit": 0,
+        "files": {
+          "literal-string-positions.c": {
+            "bytes": 5699,
+            "sha256": "62e1f59a66a7e77aaaaa09957c3e32d82f84052a90627de5d519067793d2d961"
+          },
+          "literal-string-positions.h": {
+            "bytes": 303,
+            "sha256": "09b3b43c51f1a9c2b9306eb8ee326fe491973f10b79cde1470741d162053402c"
+          }
+        }
+      },
+      "candidate": {
+        "source": "unittest/compiler-fixtures/literal-string-positions.x",
+        "exit": 0,
+        "files": {
+          "literal-string-positions.c": {
+            "bytes": 5805,
+            "sha256": "ecdad89d562a718e9efa3085eb16afc8607d9aa7b57b96b2de7068570be44f63"
+          },
+          "literal-string-positions.h": {
+            "bytes": 303,
+            "sha256": "09b3b43c51f1a9c2b9306eb8ee326fe491973f10b79cde1470741d162053402c"
+          }
+        }
+      }
+    }
+  ]
+}

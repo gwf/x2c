@@ -1,0 +1,9 @@
+  Translate 1 x2c file in 73 ms
+  Compile 1 C file in 73 ms
+  Link 1 input in 39 ms
+Built executable /tmp/dual-compiled-open-ok in 688 ms
+  Generated 1 C file and 1 header (1.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-compiled-open-ok-build (retained)
+  Output /tmp/dual-compiled-open-ok (422.4 KiB)

@@ -1,0 +1,101 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -121,6 +121,7 @@
+   Map adoptions;
+   Map macro_holes;
+   Map local_macro_captures;
++  Map prototype_bound_slots;
+   List lambda_scopes;
+   Array match_types;
+   // Import path -> declared alias map, or 1 when no aliases need replay.
+--- a/src/parse.x
++++ b/src/parse.x
+@@ -2427,6 +2427,9 @@
+ */
+ List Compiler.bind_syntax(
+   Compiler c, Var syntax, AstPos context, Type return_type) {
++  Var retained;
++  if (c.prototype_bound_slots &&
++      c.prototype_bound_slots.try_get(syntax, retained)) return retained;
+   Var value = c.evaluate_macro_slot(syntax);
+   if (value is not <list>)
+     c.report_error(<parse>, "expected syntax", c.token, NULL);
+--- a/src/expressions.x
++++ b/src/expressions.x
+@@ -2461,6 +2461,11 @@
+     retain source position.
+ */
+ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
++  Var retained;
++  if (c.prototype_bound_slots &&
++      c.prototype_bound_slots.try_get(input, retained))
++    return retained;
++
+   match (input) {
+     case %(decl *):
+       return c.bind_syntax(input, AST_BLOCK, c.return_type);
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2351,6 +2351,44 @@
+     $choice);
+ }
+ 
++macro Statement $compiler_try_shape(Statement $declarations, Statement $push,
++    Expr $condition, Statement $body, Statement $landed, Statement $landing,
++    Statement $cleanup) {
++  {
++    $declarations
++    $push
++    if (!$condition) $body
++    else { $landed $landing }
++    $cleanup
++  }
++}
++
++static List _compiler_try_shape(Compiler c, List values) {
++  Macro shape = $compiler_try_shape;
++  Map retained = {};
++  List rows = NULL;
++  List parameters = shape.assoc(<parameters>);
++  foreach (List parameter, parameters) {
++    String name = parameter.assoc(<binder>).str()[1:];
++    Var value = values.car();
++    values = values.cdr();
++    List slot = %(macro-slot 0 ${Atom.intern(name)});
++    retained[slot] = value;
++    retained[%(expr (<macro-expr>) $slot)] = value;
++    foreach (String projection, %("expression" "source" "value")) {
++      Atom binder = Atom.intern(%"?__macro_${projection}_$name");
++      rows = cons(%($binder $slot), rows);
++    }
++  }
++  List code = shape.assoc(<template>);
++  code = code.search_replace(%(at m-origin ?node), <?node>);
++  $let(c.prototype_bound_slots, retained) {
++    List bound = c.bind_syntax(code.replace(rows), AST_BLOCK, c.return_type);
++    match (bound) case %(seq ?only): return only;
++    return bound;
++  }
++}
++
+ static List _try_block(Walk walk, List body, List clause, List frame,
+                        List handle, List cleanup, List bodies) {
+   Compiler c = walk.compiler;
+@@ -2407,12 +2445,12 @@
+   List setjmp = _catch_call(%(int), "sigsetjmp", %(
+     (expr () (op . ${_catch_value(%("ExceptionFrame"), frame)} ("env")))
+     ${_integer_expression(0)}));
+-  return %(block @{declarations.list_free()}
++  return _compiler_try_shape(c, %(
++    (seq @{declarations.list_free()})
+     ${_region_call("x2c_exception_push", _frame_type, frame)}
+-    (if (expr (int) (op ! $setjmp)) $body
+-      (block ${_region_call("x2c_exception_landed", _frame_type, frame)}
+-        $landing))
+-    @cleanup);
++    $setjmp $body
++    ${_region_call("x2c_exception_landed", _frame_type, frame)}
++    $landing (seq @cleanup)));
+ }
+ 
+ static Var _rewrite(Walk walk, Var value) {

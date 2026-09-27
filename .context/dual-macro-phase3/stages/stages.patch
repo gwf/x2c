@@ -1,0 +1,82 @@
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -2241,6 +2241,8 @@
+   compiler.queue_declaration_effect(form, first, compiler.token);
+ }
+ 
++static Var _helper_result(Compiler c, Var value);
++
+ static Var _sdk_identifier_result(Var value) {
+   match (value)
+     case %("x2c.ident" (!is ?spelling type string)): return spelling;
+@@ -2277,7 +2279,8 @@
+   Var identifier = _sdk_identifier_result(value);
+   if (identifier is not void) return %(expr () (ident $identifier));
+   if (value is <list> && !value.is_nil())
+-    return compiler.bind_syntax(value, AST_EXPRESSION, NULL);
++    return compiler.bind_syntax(
++      _helper_result(compiler, value), AST_EXPRESSION, NULL);
+   compiler.report_error(
+     <macro>, "compile-time Lisp result cannot fill an expression slot",
+     invocation, %( "value:" ${value.repr()} ));
+@@ -2329,13 +2332,22 @@
+    compiler replaced by its invocation. */
+ static Var _helper_result(Compiler c, Var value) {
+   if (value is not <list> || value.is_nil()) return value;
++  match (value) {
++    case %(macrodef *): return value;
++    case %(literal *): return value;
++  }
+   Array parts = [];
+   foreach (Var part, (List) value) parts.push(_helper_result(c, part));
+   List resolved = parts.list_free();
+   match (resolved) {
+-    case %("x2c.template" ?stored ?(List values)):
+-      return _sdk_template_call(
+-        stored is <string> ? Atom.intern(stored.str()) : stored, values);
++    case %("x2c.template" ?stored ?(List values)): {
++      Token site = c.macro_invocation_site(<m-invoke>);
++      if (!site) site = c.token;
++      $let(macro_sdk_compiler, c)
++      $let(macro_import_invocation, site)
++        return _sdk_template_call(
++          stored is <string> ? Atom.intern(stored.str()) : stored, values);
++    }
+   }
+   return resolved;
+ }
+@@ -2354,8 +2366,7 @@
+   Token site;
+   Compiler c = _stub_compiler(name, site);
+   if (!c.groups_meta())
+-    return _helper_result(
+-      c, c.meta_helper_call(name, site, values.list_free()));
++    return c.meta_helper_call(name, site, values.list_free());
+   c.bind_meta_group(name, site);
+   Var bound;
+   c.macro_lisp.try_get(name, bound);
+@@ -2640,6 +2651,7 @@
+     ? _evaluate_meta_value(compiler, form, invocation)
+     : _eval_template_form(
+       compiler, form, bindings, invocation, source_file, required);
++  result = _helper_result(compiler, result);
+   Var construction = slot.assoc(<target>);
+   if (required is not void && splice) {
+     construction = required;
+@@ -2653,8 +2665,14 @@
+         exact = spelling;
+     if (exact) result = %($construction $exact);
+   }
+-  return splice && result is <list>
+-    ? %(seq @{result}) : result;
++  if (splice && result is <list>) {
++    match (result) {
++      case %(macro-invoke ? ? ?): return %(seq $result);
++      case %(seq *): return result;
++    }
++    return %(seq @{result});
++  }
++  return result;
+ }
+ 
+ /** Evaluates a macro slot and returns its syntax as a row sequence.

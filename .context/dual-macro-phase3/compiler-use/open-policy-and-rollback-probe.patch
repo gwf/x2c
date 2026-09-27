@@ -1,0 +1,194 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -2702,6 +2702,42 @@
+   }
+ }
+ 
++void Compiler.prototype_effect_rollback(Compiler c) {
++  SymScope *base = _semantic_scope(c.sym, c.sym.base_scopes - 1);
++  Map saved_global_bindings = base.bindings.copy();
++  int early = c.early_decls.len(), init = c.inits.len();
++  int origin = c.origin, exception = c.needs_exception;
++  Var key = Atom.intern("prototype-effect");
++  c.sym.push_new_scope();
++  SymTxn transaction = c.begin_semantic_transaction();
++  int binding_count = c.names.next_binding;
++  String generated = c.fresh_name("effect_probe");
++  (void) c.sym.introduce(generated);
++  c.add_early(%(prototype-declaration));
++  c.add_init(<early>, %(prototype-init));
++  c.names.adapters[key] = %(prototype-adapter);
++  List global = c.sym.reference_global(%("__prototype_global"));
++  c.origin = origin + 1;
++  c.needs_exception = !exception;
++  transaction.rollback();
++  fprintf(stderr,
++    "effects rollback: binding=%d fresh=%d early=%d init=%d memo=%d global=%d origin=%d exception=%d\n",
++    c.names.next_binding == binding_count,
++    c.fresh_name("effect_probe") == generated,
++    c.early_decls.len() == early, c.inits.len() == init,
++    !(key in c.names.adapters),
++    c.sym.resolve_global(%("__prototype_global"), NULL) != global,
++    c.origin == origin, c.needs_exception == exception);
++  c.sym.pop_scope();
++  base = _semantic_scope(c.sym, c.sym.base_scopes - 1);
++  base.bindings = saved_global_bindings;
++  c.early_decls.resize(early);
++  c.inits.resize(init);
++  c.names.adapters.del(key);
++  c.origin = origin;
++  c.needs_exception = exception;
++}
++
+ static void _semantic_reset(Sym sym, Map base, Map globals, int overlay) {
+   sym.scopes.clear();
+   sym.globals = globals != NULL ? globals : {};
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -739,7 +739,9 @@
+ int Compiler.macro_form_is_definition(Compiler compiler) {
+   if (compiler.peek(0) != <ident> || compiler.token.text != "macro") return 0;
+   if (compiler.peek(1) == <$>) return 1;
+-  return compiler.peek(1) == <ident> && compiler.peek(2) == <$>;
++  return compiler.peek(1) == <ident> &&
++         (compiler.peek(2) == <$> ||
++          (compiler.peek(2) == <ident> && compiler.peek(3) == <$>));
+ }
+ 
+ /* The `<(>` literal keeps this body braced: the API reference generator
+@@ -3391,6 +3393,74 @@
+ static const SymbolSet decorator_target_kinds =
+   %<<expr function block field unit named-type>>;
+ 
++static void _prototype_open_roles(Var value, Map seen, Array effects) {
++  if (value is not <list> || value.is_nil()) return;
++  match (value) case %(ident (!set ?reference (binding ? ?name))): {
++    if (!(reference in seen)) {
++      seen[reference] = 1;
++      effects.push(%(resolve-global $reference $name));
++    }
++  }
++  match (value) case %(decl ?base ?): {
++    if (base is <list> && base.type().is_bare_typedef_name() &&
++        !(base in seen)) {
++      seen[base] = 1;
++      effects.push(%(resolve-global-type $base ${base.car()}));
++    }
++  }
++  foreach (Var child, value.list()) _prototype_open_roles(child, seen, effects);
++}
++
++static Var _prototype_open_types(Var value, Map types) {
++  if (value is not <list> || value.is_nil()) return value;
++  match (value) case %(expr ?type ?content): {
++    if (content.is_binder()) return value;
++    return %(expr () ${_prototype_open_types(content, types)});
++  }
++  match (value) case %(decl ?base ?declarators): {
++    Var resolved;
++    if (types.try_get(base, resolved))
++      return %(decl $resolved ${_prototype_open_types(declarators, types)});
++  }
++  Array items = $auto([]);
++  foreach (Var child, value.list()) items.push(_prototype_open_types(child, types));
++  return items.list();
++}
++
++List Compiler.prototype_open_expression(Compiler c, Macro template,
++                                        List argument) {
++  SymTxn transaction = c.begin_semantic_transaction();
++  defer transaction.rollback();
++  Map replacements = {}, types = {};
++  foreach (List effect, template.assoc(<effects>).list()) {
++    Var (operation, source, name) = effect;
++    if (operation == Atom.intern("resolve-global-type"))
++      types[source] = c.sym.resolve_key(source);
++    else replacements[source] = c.sym.reference_global(%($name));
++  }
++  List code = template.assoc(<template>);
++  code = _replace_definition_bindings(code, replacements);
++  code = _prototype_open_types(code, types);
++  code = code.search_replace(%(at m-origin ?node), <?node>);
++  List parameters = template.assoc(<parameters>);
++  List parameter = parameters.car();
++  String name = parameter.assoc(<binder>).str()[1:];
++  List slot = %(macro-slot 0 ${Atom.intern(name)});
++  Map retained = {};
++  retained[slot] = argument;
++  retained[%(expr (<macro-expr>) $slot)] = argument;
++  List rows = NULL;
++  foreach (String projection, %("expression" "source" "value")) {
++    Atom binder = Atom.intern(%"?__macro_${projection}_$name");
++    rows = cons(%($binder $slot), rows);
++  }
++  List result;
++  $let(c.prototype_bound_slots, retained)
++    result = c.bind_syntax(code.replace(rows), AST_EXPRESSION, c.return_type);
++  transaction.commit();
++  return result;
++}
++
+ /** Parses the macro definition at the current token into a `macrodef` `List`.
+     A source-level definition is published immediately; a definition inside a
+     template remains syntax for later binding at its expansion site.
+@@ -3398,6 +3468,8 @@
+ List Compiler.parse_macro_definition(Compiler c) {
+   Token start = c.token;
+   c.expect(<ident>);
++  int prototype_open = c.token.text == "open";
++  if (prototype_open) c.next();
+   if (c.peek(0) == <$>)
+     c.report_error(
+       <parse>, "macro definition requires a result kind before '$'",
+@@ -3691,6 +3763,12 @@
+     name, result_kind, target_kind, target_hole, parameters,
+     fresh_rows, captures,
+     pattern, replacement, origin, source_file, imported, builtin, local);
++  if (prototype_open) {
++    Array effects = [];
++    _prototype_open_roles(replacement, {}, effects);
++    definition = definition.append(%((free-policy target-global)
++                                    (effects ${effects.list_free()})));
++  }
+   if (local && !anonymous) c.sym.define_macro(name, definition);
+   else if (!local && !old_holes)
+     c.publish_macro_definition_node(definition);
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2351,6 +2351,13 @@
+     $choice);
+ }
+ 
++static int _compiler_open_target(int value) => value;
++typedef int CompilerOpenType;
++macro open Expression $compiler_open_type(Expr $argument) =>
++  ((CompilerOpenType) $argument);
++macro open Expression $compiler_open_target(Expr $argument) =>
++  _compiler_open_target($argument);
++
+ macro Statement $compiler_try_shape(Statement $declarations, Statement $push,
+     Expr $condition, Statement $body, Statement $landed, Statement $landing,
+     Statement $cleanup) {
+@@ -2392,6 +2399,7 @@
+ static List _try_block(Walk walk, List body, List clause, List frame,
+                        List handle, List cleanup, List bodies) {
+   Compiler c = walk.compiler;
++  if (Env.get("X2C_PROTOTYPE_TXN")) c.prototype_effect_rollback();
+   List address = _address_of(_frame_type, frame);
+   Array declarations = [];
+   declarations.push(_value_declaration(%("ExceptionFrame"), frame, NULL));
+@@ -2445,6 +2453,14 @@
+   List setjmp = _catch_call(%(int), "sigsetjmp", %(
+     (expr () (op . ${_catch_value(%("ExceptionFrame"), frame)} ("env")))
+     ${_integer_expression(0)}));
++  if (Env.get("X2C_PROTOTYPE_OPEN")) {
++    Macro open_shape = $compiler_open_target;
++    setjmp = c.prototype_open_expression(open_shape, setjmp);
++  }
++  if (Env.get("X2C_PROTOTYPE_OPEN_TYPE")) {
++    Macro open_type = $compiler_open_type;
++    setjmp = c.prototype_open_expression(open_type, setjmp);
++  }
+   return _compiler_try_shape(c, %(
+     (seq @{declarations.list_free()})
+     ${_region_call("x2c_exception_push", _frame_type, frame)}

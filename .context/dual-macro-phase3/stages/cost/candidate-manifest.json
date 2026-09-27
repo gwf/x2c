@@ -1,0 +1,693 @@
+{
+  "compiler": "/Users/gary/.codex/worktrees/dual-macro-match-probe/x2c/builds/0/x2c",
+  "source_root": "/Users/gary/.codex/worktrees/agent-dual-transport/x2c",
+  "try_inventory": "lexical token after stripping ordinary C comments and quoted strings; not a parser proof",
+  "results": [
+    {
+      "source": "unittest/compiler-fixtures/ast-leaf-contract.x",
+      "exit": 0,
+      "files": {
+        "ast-leaf-contract.c": {
+          "bytes": 6178,
+          "sha256": "e146a9c0880e97f720205c0bdca543c1a265295b158b6b1131dc3ebd6ed6a372"
+        },
+        "ast-leaf-contract.h": {
+          "bytes": 929,
+          "sha256": "44bb31265b980f7a73532e392086aa3264520688b4ee0ab775dbda3d6c23983c"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/c-body-directive.x",
+      "exit": 0,
+      "files": {
+        "c-body-directive.c": {
+          "bytes": 6275,
+          "sha256": "994aea1594f600f238f9d1ab8e33f9a7c290869e8792f9903e5fe671becdfe3e"
+        },
+        "c-body-directive.h": {
+          "bytes": 225,
+          "sha256": "f48422e1bd0d0da2ea5e12ae99c2d30a5fda0b042234ce8ccfdc1ee24cdf515d"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-code-pattern.x",
+      "exit": 0,
+      "files": {
+        "catch-code-pattern.c": {
+          "bytes": 6566,
+          "sha256": "29cddfdd5c5e4a665a51d72bd8eac9c70c95d534dacf6b870c596c3efe546725"
+        },
+        "catch-code-pattern.h": {
+          "bytes": 205,
+          "sha256": "27844c560dec466b3f4ef784c8d8fd876634c75263658ab5f2db61b0223452a4"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-dynamic-pattern.x",
+      "exit": 0,
+      "files": {
+        "catch-dynamic-pattern.c": {
+          "bytes": 2402,
+          "sha256": "0d7c37331b563b40953164c501147b0bacf7dbb3dd38f6eeb0fc703d4def64c1"
+        },
+        "catch-dynamic-pattern.h": {
+          "bytes": 186,
+          "sha256": "e74312561153b729a7a23a1028501749b1a346b3652734fa866be83fa5ba0b79"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-arms.x",
+      "exit": 0,
+      "files": {
+        "catch-filter-arms.c": {
+          "bytes": 4559,
+          "sha256": "60e25887637714024b7288091a1f9603bb973620a20346d9a4f341f94c2af13e"
+        },
+        "catch-filter-arms.h": {
+          "bytes": 194,
+          "sha256": "1a887b7c169bceaa14e24268f970773a16917c4b9d7916fea2c114d6fbfa88ba"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-binder-conflict.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-binder-not-definite.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-default-order.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-detail-shape.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-missing-colon.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-requires-literal.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-filter-runtime-init.x",
+      "exit": 0,
+      "files": {
+        "catch-filter-runtime-init.c": {
+          "bytes": 3720,
+          "sha256": "b4b208f9c20d8f9b1f14a88a098857517a4dfd7ec683e1125b54784ae4d01c4f"
+        },
+        "catch-filter-runtime-init.h": {
+          "bytes": 205,
+          "sha256": "a142d3ce23cb83a61081f5032fd94d73bdb823d13be51d601c65256b3535cadb"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/catch-many-arms.x",
+      "exit": 0,
+      "files": {
+        "catch-many-arms.c": {
+          "bytes": 12228,
+          "sha256": "92f9787efcecc373c9331c69525fb83198fe5b2f444cf741d825b130f550fcd7"
+        },
+        "catch-many-arms.h": {
+          "bytes": 186,
+          "sha256": "4ae4eba7082e76fbb7a9413b4459b89bce3c5e0780fffcf2f5a97a612a7dab87"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/class-cycles.x",
+      "exit": 0,
+      "files": {
+        "class-cycles.c": {
+          "bytes": 33142,
+          "sha256": "f908462bfd6a5b771748f382edd9986a2a8a02f03854896fa972f5e339f6acf4"
+        },
+        "class-cycles.h": {
+          "bytes": 1765,
+          "sha256": "750d5ebd54127de027d69a000cf11438b0b348f29c95b1acb384c7bd1b96deea"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/class-lifetime.x",
+      "exit": 0,
+      "files": {
+        "class-lifetime.c": {
+          "bytes": 44429,
+          "sha256": "0bb407e015b61ba31e6cb19e9e0d25df1962d0490288e62c8f7722c1b94d2d83"
+        },
+        "class-lifetime.h": {
+          "bytes": 2920,
+          "sha256": "cfea0f129ff2c23bab8cf2af8c94a309a1d7260e8896de39ddec2c40ab0677bb"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/cleanup-loop-boundary.x",
+      "exit": 0,
+      "files": {
+        "cleanup-loop-boundary.c": {
+          "bytes": 8015,
+          "sha256": "30cb5d4023423c8b11ea4a288272877ca4091f1751813724294a88c9db9a1831"
+        },
+        "cleanup-loop-boundary.h": {
+          "bytes": 186,
+          "sha256": "d8e40f9c948c6c0adedba3b2e5fe6529c145e742aa92e03b85b26aecec452086"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/cleanup-nested-finalizer.x",
+      "exit": 0,
+      "files": {
+        "cleanup-nested-finalizer.c": {
+          "bytes": 3881,
+          "sha256": "5db3c1551783c617aa9c80478a52ba3a972801d37411c3eedab474a387e6e2a6"
+        },
+        "cleanup-nested-finalizer.h": {
+          "bytes": 186,
+          "sha256": "a5300d426fec197703cedcd8b12f083c46c7a502d2caaa2fe457ab13cdcd8037"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/defer-inside-try-exit.x",
+      "exit": 0,
+      "files": {
+        "defer-inside-try-exit.c": {
+          "bytes": 11714,
+          "sha256": "21bba11c1374b4436196b30de83f976493f0c817237cd044386eaa93cc55b599"
+        },
+        "defer-inside-try-exit.h": {
+          "bytes": 186,
+          "sha256": "fbe4db46e488df6b2f23c189617f5ada93f27852fa511a27af31ba4b44e0f2a8"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/defer-outside-try-exit.x",
+      "exit": 0,
+      "files": {
+        "defer-outside-try-exit.c": {
+          "bytes": 9195,
+          "sha256": "23752daae0b35f5de3dbd950dc5ed0b5e48e10303f6e72454603b7daa8d687fa"
+        },
+        "defer-outside-try-exit.h": {
+          "bytes": 186,
+          "sha256": "64355a41d657fb5f6fabb21f1888d4f0fe306ead7fcfe00d4b5e8b9de66bfa83"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+      "exit": 0,
+      "files": {
+        "defer-try-cleanup.c": {
+          "bytes": 7441,
+          "sha256": "adaf85f2d5041d92996e9395e7dc326e60e5afd6ad8600b3b8cb26c04550ee9f"
+        },
+        "defer-try-cleanup.h": {
+          "bytes": 186,
+          "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/exception-signal-mask.x",
+      "exit": 0,
+      "files": {
+        "exception-signal-mask.c": {
+          "bytes": 3026,
+          "sha256": "1d699685a1a3e805fb6f5749a6e490e1d89b3a4b3337d6bda29e2d116ab4f369"
+        },
+        "exception-signal-mask.h": {
+          "bytes": 206,
+          "sha256": "faa1a829c81a9499e5579ffd7a89da56e21dc407149930a6daaaf815e5383336"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/finally-label-rejected.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/foreach-macro-lowering.x",
+      "exit": 0,
+      "files": {
+        "foreach-macro-lowering.c": {
+          "bytes": 18037,
+          "sha256": "588588cfe667f38f6a655a655d8110c680c6457f73dde8597683ceb9ede1ae24"
+        },
+        "foreach-macro-lowering.h": {
+          "bytes": 209,
+          "sha256": "e509b99d5b3dedaa226ac22518c1381dd18758faa3aa69d8ef9c3b333291de41"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/generated-name-hygiene.x",
+      "exit": 0,
+      "files": {
+        "generated-name-hygiene.c": {
+          "bytes": 7276,
+          "sha256": "06e7ba5faa17c4e8714a1316dfa776af4f547ed3d1d07f4f27b7419c52f7f65e"
+        },
+        "generated-name-hygiene.h": {
+          "bytes": 186,
+          "sha256": "0f640f536a97a89375f6f471566bdb43a3129401c7117e7d47959e71044bd9fe"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/goto-catch-arm-rejected.x",
+      "exit": 1,
+      "files": {}
+    },
+    {
+      "source": "unittest/compiler-fixtures/goto-cleanup-regions.x",
+      "exit": 0,
+      "files": {
+        "goto-cleanup-regions.c": {
+          "bytes": 5032,
+          "sha256": "0cfa6c62e00efb215c0993fee725051154f13e7aa9b6420d41721e41b82c2ed9"
+        },
+        "goto-cleanup-regions.h": {
+          "bytes": 186,
+          "sha256": "45831fa1ebef66d6de5a62009d648bbccbd52e90ee1655f4799fcc41c0343b84"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/indent-syntax.x",
+      "exit": 0,
+      "files": {
+        "indent-syntax.c": {
+          "bytes": 4170,
+          "sha256": "36d9fa06f33de1b0f27c806a1089845989d68442863e7d7271cc54e67a73dc31"
+        },
+        "indent-syntax.h": {
+          "bytes": 381,
+          "sha256": "6a9f7f82b0964640422586278426cd68b3e74852701a497c91a324949d968495"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/let-volatile-address.x",
+      "exit": 0,
+      "files": {
+        "let-volatile-address.c": {
+          "bytes": 1953,
+          "sha256": "99432f0155ee3fe52745842272467e484056139e343606f04a866278c3ef7714"
+        },
+        "let-volatile-address.h": {
+          "bytes": 186,
+          "sha256": "013e17f0cba28ebcb61f6f43f67c3a81e7fc24f523ce0d614c376cacdaf9a05d"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/literal-string-positions.x",
+      "exit": 0,
+      "files": {
+        "literal-string-positions.c": {
+          "bytes": 5839,
+          "sha256": "96d0e428fd44ef1ddb56944d5509974f4841246e7a1be9c27e932d429dbd271d"
+        },
+        "literal-string-positions.h": {
+          "bytes": 303,
+          "sha256": "09b3b43c51f1a9c2b9306eb8ee326fe491973f10b79cde1470741d162053402c"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/macro-raise-template.x",
+      "exit": 0,
+      "files": {
+        "macro-raise-template.c": {
+          "bytes": 5660,
+          "sha256": "13c8b791818c2899042b1f3691a443ca79db7ef833933db69102795449ee78f2"
+        },
+        "macro-raise-template.h": {
+          "bytes": 186,
+          "sha256": "c932fa1b0737a6c6b07cef6acec79facc2536547a38ead032c952e2c34f1f34e"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/match-arm-transfer-regions.x",
+      "exit": 0,
+      "files": {
+        "match-arm-transfer-regions.c": {
+          "bytes": 5710,
+          "sha256": "b0f9b8360bbe4f26f962f58de8327cf5eb371cee5abac8b1530d73ff0b7a04ff"
+        },
+        "match-arm-transfer-regions.h": {
+          "bytes": 186,
+          "sha256": "a63c60382e9ceb3ff9285df0cc05e336a401b67fe2cd2f90b9dbcf82dfc49e44"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/match-typed-guards.x",
+      "exit": 0,
+      "files": {
+        "match-typed-guards.c": {
+          "bytes": 22186,
+          "sha256": "586813a8882da7922b3efb3dd548f732d6548424a06379487d1e85cd30111fb5"
+        },
+        "match-typed-guards.h": {
+          "bytes": 208,
+          "sha256": "539b441ce79e5896e27e22f7805220d87bd883537f21ac7540270c42ccd91082"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/meta-func-errors-native.x",
+      "exit": 0,
+      "files": {
+        "meta-func-errors-native.c": {
+          "bytes": 28251,
+          "sha256": "a19ebc5661faae11866831b0689ad086b87f31cccd59249f05a8341cedbe2583"
+        },
+        "meta-func-errors-native.h": {
+          "bytes": 461,
+          "sha256": "8e613464258cc73c2dbe40589068885d40b8a9b459bca8e35f9dcb0c2930354d"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/optional-reference.x",
+      "exit": 0,
+      "files": {
+        "optional-reference.c": {
+          "bytes": 8688,
+          "sha256": "2495d15dcb4c5cb3822bbc6fb3dc51440a75b98564690ea10a6f6e38888d44fd"
+        },
+        "optional-reference.h": {
+          "bytes": 215,
+          "sha256": "e785506e303e5058af41863b4082e97aa67c9020d84b258e70b0930c1884e8ca"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/protocol-operator-direct-update.x",
+      "exit": 0,
+      "files": {
+        "protocol-operator-direct-update.c": {
+          "bytes": 4401,
+          "sha256": "395bcaedd938248bcadc74c0a3b1e0e5bc94ccdd416bfb9a1cb646368e32bad3"
+        },
+        "protocol-operator-direct-update.h": {
+          "bytes": 380,
+          "sha256": "556a66dbd6f123b5dbede00f54570a8c86c4a44984c84ac5f73414170cbcba27"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/raise-in-finally-unhandled.x",
+      "exit": 0,
+      "files": {
+        "raise-in-finally-unhandled.c": {
+          "bytes": 1392,
+          "sha256": "7f8a719ef711a129050f6a108e53c778ad6357f27b624af6d316e4334cda4130"
+        },
+        "raise-in-finally-unhandled.h": {
+          "bytes": 186,
+          "sha256": "6be6c872a04a88304e9f826b48abf61901398dddc33064eac2217dcc0c608a82"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/raise-in-finally.x",
+      "exit": 0,
+      "files": {
+        "raise-in-finally.c": {
+          "bytes": 13384,
+          "sha256": "f955dbc12f91796dcbc96895206b4eb0769817f4d7c1223363ba097c6d9b5b40"
+        },
+        "raise-in-finally.h": {
+          "bytes": 186,
+          "sha256": "d4f68d181c8969c3d428e7ed9bfe05b0267226b4d6a4bc55d41f58696507bac9"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/raise-statement.x",
+      "exit": 0,
+      "files": {
+        "raise-statement.c": {
+          "bytes": 4953,
+          "sha256": "0a97d2d4f69ebb1324fc3092b96780abfd6fa9d874a00af5c3b131e0b20dfdbc"
+        },
+        "raise-statement.h": {
+          "bytes": 186,
+          "sha256": "07516f951806c4a0b7c5ebde3b5993ab8d9e4c59569be78dcc4009ddf4823499"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/static-local-once.x",
+      "exit": 0,
+      "files": {
+        "static-local-once.c": {
+          "bytes": 11853,
+          "sha256": "f34cf3377c16ae76c76391c56687fa25094b649c369f521cfd84cb396e958c30"
+        },
+        "static-local-once.h": {
+          "bytes": 186,
+          "sha256": "fc502ecb1992da04ac7883d92f8cd36c637b8de6bdc8adc4f7973565edcf2886"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/static-local-retry-address.x",
+      "exit": 0,
+      "files": {
+        "static-local-retry-address.c": {
+          "bytes": 3741,
+          "sha256": "5e2864bf8563e9b1c63eb4e06ed768951b38a052f3d91bf8fa70a0f0bfdb587a"
+        },
+        "static-local-retry-address.h": {
+          "bytes": 186,
+          "sha256": "659bae651a7b29c50a8da313e8a5fd22dc6f04697b0c9723d4741e15d9216244"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/static-local-threads.x",
+      "exit": 0,
+      "files": {
+        "static-local-threads.c": {
+          "bytes": 6962,
+          "sha256": "cb9a4926b28c923c6c4515045f5a50a2f2de54f5cddf2a038ff61b09097b1f90"
+        },
+        "static-local-threads.h": {
+          "bytes": 207,
+          "sha256": "c2831c65abe748db346920a1ec4d16c9df7e00b97383a4037c8a790c77a8dab1"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/unresolved-cleanup-return.x",
+      "exit": 0,
+      "files": {
+        "unresolved-cleanup-return.c": {
+          "bytes": 1174,
+          "sha256": "526da934213c39a4e7a964bdc651bd80f2ee115fa6554ca2d33b39026720412d"
+        },
+        "unresolved-cleanup-return.h": {
+          "bytes": 238,
+          "sha256": "4b14556834d440e304dbaf984689df3d733217e43be81de6e6678432c7f12929"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/var-matmul-numeric.x",
+      "exit": 0,
+      "files": {
+        "var-matmul-numeric.c": {
+          "bytes": 1703,
+          "sha256": "25c644ed87b81dc8230c252ed6158dfb59abba2c1970da756483c4527ac254cd"
+        },
+        "var-matmul-numeric.h": {
+          "bytes": 186,
+          "sha256": "270c8700e31254d972d4ba211a6d4499651c2bddc5f0850225240cfcb39f09af"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/var-numeric-lowering.x",
+      "exit": 0,
+      "files": {
+        "var-numeric-lowering.c": {
+          "bytes": 5892,
+          "sha256": "6b8557b17d3505210de574bc84b7f49f751baded5a42cd493c4f9c7778a87787"
+        },
+        "var-numeric-lowering.h": {
+          "bytes": 312,
+          "sha256": "e277facfb5fda23b423c18024c697d71b2034c00cc69fb2fd10d0fe119fde6ff"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/volatile-destructure.x",
+      "exit": 0,
+      "files": {
+        "volatile-destructure.c": {
+          "bytes": 2104,
+          "sha256": "db7d5292b07bea572ce983575423ed2d63af9ad6015d4f7098d1382237f575db"
+        },
+        "volatile-destructure.h": {
+          "bytes": 186,
+          "sha256": "3e8c78efcad78f5da701fcb4cd32f44667c156b615b3cf1c3451e4feed14b109"
+        }
+      }
+    },
+    {
+      "source": "unittest/compiler-fixtures/volatile-indirect-write.x",
+      "exit": 0,
+      "files": {
+        "volatile-indirect-write.c": {
+          "bytes": 2550,
+          "sha256": "4e5932e8cdcc7984499b6f100fa94a3044af839100f4a0234b7c1ed47cc52a51"
+        },
+        "volatile-indirect-write.h": {
+          "bytes": 236,
+          "sha256": "c18700cbc823535ac1b0d96b878a902005200c9b05282f3c87c4a7fdac533883"
+        }
+      }
+    },
+    {
+      "source": "src/transform.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "src/emit.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "src/expressions.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "src/generate.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "src/parse.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "src/type.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "lib/tokenizer.x",
+      "exit": 1,
+      "files": {},
+      "mode": "default"
+    },
+    {
+      "source": "unittest/benchmarks/exception-hot-paths.x",
+      "exit": 0,
+      "files": {
+        "exception-hot-paths.c": {
+          "bytes": 8033,
+          "sha256": "4d654efb362e05180b066cf105bbfbb934c9cb53a14487328a8fb0b73ed4267b"
+        },
+        "exception-hot-paths.h": {
+          "bytes": 224,
+          "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+        }
+      },
+      "mode": "default"
+    },
+    {
+      "source": "src/transform.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "src/emit.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "src/expressions.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "src/generate.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "src/parse.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "src/type.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "lib/tokenizer.x",
+      "exit": 1,
+      "files": {},
+      "mode": "live"
+    },
+    {
+      "source": "unittest/benchmarks/exception-hot-paths.x",
+      "exit": 0,
+      "files": {
+        "exception-hot-paths.c": {
+          "bytes": 8033,
+          "sha256": "4d654efb362e05180b066cf105bbfbb934c9cb53a14487328a8fb0b73ed4267b"
+        },
+        "exception-hot-paths.h": {
+          "bytes": 224,
+          "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+        }
+      },
+      "mode": "live"
+    }
+  ]
+}

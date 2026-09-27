@@ -1,0 +1,9 @@
+.context/grammar-spike/decl-as-parameters-fails.x:4:24: parse: macro hole 'parameters' has ambiguous kind
+    static $result $name($parameters...) { return $target($arguments); }
+                         ^
+  note: first: Decl also: Type
+
+.context/grammar-spike/decl-as-parameters-fails.x:7:1: parse: expected syntax
+  $forward(int, forwarded, twice, 3, int x, int y);
+  ^
+

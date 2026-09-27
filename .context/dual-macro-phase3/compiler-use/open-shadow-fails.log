@@ -1,0 +1,6 @@
+  Translate 1 x2c file in 73 ms
+/tmp/dual-compiled-open-build/gen/probe-72e7025e/probe.c:20:31: error: called object type 'int' is not a function or function pointer
+   20 |     if(! _compiler_open_target(sigsetjmp(_x2c_exception_frame_0.env, 0))){
+      |          ~~~~~~~~~~~~~~~~~~~~~^
+1 error generated.
+x2c: compile failed with status 1

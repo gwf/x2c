@@ -1,0 +1,65 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -2350,6 +2350,11 @@
+   if (head == <string>) return c.match_pattern_value(second);
+   String converter = head == <call>
+                    ? _match_pattern_converter_name(second) : NULL;
++  if (converter == "_macro_case_pattern")
++    match (third) case %(args ?template ?names ?capture): {
++      List labels = c.match_pattern_value(names);
++      return %(!and x2c-dyn @labels);
++    }
+   if (converter == "Macro_pattern")
+     match (third) case %(args ?template ?names): {
+       List labels = c.match_pattern_value(names);
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -4456,9 +4456,12 @@
+   }
+   c.expect(<)>);
+   List labels = c.cache_literal_list(names.list_free());
+-  List callee = c.resolve_expression(%(expr () (ident "Macro_pattern")), saved);
++  List callee = c.resolve_expression(
++    %(expr () (ident "_macro_case_pattern")), saved);
++  List capture = c.resolve_expression(
++    %(expr () (ident "_macro_capture")), saved);
+   return c.resolve_expression(
+-    %(expr ("List") (call $callee (args $expression $labels))), saved);
++    %(expr ("List") (call $callee (args $expression $labels $capture))), saved);
+ }
+ 
+ /* Isolated value closure: capture data-valued Macro parameters at creation. */
+@@ -4468,8 +4471,7 @@
+   List rows = %(expr ("List") (nil));
+   int captured = 0;
+   foreach (List binding, definition.assoc(<captures>).list()) {
+-    Type type = NULL;
+-    (void) c.sym.lookup(%(${binding_identity_spelling(binding)}), type);
++    Type type = c.semantic_binding_facts()[%(type $binding)];
+     if (type !== %("Macro")) continue;
+     List identity = c.cache_literal_list(binding);
+     List value = c.resolve_expression(%(expr $type (ident $binding)), c.token);
+--- a/src/emit.x
++++ b/src/emit.x
+@@ -605,6 +605,21 @@
+           @body $closing));
+     }
+     else {
++      List macro_capture = NULL;
++      match (pattern_ast) {
++        case %(expr ? (call (expr ? (ident (binding ? "_macro_case_pattern")))
++          (args ?template ?names ?capture))): {
++          macro_capture = %(@{e._emit(capture)} "(_x2c_match_expr,"
++            @{e._emit(template)} "," @{e._emit(names)} ","
++            "&_x2c_match_capture)");
++        }
++      }
++      if (macro_capture) {
++        List declarations = _make_local_binders(binders, "_x2c_match_values");
++        values.push(%("if (" @macro_capture ") {" @declarations @body
++          @implicit_break "}"));
++        continue;
++      }
+       int static_pattern = match_value_is_static(value);
+       String site_name = static_pattern
+                        ? e.fresh_name("match_site")
