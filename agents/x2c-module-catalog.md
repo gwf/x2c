@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 35
-- Runtime modules: 57
+- Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -790,6 +790,14 @@ Public functions:
 `lisp_cadar`, `lisp_caddr`, `lisp_cdaar`, `lisp_cdadr`, `lisp_cddar`,
 `lisp_cdddr`, `lisp_match`, `lisp_bound`, `lisp_search_replace`, `lisp_binder`,
 `lisp_binders`, `lisp_binder_lets`, `lisp_string_append_all`
+
+### [lib/lisp-targets.x](../lib/lisp-targets.x)
+
+evaluator targets of the optional pure modules.
+
+Public functions:
+
+`lisp_optional_native_targets`
 
 ### [lib/lisp.x](../lib/lisp.x)
 
