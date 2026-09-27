@@ -129,7 +129,7 @@ static void _exercise(ReplSession s) {
   _expect(s, "int n=0;", <executed>, void);
   _expect(s, "int next(void) { n+=1; return n; }", <defined>, void);
   _completion(s, "ne", "next", NULL);
-  _expect(s, "int bad=next(), second=[][3];", <failed>, void);
+  _expect(s, "int bad=next(), second=1/0;", <failed>, void);
   _completion(s, "ba", NULL, "bad");
   _symbols(s, %((value "n") (function "next")));
   if (s.inspect("bad") || s.inspect("second") || s.inspect("f") ||
@@ -148,13 +148,13 @@ static void _exercise(ReplSession s) {
   _expect(s, "n;", <value>, 2);
   _expect(s, "n+=3;", <executed>, void);
   _expect(s, "n;", <value>, 5);
-  _expect(s, "int rejected(void) { return missing_c_function(); }",
+  _expect(s, "int rejected(void) { goto end; end: return 0; }",
           <rejected>, void);
   _expect(s, "int twice(int x) { return 99; }", <rejected>, void);
   _symbols(s, %((value "bad") (value "n") (function "next")
                (value "second") (function "twice")));
   if (s.inspect("rejected")) {
-    fputs("inspection published a function that failed staging\n", stderr);
+    fputs("inspection published a function that failed lowering\n", stderr);
     failures++;
   }
 }
@@ -165,13 +165,14 @@ static void _retained_results(ReplSession s) {
   String inspected = entry.repr(), published = symbols.repr();
   int matched = 0;
   match (entry) {
-    case %(function (typed ?syntax)):
+    case %(function (typed ?syntax) (lowered ?forms)):
       matched = definition.status == <defined> &&
                 syntax.repr() == definition.syntax.repr() &&
-                s.lowered("wide").contains("wide(void)");
+                forms.repr() == definition.lowered.repr() &&
+                syntax.repr() != forms.repr();
   }
   if (!matched) {
-    fputs("named inspection lost typed AST or staged C\n", stderr);
+    fputs("named inspection lost typed AST or lowered Lisp\n", stderr);
     failures++;
   }
   _expect(s, "Func capture(int x) { return %!(int y) => x+y; }",
@@ -185,7 +186,7 @@ static void _retained_results(ReplSession s) {
   _expect(s, "kept.push(17);", <value>, 17);
   array = s.submit("kept;");
   ReplResult bad = s.submit("int broken = ;");
-  String syntax = wide.syntax.repr();
+  String syntax = wide.syntax.repr(), lowered = wide.lowered.repr();
   String diagnostic = bad.diagnostics.repr();
   for (int i = 0; i < 200; i++) {
     _expect(s, "n+=1;", <executed>, void);
@@ -194,9 +195,9 @@ static void _retained_results(ReplSession s) {
   }
   _expect(s, "wide();", <value>, 5000000000L);
   if (wide.value != 5000000000L || wide.syntax.repr() != syntax ||
-      bad.diagnostics.repr() != diagnostic ||
+      wide.lowered.repr() != lowered || bad.diagnostics.repr() != diagnostic ||
       bad.source != "int broken = ;" || array.value.array()[0] != 17 ||
-      s.compiler.macro_lisp.apply(closure.value, %(5)) != 12 ||
+      s.evaluator.apply(closure.value, %(5)) != 12 ||
       s.inspect("wide").repr() != inspected || entry.repr() != inspected ||
       symbols.repr() != published || s.inspect("incomplete") ||
       s.inspect("invalid") || s.inspect("broken")) {
@@ -240,6 +241,59 @@ static void _meta_records(ReplSession session) {
   _expect(session, "recovered_type();", <value>, 9);
 }
 
+static void _interpreter_ownership(ReplSession s) {
+  _expect(s,
+    "int trouble(void) { struct { int x; } p={1}; "
+    "goto end; end: return p.x; }", <rejected>, void);
+  _expect(s,
+    "int trouble(void) { struct { int x; int y; } p={2,3}; return p.y; }",
+    <defined>, void);
+  _expect(s, "trouble();", <value>, 3);
+  Var value;
+  if (s.compiler.macro_lisp.try_get("C._globals", value) ||
+      s.compiler.macro_lisp.try_get("wide", value)) {
+    fputs("interpreter definitions leaked into compiler Lisp\n", stderr);
+    failures++;
+  }
+  s.compiler.macro_lisp.set_global("__isolation", 41);
+  s.evaluator.set_global("__isolation", 7);
+  if (s.compiler.macro_lisp.eval_string("__isolation") != 41 ||
+      s.evaluator.eval_string("__isolation") != 7) {
+    fputs("interpreter and compiler globals are shared\n", stderr);
+    failures++;
+  }
+  _expect(s,
+    "struct ReplPoint make_point(int n) { "
+    "struct ReplPoint p={n}; return p; }", <defined>, void);
+  _expect(s, "struct ReplPoint returned=make_point(23);", <executed>, void);
+  _expect(s,
+    "int storage_failure(void) { struct ReplPoint p={9}; "
+    "int *q=&p.x; return *q/0; }", <defined>, void);
+  for (int i = 0; i < 20; i++) {
+    _expect(s, "storage_failure();", <failed>, void);
+    _expect(s, "make_point(99).x;", <value>, 99);
+    if (s.evaluator.automatic_storage() != s.evaluator.storage() ||
+        s.evaluator.result_storage() != s.evaluator.storage()) {
+      fputs("failed source activation left storage owners active\n", stderr);
+      failures++;
+    }
+  }
+  _expect(s, "returned.x;", <value>, 23);
+  s.evaluator.eval_string(
+    "(defun budget_loop (n) (if (= n 0) 7 "
+    "(C.unwind (lambda () (budget_loop (- n 1))) (lambda () 0) nil)))");
+  s.evaluator.call_budget(20);
+  int exhausted = 0;
+  try s.evaluator.eval_string("(budget_loop 40)");
+  catch %(call-stack (operation "apply") (why "steps")): exhausted = 1;
+  s.evaluator.call_budget(1000000);
+  if (!exhausted) {
+    fputs("nested callback renewed the evaluation budget\n", stderr);
+    failures++;
+  }
+  _expect(s, "returned.x;", <value>, 23);
+}
+
 static void _completion_does_not_publish_meta(ReplSession session) {
   Compiler compiler = session.compiler;
   size_t values = compiler.meta_group.len();
@@ -276,7 +330,9 @@ int main(int argc, char **argv) {
         _exercise(session);
         _retained_results(session);
         _meta_records(session);
+        _interpreter_ownership(session);
         _completion_does_not_publish_meta(session);
+        session.close();
       }
       unit.close();
       ScopeStats stats = Scope.stats();

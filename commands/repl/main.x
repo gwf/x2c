@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   List args = Args.from_argv(argc, argv);
   List spec = %(
     (-h --help (help "Show this help"))
-    (--dump (help "Print the typed AST"))
+    (--dump (help "Print typed AST and lowered Lisp"))
     (--stats (help "Print runtime statistics at exit"))
     (--verbose-stats (help "Print detailed statistics at exit"))
     (--native-module (value file) repeated

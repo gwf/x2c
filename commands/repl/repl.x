@@ -36,7 +36,7 @@ static const struct ReplCommand _commands[] = {
     <none>, <symbols> },
   { ":ast", ":ast NAME", "Show a session function's typed AST.",
     <function>, <ast> },
-  { ":lowered", ":lowered NAME", "Show a session function's staged C.",
+  { ":lowered", ":lowered NAME", "Show a session function's lowered Lisp.",
     <function>, <lowered> },
   { ":cancel", ":cancel", "Discard incomplete input.", <none>, <cancel> },
   { ":quit", ":quit", "Leave the session.", <none>, <quit> }
@@ -265,12 +265,10 @@ static int _inspect(
     }
     String name = words[1];
     match (session.inspect(name)) {
-      case %(function (typed ?syntax)): {
-        String code = session.lowered(name);
+      case %(function (typed ?syntax) (lowered ?forms)): {
         if (descriptor->dispatch == <ast>)
           printf("typed: %%%s\n", syntax.repr());
-        else if (code) printf("%s\n", code);
-        else break;
+        else printf("lowered: %s\n", forms.repr());
         return 1;
       }
     }
@@ -294,6 +292,7 @@ int repl_run(CliRequest request, ReplOptions options) {
     return 1;
   }
   ReplSession session = ReplSession.new(unit.compiler);
+  defer session.close();
   ReplInput input = ReplInput.new();
   defer input.close();
   String pending = "", line;
@@ -355,6 +354,8 @@ int repl_run(CliRequest request, ReplOptions options) {
     ReplResult result = session.submit(pending);
     if (options.dump && result.syntax)
       fprintf(stderr, "typed: %%%s\n", result.syntax.repr());
+    if (options.dump && result.lowered)
+      fprintf(stderr, "lowered: %s\n", result.lowered.repr());
     $let(unit.compiler.text, result.source) {
       foreach (Var entry, result.diagnostics)
         unit.compiler.print_diagnostic(entry);

@@ -2,12 +2,9 @@
 
 `x2c repl` is a shipped external command that evaluates a supported subset
 of x2c in a persistent session.
-Each submission that defines or runs code is compiled into its own native
-module, loaded into the REPL process, and called. The module reaches earlier
-functions and values at their addresses in the modules that define them, so
-its cost does not grow with the session. The C compiler runs once per new
-submission, typically 50-150 ms plus the host's first load of a new module;
-a submission identical to one compiled before loads from the module cache.
+The command lowers the compiler's typed syntax to ordinary Lisp and runs it
+in its own evaluator session. Compiler macros continue to use native meta
+compilation and helper execution.
 
 ```sh
 x2c repl
@@ -58,7 +55,7 @@ current grammar role filters that namespace: type positions offer types and
 type-producing macros, expression positions offer values and callable forms,
 and statement, block, and submission starts offer their legal union plus
 contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
-`finally` where each is legal. Fields and methods remain
+`finally` where each is legal. Fields and evaluator-callable methods remain
 available on a typed receiver. At a blank primary prompt completion also
 offers colon commands, grouped with keywords, session names, types, and other
 callables. Unsupported REPL declarations and imports are not suggested.
@@ -88,13 +85,14 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
-| `:lowered plus` | Show the C that the staging of `plus` emitted. |
+| `:lowered plus` | Show the Lisp forms used to execute `plus`. |
 | `:cancel` | Discard incomplete input. |
 | `:quit` | Exit, discarding incomplete input. |
 
 For the example above, `:symbols` prints the list template
 `%((function "plus") (value "total"))`. Typed AST output begins with
-`typed: %(`; `:lowered` prints C. Inspection does not execute the function, and earlier functions remain inspectable after
+`typed: %(`; lowered Lisp is separately labeled `lowered:`. Inspection does
+not execute the function, and earlier functions remain inspectable after
 later submissions. Values have symbol entries but no function AST.
 
 Help and inspection commands preserve incomplete input, including when a
@@ -102,20 +100,18 @@ command reports an error. Colon commands are recognized on separate lines
 even inside an incomplete string or comment. Missing names, extra arguments,
 and unknown commands report errors.
 
-`--dump` prints each available typed AST to standard error. `--stats` prints the concise runtime report at exit, to standard error.
+`--dump` prints each available typed AST and lowered Lisp form to standard
+error. `--stats` prints the concise runtime report at exit, to standard error.
 `--verbose-stats` prints the detailed report and implies exit reporting; when
 both statistics options are present, one verbose report is printed. The
 options can be combined with `--dump`.
 
 The report separates absolute live or retained quantities from activity since
-the REPL opened. Scope allocation objects and live requested bytes
-are process-wide runtime values; requested bytes count public managed payload,
-not allocator metadata. `requested-traffic-bytes` remains cumulative activity.
-Pool active and depot bytes partition retained backing capacity; they are not
-reachable payload. Scope and Pool figures overlap and must not be
-summed. x2c has no garbage collector, so reuse and promotion counters are
-activity rather than collection counts. Verbose reports add Scope creation
-and peak data and Pool traffic and capacity detail.
+the REPL opened. Scope allocation objects and live requested bytes are
+process-wide runtime values; requested bytes count public managed payload.
+Pool active and depot bytes partition retained backing capacity. Scope and
+Pool figures overlap and must not be summed. Verbose reports add Scope and
+Pool traffic and capacity details. There is no Lisp wordcode or AUTO tier.
 
 ## Supported subset
 
@@ -125,7 +121,7 @@ definitions, integer arithmetic and narrowing, assignment, conditionals,
 and length, List literals and indexing, and Array construction, mutation,
 and indexing are exercised by the focused checks.
 
-The runtime exposes the fixed-signature
+The whole interpreter exposes the fixed-signature
 `String.format(String fmt, List values)` operation. Call it as
 `fmt.format(values)`:
 
@@ -157,16 +153,22 @@ Redefinition is disabled; assign to an existing variable to change its value.
 Function replacement and mutually recursive forward declarations are not
 supported. Names beginning `__repl_` are reserved.
 
-Arbitrary C libraries, unions, enums, arrays as values, imports, protocols, user macro/meta definitions, preprocessor
+Arbitrary C libraries, unions, enums, imports, protocols, user macro/meta
+definitions, preprocessor
 directives, and direct Lisp input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with
-`--native-module`, callable from compile-time Lisp in the session. Variables need
+`--native-module`, callable in the session. Variables need
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
-Function-local `static`, `extern`, and `threaded` storage are also rejected.
-A submission whose C does not compile is rejected with the C compiler's
-diagnostics. A final expression whose type has no `Var` form cannot be
-displayed.
+Function-local `static`, `extern`, and `threaded` storage are also rejected:
+the evaluator cannot provide their native lifetime or linkage semantics.
+Records, typedefs, addressed locals and pointer reads/writes use native
+storage with layouts derived from compiler types. Record assignment copies
+into existing storage, preserving pointers to its fields. Other constructs
+depend on the existing lowering and may be declined. Full
+native execution and reference/lifecycle parity are not established; for
+example, the evaluator loses the distinction between `Var void` and an
+empty List.
 
 ## Failure and lifetime
 
@@ -178,15 +180,9 @@ remain, both for failed initialization and failed statements.
 
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
-Long sessions do not have a bounded-memory guarantee. Loaded modules stay
-loaded; each function and value lives in the module that defined it.
-Submissions run as native code in the REPL process. A crash in a
-submission, such as a null dereference or a runaway recursion, fails the
-submission with `crash` and returns to the prompt. The first Ctrl-C during a
-submission only prints a note, because stopping code inside the allocator or
-a runtime lock could deadlock the session; a second Ctrl-C fails the
-submission with `interrupt`. Effects the submission made before it stopped
-remain, and after a crash or interrupt the session may be inconsistent.
+Long sessions do not have a bounded-memory guarantee. A one-million-step
+Lisp call budget interrupts runaway interpreted evaluation; native callbacks
+are not a preemptible sandbox.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
@@ -197,5 +193,6 @@ During interactive editing, Ctrl-C clears both the current edit buffer and any
 pending incomplete submission, then returns to the `x2c> ` prompt without a
 diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
 still makes that exit status 1. Terminal canonical mode is restored before a
-submission runs, so Ctrl-C during evaluation interrupts the submission. Terminals without the required escape-sequence support use the basic
+submission runs, so Ctrl-C during evaluation continues to terminate the
+process. Terminals without the required escape-sequence support use the basic
 line reader instead. Piped input retains the same output and exit behavior.

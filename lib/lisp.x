@@ -187,6 +187,7 @@ struct Lisp {
      never frees evaluator bindings or session state, which name `scope`
      explicitly. */
   Scope user;
+  Scope *automatic_owner, *result_owner;
   /* A session may read a parent's globals, reserved names and special
      forms. The parent holds definitions built once, before any child
      exists, and a child holds only its own, so a name the child defines
@@ -227,7 +228,7 @@ typedef struct Lambda {
   List params;
   Var body;
   Map captures;
-  int macro;
+  int macro, source_function;
 } *Lambda;
 
 $(import "var-adapters.xmacro") $var.pointer(Lambda, lambda, <lambda>);
@@ -1457,6 +1458,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   lambda.body = body;
   $scope(&lisp.scope) lambda.captures = {};
   lambda.macro = macro;
+  lambda.source_function = 0;
   _capture(lisp, env, lambda.params, lambda.body, lambda.captures);
   return result = lambda;
 }
@@ -1492,6 +1494,19 @@ static Var _run_frame(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = {}; }
+  /* A lowered source function owns its automatic storage in this frame. A
+     record it returns is copied into its caller's storage before the frame
+     ends. */
+  Scope *caller_owner = lisp.automatic_owner;
+  Scope *caller_result_owner = lisp.result_owner;
+  defer if (lambda.source_function) {
+    lisp.automatic_owner = caller_owner;
+    lisp.result_owner = caller_result_owner;
+  }
+  if (lambda.source_function) {
+    lisp.result_owner = caller_owner;
+    lisp.automatic_owner = &frame;
+  }
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding
      cannot change what the body reads. */
@@ -1519,6 +1534,7 @@ static Var _run_frame(
     local.values = values;
     local.value_count = count;
   }
+  if (lambda.source_function) return _eval(lisp, lambda.body, &local);
   return _eval_tail(lisp, lambda.body, &local);
 }
 
@@ -1575,6 +1591,7 @@ static Var _eval_tail(Lisp lisp, Var expression, LispEnv *env) {
       return _apply(lisp, callable, raw, env);
     }
     Lambda lambda = callable;
+    if (lambda.source_function) return _apply_lambda(lisp, lambda, raw, env);
     if (lambda.macro) {
       expression = _call_lambda(lisp, lambda, raw);
       continue;
@@ -1840,10 +1857,11 @@ static void _install_specials(Lisp lisp) {
   }
 }
 
-/* Opens one budget. Only a public entry does this: a call that runs out
+/* Opens one budget for an outer entry: a call that runs out
    raises, and whoever catches that raise continues under the same exhausted
    budget rather than a fresh one, so one runaway reports once. */
 static void _open_call_budget(Lisp lisp) {
+  if (lisp.call_depth) return;
   lisp.call_steps = 0;
   lisp.call_exhausted = 0;
 }
@@ -1979,6 +1997,26 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
 
   Scope.move(function, &lisp.scope);
   lisp.set_global(name, function);
+}
+
+/** Borrows the session executing the current native Lisp callback. */
+Lisp Lisp.active(void) => lisp_active;
+/** Borrows the storage owner for callback state retained by this session. */
+Scope *Lisp.storage(Lisp lisp) => &lisp.scope;
+/** Borrows the current lowered source activation's automatic storage. */
+Scope *Lisp.automatic_storage(Lisp lisp) =>
+  lisp.automatic_owner ? lisp.automatic_owner : &lisp.scope;
+/** Borrows the caller's storage for a lowered record result. */
+Scope *Lisp.result_storage(Lisp lisp) =>
+  lisp.result_owner ? lisp.result_owner : &lisp.scope;
+
+/** Marks the actual Lambda installed for one lowered source function. */
+Var lisp_source_function(Var callable) {
+  if (callable is not <lambda>)
+    raise %(bad-types (operation "lisp_source_function")
+                     (want "Lambda") (actual ${callable.kind()}));
+  ((Lambda) callable).source_function = 1;
+  return callable;
 }
 
 /** Ends the owned lifetime when a managed local leaves its block. */
