@@ -44,6 +44,12 @@ execution.
 
 ### Current work
 
+- [Macro capture-role consolidation](macro-capture-role-consolidation.md):
+  not yet started; waits for meta-integration to land on dev.
+- [Dual macro core support](dual-macro-core-support.md): not yet started;
+  waits for capture consolidation; retains all old lowerings through bootstrap.
+- [Try template migration](dual-macro-try-migration.md): not yet started;
+  waits for core support and its bootstrap refresh.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
   function runs natively through a cached project helper; implemented on
   `meta-integration` and not yet on `dev`.
@@ -81,6 +87,10 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Reference audits
 
+- [Compiler dual-macro contract](compiler-dual-macro-contract.md): reference;
+  completed research on `codex/compiler-dual-macro-spike` at `1e2d5607`.
+  Evidence remains on that branch; the production work plans above are the
+  hand-off. Never merge the research branch's compiler snapshots.
 - [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
   cleanup candidates with paired source ranges and deletion boundaries.
 - [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,
