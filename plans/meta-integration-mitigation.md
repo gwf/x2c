@@ -1,24 +1,18 @@
 # Meta-integration mitigation
 
-> Status: active - 2026-09-27. Repairs the confirmed findings of the
-> expanded review of `meta-integration` at 1b23aaa7 (compared with `dev`
-> at 472255ed). Work lands on `origin/meta-integration`; merging that
-> branch into `dev` waits for this plan, a final-tree gate, and a quiet
-> performance checkpoint. Opacity enforcement of project-meta results is
-> withdrawn by Gary and is not part of this work.
+> Status: active - 2026-09-27. The review findings R1-R12 and the
+> documentation items are repaired on `origin/meta-integration` at 4bb59cc3.
+> `agent-pr-check` is green there, and CI `check.yml` with release
+> validation and the Windows probe passes all 12 jobs (run 36342464030).
+> APE and Cosmopolitan were removed on the same branch
+> ([archive/remove-ape.md](archive/remove-ape.md)). Optional checks that
+> also failed on `dev` were repaired; see "Optional checks" below. Opacity
+> enforcement of project-meta results is withdrawn by Gary.
 >
-> Delivered 2026-09-27: R1-R12 and G are on `origin/meta-integration` at
-> 057349e9 with `agent-pr-check` green. Performance checkpoint on a loaded
-> host (load average about 10): against `dev`, compiler benchmarks are
-> 10-17% faster and stage 3 is about 15% slower; the stage 3 cost was
-> already present at 1b23aaa7. Build cost scores (dev 101.1, 1b23aaa7
-> 94.5, candidate 109.8 and 106.6) disagreed, so translator and C compiler
-> cycles were counted directly in alternating builds: 25.8G/3.7G at
-> 1b23aaa7 and 25.7G/3.7G at the candidate. The batch adds no measurable
-> build cost. Open before merging into `dev`: Gary's decision on the
-> stage 3 cost. Follow-ups outside this plan: two units including one
-> header that imports meta definitions, `meta` definitions shared through
-> an included `.x` header, and retiring `meta native`.
+> Open before merging into `dev`: Gary's decision on the stage 3 build
+> time (about 15% slower than `dev` on a loaded host; already present at
+> 1b23aaa7, and the mitigation adds no measurable build cost). The
+> follow-ups listed below do not block the merge.
 
 ## Goal
 
@@ -119,12 +113,63 @@ it, falling back to a conservative bound. Reproducer:
 - S10: generated `src/linked-meta.x` counts as generated output in gate
   source-change detection, like `lib/x2c.x`.
 
-## Deferred
+## Optional checks
 
-The `stage.x`/`repl-lower.x` text decoding duplicate, helper builders
-repeated from `lib/meta.x`, and the textual scanner in
-`tools/gen-linked-meta.sh` remain review subjects. They cause no
-reproduced defect and are outside this repair.
+Every check below failed on `dev` at 472255ed and passes on the branch.
+
+- The sanitizer script and the termbox2 test rule link `match-recursive`;
+  `unittest/test-var.x` destroys its Lisp session (Linux leak check).
+- `<errno>` Symbols are quoted as `<"errno">` in `src/` and four unit
+  tests, because CPP symbol mode expanded glibc's `errno` macro.
+- The CLI boundary probe compiles its no-`PATH` case to an object.
+- Compile-time floating results are spelled by `_meta_hex_float` in
+  `src/stage.x` instead of host-dependent `%La`.
+- `lib/lisp.x` no longer exposes `json.x` and `diff.x` to every unit; their
+  native targets moved to the optional `lib/lisp-targets.x`. `process.x`
+  is included privately. This repaired yyjson, libcurl, and the
+  `mandelbrot` example.
+- `tools/check-doc-examples` finds headers under symlinked package `deps`.
+
+## Follow-ups
+
+None blocks the merge into `dev`.
+
+- **Header import replay.** A cached header replays its declarations but
+  not its `$(import ...)` effects. The R3 repair works around this by
+  forgetting collection-cache entries after the helper build, which two
+  unrelated edits broke on a cold cache. Replaying imports would remove
+  that workaround and the `slot` flag in `_evaluate_meta_value`, and would
+  fix two units that include one bridging header (also failing on `dev`).
+- **`meta` functions shared through an included `.x` header.** They are
+  not installed in the including unit, on `dev` as well. Sharing requires
+  a `.xmacro` today. Fixing it follows from the replay repair.
+- **Retire `meta native`.** With every `meta` body native, the marker only
+  selects the compiler's linked copy. The linked-copy hash check that
+  `src/linked-meta.x` applies to shipped `.xmacro` code could cover
+  `lib/` too, leaving the bodyless prototype for functions without an x2c
+  body.
+- **Private includes reach includers.** A `#pragma private` include
+  still replays into every unit that includes the module. `lib/lisp.x`
+  therefore still exposes `regex.x`, `typed-array.x`, and `typed-map.x`,
+  and `Job` from `process.x`, to x2c code. Changing the rule is a
+  language decision for Gary.
+- **C macro names in CPP symbol mode.** Quoting fixed only `errno`; any
+  Symbol whose name is a C macro can still be expanded.
+- **`Path.glob` and symlinked directories.** It does not descend into a
+  symlinked directory named by the pattern, unlike a shell glob.
+- **Compiler under ASan.** The sanitizer runs the runtime and unit tests,
+  not the compiler binary on meta fixtures.
+- **Stage 3 build time.** Measure `dev` and the branch on a quiet host and
+  find where the branch's build time goes.
+- **R5 archive distribution.** `make install` does not copy the
+  `<compiler>.extensions` archive, so an installed compiler built with
+  extensions cannot link them into its helper.
+- **R10 host flags.** `_meta_host_args` filters target flags by a deny
+  list; separate host and target inputs would remove the guess.
+- **Review duplicates.** The `stage.x`/`repl-lower.x` text decoding, the
+  helper builders repeated from `lib/meta.x`, and the textual scanner in
+  `tools/gen-linked-meta.sh` remain review subjects without a reproduced
+  defect.
 
 ## Delivery
 

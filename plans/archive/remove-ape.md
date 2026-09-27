@@ -1,9 +1,16 @@
+> Status: done - 2026-09-27, `origin/meta-integration` 71ce663a
+> (removal 5a001178). `src/bootstrap.x`, `x2c bootstrap`,
+> `etc/cosmopolitan/`, the APE targets and CI steps, and the payload
+> `support` mode are gone: .x source -470/+23. The stale generated
+> `bootstrap/src/bootstrap.[ch]` were removed by hand because
+> `bootstrap-refresh` copies over existing files without pruning.
+
 # Remove APE and Cosmopolitan
 
-> Status: active - 2026-09-27. Gary's decision: Cosmopolitan is no longer
-> supported by its authors, so x2c drops the APE build, the `x2c bootstrap`
-> command, and every Cosmopolitan path. Work lands on `meta-integration`
-> before the remaining optional checks are addressed.
+Gary's decision: Cosmopolitan is no longer supported by its authors, so
+x2c drops the APE build, the `x2c bootstrap` command, and every Cosmopolitan
+path. Work lands on `meta-integration` before the remaining optional checks
+are addressed.
 
 ## Goal
 
