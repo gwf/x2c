@@ -7,7 +7,13 @@
 
 #include "x2c.h"
 #include "compiler.h"
+String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
+
 void collect_forget_preload_entries(void);
+
+List collect_cached_paths(void);
+
+void collect_forget_entries_since(List before);
 
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, int included_only);
 

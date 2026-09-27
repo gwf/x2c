@@ -96,11 +96,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _12 = String_new("cannot lock ");
   _13 = String_new(".tmp.%ld");
   _14 = String_new("/proc/self/exe");
-  _15 = String_new("%016llx");
-  _16 = String_new("/");
-  _17 = String_new("/include/x2c");
-  _18 = String_new("/src");
-  _19 = String_new("/lib");
+  _15 = String_new("/");
+  _16 = String_new("/include/x2c");
+  _17 = String_new("/src");
+  _18 = String_new("/lib");
+  _19 = String_new("%016llx");
   _20 = String_new("x2c-module-stamp:");
   _21 = String_new("%08X");
   _22 = String_new("X2C_HOME");
@@ -214,7 +214,7 @@ String x2c_package_directory(List roots, String path){
       {
         String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_3), NULL)));
         if(! String_startswith(source, prefix)) continue;
-        String name = Var_string(List_car(String_split(String_remove_prefix(source, prefix), _16)));
+        String name = Var_string(List_car(String_split(String_remove_prefix(source, prefix), _15)));
         if(String_is_identifier(name) && ! String_equal(source, String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL))))) return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
       }
 
@@ -274,7 +274,7 @@ int String_rfind(String, String);
 int x2c_package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
   if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_4), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _16) + 1, -2147483648, 1);
+  String name = String_getslice(directory, String_rfind(directory, _15) + 1, -2147483648, 1);
   return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_3), cons(String_var(name), cons(String_var(_5), NULL))))));
 }
 
@@ -426,16 +426,12 @@ static String _executable(const char * argv0){
     return String_new(buffer);
   }
   String name = String_new(argv0);
-  if(String_truth(name) && ! String_contains(name, _16)) name = x2c_find_program(name);
+  if(String_truth(name) && ! String_contains(name, _15)) name = x2c_find_program(name);
   return Path_exists(name) ? Path_absolute(name) : NULL;
 }
 
 static String _identity(void){
-  String path = Path_exists(_34) ? _14 : x2c_executable_path;
-  int ok = path != NULL;
-  uint64_t hash = UINT64_C(1469598103934665603);
-  if(ok) hash = x2c_fnv_file(hash, path, &(ok));
-  return ok ? String_printf(_15, (unsigned long long) hash) : NULL;
+  return x2c_file_identity(Path_exists(_34) ? _14 : x2c_executable_path);
 }
 
 int Path_is_dir(Path);
@@ -450,7 +446,7 @@ static String _locate_home(Path p){
   if(! String_truth(p)) return NULL;
   Path directory = Path_is_dir(p) ? p : Path_dirname(p);
   while(! _is_home(directory)){
-    if(String_equal(directory, _16)) return NULL;
+    if(String_equal(directory, _15)) return NULL;
     directory = Path_dirname(directory);
   }
   return directory;
@@ -460,8 +456,8 @@ List cons(Var, List);
 
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
-  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_17), NULL)));
-  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_18), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_19), NULL)));
+  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_16), NULL)));
+  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_17), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_18), NULL)));
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
   x2c_repo_cpp_include_dirs = Path_is_dir(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }
@@ -494,6 +490,14 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok){
 String x2c_compiler_identity(void){
   if(! _init_guard_) _file_init_();
   return x2c_identity;
+}
+
+String x2c_file_identity(String path){
+  if(! _init_guard_) _file_init_();
+  int ok = path != NULL;
+  uint64_t hash = UINT64_C(1469598103934665603);
+  if(ok) hash = x2c_fnv_file(hash, path, &(ok));
+  return ok ? String_printf(_19, (unsigned long long) hash) : NULL;
 }
 
 String build_module_stamp(void){

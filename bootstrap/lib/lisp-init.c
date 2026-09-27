@@ -70,25 +70,55 @@ Var lisp_assoc(Var key, Var pairs){
   return List_var(NULL);
 }
 
+List cons(Var, List);
+
+int List_try_next(List, List *, Var *);
+
 List Var_cons(Var, List);
 
 List Var_list(Var);
 
 static Var _append2(Var left, Var right){
-  if(_nil(left)) return right;
-  return List_var(Var_cons(lisp_car(left), Var_list(_append2(lisp_cdr(left), right))));
+  List items = NULL;
+  for(;  ! _nil(left);  left = lisp_cdr(left)) items = cons(lisp_car(left), items);
+  {
+    Var value;
+    List _x2c_macro_object_0 = items;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      value = _x2c_macro_cursor_output_0;
+      right = List_var(Var_cons(value, Var_list(right)));
+    }
+
+  }
+  return right;
 }
 
 int List_truth(List);
 
-List List_cdr(List);
+List List_reverse(List);
 
 Var List_car(List);
 
+List List_cdr(List);
+
 Var lisp_append(List lists){
   if(! List_truth(lists)) return List_var(NULL);
-  if(! List_truth(List_cdr(lists))) return List_car(lists);
-  return _append2(List_car(lists), lisp_append(List_cdr(lists)));
+  List reversed = List_reverse(lists);
+  Var result = List_car(reversed);
+  {
+    Var left;
+    List _x2c_macro_object_1 = List_cdr(reversed);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      left = _x2c_macro_cursor_output_1;
+      result = _append2(left, result);
+    }
+
+  }
+  return result;
 }
 
 Var lisp_not(Var value){
@@ -216,8 +246,6 @@ Var lisp_binders(Var pat){
   return _binder_parts(pat);
 }
 
-List cons(Var, List);
-
 Atom Atom_intern(String);
 
 Var lisp_binder_lets(Var bindings, Var binders){
@@ -231,8 +259,6 @@ Var lisp_binder_lets(Var bindings, Var binders){
 
 Var String_var(String);
 
-int List_try_next(List, List *, Var *);
-
 Var lisp_string_append(String, String);
 
 String Var_string(Var);
@@ -241,11 +267,11 @@ Var lisp_string_append_all(List strings){
   Var text = String_var(0);
   {
     Var s;
-    List _x2c_macro_object_0 = strings;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      s = _x2c_macro_cursor_output_0;
+    List _x2c_macro_object_2 = strings;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      s = _x2c_macro_cursor_output_2;
       text = lisp_string_append(Var_string(text), Var_string(s));
     }
 

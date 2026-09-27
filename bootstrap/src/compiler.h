@@ -71,7 +71,7 @@ typedef struct Compiler{
   Array early_decls;
   int prelude;
   Array meta_defs;
-  Map meta_comptime, meta_regions, meta_hashes;
+  Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   Map native_meta;
   Array unit_nodes, meta_group;
   Map meta_group_bound;

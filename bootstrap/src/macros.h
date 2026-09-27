@@ -135,6 +135,8 @@ void x2c_register_extension(const char * name, Map(* targets)(void));
 
 int Compiler_links_extension(String name);
 
+String Compiler_extension_archive(void);
+
 void Compiler_select_package_module(Compiler c, String name, String root, Token token);
 
 void Compiler_select_native_modules(List paths);
