@@ -151,7 +151,7 @@ int main(void){
   }
   )) != 7 || value != 7) return 4;
   if(Var_int(({
-    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
+    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
       _x2c_func_argument_2
     }
     );
@@ -168,7 +168,7 @@ int main(void){
     );
   }
   )) != 3 || captured != 3 || Var_int(({
-    Func _x2c_func_call_4 = lambda;  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_4, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(NULL, _x2c_func_reference_type_4);  else _x2c_func_argument_4 = x2c_func_unrepresentable_argument(_x2c_func_call_4, 0, NULL);  Func_apply(_x2c_func_call_4, 1, (FuncArg[]){
+    Func _x2c_func_call_4 = lambda;  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_4, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(0, _x2c_func_reference_type_4);  else _x2c_func_argument_4 = x2c_func_unrepresentable_argument(_x2c_func_call_4, 0, NULL);  Func_apply(_x2c_func_call_4, 1, (FuncArg[]){
       _x2c_func_argument_4
     }
     );
@@ -192,7 +192,7 @@ int main(void){
     volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0))({
-      Func _x2c_func_call_5 = function;  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_5, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_5 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_5, 1, (FuncArg[]){
+      Func _x2c_func_call_5 = function;  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_5, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(0, 0);  else _x2c_func_argument_5 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_5, 1, (FuncArg[]){
         _x2c_func_argument_5
       }
       );

@@ -94,7 +94,7 @@ int exercise(int n){
   ));
   if(forward(NULL) != 0) return - 1;
   return result * 10 + Var_int(({
-    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
+    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
       _x2c_func_argument_2
     }
     );

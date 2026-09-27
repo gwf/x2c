@@ -107,28 +107,28 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   if(Var_integer(({
-    Func _x2c_func_call_0 = inline_direct();  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 2, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_0 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_0, 2, 1);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_1 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_0, 2, (FuncArg[]){
+    Func _x2c_func_call_0 = inline_direct();  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 2, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(0, 0);  else _x2c_func_argument_0 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_0, 2, 1);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(0, 0);  else _x2c_func_argument_1 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_0, 2, (FuncArg[]){
       _x2c_func_argument_0, _x2c_func_argument_1
     }
     );
   }
   )) != 42) return 1;
   if(Var_integer(({
-    Func _x2c_func_call_1 = inline_pointer(add);  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1, 2, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_2 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1, 2, 1);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_3 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_1, 2, (FuncArg[]){
+    Func _x2c_func_call_1 = inline_pointer(add);  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1, 2, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, 0);  else _x2c_func_argument_2 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1, 2, 1);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(0, 0);  else _x2c_func_argument_3 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_1, 2, (FuncArg[]){
       _x2c_func_argument_2, _x2c_func_argument_3
     }
     );
   }
   )) != 42) return 2;
   if(Var_integer(({
-    Func _x2c_func_call_2 = inline_noncapturing();  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_4 = FuncArg_value(int_var(41));  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
+    Func _x2c_func_call_2 = inline_noncapturing();  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(0, 0);  else _x2c_func_argument_4 = FuncArg_value(int_var(41));  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
       _x2c_func_argument_4
     }
     );
   }
   )) != 42) return 3;
   if(Var_integer(({
-    Func _x2c_func_call_3 = inline_capturing(2);  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_3, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(NULL, NULL);  else _x2c_func_argument_5 = FuncArg_value(int_var(40));  Func_apply(_x2c_func_call_3, 1, (FuncArg[]){
+    Func _x2c_func_call_3 = inline_capturing(2);  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_3, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(0, 0);  else _x2c_func_argument_5 = FuncArg_value(int_var(40));  Func_apply(_x2c_func_call_3, 1, (FuncArg[]){
       _x2c_func_argument_5
     }
     );
