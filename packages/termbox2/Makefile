@@ -37,4 +37,5 @@ builds/test-termbox: tests/test-termbox.x tests/terminal-test-helper.c \
 	$(X2C) build --output $@ --build-dir builds/termbox \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) --c-include-dir tests \
 	  --x-include-dir $(ROOT)/unittest \
-	  $< tests/terminal-test-helper.c $(ROOT)/unittest/test-support.x
+	  $< tests/terminal-test-helper.c $(ROOT)/unittest/test-support.x \
+	  $(ROOT)/unittest/match-recursive.x

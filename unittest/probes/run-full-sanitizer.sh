@@ -60,7 +60,7 @@ done
 "$ar" rcs "$runtime_archive" "${ordered_runtime_objects[@]}"
 "$ranlib" "$runtime_archive"
 
-test_sources=("$generated_tests"/test-*.c)
+test_sources=("$generated_tests"/test-*.c "$generated_tests"/match-recursive.c)
 for source in "${test_sources[@]}"; do
   name=$(basename "$source" .c)
   test_flags=()
@@ -82,7 +82,7 @@ for name in "${compiler_modules[@]}"; do
 done
 
 suite_objects=()
-for object in "$test_objects"/test-*.o; do
+for object in "$test_objects"/test-*.o "$test_objects"/match-recursive.o; do
   [[ "$object" == "$test_objects/test-all.o" ]] && continue
   suite_objects+=("$object")
 done
