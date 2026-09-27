@@ -307,6 +307,8 @@ int main(void) {
     if (table) tables[i] = table;
   }
   Map current = NULL;
+  /* A failed reset is the reply to the next call it prepared. */
+  List reset_failure = NULL;
   for (;;) {
     String text = _frame_read(in);
     unsigned cursor = 0;
@@ -315,12 +317,16 @@ int main(void) {
     match (request) {
       case %(reset ?(int index)): {
         current = tables.try_get(index, table) ? table : NULL;
+        reset_failure = NULL;
         if (current && current.try_get("x2c_module_reset", reset))
           try ((Func) reset.pointer()).apply(0, NULL);
-          catch %(?code *detail): (void) detail;
+          catch %(?code *detail):
+            reset_failure =
+              %(failure ${Error.snapshot(cons(code, detail))});
       }
       case %(call ?(String name) ?(List arguments)):
-        _call(current, name, arguments);
+        if (reset_failure) _reply(reset_failure);
+        else _call(current, name, arguments);
       default: _exit(0);
     }
   }
