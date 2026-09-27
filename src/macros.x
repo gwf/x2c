@@ -1949,6 +1949,20 @@ static List _native_module_suppliers(String name) =>
   native_module_order.filter(
     %!(String path) => name in ((Map) native_modules[path]));
 
+/** Returns the selected file-backed native module that supplies `name`,
+    with its native `type`, or NULL for a linked or absent target. */
+String Compiler.native_meta_module(Compiler c, String name, Type &type) {
+  List suppliers = _native_module_suppliers(name);
+  if (!suppliers) return NULL;
+  String path = suppliers.car();
+  if (!path.startswith("/")) return NULL;
+  Var target = ((Map) native_modules[path])[name];
+  Var bound;
+  if (!c.macro_lisp.try_get(name, bound) || !bound.equal(target)) return NULL;
+  type = ((Func) target.pointer()).signature();
+  return path;
+}
+
 /* The native type a signature names: each parameter, reference target,
    and result with its aliases resolved. */
 static List _native_signature_type(Compiler c, List signature) {
@@ -2058,11 +2072,11 @@ static void _bind_native_meta(
   _certify_native_meta(c, name, signature, marker);
   int iterator = _iterator_operation(signature);
   Var bound, function;
+  String target = iterator ? %"${name}_into" : name;
+  List suppliers = _native_module_suppliers(target);
   int present = c.macro_lisp.try_get(name, bound);
   if (present && !iterator) function = bound;
   else {
-    String target = iterator ? %"${name}_into" : name;
-    List suppliers = _native_module_suppliers(target);
     try {
       function = c.macro_lisp.eval(%(bind $target (quote $signature)));
       if (suppliers)
@@ -2078,13 +2092,14 @@ static void _bind_native_meta(
       }
       String first = suppliers.car();
       function = ((Map) native_modules[first])[target];
-      if (suppliers.cdr())
-        c.report_warning(
-          <native>, "more than one native module defines this function",
-          marker, %("name: $name" "supplied by: $first"
-                    "also defined by: ${", ".join(suppliers.cdr())}"));
     }
   }
+  if (suppliers.cdr() &&
+      function.equal(((Map) native_modules[suppliers.car()])[target]))
+    c.report_warning(
+      <native>, "more than one native module defines this function",
+      marker, %("name: $name" "supplied by: ${suppliers.car()}"
+                "also defined by: ${", ".join(suppliers.cdr())}"));
   if (!c.native_meta_accepts(function, signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
@@ -2152,6 +2167,7 @@ void Compiler.install_native_meta_function(
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   List signature = c.func_signature(type);
+  c.native_meta[name] = signature;
   _bind_native_meta(c, name, signature, marker);
 }
 

@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 /* The generated table unit supplies each module's name-to-`Func` Map. */
 Map x2c_meta_helper_table(int index);
@@ -54,6 +55,27 @@ static void _unavailable(String name) {
   _fail(%"$name is not available to project meta code",
         %("reason: it reads compiler state; pass what it answers as an"
           "argument"));
+}
+
+/* The compiler checked and selected this module before building the group.
+   Its code remains loaded for the helper's lifetime. */
+void *x2c_meta_native_symbol(String path, String name) {
+  static Map modules = {};
+  Var loaded;
+  void *handle;
+  if (modules.try_get(path, loaded)) handle = loaded.pointer();
+  else {
+    handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+    if (!handle)
+      _fail("cannot load native module in project meta helper",
+            %("module: $path" "reason: ${String.new(dlerror())}"));
+    modules[path] = handle;
+  }
+  void *target = dlsym(handle, name);
+  if (!target)
+    _fail("native module has no C target for project meta code",
+          %("module: $path" "function: $name"));
+  return target;
 }
 
 static void _check_notes(String operation, List notes) {

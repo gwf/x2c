@@ -469,8 +469,11 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
   List syntax = node;
   match (syntax) {
     case %((!or tpl-call meta-call) *): return 1;
-    case %(ident (binding ? ?(String name))):
+    case %(ident (binding ? ?(String name))): {
+      /* Expansion can insert a call typed by its macro definition. */
+      if (name in c.native_meta) c.bind_native_meta(name);
       return name in c.meta_comptime || Compiler.supplies_native_meta(name);
+    }
   }
   foreach (Var child, syntax)
     if (c.meta_reaches_compile_time(child)) return 1;
@@ -698,6 +701,59 @@ static Var _meta_template_calls(Compiler c, Var node, List callee) {
   return parts.list_free();
 }
 
+/* A native module's C target lives in the module, not in the helper.
+   Keep its native function type while looking it up in the same module
+   that supplied the compiler's binding. */
+static Var _meta_native_targets(Compiler c, Var node, List lookup) {
+  if (node is not <list>) return node;
+  match (node) {
+    case %(expr ?(Type result)
+           (call (!set ?callee
+             (expr ? (ident (binding ? ?(String name)))))
+             (args *arguments))): {
+      Type native = NULL;
+      if (name in c.native_meta && c.native_meta_module(name, native)) {
+        Array values = [];
+        List declared = c.func_signature(callee.list().cadr()).car().list()
+                         .cadr();
+        List parameters = native.car().list().cadr();
+        foreach (List argument, arguments) {
+          argument = _meta_native_targets(c, argument, lookup);
+          if (c.sym.normalize_declared_type(declared.car()).equal(
+                c.sym.normalize_declared_type(%("Func"))) &&
+              c.sym.normalize_declared_type(parameters.car()).equal(
+                c.sym.normalize_declared_type(%("Var"))))
+            argument = c.convert_expression(
+              c.convert_expression(argument, %("Func")), %("Var"));
+          values.push(argument);
+          declared = declared.cdr();
+          parameters = parameters.cdr();
+        }
+        List target = _meta_native_targets(c, callee, lookup);
+        List call = c.resolve_expression(
+          %(expr () (call $target (args @{values.list_free()}))), NULL);
+        return c.convert_expression(call, result);
+      }
+    }
+    case %(expr ?(Type type) (ident (binding ? ?(String name)))):
+      if (type.is_function() && name in c.native_meta) {
+        String module = c.native_meta_module(name, type);
+        if (module) {
+          c.add_translation_dependency(module);
+          Type pointer = type.reference();
+          List target = %(expr (* void) (call $lookup
+            (args ${x2c_literal_string(module)}
+                  ${x2c_literal_string(name)})));
+          return %(expr $pointer (cast $pointer $target));
+        }
+      }
+  }
+  Array parts = [];
+  foreach (Var part, (List) node)
+    parts.push(_meta_native_targets(c, part, lookup));
+  return parts.list_free();
+}
+
 /* Emits the group through the ordinary backend as `(hfile htext cfile
    ctext)` named by `stem`, with exported names ending in `suffix`, or
    returns NULL with `failure` set when it does not lower. The emission
@@ -742,6 +798,17 @@ static List _meta_group_code(
     List callee = %(expr $type (ident $binding));
     for (int i = 0; i < (int) units.len(); i++)
       units[i] = _meta_template_calls(c, units[i], callee);
+    if (c.meta_build) {
+      Type lookup_type = %((func (("String") ("String"))) * void);
+      List lookup_binding = c.sym.introduce("x2c_meta_native_symbol");
+      List lookup = %(expr $lookup_type
+        (ident $lookup_binding));
+      List (base, mods) = lookup_type.declaration_parts();
+      units.push(%(declare $base
+        (bindings (bind $lookup_binding $mods))));
+      for (int i = 0; i < (int) units.len(); i++)
+        units[i] = _meta_native_targets(c, units[i], lookup);
+    }
     int after = 0;
     while (after < (int) units.len() &&
            ((List) units[after]).car() == <preproc>)

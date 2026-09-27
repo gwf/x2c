@@ -259,7 +259,7 @@ static String _meta_compile(
    for every file the build read. */
 static List _meta_build(
   Frontend f, String directory, List imports, List owners, Map reaches,
-  List flags, Toolchain t, String include, String identity) {
+  List modules, List flags, Toolchain t, String include, String identity) {
   int count = owners.len() + 1;
   Map before = {};
   for (int index = 0; index < count; index++) {
@@ -268,7 +268,7 @@ static List _meta_build(
   }
   Map deps = {};
   String loop = %"${x2c_get_root()}/etc/meta-helper.x";
-  foreach (String path, %(@imports @owners $loop)) deps[path] = 1;
+  foreach (String path, %(@imports @owners @modules $loop)) deps[path] = 1;
   Array groups = [], built = [], failures = [], objects = [];
   int changed = 0;
   Compiler.use_meta_build_directory(directory);
@@ -313,6 +313,16 @@ static List _meta_build(
                   !Path.is_file(helper))) {
     Path.write_text(tables, table);
     String output = %"$directory/helper.${"%ld".printf((long) getpid())}";
+    /* Native modules use their host's runtime, including units the helper
+       itself never calls. Match the compiler's whole-runtime link. */
+    List exports = NULL;
+#ifdef __APPLE__
+    exports = %(${%"-Wl,-force_load,${t.runtime_lib}"});
+#else
+    exports = %("-Wl,--export-dynamic,--whole-archive" ${t.runtime_lib}
+                "-Wl,--no-whole-archive");
+#endif
+    t.ld_args = exports;
     ToolAction link = t.link_action(
       output, %(@{objects.list()} $tables $support));
     /* The link compiles the table, which includes the runtime headers. */
@@ -386,11 +396,20 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
                    .flatten()} @{f.request.cc_args});
   foreach (Var (root, _), packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
+  Array modules = f.request.native_modules.map(
+    %!(String path) => Path.absolute(path));
+  foreach (Var (root, _), packages) {
+    String name = Path.basename(root);
+    String module = %"$root/builds/$name.module";
+    if (!Compiler.links_extension(name) && Path.is_file(module) &&
+        !(module in modules)) modules.push(module);
+  }
   /* The helper's own source is read at build time, not linked into the
      compiler, so the stamp does not cover it. */
   String helper = %"${x2c_get_root()}/etc/meta-helper.x";
   String identity = %"$stamp\n$compiler\n${_meta_flags().repr()}\n"
                     + %"${flags.repr()}\n$include\n${t.runtime_lib}\n"
+                    + %"${modules.list().repr()}\n"
                     + (Path.is_file(helper)
                        ? Path.read_text(helper).sha256() : "");
   /* A changed source builds the same directory again, which keeps the
@@ -407,8 +426,8 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     manifest = _meta_current(directory);
     if (!manifest)
       manifest = _meta_build(
-        f, directory, imports, owners, reaches, flags, t, include,
-        identity);
+        f, directory, imports, owners, reaches, modules, flags, t,
+        include, identity);
   }
   Map failures = {}, units = {}, groups = {};
   foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;

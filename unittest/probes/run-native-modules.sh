@@ -152,6 +152,56 @@ EOF
 "$X2C" translate -q --native-module rx.so --out-dir out rx-main.x
 grep -Fq "return 41;" out/rx-main.c || fail "module calling Regex"
 
+# A native symbol already supplied by the compiler hides a module target.
+cat >shadow-native.x <<'EOF'
+meta native int abs(int n) => 99;
+EOF
+cat >shadow-native-main.x <<'EOF'
+meta int abs(int);
+meta static int value(void) => abs(-4);
+int main(void) { return $value(); }
+EOF
+"$X2C" build -q --kind meta-module shadow-native.x --output shadow-native.so
+"$X2C" translate -q --native-module shadow-native.so --out-dir out \
+  shadow-native-main.x 2>shadow-native.out
+grep -Fq "return 4;" out/shadow-native-main.c || fail "compiler precedence"
+grep -Fq "the compiler's own function hides a native module's" \
+  shadow-native.out || fail "compiler precedence warning"
+
+# `meta native` exports the C target. References and native handles keep
+# that target's ABI; a declared Func accepted by a Var target is boxed.
+cat >abi.x <<'EOF'
+#include "scope.x"
+struct NativePair { int value; };
+meta native int pair_value(struct NativePair *pair, int &extra) {
+  extra += pair->value;
+  return extra;
+}
+typedef Var NativeValue;
+meta native int invoke(NativeValue callback) { return ((Func) callback)(41); }
+EOF
+cat >abi-main.x <<'EOF'
+struct NativePair { int value; };
+typedef Var NativeValue;
+meta int pair_value(struct NativePair *, int &);
+meta int invoke(Func);
+meta static int abi_result(void) {
+  int n = 1;
+  struct NativePair pair = { 10 };
+  return pair_value(&pair, n) + invoke(%!(int x) => x + 1);
+}
+int main(void) { return $abi_result(); }
+EOF
+"$X2C" build -q --kind meta-module abi.x --output abi.so
+"$X2C" translate -q --native-module abi.so --out-dir out abi-main.x
+grep -Fq "return 53;" out/abi-main.c || fail "module native ABI"
+
+cat >private.x <<'EOF'
+meta native static int hidden(int n) => n + 1;
+EOF
+expect_error "is a static function private to its unit" \
+  "$X2C" build -q --kind meta-module private.x --output private.so
+
 printf 'int unrelated;\n' >empty.x
 expect_error "native module sources declare no meta function" \
   "$X2C" build -q --kind meta-module empty.x --output empty.so
