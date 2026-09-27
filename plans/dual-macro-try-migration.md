@@ -81,6 +81,14 @@ parent binder still owns expected types and conversions. The proof's typed
 frame exercises declaration, reference, address and member relationships;
 this migration does not promise all general Name projections.
 
+Activate the private template-construction context before beginning the outer
+transaction and before frame allocation. Retain it through region preparation,
+application and transaction completion; nested transactions inherit coverage.
+Do not activate extensions on unrelated macro/initializer transactions. Stage
+recognition belongs only to the application binding context, entered by the
+common owner without a client flag or wrapper. Use core support's distinct
+contexts rather than the prototype's shared dispatch/origin flag.
+
 Use new-name, early and cleanup effects only. Actual try uses new-name and
 cleanup; early is demonstrated by the dedicated success/rollback probe.
 Consume them through the extended
@@ -117,32 +125,42 @@ the template describes shape, not a second semantic owner.
 
 ## Cost
 
-Phase5 measured +1.40% default and +1.94% live on seven compiler translations;
-exception-heavy translation measured +1.37% default and +3.69% live. The
-current ledger row replaces phase4 +1.34%, rather than adding it. Record both
-application and transaction counts: compiler corpus has two try applications
-and two try transactions, among 2119 total default / 2124 live transactions;
-exception corpus has four try applications/transactions among 265 total.
+The cost target comes from the phase7 selective candidate, not phase5's
+unconditional support path. Record its same-window total versus the original
+baseline, default and live separately, then derive later migration increments
+by subtracting cumulative ratios measured against that same baseline.
+The measured reference is phase7: +0.133% default compiler total and -1.318%
+live (broad overlapping ranges, no speedup claim); exception is +0.869%
+default and +0.122% live. Same-window phase5 control is +1.625% default /
+-0.117% live; removal is -1.492 / -1.201 percentage points. Exception default
+is +0.506 pp worse than its control. Preserve that result, not just the improved
+compiler corpus. See [paired results](../.context/dual-macro-phase7/comparison/summary.json).
 
-[Phase6 profile](../.context/dual-macro-phase6/profile/README.md) isolates the
-three-try fixture: 2.876 ms snapshot plus application in the middle sample,
-0.959 ms per try. Scope-symbol copy is 40.0%, other snapshot 1.8%, Macro_apply
-0.1%, invocation rows 9.3%, replacement 3.8%, binding excluding producers 15.9%,
-the two producer evaluations 3.1%, and application residual 26.0%. This
-partition excludes commit and surrounding region/preparation work.
+The first per-lowering row covers this try migration; historical phase5 support
+cost is not charged anew to every future lowering.
 
-Target: preserve or improve the measured phase5 totals and reduce the dominant
-snapshot cost through lazy first-write staging in the existing transaction
-owner, if implemented in core support. This is an optimization proposal, not
-an achieved saving. Retain exact rollback, nested transactions and borrowed Map
-identity; never remove coverage to meet the target. The benchmark contains only
-two try applications, whose measured work is far smaller than its 85 ms paired
-increase. Other ordinary transactions and fixed costs are unclassified.
+Application counts remain two per compiler-corpus mode and four per exception
+benchmark mode. Total transaction counts remain 2119 default / 2124 live for
+the compiler corpus, and 265 for each exception mode; extended coverage is now
+only two and four respectively. The 2119 total is across seven translations.
 
-Recommend a 5% cumulative planning aim for the first three lowerings; 2% remains
-an aspiration whose feasibility is unproved. Record the actual combined total
-and incremental cost in the research contract's ledger using paired original
-baseline runs. This recommendation adds no gate or recurring process.
+[Post-removal spans](../.context/dual-macro-phase7/post-try/README.md) measure
+the current candidate: 1.488 ms per try default compiler corpus / 1.818 ms live
+(two applications each, one run per mode). The three-try fixture has median
+0.922 ms per try, range 0.881--1.073 across three runs. Exception has 0.931 /
+0.857 ms per try (four applications each). These windows cover snapshot and
+application only; retain their scope-copy child as part of snapshot, not an
+extra cost. Commit, frame allocation and region preparation are outside them.
+Do not divide the whole compiler delta by two and call it isolated try time.
+
+Cost target: preserve the phase7 whole-candidate result within the existing
+advisory checkpoint's ordinary variability, with this measured per-application
+work as the first lowering's reference. The old phase5 fixed cost must not
+return in core support or be multiplied into later migration estimates.
+
+Keep the 2% cumulative default translation-overhead aim; withdraw the unsupported
+5% recommendation. Combined three-lowering feasibility still requires actual
+combined measurement. Use the existing advisory checkpoint, with no new gate.
 
 ## Limits
 

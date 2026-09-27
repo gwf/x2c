@@ -1,0 +1,196 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -11,6 +11,8 @@
+     active.
+   */
+ #pragma once
++int Prototype_profile_begin(int kind);
++void Prototype_profile_end(int span);
+ $(import "../lib/private-keywords.xmacro")
+ #include "tokenizer.x"
+ #include "ast.x"
+@@ -2594,6 +2596,7 @@
+     other compiler state.
+ */
+ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
++  int profile = Prototype_profile_begin(0);
+   SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
+   transaction.compiler = c;
+   transaction.scope_index = c.sym.scopes.len() - 1;
+@@ -2606,6 +2609,7 @@
+   transaction.local_macro_names = c.sym.local_macro_names;
+   transaction.initializer_name = c.init_fn;
+   transaction.shutdown_name = c.fini_fn;
++  int extended_profile = Prototype_profile_begin(1);
+   transaction.adapters = c.names.adapters;
+   transaction.base_bindings = [];
+   transaction.early_count = c.early_decls.len();
+@@ -2620,6 +2624,7 @@
+     transaction.base_bindings.push(%($i ${base.bindings}));
+     base.bindings = base.bindings.copy();
+   }
++  Prototype_profile_end(extended_profile);
+   if (c.source_facts && c.source_primary) {
+     transaction.source_definitions = c.source_definitions.copy();
+     transaction.source_occurrences = c.source_occurrences.len();
+@@ -2638,6 +2643,7 @@
+   c.sym.binding_facts = c.semantic_binding_facts().copy();
+   c.names.counters = c.names.counters.copy();
+   transaction.active = 1;
++  Prototype_profile_end(profile);
+   return transaction;
+ }
+ 
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -3445,7 +3445,11 @@
+    Ordinary target bindings are retained as resolution facts, not emitted as
+    source-call declarations. */
+ void Compiler.prototype_prepare_open_try(Compiler c) {
+-  if (c.prototype_open_names) return;
++  int prepare_profile = Prototype_profile_begin(4);
++  if (c.prototype_open_names) {
++    Prototype_profile_end(prepare_profile);
++    return;
++  }
+   c.prototype_open_names = {};
+   foreach (String name, %("x2c_exception_push" "sigsetjmp"
+                           "x2c_exception_landed")) {
+@@ -3455,6 +3459,7 @@
+       ${name == "sigsetjmp" ? %(int) : %(void)});
+     c.prototype_open_names[%($name "resolved")] = %($binding $type);
+   }
++  Prototype_profile_end(prepare_profile);
+ }
+ 
+ static Var _prototype_open_code(Compiler c, Var input) {
+--- a/src/prototype-slots.x
++++ b/src/prototype-slots.x
+@@ -1,6 +1,74 @@
+ #pragma once
+ #include "x2c.x"
+ #include "meta.x"
++
++#include <time.h>
++#include <stdlib.h>
++#include <stdio.h>
++
++static long long _profile_inclusive[6], _profile_exclusive[6];
++static long long _profile_calls[6], _profile_started[256];
++static long long _profile_children[256];
++static int _profile_kind[256], _profile_depth, _profile_enabled, _profile_counts_only;
++static long long _profile_transactions;
++static const char *_profile_labels[6] = {
++  "all_snapshot", "extended_snapshot", "bind_slot_checks",
++  "expression_slot_checks", "open_prepare", "empty_span"
++};
++static long long _profile_now(void) {
++  if (_profile_counts_only) return 0;
++  struct timespec now;
++  clock_gettime(CLOCK_MONOTONIC, &now);
++  return (long long) now.tv_sec * 1000000000LL + now.tv_nsec;
++}
++static void _profile_report(void) {
++  fprintf(stderr, "DUAL_PROFILE all_transactions %lld 0 0\n",
++    _profile_transactions);
++  for (int i = 0; i < 6; i++)
++    fprintf(stderr, "DUAL_PROFILE %s %lld %lld %lld\n",
++      _profile_labels[i], _profile_calls[i], _profile_inclusive[i],
++      _profile_exclusive[i]);
++}
++int Prototype_profile_begin(int kind) {
++  if (!_profile_enabled) {
++    _profile_enabled = getenv("X2C_DUAL_PROFILE") ? 1 : -1;
++    if (_profile_enabled == 1) {
++      _profile_counts_only = !strcmp(getenv("X2C_DUAL_PROFILE"), "counts");
++      atexit(_profile_report);
++      if (!_profile_counts_only) {
++        for (int i = 0; i < 10000; i++) {
++          long long start = _profile_now();
++          _profile_inclusive[5] += _profile_now() - start;
++          _profile_calls[5]++;
++        }
++        _profile_exclusive[5] = _profile_inclusive[5];
++      }
++    }
++  }
++  if (_profile_enabled < 0) return -1;
++
++  int slot = _profile_depth++;
++  assert(slot < 256);
++  _profile_kind[slot] = kind;
++  _profile_children[slot] = 0;
++  _profile_started[slot] = _profile_now();
++  return slot;
++}
++void Prototype_profile_transaction(void) {
++  if (getenv("X2C_DUAL_PROFILE")) _profile_transactions++;
++}
++void Prototype_profile_end(int slot) {
++  if (slot < 0) return;
++  long long elapsed = _profile_now() - _profile_started[slot];
++  assert(slot == --_profile_depth);
++  int kind = _profile_kind[slot];
++  _profile_calls[kind]++;
++  _profile_inclusive[kind] += elapsed;
++  _profile_exclusive[kind] += elapsed - _profile_children[slot];
++  if (slot) _profile_children[slot - 1] += elapsed;
++}
++int Prototype_profile_active(int kind) =>
++  _profile_depth && _profile_kind[_profile_depth - 1] == kind;
+ 
+ meta List Prototype_bound(List code) =>
+   %("x2c.slot" "bound" $code ());
+--- a/src/parse.x
++++ b/src/parse.x
+@@ -2433,21 +2433,30 @@
+       c.prototype_bound_slots.try_get(syntax, retained)) return retained;
+   Var staged;
+   int retained_stage;
+-  if (c.prototype_take_slot(syntax, staged, retained_stage)) {
++  int check_profile = Prototype_profile_begin(2);
++  int staged_input = c.prototype_take_slot(syntax, staged, retained_stage);
++  Prototype_profile_end(check_profile);
++  if (staged_input) {
+     if (retained_stage) return staged;
+     syntax = staged;
+   }
+   Var value = c.evaluate_macro_slot(syntax);
+-  if (c.prototype_take_slot(value, staged, retained_stage)) {
++  check_profile = Prototype_profile_begin(2);
++  int staged_value = c.prototype_take_slot(value, staged, retained_stage);
++  Prototype_profile_end(check_profile);
++  if (staged_value) {
+     if (retained_stage) return staged;
+     value = staged;
+   }
++  check_profile = Prototype_profile_begin(2);
+   match (value) case %("x2c.template" ?stored ?arguments): {
++    Prototype_profile_end(check_profile);
+     List invocation = c.prototype_pending(stored, arguments);
+     List bound = c.bind_syntax(invocation, context, return_type);
+     match (bound) case %(seq ?only): return only;
+     return bound;
+   }
++  Prototype_profile_end(check_profile);
+   if (value is not <list>)
+     c.report_error(<parse>, "expected syntax", c.token, NULL);
+   List input = value;
+--- a/src/expressions.x
++++ b/src/expressions.x
+@@ -2461,11 +2461,14 @@
+     retain source position.
+ */
+ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
++  int check_profile = Prototype_profile_begin(3);
+   Var staged;
+   int retained_stage;
+   Var carrier = input;
+   match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
+-  if (c.prototype_take_slot(carrier, staged, retained_stage)) {
++  int staged_input = c.prototype_take_slot(carrier, staged, retained_stage);
++  Prototype_profile_end(check_profile);
++  if (staged_input) {
+     if (retained_stage) return staged;
+     return c.resolve_expression(staged, origin);
+   }

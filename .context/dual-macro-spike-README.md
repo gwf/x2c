@@ -56,8 +56,8 @@ another branch; it is not implemented here.
 
 `dual-macro-phase5/` records the true-open try body, wrapper-free client,
 parse/bind preparation including synthetic-try origins, same-binary rollback
-and 62-case raw C/H comparison, and paired timings. The current observed
-compiler cost total is +1.40% default and +1.94% live; it replaces the older try
+and 62-case raw C/H comparison, and paired timings. Its historical observed
+compiler cost total is +1.40% default and +1.94% live; it replaced the older try
 candidate's ledger row. The plan freezes stage attachment at producing owners.
 Its README includes the native declaration boundary and failed attempts.
 
@@ -105,3 +105,21 @@ measurements, not production code or recurring checks. All `.context` evidence
 is reference only. **Do not merge this branch.** In particular phase4 contains
 full copies of five compiler sources. Implement the plans fresh on current dev;
 do not transplant those snapshots or the intermediate name bypass.
+
+
+## Fixed support cost and selective candidate (phase 7)
+
+`dual-macro-phase7/` separates extended snapshot work, ordinary-node carrier
+checks and open preparation from per-try application work. The selective
+candidate protects effects only inside the construction context and recognizes
+stage carriers only inside application binding. It preserves the 62-case raw
+C/H comparison, rollback proof and original total transaction counts, while
+reducing extended snapshots from 2119/2124 to two in the compiler corpus.
+
+The phase6 recommendation to raise the planning aim to 5% is withdrawn.
+The production core plan starts with selective transaction and application
+contexts; the try plan uses phase7's same-window baseline/phase5/new timings.
+The 2% cumulative aim remains a recommendation, not a new recurring gate.
+Automatic standalone application entry and legacy effect-carrier ownership
+remain production implementation work rather than claims of this bounded
+performance prototype. Do not merge this branch or transplant its snapshots.

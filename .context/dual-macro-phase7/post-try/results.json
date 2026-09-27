@@ -1,0 +1,488 @@
+[
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/transform.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/emit.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "metrics": {
+      "try_application": {
+        "calls": 1,
+        "inclusive_ns": 729000,
+        "exclusive_ns": 729000
+      },
+      "try_snapshot": {
+        "calls": 1,
+        "inclusive_ns": 951000,
+        "exclusive_ns": 479000
+      },
+      "scope_symbols_copy": {
+        "calls": 1,
+        "inclusive_ns": 472000,
+        "exclusive_ns": 472000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/generate.x",
+    "metrics": {
+      "try_application": {
+        "calls": 1,
+        "inclusive_ns": 620000,
+        "exclusive_ns": 620000
+      },
+      "try_snapshot": {
+        "calls": 1,
+        "inclusive_ns": 676000,
+        "exclusive_ns": 203000
+      },
+      "scope_symbols_copy": {
+        "calls": 1,
+        "inclusive_ns": 473000,
+        "exclusive_ns": 473000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/parse.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      },
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "src/type.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      },
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      },
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      }
+    }
+  },
+  {
+    "mode": "default",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "metrics": {
+      "try_application": {
+        "calls": 4,
+        "inclusive_ns": 1876000,
+        "exclusive_ns": 1876000
+      },
+      "try_snapshot": {
+        "calls": 4,
+        "inclusive_ns": 1846000,
+        "exclusive_ns": 73000
+      },
+      "scope_symbols_copy": {
+        "calls": 4,
+        "inclusive_ns": 1773000,
+        "exclusive_ns": 1773000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      },
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/transform.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/emit.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "metrics": {
+      "try_application": {
+        "calls": 1,
+        "inclusive_ns": 761000,
+        "exclusive_ns": 761000
+      },
+      "try_snapshot": {
+        "calls": 1,
+        "inclusive_ns": 1165000,
+        "exclusive_ns": 453000
+      },
+      "scope_symbols_copy": {
+        "calls": 1,
+        "inclusive_ns": 712000,
+        "exclusive_ns": 712000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/generate.x",
+    "metrics": {
+      "try_application": {
+        "calls": 1,
+        "inclusive_ns": 618000,
+        "exclusive_ns": 618000
+      },
+      "try_snapshot": {
+        "calls": 1,
+        "inclusive_ns": 1092000,
+        "exclusive_ns": 206000
+      },
+      "scope_symbols_copy": {
+        "calls": 1,
+        "inclusive_ns": 886000,
+        "exclusive_ns": 886000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/parse.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      },
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "src/type.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      },
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "metrics": {},
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      },
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      }
+    }
+  },
+  {
+    "mode": "live",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "metrics": {
+      "try_application": {
+        "calls": 4,
+        "inclusive_ns": 1721000,
+        "exclusive_ns": 1721000
+      },
+      "try_snapshot": {
+        "calls": 4,
+        "inclusive_ns": 1705000,
+        "exclusive_ns": 61000
+      },
+      "scope_symbols_copy": {
+        "calls": 4,
+        "inclusive_ns": 1644000,
+        "exclusive_ns": 1644000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      },
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      }
+    }
+  },
+  {
+    "mode": "fixture",
+    "sample": 0,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "metrics": {
+      "try_application": {
+        "calls": 3,
+        "inclusive_ns": 1597000,
+        "exclusive_ns": 1597000
+      },
+      "try_snapshot": {
+        "calls": 3,
+        "inclusive_ns": 1046000,
+        "exclusive_ns": 48000
+      },
+      "scope_symbols_copy": {
+        "calls": 3,
+        "inclusive_ns": 998000,
+        "exclusive_ns": 998000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  },
+  {
+    "mode": "fixture",
+    "sample": 1,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "metrics": {
+      "try_application": {
+        "calls": 3,
+        "inclusive_ns": 1775000,
+        "exclusive_ns": 1775000
+      },
+      "try_snapshot": {
+        "calls": 3,
+        "inclusive_ns": 1445000,
+        "exclusive_ns": 48000
+      },
+      "scope_symbols_copy": {
+        "calls": 3,
+        "inclusive_ns": 1397000,
+        "exclusive_ns": 1397000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  },
+  {
+    "mode": "fixture",
+    "sample": 2,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "metrics": {
+      "try_application": {
+        "calls": 3,
+        "inclusive_ns": 1654000,
+        "exclusive_ns": 1654000
+      },
+      "try_snapshot": {
+        "calls": 3,
+        "inclusive_ns": 1113000,
+        "exclusive_ns": 45000
+      },
+      "scope_symbols_copy": {
+        "calls": 3,
+        "inclusive_ns": 1068000,
+        "exclusive_ns": 1068000
+      }
+    },
+    "exit": 0,
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  }
+]

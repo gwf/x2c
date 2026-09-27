@@ -1,0 +1,61 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -11,6 +11,7 @@
+     active.
+   */
+ #pragma once
++void Prototype_count_transaction(int extended);
+ $(import "../lib/private-keywords.xmacro")
+ #include "tokenizer.x"
+ #include "ast.x"
+@@ -2596,6 +2597,7 @@
+     other compiler state.
+ */
+ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
++  Prototype_count_transaction(c.prototype_effect_context > 0);
+   SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
+   transaction.compiler = c;
+   transaction.scope_index = c.sym.scopes.len() - 1;
+--- a/src/prototype-slots.x
++++ b/src/prototype-slots.x
+@@ -1,6 +1,30 @@
+ #pragma once
+ #include "x2c.x"
+ #include "meta.x"
++
++#include <stdlib.h>
++#include <stdio.h>
++static int _p7_counts_enabled;
++static long long _p7_transactions, _p7_extended, _p7_applications;
++static void _p7_counts_report(void) {
++  fprintf(stderr, "DUAL_COUNTS transactions %lld extended %lld applications %lld\n",
++    _p7_transactions, _p7_extended, _p7_applications);
++}
++static int _p7_counts_on(void) {
++  if (!_p7_counts_enabled) {
++    _p7_counts_enabled = getenv("X2C_DUAL_COUNTS") ? 1 : -1;
++    if (_p7_counts_enabled == 1) atexit(_p7_counts_report);
++  }
++  return _p7_counts_enabled == 1;
++}
++void Prototype_count_transaction(int extended) {
++  if (!_p7_counts_on()) return;
++  _p7_transactions++;
++  _p7_extended += !!extended;
++}
++void Prototype_count_application(void) {
++  if (_p7_counts_on()) _p7_applications++;
++}
+ 
+ meta List Prototype_bound(List code) =>
+   %("x2c.slot" "bound" $code ());
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2505,6 +2505,7 @@
+   _prototype_effect_probe(c);
+   List declarations = _try_declarations(c, clause, frame, handle);
+   List landing = _try_landing(c, clause, frame, handle, cleanup, bodies);
++  Prototype_count_application();
+   Macro shape = $compiler_try_shape;
+   $let(c.prototype_combined, 1)
+     return c.bind_syntax(shape(frame_code, declarations, body, landing,

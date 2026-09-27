@@ -1,10 +1,11 @@
 > Status: reference -- narrowed research complete; production hand-off scoped.
 > The combined try template/slot/effect/stage candidate passes 62-case raw
 > C/H and outcome comparison. The failing-skeleton rollback probe also passes.
-> Five paired timing samples on phase5 show +1.40% default compiler translation
-> and +1.94% live; the default ranges do not overlap in this window.
+> Phase7 selective support passes the same proof; default compiler total is
+> +0.133% versus original. Live median is -1.318% with broad overlapping ranges;
+> no stable speedup is claimed. The unsupported 5% recommendation is withdrawn.
 > Inserted-name shadowing is baseline parity and remains a follow-up.
-> Phase6 profiles the try path and hands off three scoped production plans.
+> Phase7 profiles/removes fixed support work and updates the core/try plans.
 > Production implementation is not authorized by this research record.
 
 # Compiler contract for dual-purpose macros
@@ -22,7 +23,7 @@ The requested survey was found at
 `/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/.context/dual-macro-compiler-opportunities.md`.
 Its original survey baseline is `553429f`; current source, rather than its
 line numbers or capability assumptions, is authoritative here.
-The prototypes remain in `.context/dual-macro-phase3/` through phase6 and
+The prototypes remain in `.context/dual-macro-phase3/` through phase7 and
 managed isolated worktrees. Nothing in this plan claims that its proposed
 semantics already ship in x2c. **Do not merge this research branch as is.**
 `.context/dual-macro-phase4/combined/` tracks full copies of five compiler
@@ -560,20 +561,30 @@ corpus, number of applications, transaction count, paired median/range and
 observed incremental delta. Replacing a prior candidate replaces its ledger
 row: do not count successive versions of try twice. The current entry is:
 
-| Lowering | Candidate | Default / live delta | Applications | Try transactions / all transactions | Status |
-| --- | --- | --- | --- | --- | --- |
-| try/defer/catch skeleton | phase4 final | +1.34% / historical | Not counted in phase4 | One per try; totals not measured | Historical, not added to total |
-| Same lowering, open body / producer stages | phase5 final | +1.40% / +1.94% | 2 / 2 | 2 / 2119 default; 2 / 2124 live | Current compiler-corpus total; replaces phase4 |
-| Same candidate, exception-heavy translation | phase5 final | +1.37% / +3.69% | 4 / 4 | 4 / 265 both modes | Separate workload, not an additional migration |
-| Later lowerings | Not migrated | Not measured | Not measured | Not measured | Add when migrated |
+| Ledger row | Candidate / baseline | Default total / increment | Live total / increment | Applications | All / extended transactions | Measured per-try spans ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| Original baseline | original / original | 0% / baseline | 0% / baseline | 0 template applications | Historical transaction counts not instrumented | Not measured |
+| Try/defer/catch, first migration including selective core | phase7 final / original | +0.133% / +0.133 pp | -1.318% / -1.318 pp | 2 each mode | 2119 / 2 default; 2124 / 2 live | 1.488 default / 1.818 live |
+| Same candidate, exception workload | phase7 final / original | +0.869% / separate workload | +0.122% / separate workload | 4 each mode | 265 / 4 each mode | 0.931 default / 0.857 live |
+| Historical unconditional-support control | phase5 / original, rerun in phase7 window | +1.625% / not an additional migration | -0.117% / not an additional migration | 2 each mode | 2119 / 2119 default; 2124 / 2124 live | Historical phase6 profile |
+| Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
-Counts come from phase6's instrumented phase5 candidate and independent
-count-only runs, not inferred from source occurrences. The compiler corpus
-is seven translations; exception-heavy translation is reported separately.
-Keep each cumulative candidate/original-baseline ratio; replacing successive
-try candidates does not add their deltas. Measure later increments against
-the same original baseline/workload. Independent medians do not establish
-actual cumulative cost.
+The first per-lowering row is the selective try candidate, not the old phase5
+fixed support cost. Its total includes necessary shared support and any
+unclassified remaining cost; it is not proof that every millisecond is spent
+in the two try calls. Post-removal per-application timing is reported below.
+Candidate counts come from actual count-only execution. The seven-file corpus
+is seven translations; exception-heavy translation is a separate workload.
+Historical phase4 +1.34% and phase5 +1.40% / +1.94% remain evidence for their
+original windows, not costs to add to later migrations.
+
+Track total candidate/original-baseline ratios separately for default and live.
+Derive a later migration increment by subtracting its predecessor's cumulative
+ratio, rerunning original, predecessor and new candidate in the same window
+if earlier measurements came from another window. Phase7's support-removal
+increment is -1.492 pp default / -1.201 pp live relative to its phase5 control;
+it is not a second lowering. Keep application, total transaction and extended
+transaction counts in each new row. Do not add separate-workload medians.
 
 ### Phase6 per-application profile
 
@@ -603,32 +614,131 @@ snapshot is 41.8% in the selected sample. Compiler-corpus median snapshot /
 application totals are 1.720 / 1.313 ms default and 2.541 / 1.397 ms live;
 separately calculated medians need not sum to a particular run's total.
 
-**Recommend one optimization: lazy first-write staging inside existing SymTxn
-and authoritative Sym mutation operations.** Avoid eagerly cloning untouched
-scope maps; preserve nested commit/rollback and borrowed Map identity. This
-must cover actual writes rather than skip snapshotting on a presumed pure
-call. Do not add a second transaction owner. Its saving is unmeasured: a write
-may still require the copy. It must retain the failing-skeleton proof.
+The phase6 recommendation to optimize the per-try scope copy and raise the
+planning aim to 5% is withdrawn. It did not measure the fixed support costs.
+Two try applications contribute about 3 ms measured default work, compared
+with roughly 85 ms of whole-candidate difference. Ordinary transactions and
+per-node checks must be measured separately before assigning costs to later
+lowerings. Phase7 below supersedes that cost recommendation.
 
-This profile does not time commit/rollback, region preparation, frame allocation
-or parse-time open preparation. Only two compiler-corpus applications contribute
-about 3 ms of measured default work, versus the earlier roughly 85 ms paired
-increase. Extended snapshots also run at 2119 ordinary transaction sites, not
-just two try sites; their contribution and other fixed costs are unclassified.
-Do not attribute the full +1.40% to try snapshots or promise to recover it by
-this optimization. Instrumentation overhead is not subtracted; no optimized
-candidate or three-lowering combined candidate was built.
+### Phase7 fixed-cost measurement and removal
 
-**Recommend knowingly raising the planning aim to 5% cumulative default
-translation overhead for the first three lowerings.** The existing 2% aim is
-not demonstrated achievable: try already consumes +1.40% default / +1.94%
-live and the measured per-try saving cannot explain that total. Three equal
-independent +1.40% costs would suggest about 4.2%, only a planning scenario,
-not a prediction; later workloads and shared fixed costs may differ. Keep 2%
-as an optimization aspiration, not a promised three-lowering target. These
-numbers are recommendations, not approved policy or new gates. Use the
-existing advisory performance checkpoint and report combined measured totals,
-including live and exception-heavy results separately.
+[Fixed-cost evidence](../.context/dual-macro-phase7/README.md) times
+all extended snapshot work separately from the pre-existing snapshot, stage
+checks before recursion (including effect consumption on successful hits),
+and parse-time open preparation including cache hits.
+Three repeats and count-only controls preserve all 67 raw C/H outcomes.
+
+| Work, seven-file corpus | Default ms | Share of historical 85.088 ms | Live ms | Share of historical 139.123 ms |
+| --- | ---: | ---: | ---: | ---: |
+| Extended snapshot: adapters, base maps, queue lengths, origin/exception | 5.070 | 6.0% | 5.387 | 3.9% |
+| bind_syntax added slot/pending checks | 5.753 | 6.8% | 5.771 | 4.1% |
+| resolve_expression added slot/wrapper check | 12.605 | 14.8% | 12.967 | 9.3% |
+| Open preparation, including cached entry checks | 0.043 | 0.05% | 0.046 | 0.03% |
+
+These are raw span medians, not a complete causal attribution. Per-run sums
+have median 23.457 ms default and 24.098 ms live. Per-process empty-clock
+interval adjustment estimates 19.515 / 19.979 ms, about 22.9% / 14.4% of the
+historical differences. That adjustment does not remove all profiler API,
+cache or execution disturbance. Roughly 65.6 / 119.1 ms remains unattributed
+on those provisional estimates. Pre-existing snapshot work is approximately
+224 / 226 ms aggregate; it is not new overhead. Commit and surrounding work
+are not included in the snapshot measurement. The individual extended fields
+are measured together rather than assigned separate subfield timings.
+
+Default/live execute 105245/105485 added bind checks and 122912/125983 added
+expression checks. Preparation has 80 entry calls in each mode, including
+cache hits; cold preparation is not separately counted. The 2119/2124 total
+transactions cover seven translations, not each translation.
+
+The isolated candidate selects extended coverage in existing SymTxn only
+while a template-construction context is active, established before the outer
+try transaction and frame allocation. Nested transactions inherit it, and
+stored coverage guards snapshot, commit and rollback. Outside that context
+there are no added map copies or queue snapshots; the cheap context branch
+remains. Current-scope symbol copying is unchanged. This replaces the broader
+lazy-write-hook proposal with the smaller proved selective extension.
+
+New carrier and pending checks execute only in application binding. A cheap
+context branch remains on ordinary nodes, but ordinary nodes no longer perform
+those added shape matches. The bounded prototype retains its existing private
+application flag; production must enter automatically at the first-class
+application boundary, separately from origin policy and native dispatch.
+Do not activate every legacy macro invocation or require client wrappers.
+General automatic application entry and legacy effect-bearing slots are not
+proved by this timing prototype.
+
+The final binary passes the 62-case raw C/H comparison and failing-skeleton
+rollback, independently rerun by the root agent. Extended transactions are
+now 2 of 2119 default / 2 of 2124 live in the compiler corpus; exception has
+4 of 265 in each mode. Application counts remain 2 / 2 and 4 / 4. No baseline
+ordinary transaction guarantee is silently expanded; existing rollback gaps
+outside the construction context remain baseline behavior.
+
+### Post-removal per-try work
+
+[Current-candidate profile](../.context/dual-macro-phase7/post-try/README.md)
+measures only actual try snapshots and applications, with scope-symbol copy
+as a snapshot child. All 19 translations preserve final candidate raw C/H.
+The seven-file compiler has two applications: 2.976 ms total default / 3.636 ms
+live, or 1.488 / 1.818 ms per application in one run per mode. Default snapshot
+is 1.627 ms (scope copy 0.945), application 1.349 ms; live snapshot 2.257 ms
+(scope copy 1.598), application 1.379 ms. The snapshot plus application spans
+are disjoint; do not add the scope-copy child again.
+
+The three-try fixture repeats total 2.643, 3.220 and 2.767 ms: median 0.922 ms
+per try, range 0.881--1.073. Exception benchmark has four applications, 3.722 ms
+default / 3.426 ms live in one run each. Instrumentation overhead is retained;
+commit/rollback, frame allocation and region/preparation work are outside these
+spans. These measured windows are per-try costs, not a complete transformation
+marginal cost. They remain far smaller than the old fixed support difference.
+
+The collector's summary initially failed on zero-application rows with no timer
+output. It was repaired from the retained successful translation records,
+without another build or translation run. No compiler/prototype failure was
+involved. The old log and repaired aggregation are retained.
+
+### Same-window throughput and target
+
+[Three-way results](../.context/dual-macro-phase7/comparison/summary.json)
+compare the original baseline, phase5 and phase7 after warmup, with five
+rotating-order samples per mode/workload, identical input paths and home.
+No builds ran during timing. All final timed raw C/H digests agree across all
+three binaries and their hashes remained unchanged. No output normalization
+or sample exclusions were used.
+
+| Workload | Baseline median s | Phase5 median s | Phase7 median s | Phase7 versus original | Phase7 minus phase5 ratio |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Compiler default | 6.311873 | 6.414413 | 6.320251 | +0.133% | -1.492 pp |
+| Compiler live | 7.289804 | 7.281302 | 7.193741 | -1.318% | -1.201 pp |
+| Exception default | 0.585854 | 0.587982 | 0.590944 | +0.869% | +0.506 pp |
+| Exception live | 0.654379 | 0.665897 | 0.655178 | +0.122% | -1.638 pp |
+
+Default compiler ranges overlap: baseline 6.303874--6.338763 s, new candidate
+6.290987--6.336089 s. Its phase5 control is 6.399838--6.435478 s, entirely
+above both. The controlled patch reduces their median difference by 94.162 ms;
+the remaining median difference from original is 8.379 ms. That supports
+removing the unnecessary support work, but the diagnostic spans do not fully
+attribute that 94 ms to snapshot fields versus checks or commit work.
+
+Live compiler ranges are broad and overlap (baseline 7.166489--7.533066 s;
+new 7.174852--7.584677 s). Retain the negative measured ratio in the ledger,
+but do not claim a stable speedup or credit it against default cost. Exception
+default is slightly worse than the control: candidate 0.588079--0.594368 s,
+baseline 0.579757--0.587718 s. Exception live overlaps, including a 1.200863 s
+baseline observation. All observations remain in the evidence. Five samples
+in one host window do not establish long-run distributions.
+
+**Keep the 2% cumulative default translation-overhead aim.** The new first
+migration sits well below it; raising the aim to 5% on phase5's total was
+unjustified. This does not prove that three lowerings will fit: later application
+counts and shared preparation costs must be measured in their actual combined
+candidate. Track live and exception workloads separately, including regressions.
+The target for the production try change is the phase7 result (+0.133% default
+compiler total, +0.869% exception default, and the qualified live observations),
+not phase5 +1.40%. This is a measured reference and recommendation, not a new
+gate or per-run numerical pass/fail threshold. Preserve the existing advisory
+performance checkpoint.
 
 ## 7. Name, positions and sequences
 

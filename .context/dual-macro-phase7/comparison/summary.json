@@ -1,0 +1,110 @@
+[
+  {
+    "group": "compiler-translation",
+    "mode": "default",
+    "statistics": {
+      "baseline": {
+        "median": 6.311872583115473,
+        "min": 6.303873833967373,
+        "max": 6.3387629999779165
+      },
+      "phase5": {
+        "median": 6.414413249818608,
+        "min": 6.399837957927957,
+        "max": 6.4354776670224965
+      },
+      "candidate": {
+        "median": 6.320251333061606,
+        "min": 6.290987458080053,
+        "max": 6.336089291842654
+      }
+    },
+    "ratios_percent": {
+      "baseline": 0.0,
+      "phase5": 1.6245680715646138,
+      "candidate": 0.13274586639384633
+    },
+    "removal_increment_percentage_points": -1.4918222051707675
+  },
+  {
+    "group": "compiler-translation",
+    "mode": "live",
+    "statistics": {
+      "baseline": {
+        "median": 7.289804290980101,
+        "min": 7.166488582966849,
+        "max": 7.533066374948248
+      },
+      "phase5": {
+        "median": 7.281302040908486,
+        "min": 7.250009249895811,
+        "max": 7.332087374990806
+      },
+      "candidate": {
+        "median": 7.193741124821827,
+        "min": 7.174851542105898,
+        "max": 7.584676916943863
+      }
+    },
+    "ratios_percent": {
+      "baseline": 0.0,
+      "phase5": -0.11663207587253588,
+      "candidate": -1.3177742820494664
+    },
+    "removal_increment_percentage_points": -1.2011422061769306
+  },
+  {
+    "group": "exception-translation",
+    "mode": "default",
+    "statistics": {
+      "baseline": {
+        "median": 0.585854124976322,
+        "min": 0.579756542108953,
+        "max": 0.5877184169366956
+      },
+      "phase5": {
+        "median": 0.5879815830849111,
+        "min": 0.5864627088885754,
+        "max": 0.6039322910364717
+      },
+      "candidate": {
+        "median": 0.5909435409121215,
+        "min": 0.5880789579823613,
+        "max": 0.5943680829368532
+      }
+    },
+    "ratios_percent": {
+      "baseline": 0.0,
+      "phase5": 0.36313785597652526,
+      "candidate": 0.8687172657536824
+    },
+    "removal_increment_percentage_points": 0.5055794097771571
+  },
+  {
+    "group": "exception-translation",
+    "mode": "live",
+    "statistics": {
+      "baseline": {
+        "median": 0.6543785000685602,
+        "min": 0.6446553748100996,
+        "max": 1.2008633331861347
+      },
+      "phase5": {
+        "median": 0.6658968329429626,
+        "min": 0.6559012921061367,
+        "max": 0.6693142920266837
+      },
+      "candidate": {
+        "median": 0.6551777920685709,
+        "min": 0.6483625830151141,
+        "max": 0.6688632920850068
+      }
+    },
+    "ratios_percent": {
+      "baseline": 0.0,
+      "phase5": 1.7601942718465935,
+      "candidate": 0.12214521105551324
+    },
+    "removal_increment_percentage_points": -1.6380490607910803
+  }
+]

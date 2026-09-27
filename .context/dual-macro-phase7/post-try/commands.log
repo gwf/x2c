@@ -1,0 +1,102 @@
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/transform', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/transform.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/transform in 1.09 s
+  Generated 1 C file and 1 header (378.6 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/emit', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/emit.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/emit in 840 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/expressions', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/expressions.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/expressions in 1.12 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE try_application 1 729000 729000
+DUAL_PROFILE try_snapshot 1 951000 479000
+DUAL_PROFILE scope_symbols_copy 1 472000 472000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/generate', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/generate.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/generate in 876 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE try_application 1 620000 620000
+DUAL_PROFILE try_snapshot 1 676000 203000
+DUAL_PROFILE scope_symbols_copy 1 473000 473000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/parse', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/parse.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/parse in 965 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/type', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/type.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/type in 619 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/tokenizer', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/lib/tokenizer.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/tokenizer in 624 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/default/0/exception-hot-paths', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/benchmarks/exception-hot-paths.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/default/0/exception-hot-paths in 573 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE try_application 4 1876000 1876000
+DUAL_PROFILE try_snapshot 4 1846000 73000
+DUAL_PROFILE scope_symbols_copy 4 1773000 1773000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/transform', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/transform.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/transform in 1.30 s
+  Generated 1 C file and 1 header (378.6 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/emit', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/emit.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/emit in 1.06 s
+  Generated 1 C file and 1 header (121.6 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/expressions', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/expressions.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/expressions in 1.31 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE try_application 1 761000 761000
+DUAL_PROFILE try_snapshot 1 1165000 453000
+DUAL_PROFILE scope_symbols_copy 1 712000 712000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/generate', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/generate.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/generate in 1.06 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE try_application 1 618000 618000
+DUAL_PROFILE try_snapshot 1 1092000 206000
+DUAL_PROFILE scope_symbols_copy 1 886000 886000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/parse', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/parse.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/parse in 1.16 s
+  Generated 1 C file and 1 header (236.7 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/type', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/type.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/type in 701 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/tokenizer', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/lib/tokenizer.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/tokenizer in 675 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-post-try-runs/live/0/exception-hot-paths', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/benchmarks/exception-hot-paths.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/live/0/exception-hot-paths in 621 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE try_application 4 1721000 1721000
+DUAL_PROFILE try_snapshot 4 1705000 61000
+DUAL_PROFILE scope_symbols_copy 4 1644000 1644000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/fixture/0/defer-try-cleanup', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/compiler-fixtures/defer-try-cleanup.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/fixture/0/defer-try-cleanup in 558 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE try_application 3 1597000 1597000
+DUAL_PROFILE try_snapshot 3 1046000 48000
+DUAL_PROFILE scope_symbols_copy 3 998000 998000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/fixture/1/defer-try-cleanup', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/compiler-fixtures/defer-try-cleanup.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/fixture/1/defer-try-cleanup in 560 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE try_application 3 1775000 1775000
+DUAL_PROFILE try_snapshot 3 1445000 48000
+DUAL_PROFILE scope_symbols_copy 3 1397000 1397000
+
+COMMAND ['/tmp/x2c-dual-phase7-post-try', 'translate', '--out-dir', '/tmp/dual-phase7-post-try-runs/fixture/2/defer-try-cleanup', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/compiler-fixtures/defer-try-cleanup.x']
+Translated 1 x2c file to /tmp/dual-phase7-post-try-runs/fixture/2/defer-try-cleanup in 568 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE try_application 3 1654000 1654000
+DUAL_PROFILE try_snapshot 3 1113000 45000
+DUAL_PROFILE scope_symbols_copy 3 1068000 1068000

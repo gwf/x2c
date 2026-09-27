@@ -1,0 +1,9 @@
+Translated 1 x2c file to /tmp/dual-phase6-smoke in 582 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 264 28174000 27802000
+DUAL_PROFILE extended_snapshot 264 372000 372000
+DUAL_PROFILE bind_slot_checks 11769 1538000 1538000
+DUAL_PROFILE expression_slot_checks 8417 909000 909000
+DUAL_PROFILE open_prepare 4 8000 8000
+DUAL_PROFILE empty_span 10000 171000 171000

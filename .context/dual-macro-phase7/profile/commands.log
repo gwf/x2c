@@ -1,0 +1,736 @@
+RUN counts/live/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/exception-hot-paths in 647 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 0 0
+DUAL_PROFILE extended_snapshot 265 0 0
+DUAL_PROFILE bind_slot_checks 11809 0 0
+DUAL_PROFILE expression_slot_checks 8531 0 0
+DUAL_PROFILE open_prepare 4 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/tokenizer in 702 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 0 0
+DUAL_PROFILE extended_snapshot 263 0 0
+DUAL_PROFILE bind_slot_checks 12144 0 0
+DUAL_PROFILE expression_slot_checks 12612 0 0
+DUAL_PROFILE open_prepare 5 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/parse in 1.16 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 329 0 0
+DUAL_PROFILE extended_snapshot 329 0 0
+DUAL_PROFILE bind_slot_checks 17781 0 0
+DUAL_PROFILE expression_slot_checks 22094 0 0
+DUAL_PROFILE open_prepare 37 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/type in 703 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 0 0
+DUAL_PROFILE extended_snapshot 269 0 0
+DUAL_PROFILE bind_slot_checks 12456 0 0
+DUAL_PROFILE expression_slot_checks 11538 0 0
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/expressions in 1.35 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 325 0 0
+DUAL_PROFILE extended_snapshot 325 0 0
+DUAL_PROFILE bind_slot_checks 17176 0 0
+DUAL_PROFILE expression_slot_checks 26578 0 0
+DUAL_PROFILE open_prepare 7 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/generate in 1.09 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 310 0 0
+DUAL_PROFILE extended_snapshot 310 0 0
+DUAL_PROFILE bind_slot_checks 15397 0 0
+DUAL_PROFILE expression_slot_checks 14625 0 0
+DUAL_PROFILE open_prepare 5 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/emit in 1.06 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 284 0 0
+DUAL_PROFILE extended_snapshot 284 0 0
+DUAL_PROFILE bind_slot_checks 13509 0 0
+DUAL_PROFILE expression_slot_checks 14040 0 0
+DUAL_PROFILE open_prepare 7 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/live/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/live/0/transform in 1.32 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 344 0 0
+DUAL_PROFILE extended_snapshot 344 0 0
+DUAL_PROFILE bind_slot_checks 17022 0 0
+DUAL_PROFILE expression_slot_checks 24496 0 0
+DUAL_PROFILE open_prepare 19 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/exception-hot-paths in 568 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 0 0
+DUAL_PROFILE extended_snapshot 265 0 0
+DUAL_PROFILE bind_slot_checks 11809 0 0
+DUAL_PROFILE expression_slot_checks 8503 0 0
+DUAL_PROFILE open_prepare 4 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/tokenizer in 623 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 0 0
+DUAL_PROFILE extended_snapshot 263 0 0
+DUAL_PROFILE bind_slot_checks 12144 0 0
+DUAL_PROFILE expression_slot_checks 12584 0 0
+DUAL_PROFILE open_prepare 5 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/parse in 977 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 328 0 0
+DUAL_PROFILE extended_snapshot 328 0 0
+DUAL_PROFILE bind_slot_checks 17733 0 0
+DUAL_PROFILE expression_slot_checks 21506 0 0
+DUAL_PROFILE open_prepare 37 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/type in 634 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 0 0
+DUAL_PROFILE extended_snapshot 269 0 0
+DUAL_PROFILE bind_slot_checks 12456 0 0
+DUAL_PROFILE expression_slot_checks 11443 0 0
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/expressions in 1.14 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 324 0 0
+DUAL_PROFILE extended_snapshot 324 0 0
+DUAL_PROFILE bind_slot_checks 17128 0 0
+DUAL_PROFILE expression_slot_checks 25990 0 0
+DUAL_PROFILE open_prepare 7 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/generate in 885 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 309 0 0
+DUAL_PROFILE extended_snapshot 309 0 0
+DUAL_PROFILE bind_slot_checks 15349 0 0
+DUAL_PROFILE expression_slot_checks 14033 0 0
+DUAL_PROFILE open_prepare 5 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/emit in 851 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 283 0 0
+DUAL_PROFILE extended_snapshot 283 0 0
+DUAL_PROFILE bind_slot_checks 13461 0 0
+DUAL_PROFILE expression_slot_checks 13448 0 0
+DUAL_PROFILE open_prepare 7 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN counts/default/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/counts/default/0/transform in 1.11 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 343 0 0
+DUAL_PROFILE extended_snapshot 343 0 0
+DUAL_PROFILE bind_slot_checks 16974 0 0
+DUAL_PROFILE expression_slot_checks 23908 0 0
+DUAL_PROFILE open_prepare 19 0 0
+DUAL_PROFILE empty_span 0 0 0
+
+RUN timed/live/2/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/exception-hot-paths in 646 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 28584000 28193000
+DUAL_PROFILE extended_snapshot 265 391000 391000
+DUAL_PROFILE bind_slot_checks 11809 1493000 1493000
+DUAL_PROFILE expression_slot_checks 8531 954000 954000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 186000 186000
+
+RUN timed/live/2/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/tokenizer in 702 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 26625000 26294000
+DUAL_PROFILE extended_snapshot 263 331000 331000
+DUAL_PROFILE bind_slot_checks 12144 608000 608000
+DUAL_PROFILE expression_slot_checks 12612 1352000 1352000
+DUAL_PROFILE open_prepare 5 9000 9000
+DUAL_PROFILE empty_span 10000 162000 162000
+
+RUN timed/live/2/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/parse in 1.18 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 329 35786000 34648000
+DUAL_PROFILE extended_snapshot 329 1138000 1138000
+DUAL_PROFILE bind_slot_checks 17781 860000 860000
+DUAL_PROFILE expression_slot_checks 22094 2381000 2381000
+DUAL_PROFILE open_prepare 37 9000 9000
+DUAL_PROFILE empty_span 10000 177000 177000
+
+RUN timed/live/2/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/type in 703 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 25718000 25292000
+DUAL_PROFILE extended_snapshot 269 426000 426000
+DUAL_PROFILE bind_slot_checks 12456 653000 653000
+DUAL_PROFILE expression_slot_checks 11538 1201000 1201000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 159000 159000
+
+RUN timed/live/2/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/expressions in 1.34 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 325 45290000 44071000
+DUAL_PROFILE extended_snapshot 325 1219000 1219000
+DUAL_PROFILE bind_slot_checks 17176 1087000 1087000
+DUAL_PROFILE expression_slot_checks 26578 2781000 2781000
+DUAL_PROFILE open_prepare 7 8000 8000
+DUAL_PROFILE empty_span 10000 168000 168000
+
+RUN timed/live/2/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/generate in 1.08 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 310 32628000 31893000
+DUAL_PROFILE extended_snapshot 310 735000 735000
+DUAL_PROFILE bind_slot_checks 15397 977000 977000
+DUAL_PROFILE expression_slot_checks 14625 1489000 1489000
+DUAL_PROFILE open_prepare 5 8000 8000
+DUAL_PROFILE empty_span 10000 167000 167000
+
+RUN timed/live/2/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/emit in 1.06 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 284 27612000 27061000
+DUAL_PROFILE extended_snapshot 284 551000 551000
+DUAL_PROFILE bind_slot_checks 13509 671000 671000
+DUAL_PROFILE expression_slot_checks 14040 1525000 1525000
+DUAL_PROFILE open_prepare 7 8000 8000
+DUAL_PROFILE empty_span 10000 176000 176000
+
+RUN timed/live/2/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/2/transform in 1.31 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 344 42439000 41077000
+DUAL_PROFILE extended_snapshot 344 1362000 1362000
+DUAL_PROFILE bind_slot_checks 17022 829000 829000
+DUAL_PROFILE expression_slot_checks 24496 2447000 2447000
+DUAL_PROFILE open_prepare 19 7000 7000
+DUAL_PROFILE empty_span 10000 195000 195000
+
+RUN timed/live/1/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/exception-hot-paths in 642 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 26872000 26549000
+DUAL_PROFILE extended_snapshot 265 323000 323000
+DUAL_PROFILE bind_slot_checks 11809 1453000 1453000
+DUAL_PROFILE expression_slot_checks 8531 911000 911000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 161000 161000
+
+RUN timed/live/1/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/tokenizer in 679 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 26379000 26032000
+DUAL_PROFILE extended_snapshot 263 347000 347000
+DUAL_PROFILE bind_slot_checks 12144 603000 603000
+DUAL_PROFILE expression_slot_checks 12612 1224000 1224000
+DUAL_PROFILE open_prepare 5 8000 8000
+DUAL_PROFILE empty_span 10000 163000 163000
+
+RUN timed/live/1/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/parse in 1.17 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 329 33017000 31863000
+DUAL_PROFILE extended_snapshot 329 1154000 1154000
+DUAL_PROFILE bind_slot_checks 17781 844000 844000
+DUAL_PROFILE expression_slot_checks 22094 2195000 2195000
+DUAL_PROFILE open_prepare 37 6000 6000
+DUAL_PROFILE empty_span 10000 171000 171000
+
+RUN timed/live/1/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/type in 670 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 26618000 26247000
+DUAL_PROFILE extended_snapshot 269 371000 371000
+DUAL_PROFILE bind_slot_checks 12456 629000 629000
+DUAL_PROFILE expression_slot_checks 11538 1123000 1123000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 197000 197000
+
+RUN timed/live/1/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/expressions in 1.33 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 325 38458000 37332000
+DUAL_PROFILE extended_snapshot 325 1126000 1126000
+DUAL_PROFILE bind_slot_checks 17176 1156000 1156000
+DUAL_PROFILE expression_slot_checks 26578 2783000 2783000
+DUAL_PROFILE open_prepare 7 8000 8000
+DUAL_PROFILE empty_span 10000 164000 164000
+
+RUN timed/live/1/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/generate in 1.09 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 310 33669000 33015000
+DUAL_PROFILE extended_snapshot 310 654000 654000
+DUAL_PROFILE bind_slot_checks 15397 1027000 1027000
+DUAL_PROFILE expression_slot_checks 14625 1447000 1447000
+DUAL_PROFILE open_prepare 5 7000 7000
+DUAL_PROFILE empty_span 10000 183000 183000
+
+RUN timed/live/1/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/emit in 1.05 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 284 27502000 26950000
+DUAL_PROFILE extended_snapshot 284 552000 552000
+DUAL_PROFILE bind_slot_checks 13509 649000 649000
+DUAL_PROFILE expression_slot_checks 14040 1522000 1522000
+DUAL_PROFILE open_prepare 7 7000 7000
+DUAL_PROFILE empty_span 10000 172000 172000
+
+RUN timed/live/1/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/1/transform in 1.31 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 344 41752000 40569000
+DUAL_PROFILE extended_snapshot 344 1183000 1183000
+DUAL_PROFILE bind_slot_checks 17022 863000 863000
+DUAL_PROFILE expression_slot_checks 24496 2518000 2518000
+DUAL_PROFILE open_prepare 19 8000 8000
+DUAL_PROFILE empty_span 10000 168000 168000
+
+RUN timed/live/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/exception-hot-paths in 644 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 29549000 29181000
+DUAL_PROFILE extended_snapshot 265 368000 368000
+DUAL_PROFILE bind_slot_checks 11809 1612000 1612000
+DUAL_PROFILE expression_slot_checks 8531 866000 866000
+DUAL_PROFILE open_prepare 4 8000 8000
+DUAL_PROFILE empty_span 10000 172000 172000
+
+RUN timed/live/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/tokenizer in 699 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 26530000 26201000
+DUAL_PROFILE extended_snapshot 263 329000 329000
+DUAL_PROFILE bind_slot_checks 12144 618000 618000
+DUAL_PROFILE expression_slot_checks 12612 1252000 1252000
+DUAL_PROFILE open_prepare 5 9000 9000
+DUAL_PROFILE empty_span 10000 163000 163000
+
+RUN timed/live/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/parse in 1.17 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 329 35194000 34152000
+DUAL_PROFILE extended_snapshot 329 1042000 1042000
+DUAL_PROFILE bind_slot_checks 17781 908000 908000
+DUAL_PROFILE expression_slot_checks 22094 2343000 2343000
+DUAL_PROFILE open_prepare 37 8000 8000
+DUAL_PROFILE empty_span 10000 166000 166000
+
+RUN timed/live/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/type in 712 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 27307000 26917000
+DUAL_PROFILE extended_snapshot 269 390000 390000
+DUAL_PROFILE bind_slot_checks 12456 629000 629000
+DUAL_PROFILE expression_slot_checks 11538 1166000 1166000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 191000 191000
+
+RUN timed/live/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/expressions in 1.34 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 325 39470000 38367000
+DUAL_PROFILE extended_snapshot 325 1103000 1103000
+DUAL_PROFILE bind_slot_checks 17176 1098000 1098000
+DUAL_PROFILE expression_slot_checks 26578 2818000 2818000
+DUAL_PROFILE open_prepare 7 6000 6000
+DUAL_PROFILE empty_span 10000 175000 175000
+
+RUN timed/live/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/generate in 1.07 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 310 30712000 30040000
+DUAL_PROFILE extended_snapshot 310 672000 672000
+DUAL_PROFILE bind_slot_checks 15397 975000 975000
+DUAL_PROFILE expression_slot_checks 14625 1446000 1446000
+DUAL_PROFILE open_prepare 5 8000 8000
+DUAL_PROFILE empty_span 10000 171000 171000
+
+RUN timed/live/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/emit in 1.07 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 284 30081000 29501000
+DUAL_PROFILE extended_snapshot 284 580000 580000
+DUAL_PROFILE bind_slot_checks 13509 680000 680000
+DUAL_PROFILE expression_slot_checks 14040 1468000 1468000
+DUAL_PROFILE open_prepare 7 7000 7000
+DUAL_PROFILE empty_span 10000 189000 189000
+
+RUN timed/live/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/live/0/transform in 1.31 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 344 41515000 40327000
+DUAL_PROFILE extended_snapshot 344 1188000 1188000
+DUAL_PROFILE bind_slot_checks 17022 873000 873000
+DUAL_PROFILE expression_slot_checks 24496 2474000 2474000
+DUAL_PROFILE open_prepare 19 8000 8000
+DUAL_PROFILE empty_span 10000 185000 185000
+
+RUN timed/default/2/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/exception-hot-paths in 571 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 28359000 28011000
+DUAL_PROFILE extended_snapshot 265 348000 348000
+DUAL_PROFILE bind_slot_checks 11809 1486000 1486000
+DUAL_PROFILE expression_slot_checks 8503 884000 884000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 176000 176000
+
+RUN timed/default/2/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/tokenizer in 617 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 29079000 28719000
+DUAL_PROFILE extended_snapshot 263 360000 360000
+DUAL_PROFILE bind_slot_checks 12144 577000 577000
+DUAL_PROFILE expression_slot_checks 12584 1283000 1283000
+DUAL_PROFILE open_prepare 5 6000 6000
+DUAL_PROFILE empty_span 10000 169000 169000
+
+RUN timed/default/2/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/parse in 972 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 328 31280000 30242000
+DUAL_PROFILE extended_snapshot 328 1038000 1038000
+DUAL_PROFILE bind_slot_checks 17733 861000 861000
+DUAL_PROFILE expression_slot_checks 21506 2214000 2214000
+DUAL_PROFILE open_prepare 37 7000 7000
+DUAL_PROFILE empty_span 10000 181000 181000
+
+RUN timed/default/2/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/type in 629 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 26569000 26186000
+DUAL_PROFILE extended_snapshot 269 383000 383000
+DUAL_PROFILE bind_slot_checks 12456 597000 597000
+DUAL_PROFILE expression_slot_checks 11443 1156000 1156000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 176000 176000
+
+RUN timed/default/2/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/expressions in 1.13 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 324 37864000 36825000
+DUAL_PROFILE extended_snapshot 324 1039000 1039000
+DUAL_PROFILE bind_slot_checks 17128 1134000 1134000
+DUAL_PROFILE expression_slot_checks 25990 2771000 2771000
+DUAL_PROFILE open_prepare 7 7000 7000
+DUAL_PROFILE empty_span 10000 167000 167000
+
+RUN timed/default/2/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/generate in 876 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 309 29574000 28969000
+DUAL_PROFILE extended_snapshot 309 605000 605000
+DUAL_PROFILE bind_slot_checks 15349 968000 968000
+DUAL_PROFILE expression_slot_checks 14033 1447000 1447000
+DUAL_PROFILE open_prepare 5 7000 7000
+DUAL_PROFILE empty_span 10000 198000 198000
+
+RUN timed/default/2/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/emit in 877 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 283 27773000 27278000
+DUAL_PROFILE extended_snapshot 283 495000 495000
+DUAL_PROFILE bind_slot_checks 13461 693000 693000
+DUAL_PROFILE expression_slot_checks 13448 1441000 1441000
+DUAL_PROFILE open_prepare 7 8000 8000
+DUAL_PROFILE empty_span 10000 184000 184000
+
+RUN timed/default/2/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/2/transform in 1.09 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 343 39993000 38917000
+DUAL_PROFILE extended_snapshot 343 1076000 1076000
+DUAL_PROFILE bind_slot_checks 16974 800000 800000
+DUAL_PROFILE expression_slot_checks 23908 2293000 2293000
+DUAL_PROFILE open_prepare 19 6000 6000
+DUAL_PROFILE empty_span 10000 161000 161000
+
+RUN timed/default/1/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/exception-hot-paths in 582 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 29472000 29120000
+DUAL_PROFILE extended_snapshot 265 352000 352000
+DUAL_PROFILE bind_slot_checks 11809 1460000 1460000
+DUAL_PROFILE expression_slot_checks 8503 921000 921000
+DUAL_PROFILE open_prepare 4 6000 6000
+DUAL_PROFILE empty_span 10000 183000 183000
+
+RUN timed/default/1/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/tokenizer in 628 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 28307000 27970000
+DUAL_PROFILE extended_snapshot 263 337000 337000
+DUAL_PROFILE bind_slot_checks 12144 626000 626000
+DUAL_PROFILE expression_slot_checks 12584 1314000 1314000
+DUAL_PROFILE open_prepare 5 6000 6000
+DUAL_PROFILE empty_span 10000 164000 164000
+
+RUN timed/default/1/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/parse in 989 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 328 35237000 34200000
+DUAL_PROFILE extended_snapshot 328 1037000 1037000
+DUAL_PROFILE bind_slot_checks 17733 861000 861000
+DUAL_PROFILE expression_slot_checks 21506 2227000 2227000
+DUAL_PROFILE open_prepare 37 5000 5000
+DUAL_PROFILE empty_span 10000 169000 169000
+
+RUN timed/default/1/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/type in 638 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 27737000 27344000
+DUAL_PROFILE extended_snapshot 269 393000 393000
+DUAL_PROFILE bind_slot_checks 12456 603000 603000
+DUAL_PROFILE expression_slot_checks 11443 1190000 1190000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 193000 193000
+
+RUN timed/default/1/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/expressions in 1.13 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 324 41308000 40262000
+DUAL_PROFILE extended_snapshot 324 1046000 1046000
+DUAL_PROFILE bind_slot_checks 17128 1077000 1077000
+DUAL_PROFILE expression_slot_checks 25990 2534000 2534000
+DUAL_PROFILE open_prepare 7 9000 9000
+DUAL_PROFILE empty_span 10000 147000 147000
+
+RUN timed/default/1/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/generate in 889 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 309 30711000 30078000
+DUAL_PROFILE extended_snapshot 309 633000 633000
+DUAL_PROFILE bind_slot_checks 15349 977000 977000
+DUAL_PROFILE expression_slot_checks 14033 1522000 1522000
+DUAL_PROFILE open_prepare 5 6000 6000
+DUAL_PROFILE empty_span 10000 190000 190000
+
+RUN timed/default/1/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/emit in 868 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 283 29458000 28928000
+DUAL_PROFILE extended_snapshot 283 530000 530000
+DUAL_PROFILE bind_slot_checks 13461 747000 747000
+DUAL_PROFILE expression_slot_checks 13448 1376000 1376000
+DUAL_PROFILE open_prepare 7 8000 8000
+DUAL_PROFILE empty_span 10000 199000 199000
+
+RUN timed/default/1/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/1/transform in 1.12 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 343 42218000 41059000
+DUAL_PROFILE extended_snapshot 343 1159000 1159000
+DUAL_PROFILE bind_slot_checks 16974 862000 862000
+DUAL_PROFILE expression_slot_checks 23908 2363000 2363000
+DUAL_PROFILE open_prepare 19 9000 9000
+DUAL_PROFILE empty_span 10000 158000 158000
+
+RUN timed/default/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/exception-hot-paths in 589 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 265 28251000 27889000
+DUAL_PROFILE extended_snapshot 265 362000 362000
+DUAL_PROFILE bind_slot_checks 11809 1503000 1503000
+DUAL_PROFILE expression_slot_checks 8503 933000 933000
+DUAL_PROFILE open_prepare 4 6000 6000
+DUAL_PROFILE empty_span 10000 167000 167000
+
+RUN timed/default/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/tokenizer in 634 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 263 25681000 25336000
+DUAL_PROFILE extended_snapshot 263 345000 345000
+DUAL_PROFILE bind_slot_checks 12144 653000 653000
+DUAL_PROFILE expression_slot_checks 12584 1295000 1295000
+DUAL_PROFILE open_prepare 5 7000 7000
+DUAL_PROFILE empty_span 10000 149000 149000
+
+RUN timed/default/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/parse in 972 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 328 32411000 31427000
+DUAL_PROFILE extended_snapshot 328 984000 984000
+DUAL_PROFILE bind_slot_checks 17733 897000 897000
+DUAL_PROFILE expression_slot_checks 21506 2226000 2226000
+DUAL_PROFILE open_prepare 37 8000 8000
+DUAL_PROFILE empty_span 10000 163000 163000
+
+RUN timed/default/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/type in 633 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 269 28392000 28000000
+DUAL_PROFILE extended_snapshot 269 392000 392000
+DUAL_PROFILE bind_slot_checks 12456 612000 612000
+DUAL_PROFILE expression_slot_checks 11443 1179000 1179000
+DUAL_PROFILE open_prepare 0 0 0
+DUAL_PROFILE empty_span 10000 186000 186000
+
+RUN timed/default/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/expressions in 1.14 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 324 40306000 39203000
+DUAL_PROFILE extended_snapshot 324 1103000 1103000
+DUAL_PROFILE bind_slot_checks 17128 1151000 1151000
+DUAL_PROFILE expression_slot_checks 25990 2744000 2744000
+DUAL_PROFILE open_prepare 7 9000 9000
+DUAL_PROFILE empty_span 10000 164000 164000
+
+RUN timed/default/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/generate in 875 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 309 29063000 28449000
+DUAL_PROFILE extended_snapshot 309 614000 614000
+DUAL_PROFILE bind_slot_checks 15349 988000 988000
+DUAL_PROFILE expression_slot_checks 14033 1494000 1494000
+DUAL_PROFILE open_prepare 5 6000 6000
+DUAL_PROFILE empty_span 10000 171000 171000
+
+RUN timed/default/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/emit in 873 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 283 30744000 30260000
+DUAL_PROFILE extended_snapshot 283 484000 484000
+DUAL_PROFILE bind_slot_checks 13461 728000 728000
+DUAL_PROFILE expression_slot_checks 13448 1355000 1355000
+DUAL_PROFILE open_prepare 7 6000 6000
+DUAL_PROFILE empty_span 10000 197000 197000
+
+RUN timed/default/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/timed/default/0/transform in 1.12 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 343 42630000 41482000
+DUAL_PROFILE extended_snapshot 343 1148000 1148000
+DUAL_PROFILE bind_slot_checks 16974 869000 869000
+DUAL_PROFILE expression_slot_checks 23908 2432000 2432000
+DUAL_PROFILE open_prepare 19 7000 7000
+DUAL_PROFILE empty_span 10000 163000 163000
+
+RUN fixture/default/2/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/fixture/default/2/defer-try-cleanup in 575 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 264 30513000 30189000
+DUAL_PROFILE extended_snapshot 264 324000 324000
+DUAL_PROFILE bind_slot_checks 11769 1425000 1425000
+DUAL_PROFILE expression_slot_checks 8417 905000 905000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 171000 171000
+
+RUN fixture/default/1/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/fixture/default/1/defer-try-cleanup in 578 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 264 29608000 29274000
+DUAL_PROFILE extended_snapshot 264 334000 334000
+DUAL_PROFILE bind_slot_checks 11769 1470000 1470000
+DUAL_PROFILE expression_slot_checks 8417 911000 911000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 187000 187000
+
+RUN fixture/default/0/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/profile/runs/fixture/default/0/defer-try-cleanup in 578 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 0 0 0
+DUAL_PROFILE all_snapshot 264 26719000 26395000
+DUAL_PROFILE extended_snapshot 264 324000 324000
+DUAL_PROFILE bind_slot_checks 11769 1468000 1468000
+DUAL_PROFILE expression_slot_checks 8417 884000 884000
+DUAL_PROFILE open_prepare 4 7000 7000
+DUAL_PROFILE empty_span 10000 199000 199000

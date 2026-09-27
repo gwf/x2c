@@ -1,0 +1,3687 @@
+[
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 42630000,
+        "exclusive_ns": 41482000
+      },
+      "extended_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 1148000,
+        "exclusive_ns": 1148000
+      },
+      "bind_slot_checks": {
+        "calls": 16974,
+        "inclusive_ns": 869000,
+        "exclusive_ns": 869000
+      },
+      "expression_slot_checks": {
+        "calls": 23908,
+        "inclusive_ns": 2432000,
+        "exclusive_ns": 2432000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 163000,
+        "exclusive_ns": 163000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 30744000,
+        "exclusive_ns": 30260000
+      },
+      "extended_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 484000,
+        "exclusive_ns": 484000
+      },
+      "bind_slot_checks": {
+        "calls": 13461,
+        "inclusive_ns": 728000,
+        "exclusive_ns": 728000
+      },
+      "expression_slot_checks": {
+        "calls": 13448,
+        "inclusive_ns": 1355000,
+        "exclusive_ns": 1355000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 197000,
+        "exclusive_ns": 197000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 40306000,
+        "exclusive_ns": 39203000
+      },
+      "extended_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 1103000,
+        "exclusive_ns": 1103000
+      },
+      "bind_slot_checks": {
+        "calls": 17128,
+        "inclusive_ns": 1151000,
+        "exclusive_ns": 1151000
+      },
+      "expression_slot_checks": {
+        "calls": 25990,
+        "inclusive_ns": 2744000,
+        "exclusive_ns": 2744000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 164000,
+        "exclusive_ns": 164000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 29063000,
+        "exclusive_ns": 28449000
+      },
+      "extended_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 614000,
+        "exclusive_ns": 614000
+      },
+      "bind_slot_checks": {
+        "calls": 15349,
+        "inclusive_ns": 988000,
+        "exclusive_ns": 988000
+      },
+      "expression_slot_checks": {
+        "calls": 14033,
+        "inclusive_ns": 1494000,
+        "exclusive_ns": 1494000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 171000,
+        "exclusive_ns": 171000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 32411000,
+        "exclusive_ns": 31427000
+      },
+      "extended_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 984000,
+        "exclusive_ns": 984000
+      },
+      "bind_slot_checks": {
+        "calls": 17733,
+        "inclusive_ns": 897000,
+        "exclusive_ns": 897000
+      },
+      "expression_slot_checks": {
+        "calls": 21506,
+        "inclusive_ns": 2226000,
+        "exclusive_ns": 2226000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 163000,
+        "exclusive_ns": 163000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 28392000,
+        "exclusive_ns": 28000000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 392000,
+        "exclusive_ns": 392000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 612000,
+        "exclusive_ns": 612000
+      },
+      "expression_slot_checks": {
+        "calls": 11443,
+        "inclusive_ns": 1179000,
+        "exclusive_ns": 1179000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 186000,
+        "exclusive_ns": 186000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 25681000,
+        "exclusive_ns": 25336000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 345000,
+        "exclusive_ns": 345000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 653000,
+        "exclusive_ns": 653000
+      },
+      "expression_slot_checks": {
+        "calls": 12584,
+        "inclusive_ns": 1295000,
+        "exclusive_ns": 1295000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 149000,
+        "exclusive_ns": 149000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 28251000,
+        "exclusive_ns": 27889000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 362000,
+        "exclusive_ns": 362000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1503000,
+        "exclusive_ns": 1503000
+      },
+      "expression_slot_checks": {
+        "calls": 8503,
+        "inclusive_ns": 933000,
+        "exclusive_ns": 933000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 167000,
+        "exclusive_ns": 167000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 42218000,
+        "exclusive_ns": 41059000
+      },
+      "extended_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 1159000,
+        "exclusive_ns": 1159000
+      },
+      "bind_slot_checks": {
+        "calls": 16974,
+        "inclusive_ns": 862000,
+        "exclusive_ns": 862000
+      },
+      "expression_slot_checks": {
+        "calls": 23908,
+        "inclusive_ns": 2363000,
+        "exclusive_ns": 2363000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 158000,
+        "exclusive_ns": 158000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 29458000,
+        "exclusive_ns": 28928000
+      },
+      "extended_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 530000,
+        "exclusive_ns": 530000
+      },
+      "bind_slot_checks": {
+        "calls": 13461,
+        "inclusive_ns": 747000,
+        "exclusive_ns": 747000
+      },
+      "expression_slot_checks": {
+        "calls": 13448,
+        "inclusive_ns": 1376000,
+        "exclusive_ns": 1376000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 199000,
+        "exclusive_ns": 199000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 41308000,
+        "exclusive_ns": 40262000
+      },
+      "extended_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 1046000,
+        "exclusive_ns": 1046000
+      },
+      "bind_slot_checks": {
+        "calls": 17128,
+        "inclusive_ns": 1077000,
+        "exclusive_ns": 1077000
+      },
+      "expression_slot_checks": {
+        "calls": 25990,
+        "inclusive_ns": 2534000,
+        "exclusive_ns": 2534000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 147000,
+        "exclusive_ns": 147000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 30711000,
+        "exclusive_ns": 30078000
+      },
+      "extended_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 633000,
+        "exclusive_ns": 633000
+      },
+      "bind_slot_checks": {
+        "calls": 15349,
+        "inclusive_ns": 977000,
+        "exclusive_ns": 977000
+      },
+      "expression_slot_checks": {
+        "calls": 14033,
+        "inclusive_ns": 1522000,
+        "exclusive_ns": 1522000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 190000,
+        "exclusive_ns": 190000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 35237000,
+        "exclusive_ns": 34200000
+      },
+      "extended_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 1037000,
+        "exclusive_ns": 1037000
+      },
+      "bind_slot_checks": {
+        "calls": 17733,
+        "inclusive_ns": 861000,
+        "exclusive_ns": 861000
+      },
+      "expression_slot_checks": {
+        "calls": 21506,
+        "inclusive_ns": 2227000,
+        "exclusive_ns": 2227000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 5000,
+        "exclusive_ns": 5000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 169000,
+        "exclusive_ns": 169000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 27737000,
+        "exclusive_ns": 27344000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 393000,
+        "exclusive_ns": 393000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 603000,
+        "exclusive_ns": 603000
+      },
+      "expression_slot_checks": {
+        "calls": 11443,
+        "inclusive_ns": 1190000,
+        "exclusive_ns": 1190000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 193000,
+        "exclusive_ns": 193000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 28307000,
+        "exclusive_ns": 27970000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 337000,
+        "exclusive_ns": 337000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 626000,
+        "exclusive_ns": 626000
+      },
+      "expression_slot_checks": {
+        "calls": 12584,
+        "inclusive_ns": 1314000,
+        "exclusive_ns": 1314000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 164000,
+        "exclusive_ns": 164000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 1,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 29472000,
+        "exclusive_ns": 29120000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 352000,
+        "exclusive_ns": 352000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1460000,
+        "exclusive_ns": 1460000
+      },
+      "expression_slot_checks": {
+        "calls": 8503,
+        "inclusive_ns": 921000,
+        "exclusive_ns": 921000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 183000,
+        "exclusive_ns": 183000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 39993000,
+        "exclusive_ns": 38917000
+      },
+      "extended_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 1076000,
+        "exclusive_ns": 1076000
+      },
+      "bind_slot_checks": {
+        "calls": 16974,
+        "inclusive_ns": 800000,
+        "exclusive_ns": 800000
+      },
+      "expression_slot_checks": {
+        "calls": 23908,
+        "inclusive_ns": 2293000,
+        "exclusive_ns": 2293000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 161000,
+        "exclusive_ns": 161000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 27773000,
+        "exclusive_ns": 27278000
+      },
+      "extended_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 495000,
+        "exclusive_ns": 495000
+      },
+      "bind_slot_checks": {
+        "calls": 13461,
+        "inclusive_ns": 693000,
+        "exclusive_ns": 693000
+      },
+      "expression_slot_checks": {
+        "calls": 13448,
+        "inclusive_ns": 1441000,
+        "exclusive_ns": 1441000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 184000,
+        "exclusive_ns": 184000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 37864000,
+        "exclusive_ns": 36825000
+      },
+      "extended_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 1039000,
+        "exclusive_ns": 1039000
+      },
+      "bind_slot_checks": {
+        "calls": 17128,
+        "inclusive_ns": 1134000,
+        "exclusive_ns": 1134000
+      },
+      "expression_slot_checks": {
+        "calls": 25990,
+        "inclusive_ns": 2771000,
+        "exclusive_ns": 2771000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 167000,
+        "exclusive_ns": 167000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 29574000,
+        "exclusive_ns": 28969000
+      },
+      "extended_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 605000,
+        "exclusive_ns": 605000
+      },
+      "bind_slot_checks": {
+        "calls": 15349,
+        "inclusive_ns": 968000,
+        "exclusive_ns": 968000
+      },
+      "expression_slot_checks": {
+        "calls": 14033,
+        "inclusive_ns": 1447000,
+        "exclusive_ns": 1447000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 198000,
+        "exclusive_ns": 198000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 31280000,
+        "exclusive_ns": 30242000
+      },
+      "extended_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 1038000,
+        "exclusive_ns": 1038000
+      },
+      "bind_slot_checks": {
+        "calls": 17733,
+        "inclusive_ns": 861000,
+        "exclusive_ns": 861000
+      },
+      "expression_slot_checks": {
+        "calls": 21506,
+        "inclusive_ns": 2214000,
+        "exclusive_ns": 2214000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 181000,
+        "exclusive_ns": 181000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 26569000,
+        "exclusive_ns": 26186000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 383000,
+        "exclusive_ns": 383000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 597000,
+        "exclusive_ns": 597000
+      },
+      "expression_slot_checks": {
+        "calls": 11443,
+        "inclusive_ns": 1156000,
+        "exclusive_ns": 1156000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 176000,
+        "exclusive_ns": 176000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 29079000,
+        "exclusive_ns": 28719000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 360000,
+        "exclusive_ns": 360000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 577000,
+        "exclusive_ns": 577000
+      },
+      "expression_slot_checks": {
+        "calls": 12584,
+        "inclusive_ns": 1283000,
+        "exclusive_ns": 1283000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 169000,
+        "exclusive_ns": 169000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "default",
+    "sample": 2,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 28359000,
+        "exclusive_ns": 28011000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 348000,
+        "exclusive_ns": 348000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1486000,
+        "exclusive_ns": 1486000
+      },
+      "expression_slot_checks": {
+        "calls": 8503,
+        "inclusive_ns": 884000,
+        "exclusive_ns": 884000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 176000,
+        "exclusive_ns": 176000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 41515000,
+        "exclusive_ns": 40327000
+      },
+      "extended_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 1188000,
+        "exclusive_ns": 1188000
+      },
+      "bind_slot_checks": {
+        "calls": 17022,
+        "inclusive_ns": 873000,
+        "exclusive_ns": 873000
+      },
+      "expression_slot_checks": {
+        "calls": 24496,
+        "inclusive_ns": 2474000,
+        "exclusive_ns": 2474000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 185000,
+        "exclusive_ns": 185000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 30081000,
+        "exclusive_ns": 29501000
+      },
+      "extended_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 580000,
+        "exclusive_ns": 580000
+      },
+      "bind_slot_checks": {
+        "calls": 13509,
+        "inclusive_ns": 680000,
+        "exclusive_ns": 680000
+      },
+      "expression_slot_checks": {
+        "calls": 14040,
+        "inclusive_ns": 1468000,
+        "exclusive_ns": 1468000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 189000,
+        "exclusive_ns": 189000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 39470000,
+        "exclusive_ns": 38367000
+      },
+      "extended_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 1103000,
+        "exclusive_ns": 1103000
+      },
+      "bind_slot_checks": {
+        "calls": 17176,
+        "inclusive_ns": 1098000,
+        "exclusive_ns": 1098000
+      },
+      "expression_slot_checks": {
+        "calls": 26578,
+        "inclusive_ns": 2818000,
+        "exclusive_ns": 2818000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 175000,
+        "exclusive_ns": 175000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 30712000,
+        "exclusive_ns": 30040000
+      },
+      "extended_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 672000,
+        "exclusive_ns": 672000
+      },
+      "bind_slot_checks": {
+        "calls": 15397,
+        "inclusive_ns": 975000,
+        "exclusive_ns": 975000
+      },
+      "expression_slot_checks": {
+        "calls": 14625,
+        "inclusive_ns": 1446000,
+        "exclusive_ns": 1446000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 171000,
+        "exclusive_ns": 171000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 35194000,
+        "exclusive_ns": 34152000
+      },
+      "extended_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 1042000,
+        "exclusive_ns": 1042000
+      },
+      "bind_slot_checks": {
+        "calls": 17781,
+        "inclusive_ns": 908000,
+        "exclusive_ns": 908000
+      },
+      "expression_slot_checks": {
+        "calls": 22094,
+        "inclusive_ns": 2343000,
+        "exclusive_ns": 2343000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 166000,
+        "exclusive_ns": 166000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 27307000,
+        "exclusive_ns": 26917000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 390000,
+        "exclusive_ns": 390000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 629000,
+        "exclusive_ns": 629000
+      },
+      "expression_slot_checks": {
+        "calls": 11538,
+        "inclusive_ns": 1166000,
+        "exclusive_ns": 1166000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 191000,
+        "exclusive_ns": 191000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 26530000,
+        "exclusive_ns": 26201000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 329000,
+        "exclusive_ns": 329000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 618000,
+        "exclusive_ns": 618000
+      },
+      "expression_slot_checks": {
+        "calls": 12612,
+        "inclusive_ns": 1252000,
+        "exclusive_ns": 1252000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 163000,
+        "exclusive_ns": 163000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 29549000,
+        "exclusive_ns": 29181000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 368000,
+        "exclusive_ns": 368000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1612000,
+        "exclusive_ns": 1612000
+      },
+      "expression_slot_checks": {
+        "calls": 8531,
+        "inclusive_ns": 866000,
+        "exclusive_ns": 866000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 172000,
+        "exclusive_ns": 172000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 41752000,
+        "exclusive_ns": 40569000
+      },
+      "extended_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 1183000,
+        "exclusive_ns": 1183000
+      },
+      "bind_slot_checks": {
+        "calls": 17022,
+        "inclusive_ns": 863000,
+        "exclusive_ns": 863000
+      },
+      "expression_slot_checks": {
+        "calls": 24496,
+        "inclusive_ns": 2518000,
+        "exclusive_ns": 2518000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 168000,
+        "exclusive_ns": 168000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 27502000,
+        "exclusive_ns": 26950000
+      },
+      "extended_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 552000,
+        "exclusive_ns": 552000
+      },
+      "bind_slot_checks": {
+        "calls": 13509,
+        "inclusive_ns": 649000,
+        "exclusive_ns": 649000
+      },
+      "expression_slot_checks": {
+        "calls": 14040,
+        "inclusive_ns": 1522000,
+        "exclusive_ns": 1522000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 172000,
+        "exclusive_ns": 172000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 38458000,
+        "exclusive_ns": 37332000
+      },
+      "extended_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 1126000,
+        "exclusive_ns": 1126000
+      },
+      "bind_slot_checks": {
+        "calls": 17176,
+        "inclusive_ns": 1156000,
+        "exclusive_ns": 1156000
+      },
+      "expression_slot_checks": {
+        "calls": 26578,
+        "inclusive_ns": 2783000,
+        "exclusive_ns": 2783000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 164000,
+        "exclusive_ns": 164000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 33669000,
+        "exclusive_ns": 33015000
+      },
+      "extended_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 654000,
+        "exclusive_ns": 654000
+      },
+      "bind_slot_checks": {
+        "calls": 15397,
+        "inclusive_ns": 1027000,
+        "exclusive_ns": 1027000
+      },
+      "expression_slot_checks": {
+        "calls": 14625,
+        "inclusive_ns": 1447000,
+        "exclusive_ns": 1447000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 183000,
+        "exclusive_ns": 183000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 33017000,
+        "exclusive_ns": 31863000
+      },
+      "extended_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 1154000,
+        "exclusive_ns": 1154000
+      },
+      "bind_slot_checks": {
+        "calls": 17781,
+        "inclusive_ns": 844000,
+        "exclusive_ns": 844000
+      },
+      "expression_slot_checks": {
+        "calls": 22094,
+        "inclusive_ns": 2195000,
+        "exclusive_ns": 2195000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 6000,
+        "exclusive_ns": 6000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 171000,
+        "exclusive_ns": 171000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 26618000,
+        "exclusive_ns": 26247000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 371000,
+        "exclusive_ns": 371000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 629000,
+        "exclusive_ns": 629000
+      },
+      "expression_slot_checks": {
+        "calls": 11538,
+        "inclusive_ns": 1123000,
+        "exclusive_ns": 1123000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 197000,
+        "exclusive_ns": 197000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 26379000,
+        "exclusive_ns": 26032000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 347000,
+        "exclusive_ns": 347000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 603000,
+        "exclusive_ns": 603000
+      },
+      "expression_slot_checks": {
+        "calls": 12612,
+        "inclusive_ns": 1224000,
+        "exclusive_ns": 1224000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 163000,
+        "exclusive_ns": 163000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 1,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 26872000,
+        "exclusive_ns": 26549000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 323000,
+        "exclusive_ns": 323000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1453000,
+        "exclusive_ns": 1453000
+      },
+      "expression_slot_checks": {
+        "calls": 8531,
+        "inclusive_ns": 911000,
+        "exclusive_ns": 911000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 161000,
+        "exclusive_ns": 161000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 42439000,
+        "exclusive_ns": 41077000
+      },
+      "extended_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 1362000,
+        "exclusive_ns": 1362000
+      },
+      "bind_slot_checks": {
+        "calls": 17022,
+        "inclusive_ns": 829000,
+        "exclusive_ns": 829000
+      },
+      "expression_slot_checks": {
+        "calls": 24496,
+        "inclusive_ns": 2447000,
+        "exclusive_ns": 2447000
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 195000,
+        "exclusive_ns": 195000
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 27612000,
+        "exclusive_ns": 27061000
+      },
+      "extended_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 551000,
+        "exclusive_ns": 551000
+      },
+      "bind_slot_checks": {
+        "calls": 13509,
+        "inclusive_ns": 671000,
+        "exclusive_ns": 671000
+      },
+      "expression_slot_checks": {
+        "calls": 14040,
+        "inclusive_ns": 1525000,
+        "exclusive_ns": 1525000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 176000,
+        "exclusive_ns": 176000
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 45290000,
+        "exclusive_ns": 44071000
+      },
+      "extended_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 1219000,
+        "exclusive_ns": 1219000
+      },
+      "bind_slot_checks": {
+        "calls": 17176,
+        "inclusive_ns": 1087000,
+        "exclusive_ns": 1087000
+      },
+      "expression_slot_checks": {
+        "calls": 26578,
+        "inclusive_ns": 2781000,
+        "exclusive_ns": 2781000
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 168000,
+        "exclusive_ns": 168000
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 32628000,
+        "exclusive_ns": 31893000
+      },
+      "extended_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 735000,
+        "exclusive_ns": 735000
+      },
+      "bind_slot_checks": {
+        "calls": 15397,
+        "inclusive_ns": 977000,
+        "exclusive_ns": 977000
+      },
+      "expression_slot_checks": {
+        "calls": 14625,
+        "inclusive_ns": 1489000,
+        "exclusive_ns": 1489000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 8000,
+        "exclusive_ns": 8000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 167000,
+        "exclusive_ns": 167000
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 35786000,
+        "exclusive_ns": 34648000
+      },
+      "extended_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 1138000,
+        "exclusive_ns": 1138000
+      },
+      "bind_slot_checks": {
+        "calls": 17781,
+        "inclusive_ns": 860000,
+        "exclusive_ns": 860000
+      },
+      "expression_slot_checks": {
+        "calls": 22094,
+        "inclusive_ns": 2381000,
+        "exclusive_ns": 2381000
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 177000,
+        "exclusive_ns": 177000
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 25718000,
+        "exclusive_ns": 25292000
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 426000,
+        "exclusive_ns": 426000
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 653000,
+        "exclusive_ns": 653000
+      },
+      "expression_slot_checks": {
+        "calls": 11538,
+        "inclusive_ns": 1201000,
+        "exclusive_ns": 1201000
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 159000,
+        "exclusive_ns": 159000
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 26625000,
+        "exclusive_ns": 26294000
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 331000,
+        "exclusive_ns": 331000
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 608000,
+        "exclusive_ns": 608000
+      },
+      "expression_slot_checks": {
+        "calls": 12612,
+        "inclusive_ns": 1352000,
+        "exclusive_ns": 1352000
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 9000,
+        "exclusive_ns": 9000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 162000,
+        "exclusive_ns": 162000
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "mode": "live",
+    "sample": 2,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 28584000,
+        "exclusive_ns": 28193000
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 391000,
+        "exclusive_ns": 391000
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 1493000,
+        "exclusive_ns": 1493000
+      },
+      "expression_slot_checks": {
+        "calls": 8531,
+        "inclusive_ns": 954000,
+        "exclusive_ns": 954000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 186000,
+        "exclusive_ns": 186000
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 343,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 16974,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 23908,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 283,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 13461,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 13448,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 324,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 17128,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 25990,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 309,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 15349,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 14033,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 328,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 17733,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 21506,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 11443,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 12584,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "default",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 8503,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/transform.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 344,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 17022,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 24496,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 19,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "transform.c": {
+        "bytes": 386514,
+        "sha256": "2a659d280139d557dee7b0756c7410742f478bf0a2ff6aedf4d595af391d1b17"
+      },
+      "transform.h": {
+        "bytes": 1162,
+        "sha256": "20b69beb80e6163593cdcd3c127151c32e15f3c0355348f681c7735d67881fee"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/emit.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 284,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 13509,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 14040,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "emit.c": {
+        "bytes": 124324,
+        "sha256": "4609f60e9781fa55bcb82e3fff5e15fd18939c8cab1c0cb3c38ffa162cbecc83"
+      },
+      "emit.h": {
+        "bytes": 241,
+        "sha256": "c25c16dfad728485dc6ebfce2186d026b98ac555c8196b01603ff9df8604ecdd"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/expressions.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 325,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 17176,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 26578,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 7,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "expressions.c": {
+        "bytes": 354864,
+        "sha256": "f9d397d0ba279c99f451db67c3981cb88f03a1ab02f5c63126ab057367b38b14"
+      },
+      "expressions.h": {
+        "bytes": 2275,
+        "sha256": "ed2629db3fccbf12f21e6bb9cf06abbd9fa7d8ce46744ef695b9e2b701fe5246"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/generate.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 310,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 15397,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 14625,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "generate.c": {
+        "bytes": 124564,
+        "sha256": "3987c64a40adc570d3cb8cea9b9683af903e7a0ba7b0f38812e716443d79664a"
+      },
+      "generate.h": {
+        "bytes": 485,
+        "sha256": "c892eb28afcc84df435e2bf057c6bd562350c63d54a0cd255b27981b01aa1cdb"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/parse.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 329,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 17781,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 22094,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 37,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "parse.c": {
+        "bytes": 240131,
+        "sha256": "d2ba9f807396351c30709bdddd9a6017db13a19c722852890c17aa184ed315aa"
+      },
+      "parse.h": {
+        "bytes": 2282,
+        "sha256": "ae33e1bbfbe8463b2765e390f96a675628cd028b05e91b00d149a2dff53de504"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "src/type.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 269,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 12456,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 11538,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "type.c": {
+        "bytes": 52264,
+        "sha256": "d954c38253e633f48556ea5ed2ffa3579a1a6e39a32b97346c1b9101158f97eb"
+      },
+      "type.h": {
+        "bytes": 2773,
+        "sha256": "d61049e98c69259adcbcf4eb84f050227aa8fb905c360181c8e01c07c86975b9"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "lib/tokenizer.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 263,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 12144,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 12612,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 5,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "tokenizer.c": {
+        "bytes": 42890,
+        "sha256": "99e1f7faece741e154634fe2c543b63aa7baf5cf11a32eb6273d14661d02edf9"
+      },
+      "tokenizer.h": {
+        "bytes": 1607,
+        "sha256": "824e7fe2eb10585e01347d87d1682c060ec3cc60048958139e4c4a806d3a9272"
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "mode": "live",
+    "sample": 0,
+    "source": "unittest/benchmarks/exception-hot-paths.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "extended_snapshot": {
+        "calls": 265,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "bind_slot_checks": {
+        "calls": 11809,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "expression_slot_checks": {
+        "calls": 8531,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "empty_span": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      }
+    },
+    "parity": true,
+    "files": {
+      "exception-hot-paths.c": {
+        "bytes": 7849,
+        "sha256": "cc654afd7fcd758076c0add7b455b4d4ea8d0918e4bb651a4c0a0df63bc81caf"
+      },
+      "exception-hot-paths.h": {
+        "bytes": 224,
+        "sha256": "72a204ee278b1a3209f3ecc276b3063f9d91fe697c6c66f89d6bca0e7efde173"
+      }
+    }
+  },
+  {
+    "kind": "fixture",
+    "mode": "default",
+    "sample": 0,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 26719000,
+        "exclusive_ns": 26395000
+      },
+      "extended_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 324000,
+        "exclusive_ns": 324000
+      },
+      "bind_slot_checks": {
+        "calls": 11769,
+        "inclusive_ns": 1468000,
+        "exclusive_ns": 1468000
+      },
+      "expression_slot_checks": {
+        "calls": 8417,
+        "inclusive_ns": 884000,
+        "exclusive_ns": 884000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 199000,
+        "exclusive_ns": 199000
+      }
+    },
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  },
+  {
+    "kind": "fixture",
+    "mode": "default",
+    "sample": 1,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 29608000,
+        "exclusive_ns": 29274000
+      },
+      "extended_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 334000,
+        "exclusive_ns": 334000
+      },
+      "bind_slot_checks": {
+        "calls": 11769,
+        "inclusive_ns": 1470000,
+        "exclusive_ns": 1470000
+      },
+      "expression_slot_checks": {
+        "calls": 8417,
+        "inclusive_ns": 911000,
+        "exclusive_ns": 911000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 187000,
+        "exclusive_ns": 187000
+      }
+    },
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  },
+  {
+    "kind": "fixture",
+    "mode": "default",
+    "sample": 2,
+    "source": "unittest/compiler-fixtures/defer-try-cleanup.x",
+    "exit": 0,
+    "metrics": {
+      "all_transactions": {
+        "calls": 0,
+        "inclusive_ns": 0,
+        "exclusive_ns": 0
+      },
+      "all_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 30513000,
+        "exclusive_ns": 30189000
+      },
+      "extended_snapshot": {
+        "calls": 264,
+        "inclusive_ns": 324000,
+        "exclusive_ns": 324000
+      },
+      "bind_slot_checks": {
+        "calls": 11769,
+        "inclusive_ns": 1425000,
+        "exclusive_ns": 1425000
+      },
+      "expression_slot_checks": {
+        "calls": 8417,
+        "inclusive_ns": 905000,
+        "exclusive_ns": 905000
+      },
+      "open_prepare": {
+        "calls": 4,
+        "inclusive_ns": 7000,
+        "exclusive_ns": 7000
+      },
+      "empty_span": {
+        "calls": 10000,
+        "inclusive_ns": 171000,
+        "exclusive_ns": 171000
+      }
+    },
+    "parity": true,
+    "files": {
+      "defer-try-cleanup.c": {
+        "bytes": 7220,
+        "sha256": "a8b4181e6632b7891643edcf6afc6b09019a6d7ba21b818b3e7784c08c2a8d24"
+      },
+      "defer-try-cleanup.h": {
+        "bytes": 186,
+        "sha256": "7038af1f185e8975190a8b6b1f47b6d28e590232dafdf2e606ca569624d29dc2"
+      }
+    }
+  }
+]

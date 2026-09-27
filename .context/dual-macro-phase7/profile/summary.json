@@ -1,0 +1,1001 @@
+[
+  {
+    "kind": "timed",
+    "group": "compiler",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 229227000,
+          "min": 222132000,
+          "max": 234976000
+        },
+        "exclusive_ns": {
+          "median": 224157000,
+          "min": 217136000,
+          "max": 229841000
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 5070000,
+          "min": 4996000,
+          "max": 5135000
+        },
+        "exclusive_ns": {
+          "median": 5070000,
+          "min": 4996000,
+          "max": 5135000
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 105245,
+          "min": 105245,
+          "max": 105245
+        },
+        "inclusive_ns": {
+          "median": 5753000,
+          "min": 5630000,
+          "max": 5898000
+        },
+        "exclusive_ns": {
+          "median": 5753000,
+          "min": 5630000,
+          "max": 5898000
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 122912,
+          "min": 122912,
+          "max": 122912
+        },
+        "inclusive_ns": {
+          "median": 12605000,
+          "min": 12526000,
+          "max": 12725000
+        },
+        "exclusive_ns": {
+          "median": 12605000,
+          "min": 12526000,
+          "max": 12725000
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 80,
+          "min": 80,
+          "max": 80
+        },
+        "inclusive_ns": {
+          "median": 43000,
+          "min": 41000,
+          "max": 43000
+        },
+        "exclusive_ns": {
+          "median": 43000,
+          "min": 41000,
+          "max": 43000
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 70000,
+          "min": 70000,
+          "max": 70000
+        },
+        "inclusive_ns": {
+          "median": 1220000,
+          "min": 1193000,
+          "max": 1236000
+        },
+        "exclusive_ns": {
+          "median": 1220000,
+          "min": 1193000,
+          "max": 1236000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "compiler",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 230809000,
+          "min": 227395000,
+          "max": 236098000
+        },
+        "exclusive_ns": {
+          "median": 225505000,
+          "min": 222008000,
+          "max": 230336000
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 5387000,
+          "min": 5304000,
+          "max": 5762000
+        },
+        "exclusive_ns": {
+          "median": 5387000,
+          "min": 5304000,
+          "max": 5762000
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 105485,
+          "min": 105485,
+          "max": 105485
+        },
+        "inclusive_ns": {
+          "median": 5771000,
+          "min": 5685000,
+          "max": 5781000
+        },
+        "exclusive_ns": {
+          "median": 5771000,
+          "min": 5685000,
+          "max": 5781000
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 125983,
+          "min": 125983,
+          "max": 125983
+        },
+        "inclusive_ns": {
+          "median": 12967000,
+          "min": 12812000,
+          "max": 13176000
+        },
+        "exclusive_ns": {
+          "median": 12967000,
+          "min": 12812000,
+          "max": 13176000
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 80,
+          "min": 80,
+          "max": 80
+        },
+        "inclusive_ns": {
+          "median": 46000,
+          "min": 44000,
+          "max": 49000
+        },
+        "exclusive_ns": {
+          "median": 46000,
+          "min": 44000,
+          "max": 49000
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 70000,
+          "min": 70000,
+          "max": 70000
+        },
+        "inclusive_ns": {
+          "median": 1218000,
+          "min": 1204000,
+          "max": 1240000
+        },
+        "exclusive_ns": {
+          "median": 1218000,
+          "min": 1204000,
+          "max": 1240000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "exception",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 28359000,
+          "min": 28251000,
+          "max": 29472000
+        },
+        "exclusive_ns": {
+          "median": 28011000,
+          "min": 27889000,
+          "max": 29120000
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 352000,
+          "min": 348000,
+          "max": 362000
+        },
+        "exclusive_ns": {
+          "median": 352000,
+          "min": 348000,
+          "max": 362000
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 11809,
+          "min": 11809,
+          "max": 11809
+        },
+        "inclusive_ns": {
+          "median": 1486000,
+          "min": 1460000,
+          "max": 1503000
+        },
+        "exclusive_ns": {
+          "median": 1486000,
+          "min": 1460000,
+          "max": 1503000
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 8503,
+          "min": 8503,
+          "max": 8503
+        },
+        "inclusive_ns": {
+          "median": 921000,
+          "min": 884000,
+          "max": 933000
+        },
+        "exclusive_ns": {
+          "median": 921000,
+          "min": 884000,
+          "max": 933000
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 6000,
+          "min": 6000,
+          "max": 7000
+        },
+        "exclusive_ns": {
+          "median": 6000,
+          "min": 6000,
+          "max": 7000
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "inclusive_ns": {
+          "median": 176000,
+          "min": 167000,
+          "max": 183000
+        },
+        "exclusive_ns": {
+          "median": 176000,
+          "min": 167000,
+          "max": 183000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "exception",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 28584000,
+          "min": 26872000,
+          "max": 29549000
+        },
+        "exclusive_ns": {
+          "median": 28193000,
+          "min": 26549000,
+          "max": 29181000
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 368000,
+          "min": 323000,
+          "max": 391000
+        },
+        "exclusive_ns": {
+          "median": 368000,
+          "min": 323000,
+          "max": 391000
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 11809,
+          "min": 11809,
+          "max": 11809
+        },
+        "inclusive_ns": {
+          "median": 1493000,
+          "min": 1453000,
+          "max": 1612000
+        },
+        "exclusive_ns": {
+          "median": 1493000,
+          "min": 1453000,
+          "max": 1612000
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 8531,
+          "min": 8531,
+          "max": 8531
+        },
+        "inclusive_ns": {
+          "median": 911000,
+          "min": 866000,
+          "max": 954000
+        },
+        "exclusive_ns": {
+          "median": 911000,
+          "min": 866000,
+          "max": 954000
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 7000,
+          "min": 7000,
+          "max": 8000
+        },
+        "exclusive_ns": {
+          "median": 7000,
+          "min": 7000,
+          "max": 8000
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "inclusive_ns": {
+          "median": 172000,
+          "min": 161000,
+          "max": 186000
+        },
+        "exclusive_ns": {
+          "median": 172000,
+          "min": 161000,
+          "max": 186000
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "compiler",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 105245,
+          "min": 105245,
+          "max": 105245
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 122912,
+          "min": 122912,
+          "max": 122912
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 80,
+          "min": 80,
+          "max": 80
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "compiler",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 105485,
+          "min": 105485,
+          "max": 105485
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 125983,
+          "min": 125983,
+          "max": 125983
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 80,
+          "min": 80,
+          "max": 80
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "exception",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 11809,
+          "min": 11809,
+          "max": 11809
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 8503,
+          "min": 8503,
+          "max": 8503
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "exception",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 11809,
+          "min": 11809,
+          "max": 11809
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 8531,
+          "min": 8531,
+          "max": 8531
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "fixture",
+    "group": "fixture",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_snapshot": {
+        "calls": {
+          "median": 264,
+          "min": 264,
+          "max": 264
+        },
+        "inclusive_ns": {
+          "median": 29608000,
+          "min": 26719000,
+          "max": 30513000
+        },
+        "exclusive_ns": {
+          "median": 29274000,
+          "min": 26395000,
+          "max": 30189000
+        }
+      },
+      "extended_snapshot": {
+        "calls": {
+          "median": 264,
+          "min": 264,
+          "max": 264
+        },
+        "inclusive_ns": {
+          "median": 324000,
+          "min": 324000,
+          "max": 334000
+        },
+        "exclusive_ns": {
+          "median": 324000,
+          "min": 324000,
+          "max": 334000
+        }
+      },
+      "bind_slot_checks": {
+        "calls": {
+          "median": 11769,
+          "min": 11769,
+          "max": 11769
+        },
+        "inclusive_ns": {
+          "median": 1468000,
+          "min": 1425000,
+          "max": 1470000
+        },
+        "exclusive_ns": {
+          "median": 1468000,
+          "min": 1425000,
+          "max": 1470000
+        }
+      },
+      "expression_slot_checks": {
+        "calls": {
+          "median": 8417,
+          "min": 8417,
+          "max": 8417
+        },
+        "inclusive_ns": {
+          "median": 905000,
+          "min": 884000,
+          "max": 911000
+        },
+        "exclusive_ns": {
+          "median": 905000,
+          "min": 884000,
+          "max": 911000
+        }
+      },
+      "open_prepare": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 7000,
+          "min": 7000,
+          "max": 7000
+        },
+        "exclusive_ns": {
+          "median": 7000,
+          "min": 7000,
+          "max": 7000
+        }
+      },
+      "empty_span": {
+        "calls": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "inclusive_ns": {
+          "median": 187000,
+          "min": 171000,
+          "max": 199000
+        },
+        "exclusive_ns": {
+          "median": 187000,
+          "min": 171000,
+          "max": 199000
+        }
+      }
+    }
+  }
+]

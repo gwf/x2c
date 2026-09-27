@@ -1,0 +1,160 @@
+[
+  {
+    "mode": "default",
+    "earlier_paired_delta_ms": 85.088,
+    "samples": [
+      {
+        "sample": 0,
+        "raw_ms": {
+          "extended_snapshot": 5.07,
+          "bind_slot_checks": 5.898,
+          "expression_slot_checks": 12.725,
+          "open_prepare": 0.043
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 5.033968,
+          "bind_slot_checks": 4.1110999,
+          "expression_slot_checks": 10.6532845,
+          "open_prepare": 0.0416745
+        },
+        "raw_total_ms": 23.736,
+        "calibrated_total_ms": 19.840026899999998,
+        "snapshot_total_ms": 229.227,
+        "snapshot_old_exclusive_ms": 224.157,
+        "transactions": 2119,
+        "bind_check_count": 105245,
+        "expression_check_count": 122912,
+        "prepare_count": 80
+      },
+      {
+        "sample": 1,
+        "raw_ms": {
+          "extended_snapshot": 5.135,
+          "bind_slot_checks": 5.753,
+          "expression_slot_checks": 12.526,
+          "open_prepare": 0.043
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 5.098267,
+          "bind_slot_checks": 3.9342742000000004,
+          "expression_slot_checks": 10.4412795,
+          "open_prepare": 0.041655300000000006
+        },
+        "raw_total_ms": 23.457,
+        "calibrated_total_ms": 19.515476,
+        "snapshot_total_ms": 234.976,
+        "snapshot_old_exclusive_ms": 229.841,
+        "transactions": 2119,
+        "bind_check_count": 105245,
+        "expression_check_count": 122912,
+        "prepare_count": 80
+      },
+      {
+        "sample": 2,
+        "raw_ms": {
+          "extended_snapshot": 4.996,
+          "bind_slot_checks": 5.63,
+          "expression_slot_checks": 12.605,
+          "open_prepare": 0.041
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 4.9586255999999995,
+          "bind_slot_checks": 3.7736619,
+          "expression_slot_checks": 10.4574266,
+          "open_prepare": 0.0395952
+        },
+        "raw_total_ms": 23.272000000000002,
+        "calibrated_total_ms": 19.2293093,
+        "snapshot_total_ms": 222.132,
+        "snapshot_old_exclusive_ms": 217.136,
+        "transactions": 2119,
+        "bind_check_count": 105245,
+        "expression_check_count": 122912,
+        "prepare_count": 80
+      }
+    ],
+    "raw_median_ms": 23.457,
+    "calibrated_median_ms": 19.515476,
+    "raw_median_fraction": 0.27567929672809327,
+    "calibrated_median_fraction": 0.22935638397893945
+  },
+  {
+    "mode": "live",
+    "earlier_paired_delta_ms": 139.123,
+    "samples": [
+      {
+        "sample": 0,
+        "raw_ms": {
+          "extended_snapshot": 5.304,
+          "bind_slot_checks": 5.781,
+          "expression_slot_checks": 12.967,
+          "open_prepare": 0.046
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 5.2663937,
+          "bind_slot_checks": 3.9158828000000003,
+          "expression_slot_checks": 10.7405537,
+          "open_prepare": 0.0446125
+        },
+        "raw_total_ms": 24.098,
+        "calibrated_total_ms": 19.9674427,
+        "snapshot_total_ms": 230.809,
+        "snapshot_old_exclusive_ms": 225.505,
+        "transactions": 2124,
+        "bind_check_count": 105485,
+        "expression_check_count": 125983,
+        "prepare_count": 80
+      },
+      {
+        "sample": 1,
+        "raw_ms": {
+          "extended_snapshot": 5.387,
+          "bind_slot_checks": 5.771,
+          "expression_slot_checks": 12.812,
+          "open_prepare": 0.044
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 5.3501209,
+          "bind_slot_checks": 3.9418386,
+          "expression_slot_checks": 10.6447809,
+          "open_prepare": 0.0426399
+        },
+        "raw_total_ms": 24.014,
+        "calibrated_total_ms": 19.979380300000003,
+        "snapshot_total_ms": 227.395,
+        "snapshot_old_exclusive_ms": 222.008,
+        "transactions": 2124,
+        "bind_check_count": 105485,
+        "expression_check_count": 125983,
+        "prepare_count": 80
+      },
+      {
+        "sample": 2,
+        "raw_ms": {
+          "extended_snapshot": 5.762,
+          "bind_slot_checks": 5.685,
+          "expression_slot_checks": 13.176,
+          "open_prepare": 0.049
+        },
+        "calibrated_estimate_ms": {
+          "extended_snapshot": 5.7252956,
+          "bind_slot_checks": 3.860119,
+          "expression_slot_checks": 10.9816437,
+          "open_prepare": 0.0475693
+        },
+        "raw_total_ms": 24.672,
+        "calibrated_total_ms": 20.6146276,
+        "snapshot_total_ms": 236.098,
+        "snapshot_old_exclusive_ms": 230.336,
+        "transactions": 2124,
+        "bind_check_count": 105485,
+        "expression_check_count": 125983,
+        "prepare_count": 80
+      }
+    ],
+    "raw_median_ms": 24.098,
+    "calibrated_median_ms": 19.979380300000003,
+    "raw_median_fraction": 0.1732136311034121,
+    "calibrated_median_fraction": 0.14360947003730515
+  }
+]

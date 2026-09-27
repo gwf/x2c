@@ -1,0 +1,346 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -123,6 +123,7 @@
+   Map local_macro_captures;
+   Map prototype_bound_slots, prototype_open_names;
+   int prototype_combined, prototype_slot_calls;
++  int prototype_effect_context;
+   List lambda_scopes;
+   Array match_types;
+   // Import path -> declared alias map, or 1 when no aliases need replay.
+@@ -2584,6 +2585,7 @@
+   Map adapters;
+   Array base_bindings;
+   int early_count, init_count, origin_count, origin, needs_exception;
++  int extended;
+ } *SymTxn;
+ 
+ /** Begins a reversible transaction over the current semantic scope.
+@@ -2606,19 +2608,22 @@
+   transaction.local_macro_names = c.sym.local_macro_names;
+   transaction.initializer_name = c.init_fn;
+   transaction.shutdown_name = c.fini_fn;
+-  transaction.adapters = c.names.adapters;
+-  transaction.base_bindings = [];
+-  transaction.early_count = c.early_decls.len();
+-  transaction.init_count = c.inits.len();
+-  transaction.origin_count = c.origins.len();
+-  transaction.origin = c.origin;
+-  transaction.needs_exception = c.needs_exception;
+-  c.names.adapters = c.names.adapters.copy();
+-  for (int i = 0; i < c.sym.base_scopes; i++) {
+-    if (i == transaction.scope_index) continue;
+-    SymScope *base = _semantic_scope(c.sym, i);
+-    transaction.base_bindings.push(%($i ${base.bindings}));
+-    base.bindings = base.bindings.copy();
++  transaction.extended = c.prototype_effect_context > 0;
++  if (transaction.extended) {
++    transaction.adapters = c.names.adapters;
++    transaction.base_bindings = [];
++    transaction.early_count = c.early_decls.len();
++    transaction.init_count = c.inits.len();
++    transaction.origin_count = c.origins.len();
++    transaction.origin = c.origin;
++    transaction.needs_exception = c.needs_exception;
++    c.names.adapters = c.names.adapters.copy();
++    for (int i = 0; i < c.sym.base_scopes; i++) {
++      if (i == transaction.scope_index) continue;
++      SymScope *base = _semantic_scope(c.sym, i);
++      transaction.base_bindings.push(%($i ${base.bindings}));
++      base.bindings = base.bindings.copy();
++    }
+   }
+   if (c.source_facts && c.source_primary) {
+     transaction.source_definitions = c.source_definitions.copy();
+@@ -2658,14 +2663,16 @@
+     if (scope.macros == NULL) scope.macros = {};
+     scope.macros.merge(staged.macros);
+   }
+-  Map adapters = compiler.names.adapters;
+-  compiler.names.adapters = s.adapters;
+-  s.adapters.merge(adapters);
+-  foreach (List row, s.base_bindings.list()) {
+-    SymScope *base = _semantic_scope(compiler.sym, row.car());
+-    Map staged = base.bindings, original = row.cadr();
+-    base.bindings = original;
+-    original.merge(staged);
++  if (s.extended) {
++    Map adapters = compiler.names.adapters;
++    compiler.names.adapters = s.adapters;
++    s.adapters.merge(adapters);
++    foreach (List row, s.base_bindings.list()) {
++      SymScope *base = _semantic_scope(compiler.sym, row.car());
++      Map staged = base.bindings, original = row.cadr();
++      base.bindings = original;
++      original.merge(staged);
++    }
+   }
+   s.active = 0;
+ }
+@@ -2748,14 +2755,16 @@
+     _.names.counters = transaction.counters;
+     _.init_fn = transaction.initializer_name;
+     _.fini_fn = transaction.shutdown_name;
+-    _.names.adapters = transaction.adapters;
+-    foreach (List row, transaction.base_bindings.list())
+-      _semantic_scope(_.sym, row.car()).bindings = row.cadr();
+-    _.early_decls.resize(transaction.early_count);
+-    _.inits.resize(transaction.init_count);
+-    _.origins.resize(transaction.origin_count);
+-    _.origin = transaction.origin;
+-    _.needs_exception = transaction.needs_exception;
++    if (transaction.extended) {
++      _.names.adapters = transaction.adapters;
++      foreach (List row, transaction.base_bindings.list())
++        _semantic_scope(_.sym, row.car()).bindings = row.cadr();
++      _.early_decls.resize(transaction.early_count);
++      _.inits.resize(transaction.init_count);
++      _.origins.resize(transaction.origin_count);
++      _.origin = transaction.origin;
++      _.needs_exception = transaction.needs_exception;
++    }
+     if (_.source_facts && _.source_primary) {
+       _.source_occurrences.resize(transaction.source_occurrences);
+       foreach (Var key, _.source_definitions.keys().list())
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2377,52 +2377,54 @@
+   if (done++ || !getenv("X2C_DUAL_EFFECT_PROBE")) return;
+   c.sym.push_new_scope();
+   defer c.sym.pop_scope();
+-  List before = c.prototype_snapshot();
+-  Map owner = c.names.adapters;
+-  SymTxn outer = c.begin_semantic_transaction();
+-  Var issued; int retained;
+-  c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
+-  List name = issued;
+-  int early = c.early_decls.len();
+-  Macro success = $compiler_effect_success;
+-  $let(c.prototype_combined, 1) {
+-    c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
++  $let(c.prototype_effect_context, c.prototype_effect_context + 1) {
++    List before = c.prototype_snapshot();
++    Map owner = c.names.adapters;
++    SymTxn outer = c.begin_semantic_transaction();
++    Var issued; int retained;
++    c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
++    List name = issued;
++    int early = c.early_decls.len();
++    Macro success = $compiler_effect_success;
++    $let(c.prototype_combined, 1) {
++      c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
++      assert(c.early_decls.len() == early + 1);
++      assert(c.names.adapters.contains("phase4.helper"));
++      SymTxn inner = c.begin_semantic_transaction();
++      c.sym.reference_global(%(__phase4_global));
++      c.add_init(<early>, %(seq));
++      c.origin = c.record_origin(c.token);
++      c.needs_exception = 1;
++      inner.commit();
++      int caught = 0;
++      Macro failure = $compiler_effect_failure;
++      $let(c.diagnostics, Diagnostics.new(NULL, 0))
++      $let(c.recovery_depth, c.recovery_depth + 1) {
++        try {
++          c.bind_syntax(failure(Prototype_bound(name),
++            Prototype_lowered(%(seq))), AST_BLOCK, c.return_type);
++        }
++        catch %(malformed *): { caught = 1; }
++      }
++      assert(caught);
++    }
++    outer.rollback();
++    assert(c.prototype_equal(before, c.prototype_snapshot()));
++    assert((void *) owner == (void *) c.names.adapters);
++    outer = c.begin_semantic_transaction();
++    c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
++    name = issued;
++    $let(c.prototype_combined, 1)
++      c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
+     assert(c.early_decls.len() == early + 1);
+-    assert(c.names.adapters.contains("phase4.helper"));
+-    SymTxn inner = c.begin_semantic_transaction();
+-    c.sym.reference_global(%(__phase4_global));
+-    c.add_init(<early>, %(seq));
+-    c.origin = c.record_origin(c.token);
+-    c.needs_exception = 1;
+-    inner.commit();
+-    int caught = 0;
+-    Macro failure = $compiler_effect_failure;
+-    $let(c.diagnostics, Diagnostics.new(NULL, 0))
+-    $let(c.recovery_depth, c.recovery_depth + 1) {
+-      try {
+-        c.bind_syntax(failure(Prototype_bound(name),
+-          Prototype_lowered(%(seq))), AST_BLOCK, c.return_type);
+-      }
+-      catch %(malformed *): { caught = 1; }
+-    }
+-    assert(caught);
+-  }
+-  outer.rollback();
+-  assert(c.prototype_equal(before, c.prototype_snapshot()));
+-  assert((void *) owner == (void *) c.names.adapters);
+-  outer = c.begin_semantic_transaction();
+-  c.prototype_take_slot(Prototype_name("phase4_helper"), issued, retained);
+-  name = issued;
+-  $let(c.prototype_combined, 1)
+-    c.bind_syntax(success(Prototype_bound(name)), AST_BLOCK, c.return_type);
+-  assert(c.early_decls.len() == early + 1);
+-  outer.commit();
+-  assert((void *) owner == (void *) c.names.adapters);
+-  assert(owner.contains("phase4.helper"));
+-  /* Keep the dedicated probe's successful rows outside fixture emission. */
+-  c.early_decls.resize(early);
+-  owner.del("phase4.helper");
+-  puts("phase4 effects: early-read-write rollback-all borrowed-map-commit");
++    outer.commit();
++    assert((void *) owner == (void *) c.names.adapters);
++    assert(owner.contains("phase4.helper"));
++    /* Keep the dedicated probe's successful rows outside fixture emission. */
++    c.early_decls.resize(early);
++    owner.del("phase4.helper");
++    puts("phase4 effects: early-read-write rollback-all borrowed-map-commit");
++  }
+ }
+ 
+ static List _try_declarations(Compiler c, List clause, List frame,
+@@ -2525,37 +2527,39 @@
+     }
+     case %(try ?body ?clause ?finalizer): {
+       Compiler c = walk.compiler;
+-      SymTxn transaction = c.begin_semantic_transaction();
+-      defer transaction.rollback();
+-      List frame;
+-      List frame_code = _try_frame(c, frame);
+-      List handle = clause ? clause.caddr().list() : NULL;
+-      int labelled_at = walk.origin;
+-      Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
+-      if (labelled) {
+-        String name = _label_spelling(labelled);
+-        _report_at(
+-          walk, labelled_at, "a finally body cannot define a label",
+-          %("a finalizer runs on every path that leaves its region, so '${
+-            name ? name : "this label"}' would be defined once for each"));
+-      }
+-      List cleanup;
+-      List cleanup_code = _try_cleanup(
+-        frame, handle, _rewrite(walk, finalizer), !!clause, cleanup);
+-      List body_out = _try_region(walk, cleanup, body, body);
+-      /* A catch arm runs inside the region it handles, so it leaves the
+-         same statements behind on its own exits. Each arm is its own
+-         region, which a jump from the body may not enter. */
+-      Array bodies = [];
+-      if (clause) foreach (List record, clause.cadr().list()) {
+-        List arm = record.cadr();
+-        bodies.push(_inside(walk, cleanup, arm, arm));
+-      }
+-      List lowered = _try_block(
+-        walk, body_out, clause, frame, frame_code, handle, cleanup,
+-        cleanup_code, bodies.list_free());
+-      transaction.commit();
+-      return lowered;
++      $let(c.prototype_effect_context, c.prototype_effect_context + 1) {
++        SymTxn transaction = c.begin_semantic_transaction();
++        defer transaction.rollback();
++        List frame;
++        List frame_code = _try_frame(c, frame);
++        List handle = clause ? clause.caddr().list() : NULL;
++        int labelled_at = walk.origin;
++        Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
++        if (labelled) {
++          String name = _label_spelling(labelled);
++          _report_at(
++            walk, labelled_at, "a finally body cannot define a label",
++            %("a finalizer runs on every path that leaves its region, so '${
++              name ? name : "this label"}' would be defined once for each"));
++        }
++        List cleanup;
++        List cleanup_code = _try_cleanup(
++          frame, handle, _rewrite(walk, finalizer), !!clause, cleanup);
++        List body_out = _try_region(walk, cleanup, body, body);
++        /* A catch arm runs inside the region it handles, so it leaves the
++           same statements behind on its own exits. Each arm is its own
++           region, which a jump from the body may not enter. */
++        Array bodies = [];
++        if (clause) foreach (List record, clause.cadr().list()) {
++          List arm = record.cadr();
++          bodies.push(_inside(walk, cleanup, arm, arm));
++        }
++        List lowered = _try_block(
++          walk, body_out, clause, frame, frame_code, handle, cleanup,
++          cleanup_code, bodies.list_free());
++        transaction.commit();
++        return lowered;
++      }
+     }
+     /* A function-static initializer leaves its own record at the end of its
+        block. No exit runs that record, but a jump still may not enter the
+--- a/src/parse.x
++++ b/src/parse.x
+@@ -2431,22 +2431,27 @@
+   Var retained;
+   if (c.prototype_bound_slots &&
+       c.prototype_bound_slots.try_get(syntax, retained)) return retained;
+-  Var staged;
+-  int retained_stage;
+-  if (c.prototype_take_slot(syntax, staged, retained_stage)) {
+-    if (retained_stage) return staged;
+-    syntax = staged;
++  if (c.prototype_combined) {
++    Var staged;
++    int retained_stage;
++    if (c.prototype_take_slot(syntax, staged, retained_stage)) {
++      if (retained_stage) return staged;
++      syntax = staged;
++    }
+   }
+   Var value = c.evaluate_macro_slot(syntax);
+-  if (c.prototype_take_slot(value, staged, retained_stage)) {
+-    if (retained_stage) return staged;
+-    value = staged;
+-  }
+-  match (value) case %("x2c.template" ?stored ?arguments): {
+-    List invocation = c.prototype_pending(stored, arguments);
+-    List bound = c.bind_syntax(invocation, context, return_type);
+-    match (bound) case %(seq ?only): return only;
+-    return bound;
++  if (c.prototype_combined) {
++    Var staged; int retained_stage;
++    if (c.prototype_take_slot(value, staged, retained_stage)) {
++      if (retained_stage) return staged;
++      value = staged;
++    }
++    match (value) case %("x2c.template" ?stored ?arguments): {
++      List invocation = c.prototype_pending(stored, arguments);
++      List bound = c.bind_syntax(invocation, context, return_type);
++      match (bound) case %(seq ?only): return only;
++      return bound;
++    }
+   }
+   if (value is not <list>)
+     c.report_error(<parse>, "expected syntax", c.token, NULL);
+--- a/src/expressions.x
++++ b/src/expressions.x
+@@ -2461,13 +2461,15 @@
+     retain source position.
+ */
+ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
+-  Var staged;
+-  int retained_stage;
+-  Var carrier = input;
+-  match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
+-  if (c.prototype_take_slot(carrier, staged, retained_stage)) {
+-    if (retained_stage) return staged;
+-    return c.resolve_expression(staged, origin);
++  if (c.prototype_combined) {
++    Var staged;
++    int retained_stage;
++    Var carrier = input;
++    match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
++    if (c.prototype_take_slot(carrier, staged, retained_stage)) {
++      if (retained_stage) return staged;
++      return c.resolve_expression(staged, origin);
++    }
+   }
+   Var retained;
+   if (c.prototype_bound_slots &&

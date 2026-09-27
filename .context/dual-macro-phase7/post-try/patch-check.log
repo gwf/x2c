@@ -1,0 +1,3 @@
+patching file 'src/compiler.x'
+patching file 'src/transform.x'
+patching file 'src/prototype-slots.x'

@@ -1,0 +1,117 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -11,6 +11,9 @@
+     active.
+   */
+ #pragma once
++int Prototype_profile_begin(int kind);
++void Prototype_profile_end(int span);
++int Prototype_profile_active(int kind);
+ $(import "../lib/private-keywords.xmacro")
+ #include "tokenizer.x"
+ #include "ast.x"
+@@ -2633,7 +2636,10 @@
+   /* Macro binding is incremental. Copy only the maps that construction
+      mutates so failure can discard its rows while reads still reach the
+      unchanged outer scopes. */
++  int copy_span = Prototype_profile_active(1)
++    ? Prototype_profile_begin(2) : -1;
+   scope.symbols = transaction.scope.symbols.copy();
++  Prototype_profile_end(copy_span);
+   c.merge_source_declarations(scope.symbols, transaction.scope.symbols);
+   scope.bindings = transaction.scope.bindings.copy();
+   scope.enumerators = transaction.scope.enumerators.copy();
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2506,9 +2506,13 @@
+   List declarations = _try_declarations(c, clause, frame, handle);
+   List landing = _try_landing(c, clause, frame, handle, cleanup, bodies);
+   Macro shape = $compiler_try_shape;
++  int application_span = Prototype_profile_begin(0);
++  List result;
+   $let(c.prototype_combined, 1)
+-    return c.bind_syntax(shape(frame_code, declarations, body, landing,
++    result = c.bind_syntax(shape(frame_code, declarations, body, landing,
+       cleanup_code), AST_BLOCK, c.return_type);
++  Prototype_profile_end(application_span);
++  return result;
+ }
+ 
+ static Var _rewrite(Walk walk, Var value) {
+@@ -2528,7 +2532,9 @@
+     case %(try ?body ?clause ?finalizer): {
+       Compiler c = walk.compiler;
+       $let(c.prototype_effect_context, c.prototype_effect_context + 1) {
++        int snapshot_span = Prototype_profile_begin(1);
+         SymTxn transaction = c.begin_semantic_transaction();
++        Prototype_profile_end(snapshot_span);
+         defer transaction.rollback();
+         List frame;
+         List frame_code = _try_frame(c, frame);
+--- a/src/prototype-slots.x
++++ b/src/prototype-slots.x
+@@ -1,6 +1,64 @@
+ #pragma once
+ #include "x2c.x"
+ #include "meta.x"
++
++#include <time.h>
++#include <stdlib.h>
++#include <stdio.h>
++
++static long long _profile_inclusive[3], _profile_exclusive[3];
++static long long _profile_calls[3], _profile_started[256];
++static long long _profile_children[256];
++static int _profile_kind[256], _profile_depth, _profile_enabled, _profile_counts_only;
++static long long _profile_transactions;
++static const char *_profile_labels[3] = {
++  "try_application", "try_snapshot", "scope_symbols_copy"
++};
++static long long _profile_now(void) {
++  if (_profile_counts_only) return 0;
++  struct timespec now;
++  clock_gettime(CLOCK_MONOTONIC, &now);
++  return (long long) now.tv_sec * 1000000000LL + now.tv_nsec;
++}
++static void _profile_report(void) {
++
++  for (int i = 0; i < 3; i++)
++    fprintf(stderr, "DUAL_PROFILE %s %lld %lld %lld\n",
++      _profile_labels[i], _profile_calls[i], _profile_inclusive[i],
++      _profile_exclusive[i]);
++}
++int Prototype_profile_begin(int kind) {
++  if (!_profile_enabled) {
++    _profile_enabled = getenv("X2C_DUAL_PROFILE") ? 1 : -1;
++    if (_profile_enabled == 1) {
++      _profile_counts_only = !strcmp(getenv("X2C_DUAL_PROFILE"), "counts");
++      atexit(_profile_report);
++    }
++  }
++  if (_profile_enabled < 0) return -1;
++
++  int slot = _profile_depth++;
++  assert(slot < 256);
++  _profile_kind[slot] = kind;
++  _profile_children[slot] = 0;
++  _profile_started[slot] = _profile_now();
++  return slot;
++}
++void Prototype_profile_transaction(void) {
++  if (getenv("X2C_DUAL_PROFILE")) _profile_transactions++;
++}
++void Prototype_profile_end(int slot) {
++  if (slot < 0) return;
++  long long elapsed = _profile_now() - _profile_started[slot];
++  assert(slot == --_profile_depth);
++  int kind = _profile_kind[slot];
++  _profile_calls[kind]++;
++  _profile_inclusive[kind] += elapsed;
++  _profile_exclusive[kind] += elapsed - _profile_children[slot];
++  if (slot) _profile_children[slot - 1] += elapsed;
++}
++int Prototype_profile_active(int kind) =>
++  _profile_depth && _profile_kind[_profile_depth - 1] == kind;
+ 
+ meta List Prototype_bound(List code) =>
+   %("x2c.slot" "bound" $code ());

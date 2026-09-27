@@ -1,0 +1,79 @@
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/transform', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/transform.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/transform in 1.10 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_COUNTS transactions 343 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/emit', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/emit.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/emit in 850 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_COUNTS transactions 283 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/expressions', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/expressions.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/expressions in 1.11 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_COUNTS transactions 324 extended 1 applications 1
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/generate', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/generate.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/generate in 860 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_COUNTS transactions 309 extended 1 applications 1
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/parse', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/parse.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/parse in 956 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_COUNTS transactions 328 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/type', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/type.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/type in 626 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_COUNTS transactions 269 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/tokenizer', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/lib/tokenizer.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/tokenizer in 638 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_COUNTS transactions 263 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--out-dir', '/tmp/dual-phase7-counts/default/exception-hot-paths', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/benchmarks/exception-hot-paths.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/default/exception-hot-paths in 570 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_COUNTS transactions 265 extended 4 applications 4
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/transform', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/transform.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/transform in 1.33 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_COUNTS transactions 344 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/emit', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/emit.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/emit in 1.04 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_COUNTS transactions 284 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/expressions', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/expressions.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/expressions in 1.31 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_COUNTS transactions 325 extended 1 applications 1
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/generate', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/generate.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/generate in 1.07 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_COUNTS transactions 310 extended 1 applications 1
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/parse', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/parse.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/parse in 1.15 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_COUNTS transactions 329 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/type', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/src/type.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/type in 699 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_COUNTS transactions 269 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/tokenizer', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/lib/tokenizer.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/tokenizer in 681 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_COUNTS transactions 263 extended 0 applications 0
+
+COMMAND ['/tmp/x2c-dual-phase7-counts', 'translate', '--live-symbols', '--out-dir', '/tmp/dual-phase7-counts/live/exception-hot-paths', '/Users/gary/.codex/worktrees/agent-dual-transport/x2c/unittest/benchmarks/exception-hot-paths.x']
+Translated 1 x2c file to /tmp/dual-phase7-counts/live/exception-hot-paths in 608 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_COUNTS transactions 265 extended 4 applications 4

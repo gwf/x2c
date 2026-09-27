@@ -1,0 +1,11 @@
+  Translate 1 x2c file in 80 ms
+phase4 effects: early-read-write rollback-all borrowed-map-commit
+  Compile 1 C file in 81 ms
+  Link 1 input in 39 ms
+Built executable /tmp/dual-phase7-smoke in 723 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+  Compiled with cc using 16 jobs
+  Linked with cc
+  Intermediates /tmp/dual-phase7-smoke-native (retained)
+  Output /tmp/dual-phase7-smoke (423.1 KiB)
+17 1 1 23

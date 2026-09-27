@@ -1,0 +1,201 @@
+[
+  {
+    "mode": "default",
+    "group": "compiler",
+    "all_parity": true,
+    "samples": [
+      {
+        "sample": 0,
+        "totals": {
+          "try_application": {
+            "calls": 2,
+            "inclusive_ns": 1349000,
+            "exclusive_ns": 1349000
+          },
+          "try_snapshot": {
+            "calls": 2,
+            "inclusive_ns": 1627000,
+            "exclusive_ns": 682000
+          },
+          "scope_symbols_copy": {
+            "calls": 2,
+            "inclusive_ns": 945000,
+            "exclusive_ns": 945000
+          }
+        },
+        "nonoverlap_ms": 2.976,
+        "per_try_ms": 1.488
+      }
+    ],
+    "median_nonoverlap_ms": 2.976,
+    "median_per_try_ms": 1.488
+  },
+  {
+    "mode": "default",
+    "group": "exception",
+    "all_parity": true,
+    "samples": [
+      {
+        "sample": 0,
+        "totals": {
+          "try_application": {
+            "calls": 4,
+            "inclusive_ns": 1876000,
+            "exclusive_ns": 1876000
+          },
+          "try_snapshot": {
+            "calls": 4,
+            "inclusive_ns": 1846000,
+            "exclusive_ns": 73000
+          },
+          "scope_symbols_copy": {
+            "calls": 4,
+            "inclusive_ns": 1773000,
+            "exclusive_ns": 1773000
+          }
+        },
+        "nonoverlap_ms": 3.722,
+        "per_try_ms": 0.9305
+      }
+    ],
+    "median_nonoverlap_ms": 3.722,
+    "median_per_try_ms": 0.9305
+  },
+  {
+    "mode": "live",
+    "group": "compiler",
+    "all_parity": true,
+    "samples": [
+      {
+        "sample": 0,
+        "totals": {
+          "try_application": {
+            "calls": 2,
+            "inclusive_ns": 1379000,
+            "exclusive_ns": 1379000
+          },
+          "try_snapshot": {
+            "calls": 2,
+            "inclusive_ns": 2257000,
+            "exclusive_ns": 659000
+          },
+          "scope_symbols_copy": {
+            "calls": 2,
+            "inclusive_ns": 1598000,
+            "exclusive_ns": 1598000
+          }
+        },
+        "nonoverlap_ms": 3.636,
+        "per_try_ms": 1.818
+      }
+    ],
+    "median_nonoverlap_ms": 3.636,
+    "median_per_try_ms": 1.818
+  },
+  {
+    "mode": "live",
+    "group": "exception",
+    "all_parity": true,
+    "samples": [
+      {
+        "sample": 0,
+        "totals": {
+          "try_application": {
+            "calls": 4,
+            "inclusive_ns": 1721000,
+            "exclusive_ns": 1721000
+          },
+          "try_snapshot": {
+            "calls": 4,
+            "inclusive_ns": 1705000,
+            "exclusive_ns": 61000
+          },
+          "scope_symbols_copy": {
+            "calls": 4,
+            "inclusive_ns": 1644000,
+            "exclusive_ns": 1644000
+          }
+        },
+        "nonoverlap_ms": 3.426,
+        "per_try_ms": 0.8565
+      }
+    ],
+    "median_nonoverlap_ms": 3.426,
+    "median_per_try_ms": 0.8565
+  },
+  {
+    "mode": "fixture",
+    "group": "fixture",
+    "all_parity": true,
+    "samples": [
+      {
+        "sample": 0,
+        "totals": {
+          "try_application": {
+            "calls": 3,
+            "inclusive_ns": 1597000,
+            "exclusive_ns": 1597000
+          },
+          "try_snapshot": {
+            "calls": 3,
+            "inclusive_ns": 1046000,
+            "exclusive_ns": 48000
+          },
+          "scope_symbols_copy": {
+            "calls": 3,
+            "inclusive_ns": 998000,
+            "exclusive_ns": 998000
+          }
+        },
+        "nonoverlap_ms": 2.643,
+        "per_try_ms": 0.8809999999999999
+      },
+      {
+        "sample": 1,
+        "totals": {
+          "try_application": {
+            "calls": 3,
+            "inclusive_ns": 1775000,
+            "exclusive_ns": 1775000
+          },
+          "try_snapshot": {
+            "calls": 3,
+            "inclusive_ns": 1445000,
+            "exclusive_ns": 48000
+          },
+          "scope_symbols_copy": {
+            "calls": 3,
+            "inclusive_ns": 1397000,
+            "exclusive_ns": 1397000
+          }
+        },
+        "nonoverlap_ms": 3.22,
+        "per_try_ms": 1.0733333333333335
+      },
+      {
+        "sample": 2,
+        "totals": {
+          "try_application": {
+            "calls": 3,
+            "inclusive_ns": 1654000,
+            "exclusive_ns": 1654000
+          },
+          "try_snapshot": {
+            "calls": 3,
+            "inclusive_ns": 1113000,
+            "exclusive_ns": 45000
+          },
+          "scope_symbols_copy": {
+            "calls": 3,
+            "inclusive_ns": 1068000,
+            "exclusive_ns": 1068000
+          }
+        },
+        "nonoverlap_ms": 2.767,
+        "per_try_ms": 0.9223333333333333
+      }
+    ],
+    "median_nonoverlap_ms": 2.767,
+    "median_per_try_ms": 0.9223333333333333
+  }
+]

@@ -104,12 +104,34 @@ owners before claiming general open behavior.
 
 ## Producer-attached stages and slots
 
+Phase7 measured the old unconditional support work across the seven-file
+corpus: added binder/expression carrier checks consume about 18.4 ms default
+and 18.7 ms live in raw diagnostic spans. Ordinary-node recognition must be
+absent from the first production version, rather than optimized after migration.
+See [fixed-cost evidence](../.context/dual-macro-phase7/README.md); timer
+calibration and cross-run attribution limits are explicit there.
+
 Keep one private canonical carrier `(code-value STAGE VALUE EFFECTS)` over
 ordinary AST Lists. Plain List inputs default to `source`. `source` enters
 ordinary binding. `bound` preserves binding and Type facts without rebinding;
 `lowered` also preserves lowered productions and existing lifecycle placement.
 AstPos, return context and origins remain compiler context, not duplicated
 carrier fields. No client wrapper calls or public stage getters are needed.
+
+Activate carrier recognition only inside the common application's binding
+context. Ordinary expression/node binding must not run carrier shape checks,
+search retained-hole maps or recognize deferred template carriers. The
+application owner enters this context; clients add no wrappers or flags.
+Keep ordinary macro-slot evaluation unchanged outside it. Use a distinct
+application-binding context from definition-origin policy or native dispatch;
+the prototype's shared flag is not the production owner. Standalone new Macro
+applications must enter automatically at their application boundary, preserving
+the four forms. Do not arm every legacy `_invoke_definition`, which would
+restore the ordinary-transaction cost. Direct legacy invocations producing
+new effect carriers need entry into the same construction driver before
+argument/effect preparation; that edge is not proved by the try prototype.
+A single cheap context branch may select the application path; stage
+recognition belongs only to that path.
 
 Attach marks where an operation establishes the fact:
 
@@ -148,11 +170,29 @@ that needs them, not by this core change.
 
 ## Transaction ownership
 
+Phase7 measured roughly 5.1 ms default / 5.4 ms live of added snapshot work
+across 2119/2124 ordinary transaction entries in the seven-file corpus. The
+selective candidate performs extended snapshots at only two entries per mode
+and preserves the rollback proof. Use that selective form from the start;
+do not first ship unconditional extensions. Open preparation measured only
+0.043/0.046 ms total including cache hits and remains once-unit preparation.
+
 Extend the existing `SymTxn` in `src/compiler.x`; do not add a parallel
 transaction system. Preserve existing current-scope facts and counters, stage
 separate base-scope bindings when current and base scopes differ, and include
 `names.adapters`, append positions for `early_decls`, `inits`, and origin
 records, plus scalar `origin` and `needs_exception`.
+
+Use selective extension in the existing transaction owner: arm the private
+template-construction context before the outer transaction and before frame
+allocation, and retain it through child/region preparation, producer evaluation,
+application, commit or rollback. Every nested transaction stores whether it
+has extended coverage. Snapshot and restore the added fields only when that
+coverage is active; ordinary transactions do no added map copies or queue
+captures. This preserves baseline transaction behavior outside construction.
+Do not activate coverage only around the final `shape(...)` call, which misses
+earlier mutations. The application/lowering owner establishes this context;
+it is not a public API or a client stage wrapper.
 
 Nested commit makes staged facts visible to its enclosing transaction; outer
 rollback restores them. Successful commit preserves borrowed Map owners and
@@ -221,6 +261,10 @@ initializers, adapters, origin records/scalar and exception state. The existing
 probe demonstrates append-only/immutable-row rollback, not arbitrary mutation.
 
 Helper transport and REPL interpreter isolation remain separate tracks.
+Native preparation in the proved try path holds fixed emission facts; it is
+not rollback of arbitrary prepared references. General open references prepared
+from speculative declarations need cache transaction ownership or preparation
+from committed declaration facts; the try rollback probe does not prove that.
 Precise diagnostic attribution, general slot-context conversion and mixed
 Name declaration/member uses require focused tests; corpus parity alone does
 not close them. Generic role extraction is implementation work supported by

@@ -1,0 +1,24 @@
+default src/transform.x parity True
+default src/emit.x parity True
+default src/expressions.x parity True
+default src/generate.x parity True
+default src/parse.x parity True
+default src/type.x parity True
+default lib/tokenizer.x parity True
+default unittest/benchmarks/exception-hot-paths.x parity True
+live src/transform.x parity True
+live src/emit.x parity True
+live src/expressions.x parity True
+live src/generate.x parity True
+live src/parse.x parity True
+live src/type.x parity True
+live lib/tokenizer.x parity True
+live unittest/benchmarks/exception-hot-paths.x parity True
+fixture unittest/compiler-fixtures/defer-try-cleanup.x parity True
+fixture unittest/compiler-fixtures/defer-try-cleanup.x parity True
+fixture unittest/compiler-fixtures/defer-try-cleanup.x parity True
+Traceback (most recent call last):
+  File "/Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase7/post-try/collect.py", line 19, in <module>
+    rows=[r for r in selected if r['sample']==sample];totals={n:{f:sum(r['metrics'][n][f] for r in rows) for f in ['calls','inclusive_ns','exclusive_ns']} for n in rows[0]['metrics']};calls=totals['try_application']['calls'];total_ms=(totals['try_application']['inclusive_ns']+totals['try_snapshot']['inclusive_ns'])/1e6;samples.append(dict(sample=sample,totals=totals,nonoverlap_ms=total_ms,per_try_ms=total_ms/calls))
+                                                                                                                                                                                              ~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'try_application'

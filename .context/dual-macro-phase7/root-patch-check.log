@@ -1,0 +1,5 @@
+patching file 'src/compiler.x'
+patching file 'src/transform.x'
+patching file 'src/parse.x'
+patching file 'src/expressions.x'
+All four reversed source hashes equal verified phase5 bases.

@@ -1,0 +1,16 @@
+default src/transform.x {'transactions': 343, 'extended': 0, 'applications': 0} parity True
+default src/emit.x {'transactions': 283, 'extended': 0, 'applications': 0} parity True
+default src/expressions.x {'transactions': 324, 'extended': 1, 'applications': 1} parity True
+default src/generate.x {'transactions': 309, 'extended': 1, 'applications': 1} parity True
+default src/parse.x {'transactions': 328, 'extended': 0, 'applications': 0} parity True
+default src/type.x {'transactions': 269, 'extended': 0, 'applications': 0} parity True
+default lib/tokenizer.x {'transactions': 263, 'extended': 0, 'applications': 0} parity True
+default unittest/benchmarks/exception-hot-paths.x {'transactions': 265, 'extended': 4, 'applications': 4} parity True
+live src/transform.x {'transactions': 344, 'extended': 0, 'applications': 0} parity True
+live src/emit.x {'transactions': 284, 'extended': 0, 'applications': 0} parity True
+live src/expressions.x {'transactions': 325, 'extended': 1, 'applications': 1} parity True
+live src/generate.x {'transactions': 310, 'extended': 1, 'applications': 1} parity True
+live src/parse.x {'transactions': 329, 'extended': 0, 'applications': 0} parity True
+live src/type.x {'transactions': 269, 'extended': 0, 'applications': 0} parity True
+live lib/tokenizer.x {'transactions': 263, 'extended': 0, 'applications': 0} parity True
+live unittest/benchmarks/exception-hot-paths.x {'transactions': 265, 'extended': 4, 'applications': 4} parity True
