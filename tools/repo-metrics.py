@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fnmatch
 import json
 import os
 import pathlib
@@ -91,13 +92,41 @@ def lines_of(path: pathlib.Path) -> int:
         return 0
 
 
-def source_paths(patterns, root: pathlib.Path = ROOT) -> list[pathlib.Path]:
+def source_paths(
+    patterns, files: set[str], root: pathlib.Path = ROOT
+) -> list[pathlib.Path]:
     if isinstance(patterns, str):
         patterns = (patterns,)
-    return sorted({
-        path for pattern in patterns for path in root.glob(pattern)
-        if path.is_file()
-    })
+
+    def matches(path: str, pattern: str) -> bool:
+        path_parts = pathlib.PurePath(path).parts
+        pattern_parts = pathlib.PurePath(pattern).parts
+
+        def match(path_index: int, pattern_index: int) -> bool:
+            if pattern_index == len(pattern_parts):
+                return path_index == len(path_parts)
+            if pattern_parts[pattern_index] == "**":
+                return (
+                    match(path_index, pattern_index + 1)
+                    or path_index < len(path_parts)
+                    and match(path_index + 1, pattern_index)
+                )
+            return (
+                path_index < len(path_parts)
+                and fnmatch.fnmatchcase(
+                    path_parts[path_index], pattern_parts[pattern_index]
+                )
+                and match(path_index + 1, pattern_index + 1)
+            )
+
+        return match(0, 0)
+
+    return sorted(
+        root / path
+        for path in files
+        if any(matches(path, pattern) for pattern in patterns)
+        and (root / path).is_file()
+    )
 
 
 def measure(groups, files: set[str]) -> dict:
@@ -105,8 +134,7 @@ def measure(groups, files: set[str]) -> dict:
     for name, pattern, _unit in groups:
         paths = [
             p
-            for p in source_paths(pattern)
-            if str(p.relative_to(ROOT)) in files
+            for p in source_paths(pattern, files)
         ]
         result[name] = {
             "files": len(paths),
@@ -266,8 +294,8 @@ def collect_summary(root: pathlib.Path = ROOT) -> dict:
     files = tracked()
     source = {
         name: cloc_lines([
-            path for path in source_paths(patterns, root)
-            if str(path.relative_to(root)) in files and not generated(path)
+            path for path in source_paths(patterns, files, root)
+            if not generated(path)
         ])
         for name, patterns in SUMMARY_GROUPS.items()
     }
