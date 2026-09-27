@@ -166,6 +166,41 @@ None blocks the merge into `dev`.
   extensions cannot link them into its helper.
 - **R10 host flags.** `_meta_host_args` filters target flags by a deny
   list; separate host and target inputs would remove the guess.
+- **Merge readiness.** `origin/dev` has advanced (171bec53); the merge
+  needs a final integration, the gate, and a CI run, after Gary's stage 3
+  decision.
+- **REPL suspected removals (about 250-270 lines, unproven).** Decline by
+  raising once instead of about 80 return-value checks in
+  `repl-lower.x`; bind natives directly and drop the alias layer in
+  `repl-runtime.xlisp` (needs timing); replace the hand-written buffers
+  and history in `repl-input.x` with `lib/buffer.x` and an Array; review
+  the terminal width fallback.
+- **REPL coverage.** The REPL tests never run lowering paths a user can
+  reach: `&x`, `x[i] = v`, string templates, `if`, arrays, and
+  destructuring. Add them before a larger REPL refactor.
+- **REPL partial state.** A failed submission leaves its partial effects
+  in the session.
+- **REPL piped runaway.** Without Ctrl-C, a runaway loop on piped input
+  runs about 50 s before the 40M-call budget stops it.
+- **Match machine.** Fix the stale "shared wordcode" comment at
+  `lib/match.x:16` and the `MatchFrame` comment about Lisp frames.
+  Replacing the `MatchCache` LRU, leases, and generations with a plain
+  plan table is a separate measured change (hit <= 1.1x, cold <= 1.3x).
+- **Native-meta consolidation table.** About 8 rows of the "Also strip or
+  consolidate" table in [native-meta-execution.md](native-meta-execution.md)
+  are not started: `SymTxn` copy-on-begin, `convert_expression`, the
+  `<macro-expr>` resolver sites, diagnostics renderers, the error-record
+  Pool merge, `lisp-values` derivable rows, and the small public-surface
+  drops.
+- **Lint.** About 1,900 candidate findings remain tree-wide, and files
+  outside this branch have had no violation pass. `silent-shape-guard`
+  treats any `.len()` as a shape test and is too noisy to act on.
+- **Bootstrap refresh pruning.** `make bootstrap-refresh` copies generated
+  files over `bootstrap/` without deleting ones whose source was removed;
+  `bootstrap/src/bootstrap.[ch]` had to be removed by hand.
+- **Install coverage.** `run-meta-cache-key.sh` builds its home with `cp`
+  since the payload `support` mode was removed, so no probe notices if
+  `make install` stops shipping `etc/meta-helper.x`.
 - **Review duplicates.** The `stage.x`/`repl-lower.x` text decoding, the
   helper builders repeated from `lib/meta.x`, and the textual scanner in
   `tools/gen-linked-meta.sh` remain review subjects without a reproduced
