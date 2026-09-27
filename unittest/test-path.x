@@ -183,7 +183,7 @@ static void path_failures_raise_with_details(void) {
   try file.make_dirs();
   catch %(io-fail *detail): {
     caught++;
-    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), ENOTDIR);
+    EXPECT_INT_EQ(detail.assoc(<"errno">).integer(), ENOTDIR);
   }
   Path dir = root.join("dir"), target = root.join("target");
   dir.make_dirs();
@@ -192,7 +192,7 @@ static void path_failures_raise_with_details(void) {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Path.read_text");
     EXPECT_STR_EQ(detail.assoc(<path>).string(), dir);
-    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), EISDIR);
+    EXPECT_INT_EQ(detail.assoc(<"errno">).integer(), EISDIR);
   }
   try dir.copy_file(target);
   catch %(io-fail *detail): {
@@ -249,7 +249,7 @@ static void path_copies_refuse_to_destroy_their_source(void) {
   catch %(io-fail *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Path.copy_tree");
-    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), EINVAL);
+    EXPECT_INT_EQ(detail.assoc(<"errno">).integer(), EINVAL);
   }
   try tree.copy_tree(tree);
   catch %(io-fail *): caught++;
