@@ -805,6 +805,38 @@ static void Build._place_unit_headers(Build b) {
   }
 }
 
+/* A compiler that links packages in keeps their objects beside it, in an
+   archive named by its identity, and their headers, for the project meta
+   helper to compile and link against. */
+static int _archive_extensions(Build b) {
+  String directory = %"${b.output}.extensions";
+  if (Path.exists(directory)) Path.remove_tree(directory);
+  Path.make_dirs(%"$directory/include");
+  Map sources = {};
+  foreach (String package, b.request.extensions) {
+    String root = %"${Path.absolute(package)}/src/";
+    foreach (String input, b.request.inputs) {
+      if (!input.startswith(root)) continue;
+      if (input.endswith(".c")) {
+        sources[input] = 1;
+        continue;
+      }
+      String stem = %"${b.generated_dir(input)}/${Path.stem(input)}";
+      sources[%"$stem.c"] = 1;
+      Path.write_text(%"$directory/include/${Path.stem(input)}.h",
+                      Path.read_text(%"$stem.h"));
+    }
+  }
+  Array objects = [];
+  int index = 0;
+  foreach (String source, b.c_sources)
+    if (source in sources) objects.push(b.objects[index++]);
+    else index++;
+  String identity = x2c_file_identity(b.output);
+  return b.toolchain.archive_action(
+    %"$directory/$identity.a", objects.list_free()).run();
+}
+
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
@@ -908,6 +940,8 @@ int Build.finish(Build b) {
       b.request.verbose, b.request.dry_run);
     if (debug.run()) return 1;
   }
+  if (b.request.extensions && !b.request.dry_run && _archive_extensions(b))
+    return 1;
   report_progress(action.phase, 1, 1, b.output);
   report_phase(
     action.phase, input_count, noun, 0,

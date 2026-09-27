@@ -445,6 +445,9 @@ EOF
   --output linked/x2c "$ROOT"/src/*.x
 "$X2C" translate -q --package-dir packages --out-dir out app/main.x \
   2>/dev/null && fail "stale module accepted"
+# The helper links the implementation the compiler was built with, not the
+# package's current source.
+sed -i.bak 's|value \* (value + 1)|value|' packages/tally/src/tally.x
 for pass in stale absent; do
   linked/x2c translate -q --package-dir packages --out-dir out app/main.x
   grep -Fq 'printf("%d\n", 20)' out/main.c ||

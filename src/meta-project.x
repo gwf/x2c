@@ -327,8 +327,10 @@ static List _meta_build(
                 "-Wl,--no-whole-archive");
 #endif
     t.ld_args = exports;
-    ToolAction link = t.link_action(
-      output, %(@{objects.list()} $tables $support));
+    List inputs = %(@{objects.list()} $tables $support);
+    String archive = Compiler.extension_archive();
+    if (archive) inputs = inputs.append(%($archive));
+    ToolAction link = t.link_action(output, inputs);
     /* The link compiles the table, which includes the runtime headers. */
     failure = _meta_cc(
       %(@{link.arguments} @{_meta_flags()} "-iquote" $include));
@@ -422,6 +424,10 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
                    .flatten()} @{_meta_host_args(f.request.cc_args)});
   foreach (Var (root, _), packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
+  /* A package linked into the compiler uses the headers of its build. */
+  String archive = Compiler.extension_archive();
+  if (archive)
+    flags = %("-iquote" ${%"${Path.dirname(archive)}/include"} @flags);
   Array modules = f.request.native_modules.map(
     %!(String path) => Path.absolute(path));
   foreach (Var (root, _), packages) {

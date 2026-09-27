@@ -1835,6 +1835,13 @@ int Compiler.links_extension(String name) {
   return 0;
 }
 
+/** Returns the archive of the linked packages' objects that the build of
+    this compiler kept beside it, named by the compiler's identity, or NULL
+    when the compiler links none. Project meta code links it. */
+String Compiler.extension_archive(void) =>
+  extensions ? %"${x2c_get_executable()}.extensions/"
+               + %"${x2c_compiler_identity()}.a" : NULL;
+
 /** Selects package `name`'s native module, when it has one, after the
     modules already selected, and records it as a prerequisite of the unit.
     The module is `<root>/builds/<name>.module`; a worker loads it itself

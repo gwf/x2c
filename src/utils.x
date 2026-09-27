@@ -284,14 +284,9 @@ static String _executable(const char *argv0) {
 
 /* Linux names the running image itself, which stays the same file even if
    the executable's path is replaced while the process runs. */
-static String _identity(void) {
-  String path = Path.exists("/proc/self/exe") ? %"/proc/self/exe"
-                                               : x2c_executable_path;
-  int ok = path != NULL;
-  uint64_t hash = UINT64_C(1469598103934665603);
-  if (ok) hash = x2c_fnv_file(hash, path, ok);
-  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
-}
+static String _identity(void) =>
+  x2c_file_identity(Path.exists("/proc/self/exe") ? %"/proc/self/exe"
+                                                   : x2c_executable_path);
 
 static int _is_home(Path p) =>
   p.join("include").is_dir() && p.join("etc/compiler-sdk.xlisp").is_file();
@@ -350,6 +345,16 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok) {
     Returns NULL if ordinary startup could not read its executable.
 */
 String x2c_compiler_identity(void) => x2c_identity;
+
+/** Returns the identity a compiler executable at `path` has when it runs:
+    the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
+*/
+String x2c_file_identity(String path) {
+  int ok = path != NULL;
+  uint64_t hash = UINT64_C(1469598103934665603);
+  if (ok) hash = x2c_fnv_file(hash, path, ok);
+  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
+}
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
     running compiler's identity. Returns NULL when the executable cannot be
