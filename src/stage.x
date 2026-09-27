@@ -8,8 +8,8 @@
     what it reaches and its emission through the ordinary backend. It owns
     the helper's side in the compiler: starting it, one request and one
     reply per call, and reporting a body that fails, crashes, or runs too
-    long. The REPL stages each submission's group in process instead. It
-    also owns what crosses between meta code and the program: the arguments
+    long. It also supports staging a group in process. It owns what crosses
+    between meta code and the program: the arguments
     a `$` call passes, evaluated from constants, captured syntax, and other
     `$` calls; the literal code a result becomes; and the rule that a
     function reaching a compiler operation has no runtime form.
@@ -17,8 +17,7 @@
 #pragma once
 #include "compiler.x"
 
-/* The REPL loads staged groups as native modules, which these platforms
-   lack. */
+/* In-process staging loads native modules, which these platforms lack. */
 #if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
@@ -416,17 +415,16 @@ String Compiler.meta_cc(String &include_dir) {
   return meta_cc;
 }
 
-/* Whether this process stages each unit's group in process, as the REPL
-   does for its submissions, rather than calling a project helper. */
+/* Whether this process stages each unit's group in process rather than
+   calling a project helper. */
 static int meta_in_process = 0;
 
-/** Stages the `meta` group of each unit this process parses in process and
-    loads it, as the REPL's submissions need. */
+/** Enables in-process staging of `meta` groups for compiler sessions. */
 void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 
 /** Answers whether a `meta` function or value belongs to the unit's group:
     a parse meets it outside a macro definition while the project meta build
-    parses the unit or the REPL stages it. A `.xmacro` import, and each
+    parses the unit or a session stages it. A `.xmacro` import, and each
     compiler that collects a segment of the unit, shares the unit's group. */
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
@@ -1214,7 +1212,7 @@ Var Compiler.meta_helper_call(
   }
 }
 
-/* --- a REPL submission, staged in process ------------------------------- */
+/* --- a session group, staged in process -------------------------------- */
 
 /* Holds what staged `meta static` values allocate. */
 static Scope session_meta_scope = NULL;
@@ -1252,8 +1250,7 @@ static String _stage_meta_group(Compiler c, String &failure) {
   return module;
 }
 
-/** Stages the session's `meta` group now, for the REPL, which adds
-    functions to `meta_group` itself: builds and loads it, and binds each
+/** Builds and loads the session's `meta` group, then binds each
     group function in the session not yet bound. Returns the loaded module,
     or NULL with `failure` set when the group does not stage. */
 String Compiler.stage_meta_group(Compiler c, String &failure) {

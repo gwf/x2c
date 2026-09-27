@@ -1952,6 +1952,7 @@ static List _native_module_suppliers(String name) =>
 /** Returns the selected file-backed native module that supplies `name`,
     with its native `type`, or NULL for a linked or absent target. */
 String Compiler.native_meta_module(Compiler c, String name, Type &type) {
+  if (!c.bind_native_meta(name)) return NULL;
   List suppliers = _native_module_suppliers(name);
   if (!suppliers) return NULL;
   String path = suppliers.car();

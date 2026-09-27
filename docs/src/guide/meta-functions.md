@@ -714,8 +714,9 @@ source or C header; a change to program code alone recompiles the groups
 but keeps the helper when no group object changes. The
 shipped meta code of the compiler's own `.xmacro` files and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
-REPL compiles each submission's `meta` functions and loads them into the
-compiler instead.
+REPL evaluates its supported submissions through Lisp. It accepts bodyless
+`meta` prototypes for linked or explicitly loaded native functions; user
+`meta` function definitions are outside its supported subset.
 
 Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code
