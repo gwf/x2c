@@ -203,6 +203,7 @@ struct Lisp {
   Func specials[LISP_SPECIAL_COUNT];
   int call_depth;       // evaluator calls nested on this session
   unsigned long stack_base; // C stack address at the outermost call
+  unsigned long stack_allowance; // bytes below stack_base calls may use
   Lambda tail_lambda;   // a tail call waiting for its caller's frame
   Var *tail_values;     // its evaluated arguments, owned by the session
   int tail_count;
@@ -1487,6 +1488,36 @@ static void _bind_params(
    report instead of a crash. Tail calls use none. */
 #define LISP_STACK_BYTES_MAX (6L << 20)
 
+#if defined(__GLIBC__)
+extern int pthread_getattr_np(pthread_t thread, pthread_attr_t *attributes);
+#endif
+
+/* Returns the stack evaluator calls starting at `at` may use: four fifths of
+   what the current thread has left below `at`, at most
+   LISP_STACK_BYTES_MAX. Where the thread's stack is unknown it is the
+   maximum. */
+static unsigned long _stack_allowance(unsigned long at) {
+  unsigned long low = 0;
+#if defined(__APPLE__)
+  pthread_t self = pthread_self();
+  low = (unsigned long) pthread_get_stackaddr_np(self)
+    - pthread_get_stacksize_np(self);
+#elif defined(__GLIBC__)
+  pthread_attr_t attributes;
+  if (!pthread_getattr_np(pthread_self(), &attributes)) {
+    void *address;
+    size_t size;
+    if (!pthread_attr_getstack(&attributes, &address, &size))
+      low = (unsigned long) address;
+    pthread_attr_destroy(&attributes);
+  }
+#endif
+  if (!low || low >= at) return LISP_STACK_BYTES_MAX;
+  unsigned long left = at - low;
+  left -= left / 5;
+  return left < LISP_STACK_BYTES_MAX ? left : LISP_STACK_BYTES_MAX;
+}
+
 /* Runs one activation of `lambda`. In tail position it may leave a pending
    call on `lisp` instead of making it; _call_lambda_slots runs that call
    after this frame is gone. */
@@ -1551,10 +1582,13 @@ static Var _call_lambda_slots(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
   _spend_call(lisp);
   unsigned long at = (unsigned long) __builtin_frame_address(0);
-  if (!lisp.call_depth) lisp.stack_base = at;
+  if (!lisp.call_depth) {
+    lisp.stack_base = at;
+    lisp.stack_allowance = _stack_allowance(at);
+  }
   unsigned long used = lisp.stack_base > at ? lisp.stack_base - at
                                             : at - lisp.stack_base;
-  if (used > LISP_STACK_BYTES_MAX)
+  if (used > lisp.stack_allowance)
     raise %(call-stack (operation "apply") (value ${lambda.body}));
   lisp.call_depth++;
   defer lisp.call_depth--;

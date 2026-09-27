@@ -51,15 +51,22 @@ Var lisp_assoc(Var key, Var pairs) {
 }
 
 static Var _append2(Var left, Var right) {
-  if (_nil(left)) return right;
-  return Var.cons(lisp_car(left), _append2(lisp_cdr(left), right));
+  List items = NULL;
+  for (; !_nil(left); left = lisp_cdr(left))
+    items = cons(lisp_car(left), items);
+  foreach (Var value, items)
+    right = Var.cons(value, right);
+  return right;
 }
 
 /* Concatenates its list arguments; the last is shared, not copied. */
 Var lisp_append(List lists) {
   if (!lists) return %();
-  if (!lists.cdr()) return lists.car();
-  return _append2(lists.car(), lisp_append(lists.cdr()));
+  List reversed = List.reverse(lists);
+  Var result = reversed.car();
+  foreach (Var left, reversed.cdr())
+    result = _append2(left, result);
+  return result;
 }
 
 /* Returns true when `value` is nil and nil otherwise. */

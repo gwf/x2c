@@ -960,7 +960,8 @@ static void lisp_bootstrap_arithmetic_and_strings(void) {
 /* Machine and Lisp frame storage is allocated on the session scope rather than
    the C stack. While it was a stack local, every evaluator frame reserved
    about 44 KB and recursion died with SIGSEGV past 88 levels -- inside the
-   reach of the stdlib list primitives, which recurse once per element. */
+   reach of the stdlib list primitives, which then recursed once per element.
+   They are iterative now; the long lists below keep them so. */
 static void lisp_deep_recursion_survives_stack(void) {
   Lisp lisp = _boot_session();
   _ev(lisp, "(def down (lambda (k) (if (= k 0) 0 (down (- k 1)))))");
@@ -971,15 +972,18 @@ static void lisp_deep_recursion_survives_stack(void) {
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(slow 1000)")), 0);
   _ev2(lisp, "(def build (lambda (k acc)",
              " (if (= k 0) acc (build (- k 1) (cons k acc)))))");
-  _ev(lisp, "(def wide (build 1000 nil))");
-  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(length wide)")), 1000);
+  _ev(lisp, "(def wide (build 5000 nil))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(length wide)")), 5000);
   EXPECT_INT_EQ(
-    Var.integer(_ev(lisp, "(length (map (lambda (v) v) wide))")), 1000);
+    Var.integer(_ev(lisp, "(length (map (lambda (v) v) wide))")), 5000);
   EXPECT_INT_EQ(
-    Var.integer(_ev(lisp, "(length (filter (lambda (v) true) wide))")), 1000);
+    Var.integer(_ev(lisp, "(length (filter (lambda (v) true) wide))")), 5000);
   EXPECT_INT_EQ(
-    Var.integer(_ev(lisp, "(length (append wide (list 0)))")), 1001);
-  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(length (reverse wide))")), 1000);
+    Var.integer(_ev(lisp, "(length (append wide (list 0)))")), 5001);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(length (reverse wide))")), 5000);
+  _ev(lisp, "(def huge (build 300000 nil))");
+  EXPECT_INT_EQ(
+    Var.integer(_ev(lisp, "(length (append huge (list 0)))")), 300001);
   lisp.destroy();
 }
 
