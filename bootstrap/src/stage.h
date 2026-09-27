@@ -7,6 +7,10 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List Compiler_transform(Compiler compiler, List ast);
+
+List generate_code_text(Compiler c, List ast, String basename);
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else

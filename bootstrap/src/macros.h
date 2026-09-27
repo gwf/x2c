@@ -171,7 +171,7 @@ List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 
 Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
 
-Var Compiler_evaluate_macro_slot(Compiler compiler, Var value);
+Var Compiler_evaluate_macro_slot(Compiler c, Var value);
 
 List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
 

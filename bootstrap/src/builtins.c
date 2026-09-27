@@ -29,6 +29,7 @@ static String _447, _446, _445, _444, _443, _442, _441, _440, _439, _438, _437, 
 static Var _333, _330, _327, _324, _319, _316, _306, _303, _300, _297, _294, _291, _287, _284, _280, _277, _274, _271, _265, _263, _260, _257, _254, _251, _248, _244, _241, _238, _235, _232, _229, _227, _225, _222, _219, _217, _215, _212, _204, _201, _192, _189, _186, _183, _173, _170, _166, _163, _161, _158, _155, _152, _149, _146, _143, _140, _136, _133, _132, _127, _126, _125, _124, _120, _119, _116, _114, _109, _108, _106, _104, _103, _101, _99, _98, _96, _90, _87, _85, _80, _78, _74, _72, _70, _67, _66, _60, _57, _56, _54, _51, _50, _48, _47, _46, _45, _44, _43, _42, _40, _38, _33, _30, _28, _25, _23, _21, _19, _17, _16, _15, _13, _12, _11, _9, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include "lisp.h"
+#include "macros.h"
 List x2c_expr_field(List receiver, String name);
 
 List x2c_expr_cast(List type, List expression);
@@ -42,16 +43,6 @@ static int _init_guard_ = 0;
 __attribute__((constructor)) static void _file_init_(void);
 
 static List builtin_scope_expand(List body, List destinations);
-
-List builtin_foreach_reference(String name);
-
-Var builtin_foreach_unique(String name);
-
-List builtin_foreach_complete(List expression);
-
-List builtin_foreach_collection(List expression);
-
-List builtin_foreach_bindings(List declaration);
 
 static List builtin_foreach_parameters(List type);
 
@@ -90,8 +81,6 @@ static List builtin_foreach_iter_call(List function, List collection);
 static List builtin_foreach_general_loop(List declaration, List collection, List body, List targets, List collection_type, Var iterator, Var item, Var pair, List converter);
 
 static List builtin_foreach_expand(List declaration, List collection, List body, Var iterator, Var item, Var pair, Var object, Var cursor);
-
-List builtin_class_location(void);
 
 static Var builtin_class_pointer(List type);
 
@@ -160,10 +149,6 @@ static int builtin_class_positional(List fields);
 static List builtin_class_constructor(String owner, List type, List pointee, List representation, int heap, int aggregate, int alias, List named, int positional);
 
 static List builtin_class_defaults(String owner, List type, List location);
-
-List binding_native_type(List function);
-
-List binding_literal_list(List values);
 
 static List binding_reference(String name);
 
@@ -734,8 +719,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _383 = String_new("native Lisp binding name requires a String literal");
   _384 = String_new("native Lisp binding appears after its group was installed");
   _385 = String_new("duplicate native Lisp binding name");
-  _386 = String_new("Lisp_bind");
-  _387 = String_new("Func_new");
+  _386 = String_new("Func_new");
+  _387 = String_new("Lisp_bind");
   _388 = String_new("unknown native Lisp binding group");
   _389 = String_new("String_var");
   _390 = String_new("Func_var");
@@ -904,6 +889,8 @@ static int builtin_foreach_valid_outputs(List outputs){
 
 String Var_str(Var);
 
+List builtin_foreach_reference(String);
+
 String String_add(String, String);
 
 List x2c_syntax_type(List);
@@ -973,6 +960,8 @@ static List builtin_foreach_iter_call(List function, List collection){
   return cons(_2, cons(_30, cons(List_var(cons(_4, cons(List_var(function), cons(List_var(cons(_6, cons(List_var(collection), NULL))), NULL)))), NULL)));
 }
 
+List builtin_foreach_complete(List);
+
 static List builtin_foreach_general_loop(List declaration, List collection, List body, List targets, List collection_type, Var iterator, Var item, Var pair, List converter){
   int atom = builtin_foreach_atom_type(List_var(collection_type));
   String owner = atom ? Var_str(List_car(collection_type)) : _342;
@@ -991,6 +980,10 @@ static List builtin_foreach_general_loop(List declaration, List collection, List
   return cons(List_var(cons(_0, cons(List_var(declaration), cons(List_var(builtin_foreach_declare(_29, iterator, initializer)), cons(List_var(builtin_foreach_declare(_34, item, NULL)), cons(List_var(cons(_23, cons(List_var(condition), cons(List_var(loop_body), NULL)))), NULL)))))), NULL);
 }
 
+List builtin_foreach_collection(List);
+
+List builtin_foreach_bindings(List);
+
 String Var_repr(Var);
 
 static List builtin_foreach_expand(List declaration, List collection, List body, Var iterator, Var item, Var pair, Var object, Var cursor){
@@ -999,9 +992,7 @@ static List builtin_foreach_expand(List declaration, List collection, List body,
   List type = x2c_syntax_type(collection);
   int direct = List_equal(type, _29);
   List converter = NULL;
-  if(! direct){
-    converter = List_equal(type, _34) ? builtin_foreach_reference(_344) : builtin_foreach_protocol(type, _29, _345);
-  }
+  if(! direct) converter = List_equal(type, _34) ? builtin_foreach_reference(_344) : builtin_foreach_protocol(type, _29, _345);
   List spec = direct ? NULL : builtin_foreach_cursor_spec(type);
   if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_346, NULL);
   if(! direct && ! List_truth(converter)){
@@ -1156,7 +1147,7 @@ static List builtin_class_new(String owner, List representation, int heap, List 
       {
         List field;  List _x2c_macro_object_2 = named;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
           field = Var_list(_x2c_macro_cursor_output_2); {
-            parameters = cons(List_var(builtin_class_parameter(builtin_class_value_type(Var_list(List_getindex(field, 1))), String_var(String_join(NULL, cons(String_var(_64), cons(String_var(Var_str(List_getindex(field, 0))), NULL)))))), parameters);  arguments = cons(List_var(builtin_class_ref(String_join(NULL, cons(String_var(_64), cons(String_var(Var_str(List_getindex(field, 0))), NULL))))), arguments);
+            List parameter = builtin_class_parameter(builtin_class_value_type(Var_list(List_getindex(field, 1))), String_var(String_join(NULL, cons(String_var(_64), cons(String_var(Var_str(List_getindex(field, 0))), NULL)))));  parameters = cons(List_var(parameter), parameters);  arguments = cons(List_var(builtin_class_ref(String_join(NULL, cons(String_var(_64), cons(String_var(Var_str(List_getindex(field, 0))), NULL))))), arguments);
           }
 
         }
@@ -1242,10 +1233,13 @@ return x2c_stmnt_make(expression);
 }
 
 static List builtin_class_write_fields(String owner, List fields){
-  List out = builtin_class_ref(_359);  List body = cons(List_var(x2c_stmnt_make(builtin_class_method(out, _362, cons(List_var(x2c_literal_string(String_join(NULL, cons(String_var(owner), cons(String_var(_76), NULL))))), NULL)))), NULL);  Var final = List_last(fields); {
+  List out = builtin_class_ref(_359);  List opening = builtin_class_method(out, _362, cons(List_var(x2c_literal_string(String_join(NULL, cons(String_var(owner), cons(String_var(_76), NULL))))), NULL));  List body = cons(List_var(x2c_stmnt_make(opening)), NULL);  Var final = List_last(fields); {
     List field;  List _x2c_macro_object_4 = fields;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       field = Var_list(_x2c_macro_cursor_output_4); {
-        body = cons(List_var(x2c_stmnt_make(builtin_class_method(out, _362, cons(List_var(x2c_literal_string(String_join(NULL, cons(String_var(Var_str(List_getindex(field, 0))), cons(String_var(_77), NULL))))), NULL)))), body);  body = cons(List_var(builtin_class_field_write(field)), body);  if(! List_equal(field, Var_list(final))) body = cons(List_var(x2c_stmnt_make(builtin_class_method(out, _362, cons(List_var(x2c_literal_string(_363)), NULL)))), body);
+        List label = builtin_class_method(out, _362, cons(List_var(x2c_literal_string(String_join(NULL, cons(String_var(Var_str(List_getindex(field, 0))), cons(String_var(_77), NULL))))), NULL));  body = cons(List_var(x2c_stmnt_make(label)), body);  body = cons(List_var(builtin_class_field_write(field)), body);  if(! List_equal(field, Var_list(final))){
+          List separator = builtin_class_method(out, _362, cons(List_var(x2c_literal_string(_363)), NULL));  body = cons(List_var(x2c_stmnt_make(separator)), body);
+        }
+
       }
 
     }
@@ -1256,7 +1250,10 @@ static List builtin_class_write_fields(String owner, List fields){
 
 int String_equal(String, String);
 static List builtin_class_writer(String owner, int heap, List fields, String member, List selected){
-  List type = cons(String_var(owner), NULL);  List value = builtin_class_ref(_347);  List out = builtin_class_ref(_359);  List parameters = cons(List_var(builtin_class_parameter(type, String_var(_347))), cons(List_var(builtin_class_parameter(_81, String_var(_359))), NULL));  List body;  if(List_truth(selected)) body = cons(List_var(x2c_stmnt_return(builtin_class_method(out, _362, cons(List_var(builtin_class_method(value, member, NULL)), NULL)))), NULL);  else if(heap && String_equal(member, _82)) body = cons(List_var(x2c_stmnt_return(builtin_class_pointer_output(owner, value, out))), NULL);  else if(String_equal(member, _82)) body = cons(List_var(x2c_stmnt_return(builtin_class_method(value, _360, cons(List_var(out), NULL)))), NULL);  else{
+  List type = cons(String_var(owner), NULL);  List value = builtin_class_ref(_347);  List out = builtin_class_ref(_359);  List parameters = cons(List_var(builtin_class_parameter(type, String_var(_347))), cons(List_var(builtin_class_parameter(_81, String_var(_359))), NULL));  List body;  if(List_truth(selected)){
+    List written = builtin_class_method(out, _362, cons(List_var(builtin_class_method(value, member, NULL)), NULL));  body = cons(List_var(x2c_stmnt_return(written)), NULL);
+  }
+  else if(heap && String_equal(member, _82)) body = cons(List_var(x2c_stmnt_return(builtin_class_pointer_output(owner, value, out))), NULL);  else if(String_equal(member, _82)) body = cons(List_var(x2c_stmnt_return(builtin_class_method(value, _360, cons(List_var(out), NULL)))), NULL);  else{
     body = NULL;  if(heap){
       List null_test = builtin_class_op(15739, cons(List_var(builtin_class_cast(_83, value)), cons(List_var(builtin_class_cast(_83, x2c_literal_int(0))), NULL)));  List fallback = x2c_stmnt_return(builtin_class_pointer_output(owner, value, out));  List path = builtin_class_ref(_365);  List entered = builtin_class_method(path, _366, cons(List_var(value), NULL));  body = cons(List_var(cons(_60, cons(List_var(null_test), cons(List_var(fallback), NULL)))), cons(List_var(builtin_class_declaration(_86, String_var(_365), NULL)), cons(List_var(cons(_60, cons(List_var(builtin_class_op(60, cons(List_var(entered), NULL))), cons(List_var(fallback), NULL)))), cons(List_var(cons(_7, cons(List_var(x2c_stmnt_make(builtin_class_method(path, _367, NULL))), NULL))), NULL))));
     }
@@ -1267,14 +1264,18 @@ static List builtin_class_writer(String owner, int heap, List fields, String mem
 
 static List builtin_class_string_method(String owner, String member){
   List out = builtin_class_ref(_359);
-  return builtin_class_default(owner, member, _91, cons(List_var(builtin_class_parameter(cons(String_var(owner), NULL), String_var(_347))), NULL), cons(List_var(builtin_class_declaration(_81, String_var(_359), builtin_class_call(_368, cons(List_var(x2c_literal_int(0)), NULL)))), cons(List_var(cons(_7, cons(List_var(x2c_stmnt_make(builtin_class_method(out, _369, NULL))), NULL))), cons(List_var(x2c_stmnt_make(builtin_class_method(builtin_class_ref(_347), String_join(NULL, cons(String_var(_88), cons(String_var(member), NULL))), cons(List_var(out), NULL)))), cons(List_var(x2c_stmnt_return(builtin_class_method(out, _82, NULL))), NULL)))));
+  List write = builtin_class_method(builtin_class_ref(_347), String_join(NULL, cons(String_var(_88), cons(String_var(member), NULL))), cons(List_var(out), NULL));
+  return builtin_class_default(owner, member, _91, cons(List_var(builtin_class_parameter(cons(String_var(owner), NULL), String_var(_347))), NULL), cons(List_var(builtin_class_declaration(_81, String_var(_359), builtin_class_call(_368, cons(List_var(x2c_literal_int(0)), NULL)))), cons(List_var(cons(_7, cons(List_var(x2c_stmnt_make(builtin_class_method(out, _369, NULL))), NULL))), cons(List_var(x2c_stmnt_make(write)), cons(List_var(x2c_stmnt_return(builtin_class_method(out, _82, NULL))), NULL)))));
 }
 
 static List builtin_class_equal(String owner, int heap, List fields){
   List left = builtin_class_ref(_370);
   List right = builtin_class_ref(_371);
   List body = NULL;
-  if(heap) body = cons(List_var(x2c_stmnt_return(builtin_class_op(15739, cons(List_var(builtin_class_cast(_83, left)), cons(List_var(builtin_class_cast(_83, right)), NULL))))), NULL);
+  if(heap){
+    List same = builtin_class_op(15739, cons(List_var(builtin_class_cast(_83, left)), cons(List_var(builtin_class_cast(_83, right)), NULL)));
+    body = cons(List_var(x2c_stmnt_return(same)), NULL);
+  }
   else{
     {
       List field;
@@ -1299,7 +1300,10 @@ static List builtin_class_equal(String owner, int heap, List fields){
 static List builtin_class_hash(String owner, int heap, List fields){
   List value = builtin_class_ref(_347);
   List body;
-  if(heap) body = cons(List_var(x2c_stmnt_return(builtin_class_call(_374, cons(List_var(builtin_class_cast(_92, value)), NULL)))), NULL);
+  if(heap){
+    List hashed = builtin_class_call(_374, cons(List_var(builtin_class_cast(_92, value)), NULL));
+    body = cons(List_var(x2c_stmnt_return(hashed)), NULL);
+  }
   else{
     List hash = builtin_class_ref(_375);
     body = cons(List_var(builtin_class_declaration(_41, String_var(_375), x2c_literal_int(0))), NULL);
@@ -1329,6 +1333,8 @@ static List builtin_class_own_method(String owner, String member){
   if(List_truth(found) && String_equal(x2c_binding_spelling(List_var(found)), String_join(NULL, cons(String_var(owner), cons(String_var(_49), cons(String_var(member), NULL)))))) return found;
   return NULL;
 }
+
+List builtin_class_location(void);
 
 static List builtin_class_expand(List capture){
   String owner = Var_string(List_getindex(capture, 1));
@@ -1407,16 +1413,25 @@ static List builtin_class_defaults(String owner, List type, List location){
   if(alias) return cons(_78, List_append(body, NULL));
   List drop = builtin_class_own_method(owner, _377);
   List release = cons(List_var(x2c_stmnt_make(builtin_class_call(_350, cons(List_var(value), NULL)))), NULL);
-  if(List_truth(drop)) release = cons(List_var(cons(_60, cons(List_var(value), cons(List_var(x2c_stmnt_make(builtin_class_call(x2c_binding_spelling(List_var(drop)), cons(List_var(value), NULL)))), NULL)))), release);
+  if(List_truth(drop)){
+    List dropped = builtin_class_call(x2c_binding_spelling(List_var(drop)), cons(List_var(value), NULL));
+    release = cons(List_var(cons(_60, cons(List_var(value), cons(List_var(x2c_stmnt_make(dropped)), NULL)))), release);
+  }
   if(heap && aggregate){
     List allocated = builtin_class_call(_378, cons(List_var(x2c_literal_int(1)), cons(List_var(builtin_class_size(builtin_class_op(54, cons(List_var(value), NULL)))), NULL)));
-    body = List_append(body, cons(List_var(builtin_class_default(owner, _379, cons(String_var(owner), NULL), NULL, cons(List_var(builtin_class_declaration(cons(String_var(owner), NULL), String_var(_347), allocated)), cons(List_var(x2c_stmnt_return(value)), NULL)))), NULL));
+    List alloc = builtin_class_default(owner, _379, cons(String_var(owner), NULL), NULL, cons(List_var(builtin_class_declaration(cons(String_var(owner), NULL), String_var(_347), allocated)), cons(List_var(x2c_stmnt_return(value)), NULL)));
+    body = List_append(body, cons(List_var(alloc), NULL));
   }
-  if(heap) body = List_append(body, cons(List_var(builtin_class_default(owner, _369, _58, cons(List_var(parameter), NULL), release)), cons(List_var(builtin_class_default(owner, _380, _58, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_make(builtin_class_method(value, _369, NULL))), NULL))), cons(List_var(cons(_104, cons(_108, cons(List_var(cons(String_var(owner), NULL)), cons(_109, cons(List_var(location), NULL)))))), NULL))));
+  if(heap){
+    List free_method = builtin_class_default(owner, _369, _58, cons(List_var(parameter), NULL), release);
+    List cleanup_method = builtin_class_default(owner, _380, _58, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_make(builtin_class_method(value, _369, NULL))), NULL));
+    body = List_append(body, cons(List_var(free_method), cons(List_var(cleanup_method), cons(List_var(cons(_104, cons(_108, cons(List_var(cons(String_var(owner), NULL)), cons(_109, cons(List_var(location), NULL)))))), NULL))));
+  }
   if(aggregate || heap){
     List pointer = builtin_class_call(_381, cons(List_var(value), NULL));
     List unboxed = heap ? builtin_class_cast(cons(String_var(owner), NULL), pointer) : builtin_class_op(54, cons(List_var(builtin_class_cast(cons(_51, cons(String_var(owner), NULL)), pointer)), NULL));
-    body = List_append(body, cons(List_var(builtin_class_default(owner, _382, _34, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_return(builtin_class_box(tag, heap))), NULL))), cons(List_var(builtin_class_unbox(owner, unboxed)), NULL)));
+    List var_method = builtin_class_default(owner, _382, _34, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_return(builtin_class_box(tag, heap))), NULL));
+    body = List_append(body, cons(List_var(var_method), cons(List_var(builtin_class_unbox(owner, unboxed)), NULL)));
     if(heap || positional) body = List_append(body, cons(List_var(builtin_class_equal(owner, heap, named)), cons(List_var(builtin_class_hash(owner, heap, named)), NULL)));
     else if(! List_truth(x2c_method_resolve(cons(String_var(owner), NULL), _373)) || ! List_truth(x2c_method_resolve(cons(String_var(owner), NULL), _375))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_110), cons(String_var(owner), cons(String_var(_111), NULL)))), _112), NULL);
     {
@@ -1439,7 +1454,12 @@ static List builtin_class_defaults(String owner, List type, List location){
     }
     body = List_append(body, cons(List_var(cons(_104, cons(_119, cons(List_var(cons(String_var(owner), NULL)), cons(_109, cons(List_var(cons(_120, cons(List_var(x2c_literal_symbol(tag)), NULL))), cons(List_var(location), NULL))))))), NULL));
   }
-  else body = List_append(body, cons(List_var(builtin_class_default(owner, _382, _34, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_return(builtin_class_cast(_34, builtin_class_cast(representation, value)))), NULL))), cons(List_var(builtin_class_unbox(owner, builtin_class_cast(cons(String_var(owner), NULL), builtin_class_cast(representation, value)))), cons(List_var(cons(_104, cons(_119, cons(List_var(cons(String_var(owner), NULL)), cons(_109, cons(List_var(representation), cons(List_var(location), NULL))))))), NULL))));
+  else{
+    List boxed = builtin_class_cast(_34, builtin_class_cast(representation, value));
+    List unboxed = builtin_class_cast(cons(String_var(owner), NULL), builtin_class_cast(representation, value));
+    List var_method = builtin_class_default(owner, _382, _34, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_return(boxed)), NULL));
+    body = List_append(body, cons(List_var(var_method), cons(List_var(builtin_class_unbox(owner, unboxed)), cons(List_var(cons(_104, cons(_119, cons(List_var(cons(String_var(owner), NULL)), cons(_109, cons(List_var(representation), cons(List_var(location), NULL))))))), NULL))));
+  }
   return cons(_78, List_append(body, NULL));
 }
 
@@ -1464,6 +1484,8 @@ List x2c_ident(String);
 static List binding_call(String name, List arguments){
   return x2c_expr_call(x2c_expr_ident(x2c_ident(name)), arguments);
 }
+
+List binding_native_type(List);
 
 static List binding_name_signature(String name){
   return binding_native_type(binding_reference(name));
@@ -1525,6 +1547,8 @@ static List binding_record(Var group, Var name, List function, List all_rows, Li
   return cons(List_var(cons(String_var(group_name), cons(String_var(lisp_name), cons(String_var(function_name), cons(List_var(type), NULL))))), List_append(all_rows, NULL));
 }
 
+List binding_literal_list(List);
+
 static List binding_statement(List lisp, List row){
 
   {
@@ -1533,7 +1557,10 @@ static List binding_statement(List lisp, List row){
   MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
 
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_131), &_x2c_match_capture)) {Var group = _x2c_match_values[0];  Var name = _x2c_match_values[1];  Var function = _x2c_match_values[2];  Var type = _x2c_match_values[3];  return cons(_1, cons(List_var(binding_call(_386, cons(List_var(lisp), cons(List_var(x2c_literal_string(Var_string(name))), cons(List_var(binding_call(_387, cons(List_var(x2c_expr_ident(x2c_ident(Var_string(function)))), cons(List_var(binding_literal_list(Var_list(type))), NULL)))), NULL))))), NULL));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_131), &_x2c_match_capture)) {Var group = _x2c_match_values[0];  Var name = _x2c_match_values[1];  Var function = _x2c_match_values[2];  Var type = _x2c_match_values[3]; {
+    List func = binding_call(_386, cons(List_var(x2c_expr_ident(x2c_ident(Var_string(function)))), cons(List_var(binding_literal_list(Var_list(type))), NULL)));  return cons(_1, cons(List_var(binding_call(_387, cons(List_var(lisp), cons(List_var(x2c_literal_string(Var_string(name))), cons(List_var(func), NULL))))), NULL));
+  }
+  break;
 }
 
     }
@@ -1556,7 +1583,7 @@ static List binding_statements(List lisp, List rows){
 }
 
 static List binding_target(String bind_name, String name, String maker){
-  return cons(List_var(binding_call(_389, cons(List_var(x2c_literal_string(bind_name)), NULL))), cons(List_var(binding_call(_390, cons(List_var(binding_call(maker, cons(List_var(x2c_expr_ident(x2c_ident(name))), cons(List_var(binding_literal_list(binding_name_signature(name))), NULL)))), NULL))), NULL));
+  List func = binding_call(maker, cons(List_var(x2c_expr_ident(x2c_ident(name))), cons(List_var(binding_literal_list(binding_name_signature(name))), NULL)));  return cons(List_var(binding_call(_389, cons(List_var(x2c_literal_string(bind_name)), NULL))), cons(List_var(binding_call(_390, cons(List_var(func), NULL))), NULL));
 }
 
 static List binding_target_row(List row){
@@ -1565,9 +1592,9 @@ static List binding_target_row(List row){
     List _x2c_match_expr = row;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_138), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var bind = _x2c_match_values[1];  return binding_target(Var_str(bind), Var_str(name), _387);  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_138), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var bind = _x2c_match_values[1];  return binding_target(Var_str(bind), Var_str(name), _386);  break;
 }
-static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_139), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  return binding_target(Var_str(name), Var_str(name), _387);  break;
+static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_139), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  return binding_target(Var_str(name), Var_str(name), _386);  break;
 }
 static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_142), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var marker = _x2c_match_values[1];  return binding_target(Var_str(name), Var_str(name), _391);  break;
 }
@@ -1611,6 +1638,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);  return _x2c_lambda_0(a0); ;
 }
 
+Var builtin_foreach_unique(String);
 static Var _x2c_lambda_1(Var type){
   return List_var(cons(type, cons(builtin_foreach_unique(_447), NULL))); ;
 }
