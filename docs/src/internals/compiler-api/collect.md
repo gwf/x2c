@@ -12,7 +12,10 @@ Source-ordered shallow symbol collection and replay.
 
 | Function | Summary |
 | --- | --- |
+| [`collect_cached_paths`](#collect_cached_paths) | Returns the canonical paths collected so far. |
+| [`collect_forget_entries_since`](#collect_forget_entries_since) | Drops the entries collected since `before` returned by `collect_cached_paths`. |
 | [`collect_forget_preload_entries`](#collect_forget_preload_entries) | Drops the entries collected without declaration defaults while the shared compile-time session was filled. |
+| [`collect_resolve_include`](#collect_resolve_include) | The file the include of `target` from `includer_dir` names, searched as collection searches `dirs`, or NULL. |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
 | [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
@@ -24,6 +27,25 @@ Source-ordered shallow symbol collection and replay.
 
 ### Functions
 
+#### collect_cached_paths
+
+`List collect_cached_paths(void)`
+
+Returns the canonical paths collected so far.
+
+Source: `src/collect.x:150`
+
+#### collect_forget_entries_since
+
+`void collect_forget_entries_since(List before)`
+
+Drops the entries collected since `before` returned by
+`collect_cached_paths`. A cached entry replays declarations, not the
+compile-time effects of the file's imports, which the unit that walked
+it installed in its own session.
+
+Source: `src/collect.x:156`
+
 #### collect_forget_preload_entries
 
 `void collect_forget_preload_entries(void)`
@@ -31,7 +53,16 @@ Source-ordered shallow symbol collection and replay.
 Drops the entries collected without declaration defaults while the shared
 compile-time session was filled. Call once that session is published.
 
-Source: `src/collect.x:134`
+Source: `src/collect.x:144`
+
+#### collect_resolve_include
+
+`String collect_resolve_include( SourceView sources, List dirs, String includer_dir, String target, int angle)`
+
+The file the include of `target` from `includer_dir` names, searched as
+collection searches `dirs`, or NULL.
+
+Source: `src/collect.x:116`
 
 #### interface_configure
 
@@ -44,7 +75,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:836`
+Source: `src/collect.x:860`
 
 #### interface_prelude
 
@@ -54,7 +85,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:864`
+Source: `src/collect.x:888`
 
 #### interface_text
 
@@ -66,7 +97,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1071`
+Source: `src/collect.x:1095`
 
 ### `Compiler`
 
@@ -84,7 +115,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:777`
+Source: `src/collect.x:801`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -101,7 +132,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:621`
+Source: `src/collect.x:645`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -113,7 +144,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:435`
+Source: `src/collect.x:459`
 
 <a id="Compiler.replay_included_package_imports"></a>
 #### Compiler.replay_included_package_imports
@@ -123,7 +154,7 @@ Source: `src/collect.x:435`
 Repeats included imports after full parsing resets macros, in the cache's
 original include order. The unit's own imports stay at their source sites.
 
-Source: `src/collect.x:274`
+Source: `src/collect.x:298`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -133,7 +164,7 @@ Source: `src/collect.x:274`
 Replays the import operations retained by this declaration contribution.
 The shadow borrows the unit's macro state and shared package registries.
 
-Source: `src/collect.x:238`
+Source: `src/collect.x:262`
 
 ## Design notes
 

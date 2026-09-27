@@ -22,6 +22,7 @@ System utilities for environment discovery and workers.
 | [`x2c_cpp_include_dirs`](#x2c_cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
 | [`x2c_default_include_dirs`](#x2c_default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
 | [`x2c_driver_error`](#x2c_driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
+| [`x2c_file_identity`](#x2c_file_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
 | [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
 | [`x2c_find_program`](#x2c_find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
 | [`x2c_fnv_bytes`](#x2c_fnv_bytes) | Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. |
@@ -52,7 +53,7 @@ Returns the stamp a native module records: `x2c-module-stamp:` and the
 running compiler's identity. Returns NULL when the executable cannot be
 read. Only the compiler that built a module loads it.
 
-Source: `src/utils.x:358`
+Source: `src/utils.x:363`
 
 #### file_lock
 
@@ -88,7 +89,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:382`
+Source: `src/utils.x:387`
 
 #### worker_fork
 
@@ -100,7 +101,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:371`
+Source: `src/utils.x:376`
 
 #### worker_wait_any
 
@@ -111,7 +112,7 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:392`
+Source: `src/utils.x:397`
 
 #### x2c_compiler_identity
 
@@ -122,7 +123,7 @@ Ordinary compiler startup hashes its executable with FNV-1a; an external
 command uses the identity embedded from the compiler that built it.
 Returns NULL if ordinary startup could not read its executable.
 
-Source: `src/utils.x:352`
+Source: `src/utils.x:347`
 
 #### x2c_cpp_include_dirs
 
@@ -154,13 +155,22 @@ would otherwise find still live.
 
 Source: `src/utils.x:197`
 
+#### x2c_file_identity
+
+`String x2c_file_identity(String path)`
+
+Returns the identity a compiler executable at `path` has when it runs:
+the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
+
+Source: `src/utils.x:352`
+
 #### x2c_filename_hash
 
 `String x2c_filename_hash(String filename)`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:407`
+Source: `src/utils.x:412`
 
 #### x2c_find_program
 
@@ -178,7 +188,7 @@ Source: `src/utils.x:184`
 
 Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
 
-Source: `src/utils.x:321`
+Source: `src/utils.x:316`
 
 #### x2c_fnv_file
 
@@ -187,7 +197,7 @@ Source: `src/utils.x:321`
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
 
-Source: `src/utils.x:333`
+Source: `src/utils.x:328`
 
 #### x2c_get_executable
 

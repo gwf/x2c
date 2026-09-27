@@ -41,6 +41,7 @@ prefix.
 | [`x2c_expr_composite`](meta.md#x2c_expr_composite) | `lib/meta.x` | `meta List x2c_expr_composite(List items)` |
 | [`x2c_expr_ident`](meta.md#x2c_expr_ident) | `lib/meta.x` | `meta List x2c_expr_ident(List name)` |
 | [`x2c_expr_index`](meta.md#x2c_expr_index) | `lib/meta.x` | `meta List x2c_expr_index(List base, List subscript)` |
+| `x2c_file_identity` | `src/utils.x` | `String x2c_file_identity(String path)` |
 | `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
 | `x2c_find_program` | `src/utils.x` | `String x2c_find_program(String name)` |
 | `x2c_fnv_bytes` | `src/utils.x` | `uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)` |
@@ -125,4 +126,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 113 functions.
+Total: 114 functions.

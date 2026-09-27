@@ -62,7 +62,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2428`
+Source: `src/parse.x:2451`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -109,7 +109,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2351`
+Source: `src/parse.x:2374`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -335,7 +335,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:2125`
+Source: `src/parse.x:2148`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -344,7 +344,7 @@ Source: `src/parse.x:2125`
 
 Parses one full top-level form through the shared classifier.
 
-Source: `src/parse.x:2117`
+Source: `src/parse.x:2140`
 
 <a id="Compiler.parse_top_level_mode"></a>
 #### Compiler.parse_top_level_mode
@@ -360,7 +360,7 @@ the unit emits where it reaches them. With `skip_body`, collection uses
 the same classifier and bound declarations but skips runtime bodies.
 This continuation is independent of the compiler's shallow-parse state.
 
-Source: `src/parse.x:1991`
+Source: `src/parse.x:2014`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
