@@ -385,7 +385,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1311`
+Source: `lib/error.x:1315`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -396,7 +396,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1323`
+Source: `lib/error.x:1327`
 
 <a id="Error.restore"></a>
 #### Error.restore

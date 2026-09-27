@@ -83,7 +83,8 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`collect_forget_preload_entries`, `Compiler.record_generated_symbol`,
+`collect_forget_preload_entries`, `Compiler.replay_package_imports`,
+`Compiler.replay_included_package_imports`, `Compiler.record_generated_symbol`,
 `Compiler.collect_symbols`, `Compiler.collect_package`, `interface_configure`,
 `interface_prelude`, `interface_text`
 
@@ -305,14 +306,15 @@ Public functions:
 `x2c_register_extension`, `Compiler.links_extension`,
 `Compiler.select_package_module`, `Compiler.select_native_modules`,
 `Compiler.supplies_native_meta`, `x2c_meta_definition_hashes`,
-`Compiler.bind_linked_meta`, `Compiler.native_meta_accepts`,
-`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
-`Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
-`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
-`Compiler.macro_tag_name`, `x2c_template_call`, `Compiler.peek_macro_hole`,
+`Compiler.bind_linked_meta`, `Compiler.native_meta_module`,
+`Compiler.native_meta_accepts`, `Compiler.install_native_meta_effects`,
+`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
+`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
+`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`x2c_template_call`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
 `Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
@@ -814,7 +816,9 @@ Public functions:
 `lisp_string_lstrip`, `lisp_string_rstrip`, `lisp_match_replace`,
 `lisp_read_file`, `lisp_write_file`, `Lisp.call_budget`, `Lisp.eval`,
 `Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
-`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
+`Lisp.set_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
+`Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_source_function`,
+`Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
