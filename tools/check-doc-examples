@@ -74,7 +74,7 @@ static String _stdout(Job job):
 /* Each command runs with empty input under a CPU limit, so a sample that
    spins or waits for input fails instead of stalling the check. */
 static Job _limited(List command):
-  return %(sh -c "ulimit -t 60; exec \"\x24@\"" sample @command).job()
+  return %(sh -c "ulimit -t 60; exec \"\x24@\"" sample @command)
 
 static void _launch(Job job, List attempt):
   running.push(job.start())
@@ -142,9 +142,12 @@ if !compiler.exists():
 String cc = Env.get("CC"), job_limit = Env.get("JOBS")
 Array flags = ["--cc", cc ? cc : "cc", "--package-dir",
                 root.join("packages")]
-foreach Path include in root.join("packages/*/deps/include").glob():
-  flags.push("--c-system-dir")
-  flags.push(include)
+/* Each `deps` is a symlink, which a glob does not descend into. */
+foreach Path deps in root.join("packages/*/deps").glob():
+  Path include = deps.join("include")
+  if include.is_dir():
+    flags.push("--c-system-dir")
+    flags.push(include)
 build_flags = flags.list_free()
 int limit = job_limit ? atoi(job_limit) : (int) sysconf(_SC_NPROCESSORS_ONLN)
 if limit < 1: limit = 1

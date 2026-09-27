@@ -28,7 +28,6 @@
 
 $(import "private-keywords.xmacro")
 #include "x2c.x"
-#include "process.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
     `owner`. */
@@ -86,6 +85,7 @@ protocol Cleanup(Lisp);
 // Their `meta` prototypes join the target table; a public include would
 // make x2c.h include path.h before path.h defines `Path`.
 #include "json.x"
+#include "process.x"
 #include "diff.x"
 #include "regex.x"
 #include "typed-array.x"
