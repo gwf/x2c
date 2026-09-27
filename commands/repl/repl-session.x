@@ -96,8 +96,8 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (type), (native), (function (typed AST) (lowered FORMS)), or
-    NULL if absent.
+/** Returns (value), (type), (native), (function (typed AST) (lowered
+    FORMS)), or NULL if absent.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -167,7 +167,7 @@ static List _completion_filter(
     }
     Symbol candidate_kind = <name>;
     if (kind == <members>) candidate_kind = <member>;
-    else if (session.names.contains(name)) candidate_kind = <session>;
+    else if (name in session.names) candidate_kind = <session>;
     else if (type is <list>) {
       Type semantic = type;
       if (semantic.is_typedef()) candidate_kind = <type>;
@@ -306,8 +306,7 @@ static void _require_evaluable(Var syntax) {
     case %(expr () (ident (binding ? ?name))):
       _refuse(%"unresolved identifier: $name");
     case %(declare ?spec ?):
-      if (spec.contains(<static>) || spec.contains(<extern>) ||
-          spec.contains(<threaded>))
+      if (<static> in spec || <extern> in spec || <threaded> in spec)
         _refuse("static, extern, and threaded storage need native execution");
   }
   if (syntax is <list>) foreach (Var child, syntax.list())
@@ -321,8 +320,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
       foreach (List item, bindings) {
         match (item) {
           case %(op = (bind (binding ?id ?(String name)) ?mods) ?value): {
-            if (names.contains(name) || added.contains(name) ||
-                name.startswith("__repl_"))
+            if (name in names || name in added || name.startswith("__repl_"))
               _refuse("redeclaration is disabled; use assignment");
             added.push(name);
             ids.push(id);
@@ -448,7 +446,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       match (node)
         case %(declare ? (bindings (bind (binding ? ?(String name)) *))): {
           Var bound;
-          if (names.contains(name))
+          if (name in names)
             _refuse("function redeclaration is disabled");
           if (!c.macro_lisp.try_get(name, bound))
             _refuse(%"no native function is available for $name");
@@ -464,7 +462,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     _require_evaluable(node);
     if (_type_submission_names(node, added)) {
       foreach (String name, added)
-        if (names.contains(name))
+        if (name in names)
           _refuse("a type cannot be redefined; the session keeps its layout");
       transaction.commit_transient();
       foreach (String name, added) names[name] = %(type);
@@ -481,7 +479,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       match (node) {
         case %(function ? (bind (binding ? ?(String name)) ?) ?): {
           Var existing;
-          if (names.contains(name) || name.startswith("__repl_") ||
+          if (name in names || name.startswith("__repl_") ||
               session.evaluator.try_get(name, existing))
             _refuse("function redeclaration is disabled");
           added.push(name);

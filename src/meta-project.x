@@ -109,7 +109,7 @@ static int _meta_scan(
       String target = preproc_include_target(word, angle);
       String file = target && target.endswith(".x")
         ? collect_resolve_include(
-            request.sources, request.include_dirs, directory, target, angle)
+          request.sources, request.include_dirs, directory, target, angle)
         : NULL;
       if (file && !_meta_owned(Path.absolute(file)))
         _meta_scan(request, Path.absolute(file), imports, seen, packages);
@@ -160,15 +160,16 @@ static String _meta_support(
   defer close(lock);
   if (Path.is_file(object)) return object;
   String printed = NULL, errors = NULL;
-  if (tool_capture(%(${x2c_get_executable()} "translate" "--out-dir"
-                     $directory $source), printed, errors)) {
+  if (tool_capture(
+    %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),
+    printed, errors)) {
     failure = %"cannot translate $source: ${errors.strip(NULL)}";
     return NULL;
   }
   String output = %"$object.${"%ld".printf((long) getpid())}";
-  failure = _meta_cc(%(${t.cc} @{_meta_flags()} "-iquote" $directory
-                       "-iquote" $include "-c" ${%"$directory/meta-helper.c"}
-                       "-o" $output));
+  failure = _meta_cc(
+    %(${t.cc} @{_meta_flags()} "-iquote" $directory "-iquote" $include
+      "-c" ${%"$directory/meta-helper.c"} "-o" $output));
   if (failure) return NULL;
   Path.move_to(output, object);
   return object;
@@ -182,8 +183,9 @@ static String _meta_tables(List built, int count) {
     out.printf("Map x2c_module_targets_%d(void);\n", (int) index.integer());
   out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
   foreach (Var index, built)
-    out.printf("    case %d: return x2c_module_targets_%d();\n",
-               (int) index.integer(), (int) index.integer());
+    out.printf(
+      "    case %d: return x2c_module_targets_%d();\n",
+      (int) index.integer(), (int) index.integer());
   out.write("  }\n  return NULL;\n}\n");
   out.printf("int x2c_meta_helper_count(void) { return %d; }\n", count);
   return out;
@@ -196,13 +198,13 @@ static String _meta_localize(Toolchain t, String base, int index) {
   String entry = %"x2c_module_targets_$index", object = %"$base.o";
   String merged = %"$base.r.o";
 #ifdef __APPLE__
-  String failure = _meta_cc(%(${t.cc} "-r" "-nostdlib"
-    ${%"-Wl,-exported_symbol,_$entry"} $object "-o" $merged));
+  String failure = _meta_cc(
+    %(${t.cc} "-r" "-nostdlib" ${%"-Wl,-exported_symbol,_$entry"} $object
+      "-o" $merged));
 #else
   String failure = _meta_cc(%(${t.cc} "-r" "-nostdlib" $object "-o" $merged));
   if (!failure)
-    failure = _meta_cc(%("objcopy" ${%"--keep-global-symbol=$entry"}
-                         $merged));
+    failure = _meta_cc(%("objcopy" ${%"--keep-global-symbol=$entry"} $merged));
 #endif
   if (!failure) Path.move_to(merged, object);
   return failure;

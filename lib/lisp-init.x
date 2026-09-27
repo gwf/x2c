@@ -129,8 +129,8 @@ Var lisp_binders(Var pat);
 
 static Var _binder_parts(Var parts) {
   if (_nil(parts)) return parts;
-  return _append2(lisp_binders(lisp_car(parts)),
-                  _binder_parts(lisp_cdr(parts)));
+  return _append2(
+    lisp_binders(lisp_car(parts)), _binder_parts(lisp_cdr(parts)));
 }
 
 /* Returns the binders of `pat` in order, repeats included. */
@@ -150,8 +150,9 @@ Var lisp_binder_lets(Var bindings, Var binders) {
   Var name = lisp_car(binders);
   List quoted = cons(Atom.intern("quote"), cons(name, NULL));
   List bound = cons(Atom.intern("bound"), cons(bindings, cons(quoted, NULL)));
-  return Var.cons(cons(name, cons(bound, NULL)),
-                  lisp_binder_lets(bindings, lisp_cdr(binders)));
+  return Var.cons(
+    cons(name, cons(bound, NULL)),
+    lisp_binder_lets(bindings, lisp_cdr(binders)));
 }
 
 /* Concatenates its `String` arguments; no arguments gives "". */

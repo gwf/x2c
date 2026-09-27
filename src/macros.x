@@ -2004,8 +2004,8 @@ static List _native_signature_type(Compiler c, List signature) {
       foreach (Type parameter, parameters)
         resolved.push(
           (parameter.car() == <&> || parameter.car() == <opt-ref>)
-            ? cons(parameter.car(),
-                   c.sym.normalize_declared_type(parameter.cdr()))
+            ? cons(
+              parameter.car(), c.sym.normalize_declared_type(parameter.cdr()))
             : c.sym.normalize_declared_type(parameter));
       Type native = c.sym.normalize_declared_type(result);
       return %((func ${resolved.list_free()}) @native);
@@ -2184,10 +2184,6 @@ int Compiler.bind_native_meta(Compiler c, String name) {
   return c.macro_lisp.try_get(name, bound);
 }
 
-static void _hold_group_function(Compiler c, String name);
-static void _hold_helper_function(Compiler c, String name, Type type);
-static int _shared_meta_definition(Compiler c, String name);
-
 /** Installs a prototype-only `meta` function from the compiler's trusted
     native target registry. The declaration keeps its ordinary runtime form.
 */
@@ -2225,8 +2221,11 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       /* A session refuses to replace a name an ancestor binds, which
          reaches the developer here, at the marker. */
       if (!macro_library_filling() && !_shared_meta_definition(c, name))
-        try c.macro_lisp.set_global(name, Func.new_context(
-          _meta_stub, c.func_signature(type), (char *) name, name.len() + 1));
+        try c.macro_lisp.set_global(
+          name,
+          Func.new_context(
+            _meta_stub, c.func_signature(type), (char *) name,
+            name.len() + 1));
         catch %(?code *detail): {
           List cause = cons(code, detail);
           c.report_error(
@@ -2401,7 +2400,6 @@ static int _shared_meta_definition(Compiler c, String name) {
   String key = %"${Path.absolute(c.filename)}#$name";
   return key in library_definitions;
 }
-
 
 /* The last call a `$` expression made, as a failure reports it. */
 static String meta_call_form = NULL;
@@ -2665,22 +2663,22 @@ static Var _decorator_target_replaced(Var produced, Var target, Var required) {
     Non-slots and slots outside an expansion are returned unchanged. A splice
     slot's `List` result is wrapped as `(seq ...)` for its syntax position.
 */
-Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
+Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   if (value is not <list>) return value;
   List slot = value;
   if (slot.car() != <macro-slot>) return value;
-  if (compiler.macro_holes || !compiler.macro_stack) return value;
+  if (c.macro_holes || !c.macro_stack) return value;
   int splice = slot.cadr();
   Var form = slot.caddr();
-  List active = compiler.macro_stack.car();
+  List active = c.macro_stack.car();
   (List definition, Var input, List bindings, Token invocation) = active;
   (void) input;
   String source_file = definition.assoc(<file>);
   Var required = slot.assoc(<construct>);
   Var result = form is <list>
-    ? _evaluate_meta_value(compiler, form, invocation, 1)
+    ? _evaluate_meta_value(c, form, invocation, 1)
     : _eval_template_form(
-      compiler, form, bindings, invocation, source_file, required);
+      c, form, bindings, invocation, source_file, required);
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;

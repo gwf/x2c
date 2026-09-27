@@ -52,9 +52,10 @@ static void _fail(String message, List notes) {
 }
 
 static void _unavailable(String name) {
-  _fail(%"$name is not available to project meta code",
-        %("reason: it reads compiler state; pass what it answers as an"
-          "argument"));
+  _fail(
+    %"$name is not available to project meta code",
+    %("reason: it reads compiler state; pass what it answers as an"
+      "argument"));
 }
 
 /* The compiler checked and selected this module before building the group.
@@ -67,30 +68,32 @@ void *x2c_meta_native_symbol(String path, String name) {
   else {
     handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     if (!handle)
-      _fail("cannot load native module in project meta helper",
-            %("module: $path" "reason: ${String.new(dlerror())}"));
+      _fail(
+        "cannot load native module in project meta helper",
+        %("module: $path" "reason: ${String.new(dlerror())}"));
     modules[path] = handle;
   }
   void *target = dlsym(handle, name);
   if (!target)
-    _fail("native module has no C target for project meta code",
-          %("module: $path" "function: $name"));
+    _fail(
+      "native module has no C target for project meta code",
+      %("module: $path" "function: $name"));
   return target;
 }
 
 static void _check_notes(String operation, List notes) {
   foreach (Var note, notes)
     if (note is not <string>)
-      _fail(%"$operation notes must be Strings",
-            %("value: ${note.repr()}"));
+      _fail(%"$operation notes must be Strings", %("value: ${note.repr()}"));
 }
 
 /* --- the operations a body may call ------------------------------------- */
 
 List x2c_ident(String spelling) {
   if (!spelling.is_identifier())
-    _fail("x2c.ident requires an identifier spelling",
-          %("value: ${spelling.repr()}"));
+    _fail(
+      "x2c.ident requires an identifier spelling",
+      %("value: ${spelling.repr()}"));
   return %("x2c.ident" $spelling);
 }
 
@@ -116,8 +119,9 @@ String x2c_binding_spelling(Var syntax) {
     case %((!is ?name type string)):          return name;
     case %(binding ? (!is ?name type string)): return name;
   }
-  _fail("x2c.binding.spelling requires an identifier or binding",
-        %("value: ${syntax.repr()}"));
+  _fail(
+    "x2c.binding.spelling requires an identifier or binding",
+    %("value: ${syntax.repr()}"));
 }
 
 String x2c_function_name(List function) {
@@ -212,8 +216,9 @@ String x2c_embed_text(Var path) {
           spelling = literal.parse();
         }
   if (!spelling)
-    _fail("x2c.embed.text requires a captured String literal or an "
-          "absolute path", %("value: ${path.repr()}"));
+    _fail(
+      "x2c.embed.text requires a captured String literal or an "
+      "absolute path", %("value: ${path.repr()}"));
   if (!spelling.len())
     _fail("x2c.embed.text requires a non-empty path", NULL);
   if (file && !spelling.startswith("/"))
@@ -288,8 +293,9 @@ static void _call(Map table, String name, List arguments) {
   Buffer out = Buffer.new(0);
   out.write("(value ");
   if (!datum_write(out, result, 1)) {
-    _reply(%(error "compile-time result has no value the compiler can read"
-                   ("function: $name")));
+    _reply(
+      %(error "compile-time result has no value the compiler can read"
+        ("function: $name")));
     return;
   }
   out.write(")");

@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     (--verbose-stats (help "Print detailed statistics at exit"))
     (--native-module (value file) repeated
       (help "Load a native compile-time module")));
-  if (args.contains("-h") || args.contains("--help")) {
+  if ("-h" in args || "--help" in args) {
     printf("%s", Args.usage("x2c repl", spec));
     return 0;
   }

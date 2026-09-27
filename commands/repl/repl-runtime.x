@@ -156,7 +156,10 @@ Var lisp_unwind(Var body, Var cleanup, List arguments) {
   return lisp.apply(body, arguments);
 }
 
-typedef struct ReplCallbackContext { Lisp lisp; Var callable; } ReplCallbackContext;
+typedef struct ReplCallbackContext {
+  Lisp lisp;
+  Var callable;
+} ReplCallbackContext;
 
 /* A source Func keeps its canonical signature while its adapter executes in
    the owning Lisp session. The lowered adapter reads the borrowed carriers
@@ -203,7 +206,6 @@ Var lisp_func_invalid(Func fn, unsigned index, List source) {
   (void) x2c_func_unrepresentable_argument(fn, index, source);
   return void;
 }
-
 
 void repl_runtime_initialize(Lisp lisp) {
   $lisp.bind(lisp, "repl.native.lisp_func_value", lisp_func_value);

@@ -30,6 +30,8 @@
 #include "string.x"
 #include "varconvert.x"
 #include "macros.x"
+#include "transform.x"
+#include "generate.x"
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"
@@ -51,7 +53,6 @@
 typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 
 /* --- the arguments of a `$` call ---------------------------------------- */
-
 
 /** Returns the value of a String or character literal from its source
     `spelling`, quotes included: adjacent pieces are unescaped on their own
@@ -75,8 +76,6 @@ Var literal_text_value(String spelling) {
   }
   return spelling;
 }
-
-Var Compiler.folded_constant(Compiler c, Var node);
 
 /* The value of one folded leaf, or void when it is only known at run
    time. */
@@ -249,8 +248,7 @@ static String _meta_hex_float(long double n) {
     digits[count] = "0123456789abcdef"[digit];
   }
   digits[count] = 0;
-  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits,
-    exponent - 1);
+  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
 }
 
 /* Reports at `site` a result that cannot become data in the program. */
@@ -478,8 +476,8 @@ void Compiler.group_meta_function(Compiler c, List fn) {
     to the unit, so the group places them where the import stands. */
 void Compiler.record_meta_import(Compiler c) {
   if (c.groups_meta())
-    c.meta_group.push(%(import ${c.unit_nodes ? c.unit_nodes.len() : 0}
-                            ${c.meta_defs.len()}));
+    c.meta_group.push(
+      %(import ${c.unit_nodes ? c.unit_nodes.len() : 0} ${c.meta_defs.len()}));
 }
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a
@@ -623,7 +621,7 @@ static Map _meta_initial_copies(Compiler c, Array units) {
                                      ?initializer))))): {
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (type.contains(<const>) || type.is_array() ||
+        if (<const> in type || type.is_array() ||
             !_meta_braced(initializer))
           continue;
         List copy = c.sym.introduce(
@@ -654,11 +652,12 @@ static List _meta_group_entry(
                                      ?initializer)))): {
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (type.contains(<const>) || type.is_array()) continue;
+        if (<const> in type || type.is_array()) continue;
         Var initial;
         if (initials.try_get(binding, initial)) initializer = initial;
-        resets.push(%(stmnt (expr $type
-          (op = (expr $type (ident $binding)) $initializer))));
+        resets.push(
+          %(stmnt (expr $type
+            (op = (expr $type (ident $binding)) $initializer))));
       }
   List reset = _meta_entry_function(
     c, %(void), %"x2c_module_reset$suffix",
@@ -682,10 +681,11 @@ static List _meta_group_entry(
     targets.push(_meta_call("Func_var", %($function)));
     count++;
   }
-  List table = c.bind_syntax(
-    _meta_call("Map_update_n", %(${_meta_call("Map_new", %())}
-      ${x2c_literal_int(count)} @{targets.list_free()})),
-    AST_EXPRESSION, NULL);
+  List update = _meta_call(
+    "Map_update_n",
+    %(${_meta_call("Map_new", %())} ${x2c_literal_int(count)}
+      @{targets.list_free()}));
+  List table = c.bind_syntax(update, AST_EXPRESSION, NULL);
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
   return %(
@@ -694,12 +694,9 @@ static List _meta_group_entry(
                      (expr (* char) (literal (* char) $literal)))))
     $reset
     ${_meta_entry_function(
-        c, %("Map"), %"x2c_module_targets$suffix",
-        %(block (return ("Map") $table)))});
+      c, %("Map"), %"x2c_module_targets$suffix",
+      %(block (return ("Map") $table)))});
 }
-
-List Compiler.transform(Compiler compiler, List ast);
-List generate_code_text(Compiler c, List ast, String basename);
 
 /* `node` with each template call replaced by a call of `x2c_template_call`,
    named by `callee`, on its template and its arguments as Vars. */
@@ -741,7 +738,7 @@ static Var _meta_native_targets(Compiler c, Var node, List lookup) {
         foreach (List argument, arguments) {
           argument = _meta_native_targets(c, argument, lookup);
           if (c.sym.normalize_declared_type(declared.car()).equal(
-                c.sym.normalize_declared_type(%("Func"))) &&
+            c.sym.normalize_declared_type(%("Func"))) &&
               c.sym.normalize_declared_type(parameters.car()).equal(
                 c.sym.normalize_declared_type(%("Var"))))
             argument = c.convert_expression(
@@ -825,8 +822,7 @@ static List _meta_group_code(
       List lookup = %(expr $lookup_type
         (ident $lookup_binding));
       List (base, mods) = lookup_type.declaration_parts();
-      units.push(%(declare $base
-        (bindings (bind $lookup_binding $mods))));
+      units.push(%(declare $base (bindings (bind $lookup_binding $mods))));
       for (int i = 0; i < (int) units.len(); i++)
         units[i] = _meta_native_targets(c, units[i], lookup);
     }
@@ -834,9 +830,11 @@ static List _meta_group_code(
     while (after < (int) units.len() &&
            ((List) units[after]).car() == <preproc>)
       after++;
-    units.insert(after, %(declare ("List") (bindings (bind $binding
-      ((fnmod (params (param ("Var") (bind () ()))
-                      (param ("List") (bind () ())))))))));
+    units.insert(
+      after,
+      %(declare ("List") (bindings (bind $binding
+        ((fnmod (params (param ("Var") (bind () ()))
+                        (param ("List") (bind () ())))))))));
     Map initials = _meta_initial_copies(c, units);
     foreach (Var unit, _meta_group_entry(c, stamp, initials, suffix))
       units.push(unit);
@@ -859,7 +857,7 @@ static List _meta_group_code(
 /** Returns the identity of the C compiler at `cc`: its path and content
     hash. */
 String Compiler.meta_cc_identity(String cc) {
-  String path = cc.contains("/") ? cc : x2c_find_program(cc);
+  String path = "/" in cc ? cc : x2c_find_program(cc);
   int ok = path != NULL;
   uint64_t hash = UINT64_C(1469598103934665603);
   if (ok) hash = x2c_fnv_file(hash, path, ok);
@@ -874,7 +872,7 @@ static String _meta_cc_error(String errors) {
   foreach (String line, (errors ? errors : "").split("\n")) {
     String text = line.strip(NULL);
     if (!text) continue;
-    if (text.contains(": error: ") && !text.startswith("clang:") &&
+    if (": error: " in text && !text.startswith("clang:") &&
         !text.startswith("cc:") && !text.startswith("gcc:"))
       return text;
     lines.push(text);
@@ -894,7 +892,7 @@ String Compiler.meta_cc_run(List arguments, String directory) {
   String printed = NULL, errors = NULL;
   if (!tool_capture(arguments, printed, errors)) return NULL;
   String failure = _meta_cc_error(errors);
-  return !directory || failure.contains(directory) ? failure
+  return !directory || directory in failure ? failure
     : %"$failure; the group's C is in $directory";
 }
 
@@ -963,7 +961,7 @@ void Compiler.write_meta_build(Compiler c) {
   Path.write_text(%"$base.c", source);
 }
 
-/* --- the helper that runs a project's meta functions ---------------------- */
+/* --- the helper that runs a project's meta functions -------------------- */
 
 /* The project's helper, its tables' failures by index, and the table each
    input calls, which last for the process; a forked translation worker
@@ -983,8 +981,6 @@ static Buffer helper_input = NULL;
 /** Stops the helper this process runs, which a translation worker does
     when its units are done and every process does as it ends. */
 void Compiler.stop_meta_helper(void) { _helper_stop(0); }
-
-static int _helper_stop(int signal);
 
 static void _helper_shutdown(void) {
   _helper_stop(0);
@@ -1020,8 +1016,6 @@ void Compiler.begin_meta_unit(String filename) {
 
 /* Ends the helper this process started, if any, and forgets it: asks it
    to quit, or sends it `signal`, and reaps it. Returns its wait status. */
-static int _helper_send(List message);
-
 static int _helper_stop(int signal) {
   int status = 0;
   if (helper_pid > 0 && helper_owner == getpid()) {
@@ -1254,8 +1248,9 @@ static String _stage_meta_group(Compiler c, String &failure) {
   List code = _meta_group_code(c, stamp, "group", "", failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
-  String key = String.sha256(%"$header\n$source\n$stamp\n"
-    + %"${Compiler.meta_cc_identity(meta_cc)}\n$meta_include_dir");
+  String key = String.sha256(
+    %"$header\n$source\n$stamp\n" +
+    %"${Compiler.meta_cc_identity(meta_cc)}\n$meta_include_dir");
   String directory = %"$root/meta/$key";
   String module = %"$directory/group.module";
   if (Path.is_file(module)) return module;
@@ -1264,10 +1259,11 @@ static String _stage_meta_group(Compiler c, String &failure) {
   Path.write_text(%"$directory/$hfile", header);
   Path.write_text(%"$directory/$cfile", source);
   Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
-  failure = Compiler.meta_cc_run(linker.module_action(
-    output, %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
-              "-iquote" $meta_include_dir ${%"$directory/$cfile"}))
-    .arguments, directory);
+  List arguments = linker.module_action(
+    output,
+    %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
+      "-iquote" $meta_include_dir ${%"$directory/$cfile"})).arguments;
+  failure = Compiler.meta_cc_run(arguments, directory);
   if (failure) return NULL;
   Path.move_to(output, module);
   return module;

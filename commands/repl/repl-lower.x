@@ -357,8 +357,6 @@ static void _lower_scan_function_value(Lowering l, List form) {
     }
 }
 
-static int _lower_null_constant(Var operand);
-
 static void _lower_scan_call(Lowering l, List form) {
   match (form)
     case %(call (expr ((func ?params) *) ?) (args *args)):
@@ -772,7 +770,8 @@ static Var _lower_native_call(
   foreach (Var value, values) {
     Type parameter = _lower_param_type(p);
     p = p.cdr();
-    prepare.push(parameter.car() == <&> || parameter.car() == <opt-ref>
+    prepare.push(
+      parameter.car() == <&> || parameter.car() == <opt-ref>
       ? %(C.func.reference $argv $index $value (quote ${parameter.cdr()}))
       : %(C.func.value $argv $index $value));
     index++;
@@ -850,7 +849,8 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
       Symbol tag = l.compiler.sym.var_tag_for_type(parameter, NULL);
       if (tag) {
         value = %(C.func.value-argument $fn $argv $index (quote $tag));
-        if (_lower_bool_type(l.compiler.sym, parameter)) value = %(C.bool $value);
+        if (_lower_bool_type(l.compiler.sym, parameter))
+          value = %(C.bool $value);
       }
       else value = %(C.func.pointer-argument $fn $argv $index);
     }
