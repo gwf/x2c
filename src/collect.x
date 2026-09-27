@@ -178,6 +178,7 @@ static void _replay_cached(
     if (part is <map>) {
       globs.merge(part);
       compiler.merge_source_declarations(globs, part);
+      compiler.replay_package_imports(globs, part, 0);
       continue;
     }
     if (part is <symbol>) continue;
@@ -230,6 +231,56 @@ static int _package_owns(Compiler c, String path) {
   Var root = c.package_roots[c.package];
   return root is not void &&
     path.startswith(%"${_canonical_path(root)}/");
+}
+
+/** Replays the import operations retained by this declaration contribution.
+   The shadow borrows the unit's macro state and shared package registries. */
+void Compiler.replay_package_imports(
+  Compiler c, Map globs, Map rows, int included_only) {
+  Array imports = NULL;
+  defer if (imports) imports.free();
+  foreach (Var (key, value), rows)
+    match (key)
+      case %("source-node" (package-import ?path ?position)):
+        if (!included_only || _canonical_path(home_absolute_path(path)) !=
+                              _canonical_path(c.filename)) {
+          if (!imports) imports = [];
+          imports.push(%($path $position $value));
+        }
+  if (!imports.len()) return;
+  imports.sort();
+  Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
+  shadow.take_unit_state(c);
+  shadow.sym.reset(globs);
+  foreach (List entry, imports)
+    match (entry)
+      case %(?(String path) ?
+             (package-import ?(String name) ?(String alias) ?members)): {
+        shadow.filename = home_absolute_path(path);
+        shadow.collect_package(name, NULL);
+        shadow.register_package_alias(name, alias, NULL);
+        foreach (List member, members)
+          shadow.register_package_member(
+            name, member.car(), member.cadr(), NULL, NULL);
+        shadow.import_package_macros(name, NULL);
+      }
+  shadow.return_unit_state(c);
+  c.merge_translation_dependencies(shadow.deps);
+}
+
+/** Repeats included imports after full parsing resets macros, in the cache's
+   original include order. The unit's own imports stay at their source sites. */
+void Compiler.replay_included_package_imports(
+  Compiler c, Map globs, String path, Map visited) {
+  String canonical = _canonical_path(path);
+  if (canonical in visited) return;
+  visited[canonical] = 1;
+  foreach (Var part, _entry(c, canonical).car()) {
+    if (part is <map>) c.replay_package_imports(globs, part, 1);
+    else if (part is <string>)
+      c.replay_included_package_imports(globs, part, visited);
+  }
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -632,7 +683,7 @@ static int _package_protocol_row(List key, Var value) {
   List row = value;
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
-      package-macro);
+      package-macro package-import);
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does

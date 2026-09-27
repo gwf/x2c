@@ -1707,7 +1707,8 @@ static int _test_contextual(Compiler compiler, String word) {
    Each name binds a bare local spelling to one already-built package member.
    Registration runs at the name's own token so an unknown member and a
    collision both point at the spelling the developer wrote. */
-static void _import_members(Compiler c, String name) {
+static List _import_members(Compiler c, String name) {
+  Array members = [];
   do {
     if (c.peek(0) != <ident>)
       c.report_error(
@@ -1726,7 +1727,9 @@ static void _import_members(Compiler c, String name) {
     }
     c.register_package_member(
       name, member, local, member_token, local_token);
+    members.push(%($member $local));
   } while (c.test(<,>));
+  return members.list_free();
 }
 
 /** Parses and registers one `import` declaration, including its semicolon.
@@ -1759,9 +1762,15 @@ List Compiler.parse_import_declaration(Compiler c) {
   }
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
-  if (_test_contextual(c, "with")) _import_members(c, name);
+  List members = _test_contextual(c, "with")
+    ? _import_members(c, name) : NULL;
   c.import_package_macros(name, start);
   c.expect(<;>);
+  if (c.shallow)
+    c.sym.set(
+      %("source-node" (package-import
+        ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
+      %(package-import $name $alias $members));
   return %(import $name $alias);
 }
 

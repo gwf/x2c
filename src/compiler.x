@@ -2018,6 +2018,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
+  c.replay_included_package_imports(globs, c.filename, {});
   Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     _append_preproc(c, nodes);

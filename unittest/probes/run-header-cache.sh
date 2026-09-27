@@ -1086,4 +1086,59 @@ cp "$FAKE/lib/array.x" "$BUILD/elsewhere/lib/"
   "$BUILD/fake-link/lib/x2c.x") >"$BUILD/linked.log" 2>&1 ||
   fail "a runtime operand spelled through a symlinked home did not translate"
 
+
+# Cached headers retain package aliases, renamed members, and exported macros.
+# Include order, rather than alphabetical header order, picks the last effect.
+root="$BUILD/package-imports"
+mkdir -p "$root/packages/first/src" "$root/packages/last/src" \
+  "$root/src" "$root/cold" "$root/warm"
+cat > "$root/packages/first/src/first.x" <<'SRC'
+int sum(int n) => n + 1;
+$(import "first.xmacro")
+SRC
+cat > "$root/packages/first/src/first.xmacro" <<'SRC'
+$(def package-order 1)
+SRC
+cat > "$root/packages/last/src/last.x" <<'SRC'
+$(import "last.xmacro")
+SRC
+cat > "$root/packages/last/src/last.xmacro" <<'SRC'
+$(def package-order 2)
+macro Expression $last.order() => $(x2c.literal.int package-order);
+SRC
+cat > "$root/src/z-first.x" <<'SRC'
+import "first" as f with sum as local_sum;
+SRC
+cat > "$root/src/a-last.x" <<'SRC'
+import "last";
+SRC
+cat > "$root/src/one.x" <<'SRC'
+#include "z-first.x"
+#include "a-last.x"
+int result(void) => f.sum(4) + local_sum(5) + $last.order();
+SRC
+cp "$root/src/one.x" "$root/src/two.x"
+cd "$root"
+"$X2C" translate -q -j1 --package-dir packages --out-dir cold \
+  src/one.x src/two.x
+"$X2C" translate -q --package-dir packages --out-dir warm \
+  src/z-first.x src/a-last.x
+"$X2C" translate -q --package-dir packages --out-dir warm src/one.x src/two.x
+cmp cold/one.c warm/one.c
+cmp cold/two.c warm/two.c
+grep -q 'first__sum(4).*first__sum(5).*2' warm/two.c
+echo 'cross-header order passed'
+
+# Changing an interface's alias proves this also exercises interface replay.
+cp "$root/warm/z-first.xi" "$root/warm/z-first.good"
+sed 's/(package-import "first" "f"/(package-import "first" "different"/' \
+  "$root/warm/z-first.good" > "$root/warm/z-first.xi"
+if (cd "$root" && "$X2C" translate -q --package-dir packages \
+    --out-dir warm src/two.x) >"$root/tamper.out" 2>"$root/tamper.err"; then
+  fail "tampered package alias did not reach interface replay"
+fi
+grep -q 'has no method sum' "$root/tamper.err" ||
+  fail "tampered package alias produced the wrong diagnostic"
+mv "$root/warm/z-first.good" "$root/warm/z-first.xi"
+
 echo "header cache probes passed"
