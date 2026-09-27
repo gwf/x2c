@@ -9,6 +9,8 @@ The compiler surface a `meta` function calls.
 
 | Function | Summary |
 | --- | --- |
+| [`type_base_suffix`](#type_base_suffix) | Returns the suffix of `type` that begins at its typedef name or base keyword, sharing `type`, or `NULL` when it has none. |
+| [`type_declaration_parts`](#type_declaration_parts) | Returns `(base modifiers)` for reconstructing a declaration of `type`. |
 | [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
 | [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
 | [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
@@ -24,13 +26,32 @@ The compiler surface a `meta` function calls.
 
 ### Functions
 
+#### type_base_suffix
+
+`List type_base_suffix(List type)`
+
+Returns the suffix of `type` that begins at its typedef name or base
+keyword, sharing `type`, or `NULL` when it has none.
+
+Source: `lib/meta.x:65`
+
+#### type_declaration_parts
+
+`List type_declaration_parts(List type)`
+
+Returns `(base modifiers)` for reconstructing a declaration of `type`.
+Function modifiers hold parameter syntax, and modifier order retains C
+declarator precedence.
+
+Source: `lib/meta.x:77`
+
 #### x2c_block_make
 
 `meta List x2c_block_make(List items)`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:124`
+Source: `lib/meta.x:176`
 
 #### x2c_expr_call
 
@@ -39,7 +60,7 @@ Source: `lib/meta.x:124`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:98`
+Source: `lib/meta.x:150`
 
 #### x2c_expr_composite
 
@@ -48,7 +69,7 @@ Source: `lib/meta.x:98`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:103`
+Source: `lib/meta.x:155`
 
 #### x2c_expr_ident
 
@@ -57,7 +78,7 @@ Source: `lib/meta.x:103`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:84`
+Source: `lib/meta.x:136`
 
 #### x2c_expr_index
 
@@ -65,7 +86,7 @@ Source: `lib/meta.x:84`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:87`
+Source: `lib/meta.x:139`
 
 #### x2c_function_body
 
@@ -73,7 +94,7 @@ Source: `lib/meta.x:87`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:178`
+Source: `lib/meta.x:230`
 
 #### x2c_literal_int
 
@@ -81,7 +102,7 @@ Source: `lib/meta.x:178`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:69`
+Source: `lib/meta.x:121`
 
 #### x2c_literal_string
 
@@ -89,7 +110,7 @@ Source: `lib/meta.x:69`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:64`
+Source: `lib/meta.x:116`
 
 #### x2c_literal_symbol
 
@@ -97,7 +118,7 @@ Source: `lib/meta.x:64`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:73`
+Source: `lib/meta.x:125`
 
 #### x2c_parameters_arguments
 
@@ -107,7 +128,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:186`
+Source: `lib/meta.x:238`
 
 #### x2c_stmnt_make
 
@@ -115,7 +136,7 @@ Source: `lib/meta.x:186`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:118`
+Source: `lib/meta.x:170`
 
 #### x2c_stmnt_return
 
@@ -123,7 +144,7 @@ Source: `lib/meta.x:118`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:121`
+Source: `lib/meta.x:173`
 
 ## Public types
 
@@ -141,7 +162,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:50`
+Source: `lib/meta.x:53`
 
 <a id="Type"></a>
 ### Type
@@ -152,7 +173,7 @@ A `meta` parameter declared `Type` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:45`
+Source: `lib/meta.x:48`
 
 ## Design notes
 
