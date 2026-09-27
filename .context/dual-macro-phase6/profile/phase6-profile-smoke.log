@@ -1,0 +1,12 @@
+Translated 1 x2c file to /tmp/dual-phase6-smoke in 546 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 264 0 0
+DUAL_PROFILE try_application 3 1744000 813000
+DUAL_PROFILE try_transaction_snapshot 3 1457000 46000
+DUAL_PROFILE scope_symbols_copy 3 1411000 1411000
+DUAL_PROFILE Macro_apply 3 2000 2000
+DUAL_PROFILE invocation_rows 3 264000 264000
+DUAL_PROFILE template_replace 3 102000 102000
+DUAL_PROFILE skeleton_bind 3 563000 475000
+DUAL_PROFILE producer_evaluation 6 88000 76000
+DUAL_PROFILE producer_native_body 6 12000 12000

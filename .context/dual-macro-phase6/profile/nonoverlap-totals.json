@@ -1,0 +1,57 @@
+[
+  {
+    "group": "compiler",
+    "mode": "default",
+    "samples_ms": [
+      3.033,
+      3.05,
+      3.01
+    ],
+    "median_ms": 3.033,
+    "all_parity": true
+  },
+  {
+    "group": "exception",
+    "mode": "default",
+    "samples_ms": [
+      3.373,
+      3.649,
+      3.756
+    ],
+    "median_ms": 3.649,
+    "all_parity": true
+  },
+  {
+    "group": "fixture",
+    "mode": "default",
+    "samples_ms": [
+      2.733,
+      2.876,
+      2.924
+    ],
+    "median_ms": 2.876,
+    "all_parity": true
+  },
+  {
+    "group": "compiler",
+    "mode": "live",
+    "samples_ms": [
+      3.951,
+      3.835,
+      3.852
+    ],
+    "median_ms": 3.852,
+    "all_parity": true
+  },
+  {
+    "group": "exception",
+    "mode": "live",
+    "samples_ms": [
+      3.808,
+      3.515,
+      3.685
+    ],
+    "median_ms": 3.685,
+    "all_parity": true
+  }
+]

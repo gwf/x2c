@@ -1,0 +1,201 @@
+--- a/src/compiler.x
++++ b/src/compiler.x
+@@ -11,6 +11,10 @@
+     active.
+   */
+ #pragma once
++int Prototype_profile_begin(int kind);
++void Prototype_profile_end(int span);
++int Prototype_profile_active(int kind);
++void Prototype_profile_transaction(void);
+ $(import "../lib/private-keywords.xmacro")
+ #include "tokenizer.x"
+ #include "ast.x"
+@@ -2594,6 +2598,7 @@
+     other compiler state.
+ */
+ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
++  Prototype_profile_transaction();
+   SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
+   transaction.compiler = c;
+   transaction.scope_index = c.sym.scopes.len() - 1;
+@@ -2628,7 +2633,10 @@
+   /* Macro binding is incremental. Copy only the maps that construction
+      mutates so failure can discard its rows while reads still reach the
+      unchanged outer scopes. */
++  int copy_span = Prototype_profile_active(1)
++    ? Prototype_profile_begin(2) : -1;
+   scope.symbols = transaction.scope.symbols.copy();
++  Prototype_profile_end(copy_span);
+   c.merge_source_declarations(scope.symbols, transaction.scope.symbols);
+   scope.bindings = transaction.scope.bindings.copy();
+   scope.enumerators = transaction.scope.enumerators.copy();
+--- a/src/macros.x
++++ b/src/macros.x
+@@ -2404,6 +2404,8 @@
+         raise %(meta-later (name $name));
+       List applied = values.list_free();
+       if (c.prototype_combined) {
++        int native_span = Prototype_profile_begin(8);
++        defer Prototype_profile_end(native_span);
+         c.prototype_slot_calls++;
+         if (name == "Prototype_frame") return Prototype_frame(applied.car());
+         if (name == "Prototype_cleanup")
+@@ -2647,10 +2649,12 @@
+   (void) input;
+   String source_file = definition.assoc(<file>);
+   Var required = slot.assoc(<construct>);
++  int producer_span = Prototype_profile_begin(7);
+   Var result = form is <list>
+     ? _evaluate_meta_value(compiler, form, invocation)
+     : _eval_template_form(
+       compiler, form, bindings, invocation, source_file, required);
++  Prototype_profile_end(producer_span);
+   Var construction = slot.assoc(<target>);
+   if (required is not void && splice) {
+     construction = required;
+@@ -3056,7 +3060,11 @@
+ }
+ 
+ List Compiler.prototype_pending(Compiler c, Var stored, List values) {
+-  $let(macro_sdk_compiler, c) return _sdk_template_call(stored, values);
++  int span = Prototype_profile_begin(4);
++  List result;
++  $let(macro_sdk_compiler, c) result = _sdk_template_call(stored, values);
++  Prototype_profile_end(span);
++  return result;
+ }
+ 
+ static List _sdk_template_call(Var stored, List values) {
+@@ -4191,8 +4199,10 @@
+           ($stored $input $lisp_bindings $invocation) @old_stack
+         );
+         int expansion_origin = _.record_origin(invocation);
++        int replace_span = Prototype_profile_begin(5);
+         Ast constructed = matched
+                         ? template.replace(replacement_bindings) : NULL;
++        Prototype_profile_end(replace_span);
+         if (constructed &&
+             (definition.assoc(<kind>) == <decl-unit> ||
+              definition.assoc(<target>) == <named-type>)) {
+@@ -4201,9 +4211,11 @@
+           constructed = %(declaration-bundle (rows @rows));
+         }
+         $let(_.origin, expansion_origin) {
++          int bind_span = Prototype_profile_begin(6);
+           result = _.bind_syntax(
+             matched ? constructed : void,
+             position, _.return_type);
++          Prototype_profile_end(bind_span);
+         }
+       }
+       return result;
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -2504,9 +2504,13 @@
+   List declarations = _try_declarations(c, clause, frame, handle);
+   List landing = _try_landing(c, clause, frame, handle, cleanup, bodies);
+   Macro shape = $compiler_try_shape;
++  int span = Prototype_profile_begin(0);
++  List result;
+   $let(c.prototype_combined, 1)
+-    return c.bind_syntax(shape(frame_code, declarations, body, landing,
++    result = c.bind_syntax(shape(frame_code, declarations, body, landing,
+       cleanup_code), AST_BLOCK, c.return_type);
++  Prototype_profile_end(span);
++  return result;
+ }
+ 
+ static Var _rewrite(Walk walk, Var value) {
+@@ -2525,7 +2529,9 @@
+     }
+     case %(try ?body ?clause ?finalizer): {
+       Compiler c = walk.compiler;
++      int snapshot_span = Prototype_profile_begin(1);
+       SymTxn transaction = c.begin_semantic_transaction();
++      Prototype_profile_end(snapshot_span);
+       defer transaction.rollback();
+       List frame;
+       List frame_code = _try_frame(c, frame);
+--- a/src/prototype-slots.x
++++ b/src/prototype-slots.x
+@@ -1,6 +1,67 @@
+ #pragma once
+ #include "x2c.x"
+ #include "meta.x"
++
++#include <time.h>
++#include <stdlib.h>
++#include <stdio.h>
++
++static long long _profile_inclusive[9], _profile_exclusive[9];
++static long long _profile_calls[9], _profile_started[256];
++static long long _profile_children[256];
++static int _profile_kind[256], _profile_depth, _profile_enabled, _profile_counts_only;
++static long long _profile_transactions;
++static const char *_profile_labels[9] = {
++  "try_application", "try_transaction_snapshot", "scope_symbols_copy",
++  "Macro_apply", "invocation_rows", "template_replace",
++  "skeleton_bind", "producer_evaluation", "producer_native_body"
++};
++static long long _profile_now(void) {
++  if (_profile_counts_only) return 0;
++  struct timespec now;
++  clock_gettime(CLOCK_MONOTONIC, &now);
++  return (long long) now.tv_sec * 1000000000LL + now.tv_nsec;
++}
++static void _profile_report(void) {
++  fprintf(stderr, "DUAL_PROFILE all_transactions %lld 0 0\n",
++    _profile_transactions);
++  for (int i = 0; i < 9; i++)
++    fprintf(stderr, "DUAL_PROFILE %s %lld %lld %lld\n",
++      _profile_labels[i], _profile_calls[i], _profile_inclusive[i],
++      _profile_exclusive[i]);
++}
++int Prototype_profile_begin(int kind) {
++  if (!_profile_enabled) {
++    _profile_enabled = getenv("X2C_DUAL_PROFILE") ? 1 : -1;
++    if (_profile_enabled == 1) {
++      _profile_counts_only = !strcmp(getenv("X2C_DUAL_PROFILE"), "counts");
++      atexit(_profile_report);
++    }
++  }
++  if (_profile_enabled < 0) return -1;
++  if (kind >= 3 && (!_profile_depth || _profile_kind[0] != 0)) return -1;
++  int slot = _profile_depth++;
++  assert(slot < 256);
++  _profile_kind[slot] = kind;
++  _profile_children[slot] = 0;
++  _profile_started[slot] = _profile_now();
++  return slot;
++}
++void Prototype_profile_transaction(void) {
++  if (getenv("X2C_DUAL_PROFILE")) _profile_transactions++;
++}
++void Prototype_profile_end(int slot) {
++  if (slot < 0) return;
++  long long elapsed = _profile_now() - _profile_started[slot];
++  assert(slot == --_profile_depth);
++  int kind = _profile_kind[slot];
++  _profile_calls[kind]++;
++  _profile_inclusive[kind] += elapsed;
++  _profile_exclusive[kind] += elapsed - _profile_children[slot];
++  if (slot) _profile_children[slot - 1] += elapsed;
++}
++int Prototype_profile_active(int kind) =>
++  _profile_depth && _profile_kind[_profile_depth - 1] == kind;
+ 
+ meta List Prototype_bound(List code) =>
+   %("x2c.slot" "bound" $code ());
+@@ -35,5 +96,9 @@
+   (void) captured;
+   return %("x2c.slot" "source" (not-an-ast) ());
+ }
+-List Macro_apply(Macro value, List arguments) =>
+-  %("x2c.slot" "source" ("x2c.template" $value $arguments) ());
++List Macro_apply(Macro value, List arguments) {
++  int span = Prototype_profile_begin(3);
++  List result = %("x2c.slot" "source" ("x2c.template" $value $arguments) ());
++  Prototype_profile_end(span);
++  return result;
++}

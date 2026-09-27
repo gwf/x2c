@@ -84,5 +84,24 @@ raw C comparison invalid. Do not normalize generated output to obtain parity.
 Native binaries, complete temporary generated trees and bootstrap outputs are
 not included. JSON manifests preserve generated-file hashes and statuses;
 timing samples are observations from the original host, not portable thresholds.
-The comparator does not compare diagnostic text. The full meta-slot/effect/stage
-path remains unproved and unmeasured, as the plan states.
+The comparator does not compare diagnostic text. The narrowed try meta-slot/effect/stage path is proved by phases 4 and 5;
+generic role extraction, helper transport and arbitrary conversion contexts
+remain separate unproved areas.
+
+
+## Research closure and production hand-off (phase 6)
+
+The production hand-off consists of three independent scoped plans:
+
+- `plans/dual-macro-core-support.md`: reusable support with old lowerings intact,
+  then ordinary bootstrap refresh before consumers.
+- `plans/dual-macro-try-migration.md`: depends on delivered, bootstrapped core;
+  preserves the 62-case raw C/H proof and ordinary self-host comparison.
+- `plans/macro-capture-role-consolidation.md`: independent refactor deliverable
+  on dev now under ordinary rules.
+
+`.context/dual-macro-phase6/profile/` contains one-off instrumentation and
+measurements, not production code or recurring checks. All `.context` evidence
+is reference only. **Do not merge this branch.** In particular phase4 contains
+full copies of five compiler sources. Implement the plans fresh on current dev;
+do not transplant those snapshots or the intermediate name bypass.

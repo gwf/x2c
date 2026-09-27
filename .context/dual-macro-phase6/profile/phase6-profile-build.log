@@ -1,0 +1,260 @@
+/tmp/x2c-dual-phase5-final translate   --out-dir lib \
+		../../lib/args.x ../../lib/array.x ../../lib/atom.x ../../lib/block.x ../../lib/buffer.x ../../lib/clibc.x ../../lib/cmath.x ../../lib/common.x ../../lib/context.x ../../lib/datum.x ../../lib/diff.x ../../lib/digest.x ../../lib/dispatch.x ../../lib/error.x ../../lib/error_init.x ../../lib/exception.x ../../lib/file.x ../../lib/func.x ../../lib/iter.x ../../lib/json.x ../../lib/lib.x ../../lib/lisp-init.x ../../lib/lisp.x ../../lib/list-selectors.x ../../lib/list.x ../../lib/logger.x ../../lib/machine.x ../../lib/map.x ../../lib/match-machine.x ../../lib/match.x ../../lib/meta.x ../../lib/mutex.x ../../lib/path.x ../../lib/pool.x ../../lib/process.x ../../lib/protocols.x ../../lib/regex.x ../../lib/scan.x ../../lib/scope.x ../../lib/scripting.x ../../lib/split.x ../../lib/static-init.x ../../lib/string-classify.x ../../lib/string-number.x ../../lib/string.x ../../lib/symbol.x ../../lib/symbolset.x ../../lib/thread-state.x ../../lib/thread.x ../../lib/tokenizer.x ../../lib/typed-array.x ../../lib/typed-list.x ../../lib/typed-map.x ../../lib/var-ledger.x ../../lib/var.x ../../lib/varconvert.x ../../lib/varops.x ../../lib/x2c.x
+Translated 58 x2c files to lib in 6.02 s
+  Generated 58 C files and 58 headers (2.2 MiB)
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/args.c.d -MT lib/args.o -c lib/args.c -o lib/args.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/array.c.d -MT lib/array.o -c lib/array.c -o lib/array.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/atom.c.d -MT lib/atom.o -c lib/atom.c -o lib/atom.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/block.c.d -MT lib/block.o -c lib/block.c -o lib/block.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/buffer.c.d -MT lib/buffer.o -c lib/buffer.c -o lib/buffer.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/clibc.c.d -MT lib/clibc.o -c lib/clibc.c -o lib/clibc.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/cmath.c.d -MT lib/cmath.o -c lib/cmath.c -o lib/cmath.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/common.c.d -MT lib/common.o -c lib/common.c -o lib/common.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/context.c.d -MT lib/context.o -c lib/context.c -o lib/context.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/datum.c.d -MT lib/datum.o -c lib/datum.c -o lib/datum.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/diff.c.d -MT lib/diff.o -c lib/diff.c -o lib/diff.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/digest.c.d -MT lib/digest.o -c lib/digest.c -o lib/digest.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/dispatch.c.d -MT lib/dispatch.o -c lib/dispatch.c -o lib/dispatch.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/error.c.d -MT lib/error.o -c lib/error.c -o lib/error.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/error_init.c.d -MT lib/error_init.o -c lib/error_init.c -o lib/error_init.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/exception.c.d -MT lib/exception.o -c lib/exception.c -o lib/exception.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/file.c.d -MT lib/file.o -c lib/file.c -o lib/file.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/func.c.d -MT lib/func.o -c lib/func.c -o lib/func.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/iter.c.d -MT lib/iter.o -c lib/iter.c -o lib/iter.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/json.c.d -MT lib/json.o -c lib/json.c -o lib/json.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/lib.c.d -MT lib/lib.o -c lib/lib.c -o lib/lib.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/lisp-init.c.d -MT lib/lisp-init.o -c lib/lisp-init.c -o lib/lisp-init.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/lisp.c.d -MT lib/lisp.o -c lib/lisp.c -o lib/lisp.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/list-selectors.c.d -MT lib/list-selectors.o -c lib/list-selectors.c -o lib/list-selectors.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/list.c.d -MT lib/list.o -c lib/list.c -o lib/list.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/logger.c.d -MT lib/logger.o -c lib/logger.c -o lib/logger.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/machine.c.d -MT lib/machine.o -c lib/machine.c -o lib/machine.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/map.c.d -MT lib/map.o -c lib/map.c -o lib/map.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/match-machine.c.d -MT lib/match-machine.o -c lib/match-machine.c -o lib/match-machine.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/match.c.d -MT lib/match.o -c lib/match.c -o lib/match.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/meta.c.d -MT lib/meta.o -c lib/meta.c -o lib/meta.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/mutex.c.d -MT lib/mutex.o -c lib/mutex.c -o lib/mutex.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/path.c.d -MT lib/path.o -c lib/path.c -o lib/path.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/pool.c.d -MT lib/pool.o -c lib/pool.c -o lib/pool.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/process.c.d -MT lib/process.o -c lib/process.c -o lib/process.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/protocols.c.d -MT lib/protocols.o -c lib/protocols.c -o lib/protocols.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/regex.c.d -MT lib/regex.o -c lib/regex.c -o lib/regex.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/scan.c.d -MT lib/scan.o -c lib/scan.c -o lib/scan.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/scope.c.d -MT lib/scope.o -c lib/scope.c -o lib/scope.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/scripting.c.d -MT lib/scripting.o -c lib/scripting.c -o lib/scripting.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/split.c.d -MT lib/split.o -c lib/split.c -o lib/split.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/static-init.c.d -MT lib/static-init.o -c lib/static-init.c -o lib/static-init.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/string-classify.c.d -MT lib/string-classify.o -c lib/string-classify.c -o lib/string-classify.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/string-number.c.d -MT lib/string-number.o -c lib/string-number.c -o lib/string-number.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/string.c.d -MT lib/string.o -c lib/string.c -o lib/string.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/symbol.c.d -MT lib/symbol.o -c lib/symbol.c -o lib/symbol.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/symbolset.c.d -MT lib/symbolset.o -c lib/symbolset.c -o lib/symbolset.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/thread-state.c.d -MT lib/thread-state.o -c lib/thread-state.c -o lib/thread-state.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/thread.c.d -MT lib/thread.o -c lib/thread.c -o lib/thread.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/tokenizer.c.d -MT lib/tokenizer.o -c lib/tokenizer.c -o lib/tokenizer.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/typed-array.c.d -MT lib/typed-array.o -c lib/typed-array.c -o lib/typed-array.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/typed-list.c.d -MT lib/typed-list.o -c lib/typed-list.c -o lib/typed-list.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/typed-map.c.d -MT lib/typed-map.o -c lib/typed-map.c -o lib/typed-map.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/var-ledger.c.d -MT lib/var-ledger.o -c lib/var-ledger.c -o lib/var-ledger.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/var.c.d -MT lib/var.o -c lib/var.c -o lib/var.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/varconvert.c.d -MT lib/varconvert.o -c lib/varconvert.c -o lib/varconvert.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/varops.c.d -MT lib/varops.o -c lib/varops.c -o lib/varops.o
+cc -fsigned-char -pthread  -O2     -iquote lib -MMD -MP \
+		-MF lib/x2c.c.d -MT lib/x2c.o -c lib/x2c.c -o lib/x2c.o
+rm -f libx2c.a
+ar rv libx2c.a lib/args.o lib/array.o lib/atom.o lib/block.o lib/buffer.o lib/clibc.o lib/cmath.o lib/common.o lib/context.o lib/datum.o lib/diff.o lib/digest.o lib/dispatch.o lib/error.o lib/error_init.o lib/exception.o lib/file.o lib/func.o lib/iter.o lib/json.o lib/lib.o lib/lisp-init.o lib/lisp.o lib/list-selectors.o lib/list.o lib/logger.o lib/machine.o lib/map.o lib/match-machine.o lib/match.o lib/meta.o lib/mutex.o lib/path.o lib/pool.o lib/process.o lib/protocols.o lib/regex.o lib/scan.o lib/scope.o lib/scripting.o lib/split.o lib/static-init.o lib/string-classify.o lib/string-number.o lib/string.o lib/symbol.o lib/symbolset.o lib/thread-state.o lib/thread.o lib/tokenizer.o lib/typed-array.o lib/typed-list.o lib/typed-map.o lib/var-ledger.o lib/var.o lib/varconvert.o lib/varops.o lib/x2c.o
+ar: creating archive libx2c.a
+a - lib/args.o
+a - lib/array.o
+a - lib/atom.o
+a - lib/block.o
+a - lib/buffer.o
+a - lib/clibc.o
+a - lib/cmath.o
+a - lib/common.o
+a - lib/context.o
+a - lib/datum.o
+a - lib/diff.o
+a - lib/digest.o
+a - lib/dispatch.o
+a - lib/error.o
+a - lib/error_init.o
+a - lib/exception.o
+a - lib/file.o
+a - lib/func.o
+a - lib/iter.o
+a - lib/json.o
+a - lib/lib.o
+a - lib/lisp-init.o
+a - lib/lisp.o
+a - lib/list-selectors.o
+a - lib/list.o
+a - lib/logger.o
+a - lib/machine.o
+a - lib/map.o
+a - lib/match-machine.o
+a - lib/match.o
+a - lib/meta.o
+a - lib/mutex.o
+a - lib/path.o
+a - lib/pool.o
+a - lib/process.o
+a - lib/protocols.o
+a - lib/regex.o
+a - lib/scan.o
+a - lib/scope.o
+a - lib/scripting.o
+a - lib/split.o
+a - lib/static-init.o
+a - lib/string-classify.o
+a - lib/string-number.o
+a - lib/string.o
+a - lib/symbol.o
+a - lib/symbolset.o
+a - lib/thread-state.o
+a - lib/thread.o
+a - lib/tokenizer.o
+a - lib/typed-array.o
+a - lib/typed-list.o
+a - lib/typed-map.o
+a - lib/var-ledger.o
+a - lib/var.o
+a - lib/varconvert.o
+a - lib/varops.o
+a - lib/x2c.o
+/tmp/x2c-dual-phase5-final translate   --out-dir src \
+		../../src/ast.x ../../src/bootstrap.x ../../src/build.x ../../src/builtins.x ../../src/cache.x ../../src/cli.x ../../src/collect.x ../../src/compiler.x ../../src/deps.x ../../src/diagnostics.x ../../src/editor.x ../../src/emit.x ../../src/expressions.x ../../src/format.x ../../src/frontend.x ../../src/generate.x ../../src/install.x ../../src/linked-meta.x ../../src/literals.x ../../src/macros.x ../../src/main.x ../../src/meta-project.x ../../src/parse.x ../../src/project.x ../../src/protocol.x ../../src/prototype-slots.x ../../src/regions.x ../../src/report.x ../../src/script.x ../../src/sourceview.x ../../src/stage.x ../../src/statements.x ../../src/toolchain.x ../../src/transform.x ../../src/type-ledger.x ../../src/type.x ../../src/utils.x
+Translated 37 x2c files to src in 4.41 s
+  Generated 37 C files and 37 headers (3.4 MiB)
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/ast.c.d -MT src/ast.o -c src/ast.c -o src/ast.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/bootstrap.c.d -MT src/bootstrap.o -c src/bootstrap.c -o src/bootstrap.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/build.c.d -MT src/build.o -c src/build.c -o src/build.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/builtins.c.d -MT src/builtins.o -c src/builtins.c -o src/builtins.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/cache.c.d -MT src/cache.o -c src/cache.c -o src/cache.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/cli.c.d -MT src/cli.o -c src/cli.c -o src/cli.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/collect.c.d -MT src/collect.o -c src/collect.c -o src/collect.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/compiler.c.d -MT src/compiler.o -c src/compiler.c -o src/compiler.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/deps.c.d -MT src/deps.o -c src/deps.c -o src/deps.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/diagnostics.c.d -MT src/diagnostics.o -c src/diagnostics.c -o src/diagnostics.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/editor.c.d -MT src/editor.o -c src/editor.c -o src/editor.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/emit.c.d -MT src/emit.o -c src/emit.c -o src/emit.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/expressions.c.d -MT src/expressions.o -c src/expressions.c -o src/expressions.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/format.c.d -MT src/format.o -c src/format.c -o src/format.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/frontend.c.d -MT src/frontend.o -c src/frontend.c -o src/frontend.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/generate.c.d -MT src/generate.o -c src/generate.c -o src/generate.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/install.c.d -MT src/install.o -c src/install.c -o src/install.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/linked-meta.c.d -MT src/linked-meta.o -c src/linked-meta.c -o src/linked-meta.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/literals.c.d -MT src/literals.o -c src/literals.c -o src/literals.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/macros.c.d -MT src/macros.o -c src/macros.c -o src/macros.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/main.c.d -MT src/main.o -c src/main.c -o src/main.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/meta-project.c.d -MT src/meta-project.o -c src/meta-project.c -o src/meta-project.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/parse.c.d -MT src/parse.o -c src/parse.c -o src/parse.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/project.c.d -MT src/project.o -c src/project.c -o src/project.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/protocol.c.d -MT src/protocol.o -c src/protocol.c -o src/protocol.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/prototype-slots.c.d -MT src/prototype-slots.o -c src/prototype-slots.c -o src/prototype-slots.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/regions.c.d -MT src/regions.o -c src/regions.c -o src/regions.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/report.c.d -MT src/report.o -c src/report.c -o src/report.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/script.c.d -MT src/script.o -c src/script.c -o src/script.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/sourceview.c.d -MT src/sourceview.o -c src/sourceview.c -o src/sourceview.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/stage.c.d -MT src/stage.o -c src/stage.c -o src/stage.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/statements.c.d -MT src/statements.o -c src/statements.c -o src/statements.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/toolchain.c.d -MT src/toolchain.o -c src/toolchain.c -o src/toolchain.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/transform.c.d -MT src/transform.o -c src/transform.c -o src/transform.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/type-ledger.c.d -MT src/type-ledger.o -c src/type-ledger.c -o src/type-ledger.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/type.c.d -MT src/type.o -c src/type.c -o src/type.o
+cc -fsigned-char -pthread  -O2     -iquote lib -iquote src \
+		-MMD -MP -MF src/utils.c.d -MT src/utils.o -c src/utils.c -o src/utils.o
+cc src/ast.o src/bootstrap.o src/build.o src/builtins.o src/cache.o src/cli.o src/collect.o src/compiler.o src/deps.o src/diagnostics.o src/editor.o src/emit.o src/expressions.o src/format.o src/frontend.o src/generate.o src/install.o src/linked-meta.o src/literals.o src/macros.o src/main.o src/meta-project.o src/parse.o src/project.o src/protocol.o src/prototype-slots.o src/regions.o src/report.o src/script.o src/sourceview.o src/stage.o src/statements.o src/toolchain.o src/transform.o src/type-ledger.o src/type.o src/utils.o -L. -Wl,-force_load,libx2c.a -pthread  -lm -o x2c

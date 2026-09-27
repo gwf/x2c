@@ -1,0 +1,1613 @@
+[
+  {
+    "kind": "timed",
+    "group": "compiler",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 1313000,
+          "min": 1288000,
+          "max": 1408000
+        },
+        "exclusive_ns": {
+          "median": 632000,
+          "min": 627000,
+          "max": 639000
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 1720000,
+          "min": 1642000,
+          "max": 1722000
+        },
+        "exclusive_ns": {
+          "median": 659000,
+          "min": 637000,
+          "max": 697000
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 1025000,
+          "min": 1005000,
+          "max": 1061000
+        },
+        "exclusive_ns": {
+          "median": 1025000,
+          "min": 1005000,
+          "max": 1061000
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 2000,
+          "min": 1000,
+          "max": 2000
+        },
+        "exclusive_ns": {
+          "median": 2000,
+          "min": 1000,
+          "max": 2000
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 185000,
+          "min": 174000,
+          "max": 186000
+        },
+        "exclusive_ns": {
+          "median": 185000,
+          "min": 174000,
+          "max": 186000
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 66000,
+          "min": 65000,
+          "max": 76000
+        },
+        "exclusive_ns": {
+          "median": 66000,
+          "min": 65000,
+          "max": 76000
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 434000,
+          "min": 404000,
+          "max": 516000
+        },
+        "exclusive_ns": {
+          "median": 302000,
+          "min": 282000,
+          "max": 372000
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 132000,
+          "min": 122000,
+          "max": 144000
+        },
+        "exclusive_ns": {
+          "median": 118000,
+          "min": 108000,
+          "max": 130000
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 14000,
+          "min": 14000,
+          "max": 14000
+        },
+        "exclusive_ns": {
+          "median": 14000,
+          "min": 14000,
+          "max": 14000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "compiler",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 1397000,
+          "min": 1294000,
+          "max": 1414000
+        },
+        "exclusive_ns": {
+          "median": 694000,
+          "min": 622000,
+          "max": 701000
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 2541000,
+          "min": 2438000,
+          "max": 2554000
+        },
+        "exclusive_ns": {
+          "median": 714000,
+          "min": 641000,
+          "max": 743000
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 1811000,
+          "min": 1724000,
+          "max": 1900000
+        },
+        "exclusive_ns": {
+          "median": 1811000,
+          "min": 1724000,
+          "max": 1900000
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 2000,
+          "min": 2000,
+          "max": 3000
+        },
+        "exclusive_ns": {
+          "median": 2000,
+          "min": 2000,
+          "max": 3000
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 207000,
+          "min": 182000,
+          "max": 207000
+        },
+        "exclusive_ns": {
+          "median": 207000,
+          "min": 182000,
+          "max": 207000
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 71000,
+          "min": 68000,
+          "max": 72000
+        },
+        "exclusive_ns": {
+          "median": 71000,
+          "min": 68000,
+          "max": 72000
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 420000,
+          "min": 415000,
+          "max": 439000
+        },
+        "exclusive_ns": {
+          "median": 292000,
+          "min": 292000,
+          "max": 313000
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 126000,
+          "min": 123000,
+          "max": 128000
+        },
+        "exclusive_ns": {
+          "median": 111000,
+          "min": 108000,
+          "max": 116000
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 15000,
+          "min": 12000,
+          "max": 15000
+        },
+        "exclusive_ns": {
+          "median": 15000,
+          "min": 12000,
+          "max": 15000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "exception",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1816000,
+          "min": 1764000,
+          "max": 1865000
+        },
+        "exclusive_ns": {
+          "median": 856000,
+          "min": 839000,
+          "max": 881000
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1784000,
+          "min": 1609000,
+          "max": 1940000
+        },
+        "exclusive_ns": {
+          "median": 61000,
+          "min": 56000,
+          "max": 62000
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1723000,
+          "min": 1547000,
+          "max": 1884000
+        },
+        "exclusive_ns": {
+          "median": 1723000,
+          "min": 1547000,
+          "max": 1884000
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 3000,
+          "min": 3000,
+          "max": 4000
+        },
+        "exclusive_ns": {
+          "median": 3000,
+          "min": 3000,
+          "max": 4000
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 262000,
+          "min": 252000,
+          "max": 268000
+        },
+        "exclusive_ns": {
+          "median": 262000,
+          "min": 252000,
+          "max": 268000
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 141000,
+          "min": 127000,
+          "max": 141000
+        },
+        "exclusive_ns": {
+          "median": 141000,
+          "min": 127000,
+          "max": 141000
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 564000,
+          "min": 526000,
+          "max": 578000
+        },
+        "exclusive_ns": {
+          "median": 473000,
+          "min": 446000,
+          "max": 487000
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 91000,
+          "min": 80000,
+          "max": 91000
+        },
+        "exclusive_ns": {
+          "median": 73000,
+          "min": 65000,
+          "max": 73000
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 18000,
+          "min": 15000,
+          "max": 18000
+        },
+        "exclusive_ns": {
+          "median": 18000,
+          "min": 15000,
+          "max": 18000
+        }
+      }
+    }
+  },
+  {
+    "kind": "timed",
+    "group": "exception",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1885000,
+          "min": 1850000,
+          "max": 1951000
+        },
+        "exclusive_ns": {
+          "median": 898000,
+          "min": 866000,
+          "max": 932000
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1734000,
+          "min": 1665000,
+          "max": 1923000
+        },
+        "exclusive_ns": {
+          "median": 73000,
+          "min": 64000,
+          "max": 89000
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 1661000,
+          "min": 1601000,
+          "max": 1834000
+        },
+        "exclusive_ns": {
+          "median": 1661000,
+          "min": 1601000,
+          "max": 1834000
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 4000,
+          "min": 4000,
+          "max": 5000
+        },
+        "exclusive_ns": {
+          "median": 4000,
+          "min": 4000,
+          "max": 5000
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 258000,
+          "min": 257000,
+          "max": 264000
+        },
+        "exclusive_ns": {
+          "median": 258000,
+          "min": 257000,
+          "max": 264000
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 145000,
+          "min": 139000,
+          "max": 145000
+        },
+        "exclusive_ns": {
+          "median": 145000,
+          "min": 139000,
+          "max": 145000
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 584000,
+          "min": 579000,
+          "max": 606000
+        },
+        "exclusive_ns": {
+          "median": 478000,
+          "min": 472000,
+          "max": 511000
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 106000,
+          "min": 95000,
+          "max": 107000
+        },
+        "exclusive_ns": {
+          "median": 88000,
+          "min": 80000,
+          "max": 89000
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 18000,
+          "min": 15000,
+          "max": 18000
+        },
+        "exclusive_ns": {
+          "median": 18000,
+          "min": 15000,
+          "max": 18000
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "compiler",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 2119,
+          "min": 2119,
+          "max": 2119
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "compiler",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 2124,
+          "min": 2124,
+          "max": 2124
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "exception",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "counts",
+    "group": "exception",
+    "mode": "live",
+    "all_parity": true,
+    "samples": 1,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 265,
+          "min": 265,
+          "max": 265
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 8,
+          "min": 8,
+          "max": 8
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  {
+    "kind": "fixture",
+    "group": "fixture",
+    "mode": "default",
+    "all_parity": true,
+    "samples": 3,
+    "aggregate": {
+      "all_transactions": {
+        "calls": {
+          "median": 264,
+          "min": 264,
+          "max": 264
+        },
+        "inclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "exclusive_ns": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "try_application": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 1674000,
+          "min": 1537000,
+          "max": 1730000
+        },
+        "exclusive_ns": {
+          "median": 747000,
+          "min": 659000,
+          "max": 824000
+        }
+      },
+      "try_transaction_snapshot": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 1196000,
+          "min": 1194000,
+          "max": 1202000
+        },
+        "exclusive_ns": {
+          "median": 43000,
+          "min": 40000,
+          "max": 51000
+        }
+      },
+      "scope_symbols_copy": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 1151000,
+          "min": 1151000,
+          "max": 1156000
+        },
+        "exclusive_ns": {
+          "median": 1151000,
+          "min": 1151000,
+          "max": 1156000
+        }
+      },
+      "Macro_apply": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 1000,
+          "min": 1000,
+          "max": 2000
+        },
+        "exclusive_ns": {
+          "median": 1000,
+          "min": 1000,
+          "max": 2000
+        }
+      },
+      "invocation_rows": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 255000,
+          "min": 218000,
+          "max": 268000
+        },
+        "exclusive_ns": {
+          "median": 255000,
+          "min": 218000,
+          "max": 268000
+        }
+      },
+      "template_replace": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 108000,
+          "min": 86000,
+          "max": 110000
+        },
+        "exclusive_ns": {
+          "median": 108000,
+          "min": 86000,
+          "max": 110000
+        }
+      },
+      "skeleton_bind": {
+        "calls": {
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inclusive_ns": {
+          "median": 547000,
+          "min": 542000,
+          "max": 573000
+        },
+        "exclusive_ns": {
+          "median": 464000,
+          "min": 457000,
+          "max": 494000
+        }
+      },
+      "producer_evaluation": {
+        "calls": {
+          "median": 6,
+          "min": 6,
+          "max": 6
+        },
+        "inclusive_ns": {
+          "median": 79000,
+          "min": 78000,
+          "max": 90000
+        },
+        "exclusive_ns": {
+          "median": 67000,
+          "min": 66000,
+          "max": 77000
+        }
+      },
+      "producer_native_body": {
+        "calls": {
+          "median": 6,
+          "min": 6,
+          "max": 6
+        },
+        "inclusive_ns": {
+          "median": 12000,
+          "min": 12000,
+          "max": 13000
+        },
+        "exclusive_ns": {
+          "median": 12000,
+          "min": 12000,
+          "max": 13000
+        }
+      }
+    }
+  }
+]

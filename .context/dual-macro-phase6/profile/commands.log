@@ -1,0 +1,937 @@
+RUN counts/live/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/exception-hot-paths in 654 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 0 0
+DUAL_PROFILE try_transaction_snapshot 4 0 0
+DUAL_PROFILE scope_symbols_copy 4 0 0
+DUAL_PROFILE Macro_apply 4 0 0
+DUAL_PROFILE invocation_rows 4 0 0
+DUAL_PROFILE template_replace 4 0 0
+DUAL_PROFILE skeleton_bind 4 0 0
+DUAL_PROFILE producer_evaluation 8 0 0
+DUAL_PROFILE producer_native_body 8 0 0
+
+RUN counts/live/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/tokenizer in 690 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/live/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/parse in 1.16 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 329 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/live/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/type in 712 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/live/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/expressions in 1.34 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 325 0 0
+DUAL_PROFILE try_application 1 0 0
+DUAL_PROFILE try_transaction_snapshot 1 0 0
+DUAL_PROFILE scope_symbols_copy 1 0 0
+DUAL_PROFILE Macro_apply 1 0 0
+DUAL_PROFILE invocation_rows 1 0 0
+DUAL_PROFILE template_replace 1 0 0
+DUAL_PROFILE skeleton_bind 1 0 0
+DUAL_PROFILE producer_evaluation 2 0 0
+DUAL_PROFILE producer_native_body 2 0 0
+
+RUN counts/live/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/generate in 1.08 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 310 0 0
+DUAL_PROFILE try_application 1 0 0
+DUAL_PROFILE try_transaction_snapshot 1 0 0
+DUAL_PROFILE scope_symbols_copy 1 0 0
+DUAL_PROFILE Macro_apply 1 0 0
+DUAL_PROFILE invocation_rows 1 0 0
+DUAL_PROFILE template_replace 1 0 0
+DUAL_PROFILE skeleton_bind 1 0 0
+DUAL_PROFILE producer_evaluation 2 0 0
+DUAL_PROFILE producer_native_body 2 0 0
+
+RUN counts/live/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/emit in 1.06 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 284 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/live/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/live/0/transform in 1.29 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 344 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/default/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/exception-hot-paths in 550 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 0 0
+DUAL_PROFILE try_transaction_snapshot 4 0 0
+DUAL_PROFILE scope_symbols_copy 4 0 0
+DUAL_PROFILE Macro_apply 4 0 0
+DUAL_PROFILE invocation_rows 4 0 0
+DUAL_PROFILE template_replace 4 0 0
+DUAL_PROFILE skeleton_bind 4 0 0
+DUAL_PROFILE producer_evaluation 8 0 0
+DUAL_PROFILE producer_native_body 8 0 0
+
+RUN counts/default/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/tokenizer in 632 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/default/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/parse in 978 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 328 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/default/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/type in 630 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/default/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/expressions in 1.14 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 324 0 0
+DUAL_PROFILE try_application 1 0 0
+DUAL_PROFILE try_transaction_snapshot 1 0 0
+DUAL_PROFILE scope_symbols_copy 1 0 0
+DUAL_PROFILE Macro_apply 1 0 0
+DUAL_PROFILE invocation_rows 1 0 0
+DUAL_PROFILE template_replace 1 0 0
+DUAL_PROFILE skeleton_bind 1 0 0
+DUAL_PROFILE producer_evaluation 2 0 0
+DUAL_PROFILE producer_native_body 2 0 0
+
+RUN counts/default/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/generate in 906 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 309 0 0
+DUAL_PROFILE try_application 1 0 0
+DUAL_PROFILE try_transaction_snapshot 1 0 0
+DUAL_PROFILE scope_symbols_copy 1 0 0
+DUAL_PROFILE Macro_apply 1 0 0
+DUAL_PROFILE invocation_rows 1 0 0
+DUAL_PROFILE template_replace 1 0 0
+DUAL_PROFILE skeleton_bind 1 0 0
+DUAL_PROFILE producer_evaluation 2 0 0
+DUAL_PROFILE producer_native_body 2 0 0
+
+RUN counts/default/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/emit in 856 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 283 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN counts/default/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/counts/default/0/transform in 1.13 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 343 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/2/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/exception-hot-paths in 657 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1951000 932000
+DUAL_PROFILE try_transaction_snapshot 4 1734000 73000
+DUAL_PROFILE scope_symbols_copy 4 1661000 1661000
+DUAL_PROFILE Macro_apply 4 4000 4000
+DUAL_PROFILE invocation_rows 4 264000 264000
+DUAL_PROFILE template_replace 4 145000 145000
+DUAL_PROFILE skeleton_bind 4 606000 511000
+DUAL_PROFILE producer_evaluation 8 95000 80000
+DUAL_PROFILE producer_native_body 8 15000 15000
+
+RUN timed/live/2/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/tokenizer in 701 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/2/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/parse in 1.18 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 329 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/2/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/type in 716 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/2/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/expressions in 1.36 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 325 0 0
+DUAL_PROFILE try_application 1 738000 354000
+DUAL_PROFILE try_transaction_snapshot 1 1214000 501000
+DUAL_PROFILE scope_symbols_copy 1 713000 713000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 120000 120000
+DUAL_PROFILE template_replace 1 37000 37000
+DUAL_PROFILE skeleton_bind 1 226000 162000
+DUAL_PROFILE producer_evaluation 2 64000 57000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/live/2/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/generate in 1.05 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 310 0 0
+DUAL_PROFILE try_application 1 676000 340000
+DUAL_PROFILE try_transaction_snapshot 1 1224000 213000
+DUAL_PROFILE scope_symbols_copy 1 1011000 1011000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 87000 87000
+DUAL_PROFILE template_replace 1 35000 35000
+DUAL_PROFILE skeleton_bind 1 213000 151000
+DUAL_PROFILE producer_evaluation 2 62000 54000
+DUAL_PROFILE producer_native_body 2 8000 8000
+
+RUN timed/live/2/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/emit in 1.08 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 284 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/2/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/2/transform in 1.31 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 344 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/1/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/exception-hot-paths in 651 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1850000 866000
+DUAL_PROFILE try_transaction_snapshot 4 1665000 64000
+DUAL_PROFILE scope_symbols_copy 4 1601000 1601000
+DUAL_PROFILE Macro_apply 4 4000 4000
+DUAL_PROFILE invocation_rows 4 257000 257000
+DUAL_PROFILE template_replace 4 139000 139000
+DUAL_PROFILE skeleton_bind 4 584000 478000
+DUAL_PROFILE producer_evaluation 8 106000 88000
+DUAL_PROFILE producer_native_body 8 18000 18000
+
+RUN timed/live/1/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/tokenizer in 681 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/1/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/parse in 1.21 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 329 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/1/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/type in 715 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/1/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/expressions in 1.34 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 325 0 0
+DUAL_PROFILE try_application 1 637000 306000
+DUAL_PROFILE try_transaction_snapshot 1 1066000 416000
+DUAL_PROFILE scope_symbols_copy 1 650000 650000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 92000 92000
+DUAL_PROFILE template_replace 1 35000 35000
+DUAL_PROFILE skeleton_bind 1 203000 142000
+DUAL_PROFILE producer_evaluation 2 61000 55000
+DUAL_PROFILE producer_native_body 2 6000 6000
+
+RUN timed/live/1/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/generate in 1.11 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 310 0 0
+DUAL_PROFILE try_application 1 657000 316000
+DUAL_PROFILE try_transaction_snapshot 1 1475000 225000
+DUAL_PROFILE scope_symbols_copy 1 1250000 1250000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 90000 90000
+DUAL_PROFILE template_replace 1 33000 33000
+DUAL_PROFILE skeleton_bind 1 217000 150000
+DUAL_PROFILE producer_evaluation 2 67000 61000
+DUAL_PROFILE producer_native_body 2 6000 6000
+
+RUN timed/live/1/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/emit in 1.05 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 284 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/1/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/1/transform in 1.33 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 344 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/exception-hot-paths in 645 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1885000 898000
+DUAL_PROFILE try_transaction_snapshot 4 1923000 89000
+DUAL_PROFILE scope_symbols_copy 4 1834000 1834000
+DUAL_PROFILE Macro_apply 4 5000 5000
+DUAL_PROFILE invocation_rows 4 258000 258000
+DUAL_PROFILE template_replace 4 145000 145000
+DUAL_PROFILE skeleton_bind 4 579000 472000
+DUAL_PROFILE producer_evaluation 8 107000 89000
+DUAL_PROFILE producer_native_body 8 18000 18000
+
+RUN timed/live/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/tokenizer in 704 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/parse in 1.16 s
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 329 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/type in 724 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/expressions in 1.36 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 325 0 0
+DUAL_PROFILE try_application 1 778000 389000
+DUAL_PROFILE try_transaction_snapshot 1 1263000 513000
+DUAL_PROFILE scope_symbols_copy 1 750000 750000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 121000 121000
+DUAL_PROFILE template_replace 1 37000 37000
+DUAL_PROFILE skeleton_bind 1 230000 169000
+DUAL_PROFILE producer_evaluation 2 61000 53000
+DUAL_PROFILE producer_native_body 2 8000 8000
+
+RUN timed/live/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/generate in 1.10 s
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 310 0 0
+DUAL_PROFILE try_application 1 619000 312000
+DUAL_PROFILE try_transaction_snapshot 1 1291000 230000
+DUAL_PROFILE scope_symbols_copy 1 1061000 1061000
+DUAL_PROFILE Macro_apply 1 2000 2000
+DUAL_PROFILE invocation_rows 1 86000 86000
+DUAL_PROFILE template_replace 1 34000 34000
+DUAL_PROFILE skeleton_bind 1 185000 123000
+DUAL_PROFILE producer_evaluation 2 62000 55000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/live/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/emit in 1.06 s
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 284 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/live/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/live/0/transform in 1.34 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 344 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/2/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/exception-hot-paths in 548 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1816000 839000
+DUAL_PROFILE try_transaction_snapshot 4 1940000 56000
+DUAL_PROFILE scope_symbols_copy 4 1884000 1884000
+DUAL_PROFILE Macro_apply 4 4000 4000
+DUAL_PROFILE invocation_rows 4 268000 268000
+DUAL_PROFILE template_replace 4 141000 141000
+DUAL_PROFILE skeleton_bind 4 564000 473000
+DUAL_PROFILE producer_evaluation 8 91000 73000
+DUAL_PROFILE producer_native_body 8 18000 18000
+
+RUN timed/default/2/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/tokenizer in 610 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/2/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/parse in 986 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 328 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/2/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/type in 634 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/2/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/expressions in 1.14 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 324 0 0
+DUAL_PROFILE try_application 1 709000 347000
+DUAL_PROFILE try_transaction_snapshot 1 1013000 493000
+DUAL_PROFILE scope_symbols_copy 1 520000 520000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 107000 107000
+DUAL_PROFILE template_replace 1 33000 33000
+DUAL_PROFILE skeleton_bind 1 221000 158000
+DUAL_PROFILE producer_evaluation 2 63000 55000
+DUAL_PROFILE producer_native_body 2 8000 8000
+
+RUN timed/default/2/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/generate in 864 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 309 0 0
+DUAL_PROFILE try_application 1 579000 285000
+DUAL_PROFILE try_transaction_snapshot 1 709000 204000
+DUAL_PROFILE scope_symbols_copy 1 505000 505000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 78000 78000
+DUAL_PROFILE template_replace 1 32000 32000
+DUAL_PROFILE skeleton_bind 1 183000 124000
+DUAL_PROFILE producer_evaluation 2 59000 53000
+DUAL_PROFILE producer_native_body 2 6000 6000
+
+RUN timed/default/2/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/emit in 867 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 283 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/2/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/2/transform in 1.09 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 343 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/1/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/exception-hot-paths in 586 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1865000 881000
+DUAL_PROFILE try_transaction_snapshot 4 1784000 61000
+DUAL_PROFILE scope_symbols_copy 4 1723000 1723000
+DUAL_PROFILE Macro_apply 4 3000 3000
+DUAL_PROFILE invocation_rows 4 262000 262000
+DUAL_PROFILE template_replace 4 141000 141000
+DUAL_PROFILE skeleton_bind 4 578000 487000
+DUAL_PROFILE producer_evaluation 8 91000 73000
+DUAL_PROFILE producer_native_body 8 18000 18000
+
+RUN timed/default/1/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/tokenizer in 632 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/1/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/parse in 989 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 328 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/1/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/type in 647 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/1/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/expressions in 1.12 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 324 0 0
+DUAL_PROFILE try_application 1 751000 321000
+DUAL_PROFILE try_transaction_snapshot 1 944000 446000
+DUAL_PROFILE scope_symbols_copy 1 498000 498000
+DUAL_PROFILE Macro_apply 1 0 0
+DUAL_PROFILE invocation_rows 1 101000 101000
+DUAL_PROFILE template_replace 1 32000 32000
+DUAL_PROFILE skeleton_bind 1 297000 237000
+DUAL_PROFILE producer_evaluation 2 60000 53000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/default/1/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/generate in 899 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 309 0 0
+DUAL_PROFILE try_application 1 657000 318000
+DUAL_PROFILE try_transaction_snapshot 1 698000 191000
+DUAL_PROFILE scope_symbols_copy 1 507000 507000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 85000 85000
+DUAL_PROFILE template_replace 1 34000 34000
+DUAL_PROFILE skeleton_bind 1 219000 135000
+DUAL_PROFILE producer_evaluation 2 84000 77000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/default/1/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/emit in 862 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 283 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/1/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/1/transform in 1.11 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 343 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/0/exception-hot-paths/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/exception-hot-paths in 566 ms
+  Generated 1 C file and 1 header (7.9 KiB)
+DUAL_PROFILE all_transactions 265 0 0
+DUAL_PROFILE try_application 4 1764000 856000
+DUAL_PROFILE try_transaction_snapshot 4 1609000 62000
+DUAL_PROFILE scope_symbols_copy 4 1547000 1547000
+DUAL_PROFILE Macro_apply 4 3000 3000
+DUAL_PROFILE invocation_rows 4 252000 252000
+DUAL_PROFILE template_replace 4 127000 127000
+DUAL_PROFILE skeleton_bind 4 526000 446000
+DUAL_PROFILE producer_evaluation 8 80000 65000
+DUAL_PROFILE producer_native_body 8 15000 15000
+
+RUN timed/default/0/tokenizer/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/tokenizer in 623 ms
+  Generated 1 C file and 1 header (43.5 KiB)
+DUAL_PROFILE all_transactions 263 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/0/parse/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/parse in 940 ms
+  Generated 1 C file and 1 header (236.7 KiB)
+DUAL_PROFILE all_transactions 328 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/0/type/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/type in 632 ms
+  Generated 1 C file and 1 header (53.7 KiB)
+DUAL_PROFILE all_transactions 269 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/0/expressions/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/expressions in 1.11 s
+  Generated 1 C file and 1 header (348.8 KiB)
+DUAL_PROFILE all_transactions 324 0 0
+DUAL_PROFILE try_application 1 695000 335000
+DUAL_PROFILE try_transaction_snapshot 1 957000 438000
+DUAL_PROFILE scope_symbols_copy 1 519000 519000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 99000 99000
+DUAL_PROFILE template_replace 1 38000 38000
+DUAL_PROFILE skeleton_bind 1 222000 157000
+DUAL_PROFILE producer_evaluation 2 65000 58000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/default/0/generate/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/generate in 866 ms
+  Generated 1 C file and 1 header (122.1 KiB)
+DUAL_PROFILE all_transactions 309 0 0
+DUAL_PROFILE try_application 1 618000 292000
+DUAL_PROFILE try_transaction_snapshot 1 763000 221000
+DUAL_PROFILE scope_symbols_copy 1 542000 542000
+DUAL_PROFILE Macro_apply 1 1000 1000
+DUAL_PROFILE invocation_rows 1 75000 75000
+DUAL_PROFILE template_replace 1 38000 38000
+DUAL_PROFILE skeleton_bind 1 212000 145000
+DUAL_PROFILE producer_evaluation 2 67000 60000
+DUAL_PROFILE producer_native_body 2 7000 7000
+
+RUN timed/default/0/emit/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/emit in 868 ms
+  Generated 1 C file and 1 header (121.6 KiB)
+DUAL_PROFILE all_transactions 283 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN timed/default/0/transform/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/timed/default/0/transform in 1.10 s
+  Generated 1 C file and 1 header (378.6 KiB)
+DUAL_PROFILE all_transactions 343 0 0
+DUAL_PROFILE try_application 0 0 0
+DUAL_PROFILE try_transaction_snapshot 0 0 0
+DUAL_PROFILE scope_symbols_copy 0 0 0
+DUAL_PROFILE Macro_apply 0 0 0
+DUAL_PROFILE invocation_rows 0 0 0
+DUAL_PROFILE template_replace 0 0 0
+DUAL_PROFILE skeleton_bind 0 0 0
+DUAL_PROFILE producer_evaluation 0 0 0
+DUAL_PROFILE producer_native_body 0 0 0
+
+RUN fixture/default/2/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/fixture/default/2/defer-try-cleanup in 565 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 264 0 0
+DUAL_PROFILE try_application 3 1730000 824000
+DUAL_PROFILE try_transaction_snapshot 3 1194000 43000
+DUAL_PROFILE scope_symbols_copy 3 1151000 1151000
+DUAL_PROFILE Macro_apply 3 1000 1000
+DUAL_PROFILE invocation_rows 3 255000 255000
+DUAL_PROFILE template_replace 3 108000 108000
+DUAL_PROFILE skeleton_bind 3 542000 464000
+DUAL_PROFILE producer_evaluation 6 78000 66000
+DUAL_PROFILE producer_native_body 6 12000 12000
+
+RUN fixture/default/1/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/fixture/default/1/defer-try-cleanup in 584 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 264 0 0
+DUAL_PROFILE try_application 3 1674000 747000
+DUAL_PROFILE try_transaction_snapshot 3 1202000 51000
+DUAL_PROFILE scope_symbols_copy 3 1151000 1151000
+DUAL_PROFILE Macro_apply 3 2000 2000
+DUAL_PROFILE invocation_rows 3 268000 268000
+DUAL_PROFILE template_replace 3 110000 110000
+DUAL_PROFILE skeleton_bind 3 547000 457000
+DUAL_PROFILE producer_evaluation 6 90000 77000
+DUAL_PROFILE producer_native_body 6 13000 13000
+
+RUN fixture/default/0/defer-try-cleanup/command.log
+Translated 1 x2c file to /Users/gary/.codex/worktrees/09fa/x2c/.context/dual-macro-phase6/profile/runs/fixture/default/0/defer-try-cleanup in 577 ms
+  Generated 1 C file and 1 header (7.2 KiB)
+DUAL_PROFILE all_transactions 264 0 0
+DUAL_PROFILE try_application 3 1537000 659000
+DUAL_PROFILE try_transaction_snapshot 3 1196000 40000
+DUAL_PROFILE scope_symbols_copy 3 1156000 1156000
+DUAL_PROFILE Macro_apply 3 1000 1000
+DUAL_PROFILE invocation_rows 3 218000 218000
+DUAL_PROFILE template_replace 3 86000 86000
+DUAL_PROFILE skeleton_bind 3 573000 494000
+DUAL_PROFILE producer_evaluation 6 79000 67000
+DUAL_PROFILE producer_native_body 6 12000 12000

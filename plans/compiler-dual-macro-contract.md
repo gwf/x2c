@@ -1,9 +1,10 @@
-> Status: active -- narrowed compiler contract demonstrated in isolation.
+> Status: reference -- narrowed research complete; production hand-off scoped.
 > The combined try template/slot/effect/stage candidate passes 62-case raw
 > C/H and outcome comparison. The failing-skeleton rollback probe also passes.
 > Five paired timing samples on phase5 show +1.40% default compiler translation
 > and +1.94% live; the default ranges do not overlap in this window.
 > Inserted-name shadowing is baseline parity and remains a follow-up.
+> Phase6 profiles the try path and hands off three scoped production plans.
 > Production implementation is not authorized by this research record.
 
 # Compiler contract for dual-purpose macros
@@ -21,7 +22,7 @@ The requested survey was found at
 `/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/.context/dual-macro-compiler-opportunities.md`.
 Its original survey baseline is `553429f`; current source, rather than its
 line numbers or capability assumptions, is authoritative here.
-The prototypes remain in `.context/dual-macro-phase3/` through phase5 and
+The prototypes remain in `.context/dual-macro-phase3/` through phase6 and
 managed isolated worktrees. Nothing in this plan claims that its proposed
 semantics already ship in x2c. **Do not merge this research branch as is.**
 `.context/dual-macro-phase4/combined/` tracks full copies of five compiler
@@ -114,6 +115,15 @@ The required additions beyond those four forms are:
 5. The producer table names canonical owners and required facts. Only producers
    demanded by a migration are built. The first try proof needs frame-declaration
    and cleanup-placement producers, with new-name, early and cleanup effects.
+
+6. Open references to generated-header-only functions emit native String
+   callees with the authoritative producer-declared result Type. The exception
+   helpers and sigsetjmp use this rule; typed source callees added forward
+   declarations and broke raw byte parity. Include placement stays unchanged.
+7. General free-role extraction belongs to the production application owner
+   before any lowering other than try migrates. `_prototype_open_code` currently
+   recognizes three call names by hand; that special case is not production
+   support for arbitrary open definitions.
 
 This freezes semantics, not public descriptor fields or a new API family.
 The current try body contains native calls directly. Its prepared free-reference
@@ -216,8 +226,10 @@ The lowering receives prepared inputs through the common application owner;
 it never resolves free references late or reads the preparation map.
 The cache is private per Compiler, not global across target units.
 
-Native runtime references require an explicit distinction from ordinary open
-source-function references. `_catch_call` currently constructs native String
+**Contract rule: generated-header-only function references emit as native
+String callees with the producer's declared result Type.** This applies to
+exception runtime calls and sigsetjmp. Native runtime references require an
+explicit distinction from ordinary open source-function references. `_catch_call` currently constructs native String
 callees and supplies result Types. `lib/exception.x` declares push/landed with
 `ExceptionFrame *`; its generated `exception.h` includes `<setjmp.h>` and defines
 the frame's `env` field. `generate._primary_include` adds that header only when
@@ -235,9 +247,10 @@ extra push/landed forward declarations, breaking raw C parity. Ordinary open
 source references should retain resolved binding/Type holes and ordinary call
 conversion; the earlier value/primitive Type probes establish that separate
 case. Native roles must be identified by the authoritative producer table,
-not by failure to find a Type or by a guessed function signature. The current
-three-name adapter is a bounded implementation of that rule, not a general
-value/Type/tag resolver. Its extra resolved-fact rows are audit scaffolding;
+not by failure to find a Type or by a guessed function signature. **Contract rule: general free-role extraction is required in the production
+application owner before any lowering other than try migrates.** The current
+`_prototype_open_code` recognizes three call names by hand. That bounded
+adapter is not a general value/Type/tag resolver. Its extra resolved-fact rows are audit scaffolding;
 the production owner should keep only facts its projection or recognition uses.
 
 Preparation applies to definition free roles before parameter substitution;
@@ -547,34 +560,75 @@ corpus, number of applications, transaction count, paired median/range and
 observed incremental delta. Replacing a prior candidate replaces its ledger
 row: do not count successive versions of try twice. The current entry is:
 
-| Lowering | Candidate | Default compiler corpus delta | Transaction cost | Status |
-| --- | --- | ---: | --- | --- |
-| try/defer/catch region skeleton | phase4 final (historical) | +1.34% | One per try; application/total transaction counts unmeasured | Five paired samples; overlapping ranges |
-| Same lowering, open body / producer stages | phase5 final | +1.40% | Same one per try; counts unmeasured | Current total; replaces phase4 row |
-| Later lowerings | Not migrated | Not measured | Not measured | Add when migrated |
+| Lowering | Candidate | Default / live delta | Applications | Try transactions / all transactions | Status |
+| --- | --- | --- | --- | --- | --- |
+| try/defer/catch skeleton | phase4 final | +1.34% / historical | Not counted in phase4 | One per try; totals not measured | Historical, not added to total |
+| Same lowering, open body / producer stages | phase5 final | +1.40% / +1.94% | 2 / 2 | 2 / 2119 default; 2 / 2124 live | Current compiler-corpus total; replaces phase4 |
+| Same candidate, exception-heavy translation | phase5 final | +1.37% / +3.69% | 4 / 4 | 4 / 265 both modes | Separate workload, not an additional migration |
+| Later lowerings | Not migrated | Not measured | Not measured | Not measured | Add when migrated |
 
-The current observed total is **+1.40% default** and **+1.94% live** for the
-phase5 try candidate. The earlier +1.34% row is historical, not an additional
-lowering cost. This is an
-accounting observation, not a confirmed regression or a prediction of the
-whole rewrite. Record each cumulative candidate/original-baseline ratio; derive a migration
-increment by subtracting successive cumulative ratios measured on that same
-baseline and workload. Maintain their planning sum, and measure the combined
-compiler against the original baseline at the existing performance checkpoint.
-Interactions, corpus weights and noise mean adding independent medians cannot
-establish actual cumulative cost. Different timing windows need paired original
-baseline reruns, not subtraction of their elapsed times.
+Counts come from phase6's instrumented phase5 candidate and independent
+count-only runs, not inferred from source occurrences. The compiler corpus
+is seven translations; exception-heavy translation is reported separately.
+Keep each cumulative candidate/original-baseline ratio; replacing successive
+try candidates does not add their deltas. Measure later increments against
+the same original baseline/workload. Independent medians do not establish
+actual cumulative cost.
 
-Recommend a **5% cumulative translation-overhead planning budget** for the
-whole migration on the representative default compiler corpus, with no
-sustained regression above that budget accepted without an explicit design
-choice. Aim for 2% or less through prepared templates and transaction reuse
-where the existing owner already establishes an enclosing transaction. These
-numbers are recommendations, not approved policy or new gates. A repeatable
-increase should first trigger preparation/profiling and simplification, not a
-new recurring test requirement. Preserve the current advisory checkpoint and
-report live-mode/build/runtime observations independently; do not offset a
-repeatable default slowdown with a noisy negative live delta.
+### Phase6 per-application profile
+
+[Profile evidence](../.context/dual-macro-phase6/profile/README.md) contains the
+instrumentation patch, three timed repeats, count-only controls, raw output
+hashes and summaries. All 67 translations retain their phase5 raw C/H output.
+The representative `defer-try-cleanup.x` has three applications, three try
+transactions and six producer calls. The middle total-duration sample is
+2.876 ms for snapshot plus application; this exact non-overlapping split is:
+
+| Work | Three applications, ms | Per application, ms | Share |
+| --- | ---: | ---: | ---: |
+| Current scope symbol Map copy | 1.151 | 0.384 | 40.0% |
+| Other transaction snapshot | 0.051 | 0.017 | 1.8% |
+| Macro_apply carrier construction | 0.002 | 0.001 | 0.1% |
+| x2c.template invocation rows | 0.268 | 0.089 | 9.3% |
+| Template replacement | 0.110 | 0.037 | 3.8% |
+| Skeleton binding excluding producers | 0.457 | 0.152 | 15.9% |
+| Two producer evaluations including native bodies | 0.090 | 0.030 | 3.1% |
+| Application residual: open projection, Match, freshening, bookkeeping | 0.747 | 0.249 | 26.0% |
+
+The native producer bodies account for 0.013 ms of their 0.090 ms evaluation
+cost. Inclusive application binding contains that evaluation; the table uses
+exclusive binding so it is not counted twice. Three fixture samples total
+2.733--2.924 ms. Scope copying is the largest individual part; the whole
+snapshot is 41.8% in the selected sample. Compiler-corpus median snapshot /
+application totals are 1.720 / 1.313 ms default and 2.541 / 1.397 ms live;
+separately calculated medians need not sum to a particular run's total.
+
+**Recommend one optimization: lazy first-write staging inside existing SymTxn
+and authoritative Sym mutation operations.** Avoid eagerly cloning untouched
+scope maps; preserve nested commit/rollback and borrowed Map identity. This
+must cover actual writes rather than skip snapshotting on a presumed pure
+call. Do not add a second transaction owner. Its saving is unmeasured: a write
+may still require the copy. It must retain the failing-skeleton proof.
+
+This profile does not time commit/rollback, region preparation, frame allocation
+or parse-time open preparation. Only two compiler-corpus applications contribute
+about 3 ms of measured default work, versus the earlier roughly 85 ms paired
+increase. Extended snapshots also run at 2119 ordinary transaction sites, not
+just two try sites; their contribution and other fixed costs are unclassified.
+Do not attribute the full +1.40% to try snapshots or promise to recover it by
+this optimization. Instrumentation overhead is not subtracted; no optimized
+candidate or three-lowering combined candidate was built.
+
+**Recommend knowingly raising the planning aim to 5% cumulative default
+translation overhead for the first three lowerings.** The existing 2% aim is
+not demonstrated achievable: try already consumes +1.40% default / +1.94%
+live and the measured per-try saving cannot explain that total. Three equal
+independent +1.40% costs would suggest about 4.2%, only a planning scenario,
+not a prediction; later workloads and shared fixed costs may differ. Keep 2%
+as an optimization aspiration, not a promised three-lowering target. These
+numbers are recommendations, not approved policy or new gates. Use the
+existing advisory performance checkpoint and report combined measured totals,
+including live and exception-heavy results separately.
 
 ## 7. Name, positions and sequences
 
@@ -868,7 +922,10 @@ Native String emission still has baseline caller-local shadow limitations.
 
 The freeze includes the four forms, the explicit `open` modifier, common
 slot-call result semantics, producer-attached `source`/`bound`/`lowered` stages
-and the producer table below. The stage marks belong to producer/application values;
+and the producer table below. Generated-header native references retain String
+callees and producer-declared result Types; general free-role extraction is
+required before any lowering other than try migrates. The stage marks belong
+to producer/application values;
 compiler lowering clients do not inspect them. Producers are implemented by
 the migration first needing them, not as an up-front family. In particular:
 
