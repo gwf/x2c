@@ -18,8 +18,10 @@ derivatives. Both files belong to the optional `autodiff` package in
 macros by their path, as `$(import "../src/autodiff.xmacro")` does in the
 package's own examples; the listings below write the short name. The
 package's [README](https://github.com/gwf/x2c/blob/main/packages/autodiff/README.md)
-lists its files and checks. For other specialized capabilities, see
-[Advanced Topics](../library/advanced-topics.md).
+lists its files and checks. Earlier releases shipped the macros with the
+compiler, imported as `import "autodiff";`; replace that line with the
+package path, such as `$(import "<path>/autodiff/src/autodiff.xmacro")`.
+For other specialized capabilities, see [Advanced Topics](../library/advanced-topics.md).
 
 ## Dual numbers
 

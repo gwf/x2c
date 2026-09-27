@@ -44,6 +44,11 @@ execution.
 
 ### Current work
 
+- [Native meta execution](native-meta-execution.md): every bodied `meta`
+  function runs natively through a cached project helper; implemented on
+  `meta-integration` and not yet on `dev`.
+- [Meta-integration mitigation](meta-integration-mitigation.md): repairs
+  the reviewed defects on `meta-integration` before it merges into `dev`.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.

@@ -1,37 +1,22 @@
 # Native meta execution: staging user meta code and removing the Lisp lowering
 
-> Status: needs author scoping - design spike, 2026-09-26. Nothing is
-> implemented. This records the mechanism, the removal list, and the
-> order of work so it can proceed in the background. Estimates are
-> deliberate overestimates of what becomes removable; each removal is
-> gated by the validation named beside it.
->
-> Step 1 prototype on spike/meta-staging: a unit's bodied `meta`
-> functions, `meta static` values, and type definitions (and those of an
-> imported `.xmacro`) stage as one module through `x2c build --kind
-> meta-module` in a child process, cached under
-> `$X2C_CACHE_DIR/meta/<digest>`, bound over their lowered forms at the
-> first `$` call. The lowering still runs first and remains the fallback.
-
-> Status 2026-09-26, spike/native-only: steps 1-3 landed. Every bodied
-> `meta` function runs natively; `src/comptime.x`, `etc/comptime.xlisp`,
-> `x2c_comptime_lower`, the generated built-in and binding Lisp, their x2c
-> sources, and `tools/gen-lisp-init.py` are gone. `src/stage.x` carries
-> arguments and results; the staging itself stays in `src/macros.x`. The
-> built-in macro and Lisp binding algorithms are `src/builtins.x`;
-> `etc/init.xlisp` is now hand-maintained Lisp (its natives were not moved
-> to `lib/lisp-init.x`). Remaining: the REPL still calls the deleted
-> lowering (`commands/repl`, step 5), and step 4 (evaluator) is untouched.
+> Status: implemented on `meta-integration` (1b23aaa7); landing on `dev`
+> waits for [meta-integration mitigation](meta-integration-mitigation.md).
+> Every bodied `meta` function runs natively. A project's meta functions
+> build once into a cached helper program that serves each `$` call; the
+> REPL stages each submission in process. The Lisp lowering,
+> `src/comptime.x`, and the generated built-in Lisp are gone. The opacity
+> item at the end was withdrawn by Gary on 2026-09-27. The sections below
+> record the design and its dated progress.
 
 ## Revised architecture (2026-09-26 pivot)
 
-> Status: design recorded; step 3 of the pivot not started. This section
-> supersedes "The mechanism" below wherever they differ. The staging
-> mechanism below was built on this branch, measured, and stress-tested;
-> it works at volume but mid-translation staging must forward every
-> declaration source into each module build, a crashing body killed the
-> compiler, `meta static` state split across cumulative restages, and the
-> cache key ignored included headers. Gary directed this replacement.
+This section supersedes "The mechanism" below wherever they differ.
+The staging mechanism below was built on this branch, measured, and stress-tested;
+it works at volume but mid-translation staging must forward every
+declaration source into each module build, a crashing body killed the
+compiler, `meta static` state split across cumulative restages, and the
+cache key ignored included headers. Gary directed this replacement.
 
 ### Two phases per project
 
@@ -486,4 +471,6 @@ drops address results such as closures. The REPL keeps in-process
 staging. Open: stale autodiff references in `examples` and `site`; the
 independent consolidation table; `src/stage.x` size (1326 lines).
 
-Open for landing on dev: make project-meta template results opaque so inspecting one errors (today they are placeholder Lists, documented as not for inspection; no current code inspects them).
+Withdrawn by Gary, 2026-09-27: make project-meta template results
+opaque so inspecting one errors. They stay placeholder Lists, documented
+as not for inspection; no current code inspects them.

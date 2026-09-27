@@ -162,8 +162,8 @@ semantics; it is not an additional publication gate.
 
 ## Basic benchmarks
 
-The optional runner compares the recursive interpreter with the word-machine
-shell in `examples/programs/lisp.x`. Run it from the repository root:
+The optional runner compares the recursive interpreter with the production
+Lisp shell in `examples/programs/lisp.x`. Run it from the repository root:
 
 ```sh
 python3 examples/programs/benchmark-reference-lisp.py --build
@@ -175,7 +175,7 @@ The five workloads cover startup, recursive Fibonacci, map/fold operations,
 captured closures, and runtime Lisp macros. Each sample verifies an expected
 result. The runner alternates execution order and reports median milliseconds
 from fresh processes, including startup, library initialization, reading,
-word-machine compilation, evaluation, and output. These measure complete CLI
+evaluation, and output. These measure complete CLI
 runs; they do not isolate evaluator speed. The startup baseline is reported
 separately, without subtracting it from the other measurements.
 

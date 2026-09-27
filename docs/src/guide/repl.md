@@ -166,7 +166,10 @@ Function-local `static`, `extern`, and `threaded` storage are also rejected:
 the evaluator cannot provide their native lifetime or linkage semantics.
 Records, typedefs, addressed locals and pointer reads/writes use native
 storage with layouts derived from compiler types. Record assignment copies
-into existing storage, preserving pointers to its fields. Other constructs
+into existing storage, preserving pointers to its fields. A session
+global record has an address, but a session global scalar does not:
+`&count` for an `int count` entered earlier is declined as the address
+of file-scope state. Copy the value into a local to take its address. Other constructs
 depend on the existing lowering and may be declined. Full
 native execution and reference/lifecycle parity are not established; for
 example, the evaluator loses the distinction between `Var void` and an

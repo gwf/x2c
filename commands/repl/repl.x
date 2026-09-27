@@ -226,7 +226,7 @@ static void _help(void) {
   _help_row("Ctrl-C", "Cancel the current input.", width);
   _help_row("Ctrl-D", "Exit from an empty line.", width);
   puts("\nOptions");
-  _help_row("--dump", "Print the typed AST.", width);
+  _help_row("--dump", "Print the typed AST and lowered Lisp.", width);
   _help_row("--stats", "Print runtime statistics at exit.", width);
   _help_row("--verbose-stats", "Print detailed statistics at exit.", width);
 }

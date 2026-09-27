@@ -1680,10 +1680,11 @@ not available.
 
 Marking a function `meta` has three consequences.
 
-- The function joins the translation unit's `meta` group. The first
-  compile-time call that reaches it compiles the group with the ordinary
-  backend and the configured C compiler, loads it into the compiler, and
-  calls it as native code; see
+- The function joins the project meta module. Before translation, the
+  compiler emits the bodied `meta` functions the inputs reach through the
+  ordinary backend, compiles them with the host C compiler (`--meta-cc`),
+  and links them into one cached helper program. Each `$` call runs in
+  that helper; see
   [How a meta function runs](../guide/meta-functions.md#how-a-meta-function-runs).
   It is callable during translation by `$name(args)` from an x2c body, and
   Lisp code can call it with `$(name args)`. Inside a `meta` body, `$f(x)`
@@ -1735,6 +1736,22 @@ Compile-time objects belong to the compiler. A file-scope variable that a
 `meta` body reads is the compiled group's own instance, initialized from the
 same source initializer; it is never the program's variable. A `meta static`
 value says so explicitly, and each unit gets its own instance.
+
+Native execution replaced the earlier in-process staging and the Lisp
+lowering of `meta` bodies, with these consequences:
+
+- A `meta` function defined by a macro expansion or a `$` call is an
+  error; one written in an ordinary `.x` file or an `.xmacro` file joins
+  the project meta module.
+- A project `meta` body receives compiler facts as arguments, such as
+  `Type` and `Source` parameters, and does not query the compiler.
+- A raise in a body is a diagnostic at the `$` call. A crash, exit, or
+  stack overflow ends the helper and is reported at the call; the
+  compiler continues. The Lisp step and depth budgets do not apply to a
+  native body; a call longer than `X2C_META_TIMEOUT` seconds (60 by
+  default) is stopped instead.
+- The autodiff macros moved to the `autodiff` package; see
+  [Automatic Differentiation](../guide/autodiff.md).
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
 every consuming unit; a `meta static` value gives each unit its own
