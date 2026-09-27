@@ -23,7 +23,7 @@ The built-in macros' compile-time algorithms.
 Returns the built-in macro algorithms by the names compile-time Lisp
 calls them.
 
-Source: `src/builtins.x:773`
+Source: `src/builtins.x:817`
 
 ## Design notes
 
@@ -31,5 +31,3 @@ Source: `src/builtins.x:773`
 functions, which run as native code inside the compiler. The compile-time
 Lisp in `etc/builtin-macros.xlisp` and `etc/lisp-bindings.xlisp` calls
 them by name; `builtin_targets` binds each into the shared session.
-The prototypes without a body are compiler operations `src/macros.x`
-defines.
