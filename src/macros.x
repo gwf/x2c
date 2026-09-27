@@ -2509,8 +2509,7 @@ static List _lisp_construction(Compiler compiler, String form) {
       if (name && name.type == <ident>) {
         List hole = _hole_record(compiler, Atom.intern(name.text));
         if (hole && hole.assoc(<kind>) == <unit>) {
-          Var binder = _replacement_binder(
-            hole.assoc(<binder>), "construction", 1);
+          Var binder = _hole_key(hole, "construction");
           if (!seen.contains(binder)) {
             seen[binder] = 1;
             construction.push(binder);
@@ -2535,15 +2534,10 @@ static List _parse_lisp_slot(
   Var target = compiler.macro_holes[%(target)];
   List construction = _lisp_construction(compiler, form);
   if (target is <list>) {
-    Var binder = target.list().assoc(<binder>);
-    if (role == <name>) {
-      Var required = _replacement_binder(binder, "construction", 1);
+    Var required = _hole_key(target, "construction");
+    if (role == <name>)
       construction = construction.append(%((target $required)));
-    }
-    else if (role == <unit>) {
-      Var required = _replacement_binder(binder, "construction", 1);
-      construction = construction.append(%($required));
-    }
+    else if (role == <unit>) construction = construction.append(%($required));
   }
   return %(
     macro-slot $splice $form
@@ -2772,10 +2766,29 @@ static void _file_scope_locals(List rows, Map locals) {
   }
 }
 
+/* Splice and construction projections are always Lists; return, declarator,
+   and member projections are always scalar; source, value, and expression
+   follow the hole's own cardinality. */
 static Atom _replacement_binder(Var binder, String projection, int seq) {
+  if (projection == "splice" || projection == "construction") seq = 1;
+  else if (projection == "return" || projection == "declarator" ||
+           projection == "member") seq = 0;
   String prefix = seq ? "*" : "?", name = binder.str();
   return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
 }
+
+static Atom _hole_key(List hole, String projection) =>
+  _replacement_binder(
+    hole.assoc(<binder>), projection, hole.assoc(<sequence>));
+
+/* A scalar capture has source, value, expression, and splice fields; a
+   sequence capture has source and value. Any Unit construction requirements
+   follow. Patterns and rows share this layout. */
+static List _capture_layout(
+  int sequence, List source, List value, List expression, List splice,
+  List trailing) =>
+  sequence ? %(capture $source $value @trailing)
+           : %(capture $source $value $expression $splice @trailing);
 
 /* A template binder names one lexical declaration, including its namespace.
    Its ordinal keeps same-spelled declarations distinct within a template. */
@@ -2871,49 +2884,33 @@ static Var _projection(Map binders, Var binder, Var otherwise) =>
 static List _capture_pattern(List hole, Map binders) {
   Var author = hole.assoc(<binder>);
   int sequence = hole.assoc(<sequence>);
-  Var source_binder = _replacement_binder(author, "source", sequence);
-  Var value_binder = _replacement_binder(author, "value", sequence);
-  Var expression_binder = _replacement_binder(
-    author, "expression", sequence);
-  Var splice_binder = _replacement_binder(author, "splice", 1);
   Var one = sequence ? <*>.var() : <?>.var();
-  Var source = _projection(binders, source_binder, one);
-  Var value = _projection(binders, value_binder, one);
-  Var expression = _projection(binders, expression_binder, one);
-  Var splice = _projection(binders, splice_binder, <*>);
-  if (!sequence && hole.assoc(<kind>) == <function>) {
-    Var result = _replacement_binder(author, "return", 0);
-    Var declarator = _replacement_binder(author, "declarator", 0);
+  Var source = _projection(binders, _hole_key(hole, "source"), one);
+  Var value = _projection(binders, _hole_key(hole, "value"), one);
+  Var expression = _projection(binders, _hole_key(hole, "expression"), one);
+  Var splice = _projection(binders, _hole_key(hole, "splice"), <*>);
+  if (!sequence && hole.assoc(<kind>) == <function>)
     value = %(
       !and $value
       (function
-        ${_projection(binders, result, <?>)}
-        ${_projection(binders, declarator, <?>)}
+        ${_projection(binders, _hole_key(hole, "return"), <?>)}
+        ${_projection(binders, _hole_key(hole, "declarator"), <?>)}
         ?)
     );
+  List trailing = NULL;
+  if (hole.assoc(<kind>) == <unit>) {
+    Var construction = _hole_key(hole, "construction");
+    int used = author in binders || construction in binders;
+    foreach (String role, %("source" "value" "splice"))
+      used |= _hole_key(hole, role) in binders;
+    if (used) trailing = %($construction);
   }
-  List source_pattern = %(
-    !and (source $author) (source $source)
-  );
-  List capture = sequence
-    ? %(
-      capture $source_pattern
-              (!and (value $value) (value $expression) (value $splice))
-    )
-    : %(
-      capture $source_pattern (value $value)
-              (expression $expression) (splice $splice)
-    );
-  Var construction = _replacement_binder(author, "construction", 1);
-  if (hole.assoc(<kind>) == <unit> &&
-      (author in binders ||
-       source_binder in binders ||
-       value_binder in binders ||
-       splice_binder in binders ||
-       construction in binders)) {
-    capture = capture.append(%($construction));
-  }
-  return capture;
+  return _capture_layout(
+    sequence,
+    %(!and (source $author) (source $source)),
+    sequence ? %(!and (value $value) (value $expression) (value $splice))
+             : %(value $value),
+    %(expression $expression), %(splice $splice), trailing);
 }
 
 static List _invocation_pattern(
@@ -2949,9 +2946,14 @@ static List _invocation_pattern(
    empty author name. */
 static List _forwarded_prefix_list(void) {
   Array prefixes = [];
+  Map seen = {};
   foreach (String projection, %("expression" "value" "source" "splice"))
-    for (int sequence = 0; sequence <= 1; sequence++)
-      prefixes.push(_replacement_binder(<?>, projection, sequence).str());
+    for (int sequence = 0; sequence <= 1; sequence++) {
+      String prefix = _replacement_binder(<?>, projection, sequence).str();
+      if (seen.contains(prefix)) continue;
+      seen[prefix] = 1;
+      prefixes.push(prefix);
+    }
   return prefixes.list_free();
 }
 
@@ -2977,25 +2979,17 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
   List hole = _hole_record(
     compiler, Atom.intern(spelling[prefix.len():]));
   if (!hole) return NULL;
-  Var author = hole.assoc(<binder>);
-  int sequence = hole.assoc(<sequence>);
-  Var source = _replacement_binder(author, "source", sequence);
-  if (hole.assoc(<kind>) == <unit>) {
-    Var construction = _replacement_binder(author, "construction", 1);
-    return %(
-      capture (source $source) (value $source)
-              (expression $source) (splice) $construction
-    );
-  }
+  Var source = _hole_key(hole, "source");
+  if (hole.assoc(<kind>) == <unit>)
+    return _capture_layout(
+      0, %(source $source), %(value $source), %(expression $source),
+      %(splice), %(${_hole_key(hole, "construction")}));
   if (hole.assoc(<kind>) != <expr> && hole.assoc(<kind>) != <name>)
     return NULL;
-  Var value = _replacement_binder(author, "value", sequence);
-  Var expression = _replacement_binder(author, "expression", sequence);
-  Var splice = _replacement_binder(author, "splice", 1);
-  return %(
-    capture (source $source) (value $value)
-            (expression $expression) (splice $splice)
-  );
+  return _capture_layout(
+    0, %(source $source), %(value ${_hole_key(hole, "value")}),
+    %(expression ${_hole_key(hole, "expression")}),
+    %(splice ${_hole_key(hole, "splice")}), NULL);
 }
 
 /* Capture rows keep exact source apart from syntax projections. Forwarding a
@@ -3024,11 +3018,9 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
       captured_sources.push(captured);
       values.push(_source_unwrap(captured));
     }
-    return %(
-      capture (source @{captured_sources.list_free()})
-              (value @{values.list_free()})
-              @{construction.list_free()}
-    );
+    return _capture_layout(
+      1, %(source @{captured_sources.list_free()}),
+      %(value @{values.list_free()}), NULL, NULL, construction.list_free());
   }
   Var value = _source_unwrap(source), expression = value;
   if (singular) {
@@ -3039,14 +3031,11 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
   }
   List values = value is <list> ? value : NULL;
   if (!singular)
-    return %(
-      capture (source @sources) (value @values)
-    );
-  return %(
-    capture (source $source) (value $value)
-            (expression $expression)
-            (splice @values)
-  );
+    return _capture_layout(
+      1, %(source @sources), %(value @values), NULL, NULL, NULL);
+  return _capture_layout(
+    0, %(source $source), %(value $value), %(expression $expression),
+    %(splice @values), NULL);
 }
 
 static List _sdk_template_call(Var stored, List values) {
@@ -3224,11 +3213,7 @@ static List _parse_hole(Compiler c, Symbol role) {
   int preserve_source = %(source $binder) in c.macro_holes;
   String projection = preserve_source ? "source" : splice ? "splice" :
     role in %(expression argument expr) ? "expression" : "value";
-  int list_binder = preserve_source
-                  ? binder.is_list_binder() : splice;
-  Atom replacement = _replacement_binder(
-    binder, projection, list_binder);
-  return %(macro-bind $replacement);
+  return %(macro-bind ${_hole_key(hole, projection)});
 }
 
 static int _lisp_splice_follows(Compiler compiler) =>
@@ -3642,11 +3627,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   List using_holes = using_binders.list_free();
 
   if (result_kind == <decorator> && target_kind == <function>) {
-    Var target_binder = target_hole.assoc(<binder>);
-    Var return_binder = _replacement_binder(
-      target_binder, "return", 0);
-    Var declarator_binder = _replacement_binder(
-      target_binder, "declarator", 0);
+    Var return_binder = _hole_key(target_hole, "return");
+    Var declarator_binder = _hole_key(target_hole, "declarator");
     match (replacement)
       case %(seq *body):
         replacement = %(
@@ -3675,8 +3657,7 @@ List Compiler.parse_macro_definition(Compiler c) {
      identity per literal spelling and reuse it throughout that expansion. */
   Map definition_bindings = {};
   if (target_hole && target_hole.assoc(<kind>) == <unit>) {
-    Var required = _replacement_binder(
-      target_hole.assoc(<binder>), "construction", 1);
+    Var required = _hole_key(target_hole, "construction");
     foreach (List parameter, parameters)
       if (parameter.assoc(<kind>) == <name>) {
         Var name = _replacement_binder(
@@ -3977,7 +3958,7 @@ static List _member_bindings(Compiler c, List parameters, List input) {
         c.semantic_binding_facts().try_get(
           %(source-spelling $value), spelling))
       value = spelling;
-    Var member = _replacement_binder(parameter.assoc(<binder>), "member", 0);
+    Var member = _hole_key(parameter, "member");
     bindings = cons(%($member $value), bindings);
   }
   return bindings;
@@ -3992,8 +3973,7 @@ List Compiler.try_parse_macro_member(Compiler c) {
   if (!slot || !hole || hole.assoc(<kind>) != <name> ||
       hole.assoc(<sequence>).int())
     return slot;
-  return %(macro-bind ${_replacement_binder(
-    hole.assoc(<binder>), "member", 0)});
+  return %(macro-bind ${_hole_key(hole, "member")});
 }
 
 static List _invocation_node(
