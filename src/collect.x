@@ -276,7 +276,9 @@ void Compiler.replay_included_package_imports(
   String canonical = _canonical_path(path);
   if (canonical in visited) return;
   visited[canonical] = 1;
-  foreach (Var part, _entry(c, canonical).car()) {
+  List entry = _entry(c, canonical);
+  if (!entry) return; // An unresolved C include has no collection entry.
+  foreach (Var part, entry.car()) {
     if (part is <map>) c.replay_package_imports(globs, part, 1);
     else if (part is <string>)
       c.replay_included_package_imports(globs, part, visited);
