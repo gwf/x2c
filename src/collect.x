@@ -146,6 +146,20 @@ void collect_forget_preload_entries(void) {
   preload_deferred = NULL;
 }
 
+/** Returns the canonical paths collected so far. */
+List collect_cached_paths(void) => _process_cache().keys();
+
+/** Drops the entries collected since `before` returned by
+    `collect_cached_paths`. A cached entry replays declarations, not the
+    compile-time effects of the file's imports, which the unit that walked
+    it installed in its own session. */
+void collect_forget_entries_since(List before) {
+  Map kept = {};
+  foreach (String path, before) kept[path] = 1;
+  foreach (String path, _process_cache().keys())
+    if (!(path in kept)) (void) _process_cache().del(path);
+}
+
 static Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
   Scope.push(&process_cache_scope);

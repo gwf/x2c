@@ -140,8 +140,8 @@ typedef struct Compiler {
      the lifetime check of a later `meta` function reads at its calls.
      `meta_hashes` maps each function definition to the hash of its text,
      which a `meta` definition and its copy linked into the compiler must
-     share. */
-  Map meta_comptime, meta_regions, meta_hashes;
+     share. `meta_calls` lists the names each `meta` definition references. */
+  Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro
      session the first time compile-time code calls it. */
@@ -307,6 +307,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.meta_comptime = owner.meta_comptime;
   compiler.meta_regions = owner.meta_regions;
   compiler.meta_hashes = owner.meta_hashes;
+  compiler.meta_calls = owner.meta_calls;
   compiler.native_meta = owner.native_meta;
 }
 
@@ -351,6 +352,7 @@ static Compiler _new(Compiler owner) {
     _.meta_comptime = {};
     _.meta_regions = {};
     _.meta_hashes = {};
+    _.meta_calls = {};
     _.native_meta = {};
     if (!owner) _.inherit_library_comptime();
     if (owner) {

@@ -1952,18 +1952,41 @@ static void _definition_source(
   }
 }
 
+/* Adds each name `node` references to `names`, once, in source order. */
+static void _referenced_names(Var node, Map seen, Array names) {
+  if (node is not <list>) return;
+  List syntax = node;
+  match (syntax)
+    case %(ident (binding ? ?(String name))): {
+      if (!(name in seen)) {
+        seen[name] = 1;
+        names.push(name);
+      }
+      return;
+    }
+  foreach (Var child, syntax) _referenced_names(child, seen, names);
+}
+
 /* Records the hash of a function definition's code tokens, from its first
-   token after any `meta` marker to the end of its body. A copy linked into
-   the compiler answers for a `meta` definition only when the hashes agree. */
-static void _record_meta_hash(Compiler c, List function, Token first) {
+   token after any `meta` marker to the end of its body, and the names the
+   body of a `meta` definition references. A copy linked into the compiler
+   answers for a `meta` definition only when the hashes of it and of every
+   definition it reaches agree. */
+static void _record_meta_hash(
+  Compiler c, List function, Token first, int meta) {
   uint64_t hash = 0xcbf29ce484222325ULL;
   for (Token token = first; token < c.token; token++)
     if (token.type != <space> && token.type != <comment> && token.len)
       hash = x2c_fnv_bytes(
         x2c_fnv_bytes(hash, token.text, token.text.len()), " ", 1);
   match (function)
-    case %(function ? (bind (binding ? ?(String name)) *) ?):
+    case %(function ? (bind (binding ? ?(String name)) *) ?body): {
       c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
+      if (!meta) return;
+      Array names = [];
+      _referenced_names(body, {}, names);
+      c.meta_calls[name] = names.list_free();
+    }
 }
 
 /* A macro expansion cannot produce a bodied `meta` function: the project
@@ -2083,7 +2106,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
     $let(c.meta_body, staged != NULL) {
       function = _finish_function_definition(c, decl);
     }
-    _record_meta_hash(c, function, definition_start);
+    _record_meta_hash(c, function, definition_start, meta != NULL);
     if (staged && !c.bind_linked_meta(
           function, decl.type_from_ast().canonicalize()))
       c.install_meta_function(function, staged);

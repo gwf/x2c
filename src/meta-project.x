@@ -456,10 +456,15 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     int lock = file_lock(%"$directory/lock", 1);
     defer close(lock);
     manifest = _meta_current(directory);
-    if (!manifest)
+    if (!manifest) {
+      /* The translation collects the files the build parsed again, so
+         their imports install into the translation's own session. */
+      List collected = collect_cached_paths();
       manifest = _meta_build(
         f, directory, imports, owners, reaches, modules, flags, t,
         include, identity);
+      collect_forget_entries_since(collected);
+    }
   }
   Map failures = {}, units = {}, groups = {};
   foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;

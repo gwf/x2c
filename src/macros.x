@@ -1914,6 +1914,25 @@ Map x2c_meta_definition_hashes(void) {
 static String linked_supplier = "<linked>";
 static Map linked_hashes = NULL;
 
+/* Whether the unit's definition `name` and every definition of the unit it
+   reaches through references are the texts compiled into the linked
+   copies, which freeze their callees into their own code. A reached
+   runtime builder without a hash is the runtime's own definition. */
+static int _linked_texts_match(
+  Compiler c, String name, Map linked, Map reached) {
+  Var hash, own, names;
+  if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
+  reached[name] = 1;
+  if (linked_hashes.try_get(name, hash)) {
+    if (!hash.equal(own)) return 0;
+  }
+  else if (!(name in linked)) return 0;
+  if (c.meta_calls.try_get(name, names))
+    foreach (String callee, (List) names)
+      if (!_linked_texts_match(c, callee, linked, reached)) return 0;
+  return 1;
+}
+
 /** Binds the bodied `meta` definition `fn`, of function type `type`, to the
     compiler's linked copy of it when the two definition texts hash the
     same, instead of staging it. Returns whether it did; an edited
@@ -1932,11 +1951,11 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   }
   /* A row without a hash is the runtime library's own compiled definition
      of a `lib/meta.x` builder, which has no copy to compare. */
-  Var hash, function, bound;
-  if (!((Map) native_modules[linked_supplier]).try_get(name, function))
-    return 0;
-  if (linked_hashes.try_get(name, hash)
-        ? !hash.equal(c.meta_hashes[name])
+  Map linked = native_modules[linked_supplier];
+  Var function, bound;
+  if (!linked.try_get(name, function)) return 0;
+  if (name in linked_hashes
+        ? !_linked_texts_match(c, name, linked, {})
         : !c.filename || Path.absolute(c.filename) !=
                            %"${x2c_get_root()}/lib/meta.x")
     return 0;
@@ -2400,7 +2419,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
         }
         values.push(c.meta_argument(argument, want, site, _meta_call_value));
       }
-      Var function;
+      Var function = void;
       if (!c.macro_lisp.try_get(name, function) &&
           c.bind_native_meta(name))
         c.macro_lisp.try_get(name, function);
@@ -2420,7 +2439,12 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
     %("only a call to a meta function runs at compile time"));
 }
 
-static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
+/* Evaluates the explicit meta call `expression` at `site`. The project
+   meta build's own parse leaves a project function's call for the
+   translation: an expression takes a placeholder, and a template `slot`,
+   which has none, is reported. */
+static Var _evaluate_meta_value(
+  Compiler c, List expression, Token site, int slot) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
@@ -2434,7 +2458,12 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   $let(macro_import_compiler, c)
   $let(macro_import_invocation, site) {
     try value = _meta_call_value(c, expression, site);
-    catch %(meta-later *): value = void;
+    catch %(meta-later *): {
+      value = void;
+      if (slot)
+        c.report_error(
+          <macro>, "this meta call is left for the translation", site, NULL);
+    }
     catch %(malformed (category ?category)):
       raise %(malformed (category $category));
     catch %(call-stack *):
@@ -2451,7 +2480,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
     boundary. */
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) {
-  Var value = _evaluate_meta_value(c, expression, site);
+  Var value = _evaluate_meta_value(c, expression, site, 0);
   if (value is void && c.meta_build)
     return %(expr (int) (literal (int) "0"));
   Type declared = expression.cadr();
@@ -2644,7 +2673,7 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
   String source_file = definition.assoc(<file>);
   Var required = slot.assoc(<construct>);
   Var result = form is <list>
-    ? _evaluate_meta_value(compiler, form, invocation)
+    ? _evaluate_meta_value(compiler, form, invocation, 1)
     : _eval_template_form(
       compiler, form, bindings, invocation, source_file, required);
   Var construction = slot.assoc(<target>);

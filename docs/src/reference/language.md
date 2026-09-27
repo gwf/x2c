@@ -1796,8 +1796,11 @@ function the unit has defined so far to a hash of its definition's code
 tokens, from the first token after any `meta` marker to the end of its
 body. The compiler carries native copies of the `meta` functions in the
 `.xmacro` files it ships (`src/linked-meta.x`, generated from them) and
-records their hashes with it. An imported `meta` definition whose hash matches a copy's runs as
-that copy; an edited one is compiled with the unit's group like any other.
+records their hashes with it. An imported `meta` definition runs as its
+copy when its hash, and the hash of every definition of the unit that it
+reaches through references, matches the copy's; an edited one, or one
+that reaches an edited definition, is compiled with the unit's group like
+any other.
 
 The code builders have `meta` bodies in `lib/meta.x`, shared by the x2c
 and Lisp functions. The literal builders, identifier, index, call and composite
