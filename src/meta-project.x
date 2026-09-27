@@ -104,10 +104,14 @@ static int _meta_scan(
       if (entry) packages[root] = 1;
       if (entry) _meta_scan(request, entry, imports, seen, packages);
     }
-    else if (token.type == <preproc> && word.startswith("#include \"") &&
-             word.endswith(".x\"")) {
-      String file = %"$directory/${word[10:word.len() - 1]}";
-      if (Path.is_file(file) && !_meta_owned(Path.absolute(file)))
+    else if (token.type == <preproc>) {
+      int angle = 0;
+      String target = preproc_include_target(word, angle);
+      String file = target && target.endswith(".x")
+        ? collect_resolve_include(
+            request.sources, request.include_dirs, directory, target, angle)
+        : NULL;
+      if (file && !_meta_owned(Path.absolute(file)))
         _meta_scan(request, Path.absolute(file), imports, seen, packages);
     }
   }
@@ -356,11 +360,33 @@ static List _meta_current(String directory) {
   try datum_read(text, cursor, manifest);
   catch %((!or incomplete malformed) *): return NULL;
   if (manifest is not <list>) return NULL;
+  /* A failure may come from a file the build could not read, such as a
+     missing header, which no digest covers; build again. */
+  if (((List) manifest).assoc(<failures>) ||
+      ((String) ((List) manifest).assoc(<failure>)).len())
+    return NULL;
   foreach (List row, ((List) manifest).assoc(<deps>)) {
     (String path, String digest) = row;
     if (_meta_digest(path) != digest) return NULL;
   }
   return manifest;
+}
+
+/* `cc_args` without the flags that select a target architecture, ABI, or
+   system root, since the helper runs on the host. */
+static List _meta_host_args(List cc_args) {
+  Array kept = [];
+  for (List rest = cc_args; rest; rest = rest.cdr()) {
+    String arg = rest.car();
+    if (arg == "-target" || arg == "--target" || arg == "-arch" ||
+        arg == "--sysroot" || arg == "-isysroot") {
+      if (rest.cdr()) rest = rest.cdr();
+    }
+    else if (!arg.startswith("--target=") && !arg.startswith("--sysroot=") &&
+             !arg.startswith("-m"))
+      kept.push(arg);
+  }
+  return kept.list();
 }
 
 /** Builds the helper that runs the project `meta` functions `inputs`
@@ -393,7 +419,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   /* A unit's group includes what the unit includes: the request's C
      directories and each imported package's headers. */
   List flags = %(@{f.request.include_dirs.map(%!(dir) => %("-I" $dir))
-                   .flatten()} @{f.request.cc_args});
+                   .flatten()} @{_meta_host_args(f.request.cc_args)});
   foreach (Var (root, _), packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
   Array modules = f.request.native_modules.map(

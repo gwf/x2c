@@ -111,6 +111,16 @@ static String _resolve_include(
     compiler.sources, compiler.include_dirs, includer_dir, target, angle,
     covered);
 
+/** The file the include of `target` from `includer_dir` names, searched as
+    collection searches `dirs`, or NULL. */
+String collect_resolve_include(
+  SourceView sources, List dirs, String includer_dir, String target,
+  int angle) {
+  int covered = 0;
+  return _resolve_include_dirs(
+    sources, dirs, includer_dir, target, angle, covered);
+}
+
 /* Process cache: canonical path ->
    `(ordered-parts hash definitions dependencies)`. A part is a declaration
    Map or an included source path. Dependencies map macro, Lisp, and

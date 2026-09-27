@@ -147,4 +147,60 @@ status=0
 grep -q "return 25222;" "$(find bd -name prog.c | head -1)" ||
   fail "meta built with --cc: $(cat out.log)"
 
+# A failed helper build is not reused: a header that was missing is found
+# once it exists.
+mkdir -p missing
+cat > missing/prog.x <<'EOF'
+#include "config.h"
+$(import "defs.xmacro")
+int value(void) { return $answer(); }
+EOF
+echo 'meta int answer(void) => ANSWER;' > missing/defs.xmacro
+"$X2C" translate --out-dir missing missing/prog.x >out.log 2>&1 &&
+  fail "a missing header translated"
+echo '#define ANSWER 42' > missing/config.h
+"$X2C" translate --out-dir missing missing/prog.x >out.log 2>&1 ||
+  fail "a failed helper build was reused: $(cat out.log)"
+grep -q "return 42;" missing/prog.c || fail "missing header: wrong value"
+
+# A header found through -I or spelled with spaces or tabs reaches the
+# meta code it imports.
+mkdir -p spell/inc
+echo 'meta int twice(int n) => n*2;' > spell/inc/defs.xmacro
+echo '$(import "defs.xmacro")' > spell/inc/bridge.x
+printf '#include "bridge.x"\nint value(void) { return $twice(4); }\n' \
+  > spell/via.x
+printf '#  include\t"bridge.x"\nint value(void) { return $twice(4); }\n' \
+  > spell/inc/spaced.x
+"$X2C" translate -I spell/inc --out-dir spell spell/via.x >out.log 2>&1 ||
+  fail "an include found through -I: $(cat out.log)"
+"$X2C" translate --out-dir spell spell/inc/spaced.x >out.log 2>&1 ||
+  fail "an include spelled with whitespace: $(cat out.log)"
+grep -q "return 8;" spell/via.c || fail "-I include: wrong value"
+grep -q "return 8;" spell/spaced.c || fail "spaced include: wrong value"
+
+# Target architecture flags do not reach the host helper.
+case "$(uname -s)/$(uname -m)" in
+  Darwin/arm64) target=x86_64-apple-darwin ;;
+  Darwin/x86_64) target=arm64-apple-darwin ;;
+  *) target= ;;
+esac
+if [ -n "$target" ]; then
+  printf 'meta int good(void) => 1;\nint n = $good();\n' > cross.x
+  "$X2C" build -c -Xcc "--target=$target" cross.x >out.log 2>&1 ||
+    fail "a target flag reached the helper: $(cat out.log)"
+fi
+
+# An installed support payload carries the helper's protocol loop.
+"$X2C" script "$ROOT/etc/x2c-payload.x" support home >out.log 2>&1 ||
+  fail "support payload: $(cat out.log)"
+mkdir -p home/bin
+cp "$X2C" home/bin/x2c
+cp "$(dirname "$X2C")/libx2c.a" home/lib/
+mkdir -p installed
+printf 'meta int good(void) => 1;\nint n = $good();\n' > installed/p.x
+env -u X2C_HOME home/bin/x2c translate --out-dir installed installed/p.x \
+  >out.log 2>&1 || fail "installed meta call: $(cat out.log)"
+grep -q "int n = 1;" installed/p.c || fail "installed meta call: wrong value"
+
 echo "meta cache key probes passed"
