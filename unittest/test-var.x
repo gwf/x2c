@@ -978,6 +978,7 @@ static void var_numeric_repr_prints_its_own_value(void) {
 static void var_repr_reads_back_for_reader_tags(void) {
   $test.scoped();
   Lisp lisp = Lisp.kernel();
+  defer lisp.destroy();
   Var sources[] = {
     Var.box_i32_bits((unsigned) -1), Var.box_i32_bits(65535u),
     Var.box_f64(0.1), Var.box_f64(1e-9), Var.box_f64(1e300),
