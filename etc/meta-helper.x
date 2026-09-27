@@ -289,7 +289,9 @@ static void _call(Map table, String name, List arguments) {
   try result = ((Func) target.pointer()).apply(count, argv);
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = %(error $message $notes);
-  catch %(?code *detail): failure = %(failure ${cons(code, detail)});
+  /* A catch binding is borrowed by the arm; the reply is written after. */
+  catch %(?code *detail):
+    failure = %(failure ${Error.snapshot(cons(code, detail))});
   foreach (List notice, helper_notices) _reply(notice);
   if (failure) {
     _reply(failure);
