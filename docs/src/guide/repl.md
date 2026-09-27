@@ -119,7 +119,9 @@ The current subset includes initialized simple variables, function
 definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
-and indexing are exercised by the focused checks.
+and indexing are exercised by the focused checks. Captured `Func` values
+can be called directly or passed to supported native callbacks. A record
+captured by value retains a copy through later submissions.
 
 The whole interpreter exposes the fixed-signature
 `String.format(String fmt, List values)` operation. Call it as
@@ -181,8 +183,10 @@ remain, both for failed initialization and failed statements.
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
 Long sessions do not have a bounded-memory guarantee. A one-million-step
-Lisp call budget interrupts runaway interpreted evaluation; native callbacks
-are not a preemptible sandbox.
+Lisp call budget interrupts runaway interpreted evaluation; once exhausted,
+no further interpreted code runs, including pending `defer` bodies. Ordinary
+evaluation failures still run those cleanups. The next submission gets a fresh
+budget. Native callbacks are not a preemptible sandbox.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status

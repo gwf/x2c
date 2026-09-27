@@ -74,7 +74,7 @@ Var lisp_record_result(Var source, long size) {
 }
 
 /** Copies a record, or a wide scalar's box, into storage the session owns,
-    for file-scope state. `size` is the record's size. */
+    for persistent state and captures. `size` is the record's size. */
 Var lisp_session_copy(Var source, long size) {
   if (source.is_wide())
     return Var.clone_wide(source).move_wide_to(Lisp.active().storage());

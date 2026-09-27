@@ -1147,6 +1147,10 @@ static void _catch_retain(ErrorHandler handle) {
 static void _catch_commit_captures(
   ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
   MatchCaptureBuffer *captures) {
+  if (handle.capture_values != NULL) {
+    handle.capture_values.free();
+    handle.capture_values = NULL;
+  }
   if (!layout || !layout.binder_count) return;
   int pushed = _scope_push(
     <alloc-fail>, "could not enter error scope for catch captures");

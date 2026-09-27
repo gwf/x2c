@@ -207,7 +207,7 @@ struct Lisp {
   Var *tail_values;     // its evaluated arguments, owned by the session
   int tail_count;
   long call_steps;      // calls made by the evaluation in progress, reset
-                        // at each public entry so a long translation is a
+                        // at each outer entry so a long translation is a
                         // sequence of budgets rather than one
   int call_exhausted;   // the budget ran out and no call may renew it until
                         // the public entry that opened it returns

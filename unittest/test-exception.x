@@ -685,6 +685,27 @@ static void filtered_catch_repeated_success_does_not_leak(void) {
 }
 
 
+static int _filtered_catch_replacement_once(void) {
+  int value = 0;
+  try {
+    defer raise %(invariant (value 2));
+    raise %(invariant (value 1));
+  }
+  catch %(invariant (value ?caught)): value = caught;
+  return value;
+}
+
+static void filtered_catch_replacement_releases_previous_captures(void) {
+  Error.initialize();
+  EXPECT_INT_EQ(_filtered_catch_replacement_once(), 2);
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 100; i++)
+    EXPECT_INT_EQ(_filtered_catch_replacement_once(), 2);
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+}
+
+
 $(import "test-macros.xmacro")
 
 void exception_suite(void) {
@@ -720,4 +741,5 @@ void exception_suite(void) {
   $test.run(error_regions_do_not_capture_application_pools);
   $test.run(filtered_catch_preserves_older_errors);
   $test.run(filtered_catch_repeated_success_does_not_leak);
+  $test.run(filtered_catch_replacement_releases_previous_captures);
 }

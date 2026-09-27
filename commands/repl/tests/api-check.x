@@ -279,6 +279,27 @@ static void _interpreter_ownership(ReplSession s) {
     }
   }
   _expect(s, "returned.x;", <value>, 23);
+  _expect(s,
+    "Func record_capture(void) { struct ReplPoint p={42}; "
+    "Func fn=%!(int y) => p.x+y; p.x=99; return fn; }", <defined>, void);
+  _expect(s, "Func captured_point=record_capture();", <executed>, void);
+  for (int i = 0; i < 20; i++) {
+    _expect(s, "make_point(99).x;", <value>, 99);
+    _expect(s, "%(1).map(captured_point);", <value>, %(43));
+  }
+  _expect(s, "int cleaned=0;", <executed>, void);
+  _expect(s, "int normal_cleanup(void) { defer cleaned+=1; return 1/0; }",
+          <defined>, void);
+  _expect(s, "normal_cleanup();", <failed>, void);
+  _expect(s, "cleaned;", <value>, 1);
+  _expect(s, "int budget_cleanup(void) { defer cleaned+=1; "
+             "while(1) {} return 0; }", <defined>, void);
+  s.evaluator.call_budget(100);
+  _expect(s, "budget_cleanup();", <failed>, void);
+  s.evaluator.call_budget(1000000);
+  _expect(s, "cleaned;", <value>, 1);
+  _expect(s, "normal_cleanup();", <failed>, void);
+  _expect(s, "cleaned;", <value>, 2);
   s.evaluator.eval_string(
     "(defun budget_loop (n) (if (= n 0) 7 "
     "(C.unwind (lambda () (budget_loop (- n 1))) (lambda () 0) nil)))");

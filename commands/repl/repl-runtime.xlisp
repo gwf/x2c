@@ -69,8 +69,8 @@
 (def C.record.result repl.native.lisp_record_result)
 (def C.session-copy repl.native.lisp_session_copy)
 (def C.source-function repl.native.lisp_source_function)
-// A block that holds a cleanup runs its body through this, so the cleanup
-// runs on every exit, including a raise.
+// Cleanup runs on ordinary exits and raises. An exhausted evaluation budget
+// prevents further interpreted code, including this cleanup.
 (defun C.unwind (body cleanup arguments)
   (repl.native.lisp_unwind body cleanup arguments))
 
@@ -83,11 +83,8 @@
 (defun C.index.set (p i size layout value)
   (C.poke p (* i size) layout value))
 
-// File-scope state, keyed by binding id. A unit-level initializer is not
-// part of the function, so an unwritten global reads as zero. The table
-// belongs to one translation unit, so the session that translates the unit
-// defines it rather than the shared library session. A record the table
-// holds lives in session bytes of its own.
+// Persistent submission values, keyed by compiler binding id. The table
+// belongs to this interpreter; records hold their own session-owned bytes.
 
 (defun C.gread (id)
   (if (eq? (Map.contains C._globals id) 0) 0
@@ -100,9 +97,6 @@
   (if (eq? (Map.contains C._globals id) 0)
       (C.gwrite id (C.session-copy value size))
       (C.copy (Map.getindex C._globals id) value size)))
-
-// An advertised meta value is an object in session bytes, separate from
-// compiler-only state, so its address is an ordinary typed pointer.
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.

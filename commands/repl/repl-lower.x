@@ -1089,8 +1089,8 @@ static Var _lower_operands(
   return _lower_decline(l, "unsupported operator arity");
 }
 
-/* Capture expressions run at construction, including loads from addressed
-   locals. The expression body has its own parameters and captures. */
+/* Captures run at construction. Record values copy into closure storage;
+   addressed scalars load their value before the source frame ends. */
 static Var _lower_lambda(Lowering l, List params, List held, Var body) {
   if (l.on_loop) return _lower_decline(l, "a lambda in a loop");
   match (body) case %(block *):
@@ -1109,9 +1109,16 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
   Array saved = $auto([]);
   foreach (List capture, held) {
     match (capture)
-      case %(capture (binding ?(int id) ?) ? ?source): {
+      case %(capture (binding ?(int id) ?) ?type ?source): {
         Var value = _lower_expr(l, source);
         if (_lower_failed(l, value)) return void;
+        if (_lower_record_type(l, type)) {
+          List layout = l.owner.type_layout(type);
+          if (!layout)
+            return _lower_decline(l, "a captured struct with no host layout");
+          (Var size) = layout.cddr();
+          value = %(C.session-copy $value $size);
+        }
         Var slot = _lower_name(l, "capture");
         captures.push(slot);
         captured.push(value);
