@@ -111,3 +111,44 @@ compiler pays today and the semantics are simplest:
 Bootstrap sequencing as the proposal says: the checked-in compiler must
 parse the new forms before `src/` uses them; step 1 needs an intermediate
 build.
+
+## Revision after the phase-3 status (2026-09-27)
+
+Phase 3 reports first-class macros, logical captures, hygienic recognition,
+staged construction, and retained-versus-expanded recognition each working
+in isolation, with an audited-return transformation executing end to end.
+Open: one combined helper, sequence captures through the combined path,
+mixed declaration/reference/member uses of a `Name` hole, source-location
+preservation during comparison, and definition-site reference transport
+across the helper boundary.
+
+That changes the order above. Recognition is no longer the risk, so the
+compiler-side work should not wait for it, and the first compiler targets
+should use only what is proved:
+
+1. **try/defer/catch lowering as source templates** (`src/transform.x:
+   2288-2417`). Construction only, fixed shape, Statement holes, introduced
+   locals. The one addition it needs is the open-template rule: free names
+   (`sigsetjmp`, `x2c_exception_push`, `ExceptionFrame`) resolve in the unit
+   being compiled, not where the compiler was built. Phase 3's "definition-
+   site reference transport" is the closed case of the same knob; the open
+   case is simpler and the compiler needs it first.
+2. **Wrapper-function synthesis** (`_callback_function`, `_build_func_
+   adapter`, protocol helpers). Same profile as 1 plus a Params or Decl
+   sequence hole; sequence construction is reported working.
+3. **`Func` call construct/recognize pair** (`src/expressions.x:1580,
+   1699`). Recognition with a variable argument count is a sequence capture
+   through the combined path, which is still open, so this waits for that
+   item. It is the right first recognizer once it lands.
+4. **Lambda shape** and user-facing source patterns: need the optional
+   `captures` sequence, source-location handling, and `Name` role
+   resolution. Last.
+5. **Macro-machinery deletions** (`_capture_pattern`/`_capture_row` merge,
+   `tpl-call`/`macro-invoke`/`x2c.template` collapse) fall out of building
+   the one combined helper; do them as part of that consolidation rather
+   than before it.
+
+Two things the compiler needs that the phase-3 list does not name: the
+open/closed knob for free names, and source-location preservation on the
+construction side (the compiler's lowerings must keep diagnostic positions
+even if comparison strips `at` wrappers). Both are small if decided now.
