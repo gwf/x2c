@@ -1272,7 +1272,7 @@ void generate_code(Compiler c, List ast, String dir) {
   try file_publish(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (failure) {
-    String reason = String.new(strerror((int) failure.assoc(<errno>)));
+    String reason = String.new(strerror((int) failure.assoc(<"errno">)));
     c.report_error(
       <emit>, "failed to write generated file", c.token,
       %("file: ${failure.assoc(<path>)}" "reason: $reason"));

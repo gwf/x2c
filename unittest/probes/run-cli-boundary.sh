@@ -1237,17 +1237,18 @@ ln -s real-name "$BUILD/starter/link-name"
 grep -Fxq '[target.link-name]' "$BUILD/starter/real-name/x2c.toml"
 
 # A build that keeps a build directory but cannot read its own fingerprint
-# treats that as a cache miss and builds.
+# treats that as a cache miss and builds. Without PATH, some host linkers
+# cannot find their own tools, so the build stops at the object.
 nostate="$BUILD/no-state"
 mkdir -p "$nostate"
 printf 'int main(void) { printf("built\\n"); return 0; }\n' \
   >"$nostate/hello.x"
-(cd "$nostate" && env -u PATH "$X2C" build --plain --build-dir bd \
-  --output out hello.x) >"$nostate/first.stdout" 2>"$nostate/first.stderr"
-[[ $("$nostate/out") == built ]]
-(cd "$nostate" && env -u PATH "$X2C" build --plain --build-dir bd \
-  --output out hello.x) >"$nostate/second.stdout" 2>"$nostate/second.stderr"
-[[ $("$nostate/out") == built ]]
+for run in first second; do
+  rm -f "$nostate/out.o"
+  (cd "$nostate" && env -u PATH "$X2C" build -c --plain --build-dir bd \
+    --output out.o hello.x) >"$nostate/$run.stdout" 2>"$nostate/$run.stderr"
+  [[ -s "$nostate/out.o" ]]
+done
 
 # A path holding a percent is a path, not a format.
 percent="$BUILD/percent"

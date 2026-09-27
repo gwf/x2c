@@ -206,7 +206,8 @@ void x2c_driver_error(const char *message) {
 void x2c_host_error(List detail) {
   Var subject = detail.assoc(<path>);
   if (subject is void) subject = detail.assoc(<program>);
-  long error = detail.assoc(<errno>);
+  // Quoted, the key survives a host preprocessor that expands `errno`.
+  long error = detail.assoc(<"errno">);
   x2c_driver_error(
     %"${detail.assoc(<operation>)} $subject: ${String.new(strerror(error))}");
 }
