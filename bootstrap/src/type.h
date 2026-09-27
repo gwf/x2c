@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "ast.h"
+#include "meta.h"
 typedef List Type;
 
 List Type_declaration_parts(Type type);

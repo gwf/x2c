@@ -5,16 +5,21 @@
 #ifndef __GUARD_0xD219AB39__
 #define __GUARD_0xD219AB39__
 
+#include "array.h"
+#include "atom.h"
 #include "common.h"
 #include "list.h"
 #include "match.h"
 #include "string.h"
 #include "symbol.h"
+#include "symbolset.h"
 typedef List Type;
 
 typedef List Source;
 
-List x2c_ident(String spelling);
+List type_base_suffix(List type);
+
+List type_declaration_parts(List type);
 
 List x2c_literal_string(String value);
 
