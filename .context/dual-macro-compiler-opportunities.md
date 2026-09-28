@@ -152,3 +152,22 @@ Two things the compiler needs that the phase-3 list does not name: the
 open/closed knob for free names, and source-location preservation on the
 construction side (the compiler's lowerings must keep diagnostic positions
 even if comparison strips `at` wrappers). Both are small if decided now.
+
+## Core support delivered to dual-macro-core (2026-09-28)
+
+Branch a9170d3b on top of dev fef41c5f. Two decisions the plan left open:
+
+1. Open free references need no definition-time role table. A parsed
+   template already carries binding records with their types for every
+   definition-site reference; holes and introduced locals are binders, not
+   records. So the application walks the template: a record whose name
+   resolves in the target's base scope rebinds to it, a function-typed
+   record that does not resolve becomes a native String call with the
+   record's result type, and a typedef base resolves through the base
+   scopes to its target type. This reuses the import rebinding path.
+2. The application boundary is the m-invoke macro-invoke node produced by
+   Macro_apply. That node's bind_syntax case arms macro_application and
+   owns the transaction, so effects roll back with the application and
+   ordinary expansions never pay for the extended snapshot.
+
+Gate not yet run on this branch; see the handoff prompt in the session.
