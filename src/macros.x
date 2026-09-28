@@ -3156,6 +3156,7 @@ static List _lisp_bindings(List bindings) {
 static String _kind_spelling(Symbol kind) {
   if (kind == <block-item>) return "Statement";
   if (kind == <map-entry>) return "Entry";
+  if (kind == <match-row>) return "MatchRow";
   if (kind == <named-type>) return "NamedType";
   if (kind == <decl-unit>) return "Declaration";
   return kind.str().capitalize();
@@ -3163,13 +3164,14 @@ static String _kind_spelling(Symbol kind) {
 
 static const SymbolSet author_kinds =
   %<<expr type decl function name literal param block field enumerator
-     map-entry unit named-type catch captures>>;
+     map-entry unit named-type catch captures match-row>>;
 
 static Symbol _author_kind(String spelling) {
   Symbol kind = Symbol.new(spelling);
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <namedtype>) return <named-type>;
+  if (kind == <matchrow>) return <match-row>;
   return kind in author_kinds ? kind : 0;
 }
 
@@ -3316,7 +3318,7 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
 static const SymbolSet declaration_roles =
   %<<field enumerator map-entry unit>>;
 static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit catch>>;
+  %<<argument block field enumerator map-entry param unit catch match-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 
 /** Parses a macro hole or Lisp slot for `role` while reading a template.
@@ -4057,6 +4059,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
     case <field>: return c.parse_field(%(struct ()));
     case <enumerator>: return c.parse_enumerator(c.aggregate_type);
     case <map-entry>: return c.parse_map_entry();
+    case <match-row>: return c.parse_match_row_argument();
     case <unit>: return c.parse_top_level();
     case <name>: {
       if (c.macro_holes && c.peek(0) == <$>)
@@ -4106,6 +4109,9 @@ static List _invocation_arguments(
         c.token, NULL);
     if (c.peek(0) != <)>) {
       loop {
+        if (kind == <match-row> && c.token != c.directives_taken)
+          foreach (List directive, c.leading_preproc())
+            captured.push(directive);
         Token first = c.token;
         Var argument = _parse_argument(c, kind);
         if (kind != <name>)
@@ -4114,6 +4120,9 @@ static List _invocation_arguments(
         if (!sequence || !c.test(<,>)) break;
       }
     }
+    if (kind == <match-row> && c.token != c.directives_taken)
+      foreach (List directive, c.leading_preproc())
+        captured.push(directive);
     List capture = _capture_row(c, hole, captured.list_free());
     arguments.push(capture);
     /* `in` may separate a declaration from what follows, as in

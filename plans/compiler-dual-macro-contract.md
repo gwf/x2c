@@ -3600,7 +3600,7 @@ body remain distinct fields. Patterns are ordinary Match data expressions,
 not a new AST syntax-variable language. Guarded marks control flow after
 source guard rewriting and must not be dropped in a lowered-stage match.
 
-#### Proposed complete match-row hole (plan only)
+#### Complete match-row hole (capability implemented; adoption pending)
 
 `match-arm-directive` has a guarded `case %(big ?n) if (...)` between ordinary
 arms, with `#ifdef`/`#else` rows and conditional defaults. Today
@@ -3642,7 +3642,7 @@ case %(match ?subject ?cases): {
 }
 ```
 
-Add one `MatchRow` argument kind, whose sequence spelling is
+The `MatchRow` argument kind has sequence spelling
 `MatchRow $rows...`. Its sole template slot is a match arm list:
 
 ```x2c
@@ -3674,29 +3674,30 @@ Ownership: `statements.x` parses source arms, typed captures, guards,
 directives, and conditional-default diagnostics. `macros.x` registers the
 kind, accepts its sequence argument and template slot, and projects complete
 rows for structural recognition and unchanged construction. `parse.x` keeps
-the existing `bind_syntax` arm loop and scope behavior; the shared grammar
-macro replaces only the outer raw match recognition after the projection is
-proved. `transform.x` still derives match binder records, and `emit.x` still
+the existing `bind_syntax` arm loop and scope behavior; adopting the shared
+grammar macro for its outer raw match recognition remains separate.
+`transform.x` still derives match binder records, and `emit.x` still
 uses `guarded` to choose retry/fallthrough emission. Constructed canonical
 AST Lists remain accepted by structure, as the language reference promises.
 
-Proof before adoption: show that `$matched` captures the full ordered rows of
-`match-arm-directive` and `match-typed-guards`, including the directive rows,
-typed-capture wrappers, and `guarded` marker, without a parallel raw case.
-Run the two focused fixtures and compare their checked stdout, the
-`match-arm-directive` C sidecar, and diagnostics where present; inspect
-transform output or an inert AST dump
-for exact row and binding identity. Add only a focused fixture if those two
-do not exercise an essential projection. Stop if a row requires source
-reconstruction, a second binder, or fallback recognition. Review the authored
-diff for duplicated parsing or validation before publication validation.
+Capability proof: an inert probe beside the fixtures captured all six
+directive-rich rows and both typed guarded/default rows. `List.compare`
+matched the original rows and a pending template call, and ordinary expansion
+ran both guarded forms; its output was `6 2 4 9 9 9`. The existing
+`match-arm-directive` and `match-typed-guards` fixtures passed. Their transform
+dumps matched the pre-edit compiler byte for byte; the former's checked C
+sidecar and the latter's C/H against the unchanged bootstrap compiler also
+matched. Both fixture diagnostics were empty. No recurring fixture was added.
+Before binder adoption, repeat exact row and binding comparison in that
+client, and stop if it needs reconstruction, a second binder, or fallback
+recognition.
 
 Design review: a `Statement` body hole loses the arm pattern and guard, while
 an `Expr` pattern plus fixed body can cover only a fixed arm layout. One
 opaque row sequence uses the existing parse/bind owners and avoids parallel
 semantics. Its cost is a new grammar slot and capture kind, so adopt it only
 if the focused proof shows exact projection across guarded and interleaved
-rows. This draft does not authorize an implementation or a new gate.
+rows. Gary approved the capability; binder adoption remains a separate step.
 
 ### Compile-time source items (parse.x:1760-1775,2717-2735;
 ### protocol.x:150-154, 525-558,2350-2567; macros.x:3370-3390)

@@ -379,6 +379,9 @@ error:
     c.token, %( "token:" ${c.token.text} ));
 }
 
+/** Parses one MatchRow macro argument with the ordinary match-arm owner. */
+List Compiler.parse_match_row_argument(Compiler c) => _match_case(c);
+
 /* A default arm must be last in each preprocessor configuration. `groups`
    holds, per open conditional group, whether a default preceded the group
    and whether one ended any of its branches; `saw_default` is the state of
@@ -406,6 +409,12 @@ static List _match_cases(Compiler c) {
         cases.push(directive);
         saw_default = _default_after_directive(groups, saw_default, directive);
       }
+    List hole = c.try_parse_macro_slot(<match-row>);
+    if (hole) {
+      cases.push(hole);
+      peek = c.peek(0);
+      continue;
+    }
     if (peek != <case> && peek != <default>) break;
     if (saw_default)
       c.report_error(
