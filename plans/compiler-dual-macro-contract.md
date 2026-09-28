@@ -4,7 +4,7 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> finish lambda publication, then defer.
+> repair the generated aggregate binding boundary before adopting defer.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -53,6 +53,52 @@ architecture. File merging is not an objective by itself. Routine decisions
 belong to the orchestrator; bring Gary consequential unresolved semantics,
 compatibility or architectural tradeoffs with concrete examples and evidence.
 This discussion authorizes the survey/proposal, not speculative file moves.
+
+## Resume checkpoint (2026-09-28, usage reserve)
+
+Lambda recognition/construction is published at `c99dd68d`; its gate passed
+and the single five-pair cost run is recorded below. Prerequisites published
+at `799875a8`. No timing is due again for either batch. The budget reached
+5% remaining while preparing defer; new workers use Sol medium.
+
+Defer is an unlanded draft, not a successful migration:
+
+- Worktree: `/Users/gary/.codex/worktrees/grammar-survey/x2c`.
+- Branch: `codex/defer-record-template`; draft commit `52fcc586`.
+- Grammar dependency: `7c52d0f5`, equivalent to primary `aa93eb1a`.
+- The draft removes `_defer_block`, adds adjacent templates/two slots,
+  retains cleanup as lowered code, and recognizes unary defer through
+  `$deferred`. Helper/environment synthesis remains for its own batch.
+- Final `make build` and four focused fixture compilation/runtime runs pass.
+  There was no gate, push or timing for this draft. Those passes do not make
+  it acceptable: `defer-only-cleanup.transform` contains an empty member
+  expression type in the generated capture-address assignment (lines 19--24).
+  The draft's rebaselined sidecars expose this defect; do not accept them as
+  correct expectations or blindly publish the commit.
+
+The ordinary binder rejects the generated struct tag as a reserved spelling.
+Supplying the existing binding identity allows declaration publication, but
+field registration uses `(struct BINDING)` while the semantic typedef/member
+lookup reaches `(struct SPELLING)`. The parent verified the empty expression
+in the committed transform artifact and inspected the aggregate publication
+and name owners. The precise repair is not decided. A shallow-mode experiment
+was discarded; no workaround or parallel registry remains.
+
+Next: reproduce this identity/tag/member mismatch in a focused aggregate
+binding case, fix its canonical owner as a separate capability batch, and
+land it before resuming defer adoption. Review `_finish_aggregate_type` and
+`_publish_aggregate_type` in parse.x, `Compiler.aggregate_name` and semantic
+typedef resolution in compiler.x, and existing Sym field lookup. Do not
+weaken the reserved-name rule or add a second metadata registry. Rebase the
+saved defer draft afterward, restore correct field types, review intentional
+C changes, then use its one publication gate and one five-pair cost run.
+
+The primary checkout `/Users/gary/.codex/worktrees/2fee/x2c` retains the
+standalone grammar addition at `aa93eb1a` plus plan checkpoints. This
+handoff/ledger publication intentionally contains only documentation; the
+unvalidated source draft is kept in its isolated local branch. No worker
+remains responsible for completing it unattended. Resume orchestration
+explicitly from this checkpoint rather than waiting for a worker wakeup.
 
 ## Verified checkpoint and remaining sequence
 
