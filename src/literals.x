@@ -11,7 +11,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
-$(import "grammar.xmacro")
+$(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
 #include "expressions.x"

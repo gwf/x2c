@@ -1,6 +1,6 @@
 # Raw-symbol translation of macros.x
 
-> Status: repair verified in a local checkpoint from dev `89da87d0`;
+> Status: both repairs verified in local checkpoints from dev `89da87d0`;
 > publication validation remains with the integrating worktree.
 > The explicit raw-symbol sweep remains optional; this record adds no gate.
 
@@ -75,13 +75,26 @@ succeeds. Running that source alone reproduces the same CPP/raw result. The
 source and import owner are outside this prototype move, so the sweep remains
 red for that separate import-path issue. No exclusions or sweep flags changed.
 
+That failure also reproduces on an unmodified `89da87d0` archive built with
+`make build-safe`: focused CPP translation exits 1 with path
+`unittest/grammar.xmacro`, while raw translation exits 0. The import is in
+`src/literals.x`, reached through the included compiler source.
+`_canonical_path` resolves a relative macro import against the
+current compiler filename or import stack. The CPP-flattened input therefore
+uses the `unittest/` unit directory. Changing that one import to the canonical
+`../src/grammar.xmacro` spelling already used by the other compiler clients
+fixes the focused CPP translation. In the disposable baseline archive, raw
+and CPP then produced byte-identical C/H, and the raw C/H did not change from
+before the path correction. On the authored tree, the same focused parity
+check passes after `make build`.
+
 Logs in `/Users/gary/.codex/worktrees/d40d/x2c/debug/`:
 `raw-symbol-followup.log`, `raw-symbol-relative.log`,
 `raw-symbol-absolute.log`, and `raw-symbol-cpp.log`.
 
-Integrate and use the ordinary final-tree gate. Investigate the sweep's
-separate CPP import-path failure under its existing optional contract; keep
-its expected contract and exclusions unchanged.
+Integrate and use the ordinary final-tree gate. The complete optional sweep
+has not been rerun after the independent path correction; keep its expected
+contract and exclusions unchanged.
 
 ## Plan review
 
