@@ -750,6 +750,7 @@ static List _meta_data(Compiler c, Var value){
 
 }
 
+List Compiler_macro_value_literal(Compiler, List);
 Var List_caddr(List);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 Type Type_scalar(Type);
@@ -762,7 +763,7 @@ String Symbol_str(Symbol);
 Symbol Var_symbol(Var);
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _meta_refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : _meta_value_type(value);  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _329)){
-    List expression = Compiler_cache_literal_list(c, Var_list(value));  return cons(_0, cons(_264, cons(List_caddr(expression), NULL)));
+    List expression = Compiler_macro_value_literal(c, Var_list(value));  return cons(_0, cons(_264, cons(List_caddr(expression), NULL)));
   }
   if(Sym_is_var_type(c -> sym, type)) type = List_type(_108);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _108){
     type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  if(Type_scalar(type) == _232){

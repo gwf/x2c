@@ -189,6 +189,8 @@ List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_parse_macro_definition(Compiler c);
 
+List Compiler_macro_value_literal(Compiler c, List value);
+
 List Compiler_try_parse_macro_pattern(Compiler c);
 
 List Compiler_capture_macro_value(Compiler c, List definition);
