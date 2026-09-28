@@ -50,7 +50,7 @@ Recognizes code built by `t`, whether retained as a pending
 invocation or already expanded, and publishes the captures under
 `names`. Generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:464`
+Source: `lib/meta.x:465`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -60,7 +60,7 @@ Source: `lib/meta.x:464`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture` over the match subject.
 
-Source: `lib/meta.x:484`
+Source: `lib/meta.x:485`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -80,7 +80,7 @@ Source: `lib/meta.x:150`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/meta.x:260`
+Source: `lib/meta.x:261`
 
 #### type_base_suffix
 
@@ -107,7 +107,7 @@ Source: `lib/meta.x:78`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:534`
+Source: `lib/meta.x:535`
 
 #### x2c_expr_call
 
@@ -116,7 +116,7 @@ Source: `lib/meta.x:534`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:508`
+Source: `lib/meta.x:509`
 
 #### x2c_expr_composite
 
@@ -125,7 +125,7 @@ Source: `lib/meta.x:508`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:513`
+Source: `lib/meta.x:514`
 
 #### x2c_expr_ident
 
@@ -134,7 +134,7 @@ Source: `lib/meta.x:513`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:494`
+Source: `lib/meta.x:495`
 
 #### x2c_expr_index
 
@@ -142,7 +142,7 @@ Source: `lib/meta.x:494`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:497`
+Source: `lib/meta.x:498`
 
 #### x2c_function_body
 
@@ -150,7 +150,7 @@ Source: `lib/meta.x:497`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:588`
+Source: `lib/meta.x:589`
 
 #### x2c_literal_int
 
@@ -184,7 +184,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:596`
+Source: `lib/meta.x:597`
 
 #### x2c_stmnt_make
 
@@ -192,7 +192,7 @@ Source: `lib/meta.x:596`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:528`
+Source: `lib/meta.x:529`
 
 #### x2c_stmnt_return
 
@@ -200,7 +200,7 @@ Source: `lib/meta.x:528`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:531`
+Source: `lib/meta.x:532`
 
 ## Public types
 
@@ -229,7 +229,7 @@ Source: `lib/meta.x:138`
 Records the machine slots that hold a macro's fixed locals, so a
 repeated slot compares those locals by identity during recognition.
 
-Source: `lib/meta.x:324`
+Source: `lib/meta.x:325`
 
 <a id="Source"></a>
 ### Source

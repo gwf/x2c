@@ -316,14 +316,11 @@ Thin evidence and follow-ups:
   matters in the REPL and the editor adapter, which recover and continue;
   the try migration should add the rollback test there or in its own
   recoverable context.
-- A raw binder atom that reaches the emitter, as from a malformed
-  constructed carrier, loops in `Emitter__match_site_call` (C spelling) instead of
-  reporting a diagnostic.
-- A `Macro` literal in generated C carries its definition's binding
-  numbers. They are consistent within one translation, but raw and CPP
-  symbol collection number bindings differently, so the raw symbol sweep
-  excludes `macro-early`, `macro-effects` and `macro-open`. Stable output
-  across collection modes would need binding references that do not
-  depend on global numbering.
+- Resolved on 2026-09-27: a carrier whose code keeps an unreplaced binder
+  is reported as an unbound replacement variable at the application.
+- Resolved on 2026-09-27: a cached `Macro` value names its references by
+  spelling, and application rebinds them in the applying unit's global
+  scope, so raw and CPP symbol collection emit the same C. Recognition
+  matches those references by spelling.
 - Two clang-only `cc-stderr` sidecars in the regression set fail on Linux
   hosts, as they did before this change.

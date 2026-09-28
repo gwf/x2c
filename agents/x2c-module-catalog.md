@@ -310,13 +310,13 @@ Public functions:
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
 `x2c_template_call`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.try_parse_macro_pattern`,
-`Compiler.capture_macro_value`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
-`Compiler.macro_invocation_site`, `Compiler.take_code_value`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.parse_macro_definition`, `Compiler.macro_value_literal`,
+`Compiler.try_parse_macro_pattern`, `Compiler.capture_macro_value`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
+`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
+`Compiler.take_code_value`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 

@@ -50,10 +50,28 @@ meta static List doubled(List code) {
 }
 macro Expression $twice(Expr $code) => $doubled($code);
 
+/* A value whose body calls a global recognizes the expanded call and binds
+   the callee again where it is applied. */
+static int bump(int value) { return value + 1; }
+macro Expression $inc(Expr $value) => bump($value);
+meta static List increment_operand(List code) {
+  match (code) {
+    case $inc(?value): return value;
+  }
+  return code;
+}
+meta static List increment(List code) {
+  Macro inc = $inc;
+  return inc(code);
+}
+macro Expression $inc_operand(Expr $code) => $increment_operand($code);
+macro Expression $inc_again(Expr $code) => $increment($code);
+
 int main(void) {
   int price = 19, tax = 23;
   printf("%d\n", $stage_cases(price, tax, $sum(price, tax)));
   printf("%d\n", $left_of(price + tax));
   printf("%d\n", $twice(tax));
+  printf("%d %d\n", $inc_operand($inc(price)), $inc_again(price));
   return 0;
 }

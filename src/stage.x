@@ -285,7 +285,7 @@ List Compiler.meta_value_expression(
   if (value is not <list>) _meta_refuse(c, value, site);
   Type type = declared ? declared : _meta_value_type(value);
   if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
-    List expression = c.cache_literal_list(value);
+    List expression = c.macro_value_literal(value);
     return %(expr ("Macro") ${expression.caddr()});
   }
   if (c.sym.is_var_type(type)) type = %("Var");

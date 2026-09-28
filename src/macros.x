@@ -3745,12 +3745,54 @@ List Compiler.parse_macro_definition(Compiler c) {
   return definition;
 }
 
+/* A Macro value names its references by spelling, so its literal does not
+   depend on how this translation numbered bindings. */
+static Var _macro_value_names(Var value) {
+  if (value is not <list>) return value;
+  String spelling = NULL;
+  if (binding_identity_try_parts(value, NULL, spelling))
+    return %(binding-name $spelling);
+  Array parts = $auto([]);
+  int changed = 0;
+  foreach (Var child, value.list()) {
+    Var part = _macro_value_names(child);
+    changed |= part != child;
+    parts.push(part);
+  }
+  return changed ? parts.list().var() : value;
+}
+
+/** Returns the literal expression that carries `value`, a macro definition
+    or one of its references, as run-time data. */
+List Compiler.macro_value_literal(Compiler c, List value) =>
+  c.cache_literal_list(_macro_value_names(value));
+
+/* An applied Macro value binds each named reference in the applying unit's
+   global scope, as a cached import does. Child template calls keep their
+   names, which match the value's captured children. */
+static Var _macro_value_bindings(Compiler c, Var value) {
+  if (value is not <list>) return value;
+  match (value) {
+    case %(binding-name ?(String spelling)):
+      return c.sym.reference_global(%($spelling));
+    case %(tpl-call *): return value;
+  }
+  Array parts = $auto([]);
+  int changed = 0;
+  foreach (Var child, value.list()) {
+    Var part = _macro_value_bindings(c, child);
+    changed |= part != child;
+    parts.push(part);
+  }
+  return changed ? parts.list().var() : value;
+}
+
 /** Returns the visible global macro `name` as a `Macro` value. */
 static List _macro_value(Compiler c, Atom name) {
   Var stored;
   if (c.macro_holes && _hole_record(c, name)) return NULL;
   if (!_try_definition(c, name, 1, stored)) return NULL;
-  List cached = c.cache_literal_list(stored);
+  List cached = c.macro_value_literal(stored);
   return %(expr ("Macro") ${cached.caddr()});
 }
 
@@ -3798,14 +3840,14 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     application applies the same children.
 */
 List Compiler.capture_macro_value(Compiler c, List definition) {
-  List cached = c.cache_literal_list(definition);
+  List cached = c.macro_value_literal(definition);
   List literal = %(expr ("Macro") ${cached.caddr()});
   List rows = %(expr ("List") (nil));
   int captured = 0;
   foreach (List binding, definition.assoc(<captures>).list()) {
     Type type = c.semantic_binding_facts()[%(type $binding)];
     if (!c.sym.is_named_value_type(type, "Macro")) continue;
-    List identity = c.cache_literal_list(binding);
+    List identity = c.macro_value_literal(binding);
     List value = c.resolve_expression(
       %(expr $type (ident $binding)), c.token);
     List pair = %(expr ("List")
@@ -4178,6 +4220,20 @@ static List _template(Compiler c, List definition) {
   return template.search_replace(%(at m-origin ?node), <?node>);
 }
 
+/* Returns a binder left in carrier code after its effects were applied, or
+   NULL. Pending macro applications keep their own binders. */
+static Var _carrier_binder(Var value) {
+  if (value.is_binder()) return value;
+  if (value is not <list>) return NULL;
+  match (value)
+    case %((!or "x2c.template" macro-invoke macrodef) *): return NULL;
+  foreach (Var child, value.list()) {
+    Var binder = _carrier_binder(child);
+    if (binder) return binder;
+  }
+  return NULL;
+}
+
 /** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
     into a macro value application. Effects are applied in order under the
     application's transaction, and their tokens are replaced in the code.
@@ -4209,6 +4265,13 @@ int Compiler.take_code_value(
       }
     }
     value = _replace_definition_bindings(code, replacements);
+    Var binder = _carrier_binder(value);
+    if (binder) {
+      String spelling = binder.str();
+      c.report_error(
+        <parse>, %"unbound replacement variable '$spelling'",
+        c.token, NULL);
+    }
     retained = stage != "source";
     return 1;
   }
@@ -4230,7 +4293,7 @@ List Compiler.expand_macro_invocation_node(
   else match (stored)
     case %(local-macro (!is ?name type atom)):
       definition = c.sym.lookup_macro(name);
-  if (!definition) definition = stored;
+  if (!definition) definition = _macro_value_bindings(c, stored);
   List input = arguments;
   with c {
     int block_scope = definition.assoc(<kind>) == <decorator> &&

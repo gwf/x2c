@@ -240,6 +240,7 @@ static Var _macro_pattern_view(Var value) {
       return %(expr ? ${_macro_pattern_view(body)});
     }
     case %(literal *): return %(!quote $node);
+    case %(binding-name ?name): return %(binding ? $name);
     case %(op ?operator *operands): {
       Array parts = [];
       foreach (Var operand, operands)
@@ -283,8 +284,8 @@ List Macro_pattern(Macro t, List names) {
 
 /* --- recognition with binding hygiene ------------------------------------
    Declarations the body introduces match any identity in the subject, one
-   distinct identity per declaration; other references keep their exact
-   identities. Source wrappers are removed from both sides for comparison,
+   distinct identity per declaration; other references match the
+   subject's binding of the same spelling. Source wrappers are removed from both sides for comparison,
    while captured values keep the subject's original subtrees. */
 
 static Atom _macro_fixed(int index) => Atom.intern(%"?__fixed_$index");
