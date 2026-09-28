@@ -2396,6 +2396,20 @@ Var Compiler.macro_value_syntax(Compiler c, Var value) =>
    context holds the function's name, to a call in the project's helper,
    or in the REPL to a call of the group's native code, which the first
    call stages and binds under the name. */
+/* Records each binding in `value` that is the unit's base-scope binding
+   of its spelling, for recognition in a compile-time call. */
+static void _subject_globals(Compiler c, Var value, Map globals) {
+  if (value is not <list>) return;
+  String spelling = NULL;
+  if (binding_identity_try_parts(value, NULL, spelling)) {
+    List global = c.sym.resolve_global(%($spelling), NULL);
+    if (global && List.compare(global, value) == 0)
+      globals[spelling] = value;
+    return;
+  }
+  foreach (Var child, value.list()) _subject_globals(c, child, globals);
+}
+
 static Var _meta_stub(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
   if (parameters.equal(%((void)))) parameters = NULL;
@@ -2405,6 +2419,13 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   String name = String.new((const char *) Func.context(function));
   Token site;
   Compiler c = _stub_compiler(name, site);
+  Map globals = {};
+  foreach (Var value, values) _subject_globals(c, value, globals);
+  Array rows = [];
+  foreach (Var (spelling, binding), globals) rows.push(%($spelling $binding));
+  Var previous = Macro.subject();
+  Macro.use_subject(rows.list_free());
+  defer Macro.use_subject(previous);
   if (!c.groups_meta())
     return c.meta_helper_call(name, site, values.list_free());
   c.bind_meta_group(name, site);

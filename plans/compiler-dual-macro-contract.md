@@ -588,9 +588,23 @@ root and home. Compiler corpus medians are 6.555 / 6.565 s default and
 7.705 / 7.727 s live; exception medians are 0.612 / 0.621 s and
 0.682 / 0.689 s. Counts come from a temporary count-only build of the
 candidate, then reverted. Extended transactions count every transaction
-opened while any macro value application is active, including 49 per
-translation outside try lowering; the baseline was not instrumented, so the
-increment per try is not measured. The source grew since the phase7 counts.
+opened while any macro value application is active. A second throwaway
+build attributed the 49 per translation outside try lowering: each is one
+template call from a staged `meta` body in the prelude's macro families
+(28 in lib/typed-array.x, 20 in lib/typed-map.x, one in lib/array.x).
+`x2c_template_call` returns an application, so its binding opens an
+extended transaction at depth one and closes it at its boundary. It is
+expected, not a leak. The baseline was not instrumented, so the increment
+per try is not measured. The source grew since the phase7 counts.
+
+Production follow-ups (2026-09-27). Producers a template calls in its
+slots are compiled into the compiler in src/builtins.x and registered in
+`builtin_targets`, so any unit can call them by name; the declaring
+source unit must declare them, or declaration collection fails on the
+template. The try template now calls its frame declaration and cleanup
+placement producers this way, with unchanged 62-case C/H. Recognition
+resolves a free reference against the base-scope binding the compiler
+sends with each `meta` call, so a shadowing local fails the case.
 
 The first per-lowering row is the selective try candidate, not the old phase5
 fixed support cost. Its total includes necessary shared support and any

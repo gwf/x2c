@@ -224,9 +224,31 @@ static Var _macro_inline(List environment, Var tree) {
   return parts.list_free();
 }
 
+/* The unit's base-scope binding for each spelling a compile-time call's
+   syntax arguments reference as a global, as `(SPELLING BINDING)` rows,
+   or void when no call describes its subject. */
+static Var macro_subject = void;
+
+/** Returns the table `Macro.use_subject` last set, or void. */
+Var Macro.subject(void) => macro_subject;
+
+/** Sets the `(SPELLING BINDING)` rows that give, for each spelling a
+    compile-time call's syntax arguments reference as a global, the unit's
+    base-scope binding. A macro value's free reference then recognizes only
+    that binding; with void it recognizes any binding of its spelling. The
+    compiler sets this for the length of each `meta` call. */
+void Macro.use_subject(Var rows) { macro_subject = rows; }
+
+static Var _macro_free_reference(String spelling) {
+  if (macro_subject is void) return %(binding ? $spelling);
+  foreach (List row, macro_subject.list())
+    if (row.car() == spelling) return row.cadr();
+  return %(binding-name $spelling);
+}
+
 /* Turns an instantiated body into a pattern: derived expression types
-   become wildcards, literals and operators are quoted, and a binder in a
-   hole shell stands alone. */
+   become wildcards, literals and operators are quoted, a binder in a hole
+   shell stands alone, and a free reference names the subject's binding. */
 static Var _macro_pattern_view(Var value) {
   if (value is not <list>)
     return value == <*> || value == <?> ? %(!quote $value).var() : value;
@@ -240,7 +262,7 @@ static Var _macro_pattern_view(Var value) {
       return %(expr ? ${_macro_pattern_view(body)});
     }
     case %(literal *): return %(!quote $node);
-    case %(binding-name ?name): return %(binding ? $name);
+    case %(binding-name ?(String name)): return _macro_free_reference(name);
     case %(op ?operator *operands): {
       Array parts = [];
       foreach (Var operand, operands)

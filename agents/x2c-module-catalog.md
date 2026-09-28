@@ -47,6 +47,7 @@ the built-in macros' compile-time algorithms.
 
 Public functions:
 
+`builtin_try_frame_declaration`, `builtin_try_cleanup_placement`,
 `builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
@@ -965,10 +966,10 @@ Public functions:
 
 `type_base_suffix`, `type_declaration_parts`, `x2c_literal_string`,
 `x2c_literal_int`, `x2c_literal_symbol`, `Macro_close`, `Macro_apply`,
-`Macro_pattern`, `Macro_case_capture`, `Macro_case_pattern`, `x2c_expr_ident`,
-`x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`, `x2c_stmnt_make`,
-`x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`
+`Macro.subject`, `Macro.use_subject`, `Macro_pattern`, `Macro_case_capture`,
+`Macro_case_pattern`, `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`,
+`x2c_expr_composite`, `x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`,
+`x2c_function_body`, `x2c_parameters_arguments`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

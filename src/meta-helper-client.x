@@ -224,7 +224,7 @@ Var Compiler.meta_helper_call(
     _helper_send(%(reset $helper_table));
     helper_reset = 0;
   }
-  _helper_send(%(call $name $arguments));
+  _helper_send(%(call $name $arguments ${Macro.subject()}));
   double limit = _helper_limit();
   double deadline = limit > 0 ? _helper_now() + limit : 0;
   for (;;) {

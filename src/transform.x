@@ -2352,27 +2352,13 @@ static List _catch_arms(Compiler c, List bodies, List frame, List handle) {
     $choice);
 }
 
-/* The lowered declaration of a try region's frame, whose binding is
-   already allocated. */
-meta static List _try_frame_declaration(List frame) =>
-  %(declare ("ExceptionFrame") (bindings (bind $frame ())));
-
-/* The statements that leave a try region, lowered and placed after it. The
-   cleanup effect marks the unit as needing exception support. */
-meta static List _try_cleanup_placement(List statements) {
-  Atom token = Atom.intern("?__try_cleanup");
-  return %(code-value "lowered" $token ((cleanup $token (seq @statements))));
-}
-
 static List _lowered(List code) => %(code-value "lowered" $code ());
 
-/* The frame, declared first, then the catch clause's site, patterns, and
-   handler. */
+/* The catch clause's site, patterns, and handler. */
 static List _try_declarations(Compiler c, List clause, List frame,
                               List handle) {
   List address = _address_of(_frame_type, frame);
   Array declarations = [];
-  declarations.push(_try_frame_declaration(frame));
   if (clause) {
     List records = clause.cadr();
     int count = records.len(), fallback = -1, index = 0;
@@ -2430,15 +2416,21 @@ static List _try_landing(Compiler c, List clause, List frame, List handle,
     : unhandled);
 }
 
+/* The try producers `src/builtins.x` compiles into the compiler. The
+   template calls them by name in the unit it is applied to. */
+List builtin_try_frame_declaration(Var frame);
+List builtin_try_cleanup_placement(Var cleanup);
+
 /* A try region pushes its frame and lands on it when something raises. */
 macro open Statement $compiler_try_shape(Expr $frame, Statement $declarations,
     Statement $body, Statement $landing, Statement $cleanup) {
   {
+    $builtin_try_frame_declaration($frame)...
     $declarations
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else { x2c_exception_landed(&$frame); $landing }
-    $cleanup
+    $builtin_try_cleanup_placement($cleanup)...
   }
 }
 
@@ -2494,7 +2486,7 @@ static Var _rewrite(Walk walk, Var value) {
         Macro shape = $compiler_try_shape;
         List lowered = c.bind_syntax(
           c.macro_value_syntax(shape(frame_code, declarations, body_out,
-                                     landing, _try_cleanup_placement(cleanup))),
+                                     landing, _lowered(%(seq @cleanup)))),
           AST_BLOCK, c.return_type);
         transaction.commit();
         match (lowered) case %(seq ?block): return block;

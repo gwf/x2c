@@ -318,7 +318,10 @@ Thin evidence and follow-ups:
   is reported as an unbound replacement variable at the application.
 - Resolved on 2026-09-27: a cached `Macro` value names its references by
   spelling, and application rebinds them in the applying unit's global
-  scope, so raw and CPP symbol collection emit the same C. Recognition
-  matches those references by spelling.
+  scope, so raw and CPP symbol collection emit the same C. For
+  recognition, the compiler sends each `meta` call the unit's base-scope
+  binding for every global its syntax arguments reference
+  (`Macro.use_subject`), and a free reference recognizes only that
+  binding, so a shadowing local fails the case.
 - Two clang-only `cc-stderr` sidecars in the regression set fail on Linux
   hosts, as they did before this change.

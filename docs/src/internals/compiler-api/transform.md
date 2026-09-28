@@ -35,7 +35,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:3576`
+Source: `src/transform.x:3568`
 
 #### transform_map_literal
 
@@ -45,7 +45,7 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:3587`
+Source: `src/transform.x:3579`
 
 ### `Compiler`
 
@@ -195,7 +195,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4355`
+Source: `src/transform.x:4347`
 
 ## Design notes
 

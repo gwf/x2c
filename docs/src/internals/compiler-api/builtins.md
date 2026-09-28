@@ -12,7 +12,9 @@ The built-in macros' compile-time algorithms.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_targets`](#builtin_targets) | Returns the built-in macro algorithms by the names compile-time Lisp calls them. |
+| [`builtin_targets`](#builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
+| [`builtin_try_cleanup_placement`](#builtin_try_cleanup_placement) | Places the lowered statements that leave a try region after it, with the effect that marks the unit as needing exception support. |
+| [`builtin_try_frame_declaration`](#builtin_try_frame_declaration) | Returns the lowered declaration of the try frame that `frame`, a bound reference, names. |
 
 ### Functions
 
@@ -20,10 +22,28 @@ The built-in macros' compile-time algorithms.
 
 `Map builtin_targets(void)`
 
-Returns the built-in macro algorithms by the names compile-time Lisp
-calls them.
+Returns each built-in algorithm by the name compile-time code calls it
+with.
 
-Source: `src/builtins.x:817`
+Source: `src/builtins.x:844`
+
+#### builtin_try_cleanup_placement
+
+`List builtin_try_cleanup_placement(Var cleanup)`
+
+Places the lowered statements that leave a try region after it, with
+the effect that marks the unit as needing exception support.
+
+Source: `src/builtins.x:833`
+
+#### builtin_try_frame_declaration
+
+`List builtin_try_frame_declaration(Var frame)`
+
+Returns the lowered declaration of the try frame that `frame`, a bound
+reference, names.
+
+Source: `src/builtins.x:822`
 
 ## Design notes
 

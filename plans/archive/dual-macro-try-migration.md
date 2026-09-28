@@ -197,17 +197,20 @@ The try case in `_rewrite` arms the application context, begins the outer
 transaction, and allocates the frame, in that order. Its producing
 operations attach stages: the catch declarations and frame declaration
 form one lowered sequence, the region body and landing are lowered, and
-the frame reference is bound. `_try_frame_declaration` and
-`_try_cleanup_placement` are `meta` functions in src/transform.x; the
-second returns the placed cleanup with the cleanup effect. The client
-reads `shape(frame, declarations, body, landing, cleanup)`.
+the frame reference is bound. The template calls
+`builtin_try_frame_declaration` and `builtin_try_cleanup_placement` in
+its slots; the second returns the placed cleanup with the cleanup effect.
+The client reads `shape(frame, declarations, body, landing, cleanup)`.
 
 Decisions made during delivery:
 
-- The producers run where the lowering computes their inputs and pass
-  completed carriers to the shape. A template applied in a user's unit can
-  only resolve meta functions that unit knows, so the shape does not call
-  them itself.
+- The producers are compiled into the compiler in src/builtins.x and
+  registered in `builtin_targets`, so the template calls them by name in
+  any unit it is applied to. A `meta` function in compiler source is not
+  reachable there. src/transform.x declares both producers: without the
+  declarations, declaration collection fails on the template and drops
+  every later declaration of the unit. They receive the carriers the
+  lowering computed.
 - The frame is an `Expr` hole. The template uses it only as `&$frame` and
   `$frame.env`, and a bound frame reference is an expression.
 - The three runtime calls bind through the open rule. `x2c_exception_push`

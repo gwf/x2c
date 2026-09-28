@@ -11,7 +11,10 @@
 
       (reset K)             select table K and run its `meta static`
                             initializers again; no reply
-      (call NAME (ARG ...)) call NAME in the selected table
+      (call NAME (ARG ...) (GLOBAL ...))
+                            call NAME in the selected table; each GLOBAL
+                            is `(SPELLING BINDING)`, the unit's binding
+                            that a macro value's free reference recognizes
       (quit)
 
     A call replies with a `(warning MESSAGE (NOTE ...))` frame for each
@@ -329,9 +332,11 @@ int main(void) {
             reset_failure =
               %(failure ${Error.snapshot(cons(code, detail))});
       }
-      case %(call ?(String name) ?(List arguments)):
+      case %(call ?(String name) ?(List arguments) ?(List globals)): {
+        Macro.use_subject(globals);
         if (reset_failure) _reply(reset_failure);
         else _call(current, name, arguments);
+      }
       default: _exit(0);
     }
   }

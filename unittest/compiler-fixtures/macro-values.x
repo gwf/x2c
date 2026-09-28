@@ -65,6 +65,17 @@ meta static List increment(List code) {
   return inc(code);
 }
 macro Expression $inc_operand(Expr $code) => $increment_operand($code);
+
+/* A local that shadows the callee is a different binding, so its call is
+   not what the value builds. */
+static int decrement(int value) { return value - 1; }
+meta static List increment_hit(List code) {
+  match (code) {
+    case $inc(?value): return x2c_literal_int(1);
+  }
+  return x2c_literal_int(0);
+}
+macro Expression $is_inc(Expr $code) => $increment_hit($code);
 macro Expression $inc_again(Expr $code) => $increment($code);
 
 int main(void) {
@@ -73,5 +84,11 @@ int main(void) {
   printf("%d\n", $left_of(price + tax));
   printf("%d\n", $twice(tax));
   printf("%d %d\n", $inc_operand($inc(price)), $inc_again(price));
+  int global_hit = $is_inc(bump(price)), local_hit;
+  {
+    int (*bump)(int) = decrement;
+    local_hit = $is_inc(bump(price));
+  }
+  printf("%d %d\n", global_hit, local_hit);
   return 0;
 }

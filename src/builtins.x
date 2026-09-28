@@ -814,9 +814,38 @@ macro Statement $builtin.row(Expr $rows, Expr $name, Expr $function) {
 
 /** Returns the built-in macro algorithms by the names compile-time Lisp
     calls them. */
+/* Try lowering. The compiler's try template calls these by name with the
+   facts its lowering computed. */
+
+/** Returns the lowered declaration of the try frame that `frame`, a bound
+    reference, names. */
+List builtin_try_frame_declaration(Var frame) {
+  match (frame)
+    case %(code-value ? (expr ?type (ident ?binding)) ?):
+      return %(code-value "lowered"
+        (declare $type (bindings (bind $binding ()))) ());
+  x2c_diagnostic_fail("try frame must be a bound reference", %());
+  return NULL;
+}
+
+/** Places the lowered statements that leave a try region after it, with
+    the effect that marks the unit as needing exception support. */
+List builtin_try_cleanup_placement(Var cleanup) {
+  Atom token = Atom.intern("?__try_cleanup");
+  match (cleanup)
+    case %(code-value ? ?statements ?):
+      return %(code-value "lowered" $token ((cleanup $token $statements)));
+  x2c_diagnostic_fail("try cleanup must be lowered statements", %());
+  return NULL;
+}
+
+/** Returns each built-in algorithm by the name compile-time code calls it
+    with. */
 Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", builtin_scope_expand);
+  $builtin.row(rows, "builtin_try_frame_declaration", builtin_try_frame_declaration);
+  $builtin.row(rows, "builtin_try_cleanup_placement", builtin_try_cleanup_placement);
   $builtin.row(rows, "builtin_foreach_atom_type", builtin_foreach_atom_type);
   $builtin.row(rows, "builtin_foreach_expr", builtin_foreach_expr);
   $builtin.row(rows, "builtin_foreach_address", builtin_foreach_address);

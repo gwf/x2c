@@ -28,6 +28,8 @@ The compiler surface a `meta` function calls.
 | [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
 | [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
 | [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
+| [`Macro.subject`](#Macro.subject) | Returns the table `Macro.use_subject` last set, or void. |
+| [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows that give, for each spelling a compile-time call's syntax arguments reference as a global, the unit's base-scope binding. |
 
 ### Functions
 
@@ -50,7 +52,7 @@ Recognizes code built by `t`, whether retained as a pending
 invocation or already expanded, and publishes the captures under
 `names`. Generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:465`
+Source: `lib/meta.x:487`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -60,7 +62,7 @@ Source: `lib/meta.x:465`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture` over the match subject.
 
-Source: `lib/meta.x:485`
+Source: `lib/meta.x:507`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -80,7 +82,7 @@ Source: `lib/meta.x:150`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/meta.x:261`
+Source: `lib/meta.x:283`
 
 #### type_base_suffix
 
@@ -107,7 +109,7 @@ Source: `lib/meta.x:78`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:535`
+Source: `lib/meta.x:557`
 
 #### x2c_expr_call
 
@@ -116,7 +118,7 @@ Source: `lib/meta.x:535`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:509`
+Source: `lib/meta.x:531`
 
 #### x2c_expr_composite
 
@@ -125,7 +127,7 @@ Source: `lib/meta.x:509`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:514`
+Source: `lib/meta.x:536`
 
 #### x2c_expr_ident
 
@@ -134,7 +136,7 @@ Source: `lib/meta.x:514`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:495`
+Source: `lib/meta.x:517`
 
 #### x2c_expr_index
 
@@ -142,7 +144,7 @@ Source: `lib/meta.x:495`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:498`
+Source: `lib/meta.x:520`
 
 #### x2c_function_body
 
@@ -150,7 +152,7 @@ Source: `lib/meta.x:498`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:589`
+Source: `lib/meta.x:611`
 
 #### x2c_literal_int
 
@@ -184,7 +186,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:597`
+Source: `lib/meta.x:619`
 
 #### x2c_stmnt_make
 
@@ -192,7 +194,7 @@ Source: `lib/meta.x:597`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:529`
+Source: `lib/meta.x:551`
 
 #### x2c_stmnt_return
 
@@ -200,7 +202,31 @@ Source: `lib/meta.x:529`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:532`
+Source: `lib/meta.x:554`
+
+### `Macro`
+
+<a id="Macro.subject"></a>
+#### Macro.subject
+
+`Var Macro.subject(void)`
+
+Returns the table `Macro.use_subject` last set, or void.
+
+Source: `lib/meta.x:233`
+
+<a id="Macro.use_subject"></a>
+#### Macro.use_subject
+
+`void Macro.use_subject(Var rows)`
+
+Sets the `(SPELLING BINDING)` rows that give, for each spelling a
+compile-time call's syntax arguments reference as a global, the unit's
+base-scope binding. A macro value's free reference then recognizes only
+that binding; with void it recognizes any binding of its spelling. The
+compiler sets this for the length of each `meta` call.
+
+Source: `lib/meta.x:240`
 
 ## Public types
 
@@ -229,7 +255,7 @@ Source: `lib/meta.x:138`
 Records the machine slots that hold a macro's fixed locals, so a
 repeated slot compares those locals by identity during recognition.
 
-Source: `lib/meta.x:325`
+Source: `lib/meta.x:347`
 
 <a id="Source"></a>
 ### Source
