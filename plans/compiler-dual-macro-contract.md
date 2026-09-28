@@ -1815,6 +1815,52 @@ without clarifying ownership. The prototype was discarded and the source and
 sidecars remain unchanged. This rejects that narrow implementation, not other
 protocol helpers or a different consolidation that removes more machinery.
 
+### E12. Managed declaration cleanup (target readable form)
+
+The existing `_append_managed_declaration` owner keeps eligibility, declaration
+splitting, installed identity, protocol participation, and source order. After
+it emits the managed initializer declaration, an adjacent Statement template
+writes the cleanup in the same enclosing lifetime:
+
+```x2c
+macro open Statement $managed_cleanup(Expr $receiver) {
+  defer $receiver.cleanup();
+}
+```
+
+The client supplies its already installed receiver binding and applies the
+whole statement without creating another block:
+
+```x2c
+List receiver = %(expr $type (ident $binding));
+Macro cleanup = $managed_cleanup;
+output.push(c.bind_syntax(cleanup(receiver), AST_STATEMENT, c.return_type));
+```
+
+The focused comparison must retain the generated call target, one cleanup
+per managed binding, ordering across mixed declarations, and its existing
+scope boundary. If binding the template changes any of these, retain the
+current resolved-call owner and record the limitation here.
+
+The managed-init runtime fixture and no-protocol/static rejection fixtures
+pass. Translating the runtime fixture with the prior bootstrap compiler and
+the candidate produces byte-identical C and H. The adjacent source template
+replaces the nested raw member call and defer construction without changing
+the declaration-splitting owner.
+
+### E13. Region call-recognition boundary
+
+A narrow `$called(Expr function, Expr arguments...)` recognizer in
+`src/regions.x` passed `region-safe` but missed escape calls. The region scan
+peels the typed `(expr ...)` wrapper before examining raw `(call ...)` nodes;
+the Expression matcher needs that wrapper. In the prototype,
+`region-escapes` lost all 64 expected diagnostic lines and
+`region-local-escapes` lost its `_field_of(&box)` warning and changed a
+borrowed sink's region. Restoring the original source made all three fixtures
+pass again. This rejects the narrow typed-matcher substitution. A future
+shared recognizer must account for the raw-node boundary and retain those
+escape diagnostics without a parallel raw fallback.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

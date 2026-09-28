@@ -1445,6 +1445,10 @@ static int _has_managed_declaration(List declaration) {
   return 0;
 }
 
+macro open Statement $managed_cleanup(Expr $receiver) {
+  defer $receiver.cleanup();
+}
+
 static void _append_managed_declaration(
   Compiler c, List declaration, Array output, Token origin) {
   match (declaration) {
@@ -1485,10 +1489,9 @@ static void _append_managed_declaration(
           %(declare $base
             (bindings (op = (bind $binding $modifiers) $initializer))));
         List receiver = %(expr $type (ident $binding));
-        List cleanup = c.resolve_expression(
-          %(expr () (call (expr () (op . $receiver ("cleanup")))
-                          (args))), c.token);
-        output.push(%(defer (stmnt $cleanup)));
+        Macro cleanup = $managed_cleanup;
+        output.push(c.bind_syntax(
+          cleanup(receiver), AST_STATEMENT, c.return_type));
       }
       if (ordinary.len())
         output.push(%(declare $base (bindings @{ordinary})));
