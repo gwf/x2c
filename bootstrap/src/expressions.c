@@ -1417,7 +1417,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1017 = cons(_1016, NULL);
   _1018 = cons(_984, _1017);
   _1019 = List_var(_1018);
-  _1020 = String_new("/Users/gary/Git/x2c/.claude/worktrees/compiler-warnings-conversions-0a75da/src/expressions.x");
+  _1020 = String_new("/Users/gary/.codex/worktrees/d40d/x2c/src/expressions.x");
   _1021 = String_var(_1020);
   _1022 = cons(_1021, NULL);
   _1023 = cons(_985, _1022);
