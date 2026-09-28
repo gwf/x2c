@@ -1,0 +1,31 @@
+/*  grammar.xmacro -- the source forms that lowering recognizes
+
+    Copyright (c) 2026 Gary William Flake.
+
+    Each macro's body is the source form a lowering receives, so a lowering
+    recognizes its input with `case` on the macro instead of spelling the
+    parsed node. The accessors read the parts of a parsed node that no
+    source form writes, such as a handler the parser introduced.
+*/
+/* A try whose only exit work is its finalizer. */
+macro Statement $tried(Statement $body, Statement $finalizer) {
+  try $body finally $finalizer
+}
+
+/* A try with catch arms, each a pattern and a body, and a finalizer. */
+macro Statement $caught(Statement $body, Statement $finalizer,
+    Catch $arms...) {
+  try $body catch $arms... finally $finalizer
+}
+
+/* A noncapturing lambda expression: its parameters and body. */
+macro Expression $lambda_expression(Expr $body, Param $params...) =>
+  %!($params...) => $body;
+
+/** Returns the error handler the parser introduced for the catch arms of
+    the parsed try `node`, or NULL for a try without catches. The arms read
+    their captures through it, and no source form writes it. */
+meta static List catch_handle(List node) {
+  match (node) case %(try ? (catchcases ? ?handle) ?): return handle;
+  return NULL;
+}

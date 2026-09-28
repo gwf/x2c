@@ -321,7 +321,7 @@
        ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
     (declare ("Var") 
      (bindings 
-      (bind (binding 58 "_x2c_catch_patterns_0") 
+      (bind (binding 58 "_x2c_macro_patterns_0") 
        ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
     (declare (static "ErrorCatchSite") 
      (bindings 
@@ -346,7 +346,7 @@
         (op = (expr ("Var") 
                (index 
                 (expr ((dim (expr (macro-expr) ("1"))) "Var") 
-                 (ident (binding 58 "_x2c_catch_patterns_0"))) 
+                 (ident (binding 58 "_x2c_macro_patterns_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("Var") 
           (call (expr ((func (("List"))) "Var") (ident (binding 61 "List_var"))) 
@@ -395,7 +395,7 @@
            (op & (expr (static "ErrorCatchSite") 
                   (ident (binding 59 "_x2c_macro_site_0"))))) 
           (expr ((dim (expr (macro-expr) ("1"))) "Var") 
-           (ident (binding 58 "_x2c_catch_patterns_0"))))))))) 
+           (ident (binding 58 "_x2c_macro_patterns_0"))))))))) 
     (stmnt 
      (expr (void) 
       (call (expr ((func ((* "ExceptionFrame"))) void) 
@@ -442,35 +442,46 @@
                    (op & (expr ("ExceptionFrame") 
                           (ident (binding 56 "_x2c_exception_frame_0")))))))) 
        (block 
+        (declare (int) 
+         (bindings 
+          (op = (bind (binding 69 "_x2c_macro_selected_0") ()) 
+           (expr (int) 
+            (call (expr ((func (("ErrorHandler"))) int) 
+                   (ident (binding 70 "x2c_error_catch_selected"))) 
+             (args (expr (volatile "ErrorHandler") 
+                    (ident (binding 63 "_x2c_error_handler_0"))))))))) 
         (stmnt 
          (expr (void) 
           (call (expr ((func (("ErrorHandler"))) void) 
-                 (ident (binding 69 "x2c_error_catch_detach"))) 
+                 (ident (binding 71 "x2c_error_catch_detach"))) 
            (args (expr (volatile "ErrorHandler") 
                   (ident (binding 63 "_x2c_error_handler_0"))))))) 
         (stmnt 
          (expr (void) 
           (call (expr ((func ((* "ExceptionFrame"))) void) 
-                 (ident (binding 70 "x2c_exception_mark_handled"))) 
+                 (ident (binding 72 "x2c_exception_mark_handled"))) 
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 56 "_x2c_exception_frame_0"))))))))) 
-        (block 
-         (declare ("Var") (bindings (bind (binding 71 "value") (volatile)))) 
-         (stmnt 
-          (expr ("Var") 
-           (op = (expr ("Var") (ident (binding 71 "value"))) 
-            (expr ("Var") 
-             (call "x2c_error_catch_capture" 
-              (args (expr ("ErrorHandler") 
-                     (ident (binding 63 "_x2c_error_handler_0"))) 
-               (expr (int) (literal (int) "0")))))))) 
-         (block 
-          (at 24 
+        (switch (expr (int) (ident (binding 69 "_x2c_macro_selected_0"))) 
+         (block (case (expr (int) (literal (int) "0"))) 
+          (block 
+           (declare ("Var") (bindings (bind (binding 73 "value") (volatile)))) 
            (stmnt 
             (expr ("Var") 
-             (op = (expr ("Var") (ident (binding 55 "caught"))) 
-              (expr ("Var") (ident (binding 71 "value")))))))))) 
+             (op = (expr ("Var") (ident (binding 73 "value"))) 
+              (expr ("Var") 
+               (call "x2c_error_catch_capture" 
+                (args (expr ("ErrorHandler") 
+                       (ident (binding 63 "_x2c_error_handler_0"))) 
+                 (expr (int) (literal (int) "0")))))))) 
+           (block 
+            (at 24 
+             (stmnt 
+              (expr ("Var") 
+               (op = (expr ("Var") (ident (binding 55 "caught"))) 
+                (expr ("Var") (ident (binding 73 "value"))))))))) 
+          (break)))) 
        (block 
         (if (expr (int) 
              (call "x2c_exception_claim" 
@@ -502,7 +513,7 @@
                          (ident (binding 56 "_x2c_exception_frame_0"))))))))) 
         (stmnt 
          (expr () 
-          (call (expr () (ident (binding 72 "__builtin_unreachable"))) 
+          (call (expr () (ident (binding 74 "__builtin_unreachable"))) 
            (args (expr (void) ()))))))))) 
     (if (expr (int) 
          (call "x2c_exception_claim" 
@@ -534,15 +545,15 @@
   (at 47 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 73 "lambda_value") ()) 
+     (op = (bind (binding 75 "lambda_value") ()) 
       (expr ("Var") 
        (call (expr ((func (("Var"))) "Var") 
               (parens 
                (expr ((func (("Var"))) "Var") 
-                (ident (binding 74 "_x2c_lambda_0"))))) 
+                (ident (binding 76 "_x2c_lambda_0"))))) 
         (args (expr ("Var") 
                (call (expr ((func ((int))) "Var") 
-                      (ident (binding 75 "int_var"))) 
+                      (ident (binding 77 "int_var"))) 
                 (args (expr (int) (literal (int) "2")))))))))))) 
   (at 28 
    (stmnt 
@@ -563,28 +574,28 @@
   (at 50 
    (stmnt 
     (expr (void) 
-     (cast (void) (expr ("Var") (ident (binding 73 "lambda_value"))))))) 
+     (cast (void) (expr ("Var") (ident (binding 75 "lambda_value"))))))) 
   (at 51 (return (expr (int) (literal (int) "0"))))))
 
 (typedef 
  (struct "_x2c_defer_env_0" 
   (fields 
    (declare (const void) 
-    (bindings (bind (binding 76 "_x2c_defer_capture_0") (*)))) 
+    (bindings (bind (binding 78 "_x2c_defer_capture_0") (*)))) 
    (declare (const void) 
-    (bindings (bind (binding 77 "_x2c_defer_capture_1") (*)))))) 
- (bindings (bind (binding 78 "_x2c_defer_env_0") ())))
+    (bindings (bind (binding 79 "_x2c_defer_capture_1") (*)))))) 
+ (bindings (bind (binding 80 "_x2c_defer_env_0") ())))
 
 (function (static void) 
  (bind (binding 54 "_x2c_defer_cleanup_0") 
-  ((fnmod (params (param (void) (bind (binding 79 "_x2c_defer_opaque_0") (*))))))) 
+  ((fnmod (params (param (void) (bind (binding 81 "_x2c_defer_opaque_0") (*))))))) 
  (block 
   (declare ("_x2c_defer_env_0") 
    (bindings 
-    (op = (bind (binding 80 "_x2c_defer_data_0") (*)) 
+    (op = (bind (binding 82 "_x2c_defer_data_0") (*)) 
      (expr (* "_x2c_defer_env_0") 
       (cast (* "_x2c_defer_env_0") 
-       (expr (* void) (ident (binding 79 "_x2c_defer_opaque_0")))))))) 
+       (expr (* void) (ident (binding 81 "_x2c_defer_opaque_0")))))))) 
   (stmnt 
    (expr ("ast_phase1_Count") 
     (op += 
@@ -605,16 +616,16 @@
                          "_x2c_defer_data_0->_x2c_defer_capture_1")))))))))))))))
 
 (function (static "Var") 
- (bind (binding 74 "_x2c_lambda_0") 
-  ((fnmod (params (param ("Var") (bind (binding 81 "value") ())))))) 
+ (bind (binding 76 "_x2c_lambda_0") 
+  ((fnmod (params (param ("Var") (bind (binding 83 "value") ())))))) 
  (block 
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func ((int))) "Var") (ident (binding 75 "int_var"))) 
+     (call (expr ((func ((int))) "Var") (ident (binding 77 "int_var"))) 
       (args (expr (int) 
              (op + (expr (int) 
                     (call (expr ((func (("Var"))) (int)) 
                            (ident (binding 46 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 81 "value")))))) 
+                     (args (expr ("Var") (ident (binding 83 "value")))))) 
               (expr (int) (literal (int) "1")))))))))))

@@ -815,92 +815,12 @@ macro Statement $builtin.row(Expr $rows, Expr $name, Expr $function) {
 /* Func calls: the call template prepares its arguments through this. */
 List x2c_func_call_arguments(List function, List storage, List arguments);
 
-/* --- try lowering --------------------------------------------------------
-   The compiler's try template calls these with the facts its lowering
-   computed; each writes its C through its own macro. A clause's facts are
-   `(HANDLE PATTERNS SELECTED STATE CHOICE PATTERN...)`: its handler, the
-   names of its pattern array and selected arm, its site's initial state,
-   the bound choice among its arms, and each arm's pattern, or `()` for the
-   default arm. */
-
-/* One catch site: its patterns prepared once, its handler pushed with
-   them. */
-macro open Statement $catch_site(Name $frame, Name $handle, Name $patterns,
-    Expr $count, Expr $fallback, Expr $state, Statement $preparation...) {
-  static MatchCaptureSite arms[$count];
-  Var $patterns[$count];
-  static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
-  if (x2c_error_catch_site_pending(&site)) { $preparation... }
-  volatile ErrorHandler $handle =
-    x2c_error_catch_site_push(&$frame, &site, $patterns);
-}
-
-/* One arm's pattern, prepared into its slot. */
-macro open Statement $catch_pattern(Name $patterns, Expr $index,
-    Expr $pattern) {
-  $patterns[$index] = $pattern;
-}
-
-/* A landing no catch arm handles: the region's exits run, and control does
-   not come back. */
-macro open Statement $try_unhandled(Statement $cleanup) {
-  { $cleanup __builtin_unreachable(); }
-}
-
-/* A landing that hands a raised error to its catch arms. */
-macro open Statement $catch_landing(Name $frame, Name $handle,
-    Statement $unhandled, Statement $choice, Statement $selection...) {
-  if (x2c_exception_is_error_target(&$frame)) {
-    $selection...
-    x2c_error_catch_detach($handle);
-    x2c_exception_mark_handled(&$frame);
-    $choice
-  }
-  else $unhandled
-}
-
-/* The arm the handler selected, when there are several. */
-macro open Statement $catch_selected(Name $selected, Name $handle) {
-  int $selected = x2c_error_catch_selected($handle);
-}
-
-/** Returns the catch site `frame` pushes for the clause `clause`
-    describes, or nothing for a try without one. */
-List builtin_try_catch_site(List frame, List clause) {
-  Macro site = $catch_site, prepare = $catch_pattern;
-  match (clause) {
-    case %(?handle ?patterns ? ?(String state) ? *arms): {
-      Array preparation = [];
-      int count = 0, fallback = -1;
-      foreach (List pattern, arms) {
-        if (pattern)
-          preparation.push(
-            prepare(patterns, x2c_literal_int(count), pattern));
-        else fallback = count;
-        count++;
-      }
-      return site(frame, handle, patterns, x2c_literal_int(count),
-                  x2c_literal_int(fallback), %(expr (int) $state),
-                  preparation.list_free());
-    }
-  }
-  return NULL;
-}
-
-/** Returns what runs when `frame` lands: the catch arm the clause's
-    handler selected, or `cleanup` and no return. */
-List builtin_try_landing(List frame, List clause, List cleanup) {
-  Macro unhandled = $try_unhandled, landing = $catch_landing,
-        selection = $catch_selected;
-  List otherwise = unhandled(cleanup);
-  match (clause) {
-    case %(?handle ? ?selected ? ?choice *arms): {
-      List selecting = arms.cdr() ? %(${selection(selected, handle)}) : NULL;
-      return landing(frame, handle, otherwise, choice, selecting);
-    }
-  }
-  return otherwise;
-}
+/* Try lowering: src/transform.x writes a try region through templates
+   whose slots call these. */
+List builtin_try_catch_site(List frame, List clause);
+List builtin_catch_patterns(List patterns, List items);
+List builtin_try_landing(List frame, List clause, List cleanup);
+List builtin_catch_cases(List selected, List arms);
 
 /** Places the lowered statements that leave a try region after it, with
     the effect that marks the unit as needing exception support. */
@@ -921,6 +841,8 @@ Map builtin_targets(void) {
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
   $builtin.row(rows, "builtin_try_catch_site", builtin_try_catch_site);
   $builtin.row(rows, "builtin_try_landing", builtin_try_landing);
+  $builtin.row(rows, "builtin_catch_patterns", builtin_catch_patterns);
+  $builtin.row(rows, "builtin_catch_cases", builtin_catch_cases);
   $builtin.row(rows, "builtin_try_cleanup_placement", builtin_try_cleanup_placement);
   $builtin.row(rows, "builtin_foreach_atom_type", builtin_foreach_atom_type);
   $builtin.row(rows, "builtin_foreach_expr", builtin_foreach_expr);

@@ -833,6 +833,10 @@ performance checkpoint.
 
 ## Readable form
 
+The acceptance test for every later migration is
+[lowering with macros](../agents/lowering-with-macros.md): its rules, and
+the try lowering it shows, are the standard a migrated lowering meets.
+
 A migrated site is done when a reader sees the generated C in the template
 and almost nothing in the client: one application call, no carrier
 literal, and no positional hole list longer than the C it writes has

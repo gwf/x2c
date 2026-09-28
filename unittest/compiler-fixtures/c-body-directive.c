@@ -169,6 +169,8 @@ ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
 
+int x2c_error_catch_selected(ErrorHandler);
+
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
@@ -230,15 +232,15 @@ static int governed(List items){
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_catch_patterns_0[1];
+    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
       _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(162778), NULL));
+      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(162778), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_0, _x2c_catch_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_0, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_1);
     if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
       static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/c-body-directive.x",.function = "governed",.line = 113};
@@ -247,15 +249,19 @@ static int governed(List items){
     else{
       x2c_exception_landed(& _x2c_exception_frame_1);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        {
+        switch(_x2c_macro_selected_0){
+          case 0 :{
 #ifdef QUIET
-          total = 0;
+            total = 0;
 #else
-          total += 1000;
+            total += 1000;
 #endif
 
+          }
+          break;
         }
 
       }

@@ -22,6 +22,8 @@ void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
 
+int x2c_error_catch_selected(ErrorHandler);
+
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
@@ -38,15 +40,15 @@ int main(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
     static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_catch_patterns_0[1];
+    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
       _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
+      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       sigemptyset(& blocked);
@@ -71,23 +73,27 @@ int main(void){
     else{
       x2c_exception_landed(& _x2c_exception_frame_0);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        {
-          {
-            if(sigprocmask(SIG_SETMASK, NULL, & current)){
-              int _x2c_return_value_1 = 2;
-              {
-                x2c_error_catch_close(_x2c_error_handler_0);
-                _x2c_error_handler_0 = NULL;
-                x2c_exception_leave(& _x2c_exception_frame_0);
-                return _x2c_return_value_1;
+        switch(_x2c_macro_selected_0){
+          case 0 :{
+            {
+              if(sigprocmask(SIG_SETMASK, NULL, & current)){
+                int _x2c_return_value_1 = 2;
+                {
+                  x2c_error_catch_close(_x2c_error_handler_0);
+                  _x2c_error_handler_0 = NULL;
+                  x2c_exception_leave(& _x2c_exception_frame_0);
+                  return _x2c_return_value_1;
+                }
+
               }
-
+              retained = sigismember(& current, SIGUSR1) == 1;
             }
-            retained = sigismember(& current, SIGUSR1) == 1;
-          }
 
+          }
+          break;
         }
 
       }

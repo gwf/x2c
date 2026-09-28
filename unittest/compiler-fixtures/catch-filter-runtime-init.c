@@ -64,6 +64,8 @@ void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
 
+int x2c_error_catch_selected(ErrorHandler);
+
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
@@ -72,15 +74,15 @@ static void _relabel_nested_pattern(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
     static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_catch_patterns_0[1];
+    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
       _x2c_macro_arms_0, -1, 1, ERROR_CATCH_TRANSIENT, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL)));
+      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL));
@@ -93,14 +95,18 @@ static void _relabel_nested_pattern(void){
     else{
       x2c_exception_landed(& _x2c_exception_frame_0);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        {
-          {
-            static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
-            x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
-          }
+        switch(_x2c_macro_selected_0){
+          case 0 :{
+            {
+              static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
+              x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
+            }
 
+          }
+          break;
         }
 
       }

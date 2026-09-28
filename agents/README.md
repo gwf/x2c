@@ -74,6 +74,9 @@ Skills have one canonical copy in `agents/skills/`, exposed through
   [debugging](x2c-debugging-guide.md) - build details and compiler instruments.
 - [External commands](external-commands.md) - add or move a command within
   the shared build, identity, manifest, packaging, and smoke-test contract.
+- [Lowering with macros](lowering-with-macros.md) - how a compiler lowering
+  recognizes its input and writes its output with macros, shown on try, and
+  the rules each lowering meets.
 - [AST patterns](replacing-manual-ast-walks-with-match.md) - shared canonical
   syntax, Match, templates, and ordinary compiler operations.
 - [Source graph](../commands/graph/README.md#investigate-a-change) - optional
