@@ -184,9 +184,9 @@ static BinaryFunction evaluated_pointer(void){
   return add;
 }
 
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
 int List_truth(List);
+
+List x2c_func_reference_type(Func, unsigned, unsigned);
 
 FuncArg FuncArg_reference(const void *, List);
 
@@ -198,10 +198,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 
 static Var call(Func function, long left, long right){
   return({
-    Func _x2c_func_call_0 = function;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 2, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(&(left), _1);  else _x2c_func_argument_0 = FuncArg_value(long_var(left));  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_0, 2, 1);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(&(right), _1);  else _x2c_func_argument_1 = FuncArg_value(long_var(right));  Func_apply(_x2c_func_call_0, 2, (FuncArg[]){
-      _x2c_func_argument_0, _x2c_func_argument_1
-    }
-    );
+    Func _x2c_macro_function_0 = function;  FuncArg _x2c_macro_storage_0[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 2, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(left), _1);  else _x2c_macro_storage_0[0] = FuncArg_value(long_var(left));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 2, 1))) _x2c_macro_storage_0[1] = FuncArg_reference(&(right), _1);  else _x2c_macro_storage_0[1] = FuncArg_value(long_var(right));  Func_apply(_x2c_macro_function_0, 2, _x2c_macro_storage_0);
   }
   );
 }
@@ -255,38 +252,23 @@ int main(void){
   if(passthrough(direct_lambda) != direct_lambda) return 4;
   if(Var_integer(call(_x2c_func_handle_1, 20, 22)) != 42) return 5;
   if(Var_integer(({
-    Func _x2c_func_call_1 = direct;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1, 2, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, 0);  else _x2c_func_argument_2 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1, 2, 1);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(0, 0);  else _x2c_func_argument_3 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_1, 2, (FuncArg[]){
-      _x2c_func_argument_2, _x2c_func_argument_3
-    }
-    );
+    Func _x2c_macro_function_1 = direct;  FuncArg _x2c_macro_storage_1[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 2, 0))) _x2c_macro_storage_1[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_1[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 2, 1))) _x2c_macro_storage_1[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_1[1] = FuncArg_value(int_var(22));  Func_apply(_x2c_macro_function_1, 2, _x2c_macro_storage_1);
   }
   )) != 42) return 6;
   if(Var_integer(({
-    Func _x2c_func_call_2 = assigned;  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_2, 2, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(0, 0);  else _x2c_func_argument_4 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_2, 2, 1);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(0, 0);  else _x2c_func_argument_5 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_2, 2, (FuncArg[]){
-      _x2c_func_argument_4, _x2c_func_argument_5
-    }
-    );
+    Func _x2c_macro_function_2 = assigned;  FuncArg _x2c_macro_storage_2[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_2, 2, 0))) _x2c_macro_storage_2[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_2[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_2, 2, 1))) _x2c_macro_storage_2[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_2[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_2, 2, _x2c_macro_storage_2);
   }
   )) != 13) return 7;
   if(Var_integer(({
-    Func _x2c_func_call_3 = lambda_first;  List _x2c_func_reference_type_6 = x2c_func_reference_type(_x2c_func_call_3, 1, 0);  FuncArg _x2c_func_argument_6;  if(List_truth(_x2c_func_reference_type_6)) _x2c_func_argument_6 = FuncArg_reference(0, 0);  else _x2c_func_argument_6 = FuncArg_value(int_var(41));  Func_apply(_x2c_func_call_3, 1, (FuncArg[]){
-      _x2c_func_argument_6
-    }
-    );
+    Func _x2c_macro_function_3 = lambda_first;  FuncArg _x2c_macro_storage_3[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_3, 1, 0))) _x2c_macro_storage_3[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_3[0] = FuncArg_value(int_var(41));  Func_apply(_x2c_macro_function_3, 1, _x2c_macro_storage_3);
   }
   )) != 42) return 8;
   if(Var_integer(({
-    Func _x2c_func_call_4 = direct_lambda;  List _x2c_func_reference_type_7 = x2c_func_reference_type(_x2c_func_call_4, 1, 0);  FuncArg _x2c_func_argument_7;  if(List_truth(_x2c_func_reference_type_7)) _x2c_func_argument_7 = FuncArg_reference(0, 0);  else _x2c_func_argument_7 = FuncArg_value(int_var(21));  Func_apply(_x2c_func_call_4, 1, (FuncArg[]){
-      _x2c_func_argument_7
-    }
-    );
+    Func _x2c_macro_function_4 = direct_lambda;  FuncArg _x2c_macro_storage_4[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_4, 1, 0))) _x2c_macro_storage_4[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_4[0] = FuncArg_value(int_var(21));  Func_apply(_x2c_macro_function_4, 1, _x2c_macro_storage_4);
   }
   )) != 42) return 9;
   if(Var_integer(({
-    Func _x2c_func_call_5 = parameter_lambda;  List _x2c_func_reference_type_8 = x2c_func_reference_type(_x2c_func_call_5, 1, 0);  FuncArg _x2c_func_argument_8;  if(List_truth(_x2c_func_reference_type_8)) _x2c_func_argument_8 = FuncArg_reference(0, 0);  else _x2c_func_argument_8 = FuncArg_value(int_var(43));  Func_apply(_x2c_func_call_5, 1, (FuncArg[]){
-      _x2c_func_argument_8
-    }
-    );
+    Func _x2c_macro_function_5 = parameter_lambda;  FuncArg _x2c_macro_storage_5[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_5, 1, 0))) _x2c_macro_storage_5[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_5[0] = FuncArg_value(int_var(43));  Func_apply(_x2c_macro_function_5, 1, _x2c_macro_storage_5);
   }
   )) != 42) return 10;
   if(after.allocation_calls != before.allocation_calls) return 11;
@@ -300,10 +282,7 @@ int main(void){
   );
   selected = subtract;
   if(Var_integer(({
-    Func _x2c_func_call_6 = snapshot;  List _x2c_func_reference_type_9 = x2c_func_reference_type(_x2c_func_call_6, 2, 0);  FuncArg _x2c_func_argument_9;  if(List_truth(_x2c_func_reference_type_9)) _x2c_func_argument_9 = FuncArg_reference(0, 0);  else _x2c_func_argument_9 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_10 = x2c_func_reference_type(_x2c_func_call_6, 2, 1);  FuncArg _x2c_func_argument_10;  if(List_truth(_x2c_func_reference_type_10)) _x2c_func_argument_10 = FuncArg_reference(0, 0);  else _x2c_func_argument_10 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_6, 2, (FuncArg[]){
-      _x2c_func_argument_9, _x2c_func_argument_10
-    }
-    );
+    Func _x2c_macro_function_6 = snapshot;  FuncArg _x2c_macro_storage_6[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_6, 2, 0))) _x2c_macro_storage_6[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_6[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_6, 2, 1))) _x2c_macro_storage_6[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_6[1] = FuncArg_value(int_var(22));  Func_apply(_x2c_macro_function_6, 2, _x2c_macro_storage_6);
   }
   )) != 42) return 12;
   if(Var_integer(call(({
@@ -330,24 +309,15 @@ int main(void){
   }
   );
   if(Var_integer(({
-    Func _x2c_func_call_7 = pointer_assignment;  List _x2c_func_reference_type_11 = x2c_func_reference_type(_x2c_func_call_7, 2, 0);  FuncArg _x2c_func_argument_11;  if(List_truth(_x2c_func_reference_type_11)) _x2c_func_argument_11 = FuncArg_reference(0, 0);  else _x2c_func_argument_11 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_12 = x2c_func_reference_type(_x2c_func_call_7, 2, 1);  FuncArg _x2c_func_argument_12;  if(List_truth(_x2c_func_reference_type_12)) _x2c_func_argument_12 = FuncArg_reference(0, 0);  else _x2c_func_argument_12 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_7, 2, (FuncArg[]){
-      _x2c_func_argument_11, _x2c_func_argument_12
-    }
-    );
+    Func _x2c_macro_function_7 = pointer_assignment;  FuncArg _x2c_macro_storage_7[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_7, 2, 0))) _x2c_macro_storage_7[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_7[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_7, 2, 1))) _x2c_macro_storage_7[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_7[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_7, 2, _x2c_macro_storage_7);
   }
   )) != 13) return 14;
   if(Var_integer(({
-    Func _x2c_func_call_8 = pointer_return;  List _x2c_func_reference_type_13 = x2c_func_reference_type(_x2c_func_call_8, 2, 0);  FuncArg _x2c_func_argument_13;  if(List_truth(_x2c_func_reference_type_13)) _x2c_func_argument_13 = FuncArg_reference(0, 0);  else _x2c_func_argument_13 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_14 = x2c_func_reference_type(_x2c_func_call_8, 2, 1);  FuncArg _x2c_func_argument_14;  if(List_truth(_x2c_func_reference_type_14)) _x2c_func_argument_14 = FuncArg_reference(0, 0);  else _x2c_func_argument_14 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_8, 2, (FuncArg[]){
-      _x2c_func_argument_13, _x2c_func_argument_14
-    }
-    );
+    Func _x2c_macro_function_8 = pointer_return;  FuncArg _x2c_macro_storage_8[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_8, 2, 0))) _x2c_macro_storage_8[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_8[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_8, 2, 1))) _x2c_macro_storage_8[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_8[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_8, 2, _x2c_macro_storage_8);
   }
   )) != 13) return 15;
   if(Var_integer(({
-    Func _x2c_func_call_9 = conditional;  List _x2c_func_reference_type_15 = x2c_func_reference_type(_x2c_func_call_9, 2, 0);  FuncArg _x2c_func_argument_15;  if(List_truth(_x2c_func_reference_type_15)) _x2c_func_argument_15 = FuncArg_reference(0, 0);  else _x2c_func_argument_15 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_16 = x2c_func_reference_type(_x2c_func_call_9, 2, 1);  FuncArg _x2c_func_argument_16;  if(List_truth(_x2c_func_reference_type_16)) _x2c_func_argument_16 = FuncArg_reference(0, 0);  else _x2c_func_argument_16 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_9, 2, (FuncArg[]){
-      _x2c_func_argument_15, _x2c_func_argument_16
-    }
-    );
+    Func _x2c_macro_function_9 = conditional;  FuncArg _x2c_macro_storage_9[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_9, 2, 0))) _x2c_macro_storage_9[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_9[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_9, 2, 1))) _x2c_macro_storage_9[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_9[1] = FuncArg_value(int_var(22));  Func_apply(_x2c_macro_function_9, 2, _x2c_macro_storage_9);
   }
   )) != 42) return 23;
   BinaryFunction chosen = subtract;
@@ -359,10 +329,7 @@ int main(void){
   }
   );
   if(Var_integer(({
-    Func _x2c_func_call_10 = dereferenced;  List _x2c_func_reference_type_17 = x2c_func_reference_type(_x2c_func_call_10, 2, 0);  FuncArg _x2c_func_argument_17;  if(List_truth(_x2c_func_reference_type_17)) _x2c_func_argument_17 = FuncArg_reference(0, 0);  else _x2c_func_argument_17 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_18 = x2c_func_reference_type(_x2c_func_call_10, 2, 1);  FuncArg _x2c_func_argument_18;  if(List_truth(_x2c_func_reference_type_18)) _x2c_func_argument_18 = FuncArg_reference(0, 0);  else _x2c_func_argument_18 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_10, 2, (FuncArg[]){
-      _x2c_func_argument_17, _x2c_func_argument_18
-    }
-    );
+    Func _x2c_macro_function_10 = dereferenced;  FuncArg _x2c_macro_storage_10[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_10, 2, 0))) _x2c_macro_storage_10[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_10[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_10, 2, 1))) _x2c_macro_storage_10[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_10[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_10, 2, _x2c_macro_storage_10);
   }
   )) != 13) return 24;
   Func sequenced =({
@@ -373,10 +340,7 @@ int main(void){
   }
   );
   if(Var_integer(({
-    Func _x2c_func_call_11 = sequenced;  List _x2c_func_reference_type_19 = x2c_func_reference_type(_x2c_func_call_11, 2, 0);  FuncArg _x2c_func_argument_19;  if(List_truth(_x2c_func_reference_type_19)) _x2c_func_argument_19 = FuncArg_reference(0, 0);  else _x2c_func_argument_19 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_20 = x2c_func_reference_type(_x2c_func_call_11, 2, 1);  FuncArg _x2c_func_argument_20;  if(List_truth(_x2c_func_reference_type_20)) _x2c_func_argument_20 = FuncArg_reference(0, 0);  else _x2c_func_argument_20 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_11, 2, (FuncArg[]){
-      _x2c_func_argument_19, _x2c_func_argument_20
-    }
-    );
+    Func _x2c_macro_function_11 = sequenced;  FuncArg _x2c_macro_storage_11[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_11, 2, 0))) _x2c_macro_storage_11[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_11[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_11, 2, 1))) _x2c_macro_storage_11[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_11[1] = FuncArg_value(int_var(22));  Func_apply(_x2c_macro_function_11, 2, _x2c_macro_storage_11);
   }
   )) != 42) return 25;
   Func parenthesized =({
@@ -387,10 +351,7 @@ int main(void){
   }
   );
   if(Var_integer(({
-    Func _x2c_func_call_12 = parenthesized;  List _x2c_func_reference_type_21 = x2c_func_reference_type(_x2c_func_call_12, 2, 0);  FuncArg _x2c_func_argument_21;  if(List_truth(_x2c_func_reference_type_21)) _x2c_func_argument_21 = FuncArg_reference(0, 0);  else _x2c_func_argument_21 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_22 = x2c_func_reference_type(_x2c_func_call_12, 2, 1);  FuncArg _x2c_func_argument_22;  if(List_truth(_x2c_func_reference_type_22)) _x2c_func_argument_22 = FuncArg_reference(0, 0);  else _x2c_func_argument_22 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_12, 2, (FuncArg[]){
-      _x2c_func_argument_21, _x2c_func_argument_22
-    }
-    );
+    Func _x2c_macro_function_12 = parenthesized;  FuncArg _x2c_macro_storage_12[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_12, 2, 0))) _x2c_macro_storage_12[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_12[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_12, 2, 1))) _x2c_macro_storage_12[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_12[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_12, 2, _x2c_macro_storage_12);
   }
   )) != 13) return 26;
   Func readdressed =({
@@ -401,10 +362,7 @@ int main(void){
   }
   );
   if(Var_integer(({
-    Func _x2c_func_call_13 = readdressed;  List _x2c_func_reference_type_23 = x2c_func_reference_type(_x2c_func_call_13, 2, 0);  FuncArg _x2c_func_argument_23;  if(List_truth(_x2c_func_reference_type_23)) _x2c_func_argument_23 = FuncArg_reference(0, 0);  else _x2c_func_argument_23 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_24 = x2c_func_reference_type(_x2c_func_call_13, 2, 1);  FuncArg _x2c_func_argument_24;  if(List_truth(_x2c_func_reference_type_24)) _x2c_func_argument_24 = FuncArg_reference(0, 0);  else _x2c_func_argument_24 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_13, 2, (FuncArg[]){
-      _x2c_func_argument_23, _x2c_func_argument_24
-    }
-    );
+    Func _x2c_macro_function_13 = readdressed;  FuncArg _x2c_macro_storage_13[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_13, 2, 0))) _x2c_macro_storage_13[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_13[0] = FuncArg_value(int_var(20));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_13, 2, 1))) _x2c_macro_storage_13[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_13[1] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_13, 2, _x2c_macro_storage_13);
   }
   )) != 13) return 27;
   pointer_evaluations = 0;
@@ -417,10 +375,7 @@ int main(void){
   );
   if(pointer_evaluations != 1) return 16;
   if(Var_integer(({
-    Func _x2c_func_call_14 = evaluated;  List _x2c_func_reference_type_25 = x2c_func_reference_type(_x2c_func_call_14, 2, 0);  FuncArg _x2c_func_argument_25;  if(List_truth(_x2c_func_reference_type_25)) _x2c_func_argument_25 = FuncArg_reference(0, 0);  else _x2c_func_argument_25 = FuncArg_value(int_var(19));  List _x2c_func_reference_type_26 = x2c_func_reference_type(_x2c_func_call_14, 2, 1);  FuncArg _x2c_func_argument_26;  if(List_truth(_x2c_func_reference_type_26)) _x2c_func_argument_26 = FuncArg_reference(0, 0);  else _x2c_func_argument_26 = FuncArg_value(int_var(23));  Func_apply(_x2c_func_call_14, 2, (FuncArg[]){
-      _x2c_func_argument_25, _x2c_func_argument_26
-    }
-    );
+    Func _x2c_macro_function_14 = evaluated;  FuncArg _x2c_macro_storage_14[2];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_14, 2, 0))) _x2c_macro_storage_14[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_14[0] = FuncArg_value(int_var(19));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_14, 2, 1))) _x2c_macro_storage_14[1] = FuncArg_reference(0, 0);  else _x2c_macro_storage_14[1] = FuncArg_value(int_var(23));  Func_apply(_x2c_macro_function_14, 2, _x2c_macro_storage_14);
   }
   )) != 42) return 17;
   BinaryFunction absent = NULL;
@@ -452,10 +407,7 @@ int main(void){
   );
   int value = 40;
   if(Var_integer(({
-    Func _x2c_func_call_15 = reference;  List _x2c_func_reference_type_27 = x2c_func_reference_type(_x2c_func_call_15, 1, 0);  FuncArg _x2c_func_argument_27;  if(List_truth(_x2c_func_reference_type_27)) _x2c_func_argument_27 = FuncArg_reference(&(value), _12);  else _x2c_func_argument_27 = FuncArg_value(int_var(value));  Func_apply(_x2c_func_call_15, 1, (FuncArg[]){
-      _x2c_func_argument_27
-    }
-    );
+    Func _x2c_macro_function_15 = reference;  FuncArg _x2c_macro_storage_15[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_15, 1, 0))) _x2c_macro_storage_15[0] = FuncArg_reference(&(value), _12);  else _x2c_macro_storage_15[0] = FuncArg_value(int_var(value));  Func_apply(_x2c_macro_function_15, 1, _x2c_macro_storage_15);
   }
   )) != 41 || value != 41) return 20;
   int bias = 2;
@@ -468,10 +420,7 @@ int main(void){
   );
   if(passthrough(captured) != captured) return 21;
   if(Var_integer(({
-    Func _x2c_func_call_16 = captured;  List _x2c_func_reference_type_28 = x2c_func_reference_type(_x2c_func_call_16, 1, 0);  FuncArg _x2c_func_argument_28;  if(List_truth(_x2c_func_reference_type_28)) _x2c_func_argument_28 = FuncArg_reference(0, 0);  else _x2c_func_argument_28 = FuncArg_value(int_var(40));  Func_apply(_x2c_func_call_16, 1, (FuncArg[]){
-      _x2c_func_argument_28
-    }
-    );
+    Func _x2c_macro_function_16 = captured;  FuncArg _x2c_macro_storage_16[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_16, 1, 0))) _x2c_macro_storage_16[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_16[0] = FuncArg_value(int_var(40));  Func_apply(_x2c_macro_function_16, 1, _x2c_macro_storage_16);
   }
   )) != 42) return 22;
   printf("42 13 42 41\n");

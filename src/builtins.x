@@ -819,6 +819,8 @@ macro Statement $builtin.row(Expr $rows, Expr $name, Expr $function) {
 
 /** Returns the lowered declaration of the try frame that `frame`, a bound
     reference, names. */
+List x2c_func_call_arguments(List function, List storage, List arguments);
+
 List builtin_try_frame_declaration(Var frame) {
   match (frame)
     case %(code-value ? (expr ?type (ident ?binding)) ?):
@@ -844,6 +846,7 @@ List builtin_try_cleanup_placement(Var cleanup) {
 Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", builtin_scope_expand);
+  $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
   $builtin.row(rows, "builtin_try_frame_declaration", builtin_try_frame_declaration);
   $builtin.row(rows, "builtin_try_cleanup_placement", builtin_try_cleanup_placement);
   $builtin.row(rows, "builtin_foreach_atom_type", builtin_foreach_atom_type);

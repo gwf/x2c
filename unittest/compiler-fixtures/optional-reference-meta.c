@@ -55,9 +55,9 @@ int maybe(int * value){
 
 int Var_int(Var);
 
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
 int List_truth(List);
+
+List x2c_func_reference_type(Func, unsigned, unsigned);
 
 FuncArg FuncArg_reference(const void *, List);
 
@@ -69,10 +69,7 @@ int forward(int * value){
   if(! _init_guard_) _file_init_();
   Func function = _x2c_func_handle_0;
   return Var_int(({
-    Func _x2c_func_call_0 = function;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(value, _1);  else _x2c_func_argument_0 = x2c_func_unrepresentable_argument(_x2c_func_call_0, 0, _1);  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
-      _x2c_func_argument_0
-    }
-    );
+    Func _x2c_macro_function_0 = function;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(value, _1);  else _x2c_macro_storage_0[0] = x2c_func_unrepresentable_argument(_x2c_macro_function_0, 0, _1);  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
   }
   ));
 }
@@ -86,18 +83,15 @@ int exercise(int n){
   int value = n;
   Func function = _x2c_func_handle_0;
   int result = Var_int(({
-    Func _x2c_func_call_1 = function;  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_1, 1, 0);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(&(value), _1);  else _x2c_func_argument_1 = FuncArg_value(int_var(value));  Func_apply(_x2c_func_call_1, 1, (FuncArg[]){
-      _x2c_func_argument_1
-    }
-    );
+    Func _x2c_macro_function_1 = function;  FuncArg _x2c_macro_storage_1[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 1, 0))) _x2c_macro_storage_1[0] = FuncArg_reference(&(value), _1);  else _x2c_macro_storage_1[0] = FuncArg_value(int_var(value));  Func_apply(_x2c_macro_function_1, 1, _x2c_macro_storage_1);
   }
   ));
   if(forward(NULL) != 0) return - 1;
   return result * 10 + Var_int(({
-    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
-      _x2c_func_argument_2
+    Func _x2c_macro_function_2 = function;  FuncArg _x2c_macro_storage_2[1]; {
+      List _x2c_macro_reference_0 = x2c_func_reference_type(_x2c_macro_function_2, 1, 0);  if(List_truth(_x2c_macro_reference_0)) _x2c_macro_storage_2[0] = FuncArg_reference(0, _x2c_macro_reference_0);  else _x2c_macro_storage_2[0] = x2c_func_unrepresentable_argument(_x2c_macro_function_2, 0, NULL);
     }
-    );
+    Func_apply(_x2c_macro_function_2, 1, _x2c_macro_storage_2);
   }
   ));
 }

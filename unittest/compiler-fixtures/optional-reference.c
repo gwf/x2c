@@ -97,9 +97,9 @@ static int postfix(int * value){
 
 int Var_int(Var);
 
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
 int List_truth(List);
+
+List x2c_func_reference_type(Func, unsigned, unsigned);
 
 FuncArg FuncArg_reference(const void *, List);
 
@@ -110,10 +110,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 static int forward_func(int * value){
   Func function = _x2c_func_handle_0;
   return Var_int(({
-    Func _x2c_func_call_0 = function;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(value, _1);  else _x2c_func_argument_0 = x2c_func_unrepresentable_argument(_x2c_func_call_0, 0, _1);  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
-      _x2c_func_argument_0
-    }
-    );
+    Func _x2c_macro_function_0 = function;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(value, _1);  else _x2c_macro_storage_0[0] = x2c_func_unrepresentable_argument(_x2c_macro_function_0, 0, _1);  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
   }
   ));
 }
@@ -148,17 +145,14 @@ int main(void){
   if(node_state(&(node)) != 2 || node_state(NULL) != 1) return 3;
   Func function = _x2c_func_handle_0;
   if(Var_int(({
-    Func _x2c_func_call_1 = function;  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_1, 1, 0);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(&(value), _1);  else _x2c_func_argument_1 = FuncArg_value(int_var(value));  Func_apply(_x2c_func_call_1, 1, (FuncArg[]){
-      _x2c_func_argument_1
-    }
-    );
+    Func _x2c_macro_function_1 = function;  FuncArg _x2c_macro_storage_1[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 1, 0))) _x2c_macro_storage_1[0] = FuncArg_reference(&(value), _1);  else _x2c_macro_storage_1[0] = FuncArg_value(int_var(value));  Func_apply(_x2c_macro_function_1, 1, _x2c_macro_storage_1);
   }
   )) != 7 || value != 7) return 4;
   if(Var_int(({
-    Func _x2c_func_call_2 = function;  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(0, _x2c_func_reference_type_2);  else _x2c_func_argument_2 = x2c_func_unrepresentable_argument(_x2c_func_call_2, 0, NULL);  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
-      _x2c_func_argument_2
+    Func _x2c_macro_function_2 = function;  FuncArg _x2c_macro_storage_2[1]; {
+      List _x2c_macro_reference_0 = x2c_func_reference_type(_x2c_macro_function_2, 1, 0);  if(List_truth(_x2c_macro_reference_0)) _x2c_macro_storage_2[0] = FuncArg_reference(0, _x2c_macro_reference_0);  else _x2c_macro_storage_2[0] = x2c_func_unrepresentable_argument(_x2c_macro_function_2, 0, NULL);
     }
-    );
+    Func_apply(_x2c_macro_function_2, 1, _x2c_macro_storage_2);
   }
   )) != - 1) return 5;
   int forwarded = 1;
@@ -166,16 +160,13 @@ int main(void){
   Func lambda = _x2c_func_handle_1;
   int captured = 1;
   if(Var_int(({
-    Func _x2c_func_call_3 = lambda;  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_3, 1, 0);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(&(captured), _1);  else _x2c_func_argument_3 = FuncArg_value(int_var(captured));  Func_apply(_x2c_func_call_3, 1, (FuncArg[]){
-      _x2c_func_argument_3
-    }
-    );
+    Func _x2c_macro_function_3 = lambda;  FuncArg _x2c_macro_storage_3[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_3, 1, 0))) _x2c_macro_storage_3[0] = FuncArg_reference(&(captured), _1);  else _x2c_macro_storage_3[0] = FuncArg_value(int_var(captured));  Func_apply(_x2c_macro_function_3, 1, _x2c_macro_storage_3);
   }
   )) != 3 || captured != 3 || Var_int(({
-    Func _x2c_func_call_4 = lambda;  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_4, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(0, _x2c_func_reference_type_4);  else _x2c_func_argument_4 = x2c_func_unrepresentable_argument(_x2c_func_call_4, 0, NULL);  Func_apply(_x2c_func_call_4, 1, (FuncArg[]){
-      _x2c_func_argument_4
+    Func _x2c_macro_function_4 = lambda;  FuncArg _x2c_macro_storage_4[1]; {
+      List _x2c_macro_reference_1 = x2c_func_reference_type(_x2c_macro_function_4, 1, 0);  if(List_truth(_x2c_macro_reference_1)) _x2c_macro_storage_4[0] = FuncArg_reference(0, _x2c_macro_reference_1);  else _x2c_macro_storage_4[0] = x2c_func_unrepresentable_argument(_x2c_macro_function_4, 0, NULL);
     }
-    );
+    Func_apply(_x2c_macro_function_4, 1, _x2c_macro_storage_4);
   }
   )) != - 1) return 8;
   set_with_macro(&(value));
@@ -196,10 +187,7 @@ int main(void){
     volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0))({
-      Func _x2c_func_call_5 = function;  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_5, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(0, 0);  else _x2c_func_argument_5 = FuncArg_value(int_var(7));  Func_apply(_x2c_func_call_5, 1, (FuncArg[]){
-        _x2c_func_argument_5
-      }
-      );
+      Func _x2c_macro_function_5 = function;  FuncArg _x2c_macro_storage_5[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_5, 1, 0))) _x2c_macro_storage_5[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_5[0] = FuncArg_value(int_var(7));  Func_apply(_x2c_macro_function_5, 1, _x2c_macro_storage_5);
     }
     );
     else{

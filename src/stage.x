@@ -159,6 +159,10 @@ Var Compiler.meta_argument(
           operator, c.meta_argument(right, NULL, site, call));
     default: value = c.folded_constant(node);
   }
+  /* A name that is not a constant, such as a template's own local, passes
+     as its syntax. */
+  if (value is void)
+    match (node) case %(expr ? (ident ?)): value = node;
   if (value is void)
     c.report_error(
       <macro>, "explicit meta call cannot be resolved", site,

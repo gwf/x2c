@@ -3810,6 +3810,11 @@ static Var _macro_value_bindings(Compiler c, Var value) {
   return changed ? parts.list().var() : value;
 }
 
+/** Returns the compiler running the current compile-time call. A slot
+    function compiled into the compiler reads its facts through it. */
+Compiler Compiler.expanding(void) =>
+  macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+
 /** Returns the visible global macro `name` as a `Macro` value. */
 static List _macro_value(Compiler c, Atom name) {
   Var stored;

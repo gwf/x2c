@@ -838,52 +838,68 @@ The derived pattern is cached per macro value.
 ### A. Func call (src/expressions.x)
 
 Each argument asks the runtime signature whether it passes by reference,
-so an element of the argument array is not a plain boxed value: one
-macro writes one element, choosing at run time. The array is declared
-and indexed, which replaces the compound literal of named locals in the
+so an element of the argument array is not a plain boxed value: one macro
+writes one element, choosing at run time. The array is declared and
+indexed, which replaces the compound literal of named locals in the
 generated C.
 
 ```x2c
-macro open Statement $func_call(Expr $callee, Expr $arguments...) {
+macro open Statement $func_call(Expr $callee, Expr $count,
+    Expr $arguments...) {
   {
     Func function = $callee;
-    FuncArg storage[$func_arity($arguments)];
-    $func_arguments(function, storage, $arguments)...
-    Func_apply(function, $func_arity($arguments), storage);
+    FuncArg storage[$count];
+    $x2c_func_call_arguments(function, storage, $arguments)...
+    Func_apply(function, $count, storage);
   }
 }
 
 macro open Statement $func_argument(Expr $function, Expr $storage,
-    Expr $count, Expr $index, Expr $address, Expr $carrier, Expr $value) {
+    Expr $count, Expr $index, Expr $address, Expr $type, Expr $value) {
   if (x2c_func_reference_type($function, $count, $index))
-    $storage[$index] = FuncArg_reference($address, $carrier);
+    $storage[$index] = FuncArg_reference($address, $type);
   else $storage[$index] = $value;
 }
 
+macro open Statement $func_null_argument(Expr $function, Expr $storage,
+    Expr $count, Expr $index, Expr $value) {
+  {
+    List reference = x2c_func_reference_type($function, $count, $index);
+    if (reference) $storage[$index] = FuncArg_reference(0, reference);
+    else $storage[$index] = $value;
+  }
+}
+
+macro open Expression $func_value(Expr $argument) => FuncArg_value($argument);
+macro open Expression $func_opaque(Expr $function, Expr $index,
+    Expr $type) => x2c_func_unrepresentable_argument($function, $index, $type);
 macro open Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 ```
 
-`func_arguments` (src/builtins.x) applies `$func_argument` once per
-argument; the address, carrier and by-value alternative are chosen from
-the argument's type there. Client:
+`x2c_func_call_arguments` (src/expressions.x, registered in
+src/builtins.x) applies `$func_argument` or `$func_null_argument` once per
+argument, choosing the address, type and by-value alternative from the
+argument's type through `Compiler.expanding()`. The count is a hole: a
+`$` call in an expression position inside a `meta` body is an ordinary
+call, so a count slot would not run when a `meta` function makes a Func
+call. Client:
 
 ```x2c
-Macro call = arguments ? $func_call : $func_apply;
-return %(expr ("Var")
-  (parens ${c.bind_syntax(call(callee, arguments), AST_BLOCK, NULL)}));
+if (!arguments) {
+  Macro apply = $func_apply;
+  return compiler.bind_syntax(apply(callee), AST_EXPRESSION, NULL);
+}
+Macro call = $func_call;
+return %(expr ("Var") (parens ${compiler.bind_syntax(
+  call(callee, arguments.len(), arguments), AST_BLOCK, NULL)}));
 ```
 
 x2c source has no statement expressions, so the `(parens ...)` value of
-the block is the one form the client still writes. Recognition:
-
-```x2c
-match (block) case call(?callee, *arguments): {
-  foreach (List argument, arguments)
-    match (argument)
-      case $func_argument(?function, ?storage, ?count, ?index,
-                          ?address, ?carrier, ?value): ...
-}
-```
+the block is the one form the client still writes; the call with no
+arguments is a second C shape. Recognition in `Compiler.func_call_parts`
+mirrors construction: `case call(?callee, ?count, *arguments)`, then per
+statement `case prepare(...)` or `case absent(...)`, and `case
+boxed(?value)` on the by-value alternative.
 
 ### B. Try (src/transform.x)
 

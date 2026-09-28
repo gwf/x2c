@@ -351,6 +351,9 @@ static Var _macro_view(Var value) {
   match (node) {
     case %(at ? ?body): return _macro_view(body);
     case %(src ? ?body): return _macro_view(body);
+    /* Binding can leave a typed expression inside a template's shell. */
+    case %(expr (<macro-expr>) (!set ?inner (expr *))):
+      return _macro_view(inner);
     case %(literal *): return value;
     case %(binding ? ?): return value;
   }
