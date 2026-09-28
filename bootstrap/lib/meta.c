@@ -54,7 +54,7 @@ static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var rig
 
 static int _macro_case_match(List code, Macro t, List pattern, MatchCaptureBuffer * captured);
 
-static int _macro_publish(Macro t, List names, List internal_names, Var * values, MatchCaptureBuffer * captured, MatchCaptureBuffer * published);
+static int _macro_publish(Var pattern, List names, List internal_names, Var * values, MatchCaptureBuffer * captured, MatchCaptureBuffer * published);
 
 static List _macro_internal_names(Macro t, List names, int pending);
 
@@ -656,7 +656,7 @@ List Macro_pattern(Macro t, List names){
   if(! _init_guard_) _file_init_();  List rows = NULL, labels = names; {
     List hole;  List _x2c_macro_object_10 = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
       hole = Var_list(_x2c_macro_cursor_output_10); {
-        Var selected = List_car(labels);  labels = List_cdr(labels);  if(Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(1362954))) selected = Atom_intern(String_add(_38, String_getslice(Var_str(selected), 1, -2147483648, 1)));  int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));  Var projected = sequence ? List_var(cons(selected, NULL)) : selected;  rows = cons(List_var(cons(_macro_key(hole, _198), cons(projected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _199), cons(projected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _200), cons(projected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _37), cons(selected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _36), cons(List_var(cons(selected, NULL)), NULL))), rows);
+        Var selected = List_car(labels);  labels = List_cdr(labels);  if(Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(1362954))) selected = Atom_intern(String_add(_38, String_getslice(Var_str(selected), 1, -2147483648, 1)));  int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));  Var projected = sequence ? List_var(cons(selected, NULL)) : selected;  Var expression = ! sequence && Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? List_var(cons(_21, cons(_59, cons(List_var(cons(_45, cons(selected, NULL))), NULL)))) : projected;  rows = cons(List_var(cons(_macro_key(hole, _198), cons(expression, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _199), cons(projected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _200), cons(projected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _37), cons(selected, NULL))), rows);  rows = cons(List_var(cons(_macro_key(hole, _36), cons(List_var(cons(selected, NULL)), NULL))), rows);
       }
 
     }
@@ -762,8 +762,8 @@ static int _macro_case_match(List code, Macro t, List pattern, MatchCaptureBuffe
 MatchCaptureLayout MatchCaptureLayout_analyze(Var);
 int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
 void MatchCaptureLayout_free(MatchCaptureLayout);
-static int _macro_publish(Macro t, List names, List internal_names, Var * values, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
-  MatchCaptureLayout actual = MatchCaptureLayout_analyze(List_var(cons(_116, List_append(internal_names, NULL))));  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(cons(_116, List_append(names, NULL))));  Var ordered[MACHINE_BINDER_MAX];  int matched = 1;  List labels = names, internal = internal_names;  for(;  List_truth(labels);  labels = List_cdr(labels), internal = List_cdr(internal)){
+static int _macro_publish(Var pattern, List names, List internal_names, Var * values, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
+  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(cons(_116, List_append(names, NULL))));  Var ordered[MACHINE_BINDER_MAX];  int matched = 1;  List labels = names, internal = internal_names;  for(;  List_truth(labels);  labels = List_cdr(labels), internal = List_cdr(internal)){
     int from = MatchCaptureLayout_index(actual, List_car(internal)), to = MatchCaptureLayout_index(logical, List_car(labels));  if(from < 0 || to < 0 || ! MatchCaptureBuffer_has(captured, from)){
       matched = 0;  break;
     }
@@ -836,9 +836,9 @@ int Macro_case_capture(List code, Macro t, List names, MatchCaptureBuffer * publ
     values, 0, MACHINE_BINDER_MAX
   }
   ;  List grouped = NULL;  if(_macro_pending_parts(t, code, &(grouped))){
-    List internal = _macro_internal_names(t, names, 1);  int matched = x2c_match_try_capture(grouped, List_var(internal), & captured);  return matched && _macro_publish(t, names, internal, values, & captured, published);
+    List internal = _macro_internal_names(t, names, 1);  int matched = x2c_match_try_capture(grouped, List_var(internal), & captured);  return matched && _macro_publish(List_var(internal), names, internal, values, & captured, published);
   }
-  List pattern = _macro_case_shape(t, names);  if(! _macro_case_match(code, t, pattern, & captured)) return 0;  return _macro_publish(t, names, _macro_internal_names(t, names, 0), values, & captured, published);
+  List pattern = _macro_case_shape(t, names);  if(! _macro_case_match(code, t, pattern, & captured)) return 0;  return _macro_publish(List_var(pattern), names, _macro_internal_names(t, names, 0), values, & captured, published);
 }
 
 List Macro_case_pattern(Macro t, List names){
