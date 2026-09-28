@@ -1073,7 +1073,11 @@ static void _plan_target(Project project, ProjectTarget target, CliRequest comma
   target -> planned = 1;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
 String Path_read_text(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 List install_rows(String);
 

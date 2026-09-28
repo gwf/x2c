@@ -1577,6 +1577,10 @@ String List_str(List lst){
 
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 Buffer List_write_str(List lst, Buffer out){
   {
     size_t * _x2c_macro_address_0 = & out -> padding;

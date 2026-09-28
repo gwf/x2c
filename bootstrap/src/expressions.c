@@ -5000,7 +5000,9 @@ static List _initializer_zero(Type type, List target){
 SymTxn Compiler_begin_semantic_transaction(Compiler);
 Map Map_copy(Map);
 DiagnosticsHold Diagnostics_hold(Diagnostics);
+void x2c_exception_push(ExceptionFrame *);
 void SymTxn_commit(SymTxn);
+void x2c_exception_landed(ExceptionFrame *);
 static List _initializer_conversion(Compiler c, List value, Type type, List condition, List target, int * native_used){
   if(! List_truth(condition)) return _convert_initializer(c, value, type, target, native_used);  if(native_used)(* native_used) = 1;
   {

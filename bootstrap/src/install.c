@@ -271,7 +271,11 @@ __attribute__((constructor)) static void _file_init_(void){
 
 int String_truth(String);
 
+void x2c_exception_push(ExceptionFrame *);
+
 void Path_remove_tree(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 static void _release_packages(void){
   String work = _staging;

@@ -217,7 +217,11 @@ String x2c_home(void);
 
 String Env_get(String);
 
+void x2c_exception_push(ExceptionFrame *);
+
 String Path_read_text(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 List String_split_lines(String, int);
 

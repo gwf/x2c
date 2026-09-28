@@ -632,6 +632,10 @@ int String_len(String);
 
 List Var_list(Var);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static void Job__start(Job job){
   _Launch * launch = job -> launch;
   job -> started = 1;

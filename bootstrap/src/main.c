@@ -482,7 +482,11 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
   return failed;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
 String Path_read_text(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 Tokenizer Tokenizer_new(char *, Symbol);
 

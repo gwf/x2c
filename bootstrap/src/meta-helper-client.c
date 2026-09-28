@@ -386,7 +386,11 @@ static double _helper_now(void){
   return now.tv_sec + now.tv_nsec / 1e9;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
 int datum_unframe(String, size_t *, Var *);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 Buffer Buffer_write(Buffer, const char *);
 

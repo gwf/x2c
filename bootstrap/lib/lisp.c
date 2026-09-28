@@ -3862,6 +3862,10 @@ void Lisp_set_interrupted(Lisp lisp, int interrupted){
   if(interrupted) lisp -> call_exhausted = 1;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
   if(Var_is_row(callable, 9, 7, 3)) return _apply_lambda(lisp, Var_lambda(callable), raw, env);
   if(! Var_is_row(callable, 9, 7, 1)){

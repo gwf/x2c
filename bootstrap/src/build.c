@@ -421,7 +421,11 @@ static uint64_t _state_base(CliRequest request, String tool, int * ok){
   return hash;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
 String File_string_close(File);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 List translation_depfile_parse(String);
 

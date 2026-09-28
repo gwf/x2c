@@ -264,7 +264,11 @@ int File_stat(File, struct stat *);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
 String File_string_close(File);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;

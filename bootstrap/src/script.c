@@ -108,7 +108,11 @@ int file_lock(Path, int);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
 void Path_remove_tree(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 static void _prune(String scripts){
   {

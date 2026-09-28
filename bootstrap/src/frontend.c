@@ -425,9 +425,13 @@ void Type_begin_unit(void);
 
 Compiler Compiler_new(void);
 
+void x2c_exception_push(ExceptionFrame *);
+
 int Compiler_inherits_import(String);
 
 void Compiler_begin_meta_unit(String);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 int Compiler_error_count(Compiler);
 

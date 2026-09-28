@@ -217,6 +217,10 @@ static inline void _block_putc(Block block, unsigned char value){
   block -> length = expected;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static void _write_bytes(File file, const void * ptr, size_t size, size_t * written){
   const unsigned char * bytes = ptr;
   size_t volatile offset = 0;

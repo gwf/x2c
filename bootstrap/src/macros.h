@@ -167,6 +167,8 @@ List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token inv
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
 
+Var Compiler_macro_value_syntax(Compiler c, Var value);
+
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 
 Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);

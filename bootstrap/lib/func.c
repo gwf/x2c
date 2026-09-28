@@ -188,7 +188,11 @@ int Var_is_void(Var);
 
 int Var_numeric_info(Symbol, X2CVarNumericInfo *);
 
+void x2c_exception_push(ExceptionFrame *);
+
 Var Var_convert(Var, Symbol);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 int Var_is_null(Var);
 

@@ -316,7 +316,11 @@ Var Map_setindex(Map, Var, Var);
 
 Var int_var(int);
 
+void x2c_exception_push(ExceptionFrame *);
+
 String Path_read_text(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 Path Path_dirname(Path);
 

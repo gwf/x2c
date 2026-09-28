@@ -234,11 +234,15 @@ Context Context_open_isolated_named(const char *);
 
 int Error_mark(void);
 
+void x2c_exception_push(ExceptionFrame *);
+
 ErrorHandler Error_push(ErrorHandlerFn, Var);
 
 Symbol Logger_error_handler(List, Var);
 
 Var Context_export(Context, Var);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 void Context_close(Context);
 

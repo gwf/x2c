@@ -2379,7 +2379,9 @@ List generate_code_text(Compiler c, List ast, String basename){
 
 String String_rstrip(String, char *);
 String interface_text(Compiler, List);
+void x2c_exception_push(ExceptionFrame *);
 void file_publish(List);
+void x2c_exception_landed(ExceptionFrame *);
 Var Error_snapshot(Var);
 String String_new(const char *);
 Var List_assoc(List, Var);

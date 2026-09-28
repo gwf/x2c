@@ -1002,7 +1002,11 @@ _Noreturn static void _format_error(int offset, String reason){
 
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
 Var Var_convert(Var, Symbol);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 List cons(Var, List);
 

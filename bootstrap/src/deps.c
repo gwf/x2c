@@ -244,7 +244,11 @@ Var List_var(List);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
 void file_publish(List);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 Var List_assoc(List, Var);
 

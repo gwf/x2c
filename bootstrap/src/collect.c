@@ -1400,7 +1400,11 @@ static List _interface_candidates(String canonical){
 
 String x2c_compiler_identity(void);
 
+void x2c_exception_push(ExceptionFrame *);
+
 String Path_read_text(Path);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 String interface_prelude(void){
   if(! _init_guard_) _file_init_();

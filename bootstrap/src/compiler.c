@@ -1904,8 +1904,10 @@ List Compiler_anchor_origin(Compiler compiler, List node, Token token){
 }
 
 DiagnosticsHold Diagnostics_hold(Diagnostics);
+void x2c_exception_push(ExceptionFrame *);
 void Compiler_parse_keyword_definition(Compiler);
 List Compiler_parse_macro_definition(Compiler);
+void x2c_exception_landed(ExceptionFrame *);
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 int Compiler_collect_compile_time_definition(Compiler c, int keyword){
   if(! _init_guard_) _file_init_();  int volatile failed = 0;  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics); {
