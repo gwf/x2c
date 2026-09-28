@@ -4,8 +4,10 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> Var array/map C literals. Callable-defer helper synthesis is on dev at
-> `308709aa`. Earlier lowering cost rows are complete; do not repeat them.
+> Protocol helper synthesis. Callable-defer helper synthesis is on dev at
+> `308709aa`; Var array/map literals are on dev at `aaba3ca4`. Their
+> same-checkout cost rows are complete. Investigate the observed compiler
+> translation cost before the next migration.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -88,8 +90,9 @@ in the source/refresh commits. The single five-pair cost run is complete:
 +2.30% versus `799875a8`. Do not repeat either timing run. At this checkpoint
 no jobs or workers remained active.
 
-Next work, in order: Var array/map C literals and the other surveyed
-transform shapes, protocol helper synthesis, then complete source-form
+Next work, in order: investigate the measured cost of the two latest
+lowerings, then the other surveyed transform shapes, protocol helper
+synthesis, and complete source-form
 coverage across the compiler. Static-local initialization is skipped for
 the concrete native `__typeof__`/preprocessor/type-alias boundary recorded
 below. Before each next edit, write its complete readable client/template;
@@ -127,7 +130,8 @@ After the architectural proposal, retain the requested dependency order:
 2. Defer registration is complete at `f99136f8`; static-local initialization
    is skipped for its recorded native-type limitation. Callable-defer
    environment/helper synthesis landed at `308709aa`. Next are Var array/map
-   literals and other surveyed shapes. One batch per shape.
+   literals landed at `aaba3ca4`; other surveyed shapes remain. One batch
+   per shape.
 3. Protocol helper synthesis beyond the already migrated wrapper.
 4. Complete source-form coverage for parsed statements and expressions:
    no raw `%()` recognition of parsed nodes outside grammar and parser.
@@ -776,7 +780,8 @@ row: do not count successive versions of try twice. The current entry is:
 | Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
 | Lambda source recognition and construction (2026-09-28) | c99dd68d / prerequisite dev 799875a8, same corpus and home | increment +3.24% | increment +2.30% | Not counted | Not counted | Not measured |
 | Defer record and registration (2026-09-28) | f99136f8 / prerequisite dev a9f6d566, same corpus and home | increment +2.46% | increment +4.11% | Not counted | Not counted | Not measured |
-| Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same seven-source corpus and home | observed increment -58.11% | observed increment -50.45% | Not counted | Not counted | Not measured |
+| Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same checkout, corpus and home | observed increment +18.10% | observed increment +15.45% | Not counted | Not counted | Not measured |
+| Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, same checkout, corpus and home | observed increment +18.24% | observed increment +16.16% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -851,18 +856,27 @@ Raw samples and summary are in `debug/defer-paired-a9f6d566/`. These are
 incremental compiler costs, not measurements of runtime defer performance.
 No additional timing or instrumentation was run.
 
-Callable-defer's single valid run used five alternating pairs per mode after
-warmup, optimized baseline and candidate compilers, one source root and
-`X2C_HOME`. Default medians were 6.589067 / 2.760136 s (-58.11%); live
-medians were 7.795916 / 3.863264 s (-50.45%). Default ranges were
-6.438262--6.803231 / 2.721126--2.825304 s; live ranges were
-7.569464--8.028567 / 3.845187--3.954819 s. The two compilers generated
-identical C/H for all seven corpus sources. These unusually large differences
-are observations of this pair, not an attributed speedup from the helper
-templates. An initial control copied immediately after `build-safe` showed
-the same disparity and was stopped before a complete paired run; the baseline
-was then rebuilt through stage 1 before the valid run. Samples are in
-`debug/dual-macro-paired/results.json` in the integration checkout.
+Callable-defer's corrected run used five alternating pairs per mode after
+warmup, optimized baseline and candidate compilers built in the same checkout,
+with one seven-source tree and `X2C_HOME`. Default medians were
+6.404748 / 7.563947 s (+18.10%); live medians were 7.617784 / 8.794784 s
+(+15.45%). Default ranges were 6.148572--6.628238 / 7.243557--7.854959 s;
+live ranges were 7.463306--7.636833 / 8.671259--8.883321 s. The compilers
+generated identical C/H for all seven sources. The earlier negative row was
+invalid because its baseline binary was built in a different checkout and
+run against this one; two cross-checkout trials showed that disparity.
+Corrected samples are in `debug/callable-paired-corrected-results.json` in the
+integration checkout. The added compiler cost is observed, but its precise
+source path has not been attributed.
+
+Var array/map literal calls used the same five-pair, same-checkout method.
+Default medians were 6.774885 / 8.010428 s (+18.24%); live medians were
+7.717925 / 8.965257 s (+16.16%). Default ranges were 6.591425--7.158917 /
+7.739842--8.161179 s; live ranges were 7.455660--7.766287 /
+8.689038--9.331436 s. Samples are in `debug/var-paired-valid-results.json`
+in the integration checkout. A cross-checkout control was stopped before
+completion for the same reason as the callable-defer trial. These are measured
+compiler-translation deltas, not runtime collection performance.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
