@@ -1598,178 +1598,140 @@ static List _finish_call(
    an addressable expression can supply a checked reference carrier, while a
    representable value is boxed. Func_apply validates arity and dispatches;
    the selected adapter, `x2c_func_reference_argument`, and
-   `x2c_func_value_argument` check carrier, type, and conversion. */
+   `x2c_func_value_argument` check carrier, type, and conversion. The call
+   is the value of a statement expression around this block. */
+macro open Statement $compiler_func_call(Name $function, Expr $callee,
+    Expr $count, Expr $storage, Statement $arguments...) {
+  {
+    Func $function = $callee;
+    $arguments...
+    Func_apply($function, $count, $storage);
+  }
+}
+
+/* One argument: `address` and `carrier` pass it by reference, `value` by
+   value. */
+macro open Statement $compiler_func_argument(Name $function, Expr $count,
+    Expr $index, Name $reference, Name $argument, Expr $address,
+    Expr $carrier, Expr $value) {
+  List $reference = x2c_func_reference_type($function, $count, $index);
+  FuncArg $argument;
+  if ($reference) $argument = FuncArg_reference($address, $carrier);
+  else $argument = $value;
+}
+
+/* The by-value alternative: a boxed argument, or the diagnostic call for a
+   type with no Var form. */
+macro open Expression $compiler_func_value(Expr $value) =>
+  FuncArg_value($value);
+
+macro open Expression $compiler_func_opaque(Name $function, Expr $index,
+    Expr $type) => x2c_func_unrepresentable_argument($function, $index, $type);
+
+/* A call with no arguments applies the callee directly. */
+macro open Expression $compiler_func_apply(Expr $function) =>
+  Func_apply($function, 0, 0);
+
+/* An expression the resolver already typed, as a macro value hole takes
+   it. */
+static List _bound(List expression) =>
+  %(code-value "bound" $expression ());
+
 static List _resolve_func_call(
   Compiler compiler, List callee, List supplied, Token origin) {
   List arguments = _resolve_call_arguments(compiler, NULL, supplied, origin);
   match (arguments)
     case %((expr (void) ())): arguments = NULL;
-  List storage = NULL;
-  List zero = %(expr (int) (literal (int) "0"));
-  Array locals = [], values = [];
-  List invoked = callee;
-  String count_text = %"${arguments.len()}";
-  List count = %(
-    expr (unsigned) (literal (unsigned) $count_text)
-  );
-  if (arguments) {
-    String callee_name = compiler.fresh_name("func_call");
-    List callee_binding = compiler.sym.define(%($callee_name), %("Func"));
-    locals.push(
-      %(declare ("Func")
-          (bindings (op = (bind $callee_binding ()) $callee))));
-    invoked = %(expr ("Func") (ident $callee_binding));
-    Type query_type = NULL, value_type = NULL, reference_type = NULL;
-    Type unrepresentable_type = NULL;
-    List query = compiler.sym.resolve_global(
-      %("x2c_func_reference_type"), query_type);
-    List value_constructor = compiler.sym.resolve_global(
-      %("FuncArg_value"), value_type);
-    List reference_constructor = compiler.sym.resolve_global(
-      %("FuncArg_reference"), reference_type);
-    List unrepresentable = compiler.sym.resolve_global(
-      %("x2c_func_unrepresentable_argument"), unrepresentable_type);
-    int index = 0;
-    foreach (List argument, arguments) {
-      Type source_type = argument.cadr();
-      int null_reference =
-        _integer_literal_kind(argument, NULL) == <zero> ||
-        argument.match(%(expr ? (ident (binding ? "NULL"))));
-      int forwarded_reference = source_type.car() == <opt-ref>;
-      int addressable = _expression_is_addressable(compiler, argument);
-      List source_type_literal = compiler.cache_literal_list(
-        compiler.sym.normalize_declared_type(
-          forwarded_reference ? source_type.cdr() : source_type));
-      List index_expr = %(expr (unsigned) (literal (unsigned) "$index"));
-      List reference_name = compiler.sym.define(
-        %(${compiler.fresh_name("func_reference_type")}), %("List"));
-      List queried = %(
-        expr ("List")
-          (call (expr $query_type (ident $query))
-                (args $invoked $count $index_expr))
-      );
-      locals.push(
-        %(declare ("List")
-            (bindings (op = (bind $reference_name ()) $queried))));
-      String argument_name = compiler.fresh_name("func_argument");
-      List binding = compiler.sym.define(%($argument_name), %("FuncArg"));
-      locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
-
-      List address = zero;
-      if (forwarded_reference) address = argument;
-      else if (addressable && !null_reference) {
-        Type pointer = source_type.reference();
-        address = %(expr $pointer (op & (parens $argument)));
-      }
-      /* A non-lvalue carries no reference type, so its null address cannot
-         masquerade as an absent optional reference. */
-      List carrier_type = null_reference
-                        ? %(expr ("List") (ident $reference_name))
-                        : !forwarded_reference && !addressable
-                          ? zero
-                        : source_type_literal;
-      List reference_value = %(
-        expr ("FuncArg")
-          (call (expr $reference_type (ident $reference_constructor))
-                (args $address $carrier_type))
-      );
-      List value_value = NULL;
-      if (compiler.sym.var_tag_for_type(source_type, NULL)) {
-        List boxed = compiler.convert_expression(argument, %("Var"));
-        value_value = %(
-          expr ("FuncArg")
-            (call (expr $value_type (ident $value_constructor))
-                  (args $boxed))
-        );
-      }
-      else value_value = %(
-        expr ("FuncArg")
-          (call
-            (expr $unrepresentable_type (ident $unrepresentable))
-            (args $invoked $index_expr $source_type_literal))
-      );
-      List target = %(expr ("FuncArg") (ident $binding));
-      locals.push(
-        %(if (expr ("List") (ident $reference_name))
-            (stmnt (expr ("FuncArg") (op = $target $reference_value)))
-            (stmnt (expr ("FuncArg") (op = $target $value_value)))));
-      values.push(%(expr ("FuncArg") (ident $binding)));
-      index++;
-    }
-    List array_type = %(decl ("FuncArg") (bindings (bind () ((dim)))));
-    storage = %(
-      expr ((dim) "FuncArg")
-        (cast $array_type
-          (expr ((dim) "FuncArg")
-            (composite (commas @{values.list_free()}))))
-    );
+  if (!arguments) {
+    Macro apply = $compiler_func_apply;
+    return compiler.bind_syntax(
+      apply(_bound(callee)), AST_EXPRESSION, NULL);
   }
-  else storage = zero;
-  Type apply_type = NULL;
-  List apply = compiler.sym.resolve_global(%("Func_apply"), apply_type);
-  List call = %(
-    expr ("Var")
-      (call (expr $apply_type (ident $apply))
-            (args $invoked $count $storage))
+  Macro call = $compiler_func_call, prepare = $compiler_func_argument,
+        boxed = $compiler_func_value, opaque = $compiler_func_opaque;
+  int count = arguments.len(), index = 0;
+  List function = compiler.sym.define(
+    %(${compiler.fresh_name("func_call")}), %("Func"));
+  Array prepared = [], values = [];
+  foreach (List argument, arguments) {
+    Type source_type = argument.cadr();
+    int null_reference =
+      _integer_literal_kind(argument, NULL) == <zero> ||
+      argument.match(%(expr ? (ident (binding ? "NULL"))));
+    int forwarded_reference = source_type.car() == <opt-ref>;
+    int addressable = _expression_is_addressable(compiler, argument);
+    List source = _bound(compiler.cache_literal_list(
+      compiler.sym.normalize_declared_type(
+        forwarded_reference ? source_type.cdr() : source_type)));
+    List reference = compiler.sym.define(
+      %(${compiler.fresh_name("func_reference_type")}), %("List"));
+    List name = compiler.sym.define(
+      %(${compiler.fresh_name("func_argument")}), %("FuncArg"));
+    Var address = 0;
+    if (forwarded_reference) address = _bound(argument);
+    else if (addressable && !null_reference)
+      address = _bound(
+        %(expr ${source_type.reference()} (op & (parens $argument))));
+    /* A non-lvalue carries no reference type, so its null address cannot
+       masquerade as an absent optional reference. */
+    Var carrier = null_reference ? %(expr () (ident $reference))
+                : !forwarded_reference && !addressable ? 0 : source;
+    List value = _bound(compiler.bind_syntax(
+      compiler.sym.var_tag_for_type(source_type, NULL)
+        ? boxed(_bound(compiler.convert_expression(argument, %("Var"))))
+        : opaque(function, index, source),
+      AST_EXPRESSION, NULL));
+    prepared.push(Macro_apply(prepare, %($function $count $index $reference
+      $name $address $carrier $value)));
+    values.push(%(expr ("FuncArg") (ident $name)));
+    index++;
+  }
+  List array_type = %(decl ("FuncArg") (bindings (bind () ((dim)))));
+  List storage = %(
+    expr ((dim) "FuncArg")
+      (cast $array_type
+        (expr ((dim) "FuncArg")
+          (composite (commas @{values.list_free()}))))
   );
-  if (!arguments) return call;
-  return %(
-    expr ("Var")
-      (parens (block @{locals.list_free()} (stmnt $call)))
-  );
-}
-
-static List _func_call_arguments(List body) {
-  Array parts = $auto([]);
-  match (body.car())
-    case %(declare ("Func") (bindings (op = (bind ? ()) ?callee))):
-      parts.push(callee);
-  if (!parts.len()) return NULL;
-  List rest = body.cdr();
-  for (; rest && rest.cdr(); rest = rest.cdr())
-    match (rest.car())
-      case %(if ?
-        (stmnt (expr ("FuncArg") (op = ?
-          (expr ("FuncArg")
-            (call (expr ? (ident (binding ? "FuncArg_reference")))
-                  (args ?address ?source))))))
-        (stmnt (expr ("FuncArg") (op = ? ?boxed)))): {
-        Var value = %(no-value);
-        match (boxed)
-          case %(expr ("FuncArg")
-                 (call (expr ? (ident (binding ? "FuncArg_value")))
-                       (args ?boxed_value))):
-            value = boxed_value;
-        parts.push(%(func-arg $value $address $source));
-      }
-  if (!rest) return NULL;
-  match (rest.car())
-    case %(stmnt (expr ?
-                  (call (expr ? (ident (binding ? "Func_apply")))
-                        (args ? (expr ? (literal ? ?(String count))) ?)))): {
-      long arity;
-      if (!count.try_long(&arity) || arity != parts.len() - 1) return NULL;
-      return parts;
-    }
-  return NULL;
+  List block = compiler.bind_syntax(
+    Macro_apply(call, %($function ${_bound(callee)} $count
+      ${_bound(storage)} @{prepared.list_free()})),
+    AST_STATEMENT, compiler.return_type);
+  return %(expr ("Var") (parens $block));
 }
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
-    other expression. Each argument is `(func-arg value address source)`: the
-    argument boxed as a Var, or `(no-value)` when it has no Var form; its
-    address or
-    NULL; and its type. */
+    other expression. `content` is the body of the call's `expr` node. Each
+    argument is `(func-arg value address source)`: the argument boxed as a
+    Var, or `(no-value)` when it has no Var form; its address or NULL; and
+    its type. */
 List Compiler.func_call_parts(Compiler compiler, Var content) {
+  Macro call = $compiler_func_call, prepare = $compiler_func_argument,
+        boxed = $compiler_func_value, apply = $compiler_func_apply;
   match (content) {
-    case %(parens (block *body)): return _func_call_arguments(body);
-    case %(call (expr ? (ident (binding ? "Func_apply")))
-                (args ?callee (expr ? (literal ? "0"))
-                      (expr ? (literal ? "0")))):
-      return %($callee);
-    case %(call (expr ? (ident (binding ? "Func_apply")))
-                (args ?callee (expr ? (literal ? "0"))
-                      (expr ? (ident (binding ? "NULL"))))):
-      return %($callee);
+    case %(call *):
+      match (%(expr () $content)) case apply(?callee): return %($callee);
+    case %(parens ?block):
+      match (block)
+        case call(?function, ?callee, ?count, ?storage, *arguments): {
+          Array parts = $auto([callee]);
+          // Each argument's preparation is three statements.
+          while (arguments && arguments.cdr() && arguments.cddr()) {
+            List three = %(seq ${arguments.car()} ${arguments.cadr()}
+                               ${arguments.caddr()});
+            arguments = arguments.cdr().cddr();
+            match (three)
+              case prepare(?function, ?count, ?index, ?reference, ?name,
+                           ?address, ?carrier, ?value): {
+                Var unboxed = %(no-value);
+                match (value) case boxed(?argument): unboxed = argument;
+                parts.push(%(func-arg $unboxed $address $carrier));
+                continue;
+              }
+            return NULL;
+          }
+          return arguments ? NULL : parts;
+        }
   }
   return NULL;
 }

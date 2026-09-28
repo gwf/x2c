@@ -289,7 +289,11 @@ List Macro_pattern(Macro t, List names) {
       selected = Atom.intern("*" + selected.str()[1:]);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? %($selected).var() : selected;
-    rows = cons(%(${_macro_key(hole, "expression")} $projected), rows);
+    /* A name read as an expression is an identifier of its binding, as
+       `_macro_instantiate` builds it. */
+    Var expression = !sequence && hole.assoc(<kind>) == <name>
+                   ? %(expr ? (ident $selected)).var() : projected;
+    rows = cons(%(${_macro_key(hole, "expression")} $expression), rows);
     rows = cons(%(${_macro_key(hole, "value")} $projected), rows);
     rows = cons(%(${_macro_key(hole, "source")} $projected), rows);
     rows = cons(%(${_macro_key(hole, "member")} $selected), rows);
@@ -406,12 +410,13 @@ static int _macro_case_match(
 }
 
 /* Publishes internal captures under the user's binders, in the order the
-   `case` wrote them. */
+   `case` wrote them. `values` holds them in the slots of `pattern`, the
+   pattern that captured them: its binders in lexical order, which need
+   not be the order of the parameters. */
 static int _macro_publish(
-  Macro t, List names, List internal_names, Var *values,
+  Var pattern, List names, List internal_names, Var *values,
   MatchCaptureBuffer *captured, MatchCaptureBuffer *published) {
-  MatchCaptureLayout actual = MatchCaptureLayout.analyze(
-    %(!and @internal_names));
+  MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
   MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
   Var ordered[MACHINE_BINDER_MAX];
   int matched = 1;
@@ -492,13 +497,13 @@ int Macro_case_capture(
   if (_macro_pending_parts(t, code, grouped)) {
     List internal = _macro_internal_names(t, names, 1);
     int matched = x2c_match_try_capture(grouped, internal, &captured);
-    return matched &&
-      _macro_publish(t, names, internal, values, &captured, published);
+    return matched && _macro_publish(
+      internal, names, internal, values, &captured, published);
   }
   List pattern = _macro_case_shape(t, names);
   if (!_macro_case_match(code, t, pattern, &captured)) return 0;
   return _macro_publish(
-    t, names, _macro_internal_names(t, names, 0), values, &captured,
+    pattern, names, _macro_internal_names(t, names, 0), values, &captured,
     published);
 }
 
