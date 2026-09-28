@@ -52,7 +52,7 @@ Source: `lib/meta.x:175`
 Recognizes code built by `t` without a site; see
 `Macro_case_capture_at`.
 
-Source: `lib/meta.x:589`
+Source: `lib/meta.x:592`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -64,7 +64,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:552`
+Source: `lib/meta.x:555`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -74,7 +74,7 @@ Source: `lib/meta.x:552`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture` over the match subject.
 
-Source: `lib/meta.x:595`
+Source: `lib/meta.x:598`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -121,7 +121,7 @@ Source: `lib/meta.x:78`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:645`
+Source: `lib/meta.x:648`
 
 #### x2c_expr_call
 
@@ -130,7 +130,7 @@ Source: `lib/meta.x:645`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:619`
+Source: `lib/meta.x:622`
 
 #### x2c_expr_composite
 
@@ -139,7 +139,7 @@ Source: `lib/meta.x:619`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:624`
+Source: `lib/meta.x:627`
 
 #### x2c_expr_ident
 
@@ -148,7 +148,7 @@ Source: `lib/meta.x:624`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:605`
+Source: `lib/meta.x:608`
 
 #### x2c_expr_index
 
@@ -156,7 +156,7 @@ Source: `lib/meta.x:605`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:608`
+Source: `lib/meta.x:611`
 
 #### x2c_function_body
 
@@ -164,7 +164,7 @@ Source: `lib/meta.x:608`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:699`
+Source: `lib/meta.x:702`
 
 #### x2c_literal_int
 
@@ -198,7 +198,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:707`
+Source: `lib/meta.x:710`
 
 #### x2c_stmnt_make
 
@@ -206,7 +206,7 @@ Source: `lib/meta.x:707`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:639`
+Source: `lib/meta.x:642`
 
 #### x2c_stmnt_return
 
@@ -214,7 +214,7 @@ Source: `lib/meta.x:639`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:642`
+Source: `lib/meta.x:645`
 
 ### `Macro`
 
@@ -271,7 +271,7 @@ process: the plan Match keeps, the slots of the macro's fixed locals, and
 where each binder reads its capture. The compiler emits one
 zero-initialized static site per `case`.
 
-Source: `lib/meta.x:540`
+Source: `lib/meta.x:543`
 
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
@@ -281,7 +281,7 @@ Source: `lib/meta.x:540`
 Records the machine slots that hold a macro's fixed locals, so a
 repeated slot compares those locals by identity during recognition.
 
-Source: `lib/meta.x:380`
+Source: `lib/meta.x:383`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
@@ -292,7 +292,7 @@ Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot
 in the `case`, which need not share the parameters' order.
 
-Source: `lib/meta.x:406`
+Source: `lib/meta.x:409`
 
 <a id="Source"></a>
 ### Source

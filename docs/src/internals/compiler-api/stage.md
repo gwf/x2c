@@ -48,7 +48,7 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:361`
+Source: `src/stage.x:365`
 
 <a id="Compiler.folded_constant"></a>
 #### Compiler.folded_constant
@@ -85,7 +85,7 @@ Source: `src/stage.x:129`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:376`
+Source: `src/stage.x:380`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -98,7 +98,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/stage.x:283`
+Source: `src/stage.x:287`
 
 ## Design notes
 

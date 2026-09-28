@@ -47,8 +47,8 @@ the built-in macros' compile-time algorithms.
 
 Public functions:
 
-`builtin_try_frame_declaration`, `builtin_try_cleanup_placement`,
-`builtin_targets`
+`builtin_try_catch_site`, `builtin_try_landing`,
+`builtin_try_cleanup_placement`, `builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -193,17 +193,18 @@ Public functions:
 `Compiler.complete_iter_chain`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
 `Compiler.postfix_completions`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `Compiler.func_call_parts`,
-`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
-`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
-`Compiler.resolve_expression`, `Compiler.parse_variable`,
-`Compiler.parse_conditional`, `Compiler.parse_assignment`,
-`Compiler.parse_primary`, `Compiler.parse_expression`,
-`Compiler.parse_parenthesized_statement`, `Compiler.converter_call`,
-`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_field_path`, `Compiler.initializer_rows`,
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
+`Compiler.promote_string_literal`, `x2c_func_call_arguments`,
+`Compiler.func_call_parts`, `Compiler.check_explicit_converter`,
+`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
+`Compiler.parse_variable`, `Compiler.parse_conditional`,
+`Compiler.parse_assignment`, `Compiler.parse_primary`,
+`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
+`Compiler.converter_call`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_field_path`,
+`Compiler.initializer_rows`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -312,12 +313,13 @@ Public functions:
 `x2c_template_call`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.macro_value_literal`,
-`Compiler.try_parse_macro_pattern`, `Compiler.capture_macro_value`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
-`Compiler.take_code_value`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.expanding`, `Compiler.try_parse_macro_pattern`,
+`Compiler.capture_macro_value`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_invocation_site`, `Compiler.take_code_value`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 

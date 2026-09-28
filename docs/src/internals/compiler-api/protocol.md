@@ -58,7 +58,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1847`
+Source: `src/protocol.x:1846`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -82,7 +82,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2316`
+Source: `src/protocol.x:2315`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -116,7 +116,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol.x:2449`
+Source: `src/protocol.x:2448`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -125,7 +125,7 @@ Source: `src/protocol.x:2449`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1907`
+Source: `src/protocol.x:1906`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -171,7 +171,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1773`
+Source: `src/protocol.x:1772`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -221,7 +221,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1756`
+Source: `src/protocol.x:1755`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols

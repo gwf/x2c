@@ -13,8 +13,9 @@ The built-in macros' compile-time algorithms.
 | Function | Summary |
 | --- | --- |
 | [`builtin_targets`](#builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
+| [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one. |
 | [`builtin_try_cleanup_placement`](#builtin_try_cleanup_placement) | Places the lowered statements that leave a try region after it, with the effect that marks the unit as needing exception support. |
-| [`builtin_try_frame_declaration`](#builtin_try_frame_declaration) | Returns the lowered declaration of the try frame that `frame`, a bound reference, names. |
+| [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return. |
 
 ### Functions
 
@@ -25,7 +26,16 @@ The built-in macros' compile-time algorithms.
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:844`
+Source: `src/builtins.x:918`
+
+#### builtin_try_catch_site
+
+`List builtin_try_catch_site(List frame, List clause)`
+
+Returns the catch site `frame` pushes for the clause `clause`
+describes, or nothing for a try without one.
+
+Source: `src/builtins.x:869`
 
 #### builtin_try_cleanup_placement
 
@@ -34,16 +44,16 @@ Source: `src/builtins.x:844`
 Places the lowered statements that leave a try region after it, with
 the effect that marks the unit as needing exception support.
 
-Source: `src/builtins.x:833`
+Source: `src/builtins.x:907`
 
-#### builtin_try_frame_declaration
+#### builtin_try_landing
 
-`List builtin_try_frame_declaration(Var frame)`
+`List builtin_try_landing(List frame, List clause, List cleanup)`
 
-Returns the lowered declaration of the try frame that `frame`, a bound
-reference, names.
+Returns what runs when `frame` lands: the catch arm the clause's
+handler selected, or `cleanup` and no return.
 
-Source: `src/builtins.x:822`
+Source: `src/builtins.x:892`
 
 ## Design notes
 

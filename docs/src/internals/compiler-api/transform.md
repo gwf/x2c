@@ -35,7 +35,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:3550`
+Source: `src/transform.x:3483`
 
 #### transform_map_literal
 
@@ -45,7 +45,7 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:3561`
+Source: `src/transform.x:3494`
 
 ### `Compiler`
 
@@ -94,7 +94,7 @@ Source: `src/transform.x:325`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/transform.x:1586`
+Source: `src/transform.x:1577`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -126,7 +126,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/transform.x:1613`
+Source: `src/transform.x:1604`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -169,7 +169,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/transform.x:1337`
+Source: `src/transform.x:1328`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -181,7 +181,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:1924`
+Source: `src/transform.x:1915`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -195,7 +195,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4329`
+Source: `src/transform.x:4262`
 
 ## Design notes
 

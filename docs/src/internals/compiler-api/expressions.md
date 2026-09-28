@@ -12,6 +12,7 @@ X2c expression parsing.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_func_call_arguments`](#x2c_func_call_arguments) | Returns one `$func_argument` or `$func_null_argument` application for each of `arguments`, preparing it into `storage` for the call through `function`; the `$func_call` template calls this in a slot. |
 | [`Compiler.check_explicit_converter`](#Compiler.check_explicit_converter) | Reports `parsed` when it is the explicit converter call resolved last and `target` converts its receiver on its own: either side is Var, the types share one C type, or the receiver declares a converter to the target. |
 | [`Compiler.complete_iter_chain`](#Compiler.complete_iter_chain) | Completes an eligible resolved `Iter` call chain for immediate consumption. |
 | [`Compiler.convert_compound_literal`](#Compiler.convert_compound_literal) | Keeps a compound literal's native type definition at its original scope. |
@@ -41,6 +42,19 @@ X2c expression parsing.
 | [`Compiler.var_tag_expression`](#Compiler.var_tag_expression) | Builds an exact tag expression, deferring macro type slots until binding. |
 | [`List.printf_family`](#List.printf_family) | Returns the printf-family entry a callee names, or `NULL`. |
 
+### Functions
+
+#### x2c_func_call_arguments
+
+`List x2c_func_call_arguments(List function, List storage, List arguments)`
+
+Returns one `$func_argument` or `$func_null_argument` application for
+each of `arguments`, preparing it into `storage` for the call through
+`function`; the `$func_call` template calls this in a slot. The choice
+of address, type and by-value alternative follows the argument's type.
+
+Source: `src/expressions.x:1649`
+
 ### `Compiler`
 
 <a id="Compiler.check_explicit_converter"></a>
@@ -56,7 +70,7 @@ for a typed destination, 1 for an interpolation hole, which displays
 every value through `Var.str`, and 2 for a printf-family value, which
 the format converts when it is a Var.
 
-Source: `src/expressions.x:1757`
+Source: `src/expressions.x:1764`
 
 <a id="Compiler.complete_iter_chain"></a>
 #### Compiler.complete_iter_chain
@@ -79,7 +93,7 @@ Source: `src/expressions.x:55`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:4006`
+Source: `src/expressions.x:4013`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -93,7 +107,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:4050`
+Source: `src/expressions.x:4057`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -103,7 +117,7 @@ Source: `src/expressions.x:4050`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:4001`
+Source: `src/expressions.x:4008`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -122,7 +136,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4396`
+Source: `src/expressions.x:4403`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -132,7 +146,7 @@ Source: `src/expressions.x:4396`
 The call to the converter `type` declares for `target`, applied to
 `expr`, or NULL when it declares none.
 
-Source: `src/expressions.x:3024`
+Source: `src/expressions.x:3031`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -142,10 +156,11 @@ Source: `src/expressions.x:3024`
 Returns the callee and arguments of a typed `Func` call, or NULL for any
 other expression. `content` is the body of the call's `expr` node. Each
 argument is `(func-arg value address source)`: the argument boxed as a
-Var, or `(no-value)` when it has no Var form; its address or NULL; and
-its type.
+Var, or `(no-value)` when it has no Var form; its address, or 0; and its
+type, which is `(expr ("List") (ident reference))` for a null argument
+that takes the callee's own type.
 
-Source: `src/expressions.x:1708`
+Source: `src/expressions.x:1713`
 
 <a id="Compiler.initializer_field_path"></a>
 #### Compiler.initializer_field_path
@@ -156,7 +171,7 @@ Returns the initializer path selecting one visible aggregate field.
 Anonymous aggregate members remain explicit path frames, so consumers
 observe the same member promotion as native initializer conversion.
 
-Source: `src/expressions.x:3379`
+Source: `src/expressions.x:3386`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -167,7 +182,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/expressions.x:3136`
+Source: `src/expressions.x:3143`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
@@ -180,7 +195,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:3592`
+Source: `src/expressions.x:3599`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot
@@ -189,7 +204,7 @@ Source: `src/expressions.x:3592`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/expressions.x:3263`
+Source: `src/expressions.x:3270`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -200,7 +215,7 @@ Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:2674`
+Source: `src/expressions.x:2681`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -211,7 +226,7 @@ Parses a binary expression and its optional conditional tail.
 The false arm recurses at conditional precedence, making `?:`
 right-associative, and `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:2650`
+Source: `src/expressions.x:2657`
 
 <a id="Compiler.parse_expression"></a>
 #### Compiler.parse_expression
@@ -222,7 +237,7 @@ Parses an assignment expression and any following comma expressions.
 A comma expression retains source order and takes the type of its final
 value. `compiler.token` stops at the first token outside the expression.
 
-Source: `src/expressions.x:2769`
+Source: `src/expressions.x:2776`
 
 <a id="Compiler.parse_macro_expression_target"></a>
 #### Compiler.parse_macro_expression_target
@@ -249,7 +264,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions.x:2792`
+Source: `src/expressions.x:2799`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -260,7 +275,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `compiler.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions.x:2710`
+Source: `src/expressions.x:2717`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -270,7 +285,7 @@ Source: `src/expressions.x:2710`
 Parses and resolves one complex identifier expression.
 Parsing starts at `compiler.token` and leaves it after the identifier.
 
-Source: `src/expressions.x:2613`
+Source: `src/expressions.x:2620`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -316,7 +331,7 @@ Source: `src/expressions.x:1106`
 Returns the exact Var tag for a type test, rejecting types without one.
 Enums retain no identity after boxing and cannot be tested this way.
 
-Source: `src/expressions.x:1879`
+Source: `src/expressions.x:1886`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -330,7 +345,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions.x:2435`
+Source: `src/expressions.x:2442`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -340,7 +355,7 @@ Source: `src/expressions.x:2435`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:2419`
+Source: `src/expressions.x:2426`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -364,7 +379,7 @@ Source: `src/expressions.x:370`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions.x:1907`
+Source: `src/expressions.x:1914`
 
 ### `List`
 
