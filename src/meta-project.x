@@ -4,11 +4,12 @@
 
     Before a translation starts, the bodied `meta` functions its inputs
     reach are compiled into one helper program linked against the runtime,
-    which the translation then calls (`src/stage.x`). They come from each
-    project `.xmacro` file an input imports, directly, through an included
-    header, or through a package, and from an input that defines its own
-    until those move to `.xmacro` files. Meta code under the x2c root's
-    `lib`, `src`, and `etc` is the compiler's own, linked into it.
+    which the translation then calls (`src/meta-helper-client.x`). They
+    come from each project `.xmacro` file an input imports, directly,
+    through an included header, or through a package, and from an input
+    that defines its own until those move to `.xmacro` files. Meta code
+    under the x2c root's `lib`, `src`, and `etc` is the compiler's own,
+    linked into it.
 
     Each input that reaches any gets a table of its own, parsed from the
     input itself so its imports see the declarations they are used with.
@@ -27,6 +28,7 @@
 #include "datum.x"
 #include "digest.x"
 #include "deps.x"
+#include "meta-helper-client.x"
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"
@@ -135,11 +137,6 @@ static void _meta_unit(Frontend f, String path, int index) {
   unit.parse();
 }
 
-/* Runs `arguments`, a C compiler command, and returns NULL, or its first
-   error. */
-static String _meta_cc(List arguments) =>
-  Compiler.meta_cc_run(arguments, NULL);
-
 /* The object of `etc/meta-helper.x`, the helper's protocol loop, which
    this compiler translates once per `identity`, or NULL with `failure`
    set. */
@@ -167,9 +164,9 @@ static String _meta_support(
     return NULL;
   }
   String output = %"$object.${"%ld".printf((long) getpid())}";
-  failure = _meta_cc(
+  failure = Compiler.meta_cc_run(
     %(${t.cc} @{_meta_flags()} "-iquote" $directory "-iquote" $include
-      "-c" ${%"$directory/meta-helper.c"} "-o" $output));
+      "-c" ${%"$directory/meta-helper.c"} "-o" $output), NULL);
   if (failure) return NULL;
   Path.move_to(output, object);
   return object;
@@ -198,13 +195,15 @@ static String _meta_localize(Toolchain t, String base, int index) {
   String entry = %"x2c_module_targets_$index", object = %"$base.o";
   String merged = %"$base.r.o";
 #ifdef __APPLE__
-  String failure = _meta_cc(
+  String failure = Compiler.meta_cc_run(
     %(${t.cc} "-r" "-nostdlib" ${%"-Wl,-exported_symbol,_$entry"} $object
-      "-o" $merged));
+      "-o" $merged), NULL);
 #else
-  String failure = _meta_cc(%(${t.cc} "-r" "-nostdlib" $object "-o" $merged));
+  String failure = Compiler.meta_cc_run(
+    %(${t.cc} "-r" "-nostdlib" $object "-o" $merged), NULL);
   if (!failure)
-    failure = _meta_cc(%("objcopy" ${%"--keep-global-symbol=$entry"} $merged));
+    failure = Compiler.meta_cc_run(
+      %("objcopy" ${%"--keep-global-symbol=$entry"} $merged), NULL);
 #endif
   if (!failure) Path.move_to(merged, object);
   return failure;
@@ -334,8 +333,8 @@ static List _meta_build(
     if (archive) inputs = inputs.append(%($archive));
     ToolAction link = t.link_action(output, inputs);
     /* The link compiles the table, which includes the runtime headers. */
-    failure = _meta_cc(
-      %(@{link.arguments} @{_meta_flags()} "-iquote" $include));
+    failure = Compiler.meta_cc_run(
+      %(@{link.arguments} @{_meta_flags()} "-iquote" $include), NULL);
     if (!failure) Path.move_to(output, helper);
     else if (Path.exists(helper)) Path.remove_file(helper);
   }

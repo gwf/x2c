@@ -109,6 +109,8 @@
   - [src/literals.x](internals/compiler-api/literals.md)
   - [src/macros.x](internals/compiler-api/macros.md)
   - [src/main.x](internals/compiler-api/main.md)
+  - [src/meta-group.x](internals/compiler-api/meta-group.md)
+  - [src/meta-helper-client.x](internals/compiler-api/meta-helper-client.md)
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/parse.x](internals/compiler-api/parse.md)
   - [src/project.x](internals/compiler-api/project.md)

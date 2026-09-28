@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 35
+- Compiler modules: 37
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -323,6 +323,29 @@ Public functions:
 
 `main`
 
+### [src/meta-group.x](../src/meta-group.x)
+
+a unit's meta group, emitted as C.
+
+Public functions:
+
+`Compiler.use_meta_toolchain`, `Compiler.meta_cc`,
+`Compiler.stage_meta_in_process`, `Compiler.groups_meta`,
+`Compiler.group_meta_function`, `Compiler.record_meta_import`,
+`Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
+`Compiler.meta_cc_run`, `Compiler.use_meta_build_directory`,
+`Compiler.write_meta_build`, `Compiler.meta_call_missing`,
+`Compiler.refuse_meta_call`, `Compiler.bind_meta_group`
+
+### [src/meta-helper-client.x](../src/meta-helper-client.x)
+
+the compiler's side of the project meta helper.
+
+Public functions:
+
+`Compiler.stop_meta_helper`, `Compiler.use_meta_helper`,
+`Compiler.begin_meta_unit`, `Compiler.meta_helper_call`
+
 ### [src/meta-project.x](../src/meta-project.x)
 
 the project meta build.
@@ -419,21 +442,13 @@ Public functions:
 
 ### [src/stage.x](../src/stage.x)
 
-meta groups, the project helper, and the values crossing.
+the values crossing between meta code and the program.
 
 Public functions:
 
 `literal_text_value`, `Compiler.folded_constant`, `Compiler.meta_argument`,
 `Compiler.meta_value_expression`, `Compiler.check_meta_call`,
-`Compiler.meta_is_comptime_only`, `Compiler.use_meta_toolchain`,
-`Compiler.meta_cc`, `Compiler.stage_meta_in_process`, `Compiler.groups_meta`,
-`Compiler.group_meta_function`, `Compiler.record_meta_import`,
-`Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
-`Compiler.meta_cc_run`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.stop_meta_helper`,
-`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
-`Compiler.meta_helper_call`, `Compiler.stage_meta_group`,
-`Compiler.bind_meta_group`
+`Compiler.meta_is_comptime_only`
 
 ### [src/statements.x](../src/statements.x)
 
@@ -644,7 +659,8 @@ values as Lisp reader text.
 
 Public functions:
 
-`datum_write`, `datum_read`, `datum_result_problem`
+`datum_write`, `datum_read`, `datum_frame`, `datum_unframe`,
+`datum_result_problem`
 
 ### [lib/diff.x](../lib/diff.x)
 

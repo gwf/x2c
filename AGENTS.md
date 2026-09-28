@@ -99,10 +99,12 @@ Direct destructive operations outside the requested change need approval.
 
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
   `frontend` (configured source units) -> `meta-project` (project meta
-  helper) -> `compiler` (translation state) ->
+  helper build) and `meta-helper-client` (its calls) -> `compiler`
+  (translation state) ->
   shared runtime `lib/tokenizer.x` ->
-  `parse`/`expressions`/`statements`/`macros` (+ `stage`, which carries
-  values across the compile-time boundary, and `builtins` and `linked-meta`,
+  `parse`/`expressions`/`statements`/`macros` (+ `meta-group`, which emits
+  a unit's meta group, `stage`, which carries values across the
+  compile-time boundary, and `builtins` and `linked-meta`,
   the compile-time code compiled into the compiler)/
   `literals` -> `ast` -> `type` (+ `type-ledger`)/`protocol` -> `transform`
   (+ `regions`) ->

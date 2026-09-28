@@ -113,6 +113,10 @@ is listed under [compiler options](../reference/cli.md).
 - Parse, import, hygiene, and expand: `src/macros.x`
 - Shared compile-time syntax builders: `lib/meta.x`
 - Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
+- `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
+  in-process staging: `src/meta-group.x`; the project helper:
+  `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
+  `etc/meta-helper.x` answers
 - Embedded native bindings: `etc/lisp-bindings.xmacro`,
   `etc/lisp-bindings.xlisp`, `lib/lisp.x`, and `lib/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding

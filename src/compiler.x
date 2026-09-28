@@ -215,6 +215,8 @@ protocol Var(Compiler) as void *;
 #include "protocol.x"
 #include "macros.x"
 #include "stage.x"
+#include "meta-group.x"
+#include "meta-helper-client.x"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>

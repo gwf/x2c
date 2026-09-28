@@ -7,15 +7,6 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_transform(Compiler compiler, List ast);
-
-List generate_code_text(Compiler c, List ast, String basename);
-
-#if defined(_WIN32) || defined(__CYGWIN__)
-#define X2C_NATIVE_MODULES 0
-#else
-#define X2C_NATIVE_MODULES 1
-#endif
 typedef Var(* MetaCall)(Compiler c, List expression, Token site);
 
 Var literal_text_value(String spelling);
@@ -29,40 +20,6 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
-
-void Compiler_use_meta_toolchain(String cc, String include_dir);
-
-String Compiler_meta_cc(String * include_dir);
-
-void Compiler_stage_meta_in_process(void);
-
-int Compiler_groups_meta(Compiler c);
-
-void Compiler_group_meta_function(Compiler c, List fn);
-
-void Compiler_record_meta_import(Compiler c);
-
-int Compiler_meta_reaches_compile_time(Compiler c, Var node);
-
-String Compiler_meta_cc_identity(String cc);
-
-String Compiler_meta_cc_run(List arguments, String directory);
-
-void Compiler_use_meta_build_directory(String directory);
-
-void Compiler_write_meta_build(Compiler c);
-
-void Compiler_stop_meta_helper(void);
-
-void Compiler_use_meta_helper(String path, Map failures, Map units);
-
-void Compiler_begin_meta_unit(String filename);
-
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments);
-
-String Compiler_stage_meta_group(Compiler c, String * failure);
-
-void Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 
 #endif /* __GUARD_0x042BDEBD__ */

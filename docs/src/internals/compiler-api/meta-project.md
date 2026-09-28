@@ -26,17 +26,18 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:400`
+Source: `src/meta-project.x:399`
 
 ## Design notes
 
 Before a translation starts, the bodied `meta` functions its inputs
 reach are compiled into one helper program linked against the runtime,
-which the translation then calls (`src/stage.x`). They come from each
-project `.xmacro` file an input imports, directly, through an included
-header, or through a package, and from an input that defines its own
-until those move to `.xmacro` files. Meta code under the x2c root's
-`lib`, `src`, and `etc` is the compiler's own, linked into it.
+which the translation then calls (`src/meta-helper-client.x`). They
+come from each project `.xmacro` file an input imports, directly,
+through an included header, or through a package, and from an input
+that defines its own until those move to `.xmacro` files. Meta code
+under the x2c root's `lib`, `src`, and `etc` is the compiler's own,
+linked into it.
 
 Each input that reaches any gets a table of its own, parsed from the
 input itself so its imports see the declarations they are used with.

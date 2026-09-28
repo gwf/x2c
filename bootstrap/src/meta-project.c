@@ -21,6 +21,7 @@ static Var _130, _127, _125, _123, _120, _117, _115, _113, _111, _101, _94, _86,
 #include "datum.h"
 #include "digest.h"
 #include "deps.h"
+#include "meta-helper-client.h"
 #include "script.h"
 #include "toolchain.h"
 #include "utils.h"
@@ -40,8 +41,6 @@ static String _meta_quoted(Token token);
 static int _meta_scan(CliRequest request, String path, Array imports, Map seen, Map packages);
 
 static void _meta_unit(Frontend f, String path, int index);
-
-static String _meta_cc(List arguments);
 
 static String _meta_support(Toolchain t, String include, String identity, String * failure);
 
@@ -469,12 +468,6 @@ static void _meta_unit(Frontend f, String path, int index){
 
 }
 
-String Compiler_meta_cc_run(List, String);
-
-static String _meta_cc(List arguments){
-  return Compiler_meta_cc_run(arguments, NULL);
-}
-
 String String_sha256(String);
 
 String script_cache_root(void);
@@ -490,6 +483,8 @@ String x2c_get_executable(void);
 String String_strip(String, char *);
 
 String String_printf(String, ...);
+
+String Compiler_meta_cc_run(List, String);
 
 void Path_move_to(Path, Path);
 
@@ -538,7 +533,7 @@ static String _meta_support(Toolchain t, String include, String identity, String
 
       }
       String output = String_join(NULL, cons(String_var(object), cons(String_var(_36), cons(String_var(String_printf(_37, (long) getpid())), NULL))));
-      (* failure) = _meta_cc(cons(String_var(t -> cc), List_append(_meta_flags(), cons(_39, cons(String_var(directory), cons(_39, cons(String_var(include), cons(_41, cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_42), NULL)))), cons(_44, cons(String_var(output), NULL)))))))))));
+      (* failure) = Compiler_meta_cc_run(cons(String_var(t -> cc), List_append(_meta_flags(), cons(_39, cons(String_var(directory), cons(_39, cons(String_var(include), cons(_41, cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_42), NULL)))), cons(_44, cons(String_var(output), NULL)))))))))), NULL);
       if(String_truth((* failure))){
         String _x2c_return_value_3 = NULL;
         {
@@ -610,10 +605,10 @@ static String _meta_localize(Toolchain t, String base, int index){
   String entry = String_join(NULL, cons(String_var(_45), cons(String_var(int_str(index)), NULL))), object = String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)));
   String merged = String_join(NULL, cons(String_var(base), cons(String_var(_47), NULL)));
 #ifdef __APPLE__
-  String failure = _meta_cc(cons(String_var(t -> cc), cons(_49, cons(_51, cons(String_var(String_join(NULL, cons(String_var(_52), cons(String_var(entry), NULL)))), cons(String_var(object), cons(_44, cons(String_var(merged), NULL))))))));
+  String failure = Compiler_meta_cc_run(cons(String_var(t -> cc), cons(_49, cons(_51, cons(String_var(String_join(NULL, cons(String_var(_52), cons(String_var(entry), NULL)))), cons(String_var(object), cons(_44, cons(String_var(merged), NULL))))))), NULL);
 #else
-  String failure = _meta_cc(cons(String_var(t -> cc), cons(_49, cons(_51, cons(String_var(object), cons(_44, cons(String_var(merged), NULL)))))));
-  if(! String_truth(failure)) failure = _meta_cc(cons(_54, cons(String_var(String_join(NULL, cons(String_var(_55), cons(String_var(entry), NULL)))), cons(String_var(merged), NULL))));
+  String failure = Compiler_meta_cc_run(cons(String_var(t -> cc), cons(_49, cons(_51, cons(String_var(object), cons(_44, cons(String_var(merged), NULL)))))), NULL);
+  if(! String_truth(failure)) failure = Compiler_meta_cc_run(cons(_54, cons(String_var(String_join(NULL, cons(String_var(_55), cons(String_var(entry), NULL)))), cons(String_var(merged), NULL))), NULL);
 #endif
   if(! String_truth(failure)) Path_move_to(merged, object);
   return failure;
@@ -840,7 +835,7 @@ static List _meta_build(Frontend f, String directory, List imports, List owners,
     String archive = Compiler_extension_archive();
     if(String_truth(archive)) inputs = List_append(inputs, cons(String_var(archive), NULL));
     ToolAction link = Toolchain_link_action(t, output, inputs);
-    failure = _meta_cc(List_append(link -> arguments, List_append(_meta_flags(), cons(_39, cons(String_var(include), NULL)))));
+    failure = Compiler_meta_cc_run(List_append(link -> arguments, List_append(_meta_flags(), cons(_39, cons(String_var(include), NULL)))), NULL);
     if(! String_truth(failure)) Path_move_to(output, helper);
     else if(Path_exists(helper)) Path_remove_file(helper);
   }
