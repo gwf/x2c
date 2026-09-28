@@ -99,6 +99,10 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Publication gate and local workflow](archive/publication-gate-and-local-workflow.md):
+  implemented 2026-09-28; private checkpoints and local feature adoption,
+  bounded parallel fixtures, and a smaller final publication gate.
+
 - [Try template migration](archive/dual-macro-try-migration.md): done
   2026-09-27; try lowers through one open Macro value on `dev`.
 - [Dual macro core support](archive/dual-macro-core-support.md): done

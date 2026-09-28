@@ -54,5 +54,21 @@ git diff -- unittest/compiler-fixtures
 make verify-fixtures
 ```
 
-The update command rewrites every declared expectation. Never use it merely to
-make a failing check pass; review each changed artifact as compiler behavior.
+The update command stages each fixture's declared expectations and rewrites
+them only after that complete fixture succeeds. A failed or timed-out fixture
+leaves its expectations unchanged; other successful fixtures may still update.
+Never use it merely to make a failing check pass; review each changed artifact
+as compiler behavior.
+
+Fixtures run in parallel, using `JOBS` workers (the CPU count by default).
+Each complete fixture has a 60-second wall-clock limit covering translation,
+native compilation, and program execution. Set `FIXTURE_TIMEOUT_SECONDS` to a
+positive number for an intentional slow-machine investigation. The same limit
+applies to direct `run.sh check --fixture <name>` and update runs.
+
+A timeout is a harness failure, never an expected compiler or program status.
+It reports immediately, preserves the fixture log and actual files, and stops
+that worker's process group, escalating to kill after one second. Interrupting
+the runner also stops active workers and their children. Completed runs report
+elapsed time and the slowest fixture; each case keeps an `elapsed` file beside
+its log and tally.

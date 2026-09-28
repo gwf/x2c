@@ -170,18 +170,17 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/autodiff check
 
 check: build						## Run extended non-mutating checks
+	time $(MAKE) doc-check
 	$(MAKE) check-after-precommit
 	$(MAKE) stage-diff-all
 
 check-after-precommit:
-	$(MAKE) proof-artifact-atomicity
-	$(MAKE) verify
+	time $(MAKE) proof-artifact-atomicity
+	time $(MAKE) verify
 # Example checks are optional (Gary, 2026-09-01).
 # Run `make examples doc-examples` manually.
 #	$(MAKE) examples
-	$(MAKE) proof-raw-symbols
-	$(MAKE) doc-check
-	$(MAKE) doc-outputs
+	time $(MAKE) doc-outputs
 
 # Stage 2 is where the compiler has reached its fixed point: stage 1 is built
 # by the refreshed bootstrap and stage 2 by stage 1, so `stage-diff-2` proves
@@ -196,10 +195,11 @@ precommit: build					## Prepare the final tree for commit
 	$(MAKE) stage-diff-2
 
 agent-pr-check:					## Run complete agent PR proof once
-	$(MAKE) precommit
-	$(MAKE) proof-cold-collection
+	time $(MAKE) precommit
+	time $(MAKE) doc-check
+	time $(MAKE) proof-cold-collection
 	$(MAKE) check-after-precommit
-	$(MAKE) commands-check
+	time $(MAKE) commands-check
 
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting
 	$(MAKE) build-safe

@@ -95,6 +95,15 @@ Never hand-edit bootstrap C/H. Keep temporary outputs in `/tmp` or
 `debug/`. Keep new files ASCII and shipped code free of debug scaffolding.
 Direct destructive operations outside the requested change need approval.
 
+Private worktree commits are checkpoints and may be made whenever useful,
+including incomplete experiments and intermediate bootstrap states. A local
+commit alone requires no build, test, gate, performance checkpoint, generated
+refresh, or separate bootstrap commit. Keep the working compiler and bootstrap
+usable for the next development step: refresh bootstrap before adopting a
+capability the seed cannot consume. Feature introduction, local rebootstrap,
+and adoption may share one branch and one publication batch. Individual local
+commits need not rebuild from their own bootstrap.
+
 ## Repo Map
 
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
@@ -150,8 +159,14 @@ Fresh worktrees, or worktrees that have integrated changed `bootstrap/`, need
 `mkdir -p debug && make build-safe >debug/bootstrap.log 2>&1` before using
 `builds/0`. During implementation, build or probe when it answers a current
 question. A language transition that the checked-in bootstrap cannot consume
-needs explicit intermediate validation; ordinary publication uses the single
-command below.
+can use focused probes and the existing build and stage targets locally; it
+does not require an intermediate publication or full gate. Ordinary publication
+uses the single command below.
+
+Published tips on shared upstream branches, including requested PR branches,
+must rebuild from their shipped bootstrap. Validate the completed integrated
+tree before pushing; intermediate commits in that push need no independent
+gates.
 
 Before publishing, fetch and integrate current `origin/dev`, review the
 resulting diff and generated changes, and run `git diff --check`. Commit
@@ -219,8 +234,8 @@ where either form of delivery goes.
 ### Process ceiling
 
 Preserve the existing validation targets. `precommit` is Gary's readiness
-sequence; changes to it must make it faster or simpler, or be necessary for
-build correctness. `sanity-check` remains bootstrap refresh, safe rebuild,
+sequence, not a Git commit prerequisite; changes to it must make it faster or
+simpler, or be necessary for build correctness. `sanity-check` remains bootstrap refresh, safe rebuild,
 and builds through stage 3, without added checks. `agent-pr-check` consolidates
 existing publication checks; additions require removing or consolidating an
 existing requirement of comparable cost.

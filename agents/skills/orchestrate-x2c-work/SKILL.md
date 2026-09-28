@@ -19,8 +19,8 @@ and the session stops churning on `dev`.
 
 List the changes and the files each one touches. Changes that share files, or
 where one needs another's result, go in order; everything else runs at once.
-A change that adds a native target or compiler capability is its own step:
-see [Capabilities](#capabilities).
+For local dependencies on a new compiler capability, see
+[Capabilities](#capabilities).
 
 If another session works on `dev`, agree on file boundaries with it before
 editing shared files, and tell it when a shared file is clear again.
@@ -29,59 +29,67 @@ editing shared files, and tell it when a shared file is clear again.
 
 Launch each worker with worktree isolation. Tell it to:
 
-- run `git fetch origin` and `git checkout -b <branch> origin/dev` first, and
-  to report at once if a git command is refused;
-- run `mkdir -p debug && make build-safe` before building;
-- make only its change and run `make build`, the fixtures and unit tests it
-  affects, and `git diff --check`;
-- not merge `dev`, commit, push, or run `tools/gate-state.py` or
-  `tools/land-dev`; both, and pushes to `dev` or `main`, refuse to run in
-  `agent-*` worktrees;
-- save its patch against its branch point, never against the current
-  `origin/dev`, and only for files it authored:
-  `git diff --binary $(git merge-base HEAD origin/dev) -- src lib etc unittest docs/src/guide docs/src/reference plans`;
-- save the patch in the session scratchpad. The gate deletes
-  `unittest/build/`.
+- branch from the orchestrator-selected starting revision: current dev for
+  independent work, or a local capability commit for dependent work. Record
+  that exact revision for the handoff;
+- initialize a fresh compiler with `make build-safe` before using `builds/0`,
+  then choose focused builds or tests that answer its implementation questions;
+- make only its assigned change. Private checkpoint commits are unrestricted
+  under the root local-work policy;
+- not merge `dev`, push, or run `tools/gate-state.py` or `tools/land-dev`;
+  shared integration and publication belong to the orchestrator;
+- hand over its commits or a patch containing all authored committed and
+  uncommitted changes against the recorded starting revision. For a patch,
+  use `git diff --binary <starting-revision> -- <authored-paths>` and include
+  any new untracked authored files;
+- save patches in the session scratchpad, outside `unittest/build/`, which
+  the gate deletes.
 
-A diff against the moving `origin/dev` includes the reverse of commits that
-landed after the worker branched and silently undoes other sessions' work.
-Generated docs, `site/`, and `bootstrap/` are regenerated at integration.
+A diff against a moving `origin/dev` can reverse other sessions' changes.
+Generated docs and final bootstrap artifacts are regenerated at integration;
+local bootstrap refreshes needed for development remain available to workers.
 
 ## Integrate a batch
 
-A batch is every patch finished since the last landing. While other workers
-are still running, hold finished patches rather than landing each one; land
-early only for a capability step or a patch another worker needs. Tell each
-worker the gate runs once, at integration, so its own checks stay small.
+Combine finished work into a coherent batch rather than landing each worker
+separately. Dependent workers can consume local capability commits before any
+publication. The gate runs on the completed integrated tree; commit organization
+is an implementation choice.
 
-1. Create a branch from current `origin/dev` and apply each patch with
-   `git apply --index -3`, one commit per change. Resolve conflicts by
-   keeping both sides' intent; generated files are regenerated, not merged.
-2. Run `make build` right away. A patch from an older base can call code
-   another change deleted; a three-way apply does not catch that.
+1. Integrate current `origin/dev` and the workers' commits or patches. For
+   patches, use `git apply --index -3`. Resolve conflicts by keeping both
+   sides' intent; regenerate generated files rather than merging them.
+2. Build or probe the combined changes as needed. A three-way apply does not
+   catch a caller using code another change deleted. For a language transition,
+   follow [Capabilities](#capabilities) before applying callers that need it.
 3. Review the combined authored diff for overlap, repeated checks, and
    leftover machinery.
-4. Run `tools/land-dev "<bootstrap refresh message>"`. It merges `dev`,
-   regenerates docs, runs the gate with one retry for a two-round refresh,
-   commits the refresh, and pushes only when the gate passes and the tree is
-   clean. A rejected push retries from the merge.
-5. After a failed gate, read `debug/gate.log`, fix the cause in the batch,
-   and run `tools/land-dev` again. Never rerun an unchanged gate in a loop;
-   `tools/land-dev` already retries once for a two-round refresh. Clear the
-   worktree before switching branches.
+4. Run `tools/land-dev "<bootstrap refresh message>"`. It integrates `dev`,
+   regenerates docs, runs the final gate, commits generated changes when needed,
+   and pushes only when the gate passes and the tree is clean. A rejected push
+   requires integration and validation of the resulting tree.
+5. A failed gate stops that attempt. Read its reported log path, fix the cause
+   with focused checks, and then run `tools/land-dev` again. Each attempt keeps
+   its own logs and a latest-attempt pointer. Preserve the failed tree and logs;
+   do not discard generated changes or blindly rerun the full gate. If bootstrap
+   needs another round, prepare it with local build/stage tools first.
 
 ## Capabilities
 
-A change that adds a native target, a `meta` prototype the bootstrap lacks,
-or any compiler behavior that current source depends on goes on its own
-branch. Refresh the bootstrap there and prove it with a stage-two build
-(`tools/land-dev` does both) before it reaches `dev`. Callers follow in a
-later batch. Each step then stays one revert away from a compiler that builds
-the current source.
+A new native target, `meta` prototype, or compiler behavior can be implemented,
+rebootstrapped, and adopted in one local branch and publication batch. Build the
+capability and refresh bootstrap before compiling callers the old seed cannot
+consume. Use focused probes or stage builds when they answer the transition's
+current question. Give dependent workers the local capability commit as their
+starting revision; no intervening gate or upstream landing is required.
 
-## Limits
+The final published tip must rebuild from its shipped bootstrap and pass the
+root publication checks. Intermediate private commits need not each satisfy
+that property.
 
-Workers cannot write to worktrees the orchestrator creates; each needs its own
-isolated worktree. A worker can branch from a local integration branch, because
-worktrees share one repository. When the permission check refuses a worker's
-git commands, restart it or do that change in the orchestrator's worktree.
+## Isolation
+
+Each worker edits only its assigned isolated worktree. Worktrees share the
+repository, so a worker can start from a local integration or capability
+commit. If permissions prevent access to its assigned worktree, report the
+failure to the orchestrator rather than switching to another worker's tree.

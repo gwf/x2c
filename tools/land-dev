@@ -4,53 +4,70 @@
 # Usage: tools/land-dev "commit message for a bootstrap refresh"
 #
 # Each attempt merges origin/dev, rebuilds and regenerates the docs, runs
-# the agent-pr-check gate (retrying once for a two-round bootstrap refresh),
-# commits any refreshed bootstrap/ and etc/ output, confirms the gate, and
+# the agent-pr-check gate once, commits refreshed bootstrap/ and etc/ output,
+# confirms the gate, and
 # pushes to dev only when the tree is clean. A rejected push retries from the
-# merge. A failed gate restores bootstrap/ and etc/ and stops. Logs go to
-# debug/. Landings on this machine take turns, so gates never share the CPU.
+# merge. A failed gate preserves the tree and stops. Each invocation keeps
+# its logs under debug/land-dev-*, with debug/land-dev-latest pointing to it.
+# Only shared publication takes this lock; private commits and builds do not.
 set -u
 message=${1:?usage: tools/land-dev "bootstrap refresh commit message"}
 mkdir -p debug
 lock="$(git rev-parse --git-common-dir)/land-dev.lock"
+waiting=
 until mkdir "$lock" 2>/dev/null; do
   holder=$(cat "$lock/pid" 2>/dev/null)
   if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
     rm -rf "$lock"
     continue
   fi
+  if [ "$waiting" != "${holder:-unknown}" ]; then
+    echo "land-dev: waiting for publication lock (pid ${holder:-unknown})"
+    waiting=${holder:-unknown}
+  fi
   sleep 10
 done
 echo $$ >"$lock/pid"
 trap 'rm -rf "$lock"' EXIT
 trap 'exit 1' INT TERM
+run=$(mktemp -d debug/land-dev-XXXXXXXX) || exit 1
+ln -sfn "$(basename "$run")" debug/land-dev-latest
+echo "land-dev: logs in $run"
 for attempt in 1 2 3 4; do
+  logs="$run/attempt-$attempt"
+  mkdir "$logs" || exit 1
   git fetch -q origin && git merge -q --no-edit origin/dev ||
     { echo "land-dev: merge with origin/dev failed"; exit 1; }
-  make build >debug/build.log 2>&1 && make doc-generate >debug/docgen.log 2>&1 ||
-    { echo "land-dev: build or doc-generate failed; see debug/"; exit 1; }
+  upstream=$(git rev-parse origin/dev) || exit 1
+  make build >"$logs/build.log" 2>&1 &&
+    make doc-generate >"$logs/docgen.log" 2>&1 ||
+    { echo "land-dev: build or doc-generate failed; see $logs"; exit 1; }
   if [ -n "$(git status --short)" ]; then
     git add -A docs agents site && git commit -qm "refresh generated docs"
   fi
-  if ! tools/gate-state.py ensure agent-pr-check >debug/gate.log 2>&1 &&
-     ! tools/gate-state.py ensure agent-pr-check >debug/gate.log 2>&1; then
-    git checkout -q HEAD -- bootstrap etc
-    echo "land-dev: gate failed; see debug/gate.log"
+  if ! tools/gate-state.py ensure agent-pr-check >"$logs/gate.log" 2>&1; then
+    echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
     exit 1
   fi
   if [ -n "$(git status --short)" ]; then
     git add bootstrap etc && git commit -qm "$message" &&
-      tools/gate-state.py ensure agent-pr-check >>debug/gate.log 2>&1 ||
-      { echo "land-dev: gate failed after the refresh commit"; exit 1; }
+      tools/gate-state.py check agent-pr-check >>"$logs/gate.log" 2>&1 ||
+      { echo "land-dev: proof changed after commit; see $logs/gate.log"; exit 1; }
   fi
   if [ -n "$(git status --short)" ]; then
     echo "land-dev: the gate left changes:"; git status --short; exit 1
   fi
-  if git push origin HEAD:refs/heads/dev >debug/push.log 2>&1; then
-    tail -1 debug/push.log
+  if git push origin HEAD:refs/heads/dev >"$logs/push.log" 2>&1; then
+    tail -1 "$logs/push.log"
     exit 0
   fi
-  echo "land-dev: push rejected (attempt $attempt); merging dev again"
+  git fetch -q origin ||
+    { echo "land-dev: push/fetch failed; see $logs/push.log"; exit 1; }
+  if [ "$(git rev-parse origin/dev)" = "$upstream" ]; then
+    echo "land-dev: push failed without upstream movement; see $logs/push.log"
+    exit 1
+  fi
+  echo "land-dev: dev advanced (attempt $attempt); integrating again"
 done
 echo "land-dev: gave up after four rejected pushes"
 exit 1

@@ -1038,7 +1038,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _690 = cons(_689, NULL);
   _691 = cons(_659, _690);
   _692 = List_var(_691);
-  _693 = String_new("/Users/gary/Git/x2c/.claude/worktrees/compiler-warnings-conversions-0a75da/src/builtins.x");
+  _693 = String_new("/Users/gary/.codex/worktrees/d40d/x2c/src/builtins.x");
   _694 = String_var(_693);
   _695 = cons(_694, NULL);
   _696 = cons(_660, _695);

@@ -1299,7 +1299,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _643 = cons(_642, NULL);
   _644 = cons(_610, _643);
   _645 = List_var(_644);
-  _646 = String_new("/Users/gary/Git/x2c/.claude/worktrees/compiler-warnings-conversions-0a75da/src/transform.x");
+  _646 = String_new("/Users/gary/.codex/worktrees/d40d/x2c/src/transform.x");
   _647 = String_var(_646);
   _648 = cons(_647, NULL);
   _649 = cons(_611, _648);
