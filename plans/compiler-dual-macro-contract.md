@@ -2616,6 +2616,78 @@ restore `w.origin` around the outer `at` node; this match only sees the
 inner statement. This batch changes no other region walker case or
 restoration rule.
 
+### E22. Parsed bracket index recognition: origin-wrapper exception
+
+`_parse_postfix_index` supplies a full `(expr type (index receiver selector))`
+to `Compiler.resolve_expression`. The trial shared grammar macro was:
+
+```x2c
+macro Expression $indexed(Expr $receiver, Expr $selector) =>
+  $receiver[$selector];
+```
+
+`_resolve_content` already matches lambda source macros against full `input`.
+The trial index client placed the following case in that same `match (input)`,
+before `match (content)`, and deleted the raw-content index case:
+
+```x2c
+Macro indexed = $indexed;
+match (input) {
+  /* Existing captured and ordinary lambda cases stay first. */
+  case indexed(?receiver, ?selector): {
+    receiver = c.resolve_expression(receiver, origin);
+    selector = c.resolve_expression(selector, origin);
+    if (receiver.cadr().car() == <opt-ref>)
+      c.report_error(
+        <type>, "check optional reference before indexing its value",
+        origin, NULL);
+    if (_deferred_receiver(receiver) ||
+        _deferred_receiver(selector))
+      return %(expr (<macro-expr>) (index $receiver $selector));
+    List resolved = c._postfix_index_expression(receiver, selector);
+    if (resolved) return resolved;
+    Type receiver_type = receiver.cadr();
+    // A field of a foreign struct has no x2c type; C indexes it alone.
+    if (!receiver_type &&
+        List.match(receiver, %(expr () (op (!or . ->) * *))))
+      return %(expr () (index $receiver $selector));
+    c.report_error(
+      <parse>, receiver_type.is_typedef_name()
+        ? %"type $receiver_type does not support getindex"
+        : %"type $receiver_type does not support indexing",
+      origin, %());
+  }
+}
+```
+
+The parser kept its immediate resolution. This trial client kept operand
+order, optional-reference rejection, deferred syntax, native pointer
+indexing, foreign-field fallback, and the existing diagnostics in one owner.
+`Array` and `Map` source brackets resolve to `getindex` before this case; the
+source macro does not claim their distinct semantic nodes. An inert matcher
+probe found `$indexed` matches the full parsed pointer index and preserves
+both captures, including under an `<macro-expr>` root; it does not match the
+inner `content` alone. The trial passed `make build` and the focused
+`index-slice-lowering`, `macro-generated-index`, and
+`protocol-operator-index-matrix` fixtures. Their generated C/H files
+match pre-edit bytes, and the checked AST, transform, C warning, stdout and
+status artifacts remain unchanged. `macro-deferred-free-index`,
+`string-typedef-bracket-assignment`, and `bracket-index-incompatible` retain
+their checked diagnostics; `typed-alias-own-getindex` still passes.
+
+The inert matcher also matches `(expr () (at m-origin (index receiver
+selector)))`. `Macro_case_capture` unwraps that source marker, so this
+input-level case would run before the existing `match (content)` marker case.
+That owner returns the original expression when source maps are disabled or
+macro holes are active, and otherwise replaces the marker with `c.origin`.
+The trial instead resolves the index and loses or reorders that behavior.
+Preserving the boundary requires another marker guard or changed case order,
+adding machinery beyond this one-shape replacement. Both source edits were
+restored; the raw-content index case remains, with no `$indexed` grammar macro.
+The passing fixtures establish ordinary index parity, not parity for this
+constructible marked form. No migration or generated-artifact rebaseline is
+accepted for E22.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
