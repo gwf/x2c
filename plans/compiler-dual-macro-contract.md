@@ -2548,6 +2548,38 @@ pass through in the same order. `optional-reference`, `c-body-directive`,
 `percent-after-condition`, and `macro-statement-production` check bound
 one- and two-arm if forms, direct loops, expression parsing after a
 condition, and constructed statements.
+### E23. Parenthesized expression `sizeof` recognition exception
+
+`expressions.x` resolves a parenthesized expression operand while retaining
+the parsed `sizeof (parens ...)` form, the caller's result type and origin.
+The readable source-form replacement would be:
+
+```x2c
+macro Expression $sizeof_value(Expr $operand) => sizeof($operand);
+
+/* In _resolve_content, before the content match. */
+Macro sized = $sizeof_value;
+match (input)
+  case sized(?operand):
+    return %(expr $input_type
+             (sizeof (parens ${c.resolve_expression(operand, origin)})));
+```
+
+An isolated matcher probe captured `sizeof(1 + 2)` as the typed `1 + 2`
+expression, and `sizeof((1 + 2))` as the typed inner parenthesized
+expression. Unary `sizeof 1` did not match. However, `sizeof(int)` also
+matched and captured `(decl (int) (bindings (bind () ())))`. The proposed
+client would resolve that declaration as an expression and change the
+type-operand behavior. Distinguishing the forms needs another structural
+guard or a more precise matcher capability, so no compiler source edit was
+made. The existing raw cases remain until one source macro separates the
+expression and type forms without new client-side shape inspection.
+
+The existing `sizeof-expression-operand` fixture passed on the clean base,
+including parenthesized, unary and type operands. Its checked stdout is
+`4 8 8 4 8 8`; diagnostics are empty. It declares no C/H sidecars, so
+those generated files were retained as baseline artifacts rather than
+rebaselined.
 
 ### F. Static-local initialization exception
 
