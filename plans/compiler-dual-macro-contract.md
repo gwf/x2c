@@ -582,6 +582,8 @@ row: do not count successive versions of try twice. The current entry is:
 | Same production candidate, exception workload | try migration / dev af3354b8, same window | +1.43% / separate workload | +1.04% / separate workload | 4 each mode | 323 / 57 each mode | Not measured |
 | Try client, wrappers, scope cells and Func calls (2026-09-27) | dual-macro-lowerings / dev af3354b8 (before try), same window | +0.26% / cumulative | +0.61% / cumulative | Not counted | Not counted | Not measured |
 | Same batch, exception workload | dual-macro-lowerings / dev af3354b8, same window | +0.76% / separate workload | +1.90% / separate workload | Not counted | Not counted | Not measured |
+| Readable form: Func, try, wrappers, scope cells (2026-09-28) | readable-sites / dev c2f06700, same window | increment +0.80% | increment +0.69% | Not counted | Not counted | Not measured |
+| Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
 | Lambda shape | Not migrated; see below | Not measured | Not measured | Not measured | Not measured | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
@@ -624,6 +626,13 @@ expressions and an initializer takes no sequence hole. Recognition needed
 two fixes in lib/meta.x: a Name hole read as an expression now derives
 `(expr ? (ident ?x))`, and captures publish in the matched pattern's slot
 order.
+
+The readable-form rows are medians of five alternating pairs against
+the dev compiler that carries the template capabilities (c2f06700): the
+compiler from before the try migration cannot translate the corpus's own
+src/transform.x any more, since its templates use those capabilities, so
+the cumulative ratio is estimated by adding windows (about +1.1% default
+and +1.3% live since before try, plus the unmeasured capability step).
 
 The lambda shape was not migrated. The captured form carries capture rows
 the binder derives, which no hole kind produces; the plain form needs a
