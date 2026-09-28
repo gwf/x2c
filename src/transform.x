@@ -3077,8 +3077,15 @@ static List _destructure_assignments(List targets, List temporary) {
     });
 }
 
-// A discarded destructuring result retains the compact block lowering used
-// before assignment destructuring became expression-valued.
+macro open Statement $destructure_statement(Name $temporary, Expr $source,
+    Statement $assignments...) {
+  {
+    List $temporary = $source;
+    $assignments...
+  }
+}
+
+// A discarded destructuring result retains its own block scope.
 static List _destructure_statement(Compiler compiler, List ast) {
   match (ast) {
     case %(stmnt (expr ?
@@ -3086,12 +3093,11 @@ static List _destructure_statement(Compiler compiler, List ast) {
                        (!set ?source (expr ?source_type ?))))): {
       List temporary = compiler.sym.introduce(
         compiler.fresh_name("destructure"));
-      List temp_decl = %(declare ("List")
-        (bindings (op = (bind $temporary ())
-                      ${_destructure_source(
-                        compiler, source, source_type)})));
-      List assignments = _destructure_assignments(targets, temporary);
-      return %(block $temp_decl @assignments);
+      Macro shape = $destructure_statement;
+      return compiler.bind_syntax(
+        shape(temporary, _destructure_source(compiler, source, source_type),
+              _destructure_assignments(targets, temporary)),
+        AST_BLOCK, compiler.return_type);
     }
   }
   return ast;

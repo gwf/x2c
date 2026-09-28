@@ -1828,6 +1828,44 @@ without clarifying ownership. The prototype was discarded and the source and
 sidecars remain unchanged. This rejects that narrow implementation, not other
 protocol helpers or a different consolidation that removes more machinery.
 
+### E11. Discarded destructuring assignment (target readable form)
+
+The `list-destructuring` fixture assigns `(first, missing) = %(7)` and
+checks the two writes. The existing transform gives the expression one
+`List` conversion, stores it in an issued temporary, then writes each
+target from its index in order. The statement has its own block scope.
+
+```x2c
+macro open Statement $destructure_statement(Name $temporary, Expr $source,
+    Statement $assignments...) {
+  {
+    List $temporary = $source;
+    $assignments...
+  }
+}
+
+static List _destructure_statement(Compiler compiler, List ast) {
+  match (ast) {
+    case %(stmnt (expr ?
+             (dstrasgn (targets *targets)
+                       (!set ?source (expr ?source_type ?))))): {
+      List temporary = compiler.sym.introduce(
+        compiler.fresh_name("destructure"));
+      Macro shape = $destructure_statement;
+      return compiler.bind_syntax(
+        shape(temporary, _destructure_source(compiler, source, source_type),
+              _destructure_assignments(targets, temporary)),
+        AST_BLOCK, compiler.return_type);
+    }
+  }
+  return ast;
+}
+```
+
+`_destructure_assignments` remains the shared left-to-right element owner;
+the expression-valued path and declaration paths retain their existing
+forms. The template replaces the raw block and temporary declaration,
+without introducing another source conversion or changing target bindings.
 ### E12. Managed declaration cleanup (target readable form)
 
 The existing `_append_managed_declaration` owner keeps eligibility, declaration
