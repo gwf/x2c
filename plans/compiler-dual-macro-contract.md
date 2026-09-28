@@ -2378,6 +2378,34 @@ to use its active return type for conversion. `macro-string-return`,
 `class-init-wrong-return` check source and macro returns, empty return,
 conversion, and rejection diagnostics.
 
+### E19. Parsed defer recognition (target readable form)
+
+The shared grammar already writes the source form used by transform:
+
+```x2c
+macro Statement $deferred(Statement $body) {
+  defer $body
+}
+```
+
+`Compiler.bind_syntax` can use that same form for parsed and constructed
+defer statements. Its complete client keeps body binding and the canonical
+output node with their existing order and statement-position check:
+
+```x2c
+Macro deferred = $deferred;
+match (input) {
+  case deferred(?body):
+    if (statement_position)
+      return %(defer ${_.bind_syntax(
+        body, AST_STATEMENT, _.return_type)});
+}
+```
+
+The enclosing `at` case retains source anchors. `defer-only-cleanup` checks
+assignment and increment cleanup, `defer-try-cleanup` checks transfer order,
+and `managed-init-runtime` checks compiler-produced deferred cleanup.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

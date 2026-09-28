@@ -2478,6 +2478,7 @@ List Compiler.bind_syntax(
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro return_empty = $return_empty, return_value = $return_value;
+  Macro deferred = $deferred;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2817,7 +2818,7 @@ List Compiler.bind_syntax(
       case %(stmnt ?expression):
         if (statement_position)
           return %(stmnt ${_.resolve_expression(expression, _.token)});
-      case %(defer ?body):
+      case deferred(?body):
         if (statement_position)
           return %(defer ${_.bind_syntax(
             body, AST_STATEMENT, _.return_type)});
