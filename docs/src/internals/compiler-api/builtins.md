@@ -24,7 +24,7 @@ The built-in macros' compile-time algorithms.
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:841`
+Source: `src/builtins.x:838`
 
 #### builtin_try_cleanup_placement
 
@@ -33,7 +33,7 @@ Source: `src/builtins.x:841`
 Places the lowered statements that leave a try region after it, with
 the effect that marks the unit as needing exception support.
 
-Source: `src/builtins.x:830`
+Source: `src/builtins.x:827`
 
 ## Design notes
 

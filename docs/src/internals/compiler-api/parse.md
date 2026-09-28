@@ -60,7 +60,7 @@ X2c recursive-descent parser core.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:2976`
+Source: `src/parse.x:2977`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
