@@ -606,6 +606,23 @@ placement producers this way, with unchanged 62-case C/H. Recognition
 resolves a free reference against the base-scope binding the compiler
 sends with each `meta` call, so a shadowing local fails the case.
 
+The client pattern for every migrated lowering is the try case in
+`_rewrite`:
+
+```x2c
+Macro shape = $compiler_try_shape;
+return c.bind_syntax(
+  shape(frame, declarations, body_out, landing, cleanup),
+  AST_BLOCK, c.return_type);
+```
+
+Each argument is what its producer returns: plain source, a bound
+reference, or lowered code, marked by the producer. The client writes no
+carrier, transaction, application context or result unwrapping;
+`bind_syntax` owns all of them. A template with a sequence hole puts it
+last and is applied as `Macro_apply(t, %(a b @items))`, as
+`Compiler.wrapper_function` does for generated functions.
+
 The first per-lowering row is the selective try candidate, not the old phase5
 fixed support cost. Its total includes necessary shared support and any
 unclassified remaining cost; it is not proof that every millisecond is spent

@@ -217,8 +217,26 @@ Decisions made during delivery:
   and `x2c_exception_landed` bind to the unit's declarations, so generated C
   now forward declares them; `sigsetjmp` stays a native call. That is the
   only C/H difference across the corpus, re-baselined in 25 fixtures.
-- `Compiler.macro_value_syntax` turns a pending application into the
-  invocation `bind_syntax` expands, as meta results already were.
+- The client was reduced on 2026-09-27 to what the contract promises.
+  Stages attach where values are produced: `_try_frame` returns the bound
+  frame reference, `_try_region` the lowered body, and `_try_cleanup`,
+  `_try_declarations` and `_try_landing` lowered sequences; `_inside`
+  accepts a lowered cleanup. `bind_syntax` accepts a pending application,
+  converts it through `evaluate_macro_slot`, owns its application context
+  and transaction through the existing `m-invoke` case, and returns the
+  one item of a directly applied value at statement or unit position.
+  `Compiler.macro_value_syntax` is deleted.
+- The frame stays an ordinary `_region_binding` allocated before the
+  application, and the transaction covers only the application. The
+  region exit statements `_inside` records while rewriting the body are
+  built from the frame binding before the application runs; routing the
+  frame through a `new-name` effect would need a second, token-based
+  representation in every region consumer.
+- The producers stay in src/builtins.x rather than src/linked-meta.x.
+  `Compiler.bind_linked_meta` binds a linked copy only when a unit parses
+  that `meta` definition through an import; a user unit containing a try
+  never parses the compiler's definitions, so a linked producer would be
+  unbound there. Builtins are installed in every compile-time session.
 
 Validation: all 62 cases (46 try fixtures and eight corpus files in
 default and live) keep their exit status; 18 are byte-identical and 44
