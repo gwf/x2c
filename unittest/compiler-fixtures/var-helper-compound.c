@@ -2,6 +2,10 @@
 
 #include "var-helper-compound.h"
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Var int_var(int);
 
 int main(void){

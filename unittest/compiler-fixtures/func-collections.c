@@ -117,6 +117,10 @@ List List_map(List, Func);
 
 Array Array_map(Array, Func);
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 String String_map(String, Func);

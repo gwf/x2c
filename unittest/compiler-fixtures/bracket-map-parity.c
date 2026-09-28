@@ -2,6 +2,10 @@
 
 #include "bracket-map-parity.h"
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var Symbol_var(Symbol);
 
 Var int_var(int);

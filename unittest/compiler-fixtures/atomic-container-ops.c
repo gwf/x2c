@@ -73,6 +73,14 @@ static Var next_rhs(int value){
   return int_var(value);
 }
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var Array_getindex(Array, int);
 
 Var Map_getindex(Map, Var);

@@ -24,6 +24,10 @@ static int fixture_select(int value){
   return 1000 + value;
 }
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var int_var(int);
 
 int Var_int(Var);

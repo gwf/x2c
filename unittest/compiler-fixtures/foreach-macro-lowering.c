@@ -94,6 +94,10 @@ static void record_cleanup(void){
   cleanups ++;
 }
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 int List_try_next(List, List *, Var *);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);

@@ -16,6 +16,8 @@ static long unbox_value(Var value){
   return Var_long(Var_convert(value, 818062));
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 Var Array_getindex(Array, int);

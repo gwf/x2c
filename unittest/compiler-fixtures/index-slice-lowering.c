@@ -100,6 +100,14 @@ static int next_bound(int bound){
   return bound;
 }
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var Symbol_var(Symbol);
 
 String String_malloc(int);

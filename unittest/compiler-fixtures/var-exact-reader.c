@@ -39,6 +39,10 @@ Var String_var(String);
 
 Var Map_var(Map);
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var Symbol_var(Symbol);
 
 Map Var_map(Var);

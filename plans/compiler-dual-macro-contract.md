@@ -1529,9 +1529,9 @@ Focused checks show the same generated constructor calls and successful
 execution. Binding those calls in the transform adds
 `Array_new`/`Array_update_n` and `Map_new`/`Map_update_n` declarations to
 generated C where they are used. Transform expectations record the newly
-explicit call nodes and shifted binding numbers. The seven affected fixture
-sidecars were reviewed and refreshed at integration; these output deltas do
-not change runtime behavior.
+explicit call nodes and shifted binding numbers. The affected fixture
+sidecars were reviewed and refreshed at integration; generated C differs
+only by constructor prototypes, not executable calls.
 
 ### F. Static-local initialization exception
 

@@ -40,6 +40,8 @@ const int file_object_limit = 7;
 
 Map file_object_registry;
 
+Map Map_new(void);
+
 _x2c_initializer_choice_EB67B464_0((file_object_registry = Map_new()))
 static String file_object_name;
 

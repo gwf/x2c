@@ -4,6 +4,10 @@
 
 ArrayInt Array_arrayint(Array);
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Var int_var(int);
 
 int ArrayInt_try_next(ArrayInt, int *, int *);

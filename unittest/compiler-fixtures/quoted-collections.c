@@ -35,11 +35,19 @@ static int bump(int * value){
 
 Var Array_var(Array);
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Var Symbol_var(Symbol);
 
 Var int_var(int);
 
 Var Map_var(Map);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
 
 Var String_var(String);
 

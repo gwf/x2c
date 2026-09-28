@@ -24,6 +24,8 @@ Var int_var(int);
 
 Array Array_update_n(Array, unsigned, ...);
 
+Array Array_new(void);
+
 static void update_void(void){
   Var one = int_var(1), two = int_var(2);
   Array_update_n(Array_new(), 3, one, ((void) 0, Void), two);

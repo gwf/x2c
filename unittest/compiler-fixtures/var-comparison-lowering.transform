@@ -288,87 +288,92 @@
     (bindings 
      (op = (bind (binding 39 "array") ()) 
       (expr ("Array") 
-       (varray 
-        (expr ("Var") 
-         (call (expr ((func ((int))) "Var") (ident (binding 40 "int_var"))) 
-          (args (expr (int) (literal (int) "1"))))) 
-        (expr ("Var") 
-         (call (expr ((func ((int))) "Var") (ident (binding 40 "int_var"))) 
-          (args (expr (int) (literal (int) "2")))))))) 
-     (op = (bind (binding 41 "copy") ()) 
+       (call (expr ((func (("Array") (unsigned) (...))) "Array") 
+              (ident (binding 40 "Array_update_n"))) 
+        (args (expr ("Array") 
+               (call (expr ((func ((void))) "Array") 
+                      (ident (binding 41 "Array_new"))) (args (expr (void) ())))) 
+         (expr (int) (literal (int) "2")) 
+         (expr ("Var") 
+          (call (expr ((func ((int))) "Var") (ident (binding 42 "int_var"))) 
+           (args (expr (int) (literal (int) "1"))))) 
+         (expr ("Var") 
+          (call (expr ((func ((int))) "Var") (ident (binding 42 "int_var"))) 
+           (args (expr (int) (literal (int) "2"))))))))) 
+     (op = (bind (binding 43 "copy") ()) 
       (expr ("Array") 
        (call (expr ((func (("Array"))) ("Array")) 
-              (ident (binding 42 "Array_copy"))) 
+              (ident (binding 44 "Array_copy"))) 
         (args (expr ("Array") (ident (binding 39 "array")))))))))) 
   (at 78 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 43 "array_value") ()) 
+     (op = (bind (binding 45 "array_value") ()) 
       (expr ("Var") 
-       (call (expr ((func (("Array"))) "Var") (ident (binding 44 "Array_var"))) 
+       (call (expr ((func (("Array"))) "Var") (ident (binding 46 "Array_var"))) 
         (args (expr ("Array") (ident (binding 39 "array"))))))) 
-     (op = (bind (binding 45 "copy_value") ()) 
+     (op = (bind (binding 47 "copy_value") ()) 
       (expr ("Var") 
-       (call (expr ((func (("Array"))) "Var") (ident (binding 44 "Array_var"))) 
-        (args (expr ("Array") (ident (binding 41 "copy")))))))))) 
+       (call (expr ((func (("Array"))) "Var") (ident (binding 46 "Array_var"))) 
+        (args (expr ("Array") (ident (binding 43 "copy")))))))))) 
   (at 40 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 46 "object_equal") ()) 
+     (op = (bind (binding 48 "object_equal") ()) 
       (expr (int) 
        (call (expr ((func (("Var") ("Var"))) int) 
               (ident (binding 19 "Var_equal"))) 
-        (args (expr ("Var") (ident (binding 43 "array_value"))) 
-         (expr ("Var") (ident (binding 45 "copy_value")))))))))) 
+        (args (expr ("Var") (ident (binding 45 "array_value"))) 
+         (expr ("Var") (ident (binding 47 "copy_value")))))))))) 
   (at 80 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 47 "object_same") ()) 
+     (op = (bind (binding 49 "object_same") ()) 
       (expr (int) 
        (at 79 
         (call "Var_same" 
-         (args (expr ("Var") (ident (binding 43 "array_value"))) 
-          (expr ("Var") (ident (binding 45 "copy_value"))))))))))) 
+         (args (expr ("Var") (ident (binding 45 "array_value"))) 
+          (expr ("Var") (ident (binding 47 "copy_value"))))))))))) 
   (at 82 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 48 "object_mixed_same") ()) 
+     (op = (bind (binding 50 "object_mixed_same") ()) 
       (expr (int) 
        (at 81 
         (call "Var_same" 
-         (args (expr ("Var") (ident (binding 43 "array_value"))) 
+         (args (expr ("Var") (ident (binding 45 "array_value"))) 
           (expr ("Var") 
            (call (expr ((func (("Array"))) "Var") 
-                  (ident (binding 44 "Array_var"))) 
+                  (ident (binding 46 "Array_var"))) 
             (args (expr ("Array") (ident (binding 39 "array")))))))))))))) 
   (at 45 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 49 "object_order_le") ()) 
+     (op = (bind (binding 51 "object_order_le") ()) 
       (expr (int) 
        (op <= 
         (expr (int) 
          (call (expr ((func (("Var") ("Var"))) int) 
                 (ident (binding 29 "Var_compare"))) 
-          (args (expr ("Var") (ident (binding 43 "array_value"))) 
-           (expr ("Var") (ident (binding 45 "copy_value")))))) 
+          (args (expr ("Var") (ident (binding 45 "array_value"))) 
+           (expr ("Var") (ident (binding 47 "copy_value")))))) 
         (expr (int) (literal (int) "0")))))))) 
   (at 46 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 50 "object_order_ge") ()) 
+     (op = (bind (binding 52 "object_order_ge") ()) 
       (expr (int) 
        (op >= 
         (expr (int) 
          (call (expr ((func (("Var") ("Var"))) int) 
                 (ident (binding 29 "Var_compare"))) 
-          (args (expr ("Var") (ident (binding 43 "array_value"))) 
-           (expr ("Var") (ident (binding 45 "copy_value")))))) 
+          (args (expr ("Var") (ident (binding 45 "array_value"))) 
+           (expr ("Var") (ident (binding 47 "copy_value")))))) 
         (expr (int) (literal (int) "0")))))))) 
   (at 47 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 51 "marked_equal") ()) 
+     (op = (bind (binding 53 "marked_equal") ()) 
       (expr (int) 
        (call (expr ((func (("Var") ("Var"))) int) 
               (ident (binding 19 "Var_equal"))) 
@@ -382,7 +387,7 @@
   (at 48 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 52 "printf"))) 
+     (call (expr () (ident (binding 54 "printf"))) 
       (args (expr (* char) (literal (* char) "\"native=%d,%d,%d,%d,%d\\n\"")) 
        (expr (int) (ident (binding 8 "native_eq"))) 
        (expr (int) (ident (binding 9 "native_ne"))) 
@@ -392,7 +397,7 @@
   (at 49 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 52 "printf"))) 
+     (call (expr () (ident (binding 54 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"wide=%d,%d,%d,%d,%d mixed=%d,%d,%d,%d\\n\"")) 
        (expr (int) (ident (binding 18 "value_eq"))) 
@@ -407,7 +412,7 @@
   (at 50 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 52 "printf"))) 
+     (call (expr () (ident (binding 54 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"order=%d,%d,%d,%d,%d,%d strings=%d\\n\"")) 
        (expr (int) (ident (binding 28 "order_lt"))) 
@@ -420,15 +425,15 @@
   (at 51 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 52 "printf"))) 
+     (call (expr () (ident (binding 54 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"object=%d,%d,%d,%d,%d once=%d,%d,%d\\n\"")) 
-       (expr (int) (ident (binding 46 "object_equal"))) 
-       (expr (int) (ident (binding 47 "object_same"))) 
-       (expr (int) (ident (binding 48 "object_mixed_same"))) 
-       (expr (int) (ident (binding 49 "object_order_le"))) 
-       (expr (int) (ident (binding 50 "object_order_ge"))) 
-       (expr (int) (ident (binding 51 "marked_equal"))) 
+       (expr (int) (ident (binding 48 "object_equal"))) 
+       (expr (int) (ident (binding 49 "object_same"))) 
+       (expr (int) (ident (binding 50 "object_mixed_same"))) 
+       (expr (int) (ident (binding 51 "object_order_le"))) 
+       (expr (int) (ident (binding 52 "object_order_ge"))) 
+       (expr (int) (ident (binding 53 "marked_equal"))) 
        (expr (int) (ident (binding 1 "left_calls"))) 
        (expr (int) (ident (binding 2 "right_calls")))))))) 
   (at 83 (return (expr (int) (literal (int) "0"))))))

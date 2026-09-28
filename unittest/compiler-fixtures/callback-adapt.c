@@ -63,6 +63,8 @@ Var String_var(String);
 
 Var Symbol_var(Symbol);
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 Var int_var(int);
