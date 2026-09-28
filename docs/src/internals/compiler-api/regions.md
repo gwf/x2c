@@ -33,7 +33,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions.x:1265`
+Source: `src/regions.x:1266`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -49,7 +49,7 @@ the bound and typed definition. The walk reads the summaries of the
 `meta` functions installed before `fn` and records the summary of `fn`
 in `meta_regions`.
 
-Source: `src/regions.x:1244`
+Source: `src/regions.x:1245`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -61,7 +61,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1220`
+Source: `src/regions.x:1221`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -71,7 +71,7 @@ Source: `src/regions.x:1220`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1279`
+Source: `src/regions.x:1280`
 
 <a id="Compiler.region_no_lifetime_effect"></a>
 #### Compiler.region_no_lifetime_effect
@@ -80,7 +80,7 @@ Source: `src/regions.x:1279`
 
 Reports a built-in call that neither creates nor retains tracked storage.
 
-Source: `src/regions.x:1282`
+Source: `src/regions.x:1283`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
