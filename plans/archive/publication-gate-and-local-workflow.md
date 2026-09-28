@@ -28,9 +28,24 @@ The historical compiler hang did not reproduce at the integrated base
 with unchanged expectations. No compiler repair was needed. The optional
 full raw-symbol sweep took 131.66s on this host and compared 646 of 647
 required sources successfully; src/macros.x failed standalone raw translation
-with missing Compiler methods on unchanged source. This is retained evidence,
-not a claimed green comparison or a reason to rewrite expectations. The
-required gate's final timings and corpus summary are kept in its attempt log.
+with missing Compiler methods on unchanged source. After the publication
+gate refreshed the compiler, a relative-path standalone src/macros.x raw
+translation passed in 717 ms at `813a897d`. That isolated pass did not prove
+the complete sweep passed or establish the cause of the earlier failure.
+No expectations were rewritten. The required gate's final timings and corpus
+summary are kept in its attempt log.
+
+The full follow-up sweep at `be226450`, after a fresh `make build-safe`,
+finished in 111.96s: 648 required sources, 409 classified exclusions,
+647 successful comparisons, and one failure at src/macros.x. Separate bounded
+invocations failed in raw mode with both relative and absolute source paths;
+CPP mode succeeded. The failure is therefore still reproducible, and path
+spelling does not explain this run. Its cause and relationship to the earlier
+successful compiler remain unproved. The open work is recorded in
+[Raw-symbol macros translation](../raw-symbol-macros-translation.md).
+Logs remain in `debug/raw-symbol-followup.log` and
+`debug/raw-symbol-{relative,absolute,cpp}.log` in the d40d worktree.
+The fixture deadline remains 60 seconds; no nightly requirement was added.
 
 ## Result and policy
 

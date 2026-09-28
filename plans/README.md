@@ -71,6 +71,7 @@ execution.
 
 | Record | What remains |
 | --- | --- |
+| [Raw-symbol macros translation](raw-symbol-macros-translation.md) | Fresh stage-0 raw translation of src/macros.x fails with missing Compiler methods while CPP mode succeeds; diagnose and repair the existing owner. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
