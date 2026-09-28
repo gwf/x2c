@@ -80,6 +80,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 static int continue_inside_try(void){
   int volatile caught = 0;
   {
@@ -137,6 +141,8 @@ static int continue_inside_try(void){
 }
 
 void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 static void break_inside_switch(void){
   order = 0;

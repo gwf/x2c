@@ -28,6 +28,8 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static int outward_defer(void){
   int value = 0;
   {
@@ -58,6 +60,10 @@ static int outward_defer(void){
 }
 
 void x2c_exception_push(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 
@@ -145,6 +151,8 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
 
 int main(void){
   x2c_initialize();

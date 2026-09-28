@@ -67,6 +67,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 static int preserve_parameter(int volatile value){
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -120,6 +124,8 @@ static int preserve_parameter(int volatile value){
 }
 
 void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 int Var_int(Var);
 

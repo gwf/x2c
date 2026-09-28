@@ -21,6 +21,8 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static int local_latest(void){
   int value = 7;
   {
