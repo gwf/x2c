@@ -1,8 +1,8 @@
 # Raw-symbol translation of macros.x
 
-> Status: active
-> Reproduced on 2026-09-28 at dev `be226450` after `make build-safe`.
-> Diagnosis and repair remain open; this record does not add a gate.
+> Status: repair verified in a local checkpoint from dev `89da87d0`;
+> publication validation remains with the integrating worktree.
+> The explicit raw-symbol sweep remains optional; this record adds no gate.
 
 ## Observed behavior
 
@@ -35,30 +35,57 @@ second succeeds. The full sweep remains available through its existing
 explicit target; do not exclude macros.x or rewrite expectations to hide
 this failure.
 
-## Evidence and next work
+## Cause and repair
 
 The same sweep failed on macros.x before publication of the workflow change.
 A relative-path raw translation subsequently succeeded in 717 ms with the
 post-gate compiler at `813a897d`. That was an isolated pass, not a green full
-sweep. Current fresh-build reproduction establishes that the issue remains;
-it does not establish whether bootstrap generation, interface/cache state,
-or intervening compiler changes explain the differing results.
+sweep. At dev `89da87d0`, a fresh stage-0 compiler failed the cold raw
+translation while CPP mode succeeded. In the earlier `f6606dbf` diagnosis,
+a self-hosted stage-1 compiler passed with an interface but failed with
+`--no-interfaces`, so an interface can hide the cold collection defect.
+
+`src/expressions.x` defines `$func_call` before the slot function
+`x2c_func_call_arguments` is declared. Its only earlier prototype was in
+`src/builtins.x`, which `src/macros.x` includes after `expressions.x`.
+Shallow collection therefore cannot parse the template at that point.
+`Compiler.collect_compile_time_definition` suppresses the malformed macro
+and advances to end of file, dropping the later `Compiler` method rows from
+the included contribution. Full CPP collection or a complete interface
+provides those rows by another path.
+
+The repair moves that existing prototype from `builtins.x` to immediately
+before `$func_call` in `expressions.x`. The definition and builtin
+registration remain where they were; no parser validation or second
+declaration mechanism is added. A two-file inert `/tmp` reproduction has a
+template using a slot declared later in its included file, followed by a
+method the including file calls. Raw translation reports the method missing
+before a slot prototype is placed ahead of the template and succeeds after.
+On dev `f6606dbf`, a temporary full-source copy with the prototype ahead of
+the template made cold raw `macros.x` translation succeed with stage-0 and
+stage-1; removing its later duplicate also passed stage-0 raw translation of
+`macros.x`, `builtins.x`, and `expressions.x`. On the authored tree from
+`89da87d0`, `make build` and cold raw/CPP translation of `src/macros.x`
+succeed, with byte-identical generated C/H.
+
+The optional `make proof-raw-symbols` compared 651 of 652 required sources.
+Its one failure was `unittest/test-diagnostics.x`: the CPP invocation cannot
+open `grammar.xmacro` because it looks under `unittest/`; the raw invocation
+succeeds. Running that source alone reproduces the same CPP/raw result. The
+source and import owner are outside this prototype move, so the sweep remains
+red for that separate import-path issue. No exclusions or sweep flags changed.
 
 Logs in `/Users/gary/.codex/worktrees/d40d/x2c/debug/`:
 `raw-symbol-followup.log`, `raw-symbol-relative.log`,
 `raw-symbol-absolute.log`, and `raw-symbol-cpp.log`.
 
-Diagnose the missing method declarations through the existing declaration
-collection and interface owners. Compare fresh stage-0 and self-hosted
-compilers on the same source and isolate relevant cache state before naming
-a cause. Repair the existing owner and verify the reproducer and complete
-sweep without changing their expected contract. Publication follows the
-ordinary final-tree gate; no recurring sweep requirement is introduced here.
+Integrate and use the ordinary final-tree gate. Investigate the sweep's
+separate CPP import-path failure under its existing optional contract; keep
+its expected contract and exclusions unchanged.
 
 ## Plan review
 
-This records a reproduced translation failure, not an inferred root cause.
-It reuses the existing sweep and ordinary compiler operations. No new helper,
-validator, representation, language diagnostic, negative fixture, or gate is
-proposed. Determine the smallest repair from the reproduction before editing
-compiler code.
+The repair preserves the slot's definition, registration, signature, and
+generated C/H. It reuses the existing sweep and ordinary declaration
+collection. It adds no helper, validator, representation, language diagnostic,
+recurring fixture, or gate.

@@ -1600,6 +1600,8 @@ static List _finish_call(
    arity and dispatches; the selected adapter checks carrier, type and
    conversion. The call is the value of a statement expression around this
    block. */
+List x2c_func_call_arguments(List function, List storage, List arguments);
+
 macro open Statement $func_call(Expr $callee, Expr $count,
     Expr $arguments...) {
   {

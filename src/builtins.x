@@ -812,9 +812,6 @@ macro Statement $builtin.row(Expr $rows, Expr $name, Expr $function) {
     $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
 }
 
-/* Func calls: the call template prepares its arguments through this. */
-List x2c_func_call_arguments(List function, List storage, List arguments);
-
 /* Try lowering: src/transform.x writes a try region through templates
    whose slots call these. */
 List builtin_try_catch_site(List frame, List clause);
