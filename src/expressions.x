@@ -2468,6 +2468,14 @@ List Compiler.resolve_map_entry(Compiler compiler, List input, Token origin) {
     retain source position.
 */
 List Compiler.resolve_expression(Compiler c, List input, Token origin) {
+  if (c.macro_application) {
+    Var staged;
+    int retained;
+    Var carrier = input;
+    match (input) case %(expr (<macro-expr>) ?inside): carrier = inside;
+    if (c.take_code_value(carrier, staged, retained))
+      return retained ? staged : c.resolve_expression(staged, origin);
+  }
   match (input) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);

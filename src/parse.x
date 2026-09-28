@@ -2450,7 +2450,17 @@ static List _bind_optional_reference_arm(
 */
 List Compiler.bind_syntax(
   Compiler c, Var syntax, AstPos context, Type return_type) {
+  Var staged;
+  int retained;
+  if (c.macro_application && c.take_code_value(syntax, staged, retained)) {
+    if (retained) return staged;
+    syntax = staged;
+  }
   Var value = c.evaluate_macro_slot(syntax);
+  if (c.macro_application && c.take_code_value(value, staged, retained)) {
+    if (retained) return staged;
+    value = staged;
+  }
   if (value is not <list>)
     c.report_error(<parse>, "expected syntax", c.token, NULL);
   List input = value;
@@ -2490,10 +2500,22 @@ List Compiler.bind_syntax(
     int statement_position = context == AST_BLOCK ||
                              context == AST_STATEMENT;
     match (input) {
-      case %(macro-invoke ?definition ?arguments ?invocation):
-        return _.expand_macro_invocation_node(
-          definition, arguments,
-          _.macro_invocation_site(invocation), context);
+      case %(macro-invoke ?definition ?arguments ?invocation): {
+        Token site = _.macro_invocation_site(invocation);
+        if (invocation != <m-invoke>)
+          return _.expand_macro_invocation_node(
+            definition, arguments, site, context);
+        /* A macro value application owns the transaction that covers the
+           effects its producers request. */
+        $let(_.macro_application, _.macro_application + 1) {
+          SymTxn transaction = _.begin_semantic_transaction();
+          defer transaction.rollback();
+          List bound = _.expand_macro_invocation_node(
+            definition, arguments, site, context);
+          transaction.commit();
+          return bound;
+        }
+      }
       case %(macro-slot ? ? *):
         if (_.macro_holes) return input;
       case %(src ? ?syntax): {

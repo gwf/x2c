@@ -121,6 +121,9 @@ typedef struct Compiler {
   Map adoptions;
   Map macro_holes;
   Map local_macro_captures;
+  // Depth of macro value applications being bound; their transactions
+  // also cover effects and code-value carriers are consumed.
+  int macro_application;
   List lambda_scopes;
   Array match_types;
   // Import path -> declared alias map, or 1 when no aliases need replay.
@@ -2576,6 +2579,11 @@ typedef struct SymTxn {
   Map statics, binding_facts;
   Map source_definitions;
   int source_occurrences;
+  /* A macro value application extends coverage to the effects its
+     producers request: adapters, base-scope bindings, early declarations,
+     initializers, origins, and exception support. */
+  int extended, Map adapters, Array base_bindings;
+  int early_count, init_count, origin_count, origin, needs_exception;
 } *SymTxn;
 
 /** Begins a reversible transaction over the current semantic scope.
@@ -2598,6 +2606,23 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction.local_macro_names = c.sym.local_macro_names;
   transaction.initializer_name = c.init_fn;
   transaction.shutdown_name = c.fini_fn;
+  transaction.extended = c.macro_application > 0;
+  if (transaction.extended) {
+    transaction.adapters = c.names.adapters;
+    transaction.base_bindings = [];
+    transaction.early_count = c.early_decls.len();
+    transaction.init_count = c.inits.len();
+    transaction.origin_count = c.origins.len();
+    transaction.origin = c.origin;
+    transaction.needs_exception = c.needs_exception;
+    c.names.adapters = c.names.adapters.copy();
+    for (int i = 0; i < c.sym.base_scopes; i++) {
+      if (i == transaction.scope_index) continue;
+      SymScope *base = _semantic_scope(c.sym, i);
+      transaction.base_bindings.push(%($i ${base.bindings}));
+      base.bindings = base.bindings.copy();
+    }
+  }
   if (c.source_facts && c.source_primary) {
     transaction.source_definitions = c.source_definitions.copy();
     transaction.source_occurrences = c.source_occurrences.len();
@@ -2635,6 +2660,17 @@ void SymTxn.commit(SymTxn s) {
   if (staged.macros != NULL) {
     if (scope.macros == NULL) scope.macros = {};
     scope.macros.merge(staged.macros);
+  }
+  if (s.extended) {
+    Map adapters = compiler.names.adapters;
+    compiler.names.adapters = s.adapters;
+    s.adapters.merge(adapters);
+    foreach (List row, s.base_bindings.list()) {
+      SymScope *base = _semantic_scope(compiler.sym, row.car());
+      Map staged_bindings = base.bindings, original = row.cadr();
+      base.bindings = original;
+      original.merge(staged_bindings);
+    }
   }
   s.active = 0;
 }
@@ -2688,6 +2724,16 @@ void SymTxn.rollback(SymTxn transaction) {
     _.names.counters = transaction.counters;
     _.init_fn = transaction.initializer_name;
     _.fini_fn = transaction.shutdown_name;
+    if (transaction.extended) {
+      _.names.adapters = transaction.adapters;
+      foreach (List row, transaction.base_bindings.list())
+        _semantic_scope(_.sym, row.car()).bindings = row.cadr();
+      _.early_decls.resize(transaction.early_count);
+      _.inits.resize(transaction.init_count);
+      _.origins.resize(transaction.origin_count);
+      _.origin = transaction.origin;
+      _.needs_exception = transaction.needs_exception;
+    }
     if (_.source_facts && _.source_primary) {
       _.source_occurrences.resize(transaction.source_occurrences);
       foreach (Var key, _.source_definitions.keys().list())
@@ -3757,6 +3803,18 @@ static Type _typedef_target(Sym sym, Type key) {
     if (_semantic_scope(sym, i).symbols.try_get(key, target)) return target;
   }
   return NULL;
+}
+
+/** Resolves a typedef name through the base scopes only, ignoring local
+    typedefs, or returns NULL when the base scopes do not declare it. */
+Type Sym.resolve_base_type(Sym sym, Type key) {
+  Type type = _typedef_target(sym, key);
+  for (int hops = 0; type && hops < RESOLVE_KEY_MAX_HOPS; hops++) {
+    Type next = _typedef_target(sym, type);
+    if (!next) break;
+    type = next;
+  }
+  return type;
 }
 
 static Type _typedef_base_step(Sym sym, Type type) {

@@ -2702,6 +2702,7 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   }
   if (splice && result is <list>) {
     match (result) {
+      case %(code-value ? ? ?): return result;
       case %(macro-invoke ? ? ?): return %(seq $result);
       case %(seq *): return result;
     }
@@ -4122,6 +4123,100 @@ static String _definition_note(List definition) {
     definition's fresh rows allocate invocation-local names. This method does
     not begin a semantic transaction.
 */
+/* An open definition binds its free references in the unit that applies
+   it. A value resolves to the unit's global declaration; a callee the unit
+   does not declare becomes a native call with the result type recorded
+   where the macro was defined; a typedef base resolves in the base scope.
+   Hole binders and introduced locals are not references. */
+static void _open_references(
+  Compiler c, Var value, Map replacements, Map natives) {
+  if (value is not <list> || value.is_nil()) return;
+  match (value)
+    case %(expr ?(List type) (ident ?binding)): {
+      String spelling = NULL;
+      if (!binding_identity_try_parts(binding, NULL, spelling)) return;
+      List target = c.sym.resolve_global(%($spelling), NULL);
+      if (target) replacements[binding] = target;
+      else if (type && type.type().is_function())
+        natives[binding] =
+          %($spelling ${type.type().apply().canonicalize()});
+      else replacements[binding] = c.sym.reference_global(%($spelling));
+      return;
+    }
+  foreach (Var child, value.list())
+    _open_references(c, child, replacements, natives);
+}
+
+static Var _open_natives(Compiler c, Var value, Map natives) {
+  if (value is not <list> || value.is_nil()) return value;
+  match (value) {
+    case %(expr ? (call (expr ? (ident ?binding)) (args *arguments))): {
+      Var native;
+      if (natives.try_get(binding, native)) {
+        Var (callee, result) = native;
+        List args = _open_natives(c, arguments, natives);
+        return %(expr $result (call $callee (args @args)));
+      }
+    }
+    case %(decl ?base ?declarators): {
+      Type resolved = base is <list> && base.type().is_bare_typedef_name()
+        ? c.sym.resolve_base_type(base) : NULL;
+      if (resolved)
+        return %(decl $resolved ${_open_natives(c, declarators, natives)});
+    }
+  }
+  Array items = $auto([]);
+  foreach (Var child, value.list())
+    items.push(_open_natives(c, child, natives));
+  return items.list();
+}
+
+static List _template(Compiler c, List definition) {
+  List template = definition.assoc(<template>);
+  if (definition.assoc(<open>) is void) return template;
+  Map replacements = {}, natives = {};
+  _open_references(c, template, replacements, natives);
+  template = _replace_definition_bindings(template, replacements);
+  template = _open_natives(c, template, natives);
+  return template.search_replace(%(at m-origin ?node), <?node>);
+}
+
+/** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
+    into a macro value application. Effects are applied in order under the
+    application's transaction, and their tokens are replaced in the code.
+    `retained` reports a bound or lowered stage, which ordinary binding
+    leaves untouched. Returns 0 for any other value.
+*/
+int Compiler.take_code_value(
+  Compiler c, Var input, Var &value, int &retained) {
+  match (input) case %(code-value ?(String stage) ?code ?effects): {
+    Map replacements = {};
+    foreach (List effect, effects) {
+      match (effect) {
+        case %(new-name ?token ?(String role)):
+          replacements[token] = c.sym.introduce(c.fresh_name(role));
+        case %(cleanup ?token ?placed): {
+          replacements[token] = placed;
+          c.needs_exception = 1;
+        }
+        case %(early ?key ?binding ?declaration): {
+          Var cached;
+          if (c.names.adapters.try_get(key, cached))
+            replacements[binding] = cached;
+          else {
+            c.add_early(declaration);
+            c.names.adapters[key] = binding;
+          }
+        }
+      }
+    }
+    value = _replace_definition_bindings(code, replacements);
+    retained = stage != "source";
+    return 1;
+  }
+  return 0;
+}
+
 List Compiler.expand_macro_invocation_node(
   Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
   List definition = NULL;
@@ -4176,7 +4271,7 @@ List Compiler.expand_macro_invocation_node(
       List result = NULL;
       $let(_.macro_stack, _.macro_stack) {
         List old_stack = _.macro_stack;
-        List template = definition.assoc(<template>);
+        List template = _template(_, definition);
         Map file_locals = {};
         // The outermost active row's fourth field is its invocation token.
         Token root = old_stack ? old_stack.last().list()[3] : invocation;
