@@ -17,7 +17,8 @@
 > exception. The narrow protocol discard template prototype is an exception
 > under the process ceiling. Managed declaration cleanup is on dev at
 > `c00397af`; discarded destructuring assignment is on dev at `1d5c9b0a`.
-> Other protocol shapes and source coverage remain.
+> Protocol descriptor storage is on dev at `6a3674bf`; other protocol
+> shapes and source coverage remain.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -797,6 +798,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Func bridge factories (2026-09-28) | a4c18301 / dev d546a124, binary paths differ | confounded raw -56.79% | confounded raw -47.95% | Not counted | Not counted | Not measured |
 | Managed declaration cleanup (2026-09-28) | c00397af / dev a4c18301, distinct output dirs | confounded raw -60.16% | confounded raw -52.37% | Not counted | Not counted | Not measured |
 | Discarded destructuring assignment (2026-09-28) | 1d5c9b0a / dev c00397af, distinct output dirs | confounded raw -61.37% | confounded raw -52.63% | Not counted | Not counted | Not measured |
+| Protocol descriptor storage (2026-09-28) | 6a3674bf / dev 1d5c9b0a, same staged path and cleared output dir | raw -60.99%, cause unassigned | raw -53.42%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -833,6 +835,16 @@ cross-run observation makes a source-change attribution untenable. The script
 now installs both compilers at the same staged path and uses one freshly
 cleared output directory for each sample; that correction has not been timed.
 The destructuring raw samples are in `debug/destructure-paired-results.json`.
+
+The protocol-descriptor attempt installed both binaries at `builds/0/x2c`
+and cleared the same output directory before every sample. Five alternating
+pairs yielded 7.981082 / 3.113130 s default and 8.977372 / 4.181696 s
+live. The `383495cd` binary was the fast candidate in the prior attempt and
+the slow baseline here, despite the staged path being the same in both.
+The source tree and helper/cache state changed between those attempts, and
+their effects are not isolated. These samples cannot attribute a cost or
+speedup to descriptor templates. The candidate binary was restored exactly;
+samples are in `debug/protocol-descriptor-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
