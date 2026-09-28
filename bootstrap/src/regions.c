@@ -12,11 +12,11 @@
 
 #include "exception.h"
 
-static List _765, _764, _761, _760, _759, _757, _756, _754, _753, _752, _750, _748, _747, _746, _734, _733, _732, _730, _729, _727, _726, _725, _724, _722, _721, _720, _718, _716, _715, _713, _709, _708, _707, _705, _704, _702, _700, _699, _698, _697, _695, _694, _691, _689, _688, _687, _686, _685, _684, _683, _682, _681, _680, _679, _668, _667, _666, _665, _663, _662, _661, _658, _657, _656, _654, _653, _650, _648, _647, _645, _644, _641, _640, _639, _637, _636, _635, _634, _633, _632, _631, _628, _627, _626, _624, _623, _621, _620, _618, _617, _616, _615, _612, _611, _608, _607, _606, _604, _602, _601, _600, _597, _596, _595, _593, _592, _587, _586, _585, _582, _580, _579, _578, _577, _576, _574, _573, _572, _571, _567, _566, _562, _561, _560, _553, _551, _550, _548, _547, _545, _544, _542, _540, _539, _536, _535, _534, _533, _532, _531, _530, _528, _527, _526, _523, _522, _521, _518, _517, _516, _515, _514, _512, _511, _509, _508, _507, _504, _503, _497, _495, _483, _481, _479, _478, _477, _476, _475, _474, _473, _470, _469, _468, _466, _465, _461, _459, _458, _457, _456, _455, _454, _450, _449, _448, _447, _444, _443, _441, _440, _438, _436, _435, _433, _432, _431, _430, _429, _427, _426, _424, _423, _420, _419, _418, _416, _414, _412, _411, _410, _409, _404, _403, _402, _398, _396, _395, _394, _393, _392, _390, _389, _384, _383, _382, _379, _378, _374, _373, _371, _370, _369, _367, _366, _361, _360, _359, _357, _355, _354, _353, _349, _348, _347, _343, _342, _334, _333, _332, _330, _329, _328, _326, _324, _322, _321, _319, _318, _316, _315, _311, _310, _309, _307, _301, _300, _299, _297, _296, _295, _293, _291, _289, _288, _286, _285, _283, _282, _281, _279, _277, _268, _267, _266, _264, _262, _261, _259, _258, _225, _224, _223, _220, _219, _218, _216, _215, _213, _210, _209, _208, _206, _204, _203, _199, _198, _156, _153, _150, _148, _146, _144, _142, _139, _135, _132, _131, _118, _102, _101, _100, _98, _97, _95, _89, _88, _84, _83, _82, _80, _78, _77, _52, _51, _50, _44, _34, _25, _24, _13, _12, _9, _8, _2;
+static List _1066, _1065, _1062, _1061, _1060, _1058, _1057, _1055, _1054, _1053, _1051, _1049, _1048, _1047, _1035, _1034, _1033, _1031, _1030, _1028, _1027, _1026, _1024, _1023, _1022, _1020, _1018, _1017, _1015, _1012, _1011, _1010, _1008, _1007, _1005, _1003, _1002, _1001, _1000, _998, _997, _995, _993, _992, _991, _990, _989, _988, _987, _986, _985, _984, _983, _973, _972, _971, _970, _968, _967, _966, _963, _962, _961, _959, _958, _956, _954, _953, _951, _950, _947, _946, _945, _943, _942, _941, _940, _939, _938, _937, _934, _933, _932, _930, _929, _927, _926, _924, _923, _922, _921, _918, _917, _914, _913, _912, _910, _908, _907, _906, _903, _902, _901, _899, _898, _893, _892, _891, _888, _886, _885, _884, _883, _882, _880, _879, _878, _877, _873, _872, _868, _867, _866, _859, _857, _856, _854, _853, _851, _850, _848, _846, _845, _842, _841, _840, _839, _838, _837, _836, _834, _833, _832, _829, _828, _827, _824, _823, _822, _821, _820, _818, _817, _815, _814, _813, _810, _809, _803, _802, _801, _800, _799, _798, _797, _796, _795, _794, _793, _792, _790, _789, _787, _786, _785, _784, _783, _781, _780, _777, _776, _773, _772, _770, _769, _768, _766, _765, _763, _762, _760, _759, _757, _756, _754, _752, _751, _748, _736, _734, _732, _731, _730, _729, _727, _726, _725, _724, _722, _721, _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, _708, _707, _706, _705, _703, _700, _697, _694, _693, _689, _688, _686, _685, _684, _683, _682, _680, _679, _675, _674, _670, _667, _666, _662, _661, _655, _654, _652, _651, _650, _648, _647, _646, _644, _642, _638, _634, _633, _631, _630, _629, _628, _626, _625, _624, _622, _621, _620, _619, _617, _616, _613, _611, _610, _609, _607, _605, _603, _602, _601, _600, _599, _597, _596, _593, _591, _590, _588, _586, _585, _584, _583, _582, _580, _577, _576, _573, _570, _569, _568, _566, _564, _558, _556, _553, _552, _550, _549, _548, _546, _545, _544, _543, _541, _540, _537, _536, _534, _533, _530, _529, _528, _526, _525, _522, _521, _518, _517, _516, _515, _513, _512, _508, _507, _505, _504, _498, _497, _493, _492, _488, _487, _483, _482, _478, _477, _476, _475, _474, _473, _469, _468, _467, _466, _463, _462, _460, _459, _457, _455, _454, _452, _451, _450, _449, _448, _446, _445, _443, _442, _439, _438, _437, _435, _433, _431, _430, _429, _428, _423, _422, _421, _417, _415, _414, _413, _412, _411, _409, _408, _403, _402, _401, _398, _397, _393, _392, _390, _389, _388, _386, _385, _380, _379, _377, _375, _374, _373, _371, _370, _362, _361, _360, _358, _357, _356, _354, _352, _350, _349, _347, _346, _344, _343, _339, _338, _337, _335, _329, _328, _327, _325, _324, _323, _321, _319, _317, _316, _314, _313, _311, _310, _309, _307, _305, _296, _295, _294, _292, _290, _289, _287, _286, _253, _252, _251, _248, _247, _246, _244, _243, _241, _238, _237, _236, _234, _232, _231, _227, _226, _184, _181, _178, _176, _174, _172, _170, _167, _163, _160, _159, _146, _130, _129, _128, _126, _125, _123, _117, _116, _112, _111, _110, _108, _106, _105, _80, _79, _78, _72, _62, _53, _52, _41, _40, _37, _36, _30, _24, _16, _15, _14, _12, _11, _9, _8, _7, _5, _4;
 
-static String _772, _771, _770, _769, _768, _767, _766, _564, _563, _558, _556, _555, _554, _501, _500, _499, _498, _496, _493, _492, _491, _490, _489, _488, _487, _486, _485, _484, _428, _340, _339, _338, _337, _336, _335, _317, _314, _313, _312, _306, _305, _304, _303, _302, _284, _275, _274, _273, _272, _271, _270, _269, _256, _255, _254, _253, _252, _251, _250, _249, _248, _247, _246, _245, _244, _243, _242, _241, _240, _239, _238, _237, _236, _235, _234, _233, _232, _231, _230, _229, _228, _227, _226, _221, _212, _211, _201, _200, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _183, _182, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _154, _151, _149, _147, _145, _143, _140, _137, _136, _133, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _93, _92, _91, _90, _86, _85, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _46, _45, _42, _41, _40, _39, _38, _37, _36, _35, _32, _31, _30, _29, _28, _27, _26, _22, _21, _20, _19, _18, _17, _16, _15, _14, _10, _6, _5, _4, _3, _0;
+static String _1073, _1072, _1071, _1070, _1069, _1068, _1067, _870, _869, _864, _862, _861, _860, _807, _806, _805, _804, _749, _746, _745, _744, _743, _742, _741, _740, _739, _738, _737, _691, _659, _447, _368, _367, _366, _365, _364, _363, _345, _342, _341, _340, _334, _333, _332, _331, _330, _312, _303, _302, _301, _300, _299, _298, _297, _284, _283, _282, _281, _280, _279, _278, _277, _276, _275, _274, _273, _272, _271, _270, _269, _268, _267, _266, _265, _264, _263, _262, _261, _260, _259, _258, _257, _256, _255, _254, _249, _240, _239, _229, _228, _224, _223, _222, _221, _220, _219, _218, _217, _216, _215, _214, _213, _212, _211, _210, _209, _208, _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _182, _179, _177, _175, _173, _171, _168, _165, _164, _161, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _121, _120, _119, _118, _114, _113, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _74, _73, _70, _69, _68, _67, _66, _65, _64, _63, _60, _59, _58, _57, _56, _55, _54, _50, _49, _48, _47, _46, _45, _44, _43, _42, _38, _34, _33, _32, _31, _28;
 
-static Var _763, _762, _758, _755, _751, _749, _731, _728, _723, _719, _717, _714, _712, _711, _710, _706, _703, _701, _696, _693, _692, _690, _678, _677, _676, _675, _674, _673, _672, _671, _670, _669, _664, _660, _659, _655, _652, _651, _649, _646, _643, _642, _638, _630, _629, _625, _622, _619, _614, _613, _610, _609, _605, _603, _599, _598, _594, _591, _590, _589, _588, _584, _583, _581, _575, _570, _569, _568, _565, _559, _557, _552, _549, _546, _543, _541, _538, _537, _529, _525, _524, _520, _519, _513, _510, _506, _505, _502, _494, _482, _480, _472, _471, _467, _464, _463, _462, _460, _453, _452, _451, _446, _445, _442, _439, _437, _434, _425, _422, _421, _417, _415, _413, _408, _407, _406, _405, _401, _400, _399, _397, _391, _388, _387, _386, _385, _381, _380, _377, _376, _375, _372, _368, _365, _364, _363, _362, _358, _356, _352, _351, _350, _346, _345, _344, _341, _331, _327, _325, _323, _320, _308, _298, _294, _292, _290, _287, _280, _278, _276, _265, _263, _260, _257, _222, _217, _214, _207, _205, _202, _197, _155, _152, _141, _138, _134, _130, _117, _99, _96, _94, _87, _81, _79, _76, _49, _48, _47, _43, _33, _23, _11, _7, _1;
+static Var _1064, _1063, _1059, _1056, _1052, _1050, _1032, _1029, _1025, _1021, _1019, _1016, _1014, _1013, _1009, _1006, _1004, _999, _996, _994, _982, _981, _980, _979, _978, _977, _976, _975, _974, _969, _965, _964, _960, _957, _955, _952, _949, _948, _944, _936, _935, _931, _928, _925, _920, _919, _916, _915, _911, _909, _905, _904, _900, _897, _896, _895, _894, _890, _889, _887, _881, _876, _875, _874, _871, _865, _863, _858, _855, _852, _849, _847, _844, _843, _835, _831, _830, _826, _825, _819, _816, _812, _811, _808, _791, _788, _782, _779, _778, _775, _774, _771, _767, _764, _761, _758, _755, _753, _750, _747, _735, _733, _728, _723, _720, _704, _702, _701, _699, _698, _696, _695, _692, _690, _687, _681, _678, _677, _676, _673, _672, _671, _669, _668, _665, _664, _663, _660, _658, _657, _656, _653, _649, _645, _643, _641, _640, _639, _637, _636, _635, _632, _627, _623, _618, _615, _614, _612, _608, _606, _604, _598, _595, _594, _592, _589, _587, _581, _579, _578, _575, _574, _572, _571, _567, _565, _563, _562, _561, _560, _559, _557, _555, _554, _551, _547, _542, _539, _538, _535, _532, _531, _527, _524, _523, _520, _519, _514, _511, _510, _509, _506, _503, _502, _501, _500, _499, _496, _495, _494, _491, _490, _489, _486, _485, _484, _481, _480, _479, _472, _471, _470, _465, _464, _461, _458, _456, _453, _444, _441, _440, _436, _434, _432, _427, _426, _425, _424, _420, _419, _418, _416, _410, _407, _406, _405, _404, _400, _399, _396, _395, _394, _391, _387, _384, _383, _382, _381, _378, _376, _372, _369, _359, _355, _353, _351, _348, _336, _326, _322, _320, _318, _315, _308, _306, _304, _293, _291, _288, _285, _250, _245, _242, _235, _233, _230, _225, _183, _180, _169, _166, _162, _158, _145, _127, _124, _122, _115, _109, _107, _104, _77, _76, _75, _71, _61, _51, _39, _35, _29, _18, _17, _13, _10, _6, _3, _2, _1, _0;
 
 #include "ast.h"
 #include "stage.h"
@@ -62,12 +62,12 @@ Var String_var(String);
 
 Var List_var(List);
 
-_x2c_initializer_choice_3FB21E3E_0((runtime = Map_update_n(Map_new(), 191, String_var(_0), List_var(_2), String_var(_3), List_var(_2), String_var(_4), List_var(_2), String_var(_5), List_var(_2), String_var(_6), List_var(_9), String_var(_10), List_var(_13), String_var(_14), List_var(_13), String_var(_15), List_var(_13), String_var(_16), List_var(_13), String_var(_17), List_var(_2), String_var(_18), List_var(_2), String_var(_19), List_var(_2), String_var(_20), List_var(_2), String_var(_21), List_var(_2), String_var(_22), List_var(_25), String_var(_26), List_var(_25), String_var(_27), List_var(_25), String_var(_28), List_var(_25), String_var(_29), List_var(_12), String_var(_30), List_var(_12), String_var(_31), List_var(_12), String_var(_32), List_var(_34), String_var(_35), List_var(_34), String_var(_36), List_var(_34), String_var(_37), List_var(_34), String_var(_38), List_var(_34), String_var(_39), List_var(_34), String_var(_40), List_var(_34), String_var(_41), List_var(_34), String_var(_42), List_var(_44), String_var(_45), List_var(_44), String_var(_46), List_var(_52), String_var(_53), List_var(_52), String_var(_54), List_var(_52), String_var(_55), List_var(_52), String_var(_56), List_var(_52), String_var(_57), List_var(_52), String_var(_58), List_var(_52), String_var(_59), List_var(_52), String_var(_60), List_var(_52), String_var(_61), List_var(_52), String_var(_62), List_var(_52), String_var(_63), List_var(_13), String_var(_64), List_var(_52), String_var(_65), List_var(_52), String_var(_66), List_var(_52), String_var(_67), List_var(_52), String_var(_68), List_var(_52), String_var(_69), List_var(_52), String_var(_70), List_var(_52), String_var(_71), List_var(_52), String_var(_72), List_var(_2), String_var(_73), List_var(_2), String_var(_74), List_var(_44), String_var(_75), List_var(_84), String_var(_85), List_var(_84), String_var(_86), List_var(_89), String_var(_90), List_var(_89), String_var(_91), List_var(_89), String_var(_92), List_var(_89), String_var(_93), List_var(_102), String_var(_103), List_var(_52), String_var(_104), List_var(_52), String_var(_105), List_var(_52), String_var(_106), List_var(_44), String_var(_107), List_var(_44), String_var(_108), List_var(_44), String_var(_109), List_var(_44), String_var(_110), List_var(_44), String_var(_111), List_var(_44), String_var(_112), List_var(_44), String_var(_113), List_var(_44), String_var(_114), List_var(_44), String_var(_115), List_var(_44), String_var(_116), List_var(_118), String_var(_119), List_var(_118), String_var(_120), List_var(_118), String_var(_121), List_var(_118), String_var(_122), List_var(_118), String_var(_123), List_var(_118), String_var(_124), List_var(_118), String_var(_125), List_var(_118), String_var(_126), List_var(_118), String_var(_127), List_var(_118), String_var(_128), List_var(_118), String_var(_129), List_var(_132), String_var(_133), List_var(_135), String_var(_136), List_var(_135), String_var(_137), List_var(_139), String_var(_140), List_var(_142), String_var(_143), List_var(_144), String_var(_145), List_var(_146), String_var(_147), List_var(_148), String_var(_149), List_var(_150), String_var(_151), List_var(_153), String_var(_154), List_var(_156), String_var(_157), List_var(_156), String_var(_158), List_var(_156), String_var(_159), List_var(_156), String_var(_160), List_var(_44), String_var(_161), List_var(_44), String_var(_162), List_var(_44), String_var(_163), List_var(_44), String_var(_164), List_var(_44), String_var(_165), List_var(_44), String_var(_166), List_var(_44), String_var(_167), List_var(_44), String_var(_168), List_var(_44), String_var(_169), List_var(_44), String_var(_170), List_var(_44), String_var(_171), List_var(_44), String_var(_172), List_var(_44), String_var(_173), List_var(_44), String_var(_174), List_var(_44), String_var(_175), List_var(_44), String_var(_176), List_var(_44), String_var(_177), List_var(_44), String_var(_178), List_var(_44), String_var(_179), List_var(_44), String_var(_180), List_var(_44), String_var(_181), List_var(_44), String_var(_182), List_var(_44), String_var(_183), List_var(_44), String_var(_184), List_var(_44), String_var(_185), List_var(_44), String_var(_186), List_var(_44), String_var(_187), List_var(_44), String_var(_188), List_var(_44), String_var(_189), List_var(_44), String_var(_190), List_var(_44), String_var(_191), List_var(_44), String_var(_192), List_var(_44), String_var(_193), List_var(_44), String_var(_194), List_var(_44), String_var(_195), List_var(_44), String_var(_196), List_var(_199), String_var(_200), List_var(_84), String_var(_201), List_var(_210), String_var(_211), List_var(_210), String_var(_212), List_var(_220), String_var(_221), List_var(_225), String_var(_226), List_var(_225), String_var(_227), List_var(_225), String_var(_228), List_var(_225), String_var(_229), List_var(_225), String_var(_230), List_var(_84), String_var(_231), List_var(_84), String_var(_232), List_var(_84), String_var(_233), List_var(_84), String_var(_234), List_var(_84), String_var(_235), List_var(_84), String_var(_236), List_var(_84), String_var(_237), List_var(_84), String_var(_238), List_var(_84), String_var(_239), List_var(_84), String_var(_240), List_var(_84), String_var(_241), List_var(_84), String_var(_242), List_var(_84), String_var(_243), List_var(_52), String_var(_244), List_var(_52), String_var(_245), List_var(_52), String_var(_246), List_var(_52), String_var(_247), List_var(_2), String_var(_248), List_var(_2), String_var(_249), List_var(_13), String_var(_250), List_var(_52), String_var(_251), List_var(_52), String_var(_252), List_var(_52), String_var(_253), List_var(_52), String_var(_254), List_var(_52), String_var(_255), List_var(_52), String_var(_256), List_var(_268), String_var(_269), List_var(_268), String_var(_270), List_var(_268), String_var(_271), List_var(_268), String_var(_272), List_var(_268), String_var(_273), List_var(_268), String_var(_274), List_var(_268), String_var(_275), List_var(_283), String_var(_284), List_var(_301), String_var(_302), List_var(_301), String_var(_303), List_var(_301), String_var(_304), List_var(_301), String_var(_305), List_var(_301), String_var(_306), List_var(_311), String_var(_312), List_var(_311), String_var(_313), List_var(_311), String_var(_314), List_var(_316), String_var(_317), List_var(_334), String_var(_335), List_var(_334), String_var(_336), List_var(_334))))
+_x2c_initializer_choice_3FB21E3E_0((runtime = Map_update_n(Map_new(), 191, String_var(_28), List_var(_30), String_var(_31), List_var(_30), String_var(_32), List_var(_30), String_var(_33), List_var(_30), String_var(_34), List_var(_37), String_var(_38), List_var(_41), String_var(_42), List_var(_41), String_var(_43), List_var(_41), String_var(_44), List_var(_41), String_var(_45), List_var(_30), String_var(_46), List_var(_30), String_var(_47), List_var(_30), String_var(_48), List_var(_30), String_var(_49), List_var(_30), String_var(_50), List_var(_53), String_var(_54), List_var(_53), String_var(_55), List_var(_53), String_var(_56), List_var(_53), String_var(_57), List_var(_40), String_var(_58), List_var(_40), String_var(_59), List_var(_40), String_var(_60), List_var(_62), String_var(_63), List_var(_62), String_var(_64), List_var(_62), String_var(_65), List_var(_62), String_var(_66), List_var(_62), String_var(_67), List_var(_62), String_var(_68), List_var(_62), String_var(_69), List_var(_62), String_var(_70), List_var(_72), String_var(_73), List_var(_72), String_var(_74), List_var(_80), String_var(_81), List_var(_80), String_var(_82), List_var(_80), String_var(_83), List_var(_80), String_var(_84), List_var(_80), String_var(_85), List_var(_80), String_var(_86), List_var(_80), String_var(_87), List_var(_80), String_var(_88), List_var(_80), String_var(_89), List_var(_80), String_var(_90), List_var(_80), String_var(_91), List_var(_41), String_var(_92), List_var(_80), String_var(_93), List_var(_80), String_var(_94), List_var(_80), String_var(_95), List_var(_80), String_var(_96), List_var(_80), String_var(_97), List_var(_80), String_var(_98), List_var(_80), String_var(_99), List_var(_80), String_var(_100), List_var(_30), String_var(_101), List_var(_30), String_var(_102), List_var(_72), String_var(_103), List_var(_112), String_var(_113), List_var(_112), String_var(_114), List_var(_117), String_var(_118), List_var(_117), String_var(_119), List_var(_117), String_var(_120), List_var(_117), String_var(_121), List_var(_130), String_var(_131), List_var(_80), String_var(_132), List_var(_80), String_var(_133), List_var(_80), String_var(_134), List_var(_72), String_var(_135), List_var(_72), String_var(_136), List_var(_72), String_var(_137), List_var(_72), String_var(_138), List_var(_72), String_var(_139), List_var(_72), String_var(_140), List_var(_72), String_var(_141), List_var(_72), String_var(_142), List_var(_72), String_var(_143), List_var(_72), String_var(_144), List_var(_146), String_var(_147), List_var(_146), String_var(_148), List_var(_146), String_var(_149), List_var(_146), String_var(_150), List_var(_146), String_var(_151), List_var(_146), String_var(_152), List_var(_146), String_var(_153), List_var(_146), String_var(_154), List_var(_146), String_var(_155), List_var(_146), String_var(_156), List_var(_146), String_var(_157), List_var(_160), String_var(_161), List_var(_163), String_var(_164), List_var(_163), String_var(_165), List_var(_167), String_var(_168), List_var(_170), String_var(_171), List_var(_172), String_var(_173), List_var(_174), String_var(_175), List_var(_176), String_var(_177), List_var(_178), String_var(_179), List_var(_181), String_var(_182), List_var(_184), String_var(_185), List_var(_184), String_var(_186), List_var(_184), String_var(_187), List_var(_184), String_var(_188), List_var(_72), String_var(_189), List_var(_72), String_var(_190), List_var(_72), String_var(_191), List_var(_72), String_var(_192), List_var(_72), String_var(_193), List_var(_72), String_var(_194), List_var(_72), String_var(_195), List_var(_72), String_var(_196), List_var(_72), String_var(_197), List_var(_72), String_var(_198), List_var(_72), String_var(_199), List_var(_72), String_var(_200), List_var(_72), String_var(_201), List_var(_72), String_var(_202), List_var(_72), String_var(_203), List_var(_72), String_var(_204), List_var(_72), String_var(_205), List_var(_72), String_var(_206), List_var(_72), String_var(_207), List_var(_72), String_var(_208), List_var(_72), String_var(_209), List_var(_72), String_var(_210), List_var(_72), String_var(_211), List_var(_72), String_var(_212), List_var(_72), String_var(_213), List_var(_72), String_var(_214), List_var(_72), String_var(_215), List_var(_72), String_var(_216), List_var(_72), String_var(_217), List_var(_72), String_var(_218), List_var(_72), String_var(_219), List_var(_72), String_var(_220), List_var(_72), String_var(_221), List_var(_72), String_var(_222), List_var(_72), String_var(_223), List_var(_72), String_var(_224), List_var(_227), String_var(_228), List_var(_112), String_var(_229), List_var(_238), String_var(_239), List_var(_238), String_var(_240), List_var(_248), String_var(_249), List_var(_253), String_var(_254), List_var(_253), String_var(_255), List_var(_253), String_var(_256), List_var(_253), String_var(_257), List_var(_253), String_var(_258), List_var(_112), String_var(_259), List_var(_112), String_var(_260), List_var(_112), String_var(_261), List_var(_112), String_var(_262), List_var(_112), String_var(_263), List_var(_112), String_var(_264), List_var(_112), String_var(_265), List_var(_112), String_var(_266), List_var(_112), String_var(_267), List_var(_112), String_var(_268), List_var(_112), String_var(_269), List_var(_112), String_var(_270), List_var(_112), String_var(_271), List_var(_80), String_var(_272), List_var(_80), String_var(_273), List_var(_80), String_var(_274), List_var(_80), String_var(_275), List_var(_30), String_var(_276), List_var(_30), String_var(_277), List_var(_41), String_var(_278), List_var(_80), String_var(_279), List_var(_80), String_var(_280), List_var(_80), String_var(_281), List_var(_80), String_var(_282), List_var(_80), String_var(_283), List_var(_80), String_var(_284), List_var(_296), String_var(_297), List_var(_296), String_var(_298), List_var(_296), String_var(_299), List_var(_296), String_var(_300), List_var(_296), String_var(_301), List_var(_296), String_var(_302), List_var(_296), String_var(_303), List_var(_311), String_var(_312), List_var(_329), String_var(_330), List_var(_329), String_var(_331), List_var(_329), String_var(_332), List_var(_329), String_var(_333), List_var(_329), String_var(_334), List_var(_339), String_var(_340), List_var(_339), String_var(_341), List_var(_339), String_var(_342), List_var(_344), String_var(_345), List_var(_362), String_var(_363), List_var(_362), String_var(_364), List_var(_362))))
 static Map pooled_results;
 
 Var int_var(int);
 
-_x2c_initializer_choice_3FB21E3E_1((pooled_results = Map_update_n(Map_new(), 5, String_var(_119), int_var(1), String_var(_337), int_var(1), String_var(_338), int_var(1), String_var(_339), int_var(1), String_var(_340), int_var(1))))
+_x2c_initializer_choice_3FB21E3E_1((pooled_results = Map_update_n(Map_new(), 5, String_var(_147), int_var(1), String_var(_365), int_var(1), String_var(_366), int_var(1), String_var(_367), int_var(1), String_var(_368), int_var(1))))
 static Var _effect(Walk w, String name);
 
 static Var _unwrap(Var value);
@@ -166,6 +166,8 @@ static void _analyze(Walk w, List function);
 
 static void _fixpoint(Walk w, List ast, Array functions);
 
+static Var source_expression(Var value);
+
 static VarMethods _x2c__x2c_protocol_methods_0;
 
 typedef struct _x2c_defer_env_0{
@@ -208,768 +210,1061 @@ __attribute__((constructor)) static void _file_init_(void){
   if(! x2c_register_builtin_descriptor(395496, _x2c__x2c_protocol_methods_0)){
     x2c_register_descriptor(String_new("fact"), _x2c__x2c_protocol_methods_0);
   }
-  _0 = String_new("Scope_malloc");
-  _1 = Symbol_var(2909126);
-  _2 = cons(_1, NULL);
-  _3 = String_new("Scope_calloc");
-  _4 = String_new("Scope_memdup");
-  _5 = String_new("Scope_malloc_finalized");
-  _6 = String_new("Scope_realloc");
-  _7 = Symbol_var(28291400);
-  _8 = cons(_7, NULL);
-  _9 = cons(_1, _8);
-  _10 = String_new("String_malloc");
-  _11 = Symbol_var(1080280);
-  _12 = cons(_11, NULL);
-  _13 = cons(_1, _12);
-  _14 = String_new("String_new");
-  _15 = String_new("String_new_len");
-  _16 = String_new("String_new_fill");
-  _17 = String_new("Block_new");
-  _18 = String_new("Bytes_new");
-  _19 = String_new("Array_new");
-  _20 = String_new("Map_new");
-  _21 = String_new("Buffer_new");
-  _22 = String_new("Scope_malloc_in");
-  _23 = Symbol_var(1270760);
-  _24 = cons(_23, NULL);
-  _25 = cons(_1, _24);
-  _26 = String_new("Scope_calloc_in");
-  _27 = String_new("Scope_memdup_in");
-  _28 = String_new("Scope_malloc_finalized_in");
-  _29 = String_new("cons");
-  _30 = String_new("Var_cons");
-  _31 = String_new("List_cons");
-  _32 = String_new("Array_push");
-  _33 = Symbol_var(41188490);
-  _34 = cons(_33, NULL);
-  _35 = String_new("Array_insert");
-  _36 = String_new("Array_unshift");
-  _37 = String_new("Array_setindex");
-  _38 = String_new("Map_setindex");
-  _39 = String_new("Map_set");
-  _40 = String_new("Map_setdefault");
-  _41 = String_new("Var_setindex");
-  _42 = String_new("Var_map");
-  _43 = Symbol_var(1544288);
-  _44 = cons(_43, NULL);
-  _45 = String_new("Map_var");
-  _46 = String_new("Symbol_var");
-  _47 = Symbol_var(42239593650);
-  _48 = int_var(0);
-  _49 = List_var(NULL);
-  _50 = cons(_49, NULL);
-  _51 = cons(_48, _50);
-  _52 = cons(_47, _51);
-  _53 = String_new("Var_integer");
-  _54 = String_new("Var_is_row");
-  _55 = String_new("Var_kind");
-  _56 = String_new("Var_int");
-  _57 = String_new("Var_is_void");
-  _58 = String_new("Var_is_nil");
-  _59 = String_new("Var_is_atom");
-  _60 = String_new("Map_len");
-  _61 = String_new("List_len");
-  _62 = String_new("String_equal");
-  _63 = String_new("Symbol_str");
-  _64 = String_new("int_var");
-  _65 = String_new("uint_var");
-  _66 = String_new("char_var");
-  _67 = String_new("uchar_var");
-  _68 = String_new("short_var");
-  _69 = String_new("ushort_var");
-  _70 = String_new("float_var");
-  _71 = String_new("double_var");
-  _72 = String_new("long_var");
-  _73 = String_new("Var_box_long");
-  _74 = String_new("Func_var");
-  _75 = String_new("List_car");
-  _76 = Symbol_var(1219800220);
-  _77 = cons(_76, NULL);
-  _78 = cons(_48, _77);
-  _79 = List_var(_78);
-  _80 = cons(_79, NULL);
-  _81 = List_var(_80);
-  _82 = cons(_81, NULL);
-  _83 = cons(_48, _82);
-  _84 = cons(_47, _83);
-  _85 = String_new("List_cdr");
-  _86 = String_new("String_lower");
-  _87 = int_var(2);
-  _88 = cons(_87, _82);
-  _89 = cons(_47, _88);
-  _90 = String_new("String_upper");
-  _91 = String_new("String_capitalize");
-  _92 = String_new("String_strip");
-  _93 = String_new("String_add");
-  _94 = int_var(1);
-  _95 = cons(_94, _77);
-  _96 = List_var(_95);
-  _97 = cons(_96, NULL);
-  _98 = cons(_79, _97);
-  _99 = List_var(_98);
-  _100 = cons(_99, NULL);
-  _101 = cons(_87, _100);
-  _102 = cons(_47, _101);
-  _103 = String_new("puts");
-  _104 = String_new("File_puts");
-  _105 = String_new("assert");
-  _106 = String_new("Var_array");
-  _107 = String_new("Array_var");
-  _108 = String_new("Var_list");
-  _109 = String_new("List_var");
-  _110 = String_new("Var_string");
-  _111 = String_new("String_var");
-  _112 = String_new("Var_block");
-  _113 = String_new("Block_var");
-  _114 = String_new("Var_buffer");
-  _115 = String_new("Buffer_var");
-  _116 = String_new("Array_free");
-  _117 = Symbol_var(430410);
-  _118 = cons(_117, NULL);
-  _119 = String_new("Array_list_free");
-  _120 = String_new("Array_cleanup");
-  _121 = String_new("Map_cleanup");
-  _122 = String_new("Block_free");
-  _123 = String_new("Block_cleanup");
-  _124 = String_new("Bytes_cleanup");
-  _125 = String_new("Buffer_free");
-  _126 = String_new("Buffer_cleanup");
-  _127 = String_new("Context_close");
-  _128 = String_new("Context_cleanup");
-  _129 = String_new("Scope_free");
-  _130 = Symbol_var(40074250);
-  _131 = cons(_130, NULL);
-  _132 = cons(_117, _131);
-  _133 = String_new("Scope_destroy");
-  _134 = Symbol_var(8966673394);
-  _135 = cons(_134, NULL);
-  _136 = String_new("Scope_cleanup");
-  _137 = String_new("Scope_retain");
-  _138 = Symbol_var(1016156);
-  _139 = cons(_138, _131);
-  _140 = String_new("Scope_release");
-  _141 = Symbol_var(7109834);
-  _142 = cons(_141, _131);
-  _143 = String_new("Pool_open");
-  _144 = cons(_138, _12);
-  _145 = String_new("Pool_close");
-  _146 = cons(_141, _12);
-  _147 = String_new("Scope_push");
-  _148 = cons(_138, _24);
-  _149 = String_new("Scope_pop");
-  _150 = cons(_141, _24);
-  _151 = String_new("Scope_move");
-  _152 = Symbol_var(884106);
-  _153 = cons(_152, NULL);
-  _154 = String_new("Context_export");
-  _155 = Symbol_var(377448);
-  _156 = cons(_155, NULL);
-  _157 = String_new("List_promote");
-  _158 = String_new("String_promote");
-  _159 = String_new("Atom_promote");
-  _160 = String_new("Var_as_iter");
-  _161 = String_new("Iter_var");
-  _162 = String_new("Var_adnode");
-  _163 = String_new("AdNode_var");
-  _164 = String_new("Var_token");
-  _165 = String_new("Token_var");
-  _166 = String_new("Var_file");
-  _167 = String_new("File_var");
-  _168 = String_new("Var_job");
-  _169 = String_new("Job_var");
-  _170 = String_new("Var_arraychar");
-  _171 = String_new("ArrayChar_var");
-  _172 = String_new("Var_arrayshort");
-  _173 = String_new("ArrayShort_var");
-  _174 = String_new("Var_arrayint");
-  _175 = String_new("ArrayInt_var");
-  _176 = String_new("Var_arraylong");
-  _177 = String_new("ArrayLong_var");
-  _178 = String_new("Var_arrayfloat");
-  _179 = String_new("ArrayFloat_var");
-  _180 = String_new("Var_arraydbl");
-  _181 = String_new("ArrayDbl_var");
-  _182 = String_new("Var_arraystring");
-  _183 = String_new("ArrayString_var");
-  _184 = String_new("Var_mapintint");
-  _185 = String_new("MapIntInt_var");
-  _186 = String_new("Var_maplongdouble");
-  _187 = String_new("MapLongDouble_var");
-  _188 = String_new("Var_mapstringstring");
-  _189 = String_new("MapStringString_var");
-  _190 = String_new("Var_mapstringint");
-  _191 = String_new("MapStringInt_var");
-  _192 = String_new("Var_jsonbool");
-  _193 = String_new("Var_regexcapture");
-  _194 = String_new("Var_regexmatch");
-  _195 = String_new("Var_regex");
-  _196 = String_new("List_job");
-  _197 = Symbol_var(13201496);
-  _198 = cons(_197, NULL);
-  _199 = cons(_1, _198);
-  _200 = String_new("Job_start");
-  _201 = String_new("String_lines");
-  _202 = Symbol_var(1219734312);
-  _203 = cons(_202, NULL);
-  _204 = cons(_48, _203);
-  _205 = List_var(_204);
-  _206 = cons(_205, NULL);
-  _207 = List_var(_206);
-  _208 = cons(_207, NULL);
-  _209 = cons(_94, _208);
-  _210 = cons(_47, _209);
-  _211 = String_new("String_words");
-  _212 = String_new("String_splits");
-  _213 = cons(_94, _203);
-  _214 = List_var(_213);
-  _215 = cons(_214, NULL);
-  _216 = cons(_205, _215);
-  _217 = List_var(_216);
-  _218 = cons(_217, NULL);
-  _219 = cons(_94, _218);
-  _220 = cons(_47, _219);
-  _221 = String_new("Var_fallback_iter");
-  _222 = List_var(_97);
-  _223 = cons(_222, NULL);
-  _224 = cons(_48, _223);
-  _225 = cons(_47, _224);
-  _226 = String_new("Array_write_str");
-  _227 = String_new("Array_write_repr");
-  _228 = String_new("Map_write_str");
-  _229 = String_new("Map_write_repr");
-  _230 = String_new("Buffer_reserve");
-  _231 = String_new("Buffer_clear");
-  _232 = String_new("Buffer_write_len");
-  _233 = String_new("Buffer_write");
-  _234 = String_new("Buffer_write_char");
-  _235 = String_new("Buffer_write_repeat");
-  _236 = String_new("Buffer_unwrite");
-  _237 = String_new("Buffer_pad");
-  _238 = String_new("Buffer_newline");
-  _239 = String_new("Buffer_indent");
-  _240 = String_new("Buffer_newline_indent");
-  _241 = String_new("Buffer_push");
-  _242 = String_new("Buffer_pop");
-  _243 = String_new("Scope_new");
-  _244 = String_new("Scope_new_named");
-  _245 = String_new("Context_open");
-  _246 = String_new("Context_current");
-  _247 = String_new("Iter_new");
-  _248 = String_new("Iter_array");
-  _249 = String_new("Iter_list");
-  _250 = String_new("Iter_next");
-  _251 = String_new("Iter_count");
-  _252 = String_new("Iter_sum");
-  _253 = String_new("Iter_product");
-  _254 = String_new("Iter_max");
-  _255 = String_new("Iter_min");
-  _256 = String_new("Array_iter");
-  _257 = Symbol_var(33656922);
-  _258 = cons(_94, NULL);
-  _259 = cons(_257, _258);
-  _260 = List_var(_259);
-  _261 = cons(_260, NULL);
-  _262 = cons(_48, _261);
-  _263 = List_var(_262);
-  _264 = cons(_263, _97);
-  _265 = List_var(_264);
-  _266 = cons(_265, NULL);
-  _267 = cons(_48, _266);
-  _268 = cons(_47, _267);
-  _269 = String_new("List_iter");
-  _270 = String_new("Map_iter");
-  _271 = String_new("Map_keys");
-  _272 = String_new("Map_enumerate");
-  _273 = String_new("String_iter");
-  _274 = String_new("Var_iter");
-  _275 = String_new("range");
-  _276 = int_var(3);
-  _277 = cons(_276, _77);
-  _278 = List_var(_277);
-  _279 = cons(_278, NULL);
-  _280 = List_var(_279);
-  _281 = cons(_280, NULL);
-  _282 = cons(_48, _281);
-  _283 = cons(_47, _282);
-  _284 = String_new("Iter_map");
-  _285 = cons(_87, NULL);
-  _286 = cons(_257, _285);
-  _287 = List_var(_286);
-  _288 = cons(_287, NULL);
-  _289 = cons(_48, _288);
-  _290 = List_var(_289);
-  _291 = cons(_94, _288);
-  _292 = List_var(_291);
-  _293 = cons(_87, _77);
-  _294 = List_var(_293);
-  _295 = cons(_294, NULL);
-  _296 = cons(_292, _295);
-  _297 = cons(_290, _296);
-  _298 = List_var(_297);
-  _299 = cons(_298, NULL);
-  _300 = cons(_48, _299);
-  _301 = cons(_47, _300);
-  _302 = String_new("Iter_filter");
-  _303 = String_new("Iter_zip");
-  _304 = String_new("Iter_chain");
-  _305 = String_new("Iter_accumulate");
-  _306 = String_new("Iter_enumerate");
-  _307 = cons(_290, _295);
+  _0 = Symbol_var(377892);
+  _1 = Symbol_var(58);
+  _2 = Symbol_var(1077029798);
+  _3 = Symbol_var(1965977956);
+  _4 = cons(_3, NULL);
+  _5 = cons(_2, _4);
+  _6 = List_var(_5);
+  _7 = cons(_6, NULL);
+  _8 = cons(_1, _7);
+  _9 = cons(_0, _8);
+  _10 = Symbol_var(199912);
+  _11 = cons(_1, _4);
+  _12 = cons(_10, _11);
+  _13 = List_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = cons(_1, _14);
+  _16 = cons(_0, _15);
+  _17 = Symbol_var(42162);
+  _18 = Symbol_var(214686631041382);
+  _24 = cons(_1, NULL);
+  _28 = String_new("Scope_malloc");
+  _29 = Symbol_var(2909126);
+  _30 = cons(_29, NULL);
+  _31 = String_new("Scope_calloc");
+  _32 = String_new("Scope_memdup");
+  _33 = String_new("Scope_malloc_finalized");
+  _34 = String_new("Scope_realloc");
+  _35 = Symbol_var(28291400);
+  _36 = cons(_35, NULL);
+  _37 = cons(_29, _36);
+  _38 = String_new("String_malloc");
+  _39 = Symbol_var(1080280);
+  _40 = cons(_39, NULL);
+  _41 = cons(_29, _40);
+  _42 = String_new("String_new");
+  _43 = String_new("String_new_len");
+  _44 = String_new("String_new_fill");
+  _45 = String_new("Block_new");
+  _46 = String_new("Bytes_new");
+  _47 = String_new("Array_new");
+  _48 = String_new("Map_new");
+  _49 = String_new("Buffer_new");
+  _50 = String_new("Scope_malloc_in");
+  _51 = Symbol_var(1270760);
+  _52 = cons(_51, NULL);
+  _53 = cons(_29, _52);
+  _54 = String_new("Scope_calloc_in");
+  _55 = String_new("Scope_memdup_in");
+  _56 = String_new("Scope_malloc_finalized_in");
+  _57 = String_new("cons");
+  _58 = String_new("Var_cons");
+  _59 = String_new("List_cons");
+  _60 = String_new("Array_push");
+  _61 = Symbol_var(41188490);
+  _62 = cons(_61, NULL);
+  _63 = String_new("Array_insert");
+  _64 = String_new("Array_unshift");
+  _65 = String_new("Array_setindex");
+  _66 = String_new("Map_setindex");
+  _67 = String_new("Map_set");
+  _68 = String_new("Map_setdefault");
+  _69 = String_new("Var_setindex");
+  _70 = String_new("Var_map");
+  _71 = Symbol_var(1544288);
+  _72 = cons(_71, NULL);
+  _73 = String_new("Map_var");
+  _74 = String_new("Symbol_var");
+  _75 = Symbol_var(42239593650);
+  _76 = int_var(0);
+  _77 = List_var(NULL);
+  _78 = cons(_77, NULL);
+  _79 = cons(_76, _78);
+  _80 = cons(_75, _79);
+  _81 = String_new("Var_integer");
+  _82 = String_new("Var_is_row");
+  _83 = String_new("Var_kind");
+  _84 = String_new("Var_int");
+  _85 = String_new("Var_is_void");
+  _86 = String_new("Var_is_nil");
+  _87 = String_new("Var_is_atom");
+  _88 = String_new("Map_len");
+  _89 = String_new("List_len");
+  _90 = String_new("String_equal");
+  _91 = String_new("Symbol_str");
+  _92 = String_new("int_var");
+  _93 = String_new("uint_var");
+  _94 = String_new("char_var");
+  _95 = String_new("uchar_var");
+  _96 = String_new("short_var");
+  _97 = String_new("ushort_var");
+  _98 = String_new("float_var");
+  _99 = String_new("double_var");
+  _100 = String_new("long_var");
+  _101 = String_new("Var_box_long");
+  _102 = String_new("Func_var");
+  _103 = String_new("List_car");
+  _104 = Symbol_var(1219800220);
+  _105 = cons(_104, NULL);
+  _106 = cons(_76, _105);
+  _107 = List_var(_106);
+  _108 = cons(_107, NULL);
+  _109 = List_var(_108);
+  _110 = cons(_109, NULL);
+  _111 = cons(_76, _110);
+  _112 = cons(_75, _111);
+  _113 = String_new("List_cdr");
+  _114 = String_new("String_lower");
+  _115 = int_var(2);
+  _116 = cons(_115, _110);
+  _117 = cons(_75, _116);
+  _118 = String_new("String_upper");
+  _119 = String_new("String_capitalize");
+  _120 = String_new("String_strip");
+  _121 = String_new("String_add");
+  _122 = int_var(1);
+  _123 = cons(_122, _105);
+  _124 = List_var(_123);
+  _125 = cons(_124, NULL);
+  _126 = cons(_107, _125);
+  _127 = List_var(_126);
+  _128 = cons(_127, NULL);
+  _129 = cons(_115, _128);
+  _130 = cons(_75, _129);
+  _131 = String_new("puts");
+  _132 = String_new("File_puts");
+  _133 = String_new("assert");
+  _134 = String_new("Var_array");
+  _135 = String_new("Array_var");
+  _136 = String_new("Var_list");
+  _137 = String_new("List_var");
+  _138 = String_new("Var_string");
+  _139 = String_new("String_var");
+  _140 = String_new("Var_block");
+  _141 = String_new("Block_var");
+  _142 = String_new("Var_buffer");
+  _143 = String_new("Buffer_var");
+  _144 = String_new("Array_free");
+  _145 = Symbol_var(430410);
+  _146 = cons(_145, NULL);
+  _147 = String_new("Array_list_free");
+  _148 = String_new("Array_cleanup");
+  _149 = String_new("Map_cleanup");
+  _150 = String_new("Block_free");
+  _151 = String_new("Block_cleanup");
+  _152 = String_new("Bytes_cleanup");
+  _153 = String_new("Buffer_free");
+  _154 = String_new("Buffer_cleanup");
+  _155 = String_new("Context_close");
+  _156 = String_new("Context_cleanup");
+  _157 = String_new("Scope_free");
+  _158 = Symbol_var(40074250);
+  _159 = cons(_158, NULL);
+  _160 = cons(_145, _159);
+  _161 = String_new("Scope_destroy");
+  _162 = Symbol_var(8966673394);
+  _163 = cons(_162, NULL);
+  _164 = String_new("Scope_cleanup");
+  _165 = String_new("Scope_retain");
+  _166 = Symbol_var(1016156);
+  _167 = cons(_166, _159);
+  _168 = String_new("Scope_release");
+  _169 = Symbol_var(7109834);
+  _170 = cons(_169, _159);
+  _171 = String_new("Pool_open");
+  _172 = cons(_166, _40);
+  _173 = String_new("Pool_close");
+  _174 = cons(_169, _40);
+  _175 = String_new("Scope_push");
+  _176 = cons(_166, _52);
+  _177 = String_new("Scope_pop");
+  _178 = cons(_169, _52);
+  _179 = String_new("Scope_move");
+  _180 = Symbol_var(884106);
+  _181 = cons(_180, NULL);
+  _182 = String_new("Context_export");
+  _183 = Symbol_var(377448);
+  _184 = cons(_183, NULL);
+  _185 = String_new("List_promote");
+  _186 = String_new("String_promote");
+  _187 = String_new("Atom_promote");
+  _188 = String_new("Var_as_iter");
+  _189 = String_new("Iter_var");
+  _190 = String_new("Var_adnode");
+  _191 = String_new("AdNode_var");
+  _192 = String_new("Var_token");
+  _193 = String_new("Token_var");
+  _194 = String_new("Var_file");
+  _195 = String_new("File_var");
+  _196 = String_new("Var_job");
+  _197 = String_new("Job_var");
+  _198 = String_new("Var_arraychar");
+  _199 = String_new("ArrayChar_var");
+  _200 = String_new("Var_arrayshort");
+  _201 = String_new("ArrayShort_var");
+  _202 = String_new("Var_arrayint");
+  _203 = String_new("ArrayInt_var");
+  _204 = String_new("Var_arraylong");
+  _205 = String_new("ArrayLong_var");
+  _206 = String_new("Var_arrayfloat");
+  _207 = String_new("ArrayFloat_var");
+  _208 = String_new("Var_arraydbl");
+  _209 = String_new("ArrayDbl_var");
+  _210 = String_new("Var_arraystring");
+  _211 = String_new("ArrayString_var");
+  _212 = String_new("Var_mapintint");
+  _213 = String_new("MapIntInt_var");
+  _214 = String_new("Var_maplongdouble");
+  _215 = String_new("MapLongDouble_var");
+  _216 = String_new("Var_mapstringstring");
+  _217 = String_new("MapStringString_var");
+  _218 = String_new("Var_mapstringint");
+  _219 = String_new("MapStringInt_var");
+  _220 = String_new("Var_jsonbool");
+  _221 = String_new("Var_regexcapture");
+  _222 = String_new("Var_regexmatch");
+  _223 = String_new("Var_regex");
+  _224 = String_new("List_job");
+  _225 = Symbol_var(13201496);
+  _226 = cons(_225, NULL);
+  _227 = cons(_29, _226);
+  _228 = String_new("Job_start");
+  _229 = String_new("String_lines");
+  _230 = Symbol_var(1219734312);
+  _231 = cons(_230, NULL);
+  _232 = cons(_76, _231);
+  _233 = List_var(_232);
+  _234 = cons(_233, NULL);
+  _235 = List_var(_234);
+  _236 = cons(_235, NULL);
+  _237 = cons(_122, _236);
+  _238 = cons(_75, _237);
+  _239 = String_new("String_words");
+  _240 = String_new("String_splits");
+  _241 = cons(_122, _231);
+  _242 = List_var(_241);
+  _243 = cons(_242, NULL);
+  _244 = cons(_233, _243);
+  _245 = List_var(_244);
+  _246 = cons(_245, NULL);
+  _247 = cons(_122, _246);
+  _248 = cons(_75, _247);
+  _249 = String_new("Var_fallback_iter");
+  _250 = List_var(_125);
+  _251 = cons(_250, NULL);
+  _252 = cons(_76, _251);
+  _253 = cons(_75, _252);
+  _254 = String_new("Array_write_str");
+  _255 = String_new("Array_write_repr");
+  _256 = String_new("Map_write_str");
+  _257 = String_new("Map_write_repr");
+  _258 = String_new("Buffer_reserve");
+  _259 = String_new("Buffer_clear");
+  _260 = String_new("Buffer_write_len");
+  _261 = String_new("Buffer_write");
+  _262 = String_new("Buffer_write_char");
+  _263 = String_new("Buffer_write_repeat");
+  _264 = String_new("Buffer_unwrite");
+  _265 = String_new("Buffer_pad");
+  _266 = String_new("Buffer_newline");
+  _267 = String_new("Buffer_indent");
+  _268 = String_new("Buffer_newline_indent");
+  _269 = String_new("Buffer_push");
+  _270 = String_new("Buffer_pop");
+  _271 = String_new("Scope_new");
+  _272 = String_new("Scope_new_named");
+  _273 = String_new("Context_open");
+  _274 = String_new("Context_current");
+  _275 = String_new("Iter_new");
+  _276 = String_new("Iter_array");
+  _277 = String_new("Iter_list");
+  _278 = String_new("Iter_next");
+  _279 = String_new("Iter_count");
+  _280 = String_new("Iter_sum");
+  _281 = String_new("Iter_product");
+  _282 = String_new("Iter_max");
+  _283 = String_new("Iter_min");
+  _284 = String_new("Array_iter");
+  _285 = Symbol_var(33656922);
+  _286 = cons(_122, NULL);
+  _287 = cons(_285, _286);
+  _288 = List_var(_287);
+  _289 = cons(_288, NULL);
+  _290 = cons(_76, _289);
+  _291 = List_var(_290);
+  _292 = cons(_291, _125);
+  _293 = List_var(_292);
+  _294 = cons(_293, NULL);
+  _295 = cons(_76, _294);
+  _296 = cons(_75, _295);
+  _297 = String_new("List_iter");
+  _298 = String_new("Map_iter");
+  _299 = String_new("Map_keys");
+  _300 = String_new("Map_enumerate");
+  _301 = String_new("String_iter");
+  _302 = String_new("Var_iter");
+  _303 = String_new("range");
+  _304 = int_var(3);
+  _305 = cons(_304, _105);
+  _306 = List_var(_305);
+  _307 = cons(_306, NULL);
   _308 = List_var(_307);
   _309 = cons(_308, NULL);
-  _310 = cons(_48, _309);
-  _311 = cons(_47, _310);
-  _312 = String_new("Iter_repeat");
-  _313 = String_new("Iter_head");
-  _314 = String_new("Iter_unique");
-  _315 = cons(_94, _266);
-  _316 = cons(_47, _315);
-  _317 = String_new("Iter_zip_with");
-  _318 = cons(_276, NULL);
-  _319 = cons(_257, _318);
+  _310 = cons(_76, _309);
+  _311 = cons(_75, _310);
+  _312 = String_new("Iter_map");
+  _313 = cons(_115, NULL);
+  _314 = cons(_285, _313);
+  _315 = List_var(_314);
+  _316 = cons(_315, NULL);
+  _317 = cons(_76, _316);
+  _318 = List_var(_317);
+  _319 = cons(_122, _316);
   _320 = List_var(_319);
-  _321 = cons(_320, NULL);
-  _322 = cons(_48, _321);
-  _323 = List_var(_322);
-  _324 = cons(_94, _321);
-  _325 = List_var(_324);
-  _326 = cons(_87, _321);
-  _327 = List_var(_326);
-  _328 = cons(_327, _279);
-  _329 = cons(_325, _328);
-  _330 = cons(_323, _329);
-  _331 = List_var(_330);
-  _332 = cons(_331, NULL);
-  _333 = cons(_48, _332);
-  _334 = cons(_47, _333);
-  _335 = String_new("Iter_map2");
-  _336 = String_new("Iter_scan");
-  _337 = String_new("Atom_intern");
-  _338 = String_new("List_append");
-  _339 = String_new("String_concat");
-  _340 = String_new("String_join");
-  _341 = Symbol_var(54);
-  _342 = cons(_341, NULL);
-  _343 = cons(_1, _342);
-  _344 = Symbol_var(62436);
-  _345 = Symbol_var(377892);
-  _346 = Symbol_var(199912);
-  _347 = cons(_346, NULL);
-  _348 = cons(_345, _347);
-  _349 = cons(_344, _348);
-  _350 = List_var(_349);
-  _351 = Symbol_var(58);
-  _352 = Symbol_var(1965977956);
-  _353 = cons(_352, NULL);
-  _354 = cons(_351, _353);
-  _355 = cons(_350, _354);
-  _356 = Symbol_var(1077029798);
-  _357 = cons(_356, _353);
-  _358 = Symbol_var(62180362);
-  _359 = cons(_351, NULL);
-  _360 = cons(_358, _359);
-  _361 = cons(_345, _360);
-  _362 = Symbol_var(19147688);
-  _363 = Symbol_var(2005352);
-  _364 = Symbol_var(1997793414030);
-  _365 = Symbol_var(4928588686);
-  _366 = cons(_351, _359);
-  _367 = cons(_365, _366);
-  _368 = List_var(_367);
-  _369 = cons(_368, NULL);
-  _370 = cons(_364, _369);
-  _371 = cons(_363, _370);
-  _372 = List_var(_371);
-  _373 = cons(_372, NULL);
-  _374 = cons(_362, _373);
-  _375 = Symbol_var(992);
-  _376 = Symbol_var(2050325770);
-  _377 = Symbol_var(77);
-  _378 = cons(_377, NULL);
-  _379 = cons(_376, _378);
-  _380 = List_var(_379);
-  _381 = Symbol_var(1980500170);
-  _382 = cons(_381, NULL);
-  _383 = cons(_380, _382);
-  _384 = cons(_375, _383);
-  _385 = Symbol_var(199448);
-  _386 = Symbol_var(64230035573724);
-  _387 = Symbol_var(102886);
-  _388 = Symbol_var(57834982);
-  _389 = cons(_388, NULL);
-  _390 = cons(_387, _389);
+  _321 = cons(_115, _105);
+  _322 = List_var(_321);
+  _323 = cons(_322, NULL);
+  _324 = cons(_320, _323);
+  _325 = cons(_318, _324);
+  _326 = List_var(_325);
+  _327 = cons(_326, NULL);
+  _328 = cons(_76, _327);
+  _329 = cons(_75, _328);
+  _330 = String_new("Iter_filter");
+  _331 = String_new("Iter_zip");
+  _332 = String_new("Iter_chain");
+  _333 = String_new("Iter_accumulate");
+  _334 = String_new("Iter_enumerate");
+  _335 = cons(_318, _323);
+  _336 = List_var(_335);
+  _337 = cons(_336, NULL);
+  _338 = cons(_76, _337);
+  _339 = cons(_75, _338);
+  _340 = String_new("Iter_repeat");
+  _341 = String_new("Iter_head");
+  _342 = String_new("Iter_unique");
+  _343 = cons(_122, _294);
+  _344 = cons(_75, _343);
+  _345 = String_new("Iter_zip_with");
+  _346 = cons(_304, NULL);
+  _347 = cons(_285, _346);
+  _348 = List_var(_347);
+  _349 = cons(_348, NULL);
+  _350 = cons(_76, _349);
+  _351 = List_var(_350);
+  _352 = cons(_122, _349);
+  _353 = List_var(_352);
+  _354 = cons(_115, _349);
+  _355 = List_var(_354);
+  _356 = cons(_355, _307);
+  _357 = cons(_353, _356);
+  _358 = cons(_351, _357);
+  _359 = List_var(_358);
+  _360 = cons(_359, NULL);
+  _361 = cons(_76, _360);
+  _362 = cons(_75, _361);
+  _363 = String_new("Iter_map2");
+  _364 = String_new("Iter_scan");
+  _365 = String_new("Atom_intern");
+  _366 = String_new("List_append");
+  _367 = String_new("String_concat");
+  _368 = String_new("String_join");
+  _369 = Symbol_var(54);
+  _370 = cons(_369, NULL);
+  _371 = cons(_29, _370);
+  _372 = Symbol_var(62436);
+  _373 = cons(_10, NULL);
+  _374 = cons(_0, _373);
+  _375 = cons(_372, _374);
+  _376 = List_var(_375);
+  _377 = cons(_376, _11);
+  _378 = Symbol_var(62180362);
+  _379 = cons(_378, _24);
+  _380 = cons(_0, _379);
+  _381 = Symbol_var(19147688);
+  _382 = Symbol_var(2005352);
+  _383 = Symbol_var(1997793414030);
+  _384 = Symbol_var(4928588686);
+  _385 = cons(_1, _24);
+  _386 = cons(_384, _385);
+  _387 = List_var(_386);
+  _388 = cons(_387, NULL);
+  _389 = cons(_383, _388);
+  _390 = cons(_382, _389);
   _391 = List_var(_390);
   _392 = cons(_391, NULL);
-  _393 = cons(_386, _392);
-  _394 = cons(_385, _393);
-  _395 = cons(_351, _50);
-  _396 = cons(_345, _395);
-  _397 = List_var(_396);
-  _398 = cons(_397, NULL);
-  _399 = Symbol_var(1318210446);
-  _400 = Symbol_var(806120);
-  _401 = Symbol_var(1328354264);
-  _402 = cons(_401, NULL);
-  _403 = cons(_400, _402);
-  _404 = cons(_399, _403);
-  _405 = Symbol_var(26720);
-  _406 = Symbol_var(3313778);
-  _407 = Symbol_var(5011670);
-  _408 = Symbol_var(178663780);
-  _409 = cons(_408, NULL);
-  _410 = cons(_407, _409);
-  _411 = cons(_406, _410);
+  _393 = cons(_381, _392);
+  _394 = Symbol_var(992);
+  _395 = Symbol_var(2050325770);
+  _396 = Symbol_var(77);
+  _397 = cons(_396, NULL);
+  _398 = cons(_395, _397);
+  _399 = List_var(_398);
+  _400 = Symbol_var(1980500170);
+  _401 = cons(_400, NULL);
+  _402 = cons(_399, _401);
+  _403 = cons(_394, _402);
+  _404 = Symbol_var(199448);
+  _405 = Symbol_var(64230035573724);
+  _406 = Symbol_var(102886);
+  _407 = Symbol_var(57834982);
+  _408 = cons(_407, NULL);
+  _409 = cons(_406, _408);
+  _410 = List_var(_409);
+  _411 = cons(_410, NULL);
   _412 = cons(_405, _411);
-  _413 = Symbol_var(8794);
-  _414 = cons(_413, _342);
-  _415 = List_var(_414);
-  _416 = cons(_376, _342);
-  _417 = List_var(_416);
-  _418 = cons(_417, NULL);
-  _419 = cons(_415, _418);
-  _420 = cons(_344, _419);
-  _421 = List_var(_420);
-  _422 = Symbol_var(213092);
-  _423 = cons(_422, NULL);
-  _424 = cons(_421, _423);
-  _425 = Symbol_var(7304424);
-  _426 = cons(_425, _423);
-  _427 = cons(_421, _426);
-  _428 = String_new("region opened at line ");
-  _429 = cons(_87, _50);
-  _430 = cons(_94, _50);
-  _431 = cons(_87, _218);
-  _432 = cons(_48, NULL);
-  _433 = cons(_257, _432);
+  _413 = cons(_404, _412);
+  _414 = cons(_1, _78);
+  _415 = cons(_0, _414);
+  _416 = List_var(_415);
+  _417 = cons(_416, NULL);
+  _418 = Symbol_var(1318210446);
+  _419 = Symbol_var(806120);
+  _420 = Symbol_var(1328354264);
+  _421 = cons(_420, NULL);
+  _422 = cons(_419, _421);
+  _423 = cons(_418, _422);
+  _424 = Symbol_var(26720);
+  _425 = Symbol_var(3313778);
+  _426 = Symbol_var(5011670);
+  _427 = Symbol_var(178663780);
+  _428 = cons(_427, NULL);
+  _429 = cons(_426, _428);
+  _430 = cons(_425, _429);
+  _431 = cons(_424, _430);
+  _432 = Symbol_var(8794);
+  _433 = cons(_432, _370);
   _434 = List_var(_433);
-  _435 = cons(_434, NULL);
-  _436 = cons(_94, _435);
-  _437 = List_var(_436);
-  _438 = cons(_87, _435);
-  _439 = List_var(_438);
-  _440 = cons(_439, NULL);
-  _441 = cons(_437, _440);
-  _442 = List_var(_441);
-  _443 = cons(_442, NULL);
-  _444 = cons(_48, _443);
-  _445 = Symbol_var(1979150692);
-  _446 = Symbol_var(1986622182);
-  _447 = cons(_446, NULL);
-  _448 = cons(_445, _447);
-  _449 = cons(_47, _448);
-  _450 = cons(_376, _359);
-  _451 = List_var(_450);
-  _452 = Symbol_var(1952102);
-  _453 = Symbol_var(60318);
+  _435 = cons(_395, _370);
+  _436 = List_var(_435);
+  _437 = cons(_436, NULL);
+  _438 = cons(_434, _437);
+  _439 = cons(_372, _438);
+  _440 = List_var(_439);
+  _441 = Symbol_var(213092);
+  _442 = cons(_441, NULL);
+  _443 = cons(_440, _442);
+  _444 = Symbol_var(7304424);
+  _445 = cons(_444, _442);
+  _446 = cons(_440, _445);
+  _447 = String_new("region opened at line ");
+  _448 = cons(_115, _78);
+  _449 = cons(_122, _78);
+  _450 = cons(_115, _246);
+  _451 = cons(_76, NULL);
+  _452 = cons(_285, _451);
+  _453 = List_var(_452);
   _454 = cons(_453, NULL);
-  _455 = cons(_452, _454);
-  _456 = cons(_351, _455);
-  _457 = cons(_451, _456);
-  _458 = cons(_375, _457);
-  _459 = cons(_362, _342);
-  _460 = Symbol_var(228262);
-  _461 = cons(_460, _342);
-  _462 = Symbol_var(808259842);
-  _463 = Symbol_var(209423012198);
-  _464 = Symbol_var(59583050912102);
-  _465 = cons(_464, NULL);
-  _466 = cons(_463, _465);
-  _467 = List_var(_466);
-  _468 = cons(_467, _342);
-  _469 = cons(_351, _468);
-  _470 = cons(_462, _469);
-  _471 = Symbol_var(6544469130);
-  _472 = Symbol_var(63981097423176);
+  _455 = cons(_122, _454);
+  _456 = List_var(_455);
+  _457 = cons(_115, _454);
+  _458 = List_var(_457);
+  _459 = cons(_458, NULL);
+  _460 = cons(_456, _459);
+  _461 = List_var(_460);
+  _462 = cons(_461, NULL);
+  _463 = cons(_76, _462);
+  _464 = Symbol_var(1979150692);
+  _465 = Symbol_var(1986622182);
+  _466 = cons(_465, NULL);
+  _467 = cons(_464, _466);
+  _468 = cons(_75, _467);
+  _469 = cons(_395, _24);
+  _470 = List_var(_469);
+  _471 = Symbol_var(1952102);
+  _472 = Symbol_var(60318);
   _473 = cons(_472, NULL);
-  _474 = cons(_351, _473);
-  _475 = cons(_351, _474);
-  _476 = cons(_471, _475);
-  _477 = cons(_405, NULL);
-  _478 = cons(_406, _477);
-  _479 = cons(_344, _478);
-  _480 = List_var(_479);
-  _481 = cons(_480, _342);
-  _482 = Symbol_var(7656885669130);
-  _483 = cons(_482, _342);
-  _484 = String_new(" is used after the region that allocated it ended");
-  _485 = String_new("returned");
-  _486 = String_new("stored into a static");
-  _487 = String_new("assigned to a local declared outside the region");
-  _488 = String_new("stored through an unknown pointer");
-  _489 = String_new("stored through a parameter");
-  _490 = String_new("stored into an object of another region");
-  _491 = String_new("stored into an object of an outer region");
-  _492 = String_new(" can outlive the local storage it points into when ");
-  _493 = String_new("local storage ends when the function returns");
-  _494 = String_var(_493);
-  _495 = cons(_494, NULL);
-  _496 = String_new(" can outlive the region it was allocated in when ");
-  _497 = cons(_462, _342);
-  _498 = String_new("\'");
-  _499 = String_new("an address from ");
-  _500 = String_new("the address of ");
-  _501 = String_new("an address inside ");
-  _502 = Symbol_var(11645);
-  _503 = cons(_502, NULL);
-  _504 = cons(_376, _503);
-  _505 = List_var(_504);
-  _506 = Symbol_var(60951754);
-  _507 = cons(_506, _359);
-  _508 = cons(_505, _507);
-  _509 = cons(_375, _508);
-  _510 = Symbol_var(93);
-  _511 = cons(_510, NULL);
-  _512 = cons(_376, _511);
-  _513 = List_var(_512);
-  _514 = cons(_513, _507);
-  _515 = cons(_375, _514);
-  _516 = cons(_506, NULL);
-  _517 = cons(_417, _516);
-  _518 = cons(_375, _517);
-  _519 = Symbol_var(493135733104);
-  _520 = Symbol_var(19800432);
+  _474 = cons(_471, _473);
+  _475 = cons(_1, _474);
+  _476 = cons(_470, _475);
+  _477 = cons(_394, _476);
+  _478 = cons(_381, _370);
+  _479 = Symbol_var(895740748108);
+  _480 = Symbol_var(920394);
+  _481 = Atom_intern(String_new("lambda_captured"));
+  _482 = cons(_481, NULL);
+  _483 = cons(_480, _482);
+  _484 = List_var(_483);
+  _485 = Symbol_var(740232);
+  _486 = Symbol_var(405758822009820);
+  _487 = cons(_486, NULL);
+  _488 = cons(_485, _487);
+  _489 = List_var(_488);
+  _490 = Symbol_var(1345468776);
+  _491 = Symbol_var(0);
+  _492 = cons(_491, NULL);
+  _493 = cons(_490, _492);
+  _494 = List_var(_493);
+  _495 = Symbol_var(43055000864);
+  _496 = List_var(NULL);
+  _497 = cons(_496, NULL);
+  _498 = cons(_495, _497);
+  _499 = List_var(_498);
+  _500 = Symbol_var(1129338912386214);
+  _501 = Atom_intern(String_new("macro-param"));
+  _502 = Symbol_var(154018148);
+  _503 = Symbol_var(60979506);
+  _504 = cons(_503, NULL);
+  _505 = cons(_502, _504);
+  _506 = List_var(_505);
+  _507 = cons(_0, NULL);
+  _508 = cons(_485, _507);
+  _509 = List_var(_508);
+  _510 = Symbol_var(1317592723658);
+  _511 = int_var(0);
+  _512 = cons(_511, NULL);
+  _513 = cons(_510, _512);
+  _514 = List_var(_513);
+  _515 = cons(_514, NULL);
+  _516 = cons(_509, _515);
+  _517 = cons(_506, _516);
+  _518 = cons(_501, _517);
+  _519 = List_var(_518);
+  _520 = Symbol_var(63981097423206);
   _521 = cons(_520, NULL);
-  _522 = cons(_519, _521);
-  _523 = cons(_344, _522);
-  _524 = List_var(_523);
-  _525 = List_var(_361);
-  _526 = cons(_525, NULL);
-  _527 = cons(_506, _526);
-  _528 = cons(_363, _527);
-  _529 = List_var(_528);
-  _530 = cons(_529, _359);
-  _531 = cons(_524, _530);
-  _532 = cons(_362, _359);
-  _533 = cons(_506, _342);
-  _534 = cons(_351, _533);
-  _535 = cons(_375, _534);
-  _536 = cons(_524, _507);
-  _537 = Symbol_var(437126);
-  _538 = Symbol_var(1989771622);
-  _539 = cons(_538, NULL);
-  _540 = cons(_537, _539);
-  _541 = List_var(_540);
-  _542 = cons(_541, _342);
-  _543 = List_var(_542);
-  _544 = cons(_543, _359);
-  _545 = cons(_345, _544);
-  _546 = List_var(_545);
-  _547 = cons(_546, _342);
-  _548 = cons(_385, _547);
-  _549 = Symbol_var(1978941796);
-  _550 = cons(_549, NULL);
-  _551 = cons(_257, _550);
-  _552 = Symbol_var(26416091224);
-  _553 = cons(_552, _342);
-  _554 = String_new(" is given ");
-  _555 = String_new(", which no Scope allocator returned");
-  _556 = String_new("only Scope.malloc, calloc, memdup, and realloc storage can be");
-  _557 = String_var(_556);
-  _558 = String_new("freed or reallocated");
-  _559 = String_var(_558);
-  _560 = cons(_559, NULL);
-  _561 = cons(_557, _560);
-  _562 = cons(_345, _354);
-  _563 = String_new("\' is read after its owning region ended");
-  _564 = String_new("\' is used after ");
-  _565 = Symbol_var(123);
-  _566 = cons(_565, NULL);
-  _567 = cons(_376, _566);
-  _568 = List_var(_567);
-  _569 = Symbol_var(63622494568);
-  _570 = Symbol_var(63595057480);
-  _571 = cons(_570, NULL);
-  _572 = cons(_569, _571);
-  _573 = cons(_568, _572);
-  _574 = cons(_375, _573);
-  _575 = Symbol_var(60920294);
+  _522 = cons(_502, _521);
+  _523 = List_var(_522);
+  _524 = Symbol_var(209423012198);
+  _525 = cons(_524, NULL);
+  _526 = cons(_485, _525);
+  _527 = List_var(_526);
+  _528 = cons(_527, _515);
+  _529 = cons(_523, _528);
+  _530 = cons(_501, _529);
+  _531 = List_var(_530);
+  _532 = Symbol_var(59059080038);
+  _533 = cons(_532, NULL);
+  _534 = cons(_502, _533);
+  _535 = List_var(_534);
+  _536 = cons(_285, NULL);
+  _537 = cons(_485, _536);
+  _538 = List_var(_537);
+  _539 = int_var(1);
+  _540 = cons(_539, NULL);
+  _541 = cons(_510, _540);
+  _542 = List_var(_541);
+  _543 = cons(_542, NULL);
+  _544 = cons(_538, _543);
+  _545 = cons(_535, _544);
+  _546 = cons(_501, _545);
+  _547 = List_var(_546);
+  _548 = cons(_547, NULL);
+  _549 = cons(_531, _548);
+  _550 = cons(_519, _549);
+  _551 = List_var(_550);
+  _552 = cons(_551, NULL);
+  _553 = cons(_500, _552);
+  _554 = List_var(_553);
+  _555 = Symbol_var(13774032);
+  _556 = cons(_555, _497);
+  _557 = List_var(_556);
+  _558 = cons(_524, _497);
+  _559 = List_var(_558);
+  _560 = Symbol_var(34470112412);
+  _561 = Symbol_var(6544469130);
+  _562 = Symbol_var(1969032);
+  _563 = Symbol_var(1307939018);
+  _564 = cons(_563, _504);
+  _565 = List_var(_564);
+  _566 = cons(_563, _24);
+  _567 = List_var(_566);
+  _568 = cons(_567, NULL);
+  _569 = cons(_565, _568);
+  _570 = cons(_562, _569);
+  _571 = List_var(_570);
+  _572 = Symbol_var(46228810);
+  _573 = cons(_572, _24);
+  _574 = List_var(_573);
+  _575 = Atom_intern(String_new("?__macro_expression_body"));
   _576 = cons(_575, NULL);
-  _577 = cons(_351, _576);
-  _578 = cons(_385, _577);
-  _579 = cons(_155, _44);
-  _580 = cons(_344, _579);
+  _577 = cons(_486, _576);
+  _578 = List_var(_577);
+  _579 = Symbol_var(1309427914);
+  _580 = cons(_579, _370);
   _581 = List_var(_580);
   _582 = cons(_581, NULL);
-  _583 = Symbol_var(8932560010);
-  _584 = Symbol_var(272600);
-  _585 = cons(_584, NULL);
-  _586 = cons(_583, _585);
-  _587 = cons(_344, _586);
-  _588 = List_var(_587);
-  _589 = Atom_intern(String_new("?specifiers"));
-  _590 = Symbol_var(157714837990);
-  _591 = Symbol_var(59531342737894);
-  _592 = cons(_591, NULL);
-  _593 = cons(_590, _592);
+  _583 = cons(_578, _582);
+  _584 = cons(_574, _583);
+  _585 = cons(_571, _584);
+  _586 = cons(_561, _585);
+  _587 = List_var(_586);
+  _588 = cons(_563, _521);
+  _589 = List_var(_588);
+  _590 = cons(_589, _568);
+  _591 = cons(_562, _590);
+  _592 = List_var(_591);
+  _593 = cons(_486, _24);
   _594 = List_var(_593);
-  _595 = cons(_594, NULL);
-  _596 = cons(_589, _595);
-  _597 = cons(_588, _596);
-  _598 = Symbol_var(61352008);
-  _599 = Symbol_var(62130776);
-  _600 = cons(_599, NULL);
-  _601 = cons(_598, _600);
-  _602 = cons(_460, _601);
-  _603 = Symbol_var(59597595644252);
-  _604 = cons(_603, NULL);
-  _605 = Symbol_var(2028251029860);
-  _606 = cons(_605, NULL);
-  _607 = cons(_417, _606);
-  _608 = cons(_375, _607);
-  _609 = Symbol_var(150408);
-  _610 = Symbol_var(61737802);
-  _611 = cons(_610, _359);
-  _612 = cons(_609, _611);
-  _613 = List_var(_612);
-  _614 = Symbol_var(1992385866);
-  _615 = cons(_614, NULL);
-  _616 = cons(_613, _615);
-  _617 = cons(_565, _616);
-  _618 = cons(_375, _617);
-  _619 = Symbol_var(1362954);
-  _620 = cons(_610, _369);
-  _621 = cons(_363, _620);
-  _622 = List_var(_621);
-  _623 = cons(_622, _359);
-  _624 = cons(_609, _623);
-  _625 = List_var(_624);
-  _626 = cons(_625, _615);
-  _627 = cons(_568, _626);
-  _628 = cons(_375, _627);
-  _629 = Symbol_var(41184168);
-  _630 = Atom_intern(String_new("?expression"));
-  _631 = cons(_630, NULL);
-  _632 = cons(_629, _631);
-  _633 = cons(_569, _359);
-  _634 = cons(_568, _633);
-  _635 = cons(_375, _634);
-  _636 = cons(_141, _359);
-  _637 = cons(_117, _342);
-  _638 = Symbol_var(61557640);
-  _639 = cons(_638, NULL);
-  _640 = cons(_138, _639);
-  _641 = cons(_141, _639);
-  _642 = Symbol_var(104);
-  _643 = Symbol_var(63322012252);
-  _644 = cons(_643, _353);
-  _645 = cons(_642, _644);
-  _646 = Atom_intern(String_new("*statements"));
-  _647 = cons(_646, NULL);
-  _648 = cons(_407, _647);
-  _649 = Symbol_var(39266);
-  _650 = cons(_649, _647);
-  _651 = Symbol_var(8728932);
-  _652 = Symbol_var(60979506);
-  _653 = cons(_652, _342);
-  _654 = cons(_651, _653);
-  _655 = Symbol_var(63496760104);
-  _656 = cons(_655, NULL);
-  _657 = cons(_358, _656);
-  _658 = cons(_76, _657);
-  _659 = Symbol_var(490782);
-  _660 = Symbol_var(25235800);
+  _595 = Atom_intern(String_new("*__macro_splice_captures"));
+  _596 = cons(_595, NULL);
+  _597 = cons(_579, _596);
+  _598 = List_var(_597);
+  _599 = cons(_598, NULL);
+  _600 = cons(_594, _599);
+  _601 = cons(_574, _600);
+  _602 = cons(_592, _601);
+  _603 = cons(_561, _602);
+  _604 = List_var(_603);
+  _605 = cons(_563, _533);
+  _606 = List_var(_605);
+  _607 = cons(_563, _370);
+  _608 = List_var(_607);
+  _609 = cons(_608, NULL);
+  _610 = cons(_606, _609);
+  _611 = cons(_562, _610);
+  _612 = List_var(_611);
+  _613 = cons(_572, _370);
+  _614 = List_var(_613);
+  _615 = Atom_intern(String_new("*__macro_splice_params"));
+  _616 = cons(_615, NULL);
+  _617 = cons(_572, _616);
+  _618 = List_var(_617);
+  _619 = cons(_618, NULL);
+  _620 = cons(_614, _619);
+  _621 = cons(_614, _620);
+  _622 = cons(_562, _621);
+  _623 = List_var(_622);
+  _624 = cons(_623, NULL);
+  _625 = cons(_612, _624);
+  _626 = cons(_561, _625);
+  _627 = List_var(_626);
+  _628 = cons(_627, NULL);
+  _629 = cons(_604, _628);
+  _630 = cons(_587, _629);
+  _631 = cons(_406, _630);
+  _632 = List_var(_631);
+  _633 = cons(_632, NULL);
+  _634 = cons(_560, _633);
+  _635 = List_var(_634);
+  _636 = Symbol_var(1386033712394);
+  _637 = Symbol_var(917238582723620);
+  _638 = cons(_637, NULL);
+  _639 = List_var(_638);
+  _640 = Symbol_var(808259842);
+  _641 = Symbol_var(1077021542);
+  _642 = cons(_641, _616);
+  _643 = List_var(_642);
+  _644 = cons(_524, _596);
+  _645 = List_var(_644);
+  _646 = cons(_645, _576);
+  _647 = cons(_643, _646);
+  _648 = cons(_640, _647);
+  _649 = List_var(_648);
+  _650 = cons(_649, NULL);
+  _651 = cons(_639, _650);
+  _652 = cons(_0, _651);
+  _653 = List_var(_652);
+  _654 = cons(_653, NULL);
+  _655 = cons(_636, _654);
+  _656 = List_var(_655);
+  _657 = Symbol_var(1044986460);
+  _658 = Symbol_var(412426);
+  _659 = String_new("src/grammar.xmacro");
+  _660 = String_var(_659);
   _661 = cons(_660, NULL);
-  _662 = cons(_659, _661);
-  _663 = cons(_344, _662);
-  _664 = List_var(_663);
-  _665 = cons(_664, _342);
-  _666 = cons(_569, _615);
-  _667 = cons(_568, _666);
-  _668 = cons(_375, _667);
-  _669 = Symbol_var(588);
-  _670 = Symbol_var(48777994);
-  _671 = Symbol_var(286);
-  _672 = Symbol_var(13284);
-  _673 = Symbol_var(1323933904);
-  _674 = Symbol_var(42162);
-  _675 = Symbol_var(1527056);
-  _676 = Symbol_var(27369680);
-  _677 = Symbol_var(13929613520);
-  _678 = Symbol_var(13518332722);
+  _662 = cons(_658, _661);
+  _663 = List_var(_662);
+  _664 = Symbol_var(805770);
+  _665 = int_var(26);
+  _666 = cons(_665, NULL);
+  _667 = cons(_664, _666);
+  _668 = List_var(_667);
+  _669 = Symbol_var(233614172);
+  _670 = cons(_669, _540);
+  _671 = List_var(_670);
+  _672 = Symbol_var(816725264);
+  _673 = int_var(5);
+  _674 = cons(_673, NULL);
+  _675 = cons(_672, _674);
+  _676 = List_var(_675);
+  _677 = Symbol_var(1133019155420);
+  _678 = int_var(986);
   _679 = cons(_678, NULL);
   _680 = cons(_677, _679);
-  _681 = cons(_676, _680);
-  _682 = cons(_675, _681);
-  _683 = cons(_674, _682);
-  _684 = cons(_673, _683);
-  _685 = cons(_672, _684);
-  _686 = cons(_671, _685);
-  _687 = cons(_670, _686);
-  _688 = cons(_669, _687);
-  _689 = cons(_344, _688);
+  _681 = List_var(_680);
+  _682 = cons(_681, NULL);
+  _683 = cons(_676, _682);
+  _684 = cons(_671, _683);
+  _685 = cons(_668, _684);
+  _686 = cons(_663, _685);
+  _687 = List_var(_686);
+  _688 = cons(_687, NULL);
+  _689 = cons(_657, _688);
   _690 = List_var(_689);
-  _691 = cons(_690, _604);
-  _692 = Symbol_var(214686631041382);
-  _693 = Symbol_var(62029286);
-  _694 = cons(_693, NULL);
-  _695 = cons(_692, _694);
-  _696 = Symbol_var(199882);
-  _697 = cons(_696, NULL);
-  _698 = cons(_356, _697);
-  _699 = cons(_345, _698);
-  _700 = cons(_344, _699);
+  _691 = String_new("/Users/gary/.codex/worktrees/2fee/x2c/src/grammar.xmacro");
+  _692 = String_var(_691);
+  _693 = cons(_692, NULL);
+  _694 = cons(_658, _693);
+  _695 = List_var(_694);
+  _696 = Symbol_var(647498998088);
+  _697 = cons(_696, _540);
+  _698 = List_var(_697);
+  _699 = Symbol_var(5723955804);
+  _700 = cons(_699, _512);
   _701 = List_var(_700);
-  _702 = cons(_701, _342);
-  _703 = List_var(_342);
-  _704 = cons(_703, _342);
-  _705 = cons(_345, _342);
-  _706 = Symbol_var(458361162716);
-  _707 = cons(_610, NULL);
-  _708 = cons(_351, _707);
-  _709 = cons(_365, _708);
-  _710 = List_var(_709);
-  _711 = Symbol_var(13528008);
-  _712 = Symbol_var(1077021542);
-  _713 = cons(_712, _389);
-  _714 = List_var(_713);
-  _715 = cons(_714, NULL);
-  _716 = cons(_711, _715);
-  _717 = List_var(_716);
-  _718 = cons(_717, _342);
-  _719 = List_var(_718);
-  _720 = cons(_719, NULL);
-  _721 = cons(_710, _720);
-  _722 = cons(_609, _721);
-  _723 = List_var(_722);
-  _724 = cons(_652, NULL);
-  _725 = cons(_723, _724);
-  _726 = cons(_351, _725);
-  _727 = cons(_706, _726);
-  _728 = Symbol_var(2075985422164324);
-  _729 = cons(_728, _359);
-  _730 = cons(_609, _729);
-  _731 = List_var(_730);
-  _732 = cons(_731, NULL);
-  _733 = cons(_351, _732);
-  _734 = cons(_257, _733);
-  _746 = cons(_399, NULL);
-  _747 = cons(_619, _746);
-  _748 = cons(_610, _747);
-  _749 = Symbol_var(62054);
-  _750 = cons(_749, _748);
-  _751 = List_var(_750);
-  _752 = cons(_751, NULL);
-  _753 = cons(_351, _752);
-  _754 = cons(_365, _753);
+  _702 = Symbol_var(26155096);
+  _703 = cons(_702, _512);
+  _704 = List_var(_703);
+  _705 = cons(_704, NULL);
+  _706 = cons(_701, _705);
+  _707 = cons(_698, _706);
+  _708 = cons(_695, _707);
+  _709 = cons(_690, _708);
+  _710 = cons(_656, _709);
+  _711 = cons(_635, _710);
+  _712 = cons(_559, _711);
+  _713 = cons(_557, _712);
+  _714 = cons(_554, _713);
+  _715 = cons(_499, _714);
+  _716 = cons(_494, _715);
+  _717 = cons(_489, _716);
+  _718 = cons(_484, _717);
+  _719 = cons(_479, _718);
+  _720 = Symbol_var(59583050912102);
+  _721 = cons(_720, _533);
+  _722 = cons(_503, _721);
+  _723 = Symbol_var(63981097423176);
+  _724 = cons(_723, NULL);
+  _725 = cons(_1, _724);
+  _726 = cons(_1, _725);
+  _727 = cons(_561, _726);
+  _728 = Symbol_var(228262);
+  _729 = cons(_728, _370);
+  _730 = cons(_424, NULL);
+  _731 = cons(_425, _730);
+  _732 = cons(_372, _731);
+  _733 = List_var(_732);
+  _734 = cons(_733, _370);
+  _735 = Symbol_var(7656885669130);
+  _736 = cons(_735, _370);
+  _737 = String_new(" is used after the region that allocated it ended");
+  _738 = String_new("returned");
+  _739 = String_new("stored into a static");
+  _740 = String_new("assigned to a local declared outside the region");
+  _741 = String_new("stored through an unknown pointer");
+  _742 = String_new("stored through a parameter");
+  _743 = String_new("stored into an object of another region");
+  _744 = String_new("stored into an object of an outer region");
+  _745 = String_new(" can outlive the local storage it points into when ");
+  _746 = String_new("local storage ends when the function returns");
+  _747 = String_var(_746);
+  _748 = cons(_747, NULL);
+  _749 = String_new(" can outlive the region it was allocated in when ");
+  _750 = Atom_intern(String_new("lambda_expression"));
+  _751 = cons(_750, NULL);
+  _752 = cons(_480, _751);
+  _753 = List_var(_752);
+  _754 = cons(_519, _548);
   _755 = List_var(_754);
-  _756 = cons(_755, _342);
-  _757 = cons(_609, _756);
+  _756 = cons(_755, NULL);
+  _757 = cons(_500, _756);
   _758 = List_var(_757);
-  _759 = cons(_758, _359);
-  _760 = cons(_351, _759);
-  _761 = cons(_706, _760);
-  _762 = List_var(_52);
-  _763 = List_var(_44);
-  _764 = cons(_763, NULL);
-  _765 = cons(_762, _764);
-  _766 = String_new("a closure");
-  _767 = String_new("a fresh allocation");
-  _768 = String_new("a literal");
-  _769 = String_new("Scope.realloc moved it");
-  _770 = String_new("it was freed");
-  _771 = String_new("Scope.free");
-  _772 = String_new("Scope.realloc");
+  _759 = cons(_587, _628);
+  _760 = cons(_406, _759);
+  _761 = List_var(_760);
+  _762 = cons(_761, NULL);
+  _763 = cons(_560, _762);
+  _764 = List_var(_763);
+  _765 = cons(_643, _576);
+  _766 = cons(_640, _765);
+  _767 = List_var(_766);
+  _768 = cons(_767, NULL);
+  _769 = cons(_639, _768);
+  _770 = cons(_0, _769);
+  _771 = List_var(_770);
+  _772 = cons(_771, NULL);
+  _773 = cons(_636, _772);
+  _774 = List_var(_773);
+  _775 = int_var(22);
+  _776 = cons(_775, NULL);
+  _777 = cons(_664, _776);
+  _778 = List_var(_777);
+  _779 = int_var(819);
+  _780 = cons(_779, NULL);
+  _781 = cons(_677, _780);
+  _782 = List_var(_781);
+  _783 = cons(_782, NULL);
+  _784 = cons(_676, _783);
+  _785 = cons(_671, _784);
+  _786 = cons(_778, _785);
+  _787 = cons(_663, _786);
+  _788 = List_var(_787);
+  _789 = cons(_788, NULL);
+  _790 = cons(_657, _789);
+  _791 = List_var(_790);
+  _792 = cons(_791, _708);
+  _793 = cons(_774, _792);
+  _794 = cons(_764, _793);
+  _795 = cons(_559, _794);
+  _796 = cons(_557, _795);
+  _797 = cons(_758, _796);
+  _798 = cons(_499, _797);
+  _799 = cons(_494, _798);
+  _800 = cons(_489, _799);
+  _801 = cons(_753, _800);
+  _802 = cons(_479, _801);
+  _803 = cons(_503, _533);
+  _804 = String_new("\'");
+  _805 = String_new("an address from ");
+  _806 = String_new("the address of ");
+  _807 = String_new("an address inside ");
+  _808 = Symbol_var(11645);
+  _809 = cons(_808, NULL);
+  _810 = cons(_395, _809);
+  _811 = List_var(_810);
+  _812 = Symbol_var(60951754);
+  _813 = cons(_812, _24);
+  _814 = cons(_811, _813);
+  _815 = cons(_394, _814);
+  _816 = Symbol_var(93);
+  _817 = cons(_816, NULL);
+  _818 = cons(_395, _817);
+  _819 = List_var(_818);
+  _820 = cons(_819, _813);
+  _821 = cons(_394, _820);
+  _822 = cons(_812, NULL);
+  _823 = cons(_436, _822);
+  _824 = cons(_394, _823);
+  _825 = Symbol_var(493135733104);
+  _826 = Symbol_var(19800432);
+  _827 = cons(_826, NULL);
+  _828 = cons(_825, _827);
+  _829 = cons(_372, _828);
+  _830 = List_var(_829);
+  _831 = List_var(_380);
+  _832 = cons(_831, NULL);
+  _833 = cons(_812, _832);
+  _834 = cons(_382, _833);
+  _835 = List_var(_834);
+  _836 = cons(_835, _24);
+  _837 = cons(_830, _836);
+  _838 = cons(_381, _24);
+  _839 = cons(_812, _370);
+  _840 = cons(_1, _839);
+  _841 = cons(_394, _840);
+  _842 = cons(_830, _813);
+  _843 = Symbol_var(437126);
+  _844 = Symbol_var(1989771622);
+  _845 = cons(_844, NULL);
+  _846 = cons(_843, _845);
+  _847 = List_var(_846);
+  _848 = cons(_847, _370);
+  _849 = List_var(_848);
+  _850 = cons(_849, _24);
+  _851 = cons(_0, _850);
+  _852 = List_var(_851);
+  _853 = cons(_852, _370);
+  _854 = cons(_404, _853);
+  _855 = Symbol_var(1978941796);
+  _856 = cons(_855, NULL);
+  _857 = cons(_285, _856);
+  _858 = Symbol_var(26416091224);
+  _859 = cons(_858, _370);
+  _860 = String_new(" is given ");
+  _861 = String_new(", which no Scope allocator returned");
+  _862 = String_new("only Scope.malloc, calloc, memdup, and realloc storage can be");
+  _863 = String_var(_862);
+  _864 = String_new("freed or reallocated");
+  _865 = String_var(_864);
+  _866 = cons(_865, NULL);
+  _867 = cons(_863, _866);
+  _868 = cons(_0, _11);
+  _869 = String_new("\' is read after its owning region ended");
+  _870 = String_new("\' is used after ");
+  _871 = Symbol_var(123);
+  _872 = cons(_871, NULL);
+  _873 = cons(_395, _872);
+  _874 = List_var(_873);
+  _875 = Symbol_var(63622494568);
+  _876 = Symbol_var(63595057480);
+  _877 = cons(_876, NULL);
+  _878 = cons(_875, _877);
+  _879 = cons(_874, _878);
+  _880 = cons(_394, _879);
+  _881 = Symbol_var(60920294);
+  _882 = cons(_881, NULL);
+  _883 = cons(_1, _882);
+  _884 = cons(_404, _883);
+  _885 = cons(_183, _72);
+  _886 = cons(_372, _885);
+  _887 = List_var(_886);
+  _888 = cons(_887, NULL);
+  _889 = Symbol_var(8932560010);
+  _890 = Symbol_var(272600);
+  _891 = cons(_890, NULL);
+  _892 = cons(_889, _891);
+  _893 = cons(_372, _892);
+  _894 = List_var(_893);
+  _895 = Atom_intern(String_new("?specifiers"));
+  _896 = Symbol_var(157714837990);
+  _897 = Symbol_var(59531342737894);
+  _898 = cons(_897, NULL);
+  _899 = cons(_896, _898);
+  _900 = List_var(_899);
+  _901 = cons(_900, NULL);
+  _902 = cons(_895, _901);
+  _903 = cons(_894, _902);
+  _904 = Symbol_var(61352008);
+  _905 = Symbol_var(62130776);
+  _906 = cons(_905, NULL);
+  _907 = cons(_904, _906);
+  _908 = cons(_728, _907);
+  _909 = Symbol_var(59597595644252);
+  _910 = cons(_909, NULL);
+  _911 = Symbol_var(2028251029860);
+  _912 = cons(_911, NULL);
+  _913 = cons(_436, _912);
+  _914 = cons(_394, _913);
+  _915 = Symbol_var(150408);
+  _916 = Symbol_var(61737802);
+  _917 = cons(_916, _24);
+  _918 = cons(_915, _917);
+  _919 = List_var(_918);
+  _920 = Symbol_var(1992385866);
+  _921 = cons(_920, NULL);
+  _922 = cons(_919, _921);
+  _923 = cons(_871, _922);
+  _924 = cons(_394, _923);
+  _925 = Symbol_var(1362954);
+  _926 = cons(_916, _388);
+  _927 = cons(_382, _926);
+  _928 = List_var(_927);
+  _929 = cons(_928, _24);
+  _930 = cons(_915, _929);
+  _931 = List_var(_930);
+  _932 = cons(_931, _921);
+  _933 = cons(_874, _932);
+  _934 = cons(_394, _933);
+  _935 = Symbol_var(41184168);
+  _936 = Atom_intern(String_new("?expression"));
+  _937 = cons(_936, NULL);
+  _938 = cons(_935, _937);
+  _939 = cons(_875, _24);
+  _940 = cons(_874, _939);
+  _941 = cons(_394, _940);
+  _942 = cons(_169, _24);
+  _943 = cons(_145, _370);
+  _944 = Symbol_var(61557640);
+  _945 = cons(_944, NULL);
+  _946 = cons(_166, _945);
+  _947 = cons(_169, _945);
+  _948 = Symbol_var(104);
+  _949 = Symbol_var(63322012252);
+  _950 = cons(_949, _4);
+  _951 = cons(_948, _950);
+  _952 = Atom_intern(String_new("*statements"));
+  _953 = cons(_952, NULL);
+  _954 = cons(_426, _953);
+  _955 = Symbol_var(39266);
+  _956 = cons(_955, _953);
+  _957 = Symbol_var(8728932);
+  _958 = cons(_503, _370);
+  _959 = cons(_957, _958);
+  _960 = Symbol_var(63496760104);
+  _961 = cons(_960, NULL);
+  _962 = cons(_378, _961);
+  _963 = cons(_104, _962);
+  _964 = Symbol_var(490782);
+  _965 = Symbol_var(25235800);
+  _966 = cons(_965, NULL);
+  _967 = cons(_964, _966);
+  _968 = cons(_372, _967);
+  _969 = List_var(_968);
+  _970 = cons(_969, _370);
+  _971 = cons(_875, _921);
+  _972 = cons(_874, _971);
+  _973 = cons(_394, _972);
+  _974 = Symbol_var(588);
+  _975 = Symbol_var(48777994);
+  _976 = Symbol_var(286);
+  _977 = Symbol_var(13284);
+  _978 = Symbol_var(1323933904);
+  _979 = Symbol_var(1527056);
+  _980 = Symbol_var(27369680);
+  _981 = Symbol_var(13929613520);
+  _982 = Symbol_var(13518332722);
+  _983 = cons(_982, NULL);
+  _984 = cons(_981, _983);
+  _985 = cons(_980, _984);
+  _986 = cons(_979, _985);
+  _987 = cons(_17, _986);
+  _988 = cons(_978, _987);
+  _989 = cons(_977, _988);
+  _990 = cons(_976, _989);
+  _991 = cons(_975, _990);
+  _992 = cons(_974, _991);
+  _993 = cons(_372, _992);
+  _994 = List_var(_993);
+  _995 = cons(_994, _910);
+  _996 = Symbol_var(62029286);
+  _997 = cons(_996, NULL);
+  _998 = cons(_18, _997);
+  _999 = Symbol_var(199882);
+  _1000 = cons(_999, NULL);
+  _1001 = cons(_2, _1000);
+  _1002 = cons(_0, _1001);
+  _1003 = cons(_372, _1002);
+  _1004 = List_var(_1003);
+  _1005 = cons(_1004, _370);
+  _1006 = List_var(_370);
+  _1007 = cons(_1006, _370);
+  _1008 = cons(_0, _370);
+  _1009 = Symbol_var(458361162716);
+  _1010 = cons(_916, NULL);
+  _1011 = cons(_1, _1010);
+  _1012 = cons(_384, _1011);
+  _1013 = List_var(_1012);
+  _1014 = Symbol_var(13528008);
+  _1015 = cons(_641, _408);
+  _1016 = List_var(_1015);
+  _1017 = cons(_1016, NULL);
+  _1018 = cons(_1014, _1017);
+  _1019 = List_var(_1018);
+  _1020 = cons(_1019, _370);
+  _1021 = List_var(_1020);
+  _1022 = cons(_1021, NULL);
+  _1023 = cons(_1013, _1022);
+  _1024 = cons(_915, _1023);
+  _1025 = List_var(_1024);
+  _1026 = cons(_1025, _504);
+  _1027 = cons(_1, _1026);
+  _1028 = cons(_1009, _1027);
+  _1029 = Symbol_var(2075985422164324);
+  _1030 = cons(_1029, _24);
+  _1031 = cons(_915, _1030);
+  _1032 = List_var(_1031);
+  _1033 = cons(_1032, NULL);
+  _1034 = cons(_1, _1033);
+  _1035 = cons(_285, _1034);
+  _1047 = cons(_418, NULL);
+  _1048 = cons(_925, _1047);
+  _1049 = cons(_916, _1048);
+  _1050 = Symbol_var(62054);
+  _1051 = cons(_1050, _1049);
+  _1052 = List_var(_1051);
+  _1053 = cons(_1052, NULL);
+  _1054 = cons(_1, _1053);
+  _1055 = cons(_384, _1054);
+  _1056 = List_var(_1055);
+  _1057 = cons(_1056, _370);
+  _1058 = cons(_915, _1057);
+  _1059 = List_var(_1058);
+  _1060 = cons(_1059, _24);
+  _1061 = cons(_1, _1060);
+  _1062 = cons(_1009, _1061);
+  _1063 = List_var(_80);
+  _1064 = List_var(_72);
+  _1065 = cons(_1064, NULL);
+  _1066 = cons(_1063, _1065);
+  _1067 = String_new("a closure");
+  _1068 = String_new("a fresh allocation");
+  _1069 = String_new("a literal");
+  _1070 = String_new("Scope.realloc moved it");
+  _1071 = String_new("it was freed");
+  _1072 = String_new("Scope.free");
+  _1073 = String_new("Scope.realloc");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -1012,11 +1307,11 @@ Symbol Compiler_region_result(String name){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 2909126: ;
   static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {return 1270760;  break;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_53), &_x2c_match_capture)) {return 1270760;  break;
 }
-static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {return 1080280;  break;
+static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_41), &_x2c_match_capture)) {return 1080280;  break;
 }
-static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_343), &_x2c_match_capture)) {return 40074250;  break;
+static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_371), &_x2c_match_capture)) {return 40074250;  break;
 }
 case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return 1080280;  break; } } default: break;
     }
@@ -1025,7 +1320,7 @@ return Map_contains(pooled_results, String_var(name)) ? 1080280 : 0;
 }
 
 int Compiler_region_wrapper(String name){
-  if(! _init_guard_) _file_init_();  return Var_equal(Map_getindex(runtime, String_var(name)), List_var(_44));
+  if(! _init_guard_) _file_init_();  return Var_equal(Map_getindex(runtime, String_var(name)), List_var(_72));
 }
 
 static Var _unwrap(Var value){
@@ -1034,7 +1329,7 @@ static Var _unwrap(Var value){
     List _x2c_match_expr = Var_list(value);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_355), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_377), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937838648230ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var inner = _x2c_match_values[0];  value = inner;  break; } } return value;  break;
     }
@@ -1047,7 +1342,7 @@ static List _expression_type(Var value){
     List _x2c_match_expr = Var_list(value);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_361), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  return Var_list(type);  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_380), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  return Var_list(type);  break;
 }
 default: break;
     }
@@ -1061,7 +1356,7 @@ static List _binding_of(Var value){
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 19147688: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  return Var_list(binding);  break;
+      case 19147688: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_393), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  return Var_list(binding);  break;
 }
 default: break;
     }
@@ -1075,7 +1370,7 @@ static Var _address_of(Var value){
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return place;  break;
+      case 992: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_403), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return place;  break;
 }
 default: break;
     }
@@ -1090,13 +1385,13 @@ static String _callee_of(Var value, List * arguments){
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 199448: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_394), &_x2c_match_capture)) {Var function = _x2c_match_values[0];  List rows = Var_list(_x2c_match_values[1]); {
+      case 199448: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_413), &_x2c_match_capture)) {Var function = _x2c_match_values[0];  List rows = Var_list(_x2c_match_values[1]); {
     List name = _binding_of(function);
   {
     List _x2c_match_expr = rows;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_398), &_x2c_match_capture)) {rows = NULL;  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_417), &_x2c_match_capture)) {rows = NULL;  break;
   }
 
     }
@@ -1114,7 +1409,7 @@ return NULL;
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 int List_contains(List, Var);
 static Symbol _class(Walk w, Type type){
-  Symbol tag = Sym_var_tag_for_type(w -> compiler -> sym, type, NULL);  if(List_contains(_404, Symbol_var(tag))) return 6696890603608;  return List_contains(_412, Symbol_var(tag)) ? 7659271582052 : 0;
+  Symbol tag = Sym_var_tag_for_type(w -> compiler -> sym, type, NULL);  if(List_contains(_423, Symbol_var(tag))) return 6696890603608;  return List_contains(_431, Symbol_var(tag)) ? 7659271582052 : 0;
 }
 
 int List_truth(List);
@@ -1123,7 +1418,7 @@ int Sym_is_var_type(Sym, Type);
 Type List_type(List);
 List List_match(List, Var);
 static int _copies(Walk w, Type type, Var value){
-  if(_class(w, type) == 6696890603608) return 1;  if(! List_truth(Type_list(type)) || ! Sym_is_var_type(w -> compiler -> sym, type)) return 0;  Type source = List_type(_expression_type(value));  return List_truth(Type_list(source)) &&(List_truth(({ static MatchCaptureSite _x2c_match_site_9;  x2c_match_site_match(& _x2c_match_site_9, Type_list(source), List_var(_424)); })) || List_truth(({ static MatchCaptureSite _x2c_match_site_10;  x2c_match_site_match(& _x2c_match_site_10, Type_list(source), List_var(_427)); })));
+  if(_class(w, type) == 6696890603608) return 1;  if(! List_truth(Type_list(type)) || ! Sym_is_var_type(w -> compiler -> sym, type)) return 0;  Type source = List_type(_expression_type(value));  return List_truth(Type_list(source)) &&(List_truth(({ static MatchCaptureSite _x2c_match_site_9;  x2c_match_site_match(& _x2c_match_site_9, Type_list(source), List_var(_443)); })) || List_truth(({ static MatchCaptureSite _x2c_match_site_10;  x2c_match_site_match(& _x2c_match_site_10, Type_list(source), List_var(_446)); })));
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -1174,7 +1469,7 @@ String int_str(int);
 int Var_int(Var);
 Var List_assoc(List, Var);
 static List _opened(Walk w, Region region){
-  List location = Compiler_origin_location(w -> compiler, region -> origin);  return cons(String_var(String_join(NULL, cons(String_var(_428), cons(String_var(int_str(Var_int(List_assoc(location, Symbol_var(805770))))), NULL)))), NULL);
+  List location = Compiler_origin_location(w -> compiler, region -> origin);  return cons(String_var(String_join(NULL, cons(String_var(_447), cons(String_var(int_str(Var_int(List_assoc(location, Symbol_var(805770))))), NULL)))), NULL);
 }
 
 int Var_is_void(Var);
@@ -1184,14 +1479,14 @@ static List _summary(Walk w, String callee){
     List _x2c_match_expr = Var_list(w -> audit ? _effect(w, callee) : Map_getindex(runtime, String_var(callee)));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 2909126: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {return _429;  break;
+      case 2909126: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_41), &_x2c_match_capture)) {return _448;  break;
 }
-static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_343), &_x2c_match_capture)) {return _430;  break;
+static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_371), &_x2c_match_capture)) {return _449;  break;
 }
-case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _431;  break; } } case 41188490: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802806922ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _444;  break; } } case 42239593650: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497979001212082ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var owner = _x2c_match_values[0];  Var sinks = _x2c_match_values[1];  return cons(owner, cons(sinks, NULL));  break; } } default: break;
+case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _450;  break; } } case 41188490: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802806922ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _463;  break; } } case 42239593650: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497979001212082ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var owner = _x2c_match_values[0];  Var sinks = _x2c_match_values[1];  return cons(owner, cons(sinks, NULL));  break; } } default: break;
     }
   }
-Var local = Map_getindex(w -> summaries, String_var(callee));  return Var_list(Var_is_void(local) ? List_var(_51) : local);
+Var local = Map_getindex(w -> summaries, String_var(callee));  return Var_list(Var_is_void(local) ? List_var(_79) : local);
 }
 
 int String_truth(String);
@@ -1202,14 +1497,14 @@ static Fact _fact_of(Walk w, Var expression, List * named){
     List _x2c_match_expr = Var_list(inner);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 19147688: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
+      case 19147688: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_393), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
     if(named)(* named) = Var_list(binding);  Var found = Map_getindex(w -> facts, binding);  return Var_is_void(found) ? NULL : Var_fact(found);
   }
   break;
 }
-case 992: ;  static MatchCaptureSite _x2c_match_site_14;  if (x2c_match_site_try_capture(& _x2c_match_site_14, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return _borrow(w, place, named);  break;
+case 992: ;  static MatchCaptureSite _x2c_match_site_14;  if (x2c_match_site_try_capture(& _x2c_match_site_14, _x2c_match_expr, List_var(_403), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return _borrow(w, place, named);  break;
 }
-static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_458), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1]; {
+static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_477), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1]; {
   List yes_name = NULL, no_name = NULL;  Fact fact = _fact_of(w, yes, &(yes_name));  Fact other = _fact_of(w, no, &(no_name));  if(other &&(! fact ||((other -> region || other -> other) && ! fact -> region && ! fact -> other))){
     fact = other;  yes_name = no_name;
   }
@@ -1220,7 +1515,7 @@ break;
 default: break;
     }
   }
-List arguments = NULL;  String callee = _callee_of(inner, &(arguments));  if(! String_truth(callee) ||(w -> audit ? ! Var_equal(_effect(w, callee), List_var(_44)) : ! Compiler_region_wrapper(callee))) return NULL;  return _fact_of(w, List_car(arguments), named);
+List arguments = NULL;  String callee = _callee_of(inner, &(arguments));  if(! String_truth(callee) ||(w -> audit ? ! Var_equal(_effect(w, callee), List_var(_72)) : ! Compiler_region_wrapper(callee))) return NULL;  return _fact_of(w, List_car(arguments), named);
 }
 
 int Type_is_array(Type);
@@ -1230,7 +1525,7 @@ static Fact _value_fact(Walk w, Var value, List * named){
     List _x2c_match_expr = Var_list(_unwrap(value));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 19147688: ;  static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x2c_match_site_16, _x2c_match_expr, List_var(_459), &_x2c_match_capture)) {return _borrow(w, value, named);  break;
+      case 19147688: ;  static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x2c_match_site_16, _x2c_match_expr, List_var(_478), &_x2c_match_capture)) {return _borrow(w, value, named);  break;
 }
 default: break;
     }
@@ -1267,6 +1562,7 @@ static Region _pooled(Walk w, int * born){
   Region pool = _innermost(w, 1080280); (* born) = 2;  return pool;
 }
 
+List Macro_case_pattern(Macro, List);
 int List_try_next(List, List *, Var *);
 static Region _birth(Walk w, Var value, Type type, int * born, Region * other){
   List arguments = NULL;  String callee = _callee_of(value, &(arguments)); (* born) = 1; (* other) = NULL;
@@ -1274,27 +1570,25 @@ static Region _birth(Walk w, Var value, Type type, int * born, Region * other){
     List _x2c_match_expr = Var_list(String_truth(callee) ?(w -> audit ? _effect(w, callee) : Map_getindex(runtime, String_var(callee))) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 2909126: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {return _owner(w, _slot(w, List_car(arguments)));  break;
+      case 2909126: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_53), &_x2c_match_capture)) {return _owner(w, _slot(w, List_car(arguments)));  break;
 }
-static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
+static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_41), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
 }
-static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_199), &_x2c_match_capture)) {if(w -> meta){
+static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_227), &_x2c_match_capture)) {if(w -> meta){
   return w -> frame;  break;
 }
 }
-static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_343), &_x2c_match_capture)) {return _active(w);  break;
+static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_371), &_x2c_match_capture)) {return _active(w);  break;
 }
 case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _pooled(w, &((* born)));  break; } } default: break;
     }
   }
-
+Macro captured = _719;
   {
-    List _x2c_match_expr = Var_list(_unwrap(value));
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 228262: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_461), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
-}
-case 808259842: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_470), &_x2c_match_capture)) {List captures = Var_list(_x2c_match_values[0]); {
+    List _x2c_match_expr = Var_list(source_expression(value));
+    Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
+    switch (0) {
+      default: ;  static MacroCaseSite _x2c_macro_site_0;  if (Macro_case_capture_at(& _x2c_macro_site_0, _x2c_match_expr, captured, _722, &_x2c_match_capture)) {Var body = _x2c_match_values[0];  List captures = Var_list(_x2c_match_values[1]);  List params = Var_list(_x2c_match_values[2]); {
   {
     Var capture;  List _x2c_macro_object_1 = captures;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0))){
       capture = _x2c_macro_cursor_output_0;
@@ -1302,7 +1596,7 @@ case 808259842: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_si
     List _x2c_match_expr = Var_list(capture);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 6544469130: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_476), &_x2c_match_capture)) {Var captured = _x2c_match_values[0]; {
+      case 6544469130: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_727), &_x2c_match_capture)) {Var captured = _x2c_match_values[0]; {
         Var place = _address_of(captured);  Fact fact = _fact_of(w, Var_is_void(place) ? captured : place, NULL);  if(fact &&(fact -> born || fact -> region || fact -> other)){
           if(fact -> born)(* born) = fact -> born; (* other) = fact -> other;  return fact -> region;
         }
@@ -1320,9 +1614,19 @@ return _active(w);
 }
 break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_24;  if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_481), &_x2c_match_capture)) {return _active(w);  break;
+
+    }
+  }
+
+  {
+    List _x2c_match_expr = Var_list(_unwrap(value));
+    MatchCaptureBuffer _x2c_match_capture = { 0 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 228262: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_729), &_x2c_match_capture)) {return _pooled(w, &((* born)));  break;
 }
-static MatchCaptureSite _x2c_match_site_25;  if (x2c_match_site_try_capture(& _x2c_match_site_25, _x2c_match_expr, List_var(_483), &_x2c_match_capture)) {if(_class(w, List_truth(Type_list(type)) ? type : List_type(_expression_type(value))) == 7659271582052){
+default: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_734), &_x2c_match_capture)) {return _active(w);  break;
+}
+static MatchCaptureSite _x2c_match_site_24;  if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_736), &_x2c_match_capture)) {if(_class(w, List_truth(Type_list(type)) ? type : List_type(_expression_type(value))) == 7659271582052){
   return _active(w);  break;
 }
 }
@@ -1343,16 +1647,16 @@ static int _flow_region(Walk w, Var value, Type type, Symbol sink, Fact target, 
     if(sink == 1219800220) w -> fresh |= born;  return 0;
   }
   String subject = _subject(w, value, named, fact);  if(region -> closed){
-    if(report) _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_484), NULL))), _opened(w, region));  return 1;
+    if(report) _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_737), NULL))), _opened(w, region));  return 1;
   }
   if(region -> kind == 26155096) return 0;  String exit = NULL;  switch(sink){
-    case 1219800220 : exit = _485;  break;  case 1317118534 : exit = _486;  break;  case 26155096 : if(target -> depth < region -> depth) exit = _487;  break;  default: if(! target) exit = _488;  else if(target -> param >= 0) exit = _489;  else if(target -> region == region) exit = NULL;  else if(target -> region) exit = region == w -> frame ? NULL : _490;  else exit = _491;
+    case 1219800220 : exit = _738;  break;  case 1317118534 : exit = _739;  break;  case 26155096 : if(target -> depth < region -> depth) exit = _740;  break;  default: if(! target) exit = _741;  else if(target -> param >= 0) exit = _742;  else if(target -> region == region) exit = NULL;  else if(target -> region) exit = region == w -> frame ? NULL : _743;  else exit = _744;
   }
   if(! String_truth(exit)) return 0;  if(report){
     if(region == w -> frame){
-      String message = String_join(NULL, cons(String_var(subject), cons(String_var(_492), cons(String_var(exit), NULL))));  _warn(w, 1218923484, w -> origin, message, _495);
+      String message = String_join(NULL, cons(String_var(subject), cons(String_var(_745), cons(String_var(exit), NULL))));  _warn(w, 1218923484, w -> origin, message, _748);
     }
-    else _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_496), cons(String_var(exit), NULL)))), _opened(w, region));
+    else _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_749), cons(String_var(exit), NULL)))), _opened(w, region));
   }
   return 1;
 }
@@ -1363,14 +1667,14 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target){
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_26;  if (x2c_match_site_try_capture(& _x2c_match_site_26, _x2c_match_expr, List_var(_458), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1];  return _flow(w, yes, type, sink, target) || _flow(w, no, type, sink, target);  break;
+      case 992: ;  static MatchCaptureSite _x2c_match_site_25;  if (x2c_match_site_try_capture(& _x2c_match_site_25, _x2c_match_expr, List_var(_477), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1];  return _flow(w, yes, type, sink, target) || _flow(w, no, type, sink, target);  break;
 }
 default: break;
     }
   }
 List named = NULL;  Fact fact = _value_fact(w, value, &(named));  if(! fact) fact = _returned_argument(w, value, &(named));  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, &(born), &(other));  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
   Var row = Symbol_var(sink);  if(sink == 534624){
-    if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_257, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
+    if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_285, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
   }
   if(sink != 26155096 && ! Var_is_void(row)) Map_setindex(w -> sinks, List_var(cons(int_var(fact -> param), cons(row, NULL))), int_var(1));  return 0;
 }
@@ -1387,27 +1691,29 @@ return reported;
 }
 
 static String _subject(Walk w, Var value, List named, Fact fact){
-
+  Macro lambda = _802, captured = _719;
   {
-    List _x2c_match_expr = Var_list(_unwrap(value));
-    MatchCaptureBuffer _x2c_match_capture = { 0 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 808259842: ;  static MatchCaptureSite _x2c_match_site_27;  if (x2c_match_site_try_capture(& _x2c_match_site_27, _x2c_match_expr, List_var(_497), &_x2c_match_capture)) {return _766;  break;
+    List _x2c_match_expr = Var_list(source_expression(value));
+    Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
+    switch (0) {
+      default: ;  static MacroCaseSite _x2c_macro_site_1;  if (Macro_case_capture_at(& _x2c_macro_site_1, _x2c_match_expr, lambda, _803, &_x2c_match_capture)) {Var body = _x2c_match_values[0];  List params = Var_list(_x2c_match_values[1]);  return _1067;  break;
 }
-default: break;
+static MacroCaseSite _x2c_macro_site_2;  if (Macro_case_capture_at(& _x2c_macro_site_2, _x2c_match_expr, captured, _722, &_x2c_match_capture)) {Var body = _x2c_match_values[0];  List captures = Var_list(_x2c_match_values[1]);  List params = Var_list(_x2c_match_values[2]);  return _1067;  break;
+}
+
     }
   }
-if(! List_truth(named)) return _767;  String name = String_join(NULL, cons(String_var(_498), cons(String_var(binding_identity_spelling(named)), cons(String_var(_498), NULL))));  Var own = Map_getindex(w -> facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, &(arguments)))) return String_join(NULL, cons(String_var(_499), cons(String_var(name), NULL)));
+if(! List_truth(named)) return _1068;  String name = String_join(NULL, cons(String_var(_804), cons(String_var(binding_identity_spelling(named)), cons(String_var(_804), NULL))));  Var own = Map_getindex(w -> facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, &(arguments)))) return String_join(NULL, cons(String_var(_805), cons(String_var(name), NULL)));
   {
     List _x2c_match_expr = fact ? fact -> place : NULL;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 19147688: ;  static MatchCaptureSite _x2c_match_site_28;  if (x2c_match_site_try_capture(& _x2c_match_site_28, _x2c_match_expr, List_var(_459), &_x2c_match_capture)) {return String_join(NULL, cons(String_var(_500), cons(String_var(name), NULL)));  break;
+      case 19147688: ;  static MatchCaptureSite _x2c_match_site_26;  if (x2c_match_site_try_capture(& _x2c_match_site_26, _x2c_match_expr, List_var(_478), &_x2c_match_capture)) {return String_join(NULL, cons(String_var(_806), cons(String_var(name), NULL)));  break;
 }
 default: break;
     }
   }
-return String_join(NULL, cons(String_var(_501), cons(String_var(name), NULL)));
+return String_join(NULL, cons(String_var(_807), cons(String_var(name), NULL)));
 }
 
 Type Var_type(Var);
@@ -1417,26 +1723,26 @@ static Fact _base(Walk w, Var place, int * through){
     List _x2c_match_expr = Var_list(_unwrap(place));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_29;  if (x2c_match_site_try_capture(& _x2c_match_site_29, _x2c_match_expr, List_var(_509), &_x2c_match_capture)) {Var base = _x2c_match_values[0]; {
+      case 992: ;  static MatchCaptureSite _x2c_match_site_27;  if (x2c_match_site_try_capture(& _x2c_match_site_27, _x2c_match_expr, List_var(_815), &_x2c_match_capture)) {Var base = _x2c_match_values[0]; {
     Fact fact = _fact_of(w, base, NULL);  if(! fact) fact = _base(w, base, &((* through))); (* through) = 1;  return fact;
   }
   break;
 }
-static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_515), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _base(w, base, &((* through)));  break;
+static MatchCaptureSite _x2c_match_site_28;  if (x2c_match_site_try_capture(& _x2c_match_site_28, _x2c_match_expr, List_var(_821), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _base(w, base, &((* through)));  break;
 }
-static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_518), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _fact_of(w, base, NULL);  break;
+static MatchCaptureSite _x2c_match_site_29;  if (x2c_match_site_try_capture(& _x2c_match_site_29, _x2c_match_expr, List_var(_824), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return _fact_of(w, base, NULL);  break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_531), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var type = _x2c_match_values[1]; {
+default: ;  static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_837), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var type = _x2c_match_values[1]; {
   Fact fact = _fact_of(w, base, NULL);  if(! fact) return _base(w, base, &((* through)));  Type declared = Var_type(type); (* through) = ! Type_is_array(declared) || fact -> param >= 0;  return fact;
 }
 break;
 }
-static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_532), &_x2c_match_capture)) {{
+static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_838), &_x2c_match_capture)) {{
   (* through) = 0;  return _fact_of(w, place, NULL);
 }
 break;
 }
-static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_483), &_x2c_match_capture)) {{
+static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_736), &_x2c_match_capture)) {{
   (* through) = 0;  return _fact(w, NULL, - 1);
 }
 break;
@@ -1460,11 +1766,11 @@ static List _root(Var place){
     List _x2c_match_expr = Var_list(_unwrap(place));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 19147688: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  return Var_list(binding);  break;
+      case 19147688: ;  static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_393), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  return Var_list(binding);  break;
 }
-case 992: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_535), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  place = base;  break;
+case 992: ;  static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_841), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  place = base;  break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_536), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  place = base;  break;
+default: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_842), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  place = base;  break;
 }
 return NULL;  break;
     }
@@ -1484,7 +1790,7 @@ static List _parameter_types(Var call){
     List _x2c_match_expr = Var_list(_unwrap(call));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 199448: ;  static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_548), &_x2c_match_capture)) {Var types = _x2c_match_values[0];  return Var_list(types);  break;
+      case 199448: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_854), &_x2c_match_capture)) {Var types = _x2c_match_values[0];  return Var_list(types);  break;
 }
 default: break;
     }
@@ -1531,13 +1837,13 @@ static void _end(Walk w, Var argument, String op, Symbol how){
     List _x2c_match_expr = Var_list(_unwrap(argument));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 26416091224: ;  static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try_capture(& _x2c_match_site_39, _x2c_match_expr, List_var(_553), &_x2c_match_capture)) {literal = 1;  break;
+      case 26416091224: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_859), &_x2c_match_capture)) {literal = 1;  break;
 }
 default: break;
     }
   }
 if(String_truth(op) &&(literal ||(storage &&(storage -> region == w -> frame || storage -> born == 2)))){
-  String subject = literal ? _768 : _subject(w, argument, named, storage);  _warn(w, 139920314698, w -> origin, String_join(NULL, cons(String_var(op), cons(String_var(_554), cons(String_var(subject), cons(String_var(_555), NULL))))), _561);
+  String subject = literal ? _1069 : _subject(w, argument, named, storage);  _warn(w, 139920314698, w -> origin, String_join(NULL, cons(String_var(op), cons(String_var(_860), cons(String_var(subject), cons(String_var(_861), NULL))))), _867);
 }
 Fact fact = _fact_of(w, argument, NULL);  if(! fact || fact -> depth != w -> depth) return;  fact -> ending = how;  Array_push(w -> freed, Fact_var(fact));
 }
@@ -1551,34 +1857,34 @@ static void _scan(Walk w, Var value, int deferred){
     List _x2c_match_expr = Var_list(node);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_562), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  Array_push(w -> pending, inner);  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_868), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  Array_push(w -> pending, inner);  break;
   }
-  case 19147688: ;  static MatchCaptureSite _x2c_match_site_41;  if (x2c_match_site_try_capture(& _x2c_match_site_41, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
+  case 19147688: ;  static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try_capture(& _x2c_match_site_39, _x2c_match_expr, List_var(_393), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
     Var found = Map_getindex(w -> facts, binding);  if(Var_is_void(found)) break;  Fact fact = Var_fact(found);  if(w -> audit &&((fact -> region && fact -> region -> closed) ||(fact -> other && fact -> other -> closed))){
-      String name = binding_identity_spelling(Var_list(binding));  _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(_498), cons(String_var(name), cons(String_var(_563), NULL)))), NULL);  break;
+      String name = binding_identity_spelling(Var_list(binding));  _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(_804), cons(String_var(name), cons(String_var(_869), NULL)))), NULL);  break;
     }
-    if(! fact -> dead) break;  String name = binding_identity_spelling(Var_list(binding));  String ended = fact -> dead == 28291400 ? _769 : _770;  _warn(w, 84949284065610, w -> origin, String_join(NULL, cons(String_var(_498), cons(String_var(name), cons(String_var(_564), cons(String_var(ended), NULL))))), NULL);  fact -> dead = 0;
+    if(! fact -> dead) break;  String name = binding_identity_spelling(Var_list(binding));  String ended = fact -> dead == 28291400 ? _1070 : _1071;  _warn(w, 84949284065610, w -> origin, String_join(NULL, cons(String_var(_804), cons(String_var(name), cons(String_var(_870), cons(String_var(ended), NULL))))), NULL);  fact -> dead = 0;
   }
   break;
 }
-case 992: ;  static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_574), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Var stored = _x2c_match_values[1];  if(! Var_equal(node, root)){
+case 992: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_880), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Var stored = _x2c_match_values[1];  if(! Var_equal(node, root)){
   {
     _store(w, target, stored);  Array_push(w -> pending, target);
   }
   break;
 }
 }
-case 199448: ;  static MatchCaptureSite _x2c_match_site_46;  if (x2c_match_site_try_capture(& _x2c_match_site_46, _x2c_match_expr, List_var(_578), &_x2c_match_capture)) {Var args = _x2c_match_values[0]; {
+case 199448: ;  static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_884), &_x2c_match_capture)) {Var args = _x2c_match_values[0]; {
   List arguments = NULL;  String callee = _callee_of(node, &(arguments));
   {
     List _x2c_match_expr = Var_list(String_truth(callee) ?(w -> audit ? _effect(w, callee) : Map_getindex(runtime, String_var(callee))) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_582), &_x2c_match_capture)) {break;  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_41;  if (x2c_match_site_try_capture(& _x2c_match_site_41, _x2c_match_expr, List_var(_888), &_x2c_match_capture)) {break;  break;
 }
-{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762048842ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {_end(w, List_car(arguments), NULL, 13773128);  break; } } static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_132), &_x2c_match_capture)) {_end(w, List_car(arguments), _771, 13773128);  break;
+{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762048842ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {_end(w, List_car(arguments), NULL, 13773128);  break; } } static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_160), &_x2c_match_capture)) {_end(w, List_car(arguments), _1072, 13773128);  break;
 }
-static MatchCaptureSite _x2c_match_site_45;  if (x2c_match_site_try_capture(& _x2c_match_site_45, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {_end(w, List_car(arguments), _772, 28291400);  break;
+static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_37), &_x2c_match_capture)) {_end(w, List_car(arguments), _1073, 28291400);  break;
 }
 if(String_truth(callee)) _scan_call(w, node, callee, arguments);  break;
     }
@@ -1587,7 +1893,7 @@ Array_push(w -> pending, args);
 }
 break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_47;  if (x2c_match_site_try_capture(& _x2c_match_site_47, _x2c_match_expr, List_var(_597), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
+default: ;  static MatchCaptureSite _x2c_match_site_45;  if (x2c_match_site_try_capture(& _x2c_match_site_45, _x2c_match_expr, List_var(_903), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761846694ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var head = _x2c_match_values[0];  Var tail = _x2c_match_values[1]; {
   int born = 0;  Region other = NULL;  Region region = _birth(w, node, NULL, &(born), &(other));  struct Fact result ={
@@ -1595,7 +1901,7 @@ default: ;  static MatchCaptureSite _x2c_match_site_47;  if (x2c_match_site_try_
   }
   ;  _flow(w, head, NULL, 534624, & result);  _flow(w, tail, NULL, 534624, & result);  Array_push(w -> pending, tail);  Array_push(w -> pending, head);
 }
-break; } } static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_capture(& _x2c_match_site_48, _x2c_match_expr, List_var(_604), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]);  for(int i = List_len(children) - 1;  i >= 0;  i --) Array_push(w -> pending, List_getindex(children, i));  break;
+break; } } static MatchCaptureSite _x2c_match_site_46;  if (x2c_match_site_try_capture(& _x2c_match_site_46, _x2c_match_expr, List_var(_910), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]);  for(int i = List_len(children) - 1;  i >= 0;  i --) Array_push(w -> pending, List_getindex(children, i));  break;
 }
 
     }
@@ -1639,7 +1945,7 @@ static Var _target_place(Walk w, Var target){
     List _x2c_match_expr = Var_list(inner);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_49;  if (x2c_match_site_try_capture(& _x2c_match_site_49, _x2c_match_expr, List_var(_608), &_x2c_match_capture)) {Var pointer = _x2c_match_values[0]; {
+      case 992: ;  static MatchCaptureSite _x2c_match_site_47;  if (x2c_match_site_try_capture(& _x2c_match_site_47, _x2c_match_expr, List_var(_914), &_x2c_match_capture)) {Var pointer = _x2c_match_values[0]; {
     Fact fact = _fact_of(w, pointer, NULL);  if(fact && List_truth(fact -> place)) return List_var(fact -> place);
   }
   break;
@@ -1677,8 +1983,8 @@ static void _declare(Walk w, Var specifiers, List bindings){
     List _x2c_match_expr = item;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_50;  if (x2c_match_site_try_capture(& _x2c_match_site_50, _x2c_match_expr, List_var(_618), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var value = _x2c_match_values[1]; {
-          _scan(w, value, 0);  _flow(w, value, Var_type(Map_getindex(types, List_var(cons(_619, cons(name, NULL))))), 1317118534, NULL);
+      case 992: ;  static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_capture(& _x2c_match_site_48, _x2c_match_expr, List_var(_924), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var value = _x2c_match_values[1]; {
+          _scan(w, value, 0);  _flow(w, value, Var_type(Map_getindex(types, List_var(cons(_925, cons(name, NULL))))), 1317118534, NULL);
         }
         break;
       }
@@ -1697,9 +2003,9 @@ static void _declare(Walk w, Var specifiers, List bindings){
     List _x2c_match_expr = Var_list(item);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_51;  if (x2c_match_site_try_capture(& _x2c_match_site_51, _x2c_match_expr, List_var(_628), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var value = _x2c_match_values[1];  _assign(w, _fact(w, Var_list(name), - 1), value, Var_type(Map_getindex(types, List_var(cons(_619, cons(name, NULL))))), 0);  break;
+      case 992: ;  static MatchCaptureSite _x2c_match_site_49;  if (x2c_match_site_try_capture(& _x2c_match_site_49, _x2c_match_expr, List_var(_934), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var value = _x2c_match_values[1];  _assign(w, _fact(w, Var_list(name), - 1), value, Var_type(Map_getindex(types, List_var(cons(_925, cons(name, NULL))))), 0);  break;
   }
-  case 150408: ;  static MatchCaptureSite _x2c_match_site_52;  if (x2c_match_site_try_capture(& _x2c_match_site_52, _x2c_match_expr, List_var(_624), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _fact(w, Var_list(name), - 1);  break;
+  case 150408: ;  static MatchCaptureSite _x2c_match_site_50;  if (x2c_match_site_try_capture(& _x2c_match_site_50, _x2c_match_expr, List_var(_930), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _fact(w, Var_list(name), - 1);  break;
 }
 default: break;
     }
@@ -1720,7 +2026,7 @@ static int _note_restored(Walk w, Var body){
     List _x2c_match_expr = Var_list(_unwrap(expression));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x2c_match_site_53, _x2c_match_expr, List_var(_635), &_x2c_match_capture)) {Var target = _x2c_match_values[0]; {
+      case 992: ;  static MatchCaptureSite _x2c_match_site_51;  if (x2c_match_site_try_capture(& _x2c_match_site_51, _x2c_match_expr, List_var(_941), &_x2c_match_capture)) {Var target = _x2c_match_values[0]; {
     Var place = _target_place(w, target);  if(Var_equal(place, _unwrap(target))) return 0;  w -> restored = Map_copy(w -> restored);  Map_setindex(w -> restored, place, int_var(1));  return 1;
   }
   break;
@@ -1740,9 +2046,9 @@ static void _note_deferred_stores(Walk w, Var node){
     List _x2c_match_expr = Var_list(node);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_54;  if (x2c_match_site_try_capture(& _x2c_match_site_54, _x2c_match_expr, List_var(_635), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Map_setindex(w -> restored, _unwrap(target), int_var(1));  break;
+      case 992: ;  static MatchCaptureSite _x2c_match_site_52;  if (x2c_match_site_try_capture(& _x2c_match_site_52, _x2c_match_expr, List_var(_941), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Map_setindex(w -> restored, _unwrap(target), int_var(1));  break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_55;  if (x2c_match_site_try_capture(& _x2c_match_site_55, _x2c_match_expr, List_var(_604), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
+default: ;  static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x2c_match_site_53, _x2c_match_expr, List_var(_910), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
   Var child;  List _x2c_macro_object_6 = children;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_3))){
     child = _x2c_macro_cursor_output_3;  _note_deferred_stores(w, child);
   }
@@ -1769,9 +2075,9 @@ Fact fact = _fact_of(w, List_car(arguments), NULL);
     List _x2c_match_expr = Var_list(String_truth(callee) ?(w -> audit ? _effect(w, callee) : Map_getindex(runtime, String_var(callee))) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 7109834: ;  static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_636), &_x2c_match_capture)) {return;  break;
+      case 7109834: ;  static MatchCaptureSite _x2c_match_site_54;  if (x2c_match_site_try_capture(& _x2c_match_site_54, _x2c_match_expr, List_var(_942), &_x2c_match_capture)) {return;  break;
 }
-case 430410: ;  static MatchCaptureSite _x2c_match_site_57;  if (x2c_match_site_try_capture(& _x2c_match_site_57, _x2c_match_expr, List_var(_637), &_x2c_match_capture)) {if(fact && fact -> param < 0){
+case 430410: ;  static MatchCaptureSite _x2c_match_site_55;  if (x2c_match_site_try_capture(& _x2c_match_site_55, _x2c_match_expr, List_var(_943), &_x2c_match_capture)) {if(fact && fact -> param < 0){
   {
     fact -> region = _open(w, 109854, NULL);  return;
   }
@@ -1826,9 +2132,9 @@ static void _walk(Walk w, Var node){
       case 104: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var origin = _x2c_match_values[0];  Var inner = _x2c_match_values[1]; {
     int outer = w -> origin;  w -> origin = Var_int(Var_convert(origin, 3453797));  _walk(w, inner);  w -> origin = outer;
   }
-  break; } } case 5011670: ;  static MatchCaptureSite _x2c_match_site_58;  if (x2c_match_site_try_capture(& _x2c_match_site_58, _x2c_match_expr, List_var(_648), &_x2c_match_capture)) {List statements = Var_list(_x2c_match_values[0]);  _walk_block(w, statements);  break;
+  break; } } case 5011670: ;  static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_954), &_x2c_match_capture)) {List statements = Var_list(_x2c_match_values[0]);  _walk_block(w, statements);  break;
 }
-case 39266: ;  static MatchCaptureSite _x2c_match_site_59;  if (x2c_match_site_try_capture(& _x2c_match_site_59, _x2c_match_expr, List_var(_650), &_x2c_match_capture)) {List statements = Var_list(_x2c_match_values[0]); {
+case 39266: ;  static MatchCaptureSite _x2c_match_site_57;  if (x2c_match_site_try_capture(& _x2c_match_site_57, _x2c_match_expr, List_var(_956), &_x2c_match_capture)) {List statements = Var_list(_x2c_match_values[0]); {
   Var statement;  List _x2c_macro_object_8 = statements;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_5))){
     statement = _x2c_macro_cursor_output_5;  _walk(w, statement);
   }
@@ -1836,14 +2142,14 @@ case 39266: ;  static MatchCaptureSite _x2c_match_site_59;  if (x2c_match_site_t
 }
 break;
 }
-case 8728932: ;  static MatchCaptureSite _x2c_match_site_60;  if (x2c_match_site_try_capture(& _x2c_match_site_60, _x2c_match_expr, List_var(_654), &_x2c_match_capture)) {Var body = _x2c_match_values[0];  _walk_defer(w, body);  break;
+case 8728932: ;  static MatchCaptureSite _x2c_match_site_58;  if (x2c_match_site_try_capture(& _x2c_match_site_58, _x2c_match_expr, List_var(_959), &_x2c_match_capture)) {Var body = _x2c_match_values[0];  _walk_defer(w, body);  break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_61;  if (x2c_match_site_try_capture(& _x2c_match_site_61, _x2c_match_expr, List_var(_597), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
+default: ;  static MatchCaptureSite _x2c_match_site_59;  if (x2c_match_site_try_capture(& _x2c_match_site_59, _x2c_match_expr, List_var(_903), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937981418652ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];  Var result = _x2c_match_values[1]; {
   _scan(w, result, 0);  _flow(w, result, Var_type(type), 1219800220, NULL);  _revive(w);
 }
-break; } } static MatchCaptureSite _x2c_match_site_62;  if (x2c_match_site_try_capture(& _x2c_match_site_62, _x2c_match_expr, List_var(_665), &_x2c_match_capture)) {_revive(w);  break;
+break; } } static MatchCaptureSite _x2c_match_site_60;  if (x2c_match_site_try_capture(& _x2c_match_site_60, _x2c_match_expr, List_var(_970), &_x2c_match_capture)) {_revive(w);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0]; {
   List arguments = NULL;  String callee = _callee_of(expression, &(arguments));  if(String_truth(callee) && _walk_region_call(w, callee, arguments)) break;
@@ -1851,13 +2157,13 @@ break; } } static MatchCaptureSite _x2c_match_site_62;  if (x2c_match_site_try_c
     List _x2c_match_expr = Var_list(_unwrap(expression));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 992: ;  static MatchCaptureSite _x2c_match_site_63;  if (x2c_match_site_try_capture(& _x2c_match_site_63, _x2c_match_expr, List_var(_668), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Var value = _x2c_match_values[1];  _store(w, target, value);  break;
+      case 992: ;  static MatchCaptureSite _x2c_match_site_61;  if (x2c_match_site_try_capture(& _x2c_match_site_61, _x2c_match_expr, List_var(_973), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Var value = _x2c_match_values[1];  _store(w, target, value);  break;
 }
 default: ;  _scan(w, expression, 0);  break;
     }
   }
 }
-break; } } static MatchCaptureSite _x2c_match_site_64;  if (x2c_match_site_try_capture(& _x2c_match_site_64, _x2c_match_expr, List_var(_691), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
+break; } } static MatchCaptureSite _x2c_match_site_62;  if (x2c_match_site_try_capture(& _x2c_match_site_62, _x2c_match_expr, List_var(_995), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
   Map restored = w -> restored;  w -> depth += 1; {
     Var child;  List _x2c_macro_object_9 = children;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_6))){
       child = _x2c_macro_cursor_output_6;  _walk(w, child);
@@ -1868,9 +2174,9 @@ break; } } static MatchCaptureSite _x2c_match_site_64;  if (x2c_match_site_try_c
 }
 break;
 }
-{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224712623392659814ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var rows = _x2c_match_values[0];  _walk(w, rows);  break; } } static MatchCaptureSite _x2c_match_site_65;  if (x2c_match_site_try_capture(& _x2c_match_site_65, _x2c_match_expr, List_var(_702), &_x2c_match_capture)) {_scan(w, node, 0);  break;
+{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224712623392659814ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var rows = _x2c_match_values[0];  _walk(w, rows);  break; } } static MatchCaptureSite _x2c_match_site_63;  if (x2c_match_site_try_capture(& _x2c_match_site_63, _x2c_match_expr, List_var(_1005), &_x2c_match_capture)) {_scan(w, node, 0);  break;
 }
-static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x2c_match_site_66, _x2c_match_expr, List_var(_704), &_x2c_match_capture)) {{
+static MatchCaptureSite _x2c_match_site_64;  if (x2c_match_site_try_capture(& _x2c_match_site_64, _x2c_match_expr, List_var(_1007), &_x2c_match_capture)) {{
   List row;  Iter _x2c_macro_iterator_11 = Var_iter(node, &(struct Iter){
     int_var(0)
   }
@@ -1902,9 +2208,9 @@ static void _collect_functions(Var node, Array found){
     List _x2c_match_expr = Var_list(node);
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x2c_match_site_67, _x2c_match_expr, List_var(_705), &_x2c_match_capture)) {break;  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_65;  if (x2c_match_site_try_capture(& _x2c_match_site_65, _x2c_match_expr, List_var(_1008), &_x2c_match_capture)) {break;  break;
 }
-case 458361162716: ;  static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x2c_match_site_69, _x2c_match_expr, List_var(_727), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  List rows = Var_list(_x2c_match_values[1]);  Var body = _x2c_match_values[2]; {
+case 458361162716: ;  static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x2c_match_site_67, _x2c_match_expr, List_var(_1028), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  List rows = Var_list(_x2c_match_values[1]);  Var body = _x2c_match_values[2]; {
   Array parameters = Array_new(); {
     Var row;  List _x2c_macro_object_12 = rows;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_8))){
       row = _x2c_macro_cursor_output_8;
@@ -1912,7 +2218,7 @@ case 458361162716: ;  static MatchCaptureSite _x2c_match_site_69;  if (x2c_match
     List _x2c_match_expr = Var_list(row);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 33656922: ;  static MatchCaptureSite _x2c_match_site_68;  if (x2c_match_site_try_capture(& _x2c_match_site_68, _x2c_match_expr, List_var(_734), &_x2c_match_capture)) {Var parameter = _x2c_match_values[0];  Array_push(parameters, parameter);  break;
+      case 33656922: ;  static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x2c_match_site_66, _x2c_match_expr, List_var(_1035), &_x2c_match_capture)) {Var parameter = _x2c_match_values[0];  Array_push(parameters, parameter);  break;
     }
     default: break;
     }
@@ -1924,7 +2230,7 @@ Array_push(found, List_var(cons(name, cons(List_var(Array_list_free(parameters))
 }
 break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x2c_match_site_70, _x2c_match_expr, List_var(_604), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
+default: ;  static MatchCaptureSite _x2c_match_site_68;  if (x2c_match_site_try_capture(& _x2c_match_site_68, _x2c_match_expr, List_var(_910), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
   Var child;  List _x2c_macro_object_13 = children;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_9))){
     child = _x2c_macro_cursor_output_9;  _collect_functions(child, found);
   }
@@ -1970,7 +2276,7 @@ int Array_try_next(Array, int *, Var *);
 static void _fixpoint(Walk w, List ast, Array functions){
   w -> frame = Scope_calloc(1, sizeof(struct Region));  w -> frame -> kind = 13765450;  _collect_functions(List_var(ast), functions); {
     List function;  Array _x2c_macro_object_17 = functions;  int _x2c_macro_cursor_17 = 0;  Var _x2c_macro_cursor_output_12;  while(Array_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_12))){
-      function = Var_list(_x2c_macro_cursor_output_12);  if(Var_is_void(Map_getindex(w -> summaries, List_car(function)))) Map_setindex(w -> summaries, List_car(function), List_var(_51));
+      function = Var_list(_x2c_macro_cursor_output_12);  if(Var_is_void(Map_getindex(w -> summaries, List_car(function)))) Map_setindex(w -> summaries, List_car(function), List_var(_79));
     }
 
   }
@@ -2023,10 +2329,10 @@ void Compiler_check_meta_regions(Compiler c, List fn){
     List _x2c_match_expr = fn;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x2c_match_site_71, _x2c_match_expr, List_var(_761), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x2c_match_site_69, _x2c_match_expr, List_var(_1062), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
     Var _x2c_match_value_0 = name; {
       String name = Var_string(_x2c_match_value_0); {
-        Map_setindex(c -> meta_regions, String_var(name), List_var(_51));
+        Map_setindex(c -> meta_regions, String_var(name), List_var(_79));
       }
 
     }
@@ -2111,7 +2417,26 @@ int Compiler_has_region_row(String name){
 }
 
 int Compiler_region_no_lifetime_effect(String name){
-  if(! _init_guard_) _file_init_();  return List_contains(_765, Map_getindex(runtime, String_var(name)));
+  if(! _init_guard_) _file_init_();  return List_contains(_1066, Map_getindex(runtime, String_var(name)));
+}
+
+static Var source_expression(Var value){
+  while(1){
+
+  {
+    List _x2c_match_expr = Var_list(value);
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x2c_match_site_70, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
+  }
+  static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x2c_match_site_71, _x2c_match_expr, List_var(_16), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
+}
+case 1077029798: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937838648230ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var inner = _x2c_match_values[0];  value = inner;  break; } } case 199912: ;  static MatchCaptureSite _x2c_match_site_72;  if (x2c_match_site_try_capture(& _x2c_match_site_72, _x2c_match_expr, List_var(_12), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
+}
+default: ;  return value;  break;
+    }
+  }
+}
 }
 
 void Array_cleanup(Array);
