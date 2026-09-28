@@ -4087,11 +4087,17 @@ static List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
   if (_bare(invocation, definition)) return %(args);
   Array arguments = [];
+  int parameter_scope = 0;
+  defer { if (parameter_scope) c.sym.pop_scope(); }
   c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
+    if (kind == <param> && !parameter_scope) {
+      c.sym.push_new_scope();
+      parameter_scope = 1;
+    }
     int sequence = hole.assoc(<sequence>);
     Array captured = [];
     if (c.peek(0) == <)> && !sequence)
