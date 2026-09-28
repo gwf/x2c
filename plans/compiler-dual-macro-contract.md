@@ -6,12 +6,16 @@
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
 > Protocol helper synthesis. Callable-defer helper synthesis is on dev at
 > `308709aa`; Var array/map literals are on dev at `aaba3ca4`; try/defer
-> cleanup calls are on dev at `4f89a063`. Their same-checkout cost rows are
-> complete. A narrow structural Var optimization could not retain the named
+> cleanup calls are on dev at `4f89a063`. Their timing attempts are recorded
+> below. A narrow structural Var optimization could not retain the named
 > constructor/update calls in the template under the current rebuild contract.
 > The inline captured-lambda factory is on dev at `4576e25e`; shared
-> captured-environment typedef binding is on dev at `d546a124`. Their single
-> cost rows are complete. Func bridge factories are the next local batch.
+> captured-environment typedef binding is on dev at `d546a124`; Func bridge
+> factories are on dev at `a4c18301`. Their paired timing attempts are
+> recorded below, but the binary-location mismatch invalidates causal cost
+> claims. Indirect Func context typedef binding is a concrete hygiene
+> exception. The narrow protocol discard template prototype is an exception
+> under the process ceiling; other protocol shapes and source coverage remain.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -783,12 +787,26 @@ row: do not count successive versions of try twice. The current entry is:
 | Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
 | Lambda source recognition and construction (2026-09-28) | c99dd68d / prerequisite dev 799875a8, same corpus and home | increment +3.24% | increment +2.30% | Not counted | Not counted | Not measured |
 | Defer record and registration (2026-09-28) | f99136f8 / prerequisite dev a9f6d566, same corpus and home | increment +2.46% | increment +4.11% | Not counted | Not counted | Not measured |
-| Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same checkout, corpus and home | observed increment +18.10% | observed increment +15.45% | Not counted | Not counted | Not measured |
-| Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, same checkout, corpus and home | observed increment +18.24% | observed increment +16.16% | Not counted | Not counted | Not measured |
-| Try/defer cleanup calls (2026-09-28) | 4f89a063 / dev cb6605a4, same checkout, corpus and home | observed increment +13.63% | observed increment +15.56% | Not counted | Not counted | Not measured |
-| Inline captured-lambda factory (2026-09-28) | 4576e25e / dev 4f89a063, same checkout, corpus and home | observed increment +15.04% | observed increment +11.54% | Not counted | Not counted | Not measured |
-| Shared captured-environment typedef (2026-09-28) | d546a124 / dev 4576e25e, same checkout, corpus and home | observed increment -56.40% | observed increment -47.94% | Not counted | Not counted | Not measured |
+| Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, binary paths differ | confounded raw +18.10% | confounded raw +15.45% | Not counted | Not counted | Not measured |
+| Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, binary paths differ | confounded raw +18.24% | confounded raw +16.16% | Not counted | Not counted | Not measured |
+| Try/defer cleanup calls (2026-09-28) | 4f89a063 / dev cb6605a4, binary paths differ | confounded raw +13.63% | confounded raw +15.56% | Not counted | Not counted | Not measured |
+| Inline captured-lambda factory (2026-09-28) | 4576e25e / dev 4f89a063, binary paths differ | confounded raw +15.04% | confounded raw +11.54% | Not counted | Not counted | Not measured |
+| Shared captured-environment typedef (2026-09-28) | d546a124 / dev 4576e25e, binary paths differ | confounded raw -56.40% | confounded raw -47.94% | Not counted | Not counted | Not measured |
+| Func bridge factories (2026-09-28) | a4c18301 / dev d546a124, binary paths differ | confounded raw -56.79% | confounded raw -47.95% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
+
+The six rows from callable-defer through Func bridge factories are raw
+timing records, not valid migration cost estimates. Their baseline binary
+ran from `debug/dual-macro-baseline-x2c` and the candidate from
+`builds/0/x2c`. `x2c_stage_dir` in `src/utils.x` recognizes only a compiler
+under `<home>/builds/<stage>`; `x2c_home_libexec` then selects that stage's
+helper directory. The `d546a124` revision appears as the fast candidate in
+one run and the slow baseline in the next, consistent with a binary-location
+confound. Those adjacent builds are not byte-identical saved binaries, so
+the path effect's exact share is unmeasured. Do not use these raw differences
+as a regression or speedup verdict. Earlier lambda/defer cost rows predate
+this script and need method review before comparison. Future timing must run
+both compiler revisions as staged executables with equivalent helper state.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
@@ -862,7 +880,7 @@ Raw samples and summary are in `debug/defer-paired-a9f6d566/`. These are
 incremental compiler costs, not measurements of runtime defer performance.
 No additional timing or instrumentation was run.
 
-Callable-defer's corrected run used five alternating pairs per mode after
+Callable-defer's same-checkout run used five alternating pairs per mode after
 warmup, optimized baseline and candidate compilers built in the same checkout,
 with one seven-source tree and `X2C_HOME`. Default medians were
 6.404748 / 7.563947 s (+18.10%); live medians were 7.617784 / 8.794784 s
@@ -871,9 +889,9 @@ live ranges were 7.463306--7.636833 / 8.671259--8.883321 s. The compilers
 generated identical C/H for all seven sources. The earlier negative row was
 invalid because its baseline binary was built in a different checkout and
 run against this one; two cross-checkout trials showed that disparity.
-Corrected samples are in `debug/callable-paired-corrected-results.json` in the
-integration checkout. The added compiler cost is observed, but its precise
-source path has not been attributed.
+Samples are in `debug/callable-paired-corrected-results.json` in the
+integration checkout. This run also used unequal executable locations and
+does not establish an added compiler cost.
 
 Var array/map literal calls used the same five-pair, same-checkout method.
 Default medians were 6.774885 / 8.010428 s (+18.24%); live medians were
@@ -881,8 +899,8 @@ Default medians were 6.774885 / 8.010428 s (+18.24%); live medians were
 7.739842--8.161179 s; live ranges were 7.455660--7.766287 /
 8.689038--9.331436 s. Samples are in `debug/var-paired-valid-results.json`
 in the integration checkout. A cross-checkout control was stopped before
-completion for the same reason as the callable-defer trial. These are measured
-compiler-translation deltas, not runtime collection performance.
+completion for the same reason as the callable-defer trial. These are raw
+compiler-translation times with the executable-location confound.
 
 Try/defer cleanup calls used the same five-pair, same-checkout method.
 Default medians were 6.997246 / 7.951023 s (+13.63%); live medians were
@@ -890,8 +908,8 @@ Default medians were 6.997246 / 7.951023 s (+13.63%); live medians were
 7.756784--8.403932 s; live ranges were 7.934081--8.217640 /
 8.906374--9.407776 s. Samples are in
 `debug/cleanup-paired-valid-results.json` in the integration checkout.
-The extra macro application enters a semantic transaction, but its share
-of this measured delta has not been isolated.
+The extra macro application enters a semantic transaction, but this raw
+timing difference cannot attribute a cost to it.
 
 Inline captured-lambda factory reuse used the same five-pair,
 same-checkout method. Default medians were 6.857994 / 7.889616 s
@@ -899,8 +917,8 @@ same-checkout method. Default medians were 6.857994 / 7.889616 s
 ranges were 6.525932--7.558985 / 7.654610--8.163958 s; live ranges were
 7.908140--8.648371 / 8.876117--9.772955 s. Samples are in
 `debug/factory-paired-valid-results.json` in the integration checkout.
-Focused generated C and H were unchanged; this is compiler translation
-cost, not generated program performance.
+Focused generated C and H were unchanged; this raw timing difference is
+not a compiler-cost estimate.
 
 Shared captured-environment typedef binding used the same five-pair,
 same-checkout method. Default medians were 7.054045 / 3.075359 s
@@ -909,9 +927,15 @@ ranges were 6.881619--7.201908 / 2.988293--3.254974 s; live ranges were
 8.237435--8.603484 / 4.187018--4.467973 s. Samples are in
 `debug/environment-paired-results.json` in the integration checkout.
 Every run translated all seven sources and reported the same generated
-C/H sizes. This is an unusually large observed difference for this source
-change; its cause has not been attributed, so it is not evidence that the
-typedef template itself saved that time.
+C/H sizes. This unusually large difference prompted the executable-location
+review above; it is not evidence that the typedef template saved that time.
+
+Func bridge factories used the same five-pair script. Default medians were
+7.197587 / 3.110135 s (-56.79%); live medians were 8.419454 / 4.382558 s
+(-47.95%). Default ranges were 6.943234--7.358694 / 3.064308--3.116450 s;
+live ranges were 8.151518--8.791723 / 4.187525--4.519509 s. Samples are
+in `debug/bridge-paired-results.json`. The binary-location confound makes
+these raw times unsuitable for a migration-cost claim.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
@@ -1762,6 +1786,34 @@ This batch deletes the two duplicate raw external-function skeletons. The
 indirect context typedef stays in its current form. Focused
 `function-to-func-inline` C/H, `function-to-func`, and direct-adapter fixtures
 pass unchanged; the indirect-adapter rejection fixture also passes.
+
+### E8. Indirect Func context typedef exception
+
+`_build_indirect_func_adapter` still constructs its function-pointer context
+typedef as a raw file-level unit. Reusing `$capture_environment` preserved
+the field type but failed a positive `function-to-func` fixture. The template
+bound while the adapter's local scope was active, so generated C declared
+`_x2c_local_typedef_0`; the context construction later used the intended
+`_x2c_func_pointer_context_0`. The baseline fixture compiles; the prototype
+fails native compilation at the first mismatched use. `Sym.define` and
+`Sym.bind_identity` in `src/compiler.x` assign local typedefs an emitted
+`local_typedef` name. The prototype was discarded without source or sidecar
+changes. This shape needs a proved file-scope binding path or a deliberate
+identity projection before migration; neither belongs in a typedef-only
+replacement.
+
+### E9. Protocol discard helper template prototype
+
+`Compiler.discard_helper` already delegates its generated function to
+`Compiler.wrapper_function`; its remaining body selection is six lines of
+canonical lowered statement construction. A prototype replaced that selection
+with adjacent void and value Statement templates. `make build` and the
+`protocol-operator-discard` and `protocol-operator-direct-update` fixtures
+passed with unchanged generated C expectations. The source change added 33
+lines and removed six for this compact body, roughly doubling the machinery
+without clarifying ownership. The prototype was discarded and the source and
+sidecars remain unchanged. This rejects that narrow implementation, not other
+protocol helpers or a different consolidation that removes more machinery.
 
 ### F. Static-local initialization exception
 
