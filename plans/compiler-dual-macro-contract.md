@@ -1,8 +1,10 @@
 > Status: active -- dual-macro compiler migration, updated 2026-09-28.
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
 > support landed at b59b8ade; lambda consumers are a private, incomplete
-> checkpoint at 1b908322. Next: architectural survey and proposed ownership
-> boundaries before further site conversions. The current campaign handoff
+> checkpoint at 1b908322. Architectural survey and proposed ownership
+> boundaries are recorded in compiler-dual-macro-architecture.md. Next:
+> resolve stage-preserving construction before further site conversions.
+> The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
 # Current campaign handoff
@@ -14,6 +16,11 @@ Passing tests supports this reading; it does not replace it.
 
 ## Shared direction and immediate next work
 
+The [current architecture survey](compiler-dual-macro-architecture.md)
+records the source-backed ownership proposal, shared initialization example,
+emission boundary and unresolved lambda construction projection. It is the
+next-work design companion; the historical census below is not its substitute.
+
 The campaign is broader than replacing individual case arms. Shared grammar
 macros own the relationship between language forms and tree structure, for
 construction and recognition. A macro used only for recognition is useful;
@@ -21,13 +28,13 @@ it need not have an expansion caller. Survey literal AST matches across the
 compiler as candidates, while distinguishing syntax from semantic data,
 registries and diagnostics. Do not invent source keywords for bookkeeping.
 
-Before further mechanical migrations, produce a current architectural survey
-and proposal in this plan. Trace representative transformations across their
-owners and show readable before/after clients. Identify shared prerequisites,
-duplicated structural knowledge, responsibilities to move or consolidate,
-and mechanisms that can disappear. Classify sites as migrated, directly
-migratable, needing a capability, or excluded for a concrete reason. Group
-them by transformation and owner, not just keyword or literal occurrence.
+The current architectural survey traces representative transformations
+across their owners and shows illustrative readable clients. It identifies
+shared prerequisites, duplicated structural knowledge, responsibilities to
+consolidate, and mechanisms that can disappear. Extend that inventory as
+sites are implemented: distinguish migrated, directly migratable, needing
+a capability, and excluded for a concrete reason. Group them by transformation
+and owner, not just keyword or literal occurrence.
 The historical 215-head census is a miss-detection aid, not a current site
 count, percentage of migratable code, or estimate of removable lines.
 
