@@ -4206,8 +4206,9 @@ int Compiler.take_code_value(
           if (c.names.adapters.try_get(key, cached))
             replacements[binding] = cached;
           else {
-            c.add_early(declaration);
-            c.names.adapters[key] = binding;
+            c.add_early(
+              _replace_definition_bindings(declaration, replacements));
+            c.names.adapters[key] = replacements[binding];
           }
         }
       }

@@ -1,7 +1,8 @@
-> Status: active -- not yet started.
-> Prerequisite: capture-role consolidation must land on dev first.
-> Add reusable core support with old lowerings intact; refresh bootstrap
-> before the separate try migration.
+> Status: done 2026-09-27 -- delivered to `dev`.
+> The four macro value forms, `macro open`, code-value carriers with
+> `new-name`, `early` and `cleanup` effects, and application transactions
+> landed with the old lowerings intact. Frame-declaration and
+> cleanup-placement producers move to the try migration.
 
 # Dual-purpose macro core support
 
@@ -32,7 +33,7 @@ it does not replace `_try_block` or any other lowering. Capture-role
 consolidation is the required preceding behavior-preserving change.
 
 The detailed representation and grammar remain owned by
-[the compiler contract](compiler-dual-macro-contract.md). This plan records
+[the compiler contract](../compiler-dual-macro-contract.md). This plan records
 implementation ownership and the proof required for core delivery, not a
 second language specification.
 
@@ -289,3 +290,34 @@ with operational work in existing compiler owners. No semantic validator or
 new dedicated diagnostic is proposed. Negative cases protect existing repeated
 hole recognition, closed hygiene, ordinary placement/conversion behavior and
 actual rollback of effects; they do not authenticate constructed code origin.
+
+## Delivery outcome
+
+Two decisions were settled during delivery:
+
+- An open definition's free Type role resolves through the base scopes to
+  its target type. Emitted C spells the target type, not the typedef name.
+- A free callee in an open definition is emitted as a native call with the
+  definition-recorded result type only when the applying unit has no
+  declaration for it.
+
+`(early KEY TOKEN DECLARATION)` is paired with a preceding `new-name` for
+TOKEN. On first use under KEY, the allocated binding replaces TOKEN in both
+the declaration and the code, the declaration is added early, and the
+binding is remembered under KEY; later uses substitute the remembered
+binding. The first implementation substituted only the code, so no
+producer could use the effect. `unittest/compiler-fixtures/macro-early.x`
+covers the fix.
+
+Thin evidence and follow-ups:
+
+- Rollback of carrier effects has no fixture. A failed binding ends
+  translation, so leakage cannot be observed in a compiled program. It
+  matters in the REPL and the editor adapter, which recover and continue;
+  the try migration should add the rollback test there or in its own
+  recoverable context.
+- A raw binder atom that reaches the emitter, as from a malformed
+  constructed carrier, loops in `Emitter__match_site_call` (C spelling) instead of
+  reporting a diagnostic.
+- Two clang-only `cc-stderr` sidecars in the regression set fail on Linux
+  hosts, as they did before this change.
