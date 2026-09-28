@@ -648,8 +648,8 @@ Each argument is what its producer returns: plain source, a bound
 reference, or lowered code, marked by the producer. The client writes no
 carrier, transaction, application context or result unwrapping;
 `bind_syntax` owns all of them. A template with a sequence hole puts it
-last and is applied as `Macro_apply(t, %(a b @items))`, as
-`Compiler.wrapper_function` does for generated functions.
+last, and one List passed as the last argument supplies the whole
+sequence, as `Compiler.wrapper_function` does for generated functions.
 
 The first per-lowering row is the selective try candidate, not the old phase5
 fixed support cost. Its total includes necessary shared support and any
@@ -956,8 +956,23 @@ code; the frame is the binding `_region_binding` allocates.
 ### C. Wrapper functions and scope cells
 
 The wrapper template stays one template; its callers pass lowered bodies
-through `Compiler.wrapper_function`, the one place that marks them. A
-scope cell is copied from its initializer or allocated empty, two C
+through `Compiler.wrapper_function`, the one place that marks them, and a
+parameter List passes as the whole trailing sequence:
+
+```x2c
+Macro wrapper = $compiler_wrapper;
+List function = c.bind_syntax(
+  wrapper(result, binding, %(code-value "lowered" (seq @body) ()), params),
+  AST_UNIT, NULL);
+```
+
+The mark is needed: without it, rebinding a lambda body that holds
+lowered cell declarations fails with "syntax cannot be constructed at this
+position" (lambda-parameter-mutation, lambda-local-macro-captures). The
+try lowering still has other `lowered` producers, so the wrapper is not
+the only one.
+
+A scope cell is copied from its initializer or allocated empty, two C
 shapes:
 
 ```x2c
@@ -970,11 +985,16 @@ macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
 ```
 
 A plain initializer is written as a one-element compound before the
-application, so the braced and plain cells are one template. Client:
+application, so the braced and plain cells are one template. The typed
+initializer needs no carrier. Applying the empty cell ignores the extra
+argument. Client:
 
 ```x2c
-Macro cell = initializer ? $compiler_cell : $compiler_empty_cell;
-return c.bind_syntax(cell(type, binding, compound), AST_BLOCK, NULL);
+List compound = initializer;
+if (initializer && !initializer.match(%(expr ? (composite ?))))
+  compound = %(expr () (composite (commas $initializer)));
+Macro shape = initializer ? $compiler_cell : $compiler_empty_cell;
+return c.bind_syntax(shape(type, cell, compound), AST_BLOCK, NULL);
 ```
 
 ### D. Lambda

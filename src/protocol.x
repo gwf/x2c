@@ -1676,8 +1676,7 @@ List Compiler.wrapper_function(
   int documented = c.semantic_binding_facts().try_get(key, authored);
   Macro wrapper = $compiler_wrapper;
   List function = c.bind_syntax(
-    Macro_apply(wrapper,
-      %($result $binding (code-value "lowered" (seq @body) ()) @params)),
+    wrapper(result, binding, %(code-value "lowered" (seq @body) ()), params),
     AST_UNIT, NULL);
   if (documented) c.semantic_binding_facts()[key] = authored;
   else c.semantic_binding_facts().del(key);

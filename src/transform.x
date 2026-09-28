@@ -1137,16 +1137,9 @@ static void _collect_reference_captures(
 }
 
 /* A shared lambda cell: Scope storage for one automatic binding, copied
-   from its initializer or left for a later assignment. A braced
-   initializer is already the compound literal's body. */
+   from its initializer or left for a later assignment. */
 macro open Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
-  $type *$cell = Scope_memdup((const void *)&($type){$value}, sizeof($type));
-}
-
-macro open Statement $compiler_braced_cell(Type $type, Name $cell,
-    Expr $compound) {
-  $type *$cell = Scope_memdup((const void *)&($type)$compound,
-                              sizeof($type));
+  $type *$cell = Scope_memdup((const void *)&($type)$value, sizeof($type));
 }
 
 macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
@@ -1155,16 +1148,14 @@ macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
 
 macro open Expression $compiler_cell_value(Name $cell) => (*$cell);
 
+/* A plain initializer is the one element of the compound a cell copies. */
 static List _cell_declaration(
   Compiler c, List cell, Type type, List initializer) {
-  Macro shape = $compiler_empty_cell;
-  if (!initializer)
-    return c.bind_syntax(shape(type, cell), AST_BLOCK, NULL);
-  shape = $compiler_cell;
-  match (initializer)
-    case %(expr ? (composite ?)): shape = $compiler_braced_cell;
-  List value = %(code-value "bound" $initializer ());
-  return c.bind_syntax(shape(type, cell, value), AST_BLOCK, NULL);
+  List compound = initializer;
+  if (initializer && !initializer.match(%(expr ? (composite ?))))
+    compound = %(expr () (composite (commas $initializer)));
+  Macro shape = initializer ? $compiler_cell : $compiler_empty_cell;
+  return c.bind_syntax(shape(type, cell, compound), AST_BLOCK, NULL);
 }
 
 /* Split only declarations that need cells. Keeping each cell allocation at
