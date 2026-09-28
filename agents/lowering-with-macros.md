@@ -251,3 +251,24 @@ List builtin_catch_cases(List selected, List arms) {
 - A slot argument in an expression position inside a `meta` body is an
   ordinary call, so a count the C needs in both a declarator and a call is
   a hole, as in the Func call template.
+
+## Rebuilding a bound source expression
+
+The lambda parser and binder have already established capture identities,
+parameter bindings and the result type. Applying an ordinary lambda template
+there would bind the lambda again. These producers instead use the same
+source templates through the compiler's retained construction operation:
+
+```x2c
+Macro captured = $lambda_captured, lambda = $lambda_expression;
+if (captures)
+  return c.rebuild_expression(type, captured(body, captures, params));
+return c.rebuild_expression(type, lambda(body, params));
+```
+
+This internal operation shares template projection and substitution. It
+preserves child stage, source wrappers and the known root type; it performs
+no binding or effects. Its template must be purely structural, with no new
+names, computed slots or child template calls. Ordinary lowering continues
+to apply and bind templates as in the try example above. Rewriters traverse
+outer position wrappers before rebuilding the typed expression within them.

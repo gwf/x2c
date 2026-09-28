@@ -1,9 +1,10 @@
 > Status: active -- dual-macro compiler migration, updated 2026-09-28.
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
-> support landed at b59b8ade; lambda consumers are a private, incomplete
-> checkpoint at 1b908322. Architectural survey and proposed ownership
+> support landed at b59b8ade; reconstruction and parameter-scope fixes
+> landed at 799875a8. Lambda source recognition and construction are
+> implemented, awaiting publication and their five-pair cost row. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> resolve stage-preserving construction before further site conversions.
+> finish lambda publication, then defer.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -55,13 +56,15 @@ This discussion authorizes the survey/proposal, not speculative file moves.
 
 ## Verified checkpoint and remaining sequence
 
-- Last verified publication: `b59b8ade` on dev, capability gate green.
-  Capture-clause holes and safer expansion-depth diagnostics are landed.
-- Private checkpoint: `1b908322`, lambda source-form consumers. Build and
-  15 focused fixtures pass; no lowering gate or timing has run. Construction
-  is unfinished. Applying a lambda template from its own binding producer
-  re-enters that binder. Assess this boundary in the architectural proposal;
-  do not count consumer conversion alone as completed lambda migration.
+- Last verified publication: `799875a8` on dev, prerequisite gate green.
+  Capture-clause holes, safer expansion-depth diagnostics, retained template
+  reconstruction and parameter/local redeclaration repairs are landed.
+- Lambda adoption is implemented at private checkpoint `f3b86a1d`, including
+  the earlier recognition draft. Fifteen focused fixtures passed construction;
+  six relevant fixtures passed after retaining root-wrapper traversal.
+  Publication and the one five-pair cost run remain. Parser/binder producers
+  use the source macros through `rebuild_expression`, without re-entering
+  binding. All nine manual lambda constructors were removed.
 - Earlier try/wrapper/cell/Func lowerings and their exemplar are landed.
   The recorded cumulative default compiler cost is about +1.1%; it is not
   a measurement of the unpublished lambda draft.
@@ -1302,11 +1305,20 @@ owns both templates; no parallel lambda literal recognizer remains at an
 adopted site. Bound reconstruction is listed separately from recognition
 and is not reported as migrated.
 
-Local consumer draft: `make build` and 15 focused compiler fixtures pass,
-including lambda lowering, capture mutation rejection, region escapes,
-provenance diagnostics, and constructed lambdas. No lowering publication
-gate or timing has run. The producer capability is being implemented; the
-consumer draft is not the completed lambda migration.
+Current adoption: expressions/regions/transform recognize the shared source
+forms; literals and transform reconstruct through those same templates.
+The five literals constructors and four transform constructors are gone,
+as is `_lambda_params_node`. Rewriters traverse root position wrappers
+before recognition, retaining the actual expression's type and wrappers.
+The supplied-but-unused capture case still keeps its established Func type;
+native lifting uses the computed native signature. Fifteen focused fixtures
+passed, then six affected fixtures passed after wrapper dispatch changed.
+No generated C expectations were changed. Publication and timing remain.
+
+The two `ast_contains_head(..., <lambda>)` traversal prefilters remain for
+now; they are not shape recognizers. Captured-lambda C environment/helper
+synthesis remains in the architecture survey's later transform work. Neither
+is counted as fully migrated merely because lambda source construction is.
 
 ### Migration defect tasks
 
@@ -1317,8 +1329,8 @@ consumer draft is not the completed lambda migration.
   whole stack row calls `Token_repr`, which dereferences it. The capability
   batch reports the first definition location instead of rendering internal
   stack storage. The synthetic-call crash has not yet been reproduced here.
-- **Parameter redeclaration:** reproduced and repaired in prerequisite
-  commit `69345a95`, awaiting the integrated publication gate. Ordinary,
+- **Parameter redeclaration:** landed in `799875a8`, including the
+  `fff7eec6` repair that isolates each invocation's Param argument scope. Ordinary,
   bare/typed lambda and constructed lambda redeclarations now fail at the
   existing declaration check. Nested shadowing and parameter-template
   replay pass. Outer callable bodies share parameter scope; nested blocks

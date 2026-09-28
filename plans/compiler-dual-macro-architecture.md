@@ -303,7 +303,7 @@ return c.rebuild_expression(type, captured(body, captures, parameters));
 ```
 
 `rebuild_expression` is implemented in prerequisite commit `40ea91c6`,
-awaiting integrated publication. It materializes the same source template
+published in prerequisite batch `799875a8`. It materializes the same source template
 while retaining established type and binding facts;
 ordinary `bind_syntax` and normal macro application keep their semantics.
 It must reuse the expansion/projection owner rather than add another macro
