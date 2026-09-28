@@ -821,6 +821,9 @@ List builtin_try_catch_site(List frame, List clause);
 List builtin_catch_patterns(List patterns, List items);
 List builtin_try_landing(List frame, List clause, List cleanup);
 List builtin_catch_cases(List selected, List arms);
+List builtin_defer_record(List record, List callback, List environment,
+                          List records);
+List builtin_defer_captures(List environment, List records);
 
 /** Places the lowered statements that leave a try region after it, with
     the effect that marks the unit as needing exception support. */
@@ -839,6 +842,8 @@ Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", builtin_scope_expand);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
+  $builtin.row(rows, "builtin_defer_record", builtin_defer_record);
+  $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
   $builtin.row(rows, "builtin_try_catch_site", builtin_try_catch_site);
   $builtin.row(rows, "builtin_try_landing", builtin_try_landing);
   $builtin.row(rows, "builtin_catch_patterns", builtin_catch_patterns);

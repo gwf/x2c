@@ -1683,7 +1683,8 @@ static List _region_binding(Compiler compiler, String role) =>
 /* The statements that leave a `defer` region: the runtime unlinks the
    record and calls its thunk. */
 static List _defer_cleanup(List record) =>
-  %(${_region_call("x2c_cleanup_leave", _record_type, record)});
+  %(code-value "lowered"
+    (seq ${_region_call("x2c_cleanup_leave", _record_type, record)}) ());
 
 /* The first label a finalizer defines, or NULL. The statements that leave a
    region run on every path that leaves it, so a label among them would be
@@ -2279,40 +2280,6 @@ static List _return_value(Walk walk, List expression) {
   return %(block $declaration $statement);
 }
 
-static List _defer_block(Walk walk, List body, List environment,
-                         List callback, List records, List record,
-                         List cleanup) {
-  Array statements = [];
-  List argument = %(expr (* void) (nil));
-  if (environment) {
-    Type type = %(${binding_identity_spelling(environment)});
-    List local = _region_binding(walk.compiler, "defer_env");
-    Array values = [];
-    foreach (List capture, records) {
-      List source = capture.car(), field = capture.caddr();
-      Type stored = capture.cadr();
-      List address = %(expr ${stored.reference()}
-        (op & (expr $stored (ident $source))));
-      String name = binding_identity_spelling(field);
-      values.push(%(dotinit ($name)
-        (expr (* const void) (cast (* const void) $address))));
-    }
-    List value = %(expr $type (composite
-      (commas @{values.list_free()})));
-    statements.push(_value_declaration(type, local, value));
-    argument = %(expr ${type.reference()}
-      (op & (expr $type (ident $local))));
-  }
-  List value = %(expr ($_record_type) (composite (commas
-    (dotinit ("fn") (expr () (ident $callback)))
-    (dotinit ("env") $argument))));
-  statements.push(_value_declaration(%($_record_type), record, value));
-  statements.push(_region_call("x2c_cleanup_push", _record_type, record));
-  statements.push(body);
-  foreach (List statement, cleanup) statements.push(statement);
-  return %(block @{statements.list_free()});
-}
-
 /* A try region's body or catch arm, lowered inside the region `cleanup`
    leaves. */
 static List _try_region(Walk walk, List cleanup, List body) =>
@@ -2497,15 +2464,75 @@ static List _lower_try(
     AST_BLOCK, c.return_type);
 }
 
+/* --- defer -----------------------------------------------------------------
+   Registration and its captured addresses share the body's region scope. */
+
+List builtin_defer_record(List record, List callback, List environment,
+                          List records);
+List builtin_defer_captures(List environment, List records);
+
+macro open Statement $compiler_defer(Name $record, Expr $callback,
+    Expr $environment, Expr $records, Statement $body, Statement $cleanup) {
+  {
+    $builtin_defer_record($record, $callback, $environment, $records)...
+    x2c_cleanup_push(&$record);
+    $body
+    $builtin_try_cleanup_placement($cleanup)...
+  }
+}
+
+macro open Statement $defer_plain(Name $record, Expr $callback) {
+  X2CCleanup $record = {.fn = $callback, .env = 0};
+}
+
+macro open Statement $defer_captured(Name $record, Expr $callback,
+    Type $type, Expr $records) {
+  $type environment = {0};
+  $builtin_defer_captures(environment, $records)...
+  X2CCleanup $record = {.fn = $callback, .env = &environment};
+}
+
+macro open Statement $defer_capture(Expr $environment, Name $field,
+    Expr $source) {
+  $environment.$field = (const void *)&$source;
+}
+
+/** Selects the record shape; captured records keep the environment beside
+    the record in the region's scope. */
+List builtin_defer_record(List record, List callback, List environment,
+                          List records) {
+  Macro plain = $defer_plain, captured = $defer_captured;
+  if (!environment) return plain(record, callback);
+  Type type = %(${binding_identity_spelling(environment)});
+  return captured(record, callback, type, records);
+}
+
+/** Writes captured addresses in the order capture selection established. */
+List builtin_defer_captures(List environment, List records) {
+  Macro capture = $defer_capture;
+  Array assignments = [];
+  foreach (List row, records) {
+    List source = %(expr ${row.cadr()} (ident ${row.car()}));
+    assignments.push(capture(
+      environment, binding_identity_spelling(row.caddr()), source));
+  }
+  return assignments.list_free();
+}
+
 /* Lowers a defer: its record is pushed before the body and left on each
    of the body's exits. */
 static List _lower_defer(
   Walk walk, List body, List env, List callback, List records) {
-  walk.compiler.needs_exception = 1;
-  List record = _region_binding(walk.compiler, "defer_record");
+  Compiler c = walk.compiler;
+  c.needs_exception = 1;
+  List record = _region_binding(c, "defer_record");
   List cleanup = _defer_cleanup(record);
-  return _defer_block(walk, _inside(walk, cleanup, body, body),
-                      env, callback, records, record, cleanup);
+  List function = %(expr ((func ((* void))) void) (ident $callback));
+  Macro shape = $compiler_defer;
+  return c.bind_syntax(
+    shape(record, function, env, records,
+          _try_region(walk, cleanup, body), cleanup),
+    AST_BLOCK, c.return_type);
 }
 
 /* Lowers `inner` with `origin` as the source position of its reports. */
@@ -3859,10 +3886,10 @@ static List _lower_callable_defer(
       fields.push(%(declare (const void) (bindings (bind $field (*)))));
     }
     List env_type = %(
-      typedef (struct $env_name (fields @{fields.list_free()}))
+      typedef (struct $env_binding (fields @{fields.list_free()}))
               (bindings (bind $env_binding ()))
     );
-    c.add_early(env_type);
+    c.add_early(c.bind_syntax(env_type, AST_UNIT, NULL));
   }
 
   List opaque = c.sym.introduce(c.fresh_name("defer_opaque"));
@@ -3911,9 +3938,10 @@ static List _lower_defer_region(
 static List _rewrite_defer_list(Compiler compiler, List stmts) {
   if (!stmts) return stmts;
   int has_defer = 0;
+  Macro deferred = $deferred;
   foreach (List statement, stmts) {
     List head = _without_origin(statement);
-    match (head) case %(defer ?): has_defer = 1;
+    match (head) case deferred(?finalizer): has_defer = 1;
     if (has_defer) break;
   }
   if (!has_defer) return stmts;
@@ -3927,7 +3955,7 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     List anchored = suffix.car();
     List tail = tail_changed ? result : suffix.cdr();
     List head = _without_origin(anchored);
-    match (head) case %(defer ?final_stmt): {
+    match (head) case deferred(?final_stmt): {
       List body = %(block @tail), finalizer = final_stmt;
       if (compiler.source_map)
         finalizer = _rewrap_origin(anchored, finalizer);

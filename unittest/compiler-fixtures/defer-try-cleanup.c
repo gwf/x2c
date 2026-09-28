@@ -119,6 +119,8 @@ static int preserve_parameter(int volatile value){
   return value;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int Var_int(Var);
 
 int main(void){
@@ -157,7 +159,7 @@ int main(void){
           {
             {
               X2CCleanup _x2c_defer_record_0 ={
-                .fn = _x2c_defer_cleanup_0, .env = NULL
+                .fn = _x2c_defer_cleanup_0, .env = 0
               }
               ;
               x2c_cleanup_push(& _x2c_defer_record_0);
