@@ -2490,6 +2490,39 @@ template therefore changed the emitted local identity after repeated thunk
 construction. The source trial was restored instead of adding special
 binding machinery. Keep `_guard_value_rendering` as the native AST owner for
 this shape; no template migration or artifact rebaseline was accepted.
+### E23. Parenthesized expression `sizeof` recognition exception
+
+`expressions.x` resolves a parenthesized expression operand while retaining
+the parsed `sizeof (parens ...)` form, the caller's result type and origin.
+The readable source-form replacement would be:
+
+```x2c
+macro Expression $sizeof_value(Expr $operand) => sizeof($operand);
+
+/* In _resolve_content, before the content match. */
+Macro sized = $sizeof_value;
+match (input)
+  case sized(?operand):
+    return %(expr $input_type
+             (sizeof (parens ${c.resolve_expression(operand, origin)})));
+```
+
+An isolated matcher probe captured `sizeof(1 + 2)` as the typed `1 + 2`
+expression, and `sizeof((1 + 2))` as the typed inner parenthesized
+expression. Unary `sizeof 1` did not match. However, `sizeof(int)` also
+matched and captured `(decl (int) (bindings (bind () ())))`. The proposed
+client would resolve that declaration as an expression and change the
+type-operand behavior. Distinguishing the forms needs another structural
+guard or a more precise matcher capability, so no compiler source edit was
+made. The existing raw cases remain until one source macro separates the
+expression and type forms without new client-side shape inspection.
+
+The existing `sizeof-expression-operand` fixture passed on the clean base,
+including parenthesized, unary and type operands. Its checked stdout is
+`4 8 8 4 8 8`; diagnostics are empty. It declares no C/H sidecars, so
+those generated files were retained as baseline artifacts rather than
+rebaselined.
+
 ### E24. Bound while and do transfer recognition (target readable form)
 
 The E15 shared Statement forms also describe the bound loops that
@@ -2548,75 +2581,7 @@ pass through in the same order. `optional-reference`, `c-body-directive`,
 `percent-after-condition`, and `macro-statement-production` check bound
 one- and two-arm if forms, direct loops, expression parsing after a
 condition, and constructed statements.
-### E23. Parenthesized expression `sizeof` recognition exception
-
-`expressions.x` resolves a parenthesized expression operand while retaining
-the parsed `sizeof (parens ...)` form, the caller's result type and origin.
-The readable source-form replacement would be:
-
-```x2c
-macro Expression $sizeof_value(Expr $operand) => sizeof($operand);
-
-/* In _resolve_content, before the content match. */
-Macro sized = $sizeof_value;
-match (input)
-  case sized(?operand):
-    return %(expr $input_type
-             (sizeof (parens ${c.resolve_expression(operand, origin)})));
-```
-
-An isolated matcher probe captured `sizeof(1 + 2)` as the typed `1 + 2`
-expression, and `sizeof((1 + 2))` as the typed inner parenthesized
-expression. Unary `sizeof 1` did not match. However, `sizeof(int)` also
-matched and captured `(decl (int) (bindings (bind () ())))`. The proposed
-client would resolve that declaration as an expression and change the
-type-operand behavior. Distinguishing the forms needs another structural
-guard or a more precise matcher capability, so no compiler source edit was
-made. The existing raw cases remain until one source macro separates the
-expression and type forms without new client-side shape inspection.
-
-The existing `sizeof-expression-operand` fixture passed on the clean base,
-including parenthesized, unary and type operands. Its checked stdout is
-`4 8 8 4 8 8`; diagnostics are empty. It declares no C/H sidecars, so
-those generated files were retained as baseline artifacts rather than
-rebaselined.
-
-### E27. Deferred restore statement recognition (target readable form)
-
-`regions.x` reads bound, typed statements before transform. In
-`region-safe`, `defer current_value = saved;` restores a static place after
-the block. Recognition needs only the expression statement wrapper; the
-existing assignment inspection and `_target_place` still decide whether
-the store restores a place.
-
-```x2c
-macro Statement $expression_statement(Expr $value) { $value; }
-
-static int _note_restored(Walk w, Var body) {
-  Macro statement = $expression_statement;
-  match (body) case statement(?expression):
-    match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
-      Var place = _target_place(w, target);
-      if (place == _unwrap(target)) return 0;
-      w.restored = w.restored.copy();
-      w.restored[place] = 1;
-      return 1;
-    }
-  return 0;
-}
-```
-
-The case must capture exactly the bound expression from `(stmnt EXPRESSION)`;
-it must leave the enclosing source position and `w.origin` untouched.
-An isolated matcher probe built the bound expression from the
-`region-safe` AST dump, including its two issued binding identities and
-pointer type. The macro captured a structurally equal expression, with no
-statement wrapper or extra parentheses. `_walk` continues to set and
-restore `w.origin` around the outer `at` node; this match only sees the
-inner statement. This batch changes no other region walker case or
-restoration rule.
-
-### E22. Parsed bracket index recognition: origin-wrapper exception
+### E26. Parsed bracket index recognition: origin-wrapper exception
 
 `_parse_postfix_index` supplies a full `(expr type (index receiver selector))`
 to `Compiler.resolve_expression`. The trial shared grammar macro was:
@@ -2686,7 +2651,42 @@ adding machinery beyond this one-shape replacement. Both source edits were
 restored; the raw-content index case remains, with no `$indexed` grammar macro.
 The passing fixtures establish ordinary index parity, not parity for this
 constructible marked form. No migration or generated-artifact rebaseline is
-accepted for E22.
+accepted for E26.
+
+### E27. Deferred restore statement recognition (target readable form)
+
+`regions.x` reads bound, typed statements before transform. In
+`region-safe`, `defer current_value = saved;` restores a static place after
+the block. Recognition needs only the expression statement wrapper; the
+existing assignment inspection and `_target_place` still decide whether
+the store restores a place.
+
+```x2c
+macro Statement $expression_statement(Expr $value) { $value; }
+
+static int _note_restored(Walk w, Var body) {
+  Macro statement = $expression_statement;
+  match (body) case statement(?expression):
+    match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
+      Var place = _target_place(w, target);
+      if (place == _unwrap(target)) return 0;
+      w.restored = w.restored.copy();
+      w.restored[place] = 1;
+      return 1;
+    }
+  return 0;
+}
+```
+
+The case must capture exactly the bound expression from `(stmnt EXPRESSION)`;
+it must leave the enclosing source position and `w.origin` untouched.
+An isolated matcher probe built the bound expression from the
+`region-safe` AST dump, including its two issued binding identities and
+pointer type. The macro captured a structurally equal expression, with no
+statement wrapper or extra parentheses. `_walk` continues to set and
+restore `w.origin` around the outer `at` node; this match only sees the
+inner statement. This batch changes no other region walker case or
+restoration rule.
 
 ### F. Static-local initialization exception
 
