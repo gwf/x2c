@@ -1009,6 +1009,43 @@ it with `case lambda(?body, *params)`. Sites that receive the bare
 `(lambda ...)` payload or the captured form keep their literal patterns;
 the report names them.
 
+Status: not migrated. Recognition agrees with the literal pattern: a probe
+at both expression-form sites over all compiler fixtures found 290 lambdas,
+each matched by both, with identical parameter entries. Two defects of the
+macro `case` block the migration; both are in `Macro_case_capture_at`
+(lib/meta.x), not in the sites.
+
+- Captures lose `at` and `src` wrappers. The subject is matched through
+  `_macro_view`, which copies it without them, and the copy is what `?body`
+  publishes. In 28 of the 290 lambdas the body is a block with `(at ...)`
+  statements. Fixture C stays byte-identical, but `translate --source-map`
+  of a lambda holding a nested capturing lambda loses the `#line`
+  directives of the outer body once `_prepare_nested_lambda_regions`
+  rebuilds it from the capture.
+- Every miss copies the whole subject. The macro case compiles to a
+  `default:` arm, so `Compiler.lower_lambda_expr`, which `_node` calls for
+  every `expr` node (src/transform.x:4258), copied every expression
+  subtree. Translating src/*.x took 5.84 s against 5.23 s (+12%, four
+  alternating rounds); with only the `_prepare_nested_lambda_regions` site
+  migrated it took 5.19 s.
+
+Publishing captures from the original subtree and matching without the
+eager copy (a relation that skips the wrappers) would remove both; the
+sites then migrate as written. Sites and their disposition:
+
+- src/transform.x:1252 (`_prepare_nested_lambda_regions`) and
+  src/transform.x:1624 and :1630 (`Compiler.lower_lambda_expr`, Func and
+  other types in one case) receive the expression form. Waiting on the fix.
+- src/transform.x:1245, :1621: the captured form.
+- src/transform.x:872, :1031, :1095, :1353, :1368, :1412; src/regions.x:507,
+  :656; src/expressions.x:1035, :1042, :2171, :2175: the bare payload, and
+  :507, :1035, :1353, :2171 the captured payload.
+- Construction: src/transform.x:1249 builds the captured form;
+  src/transform.x:1255 keeps the input's type and already-bound body, and
+  :1628 writes the lifted signature, so neither is a fresh binding of the
+  template. src/literals.x:1096, :1098 and :1180 are the binder that a
+  template application would itself call.
+
 ## 7. Name, positions and sequences
 
 Name is one logical argument with role-specific existing projections, not one
