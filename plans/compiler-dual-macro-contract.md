@@ -2297,6 +2297,51 @@ continues to produce its bound if node. `optional-reference` covers one-arm
 promotion and macro-produced guards; `c-body-directive` covers two-arm if
 syntax and its emitted C.
 
+### E15. Parsed while and do recognition (target readable form)
+
+`c-body-directive` contains both `while (total > 100)` and a `do` body
+followed by `while (total < 5)`. The binder continues to own statement
+position, condition resolution, body binding, loop control, and diagnostics.
+The source forms in the shared grammar are:
+
+```x2c
+macro Statement $while_loop(Expr $condition, Statement $body) {
+  while ($condition) $body
+}
+
+macro Statement $do_loop(Statement $body, Expr $condition) {
+  do $body while ($condition)
+}
+```
+
+The complete replacement client in `Compiler.bind_syntax` is:
+
+```x2c
+Macro while_loop = $while_loop, do_loop = $do_loop;
+match (input) {
+  case do_loop(?body, ?condition):
+    if (statement_position)
+      return %(do
+        ${_.bind_syntax(body, AST_STATEMENT, _.return_type)}
+        ${_.resolve_expression(condition, _.token)});
+  case while_loop(?condition, ?body):
+    if (statement_position)
+      return %(while
+        ${_.resolve_expression(condition, _.token)}
+        ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
+}
+```
+
+The enclosing `at` case still reattaches source anchors. The output remains
+the binder's canonical node; no output template is added. `for` stays with
+its existing raw pattern because its three clauses can each be absent (all
+eight combinations are in `for-omitted-clauses`), while an `Expr` source
+hole requires an expression. `c-body-directive`, `comptime-lowering`, and
+`cleanup-loop-boundary` check the two loop forms and transfer behavior.
+The `do` form omits a template trailing semicolon so a macro-produced
+`do ... while` statement matches the same binder case;
+`macro-statement-production` checks that constructed path.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

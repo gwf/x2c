@@ -34,6 +34,16 @@ macro Statement $if_else(Expr $condition, Statement $yes,
   if ($condition) $yes else $no
 }
 
+/* A loop that tests before its body. */
+macro Statement $while_loop(Expr $condition, Statement $body) {
+  while ($condition) $body
+}
+
+/* A loop that tests after its body. */
+macro Statement $do_loop(Statement $body, Expr $condition) {
+  do $body while ($condition)
+}
+
 /* A noncapturing lambda expression: its parameters and body. */
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;

@@ -2476,6 +2476,7 @@ List Compiler.bind_syntax(
   List input = value;
   if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
   Macro if_then = $if_then, if_else = $if_else;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2819,12 +2820,12 @@ List Compiler.bind_syntax(
         if (statement_position)
           return %(defer ${_.bind_syntax(
             body, AST_STATEMENT, _.return_type)});
-      case %(do ?body ?condition):
+      case do_loop(?body, ?condition):
         if (statement_position)
           return %(do
             ${_.bind_syntax(body, AST_STATEMENT, _.return_type)}
             ${_.resolve_expression(condition, _.token)});
-      case %(while ?condition ?body):
+      case while_loop(?condition, ?body):
         if (statement_position)
           return %(while
             ${_.resolve_expression(condition, _.token)}
