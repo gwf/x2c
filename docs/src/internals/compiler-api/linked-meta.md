@@ -28,7 +28,7 @@ Shipped `meta` code compiled into the compiler.
 
 Returns the hash of each linked copy's definition text by name.
 
-Source: `src/linked-meta.x:708`
+Source: `src/linked-meta.x:721`
 
 #### linked_meta_targets
 
@@ -36,7 +36,7 @@ Source: `src/linked-meta.x:708`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:622`
+Source: `src/linked-meta.x:634`
 
 #### x2c_decl_make
 
