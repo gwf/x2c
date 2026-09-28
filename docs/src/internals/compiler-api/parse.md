@@ -60,7 +60,7 @@ X2c recursive-descent parser core.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:2966`
+Source: `src/parse.x:2968`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -73,7 +73,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2454`
+Source: `src/parse.x:2456`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -120,7 +120,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2377`
+Source: `src/parse.x:2379`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
