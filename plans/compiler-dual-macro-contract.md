@@ -2125,6 +2125,7 @@ restored. Splitting each slot into a separate declaration would change the
 generated C and lose the existing compact grouping, so this batch does not
 force that shape. Cache identity, graph and initializer phases remain with
 the current owner.
+
 ### E20. Direct protocol update helper
 
 `protocol-operator-direct-update` executes compound, prefix, and postfix
