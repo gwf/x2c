@@ -2379,22 +2379,27 @@ List generate_code_text(Compiler c, List ast, String basename){
 
 String String_rstrip(String, char *);
 String interface_text(Compiler, List);
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 void x2c_exception_push(ExceptionFrame *);
 void file_publish(List);
 void x2c_exception_landed(ExceptionFrame *);
+int x2c_exception_is_error_target(ExceptionFrame *);
+void x2c_error_catch_detach(ErrorHandler);
+void x2c_exception_mark_handled(ExceptionFrame *);
 Var Error_snapshot(Var);
 String String_new(const char *);
 Var List_assoc(List, Var);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 void generate_code(Compiler c, List ast, String dir){
   if(! _init_guard_) _file_init_();  ast = _without_trivia(ast);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, "/")), cons(String_var(_712), cons(String_var(Path_stem(c -> filename)), NULL))));  List outputs = _generated_code(c, ast, basename);  String interface = c -> source_facts ? NULL : interface_text(c, _public_definition_rows(Compiler_definition_rows(c, ast)));  if(String_truth(interface)) outputs = List_append(outputs, cons(String_var(String_join(NULL, cons(String_var(basename), cons(String_var(_713), NULL)))), cons(String_var(interface), NULL)));  List volatile failure = NULL; {
-    ExceptionFrame _x2c_exception_frame_0;  MatchCaptureSite static _x2c_catch_arms_0[1];  Var _x2c_catch_patterns_0[1];  ErrorCatchSite static _x2c_catch_site_0 ={
-      _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_catch_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
+      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
-    ;  if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+    ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
       _x2c_catch_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) file_publish(outputs);  else{
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) file_publish(outputs);  else{
       x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
         x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0); {
           List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));  failure = Var_list(Error_snapshot(List_var(detail)));

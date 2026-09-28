@@ -234,6 +234,10 @@ Context Context_open_isolated_named(const char *);
 
 int Error_mark(void);
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
+
 void x2c_exception_push(ExceptionFrame *);
 
 ErrorHandler Error_push(ErrorHandlerFn, Var);
@@ -243,6 +247,14 @@ Symbol Logger_error_handler(List, Var);
 Var Context_export(Context, Var);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_is_error_target(ExceptionFrame *);
+
+int x2c_error_catch_selected(ErrorHandler);
+
+void x2c_error_catch_detach(ErrorHandler);
+
+void x2c_exception_mark_handled(ExceptionFrame *);
 
 void Context_close(Context);
 
@@ -268,17 +280,17 @@ static void * _run(void * argument){
   int mark = Error_mark();
   {
     ExceptionFrame _x2c_exception_frame_0;
-    MatchCaptureSite static _x2c_catch_arms_0[2];
+    static MatchCaptureSite _x2c_macro_arms_0[2];
     Var _x2c_catch_patterns_0[2];
-    ErrorCatchSite static _x2c_catch_site_0 ={
-      _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1
+    static ErrorCatchSite _x2c_macro_site_0 ={
+      _x2c_macro_arms_0, -1, 2, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
       _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(23041356991064), cons(Symbol_var(54), NULL)));
       _x2c_catch_patterns_0[1] = List_var(cons(Symbol_var(97614135954008), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));

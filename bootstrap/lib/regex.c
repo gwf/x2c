@@ -973,10 +973,7 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
       for(RegexMatch found = _search(r, subject, 0);  List_truth(found);  found = all ? _next(r, subject, found) : NULL){
         String_write_str(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1), out);
         if(fn) String_write_str(Var_str(({
-          Func _x2c_func_call_0 = fn;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(&(found), _6);  else _x2c_func_argument_0 = FuncArg_value(List_var(found));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
-            _x2c_func_argument_0
-          }
-          );
+          Func _x2c_macro_function_0 = fn;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(found), _6);  else _x2c_macro_storage_0[0] = FuncArg_value(List_var(found));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
         }
         )), out);
         else _expand(out, found, replacement);

@@ -28,6 +28,8 @@ List Compiler_parse_macro_expression_target(Compiler c);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 
+List x2c_func_call_arguments(List function, List storage, List arguments);
+
 List Compiler_func_call_parts(Compiler compiler, Var content);
 
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);

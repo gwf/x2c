@@ -191,6 +191,8 @@ List Compiler_parse_macro_definition(Compiler c);
 
 List Compiler_macro_value_literal(Compiler c, List value);
 
+Compiler Compiler_expanding(void);
+
 List Compiler_try_parse_macro_pattern(Compiler c);
 
 List Compiler_capture_macro_value(Compiler c, List definition);

@@ -188,11 +188,21 @@ int Var_is_void(Var);
 
 int Var_numeric_info(Symbol, X2CVarNumericInfo *);
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
+
 void x2c_exception_push(ExceptionFrame *);
 
 Var Var_convert(Var, Symbol);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_is_error_target(ExceptionFrame *);
+
+void x2c_error_catch_detach(ErrorHandler);
+
+void x2c_exception_mark_handled(ExceptionFrame *);
 
 int Var_is_null(Var);
 
@@ -217,16 +227,16 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     Var volatile converted =((void) 0, Void);
     {
       ExceptionFrame _x2c_exception_frame_0;
-      MatchCaptureSite static _x2c_catch_arms_0[1];
+      static MatchCaptureSite _x2c_macro_arms_0[1];
       Var _x2c_catch_patterns_0[1];
-      ErrorCatchSite static _x2c_catch_site_0 ={
-        _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+      static ErrorCatchSite _x2c_macro_site_0 ={
+        _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
       }
       ;
-      if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+      if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
         _x2c_catch_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(61045002), cons(Symbol_var(4372507526), cons(Symbol_var(48270474208), cons(Symbol_var(143279306979688), cons(Symbol_var(245103016899018), cons(Symbol_var(1020285550996648), NULL)))))))), cons(Symbol_var(1818340554), NULL)));
       }
-      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
       x2c_exception_push(& _x2c_exception_frame_0);
       if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
         converted = Var_convert(value, want);

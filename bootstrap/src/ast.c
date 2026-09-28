@@ -428,10 +428,7 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
     if(Var_is_row(_x2c_macro_item_3, 9, 7, 4)){
       child = _x2c_macro_item_3;
       _x2c_macro_value_0 =({
-        Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(0, 0);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
-          _x2c_func_argument_0
-        }
-        );
+        Func _x2c_macro_function_0 = per_child;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(0, 0);  else _x2c_macro_storage_0[0] = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
       }
       );
     }

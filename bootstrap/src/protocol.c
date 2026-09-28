@@ -2787,10 +2787,7 @@ Var Compiler_var(Compiler);
 Var Func_apply(Func, unsigned, const FuncArg *);
 static List _proto_cached(Compiler compiler, Var key, Func compute){
   Var cached;  if(Map_try_get(compiler -> proto_cache, key, &(cached))) return Var_is_row(cached, 9, 7, 4) ? Var_list(cached) : NULL;  List result = Var_list(({
-    Func _x2c_func_call_0 = compute;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(&(compiler), _585);  else _x2c_func_argument_0 = FuncArg_value(Compiler_var(compiler));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
-      _x2c_func_argument_0
-    }
-    );
+    Func _x2c_macro_function_0 = compute;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(compiler), _585);  else _x2c_macro_storage_0[0] = FuncArg_value(Compiler_var(compiler));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
   }
   ));  Map_setindex(compiler -> proto_cache, key, List_truth(result) ? List_var(result) : int_var(0));  return result;
 }
@@ -2817,10 +2814,7 @@ static void _each_adopted_row(Compiler compiler, List protocols, Type participan
         Type base_type = Var_type(List_car(entry));  if(! Compiler__is_adopted(compiler, base_type, participant)) continue;  List conformance = Compiler_protocol_members_for(compiler, participant, base_type);  if(! List_truth(conformance)) continue; {
           List row;  List _x2c_macro_object_28 = List_cdr(Var_list(List_last(conformance)));  List _x2c_macro_cursor_28 = _x2c_macro_object_28;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_28, &(_x2c_macro_cursor_28), &(_x2c_macro_cursor_output_34))){
             row = Var_list(_x2c_macro_cursor_output_34);  if(Var_int(({
-              Func _x2c_func_call_1 = visit;  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_1, 3, 0);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(&(compiler), _585);  else _x2c_func_argument_1 = FuncArg_value(Compiler_var(compiler));  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1, 3, 1);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(&(base_type), _592);  else _x2c_func_argument_2 = FuncArg_value(List_var(base_type));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1, 3, 2);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(&(row), _592);  else _x2c_func_argument_3 = FuncArg_value(List_var(row));  Func_apply(_x2c_func_call_1, 3, (FuncArg[]){
-                _x2c_func_argument_1, _x2c_func_argument_2, _x2c_func_argument_3
-              }
-              );
+              Func _x2c_macro_function_1 = visit;  FuncArg _x2c_macro_storage_1[3];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 3, 0))) _x2c_macro_storage_1[0] = FuncArg_reference(&(compiler), _585);  else _x2c_macro_storage_1[0] = FuncArg_value(Compiler_var(compiler));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 3, 1))) _x2c_macro_storage_1[1] = FuncArg_reference(&(base_type), _592);  else _x2c_macro_storage_1[1] = FuncArg_value(List_var(base_type));  if(List_truth(x2c_func_reference_type(_x2c_macro_function_1, 3, 2))) _x2c_macro_storage_1[2] = FuncArg_reference(&(row), _592);  else _x2c_macro_storage_1[2] = FuncArg_value(List_var(row));  Func_apply(_x2c_macro_function_1, 3, _x2c_macro_storage_1);
             }
             ))) return;
           }
@@ -2907,7 +2901,7 @@ List Compiler_wrapper_function(Compiler c, Type result, List binding, List param
   Var authored;
   int documented = Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(authored));
   Macro wrapper = _914;
-  List function = Compiler_bind_syntax(c, List_var(Macro_apply(wrapper, cons(List_var(result), cons(List_var(binding), cons(List_var(cons(_915, cons(_917, cons(List_var(cons(_17, List_append(body, NULL))), _919)))), List_append(params, NULL)))))), AST_UNIT, NULL);
+  List function = Compiler_bind_syntax(c, List_var(Macro_apply(wrapper, cons(List_var(result), cons(List_var(binding), cons(List_var(cons(_915, cons(_917, cons(List_var(cons(_17, List_append(body, NULL))), _919)))), cons(List_var(params), NULL)))))), AST_UNIT, NULL);
   if(documented) Map_setindex(Compiler_semantic_binding_facts(c), List_var(key), authored);
   else Map_del(Compiler_semantic_binding_facts(c), List_var(key));
   return function;
