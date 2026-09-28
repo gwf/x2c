@@ -25,10 +25,29 @@ not an exhaustive classification of every literal occurrence.
 `rg -l -F '%(' src --glob '*.x' --glob '*.xmacro'` finds 34 files at the
 baseline, including generated `linked-meta.x`: 33 hand-authored files.
 This textual reach count includes comments, data and syntax. It is not a
-migratable-site count. The shared grammar currently defines four source
-macros: tried, caught, lambda_expression and lambda_captured. No defensible
+migratable-site count. At that surveyed baseline the shared grammar defined
+four source macros: tried, caught, lambda_expression and lambda_captured.
+Later migration added more forms; the baseline count is not a current count.
+No defensible
 percentage of removable compiler lines follows from those numbers or the
 historical 215-head census.
+
+### Delivery overlay through `fe8fd71a`
+
+The contract's readable-form entries and cost ledger are the detailed
+implementation record. Current `dev` has these family-level changes:
+
+| Family | Shared form now used | Semantic owner retained |
+| --- | --- | --- |
+| Try, defer, callable and Func helpers, Var literals, managed cleanup and destructuring | Adjacent output templates replace their selected manual lowering skeletons | Transform still chooses captures, types, lifetime, evaluation order and placement. |
+| Protocol descriptor and direct-update helpers | Templates express storage registration and update bodies | Protocol still chooses adapters, signatures, memo keys, volatile storage and registration phase. |
+| Parsed `if`, `while`, `do`, `return` and `defer` | Shared Statement forms recognize their source shapes in the binder | Parser and binder retain positions, scopes, branch facts, type resolution and diagnostics. |
+| Bound loop and truth conversion, deferred region restore | The same forms are reused downstream; an expression-statement form names the restore site | Transform retains transfer barriers and condition conversion; region analysis retains escape and restore facts. |
+
+The contract records concrete exceptions where source templates would change
+binding or origin behavior, lose native C behavior, or add more machinery than
+they remove. This overlay is progress by transformation family, not a claim
+that the source-form or C-producing inventories are complete.
 
 Examples showing why the classification matters:
 

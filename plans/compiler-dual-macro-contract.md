@@ -802,6 +802,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Protocol descriptor storage (2026-09-28) | 6a3674bf / dev 1d5c9b0a, same staged path and cleared output dir | raw -60.99%, cause unassigned | raw -53.42%, cause unassigned | Not counted | Not counted | Not measured |
 | Protocol direct-update body (2026-09-28) | 7e8abade / dev 6a3674bf, same staged path and cleared output dir | raw -61.48%, cause unassigned | raw -53.67%, cause unassigned | Not counted | Not counted | Not measured |
 | Parsed if, while/do, return, defer recognition (2026-09-28) | 0e0006f4 / dev 7e8abade, same staged path and cleared output dir | raw -61.41%, cause unassigned | raw -53.44%, cause unassigned | Not counted | Not counted | Not measured |
+| Bound loop/truth and region restore recognition (2026-09-28) | fe8fd71a / dev 0e0006f4, same staged path and cleared output dir | raw -61.11%, cause unassigned | raw -53.48%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -866,6 +867,15 @@ baseline in this attempt. The source tree and helper/cache state changed
 between them, so these samples do not assign a cost or speedup to the four
 recognition changes. The candidate (`384e7249`) was restored exactly;
 samples are in `debug/parsed-batch-paired-results.json`.
+
+The combined transform and region attempt used the same staged path and
+cleared output directory. Five alternating pairs yielded 8.980016 /
+3.492604 s default and 10.402797 / 4.839246 s live. The exact `384e7249`
+compiler was the fast candidate in the parsed-form run and the slow baseline
+here. Source-tree and helper/cache effects remain unisolated, so the raw
+differences do not assign cost or speedup to these three recognition changes.
+The candidate (`eb8fb6aa`) was restored exactly; samples are in
+`debug/transform-region-batch-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
