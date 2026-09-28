@@ -16,8 +16,8 @@
       (op = (bind (binding 4 "_x2c_macro_environment_0") ()) 
        (expr () (composite (commas (expr (int) (literal (int) "0")))))))) 
     (stmnt 
-     (expr () 
-      (op = (expr () 
+     (expr (* const void) 
+      (op = (expr (* const void) 
              (op . (expr ("_x2c_defer_env_0") 
                     (ident (binding 4 "_x2c_macro_environment_0"))) 
               ("_x2c_defer_capture_0"))) 
@@ -153,11 +153,11 @@
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
 (typedef 
- (struct "_x2c_defer_env_0" 
+ (struct (binding 17 "_x2c_defer_env_0") 
   (fields 
    (declare (const void) 
-    (bindings (bind (binding 17 "_x2c_defer_capture_0") (*)))))) 
- (bindings (bind (binding 18 "_x2c_defer_env_0") ())))
+    (bindings (bind (binding 18 "_x2c_defer_capture_0") (*)))))) 
+ (bindings (bind (binding 17 "_x2c_defer_env_0") ())))
 
 (function (static void) 
  (bind (binding 6 "_x2c_defer_cleanup_0") 

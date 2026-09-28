@@ -4,7 +4,7 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> publish the generated aggregate binding repair, then resume defer.
+> finish defer record/registration publication, then measure it once.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -56,6 +56,16 @@ This discussion authorizes the survey/proposal, not speculative file moves.
 
 ## Resume checkpoint (2026-09-28, usage reserve)
 
+Current update: aggregate capability is published at `a9f6d566`, gate green.
+The parent integrated it with the saved defer draft in the primary checkout.
+`defer-only-cleanup` now gives the captured member and assignment type
+`(* const void)`; its generated typedef retains its tag identity. The known
+empty-type blocker is resolved. Four focused defer fixtures pass after
+reviewing the corrected transform expectation. Defer publication is now the
+active step; its one five-pair cost run has not started. The older draft
+account below is retained as the reproduction and recovery trail.
+
+
 Lambda recognition/construction is published at `c99dd68d`; its gate passed
 and the single five-pair cost run is recorded below. Prerequisites published
 at `799875a8`. No timing is due again for either batch. The budget reached
@@ -93,7 +103,7 @@ whole-type path even when unchanged. Only parse.x and the focused
 the before/after dump with saved c99dd68d and the repaired compiler: the tag
 identity is retained and member access changes from `(expr ())` to
 `(expr (int))`. No registry, shallow-mode or reserved-name workaround was
-added. Capability publication is the current active step; no timing is due.
+added. Capability publication passed at `a9f6d566`; no timing is due for it.
 
 Next after the capability lands: integrate it into the saved defer draft,
 restore correct field-type expectations, review intentional C changes,

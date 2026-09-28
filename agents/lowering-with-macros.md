@@ -272,3 +272,15 @@ no binding or effects. Its template must be purely structural, with no new
 names, computed slots or child template calls. Ordinary lowering continues
 to apply and bind templates as in the try example above. Rewriters traverse
 outer position wrappers before rebuilding the typed expression within them.
+
+## Defer registration
+
+The defer source macro recognizes the cleanup statement. `_lower_defer`
+keeps region ownership and exit placement, then makes one application of
+`$compiler_defer`. Its template visibly declares the cleanup record, pushes
+it, runs the lowered body and leaves the region. The record slot chooses
+plain or captured storage; the capture slot applies one field-assignment
+template per captured address, in the established order. A zero-initialized
+environment plus those assignments uses ordinary source forms without an
+initializer sequence hole. Generated environment types go through the
+ordinary declaration binder before these templates use their members.
