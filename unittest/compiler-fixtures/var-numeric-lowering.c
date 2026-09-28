@@ -77,6 +77,12 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 long Var_long(Var);
 
 double Var_double(Var);

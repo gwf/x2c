@@ -36,6 +36,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 int main(void){
   x2c_initialize();
   int volatile direct = 1;

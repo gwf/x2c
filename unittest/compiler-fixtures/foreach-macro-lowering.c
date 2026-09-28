@@ -118,6 +118,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int String_truth(String);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
@@ -137,6 +139,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int Split_try_next(Split, int *, String *);
 

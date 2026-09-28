@@ -393,36 +393,40 @@
        (block 
         (stmnt 
          (expr (void) 
-          (call "x2c_error_catch_close" 
+          (call (expr ((func (("ErrorHandler"))) void) 
+                 (ident (binding 50 "x2c_error_catch_close"))) 
            (args (expr (("ErrorHandler")) 
                   (ident (binding 40 "_x2c_error_handler_0"))))))) 
         (stmnt 
          (expr (("ErrorHandler")) 
           (op = (expr (("ErrorHandler")) 
                  (ident (binding 40 "_x2c_error_handler_0"))) 
-           (expr (("ErrorHandler")) (nil))))) 
+           (expr () (ident (binding 51 "NULL")))))) 
         (stmnt 
          (expr (void) 
-          (call "x2c_exception_leave" 
+          (call (expr ((func ((* "ExceptionFrame"))) void) 
+                 (ident (binding 52 "x2c_exception_leave"))) 
            (args (expr (* ("ExceptionFrame")) 
                   (op & (expr (("ExceptionFrame")) 
                          (ident (binding 34 "_x2c_exception_frame_0"))))))))) 
         (stmnt 
          (expr () 
-          (call (expr () (ident (binding 50 "__builtin_unreachable"))) 
+          (call (expr () (ident (binding 53 "__builtin_unreachable"))) 
            (args (expr (void) ()))))))))) 
     (stmnt 
      (expr (void) 
-      (call "x2c_error_catch_close" 
+      (call (expr ((func (("ErrorHandler"))) void) 
+             (ident (binding 50 "x2c_error_catch_close"))) 
        (args (expr (("ErrorHandler")) 
               (ident (binding 40 "_x2c_error_handler_0"))))))) 
     (stmnt 
      (expr (("ErrorHandler")) 
       (op = (expr (("ErrorHandler")) (ident (binding 40 "_x2c_error_handler_0"))) 
-       (expr (("ErrorHandler")) (nil))))) 
+       (expr () (ident (binding 51 "NULL")))))) 
     (stmnt 
      (expr (void) 
-      (call "x2c_exception_leave" 
+      (call (expr ((func ((* "ExceptionFrame"))) void) 
+             (ident (binding 52 "x2c_exception_leave"))) 
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 34 "_x2c_exception_frame_0")))))))))))))

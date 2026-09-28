@@ -30,6 +30,12 @@ void x2c_exception_mark_handled(ExceptionFrame *);
 
 int Var_int(Var);
 
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 int List_len(List);
 
 int filtered(int volatile mode){

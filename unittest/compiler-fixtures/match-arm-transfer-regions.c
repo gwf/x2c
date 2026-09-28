@@ -67,6 +67,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 List Var_list(Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static int deferred(Var item){
   int n = 0;
   {
@@ -114,6 +116,10 @@ static int deferred(Var item){
 int List_try_next(List, List *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 

@@ -83,6 +83,8 @@ int List_try_next(List, List *, Var *);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
@@ -100,6 +102,12 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int main(void){
   x2c_initialize();

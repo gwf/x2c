@@ -19,6 +19,8 @@ Var Box_var(Box);
 
 String Var_repr(Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int main(void){
   x2c_initialize();
   Box box = Box_new(3);

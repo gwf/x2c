@@ -18,6 +18,10 @@ ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);

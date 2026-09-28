@@ -16,7 +16,13 @@ void x2c_exception_push(ExceptionFrame *);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int main(void){
   x2c_initialize();

@@ -222,28 +222,31 @@
                 (args (expr ("Var") (ident (binding 21 "count"))))))))) 
            (block 
             (if (expr (int) 
-                 (call "x2c_exception_claim" 
+                 (call (expr ((func ((* "ExceptionFrame"))) int) 
+                        (ident (binding 24 "x2c_exception_claim"))) 
                   (args (expr (* ("ExceptionFrame")) 
                          (op & (expr (("ExceptionFrame")) 
                                 (ident (binding 3 "_x2c_exception_frame_0")))))))) 
              (block 
               (stmnt 
                (expr (void) 
-                (call "x2c_error_catch_close" 
+                (call (expr ((func (("ErrorHandler"))) void) 
+                       (ident (binding 25 "x2c_error_catch_close"))) 
                  (args (expr (("ErrorHandler")) 
                         (ident (binding 10 "_x2c_error_handler_0"))))))) 
               (stmnt 
                (expr (("ErrorHandler")) 
                 (op = (expr (("ErrorHandler")) 
                        (ident (binding 10 "_x2c_error_handler_0"))) 
-                 (expr (("ErrorHandler")) (nil))))) 
+                 (expr () (ident (binding 26 "NULL")))))) 
               (block 
                (at 4 (stmnt 
                       (expr (int) 
                        (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
             (stmnt 
              (expr (void) 
-              (call "x2c_exception_leave" 
+              (call (expr ((func ((* "ExceptionFrame"))) void) 
+                     (ident (binding 27 "x2c_exception_leave"))) 
                (args (expr (* ("ExceptionFrame")) 
                       (op & (expr (("ExceptionFrame")) 
                              (ident (binding 3 "_x2c_exception_frame_0"))))))))) 
@@ -252,10 +255,10 @@
              (op == (expr (int) (ident (binding 17 "_x2c_macro_selected_0"))) 
               (expr (int) (literal (int) "1")))) 
          (block 
-          (declare ("List") (bindings (bind (binding 24 "rest") (volatile)))) 
+          (declare ("List") (bindings (bind (binding 28 "rest") (volatile)))) 
           (stmnt 
            (expr ("List") 
-            (op = (expr ("List") (ident (binding 24 "rest"))) 
+            (op = (expr ("List") (ident (binding 28 "rest"))) 
              (expr ("List") 
               (call "Var_list" 
                (args (expr ("Var") 
@@ -267,14 +270,15 @@
            (at 9 (block 
                   (declare (int) 
                    (bindings 
-                    (op = (bind (binding 25 "_x2c_return_value_1") ()) 
+                    (op = (bind (binding 29 "_x2c_return_value_1") ()) 
                      (expr (int) 
                       (call (expr ((func (("List"))) (int)) 
-                             (ident (binding 26 "List_len"))) 
-                       (args (expr ("List") (ident (binding 24 "rest"))))))))) 
+                             (ident (binding 30 "List_len"))) 
+                       (args (expr ("List") (ident (binding 28 "rest"))))))))) 
                   (block 
                    (if (expr (int) 
-                        (call "x2c_exception_claim" 
+                        (call (expr ((func ((* "ExceptionFrame"))) int) 
+                               (ident (binding 24 "x2c_exception_claim"))) 
                          (args (expr (* ("ExceptionFrame")) 
                                 (op & (expr (("ExceptionFrame")) 
                                        (ident 
@@ -282,14 +286,15 @@
                     (block 
                      (stmnt 
                       (expr (void) 
-                       (call "x2c_error_catch_close" 
+                       (call (expr ((func (("ErrorHandler"))) void) 
+                              (ident (binding 25 "x2c_error_catch_close"))) 
                         (args (expr (("ErrorHandler")) 
                                (ident (binding 10 "_x2c_error_handler_0"))))))) 
                      (stmnt 
                       (expr (("ErrorHandler")) 
                        (op = (expr (("ErrorHandler")) 
                               (ident (binding 10 "_x2c_error_handler_0"))) 
-                        (expr (("ErrorHandler")) (nil))))) 
+                        (expr () (ident (binding 26 "NULL")))))) 
                      (block 
                       (at 4 (stmnt 
                              (expr (int) 
@@ -297,12 +302,13 @@
                                (expr (int) (ident (binding 2 "mode")))))))))) 
                    (stmnt 
                     (expr (void) 
-                     (call "x2c_exception_leave" 
+                     (call (expr ((func ((* "ExceptionFrame"))) void) 
+                            (ident (binding 27 "x2c_exception_leave"))) 
                       (args (expr (* ("ExceptionFrame")) 
                              (op & (expr (("ExceptionFrame")) 
                                     (ident (binding 3 "_x2c_exception_frame_0"))))))))) 
                    (return 
-                    (expr (int) (ident (binding 25 "_x2c_return_value_1")))))))))) 
+                    (expr (int) (ident (binding 29 "_x2c_return_value_1")))))))))) 
         (if (expr (int) 
              (op == (expr (int) (ident (binding 17 "_x2c_macro_selected_0"))) 
               (expr (int) (literal (int) "2")))) 
@@ -310,89 +316,98 @@
           (block 
            (declare (int) 
             (bindings 
-             (op = (bind (binding 27 "_x2c_return_value_2") ()) 
+             (op = (bind (binding 31 "_x2c_return_value_2") ()) 
               (expr (int) (op - (expr (int) (literal (int) "1"))))))) 
            (block 
             (if (expr (int) 
-                 (call "x2c_exception_claim" 
+                 (call (expr ((func ((* "ExceptionFrame"))) int) 
+                        (ident (binding 24 "x2c_exception_claim"))) 
                   (args (expr (* ("ExceptionFrame")) 
                          (op & (expr (("ExceptionFrame")) 
                                 (ident (binding 3 "_x2c_exception_frame_0")))))))) 
              (block 
               (stmnt 
                (expr (void) 
-                (call "x2c_error_catch_close" 
+                (call (expr ((func (("ErrorHandler"))) void) 
+                       (ident (binding 25 "x2c_error_catch_close"))) 
                  (args (expr (("ErrorHandler")) 
                         (ident (binding 10 "_x2c_error_handler_0"))))))) 
               (stmnt 
                (expr (("ErrorHandler")) 
                 (op = (expr (("ErrorHandler")) 
                        (ident (binding 10 "_x2c_error_handler_0"))) 
-                 (expr (("ErrorHandler")) (nil))))) 
+                 (expr () (ident (binding 26 "NULL")))))) 
               (block 
                (at 4 (stmnt 
                       (expr (int) 
                        (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
             (stmnt 
              (expr (void) 
-              (call "x2c_exception_leave" 
+              (call (expr ((func ((* "ExceptionFrame"))) void) 
+                     (ident (binding 27 "x2c_exception_leave"))) 
                (args (expr (* ("ExceptionFrame")) 
                       (op & (expr (("ExceptionFrame")) 
                              (ident (binding 3 "_x2c_exception_frame_0"))))))))) 
-            (return (expr (int) (ident (binding 27 "_x2c_return_value_2"))))))))) 
+            (return (expr (int) (ident (binding 31 "_x2c_return_value_2"))))))))) 
        (block 
         (if (expr (int) 
-             (call "x2c_exception_claim" 
+             (call (expr ((func ((* "ExceptionFrame"))) int) 
+                    (ident (binding 24 "x2c_exception_claim"))) 
               (args (expr (* ("ExceptionFrame")) 
                      (op & (expr (("ExceptionFrame")) 
                             (ident (binding 3 "_x2c_exception_frame_0")))))))) 
          (block 
           (stmnt 
            (expr (void) 
-            (call "x2c_error_catch_close" 
+            (call (expr ((func (("ErrorHandler"))) void) 
+                   (ident (binding 25 "x2c_error_catch_close"))) 
              (args (expr (("ErrorHandler")) 
                     (ident (binding 10 "_x2c_error_handler_0"))))))) 
           (stmnt 
            (expr (("ErrorHandler")) 
             (op = (expr (("ErrorHandler")) 
                    (ident (binding 10 "_x2c_error_handler_0"))) 
-             (expr (("ErrorHandler")) (nil))))) 
+             (expr () (ident (binding 26 "NULL")))))) 
           (block 
            (at 4 (stmnt 
                   (expr (int) 
                    (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
         (stmnt 
          (expr (void) 
-          (call "x2c_exception_leave" 
+          (call (expr ((func ((* "ExceptionFrame"))) void) 
+                 (ident (binding 27 "x2c_exception_leave"))) 
            (args (expr (* ("ExceptionFrame")) 
                   (op & (expr (("ExceptionFrame")) 
                          (ident (binding 3 "_x2c_exception_frame_0"))))))))) 
         (stmnt 
          (expr () 
-          (call (expr () (ident (binding 28 "__builtin_unreachable"))) 
+          (call (expr () (ident (binding 32 "__builtin_unreachable"))) 
            (args (expr (void) ()))))))))) 
     (if (expr (int) 
-         (call "x2c_exception_claim" 
+         (call (expr ((func ((* "ExceptionFrame"))) int) 
+                (ident (binding 24 "x2c_exception_claim"))) 
           (args (expr (* ("ExceptionFrame")) 
                  (op & (expr (("ExceptionFrame")) 
                         (ident (binding 3 "_x2c_exception_frame_0")))))))) 
      (block 
       (stmnt 
        (expr (void) 
-        (call "x2c_error_catch_close" 
+        (call (expr ((func (("ErrorHandler"))) void) 
+               (ident (binding 25 "x2c_error_catch_close"))) 
          (args (expr (("ErrorHandler")) 
                 (ident (binding 10 "_x2c_error_handler_0"))))))) 
       (stmnt 
        (expr (("ErrorHandler")) 
         (op = (expr (("ErrorHandler")) 
                (ident (binding 10 "_x2c_error_handler_0"))) 
-         (expr (("ErrorHandler")) (nil))))) 
+         (expr () (ident (binding 26 "NULL")))))) 
       (block 
        (at 4 (stmnt 
               (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
     (stmnt 
      (expr (void) 
-      (call "x2c_exception_leave" 
+      (call (expr ((func ((* "ExceptionFrame"))) void) 
+             (ident (binding 27 "x2c_exception_leave"))) 
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 3 "_x2c_exception_frame_0"))))))))))) 

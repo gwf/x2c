@@ -157,9 +157,15 @@ static int sum(List items){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
@@ -176,6 +182,8 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
 
 static int governed(List items){
   int volatile total = 0;
