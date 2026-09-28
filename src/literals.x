@@ -1085,7 +1085,8 @@ List Compiler.bind_lambda_expression(
   c.check_lambda_captures(body);
   parameters = %(params @{entries.list_free()});
   if (type === %(<macro-expr>))
-    type = %((func ${c.lambda_param_types(parameters.cdr())}) "Var");
+    type = supplied ? %("Func")
+         : %((func ${c.lambda_param_types(parameters.cdr())}) "Var");
   if (captures)
     return %(expr ("Func")
              (lambda $parameters (captures @captures) $body));
