@@ -200,6 +200,8 @@ void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
 
+int x2c_error_catch_selected(ErrorHandler);
+
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
@@ -228,15 +230,15 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     {
       ExceptionFrame _x2c_exception_frame_0;
       static MatchCaptureSite _x2c_macro_arms_0[1];
-      Var _x2c_catch_patterns_0[1];
+      Var _x2c_macro_patterns_0[1];
       static ErrorCatchSite _x2c_macro_site_0 ={
         _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
       }
       ;
       if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-        _x2c_catch_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(61045002), cons(Symbol_var(4372507526), cons(Symbol_var(48270474208), cons(Symbol_var(143279306979688), cons(Symbol_var(245103016899018), cons(Symbol_var(1020285550996648), NULL)))))))), cons(Symbol_var(1818340554), NULL)));
+        _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(61045002), cons(Symbol_var(4372507526), cons(Symbol_var(48270474208), cons(Symbol_var(143279306979688), cons(Symbol_var(245103016899018), cons(Symbol_var(1020285550996648), NULL)))))))), cons(Symbol_var(1818340554), NULL)));
       }
-      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
+      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
       x2c_exception_push(& _x2c_exception_frame_0);
       if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
         converted = Var_convert(value, want);
@@ -244,9 +246,10 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
       else{
         x2c_exception_landed(& _x2c_exception_frame_0);
         if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+          int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
           x2c_error_catch_detach(_x2c_error_handler_0);
           x2c_exception_mark_handled(& _x2c_exception_frame_0);
-          {
+          if(_x2c_macro_selected_0 == 0){
             Var volatile code;
             code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
             List volatile cause;

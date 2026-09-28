@@ -31,6 +31,14 @@ List Compiler_lower_lambda_expr(Compiler compiler, List expression);
 
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
 
+List builtin_try_catch_site(List frame, List clause);
+
+List builtin_catch_patterns(List patterns, List items);
+
+List builtin_try_landing(List frame, List clause, List cleanup);
+
+List builtin_catch_cases(List selected, List arms);
+
 List transform_array_literal(Compiler compiler, List ast);
 
 List transform_map_literal(Compiler compiler, List ast);

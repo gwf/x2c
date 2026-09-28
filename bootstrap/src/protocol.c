@@ -1123,7 +1123,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _879 = cons(_878, NULL);
   _880 = cons(_848, _879);
   _881 = List_var(_880);
-  _882 = String_new("/Users/gary/.codex/worktrees/d40d/x2c/src/protocol.x");
+  _882 = String_new("/Users/gary/Git/x2c/.claude/worktrees/compiler-warnings-conversions-0a75da/src/protocol.x");
   _883 = String_var(_882);
   _884 = cons(_883, NULL);
   _885 = cons(_849, _884);

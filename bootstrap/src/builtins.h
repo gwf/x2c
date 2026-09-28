@@ -7,10 +7,6 @@
 
 #include "x2c.h"
 #include "meta.h"
-List builtin_try_catch_site(List frame, List clause);
-
-List builtin_try_landing(List frame, List clause, List cleanup);
-
 List builtin_try_cleanup_placement(Var cleanup);
 
 Map builtin_targets(void);

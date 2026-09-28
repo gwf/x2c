@@ -1417,7 +1417,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1017 = cons(_1016, NULL);
   _1018 = cons(_984, _1017);
   _1019 = List_var(_1018);
-  _1020 = String_new("/Users/gary/.codex/worktrees/d40d/x2c/src/expressions.x");
+  _1020 = String_new("/Users/gary/Git/x2c/.claude/worktrees/compiler-warnings-conversions-0a75da/src/expressions.x");
   _1021 = String_var(_1020);
   _1022 = cons(_1021, NULL);
   _1023 = cons(_985, _1022);
@@ -5977,6 +5977,7 @@ void x2c_exception_push(ExceptionFrame *);
 void SymTxn_commit(SymTxn);
 void x2c_exception_landed(ExceptionFrame *);
 int x2c_exception_is_error_target(ExceptionFrame *);
+int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
 static List _initializer_conversion(Compiler c, List value, Type type, List condition, List target, int * native_used){
@@ -6000,18 +6001,18 @@ SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> ke
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_5); {
       c -> recovery_depth = depth + 1; {
-        ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_catch_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
+        ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
           _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
         }
         ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-          _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL)));
+          _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL)));
         }
-        volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+        volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
           result = List_truth(({ static MatchCaptureSite _x2c_match_site_133;  x2c_match_site_match(& _x2c_match_site_133, value, List_var(_2470)); })) ? _convert_composite(c, value, Type_canonicalize(type), target, condition, native_used) : Compiler_convert_expression(c, value, type);  SymTxn_commit(transaction);  completed = 1;
         }
         else{
           x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-            x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0); {
+            int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
               rejected = 1;
             }
 

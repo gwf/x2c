@@ -865,6 +865,7 @@ List Compiler_convert_expression(Compiler, List, Type);
 Type List_type(List);
 void x2c_exception_landed(ExceptionFrame *);
 int x2c_exception_is_error_target(ExceptionFrame *);
+int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
 List x2c_literal_string(String);
@@ -913,15 +914,15 @@ int count = 0; {
   List row;  List _x2c_macro_object_13 = named;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_14))){
     row = Var_list(_x2c_macro_cursor_output_14); {
       List _x2c_destructure_0 = row;  String name = Var_string(List_getindex(_x2c_destructure_0, 0));  List binding = Var_list(List_getindex(_x2c_destructure_0, 1));  Type type = Var_type(List_getindex(_x2c_destructure_0, 2));  List volatile function = NULL; {
-        ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_catch_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
+        ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
           _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
         }
         ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-          _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
+          _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
         }
-        volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) function = Compiler_convert_expression(c, cons(_164, cons(List_var(type), cons(List_var(cons(_90, cons(List_var(binding), NULL))), NULL))), List_type(_255));  else{
+        volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) function = Compiler_convert_expression(c, cons(_164, cons(List_var(type), cons(List_var(cons(_90, cons(List_var(binding), NULL))), NULL))), List_type(_255));  else{
           x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-            x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0); {
+            int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
               {
                 {
                   x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  continue;
@@ -1088,15 +1089,15 @@ static List _meta_group_code(Compiler c, String stamp, String stem, String suffi
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_catch_patterns_1[1];
+    Var _x2c_macro_patterns_1[1];
     static ErrorCatchSite _x2c_macro_site_1 ={
       _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_catch_patterns_1[0] = List_var(cons(Symbol_var(61557640), cons(Symbol_var(58262293080), NULL)));
+      _x2c_macro_patterns_1[0] = List_var(cons(Symbol_var(61557640), cons(Symbol_var(58262293080), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_catch_patterns_1);
+    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
     x2c_exception_push(& _x2c_exception_frame_1);
     if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
       List binding = Sym_introduce(c -> sym, _443);
@@ -1136,9 +1137,10 @@ static List _meta_group_code(Compiler c, String stamp, String stem, String suffi
     else{
       x2c_exception_landed(& _x2c_exception_frame_1);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+        int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
         x2c_error_catch_detach(_x2c_error_handler_1);
         x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        {
+        if(_x2c_macro_selected_1 == 0){
           Var volatile kind;
           kind = x2c_error_catch_capture(_x2c_error_handler_1, 0);
           List volatile detail;
