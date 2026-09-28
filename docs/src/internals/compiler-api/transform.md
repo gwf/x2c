@@ -35,7 +35,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:3568`
+Source: `src/transform.x:3550`
 
 #### transform_map_literal
 
@@ -45,7 +45,7 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:3579`
+Source: `src/transform.x:3561`
 
 ### `Compiler`
 
@@ -64,7 +64,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/transform.x:910`
+Source: `src/transform.x:908`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -75,7 +75,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/transform.x:1088`
+Source: `src/transform.x:1086`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -84,7 +84,7 @@ Source: `src/transform.x:1088`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/transform.x:327`
+Source: `src/transform.x:325`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
@@ -94,7 +94,7 @@ Source: `src/transform.x:327`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/transform.x:1607`
+Source: `src/transform.x:1586`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -109,7 +109,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/transform.x:861`
+Source: `src/transform.x:859`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -126,7 +126,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/transform.x:1634`
+Source: `src/transform.x:1613`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -140,7 +140,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/transform.x:173`
+Source: `src/transform.x:171`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -154,7 +154,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/transform.x:548`
+Source: `src/transform.x:546`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -169,7 +169,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/transform.x:1358`
+Source: `src/transform.x:1337`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -181,7 +181,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:1941`
+Source: `src/transform.x:1924`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -195,7 +195,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4347`
+Source: `src/transform.x:4329`
 
 ## Design notes
 

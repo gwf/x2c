@@ -1669,11 +1669,19 @@ macro open Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
     parameter declarations, and `body` its lowered statements. */
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
+  /* The template's own definition is not authored API of this unit; a
+     documented prototype the function completes keeps its prose. */
+  List key = %(api-definition $binding);
+  Var authored;
+  int documented = c.semantic_binding_facts().try_get(key, authored);
   Macro wrapper = $compiler_wrapper;
-  return c.bind_syntax(
+  List function = c.bind_syntax(
     Macro_apply(wrapper,
       %($result $binding (code-value "lowered" (seq @body) ()) @params)),
     AST_UNIT, NULL);
+  if (documented) c.semantic_binding_facts()[key] = authored;
+  else c.semantic_binding_facts().del(key);
+  return function;
 }
 
 static List _resolve_protocol_member(

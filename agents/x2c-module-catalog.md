@@ -306,10 +306,10 @@ Public functions:
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.macro_value_syntax`, `Compiler.evaluate_meta_expression`,
-`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
-`Compiler.macro_tag_name`, `x2c_template_call`, `Compiler.peek_macro_hole`,
+`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`x2c_template_call`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.macro_value_literal`,
 `Compiler.try_parse_macro_pattern`, `Compiler.capture_macro_value`,
@@ -403,9 +403,10 @@ Public functions:
 `Compiler.protocol_members_for`, `Compiler.protocol_rejects_direct_member`,
 `Compiler.operator_member`, `Compiler.dump_conformance`,
 `Compiler.derived_member`, `Compiler.protocol_member_names`,
-`Compiler.resolve_protocol_member`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
+`Compiler.wrapper_function`, `Compiler.resolve_protocol_member`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.parse_protocol_declaration`
 
 ### [src/regions.x](../src/regions.x)
 
