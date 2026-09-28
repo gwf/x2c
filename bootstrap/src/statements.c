@@ -918,6 +918,10 @@ List guard = Compiler_peek(c, 0) == 588 ? _keyword_paren_expr(c, 588) : NULL;  C
 if(List_truth(guard)) body = cons(_69, cons(List_var(body), NULL));  Sym_pop_scope(c -> sym);  return cons(List_var(pattern), cons(List_var(body), NULL));  error : Compiler_report_error(c, 33658058, _187, c -> token, cons(_71, cons(String_var(c -> token -> text), NULL)));
 }
 
+List Compiler_parse_match_row_argument(Compiler c){
+  if(! _init_guard_) _file_init_();  return _match_case(c);
+}
+
 Var int_var(int);
 Var Array_take_last(Array);
 Var List_getindex(List, int);
@@ -928,6 +932,7 @@ static int _default_after_directive(Array groups, int saw_default, List d){
   return saw_default;
 }
 
+List Compiler_try_parse_macro_slot(Compiler, Symbol);
 static List _match_cases(Compiler c){
   Array cases = Array_new();  Array groups = Array_new(); {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
@@ -946,6 +951,9 @@ static List _match_cases(Compiler c){
 
           }
 
+        }
+        List hole = Compiler_try_parse_macro_slot(c, 28699191645166);  if(List_truth(hole)){
+          Array_push(cases, List_var(hole));  peek = Compiler_peek(c, 0);  continue;
         }
         if(peek != 199882 && peek != 8938171176) break;  if(saw_default) Compiler_report_error(c, 33658058, _188, c -> token, _74);  if(peek == 8938171176) saw_default = 1;  List mcase = _match_case(c);  Array_push(cases, List_var(mcase));  peek = Compiler_peek(c, 0);
       }
@@ -987,7 +995,6 @@ static List _filtered_catch_arm(Compiler c, int * is_default, List handle){
   List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _161);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = _continued(c, body);  Sym_pop_scope(c -> sym);  return cons(List_var(pattern), cons(List_var(cons(_66, List_append(Compiler_catch_binder_declarations(c, bindings, handle), cons(List_var(body), NULL)))), NULL));
 }
 
-List Compiler_try_parse_macro_slot(Compiler, Symbol);
 static List _filtered_catches(Compiler compiler){
   List handle = Map_truth(compiler -> macro_holes) ? Compiler_macro_introduced_name(compiler, _190) : Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _190));  Array arms = Array_new();  int saw_default = 0;  while(1){
     List hole = Compiler_try_parse_macro_slot(compiler, 6398160);  if(List_truth(hole)){

@@ -15,6 +15,8 @@ void Compiler_begin_match_arm(Compiler compiler, List pattern, Token start, int 
 
 List Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
 
+List Compiler_parse_match_row_argument(Compiler c);
+
 List Compiler_with_binding(Compiler c);
 
 List Compiler_parse_block_item(Compiler c);
