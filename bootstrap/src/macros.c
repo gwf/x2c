@@ -477,7 +477,7 @@ static List _lisp_bindings(List bindings);
 
 static String _kind_spelling(Symbol kind);
 
-static const SymbolSet author_kinds =(SymbolSet) "\001\000\000\000\016\000\000\000\007\000\000\000\030\151\335\120\354\303\354\157\000\000\004\010\007\011\006\013\012\003\000\014\007\000\000\015\007\000\000\000\012\013\000\000\044\304\005\000\000\000\000\000\012\314\024\000\000\000\000\000\330\050\004\000\000\000\000\000\334\113\164\270\152\000\000\000\112\013\016\000\000\000\000\000\130\220\205\046\006\000\000\000\132\220\001\002\000\000\000\000\326\170\114\000\000\000\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\150\162\025\000\000\000\000\000\012\314\364\223\322\202\003\000\320\240\141\000\000\000\000\000";
+static const SymbolSet author_kinds =(SymbolSet) "\001\000\000\000\017\000\000\000\007\000\000\000\030\151\335\120\354\303\354\157\000\016\004\010\007\011\006\013\012\003\000\000\007\000\000\015\007\000\014\000\012\013\000\000\044\304\005\000\000\000\000\000\012\314\024\000\000\000\000\000\330\050\004\000\000\000\000\000\334\113\164\270\152\000\000\000\112\013\016\000\000\000\000\000\130\220\205\046\006\000\000\000\132\220\001\002\000\000\000\000\326\170\114\000\000\000\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\150\162\025\000\000\000\000\000\012\314\364\223\322\202\003\000\320\240\141\000\000\000\000\000\146\221\225\302\060\000\000\000";
 
 static Symbol _author_kind(String spelling);
 
@@ -5721,7 +5721,7 @@ static List _parse_hole(Compiler c, Symbol role){
   else if(! _kind_accepts_role(kind, role)){
     String spelling = Atom_str(name);  Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_1065), cons(String_var(spelling), cons(String_var(_1066), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_1067), cons(String_var(_kind_spelling(kind)), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_1068), cons(String_var(_kind_spelling(inferred)), NULL)))), NULL)));
   }
-  Var binder = List_assoc(hole, Symbol_var(154018148));  int splice = sequence || role == 1362954;  int preserve_source = Map_contains(c -> macro_holes, List_var(cons(_391, cons(binder, NULL))));  String projection = preserve_source ? _1258 : splice ? _984 : List_contains(_1072, Symbol_var(role)) ? _1454 : _1453;  return cons(_1026, cons(_hole_key(hole, projection), NULL));
+  Var binder = List_assoc(hole, Symbol_var(154018148));  int splice = sequence || role == 1362954 || role == 209423012198;  int preserve_source = Map_contains(c -> macro_holes, List_var(cons(_391, cons(binder, NULL))));  String projection = preserve_source ? _1258 : splice ? _984 : List_contains(_1072, Symbol_var(role)) ? _1454 : _1453;  return cons(_1026, cons(_hole_key(hole, projection), NULL));
 }
 
 static int _lisp_splice_follows(Compiler compiler){
@@ -6729,8 +6729,9 @@ if(! List_truth(definition)) definition = Var_list(_macro_value_bindings(c, stor
 
               }
               if(List_len((c) -> macro_stack) >= 64){
-                String first_note = String_join(NULL, cons(String_var(_1273), cons(String_var(Var_repr(List_last(c -> macro_stack))), NULL)));
-                Compiler_report_error((c), 27335838, _1482, invocation, cons(String_var(_definition_note(definition)), cons(String_var(String_join(NULL, cons(String_var(_1272), cons(String_var(List_repr(input)), NULL)))), cons(String_var(first_note), NULL))));
+                List first = Var_list(List_car(Var_list(List_last(c -> macro_stack))));
+                String first_note = String_join(NULL, cons(String_var(_1273), cons(String_var(_definition_note(first)), NULL)));
+                Compiler_report_error((c), 27335838, _1482, invocation, cons(String_var(_definition_note(definition)), cons(String_var(first_note), NULL)));
               }
               if((c) -> macro_count >= 10000) Compiler_report_error((c), 27335838, _1483, invocation, NULL);
               (c) -> macro_count ++;
