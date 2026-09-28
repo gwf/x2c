@@ -67,6 +67,16 @@ Examples showing why the classification matters:
   `toolchain.x:120-191` uses them for process arguments. Neither is program
   AST, so neither should move into the language grammar.
 
+The current `stage.x` and `meta-group.x` clients do not offer a bounded
+source-form migration. `_meta_constant_leaf` reads typed, folded values and
+cache/meta carriers; a cast source macro would replace only one case header
+while still needing the bound result type and conversion. `meta-group.x`
+rebuilds declarations from bound functions and compiler-created static
+records with binding identities and exact modifier layout. A source
+declaration template would discard those facts. Retain these current raw
+cases as stage-specific consumers; revisit them only with a projection that
+deletes their structural work while preserving identity and stage.
+
 ## Proposed ownership
 
 | Concern | Target owner | What changes or disappears |
