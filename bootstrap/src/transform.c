@@ -1540,11 +1540,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _870 = cons(_869, NULL);
   _871 = cons(_394, _870);
   _872 = List_var(_871);
-  _873 = int_var(1147);
+  _873 = int_var(1143);
   _874 = cons(_873, NULL);
   _875 = cons(_400, _874);
   _876 = List_var(_875);
-  _877 = int_var(42091);
+  _877 = int_var(42089);
   _878 = cons(_877, NULL);
   _879 = cons(_413, _878);
   _880 = List_var(_879);
@@ -1646,11 +1646,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _976 = cons(_975, NULL);
   _977 = cons(_376, _976);
   _978 = List_var(_977);
-  _979 = int_var(1151);
+  _979 = int_var(1147);
   _980 = cons(_979, NULL);
   _981 = cons(_400, _980);
   _982 = List_var(_981);
-  _983 = int_var(42245);
+  _983 = int_var(42243);
   _984 = cons(_983, NULL);
   _985 = cons(_413, _984);
   _986 = List_var(_985);
@@ -1738,11 +1738,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1068 = cons(_1067, NULL);
   _1069 = cons(_376, _1068);
   _1070 = List_var(_1069);
-  _1071 = int_var(1155);
+  _1071 = int_var(1151);
   _1072 = cons(_1071, NULL);
   _1073 = cons(_400, _1072);
   _1074 = List_var(_1073);
-  _1075 = int_var(42362);
+  _1075 = int_var(42360);
   _1076 = cons(_1075, NULL);
   _1077 = cons(_413, _1076);
   _1078 = List_var(_1077);
@@ -1926,11 +1926,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1256 = cons(_1255, NULL);
   _1257 = cons(_376, _1256);
   _1258 = List_var(_1257);
-  _1259 = int_var(1440);
+  _1259 = int_var(1436);
   _1260 = cons(_1259, NULL);
   _1261 = cons(_400, _1260);
   _1262 = List_var(_1261);
-  _1263 = int_var(52634);
+  _1263 = int_var(52632);
   _1264 = cons(_1263, NULL);
   _1265 = cons(_413, _1264);
   _1266 = List_var(_1265);
@@ -2039,11 +2039,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1369 = cons(_1368, NULL);
   _1370 = cons(_376, _1369);
   _1371 = List_var(_1370);
-  _1372 = int_var(1681);
+  _1372 = int_var(1677);
   _1373 = cons(_1372, NULL);
   _1374 = cons(_400, _1373);
   _1375 = List_var(_1374);
-  _1376 = int_var(62778);
+  _1376 = int_var(62776);
   _1377 = cons(_1376, NULL);
   _1378 = cons(_413, _1377);
   _1379 = List_var(_1378);
@@ -2188,11 +2188,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1521 = cons(_1520, NULL);
   _1522 = cons(_376, _1521);
   _1523 = List_var(_1522);
-  _1524 = int_var(1723);
+  _1524 = int_var(1719);
   _1525 = cons(_1524, NULL);
   _1526 = cons(_400, _1525);
   _1527 = List_var(_1526);
-  _1528 = int_var(64017);
+  _1528 = int_var(64015);
   _1529 = cons(_1528, NULL);
   _1530 = cons(_413, _1529);
   _1531 = List_var(_1530);
@@ -2383,11 +2383,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1716 = cons(_1715, NULL);
   _1717 = cons(_376, _1716);
   _1718 = List_var(_1717);
-  _1719 = int_var(1734);
+  _1719 = int_var(1730);
   _1720 = cons(_1719, NULL);
   _1721 = cons(_400, _1720);
   _1722 = List_var(_1721);
-  _1723 = int_var(64256);
+  _1723 = int_var(64254);
   _1724 = cons(_1723, NULL);
   _1725 = cons(_413, _1724);
   _1726 = List_var(_1725);
@@ -2432,11 +2432,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1765 = cons(_1764, NULL);
   _1766 = cons(_376, _1765);
   _1767 = List_var(_1766);
-  _1768 = int_var(1728);
+  _1768 = int_var(1724);
   _1769 = cons(_1768, NULL);
   _1770 = cons(_400, _1769);
   _1771 = List_var(_1770);
-  _1772 = int_var(64128);
+  _1772 = int_var(64126);
   _1773 = cons(_1772, NULL);
   _1774 = cons(_413, _1773);
   _1775 = List_var(_1774);
@@ -3119,11 +3119,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2457 = cons(_2456, NULL);
   _2458 = cons(_376, _2457);
   _2459 = List_var(_2458);
-  _2460 = int_var(2338);
+  _2460 = int_var(2334);
   _2461 = cons(_2460, NULL);
   _2462 = cons(_400, _2461);
   _2463 = List_var(_2462);
-  _2464 = int_var(87108);
+  _2464 = int_var(87106);
   _2465 = cons(_2464, NULL);
   _2466 = cons(_413, _2465);
   _2467 = List_var(_2466);
@@ -3272,11 +3272,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2615 = cons(_2614, NULL);
   _2616 = cons(_376, _2615);
   _2617 = List_var(_2616);
-  _2618 = int_var(2351);
+  _2618 = int_var(2347);
   _2619 = cons(_2618, NULL);
   _2620 = cons(_400, _2619);
   _2621 = List_var(_2620);
-  _2622 = int_var(87613);
+  _2622 = int_var(87611);
   _2623 = cons(_2622, NULL);
   _2624 = cons(_413, _2623);
   _2625 = List_var(_2624);
@@ -3379,11 +3379,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2722 = cons(_2721, NULL);
   _2723 = cons(_376, _2722);
   _2724 = List_var(_2723);
-  _2725 = int_var(2378);
+  _2725 = int_var(2374);
   _2726 = cons(_2725, NULL);
   _2727 = cons(_400, _2726);
   _2728 = List_var(_2727);
-  _2729 = int_var(88592);
+  _2729 = int_var(88590);
   _2730 = cons(_2729, NULL);
   _2731 = cons(_413, _2730);
   _2732 = List_var(_2731);
@@ -3648,11 +3648,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2991 = cons(_2990, NULL);
   _2992 = cons(_376, _2991);
   _2993 = List_var(_2992);
-  _2994 = int_var(2357);
+  _2994 = int_var(2353);
   _2995 = cons(_2994, NULL);
   _2996 = cons(_400, _2995);
   _2997 = List_var(_2996);
-  _2998 = int_var(87809);
+  _2998 = int_var(87807);
   _2999 = cons(_2998, NULL);
   _3000 = cons(_413, _2999);
   _3001 = List_var(_3000);
@@ -3760,11 +3760,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3103 = cons(_3102, NULL);
   _3104 = cons(_376, _3103);
   _3105 = List_var(_3104);
-  _3106 = int_var(2371);
+  _3106 = int_var(2367);
   _3107 = cons(_3106, NULL);
   _3108 = cons(_400, _3107);
   _3109 = List_var(_3108);
-  _3110 = int_var(88376);
+  _3110 = int_var(88374);
   _3111 = cons(_3110, NULL);
   _3112 = cons(_413, _3111);
   _3113 = List_var(_3112);
@@ -4113,11 +4113,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3456 = cons(_3455, NULL);
   _3457 = cons(_376, _3456);
   _3458 = List_var(_3457);
-  _3459 = int_var(2321);
+  _3459 = int_var(2317);
   _3460 = cons(_3459, NULL);
   _3461 = cons(_400, _3460);
   _3462 = List_var(_3461);
-  _3463 = int_var(86601);
+  _3463 = int_var(86599);
   _3464 = cons(_3463, NULL);
   _3465 = cons(_413, _3464);
   _3466 = List_var(_3465);
@@ -4238,11 +4238,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3581 = cons(_3580, NULL);
   _3582 = cons(_376, _3581);
   _3583 = List_var(_3582);
-  _3584 = int_var(2501);
+  _3584 = int_var(2497);
   _3585 = cons(_3584, NULL);
   _3586 = cons(_400, _3585);
   _3587 = List_var(_3586);
-  _3588 = int_var(93354);
+  _3588 = int_var(93352);
   _3589 = cons(_3588, NULL);
   _3590 = cons(_413, _3589);
   _3591 = List_var(_3590);
@@ -4414,11 +4414,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3757 = cons(_3756, NULL);
   _3758 = cons(_376, _3757);
   _3759 = List_var(_3758);
-  _3760 = int_var(2505);
+  _3760 = int_var(2501);
   _3761 = cons(_3760, NULL);
   _3762 = cons(_400, _3761);
   _3763 = List_var(_3762);
-  _3764 = int_var(93475);
+  _3764 = int_var(93473);
   _3765 = cons(_3764, NULL);
   _3766 = cons(_413, _3765);
   _3767 = List_var(_3766);
@@ -4569,11 +4569,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3912 = cons(_3911, NULL);
   _3913 = cons(_376, _3912);
   _3914 = List_var(_3913);
-  _3915 = int_var(2512);
+  _3915 = int_var(2508);
   _3916 = cons(_3915, NULL);
   _3917 = cons(_400, _3916);
   _3918 = List_var(_3917);
-  _3919 = int_var(93720);
+  _3919 = int_var(93718);
   _3920 = cons(_3919, NULL);
   _3921 = cons(_413, _3920);
   _3922 = List_var(_3921);
@@ -4747,11 +4747,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4090 = cons(_4089, NULL);
   _4091 = cons(_376, _4090);
   _4092 = List_var(_4091);
-  _4093 = int_var(2491);
+  _4093 = int_var(2487);
   _4094 = cons(_4093, NULL);
   _4095 = cons(_400, _4094);
   _4096 = List_var(_4095);
-  _4097 = int_var(93036);
+  _4097 = int_var(93034);
   _4098 = cons(_4097, NULL);
   _4099 = cons(_413, _4098);
   _4100 = List_var(_4099);
@@ -5328,11 +5328,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4674 = cons(_4673, NULL);
   _4675 = cons(_376, _4674);
   _4676 = List_var(_4675);
-  _4677 = int_var(3641);
+  _4677 = int_var(3637);
   _4678 = cons(_4677, NULL);
   _4679 = cons(_400, _4678);
   _4680 = List_var(_4679);
-  _4681 = int_var(136696);
+  _4681 = int_var(136694);
   _4682 = cons(_4681, NULL);
   _4683 = cons(_413, _4682);
   _4684 = List_var(_4683);
@@ -5435,11 +5435,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4781 = cons(_4780, NULL);
   _4782 = cons(_376, _4781);
   _4783 = List_var(_4782);
-  _4784 = int_var(3638);
+  _4784 = int_var(3634);
   _4785 = cons(_4784, NULL);
   _4786 = cons(_400, _4785);
   _4787 = List_var(_4786);
-  _4788 = int_var(136578);
+  _4788 = int_var(136576);
   _4789 = cons(_4788, NULL);
   _4790 = cons(_413, _4789);
   _4791 = List_var(_4790);
@@ -5492,11 +5492,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4838 = cons(_4837, NULL);
   _4839 = cons(_376, _4838);
   _4840 = List_var(_4839);
-  _4841 = int_var(3646);
+  _4841 = int_var(3642);
   _4842 = cons(_4841, NULL);
   _4843 = cons(_400, _4842);
   _4844 = List_var(_4843);
-  _4845 = int_var(136868);
+  _4845 = int_var(136866);
   _4846 = cons(_4845, NULL);
   _4847 = cons(_413, _4846);
   _4848 = List_var(_4847);
@@ -5594,11 +5594,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4940 = cons(_4939, NULL);
   _4941 = cons(_376, _4940);
   _4942 = List_var(_4941);
-  _4943 = int_var(3643);
+  _4943 = int_var(3639);
   _4944 = cons(_4943, NULL);
   _4945 = cons(_400, _4944);
   _4946 = List_var(_4945);
-  _4947 = int_var(136754);
+  _4947 = int_var(136752);
   _4948 = cons(_4947, NULL);
   _4949 = cons(_413, _4948);
   _4950 = List_var(_4949);
@@ -5772,7 +5772,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _5118 = cons(_318, _5117);
   _5119 = List_var(_5118);
   _5120 = Symbol_var(106239471489226);
-  _5121 = int_var(3926);
+  _5121 = int_var(3922);
   _5122 = String_new("");
   _5123 = String_var(_5122);
   _5124 = cons(_92, _32);
@@ -5848,11 +5848,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5194 = cons(_5193, NULL);
   _5195 = cons(_376, _5194);
   _5196 = List_var(_5195);
-  _5197 = int_var(3924);
+  _5197 = int_var(3920);
   _5198 = cons(_5197, NULL);
   _5199 = cons(_400, _5198);
   _5200 = List_var(_5199);
-  _5201 = int_var(146909);
+  _5201 = int_var(146907);
   _5202 = cons(_5201, NULL);
   _5203 = cons(_413, _5202);
   _5204 = List_var(_5203);
@@ -5897,7 +5897,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _5243 = cons(_5242, NULL);
   _5244 = cons(_318, _5243);
   _5245 = List_var(_5244);
-  _5246 = int_var(3921);
+  _5246 = int_var(3917);
   _5247 = cons(_181, _3180);
   _5248 = List_var(_5247);
   _5249 = cons(_5248, NULL);
@@ -5916,11 +5916,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5262 = cons(_5261, NULL);
   _5263 = cons(_376, _5262);
   _5264 = List_var(_5263);
-  _5265 = int_var(3919);
+  _5265 = int_var(3915);
   _5266 = cons(_5265, NULL);
   _5267 = cons(_400, _5266);
   _5268 = List_var(_5267);
-  _5269 = int_var(146772);
+  _5269 = int_var(146770);
   _5270 = cons(_5269, NULL);
   _5271 = cons(_413, _5270);
   _5272 = List_var(_5271);
@@ -6840,7 +6840,7 @@ static List _func_bridge_call(List bridge, List parameters, Type function_type, 
 static List _direct_func_value(Compiler compiler, List source_binding, Type source_type){
   List handle = _direct_func_handle(compiler, source_binding, source_type);  if(! compiler -> inline_header) return handle;  Type key_type = Type_canonicalize(source_type);  List key = cons(_216, cons(List_var(source_binding), cons(List_var(key_type), NULL)));  List bridge = NULL;  List parameters = _45;  Var _x2c_macro_cached_4;  if(Map_try_get(compiler -> names -> adapters, List_var(key), &(_x2c_macro_cached_4))) bridge = Var_list(_x2c_macro_cached_4);  else{
     {
-      bridge = _func_bridge_binding(compiler, _5579);  Compiler_add_early(compiler, cons(_128, cons(_161, cons(List_var(cons(_34, cons(List_var(bridge), cons(List_var(cons(List_var(cons(_215, cons(List_var(parameters), NULL))), NULL)), NULL)))), cons(List_var(cons(_181, cons(List_var(cons(_93, cons(List_var(cons(_91, cons(List_var(handle), NULL))), NULL))), NULL))), NULL)))));
+      bridge = _func_bridge_binding(compiler, _5579);  Compiler_add_early(compiler, Compiler_wrapper_function(compiler, List_type(_160), bridge, List_cdr(parameters), List_cdr(cons(_181, cons(List_var(cons(_93, cons(List_var(cons(_91, cons(List_var(handle), NULL))), NULL))), NULL)))));
     }
     ;  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(bridge));
   }
@@ -6866,7 +6866,7 @@ List Type_parameter_ast(Type, List);
 static List _indirect_func_lift(Compiler compiler, List expression, Type pointer_type){
   if(! compiler -> inline_header) return _indirect_func_value(compiler, expression, pointer_type);  Type key_type = Type_canonicalize(pointer_type);  List key = cons(_231, cons(List_var(key_type), NULL));  List bridge = NULL;  Var _x2c_macro_cached_5;  if(Map_try_get(compiler -> names -> adapters, List_var(key), &(_x2c_macro_cached_5))) bridge = Var_list(_x2c_macro_cached_5);  else{
     {
-      bridge = _func_bridge_binding(compiler, _5582);  List parameter = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _5573));  List parameters = cons(_28, cons(List_var(Type_parameter_ast(pointer_type, parameter)), NULL));  List value = _indirect_func_value(compiler, cons(_0, cons(List_var(pointer_type), cons(List_var(cons(_88, cons(List_var(parameter), NULL))), NULL))), pointer_type);  Compiler_add_early(compiler, cons(_128, cons(_161, cons(List_var(cons(_34, cons(List_var(bridge), cons(List_var(cons(List_var(cons(_215, cons(List_var(parameters), NULL))), NULL)), NULL)))), cons(List_var(cons(_181, cons(List_var(cons(_93, cons(List_var(cons(_91, cons(List_var(value), NULL))), NULL))), NULL))), NULL)))));
+      bridge = _func_bridge_binding(compiler, _5582);  List parameter = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _5573));  List parameters = cons(_28, cons(List_var(Type_parameter_ast(pointer_type, parameter)), NULL));  List value = _indirect_func_value(compiler, cons(_0, cons(List_var(pointer_type), cons(List_var(cons(_88, cons(List_var(parameter), NULL))), NULL))), pointer_type);  Compiler_add_early(compiler, Compiler_wrapper_function(compiler, List_type(_160), bridge, List_cdr(parameters), List_cdr(cons(_181, cons(List_var(cons(_93, cons(List_var(cons(_91, cons(List_var(value), NULL))), NULL))), NULL)))));
     }
     ;  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(bridge));
   }
