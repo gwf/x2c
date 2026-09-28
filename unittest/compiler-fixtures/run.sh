@@ -7,6 +7,11 @@ if [[ "$mode" != check && "$mode" != update ]]; then
   exit 2
 fi
 
+# Public runs supervise the suite dispatcher or one complete fixture worker.
+if [[ "${2:-}" != --worker && "${2:-}" != --suite ]]; then
+  exec python3 "$(dirname "$0")/supervise.py" "$@"
+fi
+
 # FIXTURE_DIR and FIXTURE_BUILD let a package run its own fixtures here.
 script_dir=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$script_dir/../.." && pwd)
@@ -18,7 +23,7 @@ read -r -a build_cflags <<< "${BUILD_CFLAGS:-}"
 
 # Start from an empty tree so no fixture can read a tally left by an earlier
 # run; the parent below treats a missing tally as a failure to report.
-if [[ "${2:-}" != --fixture ]]; then
+if [[ "${2:-}" == --suite ]]; then
   rm -rf "$build"
 fi
 mkdir -p "$build"
@@ -72,7 +77,8 @@ check_artifact() {
   artifact_count=$((artifact_count + 1))
 
   if [[ "$mode" == update ]]; then
-    cp "$actual" "$expected"
+    mkdir -p "$case_build/updates"
+    cp "$actual" "$case_build/updates/$phase"
     return
   fi
   if [[ ! -f "$expected" ]]; then
@@ -316,18 +322,10 @@ run_fixture() {
   return 0
 }
 
-# A single fixture reports its own result unless the full run below, which
-# reads every tally and prints each failing log, started it.
-if [[ ${2:-} == --fixture ]]; then
-  exec 3>&2
+# The supervisor publishes staged updates only after successful completion.
+if [[ ${2:-} == --worker ]]; then
   run_fixture "$3"
   printf '%d %d\n' "$failures" "$artifact_count" >"$build/$3/tally"
-  [[ -n ${FIXTURE_TALLY_ONLY:-} ]] && exit 0
-  if ((failures)); then
-    cat "$build/$3/log" >&3
-    exit 1
-  fi
-  echo "Compiler fixture $3 passed" >&3
   exit 0
 fi
 
