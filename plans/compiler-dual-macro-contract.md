@@ -3528,6 +3528,104 @@ body remain distinct fields. Patterns are ordinary Match data expressions,
 not a new AST syntax-variable language. Guarded marks control flow after
 source guard rewriting and must not be dropped in a lowered-stage match.
 
+#### Proposed complete match-row hole (plan only)
+
+`match-arm-directive` has a guarded `case %(big ?n) if (...)` between ordinary
+arms, with `#ifdef`/`#else` rows and conditional defaults. Today
+`statements.x::_match_case` makes `(PATTERN BODY)`, changes a guard into
+`(guarded (if GUARD (block BODY (break))))`, and may wrap the body in typed
+capture declarations. `_match_cases` inserts `(preproc TEXT)` rows in their
+token order and tracks defaults across directive branches. Later,
+`parse.x::bind_syntax` recognizes the raw `(match SUBJECT CASES)` shape and
+walks those rows to resolve patterns, open arm scopes, and bind bodies:
+
+```x2c
+case %(match ?subject ?cases): {
+  if (!statement_position) goto construction_error;
+  Array bound = [];
+  foreach (List row, cases.list()) {
+    if (row.car() == <preproc>) {
+      bound.push(row);
+      continue;
+    }
+    List pattern = row.car();
+    int binds = pattern !== %(*);
+    if (binds) pattern = _.resolve_expression(pattern, _.token);
+    _.begin_match_arm(pattern, _.token, binds);
+    {
+      defer _.sym.pop_scope();
+      List body = row.cadr();
+      match (body) {
+        case %(guarded ?statements):
+          body = %(guarded ${_.bind_syntax(
+            statements, AST_STATEMENT, _.return_type)});
+        default:
+          body = _.bind_syntax(body, AST_STATEMENT, _.return_type);
+      }
+      bound.push(%($pattern $body));
+    }
+  }
+  return %(match ${_.resolve_expression(subject, _.token)}
+                 ${bound.list_free()});
+}
+```
+
+Add one `MatchRow` argument kind, whose sequence spelling is
+`MatchRow $rows...`. Its sole template slot is a match arm list:
+
+```x2c
+macro Statement $matched(Expr $subject, MatchRow $rows...) {
+  match ($subject) { $rows... }
+}
+
+Macro shape = $matched;
+match (input) case shape(?subject, *rows): {
+  // Keep the existing pattern resolution, arm scopes, guarded-body binding,
+  // and subject resolution, using rows in place of cases.list().
+}
+```
+
+The sequence captures each complete canonical row without splitting its
+pattern, guard, binder declarations, or body: either `(PATTERN BODY)` or
+`(preproc TEXT)`. A default is `(* BODY)`, not a different hole kind. The
+matched rows retain order, binding identities, source positions, and their
+current parser/binder stage. The hole neither reconstructs source guard text
+from `guarded` nor rebinds a row during recognition. Construction still uses
+ordinary `bind_syntax` once. In a template, its splice occupies
+the whole `match { ... }` row list; it cannot appear as an expression or a
+standalone statement. This is analogous to `Catch $arms...`, but cannot reuse
+`Catch`: match rows include directives and have different binder and guard
+semantics. A fixed guarded arm is already expressible, as `$typed_arm` in
+`match-typed-guards` demonstrates; that does not capture arbitrary rows.
+
+Ownership: `statements.x` parses source arms, typed captures, guards,
+directives, and conditional-default diagnostics. `macros.x` registers the
+kind, accepts its sequence argument and template slot, and projects complete
+rows for structural recognition and unchanged construction. `parse.x` keeps
+the existing `bind_syntax` arm loop and scope behavior; the shared grammar
+macro replaces only the outer raw match recognition after the projection is
+proved. `transform.x` still derives match binder records, and `emit.x` still
+uses `guarded` to choose retry/fallthrough emission. Constructed canonical
+AST Lists remain accepted by structure, as the language reference promises.
+
+Proof before adoption: show that `$matched` captures the full ordered rows of
+`match-arm-directive` and `match-typed-guards`, including the directive rows,
+typed-capture wrappers, and `guarded` marker, without a parallel raw case.
+Run the two focused fixtures and compare their checked stdout, the
+`match-arm-directive` C sidecar, and diagnostics where present; inspect
+transform output or an inert AST dump
+for exact row and binding identity. Add only a focused fixture if those two
+do not exercise an essential projection. Stop if a row requires source
+reconstruction, a second binder, or fallback recognition. Review the authored
+diff for duplicated parsing or validation before publication validation.
+
+Design review: a `Statement` body hole loses the arm pattern and guard, while
+an `Expr` pattern plus fixed body can cover only a fixed arm layout. One
+opaque row sequence uses the existing parse/bind owners and avoids parallel
+semantics. Its cost is a new grammar slot and capture kind, so adopt it only
+if the focused proof shows exact projection across guarded and interleaved
+rows. This draft does not authorize an implementation or a new gate.
+
 ### Compile-time source items (parse.x:1760-1775,2717-2735;
 ### protocol.x:150-154, 525-558,2350-2567; macros.x:3370-3390)
 
