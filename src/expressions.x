@@ -1062,6 +1062,9 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
           return 1;
       }
       case %(ident ?): return 1;
+      // A Type hole can supply declarators with the base they bind to.
+      case %(decl ?(List base) *):
+        if (base.type().declaration_parts().cadr()) return 1;
     }
     foreach (Var child, syntax)
       if (child is <list>) pending.push(child);

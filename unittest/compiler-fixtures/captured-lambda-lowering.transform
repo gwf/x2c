@@ -142,7 +142,7 @@
                         (expr (int) 
                          (composite 
                           (commas (expr (int) (ident (binding 22 "value")))))))))))) 
-        (expr (size_t) (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 
+        (expr (unsigned) (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 
   (at 19 
    (return 
     (expr ("Func") 

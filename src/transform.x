@@ -1136,55 +1136,35 @@ static void _collect_reference_captures(
   }
 }
 
-static List _cell_reference(List cell, Type type) =>
-  %(expr ${type.reference()} (ident $cell));
+/* A shared lambda cell: Scope storage for one automatic binding, copied
+   from its initializer or left for a later assignment. A braced
+   initializer is already the compound literal's body. */
+macro open Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
+  $type *$cell = Scope_memdup((const void *)&($type){$value}, sizeof($type));
+}
 
-static List _cell_value(List cell, Type type) => %(
-    expr $type
-      (parens
-        (expr $type (op * ${_cell_reference(cell, type)})))
-  );
+macro open Statement $compiler_braced_cell(Type $type, Name $cell,
+    Expr $compound) {
+  $type *$cell = Scope_memdup((const void *)&($type)$compound,
+                              sizeof($type));
+}
+
+macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
+  $type *$cell = Scope_malloc(sizeof($type));
+}
+
+macro open Expression $compiler_cell_value(Name $cell) => (*$cell);
 
 static List _cell_declaration(
-  Compiler compiler, List cell, Type type, List initializer) {
-  Type pointer = type.reference();
-  Type allocator_type = NULL;
-  String allocator_name = initializer ? "Scope_memdup" : "Scope_malloc";
-  List allocator = _adapter_helper(
-    compiler, allocator_name, allocator_type);
-  List (value_base, value_mods) = type.declaration_parts();
-  List size = %(
-    expr (size_t)
-      (sizeof
-        (parens
-          (decl $value_base (bindings (bind () $value_mods)))))
-  );
-  List arguments = %($size);
-  if (initializer) {
-    List compound = NULL;
-    match (initializer)
-      case %(expr ? (composite ?)): compound = initializer;
-    if (!compound)
-      compound = %(
-        expr () (composite (commas $initializer))
-      );
-    List value = %(expr $type (cast $type $compound));
-    List address = %(expr $pointer (op & $value));
-    List source = %(
-      expr (* const void) (cast (* const void) $address)
-    );
-    arguments = %($source $size);
-  }
-  List allocation = %(
-    expr (* void)
-      (call (expr $allocator_type (ident $allocator))
-            (args @arguments))
-  );
-  List (base, mods) = pointer.declaration_parts();
-  return %(
-    declare $base
-      (bindings (op = (bind $cell $mods) $allocation))
-  );
+  Compiler c, List cell, Type type, List initializer) {
+  Macro shape = $compiler_empty_cell;
+  if (!initializer)
+    return c.bind_syntax(shape(type, cell), AST_BLOCK, NULL);
+  shape = $compiler_cell;
+  match (initializer)
+    case %(expr ? (composite ?)): shape = $compiler_braced_cell;
+  List value = %(code-value "bound" $initializer ());
+  return c.bind_syntax(shape(type, cell, value), AST_BLOCK, NULL);
 }
 
 /* Split only declarations that need cells. Keeping each cell allocation at
@@ -1244,7 +1224,8 @@ static List _rewrite_lambda_cells(
       if (_cell_parts(cells, binding, cell, type)) {
         if (source_type.car() == <&>)
           return %(expr $source_type (ident $cell));
-        return _cell_value(cell, type);
+        Macro value = $compiler_cell_value;
+        return compiler.bind_syntax(value(cell), AST_EXPRESSION, NULL);
       }
       return ast;
     }
