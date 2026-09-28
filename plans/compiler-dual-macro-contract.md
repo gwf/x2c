@@ -801,6 +801,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Discarded destructuring assignment (2026-09-28) | 1d5c9b0a / dev c00397af, distinct output dirs | confounded raw -61.37% | confounded raw -52.63% | Not counted | Not counted | Not measured |
 | Protocol descriptor storage (2026-09-28) | 6a3674bf / dev 1d5c9b0a, same staged path and cleared output dir | raw -60.99%, cause unassigned | raw -53.42%, cause unassigned | Not counted | Not counted | Not measured |
 | Protocol direct-update body (2026-09-28) | 7e8abade / dev 6a3674bf, same staged path and cleared output dir | raw -61.48%, cause unassigned | raw -53.67%, cause unassigned | Not counted | Not counted | Not measured |
+| Parsed if, while/do, return, defer recognition (2026-09-28) | 0e0006f4 / dev 7e8abade, same staged path and cleared output dir | raw -61.41%, cause unassigned | raw -53.44%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -856,6 +857,15 @@ slow here. Source-tree, helper, or cache effects remain unisolated, so the
 samples do not establish the update body's compiler cost. The candidate
 binary (`c88095c2`) was restored exactly. Samples are in
 `debug/protocol-update-paired-results.json`.
+
+The combined parsed-form batch used the same staged path and freshly
+cleared output directory. Five alternating pairs yielded 8.956399 /
+3.456621 s default and 10.386815 / 4.836183 s live. The exact `c88095c2`
+binary was the fast candidate in the protocol-update attempt and the slow
+baseline in this attempt. The source tree and helper/cache state changed
+between them, so these samples do not assign a cost or speedup to the four
+recognition changes. The candidate (`384e7249`) was restored exactly;
+samples are in `debug/parsed-batch-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
