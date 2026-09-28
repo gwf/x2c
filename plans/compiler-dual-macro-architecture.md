@@ -32,7 +32,7 @@ No defensible
 percentage of removable compiler lines follows from those numbers or the
 historical 215-head census.
 
-### Delivery overlay through `fe8fd71a`
+### Delivery overlay through `f6606dbf`
 
 The contract's readable-form entries and cost ledger are the detailed
 implementation record. Current `dev` has these family-level changes:
@@ -42,7 +42,7 @@ implementation record. Current `dev` has these family-level changes:
 | Try, defer, callable and Func helpers, Var literals, managed cleanup and destructuring | Adjacent output templates replace their selected manual lowering skeletons | Transform still chooses captures, types, lifetime, evaluation order and placement. |
 | Protocol descriptor and direct-update helpers | Templates express storage registration and update bodies | Protocol still chooses adapters, signatures, memo keys, volatile storage and registration phase. |
 | Parsed `if`, `while`, `do`, `return` and `defer` | Shared Statement forms recognize their source shapes in the binder | Parser and binder retain positions, scopes, branch facts, type resolution and diagnostics. |
-| Bound loop and truth conversion, deferred region restore | The same forms are reused downstream; an expression-statement form names the restore site | Transform retains transfer barriers and condition conversion; region analysis retains escape and restore facts. |
+| Bound loop, switch and truth conversion, region expression statements | The same forms are reused downstream; an expression-statement form names region calls and stores | Transform retains transfer barriers and condition conversion; region analysis retains escape and restore facts. |
 
 The contract records concrete exceptions where source templates would change
 binding or origin behavior, lose native C behavior, or add more machinery than
@@ -158,6 +158,14 @@ for extraction than a file-size preference. Cache selection/dependency order
 stays in cache.x. Translation-unit partitions, conditional preprocessor arms
 and shutdown registration stay in generate.x. Do not merge those modules.
 
+A current-tree check narrows this proposal. Both consumers patch already
+bound functions after transform. `promoted-string-cache` exercises the
+header-local and source-local guards and their lazy calls. A shared
+conditional alone leaves the two function constructors intact; rebinding a
+whole function template could change its identity, header placement or
+preprocessor arms. Keep their present owners until one stage-preserving
+construction is proved on both paths with exact C/H and runtime behavior.
+
 There is also actual lowering in emit.x, not just formatting. For example,
 `Emitter._var_collection` chooses a constructor alone for an empty collection
 or an update call for nonempty elements. `_local_static` generates guarded
@@ -232,7 +240,7 @@ another binder as part of a parser-file split.
 | Try and cleanup, transform.x:_try_cleanup, _lower_try | The outer try exemplar is landed; cleanup still has manual calls/assignments. Do not count the whole family complete merely because its outer template landed. |
 | Defer, transform.x:_defer_block and 3754-3933 | One visible record/registration/body/cleanup template, with capture-field loops in slots. Keep capture selection and unwind placement separate semantic steps. |
 | Destructuring and sequenced protocol calls, transform.x:2989-3140,3246-3274 | Templates for declarations, assignments and temporaries; retain ordered evaluation, result types and pre-cell lowering order. |
-| Var arrays/maps, transform.x:3593-3622 and emit.x:_var_collection | Lower through to ordinary C calls. Potentially delete varray/vmap/vpair emission and _var_collection, rather than merely rename intermediate nodes. Preserve mutable construction and evaluation behavior. |
+| Var arrays/maps, transform.x:3593-3622 | Ordinary constructor calls are landed; current emit.x has no varray/vmap/vpair or _var_collection path to delete. Retained transform/cache aliases can accept legal constructed syntax, so their removal needs a compatibility decision. |
 | String conversion, transform.x:3649-3689 | Separate output shape from conversion/cache decisions and the native-depth segment boundary. Do not merge with collection conversion just because both are literals. |
 | Protocol synthesis, protocol.x:1766-2363 | Template update/discard/adapter bodies and descriptor/registration shapes. Reuse wrapper_function; keep conformance, linkage, freshness and registration phases in protocol services. |
 | Cache materialization, cache.x:35-474,508-707 | Template generated declarations/assignments; retain cache identity, dependency graph and initializer phase propagation. Share only actual duplicated initializer shapes with generate.x. |
@@ -250,6 +258,15 @@ and signature checks, not ordinary wrapper functions. These are concrete
 boundaries where a simple Type hole or callable template is not established
 as sufficient. Record such exceptions per family; do not force a translation
 that changes the native mechanism.
+
+`Emitter._raise` also remains an emission boundary. It records the final
+file, line and function name, including a generated defer callback's owner,
+and appends `__builtin_unreachable()` only for a cause that
+`Ast.never_returns()` recognizes. `raise-statement` checks the site and
+runtime location. Moving the raise node into an earlier source template
+would lose those emitter facts and the terminal marker used for `_Noreturn`;
+retaining both paths would add machinery. This is a bounded backend
+exception for the current representation.
 
 ### Protocol update example
 
