@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/parameter-local-redeclaration.x:2:30: parse: declaration 'value' is already bound
+  int f(int value) { int value = 2; return value; }
+                               ^
+  note: prior binding: 'value'
+

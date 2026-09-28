@@ -883,6 +883,8 @@ static List _finish_parameter(
   match (declarator)
     case %(bind ?binding ?):
       if (!compiler.macro_holes) {
+        if (binding)
+          compiler.semantic_binding_facts()[%(parameter $binding)] = 1;
         Symbol kind = parameter.type_from_ast().car();
         if (kind == <&> || kind == <opt-ref>)
           compiler.semantic_binding_facts()[
@@ -1620,9 +1622,9 @@ static List _finish_function_parts(
       c.return_type = old_return;
       c.fn_name = old_fn;
     }
-    if (syntax) body = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
+    if (syntax) body = c.bind_callable_body(syntax, c.return_type);
     else if (expression_body) body = _parse_expression_function_body(c);
-    else body = c.parse_compound_statement();
+    else body = c.parse_callable_body();
   }
   _publish_function_lifecycle(c, name, initializer_owner, shutdown_owner);
   return %(function $rtype $declarator $body);
@@ -2331,9 +2333,10 @@ static List _install_declarator_node(
         compiler.token, NULL);
   }
   String exact = _syntax_exact_name(name);
-  if (exact_name) {
-    List prior_binding = compiler.sym.current_binding(%($exact));
-    Var prior = prior_binding
+  List existing = exact ? compiler.sym.current_binding(%($exact)) : NULL;
+  if (exact_name || (existing &&
+      compiler.semantic_binding_facts().contains(%(parameter $existing)))) {
+    Var prior = existing
               ? compiler.sym.current_symbols()[%($exact)] : void;
     if (prior is <list>) {
       Type prior_type = prior;
@@ -2938,20 +2941,9 @@ List Compiler.bind_syntax(
       }
       case %(block *children): {
         if (!statement_position) goto construction_error;
-        Array fields = [];
-        List present_before = _.present_references();
-        defer _.restore_reference_presence(present_before);
         _.sym.push_new_scope();
-        {
-          defer _.sym.pop_scope();
-          foreach (Var child, children) {
-            List bound = _.bind_syntax(child, AST_BLOCK, _.return_type);
-            if (bound.car() == <seq>)
-              foreach (Var item, bound.cdr()) fields.push(item);
-            else fields.push(bound);
-          }
-        }
-        return %(block @{fields.list_free()});
+        defer _.sym.pop_scope();
+        return _.bind_callable_body(input, _.return_type);
       }
       case %(group *children): {
         if (!statement_position) goto construction_error;
@@ -2966,4 +2958,31 @@ List Compiler.bind_syntax(
       <parse>, "syntax cannot be constructed at this position",
       _.token, NULL);
   }
+}
+
+/** Binds a callable's outer block in its active parameter scope. Ordinary
+    constructed blocks open their own scope before using this operation.
+*/
+List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
+  match (syntax) {
+    case %(at ?origin ?body): {
+      List bound = c.bind_callable_body(body, return_type);
+      match (bound) case %(seq ?only): bound = only;
+      Var anchor = origin == <m-origin> ? c.origin : origin;
+      return %(at $anchor $bound);
+    }
+    case %(block *children): {
+      Array fields = [];
+      List present_before = c.present_references();
+      defer c.restore_reference_presence(present_before);
+      foreach (Var child, children) {
+        List bound = c.bind_syntax(child, AST_BLOCK, return_type);
+        if (bound.car() == <seq>)
+          foreach (Var item, bound.cdr()) fields.push(item);
+        else fields.push(bound);
+      }
+      return %(block @{fields.list_free()});
+    }
+  }
+  return c.bind_syntax(syntax, AST_BLOCK, return_type);
 }

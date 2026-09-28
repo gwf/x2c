@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/parameter-local-redeclaration-constructed-lambda.x:13:10: parse: declaration 'value' is already bound
+  Func f = $raw();
+           ^
+  note: prior binding: 'value'
+
