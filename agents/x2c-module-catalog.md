@@ -309,7 +309,7 @@ Public functions:
 `Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
 `Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`x2c_template_call`, `Compiler.peek_macro_hole`,
+`x2c_template_call`, `Compiler.rebuild_expression`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.macro_value_literal`,
 `Compiler.expanding`, `Compiler.try_parse_macro_pattern`,
@@ -382,7 +382,7 @@ Public functions:
 `Compiler.skip_linkage_brace`, `Compiler.definition_doc`,
 `Compiler.parse_top_level_mode`, `Compiler.parse_top_level`,
 `Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
-`Compiler.bind_syntax`
+`Compiler.bind_syntax`, `Compiler.bind_callable_body`
 
 ### [src/project.x](../src/project.x)
 
@@ -466,7 +466,7 @@ Public functions:
 `Compiler.begin_match_arm`, `Compiler.begin_catch_arm`,
 `Compiler.with_binding`, `Compiler.parse_block_item`,
 `Compiler.parse_statement`, `Compiler.parse_block_items`,
-`Compiler.parse_compound_statement`
+`Compiler.parse_callable_body`, `Compiler.parse_compound_statement`
 
 ### [src/toolchain.x](../src/toolchain.x)
 

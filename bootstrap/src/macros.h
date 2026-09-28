@@ -181,6 +181,8 @@ List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definitio
 
 List x2c_template_call(Var stored, List values);
 
+List Compiler_rebuild_expression(Compiler c, Type type, List application);
+
 List Compiler_peek_macro_hole(Compiler compiler);
 
 int Compiler_macro_lisp_starts_declaration(Compiler c);
