@@ -1484,6 +1484,55 @@ hoistability, write/volatile semantics, and the unsupported-capture try
 fallback remain with their existing owners. No new parser or runtime behavior
 is intended.
 
+### E3. Var array and map literal calls (target readable form)
+
+The transform converts each source element to `Var` in its existing source
+order. The resulting expression template makes the C call visible before
+emission:
+
+```x2c
+macro open Expression $var_array(Expr $count, Expr $values...) =>
+  Array.update_n(Array.new(), $count, $values...);
+macro open Expression $empty_var_array() => Array.new();
+macro open Expression $var_map(Expr $count, Expr $entries...) =>
+  Map.update_n(Map.new(), $count, $entries...);
+macro open Expression $empty_var_map() => Map.new();
+
+List transform_array_literal(Compiler c, List ast) {
+  Array values = [];
+  foreach (List element, ast.cdr())
+    values.push(_literal_element(c, element));
+  return _var_array_literal(c, values.list_free());
+}
+
+List transform_map_literal(Compiler c, List ast) {
+  Array entries = [];
+  foreach (List pair, ast.cdr()) {
+    entries.push(_literal_element(c, pair.cadr()));
+    entries.push(_literal_element(c, pair.caddr()));
+  }
+  return _var_map_literal(c, entries.list_free());
+}
+```
+
+The two narrow producers choose the empty template or pass an already typed
+count and converted arguments to the nonempty template. They return the
+lowered expression content at its established Array or Map type and stage.
+`cache.x` continues to materialize cached values through these producers.
+The `varray`, `vmap`, `vpair` emitter arms and `_var_collection` disappear
+once no lowerer emits those nodes. The generated call should retain the
+existing argument order and empty constructor-only form. C's argument
+evaluation rules remain the same; the migration does not introduce staging
+temporaries or new order guarantees.
+
+Focused checks at the local adoption show the same generated constructor
+calls and successful execution. Binding those calls in the transform adds
+`Array_new`/`Array_update_n` and `Map_new`/`Map_update_n` declarations to
+generated C where they are used. Transform expectations record the newly
+explicit call nodes and shifted binding numbers. The fixture expectations
+remain for integration to review and refresh; these are output deltas, not
+new runtime behavior.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

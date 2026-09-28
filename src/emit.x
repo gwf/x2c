@@ -264,13 +264,6 @@ static List Emitter._literal(Emitter emitter, List ast) {
   return %( $text );
 }
 
-static List Emitter._var_collection(Emitter e, String type, List elements) {
-  if (!elements) return %("${type}_new()");
-  List emitted = e._commas(e._emit(elements));
-  String count = %"${elements.len()}";
-  return %("${type}_update_n(${type}_new(), " $count ", " $emitted ")");
-}
-
 static List Emitter._binding(Emitter emitter, List ast) =>
   %(${emitter.emitted_binding_name(ast)});
 
@@ -1034,15 +1027,6 @@ static List Emitter._emit(Emitter e, List ast) {
       if (e.compiler.source_map)
         return %(src-at $origin @result src-at $old_origin);
       return result;
-    }
-    case %(varray *elements):
-      return e._var_collection("Array", elements);
-    case %(vmap *elements):
-      return e._var_collection("Map", elements);
-    case %(vpair ?key ?value): {
-      List c_key = e._emit(%($key));
-      List c_value = e._emit(%($value));
-      return %(@c_key ", " @c_value);
     }
     case %(cons ?item ?tail): {
       List c_item = e._emit(%($item));

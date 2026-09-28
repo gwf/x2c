@@ -3616,6 +3616,45 @@ static List _truthy(Compiler compiler, List ast) {
 
 // collection passes
 
+/* The converted Var values enter the native counted constructors unchanged.
+   Empty literals need only allocate their container. */
+macro open Expression $var_array(Expr $count, Expr $values...) =>
+  Array.update_n(Array.new(), $count, $values...);
+
+macro open Expression $empty_var_array() => Array.new();
+
+macro open Expression $var_map(Expr $count, Expr $entries...) =>
+  Map.update_n(Map.new(), $count, $entries...);
+
+macro open Expression $empty_var_map() => Map.new();
+
+/* The containing typed expression already fixes the result type. */
+static List _var_literal_content(Compiler compiler, List application) {
+  List bound = compiler.bind_syntax(application, AST_EXPRESSION, NULL);
+  match (bound) case %(expr ? ?content): return content;
+  __builtin_unreachable();
+}
+
+static List _var_array_literal(Compiler compiler, List values) {
+  if (!values) {
+    Macro empty = $empty_var_array;
+    return _var_literal_content(compiler, empty());
+  }
+  Macro shape = $var_array;
+  return _var_literal_content(
+    compiler, shape(x2c_literal_int(values.len()), values));
+}
+
+static List _var_map_literal(Compiler compiler, List entries) {
+  if (!entries) {
+    Macro empty = $empty_var_map;
+    return _var_literal_content(compiler, empty());
+  }
+  Macro shape = $var_map;
+  return _var_literal_content(
+    compiler, shape(x2c_literal_int(entries.len() / 2), entries));
+}
+
 // Normalize cons nodes so head and tail carry expected runtime types.
 static List _cons(Compiler compiler, List ast) {
   List (head, tail) = ast.cdr();
@@ -3631,30 +3670,25 @@ static List _literal_element(Compiler c, List element) {
   return c.convert_expression(element, %("Var"));
 }
 
-/** Converts an `(array ...)` or `(varray ...)` node to source-ordered
-    `(varray ...)` form, converting every typed element to `Var`.
-*/
+/** Converts an array literal to source-ordered Var arguments for its
+    counted constructor. */
 List transform_array_literal(Compiler compiler, List ast) {
   Array values = [];
   foreach (List elem, ast.cdr())
     values.push(_literal_element(compiler, elem));
-  return %(varray @{values.list_free()});
+  return _var_array_literal(compiler, values.list_free());
 }
 
-/** Converts a `(map ...)` or `(vmap ...)` node to source-ordered
-    `(vmap (vpair ...))` form, converting every typed key and value to
-    `Var`.
-*/
+/** Converts a map literal to alternating Var key/value arguments for its
+    counted constructor. */
 List transform_map_literal(Compiler compiler, List ast) {
   List elems = ast.cdr(), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
-    values.push(
-      %(vpair ${_literal_element(compiler, key)}
-              ${_literal_element(compiler, val)}));
+    values.push(_literal_element(compiler, key));
+    values.push(_literal_element(compiler, val));
   }
-  List velems = values.list_free();
-  return %(vmap @velems);
+  return _var_map_literal(compiler, values.list_free());
 }
 
 static List _append(Compiler compiler, List ast) {
@@ -4376,8 +4410,10 @@ static Ast _step(Compiler c, Ast ast) {
           if (first.match(%(expr ? (op *)))):
             return _op_chain(c, ast);
       break;
-    case <array>:    ast = transform_array_literal(c, ast);     break;
-    case <map>:      ast = transform_map_literal(c, ast);       break;
+    case <array>: case <varray>:
+      ast = transform_array_literal(c, ast); break;
+    case <map>: case <vmap>:
+      ast = transform_map_literal(c, ast); break;
     case <cast>:     ast = _cast(c, ast);             break;
     case <index>:    ast = _index(c, ast);            break;
     case <cons>:     ast = _cons(c, ast);             break;
