@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <string.h>
 #include "scope.x"
+#include "array.x"
 #include "exception.x"
 #include "match.x"
 
@@ -108,7 +109,34 @@ static void MatchMachine._set_span(
 static int MatchMachine._slot_value_equal(
   MatchMachine m, MachineSlot *slot, Var value) {
   if (slot.kind != MACHINE_SLOT_VALUE) return 0;
+  if (m.relation)
+    return m.relation(m, (int) (slot - m.slots), slot.value, value,
+                      m.relation_context);
   return slot.value == value;
+}
+
+/* A sequence comparison under a relation materializes both sides once; the
+   default path keeps the allocation-free span comparison. */
+static int MatchMachine._slot_sequence_equal(
+  MatchMachine m, int index, List input, int length, int final) {
+  MachineSlot *slot = &m.slots[index];
+  if (!m.relation)
+    return final ? slot.final_equal(input, m.stats)
+                 : slot.prefix_equal(input, length, m.stats);
+  List expected = slot.kind == MACHINE_SLOT_SPAN
+    ? m.materialize_span(slot.span) : slot.value.list();
+  if (m.status == <error>) return 0;
+  List candidate = input;
+  if (!final) {
+    Array items = [];
+    for (int n = 0; n < length; n++) {
+      if (!input) return 0;
+      items.push(input.car());
+      input = input.cdr();
+    }
+    candidate = items.list_free();
+  }
+  return m.relation(m, index, expected, candidate, m.relation_context);
 }
 
 static int MatchMachine._push_frame(MatchMachine m) {
@@ -349,15 +377,14 @@ int MatchMachine.step(MatchMachine m) {
 
     case MW_SLOT_EQ_PREFIX: {
       int length = *m._distance(w.c) - *m._distance(w.b);
-      MachineSlot *slot = &m.slots[w.a];
-      if (!slot.prefix_equal(*m._cursor(w.b), length, m.stats))
+      if (!m._slot_sequence_equal(w.a, *m._cursor(w.b), length, 0))
         m.pc = w.target;
       break;
     }
 
     case MW_SLOT_EQ_FINAL_IDENTITY: {
-      MachineSlot *slot = &m.slots[w.a];
-      if (!slot.final_equal(*m._cursor(w.b), m.stats)) m.pc = w.target;
+      if (!m._slot_sequence_equal(w.a, *m._cursor(w.b), 0, 1))
+        m.pc = w.target;
       break;
     }
 

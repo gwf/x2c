@@ -2293,6 +2293,11 @@ List Compiler.cache_literal_var(Compiler compiler, Var value) {
     literal = compiler.convert_expression(literal, %("Var"));
     return compiler.cache(%(var $literal));
   }
+  if (value is <lsym>) {
+    List literal = %(expr ("Atom") (literal ("Atom") ${value.str()} $value));
+    literal = compiler.convert_expression(literal, %("Var"));
+    return compiler.cache(%(var $literal));
+  }
   if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
   List literal = %(
@@ -2350,6 +2355,11 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (converter == "List_var" || converter == "Symbol_var")
     match (third) case %(args ?argument):
       return c.match_pattern_value(argument);
+  if (converter == "Macro_case_pattern")
+    match (third) case %(args ? ?names): {
+      List labels = c.match_pattern_value(names);
+      return %(!and x2c-dyn @labels);
+    }
   if (head == <literal>) return ast.last();
   if (head == <nil>) return %();
   if (head == <cons>) {

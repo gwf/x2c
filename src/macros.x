@@ -739,7 +739,9 @@ static Var _lisp_import_hook(String path) {
 int Compiler.macro_form_is_definition(Compiler compiler) {
   if (compiler.peek(0) != <ident> || compiler.token.text != "macro") return 0;
   if (compiler.peek(1) == <$>) return 1;
-  return compiler.peek(1) == <ident> && compiler.peek(2) == <$>;
+  return compiler.peek(1) == <ident> &&
+    (compiler.peek(2) == <$> ||
+     (compiler.peek(2) == <ident> && compiler.peek(3) == <$>));
 }
 
 /* The `<(>` literal keeps this body braced: the API reference generator
@@ -2271,6 +2273,8 @@ void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
   compiler.queue_declaration_effect(form, first, compiler.token);
 }
 
+static Var _helper_result(Compiler c, Var value);
+
 static Var _sdk_identifier_result(Var value) {
   match (value)
     case %("x2c.ident" (!is ?spelling type string)): return spelling;
@@ -2307,7 +2311,8 @@ List Compiler.lift_macro_lisp_expression(
   Var identifier = _sdk_identifier_result(value);
   if (identifier is not void) return %(expr () (ident $identifier));
   if (value is <list> && !value.is_nil())
-    return compiler.bind_syntax(value, AST_EXPRESSION, NULL);
+    return compiler.bind_syntax(
+      _helper_result(compiler, value), AST_EXPRESSION, NULL);
   compiler.report_error(
     <macro>, "compile-time Lisp result cannot fill an expression slot",
     invocation, %( "value:" ${value.repr()} ));
@@ -2359,13 +2364,22 @@ static Compiler _stub_compiler(String name, Token &site) {
    compiler replaced by its invocation. */
 static Var _helper_result(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
+  match (value) {
+    case %(macrodef *): return value;
+    case %(literal *): return value;
+  }
   Array parts = [];
   foreach (Var part, (List) value) parts.push(_helper_result(c, part));
   List resolved = parts.list_free();
   match (resolved) {
-    case %("x2c.template" ?stored ?(List values)):
-      return _sdk_template_call(
-        stored is <string> ? Atom.intern(stored.str()) : stored, values);
+    case %("x2c.template" ?stored ?(List values)): {
+      Token site = c.macro_invocation_site(<m-invoke>);
+      if (!site) site = c.token;
+      $let(macro_sdk_compiler, c)
+      $let(macro_import_invocation, site)
+        return _sdk_template_call(
+          stored is <string> ? Atom.intern(stored.str()) : stored, values);
+    }
   }
   return resolved;
 }
@@ -2384,8 +2398,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   Token site;
   Compiler c = _stub_compiler(name, site);
   if (!c.groups_meta())
-    return _helper_result(
-      c, c.meta_helper_call(name, site, values.list_free()));
+    return c.meta_helper_call(name, site, values.list_free());
   c.bind_meta_group(name, site);
   Var bound;
   c.macro_lisp.try_get(name, bound);
@@ -2673,6 +2686,7 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
     ? _evaluate_meta_value(c, form, invocation, 1)
     : _eval_template_form(
       c, form, bindings, invocation, source_file, required);
+  result = _helper_result(c, result);
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
@@ -2686,8 +2700,14 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
         exact = spelling;
     if (exact) result = %($construction $exact);
   }
-  return splice && result is <list>
-    ? %(seq @{result}) : result;
+  if (splice && result is <list>) {
+    match (result) {
+      case %(macro-invoke ? ? ?): return %(seq $result);
+      case %(seq *): return result;
+    }
+    return %(seq @{result});
+  }
+  return result;
 }
 
 /** Evaluates a macro slot and returns its syntax as a row sequence.
@@ -3422,13 +3442,17 @@ static const SymbolSet decorator_target_kinds =
 List Compiler.parse_macro_definition(Compiler c) {
   Token start = c.token;
   c.expect(<ident>);
+  int open = c.peek(0) == <ident> && c.token.text == "open" &&
+             c.peek(1) == <ident>;
+  if (open) c.next();
   if (c.peek(0) == <$>)
     c.report_error(
       <parse>, "macro definition requires a result kind before '$'",
       c.token,
       %("write the result kind between 'macro' and the macro name"));
-  int local = c.peek(0) == <ident> &&
-              c.peek(1) == <ident> && c.peek(2) == <(>;
+  int anonymous = c.peek(0) == <ident> && c.peek(1) == <(>;
+  int local = anonymous || (c.peek(0) == <ident> &&
+              c.peek(1) == <ident> && c.peek(2) == <(>);
   if (c.peek(0) != <ident> || (!local && c.peek(1) != <$>))
     c.report_error(
       <parse>, "expected macro result kind before '$'",
@@ -3437,7 +3461,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   c.next();
   Symbol result_kind = _result_kind_token(c, kind_token);
   Atom name;
-  if (local) {
+  if (anonymous) name = Atom.intern(c.fresh_name("anonymous_macro"));
+  else if (local) {
     name = Atom.intern(c.token.text);
     c.next();
   }
@@ -3584,8 +3609,9 @@ List Compiler.parse_macro_definition(Compiler c) {
     name, result_kind, target_kind,
     target_hole, parameters, NULL, NULL,
     NULL, NULL, origin, source_file, imported, builtin, local);
-  if (local) c.sym.define_macro(name, definition);
-  else if (!old_holes)
+  if (open) definition = definition.append(%((open 1)));
+  if (local && !anonymous) c.sym.define_macro(name, definition);
+  else if (!local && !old_holes)
     c.macros[name] = definition;
 
   Map old_local_macro_captures = c.local_macro_captures;
@@ -3608,7 +3634,7 @@ List Compiler.parse_macro_definition(Compiler c) {
       }
       else {
         replacement = c.parse_expression();
-        c.expect(<;>);
+        if (!anonymous) c.expect(<;>);
       }
     }
     else {
@@ -3709,10 +3735,88 @@ List Compiler.parse_macro_definition(Compiler c) {
     name, result_kind, target_kind, target_hole, parameters,
     fresh_rows, captures,
     pattern, replacement, origin, source_file, imported, builtin, local);
-  if (local) c.sym.define_macro(name, definition);
-  else if (!old_holes)
+  if (open) definition = definition.append(%((open 1)));
+  if (local && !anonymous) c.sym.define_macro(name, definition);
+  else if (!local && !old_holes)
     c.publish_macro_definition_node(definition);
   return definition;
+}
+
+/** Returns the visible global macro `name` as a `Macro` value. */
+static List _macro_value(Compiler c, Atom name) {
+  Var stored;
+  if (!_try_definition(c, name, 1, stored)) return NULL;
+  List cached = c.cache_literal_list(stored);
+  return %(expr ("Macro") ${cached.caddr()});
+}
+
+/** Parses `case NAME(?a, *b)` where NAME selects a macro, as `$name` or as
+    a `Macro` variable, into the pattern expression that recognizes code the
+    macro builds. Returns NULL without consuming tokens for any other case.
+*/
+List Compiler.try_parse_macro_pattern(Compiler c) {
+  Token saved = c.token;
+  List expression = NULL;
+  if (c.peek(0) == <$>) expression = _macro_value(c, _name(c));
+  else if (c.peek(0) == <ident>) {
+    Type type = NULL;
+    List binding = c.sym.lookup(%(${c.token.text}), type);
+    if (binding && c.sym.is_named_value_type(type, "Macro")) {
+      expression = c.resolve_expression(
+        %(expr $type (ident $binding)), c.token);
+      c.next();
+    }
+  }
+  if (!expression || c.peek(0) != <(>) {
+    c.token = saved;
+    return NULL;
+  }
+  c.expect(<(>);
+  Array names = [];
+  if (c.peek(0) != <)>) loop {
+    int sequence = c.peek(0) == <*>;
+    c.expect(sequence ? <*> : <?>);
+    String name = c.token.text;
+    c.expect(<ident>);
+    names.push(Atom.intern(%"${sequence ? "*" : "?"}$name"));
+    if (!c.test(<,>)) break;
+  }
+  c.expect(<)>);
+  List labels = c.cache_literal_list(names.list_free());
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_case_pattern")), saved);
+  return c.resolve_expression(
+    %(expr ("List") (call $callee (args $expression $labels))), saved);
+}
+
+/** Returns an anonymous macro definition as a `Macro` value. Macro values
+    the body applies are captured where the literal is written, so a later
+    application applies the same children.
+*/
+List Compiler.capture_macro_value(Compiler c, List definition) {
+  List cached = c.cache_literal_list(definition);
+  List literal = %(expr ("Macro") ${cached.caddr()});
+  List rows = %(expr ("List") (nil));
+  int captured = 0;
+  foreach (List binding, definition.assoc(<captures>).list()) {
+    Type type = c.semantic_binding_facts()[%(type $binding)];
+    if (!c.sym.is_named_value_type(type, "Macro")) continue;
+    List identity = c.cache_literal_list(binding);
+    List value = c.resolve_expression(
+      %(expr $type (ident $binding)), c.token);
+    List pair = %(expr ("List")
+      (cons ${c.convert_expression(identity, %("Var"))}
+        (expr ("List") (cons ${c.convert_expression(value, %("Var"))}
+          (expr ("List") (nil))))));
+    rows = %(expr ("List")
+      (cons ${c.convert_expression(pair, %("Var"))} $rows));
+    captured = 1;
+  }
+  if (!captured) return literal;
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_close")), c.token);
+  return c.resolve_expression(
+    %(expr ("Macro") (call $callee (args $literal $rows))), c.token);
 }
 
 /** Publishes a canonical `macrodef` in source order and returns `node`.
@@ -4233,6 +4337,14 @@ static List _take_invocation(Compiler c, AstPos position) {
 */
 List Compiler.try_parse_macro_expression(Compiler c) {
   Token invocation = c.token;
+  if (c.peek(0) == <$>) {
+    Atom name = _name(c);
+    if (c.peek(0) != <(>) {
+      List value = _macro_value(c, name);
+      if (value) return value;
+    }
+    c.token = invocation;
+  }
   if (c.peek(0) == <$> && !_peek_invocation(c)) {
     c.next();
     List callee = c.parse_variable();

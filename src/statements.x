@@ -339,7 +339,8 @@ static List _match_case(Compiler c) {
       Array captures = $auto([]);
       $let(c.in_pattern, 1)
       $let(c.match_types, captures) {
-        pattern = c.parse_expression();
+        pattern = c.try_parse_macro_pattern();
+        if (!pattern) pattern = c.parse_expression();
         types = captures;
       }
     }

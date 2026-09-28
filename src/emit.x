@@ -570,6 +570,18 @@ static List _flat_match_condition(Symbol head, List tags) {
    front of the conditional groups around its arm, so the switch still
    reaches later arms when the preprocessor removes that arm. */
 
+/* A macro-valued case recognizes the subject through the runtime, which
+   publishes captures into the arm's buffer. */
+static List _macro_case_condition(Emitter e, List pattern_ast) {
+  match (pattern_ast)
+    case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
+                        (args ?template ?names))):
+      return %("Macro_case_capture(_x2c_match_expr,"
+        @{e._emit(template)} "," @{e._emit(names)} ","
+        "&_x2c_match_capture)");
+  return NULL;
+}
+
 static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
   Array values = [], heads = [], int labelling = 1, opening = 0;
   List arms = NULL;
@@ -595,7 +607,13 @@ static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
     List label =
       _match_arm_label(match_value_head(value), heads, labelling);
     if (label) values.insert(arms ? opening++ : values.len(), label);
+    List macro_case = _macro_case_condition(e, pattern_ast);
     if (pattern === %(*)) values.push(%($body @implicit_break));
+    else if (macro_case) {
+      List declarations = _make_local_binders(binders, "_x2c_match_values");
+      values.push(
+        %("if (" @macro_case ") {" @declarations @body @implicit_break "}"));
+    }
     else if (flat_head) {
       List condition = _flat_match_condition(flat_head, flat_tags);
       List declarations = _make_local_binders(binders, "_x2c_match_values");

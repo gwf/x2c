@@ -52,6 +52,7 @@ typedef List Type;
    S))`. `x2c_source_text` and `x2c_embed_text` read it directly. */
 typedef List Source;
 
+
 /* --- declaration parts --------------------------------------------------
    The compiler and a project's helper both spell a Type as declaration
    syntax, so the one implementation lives here. */
@@ -124,6 +125,360 @@ meta List x2c_literal_int(int value) =>
 /** Returns a `Symbol` expression holding `value`. */
 meta List x2c_literal_symbol(Symbol value) =>
   %(expr ("Symbol") (literal ("Symbol") ${value.str()} $value));
+
+/* --- macro values -------------------------------------------------------
+   A `Macro` is the canonical `macrodef` record of a definition. `$name`
+   selects one and `macro Kind(...) => ...` creates one. Applying it
+   returns a pending invocation the compiler expands and binds at the
+   insertion site; naming it in a `case` derives a Match pattern from the
+   same body. Projection keys spell the compiler's replacement binders. */
+
+/** A macro as a value: called to build code, or used in a Match `case` to
+   recognize code and capture its parameters. */
+typedef List Macro;
+
+static Atom _macro_key(List hole, String projection) {
+  String name = hole.assoc(<binder>).str()[1:];
+  int sequence = hole.assoc(<sequence>);
+  if (projection == "splice") sequence = 1;
+  else if (projection == "member") sequence = 0;
+  return Atom.intern(%"${sequence ? "*" : "?"}__macro_${projection}_$name");
+}
+
+/** Records the Macro values an anonymous macro captured where it was
+   created, so applying it later applies the same children. */
+Macro Macro_close(Macro value, List captures) =>
+  value.append(%((env $captures)));
+
+static Var _macro_expr_value(Var value) =>
+  value.is_integer() ? x2c_literal_int(value.integer()) : value;
+
+/* Groups positional arguments by the definition's parameters: a sequence
+   parameter takes every remaining argument as one List. */
+static List _macro_group(Macro t, List values) {
+  Array grouped = [];
+  foreach (List hole, t.assoc(<parameters>).list()) {
+    int sequence = hole.assoc(<sequence>);
+    grouped.push(sequence ? values.var() : values.car());
+    values = sequence ? NULL : values.cdr();
+  }
+  return grouped.list_free();
+}
+
+/** Applies a macro value to code values. The result is a pending
+   invocation; inserting it into a program expands and binds it there. */
+List Macro_apply(Macro t, List values) =>
+  %("x2c.template" $t ${_macro_group(t, values)});
+
+static Var _macro_inline(List environment, Var tree);
+
+/* Substitutes grouped values into the body directly. Pattern derivation
+   uses this for a captured child macro; construction goes through the
+   compiler's invocation rows instead. */
+static List _macro_instantiate(Macro t, List values) {
+  List rows = NULL;
+  foreach (List hole, t.assoc(<parameters>).list()) {
+    int sequence = hole.assoc(<sequence>);
+    Var value = sequence ? values.var() : values.car();
+    if (hole.assoc(<kind>) == <expr>) {
+      if (sequence) {
+        Array lifted = [];
+        foreach (Var item, values) lifted.push(_macro_expr_value(item));
+        value = lifted.list_free();
+      }
+      else value = _macro_expr_value(value);
+    }
+    Var expression = value;
+    if (!sequence && hole.assoc(<kind>) == <name>)
+      expression = %(expr () (ident $value));
+    rows = cons(%(${_macro_key(hole, "expression")} $expression), rows);
+    rows = cons(%(${_macro_key(hole, "value")} $value), rows);
+    rows = cons(%(${_macro_key(hole, "source")} $value), rows);
+    if (hole.assoc(<kind>) == <name>)
+      rows = cons(%(${_macro_key(hole, "member")} $value), rows);
+    rows = cons(%(${_macro_key(hole, "splice")} $value), rows);
+    values = sequence ? NULL : values.cdr();
+  }
+  List body = t.assoc(<template>);
+  return _macro_inline(t.assoc(<env>), body.replace(rows));
+}
+
+static Var _macro_inline(List environment, Var tree) {
+  if (tree is not <list>) return tree;
+  match (tree) {
+    case %(expr (<macro-expr>) (expr ?type ?body)):
+      return _macro_inline(environment, %(expr $type $body));
+    case %(tpl-call (expr ? (ident ?binding)) (args *arguments)): {
+      Macro child = NULL;
+      foreach (List row, environment)
+        if (List.compare(row.car(), binding) == 0) {
+          child = row.cadr();
+          break;
+        }
+      return _macro_instantiate(child, arguments);
+    }
+    case %(literal *): return tree;
+  }
+  Array parts = [];
+  foreach (Var part, tree.list()) parts.push(_macro_inline(environment, part));
+  return parts.list_free();
+}
+
+/* Turns an instantiated body into a pattern: derived expression types
+   become wildcards, literals and operators are quoted, and a binder in a
+   hole shell stands alone. */
+static Var _macro_pattern_view(Var value) {
+  if (value is not <list>)
+    return value == <*> || value == <?> ? %(!quote $value).var() : value;
+  List node = value;
+  match (node) {
+    case %(expr ?type ?body): {
+      if (type === %(<macro-expr>) && body.is_binder()) return body;
+      if (type === %(<macro-expr>) && body is <list> &&
+          body.list().car() == <expr>)
+        return _macro_pattern_view(body);
+      return %(expr ? ${_macro_pattern_view(body)});
+    }
+    case %(literal *): return %(!quote $node);
+    case %(op ?operator *operands): {
+      Array parts = [];
+      foreach (Var operand, operands)
+        parts.push(_macro_pattern_view(operand));
+      return %(op (!quote $operator) @{parts.list_free()});
+    }
+    case %(seq ?one): return _macro_pattern_view(one);
+    case %(return ?type ?body):
+      return %(return ? ${_macro_pattern_view(body)});
+  }
+  Array parts = [];
+  foreach (Var part, node) parts.push(_macro_pattern_view(part));
+  return parts.list_free();
+}
+
+/** Derives the Match pattern that recognizes code this macro builds,
+   capturing each parameter under the given binder. */
+List Macro_pattern(Macro t, List names) {
+  List rows = NULL, labels = names;
+  foreach (List hole, t.assoc(<parameters>).list()) {
+    Var selected = labels.car();
+    labels = labels.cdr();
+    if (hole.assoc(<kind>) == <type>)
+      selected = Atom.intern("*" + selected.str()[1:]);
+    int sequence = hole.assoc(<sequence>);
+    Var projected = sequence ? %($selected).var() : selected;
+    rows = cons(%(${_macro_key(hole, "expression")} $projected), rows);
+    rows = cons(%(${_macro_key(hole, "value")} $projected), rows);
+    rows = cons(%(${_macro_key(hole, "source")} $projected), rows);
+    rows = cons(%(${_macro_key(hole, "member")} $selected), rows);
+    rows = cons(%(${_macro_key(hole, "splice")} ($selected)), rows);
+  }
+  List body = t.assoc(<template>);
+  List pattern = _macro_pattern_view(
+    _macro_inline(t.assoc(<env>), body.replace(rows)));
+  if (t.assoc(<kind>) == <block-item> && body.car() == <seq> &&
+      body.cdr().len() == 1)
+    return %(!or $pattern (seq $pattern));
+  return pattern;
+}
+
+/* --- recognition with binding hygiene ------------------------------------
+   Declarations the body introduces match any identity in the subject, one
+   distinct identity per declaration; other references keep their exact
+   identities. Source wrappers are removed from both sides for comparison,
+   while captured values keep the subject's original subtrees. */
+
+static Atom _macro_fixed(int index) => Atom.intern(%"?__fixed_$index");
+
+static Var _macro_view(Var value) {
+  if (value is not <list>) return value;
+  List node = value;
+  match (node) {
+    case %(at ? ?body): return _macro_view(body);
+    case %(src ? ?body): return _macro_view(body);
+    case %(literal *): return value;
+    case %(binding ? ?): return value;
+  }
+  Array parts = [];
+  foreach (Var child, node) parts.push(_macro_view(child));
+  return parts.list_free();
+}
+
+static List _macro_case_shape(Macro t, List names) {
+  List pattern = Macro_pattern(t, names), replacements = NULL;
+  int ordinal = 0;
+  foreach (List fresh, t.assoc(<fresh>).list()) {
+    Atom identity = _macro_fixed(ordinal++);
+    replacements = cons(
+      %(${fresh.car()} (binding (!and $identity $identity) ?)),
+      replacements);
+  }
+  pattern = pattern.replace(replacements);
+  match (pattern)
+    case %(seq *parts): pattern = %(!or (seq @parts) (block @parts));
+  return _macro_view(pattern);
+}
+
+typedef struct MacroFixedSlots {
+  int count, slots[MACHINE_BINDER_MAX];
+} MacroFixedSlots;
+
+static int _macro_identity_equal(
+  void *raw_machine, int slot, Var left, Var right, void *raw_policy) {
+  if (left != right) return 0;
+  MatchMachine machine = raw_machine;
+  MacroFixedSlots *policy = raw_policy;
+  int local = 0;
+  for (int i = 0; i < policy.count; i++)
+    if (policy.slots[i] == slot) local = 1;
+  if (!local) return 1;
+  for (int i = 0; i < policy.count; i++) {
+    int other = policy.slots[i];
+    if (other != slot && machine.slots[other].kind == MACHINE_SLOT_VALUE &&
+        machine.slots[other].value == right)
+      return 0;
+  }
+  return 1;
+}
+
+static int _macro_case_match(
+  List code, Macro t, List pattern, MatchCaptureBuffer *captured) {
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  if (plan.status != MACHINE_PREPARED) {
+    int result = plan.execute_capture(code, *captured, NULL);
+    plan.free();
+    return result == 1;
+  }
+  MacroFixedSlots policy;
+  policy.count = 0;
+  int ordinal = 0;
+  foreach (List fresh, t.assoc(<fresh>).list()) {
+    int slot = plan.layout.index(_macro_fixed(ordinal++));
+    if (slot >= 0) policy.slots[policy.count++] = slot;
+  }
+  struct MatchMachine storage;
+  MatchMachine machine = &storage;
+  machine.open();
+  machine.relation = _macro_identity_equal;
+  machine.relation_context = &policy;
+  machine.begin(plan.program.view(), _macro_view(code));
+  machine.run();
+  int matched = machine.status == <ok>;
+  if (matched) {
+    for (int i = 0; i < machine.slot_count; i++) {
+      MachineSlot *slot = &machine.slots[i];
+      if (slot.kind == MACHINE_SLOT_INVALID) continue;
+      captured->values[i] = slot.kind == MACHINE_SLOT_SPAN
+        ? machine.materialize_span(slot.span) : slot.value;
+      captured->present |= 1UL << i;
+    }
+    matched = machine.status == <ok>;
+  }
+  machine.finish();
+  machine.dispose();
+  plan.free();
+  return matched;
+}
+
+/* Publishes internal captures under the user's binders, in the order the
+   `case` wrote them. */
+static int _macro_publish(
+  Macro t, List names, List internal_names, Var *values,
+  MatchCaptureBuffer *captured, MatchCaptureBuffer *published) {
+  MatchCaptureLayout actual = MatchCaptureLayout.analyze(
+    %(!and @internal_names));
+  MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
+  Var ordered[MACHINE_BINDER_MAX];
+  int matched = 1;
+  List labels = names, internal = internal_names;
+  for (; labels; labels = labels.cdr(), internal = internal.cdr()) {
+    int from = actual.index(internal.car()), to = logical.index(labels.car());
+    if (from < 0 || to < 0 || !captured.has(from)) {
+      matched = 0;
+      break;
+    }
+    ordered[to] = values[from];
+  }
+  if (matched) {
+    for (int i = 0; i < logical.binder_count; i++)
+      published->values[i] = ordered[i];
+    published->present = logical.definite;
+  }
+  actual.free();
+  logical.free();
+  return matched;
+}
+
+/* The binder each parameter is captured under inside the derived pattern:
+   a Type parameter is a List splice, so it needs a List binder. */
+static List _macro_internal_names(Macro t, List names, int pending) {
+  Array internal = [];
+  List labels = names;
+  foreach (List hole, t.assoc(<parameters>).list()) {
+    String label = labels.car().str(), prefix = label[0:1];
+    labels = labels.cdr();
+    if (pending) prefix = "?";
+    else if (hole.assoc(<kind>) == <type>) prefix = "*";
+    internal.push(Atom.intern(prefix + label[1:]));
+  }
+  return internal.list_free();
+}
+
+/* A retained invocation of this same definition matches by its arguments,
+   without expanding it. */
+static int _macro_pending_parts(
+  Macro t, List code, List &grouped) {
+  match (code) {
+    case %("x2c.template" ?descriptor ?arguments): {
+      if (descriptor is not <list> || List.compare(descriptor, t) != 0)
+        return 0;
+      grouped = arguments;
+      return 1;
+    }
+    case %(macro-invoke ?descriptor (args *rows) ?): {
+      if (descriptor is not <list> || List.compare(descriptor, t) != 0)
+        return 0;
+      Array projected = [];
+      List holes = t.assoc(<parameters>);
+      foreach (List row, rows) {
+        List hole = holes.car();
+        holes = holes.cdr();
+        Var value = hole.assoc(<kind>) == <expr>
+          ? row.assoc(<expression>) : row.assoc(<value>);
+        if (hole.assoc(<sequence>).int())
+          match (row) case %(capture ? (value *items) *): value = items;
+        projected.push(value);
+      }
+      grouped = projected.list_free();
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/** Recognizes code built by `t`, whether retained as a pending
+   invocation or already expanded, and publishes the captures under
+   `names`. Generated `match` code calls this for a macro-valued case. */
+int Macro_case_capture(
+  List code, Macro t, List names, MatchCaptureBuffer *published) {
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
+  List grouped = NULL;
+  if (_macro_pending_parts(t, code, grouped)) {
+    List internal = _macro_internal_names(t, names, 1);
+    int matched = x2c_match_try_capture(grouped, internal, &captured);
+    return matched &&
+      _macro_publish(t, names, internal, values, &captured, published);
+  }
+  List pattern = _macro_case_shape(t, names);
+  if (!_macro_case_match(code, t, pattern, &captured)) return 0;
+  return _macro_publish(
+    t, names, _macro_internal_names(t, names, 0), values, &captured,
+    published);
+}
+
+/** The pattern a macro-valued `case` compiles to; the compiler lowers a
+   call of this to `Macro_case_capture` over the match subject. */
+List Macro_case_pattern(Macro t, List names) => Macro_pattern(t, names);
 
 /* --- expression construction --------------------------------------------
    The five expression shapes a macro assembles from parts it was given. A

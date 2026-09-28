@@ -220,6 +220,10 @@ typedef struct MatchMachine {
   Var value, error;
   int fp, current_entry_undo, undo_count, slot_count;
   MachineStats *stats;
+  // An optional relation replaces plain equality when a repeated binder is
+  // compared, for value slots and for prefix or final sequence slots.
+  int (*relation)(void *, int, Var, Var, void *);
+  void *relation_context;
   Var *scratch;
   int scratch_capacity;
   MatchFrame frames[MACHINE_FRAME_MAX];

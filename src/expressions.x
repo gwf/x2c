@@ -291,6 +291,24 @@ static void _check_explicit_converter_arguments(
         compiler, car(n), car(a), car(a).list().cadr(), 2);
 }
 
+/* Calling a Macro value builds code. Inside a template body the call is
+   retained so the template can capture the value it applies; elsewhere it
+   is an ordinary `Macro_apply` over the argument values. */
+static List _apply_macro_value(
+  Compiler c, List expr, List supplied, Token origin) {
+  if (c.macro_holes)
+    return %(expr (<macro-expr>) (tpl-call $expr (args @supplied)));
+  List values = %(expr ("List") (nil));
+  if (supplied === %((expr (void) ()))) supplied = NULL;
+  foreach (List argument, supplied.reverse())
+    values = %(expr ("List")
+      (cons ${c.convert_expression(argument, %("Var"))} $values));
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_apply")), origin);
+  return c.resolve_expression(
+    %(expr ("List") (call $callee (args $expr $values))), origin);
+}
+
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
@@ -304,6 +322,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   }
   c.expect(<)>);
   List supplied = arguments.list_free();
+  if (c.sym.is_named_value_type(expr.cadr(), "Macro"))
+    return _apply_macro_value(c, expr, supplied, origin);
   List result = c.resolve_expression(
     %(expr () (call $expr (args @supplied))), origin);
   int method = !!expr.match(%(expr () (op . ? (?))));
@@ -2724,6 +2744,14 @@ List Compiler.parse_primary(Compiler compiler) {
     case <lit-char*>:  return _parse_c_string_literals(compiler);
     case <$>:          return compiler.try_parse_macro_expression();
     case <ident>: {
+      if (compiler.token.text == "macro" && compiler.peek(1) == <ident> &&
+          compiler.peek(2) == <(>) {
+        List definition = compiler.parse_macro_definition();
+        foreach (Var captured, definition.assoc(<captures>).list())
+          compiler.semantic_binding_facts()[
+            %(local-macro-capture $captured)] = 1;
+        return compiler.capture_macro_value(definition);
+      }
       List binding = compiler.with_binding();
       Var stored;
       if (binding && compiler.semantic_binding_facts().try_get(
