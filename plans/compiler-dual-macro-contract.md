@@ -2075,6 +2075,43 @@ removed no shared machinery. The extra template and binding step do not
 earn their cost for this single statement, so the source edit was restored.
 The declarations and initializer functions remain separate potential shapes.
 
+### E19. Static cache slot declaration exception
+
+`literal-cache-init` emits grouped file-static String and Var slots. Both
+header and source setup call `_generate_cache_declare` once per nonempty
+List, String and Var group. `Compiler.cache` still assigns the ids; the
+helper still turns each id into the current region's referenced binding.
+
+```x2c
+macro open Unit $cache_slots(Type $type, Name $names...) {
+  static $type $names...;
+}
+
+static List _generate_cache_declare(
+  List ids, String type, Compiler compiler, String prefix) {
+  if (!ids) return NULL;
+  Array names = [];
+  foreach (Var id, ids)
+    names.push(compiler.sym.reference(
+      %(${_generate_cache_ident(id, prefix)}), NULL));
+  Macro slots = $cache_slots;
+  return compiler.bind_syntax(
+    slots(%($type), names.list_free()), AST_UNIT, NULL);
+}
+```
+
+The existing header and source callers would retain their type order and
+nonempty checks. The attempted template built, but `literal-cache-init`
+emitted `static String;` and `static Var;` instead of the grouped slot
+declarations. Clang then reported undeclared `_0` through `_4` references.
+The generated header matched its checked expectation; the generated C did
+not. A `Name...` splice in this declarator position does not materialize
+the names with the current template capability. The source edit was
+restored. Splitting each slot into a separate declaration would change the
+generated C and lose the existing compact grouping, so this batch does not
+force that shape. Cache identity, graph and initializer phases remain with
+the current owner.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
