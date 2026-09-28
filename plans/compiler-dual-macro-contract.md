@@ -16,7 +16,8 @@
 > claims. Indirect Func context typedef binding is a concrete hygiene
 > exception. The narrow protocol discard template prototype is an exception
 > under the process ceiling. Managed declaration cleanup is on dev at
-> `c00397af`; other protocol shapes and source coverage remain.
+> `c00397af`; discarded destructuring assignment is on dev at `1d5c9b0a`.
+> Other protocol shapes and source coverage remain.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -794,7 +795,8 @@ row: do not count successive versions of try twice. The current entry is:
 | Inline captured-lambda factory (2026-09-28) | 4576e25e / dev 4f89a063, binary paths differ | confounded raw +15.04% | confounded raw +11.54% | Not counted | Not counted | Not measured |
 | Shared captured-environment typedef (2026-09-28) | d546a124 / dev 4576e25e, binary paths differ | confounded raw -56.40% | confounded raw -47.94% | Not counted | Not counted | Not measured |
 | Func bridge factories (2026-09-28) | a4c18301 / dev d546a124, binary paths differ | confounded raw -56.79% | confounded raw -47.95% | Not counted | Not counted | Not measured |
-| Managed declaration cleanup (2026-09-28) | c00397af / dev a4c18301, same staged path | raw -60.16%, cause unassigned | raw -52.37%, cause unassigned | Not counted | Not counted | Not measured |
+| Managed declaration cleanup (2026-09-28) | c00397af / dev a4c18301, distinct output dirs | confounded raw -60.16% | confounded raw -52.37% | Not counted | Not counted | Not measured |
+| Discarded destructuring assignment (2026-09-28) | 1d5c9b0a / dev c00397af, distinct output dirs | confounded raw -61.37% | confounded raw -52.63% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -816,10 +818,21 @@ and the c00397af compiler (`ffbb9cdb`), installed in turn at
 `builds/0/x2c`; the script restored the candidate byte-for-byte afterward.
 Five alternating pairs yielded 8.375224 / 3.337080 s default and
 9.729676 / 4.634577 s live. Generated C and H for the seven-source corpus
-were identical between the two binaries. The large split remains unexplained,
-and the saved baseline's build provenance and helper/cache equivalence have
-not been demonstrated. It is a raw observation, not a cost estimate for the
-managed cleanup edit. Samples are in `debug/managed-paired-results.json`.
+were identical between the two binaries. The baseline and candidate wrote to
+different output directories, which may change cache/resource state. The
+saved baseline's build provenance and helper/cache equivalence have not been
+demonstrated. This is not a cost estimate for the managed cleanup edit.
+Samples are in `debug/managed-paired-results.json`.
+
+The destructuring attempt used the same script and five alternating pairs.
+It yielded 8.472154 / 3.273020 s default and 9.556581 / 4.526578 s live,
+with matching generated C/H. The exact `ffbb9cdb` compiler binary was the
+fast candidate in the managed attempt and the slow baseline in this next
+attempt, while the script assigned it a different output directory. This
+cross-run observation makes a source-change attribution untenable. The script
+now installs both compilers at the same staged path and uses one freshly
+cleared output directory for each sample; that correction has not been timed.
+The destructuring raw samples are in `debug/destructure-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
