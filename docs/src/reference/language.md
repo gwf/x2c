@@ -1327,6 +1327,16 @@ as `case $sum(?left, ?right):` selects the macro directly. An anonymous
 `macro Kind(parameters) => body` or `macro Kind(parameters) { body }` is a
 value without a global name.
 
+A template can call a `meta` function in a slot and pass it a sequence
+hole written without `...`; the function receives the captured items as
+one `List`. Applying a macro value with one `List` of syntax as the last
+argument passes that List as the whole trailing sequence, so
+`outer(head, items)` and `outer(head, a, b)` build the same code. A `case`
+on a macro value captures what a spliced slot built under the sequence
+hole the slot was given, one element per statement, so each element can
+be recognized with a `case` on the macro that built it. The pattern a
+literal macro value derives is prepared once per process.
+
 ### Open definitions
 
 A definition is closed by default. Free identifiers in its body resolve where

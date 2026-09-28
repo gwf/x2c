@@ -4552,7 +4552,14 @@ List Compiler.try_parse_macro_expression(Compiler c) {
       List hole = c.peek_macro_hole();
       int direct = hole && (c.peek(2) == <,> || c.peek(2) == <)>);
       Symbol kind = hole ? hole.assoc(<kind>) : 0;
-      List argument = direct
+      List argument = NULL;
+      /* A sequence hole passes its captured items as one List. */
+      if (direct && hole.assoc(<sequence>).int()) {
+        c.expect(<$>);
+        c.next();
+        argument = %(expr ("List") (meta-cap (${_hole_key(hole, "value")})));
+      }
+      else argument = direct
         ? %(expr (<macro-expr>) ${_parse_hole(c, kind ? kind : <argument>)})
         : c.parse_assignment();
       if (hole && argument.match(%(expr ? (macro-bind ?)))) {

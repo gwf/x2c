@@ -822,6 +822,81 @@ not phase5 +1.40%. This is a measured reference and recommendation, not a new
 gate or per-run numerical pass/fail threshold. Preserve the existing advisory
 performance checkpoint.
 
+## Readable form
+
+A migrated site is done when a reader sees the generated C in the template
+and almost nothing in the client: one application call, no carrier
+literal, and no positional hole list longer than the C it writes has
+parameters. Typed expressions are already bound and pass to holes as they
+are. Loops and type-dependent choices live in compiler-internal meta
+functions registered in src/builtins.x and called from template slots;
+each sub-shape is its own macro, so recognition mirrors construction
+element by element. A slot whose arguments include one sequence hole
+captures its output under that hole's name when the macro is recognized.
+The derived pattern is cached per macro value.
+
+### A. Func call (src/expressions.x)
+
+Each argument asks the runtime signature whether it passes by reference,
+so an element of the argument array is not a plain boxed value: one
+macro writes one element, choosing at run time. The array is declared
+and indexed, which replaces the compound literal of named locals in the
+generated C.
+
+```x2c
+macro open Statement $func_call(Expr $callee, Expr $arguments...) {
+  {
+    Func function = $callee;
+    FuncArg storage[$func_arity($arguments)];
+    $func_arguments(function, storage, $arguments)...
+    Func_apply(function, $func_arity($arguments), storage);
+  }
+}
+
+macro open Statement $func_argument(Expr $function, Expr $storage,
+    Expr $count, Expr $index, Expr $address, Expr $carrier, Expr $value) {
+  if (x2c_func_reference_type($function, $count, $index))
+    $storage[$index] = FuncArg_reference($address, $carrier);
+  else $storage[$index] = $value;
+}
+
+macro open Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
+```
+
+`func_arguments` (src/builtins.x) applies `$func_argument` once per
+argument; the address, carrier and by-value alternative are chosen from
+the argument's type there. Client:
+
+```x2c
+Macro call = arguments ? $func_call : $func_apply;
+return %(expr ("Var")
+  (parens ${c.bind_syntax(call(callee, arguments), AST_BLOCK, NULL)}));
+```
+
+x2c source has no statement expressions, so the `(parens ...)` value of
+the block is the one form the client still writes. Recognition:
+
+```x2c
+match (block) case call(?callee, *arguments): {
+  foreach (List argument, arguments)
+    match (argument)
+      case $func_argument(?function, ?storage, ?count, ?index,
+                          ?address, ?carrier, ?value): ...
+}
+```
+
+### B. Try (src/transform.x)
+
+Target to be written before the site changes.
+
+### C. Wrapper functions and scope cells
+
+Target to be written before the site changes.
+
+### D. Lambda
+
+Target to be written before the site changes.
+
 ## 7. Name, positions and sequences
 
 Name is one logical argument with role-specific existing projections, not one

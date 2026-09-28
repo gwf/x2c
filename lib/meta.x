@@ -38,6 +38,8 @@
 #include "common.x"
 #include "list.x"
 #include "match.x"
+#include "mutex.x"
+#include <pthread.h>
 #include "string.x"
 #include "symbol.x"
 #include "symbolset.x"
@@ -159,6 +161,11 @@ static List _macro_group(Macro t, List values) {
   Array grouped = [];
   foreach (List hole, t.assoc(<parameters>).list()) {
     int sequence = hole.assoc(<sequence>);
+    /* One List of syntax passes the whole sequence, as `call(f, items)`. */
+    if (sequence && values && !values.cdr() && values.car() is <list>) {
+      List items = values.car();
+      if (!items || items.car() is <list>) values = items;
+    }
     grouped.push(sequence ? values.var() : values.car());
     values = sequence ? NULL : values.cdr();
   }
@@ -246,6 +253,18 @@ static Var _macro_free_reference(String spelling) {
   return %(binding-name $spelling);
 }
 
+/* The sequence binder a slot's arguments name, or NULL. */
+static Var _macro_slot_binder(Var form) {
+  if (form.is_binder())
+    return form.str().len() > 1 && form.str()[0] == '*' ? form : NULL;
+  if (form is not <list>) return NULL;
+  foreach (Var child, form.list()) {
+    Var binder = _macro_slot_binder(child);
+    if (binder) return binder;
+  }
+  return NULL;
+}
+
 /* Turns an instantiated body into a pattern: derived expression types
    become wildcards, literals and operators are quoted, a binder in a hole
    shell stands alone, and a free reference names the subject's binding. */
@@ -270,6 +289,13 @@ static Var _macro_pattern_view(Var value) {
       return %(op (!quote $operator) @{parts.list_free()});
     }
     case %(seq ?one): return _macro_pattern_view(one);
+    /* A slot builds code the pattern cannot see; a spliced slot captures it
+       under the sequence hole it was given. */
+    case %(macro-slot ?(int splice) ?form): {
+      if (!splice) return <?>;
+      Var binder = _macro_slot_binder(form);
+      return binder ? binder : <*>;
+    }
     case %(return ?type ?body):
       return %(return ? ${_macro_pattern_view(body)});
   }
@@ -325,8 +351,15 @@ static Var _macro_view(Var value) {
     case %(literal *): return value;
     case %(binding ? ?): return value;
   }
+  /* A statement group is transparent in C, so its items stand in place. */
   Array parts = [];
-  foreach (Var child, node) parts.push(_macro_view(child));
+  foreach (Var child, node) {
+    Var viewed = _macro_view(child);
+    match (viewed) {
+      case %(seq *items): foreach (Var item, items) parts.push(item);
+      default: parts.push(viewed);
+    }
+  }
   return parts.list_free();
 }
 
@@ -370,21 +403,131 @@ static int _macro_identity_equal(
   return 1;
 }
 
-static int _macro_case_match(
-  List code, Macro t, List pattern, MatchCaptureBuffer *captured) {
-  MatchPlan plan = MatchPlan.prepare(pattern);
-  if (plan.status != MACHINE_PREPARED) {
-    int result = plan.execute_capture(code, *captured, NULL);
-    plan.free();
-    return result == 1;
+/* Where each of the user's binders reads its capture: the slot of its
+   internal binder in the pattern that captured, and its own slot in the
+   `case`, which need not share the parameters' order. */
+typedef struct MacroPublishing {
+  int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX];
+  int count, binders, complete;
+  unsigned long definite;
+} MacroPublishing;
+
+static MacroPublishing _macro_publishing(
+  Var pattern, List names, List internal_names) {
+  MacroPublishing route;
+  memset(&route, 0, sizeof(route));
+  MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
+  MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
+  route.complete = 1;
+  List labels = names, internal = internal_names;
+  for (; labels; labels = labels.cdr(), internal = internal.cdr()) {
+    int from = actual.index(internal.car()), to = logical.index(labels.car());
+    if (from < 0 || to < 0) route.complete = 0;
+    route.from[route.count] = from;
+    route.to[route.count++] = to;
   }
+  route.binders = logical.binder_count;
+  route.definite = logical.definite;
+  actual.free();
+  logical.free();
+  return route;
+}
+
+/* Publishes internal captures under the user's binders. */
+static int _macro_publish(
+  MacroPublishing *route, Var *values, MatchCaptureBuffer *captured,
+  MatchCaptureBuffer *published) {
+  if (!route.complete) return 0;
+  Var ordered[MACHINE_BINDER_MAX];
+  for (int i = 0; i < route.count; i++) {
+    if (!captured.has(route.from[i])) return 0;
+    ordered[route.to[i]] = values[route.from[i]];
+  }
+  for (int i = 0; i < route.binders; i++) published->values[i] = ordered[i];
+  published->present = route.definite;
+  return 1;
+}
+
+/* The derived pattern, its prepared plan and the slots of its fixed
+   locals for one macro value and `case` binder list. */
+typedef struct MacroCaseShape {
+  List pattern;
+  MatchPlan plan;
   MacroFixedSlots policy;
-  policy.count = 0;
+  MacroPublishing route;
+} *MacroCaseShape;
+
+static MacroCaseShape _macro_case_derive(Macro t, List names) {
+  MacroCaseShape shape = Scope.calloc(1, sizeof(struct MacroCaseShape));
+  shape.pattern = _macro_case_shape(t, names);
+  shape.route = _macro_publishing(
+    shape.pattern, names, _macro_internal_names(t, names, 0));
+  shape.plan = MatchPlan.prepare(shape.pattern);
   int ordinal = 0;
-  foreach (List fresh, t.assoc(<fresh>).list()) {
-    int slot = plan.layout.index(_macro_fixed(ordinal++));
-    if (slot >= 0) policy.slots[policy.count++] = slot;
+  if (shape.plan.status == MACHINE_PREPARED)
+    foreach (List fresh, t.assoc(<fresh>).list()) {
+      int slot = shape.plan.layout.index(_macro_fixed(ordinal++));
+      if (slot >= 0) shape.policy.slots[shape.policy.count++] = slot;
+    }
+  return shape;
+}
+
+/* Shapes derived for macro values and binder lists that live as long as
+   the process, such as literals, keyed by their identities. */
+static Scope macro_shapes_scope = NULL;
+static Map macro_shapes = NULL;
+static pthread_mutex_t macro_shapes_mutex;
+static pthread_once_t macro_shapes_once = (pthread_once_t) PTHREAD_ONCE_INIT;
+
+static void _macro_shapes_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &macro_shapes_mutex, "Macro: could not initialize the shape mutex");
+
+static void _macro_shapes_shutdown(void) {
+  if (macro_shapes)
+    foreach (Var (key, stored), macro_shapes)
+      ((MacroCaseShape) stored.pointer()).plan.free();
+  macro_shapes = NULL;
+  macro_shapes_scope.destroy();
+  macro_shapes_scope = NULL;
+}
+
+/* The shape for `t` and `names`: derived once for lasting values, and
+   derived for this call alone otherwise, released by `release`. */
+static MacroCaseShape _macro_case_shape_for(
+  Macro t, List names, int &release) {
+  release = !Pool.is_permanent(t) || !Pool.is_permanent(names);
+  if (release) return _macro_case_derive(t, names);
+  String key = "%p %p".printf((void *) t, (void *) names);
+  x2c_mutex_recursive_lock(
+    &macro_shapes_mutex, &macro_shapes_once, _macro_shapes_initialize,
+    "Macro: could not lock the shape cache");
+  defer x2c_mutex_recursive_unlock(
+    &macro_shapes_mutex, "Macro: could not unlock the shape cache");
+  if (!macro_shapes_scope) {
+    macro_shapes_scope = Scope.new();
+    Scope.shutdown_hook(_macro_shapes_shutdown);
   }
+  Var stored;
+  MacroCaseShape shape = NULL;
+  $scope(&macro_shapes_scope) {
+    if (!macro_shapes) macro_shapes = {};
+    if (macro_shapes.try_get(key, stored))
+      shape = (MacroCaseShape) stored.pointer();
+    else {
+      shape = _macro_case_derive(t, names);
+      macro_shapes[String.new(key)] = (void *) shape;
+    }
+  }
+  return shape;
+}
+
+static int _macro_case_match(
+  List code, MacroCaseShape shape, MatchCaptureBuffer *captured) {
+  MatchPlan plan = shape.plan;
+  if (plan.status != MACHINE_PREPARED)
+    return plan.execute_capture(code, *captured, NULL) == 1;
+  MacroFixedSlots policy = shape.policy;
   struct MatchMachine storage;
   MatchMachine machine = &storage;
   machine.open();
@@ -405,37 +548,6 @@ static int _macro_case_match(
   }
   machine.finish();
   machine.dispose();
-  plan.free();
-  return matched;
-}
-
-/* Publishes internal captures under the user's binders, in the order the
-   `case` wrote them. `values` holds them in the slots of `pattern`, the
-   pattern that captured them: its binders in lexical order, which need
-   not be the order of the parameters. */
-static int _macro_publish(
-  Var pattern, List names, List internal_names, Var *values,
-  MatchCaptureBuffer *captured, MatchCaptureBuffer *published) {
-  MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
-  MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
-  Var ordered[MACHINE_BINDER_MAX];
-  int matched = 1;
-  List labels = names, internal = internal_names;
-  for (; labels; labels = labels.cdr(), internal = internal.cdr()) {
-    int from = actual.index(internal.car()), to = logical.index(labels.car());
-    if (from < 0 || to < 0 || !captured.has(from)) {
-      matched = 0;
-      break;
-    }
-    ordered[to] = values[from];
-  }
-  if (matched) {
-    for (int i = 0; i < logical.binder_count; i++)
-      published->values[i] = ordered[i];
-    published->present = logical.definite;
-  }
-  actual.free();
-  logical.free();
   return matched;
 }
 
@@ -496,15 +608,15 @@ int Macro_case_capture(
   List grouped = NULL;
   if (_macro_pending_parts(t, code, grouped)) {
     List internal = _macro_internal_names(t, names, 1);
-    int matched = x2c_match_try_capture(grouped, internal, &captured);
-    return matched && _macro_publish(
-      internal, names, internal, values, &captured, published);
+    if (!x2c_match_try_capture(grouped, internal, &captured)) return 0;
+    MacroPublishing route = _macro_publishing(internal, names, internal);
+    return _macro_publish(&route, values, &captured, published);
   }
-  List pattern = _macro_case_shape(t, names);
-  if (!_macro_case_match(code, t, pattern, &captured)) return 0;
-  return _macro_publish(
-    pattern, names, _macro_internal_names(t, names, 0), values, &captured,
-    published);
+  int release = 0;
+  MacroCaseShape shape = _macro_case_shape_for(t, names, release);
+  defer if (release) shape.plan.free();
+  if (!_macro_case_match(code, shape, &captured)) return 0;
+  return _macro_publish(&shape.route, values, &captured, published);
 }
 
 /** The pattern a macro-valued `case` compiles to; the compiler lowers a
