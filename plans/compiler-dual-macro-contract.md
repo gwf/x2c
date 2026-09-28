@@ -5,9 +5,11 @@
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
 > Protocol helper synthesis. Callable-defer helper synthesis is on dev at
-> `308709aa`; Var array/map literals are on dev at `aaba3ca4`. Their
-> same-checkout cost rows are complete. Investigate the observed compiler
-> translation cost before the next migration.
+> `308709aa`; Var array/map literals are on dev at `aaba3ca4`; try/defer
+> cleanup calls are on dev at `4f89a063`. Their same-checkout cost rows are
+> complete. A narrow structural Var optimization could not retain the named
+> constructor/update calls in the template under the current rebuild contract.
+> The inline captured-lambda factory is the next local batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -90,8 +92,7 @@ in the source/refresh commits. The single five-pair cost run is complete:
 +2.30% versus `799875a8`. Do not repeat either timing run. At this checkpoint
 no jobs or workers remained active.
 
-Next work, in order: investigate the measured cost of the two latest
-lowerings, then the other surveyed transform shapes, protocol helper
+Next work, in order: the other surveyed transform shapes, protocol helper
 synthesis, and complete source-form
 coverage across the compiler. Static-local initialization is skipped for
 the concrete native `__typeof__`/preprocessor/type-alias boundary recorded
@@ -782,6 +783,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Defer record and registration (2026-09-28) | f99136f8 / prerequisite dev a9f6d566, same corpus and home | increment +2.46% | increment +4.11% | Not counted | Not counted | Not measured |
 | Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same checkout, corpus and home | observed increment +18.10% | observed increment +15.45% | Not counted | Not counted | Not measured |
 | Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, same checkout, corpus and home | observed increment +18.24% | observed increment +16.16% | Not counted | Not counted | Not measured |
+| Try/defer cleanup calls (2026-09-28) | 4f89a063 / dev cb6605a4, same checkout, corpus and home | observed increment +13.63% | observed increment +15.56% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -877,6 +879,15 @@ Default medians were 6.774885 / 8.010428 s (+18.24%); live medians were
 in the integration checkout. A cross-checkout control was stopped before
 completion for the same reason as the callable-defer trial. These are measured
 compiler-translation deltas, not runtime collection performance.
+
+Try/defer cleanup calls used the same five-pair, same-checkout method.
+Default medians were 6.997246 / 7.951023 s (+13.63%); live medians were
+7.989776 / 9.232746 s (+15.56%). Default ranges were 6.607302--7.057842 /
+7.756784--8.403932 s; live ranges were 7.934081--8.217640 /
+8.906374--9.407776 s. Samples are in
+`debug/cleanup-paired-valid-results.json` in the integration checkout.
+The extra macro application enters a semantic transaction, but its share
+of this measured delta has not been isolated.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
