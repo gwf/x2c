@@ -369,4 +369,5 @@ two migrations that both change transform.x or grammar.xmacro concurrently.
 The two read-only survey workers finished. Their isolated worktrees are now
 assigned to the construction capability and the parameter-redeclaration
 repair, with disjoint source ownership. The orchestrator collects results
-and lands each coherent change separately before lambda adoption.
+and lands these prerequisites in one integrated batch before lambda adoption.
+This batch contains no adopters or cleanup and receives one publication gate.
