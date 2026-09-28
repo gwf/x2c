@@ -292,9 +292,9 @@ removes duplicated layout knowledge, but does not meet the requested goal
 of writing these constructors with the source template. It must not be
 reported as equivalent completion.
 
-The consequential choice is whether the narrow construction projection is
-part of the compiler capability or whether producer exceptions are acceptable.
-Recommend a compiler-internal operation first, not a new public macro mode.
+The implementation direction is a narrow compiler-internal construction
+operation, not a new public macro mode. The campaign authorizes this routine
+capability choice; it does not need another permission round.
 An illustrative producer client is:
 
 ```x2c
@@ -349,8 +349,8 @@ Final authored review precedes publication validation.
 
 ## Execution map
 
-The bounded probe supports the construction proposal. Resolve that design
-choice, then retain the campaign's lambda, transform shapes, protocol,
+The bounded probe supports the construction proposal. Implement the narrow
+capability, then retain the campaign's lambda, transform shapes, protocol,
 and final source-vocabulary sequence. The ownership proposal guides where
 each batch lives; it does not authorize mixing capability and cleanup work.
 
@@ -366,5 +366,7 @@ not only expressions/statements.
 For parallel work, assign semantic families with disjoint authored files;
 the orchestrator owns shared grammar and plan integration. Do not dispatch
 two migrations that both change transform.x or grammar.xmacro concurrently.
-The two read-only survey workers are finished and their worktrees are
-available for later isolated assignments. No implementation worker is active.
+The two read-only survey workers finished. Their isolated worktrees are now
+assigned to the construction capability and the parameter-redeclaration
+repair, with disjoint source ownership. The orchestrator collects results
+and lands each coherent change separately before lambda adoption.

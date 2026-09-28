@@ -99,6 +99,10 @@ Gary requires Sol, not Astra, for campaign subagents. Explicitly select
 `gpt-6-sol` when spawning workers rather than inheriting the parent model.
 Give workers explicit ownership, acceptance examples and focused checks;
 verify their findings and review their authored changes before integration.
+Keep ownership of continuation: collect worker completion, integrate or
+dispatch the next ready work, and remain active while workers or jobs are
+pending. Gary is not the wakeup mechanism. Do not end a turn on a routine
+implementation choice already covered by the campaign's authorization.
 
 - Private commits are checkpoints and require no checks merely to commit.
 - Between implementation edits: `make build`, then
@@ -1272,11 +1276,26 @@ applying either source-form template asks this same binder to produce.
 Their result type is the supplied native signature or `Func`, chosen by
 capture and meta-body state. The current template application interface
 binds its result and cannot express that producer boundary without
-re-entering the binder. These sites remain explicit exceptions pending
-Gary's choice on a separate syntax-construction capability. The same
+re-entering the binder. The next capability batch adds a narrow compiler-only
+construction path through the shared template projection, preserving already
+established type and binding facts. Normal macro application is unchanged.
+The same
 boundary applies to rebuilding a lambda with a prepared body or rewritten
 capture expressions while retaining its existing type and stage. This is
 not a claim that all possible template-construction interfaces fail.
+
+Target producer client (the capability batch owns the final internal name):
+
+```x2c
+Macro captured = $lambda_captured, lambda = $lambda_expression;
+if (captures)
+  return c.rebuild_expression(type, captured(body, captures, params));
+return c.rebuild_expression(type, lambda(body, params));
+```
+
+The producer has already selected the result type and resolved its parameter,
+capture and body facts. Rebuilding after a body/capture rewrite uses the same
+forms and retained root type. No parallel hand-built lambda arm remains.
 
 The consumers' target client is one source-form case. The grammar file
 owns both templates; no parallel lambda literal recognizer remains at an
@@ -1286,7 +1305,7 @@ and is not reported as migrated.
 Local consumer draft: `make build` and 15 focused compiler fixtures pass,
 including lambda lowering, capture mutation rejection, region escapes,
 provenance diagnostics, and constructed lambdas. No lowering publication
-gate or timing has run. The producer-boundary decision remains open; the
+gate or timing has run. The producer capability is being implemented; the
 consumer draft is not the completed lambda migration.
 
 ### Migration defect tasks
