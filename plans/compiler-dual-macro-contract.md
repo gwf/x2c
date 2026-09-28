@@ -2239,6 +2239,63 @@ matrix cases. Binding the template retains the `volatile` type on four
 `lhs[0]` expression annotations in each of two transform sidecars. Their
 generated C remains byte-identical, and both fixtures compile and run; the
 transform sidecars are rebaselined to the bound type.
+### E14. Parsed if statement recognition (target readable form)
+
+`Compiler.bind_syntax` owns condition resolution, optional-reference facts,
+branch scope, and termination promotion. The shared grammar names its two
+parsed source forms:
+
+```x2c
+macro Statement $if_then(Expr $condition, Statement $yes) {
+  if ($condition) $yes
+}
+
+macro Statement $if_else(Expr $condition, Statement $yes,
+    Statement $no) {
+  if ($condition) $yes else $no
+}
+```
+
+The complete binder client retains the current semantic operations and
+their order, replacing only the two raw input patterns:
+
+```x2c
+Macro if_then = $if_then, if_else = $if_else;
+match (input) {
+  case if_then(?condition, ?ontrue):
+    if (statement_position) {
+      List test = _.resolve_expression(condition, _.token);
+      int true_is_present = 1;
+      List binding = _.optional_reference_test(test, true_is_present);
+      List yes = _bind_optional_reference_arm(
+        _, ontrue, binding, true_is_present);
+      if (binding && !true_is_present && reference_guard_exits(yes))
+        _.mark_reference_present(binding);
+      return %(if $test $yes);
+    }
+  case if_else(?condition, ?ontrue, ?onfalse):
+    if (statement_position) {
+      List test = _.resolve_expression(condition, _.token);
+      int true_is_present = 1;
+      List binding = _.optional_reference_test(test, true_is_present);
+      List yes = _bind_optional_reference_arm(
+        _, ontrue, binding, true_is_present);
+      List no = _bind_optional_reference_arm(
+        _, onfalse, binding, !true_is_present);
+      if (binding &&
+          ((reference_guard_exits(yes) && !true_is_present) ||
+           (reference_guard_exits(no) && true_is_present)))
+        _.mark_reference_present(binding);
+      return %(if $test $yes $no);
+    }
+}
+```
+
+The enclosing `at` case still binds first and reattaches its anchor. No
+output template is added: these macros are recognition forms, and the binder
+continues to produce its bound if node. `optional-reference` covers one-arm
+promotion and macro-produced guards; `c-body-directive` covers two-arm if
+syntax and its emitted C.
 
 ### F. Static-local initialization exception
 

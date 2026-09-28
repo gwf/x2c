@@ -16,6 +16,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #include "type.x"
 #pragma private
+$(import "../src/grammar.xmacro")
 #include "statements.x"
 #include "expressions.x"
 #include "literals.x"
@@ -2474,6 +2475,7 @@ List Compiler.bind_syntax(
     c.report_error(<parse>, "expected syntax", c.token, NULL);
   List input = value;
   if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
+  Macro if_then = $if_then, if_else = $if_else;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2832,7 +2834,7 @@ List Compiler.bind_syntax(
           return %(switch
             ${_.resolve_expression(expression, _.token)}
             ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
-      case %(if ?condition ?ontrue):
+      case if_then(?condition, ?ontrue):
         if (statement_position) {
           List test = _.resolve_expression(condition, _.token);
           int true_is_present = 1;
@@ -2843,7 +2845,7 @@ List Compiler.bind_syntax(
             _.mark_reference_present(binding);
           return %(if $test $yes);
         }
-      case %(if ?condition ?ontrue ?onfalse):
+      case if_else(?condition, ?ontrue, ?onfalse):
         if (statement_position) {
           List test = _.resolve_expression(condition, _.token);
           int true_is_present = 1;

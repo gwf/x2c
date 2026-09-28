@@ -23,6 +23,17 @@ macro Statement $deferred(Statement $body) {
   defer $body
 }
 
+/* A conditional with one branch. */
+macro Statement $if_then(Expr $condition, Statement $yes) {
+  if ($condition) $yes
+}
+
+/* A conditional with both branches. */
+macro Statement $if_else(Expr $condition, Statement $yes,
+    Statement $no) {
+  if ($condition) $yes else $no
+}
+
 /* A noncapturing lambda expression: its parameters and body. */
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
