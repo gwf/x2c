@@ -29,6 +29,7 @@
 #include "compiler.x"
 
 #pragma private
+$(import "../src/grammar.xmacro")
 
 #include "ast.x"
 #include "stage.x"
@@ -499,12 +500,12 @@ static Region _birth(
     case %(alloc *): return _active(w);
     case %(pool): return _pooled(w, born);
   }
-  match (_unwrap(value)) {
-    case %(cons *): return _pooled(w, born);
+  Macro captured = $lambda_captured;
+  match (source_expression(value)) {
     /* A closure holds what it captures, so it lives no longer than they. A
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
-    case %(lambda ? (captures *captures) *): {
+    case captured(?body, *captures, *params): {
       foreach (Var capture, captures)
         match (capture) case %(capture ? ? ?captured): {
           Var place = _address_of(captured);
@@ -517,6 +518,9 @@ static Region _birth(
         }
       return _active(w);
     }
+  }
+  match (_unwrap(value)) {
+    case %(cons *): return _pooled(w, born);
     case %((!or array map) *): return _active(w);
     case %(composite *)
       if (_class(w, type ? type : _expression_type(value)) == <container>):
@@ -653,7 +657,11 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
    address by the local it borrows from. A callee may hand back the address
    it was given or one inside it. */
 static String _subject(Walk w, Var value, List named, Fact fact) {
-  match (_unwrap(value)) case %(lambda *): return "a closure";
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
+  match (source_expression(value)) {
+    case lambda(?body, *params): return "a closure";
+    case captured(?body, *captures, *params): return "a closure";
+  }
   if (!named) return "a fresh allocation";
   String name = %"'${binding_identity_spelling(named)}'";
   Var own = w.facts[named];

@@ -20,6 +20,7 @@ typedef struct PrintfFn {
 } PrintfFn;
 
 #pragma private
+$(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "literals.x"
 #include "protocol.x"
@@ -1025,6 +1026,7 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
   // The scan is an any-search; a worklist keeps deep operator chains from
   // costing one C frame per nesting level.
   Array pending = $auto([]);
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   pending.push(value);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -1032,15 +1034,15 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
     List syntax = current;
     match (syntax) {
       case %(expr (? *) (parens (block *))): continue;
-      case %(lambda ? (captures *captures) ?): {
+      case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case captured(?body, *captures, *params): {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
             if (!compiler.semantic_binding_facts().contains(
               %(lambda-depth $binding))) return 1;
         continue;
       }
-      case %(lambda ? ?): return 1;
-      case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case lambda(?body, *params): return 1;
       case %(at m-origin ?):
         if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot meta-call) *): return 1;
@@ -2028,6 +2030,19 @@ static List _resolve_initializer(Compiler c, List node, Token origin) {
 
 static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
+  match (input) {
+    case captured(?body, *captures, *params): {
+      if (c.macro_holes) return input;
+      return c.bind_lambda_expression(
+        input_type, %(params @params), captures, body);
+    }
+    case lambda(?body, *params): {
+      if (c.macro_holes) return input;
+      return c.bind_lambda_expression(
+        input_type, %(params @params), NULL, body);
+    }
+  }
   match (content) {
     case %(at m-origin ?inner): {
       if (!c.source_map || c.macro_holes) return input;
@@ -2174,14 +2189,6 @@ static List _resolve_content(
       foreach (List element, elements)
         resolved.push(c.resolve_expression(element, origin));
       return %(expr $input_type (array @{resolved.list_free()}));
-    }
-    case %(lambda ?parameters (captures *captures) ?body): {
-      if (c.macro_holes) return input;
-      return c.bind_lambda_expression(input_type, parameters, captures, body);
-    }
-    case %(lambda ?parameters ?body): {
-      if (c.macro_holes) return input;
-      return c.bind_lambda_expression(input_type, parameters, NULL, body);
     }
     case %((!or offsetof nil cache macro-bind) *): return input;
     case %(parens ?inner): {

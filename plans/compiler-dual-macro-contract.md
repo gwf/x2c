@@ -1126,6 +1126,38 @@ accept expressions or blocks without an expression-only wrapper. No extra traver
 needed. `Captures` is a complete clause because two ungrouped sequence
 holes cannot share the existing macro calling convention.
 
+### Lambda adoption sites
+
+The capture capability landed at `b59b8ade`. Recognition moves to the full
+expression before a walker descends to its payload. The target cases above
+replace the lambda alternatives in `_expression_requires_resolution`,
+`_resolve_content`, `lift_func_expression`, region ownership and capture
+walks, and `lower_lambda_expr`. A caller which previously unwrapped casts
+or parentheses retains that behavior before recognition.
+
+The constructors in `bind_lambda_expression` and `parse_lambda_literal`
+are not ordinary lowering clients: they produce the bound lambda that
+applying either source-form template asks this same binder to produce.
+Their result type is the supplied native signature or `Func`, chosen by
+capture and meta-body state. The current template application interface
+binds its result and cannot express that producer boundary without
+re-entering the binder. These sites remain explicit exceptions pending
+Gary's choice on a separate syntax-construction capability. The same
+boundary applies to rebuilding a lambda with a prepared body or rewritten
+capture expressions while retaining its existing type and stage. This is
+not a claim that all possible template-construction interfaces fail.
+
+The consumers' target client is one source-form case. The grammar file
+owns both templates; no parallel lambda literal recognizer remains at an
+adopted site. Bound reconstruction is listed separately from recognition
+and is not reported as migrated.
+
+Local consumer draft: `make build` and 15 focused compiler fixtures pass,
+including lambda lowering, capture mutation rejection, region escapes,
+provenance diagnostics, and constructed lambdas. No lowering publication
+gate or timing has run. The producer-boundary decision remains open; the
+consumer draft is not the completed lambda migration.
+
 ### Migration defect tasks
 
 - **Expansion depth diagnostic:** open; reported by the previous migration.

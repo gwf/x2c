@@ -869,8 +869,9 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   Type func_type = c.sym.resolve_key(%("Func"));
   if (c.sym.resolve_key(type).equal(func_type)) return expression;
 
-  match (payload)
-    case %(lambda *): {
+  Macro lambda = $lambda_expression;
+  match (expression)
+    case lambda(?body, *params): {
       expression = c.lower_lambda_expr(expression);
       match (expression)
         case %(expr ?lowered_type ?lowered_payload): {
@@ -1026,10 +1027,12 @@ static void _collect_region_bindings(
   Compiler compiler, List ast, Map owned, Array order) {
   if (!ast) return;
   Array resume = $auto([]);
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   for (;;) {
     int pruned = 0;
     match (ast) {
-      case %(lambda *): pruned = 1;
+      case lambda(?body, *params): pruned = 1;
+      case captured(?body, *captures, *params): pruned = 1;
       case %(bind ?binding *): {
         _record_region_binding(compiler, binding, owned, order);
         pruned = 1;
@@ -1086,6 +1089,7 @@ static void _require_capture_lvalue(Compiler c, List target) {
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   Array pending = $auto([]);
   pending.push(ast);
   while (pending.len()) {
@@ -1093,7 +1097,8 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     match (node) {
-      case %(lambda *): continue;
+      case lambda(?body, *params): continue;
+      case captured(?body, *captures, *params): continue;
       case %(op & ?target): _require_capture_lvalue(c, target);
       case %(op ?operator ?target *):
         if (operator is <symbol> && ast_changes_left_operand(operator))
@@ -1232,13 +1237,12 @@ static List _rewrite_lambda_cells(
 static List _prepare_nested_lambda_regions(
   Compiler compiler, List ast) {
   if (!ast) return ast;
-  Macro lambda = $lambda_expression;
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (ast) {
-    case %(expr ?type
-           (lambda (params *entries) (captures *captures) ?body)): {
+    case captured(?body, *captures, *entries): {
       List prepared = _prepare_lambda_region(compiler, entries, body);
       return prepared == body ? ast : %(
-        expr $type
+        expr ${ast.cadr()}
           (lambda (params @entries) (captures @captures) $prepared)
       );
     }
@@ -1342,9 +1346,10 @@ static List _rewrite_lambda_captures(
   Compiler compiler, List ast, Map slots, List environment_binding,
   Type environment_type) {
   if (!ast) return ast;
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (ast) {
-    case %(lambda ?parameters (!set ?rows (captures *)) ?body): {
-      List rewritten = Ast.rewrite_children(rows, %!(List record) => {
+    case captured(?body, *captures, *params): {
+      List rewritten = Ast.rewrite_children(captures, %!(List record) => {
         match (record)
           case %(capture ?binding ?type ?expression): {
             List value = _rewrite_lambda_captures(
@@ -1355,10 +1360,11 @@ static List _rewrite_lambda_captures(
           }
         return record;
       });
-      return rewritten == rows ? ast
-           : %(lambda $parameters $rewritten $body);
+      return rewritten == captures ? ast
+           : %(expr ${ast.cadr()}
+                (lambda (params @params) (captures @rewritten) $body));
     }
-    case %(lambda ? ?): return ast;
+    case lambda(?body, *params): return ast;
     case %(expr ?source_type (ident ?bound)): {
       Var stored;
       if (slots.try_get(bound, stored)) {
@@ -1401,8 +1407,10 @@ static List _no_value_return(void) => %(
    fallthrough. Nested lambdas normalize their own returns when lowered. */
 static List _block_returns(List ast) {
   if (!ast) return ast;
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (ast) {
-    case %(lambda *): return ast;
+    case lambda(?body, *params): return ast;
+    case captured(?body, *captures, *params): return ast;
     case %(return): return _no_value_return();
   }
   return Ast.rewrite_children(ast, _block_returns);
@@ -1604,15 +1612,14 @@ List Compiler.lambda_param_types(Compiler compiler, List entries) {
     remain around lowered helpers; other non-lambda expressions pass through.
 */
 List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
-  Macro lambda = $lambda_expression;
+  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (expression) {
     case %(expr ?type (parens ?inner)): {
       List lowered = compiler.lower_lambda_expr(inner);
       if (lowered == inner) return expression;
       return %(expr $type (parens $lowered));
     }
-    case %(expr ("Func")
-           (lambda (params *entries) (captures *captures) ?body)):
+    case captured(?body, *captures, *entries):
       return _lower_captured_lambda(compiler, entries, captures, body);
     case lambda(?body, *params): {
       Type type = expression.cadr();

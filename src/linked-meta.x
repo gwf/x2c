@@ -83,6 +83,18 @@ List x2c_type_members(List type) {
 
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
+static Var source_expression(Var value) {
+  while (1) {
+    match (value) {
+      case %(expr ? (parens ?inner)): value = inner;
+      case %(expr ? (cast ? ?inner)): value = inner;
+      case %(parens ?inner): value = inner;
+      case %(cast ? ?inner): value = inner;
+      default: return value;
+    }
+  }
+}
+
 /** Returns the error handler the parser introduced for the catch arms of
     the parsed try `node`, or NULL for a try without catches. The arms read
     their captures through it, and no source form writes it. */
@@ -629,6 +641,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_dedent_width", _dedent_width);

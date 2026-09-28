@@ -22,6 +22,23 @@ macro Statement $caught(Statement $body, Statement $finalizer,
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
 
+/* A lambda with the value and reference rows its binder supplied. */
+macro Expression $lambda_captured(Expr $body, Captures $captures,
+    Param $params...) => %!($params...) using $captures => $body;
+
+/* The source expression beneath casts and parentheses, retaining its type. */
+meta static Var source_expression(Var value) {
+  while (1) {
+    match (value) {
+      case %(expr ? (parens ?inner)): value = inner;
+      case %(expr ? (cast ? ?inner)): value = inner;
+      case %(parens ?inner): value = inner;
+      case %(cast ? ?inner): value = inner;
+      default: return value;
+    }
+  }
+}
+
 /** Returns the error handler the parser introduced for the catch arms of
     the parsed try `node`, or NULL for a try without catches. The arms read
     their captures through it, and no source form writes it. */
