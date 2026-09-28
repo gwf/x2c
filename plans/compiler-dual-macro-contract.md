@@ -9,9 +9,9 @@
 > cleanup calls are on dev at `4f89a063`. Their same-checkout cost rows are
 > complete. A narrow structural Var optimization could not retain the named
 > constructor/update calls in the template under the current rebuild contract.
-> The inline captured-lambda factory is on dev at `4576e25e`; its single
-> cost row is complete. Shared captured-environment typedef binding is the
-> next local batch.
+> The inline captured-lambda factory is on dev at `4576e25e`; shared
+> captured-environment typedef binding is on dev at `d546a124`. Their single
+> cost rows are complete. Func bridge factories are the next local batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -787,6 +787,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, same checkout, corpus and home | observed increment +18.24% | observed increment +16.16% | Not counted | Not counted | Not measured |
 | Try/defer cleanup calls (2026-09-28) | 4f89a063 / dev cb6605a4, same checkout, corpus and home | observed increment +13.63% | observed increment +15.56% | Not counted | Not counted | Not measured |
 | Inline captured-lambda factory (2026-09-28) | 4576e25e / dev 4f89a063, same checkout, corpus and home | observed increment +15.04% | observed increment +11.54% | Not counted | Not counted | Not measured |
+| Shared captured-environment typedef (2026-09-28) | d546a124 / dev 4576e25e, same checkout, corpus and home | observed increment -56.40% | observed increment -47.94% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -900,6 +901,17 @@ ranges were 6.525932--7.558985 / 7.654610--8.163958 s; live ranges were
 `debug/factory-paired-valid-results.json` in the integration checkout.
 Focused generated C and H were unchanged; this is compiler translation
 cost, not generated program performance.
+
+Shared captured-environment typedef binding used the same five-pair,
+same-checkout method. Default medians were 7.054045 / 3.075359 s
+(-56.40%); live medians were 8.441934 / 4.395214 s (-47.94%). Default
+ranges were 6.881619--7.201908 / 2.988293--3.254974 s; live ranges were
+8.237435--8.603484 / 4.187018--4.467973 s. Samples are in
+`debug/environment-paired-results.json` in the integration checkout.
+Every run translated all seven sources and reported the same generated
+C/H sizes. This is an unusually large observed difference for this source
+change; its cause has not been attributed, so it is not evidence that the
+typedef template itself saved that time.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
