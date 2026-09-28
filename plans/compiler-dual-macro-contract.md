@@ -1331,7 +1331,17 @@ is counted as fully migrated merely because lambda source construction is.
 ### E. Defer record and registration
 
 The next batch replaces `_defer_block`, keeping cleanup ancestry and capture
-selection in their existing owners. Target client:
+selection in their existing owners. Source recognition in `_rewrite_defer_list`
+uses the grammar-owned unary form; the extended lowered record remains an
+internal producer form:
+
+```x2c
+macro Statement $deferred(Statement $body) { defer $body }
+Macro deferred = $deferred;
+match (head) case deferred(?final_stmt): { /* lower this region */ }
+```
+
+Target client:
 
 ```x2c
 Macro shape = $compiler_defer;
