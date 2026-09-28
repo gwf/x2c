@@ -2406,6 +2406,81 @@ The enclosing `at` case retains source anchors. `defer-only-cleanup` checks
 assignment and increment cleanup, `defer-try-cleanup` checks transfer order,
 and `managed-init-runtime` checks compiler-produced deferred cleanup.
 
+### E21. Aggregate descriptor rendering guard: binding exception
+
+The `class-private` executable probe generates all four aggregate `Var`
+rendering thunks. Their current bodies each declare a `RenderPath`, fall back
+on recursive entry, defer leaving the path, then run the original member
+call. The trial adjacent template showed that C shape while retaining the
+producer's already typed calls and member-specific fallback:
+
+```x2c
+macro open Statement $render_guard(Name $path, Expr $enter,
+    Expr $fallback, Statement $leave, Statement $body) {
+  RenderPath $path;
+  if (!$enter) return $fallback;
+  defer $leave
+  $body
+}
+```
+
+The trial client replaced only `_guard_value_rendering`. It
+keeps the generated function's result, binding, parameters, and original
+body; selection of the `String` or `Buffer` fallback remains adjacent:
+
+```x2c
+static List _guard_value_rendering(
+  Compiler compiler, List function, String member) {
+  match (function)
+    case %(function ?result
+           (!set ?declarator
+             (bind ? ((fnmod (params
+               (param ? (bind ?boxed ?)) *remaining)) *)))
+           (block *body)): {
+      Type returns = result.type().declared();
+      List value = %(expr ("Var") (ident $boxed));
+      List fallback = NULL;
+      if (member == "str" || member == "repr")
+        fallback = %(expr ("String")
+          (call "Var_pointer_string" (args $value)));
+      else match (remaining)
+        case %((param ? (bind ?output ?))):
+          fallback = %(expr ("Buffer")
+            (call "Var_write_pointer_repr"
+              (args $value (expr ("Buffer") (ident $output)))));
+      List path = compiler.sym.introduce("render_path");
+      compiler.semantic_binding_facts()[%(automatic $path)] = 1;
+      compiler.semantic_binding_facts()[%(type $path)] = %("RenderPath");
+      List address = %(expr (* "RenderPath")
+        (op & (expr ("RenderPath") (ident $path))));
+      List enter = %(expr (int)
+        (call "RenderPath_enter" (args $address
+          (expr (* void) (call "Var_pointer" (args $value))))));
+      List leave = %(stmnt (expr (void)
+        (call "RenderPath_leave" (args $address))));
+      Macro guard = $render_guard;
+      List guarded = compiler.bind_syntax(
+        guard(path, enter, fallback, leave,
+          %(code-value "lowered" (seq @body) ())),
+        AST_BLOCK, returns);
+      return %(function $result $declarator (block @guarded.cdr()));
+    }
+  return function;
+}
+```
+
+The trial deleted the hand-built declaration, conditional return and defer
+body while keeping typed `RenderPath` calls and the function skeleton.
+`make build` passed, but the exact C/H comparison failed: in both
+`class-private-a.c` and `class-private-b.c`, the last `write_repr` thunk
+changed `RenderPath render_path` to
+`RenderPath _x2c_binding_shadow_0`; its enter call and deferred capture used
+that renamed binding. The other generated C/H files matched. Binding the
+template therefore changed the emitted local identity after repeated thunk
+construction. The source trial was restored instead of adding special
+binding machinery. Keep `_guard_value_rendering` as the native AST owner for
+this shape; no template migration or artifact rebaseline was accepted.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
