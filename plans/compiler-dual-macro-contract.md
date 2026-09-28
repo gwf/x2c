@@ -2125,6 +2125,105 @@ restored. Splitting each slot into a separate declaration would change the
 generated C and lose the existing compact grouping, so this batch does not
 force that shape. Cache identity, graph and initializer phases remain with
 the current owner.
+### E20. Direct protocol update helper
+
+`protocol-operator-direct-update` executes compound, prefix, and postfix
+updates and observes their stored and returned values. The existing helper
+decides the member signature, memo key, volatile pointer parameter, name,
+and converted unit RHS. Two adjacent templates describe the two bodies:
+
+```x2c
+macro open Statement $protocol_update_body(Expr $current, Expr $call) {
+  $current = $call;
+  return $current;
+}
+
+macro open Statement $protocol_postfix_body(Type $type, Name $old,
+    Expr $current, Expr $call) {
+  $type $old = $current;
+  $current = $call;
+  return $old;
+}
+```
+
+The complete client keeps the existing lookup, signature check,
+memoization, bindings, and parameter rows. It builds the typed current value
+and method call exactly once, then asks one template for the body and passes
+its lowered statements to `wrapper_function`:
+
+```x2c
+String Compiler.protocol_update_helper(
+  Compiler c, Type participant, String member, int postfix) {
+  List key = %("protocol-update-helper" $participant $member $postfix);
+  Var stored;
+  if (c.protocol_helpers.try_get(key, stored)) return stored;
+
+  List resolved = c.resolve_protocol_member(participant, member);
+  if (!resolved) return NULL;
+  List (source_binding, source_type) = resolved;
+  List parameters = source_type.car().list().cadr();
+  Type result = source_type.cdr();
+  Type rhs_type = NULL;
+  match (parameters)
+    case %(?receiver ?rhs):
+      if (List.equal(receiver, participant) &&
+          result.equal(participant))
+        rhs_type = rhs;
+  if (!rhs_type) return NULL;
+
+  String suffix = postfix ? "postfix" : "update";
+  String name =
+    %"_x2c_proto_${participant.car().str().lower()}_${member}_$suffix";
+  List helper_binding = c.sym.introduce(name);
+  List lhs_binding = c.sym.introduce("lhs");
+  List op_binding = c.sym.introduce("op");
+  Type pointer = cons(<*>, cons(<volatile>, participant));
+  Type pointer_base = cons(<volatile>, participant);
+  List lhs_pointer = %(expr $pointer (ident $lhs_binding));
+  List zero = %(expr (int) (literal (int) "0"));
+  List current = %(expr $participant (index $lhs_pointer $zero));
+  List call_rhs = NULL, old_binding = NULL;
+  Array declarations = [];
+  declarations.push(%(param $pointer_base (bind $lhs_binding (*))));
+  declarations.push(%(param ("Symbol") (bind $op_binding ())));
+
+  if (postfix) {
+    List one = %(expr (int) (literal (int) "1"));
+    call_rhs = c.convert_expression(one, rhs_type);
+    old_binding = c.sym.introduce("old");
+  }
+  else {
+    List rhs_binding = c.sym.introduce("rhs");
+    declarations.push(%(param $rhs_type (bind $rhs_binding ())));
+    call_rhs = %(expr $rhs_type (ident $rhs_binding));
+  }
+
+  List call = %(expr $result
+    (call
+      (expr $source_type (ident $source_binding))
+      (args $current $call_rhs)));
+  Macro ordinary = $protocol_update_body;
+  Macro saved = $protocol_postfix_body;
+  List shape = postfix
+    ? saved(participant, old_binding, current, call)
+    : ordinary(current, call);
+  List body = c.bind_syntax(shape, AST_BLOCK, participant);
+  c.add_early(c.wrapper_function(
+    %(static @participant), helper_binding, declarations.list_free(),
+    body.cdr()));
+  c.protocol_helpers[key] = name;
+  return name;
+}
+```
+
+The `current` expression deliberately retains `lhs[0]`, which the existing
+emitter writes; changing it to `*lhs` would alter generated C even though C
+values agree. The bound body is a `seq` of already typed statements, so its
+tail supplies the wrapper's lowered body without a second body constructor.
+The direct update fixture's C and H match the pre-edit bytes exactly;
+compound, prefix, and postfix output and evaluation order are unchanged.
+Four focused operator fixtures pass, including the direct update and index
+matrix cases. No generated artifact rebaseline was needed.
 
 ### F. Static-local initialization exception
 

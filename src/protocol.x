@@ -1763,6 +1763,18 @@ List Compiler.resolve_protocol_member(
   return spelling == compiler.fn_name ? NULL : resolved;
 }
 
+macro open Statement $protocol_update_body(Expr $current, Expr $call) {
+  $current = $call;
+  return $current;
+}
+
+macro open Statement $protocol_postfix_body(Type $type, Name $old,
+    Expr $current, Expr $call) {
+  $type $old = $current;
+  $current = $call;
+  return $old;
+}
+
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
     A matching helper is emitted once into the compiler's early declarations;
@@ -1799,7 +1811,7 @@ String Compiler.protocol_update_helper(
   List lhs_pointer = %(expr $pointer (ident $lhs_binding));
   List zero = %(expr (int) (literal (int) "0"));
   List current = %(expr $participant (index $lhs_pointer $zero));
-  List call_rhs = NULL, old_declaration = NULL, return_value = current;
+  List call_rhs = NULL, old_binding = NULL;
   Array declarations = [];
   declarations.push(%(param $pointer_base (bind $lhs_binding (*))));
   declarations.push(%(param ("Symbol") (bind $op_binding ())));
@@ -1807,12 +1819,7 @@ String Compiler.protocol_update_helper(
   if (postfix) {
     List one = %(expr (int) (literal (int) "1"));
     call_rhs = c.convert_expression(one, rhs_type);
-    List old_binding = c.sym.introduce("old");
-    old_declaration = %(
-      declare $participant
-        (bindings (op = (bind $old_binding ()) $current))
-    );
-    return_value = %(expr $participant (ident $old_binding));
+    old_binding = c.sym.introduce("old");
   }
   else {
     List rhs_binding = c.sym.introduce("rhs");
@@ -1824,13 +1831,15 @@ String Compiler.protocol_update_helper(
     (call
       (expr $source_type (ident $source_binding))
       (args $current $call_rhs)));
-  List assignment = %(stmnt (expr $participant (op = $current $call)));
-  List body = postfix
-            ? %($old_declaration $assignment
-                (return $participant $return_value))
-            : %($assignment (return $participant $return_value));
+  Macro ordinary = $protocol_update_body;
+  Macro saved = $protocol_postfix_body;
+  List shape = postfix
+    ? saved(participant, old_binding, current, call)
+    : ordinary(current, call);
+  List body = c.bind_syntax(shape, AST_BLOCK, participant);
   c.add_early(c.wrapper_function(
-    %(static @participant), helper_binding, declarations.list_free(), body));
+    %(static @participant), helper_binding, declarations.list_free(),
+    body.cdr()));
   c.protocol_helpers[key] = name;
   return name;
 }
