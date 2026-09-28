@@ -1547,6 +1547,71 @@ explicit call nodes and shifted binding numbers. The affected fixture
 sidecars were reviewed and refreshed at integration; generated C differs
 only by constructor prototypes, not executable calls.
 
+### E4. Try and defer exit calls (target readable form)
+
+The region walk still decides which exits run cleanup, in what order, and
+where each result is placed. Its lowered code carrier is produced by the
+cleanup operation after one ordinary binding of an adjacent C template:
+
+```x2c
+Macro leave = $defer_cleanup_call;
+List call = c.bind_syntax(
+  leave(_address_of(_record_type, record)), AST_BLOCK, c.return_type);
+return %(code-value "lowered" (seq $call) ());
+
+Macro close = $try_close_handler;
+List before = has_clause
+  ? %(${close(%(expr $handler (ident $handle)))}) : NULL;
+List address = _address_of(_frame_type, frame);
+List syntax;
+if (finalizer) {
+  Macro finish = $try_finish_cleanup;
+  syntax = finish(address,
+    %(code-value "lowered" (seq $finalizer) ()), before);
+}
+else {
+  Macro leave = $try_leave_cleanup;
+  syntax = leave(address, before);
+}
+List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
+return %(code-value "lowered" $result ());
+```
+
+The complete target templates are:
+
+```x2c
+macro open Statement $defer_cleanup_call(Expr $record) {
+  x2c_cleanup_leave($record);
+}
+
+macro open Statement $try_close_handler(Expr $handle) {
+  x2c_error_catch_close($handle);
+  $handle = NULL;
+}
+
+macro open Statement $try_leave_cleanup(Expr $frame,
+    Statement $before...) {
+  $before...
+  x2c_exception_leave($frame);
+}
+
+macro open Statement $try_finish_cleanup(Expr $frame,
+    Statement $finalizer, Statement $before...) {
+  if (x2c_exception_claim($frame)) {
+    $before...
+    $finalizer
+  }
+  x2c_exception_leave($frame);
+}
+```
+
+The producer supplies typed frame/record addresses and a typed handler use
+because these region-owned names are declared only when the enclosing region
+template binds. The finalizer is already lowered and enters its Statement
+hole as a retained carrier, once. The templates call the existing runtime
+functions in their established order; no region or finalizer analysis moves
+into the templates.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

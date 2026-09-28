@@ -1669,22 +1669,23 @@ static List _address_of(String spelling, List binding) {
   return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
 }
 
-/* One native call on a region's record or frame, as a statement. */
-static List _region_call(String function, String type, List binding) =>
-  %(stmnt (expr (void)
-    (call $function (args ${_address_of(type, binding)}))));
-
 /* Introduce a name this pass owns. The emitted declaration spells this
    binding, so the record a region pushes and the record its exits leave are
    one name by construction. */
 static List _region_binding(Compiler compiler, String role) =>
   compiler.sym.introduce(compiler.fresh_name(role));
 
-/* The statements that leave a `defer` region: the runtime unlinks the
-   record and calls its thunk. */
-static List _defer_cleanup(List record) =>
-  %(code-value "lowered"
-    (seq ${_region_call("x2c_cleanup_leave", _record_type, record)}) ());
+/* The runtime unlinks this record and calls its thunk. */
+macro open Statement $defer_cleanup_call(Expr $record) {
+  x2c_cleanup_leave($record);
+}
+
+static List _defer_cleanup(Compiler c, List record) {
+  Macro shape = $defer_cleanup_call;
+  List call = c.bind_syntax(
+    shape(_address_of(_record_type, record)), AST_BLOCK, c.return_type);
+  return %(code-value "lowered" (seq $call) ());
+}
 
 /* The first label a finalizer defines, or NULL. The statements that leave a
    region run on every path that leaves it, so a label among them would be
@@ -1717,33 +1718,47 @@ static Var _finalizer_label(Var value, int origin, int &at) {
   return NULL;
 }
 
-/* The statements that leave a `try` region, in the order the frame
-   requires: a catch clause closes and clears its handler, a finalizer runs
-   under the frame's run-once claim, and the frame leaves last. Claiming also
-   retires the landing, so a `raise` from the finalizer reaches the enclosing
-   frame instead of re-entering this one and looping. They are lowered. */
-static List _try_cleanup(
-  List frame, List handle, List finalizer, int has_clause) {
-  Array body = [];
-  if (has_clause) {
-    Type handler = %(($_handler_type));
-    body.push(
-      %(stmnt (expr (void)
-        (call "x2c_error_catch_close"
-          (args (expr $handler (ident $handle)))))));
-    body.push(
-      %(stmnt (expr $handler
-        (op = (expr $handler (ident $handle)) (expr $handler (nil))))));
+macro open Statement $try_close_handler(Expr $handle) {
+  x2c_error_catch_close($handle);
+  $handle = NULL;
+}
+
+macro open Statement $try_leave_cleanup(Expr $frame,
+    Statement $before...) {
+  $before...
+  x2c_exception_leave($frame);
+}
+
+macro open Statement $try_finish_cleanup(Expr $frame,
+    Statement $finalizer, Statement $before...) {
+  if (x2c_exception_claim($frame)) {
+    $before...
+    $finalizer
   }
-  if (finalizer) body.push(finalizer);
-  List statements = body.list_free();
-  if (finalizer)
-    statements = %((if (expr (int)
-      (call "x2c_exception_claim" (args ${_address_of(_frame_type, frame)})))
-      (block @statements)));
-  statements = statements.append(
-    %(${_region_call("x2c_exception_leave", _frame_type, frame)}));
-  return %(code-value "lowered" (seq @statements) ());
+  x2c_exception_leave($frame);
+}
+
+/* A catch closes before a claimed finalizer, then the frame leaves. The
+   finalizer is already lowered and retains its stage through the template. */
+static List _try_cleanup(
+  Compiler c, List frame, List handle, List finalizer, int has_clause) {
+  Macro close = $try_close_handler;
+  Type handler = %(($_handler_type));
+  List before = has_clause
+    ? %(${close(%(expr $handler (ident $handle)))}) : NULL;
+  List address = _address_of(_frame_type, frame);
+  List syntax;
+  if (finalizer) {
+    Macro finish = $try_finish_cleanup;
+    syntax = finish(
+      address, %(code-value "lowered" (seq $finalizer) ()), before);
+  }
+  else {
+    Macro leave = $try_leave_cleanup;
+    syntax = leave(address, before);
+  }
+  List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
+  return %(code-value "lowered" $result ());
 }
 
 /* The statements a lowered sequence holds, or `code` itself. */
@@ -2455,7 +2470,7 @@ static List _lower_try(
   List frame = _region_binding(c, "exception_frame");
   List handle = arms ? catch_handle(node) : NULL;
   List cleanup = _try_cleanup(
-    frame, handle, _rewrite(walk, finalizer), !!arms);
+    c, frame, handle, _rewrite(walk, finalizer), !!arms);
   List lowered = _try_region(walk, cleanup, body);
   Macro shape = $compiler_try;
   return c.bind_syntax(
@@ -2526,7 +2541,7 @@ static List _lower_defer(
   Compiler c = walk.compiler;
   c.needs_exception = 1;
   List record = _region_binding(c, "defer_record");
-  List cleanup = _defer_cleanup(record);
+  List cleanup = _defer_cleanup(c, record);
   List function = %(expr ((func ((* void))) void) (ident $callback));
   Macro shape = $compiler_defer;
   return c.bind_syntax(
