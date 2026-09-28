@@ -97,6 +97,13 @@ exclusions["$ROOT/unittest/compiler-fixtures/meta-job-lifetime.x"]=$(
   printf '%s' "embeds a compile-time process id, so no two translations match"
 )
 
+for name in macro-early macro-effects macro-open; do
+  exclusions["$ROOT/unittest/compiler-fixtures/$name.x"]=$(
+    printf '%s' "a Macro literal carries binding numbers, which each" \
+      "symbol mode assigns differently"
+  )
+done
+
 exclusions["$ROOT/unittest/compiler-fixtures/meta-import-included.x"]=$(
   printf '%s' "CPP symbol mode inlines the header, so its relative import" \
     "resolves from the includer's directory"

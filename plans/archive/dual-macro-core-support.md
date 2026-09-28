@@ -319,5 +319,11 @@ Thin evidence and follow-ups:
 - A raw binder atom that reaches the emitter, as from a malformed
   constructed carrier, loops in `Emitter__match_site_call` (C spelling) instead of
   reporting a diagnostic.
+- A `Macro` literal in generated C carries its definition's binding
+  numbers. They are consistent within one translation, but raw and CPP
+  symbol collection number bindings differently, so the raw symbol sweep
+  excludes `macro-early`, `macro-effects` and `macro-open`. Stable output
+  across collection modes would need binding references that do not
+  depend on global numbering.
 - Two clang-only `cc-stderr` sidecars in the regression set fail on Linux
   hosts, as they did before this change.
