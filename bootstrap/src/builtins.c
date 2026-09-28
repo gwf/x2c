@@ -178,8 +178,6 @@ static List binding_target_row(List row);
 
 static List binding_targets(List rows);
 
-List x2c_func_call_arguments(List function, List storage, List arguments);
-
 List builtin_try_catch_site(List frame, List clause);
 
 List builtin_catch_patterns(List patterns, List items);
@@ -1753,6 +1751,7 @@ static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func
   List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 806120));  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 1, 806120));  return List_var(builtin_scope_expand(a0, a1)); ;
 }
 
+List x2c_func_call_arguments(List, List, List);
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
   List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, 806120));  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 1, 806120));  List a2 = Var_list(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 2, 806120));  return List_var(x2c_func_call_arguments(a0, a1, a2)); ;
 }
