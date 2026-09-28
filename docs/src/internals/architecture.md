@@ -493,9 +493,9 @@ The modules under `src/` divide ownership as follows:
   grammar and AST construction;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
-- `src/stage.x` -- the arguments and results that cross between `meta`
-  code and program code;
-- `src/meta-group.x` -- a unit's `meta` group, its emission as C, and
+- `src/stage.x` -- the arguments and results that cross between meta code
+  and program code;
+- `src/meta-group.x` -- a unit's meta group, its emission as C, and
   in-process staging;
 - `src/builtins.x`, `src/linked-meta.x` -- the built-in macro algorithms and
   the shipped compile-time code compiled into the compiler;
