@@ -2068,44 +2068,43 @@ static List _string_literal(Compiler compiler, String value) {
   return %(expr ("String") (call "String_new" (args $chars)));
 }
 
+macro open Unit $protocol_methods(Name $methods) {
+  static VarMethods $methods;
+}
+
+macro open Statement $protocol_methods_value(Name $methods, Expr $value) {
+  $methods = $value;
+}
+
 static void Compiler._generate_descriptor_registration(
   Compiler compiler, Type participant, String name, Symbol explicit_tag,
   List thunks, int central_initializer) {
-  String methods_name = compiler.fresh_name("_x2c_protocol_methods");
-  List methods_binding = compiler.sym.introduce(methods_name);
+  Macro methods_shape = $protocol_methods;
+  Macro assign_shape = $protocol_methods_value;
+  List methods = compiler.sym.introduce(
+    compiler.fresh_name("_x2c_protocol_methods"));
   Array fields = [];
   foreach (List row, thunks) {
-    (String member, List thunk_binding, Type thunk_type) = row;
+    (String member, List thunk, Type type) = row;
     fields.push(
       %(
       dotinit ($member)
-        (expr $thunk_type (ident $thunk_binding))
+        (expr $type (ident $thunk))
     ));
   }
-  List declaration = %(
-    declare (static "VarMethods")
-      (bindings (bind $methods_binding ()))
-  );
-  List methods_type = %(decl ("VarMethods") (bindings (bind () ())));
-  List methods_literal = %(expr () (composite (commas @{fields.list_free()})));
-  List methods_value = %(
-    expr ("VarMethods") (cast $methods_type $methods_literal)
-  );
+  List value = %(expr ("VarMethods")
+    (cast (decl ("VarMethods") (bindings (bind () ())))
+      (expr () (composite (commas @{fields.list_free()})))));
   /* A participant with no thunks still needs its tag registered, and the
      file-scope table is already zero, so skip the assignment rather than
      emit an empty initializer, which C only accepts from C23 on. */
-  List assignment = thunks ? %(
-    stmnt
-      (expr ("VarMethods")
-        (op = (expr ("VarMethods") (ident $methods_binding)) $methods_value))
-  ) : NULL;
   Symbol tag_symbol = participant.var_tag();
   List early_call = %(
     expr (int)
       (call "x2c_register_builtin_descriptor"
         (args
           (expr ("Symbol") (literal ("Symbol") $name $tag_symbol))
-          (expr ("VarMethods") (ident $methods_binding))))
+          (expr ("VarMethods") (ident $methods))))
   );
   List fallback = %(
     stmnt
@@ -2113,7 +2112,7 @@ static void Compiler._generate_descriptor_registration(
         (call "x2c_register_descriptor"
           (args
             ${_string_literal(compiler, name)}
-            (expr ("VarMethods") (ident $methods_binding)))))
+            (expr ("VarMethods") (ident $methods)))))
   );
   List registration = %(if (expr (int) (op ! $early_call)) (block $fallback));
   List explicit_call = NULL;
@@ -2125,18 +2124,16 @@ static void Compiler._generate_descriptor_registration(
             (expr ("Symbol")
               (literal ("Symbol") ${explicit_tag.str()} $explicit_tag))
             ${_string_literal(compiler, name)}
-            (expr ("VarMethods") (ident $methods_binding))))
+            (expr ("VarMethods") (ident $methods))))
     );
-  compiler.add_early(declaration);
+  Symbol queue = central_initializer ? <protocol> : <early>;
+  compiler.add_early(compiler.bind_syntax(
+    methods_shape(methods), AST_UNIT, NULL));
+  if (thunks) compiler.add_init(queue, compiler.bind_syntax(
+    assign_shape(methods, value), AST_BLOCK, NULL));
   List call = explicit_tag ? explicit_call : early_call;
-  if (central_initializer) {
-    if (assignment) compiler.add_init(<protocol>, assignment);
-    compiler.add_init(<protocol>, %(stmnt $call));
-  }
-  else {
-    if (assignment) compiler.add_init(<early>, assignment);
-    compiler.add_init(<early>, explicit_tag ? %(stmnt $call) : registration);
-  }
+  compiler.add_init(queue,
+    central_initializer || explicit_tag ? %(stmnt $call) : registration);
 }
 
 static void _report_requirement(

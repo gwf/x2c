@@ -1841,6 +1841,66 @@ without clarifying ownership. The prototype was discarded and the source and
 sidecars remain unchanged. This rejects that narrow implementation, not other
 protocol helpers or a different consolidation that removes more machinery.
 
+### E10. Protocol descriptor registration
+
+The adapter loop decides which thunks exist and preserves their member order.
+The descriptor producer still chooses the participant tag, explicit tag,
+zero-thunk case, and `<protocol>` versus `<early>` initializer queue. Its
+descriptor declaration and assignment can be read in two adjacent templates:
+
+```x2c
+macro open Unit $protocol_methods(Name $methods) {
+  static VarMethods $methods;
+}
+
+macro open Statement $protocol_methods_value(Name $methods, Expr $value) {
+  $methods = $value;
+}
+```
+
+The client retains one canonical designated-initializer row per thunk. The
+current macro hole kinds cannot splice a `dotinit` row into a C composite
+initializer, so the value is the one structural AST island; the declaration
+and assignment become source templates. The client prepares the typed value,
+binds the shapes, and queues them at the existing positions:
+
+```x2c
+Macro methods_shape = $protocol_methods;
+Macro assign_shape = $protocol_methods_value;
+List methods = compiler.sym.introduce(
+  compiler.fresh_name("_x2c_protocol_methods"));
+Array fields = [];
+foreach (List row, thunks) {
+  (String member, List thunk, Type type) = row;
+  fields.push(%(dotinit ($member) (expr $type (ident $thunk))));
+}
+List value = %(expr ("VarMethods")
+  (cast (decl ("VarMethods") (bindings (bind () ())))
+    (expr () (composite (commas @{fields.list_free()})))));
+Symbol queue = central_initializer ? <protocol> : <early>;
+compiler.add_early(compiler.bind_syntax(
+  methods_shape(methods), AST_UNIT, NULL));
+if (thunks) compiler.add_init(queue,
+  compiler.bind_syntax(assign_shape(methods, value), AST_BLOCK, NULL));
+/* Existing typed call nodes and `if` block remain, then: */
+List call = explicit_tag ? explicit_call : early_call;
+compiler.add_init(queue,
+  central_initializer || explicit_tag ? %(stmnt $call) : registration);
+```
+
+The cast and member rows keep their current bound types and method names.
+For an explicit tag, `name` retains its original case and the registration
+call remains direct. With no thunks, the table remains zero-initialized and
+there is no C23-only empty composite assignment. A first implementation also
+templated the registration calls. `protocol-static-descriptor` then emitted
+new `x2c_register_builtin_descriptor` and `x2c_register_descriptor`
+prototypes and removed the fallback `if` braces, changing its generated C.
+Those call templates were removed; their typed call nodes and fallback block
+are a concrete exact-output exception to this batch. Ten focused fixtures,
+including static, private, no-thunk, and package cases, pass with unchanged
+expected artifacts after retaining them. The protocol boundary probes also
+pass, including their explicit-tag checks.
+
 ### E11. Discarded destructuring assignment (target readable form)
 
 The `list-destructuring` fixture assigns `(first, missing) = %(7)` and
@@ -1879,6 +1939,7 @@ static List _destructure_statement(Compiler compiler, List ast) {
 the expression-valued path and declaration paths retain their existing
 forms. The template replaces the raw block and temporary declaration,
 without introducing another source conversion or changing target bindings.
+
 ### E12. Managed declaration cleanup (target readable form)
 
 The existing `_append_managed_declaration` owner keeps eligibility, declaration
