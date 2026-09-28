@@ -2378,7 +2378,7 @@ to use its active return type for conversion. `macro-string-return`,
 `class-init-wrong-return` check source and macro returns, empty return,
 conversion, and rejection diagnostics.
 
-### E19. Parsed defer recognition (target readable form)
+### E21. Parsed defer recognition (target readable form)
 
 The shared grammar already writes the source form used by transform:
 
