@@ -62,6 +62,7 @@ typedef struct Compiler{
   Map adoptions;
   Map macro_holes;
   Map local_macro_captures;
+  int macro_application;
   List lambda_scopes;
   Array match_types;
   Map imports;
@@ -366,6 +367,8 @@ Type Sym_resolve_numeric_type(Sym sym, Type type);
 Type Sym_local_type(Sym sym, Type type);
 
 Var Compiler_aggregate_name(Compiler compiler, Symbol kind, Var name, int definition);
+
+Type Sym_resolve_base_type(Sym sym, Type key);
 
 Type Sym_normalize_declared_type(Sym sym, Type type);
 

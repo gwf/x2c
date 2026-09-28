@@ -121,6 +121,8 @@ typedef struct MatchMachine{
   Var value, error;
   int fp, current_entry_undo, undo_count, slot_count;
   MachineStats * stats;
+  int(* relation)(void *, int, Var, Var, void *);
+  void * relation_context;
   Var * scratch;
   int scratch_capacity;
   MatchFrame frames[MACHINE_FRAME_MAX];

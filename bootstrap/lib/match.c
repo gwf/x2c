@@ -2583,6 +2583,8 @@ void MatchMachine_open(MatchMachine m){
   m -> undo_count = 0;
   m -> slot_count = 0;
   m -> stats = NULL;
+  m -> relation = NULL;
+  m -> relation_context = NULL;
   m -> scratch = NULL;
   m -> scratch_capacity = 0;
 }

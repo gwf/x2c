@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include "scope.h"
+#include "array.h"
 #include "exception.h"
 #include "match.h"
 static List * MatchMachine__cursor(MatchMachine m, int reg);
@@ -32,6 +33,8 @@ static void MatchMachine__set_value(MatchMachine m, int slot, Var value, int rep
 static void MatchMachine__set_span(MatchMachine m, int slot, List begin, List end, int length);
 
 static int MatchMachine__slot_value_equal(MatchMachine m, MachineSlot * slot, Var value);
+
+static int MatchMachine__slot_sequence_equal(MatchMachine m, int index, List input, int length, int final);
 
 static int MatchMachine__push_frame(MatchMachine m);
 
@@ -128,7 +131,44 @@ int Var_equal(Var, Var);
 
 static int MatchMachine__slot_value_equal(MatchMachine m, MachineSlot * slot, Var value){
   if(slot -> kind != MACHINE_SLOT_VALUE) return 0;
+  if(m -> relation) return m -> relation(m, (int)(slot - m -> slots), slot -> value, value, m -> relation_context);
   return Var_equal(slot -> value, value);
+}
+
+int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
+
+int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
+
+List Var_list(Var);
+
+int List_truth(List);
+
+Var Array_push(Array, Var);
+
+Var List_car(List);
+
+List List_cdr(List);
+
+List Array_list_free(Array);
+
+Var List_var(List);
+
+static int MatchMachine__slot_sequence_equal(MatchMachine m, int index, List input, int length, int final){
+  MachineSlot * slot = & m -> slots[index];
+  if(! m -> relation) return final ? MachineSlot_final_equal(slot, input, m -> stats) : MachineSlot_prefix_equal(slot, input, length, m -> stats);
+  List expected = slot -> kind == MACHINE_SLOT_SPAN ? MatchMachine_materialize_span(m, slot -> span) : Var_list(slot -> value);
+  if(m -> status == 11703268) return 0;
+  List candidate = input;
+  if(! final){
+    Array items = Array_new();
+    for(int n = 0;  n < length;  n ++){
+      if(! List_truth(input)) return 0;
+      Array_push(items, List_car(input));
+      input = List_cdr(input);
+    }
+    candidate = Array_list_free(items);
+  }
+  return m -> relation(m, index, List_var(expected), List_var(candidate), m -> relation_context);
 }
 
 static int MatchMachine__push_frame(MatchMachine m){
@@ -197,23 +237,9 @@ void MatchMachine_begin(MatchMachine m, MachineView program, Var input){
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-List Var_list(Var);
-
-int List_truth(List);
-
 Var car(List);
 
-Var List_var(List);
-
 List cdr(List);
-
-Var List_car(List);
-
-List List_cdr(List);
-
-int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
-
-int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
 
 int Var_is(Var, Symbol);
 
@@ -347,13 +373,11 @@ int MatchMachine_step(MatchMachine m){
     break;
     case MW_SLOT_EQ_PREFIX :{
       int length = * MatchMachine__distance(m, w -> c) - * MatchMachine__distance(m, w -> b);
-      MachineSlot * slot = & m -> slots[w -> a];
-      if(! MachineSlot_prefix_equal(slot, * MatchMachine__cursor(m, w -> b), length, m -> stats)) m -> pc = w -> target;
+      if(! MatchMachine__slot_sequence_equal(m, w -> a, * MatchMachine__cursor(m, w -> b), length, 0)) m -> pc = w -> target;
       break;
     }
     case MW_SLOT_EQ_FINAL_IDENTITY :{
-      MachineSlot * slot = & m -> slots[w -> a];
-      if(! MachineSlot_final_equal(slot, * MatchMachine__cursor(m, w -> b), m -> stats)) m -> pc = w -> target;
+      if(! MatchMachine__slot_sequence_equal(m, w -> a, * MatchMachine__cursor(m, w -> b), 0, 1)) m -> pc = w -> target;
       break;
     }
     case MW_CURSOR_VALUE : m -> value = List_var(* MatchMachine__cursor(m, w -> a));
@@ -497,7 +521,7 @@ Var String_var(String);
 
 void MatchMachine_finish(MatchMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 516};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 543};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }

@@ -189,6 +189,10 @@ List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_parse_macro_definition(Compiler c);
 
+List Compiler_try_parse_macro_pattern(Compiler c);
+
+List Compiler_capture_macro_value(Compiler c, List definition);
+
 List Compiler_publish_macro_definition_node(Compiler compiler, List node);
 
 void Compiler_parse_keyword_definition(Compiler c);
@@ -200,6 +204,8 @@ int Compiler_skip_named_type_declaration(Compiler c);
 List Compiler_try_parse_macro_member(Compiler c);
 
 Token Compiler_macro_invocation_site(Compiler compiler, Var site);
+
+int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
 
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
 

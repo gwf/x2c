@@ -834,6 +834,7 @@ static List _match_capture_locals(Compiler c, Array locals){
 return Array_list_free(declarations);
 }
 
+List Compiler_try_parse_macro_pattern(Compiler);
 List Compiler_typed_match_pattern(Compiler, List, List);
 String List_repr(List);
 SymScope Sym_pop_scope(Sym);
@@ -867,7 +868,7 @@ static List _match_case(Compiler c){
                     }
                     ;  x2c_cleanup_push(& _x2c_defer_record_4); {
                       * _x2c_macro_address_0 = captures; {
-                        pattern = Compiler_parse_expression(c);  types = Array_list(captures);
+                        pattern = Compiler_try_parse_macro_pattern(c);  if(! List_truth(pattern)) pattern = Compiler_parse_expression(c);  types = Array_list(captures);
                       }
 
                     }

@@ -27,6 +27,18 @@ List x2c_literal_int(int value);
 
 List x2c_literal_symbol(Symbol value);
 
+typedef List Macro;
+
+Macro Macro_close(Macro value, List captures);
+
+List Macro_apply(Macro t, List values);
+
+List Macro_pattern(Macro t, List names);
+
+int Macro_case_capture(List code, Macro t, List names, MatchCaptureBuffer * published);
+
+List Macro_case_pattern(Macro t, List names);
+
 List x2c_expr_ident(List name);
 
 List x2c_expr_index(List base, List subscript);
