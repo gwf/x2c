@@ -804,6 +804,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Parsed if, while/do, return, defer recognition (2026-09-28) | 0e0006f4 / dev 7e8abade, same staged path and cleared output dir | raw -61.41%, cause unassigned | raw -53.44%, cause unassigned | Not counted | Not counted | Not measured |
 | Bound loop/truth and region restore recognition (2026-09-28) | fe8fd71a / dev 0e0006f4, same staged path and cleared output dir | raw -61.11%, cause unassigned | raw -53.48%, cause unassigned | Not counted | Not counted | Not measured |
 | Bound switch and region statement recognition (2026-09-28) | f6606dbf / dev fe8fd71a, same staged path and cleared output dir | raw -61.09%, cause unassigned | raw -53.45%, cause unassigned | Not counted | Not counted | Not measured |
+| MatchRow and expression origin preflight (2026-09-28) | 89da87d0 / dev f6606dbf, same staged path and cleared output dir | raw -61.51%, cause unassigned | raw -53.83%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -886,6 +887,16 @@ baseline here. Source-tree and helper/cache effects remain unisolated, so
 the raw difference does not assign cost or speedup to these two recognition
 changes. The candidate (`eaa301d5`) was restored exactly; samples are in
 `debug/switch-region-batch-paired-results.json`.
+
+The MatchRow and expression-origin capability batch used the same staged path
+and cleared output directory. Five alternating pairs yielded 9.260695 /
+3.564551 s default and 10.841318 / 5.005338 s live. The exact `eaa301d5`
+compiler was the fast candidate in the preceding attempt and the slow
+baseline here. Other agents completed focused builds early in this timing
+window, so this run also lacks a quiet-host comparison. The raw difference
+cannot be assigned to either capability. The candidate (`6910daf2`) was
+restored exactly; samples are in
+`debug/matchrow-origin-batch-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
