@@ -1690,7 +1690,7 @@ return c.bind_syntax(
 Move the existing whole-typedef template beside lambda lowering and remove
 its defer-specific definition; do not bind fields separately, which loses
 their member types. Captures, conversion and storage decisions, generated
-identity, early-declaration order, and the inline bridge stay with their
+name spelling, early-declaration order, and the inline bridge stay with their
 current owners. Focused C/H and transform comparisons must check mixed
 `Var` and reference fields and the callable-defer shape.
 
@@ -1699,7 +1699,8 @@ transform sidecar now records the struct tag as the introduced typedef
 binding, where the raw skeleton recorded a spelling string; field types and
 emitted tag/typedef spellings are unchanged. The inline C/H fixture and four
 callable-defer fixtures pass exactly. Reference and nested-capture fixtures
-also pass exactly. The transform sidecar awaits integration review.
+also pass exactly. The transform sidecar records the reviewed tag identity
+change.
 
 ### F. Static-local initialization exception
 

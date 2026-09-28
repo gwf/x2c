@@ -637,10 +637,10 @@
   (at 24 (return (expr (int) (literal (int) "0"))))))
 
 (typedef 
- (struct "_x2c_lambda_context_0" 
+ (struct (binding 62 "_x2c_lambda_context_0") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 62 "_x2c_lambda_capture_0") ()))))) 
- (bindings (bind (binding 63 "_x2c_lambda_context_0") ())))
+   (declare ("Var") (bindings (bind (binding 63 "_x2c_lambda_capture_0") ()))))) 
+ (bindings (bind (binding 62 "_x2c_lambda_context_0") ())))
 
 (function (static "Var") 
  (bind (binding 8 "_x2c_lambda_0") 
@@ -697,11 +697,11 @@
               (expr (int) (ident (binding 1 "live"))))))))))))
 
 (typedef 
- (struct "_x2c_lambda_context_2" 
+ (struct (binding 70 "_x2c_lambda_context_2") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 70 "_x2c_lambda_capture_1") ()))) 
-   (declare ("Var") (bindings (bind (binding 71 "_x2c_lambda_capture_2") ()))))) 
- (bindings (bind (binding 72 "_x2c_lambda_context_2") ())))
+   (declare ("Var") (bindings (bind (binding 71 "_x2c_lambda_capture_1") ()))) 
+   (declare ("Var") (bindings (bind (binding 72 "_x2c_lambda_capture_2") ()))))) 
+ (bindings (bind (binding 70 "_x2c_lambda_context_2") ())))
 
 (function (static "Var") 
  (bind (binding 15 "_x2c_lambda_1") 
@@ -782,17 +782,17 @@
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
- (struct "_x2c_lambda_context_4" 
+ (struct (binding 77 "_x2c_lambda_context_4") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 77 "_x2c_lambda_capture_3") ()))))) 
- (bindings (bind (binding 78 "_x2c_lambda_context_4") ())))
+   (declare ("Var") (bindings (bind (binding 78 "_x2c_lambda_capture_3") ()))))) 
+ (bindings (bind (binding 77 "_x2c_lambda_context_4") ())))
 
 (typedef 
- (struct "_x2c_lambda_context_5" 
+ (struct (binding 79 "_x2c_lambda_context_5") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 79 "_x2c_lambda_capture_4") ()))) 
-   (declare ("Var") (bindings (bind (binding 80 "_x2c_lambda_capture_5") ()))))) 
- (bindings (bind (binding 81 "_x2c_lambda_context_5") ())))
+   (declare ("Var") (bindings (bind (binding 80 "_x2c_lambda_capture_4") ()))) 
+   (declare ("Var") (bindings (bind (binding 81 "_x2c_lambda_capture_5") ()))))) 
+ (bindings (bind (binding 79 "_x2c_lambda_context_5") ())))
 
 (function (static "Var") 
  (bind (binding 82 "_x2c_lambda_3") 
@@ -951,10 +951,10 @@
                       (ident (binding 94 "_x2c_lambda_context_6")))))))))))))))))))
 
 (typedef 
- (struct "_x2c_lambda_context_8" 
+ (struct (binding 95 "_x2c_lambda_context_8") 
   (fields 
-   (declare (int) (bindings (bind (binding 95 "_x2c_lambda_capture_6") (*)))))) 
- (bindings (bind (binding 96 "_x2c_lambda_context_8") ())))
+   (declare (int) (bindings (bind (binding 96 "_x2c_lambda_capture_6") (*)))))) 
+ (bindings (bind (binding 95 "_x2c_lambda_context_8") ())))
 
 (function (static "Var") 
  (bind (binding 27 "_x2c_lambda_4") 
@@ -987,10 +987,10 @@
                          ("_x2c_lambda_capture_6"))))))))))))))))
 
 (typedef 
- (struct "_x2c_lambda_context_10" 
+ (struct (binding 100 "_x2c_lambda_context_10") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 100 "_x2c_lambda_capture_7") ()))))) 
- (bindings (bind (binding 101 "_x2c_lambda_context_10") ())))
+   (declare ("Var") (bindings (bind (binding 101 "_x2c_lambda_capture_7") ()))))) 
+ (bindings (bind (binding 100 "_x2c_lambda_context_10") ())))
 
 (function (static "Var") 
  (bind (binding 48 "_x2c_lambda_5") 
@@ -1044,10 +1044,10 @@
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
- (struct "_x2c_lambda_context_12" 
+ (struct (binding 106 "_x2c_lambda_context_12") 
   (fields 
-   (declare ("Var") (bindings (bind (binding 106 "_x2c_lambda_capture_8") ()))))) 
- (bindings (bind (binding 107 "_x2c_lambda_context_12") ())))
+   (declare ("Var") (bindings (bind (binding 107 "_x2c_lambda_capture_8") ()))))) 
+ (bindings (bind (binding 106 "_x2c_lambda_context_12") ())))
 
 (function (static "Var") 
  (bind (binding 53 "_x2c_lambda_6") 
