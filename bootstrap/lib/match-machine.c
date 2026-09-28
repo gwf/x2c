@@ -263,12 +263,15 @@ int MatchMachine_step(MatchMachine m){
     }
     case MW_EQ_VALUE_BITS : if(m -> value.u64 != p -> consts[w -> a].u64) m -> pc = w -> target;
     break;
-    case MW_INPUT_LIST : if(! Var_is_row(m -> value, 9, 7, 4)) m -> pc = w -> target;
-    else{
-      * MatchMachine__cursor(m, w -> a) = Var_list(m -> value);
-      * MatchMachine__distance(m, w -> a) = 0;
+    case MW_INPUT_LIST :{
+      Var value = m -> view ? m -> view(m -> value) : m -> value;
+      if(! Var_is_row(value, 9, 7, 4)) m -> pc = w -> target;
+      else{
+        * MatchMachine__cursor(m, w -> a) = Var_list(value);
+        * MatchMachine__distance(m, w -> a) = 0;
+      }
+      break;
     }
-    break;
     case MW_NONNIL : if(! List_truth(* MatchMachine__cursor(m, w -> a))) m -> pc = w -> target;
     break;
     case MW_NIL : if(List_truth(* MatchMachine__cursor(m, w -> a))) m -> pc = w -> target;
@@ -319,7 +322,7 @@ int MatchMachine_step(MatchMachine m){
         m -> pc = w -> target;
         break;
       }
-      Var head = List_car(at);
+      Var head = m -> view ? m -> view(List_car(at)) : List_car(at);
       if(! Var_is_row(head, 9, 7, 4)){
         m -> pc = w -> target;
         break;
@@ -521,7 +524,7 @@ Var String_var(String);
 
 void MatchMachine_finish(MatchMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 543};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 546};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }

@@ -977,8 +977,12 @@ static List _filtered_catch_arm(Compiler c, int * is_default, List handle){
   List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _161);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = _continued(c, body);  Sym_pop_scope(c -> sym);  return cons(List_var(pattern), cons(List_var(cons(_66, List_append(Compiler_catch_binder_declarations(c, bindings, handle), cons(List_var(body), NULL)))), NULL));
 }
 
+List Compiler_try_parse_macro_slot(Compiler, Symbol);
 static List _filtered_catches(Compiler compiler){
-  List handle = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _190));  Array arms = Array_new();  int saw_default = 0;  while(1){
+  List handle = Map_truth(compiler -> macro_holes) ? Compiler_macro_introduced_name(compiler, _190) : Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _190));  Array arms = Array_new();  int saw_default = 0;  while(1){
+    List hole = Compiler_try_parse_macro_slot(compiler, 6398160);  if(List_truth(hole)){
+      Array_push(arms, List_var(hole));  if(! Compiler_test(compiler, 6398160)) break;  continue;
+    }
     int is_default = 0;  List arm = _filtered_catch_arm(compiler, &(is_default), handle);  Array_push(arms, List_var(arm));  if(is_default) saw_default = 1;  if(! Compiler_test(compiler, 6398160)) break;  if(saw_default) Compiler_report_error(compiler, 33658058, _191, compiler -> token, _164);
   }
   return cons(_165, cons(List_var(Array_list_free(arms)), cons(List_var(handle), NULL)));
@@ -994,7 +998,6 @@ static List _raise_statement(Compiler compiler){
 }
 
 List Compiler_peek_macro_hole(Compiler);
-List Compiler_try_parse_macro_slot(Compiler, Symbol);
 static List _optional_label_statement(Compiler compiler){
   Token head = compiler -> token;  if(Compiler_peek(compiler, 0) == 19147688 ||(Map_truth(compiler -> macro_holes) && List_truth(Compiler_peek_macro_hole(compiler)) && Compiler_peek(compiler, 2) == 117)){
     List label = Compiler_try_parse_macro_slot(compiler, 920394);  if(! List_truth(label)) label = Compiler_parse_optional_identifier(compiler);  if(Compiler_test(compiler, 117)) return cons(_170, cons(List_var(label), NULL));  compiler -> token = head;

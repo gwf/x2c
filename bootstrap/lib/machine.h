@@ -123,6 +123,7 @@ typedef struct MatchMachine{
   MachineStats * stats;
   int(* relation)(void *, int, Var, Var, void *);
   void * relation_context;
+  Var(* view)(Var);
   Var * scratch;
   int scratch_capacity;
   MatchFrame frames[MACHINE_FRAME_MAX];
