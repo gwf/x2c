@@ -162,6 +162,34 @@ int datum_read(String text, unsigned &cursor, Var &out) {
   return 1;
 }
 
+/* Writes `value` to `out` as one frame, its tagged datum's length in
+   decimal and a newline before it, and returns 1, or writes nothing and
+   returns 0 for a value the grammar cannot spell. */
+int datum_frame(Buffer out, Var value) {
+  Buffer body = $auto(Buffer.new(0));
+  if (!datum_write(body, value, 1)) return 0;
+  out.write(%"${body.len()}\n$body");
+  return 1;
+}
+
+/* Reads the frame at the start of `input` into `value` and sets `used` to
+   its size. Returns 0 while `input` holds no complete frame.
+
+   Raises: `<incomplete>` or `<malformed>` for a frame that is not one
+   datum. */
+int datum_unframe(String input, size_t &used, Var &value) {
+  int newline = input.find("\n");
+  if (newline <= 0) return 0;
+  size_t length = strtoul(input, NULL, 10);
+  if (input.len() < newline + 1 + length) return 0;
+  String frame = String.new_len(input + newline + 1, length);
+  unsigned cursor = 0;
+  value = void;
+  if (!datum_read(frame, cursor, value)) raise %(malformed (frame $frame));
+  used = newline + 1 + length;
+  return 1;
+}
+
 /* Returns why the compile-time result `value` cannot become data in the
    program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
    contains itself, or holds one Array or Map twice. `marks` holds 1 for

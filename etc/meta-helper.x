@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 #include <dlfcn.h>
 
 /* The generated table unit supplies each module's name-to-`Func` Map. */
@@ -233,28 +234,35 @@ String x2c_embed_text(Var path) {
 
 /* --- the protocol ------------------------------------------------------- */
 
-/* The next frame on `in`, or NULL at its end. */
-static String _frame_read(FILE *in) {
-  size_t length = 0;
-  if (fscanf(in, "%zu", &length) != 1 || fgetc(in) != '\n') return NULL;
-  char *bytes = malloc(length + 1);
-  if (!bytes || fread(bytes, 1, length, in) != length) return NULL;
-  bytes[length] = 0;
-  String text = String.new_len(bytes, length);
-  free(bytes);
-  return text;
+/* The next request frame on descriptor `in`, reading into `input`, or
+   void at the end of `in`. */
+static Var _request(int in, Buffer input) {
+  for (;;) {
+    String text = input;
+    size_t used = 0;
+    Var request = void;
+    if (datum_unframe(text, used, request)) {
+      String rest = text[used:];
+      input.clear();
+      if (rest) input.write(rest);
+      return request;
+    }
+    char bytes[65536];
+    ssize_t n = read(in, bytes, sizeof bytes);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) return void;
+    input.write(String.new_len(bytes, n));
+  }
 }
 
-static void _frame_write(String text) {
-  fprintf(helper_out, "%zu\n", (size_t) text.len());
-  fwrite((char *) text, 1, text.len(), helper_out);
-  fflush(helper_out);
-}
-
-static void _reply(List message) {
+/* Writes one reply frame, or returns 0 for a message with no datum. */
+static int _reply(List message) {
   Buffer out = Buffer.new(0);
-  datum_write(out, message, 1);
-  _frame_write(out);
+  if (!datum_frame(out, message)) return 0;
+  String frame = %"$out";
+  fwrite((char *) frame, 1, frame.len(), helper_out);
+  fflush(helper_out);
+  return 1;
 }
 
 static void _call(Map table, String name, List arguments) {
@@ -290,23 +298,17 @@ static void _call(Map table, String name, List arguments) {
     _reply(%(void));
     return;
   }
-  Buffer out = Buffer.new(0);
-  out.write("(value ");
-  if (!datum_write(out, result, 1)) {
+  if (!_reply(%(value $result)))
     _reply(
       %(error "compile-time result has no value the compiler can read"
         ("function: $name")));
-    return;
-  }
-  out.write(")");
-  _frame_write(out);
 }
 
 int main(void) {
   Lisp.kernel();
-  FILE *in = fdopen(3, "rb");
   helper_out = fdopen(4, "wb");
-  if (!in || !helper_out) _exit(2);
+  if (!helper_out) _exit(2);
+  Buffer input = Buffer.new(0);
   Map tables = {};
   for (int i = 0; i < x2c_meta_helper_count(); i++) {
     Map table = x2c_meta_helper_table(i);
@@ -316,10 +318,7 @@ int main(void) {
   /* A failed reset is the reply to the next call it prepared. */
   List reset_failure = NULL;
   for (;;) {
-    String text = _frame_read(in);
-    unsigned cursor = 0;
-    Var request = void, table, reset;
-    if (!text || !datum_read(text, cursor, request)) _exit(0);
+    Var request = _request(3, input), table, reset;
     match (request) {
       case %(reset ?(int index)): {
         current = tables.try_get(index, table) ? table : NULL;

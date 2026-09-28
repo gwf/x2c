@@ -261,8 +261,8 @@ forms, including initializer recognition and the function-body boundary,
 `src/expressions.x` for the C precedence ladder plus dotted method sugar,
 `src/statements.x` for control flow, `match`, `try`/`catch`, and `defer`, and
 `src/literals.x` for collection, interpolated `String`, and lambda literals.
-`src/stage.x` stages a unit's bodied `meta` functions as native code and
-carries values across that boundary. The built-in source macro
+`src/meta-group.x` stages a unit's bodied `meta` functions as native code,
+and `src/stage.x` carries values across that boundary. The built-in source macro
 in `src/macros.x`, `etc/builtin-macros.xmacro`, and the algorithms in
 `src/builtins.x` expand `foreach` during this pass. `src/type.x`
 owns the `List`-backed `Type` representation those modules consult; `src/ast.x`
@@ -473,6 +473,8 @@ The modules under `src/` divide ownership as follows:
   and sequential unit Context/Type lifetimes;
 - `src/meta-project.x` -- the project meta build: the helper program that
   runs a project's meta functions, built and cached before translation;
+- `src/meta-helper-client.x` -- the compiler's side of that helper: one
+  request and one reply per call, with its timeout and failures;
 - `commands/repl/` -- terminal interaction, inline editing and history,
   persistent submissions, and named inspection over the compiler session API;
 - `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
@@ -491,8 +493,10 @@ The modules under `src/` divide ownership as follows:
   grammar and AST construction;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
-- `src/stage.x` -- a unit's staged compile-time functions and the arguments
-  and results that cross between them and program code;
+- `src/stage.x` -- the arguments and results that cross between `meta`
+  code and program code;
+- `src/meta-group.x` -- a unit's `meta` group, its emission as C, and
+  in-process staging;
 - `src/builtins.x`, `src/linked-meta.x` -- the built-in macro algorithms and
   the shipped compile-time code compiled into the compiler;
 - `src/ast.x` -- AST sequence placement and binding helpers;

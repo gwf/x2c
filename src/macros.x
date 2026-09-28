@@ -15,6 +15,8 @@ $(import "../src/ast-rewrite.xmacro")
 #include "linked-meta.x"
 #include "literals.x"
 #include "stage.x"
+#include "meta-group.x"
+#include "meta-helper-client.x"
 #include "meta.x"
 #include "parse.x"
 #include "regions.x"
