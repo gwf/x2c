@@ -3291,7 +3291,7 @@ return value;
 }
 
 static List _finish_type(Compiler compiler, List type){
-  Var whole = _finish_type_spec(compiler, List_var(type));  if(! Var_equal(whole, List_var(type))){
+  Var whole = _finish_type_spec(compiler, List_var(type));  if(! Var_equal(whole, List_var(type)) || Var_equal(List_car(type), Symbol_var(1318234344)) || Var_equal(List_car(type), Symbol_var(44977116)) || Var_equal(List_car(type), Symbol_var(357722))){
     List constructed = Var_list(whole);  Type type = List_type(Var_equal(List_car(constructed), Symbol_var(39266)) ? List_cdr(constructed) : constructed);  return Type_list(Sym_local_type(compiler -> sym, type));
   }
   Array bound = Array_new(); {
