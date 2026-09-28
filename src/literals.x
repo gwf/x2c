@@ -11,6 +11,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
+$(import "grammar.xmacro")
 #include "parse.x"
 #include "type.x"
 #include "expressions.x"
@@ -889,10 +890,6 @@ static List _lambda_parse_bare_params(Compiler compiler) {
   return names.list_free();
 }
 
-static List _lambda_params_node(
-  List names, List typed_params, int used_typed) =>
-    used_typed ? %( params @typed_params ) : %( params @names );
-
 static int _lambda_binding_is_outer(
   Compiler c, List binding, int depth) {
   Var captured_depth;
@@ -1085,22 +1082,23 @@ List Compiler.bind_lambda_expression(
   }
   List captures = c.end_lambda_captures();
   c.check_lambda_captures(body);
-  parameters = %(params @{entries.list_free()});
+  List params = entries.list_free();
+  Macro captured = $lambda_captured, lambda = $lambda_expression;
   if (type === %(<macro-expr>))
     type = supplied ? %("Func")
-         : %((func ${c.lambda_param_types(parameters.cdr())}) "Var");
+         : %((func ${c.lambda_param_types(params)}) "Var");
   if (captures)
-    return %(expr ("Func")
-             (lambda $parameters (captures @captures) $body));
+    return c.rebuild_expression(
+      %("Func"), captured(body, captures, params));
   /* A meta body keeps the lambda for meta lowering to adapt; the transform
      lifts it for native code. */
   if (type === %("Func") && !c.meta_body) {
     Type signature = %(
-      (func ${c.lambda_param_types(parameters.cdr())}) "Var");
+      (func ${c.lambda_param_types(params)}) "Var");
     return c.lift_func_expression(
-      %(expr $signature (lambda $parameters $body)));
+      c.rebuild_expression(signature, lambda(body, params)));
   }
-  return %(expr $type (lambda $parameters $body));
+  return c.rebuild_expression(type, lambda(body, params));
 }
 
 /** Parses a `%!(...) => ...` literal and returns its typed lambda expression.
@@ -1174,8 +1172,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
   }
   else body = c.parse_assignment();
   List rtype = %("Var");
-  List params_node = _lambda_params_node(names, typed_params, used_typed);
-  List param_types = c.lambda_param_types(params_node.cdr());
+  List entries = used_typed ? typed_params : names;
+  List param_types = c.lambda_param_types(entries);
   List ftype = %((func $param_types) @rtype);
   List captures = c.end_lambda_captures();
   c.check_lambda_captures(body);
@@ -1187,10 +1185,12 @@ List Compiler.parse_lambda_literal(Compiler c) {
     match (body)
       case %(expr (<macro-expr>) (!set ?hole (macro-bind ?))): body = hole;
   }
+  Macro captured = $lambda_captured, lambda = $lambda_expression;
   if (captures)
-    return %(expr ${c.macro_holes ? ftype : %("Func")}
-             (lambda $params_node (captures @captures) $body));
-  return %(expr $ftype (lambda $params_node $body));
+    return c.rebuild_expression(
+      c.macro_holes ? ftype : %("Func"),
+      captured(body, captures, entries));
+  return c.rebuild_expression(ftype, lambda(body, entries));
 }
 
 static void _validate_match_binder_atom(Compiler compiler, Atom atom) {

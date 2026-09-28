@@ -1238,20 +1238,22 @@ static List _prepare_nested_lambda_regions(
   Compiler compiler, List ast) {
   if (!ast) return ast;
   Macro lambda = $lambda_expression, captured = $lambda_captured;
-  match (ast) {
-    case captured(?body, *captures, *entries): {
-      List prepared = _prepare_lambda_region(compiler, entries, body);
-      return prepared == body ? ast : %(
-        expr ${ast.cadr()}
-          (lambda (params @entries) (captures @captures) $prepared)
-      );
-    }
-    case lambda(?body, *params): {
-      List prepared = _prepare_lambda_region(compiler, params, body);
-      return prepared == body ? ast
-           : %(expr ${ast.cadr()} (lambda (params @params) $prepared));
+  if (ast.car() == <expr>) {
+    match (ast) {
+      case captured(?body, *captures, *entries): {
+        List prepared = _prepare_lambda_region(compiler, entries, body);
+        return prepared == body ? ast : compiler.rebuild_expression(
+          ast.cadr(), captured(prepared, captures, entries));
+      }
+      case lambda(?body, *params): {
+        List prepared = _prepare_lambda_region(compiler, params, body);
+        return prepared == body ? ast
+             : compiler.rebuild_expression(
+                 ast.cadr(), lambda(prepared, params));
+      }
     }
   }
+
   return Ast.rewrite_children(
     ast, %!(List child) => ast_contains_head(child, <lambda>)
       ? _prepare_nested_lambda_regions(compiler, child) : child);
@@ -1347,53 +1349,56 @@ static List _rewrite_lambda_captures(
   Type environment_type) {
   if (!ast) return ast;
   Macro lambda = $lambda_expression, captured = $lambda_captured;
-  match (ast) {
-    case captured(?body, *captures, *params): {
-      List rewritten = Ast.rewrite_children(captures, %!(List record) => {
-        match (record)
-          case %(capture ?binding ?type ?expression): {
-            List value = _rewrite_lambda_captures(
-              compiler, expression, slots, environment_binding,
-              environment_type);
-            if (value != expression)
-              return %(capture $binding $type $value);
-          }
-        return record;
-      });
-      return rewritten == captures ? ast
-           : %(expr ${ast.cadr()}
-                (lambda (params @params) (captures @rewritten) $body));
-    }
-    case lambda(?body, *params): return ast;
-    case %(expr ?source_type (ident ?bound)): {
-      Var stored;
-      if (slots.try_get(bound, stored)) {
-        List field = NULL;
-        Type storage_type = NULL;
-        match (stored)
-          case %(capture-field ?matched_field ?matched_type): {
-            field = matched_field;
-            storage_type = matched_type;
-          }
-        String field_name = binding_identity_spelling(field);
-        List read = %(
-          expr $storage_type
-            (op -> (expr $environment_type (ident $environment_binding))
-                   ($field_name))
-        );
-        if (source_type.car() == <&>)
-          return %(expr $source_type ${read.caddr()});
-        List converted = compiler.convert_expression(read, source_type);
-        match (converted)
-          case %(expr ? (call "Var_pointer" ?)):
-            return %(expr $source_type
-                     (parens (expr $source_type
-                       (cast $source_type $converted))));
-        return converted;
+  if (ast.car() == <expr>) {
+    match (ast) {
+      case captured(?body, *captures, *params): {
+        List rewritten = Ast.rewrite_children(captures, %!(List record) => {
+          match (record)
+            case %(capture ?binding ?type ?expression): {
+              List value = _rewrite_lambda_captures(
+                compiler, expression, slots, environment_binding,
+                environment_type);
+              if (value != expression)
+                return %(capture $binding $type $value);
+            }
+          return record;
+        });
+        return rewritten == captures ? ast
+             : compiler.rebuild_expression(
+                 ast.cadr(), captured(body, rewritten, params));
       }
-      return ast;
+      case lambda(?body, *params): return ast;
+      case %(expr ?source_type (ident ?bound)): {
+        Var stored;
+        if (slots.try_get(bound, stored)) {
+          List field = NULL;
+          Type storage_type = NULL;
+          match (stored)
+            case %(capture-field ?matched_field ?matched_type): {
+              field = matched_field;
+              storage_type = matched_type;
+            }
+          String field_name = binding_identity_spelling(field);
+          List read = %(
+            expr $storage_type
+              (op -> (expr $environment_type (ident $environment_binding))
+                     ($field_name))
+          );
+          if (source_type.car() == <&>)
+            return %(expr $source_type ${read.caddr()});
+          List converted = compiler.convert_expression(read, source_type);
+          match (converted)
+            case %(expr ? (call "Var_pointer" ?)):
+              return %(expr $source_type
+                       (parens (expr $source_type
+                         (cast $source_type $converted))));
+          return converted;
+        }
+        return ast;
+      }
     }
   }
+
   return Ast.rewrite_children(
     ast, %!(List child) => _rewrite_lambda_captures(
       compiler, child, slots, environment_binding, environment_type));
@@ -1612,6 +1617,9 @@ List Compiler.lambda_param_types(Compiler compiler, List entries) {
     remain around lowered helpers; other non-lambda expressions pass through.
 */
 List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
+  if (expression.car() == <at> || expression.car() == <src>)
+    return Ast.rewrite_children(expression,
+      %!(List child) => compiler.lower_lambda_expr(child));
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (expression) {
     case %(expr ?type (parens ?inner)): {
@@ -1628,7 +1636,7 @@ List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
         Type signature = %(
           (func ${compiler.lambda_param_types(params)}) "Var");
         return compiler.lift_func_expression(
-          %(expr $signature (lambda (params @params) $body)));
+          compiler.rebuild_expression(signature, lambda(body, params)));
       }
       String lname = compiler.fresh_name("lambda");
       List lambda_binding = compiler.sym.introduce(lname);
