@@ -66,18 +66,18 @@
      (param ("String") (bind (binding 15 "rhs") ())))))) 
  (block 
   (stmnt 
-   (expr ("String") 
-    (op = (expr ("String") 
+   (expr (volatile "String") 
+    (op = (expr (volatile "String") 
            (index (expr (* volatile "String") (ident (binding 13 "lhs"))) 
             (expr (int) (literal (int) "0")))) 
      (expr ("String") 
       (call (expr ((func (("String") ("String"))) "String") 
              (ident (binding 7 "String_add"))) 
-       (args (expr ("String") 
+       (args (expr (volatile "String") 
               (index (expr (* volatile "String") (ident (binding 13 "lhs"))) 
                (expr (int) (literal (int) "0")))) 
         (expr ("String") (ident (binding 15 "rhs"))))))))) 
   (return 
-   (expr ("String") 
+   (expr (volatile "String") 
     (index (expr (* volatile "String") (ident (binding 13 "lhs"))) 
      (expr (int) (literal (int) "0")))))))

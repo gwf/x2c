@@ -2224,7 +2224,10 @@ tail supplies the wrapper's lowered body without a second body constructor.
 The direct update fixture's C and H match the pre-edit bytes exactly;
 compound, prefix, and postfix output and evaluation order are unchanged.
 Four focused operator fixtures pass, including the direct update and index
-matrix cases. No generated artifact rebaseline was needed.
+matrix cases. Binding the template retains the `volatile` type on four
+`lhs[0]` expression annotations in each of two transform sidecars. Their
+generated C remains byte-identical, and both fixtures compile and run; the
+transform sidecars are rebaselined to the bound type.
 
 ### F. Static-local initialization exception
 
