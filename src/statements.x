@@ -464,9 +464,19 @@ static List _filtered_catch_arm(Compiler c, int &is_default, List handle) {
 }
 
 static List _filtered_catches(Compiler compiler) {
-  List handle = compiler.sym.introduce(compiler.fresh_name("error_handler"));
+  /* A template's handler is its own local, like any it declares. */
+  List handle = compiler.macro_holes
+    ? compiler.macro_introduced_name("error_handler")
+    : compiler.sym.introduce(compiler.fresh_name("error_handler"));
   Array arms = [], int saw_default = 0;
   loop {
+    /* A template writes its catch arms as one `Catch` sequence hole. */
+    List hole = compiler.try_parse_macro_slot(<catch>);
+    if (hole) {
+      arms.push(hole);
+      if (!compiler.test(<catch>)) break;
+      continue;
+    }
     int is_default = 0;
     List arm = _filtered_catch_arm(compiler, is_default, handle);
     arms.push(arm);

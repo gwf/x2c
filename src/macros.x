@@ -3132,7 +3132,7 @@ static String _kind_spelling(Symbol kind) {
 
 static const SymbolSet author_kinds =
   %<<expr type decl function name literal param block field enumerator
-     map-entry unit named-type>>;
+     map-entry unit named-type catch>>;
 
 static Symbol _author_kind(String spelling) {
   Symbol kind = Symbol.new(spelling);
@@ -3285,7 +3285,7 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
 static const SymbolSet declaration_roles =
   %<<field enumerator map-entry unit>>;
 static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit>>;
+  %<<argument block field enumerator map-entry param unit catch>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 
 /** Parses a macro hole or Lisp slot for `role` while reading a template.
