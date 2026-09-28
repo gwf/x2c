@@ -1442,6 +1442,35 @@ has not bound the generated typedef. Do not introduce a second type registry
 or duplicate environment synthesis inside the slot. The callable-defer
 helper/environment construction remains a separate subsequent shape.
 
+### E2. Callable-defer environment and helper (target readable form)
+
+The callable pass still selects captures, checks whether their types can be
+hoisted, records writes, and rewrites typed references. Its output construction
+reads as one producer call for each generated unit:
+
+```x2c
+if (records)
+  c.add_early(_defer_environment_unit(c, env_binding, records));
+c.add_early(_defer_callback_unit(
+  c, callback, opaque, env_binding, env_local, rewritten));
+return %(defer $body $env_binding $callback $records $written);
+```
+
+The adjacent source templates express `typedef struct NAME { FIELDS... }
+NAME` and the two file-static `void CALLBACK(void *OPAQUE)` helper shapes,
+with and without a typed environment-pointer declaration. The environment
+producer supplies canonical `const void *FIELD` rows. A separately bound
+`Field` template was tried but lost the member type in the enclosing record;
+the generated C was unchanged while the transform sidecar lost its type.
+Keep the field rows with the producer until a direct `Field` projection
+preserves that type fact.
+The final lowered `defer` record is the existing internal producer form and
+retains the current stage. Ordinary binding publishes the generated typedef;
+`add_early` preserves the current unit order. Capture discovery, type
+hoistability, write/volatile semantics, and the unsupported-capture try
+fallback remain with their existing owners. No new parser or runtime behavior
+is intended.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

@@ -35,6 +35,13 @@ Each rule is a property a reviewer can check by reading the code.
    only registers the slot functions, so any unit the template is applied
    in can call them by name.
 
+The callable-defer environment is a narrow exception to the second rule's
+slot placement: its producer supplies canonical `const void *` field rows to
+the adjacent typedef template. Binding a `Field` template separately before
+binding that typedef loses the member type in the transform tree. Keep these
+rows in the producer until a direct field projection retains the type fact;
+capture selection and type checking remain with the existing transform pass.
+
 ## Recognition
 
 `src/grammar.xmacro` writes each form as its source. A `Catch` sequence hole

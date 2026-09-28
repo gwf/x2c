@@ -3863,6 +3863,57 @@ static List _defer_rewrite_captures(
     _defer_rewrite_captures(child, captures, written, env_name));
 }
 
+/* File-static storage shared by a callable defer and its region record. */
+macro open Unit $defer_environment(Name $name, Field $fields...) {
+  typedef struct $name { $fields... } $name;
+}
+
+/* The body is already lowered; these templates supply its generated entry
+   and the captured variant's environment pointer. */
+macro open Unit $defer_callback(Name $callback, Name $opaque,
+    Statement $body) {
+  static void $callback(void *$opaque) { $body }
+}
+
+macro open Unit $defer_captured_callback(Type $type, Name $callback,
+    Name $opaque, Name $local, Statement $body) {
+  static void $callback(void *$opaque) {
+    $type *$local = ($type *)$opaque;
+    $body
+  }
+}
+
+/* Bind the generated type so its fields are visible to the record template.
+   Field rows remain canonical syntax: separately binding a Field template
+   loses its member type before the enclosing typedef is bound. */
+static List _defer_environment_unit(
+  Compiler c, List env_binding, List records) {
+  Array fields = [];
+  foreach (List record, records) {
+    List field = record.caddr();
+    fields.push(%(declare (const void) (bindings (bind $field (*)))));
+  }
+  Macro environment = $defer_environment;
+  return c.bind_syntax(
+    environment(env_binding, fields.list_free()), AST_UNIT, NULL);
+}
+
+/* Preserve the lowered finalizer while binding the new function entry. */
+static List _defer_callback_unit(
+  Compiler c, List callback, List opaque, List env_binding,
+  List env_local, List rewritten) {
+  List body = %(code-value "lowered" (seq $rewritten) ());
+  if (env_binding) {
+    Type env_type = %(${binding_identity_spelling(env_binding)});
+    Macro captured = $defer_captured_callback;
+    return c.bind_syntax(
+      captured(env_type, callback, opaque, env_local, body),
+      AST_UNIT, NULL);
+  }
+  Macro plain = $defer_callback;
+  return c.bind_syntax(plain(callback, opaque, body), AST_UNIT, NULL);
+}
+
 static List _lower_callable_defer(
   Compiler c, List body, List finalizer) {
   List declared = %(), written = %();
@@ -3880,16 +3931,7 @@ static List _lower_callable_defer(
     env_name = c.fresh_name("defer_env");
     env_binding = c.sym.introduce(env_name);
     env_local = c.sym.introduce(c.fresh_name("defer_data"));
-    Array fields = [];
-    foreach (List record, record_list) {
-      List field = record.caddr();
-      fields.push(%(declare (const void) (bindings (bind $field (*)))));
-    }
-    List env_type = %(
-      typedef (struct $env_binding (fields @{fields.list_free()}))
-              (bindings (bind $env_binding ()))
-    );
-    c.add_early(c.bind_syntax(env_type, AST_UNIT, NULL));
+    c.add_early(_defer_environment_unit(c, env_binding, record_list));
   }
 
   List opaque = c.sym.introduce(c.fresh_name("defer_opaque"));
@@ -3900,23 +3942,8 @@ static List _lower_callable_defer(
                  ? _defer_rewrite_captures(
                    finalizer, captures, written, env_local_name)
                  : finalizer;
-  List setup = NULL;
-  if (env_binding) {
-    List opaque_expr = %(expr (* void) (ident $opaque));
-    List cast = %(expr (* $env_name) (cast (* $env_name) $opaque_expr));
-    setup = %(declare ($env_name)
-              (bindings (op = (bind $env_local (*)) $cast)));
-  }
-  List callback_body = setup
-                     ? %(block $setup $rewritten)
-                     : %(block $rewritten);
-  List callback_bind = %(
-    bind $callback
-      ((fnmod (params (param (void) (bind $opaque (*))))))
-  );
-  List callback_func = %(
-    function (static void) $callback_bind $callback_body);
-  c.add_early(callback_func);
+  c.add_early(_defer_callback_unit(
+    c, callback, opaque, env_binding, env_local, rewritten));
   if (c.fn_name)
     c.semantic_binding_facts()[%(defer-ownr $callback)] =
       c.fn_name;
