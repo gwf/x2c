@@ -576,8 +576,8 @@ static List _macro_case_condition(Emitter e, List pattern_ast) {
   match (pattern_ast)
     case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
                         (args ?template ?names))):
-      return %("Macro_case_capture(_x2c_match_expr,"
-        @{e._emit(template)} "," @{e._emit(names)} ","
+      return %("Macro_case_capture_at(&" ${e.fresh_name("macro_site")}
+        ", _x2c_match_expr," @{e._emit(template)} "," @{e._emit(names)} ","
         "&_x2c_match_capture)");
   return NULL;
 }
@@ -611,8 +611,10 @@ static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (macro_case) {
       List declarations = _make_local_binders(binders, "_x2c_match_values");
+      String site = macro_case[1];
       values.push(
-        %("if (" @macro_case ") {" @declarations @body @implicit_break "}"));
+        %("static MacroCaseSite" $site ";"
+          "if (" @macro_case ") {" @declarations @body @implicit_break "}"));
     }
     else if (flat_head) {
       List condition = _flat_match_condition(flat_head, flat_tags);

@@ -38,8 +38,6 @@
 #include "common.x"
 #include "list.x"
 #include "match.x"
-#include "mutex.x"
-#include <pthread.h>
 #include "string.x"
 #include "symbol.x"
 #include "symbolset.x"
@@ -246,8 +244,13 @@ Var Macro.subject(void) => macro_subject;
     compiler sets this for the length of each `meta` call. */
 void Macro.use_subject(Var rows) { macro_subject = rows; }
 
+/* Whether the pattern being derived resolved a free reference against the
+   current call's subject, which ties it to that call. */
+static threaded int macro_subject_used;
+
 static Var _macro_free_reference(String spelling) {
   if (macro_subject is void) return %(binding ? $spelling);
+  macro_subject_used = 1;
   foreach (List row, macro_subject.list())
     if (row.car() == spelling) return row.cadr();
   return %(binding-name $spelling);
@@ -351,15 +354,8 @@ static Var _macro_view(Var value) {
     case %(literal *): return value;
     case %(binding ? ?): return value;
   }
-  /* A statement group is transparent in C, so its items stand in place. */
   Array parts = [];
-  foreach (Var child, node) {
-    Var viewed = _macro_view(child);
-    match (viewed) {
-      case %(seq *items): foreach (Var item, items) parts.push(item);
-      default: parts.push(viewed);
-    }
-  }
+  foreach (Var child, node) parts.push(_macro_view(child));
   return parts.list_free();
 }
 
@@ -449,88 +445,11 @@ static int _macro_publish(
   return 1;
 }
 
-/** Holds what recognizing one macro value under one `case` binder list
-    needs: the derived pattern, its prepared plan, the slots of its fixed
-    locals, and where each binder reads its capture.
-*/
-typedef struct MacroCaseShape {
-  List pattern;
-  MatchPlan plan;
-  MacroFixedSlots policy;
-  MacroPublishing route;
-} *MacroCaseShape;
-
-static MacroCaseShape _macro_case_derive(Macro t, List names) {
-  MacroCaseShape shape = Scope.calloc(1, sizeof(struct MacroCaseShape));
-  shape.pattern = _macro_case_shape(t, names);
-  shape.route = _macro_publishing(
-    shape.pattern, names, _macro_internal_names(t, names, 0));
-  shape.plan = MatchPlan.prepare(shape.pattern);
-  int ordinal = 0;
-  if (shape.plan.status == MACHINE_PREPARED)
-    foreach (List fresh, t.assoc(<fresh>).list()) {
-      int slot = shape.plan.layout.index(_macro_fixed(ordinal++));
-      if (slot >= 0) shape.policy.slots[shape.policy.count++] = slot;
-    }
-  return shape;
-}
-
-/* Shapes derived for macro values and binder lists that live as long as
-   the process, such as literals, keyed by their identities. */
-static Scope macro_shapes_scope = NULL;
-static Map macro_shapes = NULL;
-static pthread_mutex_t macro_shapes_mutex;
-static pthread_once_t macro_shapes_once = (pthread_once_t) PTHREAD_ONCE_INIT;
-
-static void _macro_shapes_initialize(void) =>
-  x2c_mutex_recursive_initialize(
-    &macro_shapes_mutex, "Macro: could not initialize the shape mutex");
-
-static void _macro_shapes_shutdown(void) {
-  if (macro_shapes)
-    foreach (Var (key, stored), macro_shapes)
-      ((MacroCaseShape) stored.pointer()).plan.free();
-  macro_shapes = NULL;
-  macro_shapes_scope.destroy();
-  macro_shapes_scope = NULL;
-}
-
-/* The shape for `t` and `names`: derived once for lasting values, and
-   derived for this call alone otherwise, released by `release`. */
-static MacroCaseShape _macro_case_shape_for(
-  Macro t, List names, int &release) {
-  release = !Pool.is_permanent(t) || !Pool.is_permanent(names);
-  if (release) return _macro_case_derive(t, names);
-  String key = "%p %p".printf((void *) t, (void *) names);
-  x2c_mutex_recursive_lock(
-    &macro_shapes_mutex, &macro_shapes_once, _macro_shapes_initialize,
-    "Macro: could not lock the shape cache");
-  defer x2c_mutex_recursive_unlock(
-    &macro_shapes_mutex, "Macro: could not unlock the shape cache");
-  if (!macro_shapes_scope) {
-    macro_shapes_scope = Scope.new();
-    Scope.shutdown_hook(_macro_shapes_shutdown);
-  }
-  Var stored;
-  MacroCaseShape shape = NULL;
-  $scope(&macro_shapes_scope) {
-    if (!macro_shapes) macro_shapes = {};
-    if (macro_shapes.try_get(key, stored))
-      shape = (MacroCaseShape) stored.pointer();
-    else {
-      shape = _macro_case_derive(t, names);
-      macro_shapes[String.new(key)] = (void *) shape;
-    }
-  }
-  return shape;
-}
-
 static int _macro_case_match(
-  List code, MacroCaseShape shape, MatchCaptureBuffer *captured) {
-  MatchPlan plan = shape.plan;
+  List code, MatchPlan plan, MacroFixedSlots policy,
+  MatchCaptureBuffer *captured) {
   if (plan.status != MACHINE_PREPARED)
     return plan.execute_capture(code, *captured, NULL) == 1;
-  MacroFixedSlots policy = shape.policy;
   struct MatchMachine storage;
   MatchMachine machine = &storage;
   machine.open();
@@ -552,6 +471,18 @@ static int _macro_case_match(
   machine.finish();
   machine.dispose();
   return matched;
+}
+
+static MacroFixedSlots _macro_fixed_slots(Macro t, MatchPlan plan) {
+  MacroFixedSlots policy;
+  policy.count = 0;
+  int ordinal = 0;
+  if (plan.status == MACHINE_PREPARED)
+    foreach (List fresh, t.assoc(<fresh>).list()) {
+      int slot = plan.layout.index(_macro_fixed(ordinal++));
+      if (slot >= 0) policy.slots[policy.count++] = slot;
+    }
+  return policy;
 }
 
 /* The binder each parameter is captured under inside the derived pattern:
@@ -601,11 +532,26 @@ static int _macro_pending_parts(
   return 0;
 }
 
-/** Recognizes code built by `t`, whether retained as a pending
-   invocation or already expanded, and publishes the captures under
-   `names`. Generated `match` code calls this for a macro-valued case. */
-int Macro_case_capture(
-  List code, Macro t, List names, MatchCaptureBuffer *published) {
+/** Holds one macro-valued `case` site's prepared recognition for the
+    process: the plan Match keeps, the slots of the macro's fixed locals, and
+    where each binder reads its capture. The compiler emits one
+    zero-initialized static site per `case`.
+*/
+typedef struct MacroCaseSite {
+  MatchCaptureSite match;
+  MacroFixedSlots policy;
+  MacroPublishing route;
+  int ready;
+} MacroCaseSite;
+
+/** Recognizes code built by `t` for the `case` whose site is `site`, which
+    may be NULL, and publishes the captures under `names`. A pattern that
+    does not depend on the current call's subject is prepared once and kept
+    in the site; generated `match` code calls this for a macro-valued case.
+*/
+int Macro_case_capture_at(
+  MacroCaseSite *site, List code, Macro t, List names,
+  MatchCaptureBuffer *published) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
   List grouped = NULL;
@@ -615,12 +561,34 @@ int Macro_case_capture(
     MacroPublishing route = _macro_publishing(internal, names, internal);
     return _macro_publish(&route, values, &captured, published);
   }
-  int release = 0;
-  MacroCaseShape shape = _macro_case_shape_for(t, names, release);
-  defer if (release) shape.plan.free();
-  if (!_macro_case_match(code, shape, &captured)) return 0;
-  return _macro_publish(&shape.route, values, &captured, published);
+  if (site && __atomic_load_n(&site.ready, __ATOMIC_ACQUIRE))
+    return _macro_case_match(code, site.match.plan, site.policy, &captured) &&
+      _macro_publish(&site.route, values, &captured, published);
+  macro_subject_used = 0;
+  List pattern = _macro_case_shape(t, names);
+  MacroPublishing route = _macro_publishing(
+    pattern, names, _macro_internal_names(t, names, 0));
+  MatchPlan kept = site && !macro_subject_used && List.try_own(pattern)
+                 ? x2c_match_site_prepare(&site.match, pattern) : NULL;
+  if (kept && kept.status == MACHINE_PREPARED) {
+    site.policy = _macro_fixed_slots(t, kept);
+    site.route = route;
+    __atomic_store_n(&site.ready, 1, __ATOMIC_RELEASE);
+    return _macro_case_match(code, kept, site.policy, &captured) &&
+      _macro_publish(&route, values, &captured, published);
+  }
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  defer plan.free();
+  return _macro_case_match(
+      code, plan, _macro_fixed_slots(t, plan), &captured) &&
+    _macro_publish(&route, values, &captured, published);
 }
+
+/** Recognizes code built by `t` without a site; see
+    `Macro_case_capture_at`. */
+int Macro_case_capture(
+  List code, Macro t, List names, MatchCaptureBuffer *published) =>
+  Macro_case_capture_at(NULL, code, t, names, published);
 
 /** The pattern a macro-valued `case` compiles to; the compiler lowers a
    call of this to `Macro_case_capture` over the match subject. */
