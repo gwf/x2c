@@ -2452,6 +2452,7 @@ List Compiler.bind_syntax(
   Compiler c, Var syntax, AstPos context, Type return_type) {
   Var staged;
   int retained;
+  int pending = syntax is <list> && syntax.list().car() == "x2c.template";
   if (c.macro_application && c.take_code_value(syntax, staged, retained)) {
     if (retained) return staged;
     syntax = staged;
@@ -2513,6 +2514,9 @@ List Compiler.bind_syntax(
           List bound = _.expand_macro_invocation_node(
             definition, arguments, site, context);
           transaction.commit();
+          /* A Macro value applied directly stands for one statement. */
+          if (pending && statement_position)
+            match (bound) case %(seq ?statement): return statement;
           return bound;
         }
       }

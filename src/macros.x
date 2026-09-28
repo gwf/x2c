@@ -2386,12 +2386,6 @@ static Var _helper_result(Compiler c, Var value) {
   return resolved;
 }
 
-/** Returns `value` with each pending Macro value application replaced by
-    the invocation that expands it, so compiler code can bind what applying
-    a Macro value returns. */
-Var Compiler.macro_value_syntax(Compiler c, Var value) =>
-  _helper_result(c, value);
-
 /* Adapts a call of a bodied `meta` function's session binding, whose
    context holds the function's name, to a call in the project's helper,
    or in the REPL to a call of the group's native code, which the first
@@ -2695,13 +2689,15 @@ static Var _decorator_target_replaced(Var produced, Var target, Var required) {
   return void;
 }
 
-/** Evaluates an active template's `(macro-slot ...)` value.
+/** Evaluates an active template's `(macro-slot ...)` value, or a pending
+    Macro value application into the invocation that expands it.
     Non-slots and slots outside an expansion are returned unchanged. A splice
     slot's `List` result is wrapped as `(seq ...)` for its syntax position.
 */
 Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   if (value is not <list>) return value;
   List slot = value;
+  if (slot.car() == "x2c.template") return _helper_result(c, value);
   if (slot.car() != <macro-slot>) return value;
   if (c.macro_holes || !c.macro_stack) return value;
   int splice = slot.cadr();
