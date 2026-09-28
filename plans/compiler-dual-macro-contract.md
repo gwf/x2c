@@ -2406,7 +2406,7 @@ The enclosing `at` case retains source anchors. `defer-only-cleanup` checks
 assignment and increment cleanup, `defer-try-cleanup` checks transfer order,
 and `managed-init-runtime` checks compiler-produced deferred cleanup.
 
-### E21. Aggregate descriptor rendering guard: binding exception
+### E22. Aggregate descriptor rendering guard: binding exception
 
 The `class-private` executable probe generates all four aggregate `Var`
 rendering thunks. Their current bodies each declare a `RenderPath`, fall back
