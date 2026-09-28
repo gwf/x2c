@@ -2890,6 +2890,78 @@ proposed pair. `macro-postfix-members` and `method-pointer-receiver` remain
 the focused behavior fixtures; their artifacts were not rerun for this
 inert-only exception.
 
+### E33. Shared expression source-form preflight
+
+`Compiler.resolve_expression` remains the sole caller of `_resolve_content`.
+It first consumes staged code and returns already-resolved expressions that
+need no further resolution. Inside `_resolve_content`, the existing captured
+and ordinary lambda cases must remain first: they already match full `input`
+and bind or retain their bodies according to `macro_holes`.
+
+Source-form cases for index, member, and `is` also need full `input`. A macro
+case looks through `at`, `src`, and nested macro-expression shells, while the
+current content matcher handles a direct `at m-origin` marker before those
+parsed nodes. The shared client preflight belongs after the lambda cases and
+before future full-input source-form cases. The complete local shape is:
+
+```x2c
+match (input) {
+  case captured(?body, *captures, *params): {
+    if (c.macro_holes) return input;
+    return c.bind_lambda_expression(
+      input_type, %(params @params), captures, body);
+  }
+  case lambda(?body, *params): {
+    if (c.macro_holes) return input;
+    return c.bind_lambda_expression(
+      input_type, %(params @params), NULL, body);
+  }
+}
+if (content &&
+    (content.car() == <at> || content.car() == <src>)) {
+  match (content) case %(at m-origin ?inner): {
+    if (!c.source_map || c.macro_holes) return input;
+    return %(expr $input_type (at ${c.origin} $inner));
+  }
+  return input;
+}
+if (content && content.car() == <expr>)
+  match (content) case %(!set ?inner (expr ? ?)):
+    return c.resolve_expression(inner, origin);
+/* Future full-input source-form cases belong here. */
+match (content) {
+  /* The remaining existing content cases stay in their current order. */
+}
+```
+
+The `at` branch preserves direct `m-origin` reanchoring and the unchanged
+fallback for every other outer `at`. The `src` branch preserves its unchanged
+fallback. Nested expressions still recurse before any future macro case.
+The ordinary content matcher loses only those two leading cases. The outer
+head check avoids a second full matcher on ordinary expressions; only rare
+wrapper and nested-expression heads run a focused match. This is resolver
+ordering, not a change to global macro matching or source-origin validation.
+It is a capability checkpoint preceding any index/member/`is` adopter, whose
+capture and output parity remain separate decisions.
+
+The source diff adds six net lines. `make build` passes. A temporary native
+probe linked the current compiler objects and called `resolve_expression`
+on constructed direct `m-origin`, numeric `at`, `src`, and nested-expression
+inputs for all four `source_map`/`macro_holes` combinations. It printed
+`1111 1111 1111 1111`: direct `m-origin` stays identical except for the
+existing source-map reanchor when `source_map` is on and `macro_holes` is
+off; the other wrappers retain identity, and nested expressions recurse.
+The probe and output are retained under `/tmp/x2c-e33-resolver-probe`.
+
+Focused checked artifacts pass for `is-type-macro`, `macro-generated-index`,
+`macro-postfix-members`, `lambda-lowering`, `provenance-generated-lambda`,
+`is-type-non-var`, `macro-postfix-missing-method`,
+`index-slice-lowering`, and `method-pointer-receiver`. Source-map C/H from
+the first three fixtures match pre-edit bytes after normalizing only the
+different output-directory path written in C `#line` directives. This
+checkpoint changes resolver ordering alone; no source-form adopter or global
+matcher behavior changed.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

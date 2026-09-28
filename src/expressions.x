@@ -2043,13 +2043,19 @@ static List _resolve_content(
         input_type, %(params @params), NULL, body);
     }
   }
-  match (content) {
-    case %(at m-origin ?inner): {
+  // Source-form cases examine input through origin and source wrappers.
+  if (content &&
+      (content.car() == <at> || content.car() == <src>)) {
+    match (content) case %(at m-origin ?inner): {
       if (!c.source_map || c.macro_holes) return input;
       return %(expr $input_type (at ${c.origin} $inner));
     }
-    case %(!set ?inner (expr ? ?)):
+    return input;
+  }
+  if (content && content.car() == <expr>)
+    match (content) case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
+  match (content) {
     case %(managed-init ?initializer): {
       initializer = c.resolve_expression(initializer, origin);
       Type type = initializer.cadr();
