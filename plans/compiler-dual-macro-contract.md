@@ -887,15 +887,91 @@ match (block) case call(?callee, *arguments): {
 
 ### B. Try (src/transform.x)
 
-Target to be written before the site changes.
+The template writes the whole region: the frame, the catch site, the
+push, the landing and the cleanup. Slot functions in src/builtins.x
+build the catch site, the arm dispatch and the placed cleanup from the
+facts the lowering computed; each writes its C through its own macro.
+
+```x2c
+macro open Statement $compiler_try(Name $frame, Expr $clause,
+    Statement $body, Statement $cleanup, Statement $arms...) {
+  {
+    ExceptionFrame $frame;
+    $try_catch_site($frame, $clause)...
+    x2c_exception_push(&$frame);
+    if (!sigsetjmp($frame.env, 0)) $body
+    else {
+      x2c_exception_landed(&$frame);
+      $try_landing($frame, $clause, $cleanup, $arms)...
+    }
+    $try_cleanup_placement($cleanup)...
+  }
+}
+
+/* One catch site: patterns prepared once, the handler pushed with them. */
+macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
+    Expr $fallback, Expr $state, Statement $patterns...) {
+  static MatchCaptureSite arms[$count];
+  Var patterns[$count];
+  static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
+  if (x2c_error_catch_site_pending(&site)) { $patterns... }
+  volatile ErrorHandler $handle =
+    x2c_error_catch_site_push(&$frame, &site, patterns);
+}
+
+/* One catch arm of several, chosen by its index. */
+macro open Statement $catch_arm(Expr $selected, Expr $index,
+    Statement $arm, Statement $rest) {
+  if ($selected == $index) $arm else $rest
+}
+```
+
+Client, after the label diagnostic:
+
+```x2c
+Macro shape = $compiler_try;
+return c.bind_syntax(shape(frame, clause, body, cleanup, arms),
+                     AST_BLOCK, c.return_type);
+```
+
+`body`, `cleanup` and each arm come from the region driver as lowered
+code; the frame is the binding `_region_binding` allocates.
 
 ### C. Wrapper functions and scope cells
 
-Target to be written before the site changes.
+The wrapper template stays one template; its callers pass lowered bodies
+through `Compiler.wrapper_function`, the one place that marks them. A
+scope cell is copied from its initializer or allocated empty, two C
+shapes:
+
+```x2c
+macro open Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
+  $type *$cell = Scope_memdup((const void *)&($type)$value, sizeof($type));
+}
+macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
+  $type *$cell = Scope_malloc(sizeof($type));
+}
+```
+
+A plain initializer is written as a one-element compound before the
+application, so the braced and plain cells are one template. Client:
+
+```x2c
+Macro cell = initializer ? $compiler_cell : $compiler_empty_cell;
+return c.bind_syntax(cell(type, binding, compound), AST_BLOCK, NULL);
+```
 
 ### D. Lambda
 
-Target to be written before the site changes.
+```x2c
+macro Expression $compiler_lambda(Expr $body, Param $params...) =>
+  %!($params...) => $body;
+```
+
+Sites that receive the expression form `(expr T (lambda ...))` recognize
+it with `case lambda(?body, *params)`. Sites that receive the bare
+`(lambda ...)` payload or the captured form keep their literal patterns;
+the report names them.
 
 ## 7. Name, positions and sequences
 
