@@ -81,11 +81,21 @@ int Var_int(Var);
 
 int List_try_next(List, List *, Var *);
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
 Var List_var(List);
+
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_is_error_target(ExceptionFrame *);
+
+void x2c_error_catch_detach(ErrorHandler);
+
+void x2c_exception_mark_handled(ExceptionFrame *);
 
 int main(void){
   x2c_initialize();
@@ -155,13 +165,13 @@ break;
     }
   }
 Var volatile caught =((void) 0, Void); {
-  ExceptionFrame _x2c_exception_frame_0;  MatchCaptureSite static _x2c_catch_arms_0[1];  Var _x2c_catch_patterns_0[1];  ErrorCatchSite static _x2c_catch_site_0 ={
-    _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1
+  ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_catch_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
+    _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
   }
-  ;  if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+  ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
     _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), cons(List_var(cons(Symbol_var(46228810), cons(Symbol_var(1992385866), NULL))), NULL)));
   }
-  volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+  volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
     if(callback((int) count) > 0){
       static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/ast-leaf-contract.x",.function = "main",.line = 82};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 1, Symbol_var(46228810), left_value);  __builtin_unreachable();
     }

@@ -6,15 +6,27 @@
 
 #include "exception.h"
 
-Var Symbol_var(Symbol);
+int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
+
+Var Symbol_var(Symbol);
+
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
 
 Var int_var(int);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_is_error_target(ExceptionFrame *);
+
+int x2c_error_catch_selected(ErrorHandler);
+
+void x2c_error_catch_detach(ErrorHandler);
+
+void x2c_exception_mark_handled(ExceptionFrame *);
 
 int Var_int(Var);
 
@@ -23,17 +35,17 @@ int List_len(List);
 int filtered(int volatile mode){
   {
     ExceptionFrame _x2c_exception_frame_0;
-    MatchCaptureSite static _x2c_catch_arms_0[3];
+    static MatchCaptureSite _x2c_macro_arms_0[3];
     Var _x2c_catch_patterns_0[3];
-    ErrorCatchSite static _x2c_catch_site_0 ={
-      _x2c_catch_arms_0, 2, 3, ERROR_CATCH_PENDING, -1
+    static ErrorCatchSite _x2c_macro_site_0 ={
+      _x2c_macro_arms_0, 2, 3, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_catch_site_0)){
+    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
       _x2c_catch_patterns_0[0] = List_var(cons(Symbol_var(97614135954008), cons(Symbol_var(54), cons(List_var(cons(Symbol_var(5874022), cons(Symbol_var(1953475496), NULL))), cons(Symbol_var(54), NULL)))));
       _x2c_catch_patterns_0[1] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(57814248), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_catch_site_0, _x2c_catch_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_catch_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       if(mode == 1){

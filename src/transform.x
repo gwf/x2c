@@ -2294,127 +2294,74 @@ static List _defer_block(Walk walk, List body, List environment,
   return %(block @{statements.list_free()});
 }
 
-static List _catch_call(Type type, String name, List arguments) =>
-  %(expr $type (call $name (args @arguments)));
-
-static List _catch_statement(String name, List arguments) =>
-  %(stmnt ${_catch_call(%(void), name, arguments)});
-
-static List _catch_value(Type type, List binding) =>
-  %(expr $type (ident $binding));
-
-static List _catch_arms(Compiler c, List bodies, List frame, List handle) {
-  List selected = _region_binding(c, "catch_selected");
-  List choice = NULL;
-  int index = bodies.len();
-  foreach (List body, bodies.reverse()) {
-    index--;
-    choice = choice
-      ? %(if (expr (int) (op == ${_catch_value(%(int), selected)}
-                               ${_integer_expression(index)})) $body $choice)
-      : body;
-  }
-  List declaration = bodies.len() > 1
-    ? %(${_value_declaration(%(int), selected,
-      _catch_call(%(int), "x2c_error_catch_selected",
-                  %(${_catch_value(%("ErrorHandler"), handle)})))})
-    : NULL;
-  return %(block @declaration
-    ${_catch_statement("x2c_error_catch_detach",
-      %(${_catch_value(%("ErrorHandler"), handle)}))}
-    ${_region_call("x2c_exception_mark_handled", _frame_type, frame)}
-    $choice);
-}
-
-/* The catch clause's site, patterns, and handler. */
-static List _try_declarations(Compiler c, List clause, List frame,
-                              List handle) {
-  List address = _address_of(_frame_type, frame);
-  Array declarations = [];
-  if (clause) {
-    List records = clause.cadr();
-    int count = records.len(), fallback = -1, index = 0;
-    String state = "ERROR_CATCH_PENDING";
-    List arms = _region_binding(c, "catch_arms");
-    List site = _region_binding(c, "catch_site");
-    List patterns = _region_binding(c, "catch_patterns");
-    Type arms_type = %((dim ${_integer_expression(count)}) "MatchCaptureSite");
-    Type patterns_type = %((dim ${_integer_expression(count)}) "Var");
-    declarations.push(_value_declaration(
-      %((dim ${_integer_expression(count)}) static "MatchCaptureSite"), arms, NULL));
-    declarations.push(_value_declaration(patterns_type, patterns, NULL));
-    Array preparation = [];
-    foreach (List record, records) {
-      List pattern = record.car();
-      if (pattern) {
-        if (!c.match_pattern_is_static(pattern))
-          state = "ERROR_CATCH_TRANSIENT";
-        List value = _catch_call(%("Var"), "List_var", %($pattern));
-        preparation.push(%(stmnt (expr ("Var")
-          (op = (expr ("Var") (index
-            ${_catch_value(patterns_type, patterns)}
-            ${_integer_expression(index)})) $value))));
-      }
-      else fallback = index;
-      index++;
-    }
-    Type site_type = %("ErrorCatchSite");
-    List initializer = %(expr $site_type (composite (commas
-      ${_catch_value(arms_type, arms)} ${_integer_expression(fallback)}
-      ${_integer_expression(count)} (expr (int) $state) ${_integer_expression(-1)})));
-    declarations.push(_value_declaration(
-      %(static "ErrorCatchSite"), site, initializer));
-    List site_address = _address_of("ErrorCatchSite", site);
-    declarations.push(%(if ${_catch_call(%(int),
-      "x2c_error_catch_site_pending", %($site_address))}
-      (block @{preparation.list_free()})));
-    declarations.push(_value_declaration(%(volatile "ErrorHandler"), handle,
-      _catch_call(%("ErrorHandler"), "x2c_error_catch_site_push",
-        %($address $site_address ${_catch_value(patterns_type, patterns)}))));
-  }
-  return %(code-value "lowered" (seq @{declarations.list_free()}) ());
-}
-
-/* What runs when the frame lands: the selected catch arm, or the cleanup
-   and an unreachable end. */
-static List _try_landing(Compiler c, List clause, List frame, List handle,
-                         List cleanup, List bodies) {
-  List unhandled = %(block @{_statements(cleanup)}
-    ${_catch_statement("__builtin_unreachable", NULL)});
-  List landing = clause
-    ? %(if ${_catch_call(%(int), "x2c_exception_is_error_target",
-             %(${_address_of(_frame_type, frame)}))}
-        ${_catch_arms(c, bodies, frame, handle)} $unhandled)
-    : unhandled;
-  return %(code-value "lowered" $landing ());
-}
-
-/* A try region's frame: a fresh binding, returned as a bound reference
-   with the binding in `binding`. */
-static List _try_frame(Compiler c, List &binding) {
-  binding = _region_binding(c, "exception_frame");
-  return %(code-value "bound"
-    ${_catch_value(%("ExceptionFrame"), binding)} ());
-}
-
-/* A try region's body, lowered inside the region `cleanup` leaves. */
+/* A try region's body or catch arm, lowered inside the region `cleanup`
+   leaves. */
 static List _try_region(Walk walk, List cleanup, List body) =>
   %(code-value "lowered" ${_inside(walk, cleanup, body, body)} ());
 
+/* One catch arm of several, chosen by its index. */
+macro open Statement $catch_arm(Name $selected, Expr $index,
+    Statement $arm, Statement $rest) {
+  if ($selected == $index) $arm else $rest
+}
+
+/* The lowered arm among `arms` that `selected` names. Each test is bound
+   before the one that holds it: a chain of nested applications would be
+   as deep as the arms are many, past the macro expansion depth limit. */
+static List _catch_choice(Compiler c, List selected, List arms) {
+  Macro arm = $catch_arm;
+  List choice = NULL;
+  int index = arms.len();
+  foreach (List body, arms.reverse()) {
+    index--;
+    choice = choice
+      ? %(code-value "lowered" ${c.bind_syntax(
+          arm(selected, _integer_expression(index), body, choice),
+          AST_STATEMENT, c.return_type)} ())
+      : body;
+  }
+  return choice;
+}
+
+/* The facts the catch site and landing of `clause` are written from, as
+   `src/builtins.x` reads them: the handler, fresh names for the pattern
+   array and the selected arm, the site's initial state, the choice among
+   the lowered `arms`, and each arm's pattern. A pattern with a dynamic
+   part is prepared again on each entry. */
+static List _catch_clause(Compiler c, List clause, List arms) {
+  if (!clause) return NULL;
+  String state = "ERROR_CATCH_PENDING";
+  Array patterns = [];
+  foreach (List record, clause.cadr().list()) {
+    List pattern = record.car();
+    if (pattern && !c.match_pattern_is_static(pattern))
+      state = "ERROR_CATCH_TRANSIENT";
+    patterns.push(pattern);
+  }
+  List selected = c.sym.define(%(${c.fresh_name("catch_selected")}), %(int));
+  return %(${clause.caddr()} ${_region_binding(c, "catch_patterns")}
+    $selected $state ${_catch_choice(c, selected, arms)}
+    @{patterns.list_free()});
+}
+
 /* The try producers `src/builtins.x` compiles into the compiler. The
    template calls them by name in the unit it is applied to. */
-List builtin_try_frame_declaration(Var frame);
+List builtin_try_catch_site(List frame, List clause);
+List builtin_try_landing(List frame, List clause, List cleanup);
 List builtin_try_cleanup_placement(Var cleanup);
 
 /* A try region pushes its frame and lands on it when something raises. */
-macro open Statement $compiler_try_shape(Expr $frame, Statement $declarations,
-    Statement $body, Statement $landing, Statement $cleanup) {
+macro open Statement $compiler_try(Name $frame, Expr $clause,
+    Statement $body, Statement $cleanup) {
   {
-    $builtin_try_frame_declaration($frame)...
-    $declarations
+    ExceptionFrame $frame;
+    $builtin_try_catch_site($frame, $clause)...
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
-    else { x2c_exception_landed(&$frame); $landing }
+    else {
+      x2c_exception_landed(&$frame);
+      $builtin_try_landing($frame, $clause, $cleanup)...
+    }
     $builtin_try_cleanup_placement($cleanup)...
   }
 }
@@ -2435,8 +2382,7 @@ static Var _rewrite(Walk walk, Var value) {
     }
     case %(try ?body ?clause ?finalizer): {
       Compiler c = walk.compiler;
-      List binding = NULL;
-      List frame = _try_frame(c, binding);
+      List frame = _region_binding(c, "exception_frame");
       List handle = clause ? clause.caddr().list() : NULL;
       int labelled_at = walk.origin;
       Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
@@ -2448,22 +2394,18 @@ static Var _rewrite(Walk walk, Var value) {
             name ? name : "this label"}' would be defined once for each"));
       }
       List cleanup = _try_cleanup(
-        binding, handle, _rewrite(walk, finalizer), !!clause);
-      List body_out = _try_region(walk, cleanup, body);
+        frame, handle, _rewrite(walk, finalizer), !!clause);
+      List lowered = _try_region(walk, cleanup, body);
       /* A catch arm runs inside the region it handles, so it leaves the
          same statements behind on its own exits. Each arm is its own
          region, which a jump from the body may not enter. */
-      Array bodies = [];
-      if (clause) foreach (List record, clause.cadr().list()) {
-        List arm = record.cadr();
-        bodies.push(_inside(walk, cleanup, arm, arm));
-      }
-      List declarations = _try_declarations(c, clause, binding, handle);
-      List landing = _try_landing(
-        c, clause, binding, handle, cleanup, bodies.list_free());
-      Macro shape = $compiler_try_shape;
+      Array arms = [];
+      if (clause) foreach (List record, clause.cadr().list())
+        arms.push(_try_region(walk, cleanup, record.cadr()));
+      Macro shape = $compiler_try;
       return c.bind_syntax(
-        shape(frame, declarations, body_out, landing, cleanup),
+        shape(frame, _catch_clause(c, clause, arms.list_free()), lowered,
+              cleanup),
         AST_BLOCK, c.return_type);
     }
     /* A function-static initializer leaves its own record at the end of its

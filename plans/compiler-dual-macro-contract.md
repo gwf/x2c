@@ -905,53 +905,126 @@ boxed(?value)` on the by-value alternative.
 
 The template writes the whole region: the frame, the catch site, the
 push, the landing and the cleanup. Slot functions in src/builtins.x
-build the catch site, the arm dispatch and the placed cleanup from the
-facts the lowering computed; each writes its C through its own macro.
+build the catch site, the landing and the placed cleanup from the facts
+the lowering computed; each writes its C through its own macro.
 
 ```x2c
 macro open Statement $compiler_try(Name $frame, Expr $clause,
-    Statement $body, Statement $cleanup, Statement $arms...) {
+    Statement $body, Statement $cleanup) {
   {
     ExceptionFrame $frame;
-    $try_catch_site($frame, $clause)...
+    $builtin_try_catch_site($frame, $clause)...
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else {
       x2c_exception_landed(&$frame);
-      $try_landing($frame, $clause, $cleanup, $arms)...
+      $builtin_try_landing($frame, $clause, $cleanup)...
     }
-    $try_cleanup_placement($cleanup)...
+    $builtin_try_cleanup_placement($cleanup)...
   }
 }
 
-/* One catch site: patterns prepared once, the handler pushed with them. */
-macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Statement $patterns...) {
-  static MatchCaptureSite arms[$count];
-  Var patterns[$count];
-  static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
-  if (x2c_error_catch_site_pending(&site)) { $patterns... }
-  volatile ErrorHandler $handle =
-    x2c_error_catch_site_push(&$frame, &site, patterns);
-}
-
 /* One catch arm of several, chosen by its index. */
-macro open Statement $catch_arm(Expr $selected, Expr $index,
+macro open Statement $catch_arm(Name $selected, Expr $index,
     Statement $arm, Statement $rest) {
   if ($selected == $index) $arm else $rest
 }
 ```
 
+The catch-site and landing sub-shapes live in src/builtins.x beside the
+slot functions that apply them:
+
+```x2c
+/* One catch site: its patterns prepared once, its handler pushed with
+   them. */
+macro open Statement $catch_site(Name $frame, Name $handle, Name $patterns,
+    Expr $count, Expr $fallback, Expr $state, Statement $preparation...) {
+  static MatchCaptureSite arms[$count];
+  Var $patterns[$count];
+  static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
+  if (x2c_error_catch_site_pending(&site)) { $preparation... }
+  volatile ErrorHandler $handle =
+    x2c_error_catch_site_push(&$frame, &site, $patterns);
+}
+
+/* One arm's pattern, prepared into its slot. */
+macro open Statement $catch_pattern(Name $patterns, Expr $index,
+    Expr $pattern) {
+  $patterns[$index] = $pattern;
+}
+
+/* A landing no catch arm handles: the region's exits run, and control does
+   not come back. */
+macro open Statement $try_unhandled(Statement $cleanup) {
+  { $cleanup __builtin_unreachable(); }
+}
+
+/* A landing that hands a raised error to its catch arms. */
+macro open Statement $catch_landing(Name $frame, Name $handle,
+    Statement $unhandled, Statement $choice, Statement $selection...) {
+  if (x2c_exception_is_error_target(&$frame)) {
+    $selection...
+    x2c_error_catch_detach($handle);
+    x2c_exception_mark_handled(&$frame);
+    $choice
+  }
+  else $unhandled
+}
+
+/* The arm the handler selected, when there are several. */
+macro open Statement $catch_selected(Name $selected, Name $handle) {
+  int $selected = x2c_error_catch_selected($handle);
+}
+```
+
+`builtin_try_catch_site` applies `$catch_site` with one `$catch_pattern`
+per filtered arm. `builtin_try_landing` applies `$try_unhandled`, and
+with a clause applies `$catch_landing`, with `$catch_selected` when there
+are several arms. The slot functions keep the `builtin_` prefix of every
+name in the shared compile-time Lisp session, so a user `meta` function
+cannot take their names.
+
 Client, after the label diagnostic:
 
 ```x2c
 Macro shape = $compiler_try;
-return c.bind_syntax(shape(frame, clause, body, cleanup, arms),
-                     AST_BLOCK, c.return_type);
+return c.bind_syntax(
+  shape(frame, _catch_clause(c, clause, arms.list_free()), lowered,
+        cleanup),
+  AST_BLOCK, c.return_type);
 ```
 
-`body`, `cleanup` and each arm come from the region driver as lowered
-code; the frame is the binding `_region_binding` allocates.
+`lowered`, `cleanup` and each arm come from the region driver as lowered
+code; the frame is the binding `_region_binding` allocates. The clause is
+passed as facts, `(HANDLE PATTERNS SELECTED STATE CHOICE PATTERN...)`.
+`_catch_clause` computes the site's initial state, which needs the
+compiler's static-pattern test, allocates the pattern array and the
+selected arm, and builds the choice among the arms.
+
+Two parts do not meet the standard:
+
+- The arm choice is a loop in the region driver (`_catch_choice`), not in
+  a slot function. It applies `$catch_arm` once per arm and binds each
+  application before the one that holds it. A slot returning the nested
+  chain expands one application inside the next, and the compiler rejects
+  an expansion deeper than 64 (`macros.x`, "macro expansion depth exceeds
+  64"), so `catch-many-arms` (65 arms) failed; the report of that limit
+  also crashed in `Token_repr`. Building the chain as nested pending
+  applications also cost exponential time before the limit: each nested
+  application holds its hole value in several capture rows, and building
+  the next application walks the whole value (`_source_unwrap`), so 12
+  arms took 75 s. Binding each test first keeps both costs linear and the
+  C unchanged.
+- The pattern array and the selected arm are compiler-allocated Names,
+  not macro locals. A slot argument cannot name a macro local ("an
+  argument must be a constant, captured syntax, or a meta call"), so a
+  slot inside `$catch_site` cannot write the pattern assignments, and the
+  driver-bound arm tests must name the selected arm before the landing
+  declares it. The arm and site arrays, which only the catch site reads,
+  are macro locals and now spell `_x2c_macro_arms_N` and
+  `_x2c_macro_site_N`. The same limit applies to A's
+  `$func_arguments(function, storage, $arguments)`.
+
 
 ### C. Wrapper functions and scope cells
 
