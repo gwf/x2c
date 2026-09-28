@@ -2698,6 +2698,21 @@ restore `w.origin` around the outer `at` node; this match only sees the
 inner statement. This batch changes no other region walker case or
 restoration rule.
 
+### E28. Region control-walker boundary
+
+`Compiler.check_regions` walks the bound, typed unit before transform. Its
+single `src/regions.x` control case gives if, while, do, for, switch, try,
+match, and other control children one nested depth and restored-state scope.
+`cleanup-loop-boundary` exercises a try containing loop and switch transfers
+whose cleanup depends on that shared scope. Replacing just while/do or try
+with source matchers would duplicate the depth/restored handling while the
+heterogeneous raw case remained. A whole-case source form would also need
+to represent optional for clauses and the different bound try and match
+children; with is consumed into a block, and finally belongs to try.
+Keep this combined walker as a current bounded exception. This records the
+present representation boundary, not a claim that a later cohesive change
+is impossible.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
