@@ -1985,6 +1985,7 @@ borrowed sink's region. Restoring the original source made all three fixtures
 pass again. This rejects the narrow typed-matcher substitution. A future
 shared recognizer must account for the raw-node boundary and retain those
 escape diagnostics without a parallel raw fallback.
+
 ### E16. Synthetic file initializer: sequence-hole exception
 
 The executable `conditional-type-initializer` fixture establishes the
@@ -2040,6 +2041,7 @@ hole has not been shown to preserve. The `src/generate.x` trial was restored.
 The existing native constructor remains the owner of preprocessor placement,
 guard identity, phase order, and shutdown. No generated C/H comparison of the
 trial was possible because the source could not compile.
+
 ### E17. Cache-slot assignment exception
 
 `literal-cache-init` exercises the source cache's String, List, Array,
