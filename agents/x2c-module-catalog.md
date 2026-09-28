@@ -47,7 +47,6 @@ the built-in macros' compile-time algorithms.
 
 Public functions:
 
-`builtin_try_catch_site`, `builtin_try_landing`,
 `builtin_try_cleanup_placement`, `builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
@@ -493,7 +492,9 @@ Public functions:
 `Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
 `Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
 `Compiler.lower_lambda_expr`, `Compiler.static_value_is_runtime`,
-`transform_array_literal`, `transform_map_literal`, `Compiler.transform`
+`builtin_try_catch_site`, `builtin_catch_patterns`, `builtin_try_landing`,
+`builtin_catch_cases`, `transform_array_literal`, `transform_map_literal`,
+`Compiler.transform`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 

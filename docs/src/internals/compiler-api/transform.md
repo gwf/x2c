@@ -12,6 +12,10 @@ X2c AST transformation pipeline.
 
 | Function | Summary |
 | --- | --- |
+| [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`; `$catch_landing` calls this in a slot. |
+| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns one `$catch_pattern` for each of `items`, prepared into the catch site's `patterns`; `$catch_site` calls this in a slot. |
+| [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
+| [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
 | [`transform_array_literal`](#transform_array_literal) | Converts an `(array ...)` or `(varray ...)` node to source-ordered `(varray ...)` form, converting every typed element to `Var`. |
 | [`transform_map_literal`](#transform_map_literal) | Converts a `(map ...)` or `(vmap ...)` node to source-ordered `(vmap (vpair ...))` form, converting every typed key and value to `Var`. |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
@@ -28,6 +32,45 @@ X2c AST transformation pipeline.
 
 ### Functions
 
+#### builtin_catch_cases
+
+`List builtin_catch_cases(List selected, List arms)`
+
+Returns one `$catch_case` for each lowered arm of `arms`, numbered in
+order and tested against `selected`; `$catch_landing` calls this in a
+slot.
+
+Source: `src/transform.x:2424`
+
+#### builtin_catch_patterns
+
+`List builtin_catch_patterns(List patterns, List items)`
+
+Returns one `$catch_pattern` for each of `items`, prepared into the
+catch site's `patterns`; `$catch_site` calls this in a slot.
+
+Source: `src/transform.x:2400`
+
+#### builtin_try_catch_site
+
+`List builtin_try_catch_site(List frame, List clause)`
+
+Returns the catch site `frame` pushes for the clause `clause`
+describes, or nothing for a try without one; the `$compiler_try`
+template calls this in a slot.
+
+Source: `src/transform.x:2386`
+
+#### builtin_try_landing
+
+`List builtin_try_landing(List frame, List clause, List cleanup)`
+
+Returns what runs when `frame` lands: the catch arm the clause's
+handler selected, or `cleanup` and no return; the `$compiler_try`
+template calls this in a slot.
+
+Source: `src/transform.x:2412`
+
 #### transform_array_literal
 
 `List transform_array_literal(Compiler compiler, List ast)`
@@ -35,7 +78,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:3483`
+Source: `src/transform.x:3595`
 
 #### transform_map_literal
 
@@ -45,7 +88,7 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:3494`
+Source: `src/transform.x:3606`
 
 ### `Compiler`
 
@@ -64,7 +107,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/transform.x:908`
+Source: `src/transform.x:909`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -75,7 +118,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/transform.x:1086`
+Source: `src/transform.x:1087`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -84,7 +127,7 @@ Source: `src/transform.x:1086`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/transform.x:325`
+Source: `src/transform.x:326`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
@@ -94,7 +137,7 @@ Source: `src/transform.x:325`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/transform.x:1577`
+Source: `src/transform.x:1579`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -109,7 +152,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/transform.x:859`
+Source: `src/transform.x:860`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -126,7 +169,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/transform.x:1604`
+Source: `src/transform.x:1606`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -140,7 +183,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/transform.x:171`
+Source: `src/transform.x:172`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -154,7 +197,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/transform.x:546`
+Source: `src/transform.x:547`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -169,7 +212,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/transform.x:1328`
+Source: `src/transform.x:1330`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -181,7 +224,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:1915`
+Source: `src/transform.x:1919`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -195,7 +238,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4262`
+Source: `src/transform.x:4374`
 
 ## Design notes
 
