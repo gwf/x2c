@@ -464,9 +464,10 @@ Public functions:
 
 `Compiler.parse_governed`, `Compiler.finish_return_statement`,
 `Compiler.begin_match_arm`, `Compiler.begin_catch_arm`,
-`Compiler.with_binding`, `Compiler.parse_block_item`,
-`Compiler.parse_statement`, `Compiler.parse_block_items`,
-`Compiler.parse_callable_body`, `Compiler.parse_compound_statement`
+`Compiler.parse_match_row_argument`, `Compiler.with_binding`,
+`Compiler.parse_block_item`, `Compiler.parse_statement`,
+`Compiler.parse_block_items`, `Compiler.parse_callable_body`,
+`Compiler.parse_compound_statement`
 
 ### [src/toolchain.x](../src/toolchain.x)
 

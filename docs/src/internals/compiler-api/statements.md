@@ -20,6 +20,7 @@ X2c statement parsing.
 | [`Compiler.parse_callable_body`](#Compiler.parse_callable_body) | Parses a callable's outer block in its active parameter scope. |
 | [`Compiler.parse_compound_statement`](#Compiler.parse_compound_statement) | Parses a compound body after its opening brace and consumes the closing `}`, returning an origin-anchored `(block ...)` node. |
 | [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `AST_BLOCK`. |
+| [`Compiler.parse_match_row_argument`](#Compiler.parse_match_row_argument) | Parses one MatchRow macro argument with the ordinary match-arm owner. |
 | [`Compiler.parse_statement`](#Compiler.parse_statement) | Parses and binds one statement or statement-position macro at the current token. |
 | [`Compiler.with_binding`](#Compiler.with_binding) | Returns the binding of the current identifier when it names a live `with` expression, or NULL. |
 
@@ -68,7 +69,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:555`
+Source: `src/statements.x:564`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -78,7 +79,7 @@ Source: `src/statements.x:555`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:712`
+Source: `src/statements.x:721`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -87,7 +88,7 @@ Source: `src/statements.x:712`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:719`
+Source: `src/statements.x:728`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -97,7 +98,7 @@ Source: `src/statements.x:719`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:724`
+Source: `src/statements.x:733`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -115,6 +116,15 @@ as in C.
 
 Source: `src/statements.x:70`
 
+<a id="Compiler.parse_match_row_argument"></a>
+#### Compiler.parse_match_row_argument
+
+`List Compiler.parse_match_row_argument(Compiler c)`
+
+Parses one MatchRow macro argument with the ordinary match-arm owner.
+
+Source: `src/statements.x:383`
+
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement
 
@@ -124,7 +134,7 @@ Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:583`
+Source: `src/statements.x:592`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
@@ -134,7 +144,7 @@ Source: `src/statements.x:583`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:541`
+Source: `src/statements.x:550`
 
 ## Design notes
 

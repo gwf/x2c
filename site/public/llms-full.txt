@@ -2125,6 +2125,14 @@ sequence. Apply this template as a macro value with the captured rows;
 recognition binds those rows with `*captures`. Like `Catch` rows, capture
 rows retain their canonical structure when supplied by compile-time code.
 
+`MatchRow $rows...` carries complete `match` arms in a `Statement` template:
+`match ($subject) { $rows... }`. Each captured row retains its pattern,
+guarded body, typed captures, and position; preprocessor directive rows stay
+interleaved with the arms. A `default` arm is one row. Source macro calls may
+pass comma-separated `case` and `default` arms; compile-time code may pass a
+List of canonical rows to a macro value. The ordinary match binder handles
+the rows when the template is expanded.
+
 ### Result kinds and invocation positions
 
 A macro has one result kind as well as argument kinds:
