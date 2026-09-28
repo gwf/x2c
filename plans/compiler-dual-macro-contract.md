@@ -4,7 +4,8 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> finish defer record/registration publication, then measure it once.
+> callable-defer environment/helper synthesis. Both lowering cost rows
+> are complete; do not repeat their timing.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -56,73 +57,58 @@ This discussion authorizes the survey/proposal, not speculative file moves.
 
 ## Resume checkpoint (2026-09-28, usage reserve)
 
-Current update: aggregate capability is published at `a9f6d566`, gate green.
-The parent integrated it with the saved defer draft in the primary checkout.
-`defer-only-cleanup` now gives the captured member and assignment type
-`(* const void)`; its generated typedef retains its tag identity. The known
-empty-type blocker is resolved. Four focused defer fixtures pass after
-reviewing the corrected transform expectation. Defer publication is now the
-active step; its one five-pair cost run has not started. The older draft
-account below is retained as the reproduction and recovery trail.
+Published compiler checkpoint: `f99136f8`, defer record/registration, gate
+green. Lambda source recognition/construction is on dev at `c99dd68d`;
+retained reconstruction and parameter-scope prerequisites at `799875a8`;
+constructed aggregate tag-identity repair at `a9f6d566`. All workers finished
+and their results were collected. New workers must use Sol medium. Gary
+asked to preserve a committed, pushed handoff before usage reaches zero.
 
+The defer draft's empty member type was a real compiler defect, not a
+reason to accept its passing runtime tests. A reduced identity-tag/identity-
+field fixture showed `_finish_type` converting a tag identity to a spelling
+when binding returned structurally equal syntax. The separate capability
+keeps aggregate roots on the whole-type path. After integration, captured
+member assignments have `(* const void)` and typedef tags retain identity.
 
-Lambda recognition/construction is published at `c99dd68d`; its gate passed
-and the single five-pair cost run is recorded below. Prerequisites published
-at `799875a8`. No timing is due again for either batch. The budget reached
-5% remaining while preparing defer; new workers use Sol medium.
+Defer registration now uses adjacent templates and two registered slots.
+`_defer_block` and its manual C-shape assembly are deleted. The grammar owns
+unary `$deferred` recognition. Capture addresses are assigned in order into
+a zero-initialized, hygienically named environment; body and cleanup retain
+their lowered stage. Ordinary binding publishes generated environment types.
+Callable-defer environment/helper synthesis itself remains a separate shape.
 
-Defer is an unlanded draft, not a successful migration:
+Publication required a local bootstrap refresh after the first stage-0
+comparison exposed the previous defer output; the local 192-file comparison
+then passed. The next attempt exposed only sidecar differences in nine
+fixtures. Each diff was reviewed before updating expectations; the final
+gate passed and pushed. Intentional C changes and their reason are recorded
+in the source/refresh commits. The single five-pair cost run is complete:
++2.46% default / +4.11% live versus `a9f6d566`. Lambda measured +3.24% /
++2.30% versus `799875a8`. Do not repeat either timing run. No jobs or workers
+remain active; the campaign stops here to preserve the usage reserve.
 
-- Worktree: `/Users/gary/.codex/worktrees/grammar-survey/x2c`.
-- Branch: `codex/defer-record-template`; draft commit `52fcc586`.
-- Grammar dependency: `7c52d0f5`, equivalent to primary `aa93eb1a`.
-- The draft removes `_defer_block`, adds adjacent templates/two slots,
-  retains cleanup as lowered code, and recognizes unary defer through
-  `$deferred`. Helper/environment synthesis remains for its own batch.
-- Final `make build` and four focused fixture compilation/runtime runs pass.
-  There was no gate, push or timing for this draft. Those passes do not make
-  it acceptable: `defer-only-cleanup.transform` contains an empty member
-  expression type in the generated capture-address assignment (lines 19--24).
-  The draft's rebaselined sidecars expose this defect; do not accept them as
-  correct expectations or blindly publish the commit.
+Next work, in order: callable-defer environment/helper synthesis in
+`_lower_callable_defer`, Var array/map C literals and the other surveyed
+transform shapes, protocol helper synthesis, then complete source-form
+coverage across the compiler. Static-local initialization is skipped for
+the concrete native `__typeof__`/preprocessor/type-alias boundary recorded
+below. Before each next edit, write its complete readable client/template;
+keep capability changes separate from adopters. No parser/library repair
+should be hidden inside a lowering cleanup.
 
-The string tag was rejected as reserved; using its existing binding identity
-is the correct constructed-syntax route. The independent investigation then
-reproduced the empty member type at file scope, ruling out local scope as
-its cause. `_finish_type` used structural inequality to recognize that
-`_finish_type_spec` had handled a whole aggregate. Already identity-bound
-members can leave that syntax structurally unchanged. The fallback then
-processed its parts and converted the tag binding to a spelling, separating
-the typedef from the field metadata.
-
-The narrow fix is private capability commit `c7622b77`, integrated as
-`a2ae92bb` for publication: whole struct/union/enum roots stay on the
-whole-type path even when unchanged. Only parse.x and the focused
-`generated-aggregate-binding` fixture change. Build and that fixture plus
-`local-typedef-constructed` and `macro-type-fields` pass. The parent repeated
-the before/after dump with saved c99dd68d and the repaired compiler: the tag
-identity is retained and member access changes from `(expr ())` to
-`(expr (int))`. No registry, shallow-mode or reserved-name workaround was
-added. Capability publication passed at `a9f6d566`; no timing is due for it.
-
-Next after the capability lands: integrate it into the saved defer draft,
-restore correct field-type expectations, review intentional C changes,
-then use the defer batch's one publication gate and one five-pair cost run.
-The grammar-survey worktree currently holds branch
-`codex/generated-aggregate-binding` at `c7622b77`; the prior defer branch and
-`52fcc586` remain intact. No worker is still running. Do not mistake focused
-capability success for completed defer adoption.
-
-The primary checkout `/Users/gary/.codex/worktrees/2fee/x2c` retains the
-standalone grammar addition at `aa93eb1a` plus plan checkpoints. This
-handoff/ledger publication intentionally contains only documentation; the
-unvalidated source draft is kept in its isolated local branch. No worker
-remains responsible for completing it unattended. Resume orchestration
-explicitly from this checkpoint rather than waiting for a worker wakeup.
+Primary checkout: `/Users/gary/.codex/worktrees/2fee/x2c`, branch
+`codex/dual-macro-migration`. Worker checkouts are free and preserved at
+`/Users/gary/.codex/worktrees/grammar-survey/x2c` and
+`/Users/gary/.codex/worktrees/helper-survey/x2c`. Their older draft branches
+are historical recovery points, not pending work to merge wholesale.
+The primary branch contains all integrated authored work. Resume here and
+verify origin/dev before starting the next batch. Do not wait for an old
+worker or use Gary as the wakeup mechanism.
 
 ## Verified checkpoint and remaining sequence
 
-- Last verified publication: `c99dd68d` on dev, lambda adoption gate green.
+- Last verified publication: `f99136f8` on dev, defer registration gate green.
   Capture-clause holes, safer expansion-depth diagnostics, retained template
   reconstruction and parameter/local redeclaration repairs are landed.
 - Lambda adoption is implemented at private checkpoint `f3b86a1d`, including
@@ -137,11 +123,11 @@ explicitly from this checkpoint rather than waiting for a worker wakeup.
 
 After the architectural proposal, retain the requested dependency order:
 
-1. Finish lambda recognition in expressions/regions/transform and
-   construction in literals, deleting replaced manual arms. The captures
-   capability is already landed separately.
-2. Remaining transform C shapes: defer, static-local initialization,
-   callable-defer environment, Var array/map literals, and other surveyed
+1. Lambda recognition and construction are complete at `c99dd68d`.
+   Captured-lambda C helper synthesis remains in the later transform survey.
+2. Defer registration is complete at `f99136f8`; static-local initialization
+   is skipped for its recorded native-type limitation. Next are callable-defer
+   environment/helper synthesis, Var array/map literals, and other surveyed
    shapes. One batch per shape.
 3. Protocol helper synthesis beyond the already migrated wrapper.
 4. Complete source-form coverage for parsed statements and expressions:
@@ -790,6 +776,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Readable form: Func, try, wrappers, scope cells (2026-09-28) | readable-sites / dev c2f06700, same window | increment +0.80% | increment +0.69% | Not counted | Not counted | Not measured |
 | Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
 | Lambda source recognition and construction (2026-09-28) | c99dd68d / prerequisite dev 799875a8, same corpus and home | increment +3.24% | increment +2.30% | Not counted | Not counted | Not measured |
+| Defer record and registration (2026-09-28) | f99136f8 / prerequisite dev a9f6d566, same corpus and home | increment +2.46% | increment +4.11% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -853,6 +840,16 @@ of matching versus reconstruction. Earlier cumulative estimates exclude
 unmeasured prerequisite changes; do not turn their sum into an exact total.
 The former capture-hole, cached-pattern and retained-construction blockers
 are resolved. Captured-lambda C helper synthesis remains later work.
+
+Defer registration's single run used the same seven-source corpus and
+five alternating pairs after warmup, saved binaries and one source/home.
+Default medians were 6.052123 / 6.200805 s (+2.46%); live medians were
+7.073042 / 7.363418 s (+4.11%). Default ranges were 6.039657--6.146991 /
+6.135763--6.238836 s; live ranges were 7.038766--7.097293 /
+7.250071--7.383362 s. No builds or worker probes ran during timing.
+Raw samples and summary are in `debug/defer-paired-a9f6d566/`. These are
+incremental compiler costs, not measurements of runtime defer performance.
+No additional timing or instrumentation was run.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
@@ -1396,7 +1393,7 @@ is counted as fully migrated merely because lambda source construction is.
 
 ### E. Defer record and registration
 
-The next batch replaces `_defer_block`, keeping cleanup ancestry and capture
+Landed at `f99136f8`: this batch replaces `_defer_block`, keeping cleanup ancestry and capture
 selection in their existing owners. Source recognition in `_rewrite_defer_list`
 uses the grammar-owned unary form; the extended lowered record remains an
 internal producer form:
