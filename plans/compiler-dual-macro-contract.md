@@ -2,7 +2,7 @@
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
 > support landed at b59b8ade; reconstruction and parameter-scope fixes
 > landed at 799875a8. Lambda source recognition and construction are
-> implemented, awaiting publication and their five-pair cost row. Ownership
+> published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
 > finish lambda publication, then defer.
 > The current campaign handoff
@@ -56,13 +56,13 @@ This discussion authorizes the survey/proposal, not speculative file moves.
 
 ## Verified checkpoint and remaining sequence
 
-- Last verified publication: `799875a8` on dev, prerequisite gate green.
+- Last verified publication: `c99dd68d` on dev, lambda adoption gate green.
   Capture-clause holes, safer expansion-depth diagnostics, retained template
   reconstruction and parameter/local redeclaration repairs are landed.
 - Lambda adoption is implemented at private checkpoint `f3b86a1d`, including
   the earlier recognition draft. Fifteen focused fixtures passed construction;
   six relevant fixtures passed after retaining root-wrapper traversal.
-  Publication and the one five-pair cost run remain. Parser/binder producers
+  Publication passed at `c99dd68d`; the one five-pair cost run measured +3.24% default / +2.30% live. Parser/binder producers
   use the source macros through `rebuild_expression`, without re-entering
   binding. All nine manual lambda constructors were removed.
 - Earlier try/wrapper/cell/Func lowerings and their exemplar are landed.
@@ -99,7 +99,8 @@ publication and cost reporting. Use a single agent unless two changes touch
 disjoint files. Delegate bounded independent work in isolated worktrees under
 `orchestrate-x2c-work`; workers never gate, push, merge dev, or run timing.
 Gary requires Sol, not Astra, for campaign subagents. Explicitly select
-`gpt-6-sol` when spawning workers rather than inheriting the parent model.
+`gpt-6-sol` with `medium` reasoning for new workers rather than inheriting
+the parent model. Gary reduced the reasoning level to conserve usage budget.
 Give workers explicit ownership, acceptance examples and focused checks;
 verify their findings and review their authored changes before integration.
 Keep ownership of continuation: collect worker completion, integrate or
@@ -722,7 +723,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Same batch, exception workload | dual-macro-lowerings / dev af3354b8, same window | +0.76% / separate workload | +1.90% / separate workload | Not counted | Not counted | Not measured |
 | Readable form: Func, try, wrappers, scope cells (2026-09-28) | readable-sites / dev c2f06700, same window | increment +0.80% | increment +0.69% | Not counted | Not counted | Not measured |
 | Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
-| Lambda shape | Not migrated; see below | Not measured | Not measured | Not measured | Not measured | Not measured |
+| Lambda source recognition and construction (2026-09-28) | c99dd68d / prerequisite dev 799875a8, same corpus and home | increment +3.24% | increment +2.30% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -772,14 +773,20 @@ src/transform.x any more, since its templates use those capabilities, so
 the cumulative ratio is estimated by adding windows (about +1.1% default
 and +1.3% live since before try, plus the unmeasured capability step).
 
-The lambda shape was not migrated. The captured form carries capture rows
-the binder derives, which no hole kind produces; the plain form needs a
-parser change that must reach bootstrap before src/ can use it; most
-recognizer sites match the bare lambda payload rather than an
-expression; construction sites choose the result type per caller; and
-`Macro_case_capture` derives its pattern on every call, measured at about
-350 times a literal match, which is too costly for sites that visit every
-node until the derived pattern is cached per Macro value.
+The lambda source-form migration landed at `c99dd68d`. Its single run used
+five alternating pairs per mode after warmup, the seven-source compiler
+translation corpus, the same source root and `X2C_HOME`, and saved baseline
+and candidate binaries. Default medians were 5.758805 / 5.945371 s
+(+3.24%); live medians were 6.810948 / 6.967717 s (+2.30%). Default ranges
+were 5.713885--5.809097 / 5.911796--6.012758 s; live ranges were
+6.736723--7.071650 / 6.886104--7.132623 s. No builds or worker probes ran
+during timing. Raw samples and summary are in
+`debug/lambda-paired-799875a8/`. No counts or extra timing were taken.
+This is an observed incremental compiler cost, not an isolated measurement
+of matching versus reconstruction. Earlier cumulative estimates exclude
+unmeasured prerequisite changes; do not turn their sum into an exact total.
+The former capture-hole, cached-pattern and retained-construction blockers
+are resolved. Captured-lambda C helper synthesis remains later work.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
@@ -1313,12 +1320,67 @@ before recognition, retaining the actual expression's type and wrappers.
 The supplied-but-unused capture case still keeps its established Func type;
 native lifting uses the computed native signature. Fifteen focused fixtures
 passed, then six affected fixtures passed after wrapper dispatch changed.
-No generated C expectations were changed. Publication and timing remain.
+No generated C expectations were changed. The publication gate passed at
+`c99dd68d`; the one five-pair cost run measured +3.24% default / +2.30% live.
 
 The two `ast_contains_head(..., <lambda>)` traversal prefilters remain for
 now; they are not shape recognizers. Captured-lambda C environment/helper
 synthesis remains in the architecture survey's later transform work. Neither
 is counted as fully migrated merely because lambda source construction is.
+
+### E. Defer record and registration
+
+The next batch replaces `_defer_block`, keeping cleanup ancestry and capture
+selection in their existing owners. Target client:
+
+```x2c
+Macro shape = $compiler_defer;
+return c.bind_syntax(
+  shape(record, callback, environment, records,
+        _try_region(walk, cleanup, body), cleanup),
+  AST_BLOCK, c.return_type);
+```
+
+Target C shape:
+
+```x2c
+macro open Statement $compiler_defer(Name $record, Expr $callback,
+    Expr $environment, Expr $records, Statement $body, Statement $cleanup) {
+  {
+    $builtin_defer_record($record, $callback, $environment, $records)...
+    x2c_cleanup_push(&$record);
+    $body
+    $builtin_try_cleanup_placement($cleanup)...
+  }
+}
+```
+
+The record slot selects a plain record or an environment plus record. The
+captured template declares `environment = {0}`, calls one assignment template
+per captured address, then declares
+`X2CCleanup record = {.fn = callback, .env = &environment}`. The plain
+record uses `.env = 0`. Assignments avoid unsupported initializer-item
+sequence splices; capture addresses retain source order. The callback passes
+as an already typed expression. Body and cleanup use lowered carriers.
+
+Before adopting this shape, resolve generated environment type visibility
+through the existing declaration binder: `add_early` only queues syntax and
+has not bound the generated typedef. Do not introduce a second type registry
+or duplicate environment synthesis inside the slot. The callable-defer
+helper/environment construction remains a separate subsequent shape.
+
+### F. Static-local initialization exception
+
+The survey traced this shape to `Emitter._local_static` and `_static_copy`
+in emit.x, rather than the distinct file-initialization paths in cache and
+generate. Inferred arrays depend on native `__typeof__(formal)` after
+preprocessing; native aliases and `static_objects` substitutions also preserve
+the initializer's original expansion position and stable payload address.
+Current source templates cannot express that type-dispatch boundary directly.
+Skip this whole-shape migration under the campaign's explicit exception rule;
+retain its existing native owner. This is not a migrated shape or a claim
+that a future native-template capability is impossible. Do not create that
+capability merely to force this migration.
 
 ### Migration defect tasks
 
