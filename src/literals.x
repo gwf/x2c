@@ -1084,6 +1084,8 @@ List Compiler.bind_lambda_expression(
   List captures = c.end_lambda_captures();
   c.check_lambda_captures(body);
   parameters = %(params @{entries.list_free()});
+  if (type === %(<macro-expr>))
+    type = %((func ${c.lambda_param_types(parameters.cdr())}) "Var");
   if (captures)
     return %(expr ("Func")
              (lambda $parameters (captures @captures) $body));
@@ -1121,7 +1123,9 @@ List Compiler.parse_lambda_literal(Compiler c) {
   Array references = [], prescribed = [];
   if (c.peek(0) == <ident> && c.token.text == "using") {
     c.next();
-    do {
+    List hole = c.try_parse_macro_slot(<captures>);
+    if (hole) prescribed.push(hole);
+    else do {
       c.expect(<&>);
       if (c.macro_holes) {
         List name = NULL, value = NULL;
@@ -1174,8 +1178,14 @@ List Compiler.parse_lambda_literal(Compiler c) {
   c.check_lambda_captures(body);
   if (c.macro_holes) captures = prescribed.list_free();
   c.sym.pop_scope();
+  if (c.macro_holes) {
+    ftype = %(<macro-expr>);
+    /* The body hole may supply either an expression or a block. */
+    match (body)
+      case %(expr (<macro-expr>) (!set ?hole (macro-bind ?))): body = hole;
+  }
   if (captures)
-    return %(expr ("Func")
+    return %(expr ${c.macro_holes ? ftype : %("Func")}
              (lambda $params_node (captures @captures) $body));
   return %(expr $ftype (lambda $params_node $body));
 }

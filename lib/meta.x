@@ -314,7 +314,7 @@ List Macro_pattern(Macro t, List names) {
   foreach (List hole, t.assoc(<parameters>).list()) {
     Var selected = labels.car();
     labels = labels.cdr();
-    if (hole.assoc(<kind>) == <type>)
+    if (hole.assoc(<kind>) == <type> || hole.assoc(<kind>) == <captures>)
       selected = Atom.intern("*" + selected.str()[1:]);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? %($selected).var() : selected;

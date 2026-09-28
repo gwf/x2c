@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-expansion-depth.x:70:25: macro: macro expansion depth exceeds 64
+  int main(void) { return $step64(0); }
+                          ^
+  note: definition: unittest/compiler-fixtures/macro-expansion-depth.x:4:1 first expansion: definition: unittest/compiler-fixtures/macro-expansion-depth.x:68:1
+

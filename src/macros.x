@@ -3132,7 +3132,7 @@ static String _kind_spelling(Symbol kind) {
 
 static const SymbolSet author_kinds =
   %<<expr type decl function name literal param block field enumerator
-     map-entry unit named-type catch>>;
+     map-entry unit named-type catch captures>>;
 
 static Symbol _author_kind(String spelling) {
   Symbol kind = Symbol.new(spelling);
@@ -3255,7 +3255,7 @@ static List _parse_hole(Compiler c, Symbol role) {
     );
   }
   Var binder = hole.assoc(<binder>);
-  int splice = sequence || role == <type>;
+  int splice = sequence || role == <type> || role == <captures>;
   int preserve_source = %(source $binder) in c.macro_holes;
   String projection = preserve_source ? "source" : splice ? "splice" :
     role in %(expression argument expr) ? "expression" : "value";
@@ -4352,15 +4352,13 @@ List Compiler.expand_macro_invocation_node(
         }
       }
       if (_.macro_stack.len() >= 64) {
-        String first_note =
-          %"first expansion: ${
-            c.macro_stack.last().repr()
-          }";
+        /* Compiler-generated applications can have no invocation token. */
+        List first = c.macro_stack.last().list().car();
+        String first_note = %"first expansion: ${_definition_note(first)}";
         _.report_error(
           <macro>, "macro expansion depth exceeds 64",
           invocation,
-          %(${_definition_note(definition)}
-            "input: ${input.repr()}" $first_note)
+          %(${_definition_note(definition)} $first_note)
         );
       }
       if (_.macro_count >= 10000)

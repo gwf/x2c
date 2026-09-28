@@ -1085,52 +1085,64 @@ return c.bind_syntax(shape(type, cell, compound), AST_BLOCK, NULL);
 
 ### D. Lambda
 
+The next capability is a `Captures` hole for a complete lambda capture
+clause. It carries the binder's rows as one value, leaving the existing
+trailing `Param` sequence for parameters. It introduces no new capture
+representation and does not change ordinary `using &name` source syntax.
+Target source forms, before adoption:
+
 ```x2c
-macro Expression $compiler_lambda(Expr $body, Param $params...) =>
+macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
+macro Expression $lambda_captured(Expr $body, Captures $captures,
+    Param $params...) => %!($params...) using $captures => $body;
 ```
 
-Sites that receive the expression form `(expr T (lambda ...))` recognize
-it with `case lambda(?body, *params)`. Sites that receive the bare
-`(lambda ...)` payload or the captured form keep their literal patterns;
-the report names them.
+Target recognizer:
 
-Status: not migrated. Recognition agrees with the literal pattern: a probe
-at both expression-form sites over all compiler fixtures found 290 lambdas,
-each matched by both, with identical parameter entries. Two defects of the
-macro `case` block the migration; both are in `Macro_case_capture_at`
-(lib/meta.x), not in the sites.
+```x2c
+Macro captured = $lambda_captured, lambda = $lambda_expression;
+match (expression) {
+  case captured(?body, *captures, *params):
+    return lower_captured(c, params, captures, body);
+  case lambda(?body, *params):
+    return lower_plain(c, params, body);
+}
+```
 
-- Captures lose `at` and `src` wrappers. The subject is matched through
-  `_macro_view`, which copies it without them, and the copy is what `?body`
-  publishes. In 28 of the 290 lambdas the body is a block with `(at ...)`
-  statements. Fixture C stays byte-identical, but `translate --source-map`
-  of a lambda holding a nested capturing lambda loses the `#line`
-  directives of the outer body once `_prepare_nested_lambda_regions`
-  rebuilds it from the capture.
-- Every miss copies the whole subject. The macro case compiles to a
-  `default:` arm, so `Compiler.lower_lambda_expr`, which `_node` calls for
-  every `expr` node (src/transform.x:4258), copied every expression
-  subtree. Translating src/*.x took 5.84 s against 5.23 s (+12%, four
-  alternating rounds); with only the `_prepare_nested_lambda_regions` site
-  migrated it took 5.19 s.
+The capability batch adds only the hole, its parser insertion point and
+focused construction/recognition coverage. The adopter batch replaces
+lambda recognizers in expressions.x, regions.x and transform.x and the
+construction in literals.x. Bound type selection and lexical capture
+operations retain their current owners. Before adoption, spell out each
+construction client here, including any type-dispatch exception that source
+syntax cannot express. The wrapper-preserving, cached macro matcher is
+already on dev; the earlier copy-on-miss blockers are historical.
 
-Publishing captures from the original subtree and matching without the
-eager copy (a relation that skips the wrappers) would remove both; the
-sites then migrate as written. Sites and their disposition:
+The capability reuses the scalar splice projection (also used by Type
+holes), substitution, and the existing lambda binder. Template lambda
+signatures wait until their parameter holes are supplied, and body holes
+accept expressions or blocks without an expression-only wrapper. No extra traversal, validator or diagnostic is
+needed. `Captures` is a complete clause because two ungrouped sequence
+holes cannot share the existing macro calling convention.
 
-- src/transform.x:1252 (`_prepare_nested_lambda_regions`) and
-  src/transform.x:1624 and :1630 (`Compiler.lower_lambda_expr`, Func and
-  other types in one case) receive the expression form. Waiting on the fix.
-- src/transform.x:1245, :1621: the captured form.
-- src/transform.x:872, :1031, :1095, :1353, :1368, :1412; src/regions.x:507,
-  :656; src/expressions.x:1035, :1042, :2171, :2175: the bare payload, and
-  :507, :1035, :1353, :2171 the captured payload.
-- Construction: src/transform.x:1249 builds the captured form;
-  src/transform.x:1255 keeps the input's type and already-bound body, and
-  :1628 writes the lifted signature, so neither is a fresh binding of the
-  template. src/literals.x:1096, :1098 and :1180 are the binder that a
-  template application would itself call.
+### Migration defect tasks
+
+- **Expansion depth diagnostic:** open; reported by the previous migration.
+  Source and macro-value finite-chain probes reach the 64-level limit with
+  a normal diagnostic on this checkout. The compiler-generated path may
+  have a null invocation token (`macro_invocation_site`), and rendering the
+  whole stack row calls `Token_repr`, which dereferences it. The capability
+  batch reports the first definition location instead of rendering internal
+  stack storage. The synthetic-call crash has not yet been reproduced here.
+- **Parameter redeclaration:** open; reported by the previous migration.
+  A local may redeclare a parameter. Reproduce and fix when the migration
+  reaches the parameter/body scope owner; retain legal nested shadowing.
+- **Standalone raw-symbol sweep:** open and already filed in
+  [raw-symbol translation of macros.x](raw-symbol-macros-translation.md).
+  Keep this independent from the capture-hole capability; the current
+  standalone raw translation failure is not evidence against that hole.
+
 
 ## 7. Name, positions and sequences
 

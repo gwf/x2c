@@ -1,5 +1,14 @@
 # Status
 
+## Dual-macro migration follow-ups
+
+The [migration tasks](../plans/compiler-dual-macro-contract.md#migration-defect-tasks)
+track the reported synthetic-expansion depth crash, parameter redeclaration,
+and standalone raw-symbol translation failure in macros.x. The depth fixture
+checks the 64-level diagnostic; reproducing the synthetic-origin crash remains
+open. The capture-clause fixture checks reconstruction of value and reference
+captures, expression and block bodies, and typed parameter sequences.
+
 ## Coverage
 
 - Native module probes reuse a constructor's cached Func across isolated
