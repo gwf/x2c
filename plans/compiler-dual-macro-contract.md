@@ -1656,6 +1656,51 @@ skeleton. `function-to-func-inline` passes with identical generated C and H,
 including its bridge prototype and identity. `captured-lambda-lowering` and
 `lambda-adapt-direct-function` also pass unchanged.
 
+### E6. Shared captured environment typedef (target readable form)
+
+The captured-lambda loop still chooses each field's storage type, introduces
+its binding, and supplies canonical `Field` rows in first-use order. One
+adjacent Unit template writes the completed typedef for both lambda and
+callable-defer environments:
+
+```x2c
+macro open Unit $capture_environment(Name $name, Field $fields...) {
+  typedef struct $name { $fields... } $name;
+}
+```
+
+The lambda producer replaces its raw typedef skeleton with one binding of
+that whole template at the existing early-declaration point:
+
+```x2c
+Macro environment = $capture_environment;
+compiler.add_early(compiler.bind_syntax(
+  environment(environment_typedef, fields.list_free()), AST_UNIT, NULL));
+```
+
+The callable-defer producer keeps its field-row construction and changes
+only the selected template name:
+
+```x2c
+Macro environment = $capture_environment;
+return c.bind_syntax(
+  environment(env_binding, fields.list_free()), AST_UNIT, NULL);
+```
+
+Move the existing whole-typedef template beside lambda lowering and remove
+its defer-specific definition; do not bind fields separately, which loses
+their member types. Captures, conversion and storage decisions, generated
+identity, early-declaration order, and the inline bridge stay with their
+current owners. Focused C/H and transform comparisons must check mixed
+`Var` and reference fields and the callable-defer shape.
+
+Focused checks compile and run the mixed-field lambda with unchanged C. Its
+transform sidecar now records the struct tag as the introduced typedef
+binding, where the raw skeleton recorded a spelling string; field types and
+emitted tag/typedef spellings are unchanged. The inline C/H fixture and four
+callable-defer fixtures pass exactly. Reference and nested-capture fixtures
+also pass exactly. The transform sidecar awaits integration review.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

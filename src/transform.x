@@ -1435,6 +1435,12 @@ static List _helper_body(
   return %(block @setup (stmnt (return $result)));
 }
 
+/* File-static context storage shared by captured lambdas and callable
+   defers. Bind the complete typedef so each field keeps its member type. */
+macro open Unit $capture_environment(Name $name, Field $fields...) {
+  typedef struct $name { $fields... } $name;
+}
+
 /* Capture rows arrive resolved and in first-use order from `literals.x`.
    Materialize one local per row before the
    context aggregate so conversion effects run left to right. `Var` fields are
@@ -1490,11 +1496,9 @@ static List _lower_captured_lambda(
         ));
         field_values.push(%(expr $storage_type (ident $temporary)));
       }
-  compiler.add_early(
-    %(
-    typedef (struct $environment_name (fields @{fields.list_free()}))
-            (bindings (bind $environment_typedef ()))
-  ));
+  Macro environment = $capture_environment;
+  compiler.add_early(compiler.bind_syntax(
+    environment(environment_typedef, fields.list_free()), AST_UNIT, NULL));
 
   Type context_type = NULL, constructor_type = NULL;
   List context_helper = _adapter_helper(
@@ -3910,11 +3914,6 @@ static List _defer_rewrite_captures(
     _defer_rewrite_captures(child, captures, written, env_name));
 }
 
-/* File-static storage shared by a callable defer and its region record. */
-macro open Unit $defer_environment(Name $name, Field $fields...) {
-  typedef struct $name { $fields... } $name;
-}
-
 /* The body is already lowered; these templates supply its generated entry
    and the captured variant's environment pointer. */
 macro open Unit $defer_callback(Name $callback, Name $opaque,
@@ -3940,7 +3939,7 @@ static List _defer_environment_unit(
     List field = record.caddr();
     fields.push(%(declare (const void) (bindings (bind $field (*)))));
   }
-  Macro environment = $defer_environment;
+  Macro environment = $capture_environment;
   return c.bind_syntax(
     environment(env_binding, fields.list_free()), AST_UNIT, NULL);
 }
