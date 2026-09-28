@@ -257,7 +257,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4417`
+Source: `src/transform.x:4444`
 
 ## Design notes
 
