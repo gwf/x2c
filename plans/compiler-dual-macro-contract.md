@@ -2713,6 +2713,39 @@ Keep this combined walker as a current bounded exception. This records the
 present representation boundary, not a claim that a later cohesive change
 is impossible.
 
+### E29. Iter-chain outer-call recognition exception
+
+`Compiler.complete_iter_chain` in `src/expressions.x` recognizes a typed
+direct identifier call whose callee has a `func` signature. It uses the
+signature's formal parameters, the result type, and the callee binding to
+complete nested `Iter` calls and append a missing destination. The
+`iter-chain-completion` fixture checks AST, transform, C, stdout, and status
+for fluent, nested, and explicitly stored chains.
+
+An inert matcher probe tried this shared source form:
+
+```x2c
+macro Expression $called(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
+```
+
+It compared a typed direct `Iter_map` call with indirect,
+native-string-callee, untyped-callee, and non-`Iter`-result controls. Its
+output was `1111 100 100 100 1111`:
+the shared macro matched every call, while the current raw case matched only
+the typed direct call and the non-`Iter`-result control. The later result-type
+test rejects that last control. The macro preserved callee and argument
+captures for the direct call.
+
+A complete client would still match the captured callee against
+`(expr ((func parameters) result) (ident binding))` and read the outer result
+type, before running the existing semantic body. It would retain raw signature
+destructuring while adding a grammar macro, a macro binding, a nested match,
+and result extraction. This proposed outer-call replacement removes too
+little structural code to justify those additions. Keep the current case;
+this finding does not reject other call-form consumers or a different shared
+projection.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
