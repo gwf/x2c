@@ -2479,6 +2479,7 @@ List Compiler.bind_syntax(
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro return_empty = $return_empty, return_value = $return_value;
   Macro deferred = $deferred;
+  Macro matched = $matched;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2921,10 +2922,10 @@ List Compiler.bind_syntax(
           ${_.bind_syntax(body, AST_STATEMENT, _.return_type)}
           $catches $cleanup);
       }
-      case %(match ?subject ?cases): {
+      case matched(?subject, *cases): {
         if (!statement_position) goto construction_error;
         Array bound = [];
-        foreach (List row, cases.list()) {
+        foreach (List row, cases) {
           if (row.car() == <preproc>) {
             bound.push(row);
             continue;

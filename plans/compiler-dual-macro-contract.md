@@ -2973,6 +2973,64 @@ different output-directory path written in C `#line` directives. This
 checkpoint changes resolver ordering alone; no source-form adopter or global
 matcher behavior changed.
 
+### E34. Parsed match statement recognition (target readable form)
+
+`parse.x::bind_syntax` receives `(match SUBJECT CASES)` from the ordinary
+statement parser and from constructed canonical Lists. The `MatchRow` hole
+now captures each complete arm or directive row. In `match-arm-directive`,
+those rows interleave preprocessor directives, guarded cases, and conditional
+defaults; `match-typed-guards` adds typed capture declarations. Recognize only
+the outer source form:
+
+```x2c
+macro Statement $matched(Expr $subject, MatchRow $rows...) {
+  match ($subject) { $rows... }
+}
+
+Macro matched = $matched;
+match (input) {
+  case matched(?subject, *cases): {
+    if (!statement_position) goto construction_error;
+    Array bound = [];
+    foreach (List row, cases) {
+      if (row.car() == <preproc>) {
+        bound.push(row);
+        continue;
+      }
+      List pattern = row.car();
+      int binds = pattern !== %(*);
+      if (binds) pattern = _.resolve_expression(pattern, _.token);
+      _.begin_match_arm(pattern, _.token, binds);
+      {
+        defer _.sym.pop_scope();
+        List body = row.cadr();
+        match (body) {
+          case %(guarded ?statements):
+            body = %(guarded ${_.bind_syntax(
+              statements, AST_STATEMENT, _.return_type)});
+          default:
+            body = _.bind_syntax(body, AST_STATEMENT, _.return_type);
+        }
+        bound.push(%($pattern $body));
+      }
+    }
+    return %(match ${_.resolve_expression(subject, _.token)}
+                   ${bound.list_free()});
+  }
+}
+```
+
+The macro is shared in `grammar.xmacro`; `parse.x` keeps the entire existing
+row loop, scopes, guarded-body path, subject resolution, and error route.
+No raw fallback or row projection is added. `bind_syntax` continues to accept
+constructed canonical Lists by structure, without authenticating their
+origin or adding a validator. Before adoption, compare the macro's captured
+subject and rows with the raw shape for both fixtures using `List.compare`,
+including typed binding identities and every directive/default row. After
+the one-case edit, require byte-identical checked C/H, transform, stdout,
+status, and diagnostics for those fixtures. Review the two-file authored
+source diff before committing. This batch does not lower or emit match arms.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

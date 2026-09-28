@@ -18,6 +18,11 @@ macro Statement $caught(Statement $body, Statement $finalizer,
   try $body catch $arms... finally $finalizer
 }
 
+/* A match with its complete source-ordered arm and directive rows. */
+macro Statement $matched(Expr $subject, MatchRow $rows...) {
+  match ($subject) { $rows... }
+}
+
 /* A cleanup statement owned by the rest of its enclosing block. */
 macro Statement $deferred(Statement $body) {
   defer $body
