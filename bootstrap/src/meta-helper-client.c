@@ -496,6 +496,8 @@ String Compiler_meta_call_missing(Compiler, String);
 
 int String_startswith(String, String);
 
+Var Macro_subject(void);
+
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 String String_printf(String, ...);
@@ -520,7 +522,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     _helper_send(cons(_7, cons(int_var(helper_table), NULL)));
     helper_reset = 0;
   }
-  _helper_send(cons(_8, cons(String_var(name), cons(List_var(arguments), NULL))));
+  _helper_send(cons(_8, cons(String_var(name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
   double limit = _helper_limit();
   double deadline = limit > 0 ? _helper_now() + limit : 0;
   for(; ; ){

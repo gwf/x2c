@@ -33,6 +33,10 @@ Macro Macro_close(Macro value, List captures);
 
 List Macro_apply(Macro t, List values);
 
+Var Macro_subject(void);
+
+void Macro_use_subject(Var rows);
+
 List Macro_pattern(Macro t, List names);
 
 int Macro_case_capture(List code, Macro t, List names, MatchCaptureBuffer * published);

@@ -7,6 +7,10 @@
 
 #include "x2c.h"
 #include "meta.h"
+List builtin_try_frame_declaration(Var frame);
+
+List builtin_try_cleanup_placement(Var cleanup);
+
 Map builtin_targets(void);
 
 
