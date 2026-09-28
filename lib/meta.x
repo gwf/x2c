@@ -384,9 +384,25 @@ typedef struct MacroFixedSlots {
   int count, slots[MACHINE_BINDER_MAX];
 } MacroFixedSlots;
 
+/* The node a pattern examines for `value`: through position and source
+   wrappers, and through the shell binding leaves around a typed
+   expression. */
+static Var _macro_unwrap(Var value) {
+  for (;;) {
+    if (value is not <list>) return value;
+    List node = value;
+    match (node) {
+      case %(at ? ?body): value = body;
+      case %(src ? ?body): value = body;
+      case %(expr (<macro-expr>) (!set ?inner (expr *))): value = inner;
+      default: return value;
+    }
+  }
+}
+
 static int _macro_identity_equal(
   void *raw_machine, int slot, Var left, Var right, void *raw_policy) {
-  if (left != right) return 0;
+  if (_macro_unwrap(left) != _macro_unwrap(right)) return 0;
   MatchMachine machine = raw_machine;
   MacroFixedSlots *policy = raw_policy;
   int local = 0;
@@ -458,7 +474,8 @@ static int _macro_case_match(
   machine.open();
   machine.relation = _macro_identity_equal;
   machine.relation_context = &policy;
-  machine.begin(plan.program.view(), _macro_view(code));
+  machine.view = _macro_unwrap;
+  machine.begin(plan.program.view(), code);
   machine.run();
   int matched = machine.status == <ok>;
   if (matched) {

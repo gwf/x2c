@@ -224,6 +224,9 @@ typedef struct MatchMachine {
   // compared, for value slots and for prefix or final sequence slots.
   int (*relation)(void *, int, Var, Var, void *);
   void *relation_context;
+  // An optional view gives the value a list pattern examines when the
+  // machine enters an element; captures keep the element itself.
+  Var (*view)(Var);
   Var *scratch;
   int scratch_capacity;
   MatchFrame frames[MACHINE_FRAME_MAX];

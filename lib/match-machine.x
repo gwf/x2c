@@ -228,12 +228,15 @@ int MatchMachine.step(MatchMachine m) {
       if (m.value.u64 != p.consts[w.a].u64) m.pc = w.target;
       break;
 
-    case MW_INPUT_LIST: if (m.value is not <list>) m.pc = w.target;
+    case MW_INPUT_LIST: {
+      Var value = m.view ? m.view(m.value) : m.value;
+      if (value is not <list>) m.pc = w.target;
       else {
-        *m._cursor(w.a) = m.value;
+        *m._cursor(w.a) = value;
         *m._distance(w.a) = 0;
       }
       break;
+    }
 
     case MW_NONNIL:
       if (!*m._cursor(w.a)) m.pc = w.target;
@@ -306,7 +309,7 @@ int MatchMachine.step(MatchMachine m) {
         m.pc = w.target;
         break;
       }
-      Var head = at.car();
+      Var head = m.view ? m.view(at.car()) : at.car();
       if (head is not <list>) {
         m.pc = w.target;
         break;

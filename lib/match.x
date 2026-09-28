@@ -2671,6 +2671,7 @@ void MatchMachine.open(MatchMachine m) {
   m.stats = NULL;
   m.relation = NULL;
   m.relation_context = NULL;
+  m.view = NULL;
   m.scratch = NULL;
   m.scratch_capacity = 0;
 }
