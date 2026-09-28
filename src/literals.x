@@ -836,6 +836,7 @@ List Compiler.parse_string_literal(Compiler compiler) {
 
 static int _lambda_looks_typed(Compiler compiler) {
   Symbol head = compiler.peek(0);
+  if (head == <$> && compiler.macro_holes) return 1;
   if (head.is_builtin_type() || head.is_type_qualifier() ||
       head == <struct> || head == <union> || head == <enum> || head == <void>)
     return 1;
