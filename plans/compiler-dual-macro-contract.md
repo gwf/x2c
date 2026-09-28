@@ -2517,6 +2517,38 @@ continues to handle its optional clauses separately. The checked
 `c-body-directive` fixtures cover transfer boundaries, constructed do, and
 direct while/do C output.
 
+### E25. Bound conditional truth conversion (target readable form)
+
+The binder emits one-arm `(if test yes)` and two-arm `(if test yes no)`
+nodes; the transform's `_truthy` reads these before rewriting their
+children. The E14 and E15 Statement forms recognize them without changing
+condition conversion or branch ownership. The complete client is:
+
+```x2c
+static List _truthy(Compiler compiler, List ast) {
+  Macro if_then = $if_then, if_else = $if_else;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
+  match (ast) {
+    case if_then(?condition, ?yes):
+      return %(if ${_truthy_expression(compiler, condition)} $yes);
+    case if_else(?condition, ?yes, ?no):
+      return %(if ${_truthy_expression(compiler, condition)} $yes $no);
+    case while_loop(?condition, ?body):
+      return %(while ${_truthy_expression(compiler, condition)} $body);
+    case do_loop(?body, ?condition):
+      return %(do $body ${_truthy_expression(compiler, condition)});
+  }
+  // The existing for, operator, and default cases follow unchanged.
+}
+```
+
+The `at` owner retains the anchor around the node, and `_truthy_expression`
+still makes the sole condition conversion. Branch bodies and loop bodies
+pass through in the same order. `optional-reference`, `c-body-directive`,
+`percent-after-condition`, and `macro-statement-production` check bound
+one- and two-arm if forms, direct loops, expression parsing after a
+condition, and constructed statements.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

@@ -3610,12 +3610,16 @@ static List _postfix(Compiler compiler, List ast) {
 }
 
 static List _truthy(Compiler compiler, List ast) {
+  Macro if_then = $if_then, if_else = $if_else;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
   match (ast) {
-    case %(if ?condition *body):
-      return %(if ${_truthy_expression(compiler, condition)} @body);
-    case %(while ?condition ?body):
+    case if_then(?condition, ?yes):
+      return %(if ${_truthy_expression(compiler, condition)} $yes);
+    case if_else(?condition, ?yes, ?no):
+      return %(if ${_truthy_expression(compiler, condition)} $yes $no);
+    case while_loop(?condition, ?body):
       return %(while ${_truthy_expression(compiler, condition)} $body);
-    case %(do ?body ?condition):
+    case do_loop(?body, ?condition):
       return %(do $body ${_truthy_expression(compiler, condition)});
     case %(for ?init ?condition ?increment ?body):
       return %(for $init ${_truthy_expression(compiler, condition)}
