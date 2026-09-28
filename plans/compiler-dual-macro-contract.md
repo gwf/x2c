@@ -1,4 +1,5 @@
-> Status: reference -- research complete; production work not started.
+> Status: reference -- research complete; core support and the try
+> migration are on dev. The ledger records the production try row.
 > The combined try template/slot/effect/stage candidate passes 62-case raw
 > C/H and outcome comparison. The failing-skeleton rollback probe also passes.
 > Phase7 selective support passes the same proof; default compiler total is
@@ -577,7 +578,19 @@ row: do not count successive versions of try twice. The current entry is:
 | Try/defer/catch, first migration including selective core | phase7 final / original | +0.133% / +0.133 pp | -1.318% / -1.318 pp | 2 each mode | 2119 / 2 default; 2124 / 2 live | 1.488 default / 1.818 live |
 | Same candidate, exception workload | phase7 final / original | +0.869% / separate workload | +0.122% / separate workload | 4 each mode | 265 / 4 each mode | 0.931 default / 0.857 live |
 | Historical unconditional-support control | phase5 / original, rerun in phase7 window | +1.625% / not an additional migration | -0.117% / not an additional migration | 2 each mode | 2119 / 2119 default; 2124 / 2124 live | Historical phase6 profile |
+| Try/defer/catch, production on dev (2026-09-27) | try migration / dev af3354b8, same window | +0.15% / first production row | +0.29% / first production row | 2 each mode | 2540 / 347 default; 2517 / 347 live | Not measured |
+| Same production candidate, exception workload | try migration / dev af3354b8, same window | +1.43% / separate workload | +1.04% / separate workload | 4 each mode | 323 / 57 each mode | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
+
+The production rows are medians of five alternating pairs on one host
+against the dev compiler the migration started from, with the same source
+root and home. Compiler corpus medians are 6.555 / 6.565 s default and
+7.705 / 7.727 s live; exception medians are 0.612 / 0.621 s and
+0.682 / 0.689 s. Counts come from a temporary count-only build of the
+candidate, then reverted. Extended transactions count every transaction
+opened while any macro value application is active, including 49 per
+translation outside try lowering; the baseline was not instrumented, so the
+increment per try is not measured. The source grew since the phase7 counts.
 
 The first per-lowering row is the selective try candidate, not the old phase5
 fixed support cost. Its total includes necessary shared support and any

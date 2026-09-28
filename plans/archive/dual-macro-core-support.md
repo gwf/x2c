@@ -311,11 +311,9 @@ covers the fix.
 
 Thin evidence and follow-ups:
 
-- Rollback of carrier effects has no fixture. A failed binding ends
-  translation, so leakage cannot be observed in a compiled program. It
-  matters in the REPL and the editor adapter, which recover and continue;
-  the try migration should add the rollback test there or in its own
-  recoverable context.
+- Resolved on 2026-09-27: `commands/repl/tests/api-check.x` checks that a
+  failed application leaves no carrier effect behind, in a recovering
+  compiler; see the [try migration](dual-macro-try-migration.md).
 - Resolved on 2026-09-27: a carrier whose code keeps an unreplaced binder
   is reported as an unbound replacement variable at the application.
 - Resolved on 2026-09-27: a cached `Macro` value names its references by

@@ -12,6 +12,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int main(void){
   x2c_initialize();
   int volatile outer = 1;

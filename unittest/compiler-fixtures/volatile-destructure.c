@@ -28,6 +28,10 @@ __attribute__((constructor)) static void _file_init_(void){
 
 Var List_getindex(List, int);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int Var_int(Var);
 
 int main(void){

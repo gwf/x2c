@@ -155,6 +155,10 @@ static int sum(List items){
   return total;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 Var Symbol_var(Symbol);
 
 static int governed(List items){

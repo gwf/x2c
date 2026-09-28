@@ -2386,6 +2386,12 @@ static Var _helper_result(Compiler c, Var value) {
   return resolved;
 }
 
+/** Returns `value` with each pending Macro value application replaced by
+    the invocation that expands it, so compiler code can bind what applying
+    a Macro value returns. */
+Var Compiler.macro_value_syntax(Compiler c, Var value) =>
+  _helper_result(c, value);
+
 /* Adapts a call of a bodied `meta` function's session binding, whose
    context holds the function's name, to a call in the project's helper,
    or in the REPL to a call of the group's native code, which the first
@@ -4220,17 +4226,23 @@ static List _template(Compiler c, List definition) {
   return template.search_replace(%(at m-origin ?node), <?node>);
 }
 
-/* Returns a binder left in carrier code after its effects were applied, or
-   NULL. Pending macro applications keep their own binders. */
+/* A named binder left as a carrier's code, identifier, or declarator
+   after its effects were applied, or NULL. Binders elsewhere are data,
+   such as a lowered match pattern, and a bare `*` or `?` is syntax. */
 static Var _carrier_binder(Var value) {
-  if (value.is_binder()) return value;
+  if (value.is_binder()) return value.str().len() > 1 ? value : NULL;
   if (value is not <list>) return NULL;
-  match (value)
-    case %((!or "x2c.template" macro-invoke macrodef) *): return NULL;
-  foreach (Var child, value.list()) {
-    Var binder = _carrier_binder(child);
-    if (binder) return binder;
+  match (value) {
+    case %((!or ident bind) ?name *):
+      if (name.is_binder() && name.str().len() > 1) return name;
+    case %((!or "x2c.template" macro-invoke macrodef literal) *):
+      return NULL;
   }
+  foreach (Var child, value.list())
+    if (child is <list>) {
+      Var binder = _carrier_binder(child);
+      if (binder) return binder;
+    }
   return NULL;
 }
 

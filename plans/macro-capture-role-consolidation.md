@@ -24,7 +24,7 @@ The detailed read-only scope and traced call graph are in
 [capture-scope.md](https://github.com/gwf/x2c/blob/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase4/capture-scope.md). This is the
 first production change named by
 [the compiler contract](compiler-dual-macro-contract.md); it is independent of
-[try migration](dual-macro-try-migration.md).
+[try migration](archive/dual-macro-try-migration.md).
 
 ## Shared schema and exact compatibility
 

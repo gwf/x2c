@@ -1,6 +1,7 @@
-> Status: active -- not yet started.
-> Prerequisite: core support must land on dev with its bootstrap refresh.
-> Migrate only after the checked-in compiler supports the frozen forms.
+> Status: done 2026-09-27 -- delivered to `dev`.
+> `_rewrite` lowers every try through `$compiler_try_shape`, a
+> `macro open Statement` in src/transform.x. The 62-case corpus keeps every
+> outcome; C/H differ only by two forward declarations.
 
 # Migrate try lowering to one dual-purpose Macro
 
@@ -18,7 +19,7 @@ migration after core support and its bootstrap refresh. Core support follows
 capture-role consolidation.
 
 The authoritative contract is
-[compiler-dual-macro-contract.md](compiler-dual-macro-contract.md). Evidence:
+[compiler-dual-macro-contract.md](../compiler-dual-macro-contract.md). Evidence:
 [phase3](https://github.com/gwf/x2c/tree/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase3/),
 [phase4 combined proof](https://github.com/gwf/x2c/blob/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase4/combined/README.md), and
 [phase5 open-body proof](https://github.com/gwf/x2c/blob/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase5/README.md). Phase4 tracks
@@ -189,3 +190,46 @@ code expresses the body and side effects remain ordinary compiler operations.
 No new semantic validator, dedicated diagnostic or negative fixture is
 proposed. Existing rollback and native-shadow cases protect state restoration
 and preserve deliberate baseline behavior through the existing checks.
+
+## Delivery outcome
+
+The try case in `_rewrite` arms the application context, begins the outer
+transaction, and allocates the frame, in that order. Its producing
+operations attach stages: the catch declarations and frame declaration
+form one lowered sequence, the region body and landing are lowered, and
+the frame reference is bound. `_try_frame_declaration` and
+`_try_cleanup_placement` are `meta` functions in src/transform.x; the
+second returns the placed cleanup with the cleanup effect. The client
+reads `shape(frame, declarations, body, landing, cleanup)`.
+
+Decisions made during delivery:
+
+- The producers run where the lowering computes their inputs and pass
+  completed carriers to the shape. A template applied in a user's unit can
+  only resolve meta functions that unit knows, so the shape does not call
+  them itself.
+- The frame is an `Expr` hole. The template uses it only as `&$frame` and
+  `$frame.env`, and a bound frame reference is an expression.
+- The three runtime calls bind through the open rule. `x2c_exception_push`
+  and `x2c_exception_landed` bind to the unit's declarations, so generated C
+  now forward declares them; `sigsetjmp` stays a native call. That is the
+  only C/H difference across the corpus, re-baselined in 25 fixtures.
+- `Compiler.macro_value_syntax` turns a pending application into the
+  invocation `bind_syntax` expands, as meta results already were.
+
+Validation: all 62 cases (46 try fixtures and eight corpus files in
+default and live) keep their exit status; 18 are byte-identical and 44
+differ only by the two forward declarations. The gate's self-host
+comparison passed. The rollback check in `commands/repl/tests/api-check.x`
+applies a carrier with `new-name`, `early` and `cleanup` effects whose
+skeleton fails to bind, and confirms that early declarations, adapters,
+generated-name counters and the exception flag are unchanged; it reports
+a leak when rollback is disabled. Timing and counts are the production
+rows of the contract ledger.
+
+Thin evidence:
+
+- The rollback check drives the carrier path under a recovering compiler
+  directly. No user input makes the fixed try shape itself fail to bind.
+- Timing is five alternating pairs on one host. The exception workload
+  is about 1% slower, above the phase7 reference.

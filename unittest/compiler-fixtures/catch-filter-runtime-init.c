@@ -50,9 +50,13 @@ Var List_var(List);
 
 Var String_var(String);
 
+void x2c_exception_push(ExceptionFrame *);
+
 List cons(Var, List);
 
 String String_new(const char *);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 static void _relabel_nested_pattern(void){
   {

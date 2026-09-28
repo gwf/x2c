@@ -59,6 +59,10 @@ int Var_truth(Var);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 long Var_long(Var);
 
 double Var_double(Var);

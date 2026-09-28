@@ -110,6 +110,10 @@ static int deferred(Var item){
 
 int List_try_next(List, List *, Var *);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static int guarded(List items){
   int volatile kept = 0;
   {

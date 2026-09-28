@@ -100,6 +100,10 @@ static int apply_int(int(* fn)(int)){
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

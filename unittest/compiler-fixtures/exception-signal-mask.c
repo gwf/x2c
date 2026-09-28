@@ -10,6 +10,10 @@ void Error_initialize(void);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int main(void){
   x2c_initialize();
   Error_initialize();

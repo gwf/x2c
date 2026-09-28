@@ -331,14 +331,15 @@
            (ident (binding 36 "_x2c_catch_patterns_0"))))))))) 
     (stmnt 
      (expr (void) 
-      (call "x2c_exception_push" 
-       (args (expr (* ("ExceptionFrame")) 
-              (op & (expr (("ExceptionFrame")) 
+      (call (expr ((func ((* "ExceptionFrame"))) void) 
+             (ident (binding 39 "x2c_exception_push"))) 
+       (args (expr (* "ExceptionFrame") 
+              (op & (expr ("ExceptionFrame") 
                      (ident (binding 34 "_x2c_exception_frame_0"))))))))) 
     (if (expr (int) 
-         (op ! (expr (int) 
-                (call "sigsetjmp" 
-                 (args (expr () 
+         (op ! (expr () 
+                (call (expr () (ident (binding 40 "sigsetjmp"))) 
+                 (args (expr ("sigjmp_buf") 
                         (op . (expr ("ExceptionFrame") 
                                (ident (binding 34 "_x2c_exception_frame_0"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
@@ -349,9 +350,10 @@
      (block 
       (stmnt 
        (expr (void) 
-        (call "x2c_exception_landed" 
-         (args (expr (* ("ExceptionFrame")) 
-                (op & (expr (("ExceptionFrame")) 
+        (call (expr ((func ((* "ExceptionFrame"))) void) 
+               (ident (binding 41 "x2c_exception_landed"))) 
+         (args (expr (* "ExceptionFrame") 
+                (op & (expr ("ExceptionFrame") 
                        (ident (binding 34 "_x2c_exception_frame_0"))))))))) 
       (if (expr (int) 
            (call "x2c_exception_is_error_target" 

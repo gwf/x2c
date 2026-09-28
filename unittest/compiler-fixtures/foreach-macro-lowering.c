@@ -114,6 +114,10 @@ int String_truth(String);
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int Split_try_next(Split, int *, String *);
 
 Split String_lines(String);

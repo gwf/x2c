@@ -10,7 +10,11 @@ Var Symbol_var(Symbol);
 
 Var List_var(List);
 
+void x2c_exception_push(ExceptionFrame *);
+
 Var int_var(int);
+
+void x2c_exception_landed(ExceptionFrame *);
 
 int Var_int(Var);
 

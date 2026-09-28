@@ -54,6 +54,10 @@ static int outward_defer(void){
   done : return value;
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static int outward_finally(void){
   int volatile value = 0;
   {

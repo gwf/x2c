@@ -49,6 +49,10 @@ _Noreturn static void raise_from_callee(void){
 
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static int preserve_parameter(int volatile value){
   {
     ExceptionFrame _x2c_exception_frame_0;

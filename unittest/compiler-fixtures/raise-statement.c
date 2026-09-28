@@ -97,6 +97,10 @@ static void raise_after_return(int code){
 
 }
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static void raise_caught(void){
   {
     ExceptionFrame _x2c_exception_frame_0;

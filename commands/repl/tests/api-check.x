@@ -96,6 +96,44 @@ static void _transaction_deletion(Compiler c) {
   }
 }
 
+/* A macro value application whose producer effects ran and whose skeleton
+   then fails to bind leaves no early declaration, adapter, generated name,
+   or exception flag behind. */
+static void _carrier_rollback(Compiler c) {
+  List key = %(repl-rollback-probe);
+  Atom token = Atom.intern("?__rollback_probe");
+  Atom placed = Atom.intern("?__rollback_cleanup");
+  List carrier = %(code-value "source"
+    (seq (stmnt (expr () (ident $token))) $placed)
+    ((new-name $token "rollback")
+     (early $key $token (declare (int) (bindings (bind $token ()))))
+     (cleanup $placed (seq))));
+  int early = c.early_decls.len(), exception = c.needs_exception;
+  String counters = c.names.counters.repr();
+  int failed = 0;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  $let(c.recovery_depth, c.recovery_depth + 1)
+  $let(c.macro_application, c.macro_application + 1) {
+    SymTxn transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    try {
+      Var value;
+      int retained;
+      c.take_code_value(carrier, value, retained);
+      c.bind_syntax(value, AST_STATEMENT, NULL);
+      transaction.commit();
+    }
+    catch %(malformed *): failed = 1;
+  }
+  c.diagnostics.release(hold, 0);
+  if (!failed || c.early_decls.len() != early ||
+      c.names.adapters.contains(key) || c.needs_exception != exception ||
+      c.names.counters.repr() != counters) {
+    fputs("carrier effects leaked past a failed application\n", stderr);
+    failures++;
+  }
+}
+
 static void _exercise(ReplSession s) {
   _symbols(s, %());
   _completion(s, "Str", "String", NULL);
@@ -358,6 +396,7 @@ int main(int argc, char **argv) {
       if (!frontend.open_session(unit)) return 1;
       if (phase) {
         _transaction_deletion(unit.compiler);
+        _carrier_rollback(unit.compiler);
         ReplSession session = ReplSession.new(unit.compiler);
         _exercise(session);
         _retained_results(session);

@@ -132,6 +132,10 @@ FuncArg FuncArg_value(Var);
 
 Var int_var(int);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

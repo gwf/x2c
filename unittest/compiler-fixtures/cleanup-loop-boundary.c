@@ -62,6 +62,10 @@ static void record_step(int value){
 
 Var Symbol_var(Symbol);
 
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
 static int continue_inside_try(void){
   int volatile caught = 0;
   {

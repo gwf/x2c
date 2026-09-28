@@ -36,6 +36,7 @@ $(import "../src/adapter-memo.xmacro")
 #include "list.x"
 #include "protocol.x"
 #include "regions.x"
+#include "meta.x"
 
 // Produce typed parameters from types and their binding identities.
 static List _named_decl_params(List types, List names) {
@@ -2351,12 +2352,27 @@ static List _catch_arms(Compiler c, List bodies, List frame, List handle) {
     $choice);
 }
 
-static List _try_block(Walk walk, List body, List clause, List frame,
-                       List handle, List cleanup, List bodies) {
-  Compiler c = walk.compiler;
+/* The lowered declaration of a try region's frame, whose binding is
+   already allocated. */
+meta static List _try_frame_declaration(List frame) =>
+  %(declare ("ExceptionFrame") (bindings (bind $frame ())));
+
+/* The statements that leave a try region, lowered and placed after it. The
+   cleanup effect marks the unit as needing exception support. */
+meta static List _try_cleanup_placement(List statements) {
+  Atom token = Atom.intern("?__try_cleanup");
+  return %(code-value "lowered" $token ((cleanup $token (seq @statements))));
+}
+
+static List _lowered(List code) => %(code-value "lowered" $code ());
+
+/* The frame, declared first, then the catch clause's site, patterns, and
+   handler. */
+static List _try_declarations(Compiler c, List clause, List frame,
+                              List handle) {
   List address = _address_of(_frame_type, frame);
   Array declarations = [];
-  declarations.push(_value_declaration(%("ExceptionFrame"), frame, NULL));
+  declarations.push(_try_frame_declaration(frame));
   if (clause) {
     List records = clause.cadr();
     int count = records.len(), fallback = -1, index = 0;
@@ -2398,21 +2414,32 @@ static List _try_block(Walk walk, List body, List clause, List frame,
       _catch_call(%("ErrorHandler"), "x2c_error_catch_site_push",
         %($address $site_address ${_catch_value(patterns_type, patterns)}))));
   }
+  return _lowered(%(seq @{declarations.list_free()}));
+}
+
+/* What runs when the frame lands: the selected catch arm, or the cleanup
+   and an unreachable end. */
+static List _try_landing(Compiler c, List clause, List frame, List handle,
+                         List cleanup, List bodies) {
   List unhandled = %(block @cleanup
     ${_catch_statement("__builtin_unreachable", NULL)});
-  List landing = clause
-    ? %(if ${_catch_call(%(int), "x2c_exception_is_error_target", %($address))}
+  return _lowered(clause
+    ? %(if ${_catch_call(%(int), "x2c_exception_is_error_target",
+             %(${_address_of(_frame_type, frame)}))}
         ${_catch_arms(c, bodies, frame, handle)} $unhandled)
-    : unhandled;
-  List setjmp = _catch_call(%(int), "sigsetjmp", %(
-    (expr () (op . ${_catch_value(%("ExceptionFrame"), frame)} ("env")))
-    ${_integer_expression(0)}));
-  return %(block @{declarations.list_free()}
-    ${_region_call("x2c_exception_push", _frame_type, frame)}
-    (if (expr (int) (op ! $setjmp)) $body
-      (block ${_region_call("x2c_exception_landed", _frame_type, frame)}
-        $landing))
-    @cleanup);
+    : unhandled);
+}
+
+/* A try region pushes its frame and lands on it when something raises. */
+macro open Statement $compiler_try_shape(Expr $frame, Statement $declarations,
+    Statement $body, Statement $landing, Statement $cleanup) {
+  {
+    $declarations
+    x2c_exception_push(&$frame);
+    if (!sigsetjmp($frame.env, 0)) $body
+    else { x2c_exception_landed(&$frame); $landing }
+    $cleanup
+  }
 }
 
 static Var _rewrite(Walk walk, Var value) {
@@ -2430,31 +2457,49 @@ static Var _rewrite(Walk walk, Var value) {
                           env, callback, records, record, cleanup);
     }
     case %(try ?body ?clause ?finalizer): {
-      walk.compiler.needs_exception = 1;
-      List frame = _region_binding(walk.compiler, "exception_frame");
-      List handle = clause ? clause.caddr().list() : NULL;
-      int labelled_at = walk.origin;
-      Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
-      if (labelled) {
-        String name = _label_spelling(labelled);
-        _report_at(
-          walk, labelled_at, "a finally body cannot define a label",
-          %("a finalizer runs on every path that leaves its region, so '${
-            name ? name : "this label"}' would be defined once for each"));
+      Compiler c = walk.compiler;
+      /* The application context covers the frame allocation and every
+         producer effect, so a failed application leaves none behind. */
+      $let(c.macro_application, c.macro_application + 1) {
+        SymTxn transaction = c.begin_semantic_transaction();
+        defer transaction.rollback();
+        c.needs_exception = 1;
+        List frame = _region_binding(c, "exception_frame");
+        List handle = clause ? clause.caddr().list() : NULL;
+        int labelled_at = walk.origin;
+        Var labelled = _finalizer_label(finalizer, walk.origin, labelled_at);
+        if (labelled) {
+          String name = _label_spelling(labelled);
+          _report_at(
+            walk, labelled_at, "a finally body cannot define a label",
+            %("a finalizer runs on every path that leaves its region, so '${
+              name ? name : "this label"}' would be defined once for each"));
+        }
+        List cleanup = _try_cleanup(
+          frame, handle, _rewrite(walk, finalizer), !!clause);
+        List body_out = _lowered(_inside(walk, cleanup, body, body));
+        /* A catch arm runs inside the region it handles, so it leaves the
+           same statements behind on its own exits. Each arm is its own
+           region, which a jump from the body may not enter. */
+        Array bodies = [];
+        if (clause) foreach (List record, clause.cadr().list()) {
+          List arm = record.cadr();
+          bodies.push(_inside(walk, cleanup, arm, arm));
+        }
+        List frame_code = %(code-value "bound"
+          ${_catch_value(%("ExceptionFrame"), frame)} ());
+        List declarations = _try_declarations(c, clause, frame, handle);
+        List landing = _try_landing(
+          c, clause, frame, handle, cleanup, bodies.list_free());
+        Macro shape = $compiler_try_shape;
+        List lowered = c.bind_syntax(
+          c.macro_value_syntax(shape(frame_code, declarations, body_out,
+                                     landing, _try_cleanup_placement(cleanup))),
+          AST_BLOCK, c.return_type);
+        transaction.commit();
+        match (lowered) case %(seq ?block): return block;
+        return lowered;
       }
-      List cleanup = _try_cleanup(
-        frame, handle, _rewrite(walk, finalizer), !!clause);
-      List body_out = _inside(walk, cleanup, body, body);
-      /* A catch arm runs inside the region it handles, so it leaves the
-         same statements behind on its own exits. Each arm is its own
-         region, which a jump from the body may not enter. */
-      Array bodies = [];
-      if (clause) foreach (List record, clause.cadr().list()) {
-        List arm = record.cadr();
-        bodies.push(_inside(walk, cleanup, arm, arm));
-      }
-      return _try_block(
-        walk, body_out, clause, frame, handle, cleanup, bodies.list_free());
     }
     /* A function-static initializer leaves its own record at the end of its
        block. No exit runs that record, but a jump still may not enter the

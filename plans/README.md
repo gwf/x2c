@@ -46,8 +46,6 @@ execution.
 
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
   not yet started; waits for meta-integration to land on dev.
-- [Try template migration](dual-macro-try-migration.md): not yet started;
-  core support is on `dev`; it also owns the carrier rollback test.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
   function runs natively through a cached project helper; implemented on
   `meta-integration` and not yet on `dev`.
@@ -101,6 +99,8 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Try template migration](archive/dual-macro-try-migration.md): done
+  2026-09-27; try lowers through one open Macro value on `dev`.
 - [Dual macro core support](archive/dual-macro-core-support.md): done
   2026-09-27; macro values, `macro open`, carriers and effects on `dev`.
 - [Native `meta` definitions](archive/meta-native-definitions.md): done
