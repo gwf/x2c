@@ -3041,18 +3041,20 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
 /* Capture rows keep exact source apart from syntax projections. Forwarding a
    macro projection reconstructs its original row instead of assigning source
    text to generated syntax; Unit construction requirements travel with it. */
-static List _capture_row(Compiler compiler, List hole, List sources) {
+static List _capture_row_project(
+  Compiler compiler, List hole, List sources, int retain_syntax) {
   int sequence = hole.assoc(<sequence>);
   int singular = !sequence && sources && !sources.cdr();
   Var source = singular ? sources.car() : sources;
-  if (singular) {
+  if (singular && !retain_syntax) {
     List forwarded = _forwarded_capture(compiler, source);
     if (forwarded) return forwarded;
   }
   if (sequence) {
     Array captured_sources = [], values = [], construction = [];
     foreach (Var captured, sources) {
-      List forwarded = _forwarded_capture(compiler, captured);
+      List forwarded = retain_syntax ? NULL
+        : _forwarded_capture(compiler, captured);
       match (forwarded)
         case %(capture (source *forwarded_sources)
                        (value *forwarded_values) ? ? *required): {
@@ -3062,13 +3064,14 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
           continue;
         }
       captured_sources.push(captured);
-      values.push(_source_unwrap(captured));
+      values.push(retain_syntax ? captured : _source_unwrap(captured));
     }
     return _capture_layout(
       1, %(source @{captured_sources.list_free()}),
       %(value @{values.list_free()}), NULL, NULL, construction.list_free());
   }
-  Var value = _source_unwrap(source), expression = value;
+  Var value = retain_syntax ? source : _source_unwrap(source);
+  Var expression = value;
   if (singular) {
     if (value is <string>) expression = %(expr () (ident $value));
     else if (value is <list> && !value.is_nil() &&
@@ -3084,10 +3087,12 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
     %(splice @values), NULL);
 }
 
-static List _sdk_template_call(Var stored, List values) {
-  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
-  List definition = stored.is_atom()
-    ? _lookup(c, stored, macro_import_invocation) : stored;
+static List _capture_row(Compiler compiler, List hole, List sources) =>
+  _capture_row_project(compiler, hole, sources, 0);
+
+static List _template_arguments(
+  Compiler c, List definition, List values, Token invocation,
+  int retain_syntax) {
   Array rows = [];
   List holes = definition.assoc(<parameters>);
   for (; holes; holes = holes.cdr(), values = values.cdr()) {
@@ -3096,11 +3101,20 @@ static List _sdk_template_call(Var stored, List values) {
     if (hole.assoc(<kind>) == <expr> &&
         (value.is_integer() || value.is_floating() || value is <string> ||
          value is <symbol>))
-      value = c.lift_macro_lisp_expression(value, macro_import_invocation);
+      value = c.lift_macro_lisp_expression(value, invocation);
     List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
-    rows.push(_capture_row(c, hole, sources));
+    rows.push(_capture_row_project(c, hole, sources, retain_syntax));
   }
-  return %(macro-invoke $stored (args @{rows.list_free()}) m-invoke);
+  return %(args @{rows.list_free()});
+}
+
+static List _sdk_template_call(Var stored, List values) {
+  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  List definition = stored.is_atom()
+    ? _lookup(c, stored, macro_import_invocation) : stored;
+  return %(macro-invoke $stored
+    ${_template_arguments(c, definition, values, macro_import_invocation, 0)}
+    m-invoke);
 }
 
 /** Returns the syntax that invokes the template `stored`, a macro name
@@ -3109,6 +3123,23 @@ static List _sdk_template_call(Var stored, List values) {
 List x2c_template_call(Var stored, List values) =>
   _sdk_template_call(
     stored is <string> ? Atom.intern(stored.str()) : stored, values);
+
+/** Rebuilds an expression from a pending Macro value application, preserving
+    its established root `type`, child stage, and source wrappers. The caller
+    supplies bound syntax or parser-template holes and a purely structural
+    Expression template: no introduced names, unresolved free references,
+    computed slots, or child template calls. Capture rows and parameter
+    sequences are Lists. No binding, capture collection, hygiene, or effects
+    run; the returned AST is for the compiler, not ordinary source insertion.
+*/
+List Compiler.rebuild_expression(Compiler c, Type type, List application) {
+  (Var marker, List definition, List values) = application;
+  (void) marker;
+  List arguments = _template_arguments(c, definition, values, c.token, 1);
+  List bindings = arguments.match(definition.assoc(<pattern>));
+  List rebuilt = definition.assoc(<template>).list().replace(bindings);
+  return %(expr $type @{rebuilt.cddr()});
+}
 
 static List _lisp_bindings(List bindings) {
   Array result = [];
@@ -4056,11 +4087,17 @@ static List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
   if (_bare(invocation, definition)) return %(args);
   Array arguments = [];
+  int parameter_scope = 0;
+  defer { if (parameter_scope) c.sym.pop_scope(); }
   c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
+    if (kind == <param> && !parameter_scope) {
+      c.sym.push_new_scope();
+      parameter_scope = 1;
+    }
     int sequence = hole.assoc(<sequence>);
     Array captured = [];
     if (c.peek(0) == <)> && !sequence)

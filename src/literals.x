@@ -879,6 +879,7 @@ static List _lambda_parse_bare_params(Compiler compiler) {
     String pname = compiler.token.text;
     List binding = compiler.sym.define(%($pname), %("Var"));
     names.push(binding);
+    compiler.semantic_binding_facts()[%(parameter $binding)] = 1;
     compiler.semantic_binding_facts()[%(lambda-param $binding)] = 1;
     compiler.semantic_binding_facts()[%(automatic $binding)] = 1;
     compiler.semantic_binding_facts()[%(type $binding)] = %("Var");
@@ -1071,6 +1072,7 @@ List Compiler.bind_lambda_expression(
     }
     match (declaration)
       case %(declare ?base (bindings (!set ?declarator (bind ?binding ?)))): {
+        c.semantic_binding_facts()[%(parameter $binding)] = 1;
         c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
         if (declaration.type_from_ast().car() == <&>)
           c.semantic_binding_facts()[%(reference-param $binding)] = 1;
@@ -1078,7 +1080,7 @@ List Compiler.bind_lambda_expression(
       }
   }
   match (body) {
-    case %(block *): body = c.bind_syntax(body, AST_STATEMENT, %("Var"));
+    case %(block *): body = c.bind_callable_body(body, %("Var"));
     default: body = c.resolve_expression(body, c.token);
   }
   List captures = c.end_lambda_captures();
@@ -1167,7 +1169,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   List body = NULL;
   if (c.test(<"{">)) {
     $let(c.return_type, %("Var")) {
-      body = c.parse_compound_statement();
+      body = c.parse_callable_body();
     }
   }
   else body = c.parse_assignment();

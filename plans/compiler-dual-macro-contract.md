@@ -1317,9 +1317,12 @@ consumer draft is not the completed lambda migration.
   whole stack row calls `Token_repr`, which dereferences it. The capability
   batch reports the first definition location instead of rendering internal
   stack storage. The synthetic-call crash has not yet been reproduced here.
-- **Parameter redeclaration:** open; reported by the previous migration.
-  A local may redeclare a parameter. Reproduce and fix when the migration
-  reaches the parameter/body scope owner; retain legal nested shadowing.
+- **Parameter redeclaration:** reproduced and repaired in prerequisite
+  commit `69345a95`, awaiting the integrated publication gate. Ordinary,
+  bare/typed lambda and constructed lambda redeclarations now fail at the
+  existing declaration check. Nested shadowing and parameter-template
+  replay pass. Outer callable bodies share parameter scope; nested blocks
+  keep their own scopes.
 - **Standalone raw-symbol sweep:** open and already filed in
   [raw-symbol translation of macros.x](raw-symbol-macros-translation.md).
   Keep this independent from the capture-hole capability; the current

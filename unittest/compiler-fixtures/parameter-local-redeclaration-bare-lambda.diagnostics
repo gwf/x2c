@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/parameter-local-redeclaration-bare-lambda.x:2:35: parse: declaration 'value' is already bound
+  Func f = %!(value) => { int value = 2; return value; };
+                                    ^
+  note: prior binding: 'value'
+

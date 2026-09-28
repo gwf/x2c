@@ -667,17 +667,10 @@ List Compiler.parse_statement(Compiler c) {
   return _expression_statement(c);
 }
 
-/** Parses block items after an already-consumed opening brace through `}` and
-    returns a `(block ...)` node. The call opens one lexical `Sym` scope;
-    `anchor_items` records statement origins and distributes a macro sequence's
-    invocation origin over its inserted items.
-*/
-List Compiler.parse_block_items(Compiler c, int anchor_items) {
+static List _parse_block_items(Compiler c, int anchor_items) {
   Array block = $auto([]), List stmt = NULL;
   List present_before = c.present_references();
   defer c.restore_reference_presence(present_before);
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
   loop {
     c.__complete_here(<block>, _block_completion_keywords());
     if (c.token != c.directives_taken)
@@ -712,6 +705,18 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
   c.expect(<"}">);
   return cons(<block>, block);
 }
+
+/** Parses block items after an already-consumed opening brace through `}` in
+    a new lexical scope. `anchor_items` records statement origins.
+*/
+List Compiler.parse_block_items(Compiler c, int anchor_items) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  return _parse_block_items(c, anchor_items);
+}
+
+/** Parses a callable's outer block in its active parameter scope. */
+List Compiler.parse_callable_body(Compiler c) => _parse_block_items(c, 1);
 
 /** Parses a compound body after its opening brace and consumes the closing
     `}`, returning an origin-anchored `(block ...)` node.

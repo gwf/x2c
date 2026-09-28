@@ -302,8 +302,9 @@ Macro captured = $lambda_captured;
 return c.rebuild_expression(type, captured(body, captures, parameters));
 ```
 
-`rebuild_expression` is proposed, not implemented. It would materialize the
-same source template while retaining established type and binding facts;
+`rebuild_expression` is implemented in prerequisite commit `40ea91c6`,
+awaiting integrated publication. It materializes the same source template
+while retaining established type and binding facts;
 ordinary `bind_syntax` and normal macro application keep their semantics.
 It must reuse the expansion/projection owner rather than add another macro
 interpreter. Template-introduced bindings, computed slots and side effects
@@ -331,6 +332,17 @@ retained bound result. It does not establish a general construction API,
 hygiene for newly introduced names, arbitrary meta slots/effects, all type
 forms, or compiler bootstrap compatibility. Those remain capability work,
 not reasons to reject this successful narrow construction route.
+
+The implemented internal operation reuses capture-row projection and the
+descriptor's matching/substitution. Its retained-syntax path bypasses normal
+invocation forwarding and source unwrapping, preserving bound children and
+deferred parser holes. The native probe in
+`unittest/probes/bound-template-expression.c` parses actual source templates
+and lambdas and checks the operation directly: eight cases include captured
+mutation, block/expression bodies, parameters, an established Func type,
+source wrappers and deferred shells. It also checks unchanged binding facts,
+scope/expansion state and body identity. This is a focused probe, not a new
+recurring gate. Normal application still returns a pending invocation.
 
 ## Design review
 
