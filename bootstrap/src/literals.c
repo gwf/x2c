@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _332, _330, _327, _326, _325, _315, _314, _313, _311, _310, _309, _307, _302, _297, _293, _291, _290, _289, _287, _286, _284, _283, _279, _276, _275, _273, _272, _271, _267, _265, _264, _263, _262, _259, _258, _257, _256, _254, _253, _252, _244, _243, _242, _239, _238, _237, _236, _233, _232, _231, _229, _228, _225, _223, _222, _221, _220, _219, _211, _210, _209, _207, _206, _203, _202, _201, _199, _194, _187, _184, _180, _177, _176, _175, _173, _166, _162, _161, _160, _158, _157, _155, _154, _153, _148, _143, _142, _140, _139, _138, _136, _135, _134, _132, _131, _130, _128, _127, _126, _124, _123, _122, _120, _116, _113, _112, _110, _109, _106, _105, _104, _101, _100, _98, _97, _96, _94, _92, _91, _90, _88, _87, _84, _83, _82, _80, _79, _78, _76, _75, _71, _70, _69, _68, _65, _58, _54, _47, _46, _45, _43, _42, _41, _39, _38, _34, _33, _32, _29, _22, _21, _20, _18, _17, _16, _14, _9, _8, _5;
+static List _332, _330, _327, _326, _325, _315, _314, _313, _311, _310, _309, _307, _302, _296, _293, _291, _290, _289, _287, _286, _284, _283, _279, _276, _275, _273, _272, _271, _267, _265, _264, _263, _262, _259, _258, _257, _256, _254, _253, _252, _244, _243, _242, _239, _238, _237, _236, _233, _232, _231, _229, _228, _225, _223, _222, _221, _220, _219, _211, _210, _209, _207, _206, _203, _202, _201, _199, _194, _187, _184, _180, _177, _176, _175, _173, _166, _162, _161, _160, _158, _157, _155, _154, _153, _148, _143, _142, _140, _139, _138, _136, _135, _134, _132, _131, _130, _128, _127, _126, _124, _123, _122, _120, _116, _113, _112, _110, _109, _106, _105, _104, _101, _100, _98, _97, _96, _94, _92, _91, _90, _88, _87, _84, _83, _82, _80, _79, _78, _76, _75, _71, _70, _69, _68, _65, _58, _54, _47, _46, _45, _43, _42, _41, _39, _38, _34, _33, _32, _29, _22, _21, _20, _18, _17, _16, _14, _9, _8, _5;
 
-static String _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _347, _346, _345, _344, _343, _342, _341, _340, _339, _337, _335, _333, _323, _321, _320, _319, _318, _316, _304, _303, _301, _295, _268, _248, _192, _185, _182, _178, _172, _171, _170, _169, _167, _164, _146, _118, _114, _99, _72, _63, _62, _61, _60, _56, _52, _50, _49, _24, _12, _3, _1, _0;
+static String _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _352, _351, _350, _349, _348, _347, _346, _345, _344, _343, _342, _341, _340, _339, _337, _335, _333, _323, _321, _320, _319, _318, _316, _304, _303, _301, _294, _268, _248, _192, _185, _182, _178, _172, _171, _170, _169, _167, _164, _146, _118, _114, _99, _72, _63, _62, _61, _60, _56, _52, _50, _49, _24, _12, _3, _1, _0;
 
-static Var _338, _336, _334, _331, _329, _328, _324, _322, _317, _312, _308, _306, _305, _300, _299, _298, _296, _294, _292, _288, _285, _282, _281, _280, _278, _277, _274, _269, _266, _255, _251, _250, _249, _247, _246, _245, _241, _240, _235, _234, _230, _227, _226, _224, _218, _217, _216, _215, _214, _213, _212, _208, _205, _204, _200, _198, _197, _196, _195, _193, _191, _190, _189, _188, _186, _183, _181, _179, _174, _168, _165, _163, _159, _156, _152, _151, _150, _149, _147, _145, _144, _141, _137, _133, _129, _125, _121, _119, _117, _115, _111, _108, _107, _103, _102, _95, _93, _89, _86, _85, _81, _77, _74, _73, _67, _66, _64, _59, _57, _55, _53, _51, _48, _44, _40, _37, _36, _35, _31, _30, _28, _27, _26, _25, _23, _19, _15, _13, _11, _10, _7, _6, _4, _2;
+static Var _338, _336, _334, _331, _329, _328, _324, _322, _317, _312, _308, _306, _305, _300, _299, _298, _297, _295, _292, _288, _285, _282, _281, _280, _278, _277, _274, _269, _266, _255, _251, _250, _249, _247, _246, _245, _241, _240, _235, _234, _230, _227, _226, _224, _218, _217, _216, _215, _214, _213, _212, _208, _205, _204, _200, _198, _197, _196, _195, _193, _191, _190, _189, _188, _186, _183, _181, _179, _174, _168, _165, _163, _159, _156, _152, _151, _150, _149, _147, _145, _144, _141, _137, _133, _129, _125, _121, _119, _117, _115, _111, _108, _107, _103, _102, _95, _93, _89, _86, _85, _81, _77, _74, _73, _67, _66, _64, _59, _57, _55, _53, _51, _48, _44, _40, _37, _36, _35, _31, _30, _28, _27, _26, _25, _23, _19, _15, _13, _11, _10, _7, _6, _4, _2;
 
 #include "parse.h"
 #include "type.h"
@@ -503,11 +503,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _291 = cons(_277, _290);
   _292 = Symbol_var(5011670);
   _293 = cons(_292, _38);
-  _294 = Symbol_var(437126);
-  _295 = String_new("Func");
-  _296 = String_var(_295);
-  _297 = cons(_296, NULL);
-  _298 = List_var(_297);
+  _294 = String_new("Func");
+  _295 = String_var(_294);
+  _296 = cons(_295, NULL);
+  _297 = Symbol_var(437126);
+  _298 = List_var(_296);
   _299 = Symbol_var(808259842);
   _300 = Symbol_var(209423012198);
   _301 = String_new("using");
@@ -1834,14 +1834,14 @@ Sym_push_new_scope(c -> sym); {
     default: ;  body = Compiler_resolve_expression(c, body, c -> token);  break;
     }
   }
-List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  parameters = cons(_214, List_append(Array_list_free(entries), NULL));  if(type == _29) type = List_type(cons(List_var(cons(_294, cons(List_var(Compiler_lambda_param_types(c, List_cdr(parameters))), NULL))), _5));  if(List_truth(captures)){
+List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  parameters = cons(_214, List_append(Array_list_free(entries), NULL));  if(type == _29) type = List_type(List_truth(supplied) ? _296 : cons(List_var(cons(_297, cons(List_var(Compiler_lambda_param_types(c, List_cdr(parameters))), NULL))), _5));  if(List_truth(captures)){
       List _x2c_return_value_6 = cons(_11, cons(_298, cons(List_var(cons(_299, cons(List_var(parameters), cons(List_var(cons(_300, List_append(captures, NULL))), cons(List_var(body), NULL))))), NULL))); {
         x2c_cleanup_leave(& _x2c_defer_record_9);  x2c_cleanup_leave(& _x2c_defer_record_8);  x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_6;
       }
 
     }
-    if(type == _297 && ! c -> meta_body){
-      Type signature = List_type(cons(List_var(cons(_294, cons(List_var(Compiler_lambda_param_types(c, List_cdr(parameters))), NULL))), _5)); {
+    if(type == _296 && ! c -> meta_body){
+      Type signature = List_type(cons(List_var(cons(_297, cons(List_var(Compiler_lambda_param_types(c, List_cdr(parameters))), NULL))), _5)); {
         List _x2c_return_value_7 = Compiler_lift_func_expression(c, cons(_11, cons(List_var(signature), cons(List_var(cons(_299, cons(List_var(parameters), cons(List_var(body), NULL)))), NULL)))); {
           x2c_cleanup_leave(& _x2c_defer_record_9);  x2c_cleanup_leave(& _x2c_defer_record_8);  x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_7;
         }
@@ -1922,7 +1922,7 @@ List Compiler_parse_lambda_literal(Compiler c){
         }
 
       }
-      else body = Compiler_parse_assignment(c);  List rtype = _5;  List params_node = _lambda_params_node(names, typed_params, used_typed);  List param_types = Compiler_lambda_param_types(c, List_cdr(params_node));  List ftype = cons(List_var(cons(_294, cons(List_var(param_types), NULL))), List_append(rtype, NULL));  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(Map_truth(c -> macro_holes)){
+      else body = Compiler_parse_assignment(c);  List rtype = _5;  List params_node = _lambda_params_node(names, typed_params, used_typed);  List param_types = Compiler_lambda_param_types(c, List_cdr(params_node));  List ftype = cons(List_var(cons(_297, cons(List_var(param_types), NULL))), List_append(rtype, NULL));  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(Map_truth(c -> macro_holes)){
         ftype = _29;
   {
     List _x2c_match_expr = body;
@@ -1935,7 +1935,7 @@ List Compiler_parse_lambda_literal(Compiler c){
   }
     }
     if(List_truth(captures)){
-      List _x2c_return_value_9 = cons(_11, cons(List_var(Map_truth(c -> macro_holes) ? ftype : _297), cons(List_var(cons(_299, cons(List_var(params_node), cons(List_var(cons(_300, List_append(captures, NULL))), cons(List_var(body), NULL))))), NULL))); {
+      List _x2c_return_value_9 = cons(_11, cons(List_var(Map_truth(c -> macro_holes) ? ftype : _296), cons(List_var(cons(_299, cons(List_var(params_node), cons(List_var(cons(_300, List_append(captures, NULL))), cons(List_var(body), NULL))))), NULL))); {
         x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_9;
       }
 
