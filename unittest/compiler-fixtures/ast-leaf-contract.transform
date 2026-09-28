@@ -594,7 +594,7 @@
                         (expr (* const void) 
                          "_x2c_defer_data_0->_x2c_defer_capture_1")))))))))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 68 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 75 "value") ())))))) 
  (block 

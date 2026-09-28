@@ -17,6 +17,7 @@
 #include "collect.x"
 #include "expressions.x"
 #include "parse.x"
+#include "meta.x"
 
 /* A relative path names a file below the working directory, or else one below
    the x2c root, where `Compiler.display_path` spells root sources. */
@@ -1656,6 +1657,25 @@ static void _report_generated_collision(
     <protocol>, message, _adoption_location(row), notes);
 }
 
+/* A generated function around a body its caller lowered. `result` carries
+   the storage class, so static, inline and external helpers share it. */
+macro open Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
+    Param $params...) {
+  $result $name($params...) { $body }
+}
+
+/** Returns the function `result name(params) { body }` bound in this
+    unit. `result` is the storage class and result type, `params` the
+    parameter declarations, and `body` its lowered statements. */
+List Compiler.wrapper_function(
+  Compiler c, Type result, List binding, List params, List body) {
+  Macro wrapper = $compiler_wrapper;
+  return c.bind_syntax(
+    Macro_apply(wrapper,
+      %($result $binding (code-value "lowered" (seq @body) ()) @params)),
+    AST_UNIT, NULL);
+}
+
 static List _resolve_protocol_member(
   Compiler compiler, Type participant, String member_name) {
   List cache_key = %("protocol-member" $participant $member_name);
@@ -1799,15 +1819,11 @@ String Compiler.protocol_update_helper(
       (args $current $call_rhs)));
   List assignment = %(stmnt (expr $participant (op = $current $call)));
   List body = postfix
-            ? %(block $old_declaration $assignment
+            ? %($old_declaration $assignment
                 (return $participant $return_value))
-            : %(block $assignment (return $participant $return_value));
-  List function = %(
-    function (static @participant)
-      (bind $helper_binding ((fnmod (params @{declarations.list_free()}))))
-      $body
-  );
-  c.add_early(function);
+            : %($assignment (return $participant $return_value));
+  c.add_early(c.wrapper_function(
+    %(static @participant), helper_binding, declarations.list_free(), body));
   c.protocol_helpers[key] = name;
   return name;
 }
@@ -1863,17 +1879,12 @@ List Compiler.discard_helper(
     (call (expr $signature (ident $binding))
           (args @{arguments.list_free()})));
   List body = result.equal(%(void))
-    ? %(block (stmnt $call) @{discards.list_free()} (return))
-    : %(block
-        (declare $result (bindings (op = (bind $value_binding ()) $call)))
+    ? %((stmnt $call) @{discards.list_free()} (return))
+    : %((declare $result (bindings (op = (bind $value_binding ()) $call)))
         @{discards.list_free()}
         (return $result (expr $result (ident $value_binding))));
-  List function = %(
-    function (static @result)
-      (bind $helper_binding ((fnmod (params @{declarations.list_free()}))))
-      $body
-  );
-  c.add_early(function);
+  c.add_early(c.wrapper_function(
+    %(static @result), helper_binding, declarations.list_free(), body));
   List entry = %($helper_binding $signature);
   c.protocol_helpers[key] = entry;
   /* Wrapping a call preserves its return ownership. Discarding an argument
@@ -1966,13 +1977,10 @@ static List Compiler._generate_protocol_function(
   if (make_static) function_binding = compiler.sym.introduce(name);
   if (binding_out) binding_out = function_binding;
   List storage = make_static ? %(static inline @target_result) : target_result;
-  List function = %(
-    function $storage
-      (bind $function_binding ((fnmod (params @declarations))))
-      (block (return $target_result $result))
-  );
   parameter_bindings.free();
-  return function;
+  return compiler.wrapper_function(
+    storage, function_binding, declarations,
+    %((return $target_result $result)));
 }
 
 static int _defines_function(Compiler compiler, String name) {

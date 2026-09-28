@@ -113,7 +113,7 @@
     (return (expr (int) (literal (int) "3"))))) 
   (at 21 (return (expr (int) (literal (int) "0"))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 17 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 20 "value") ())))))) 
  (block 

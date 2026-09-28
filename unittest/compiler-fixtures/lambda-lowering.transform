@@ -73,7 +73,7 @@
                        (expr (int) (literal (int) "1"))))))))))))) 
   (at 10 (return (expr (int) (literal (int) "0"))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 12 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 13 "value") ())))))) 
  (block 
@@ -88,7 +88,7 @@
                      (args (expr ("Var") (ident (binding 13 "value")))))) 
               (expr (int) (literal (int) "2")))))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 15 "_x2c_func_adapt_0") 
   ((fnmod 
     (params (param ("Func") (bind (binding 16 "_x2c_func_binding_0") ())) 
@@ -118,7 +118,7 @@
      (args (expr ("FuncAdapter") (ident (binding 15 "_x2c_func_adapt_0"))) 
       (expr ("List") (expr ("List") (cache 24)))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 21 "_x2c_lambda_1") 
   ((fnmod (params (param ("Var") (bind (binding 22 "value") ())))))) 
  (block 
@@ -133,7 +133,7 @@
               (args (expr ("Var") (ident (binding 22 "value")))))) 
        (expr (int) (literal (int) "0")))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 24 "_x2c_func_adapt_1") 
   ((fnmod 
     (params (param ("Func") (bind (binding 25 "_x2c_func_binding_1") ())) 

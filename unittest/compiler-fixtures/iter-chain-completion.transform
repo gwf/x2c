@@ -384,7 +384,7 @@
       (args (expr (void) ())))))) 
   (at 36 (return (expr (int) (literal (int) "0"))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 45 "_x2c_func_adapt_0") 
   ((fnmod 
     (params (param ("Func") (bind (binding 46 "_x2c_func_binding_0") ())) 
@@ -416,7 +416,7 @@
      (args (expr ("FuncAdapter") (ident (binding 45 "_x2c_func_adapt_0"))) 
       (expr ("List") (expr ("List") (cache 12)))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 51 "_x2c_func_adapt_1") 
   ((fnmod 
     (params (param ("Func") (bind (binding 52 "_x2c_func_binding_1") ())) 
@@ -446,7 +446,7 @@
      (args (expr ("FuncAdapter") (ident (binding 51 "_x2c_func_adapt_1"))) 
       (expr ("List") (expr ("List") (cache 13)))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 55 "_x2c_func_adapt_2") 
   ((fnmod 
     (params (param ("Func") (bind (binding 56 "_x2c_func_binding_2") ())) 

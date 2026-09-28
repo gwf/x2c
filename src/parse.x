@@ -2514,9 +2514,10 @@ List Compiler.bind_syntax(
           List bound = _.expand_macro_invocation_node(
             definition, arguments, site, context);
           transaction.commit();
-          /* A Macro value applied directly stands for one statement. */
-          if (pending && statement_position)
-            match (bound) case %(seq ?statement): return statement;
+          /* A Macro value applied directly stands for one statement or
+             unit item. */
+          if (pending && (statement_position || context == AST_UNIT))
+            match (bound) case %(seq ?item): return item;
           return bound;
         }
       }

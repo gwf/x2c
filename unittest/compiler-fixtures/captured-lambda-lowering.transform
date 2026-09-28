@@ -639,7 +639,7 @@
    (declare ("Var") (bindings (bind (binding 67 "_x2c_lambda_capture_0") ()))))) 
  (bindings (bind (binding 68 "_x2c_lambda_context_0") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 8 "_x2c_lambda_0") 
   ((fnmod 
     (params (param ("Func") (bind (binding 69 "_x2c_lambda_closure_0") ())) 
@@ -700,7 +700,7 @@
    (declare ("Var") (bindings (bind (binding 76 "_x2c_lambda_capture_2") ()))))) 
  (bindings (bind (binding 77 "_x2c_lambda_context_2") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 15 "_x2c_lambda_1") 
   ((fnmod 
     (params (param ("Func") (bind (binding 78 "_x2c_lambda_closure_1") ())) 
@@ -791,7 +791,7 @@
    (declare ("Var") (bindings (bind (binding 85 "_x2c_lambda_capture_5") ()))))) 
  (bindings (bind (binding 86 "_x2c_lambda_context_5") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 87 "_x2c_lambda_3") 
   ((fnmod 
     (params (param ("Func") (bind (binding 88 "_x2c_lambda_closure_3") ())) 
@@ -855,7 +855,7 @@
                                 ("_x2c_lambda_capture_5"))) 
                          (expr ("Symbol") "3453797"))))))))))))))))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 20 "_x2c_lambda_2") 
   ((fnmod 
     (params (param ("Func") (bind (binding 92 "_x2c_lambda_closure_2") ())) 
@@ -953,7 +953,7 @@
    (declare (int) (bindings (bind (binding 100 "_x2c_lambda_capture_6") (*)))))) 
  (bindings (bind (binding 101 "_x2c_lambda_context_8") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 27 "_x2c_lambda_4") 
   ((fnmod 
     (params (param ("Func") (bind (binding 102 "_x2c_lambda_closure_4") ())) 
@@ -989,7 +989,7 @@
    (declare ("Var") (bindings (bind (binding 105 "_x2c_lambda_capture_7") ()))))) 
  (bindings (bind (binding 106 "_x2c_lambda_context_10") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 49 "_x2c_lambda_5") 
   ((fnmod 
     (params (param ("Func") (bind (binding 107 "_x2c_lambda_closure_5") ())) 
@@ -1046,7 +1046,7 @@
    (declare ("Var") (bindings (bind (binding 111 "_x2c_lambda_capture_8") ()))))) 
  (bindings (bind (binding 112 "_x2c_lambda_context_12") ())))
 
-(function (static ("Var")) 
+(function (static "Var") 
  (bind (binding 55 "_x2c_lambda_6") 
   ((fnmod 
     (params (param ("Func") (bind (binding 113 "_x2c_lambda_closure_6") ())) 

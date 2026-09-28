@@ -191,7 +191,7 @@
       (args (expr (void) ())))))) 
   (at 27 (return (expr (int) (literal (int) "0"))))))
 
-(function (static ("String")) 
+(function (static "String") 
  (bind (binding 13 "_x2c_callback_adapt_0") 
   ((fnmod (params (param ("Var") (bind (binding 41 "a0") ())))))) 
  (block 
@@ -205,7 +205,7 @@
                     (ident (binding 43 "Var_string"))) 
               (args (expr ("Var") (ident (binding 41 "a0")))))))))))))
 
-(function (static ("String")) 
+(function (static "String") 
  (bind (binding 14 "_x2c_callback_adapt_1") 
   ((fnmod (params (param ("Var") (bind (binding 44 "a0") ())))))) 
  (block 
@@ -218,7 +218,7 @@
                     (ident (binding 43 "Var_string"))) 
               (args (expr ("Var") (ident (binding 44 "a0")))))))))))))
 
-(function (static (int)) 
+(function (static int) 
  (bind (binding 15 "_x2c_callback_adapt_2") 
   ((fnmod 
     (params (param ("Var") (bind (binding 45 "a0") ())) 
@@ -234,7 +234,7 @@
        (expr ("Symbol") 
         (call "Var_symbol" (args (expr ("Var") (ident (binding 46 "a1")))))))))))))
 
-(function (static (int)) 
+(function (static int) 
  (bind (binding 16 "_x2c_callback_adapt_3") 
   ((fnmod 
     (params (param ("Var") (bind (binding 48 "a0") ())) 
@@ -253,7 +253,7 @@
         (call (expr ((func (("Var"))) "File") (ident (binding 51 "Var_file"))) 
          (args (expr ("Var") (ident (binding 49 "a1")))))))))))))
 
-(function (static ("Iter")) 
+(function (static "Iter") 
  (bind (binding 17 "_x2c_callback_adapt_4") 
   ((fnmod 
     (params (param ("Var") (bind (binding 52 "a0") ())) 

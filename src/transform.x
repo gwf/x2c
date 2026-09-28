@@ -156,11 +156,9 @@ static List _callback_function(
           (args @{arguments.list_free()})));
   List statement = result === %(void) ? call
     : %(return ${compiler.convert_expression(call, result)});
-  return %(
-    function (static $result)
-      (bind $binding ((fnmod $declaration_params)))
-      (block (stmnt $statement))
-  );
+  return compiler.wrapper_function(
+    %(static @result), binding, declaration_params.cdr(),
+    %((stmnt $statement)));
 }
 
 /** Lowers a resolved `tadapt` expression to a typed callback helper.
@@ -437,9 +435,9 @@ static void _publish_func_adapter(
   List body, List setup) {
   List parameters = _named_decl_params(
     %(("Func") (* const "FuncArg")), %($fn_binding $argv_binding));
-  compiler.add_early(
-    %(function (static ("Var")) (bind $binding ((fnmod $parameters)))
-        ${_helper_body(compiler, body, setup)}));
+  compiler.add_early(compiler.wrapper_function(
+    %(static "Var"), binding, parameters.cdr(),
+    _helper_body(compiler, body, setup).cdr()));
 }
 
 static List _build_func_adapter(
@@ -1652,12 +1650,9 @@ List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
       String lname = compiler.fresh_name("lambda");
       List lambda_binding = compiler.sym.introduce(lname);
       List decl_params = _params_to_decl_params(entries);
-      compiler.add_early(
-        %(
-        function (static ("Var"))
-          (bind $lambda_binding ((fnmod $decl_params)))
-          ${_helper_body(compiler, body, NULL)}
-      ));
+      compiler.add_early(compiler.wrapper_function(
+        %(static "Var"), lambda_binding, decl_params.cdr(),
+        _helper_body(compiler, body, NULL).cdr()));
       return %(expr $type (ident $lambda_binding));
     }
   }
