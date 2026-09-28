@@ -88,6 +88,8 @@ The orchestrator owns the entire campaign, integration, source review,
 publication and cost reporting. Use a single agent unless two changes touch
 disjoint files. Delegate bounded independent work in isolated worktrees under
 `orchestrate-x2c-work`; workers never gate, push, merge dev, or run timing.
+Gary requires Sol, not Astra, for campaign subagents. Explicitly select
+`gpt-6-sol` when spawning workers rather than inheriting the parent model.
 Give workers explicit ownership, acceptance examples and focused checks;
 verify their findings and review their authored changes before integration.
 
