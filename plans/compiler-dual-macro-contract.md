@@ -580,6 +580,9 @@ row: do not count successive versions of try twice. The current entry is:
 | Historical unconditional-support control | phase5 / original, rerun in phase7 window | +1.625% / not an additional migration | -0.117% / not an additional migration | 2 each mode | 2119 / 2119 default; 2124 / 2124 live | Historical phase6 profile |
 | Try/defer/catch, production on dev (2026-09-27) | try migration / dev af3354b8, same window | +0.15% / first production row | +0.29% / first production row | 2 each mode | 2540 / 347 default; 2517 / 347 live | Not measured |
 | Same production candidate, exception workload | try migration / dev af3354b8, same window | +1.43% / separate workload | +1.04% / separate workload | 4 each mode | 323 / 57 each mode | Not measured |
+| Try client, wrappers, scope cells and Func calls (2026-09-27) | dual-macro-lowerings / dev af3354b8 (before try), same window | +0.26% / cumulative | +0.61% / cumulative | Not counted | Not counted | Not measured |
+| Same batch, exception workload | dual-macro-lowerings / dev af3354b8, same window | +0.76% / separate workload | +1.90% / separate workload | Not counted | Not counted | Not measured |
+| Lambda shape | Not migrated; see below | Not measured | Not measured | Not measured | Not measured | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -605,6 +608,31 @@ template. The try template now calls its frame declaration and cleanup
 placement producers this way, with unchanged 62-case C/H. Recognition
 resolves a free reference against the base-scope binding the compiler
 sends with each `meta` call, so a shadowing local fails the case.
+
+The 2026-09-27 batch rows are medians of five alternating pairs against
+the compiler from before the try migration, so they are cumulative for
+try, wrappers, scope cells and Func calls; generated C/H is byte-identical
+to the previous dev on every fixture. Wrapper functions share one
+`macro open Unit` template whose Type argument carries the storage class.
+Scope cells use four small templates: the initialized, braced and empty
+cells call different runtime functions, and a sequence hole is not legal
+inside braces. The Func call is built from five templates and recognized
+in `Compiler.func_call_parts` with `case` on the same values, the first
+recognition consumer in the compiler; its outer statement expression and
+storage array stay hand-built, since x2c source has no statement
+expressions and an initializer takes no sequence hole. Recognition needed
+two fixes in lib/meta.x: a Name hole read as an expression now derives
+`(expr ? (ident ?x))`, and captures publish in the matched pattern's slot
+order.
+
+The lambda shape was not migrated. The captured form carries capture rows
+the binder derives, which no hole kind produces; the plain form needs a
+parser change that must reach bootstrap before src/ can use it; most
+recognizer sites match the bare lambda payload rather than an
+expression; construction sites choose the result type per caller; and
+`Macro_case_capture` derives its pattern on every call, measured at about
+350 times a literal match, which is too costly for sites that visit every
+node until the derived pattern is cached per Macro value.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
