@@ -1162,7 +1162,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros.x:4724`
+Source: `src/macros.x:4731`
 
 ## Design notes
 

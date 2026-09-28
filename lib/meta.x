@@ -403,9 +403,10 @@ static int _macro_identity_equal(
   return 1;
 }
 
-/* Where each of the user's binders reads its capture: the slot of its
-   internal binder in the pattern that captured, and its own slot in the
-   `case`, which need not share the parameters' order. */
+/** Records where each of a `case`'s binders reads its capture: the slot
+    of its internal binder in the pattern that captured, and its own slot
+    in the `case`, which need not share the parameters' order.
+*/
 typedef struct MacroPublishing {
   int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX];
   int count, binders, complete;
@@ -448,8 +449,10 @@ static int _macro_publish(
   return 1;
 }
 
-/* The derived pattern, its prepared plan and the slots of its fixed
-   locals for one macro value and `case` binder list. */
+/** Holds what recognizing one macro value under one `case` binder list
+    needs: the derived pattern, its prepared plan, the slots of its fixed
+    locals, and where each binder reads its capture.
+*/
 typedef struct MacroCaseShape {
   List pattern;
   MatchPlan plan;
