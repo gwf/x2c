@@ -2822,6 +2822,64 @@ assignment in `region-safe`. After this edit, `make build` and the
 passed. Their checked diagnostics, and the latter fixture's generated C and
 transform sidecar, matched byte for byte.
 
+### E32. Parsed member access: marker and Name-shape exception
+
+`_parse_postfix_dot` and `_parse_postfix_arrow` produce full expressions with
+`(op . receiver field)` and `(op -> receiver field)`. The field is a one-item
+list containing its spelling. `_resolve_content` recognizes both with one raw
+content case, then retains `resolve_postfix_member` as the owner of field and
+method selection, native access, deferred typing, and diagnostics.
+
+The proposed shared forms and complete client were:
+
+```x2c
+macro Expression $dotted(Expr $receiver, Name $member) =>
+  $receiver.$member;
+macro Expression $arrowed(Expr $receiver, Name $member) =>
+  $receiver->$member;
+
+Macro dotted = $dotted, arrowed = $arrowed;
+List receiver = NULL, field = NULL;
+Symbol operator = 0;
+if (!List.match(content, %(at m-origin ?))) match (input) {
+  case dotted(?target, ?name): {
+    receiver = target;
+    field = %($name);
+    operator = <.>;
+  }
+  case arrowed(?target, ?name): {
+    receiver = target;
+    field = %($name);
+    operator = <"->">;
+  }
+}
+if (operator) {
+  receiver = c.resolve_expression(receiver, origin);
+  Type receiver_type = receiver.cadr();
+  List resolution = c.resolve_postfix_member(
+    receiver_type, field, operator, 0);
+  match (resolution)
+    case %(field ?access ?field_type):
+      return %(expr $field_type (op $access $receiver $field));
+  Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
+  return %(expr $type (op $operator $receiver $field));
+}
+```
+
+An inert direct dot/arrow probe matched each full input, preserved its
+receiver, and captured the exact member spelling. It also matched both nodes
+inside `(expr () (at m-origin ...))`: the probe printed `11111 11111`, with
+the last bit denoting that marker overcapture. The Name capture is the
+spelling, while the current resolver consumes the one-item field list, so
+the client must rebuild it. Full-input matching would run before the existing
+`match (content)` origin case, which returns the original expression when
+source maps are off or macro holes are active and otherwise reanchors it.
+The guard, field reconstruction, and two-arm dispatch enlarge the current
+compact case. No source migration or output rebaseline is accepted for this
+proposed pair. `macro-postfix-members` and `method-pointer-receiver` remain
+the focused behavior fixtures; their artifacts were not rerun for this
+inert-only exception.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
