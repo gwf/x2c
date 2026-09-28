@@ -1315,7 +1315,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _653 = cons(_652, NULL);
   _654 = cons(_620, _653);
   _655 = List_var(_654);
-  _656 = String_new("/Users/gary/.codex/worktrees/2fee/x2c/src/transform.x");
+  _656 = String_new("/Users/gary/.codex/worktrees/helper-survey/x2c/src/transform.x");
   _657 = String_var(_656);
   _658 = cons(_657, NULL);
   _659 = cons(_621, _658);
@@ -1643,7 +1643,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _981 = cons(_980, NULL);
   _982 = cons(_620, _981);
   _983 = List_var(_982);
-  _984 = String_new("/Users/gary/.codex/worktrees/2fee/x2c/src/grammar.xmacro");
+  _984 = String_new("/Users/gary/.codex/worktrees/helper-survey/x2c/src/grammar.xmacro");
   _985 = String_var(_984);
   _986 = cons(_985, NULL);
   _987 = cons(_621, _986);

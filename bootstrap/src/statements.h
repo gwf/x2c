@@ -23,6 +23,8 @@ List Compiler_parse_statement(Compiler c);
 
 List Compiler_parse_block_items(Compiler c, int anchor_items);
 
+List Compiler_parse_callable_body(Compiler c);
+
 List Compiler_parse_compound_statement(Compiler c);
 
 

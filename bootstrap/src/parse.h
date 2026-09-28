@@ -80,5 +80,7 @@ List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syn
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
 
+List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
+
 
 #endif /* __GUARD_0x46021D32__ */
