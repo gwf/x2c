@@ -71,6 +71,14 @@ Var String_var(String);
 
 String int_str(int);
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 int Var_int(Var);
 
 Var Array_getindex(Array, int);

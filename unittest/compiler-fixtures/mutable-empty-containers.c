@@ -32,6 +32,10 @@ static void box_null_map(void){
 
 void Scope_retain(void);
 
+Array Array_new(void);
+
+Map Map_new(void);
+
 Var Array_var(Array);
 
 Var Map_var(Map);

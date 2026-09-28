@@ -15,6 +15,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = String_new("two");
 }
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Var int_var(int);
 
 Var String_var(String);

@@ -57,8 +57,16 @@ static List values;
 _x2c_initializer_choice_D1E0FCF3_2((values = cons(_2, cons(String_var(root), cons(String_var(path), NULL)))))
 static Array positions;
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 _x2c_initializer_choice_D1E0FCF3_3((positions = Array_update_n(Array_new(), 2, String_var(root), String_var(path))))
 static Map lookup;
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
 
 Var Symbol_var(Symbol);
 
