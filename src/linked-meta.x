@@ -81,6 +81,16 @@ List x2c_type_members(List type) {
   return rows.reverse();
 }
 
+/* --- src/grammar.xmacro -------------------------------------------------- */
+
+/** Returns the error handler the parser introduced for the catch arms of
+    the parsed try `node`, or NULL for a try without catches. The arms read
+    their captures through it, and no source form writes it. */
+static List catch_handle(List node) {
+  match (node) case %(try ? (catchcases ? ?handle) ?): return handle;
+  return NULL;
+}
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -619,6 +629,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_dedent_width", _dedent_width);
   $linked.row(rows, "_dedent_blank", _dedent_blank);

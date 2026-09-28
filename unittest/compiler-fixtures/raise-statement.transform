@@ -387,8 +387,9 @@
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 34 "_x2c_exception_frame_0"))))))))) 
-        (switch (expr (int) (ident (binding 46 "_x2c_macro_selected_0"))) 
-         (block (case (expr (int) (literal (int) "0"))) (block (block)) (break)))) 
+        (if (expr (int) 
+             (op == (expr (int) (ident (binding 46 "_x2c_macro_selected_0"))) 
+              (expr (int) (literal (int) "0")))) (block (block)))) 
        (block 
         (stmnt 
          (expr (void) 

@@ -98,15 +98,12 @@ static void _relabel_nested_pattern(void){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        switch(_x2c_macro_selected_0){
-          case 0 :{
-            {
-              static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
-              x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
-            }
-
+        if(_x2c_macro_selected_0 == 0){
+          {
+            static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
+            x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
           }
-          break;
+
         }
 
       }

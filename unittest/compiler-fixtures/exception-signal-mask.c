@@ -76,24 +76,21 @@ int main(void){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        switch(_x2c_macro_selected_0){
-          case 0 :{
-            {
-              if(sigprocmask(SIG_SETMASK, NULL, & current)){
-                int _x2c_return_value_1 = 2;
-                {
-                  x2c_error_catch_close(_x2c_error_handler_0);
-                  _x2c_error_handler_0 = NULL;
-                  x2c_exception_leave(& _x2c_exception_frame_0);
-                  return _x2c_return_value_1;
-                }
-
+        if(_x2c_macro_selected_0 == 0){
+          {
+            if(sigprocmask(SIG_SETMASK, NULL, & current)){
+              int _x2c_return_value_1 = 2;
+              {
+                x2c_error_catch_close(_x2c_error_handler_0);
+                _x2c_error_handler_0 = NULL;
+                x2c_exception_leave(& _x2c_exception_frame_0);
+                return _x2c_return_value_1;
               }
-              retained = sigismember(& current, SIGUSR1) == 1;
-            }
 
+            }
+            retained = sigismember(& current, SIGUSR1) == 1;
           }
-          break;
+
         }
 
       }

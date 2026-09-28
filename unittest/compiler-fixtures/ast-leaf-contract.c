@@ -181,14 +181,11 @@ Var volatile caught =((void) 0, Void); {
   }
   else{
     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-      int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  switch(_x2c_macro_selected_0){
-        case 0 :{
-          Var volatile value;  value = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-            caught = value;
-          }
-
+      int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
+        Var volatile value;  value = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
+          caught = value;
         }
-        break;
+
       }
 
     }

@@ -159,14 +159,16 @@
                 (args (expr (* "ExceptionFrame") 
                        (op & (expr ("ExceptionFrame") 
                               (ident (binding 6 "_x2c_exception_frame_0"))))))))) 
-             (switch (expr (int) (ident (binding 20 "_x2c_macro_selected_0"))) 
-              (block (case (expr (int) (literal (int) "0"))) 
+             (if (expr (int) 
+                  (op == 
+                   (expr (int) (ident (binding 20 "_x2c_macro_selected_0"))) 
+                   (expr (int) (literal (int) "0")))) 
+              (block 
                (block 
-                (block 
-                 (at 6 (stmnt 
-                        (expr (int) 
-                         (op = (expr (int) (ident (binding 5 "caught"))) 
-                          (expr (int) (literal (int) "1")))))))) (break)))) 
+                (at 6 (stmnt 
+                       (expr (int) 
+                        (op = (expr (int) (ident (binding 5 "caught"))) 
+                         (expr (int) (literal (int) "1")))))))))) 
             (block 
              (stmnt 
               (expr (void) 
@@ -426,15 +428,16 @@
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 31 "_x2c_exception_frame_1"))))))))) 
-        (switch (expr (int) (ident (binding 42 "_x2c_macro_selected_1"))) 
-         (block (case (expr (int) (literal (int) "0"))) 
+        (if (expr (int) 
+             (op == (expr (int) (ident (binding 42 "_x2c_macro_selected_1"))) 
+              (expr (int) (literal (int) "0")))) 
+         (block 
           (block 
-           (block 
-            (at 24 
-             (stmnt 
-              (expr (int) 
-               (op = (expr (int) (ident (binding 30 "caught"))) 
-                (expr (int) (literal (int) "1")))))))) (break)))) 
+           (at 24 
+            (stmnt 
+             (expr (int) 
+              (op = (expr (int) (ident (binding 30 "caught"))) 
+               (expr (int) (literal (int) "1")))))))))) 
        (block 
         (stmnt 
          (expr (void) 

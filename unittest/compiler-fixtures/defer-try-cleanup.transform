@@ -151,9 +151,10 @@
                 (args (expr (* "ExceptionFrame") 
                        (op & (expr ("ExceptionFrame") 
                               (ident (binding 8 "_x2c_exception_frame_0"))))))))) 
-             (switch (expr (int) (ident (binding 20 "_x2c_macro_selected_0"))) 
-              (block (case (expr (int) (literal (int) "0"))) 
-               (block (block)) (break)))) 
+             (if (expr (int) 
+                  (op == 
+                   (expr (int) (ident (binding 20 "_x2c_macro_selected_0"))) 
+                   (expr (int) (literal (int) "0")))) (block (block)))) 
             (block 
              (stmnt 
               (expr (void) 
@@ -449,37 +450,38 @@
                (args (expr (* "ExceptionFrame") 
                       (op & (expr ("ExceptionFrame") 
                              (ident (binding 33 "_x2c_exception_frame_2"))))))))) 
-            (switch (expr (int) (ident (binding 40 "_x2c_macro_selected_1"))) 
-             (block (case (expr (int) (literal (int) "0"))) 
+            (if (expr (int) 
+                 (op == 
+                  (expr (int) (ident (binding 40 "_x2c_macro_selected_1"))) 
+                  (expr (int) (literal (int) "0")))) 
+             (block 
+              (declare ("Var") (bindings (bind (binding 41 "value") (volatile)))) 
+              (stmnt 
+               (expr ("Var") 
+                (op = (expr ("Var") (ident (binding 41 "value"))) 
+                 (expr ("Var") 
+                  (call "x2c_error_catch_capture" 
+                   (args (expr ("ErrorHandler") 
+                          (ident (binding 37 "_x2c_error_handler_1"))) 
+                    (expr (int) (literal (int) "0")))))))) 
               (block 
-               (declare ("Var") 
-                (bindings (bind (binding 41 "value") (volatile)))) 
-               (stmnt 
-                (expr ("Var") 
-                 (op = (expr ("Var") (ident (binding 41 "value"))) 
-                  (expr ("Var") 
-                   (call "x2c_error_catch_capture" 
-                    (args (expr ("ErrorHandler") 
-                           (ident (binding 37 "_x2c_error_handler_1"))) 
-                     (expr (int) (literal (int) "0")))))))) 
-               (block 
-                (at 11 
-                 (stmnt 
-                  (expr (int) 
-                   (op = (expr (int) (ident (binding 26 "caught"))) 
-                    (expr (int) 
-                     (call (expr ((func (("Var"))) (int)) 
-                            (ident (binding 42 "Var_int"))) 
-                      (args (expr ("Var") (ident (binding 41 "value")))))))))) 
-                (at 12 
-                 (stmnt 
-                  (expr (int) 
-                   (op = (expr (int) (ident (binding 27 "inner_handled"))) 
-                    (expr (int) (literal (int) "1")))))) 
-                (at 13 
-                 (raise 
-                  (expr ("Symbol") (literal ("Symbol") "bad-state" bad-state)) 
-                  (args))))) (break)))) 
+               (at 11 
+                (stmnt 
+                 (expr (int) 
+                  (op = (expr (int) (ident (binding 26 "caught"))) 
+                   (expr (int) 
+                    (call (expr ((func (("Var"))) (int)) 
+                           (ident (binding 42 "Var_int"))) 
+                     (args (expr ("Var") (ident (binding 41 "value")))))))))) 
+               (at 12 
+                (stmnt 
+                 (expr (int) 
+                  (op = (expr (int) (ident (binding 27 "inner_handled"))) 
+                   (expr (int) (literal (int) "1")))))) 
+               (at 13 
+                (raise 
+                 (expr ("Symbol") (literal ("Symbol") "bad-state" bad-state)) 
+                 (args))))))) 
            (block 
             (stmnt 
              (expr (void) 
@@ -553,8 +555,9 @@
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 28 "_x2c_exception_frame_1"))))))))) 
-        (switch (expr (int) (ident (binding 43 "_x2c_macro_selected_2"))) 
-         (block (case (expr (int) (literal (int) "0"))) (block (block)) (break)))) 
+        (if (expr (int) 
+             (op == (expr (int) (ident (binding 43 "_x2c_macro_selected_2"))) 
+              (expr (int) (literal (int) "0")))) (block (block)))) 
        (block 
         (stmnt 
          (expr (void) 

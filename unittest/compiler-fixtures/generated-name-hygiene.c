@@ -167,14 +167,11 @@ int main(void){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        switch(_x2c_macro_selected_0){
-          case 0 :{
-            {
-
-            }
+        if(_x2c_macro_selected_0 == 0){
+          {
 
           }
-          break;
+
         }
 
       }

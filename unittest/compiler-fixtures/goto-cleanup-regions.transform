@@ -357,13 +357,14 @@
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 20 "_x2c_exception_frame_1"))))))))) 
-        (switch (expr (int) (ident (binding 30 "_x2c_macro_selected_0"))) 
-         (block (case (expr (int) (literal (int) "0"))) 
-          (block 
-           (stmnt 
-            (expr (int) 
-             (op = (expr (int) (ident (binding 19 "caught"))) 
-              (expr (int) (literal (int) "1")))))) (break)))) 
+        (if (expr (int) 
+             (op == (expr (int) (ident (binding 30 "_x2c_macro_selected_0"))) 
+              (expr (int) (literal (int) "0")))) 
+         (block 
+          (stmnt 
+           (expr (int) 
+            (op = (expr (int) (ident (binding 19 "caught"))) 
+             (expr (int) (literal (int) "1")))))))) 
        (block 
         (stmnt 
          (expr (void) 

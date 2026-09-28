@@ -463,25 +463,25 @@
            (args (expr (* "ExceptionFrame") 
                   (op & (expr ("ExceptionFrame") 
                          (ident (binding 56 "_x2c_exception_frame_0"))))))))) 
-        (switch (expr (int) (ident (binding 69 "_x2c_macro_selected_0"))) 
-         (block (case (expr (int) (literal (int) "0"))) 
+        (if (expr (int) 
+             (op == (expr (int) (ident (binding 69 "_x2c_macro_selected_0"))) 
+              (expr (int) (literal (int) "0")))) 
+         (block 
+          (declare ("Var") (bindings (bind (binding 73 "value") (volatile)))) 
+          (stmnt 
+           (expr ("Var") 
+            (op = (expr ("Var") (ident (binding 73 "value"))) 
+             (expr ("Var") 
+              (call "x2c_error_catch_capture" 
+               (args (expr ("ErrorHandler") 
+                      (ident (binding 63 "_x2c_error_handler_0"))) 
+                (expr (int) (literal (int) "0")))))))) 
           (block 
-           (declare ("Var") (bindings (bind (binding 73 "value") (volatile)))) 
-           (stmnt 
-            (expr ("Var") 
-             (op = (expr ("Var") (ident (binding 73 "value"))) 
-              (expr ("Var") 
-               (call "x2c_error_catch_capture" 
-                (args (expr ("ErrorHandler") 
-                       (ident (binding 63 "_x2c_error_handler_0"))) 
-                 (expr (int) (literal (int) "0")))))))) 
-           (block 
-            (at 24 
-             (stmnt 
-              (expr ("Var") 
-               (op = (expr ("Var") (ident (binding 55 "caught"))) 
-                (expr ("Var") (ident (binding 73 "value"))))))))) 
-          (break)))) 
+           (at 24 
+            (stmnt 
+             (expr ("Var") 
+              (op = (expr ("Var") (ident (binding 55 "caught"))) 
+               (expr ("Var") (ident (binding 73 "value"))))))))))) 
        (block 
         (if (expr (int) 
              (call "x2c_exception_claim" 

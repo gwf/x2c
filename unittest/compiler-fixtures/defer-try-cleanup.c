@@ -96,14 +96,11 @@ static int preserve_parameter(int volatile value){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        switch(_x2c_macro_selected_0){
-          case 0 :{
-            {
-
-            }
+        if(_x2c_macro_selected_0 == 0){
+          {
 
           }
-          break;
+
         }
 
       }
@@ -179,23 +176,20 @@ int main(void){
             int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
             x2c_error_catch_detach(_x2c_error_handler_1);
             x2c_exception_mark_handled(& _x2c_exception_frame_2);
-            switch(_x2c_macro_selected_1){
-              case 0 :{
-                Var volatile value;
-                value = x2c_error_catch_capture(_x2c_error_handler_1, 0);
+            if(_x2c_macro_selected_1 == 0){
+              Var volatile value;
+              value = x2c_error_catch_capture(_x2c_error_handler_1, 0);
+              {
+                caught = Var_int(value);
+                inner_handled = 1;
                 {
-                  caught = Var_int(value);
-                  inner_handled = 1;
-                  {
-                    static const X2CErrorSite _x2c_error_site_2 = {.file = "unittest/compiler-fixtures/defer-try-cleanup.x",.function = "main",.line = 35};
-                    x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 0);
-                    __builtin_unreachable();
-                  }
-
+                  static const X2CErrorSite _x2c_error_site_2 = {.file = "unittest/compiler-fixtures/defer-try-cleanup.x",.function = "main",.line = 35};
+                  x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 0);
+                  __builtin_unreachable();
                 }
 
               }
-              break;
+
             }
 
           }
@@ -219,14 +213,11 @@ int main(void){
         int _x2c_macro_selected_2 = x2c_error_catch_selected(_x2c_error_handler_2);
         x2c_error_catch_detach(_x2c_error_handler_2);
         x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        switch(_x2c_macro_selected_2){
-          case 0 :{
-            {
-
-            }
+        if(_x2c_macro_selected_2 == 0){
+          {
 
           }
-          break;
+
         }
 
       }
