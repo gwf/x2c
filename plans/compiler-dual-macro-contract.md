@@ -2040,6 +2040,40 @@ hole has not been shown to preserve. The `src/generate.x` trial was restored.
 The existing native constructor remains the owner of preprocessor placement,
 guard identity, phase order, and shutdown. No generated C/H comparison of the
 trial was possible because the source could not compile.
+### E17. Cache-slot assignment exception
+
+`literal-cache-init` exercises the source cache's String, List, Array,
+Map and boxed-Var slots. `_generate_cache_initializer` still selects each
+slot's type from `Compiler.id_keys`; `_generate_cache_val` still resolves
+references in the graph, and `Compiler.convert_expression` still prepares
+one stored value. The assignment's C shape is this template:
+
+```x2c
+macro open Statement $cache_assignment(Expr $slot, Expr $value) {
+  $slot = $value;
+}
+
+static List _generate_cache_assignment(
+  int id, List value, List type, Compiler compiler, String prefix) {
+  String ident = _generate_cache_ident(id, prefix);
+  List binding = compiler.sym.reference(%($ident), NULL);
+  List rhs = _generate_cache_val(value, compiler, prefix);
+  rhs = compiler.convert_expression(rhs, type);
+  Macro assignment = $cache_assignment;
+  return compiler.bind_syntax(
+    assignment(%(expr $type (ident $binding)), rhs), AST_BLOCK, NULL);
+}
+```
+
+The caller would continue to append each statement to its existing header
+or source initializer, preserving cache identity, graph dependency order
+and early/late phase decisions. The attempted migration built and passed
+`literal-cache-init`, `promoted-string-cache`, and `cache-reachability`; their
+checked C, H, and transform sidecars did not change. It added seven lines
+to `src/cache.x` to replace one compact AST assignment statement and
+removed no shared machinery. The extra template and binding step do not
+earn their cost for this single statement, so the source edit was restored.
+The declarations and initializer functions remain separate potential shapes.
 
 ### F. Static-local initialization exception
 
