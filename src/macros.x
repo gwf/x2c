@@ -3748,6 +3748,7 @@ List Compiler.parse_macro_definition(Compiler c) {
 /** Returns the visible global macro `name` as a `Macro` value. */
 static List _macro_value(Compiler c, Atom name) {
   Var stored;
+  if (c.macro_holes && _hole_record(c, name)) return NULL;
   if (!_try_definition(c, name, 1, stored)) return NULL;
   List cached = c.cache_literal_list(stored);
   return %(expr ("Macro") ${cached.caddr()});
