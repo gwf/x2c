@@ -18,6 +18,11 @@ macro Statement $caught(Statement $body, Statement $finalizer,
   try $body catch $arms... finally $finalizer
 }
 
+/* A cleanup statement owned by the rest of its enclosing block. */
+macro Statement $deferred(Statement $body) {
+  defer $body
+}
+
 /* A noncapturing lambda expression: its parameters and body. */
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
