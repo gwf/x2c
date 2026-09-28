@@ -2219,7 +2219,9 @@ static Var _finish_type_spec(Compiler compiler, Var value) {
 
 static List _finish_type(Compiler compiler, List type) {
   Var whole = _finish_type_spec(compiler, type);
-  if (whole != type) {
+  // Binding an already constructed aggregate can preserve its whole form.
+  if (whole != type || type.car() == <struct> ||
+      type.car() == <union> || type.car() == <enum>) {
     List constructed = whole;
     Type type = constructed.car() == <seq>
               ? constructed.cdr() : constructed;

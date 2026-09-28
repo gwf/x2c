@@ -4,7 +4,7 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> repair the generated aggregate binding boundary before adopting defer.
+> publish the generated aggregate binding repair, then resume defer.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -76,22 +76,32 @@ Defer is an unlanded draft, not a successful migration:
   The draft's rebaselined sidecars expose this defect; do not accept them as
   correct expectations or blindly publish the commit.
 
-The ordinary binder rejects the generated struct tag as a reserved spelling.
-Supplying the existing binding identity allows declaration publication, but
-field registration uses `(struct BINDING)` while the semantic typedef/member
-lookup reaches `(struct SPELLING)`. The parent verified the empty expression
-in the committed transform artifact and inspected the aggregate publication
-and name owners. The precise repair is not decided. A shallow-mode experiment
-was discarded; no workaround or parallel registry remains.
+The string tag was rejected as reserved; using its existing binding identity
+is the correct constructed-syntax route. The independent investigation then
+reproduced the empty member type at file scope, ruling out local scope as
+its cause. `_finish_type` used structural inequality to recognize that
+`_finish_type_spec` had handled a whole aggregate. Already identity-bound
+members can leave that syntax structurally unchanged. The fallback then
+processed its parts and converted the tag binding to a spelling, separating
+the typedef from the field metadata.
 
-Next: reproduce this identity/tag/member mismatch in a focused aggregate
-binding case, fix its canonical owner as a separate capability batch, and
-land it before resuming defer adoption. Review `_finish_aggregate_type` and
-`_publish_aggregate_type` in parse.x, `Compiler.aggregate_name` and semantic
-typedef resolution in compiler.x, and existing Sym field lookup. Do not
-weaken the reserved-name rule or add a second metadata registry. Rebase the
-saved defer draft afterward, restore correct field types, review intentional
-C changes, then use its one publication gate and one five-pair cost run.
+The narrow fix is private capability commit `c7622b77`, integrated as
+`a2ae92bb` for publication: whole struct/union/enum roots stay on the
+whole-type path even when unchanged. Only parse.x and the focused
+`generated-aggregate-binding` fixture change. Build and that fixture plus
+`local-typedef-constructed` and `macro-type-fields` pass. The parent repeated
+the before/after dump with saved c99dd68d and the repaired compiler: the tag
+identity is retained and member access changes from `(expr ())` to
+`(expr (int))`. No registry, shallow-mode or reserved-name workaround was
+added. Capability publication is the current active step; no timing is due.
+
+Next after the capability lands: integrate it into the saved defer draft,
+restore correct field-type expectations, review intentional C changes,
+then use the defer batch's one publication gate and one five-pair cost run.
+The grammar-survey worktree currently holds branch
+`codex/generated-aggregate-binding` at `c7622b77`; the prior defer branch and
+`52fcc586` remain intact. No worker is still running. Do not mistake focused
+capability success for completed defer adoption.
 
 The primary checkout `/Users/gary/.codex/worktrees/2fee/x2c` retains the
 standalone grammar addition at `aa93eb1a` plus plan checkpoints. This

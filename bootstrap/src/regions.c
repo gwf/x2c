@@ -893,7 +893,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _688 = cons(_687, NULL);
   _689 = cons(_657, _688);
   _690 = List_var(_689);
-  _691 = String_new("/Users/gary/.codex/worktrees/2fee/x2c/src/grammar.xmacro");
+  _691 = String_new("/Users/gary/.codex/worktrees/helper-survey/x2c/src/grammar.xmacro");
   _692 = String_var(_691);
   _693 = cons(_692, NULL);
   _694 = cons(_658, _693);
