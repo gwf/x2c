@@ -1,3 +1,125 @@
+> Status: active -- dual-macro compiler migration, updated 2026-09-28.
+> Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
+> support landed at b59b8ade; lambda consumers are a private, incomplete
+> checkpoint at 1b908322. Next: architectural survey and proposed ownership
+> boundaries before further site conversions. The current campaign handoff
+> below supersedes historical sequencing and authorization in this record.
+
+# Current campaign handoff
+
+Gary authorizes the compiler migration through delivery to dev. The goal is
+that x2c is its own meta-language: a reader sees the source construct being
+recognized and the C it becomes, without knowing the intermediate tree.
+Passing tests supports this reading; it does not replace it.
+
+## Shared direction and immediate next work
+
+The campaign is broader than replacing individual case arms. Shared grammar
+macros own the relationship between language forms and tree structure, for
+construction and recognition. A macro used only for recognition is useful;
+it need not have an expansion caller. Survey literal AST matches across the
+compiler as candidates, while distinguishing syntax from semantic data,
+registries and diagnostics. Do not invent source keywords for bookkeeping.
+
+Before further mechanical migrations, produce a current architectural survey
+and proposal in this plan. Trace representative transformations across their
+owners and show readable before/after clients. Identify shared prerequisites,
+duplicated structural knowledge, responsibilities to move or consolidate,
+and mechanisms that can disappear. Classify sites as migrated, directly
+migratable, needing a capability, or excluded for a concrete reason. Group
+them by transformation and owner, not just keyword or literal occurrence.
+The historical 215-head census is a miss-detection aid, not a current site
+count, percentage of migratable code, or estimate of removable lines.
+
+Proposed boundaries to investigate, not yet decided file moves:
+
+- Shared grammar vocabulary in `src/grammar.xmacro`.
+- Cohesive transformations with input recognition, output templates and
+  supporting meta functions readable together.
+- Existing shared services for binding, types, traversal, lifetimes,
+  diagnostics and emission. Preserve semantic ownership while removing
+  repeated knowledge of structural representations.
+
+The proposal should make the small delivery batches serve an explicit
+architecture. File merging is not an objective by itself. Routine decisions
+belong to the orchestrator; bring Gary consequential unresolved semantics,
+compatibility or architectural tradeoffs with concrete examples and evidence.
+This discussion authorizes the survey/proposal, not speculative file moves.
+
+## Verified checkpoint and remaining sequence
+
+- Last verified publication: `b59b8ade` on dev, capability gate green.
+  Capture-clause holes and safer expansion-depth diagnostics are landed.
+- Private checkpoint: `1b908322`, lambda source-form consumers. Build and
+  15 focused fixtures pass; no lowering gate or timing has run. Construction
+  is unfinished. Applying a lambda template from its own binding producer
+  re-enters that binder. Assess this boundary in the architectural proposal;
+  do not count consumer conversion alone as completed lambda migration.
+- Earlier try/wrapper/cell/Func lowerings and their exemplar are landed.
+  The recorded cumulative default compiler cost is about +1.1%; it is not
+  a measurement of the unpublished lambda draft.
+
+After the architectural proposal, retain the requested dependency order:
+
+1. Finish lambda recognition in expressions/regions/transform and
+   construction in literals, deleting replaced manual arms. The captures
+   capability is already landed separately.
+2. Remaining transform C shapes: defer, static-local initialization,
+   callable-defer environment, Var array/map literals, and other surveyed
+   shapes. One batch per shape.
+3. Protocol helper synthesis beyond the already migrated wrapper.
+4. Complete source-form coverage for parsed statements and expressions:
+   no raw `%()` recognition of parsed nodes outside grammar and parser.
+
+Write each target client/template in "Readable form" before implementation.
+Remove the old paths rather than retaining parallel implementations. Record
+a concrete exception when type dispatch cannot be expressed by a template;
+do not force a migration or silently treat exceptions as completed work.
+Generated C rebaselines need their reason in the commit. Keep
+`agents/lowering-with-macros.md` current when a rule or better exemplar lands.
+The three defect tasks under "Migration defect tasks" remain authoritative:
+depth diagnostics, parameter redeclaration, and the standalone raw-symbol
+sweep. Fix the first two when migration touches their owners; do not turn
+the standalone sweep into unrelated recurring campaign validation.
+
+## Coordination, validation and reporting agreement
+
+The orchestrator owns the entire campaign, integration, source review,
+publication and cost reporting. Use a single agent unless two changes touch
+disjoint files. Delegate bounded independent work in isolated worktrees under
+`orchestrate-x2c-work`; workers never gate, push, merge dev, or run timing.
+Give workers explicit ownership, acceptance examples and focused checks;
+verify their findings and review their authored changes before integration.
+
+- Private commits are checkpoints and require no checks merely to commit.
+- Between implementation edits: `make build`, then
+  `unittest/compiler-fixtures/run.sh check --fixture NAME` for touched
+  fixtures. Nothing broader. Resolve known bootstrap transitions locally.
+- Land parser/library capabilities first; land their adopters in the next
+  batch. Do not bundle capability work with cleanup.
+- Review the complete batch, then run `tools/land-dev` once. Do not run its
+  broad components separately. On sidecar-only rebaseline failures, read
+  the diff, update sidecars and retry once. Other failures require fixing
+  the cause with focused checks before retrying. Never rerun a gate on an
+  unchanged tree.
+- Timing: exactly one five-pair paired run per landed lowering, recorded
+  as a ledger row. No timing at other times.
+- Give useful periodic updates during long jobs: verified progress, what
+  remains, failures and independent work. Report each batch in five lines:
+  commit on dev; change as read; gate result; cost row; next work.
+
+On resumption read AGENTS.md, the lowering exemplar, grammar.xmacro,
+_lower_try/$compiler_try in transform.x, the Func templates in expressions.x,
+then this handoff, "Readable form" and the ledger. Verify checkout and remote
+state before acting; checkpoint hashes above are historical evidence, not
+a claim that upstream cannot advance. Do not read `.context/` or the research
+branch `codex/compiler-dual-macro-spike`; never merge that branch.
+
+## Historical research status
+
+The following research evidence is retained for context. Its authorization,
+cost baselines and implementation status do not override the handoff above.
+
 > Status: reference -- research complete; core support and the try
 > migration are on dev. The ledger records the production try row.
 > The combined try template/slot/effect/stage candidate passes 62-case raw

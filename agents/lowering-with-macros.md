@@ -9,6 +9,14 @@ lowering meets. The
 [dual-macro contract](../plans/compiler-dual-macro-contract.md) uses these
 rules as its acceptance test for later migrations.
 
+The campaign also reviews ownership across the compiler. Shared grammar
+macros remove repeated knowledge of source structure; recognition-only use
+is sufficient reason for a macro. Group related transformations and their
+templates coherently while preserving shared semantic services. Individual
+case conversions must serve that architecture, not determine it accidentally.
+The contract's [current handoff](../plans/compiler-dual-macro-contract.md#current-campaign-handoff)
+records the architectural survey, remaining work and coordination agreement.
+
 ## The rules
 
 Each rule is a property a reviewer can check by reading the code.

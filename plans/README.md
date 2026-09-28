@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Compiler dual-macro campaign](compiler-dual-macro-contract.md#current-campaign-handoff):
+  active; core lowerings and capture holes are landed, lambda adoption is
+  incomplete. Next is a current architectural survey and ownership proposal
+  before further site conversions; the handoff records delivery rules.
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
   not yet started; waits for meta-integration to land on dev.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
