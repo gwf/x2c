@@ -58,7 +58,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1846`
+Source: `src/protocol.x:1855`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -82,7 +82,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2312`
+Source: `src/protocol.x:2321`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -116,7 +116,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol.x:2445`
+Source: `src/protocol.x:2454`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -125,7 +125,7 @@ Source: `src/protocol.x:2445`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1906`
+Source: `src/protocol.x:1915`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -171,7 +171,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1772`
+Source: `src/protocol.x:1784`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
