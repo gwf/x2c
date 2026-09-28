@@ -140,8 +140,8 @@ After the architectural proposal, retain the requested dependency order:
 2. Defer registration is complete at `f99136f8`; static-local initialization
    is skipped for its recorded native-type limitation. Callable-defer
    environment/helper synthesis landed at `308709aa`. Next are Var array/map
-   literals landed at `aaba3ca4`; other surveyed shapes remain. One batch
-   per shape.
+   literals landed at `aaba3ca4`; other surveyed shapes remain. Gary approved
+   combining independently checked, disjoint shapes in one publication batch.
 3. Protocol helper synthesis beyond the already migrated wrapper.
 4. Complete source-form coverage for parsed statements and expressions:
    no raw `%()` recognition of parsed nodes outside grammar and parser.
@@ -184,8 +184,9 @@ implementation choice already covered by the campaign's authorization.
   the diff, update sidecars and retry once. Other failures require fixing
   the cause with focused checks before retrying. Never rerun a gate on an
   unchanged tree.
-- Timing: exactly one five-pair paired run per landed lowering, recorded
-  as a ledger row. No timing at other times.
+- Timing: exactly one five-pair paired run per landed batch, recorded as a
+  ledger row. A combined batch receives one batch-level cost row, without
+  assigning cost to its individual shapes. No timing at other times.
 - Give useful periodic updates during long jobs: verified progress, what
   remains, failures and independent work. Report each batch in five lines:
   commit on dev; change as read; gate result; cost row; next work.
@@ -799,6 +800,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Managed declaration cleanup (2026-09-28) | c00397af / dev a4c18301, distinct output dirs | confounded raw -60.16% | confounded raw -52.37% | Not counted | Not counted | Not measured |
 | Discarded destructuring assignment (2026-09-28) | 1d5c9b0a / dev c00397af, distinct output dirs | confounded raw -61.37% | confounded raw -52.63% | Not counted | Not counted | Not measured |
 | Protocol descriptor storage (2026-09-28) | 6a3674bf / dev 1d5c9b0a, same staged path and cleared output dir | raw -60.99%, cause unassigned | raw -53.42%, cause unassigned | Not counted | Not counted | Not measured |
+| Protocol direct-update body (2026-09-28) | 7e8abade / dev 6a3674bf, same staged path and cleared output dir | raw -61.48%, cause unassigned | raw -53.67%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -845,6 +847,15 @@ The source tree and helper/cache state changed between those attempts, and
 their effects are not isolated. These samples cannot attribute a cost or
 speedup to descriptor templates. The candidate binary was restored exactly;
 samples are in `debug/protocol-descriptor-paired-results.json`.
+
+The protocol direct-update attempt used the same staged path and freshly
+cleared output directory for both binaries. Five alternating pairs yielded
+8.875153 / 3.418313 s default and 10.279318 / 4.762153 s live. The baseline
+binary (`29a483b2`) was the fast candidate of the preceding attempt, but is
+slow here. Source-tree, helper, or cache effects remain unisolated, so the
+samples do not establish the update body's compiler cost. The candidate
+binary (`c88095c2`) was restored exactly. Samples are in
+`debug/protocol-update-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
