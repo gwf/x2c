@@ -9,7 +9,9 @@
 > cleanup calls are on dev at `4f89a063`. Their same-checkout cost rows are
 > complete. A narrow structural Var optimization could not retain the named
 > constructor/update calls in the template under the current rebuild contract.
-> The inline captured-lambda factory is the next local batch.
+> The inline captured-lambda factory is on dev at `4576e25e`; its single
+> cost row is complete. Shared captured-environment typedef binding is the
+> next local batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -784,6 +786,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same checkout, corpus and home | observed increment +18.10% | observed increment +15.45% | Not counted | Not counted | Not measured |
 | Var array/map literal calls (2026-09-28) | aaba3ca4 / dev 534722aa, same checkout, corpus and home | observed increment +18.24% | observed increment +16.16% | Not counted | Not counted | Not measured |
 | Try/defer cleanup calls (2026-09-28) | 4f89a063 / dev cb6605a4, same checkout, corpus and home | observed increment +13.63% | observed increment +15.56% | Not counted | Not counted | Not measured |
+| Inline captured-lambda factory (2026-09-28) | 4576e25e / dev 4f89a063, same checkout, corpus and home | observed increment +15.04% | observed increment +11.54% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -888,6 +891,15 @@ Default medians were 6.997246 / 7.951023 s (+13.63%); live medians were
 `debug/cleanup-paired-valid-results.json` in the integration checkout.
 The extra macro application enters a semantic transaction, but its share
 of this measured delta has not been isolated.
+
+Inline captured-lambda factory reuse used the same five-pair,
+same-checkout method. Default medians were 6.857994 / 7.889616 s
+(+15.04%); live medians were 8.209702 / 9.156937 s (+11.54%). Default
+ranges were 6.525932--7.558985 / 7.654610--8.163958 s; live ranges were
+7.908140--8.648371 / 8.876117--9.772955 s. Samples are in
+`debug/factory-paired-valid-results.json` in the integration checkout.
+Focused generated C and H were unchanged; this is compiler translation
+cost, not generated program performance.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
