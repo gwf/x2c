@@ -324,6 +324,8 @@ Var List_assoc(List, Var);
 
 Buffer Buffer_new(size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 Buffer Buffer_write(Buffer, const char *);
 
 String Var_json(Var);
@@ -343,12 +345,13 @@ static void Compiler__write_json(Compiler c, List entry){
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436))), notes = Var_list(List_assoc(entry, Symbol_var(30384486)));
   Buffer out = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & out
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);

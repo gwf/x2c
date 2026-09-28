@@ -2156,6 +2156,8 @@ static void _cache_activate(MatchCache cache, int slot, MatchLease * lease){
   entry -> pin_count ++;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
   if(! _init_guard_) _file_init_();
   (* lease) =(MatchLease){
@@ -2191,7 +2193,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
     {
       {
         X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = NULL
+          .fn = _x2c_defer_cleanup_0, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_0);
@@ -2483,7 +2485,7 @@ static void _capture_sites_initialize(void){
     {
       {
         X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_1, .env = NULL
+          .fn = _x2c_defer_cleanup_1, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_1);
@@ -2516,7 +2518,7 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
     {
       {
         X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_2, .env = NULL
+          .fn = _x2c_defer_cleanup_2, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_2);
@@ -2549,7 +2551,7 @@ static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern){
   _site_lock();
   {
     X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = NULL
+      .fn = _x2c_defer_cleanup_3, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_3);

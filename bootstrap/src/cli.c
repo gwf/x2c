@@ -671,10 +671,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -1466,6 +1466,8 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
 
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 String String_replace(String, String, String);
 
 void * Scope_calloc(size_t, size_t);
@@ -1476,12 +1478,13 @@ CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
   Array words = Array_new();
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & words
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & words;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -1640,12 +1643,13 @@ CliRequest cli_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
   Array args = Array_new();
   {
-    _x2c_defer_env_2 _x2c_defer_env_3 ={
-      ._x2c_defer_capture_1 =(const void *) & args
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
     }
     ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & args;
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -1737,7 +1741,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

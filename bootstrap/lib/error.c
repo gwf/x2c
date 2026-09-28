@@ -227,6 +227,8 @@ int x2c_error_catch_site_pending(ErrorCatchSite * site){
   return ! site || __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int List_try_own(List);
 
 List Var_list(Var);
@@ -239,7 +241,7 @@ static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
   _catch_site_lock();
   {
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = NULL
+      .fn = _x2c_defer_cleanup_0, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -1186,12 +1188,13 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
     if(h -> site) disposition = _catch_match(h);
     else{
       {
-        _x2c_defer_env_0 _x2c_defer_env_1 ={
-          ._x2c_defer_capture_0 =(const void *) & h
+        _x2c_defer_env_0 _x2c_macro_environment_0 ={
+          0
         }
         ;
+        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & h;
         X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_1
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_1);

@@ -921,6 +921,7 @@ int x2c_match_try_capture(List, Var, MatchCaptureBuffer *);
 int List_try_own(List);
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 MatchPlan MatchPlan_prepare(Var);
+void x2c_cleanup_push(X2CCleanup *);
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   if(! _init_guard_) _file_init_();  Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX
@@ -932,11 +933,11 @@ int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, 
     site -> policy = _macro_fixed_slots(t, kept);  site -> route = route;  __atomic_store_n(& site -> ready, 1, __ATOMIC_RELEASE);  return _macro_case_match(code, kept, site -> policy, & captured) && _macro_publish(& route, values, & captured, published);
   }
   MatchPlan plan = MatchPlan_prepare(List_var(pattern)); {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & plan
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
-    ;  X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & plan;  X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       {

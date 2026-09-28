@@ -385,6 +385,8 @@ static void _write_row(Buffer out, String label, String help){
 
 Buffer Buffer_new(size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 String Buffer_str(Buffer);
 
 String Args_usage(String program, List spec){
@@ -392,48 +394,52 @@ String Args_usage(String program, List spec){
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = Buffer_new(0);
   {
-    _x2c_defer_env_3 _x2c_defer_env_7 ={
-      ._x2c_defer_capture_3 =(const void *) & synopsis
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+      0
     }
     ;
+    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & synopsis;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_defer_env_7
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       Buffer options = Buffer_new(0);
       {
-        _x2c_defer_env_2 _x2c_defer_env_6 ={
-          ._x2c_defer_capture_2 =(const void *) & options
+        _x2c_defer_env_2 _x2c_macro_environment_2 ={
+          0
         }
         ;
+        _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & options;
         X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_6
+          .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_1);
         {
           Buffer operands = Buffer_new(0);
           {
-            _x2c_defer_env_1 _x2c_defer_env_5 ={
-              ._x2c_defer_capture_1 =(const void *) & operands
+            _x2c_defer_env_1 _x2c_macro_environment_1 ={
+              0
             }
             ;
+            _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & operands;
             X2CCleanup _x2c_defer_record_2 ={
-              .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_5
+              .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_2);
             {
               Buffer out = Buffer_new(0);
               {
-                _x2c_defer_env_0 _x2c_defer_env_4 ={
-                  ._x2c_defer_capture_0 =(const void *) & out
+                _x2c_defer_env_0 _x2c_macro_environment_0 ={
+                  0
                 }
                 ;
+                _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
                 X2CCleanup _x2c_defer_record_3 ={
-                  .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_4
+                  .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
                 }
                 ;
                 x2c_cleanup_push(& _x2c_defer_record_3);

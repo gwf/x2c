@@ -319,6 +319,8 @@ static int _helper_start(void){
   return 1;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int datum_frame(Buffer, Var);
 
 String Buffer_str(Buffer);
@@ -328,12 +330,13 @@ int String_len(String);
 static int _helper_send(List message){
   Buffer out = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & out
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);

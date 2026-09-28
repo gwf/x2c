@@ -1017,16 +1017,17 @@ __builtin_unreachable();
 return cons(List_var(list_ids), cons(List_var(string_ids), cons(List_var(var_ids), NULL)));
 }
 
+void x2c_cleanup_push(X2CCleanup *);
 Var Array_take_last(Array);
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int List_equal(List, List);
 static int _collect_cache_ids(Compiler compiler, Var value, List * seen, Array ids){
   Array pending = Array_update_n(Array_new(), 1, value); {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & pending
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
-    ;  X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & pending;  X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       int count = 0;  while(Array_truth(pending)){

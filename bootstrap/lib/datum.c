@@ -370,6 +370,8 @@ int datum_read(String text, unsigned * cursor, Var * out){
 
 Buffer Buffer_new(size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 size_t Buffer_len(Buffer);
 
 String Buffer_str(Buffer);
@@ -378,12 +380,13 @@ int datum_frame(Buffer out, Var value){
   if(! _init_guard_) _file_init_();
   Buffer body = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & body
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & body;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);

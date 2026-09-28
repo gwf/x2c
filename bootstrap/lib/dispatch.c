@@ -200,6 +200,8 @@ int Var_try_dispatch_unary(Var value, Symbol member, Var * result){
   return 1;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -209,7 +211,7 @@ void x2c_register_type(String name){
   _descriptor_lock();
   {
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = NULL
+      .fn = _x2c_defer_cleanup_0, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -230,7 +232,7 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
   _descriptor_lock();
   {
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = NULL
+      .fn = _x2c_defer_cleanup_1, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -271,7 +273,7 @@ int x2c_try_register_descriptor(String name, VarMethods methods){
   _descriptor_lock();
   {
     X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = NULL
+      .fn = _x2c_defer_cleanup_2, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
@@ -315,7 +317,7 @@ int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods metho
   _descriptor_lock();
   {
     X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = NULL
+      .fn = _x2c_defer_cleanup_3, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_3);

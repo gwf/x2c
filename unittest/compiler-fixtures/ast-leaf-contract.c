@@ -81,6 +81,8 @@ int Var_int(Var);
 
 int List_try_next(List, List *, Var *);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
@@ -128,12 +130,14 @@ int main(void){
       value = _x2c_macro_cursor_output_0;
       {
         {
-          _x2c_defer_env_0 _x2c_defer_env_1 ={
-            ._x2c_defer_capture_0 =(const void *) & count, ._x2c_defer_capture_1 =(const void *) & value
+          _x2c_defer_env_0 _x2c_macro_environment_0 ={
+            0
           }
           ;
+          _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & count;
+          _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & value;
           X2CCleanup _x2c_defer_record_0 ={
-            .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+            .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
           }
           ;
           x2c_cleanup_push(& _x2c_defer_record_0);

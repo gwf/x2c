@@ -136,11 +136,13 @@ static int continue_inside_try(void){
   return caught;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 static void break_inside_switch(void){
   order = 0;
   {
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = NULL
+      .fn = _x2c_defer_cleanup_0, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -234,7 +236,7 @@ static void loop_switch_boundaries(void){
   for(int i = 0;  i < 3;  i ++){
     {
       X2CCleanup _x2c_defer_record_1 ={
-        .fn = _x2c_defer_cleanup_1, .env = NULL
+        .fn = _x2c_defer_cleanup_1, .env = 0
       }
       ;
       x2c_cleanup_push(& _x2c_defer_record_1);
@@ -262,7 +264,7 @@ static void switch_loop_boundaries(void){
     case 1 :{
       {
         X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_2, .env = NULL
+          .fn = _x2c_defer_cleanup_2, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_2);

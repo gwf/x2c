@@ -63,17 +63,20 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 List Var_list(Var);
 
 static int deferred(Var item){
   int n = 0;
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & n
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & n;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);

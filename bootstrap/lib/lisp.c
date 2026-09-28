@@ -1159,10 +1159,10 @@ static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-typedef struct _x2c_defer_env_4{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_4;
 }
-_x2c_defer_env_4;
+_x2c_defer_env_2;
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
@@ -1765,86 +1765,86 @@ static Var _x2c_func_adapt_595(Func _x2c_func_binding_595, const FuncArg * _x2c_
 static Var _x2c_func_adapt_596(Func _x2c_func_binding_596, const FuncArg * _x2c_func_argv_596);
 static Var _x2c_func_adapt_597(Func _x2c_func_binding_597, const FuncArg * _x2c_func_argv_597);
 static Var _x2c_func_adapt_598(Func _x2c_func_binding_598, const FuncArg * _x2c_func_argv_598);
-typedef struct _x2c_defer_env_6{
+typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_5;
 }
-_x2c_defer_env_6;
+_x2c_defer_env_3;
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
-typedef struct _x2c_defer_env_8{
+typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_6;  const void * _x2c_defer_capture_7;
 }
-_x2c_defer_env_8;
+_x2c_defer_env_4;
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
-typedef struct _x2c_defer_env_10{
+typedef struct _x2c_defer_env_5{
   const void * _x2c_defer_capture_8;  const void * _x2c_defer_capture_9;  const void * _x2c_defer_capture_10;  const void * _x2c_defer_capture_11;
 }
-_x2c_defer_env_10;
+_x2c_defer_env_5;
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
-typedef struct _x2c_defer_env_11{
+typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_12;
 }
-_x2c_defer_env_11;
+_x2c_defer_env_6;
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
-typedef struct _x2c_defer_env_14{
+typedef struct _x2c_defer_env_7{
   const void * _x2c_defer_capture_13;
 }
-_x2c_defer_env_14;
+_x2c_defer_env_7;
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
-typedef struct _x2c_defer_env_15{
+typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_14;
 }
-_x2c_defer_env_15;
+_x2c_defer_env_8;
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
-typedef struct _x2c_defer_env_18{
+typedef struct _x2c_defer_env_9{
   const void * _x2c_defer_capture_15;  const void * _x2c_defer_capture_16;
 }
-_x2c_defer_env_18;
+_x2c_defer_env_9;
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
-typedef struct _x2c_defer_env_20{
+typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_17;
 }
-_x2c_defer_env_20;
+_x2c_defer_env_10;
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
-typedef struct _x2c_defer_env_22{
+typedef struct _x2c_defer_env_11{
   const void * _x2c_defer_capture_18;
 }
-_x2c_defer_env_22;
+_x2c_defer_env_11;
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
-typedef struct _x2c_defer_env_24{
+typedef struct _x2c_defer_env_12{
   const void * _x2c_defer_capture_19;
 }
-_x2c_defer_env_24;
+_x2c_defer_env_12;
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
 static Var _x2c_func_adapt_599(Func _x2c_func_binding_599, const FuncArg * _x2c_func_argv_599);
-typedef struct _x2c_defer_env_26{
+typedef struct _x2c_defer_env_13{
   const void * _x2c_defer_capture_21;
 }
-_x2c_defer_env_26;
+_x2c_defer_env_13;
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
-typedef struct _x2c_defer_env_28{
+typedef struct _x2c_defer_env_14{
   const void * _x2c_defer_capture_22;
 }
-_x2c_defer_env_28;
+_x2c_defer_env_14;
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
-typedef struct _x2c_defer_env_30{
+typedef struct _x2c_defer_env_15{
   const void * _x2c_defer_capture_23;
 }
-_x2c_defer_env_30;
+_x2c_defer_env_15;
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
 static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26);
-typedef struct _x2c_defer_env_31{
+typedef struct _x2c_defer_env_16{
   const void * _x2c_defer_capture_24;
 }
-_x2c_defer_env_31;
+_x2c_defer_env_16;
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
-typedef struct _x2c_defer_env_34{
+typedef struct _x2c_defer_env_17{
   const void * _x2c_defer_capture_25;
 }
-_x2c_defer_env_34;
+_x2c_defer_env_17;
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
 static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29);
 List cons(Var, List);
@@ -2111,6 +2111,7 @@ static Symbol _read_tokenizer(Tokenizer tokenizer, String source, unsigned base,
 }
 
 void Scope_push(Scope *);
+void x2c_cleanup_push(X2CCleanup *);
 Tokenizer Tokenizer_new(char *, Symbol);
 void Tokenizer_scan(Tokenizer);
 static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
@@ -2118,7 +2119,7 @@ static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
     Scope_push(scope); {
       {
         X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = NULL
+          .fn = _x2c_defer_cleanup_0, .env = 0
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_0); {
           {
@@ -2146,26 +2147,26 @@ Scope Scope_new_named(const char *);
 void * Scope_calloc(size_t, size_t);
 Lisp Lisp_kernel(void){
   if(! _init_guard_) _file_init_();  Scope session = Scope_new_named("Lisp session");  Lisp result = NULL; {
-    _x2c_defer_env_1 _x2c_defer_env_3 ={
-      ._x2c_defer_capture_2 =(const void *) & result, ._x2c_defer_capture_3 =(const void *) & session
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
     }
-    ;  X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_3
+    ;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & result;  _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & session;  X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_1
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_1); {
       Lisp lisp = NULL; {
-        _x2c_defer_env_0 _x2c_defer_env_2 ={
-          ._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & lisp
+        _x2c_defer_env_0 _x2c_macro_environment_0 ={
+          0
         }
-        ;  X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_2
+        ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & result;  _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & lisp;  X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_0
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_2); {
           {
             Scope_push(& session); {
               {
                 X2CCleanup _x2c_defer_record_3 ={
-                  .fn = _x2c_defer_cleanup_3, .env = NULL
+                  .fn = _x2c_defer_cleanup_3, .env = 0
                 }
                 ;  x2c_cleanup_push(& _x2c_defer_record_3); {
                   {
@@ -2189,7 +2190,7 @@ Lisp Lisp_kernel(void){
             Scope_push(& lisp -> scope); {
               {
                 X2CCleanup _x2c_defer_record_4 ={
-                  .fn = _x2c_defer_cleanup_4, .env = NULL
+                  .fn = _x2c_defer_cleanup_4, .env = 0
                 }
                 ;  x2c_cleanup_push(& _x2c_defer_record_4); {
                   {
@@ -2234,7 +2235,7 @@ void Lisp_adopt(Lisp lisp, Lisp parent){
     Scope_push(& lisp -> scope); {
       {
         X2CCleanup _x2c_defer_record_5 ={
-          .fn = _x2c_defer_cleanup_5, .env = NULL
+          .fn = _x2c_defer_cleanup_5, .env = 0
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_5); {
           lisp -> reserved = Map_new();
@@ -2255,11 +2256,11 @@ void Lisp_freeze(Lisp lisp){
 Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
   if(! _init_guard_) _file_init_(); (void) lisp;  if(! String_truth(source)) return 11212;  if(! cursor) return 11212;  unsigned base =(* cursor);  Symbol status; {
     Scope tokens_scope = Scope_new_named("Lisp tokens"); {
-      _x2c_defer_env_4 _x2c_defer_env_5 ={
-        ._x2c_defer_capture_4 =(const void *) & tokens_scope
+      _x2c_defer_env_2 _x2c_macro_environment_2 ={
+        0
       }
-      ;  X2CCleanup _x2c_defer_record_6 ={
-        .fn = _x2c_defer_cleanup_6, .env = & _x2c_defer_env_5
+      ;  _x2c_macro_environment_2._x2c_defer_capture_4 =(const void *) & tokens_scope;  X2CCleanup _x2c_defer_record_6 ={
+        .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_2
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_6); {
         Tokenizer tokenizer = _scan_lisp_tokens(source + base, & tokens_scope);  status = _read_tokenizer(tokenizer, source, base, &(* cursor), out);
@@ -2864,7 +2865,7 @@ static Job _lisp_List_job(List command){
     {
       {
         X2CCleanup _x2c_defer_record_7 ={
-          .fn = _x2c_defer_cleanup_7, .env = NULL
+          .fn = _x2c_defer_cleanup_7, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_7);
@@ -2891,7 +2892,7 @@ static Job _lisp_Job_start(Job job){
     {
       {
         X2CCleanup _x2c_defer_record_8 ={
-          .fn = _x2c_defer_cleanup_8, .env = NULL
+          .fn = _x2c_defer_cleanup_8, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_8);
@@ -3072,12 +3073,13 @@ int Array_try_next(Array, int *, Var *);
 static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captures){
   Array names = Array_new();
   {
-    _x2c_defer_env_6 _x2c_defer_env_7 ={
-      ._x2c_defer_capture_5 =(const void *) & names
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+      0
     }
     ;
+    _x2c_macro_environment_3._x2c_defer_capture_5 =(const void *) & names;
     X2CCleanup _x2c_defer_record_9 ={
-      .fn = _x2c_defer_cleanup_9, .env = & _x2c_defer_env_7
+      .fn = _x2c_defer_cleanup_9, .env = & _x2c_macro_environment_3
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_9);
@@ -3169,12 +3171,14 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   Var result =((void) 0, Void);
   lambda -> captures = NULL;
   {
-    _x2c_defer_env_8 _x2c_defer_env_9 ={
-      ._x2c_defer_capture_6 =(const void *) & result, ._x2c_defer_capture_7 =(const void *) & lambda
+    _x2c_defer_env_4 _x2c_macro_environment_4 ={
+      0
     }
     ;
+    _x2c_macro_environment_4._x2c_defer_capture_6 =(const void *) & result;
+    _x2c_macro_environment_4._x2c_defer_capture_7 =(const void *) & lambda;
     X2CCleanup _x2c_defer_record_10 ={
-      .fn = _x2c_defer_cleanup_10, .env = & _x2c_defer_env_9
+      .fn = _x2c_defer_cleanup_10, .env = & _x2c_macro_environment_4
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_10);
@@ -3189,7 +3193,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
         {
           {
             X2CCleanup _x2c_defer_record_11 ={
-              .fn = _x2c_defer_cleanup_11, .env = NULL
+              .fn = _x2c_defer_cleanup_11, .env = 0
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_11);
@@ -3279,12 +3283,13 @@ int List_contains(List, Var);
 static Var _run_frame(Lisp lisp, Lambda lambda, const Var * values, int count){
   Scope frame = Scope_new_named("Lisp frame");
   {
-    _x2c_defer_env_11 _x2c_defer_env_13 ={
-      ._x2c_defer_capture_12 =(const void *) & frame
+    _x2c_defer_env_6 _x2c_macro_environment_6 ={
+      0
     }
     ;
+    _x2c_macro_environment_6._x2c_defer_capture_12 =(const void *) & frame;
     X2CCleanup _x2c_defer_record_12 ={
-      .fn = _x2c_defer_cleanup_14, .env = & _x2c_defer_env_13
+      .fn = _x2c_defer_cleanup_14, .env = & _x2c_macro_environment_6
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_12);
@@ -3295,7 +3300,7 @@ static Var _run_frame(Lisp lisp, Lambda lambda, const Var * values, int count){
         {
           {
             X2CCleanup _x2c_defer_record_13 ={
-              .fn = _x2c_defer_cleanup_13, .env = NULL
+              .fn = _x2c_defer_cleanup_13, .env = 0
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_13);
@@ -3314,12 +3319,16 @@ static Var _run_frame(Lisp lisp, Lambda lambda, const Var * values, int count){
       Scope * caller_owner = lisp -> automatic_owner;
       Scope * caller_result_owner = lisp -> result_owner;
       {
-        _x2c_defer_env_10 _x2c_defer_env_12 ={
-          ._x2c_defer_capture_8 =(const void *) & lambda, ._x2c_defer_capture_9 =(const void *) & lisp, ._x2c_defer_capture_10 =(const void *) & caller_owner, ._x2c_defer_capture_11 =(const void *) & caller_result_owner
+        _x2c_defer_env_5 _x2c_macro_environment_5 ={
+          0
         }
         ;
+        _x2c_macro_environment_5._x2c_defer_capture_8 =(const void *) & lambda;
+        _x2c_macro_environment_5._x2c_defer_capture_9 =(const void *) & lisp;
+        _x2c_macro_environment_5._x2c_defer_capture_10 =(const void *) & caller_owner;
+        _x2c_macro_environment_5._x2c_defer_capture_11 =(const void *) & caller_result_owner;
         X2CCleanup _x2c_defer_record_14 ={
-          .fn = _x2c_defer_cleanup_12, .env = & _x2c_defer_env_12
+          .fn = _x2c_defer_cleanup_12, .env = & _x2c_macro_environment_5
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_14);
@@ -3419,24 +3428,26 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
   }
   lisp -> call_depth ++;
   {
-    _x2c_defer_env_15 _x2c_defer_env_17 ={
-      ._x2c_defer_capture_14 =(const void *) & lisp
+    _x2c_defer_env_8 _x2c_macro_environment_8 ={
+      0
     }
     ;
+    _x2c_macro_environment_8._x2c_defer_capture_14 =(const void *) & lisp;
     X2CCleanup _x2c_defer_record_15 ={
-      .fn = _x2c_defer_cleanup_16, .env = & _x2c_defer_env_17
+      .fn = _x2c_defer_cleanup_16, .env = & _x2c_macro_environment_8
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_15);
     {
       Var * owned = NULL;
       {
-        _x2c_defer_env_14 _x2c_defer_env_16 ={
-          ._x2c_defer_capture_13 =(const void *) & owned
+        _x2c_defer_env_7 _x2c_macro_environment_7 ={
+          0
         }
         ;
+        _x2c_macro_environment_7._x2c_defer_capture_13 =(const void *) & owned;
         X2CCleanup _x2c_defer_record_16 ={
-          .fn = _x2c_defer_cleanup_15, .env = & _x2c_defer_env_16
+          .fn = _x2c_defer_cleanup_15, .env = & _x2c_macro_environment_7
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_16);
@@ -3493,12 +3504,14 @@ static Var _eval_tail(Lisp lisp, Var expression, LispEnv * env){
     Var * values = Scope_malloc_in(& lisp -> scope, (count + 1) * sizeof(Var));
     int pending = 0;
     {
-      _x2c_defer_env_18 _x2c_defer_env_19 ={
-        ._x2c_defer_capture_15 =(const void *) & pending, ._x2c_defer_capture_16 =(const void *) & values
+      _x2c_defer_env_9 _x2c_macro_environment_9 ={
+        0
       }
       ;
+      _x2c_macro_environment_9._x2c_defer_capture_15 =(const void *) & pending;
+      _x2c_macro_environment_9._x2c_defer_capture_16 =(const void *) & values;
       X2CCleanup _x2c_defer_record_17 ={
-        .fn = _x2c_defer_cleanup_17, .env = & _x2c_defer_env_19
+        .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_9
       }
       ;
       x2c_cleanup_push(& _x2c_defer_record_17);
@@ -3539,12 +3552,13 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args){
   int count = List_len(args), index = 0;
   Var * values = Scope_malloc_in(& lisp -> scope, (count + 1) * sizeof(Var));
   {
-    _x2c_defer_env_20 _x2c_defer_env_21 ={
-      ._x2c_defer_capture_17 =(const void *) & values
+    _x2c_defer_env_10 _x2c_macro_environment_10 ={
+      0
     }
     ;
+    _x2c_macro_environment_10._x2c_defer_capture_17 =(const void *) & values;
     X2CCleanup _x2c_defer_record_18 ={
-      .fn = _x2c_defer_cleanup_18, .env = & _x2c_defer_env_21
+      .fn = _x2c_defer_cleanup_18, .env = & _x2c_macro_environment_10
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_18);
@@ -3580,12 +3594,13 @@ static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv * env){
   int count = List_len(raw), index = 0;
   Var * values = Scope_malloc_in(& lisp -> scope, (count + 1) * sizeof(Var));
   {
-    _x2c_defer_env_22 _x2c_defer_env_23 ={
-      ._x2c_defer_capture_18 =(const void *) & values
+    _x2c_defer_env_11 _x2c_macro_environment_11 ={
+      0
     }
     ;
+    _x2c_macro_environment_11._x2c_defer_capture_18 =(const void *) & values;
     X2CCleanup _x2c_defer_record_19 ={
-      .fn = _x2c_defer_cleanup_19, .env = & _x2c_defer_env_23
+      .fn = _x2c_defer_cleanup_19, .env = & _x2c_macro_environment_11
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_19);
@@ -3832,12 +3847,13 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   {
     File source = File_open(Var_pointer(path), "r");
     {
-      _x2c_defer_env_24 _x2c_defer_env_25 ={
-        ._x2c_defer_capture_19 =(const void *) & source
+      _x2c_defer_env_12 _x2c_macro_environment_12 ={
+        0
       }
       ;
+      _x2c_macro_environment_12._x2c_defer_capture_19 =(const void *) & source;
       X2CCleanup _x2c_defer_record_20 ={
-        .fn = _x2c_defer_cleanup_20, .env = & _x2c_defer_env_25
+        .fn = _x2c_defer_cleanup_20, .env = & _x2c_macro_environment_12
       }
       ;
       x2c_cleanup_push(& _x2c_defer_record_20);
@@ -4039,7 +4055,7 @@ Var Lisp_eval(Lisp lisp, Var expression){
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_21 ={
-      .fn = _x2c_defer_cleanup_22, .env = NULL
+      .fn = _x2c_defer_cleanup_22, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_21);
@@ -4047,12 +4063,13 @@ Var Lisp_eval(Lisp lisp, Var expression){
       Lisp _x2c_macro_prior_lisp_0 = lisp_active;
       lisp_active = lisp;
       {
-        _x2c_defer_env_26 _x2c_defer_env_27 ={
-          ._x2c_defer_capture_21 =(const void *) & _x2c_macro_prior_lisp_0
+        _x2c_defer_env_13 _x2c_macro_environment_13 ={
+          0
         }
         ;
+        _x2c_macro_environment_13._x2c_defer_capture_21 =(const void *) & _x2c_macro_prior_lisp_0;
         X2CCleanup _x2c_defer_record_22 ={
-          .fn = _x2c_defer_cleanup_21, .env = & _x2c_defer_env_27
+          .fn = _x2c_defer_cleanup_21, .env = & _x2c_macro_environment_13
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_22);
@@ -4084,7 +4101,7 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_23 ={
-      .fn = _x2c_defer_cleanup_24, .env = NULL
+      .fn = _x2c_defer_cleanup_24, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_23);
@@ -4092,12 +4109,13 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
       Lisp _x2c_macro_prior_lisp_1 = lisp_active;
       lisp_active = lisp;
       {
-        _x2c_defer_env_28 _x2c_defer_env_29 ={
-          ._x2c_defer_capture_22 =(const void *) & _x2c_macro_prior_lisp_1
+        _x2c_defer_env_14 _x2c_macro_environment_14 ={
+          0
         }
         ;
+        _x2c_macro_environment_14._x2c_defer_capture_22 =(const void *) & _x2c_macro_prior_lisp_1;
         X2CCleanup _x2c_defer_record_24 ={
-          .fn = _x2c_defer_cleanup_23, .env = & _x2c_defer_env_29
+          .fn = _x2c_defer_cleanup_23, .env = & _x2c_macro_environment_14
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_24);
@@ -4129,7 +4147,7 @@ Var Lisp_eval_string(Lisp lisp, String source){
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_25 ={
-      .fn = _x2c_defer_cleanup_26, .env = NULL
+      .fn = _x2c_defer_cleanup_26, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_25);
@@ -4137,12 +4155,13 @@ Var Lisp_eval_string(Lisp lisp, String source){
       Lisp _x2c_macro_prior_lisp_2 = lisp_active;
       lisp_active = lisp;
       {
-        _x2c_defer_env_30 _x2c_defer_env_33 ={
-          ._x2c_defer_capture_23 =(const void *) & _x2c_macro_prior_lisp_2
+        _x2c_defer_env_15 _x2c_macro_environment_16 ={
+          0
         }
         ;
+        _x2c_macro_environment_16._x2c_defer_capture_23 =(const void *) & _x2c_macro_prior_lisp_2;
         X2CCleanup _x2c_defer_record_26 ={
-          .fn = _x2c_defer_cleanup_25, .env = & _x2c_defer_env_33
+          .fn = _x2c_defer_cleanup_25, .env = & _x2c_macro_environment_16
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_26);
@@ -4159,12 +4178,13 @@ Var Lisp_eval_string(Lisp lisp, String source){
           _open_call_budget(lisp);
           Scope tokens_scope = Scope_new_named("Lisp tokens");
           {
-            _x2c_defer_env_31 _x2c_defer_env_32 ={
-              ._x2c_defer_capture_24 =(const void *) & tokens_scope
+            _x2c_defer_env_16 _x2c_macro_environment_15 ={
+              0
             }
             ;
+            _x2c_macro_environment_15._x2c_defer_capture_24 =(const void *) & tokens_scope;
             X2CCleanup _x2c_defer_record_27 ={
-              .fn = _x2c_defer_cleanup_27, .env = & _x2c_defer_env_32
+              .fn = _x2c_defer_cleanup_27, .env = & _x2c_macro_environment_15
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_27);
@@ -4216,12 +4236,13 @@ Var Lisp_eval_file(Lisp l, File source){
   }
   Block content = Block_new(sizeof(char));
   {
-    _x2c_defer_env_34 _x2c_defer_env_35 ={
-      ._x2c_defer_capture_25 =(const void *) & content
+    _x2c_defer_env_17 _x2c_macro_environment_17 ={
+      0
     }
     ;
+    _x2c_macro_environment_17._x2c_defer_capture_25 =(const void *) & content;
     X2CCleanup _x2c_defer_record_28 ={
-      .fn = _x2c_defer_cleanup_28, .env = & _x2c_defer_env_35
+      .fn = _x2c_defer_cleanup_28, .env = & _x2c_macro_environment_17
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_28);
@@ -4287,7 +4308,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     {
       {
         X2CCleanup _x2c_defer_record_29 ={
-          .fn = _x2c_defer_cleanup_29, .env = NULL
+          .fn = _x2c_defer_cleanup_29, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_29);
@@ -4391,7 +4412,7 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
 void Scope_cleanup(Scope);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
-  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_6;
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_6;
   Scope_cleanup((*(Scope *) _x2c_defer_data_2->_x2c_defer_capture_4));
 }
 
@@ -9248,12 +9269,12 @@ static Var _x2c_func_adapt_598(Func _x2c_func_binding_598, const FuncArg * _x2c_
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
-  _x2c_defer_env_6 * _x2c_defer_data_3 =(_x2c_defer_env_6 *) _x2c_defer_opaque_9;
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_9;
   Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
-  _x2c_defer_env_8 * _x2c_defer_data_4 =(_x2c_defer_env_8 *) _x2c_defer_opaque_10;
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_10;
   if(Var_is_void((*(Var *) _x2c_defer_data_4->_x2c_defer_capture_6))) Scope_free((*(Lambda *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
@@ -9262,7 +9283,7 @@ static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
 }
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
-  _x2c_defer_env_10 * _x2c_defer_data_5 =(_x2c_defer_env_10 *) _x2c_defer_opaque_12;
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_12;
   if((*(Lambda *) _x2c_defer_data_5->_x2c_defer_capture_8) -> source_function){
     (*(Lisp *) _x2c_defer_data_5->_x2c_defer_capture_9) -> automatic_owner =(*(Scope * *) _x2c_defer_data_5->_x2c_defer_capture_10);
     (*(Lisp *) _x2c_defer_data_5->_x2c_defer_capture_9) -> result_owner =(*(Scope * *) _x2c_defer_data_5->_x2c_defer_capture_11);
@@ -9275,39 +9296,39 @@ static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
 }
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
-  _x2c_defer_env_11 * _x2c_defer_data_6 =(_x2c_defer_env_11 *) _x2c_defer_opaque_14;
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_14;
   Scope_cleanup((*(Scope *) _x2c_defer_data_6->_x2c_defer_capture_12));
 }
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
-  _x2c_defer_env_14 * _x2c_defer_data_7 =(_x2c_defer_env_14 *) _x2c_defer_opaque_15;
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_15;
   if((*(Var * *) _x2c_defer_data_7->_x2c_defer_capture_13)) Scope_free((*(Var * *) _x2c_defer_data_7->_x2c_defer_capture_13));
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
-  _x2c_defer_env_15 * _x2c_defer_data_8 =(_x2c_defer_env_15 *) _x2c_defer_opaque_16;
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_16;
   (*(Lisp *) _x2c_defer_data_8->_x2c_defer_capture_14) -> call_depth --;
 }
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
-  _x2c_defer_env_18 * _x2c_defer_data_9 =(_x2c_defer_env_18 *) _x2c_defer_opaque_17;
+  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_17;
   if(!(*(int *) _x2c_defer_data_9->_x2c_defer_capture_15)) Scope_free((*(Var * *) _x2c_defer_data_9->_x2c_defer_capture_16));
 }
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
-  _x2c_defer_env_20 * _x2c_defer_data_10 =(_x2c_defer_env_20 *) _x2c_defer_opaque_18;
+  _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_18;
   Scope_free((*(Var * *) _x2c_defer_data_10->_x2c_defer_capture_17));
 }
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
-  _x2c_defer_env_22 * _x2c_defer_data_11 =(_x2c_defer_env_22 *) _x2c_defer_opaque_19;
+  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_19;
   Scope_free((*(Var * *) _x2c_defer_data_11->_x2c_defer_capture_18));
 }
 
 void File_cleanup(File);
 
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
-  _x2c_defer_env_24 * _x2c_defer_data_12 =(_x2c_defer_env_24 *) _x2c_defer_opaque_20;
+  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_20;
   File_cleanup((*(File *) _x2c_defer_data_12->_x2c_defer_capture_19));
 }
 
@@ -9317,7 +9338,7 @@ static Var _x2c_func_adapt_599(Func _x2c_func_binding_599, const FuncArg * _x2c_
 }
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
-  _x2c_defer_env_26 * _x2c_defer_data_13 =(_x2c_defer_env_26 *) _x2c_defer_opaque_21;
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_21;
   lisp_active =(*(Lisp *) _x2c_defer_data_13->_x2c_defer_capture_21);
 }
 
@@ -9326,7 +9347,7 @@ static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
 }
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
-  _x2c_defer_env_28 * _x2c_defer_data_14 =(_x2c_defer_env_28 *) _x2c_defer_opaque_23;
+  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_23;
   lisp_active =(*(Lisp *) _x2c_defer_data_14->_x2c_defer_capture_22);
 }
 
@@ -9335,7 +9356,7 @@ static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){
 }
 
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25){
-  _x2c_defer_env_30 * _x2c_defer_data_15 =(_x2c_defer_env_30 *) _x2c_defer_opaque_25;
+  _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_25;
   lisp_active =(*(Lisp *) _x2c_defer_data_15->_x2c_defer_capture_23);
 }
 
@@ -9344,14 +9365,14 @@ static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26){
 }
 
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27){
-  _x2c_defer_env_31 * _x2c_defer_data_16 =(_x2c_defer_env_31 *) _x2c_defer_opaque_27;
+  _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_27;
   Scope_cleanup((*(Scope *) _x2c_defer_data_16->_x2c_defer_capture_24));
 }
 
 void Block_cleanup(Block);
 
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
-  _x2c_defer_env_34 * _x2c_defer_data_17 =(_x2c_defer_env_34 *) _x2c_defer_opaque_28;
+  _x2c_defer_env_17 * _x2c_defer_data_17 =(_x2c_defer_env_17 *) _x2c_defer_opaque_28;
   Block_cleanup((*(Block *) _x2c_defer_data_17->_x2c_defer_capture_25));
 }
 

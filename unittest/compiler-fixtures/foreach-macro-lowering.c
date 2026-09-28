@@ -110,6 +110,8 @@ int Iter_try_next(Iter, Var *);
 
 int Var_truth(Var);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int String_truth(String);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
@@ -322,7 +324,7 @@ int main(void){
       {
         {
           X2CCleanup _x2c_defer_record_0 ={
-            .fn = _x2c_defer_cleanup_0, .env = NULL
+            .fn = _x2c_defer_cleanup_0, .env = 0
           }
           ;
           x2c_cleanup_push(& _x2c_defer_record_0);
@@ -388,7 +390,7 @@ int main(void){
           {
             {
               X2CCleanup _x2c_defer_record_1 ={
-                .fn = _x2c_defer_cleanup_1, .env = NULL
+                .fn = _x2c_defer_cleanup_1, .env = 0
               }
               ;
               x2c_cleanup_push(& _x2c_defer_record_1);

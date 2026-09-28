@@ -39,6 +39,10 @@ List builtin_try_landing(List frame, List clause, List cleanup);
 
 List builtin_catch_cases(List selected, List arms);
 
+List builtin_defer_record(List record, List callback, List environment, List records);
+
+List builtin_defer_captures(List environment, List records);
+
 List transform_array_literal(Compiler compiler, List ast);
 
 List transform_map_literal(Compiler compiler, List ast);

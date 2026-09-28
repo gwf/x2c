@@ -131,10 +131,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -709,6 +709,8 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth){
   Buffer_write_char(out, ']');
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -728,12 +730,13 @@ Var Map_getindex(Map, Var);
 static void _write_members(Buffer out, Map object, int pretty, int depth){
   Array names = Array_new();
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & names
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & names;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -840,12 +843,13 @@ String Buffer_str(Buffer);
 static String _json(Var value, int pretty){
   Buffer out = Buffer_new(0);
   {
-    _x2c_defer_env_2 _x2c_defer_env_3 ={
-      ._x2c_defer_capture_1 =(const void *) & out
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
     }
     ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & out;
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -918,7 +922,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

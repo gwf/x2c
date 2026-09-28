@@ -90,10 +90,10 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_4{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
 }
-_x2c_defer_env_4;
+_x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
@@ -242,6 +242,8 @@ void x2c_exception_push(ExceptionFrame *);
 
 ErrorHandler Error_push(ErrorHandlerFn, Var);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 Symbol Logger_error_handler(List, Var);
 
 Var Context_export(Context, Var);
@@ -295,24 +297,26 @@ static void * _run(void * argument){
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
       {
-        _x2c_defer_env_1 _x2c_defer_env_3 ={
-          ._x2c_defer_capture_1 =(const void *) & observer
+        _x2c_defer_env_1 _x2c_macro_environment_1 ={
+          0
         }
         ;
+        _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & observer;
         X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_0);
         {
           ErrorHandler logger_handler = Error_push(Logger_error_handler, ((void) 0, Void));
           {
-            _x2c_defer_env_0 _x2c_defer_env_2 ={
-              ._x2c_defer_capture_0 =(const void *) & logger_handler
+            _x2c_defer_env_0 _x2c_macro_environment_0 ={
+              0
             }
             ;
+            _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & logger_handler;
             X2CCleanup _x2c_defer_record_1 ={
-              .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_2
+              .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_1);
@@ -452,12 +456,13 @@ Var Thread_join(Thread t){
   }
   __atomic_fetch_sub(& thread_live_count, 1, __ATOMIC_SEQ_CST);
   {
-    _x2c_defer_env_4 _x2c_defer_env_5 ={
-      ._x2c_defer_capture_2 =(const void *) & t
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+      0
     }
     ;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & t;
     X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
@@ -508,7 +513,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_4 * _x2c_defer_data_2 =(_x2c_defer_env_4 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   _finish_join((*(Thread *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 

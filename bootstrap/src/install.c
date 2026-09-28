@@ -432,6 +432,8 @@ static String _fetch(String url, String directory, String name){
 
 File File_open(const char *, const char *);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 String File_sha256(File);
 
 int String_equal(String, String);
@@ -439,12 +441,13 @@ int String_equal(String, String);
 static void _verify(Path p, String expected){
   File input = File_open(p, "rb");
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & input
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & input;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -954,7 +957,7 @@ int install_command(CliRequest request){
   Path work = _work_directory(packages);
   {
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = NULL
+      .fn = _x2c_defer_cleanup_1, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -999,7 +1002,7 @@ List install_require(CliRequest request, String name, String version, List locke
   Path work = _work_directory(packages);
   {
     X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = NULL
+      .fn = _x2c_defer_cleanup_2, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
@@ -1037,7 +1040,7 @@ int remove_command(CliRequest request){
   _locked_packages(_125, request -> quiet);
   {
     X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = NULL
+      .fn = _x2c_defer_cleanup_3, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_3);

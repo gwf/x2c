@@ -108,6 +108,8 @@ ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
@@ -145,7 +147,7 @@ int main(void){
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       {
         X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = NULL
+          .fn = _x2c_defer_cleanup_0, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_0);

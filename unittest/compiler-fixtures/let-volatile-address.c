@@ -14,6 +14,8 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 void x2c_exception_push(ExceptionFrame *);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 void x2c_exception_landed(ExceptionFrame *);
 
 int main(void){
@@ -28,12 +30,14 @@ int main(void){
         volatile int * _x2c_macro_address_0 = & outer;
         int _x2c_macro_previous_0 = * _x2c_macro_address_0;
         {
-          _x2c_defer_env_0 _x2c_defer_env_1 ={
-            ._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0
+          _x2c_defer_env_0 _x2c_macro_environment_0 ={
+            0
           }
           ;
+          _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0;
+          _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0;
           X2CCleanup _x2c_defer_record_0 ={
-            .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+            .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
           }
           ;
           x2c_cleanup_push(& _x2c_defer_record_0);

@@ -63,10 +63,10 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -290,6 +290,8 @@ static void _configure_package(Compiler c, CliRequest request, String filename){
   Map_setindex(c -> package_roots, String_var(name), String_var(package));
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 Var Map_getindex(Map, Var);
 
 int Var_is_void(Var);
@@ -301,12 +303,14 @@ Map Compiler_collect_symbols(Compiler, Map);
 static Map _collect_input(Frontend frontend, Compiler c, Map globs){
   String package = c -> package;
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & package
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & c;
+    _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & package;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -569,12 +573,13 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
   {
-    _x2c_defer_env_2 _x2c_defer_env_3 ={
-      ._x2c_defer_capture_2 =(const void *) & unit
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
     }
     ;
+    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & unit;
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -850,7 +855,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_1->_x2c_defer_capture_2)));
 }
 

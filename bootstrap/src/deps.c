@@ -123,6 +123,8 @@ static void _write_word(Buffer out, String word){
 
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 Array Array_sort(Array);
@@ -142,12 +144,13 @@ int String_equal(String, String);
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
   Array paths = Array_new();
   {
-    _x2c_defer_env_1 _x2c_defer_env_3 ={
-      ._x2c_defer_capture_1 =(const void *) & paths
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
     }
     ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & paths;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_3
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -169,12 +172,13 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
       Array_sort(paths);
       Buffer out = Buffer_new(0);
       {
-        _x2c_defer_env_0 _x2c_defer_env_2 ={
-          ._x2c_defer_capture_0 =(const void *) & out
+        _x2c_defer_env_0 _x2c_macro_environment_0 ={
+          0
         }
         ;
+        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
         X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_2
+          .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_1);

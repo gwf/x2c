@@ -41,17 +41,17 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-typedef struct _x2c_defer_env_2{
+typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
-_x2c_defer_env_2;
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_3{
+typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
 }
-_x2c_defer_env_3;
+_x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
@@ -89,6 +89,8 @@ static int _same(_Diff * d, int i, int j){
 
 void * Scope_calloc(size_t, size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 Var int_var(int);
 
 int List_try_next(List, List *, Var *);
@@ -102,12 +104,13 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
   int max = n + m < _LIMIT ? n + m : _LIMIT, found = - 1;
   int * trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
   {
-    _x2c_defer_env_0 _x2c_defer_env_1 ={
-      ._x2c_defer_capture_0 =(const void *) & trace
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
     ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & trace;
     X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
@@ -262,24 +265,26 @@ String Diff_unified(String old, String new, String old_name, String new_name){
   if(! _init_guard_) _file_init_();
   Array edits = List_array(Diff_lines(old, new));
   {
-    _x2c_defer_env_3 _x2c_defer_env_5 ={
-      ._x2c_defer_capture_2 =(const void *) & edits
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+      0
     }
     ;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & edits;
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_defer_env_5
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
       Buffer out = Buffer_new(0);
       {
-        _x2c_defer_env_2 _x2c_defer_env_4 ={
-          ._x2c_defer_capture_1 =(const void *) & out
+        _x2c_defer_env_1 _x2c_macro_environment_1 ={
+          0
         }
         ;
+        _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & out;
         X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_defer_env_4
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_2);
@@ -342,14 +347,14 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_2 * _x2c_defer_data_1 =(_x2c_defer_env_2 *) _x2c_defer_opaque_1;
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_3 * _x2c_defer_data_2 =(_x2c_defer_env_3 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 

@@ -365,6 +365,8 @@ int List_len(List);
 
 void * Scope_calloc(size_t, size_t);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(rest && ! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, signature, List_var(_14)); }))){
     static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/func.x",.function = "_new",.line = 295};
@@ -399,11 +401,11 @@ size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context
   static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/func.x",.function = "_new",.line = 306};  x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
 }
 int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));  size_t bytes = context_offset + context_size;  Func fn = Scope_calloc(1, bytes), result = NULL; {
-  _x2c_defer_env_0 _x2c_defer_env_1 ={
-    ._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & fn
+  _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    0
   }
-  ;  X2CCleanup _x2c_defer_record_0 ={
-    .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+  ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & result;  _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & fn;  X2CCleanup _x2c_defer_record_0 ={
+    .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
   }
   ;  x2c_cleanup_push(& _x2c_defer_record_0); {
     fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : List_len(params);  if(context_size) memcpy(_context(fn), context, context_size);  result = fn; {

@@ -316,6 +316,8 @@ void Scope_shutdown_hook(void(*)(void));
 
 void Scope_push(Scope *);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 void * Scope_calloc(size_t, size_t);
 
 Var Map_setindex(Map, Var, Var);
@@ -332,7 +334,7 @@ VarDescriptor * x2c_var_declare(Symbol tag){
     {
       {
         X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = NULL
+          .fn = _x2c_defer_cleanup_0, .env = 0
         }
         ;
         x2c_cleanup_push(& _x2c_defer_record_0);
@@ -372,7 +374,7 @@ int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
     X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = NULL
+      .fn = _x2c_defer_cleanup_1, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
@@ -420,7 +422,7 @@ static int _assign_row(VarDescriptor * descriptor){
   x2c_descriptor_thread_start_begin();
   {
     X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = NULL
+      .fn = _x2c_defer_cleanup_2, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
@@ -462,7 +464,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_descriptor_thread_start_begin();
   {
     X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = NULL
+      .fn = _x2c_defer_cleanup_3, .env = 0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_3);
@@ -477,7 +479,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
         {
           {
             X2CCleanup _x2c_defer_record_4 ={
-              .fn = _x2c_defer_cleanup_4, .env = NULL
+              .fn = _x2c_defer_cleanup_4, .env = 0
             }
             ;
             x2c_cleanup_push(& _x2c_defer_record_4);

@@ -155,6 +155,8 @@ static int sum(List items){
   return total;
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
@@ -179,12 +181,13 @@ static int governed(List items){
   int volatile total = 0;
   {
     {
-      _x2c_defer_env_0 _x2c_defer_env_1 ={
-        ._x2c_defer_capture_0 =(const void *) & total
+      _x2c_defer_env_0 _x2c_macro_environment_0 ={
+        0
       }
       ;
+      _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & total;
       X2CCleanup _x2c_defer_record_0 ={
-        .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
       }
       ;
       x2c_cleanup_push(& _x2c_defer_record_0);

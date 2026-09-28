@@ -1123,7 +1123,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _879 = cons(_878, NULL);
   _880 = cons(_848, _879);
   _881 = List_var(_880);
-  _882 = String_new("/Users/gary/.codex/worktrees/helper-survey/x2c/src/protocol.x");
+  _882 = String_new("/Users/gary/.codex/worktrees/2fee/x2c/src/protocol.x");
   _883 = String_var(_882);
   _884 = cons(_883, NULL);
   _885 = cons(_849, _884);
@@ -3438,6 +3438,7 @@ static List _parse_associated_type(Compiler c, Map names, String participant){
   (void) participant;  Compiler_expect(c, 113488288653640);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 1139215899608, _1285, c -> token, NULL);  String name = c -> token -> text;  Compiler_next(c);  if(Map_contains(names, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_1188), cons(String_var(name), cons(String_var(_504), NULL)))), c -> token, NULL);  Compiler_expect(c, 123);  Type type = Type_canonicalize(Compiler_parse_type_name(c));  Compiler_expect(c, 119);  Map_setindex(names, String_var(name), int_var(1));  Sym_define(c -> sym, cons(String_var(name), NULL), cons(_29, cons(String_var(name), NULL)));  return cons(String_var(name), cons(List_var(type), NULL));
 }
 
+void x2c_cleanup_push(X2CCleanup *);
 List Compiler_parse_simple_declaration(Compiler);
 int String_startswith(String, String);
 int String_len(String);
@@ -3446,11 +3447,11 @@ int Compiler_test(Compiler, Symbol);
 static List _parse_protocol_member(Compiler c, String participant, Map members){
   List declaration = NULL; {
     int * _x2c_macro_address_0 = & c -> in_proto;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
-      _x2c_defer_env_0 _x2c_defer_env_1 ={
-        ._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0
+      _x2c_defer_env_0 _x2c_macro_environment_0 ={
+        0
       }
-      ;  X2CCleanup _x2c_defer_record_0 ={
-        .fn = _x2c_defer_cleanup_0, .env = & _x2c_defer_env_1
+      ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0;  _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0;  X2CCleanup _x2c_defer_record_0 ={
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_0); {
         * _x2c_macro_address_0 = 1; {
