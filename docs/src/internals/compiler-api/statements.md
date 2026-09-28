@@ -16,7 +16,8 @@ X2c statement parsing.
 | [`Compiler.begin_match_arm`](#Compiler.begin_match_arm) | Opens a `Sym` scope for one match arm and optionally defines its definite pattern binders. |
 | [`Compiler.finish_return_statement`](#Compiler.finish_return_statement) | Builds a return node for an optional expression without consuming tokens. |
 | [`Compiler.parse_block_item`](#Compiler.parse_block_item) | Parses one block-position declaration, statement, or macro insertion. |
-| [`Compiler.parse_block_items`](#Compiler.parse_block_items) | Parses block items after an already-consumed opening brace through `}` and returns a `(block ...)` node. |
+| [`Compiler.parse_block_items`](#Compiler.parse_block_items) | Parses block items after an already-consumed opening brace through `}` in a new lexical scope. |
+| [`Compiler.parse_callable_body`](#Compiler.parse_callable_body) | Parses a callable's outer block in its active parameter scope. |
 | [`Compiler.parse_compound_statement`](#Compiler.parse_compound_statement) | Parses a compound body after its opening brace and consumes the closing `}`, returning an origin-anchored `(block ...)` node. |
 | [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `AST_BLOCK`. |
 | [`Compiler.parse_statement`](#Compiler.parse_statement) | Parses and binds one statement or statement-position macro at the current token. |
@@ -74,12 +75,19 @@ Source: `src/statements.x:555`
 
 `List Compiler.parse_block_items(Compiler c, int anchor_items)`
 
-Parses block items after an already-consumed opening brace through `}` and
-returns a `(block ...)` node. The call opens one lexical `Sym` scope;
-`anchor_items` records statement origins and distributes a macro sequence's
-invocation origin over its inserted items.
+Parses block items after an already-consumed opening brace through `}` in
+a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:675`
+Source: `src/statements.x:712`
+
+<a id="Compiler.parse_callable_body"></a>
+#### Compiler.parse_callable_body
+
+`List Compiler.parse_callable_body(Compiler c)`
+
+Parses a callable's outer block in its active parameter scope.
+
+Source: `src/statements.x:719`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -89,7 +97,7 @@ Source: `src/statements.x:675`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:719`
+Source: `src/statements.x:724`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
