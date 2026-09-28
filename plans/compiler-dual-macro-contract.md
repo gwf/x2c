@@ -1714,6 +1714,43 @@ callable-defer fixtures pass exactly. Reference and nested-capture fixtures
 also pass exactly. The transform sidecar records the reviewed tag identity
 change.
 
+### E7. Inline Func bridge factories (target readable form)
+
+The direct-function getter and the indirect-function-pointer factory both
+publish an external `Func` bridge whose body returns one already typed
+expression. Their memo blocks continue to allocate the bridge, prepare its
+parameters and value, and queue it at the same point. Each uses the existing
+wrapper operation rather than constructing a raw `function` node:
+
+```x2c
+/* Direct getter, inside its existing memo block. */
+compiler.add_early(compiler.wrapper_function(
+  %("Func"), bridge, parameters.cdr(),
+  %(block (stmnt (return $handle))).cdr()));
+
+/* Indirect pointer factory, inside its existing memo block. */
+compiler.add_early(compiler.wrapper_function(
+  %("Func"), bridge, parameters.cdr(),
+  %(block (stmnt (return $value))).cdr()));
+```
+
+The operation binds the already existing template in `src/protocol.x` and
+retains the body as lowered code:
+
+```x2c
+macro open Unit $compiler_wrapper(Type $result, Name $name,
+    Statement $body, Param $params...) {
+  $result $name($params...) { $body }
+}
+```
+
+The result type, parameter types and order, bridge binding, memo keys, early
+declaration order, and inline header API remain with their present producers.
+This batch deletes the two duplicate raw external-function skeletons. The
+indirect context typedef stays in its current form. Focused
+`function-to-func-inline` C/H, `function-to-func`, and direct-adapter fixtures
+pass unchanged; the indirect-adapter rejection fixture also passes.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

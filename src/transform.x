@@ -718,11 +718,9 @@ static List _direct_func_value(
   List parameters = %(params (param (void) (bind () ())));
   $adapter.memo(compiler, key, bridge) {
     bridge = _func_bridge_binding(compiler, "func_get");
-    compiler.add_early(
-      %(
-      function ("Func") (bind $bridge ((fnmod $parameters)))
-        (block (stmnt (return $handle)))
-    ));
+    compiler.add_early(compiler.wrapper_function(
+      %("Func"), bridge, parameters.cdr(),
+      %(block (stmnt (return $handle))).cdr()));
   }
   Type getter_type = %((func ((void))) "Func");
   return _func_bridge_call(
@@ -804,11 +802,9 @@ static List _indirect_func_lift(
     );
     List value = _indirect_func_value(
       compiler, %(expr $pointer_type (ident $parameter)), pointer_type);
-    compiler.add_early(
-      %(
-      function ("Func") (bind $bridge ((fnmod $parameters)))
-        (block (stmnt (return $value)))
-    ));
+    compiler.add_early(compiler.wrapper_function(
+      %("Func"), bridge, parameters.cdr(),
+      %(block (stmnt (return $value))).cdr()));
   }
   List parameters = %(
     params ${pointer_type.parameter_ast(NULL)}
