@@ -493,8 +493,8 @@ Public functions:
 `Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
 `Compiler.lower_lambda_expr`, `Compiler.static_value_is_runtime`,
 `builtin_try_catch_site`, `builtin_catch_patterns`, `builtin_try_landing`,
-`builtin_catch_cases`, `transform_array_literal`, `transform_map_literal`,
-`Compiler.transform`
+`builtin_catch_cases`, `builtin_defer_record`, `builtin_defer_captures`,
+`transform_array_literal`, `transform_map_literal`, `Compiler.transform`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 

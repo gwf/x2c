@@ -14,6 +14,8 @@ X2c AST transformation pipeline.
 | --- | --- |
 | [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`; `$catch_landing` calls this in a slot. |
 | [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns one `$catch_pattern` for each of `items`, prepared into the catch site's `patterns`; `$catch_site` calls this in a slot. |
+| [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
+| [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
 | [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
 | [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
 | [`transform_array_literal`](#transform_array_literal) | Converts an `(array ...)` or `(varray ...)` node to source-ordered `(varray ...)` form, converting every typed element to `Var`. |
@@ -40,7 +42,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`; `$catch_landing` calls this in a
 slot.
 
-Source: `src/transform.x:2439`
+Source: `src/transform.x:2406`
 
 #### builtin_catch_patterns
 
@@ -49,7 +51,24 @@ Source: `src/transform.x:2439`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/transform.x:2415`
+Source: `src/transform.x:2382`
+
+#### builtin_defer_captures
+
+`List builtin_defer_captures(List environment, List records)`
+
+Writes captured addresses in the order capture selection established.
+
+Source: `src/transform.x:2511`
+
+#### builtin_defer_record
+
+`List builtin_defer_record(List record, List callback, List environment, List records)`
+
+Selects the record shape; captured records keep the environment beside
+the record in the region's scope.
+
+Source: `src/transform.x:2502`
 
 #### builtin_try_catch_site
 
@@ -59,7 +78,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2401`
+Source: `src/transform.x:2368`
 
 #### builtin_try_landing
 
@@ -69,7 +88,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2427`
+Source: `src/transform.x:2394`
 
 #### transform_array_literal
 
@@ -78,7 +97,7 @@ Source: `src/transform.x:2427`
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:3610`
+Source: `src/transform.x:3637`
 
 #### transform_map_literal
 
@@ -88,7 +107,7 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:3621`
+Source: `src/transform.x:3648`
 
 ### `Compiler`
 
@@ -224,7 +243,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:1934`
+Source: `src/transform.x:1935`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -238,7 +257,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4389`
+Source: `src/transform.x:4417`
 
 ## Design notes
 
