@@ -2572,6 +2572,7 @@ static Var _rewrite(Walk walk, Var value) {
   // is long, so the walk stops here.
   match (node) case %(expr *): return value;
   Macro caught = $caught, tried = $tried;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
   match (node) {
     /* First: recognition looks through a position wrapper, which this
        case records for reports. */
@@ -2598,9 +2599,9 @@ static Var _rewrite(Walk walk, Var value) {
     case %(break): return _transfer(walk, walk.break_stop, node);
     case %(continue): return _transfer(walk, walk.continue_stop, node);
     case %(goto ?label): return _transfer(walk, _goto_stop(walk, label), node);
-    case %(while ?condition ?body):
+    case while_loop(?condition, ?body):
       return %(while ${_rewrite(walk, condition)} ${_bounded(walk, body, 1)});
-    case %(do ?body ?condition):
+    case do_loop(?body, ?condition):
       return %(do ${_bounded(walk, body, 1)} ${_rewrite(walk, condition)});
     case %(for ?initial ?condition ?increment ?body):
       return %(for ${_rewrite(walk, initial)} ${_rewrite(walk, condition)}

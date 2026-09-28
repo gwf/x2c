@@ -2490,6 +2490,32 @@ template therefore changed the emitted local identity after repeated thunk
 construction. The source trial was restored instead of adding special
 binding machinery. Keep `_guard_value_rendering` as the native AST owner for
 this shape; no template migration or artifact rebaseline was accepted.
+### E24. Bound while and do transfer recognition (target readable form)
+
+The E15 shared Statement forms also describe the bound loops that
+`_rewrite` receives. This pass owns transfer-region barriers, so it keeps
+its `_bounded(body, 1)` call and the condition rewrite in their current
+positions. Its complete client is:
+
+```x2c
+Macro caught = $caught, tried = $tried;
+Macro while_loop = $while_loop, do_loop = $do_loop;
+match (node) {
+  case while_loop(?condition, ?body):
+    return %(while ${_rewrite(walk, condition)}
+                  ${_bounded(walk, body, 1)});
+  case do_loop(?body, ?condition):
+    return %(do ${_bounded(walk, body, 1)}
+               ${_rewrite(walk, condition)});
+}
+```
+
+The `at` case still sets the origin before either matcher runs. This is
+recognition only; output remains the canonical bound loop node, and `for`
+continues to handle its optional clauses separately. The checked
+`cleanup-loop-boundary`, `macro-statement-production`, and
+`c-body-directive` fixtures cover transfer boundaries, constructed do, and
+direct while/do C output.
 
 ### F. Static-local initialization exception
 
