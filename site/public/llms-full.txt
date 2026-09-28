@@ -2118,6 +2118,13 @@ unique, and a name cannot be both singular and sequence-valued.
 `Entry` holes capture one `key: value` row; `Entry $rows...` captures and
 forwards zero or more complete rows.
 
+A `Captures` hole carries a complete lambda capture clause as one value.
+In a template, `%!($params...) using $captures => $body` preserves its
+value and reference capture rows, with `Param $params...` as the trailing
+sequence. Apply this template as a macro value with the captured rows;
+recognition binds those rows with `*captures`. Like `Catch` rows, capture
+rows retain their canonical structure when supplied by compile-time code.
+
 ### Result kinds and invocation positions
 
 A macro has one result kind as well as argument kinds:
