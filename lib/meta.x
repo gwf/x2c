@@ -318,6 +318,9 @@ static List _macro_case_shape(Macro t, List names) {
   return _macro_view(pattern);
 }
 
+/** Records the machine slots that hold a macro's fixed locals, so a
+    repeated slot compares those locals by identity during recognition.
+*/
 typedef struct MacroFixedSlots {
   int count, slots[MACHINE_BINDER_MAX];
 } MacroFixedSlots;

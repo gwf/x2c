@@ -4120,12 +4120,6 @@ static String _definition_note(List definition) {
   return %"definition: $file:$line:$column";
 }
 
-/** Expands canonical macro capture rows and binds the result at `position`.
-    `stored` is a `macrodef` or visible macro name. The active expansion stack
-    supplies Lisp bindings, source location, and recursion checks; the
-    definition's fresh rows allocate invocation-local names. This method does
-    not begin a semantic transaction.
-*/
 /* An open definition binds its free references in the unit that applies
    it. A value resolves to the unit's global declaration; a callee the unit
    does not declare becomes a native call with the result type recorded
@@ -4221,6 +4215,12 @@ int Compiler.take_code_value(
   return 0;
 }
 
+/** Expands canonical macro capture rows and binds the result at `position`.
+    `stored` is a `macrodef` or visible macro name. The active expansion stack
+    supplies Lisp bindings, source location, and recursion checks; the
+    definition's fresh rows allocate invocation-local names. This method does
+    not begin a semantic transaction.
+*/
 List Compiler.expand_macro_invocation_node(
   Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
   List definition = NULL;

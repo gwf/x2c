@@ -693,7 +693,7 @@ Source: `lib/match.x:2289`
 Frees reusable materialization scratch. Finish active execution first;
 this does not clear invocation state.
 
-Source: `lib/match.x:2679`
+Source: `lib/match.x:2681`
 
 <a id="MatchMachine.open"></a>
 #### MatchMachine.open

@@ -138,11 +138,12 @@ Public functions:
 `Compiler.imported_providers`, `Compiler.imported_spelling`, `Sym.declare`,
 `Sym.bind_identity`, `Sym.resolve_key`, `Sym.next_typedef`,
 `Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
-`Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
-`Compiler.gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+`Sym.resolve_base_type`, `Sym.normalize_declared_type`, `Sym.var_tag_for_type`,
+`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
+`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
+`Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
+`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -309,11 +310,13 @@ Public functions:
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
 `x2c_template_call`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_macro_definition`, `Compiler.try_parse_macro_pattern`,
+`Compiler.capture_macro_value`, `Compiler.publish_macro_definition_node`,
 `Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
 `Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
-`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.macro_invocation_site`, `Compiler.take_code_value`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -961,9 +964,11 @@ the compiler surface a `meta` function calls.
 Public functions:
 
 `type_base_suffix`, `type_declaration_parts`, `x2c_literal_string`,
-`x2c_literal_int`, `x2c_literal_symbol`, `x2c_expr_ident`, `x2c_expr_index`,
-`x2c_expr_call`, `x2c_expr_composite`, `x2c_stmnt_make`, `x2c_stmnt_return`,
-`x2c_block_make`, `x2c_function_body`, `x2c_parameters_arguments`
+`x2c_literal_int`, `x2c_literal_symbol`, `Macro_close`, `Macro_apply`,
+`Macro_pattern`, `Macro_case_capture`, `Macro_case_pattern`, `x2c_expr_ident`,
+`x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`, `x2c_stmnt_make`,
+`x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
+`x2c_parameters_arguments`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

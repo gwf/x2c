@@ -2440,6 +2440,45 @@ source target. A public target's captured source must participate in the
 decorator's `Match` replacement, and dropping it makes the match fail. Imported
 decorators work without an extra prototype.
 
+### Macro values
+
+A macro is also a compile-time value of type `Macro`, available to `meta`
+functions. The same value builds code and recognizes it. There are four
+forms:
+
+```x2c
+Macro sum = $sum;
+List result = sum(left, right);
+match (result) { case sum(?left, ?right): consume(left, right); }
+Macro twice = macro Expression(Expr $value) => $value + $value;
+```
+
+`$name` written without an argument list selects the macro as a value.
+Applying a `Macro` returns a pending invocation. The compiler expands it
+where the result is bound, so a producer can return it as ordinary syntax.
+A `case` on a `Macro` value recognizes both the pending invocation and its
+expanded body, and it binds the same holes in either case. A named case such
+as `case $sum(?left, ?right):` selects the macro directly. An anonymous
+`macro Kind(parameters) => body` or `macro Kind(parameters) { body }` is a
+value without a global name.
+
+### Open definitions
+
+A definition is closed by default. Free identifiers in its body resolve where
+the macro was defined, as described under
+[hygiene](https://x2c-lang.dev/docs/reference/language.html#hygiene-and-generated-names).
+`macro open` instead binds free values in the applying unit's global scope:
+
+```x2c
+macro open Expression $bump(Expr $value) => target((Width) $value);
+```
+
+A caller's local of the same spelling does not capture them. A free type
+name resolves through the base scopes to its target type, so the generated C
+spells the target type rather than the typedef name. A free callee that the
+applying unit does not declare is emitted as a native call with the result
+type recorded where the macro was defined.
+
 ### Hygiene and generated names
 
 Captured syntax retains its call-site binding identity. Free identifiers

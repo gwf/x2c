@@ -48,7 +48,7 @@ and not the source. Another `meta` function may call it: calling one is
 what makes the caller compile-time only too, so a body being parsed
 under the marker is left alone.
 
-Source: `src/stage.x:357`
+Source: `src/stage.x:361`
 
 <a id="Compiler.folded_constant"></a>
 #### Compiler.folded_constant
@@ -85,7 +85,7 @@ Source: `src/stage.x:129`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/stage.x:372`
+Source: `src/stage.x:376`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
