@@ -4,8 +4,8 @@
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
 > boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> callable-defer environment/helper synthesis. Both lowering cost rows
-> are complete; do not repeat their timing.
+> Var array/map C literals. Callable-defer helper synthesis is on dev at
+> `308709aa`. Earlier lowering cost rows are complete; do not repeat them.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -85,11 +85,10 @@ fixtures. Each diff was reviewed before updating expectations; the final
 gate passed and pushed. Intentional C changes and their reason are recorded
 in the source/refresh commits. The single five-pair cost run is complete:
 +2.46% default / +4.11% live versus `a9f6d566`. Lambda measured +3.24% /
-+2.30% versus `799875a8`. Do not repeat either timing run. No jobs or workers
-remain active; the campaign stops here to preserve the usage reserve.
++2.30% versus `799875a8`. Do not repeat either timing run. At this checkpoint
+no jobs or workers remained active.
 
-Next work, in order: callable-defer environment/helper synthesis in
-`_lower_callable_defer`, Var array/map C literals and the other surveyed
+Next work, in order: Var array/map C literals and the other surveyed
 transform shapes, protocol helper synthesis, then complete source-form
 coverage across the compiler. Static-local initialization is skipped for
 the concrete native `__typeof__`/preprocessor/type-alias boundary recorded
@@ -126,9 +125,9 @@ After the architectural proposal, retain the requested dependency order:
 1. Lambda recognition and construction are complete at `c99dd68d`.
    Captured-lambda C helper synthesis remains in the later transform survey.
 2. Defer registration is complete at `f99136f8`; static-local initialization
-   is skipped for its recorded native-type limitation. Next are callable-defer
-   environment/helper synthesis, Var array/map literals, and other surveyed
-   shapes. One batch per shape.
+   is skipped for its recorded native-type limitation. Callable-defer
+   environment/helper synthesis landed at `308709aa`. Next are Var array/map
+   literals and other surveyed shapes. One batch per shape.
 3. Protocol helper synthesis beyond the already migrated wrapper.
 4. Complete source-form coverage for parsed statements and expressions:
    no raw `%()` recognition of parsed nodes outside grammar and parser.
@@ -777,6 +776,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Same batch, exception workload | readable-sites / dev c2f06700, same window | increment +0.25% | increment +0.44% | Not counted | Not counted | Not measured |
 | Lambda source recognition and construction (2026-09-28) | c99dd68d / prerequisite dev 799875a8, same corpus and home | increment +3.24% | increment +2.30% | Not counted | Not counted | Not measured |
 | Defer record and registration (2026-09-28) | f99136f8 / prerequisite dev a9f6d566, same corpus and home | increment +2.46% | increment +4.11% | Not counted | Not counted | Not measured |
+| Callable-defer helper synthesis (2026-09-28) | 308709aa / dev 2807858c, same seven-source corpus and home | observed increment -58.11% | observed increment -50.45% | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The production rows are medians of five alternating pairs on one host
@@ -850,6 +850,19 @@ Default medians were 6.052123 / 6.200805 s (+2.46%); live medians were
 Raw samples and summary are in `debug/defer-paired-a9f6d566/`. These are
 incremental compiler costs, not measurements of runtime defer performance.
 No additional timing or instrumentation was run.
+
+Callable-defer's single valid run used five alternating pairs per mode after
+warmup, optimized baseline and candidate compilers, one source root and
+`X2C_HOME`. Default medians were 6.589067 / 2.760136 s (-58.11%); live
+medians were 7.795916 / 3.863264 s (-50.45%). Default ranges were
+6.438262--6.803231 / 2.721126--2.825304 s; live ranges were
+7.569464--8.028567 / 3.845187--3.954819 s. The two compilers generated
+identical C/H for all seven corpus sources. These unusually large differences
+are observations of this pair, not an attributed speedup from the helper
+templates. An initial control copied immediately after `build-safe` showed
+the same disparity and was stopped before a complete paired run; the baseline
+was then rebuilt through stage 1 before the valid run. Samples are in
+`debug/dual-macro-paired/results.json` in the integration checkout.
 
 The client pattern for every migrated lowering is the try case in
 `_rewrite`:
