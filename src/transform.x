@@ -1550,12 +1550,10 @@ static List _lower_captured_lambda(
       environment_value_type, factory_context, lambda_binding,
       adapter_type, signature, constructor, constructor_type);
     List declaration_params = %(params @{parameters.list_free()});
-    compiler.add_early(
-      %(
-      function ("Func") (bind $bridge ((fnmod $declaration_params)))
-        (block $factory_storage
-               (stmnt (return $factory_construction)))
-    ));
+    List factory_body = %(block $factory_storage
+      (stmnt (return $factory_construction)));
+    compiler.add_early(compiler.wrapper_function(
+      %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
     List parameter_types = field_types.list_free();
     Type factory_type = %((func $parameter_types) "Func");
     List call = _func_bridge_call(

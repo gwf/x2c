@@ -1612,6 +1612,39 @@ hole as a retained carrier, once. The templates call the existing runtime
 functions in their established order; no region or finalizer analysis moves
 into the templates.
 
+### E5. Inline captured-lambda factory (target readable form)
+
+The captured-lambda pass owns capture discovery, first-use order, storage
+types, value conversions, context construction, and the bridge identity. Its
+inline-header branch keeps those facts and applies the existing wrapper
+operation to its already lowered factory body:
+
+```x2c
+List factory_body = %(block $factory_storage
+  (stmnt (return $factory_construction)));
+compiler.add_early(compiler.wrapper_function(
+  %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
+```
+
+`Compiler.wrapper_function` in `src/protocol.x` binds this existing template;
+its producer passes the body as a `code-value "lowered"` carrier:
+
+```x2c
+macro open Unit $compiler_wrapper(Type $result, Name $name,
+    Statement $body, Param $params...) {
+  $result $name($params...) { $body }
+}
+```
+
+The function remains in the early queue after its context storage and call
+are prepared. The bridge's typed parameter declarations retain their order,
+and the generated factory remains an external `Func` function for inline
+header callers. `_publish_func_adapter` already uses this wrapper for the
+static callback; this batch deletes only the duplicate raw factory function
+skeleton. `function-to-func-inline` passes with identical generated C and H,
+including its bridge prototype and identity. `captured-lambda-lowering` and
+`lambda-adapt-direct-function` also pass unchanged.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
