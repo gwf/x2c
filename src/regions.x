@@ -1035,7 +1035,8 @@ static void _note_deferred_stores(Walk w, Var node) {
 static void _walk_defer(Walk w, Var body) {
   List arguments = NULL;
   String callee = NULL;
-  match (body) case %(stmnt ?expression):
+  Macro statement = $expression_statement;
+  match (body) case statement(?expression):
     callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
@@ -1100,6 +1101,7 @@ static void _walk_block(Walk w, List statements) {
 }
 
 static void _walk(Walk w, Var node) {
+  Macro statement = $expression_statement;
   match (node) {
     case %(at ?origin ?inner): {
       int outer = w.origin;
@@ -1122,7 +1124,7 @@ static void _walk(Walk w, Var node) {
        where that path arrives, so neither carries forward what the path
        before it freed. */
     case %((!or goto label) *): _revive(w);
-    case %(stmnt ?expression): {
+    case statement(?expression): {
       List arguments = NULL;
       String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;

@@ -2775,6 +2775,52 @@ The outer `at` case still owns source origins, and the result stays a
 canonical switch node. `cleanup-loop-boundary` checks break/continue
 cleanup, `c-body-directive` checks native C output, and
 `comptime-lowering` checks switch execution.
+### E31. Remaining region expression statement recognition (target readable form)
+
+`regions.x` also reads expression statements in the deferred-effect walker
+and the main region walker. The E27 source matcher supplies the same bound
+expression from each `(stmnt EXPRESSION)` node:
+
+```x2c
+macro Statement $expression_statement(Expr $value) { $value; }
+
+static void _walk_defer(Walk w, Var body) {
+  List arguments = NULL;
+  String callee = NULL;
+  Macro statement = $expression_statement;
+  match (body) case statement(?expression):
+    callee = _callee_of(expression, arguments);
+  // Existing fact, effect, ownership, and deferred-store handling follows.
+}
+
+static void _walk(Walk w, Var node) {
+  Macro statement = $expression_statement;
+  match (node) {
+    // Existing origin and other statement cases precede this case.
+    case statement(?expression): {
+      List arguments = NULL;
+      String callee = _callee_of(expression, arguments);
+      if (callee && _walk_region_call(w, callee, arguments)) break;
+      match (_unwrap(expression)) {
+        case %(op (!quote =) ?target ?value): _store(w, target, value);
+        default: _scan(w, expression, 0);
+      }
+    }
+  }
+}
+```
+
+Only the two outer wrapper cases change. `_callee_of` still receives the
+bound expression and retains call argument identity and order. `_walk_defer`
+continues to resolve the same fact and effect before its ownership cases.
+`_walk` continues to set and restore `w.origin` at the enclosing `at` node;
+its region call handling, `_store`, and `_scan` keep the same expression,
+targets, values, and diagnostic origins. The matcher adds no fallback raw
+statement case. The E27 probe established exact capture of a bound typed
+assignment in `region-safe`. After this edit, `make build` and the
+`region-safe`, `region-local-escapes`, and `goto-cleanup-regions` fixtures
+passed. Their checked diagnostics, and the latter fixture's generated C and
+transform sidecar, matched byte for byte.
 
 ### F. Static-local initialization exception
 
