@@ -1480,6 +1480,8 @@ String ArrayChar_repr(ArrayChar _x2c_macro_array_39){
   return _array_finish_buffer(_x2c_macro_out_10);
 }
 
+Array Array_new(void);
+
 Array ArrayChar_array(ArrayChar _x2c_macro_array_41){
   if(! _init_guard_) _file_init_();
   if(_x2c_macro_array_41 == NULL) return NULL;

@@ -1075,6 +1075,8 @@ RegexMatch Regex_match(Regex r, String subject){
   return _search(r, subject, 0);
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 List Array_list(Array);

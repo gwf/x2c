@@ -1700,6 +1700,7 @@ default: break;
 x2c_diagnostic_fail(_417, NULL);  return NULL;
 }
 
+Map Map_new(void);
 Var Map_setindex(Map, Var, Var);
 Var Func_var(Func);
 Map builtin_targets(void){

@@ -141,6 +141,8 @@ int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
 
 List Var_list(Var);
 
+Array Array_new(void);
+
 int List_truth(List);
 
 Var Array_push(Array, Var);

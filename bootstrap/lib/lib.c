@@ -281,6 +281,8 @@ void DisjointSet_union(DisjointSet set, int a, int b){
   set -> ncmpnts --;
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 Var List_var(List);

@@ -463,6 +463,8 @@ Scope Scope_new_named(const char *);
 
 void Scope_push(Scope *);
 
+Map Map_new(void);
+
 void Error_initialize_raw(void){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();

@@ -488,6 +488,8 @@ static int _unique_next(Iter iter, Var * out){
 
 Var Map_var(Map);
 
+Map Map_new(void);
+
 Iter Iter_unique(Iter iter, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Iter_var(iter), _unique_next, Map_var(Map_new()));
@@ -505,6 +507,8 @@ static int _unzip_column_next(Iter iter, Var * out){
   _unzip_compact(shared, state -> column);
   return 1;
 }
+
+Array Array_new(void);
 
 static void _unzip_shared_init(UnzipShared * u, Iter source){
   if(! u) return;

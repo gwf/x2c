@@ -292,6 +292,8 @@ static Var _datum_decode_number(String tag, String text){
   return Var_convert(Var_box_long_long(value), target);
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 List Array_list_free(Array);
@@ -325,6 +327,8 @@ Var Var_new(Symbol, ...);
 Var Array_var(Array);
 
 Array List_array(List);
+
+Map Map_new(void);
 
 Var Map_setindex(Map, Var, Var);
 

@@ -1255,6 +1255,10 @@ void Compiler_close_child(Compiler compiler, Compiler child){
 
 void * Scope_malloc_finalized(size_t, void(*)(void *));
 
+Array Array_new(void);
+
+Map Map_new(void);
+
 void Compiler_inherit_library_comptime(Compiler);
 
 void * Scope_calloc(size_t, size_t);

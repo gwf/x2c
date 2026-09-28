@@ -225,6 +225,8 @@ static void _read_row(_Option * option, List row, Map index, int position){
 
 int List_len(List);
 
+Map Map_new(void);
+
 void * Scope_calloc(size_t, size_t);
 
 static _Spec _read_spec(List spec){
@@ -331,6 +333,8 @@ static void _assign_operands(_Spec * spec, Map result, List operands){
   }
   if(List_truth(operands)) _bad_operand(_19, Var_str(List_car(operands)));
 }
+
+Array Array_new(void);
 
 int String_getindex(String, int);
 

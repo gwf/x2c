@@ -733,6 +733,10 @@ static String _meta_compile(String directory, int index, String unit, List flags
 
 int List_len(List);
 
+Map Map_new(void);
+
+Array Array_new(void);
+
 void Compiler_use_meta_build_directory(String);
 
 List Var_list(Var);
@@ -1044,6 +1048,8 @@ int Compiler_links_extension(String);
 int Array_contains(Array, Var);
 
 String List_repr(List);
+
+Array Array_update_n(Array, unsigned, ...);
 
 List collect_cached_paths(void);
 

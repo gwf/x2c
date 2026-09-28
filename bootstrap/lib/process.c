@@ -381,6 +381,8 @@ static int _decoded_status(int status){
   return - 1;
 }
 
+Map Map_new(void);
+
 Iter Map_keys(Map, Iter);
 
 int Iter_try_next(Iter, Var *);
@@ -390,6 +392,8 @@ Var Map_setindex(Map, Var, Var);
 Var String_var(String);
 
 String Var_str(Var);
+
+Array Array_new(void);
 
 String String_new(const char *);
 
@@ -970,6 +974,8 @@ Job Job_options(Job job, Map options){
   }
   return job;
 }
+
+Map Map_update_n(Map, unsigned, ...);
 
 Job Job_live(Job job){
   if(! _init_guard_) _file_init_();

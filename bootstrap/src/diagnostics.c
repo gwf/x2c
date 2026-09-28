@@ -177,6 +177,8 @@ static void _emit_entry(Diagnostics diag, List entry){
 
 void * Scope_malloc(size_t);
 
+Array Array_new(void);
+
 Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
@@ -339,6 +341,8 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 String Var_string(Var);
 
 Var Array_var(Array);
+
+Array Array_update_n(Array, unsigned, ...);
 
 static void Compiler__write_json(Compiler c, List entry){
   Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));

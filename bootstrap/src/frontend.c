@@ -429,6 +429,10 @@ void Type_begin_unit(void);
 
 Compiler Compiler_new(void);
 
+Array Array_new(void);
+
+Map Map_new(void);
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);

@@ -467,6 +467,8 @@ static String _string_value(Project project, int line, String value){
   return result;
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 List Array_list_free(Array);
@@ -505,6 +507,8 @@ static int _bool_value(Project project, int line, String value){
 }
 
 void * Scope_calloc(size_t, size_t);
+
+Map Map_new(void);
 
 static ProjectTarget _target(Project project, String name, int create){
   for(ProjectTarget target = project -> targets;  target;  target = target -> next) if(String_equal(target -> name, name)) return target;

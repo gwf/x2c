@@ -96,6 +96,8 @@ static inline int _line_end(String str, int start, int keep_ends, int * next){
   return keep_ends ? * next : end;
 }
 
+Array Array_new(void);
+
 String String_new_len(const char *, int);
 
 Var Array_push(Array, Var);

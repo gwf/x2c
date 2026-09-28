@@ -284,6 +284,8 @@ List preproc_track_arms(List arms, String text){
   return kind == 7109834 ? List_cdr(arms) : arms;
 }
 
+Array Array_new(void);
+
 List List_reverse(List);
 
 int List_try_next(List, List *, Var *);

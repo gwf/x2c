@@ -711,6 +711,8 @@ void * Scope_calloc(size_t, size_t);
 
 Toolchain toolchain_new(String, String, List, List, List, int, int);
 
+Array Array_new(void);
+
 unsigned long report_now_us(void);
 
 Path Path_temp_dir(void);
@@ -1135,6 +1137,8 @@ CliRequest Build_module_entry(Build b){
   return Build__entry_request(b, cons(String_var(entry), NULL));
 }
 
+Map Map_new(void);
+
 Path Path_basename(Path);
 
 Var Map_setindex(Map, Var, Var);
@@ -1344,6 +1348,8 @@ static int _finish_compile(Build state, CcJob * pending){
   }
   return status != 0;
 }
+
+Map Map_update_n(Map, unsigned, ...);
 
 String Var_json(Var);
 

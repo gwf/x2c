@@ -630,6 +630,7 @@ static String _meta_hex_float(long double n){
   digits[count] = 0;  return String_printf(_250, sign, count ? "." : "", digits, exponent - 1);
 }
 
+Map Map_new(void);
 void x2c_cleanup_push(X2CCleanup *);
 List datum_result_problem(Var, Map);
 Var List_cadr(List);
@@ -652,6 +653,7 @@ static void _meta_refuse(Compiler c, Var value, Token site){
 List Compiler_cache_literal_list(Compiler, List);
 List Compiler_cache_literal_var(Compiler, Var);
 List List_reverse(List);
+Array Array_new(void);
 Array Var_array(Var);
 int Array_try_next(Array, int *, Var *);
 Var Array_push(Array, Var);

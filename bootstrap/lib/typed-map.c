@@ -1730,6 +1730,8 @@ String MapIntInt_repr(MapIntInt _x2c_macro_map_41){
   return Buffer_str_free(_x2c_macro_out_13);
 }
 
+Map Map_new(void);
+
 Var Map_setindex(Map, Var, Var);
 
 Map MapIntInt_map(MapIntInt _x2c_macro_map_42){

@@ -1227,6 +1227,8 @@ static void _tokenize_response(Array output, String path, const char * text, siz
   Buffer_free(token);
 }
 
+Array Array_new(void);
+
 void Scope_free(void *);
 
 List Array_list_free(Array);

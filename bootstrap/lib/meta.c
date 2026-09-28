@@ -370,6 +370,8 @@ List type_base_suffix(List type){
   return NULL;
 }
 
+Array Array_new(void);
+
 List List_reverse(List);
 
 int List_try_next(List, List *, Var *);

@@ -2546,6 +2546,8 @@ default: break;
 return NULL;
 }
 
+Map Map_update_n(Map, unsigned, ...);
+Map Map_new(void);
 static Map native_scalar_types(void){
   return Map_update_n(Map_new(), 14, List_var(_57), List_var(_65), List_var(_67), List_var(_72), List_var(_74), List_var(_82), List_var(_84), List_var(_92), List_var(_93), List_var(_101), List_var(_103), List_var(_111), List_var(_112), List_var(_120), List_var(_122), List_var(_129), List_var(_130), List_var(_138), List_var(_139), List_var(_147), List_var(_148), List_var(_156), List_var(_158), List_var(_166), List_var(_168), List_var(_176), List_var(_177), List_var(_185));
 }
@@ -2561,6 +2563,7 @@ static int _dedent_blank(String line){
 }
 
 String String_getslice(String, int, int, int);
+Array Array_new(void);
 List String_split(String, String);
 Var Array_push(Array, Var);
 String String_remove_prefix(String, String);
@@ -2716,6 +2719,7 @@ static List _tag_composite(List items){
   return cons(_0, cons(_1, cons(List_var(cons(_1300, cons(List_var(cons(_1301, List_append(items, NULL))), NULL))), NULL)));
 }
 
+Array Array_update_n(Array, unsigned, ...);
 List x2c_literal_symbol(Symbol);
 List x2c_literal_int(int);
 static List _tag_info_row(List row){

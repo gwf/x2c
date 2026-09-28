@@ -58,6 +58,10 @@ typedef struct Walk{
 
 static Map runtime;
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var String_var(String);
 
 Var List_var(List);
@@ -2201,6 +2205,7 @@ break;
   }
 }
 
+Array Array_new(void);
 List Array_list_free(Array);
 static void _collect_functions(Var node, Array found){
 

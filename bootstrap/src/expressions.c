@@ -3331,6 +3331,8 @@ List Var_list(Var);
 
 int String_equal(String, String);
 
+Array Array_new(void);
+
 int List_len(List);
 
 int List_truth(List);
@@ -3774,12 +3776,12 @@ static void _completion_methods(Compiler compiler, Type receiver, Map seen, Arra
 
 }
 
+Map Map_new(void);
 static void _completion_delegates(Compiler compiler, Type receiver, Map seen, Array names, Map visited){
   Type aggregate = Sym_delegate_aggregate(compiler -> sym, receiver);  if(! List_truth(Type_list(aggregate)) || Map_contains(visited, List_var(aggregate))) return;  Map_setindex(visited, List_var(aggregate), int_var(1));  List order = Sym_field_order(compiler -> sym, aggregate); {
     List row;  List _x2c_macro_object_10 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_11))){
       row = Var_list(_x2c_macro_cursor_output_11); {
-        String field = Var_string(List_car(row));  if(! String_truth(field) || ! List_truth(Sym_get(compiler -> sym, List_append(Type_list(aggregate), cons(_316, cons(String_var(field), NULL)))))) continue;  Type type = Var_type(List_cadr(row));  _completion_methods(compiler, type, seen, names);  _completion_fields(compiler, type, seen, names, Map_new());
-        _completion_delegates(compiler, type, seen, names, visited);
+        String field = Var_string(List_car(row));  if(! String_truth(field) || ! List_truth(Sym_get(compiler -> sym, List_append(Type_list(aggregate), cons(_316, cons(String_var(field), NULL)))))) continue;  Type type = Var_type(List_cadr(row));  _completion_methods(compiler, type, seen, names);  _completion_fields(compiler, type, seen, names, Map_new());  _completion_delegates(compiler, type, seen, names, visited);
       }
 
     }
@@ -3789,51 +3791,27 @@ static void _completion_delegates(Compiler compiler, Type receiver, Map seen, Ar
 }
 
 void x2c_cleanup_push(X2CCleanup *);
-
 Array Array_sort(Array);
-
 int Array_try_next(Array, int *, Var *);
-
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access){
-  if(! _init_guard_) _file_init_();
-  Map seen = Map_new(), visited = Map_new();
-  Array names = Array_new();
-  {
+  if(! _init_guard_) _file_init_();  Map seen = Map_new(), visited = Map_new();  Array names = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
-    ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & names;
-    X2CCleanup _x2c_defer_record_0 ={
+    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & names;  X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
-    {
-      Array accepted = Array_new();
-      Type fields = Sym_resolve_key(c -> sym, receiver);
-      if(Type_is_pointer(fields)) fields = Type_dereference(fields);
-      _completion_fields(c, fields, seen, names, Map_new());
-      if(access == 93){
-        _completion_methods(c, receiver, seen, names);
-        _completion_delegates(c, receiver, seen, names, visited);
+    ;  x2c_cleanup_push(& _x2c_defer_record_0); {
+      Array accepted = Array_new();  Type fields = Sym_resolve_key(c -> sym, receiver);  if(Type_is_pointer(fields)) fields = Type_dereference(fields);  _completion_fields(c, fields, seen, names, Map_new());  if(access == 93){
+        _completion_methods(c, receiver, seen, names);  _completion_delegates(c, receiver, seen, names, visited);
       }
-      Array_sort(names);
-      {
-        String name;
-        Array _x2c_macro_object_11 = names;
-        int _x2c_macro_cursor_11 = 0;
-        Var _x2c_macro_cursor_output_12;
-        while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_12))){
-          name = Var_string(_x2c_macro_cursor_output_12);
-          {
-            List resolution = Compiler_resolve_postfix_member(c, receiver, cons(String_var(name), NULL), access, 1);
-            if(! List_truth(resolution) && access == 93) resolution = _resolve_delegate_method(c, receiver, name, c -> token);
-
+      Array_sort(names); {
+        String name;  Array _x2c_macro_object_11 = names;  int _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_12;  while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_12))){
+          name = Var_string(_x2c_macro_cursor_output_12); {
+            List resolution = Compiler_resolve_postfix_member(c, receiver, cons(String_var(name), NULL), access, 1);  if(! List_truth(resolution) && access == 93) resolution = _resolve_delegate_method(c, receiver, name, c -> token);
   {
     List _x2c_match_expr = resolution;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
-
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_326), &_x2c_match_capture)) {Array_push(accepted, String_var(name));  break;
           }
@@ -4657,6 +4635,7 @@ static List _slot_statements(List items){
 }
 }
 
+Array Array_update_n(Array, unsigned, ...);
 List Compiler_func_call_parts(Compiler compiler, Var content){
   if(! _init_guard_) _file_init_();  Macro call = _1913, apply = _1703, prepare = _1286, absent = _1415, boxed = _1516;
   {

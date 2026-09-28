@@ -341,6 +341,8 @@ static List _prepend_array(Array values, List tail){
   return tail;
 }
 
+Array Array_new(void);
+
 void x2c_cleanup_push(X2CCleanup *);
 
 Var Array_push(Array, Var);

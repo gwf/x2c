@@ -231,6 +231,8 @@ String SourceView_repr(SourceView value){
 
 }
 
+Map Map_new(void);
+
 void SourceView_init(SourceView sources){
   sources -> overlays = Map_new();
   sources -> dirty_paths = Map_new();

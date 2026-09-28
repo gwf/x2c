@@ -490,6 +490,8 @@ static String _JsonReader__string(_JsonReader j){
 
 }
 
+Array Array_new(void);
+
 Var Array_var(Array);
 
 Var Array_push(Array, Var);
@@ -513,6 +515,8 @@ static Var _JsonReader__array(_JsonReader j){
   }
 
 }
+
+Map Map_new(void);
 
 Var Map_var(Map);
 

@@ -380,6 +380,8 @@ int String_rfind(String str, String sub){
   return - 1;
 }
 
+Array Array_new(void);
+
 Var Array_push(Array, Var);
 
 List Array_list_free(Array);

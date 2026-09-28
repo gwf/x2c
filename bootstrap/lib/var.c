@@ -318,6 +318,8 @@ void Scope_push(Scope *);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+Map Map_new(void);
+
 void * Scope_calloc(size_t, size_t);
 
 Var Map_setindex(Map, Var, Var);

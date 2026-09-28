@@ -230,6 +230,10 @@ _x2c_initializer_choice_D09CF48E_13((_native_scalar_access_long_double =(struct 
 ))
 static Map native_scalars;
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var List_var(List);
 
 Var Symbol_var(Symbol);
@@ -501,8 +505,6 @@ static Job _lisp_List_job(List command);
 static Job _lisp_Job_start(Job job);
 static Buffer _lisp_Buffer_write_len(Buffer buf, const char * text, size_t length);
 static Map lisp_native_targets;
-Map Map_update_n(Map, unsigned, ...);
-Map Map_new(void);
 Var String_var(String);
 Var Func_var(Func);
 Func Func_new(FuncAdapter, List);
@@ -2039,6 +2041,7 @@ _Noreturn static Symbol _malformed(String source, unsigned at){
 
 }
 
+Array Array_new(void);
 Token Tokenizer_next(Tokenizer);
 Var Array_push(Array, Var);
 List Array_list(Array);
@@ -2549,30 +2552,21 @@ const void * Func_context(Func);
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 static Var _lisp_callback_one(Func function, const FuncArg * arguments){
   LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_one",.line = 873};  x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
-    __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_one",.line = 873};  x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
-  Var value = x2c_func_value_argument(function, arguments, 0, 45156);
-  return _apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL);
+  Var value = x2c_func_value_argument(function, arguments, 0, 45156);  return _apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL);
 }
 
 static Var _lisp_callback_two(Func function, const FuncArg * arguments){
-  LispCallbackContext * context =(void *) Func_context(function);
-  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_two",.line = 881};
-    x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
-    __builtin_unreachable();
+  LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_lisp_callback_two",.line = 881};  x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));  __builtin_unreachable();
   }
-  Var left = x2c_func_value_argument(function, arguments, 0, 45156);
-  Var right = x2c_func_value_argument(function, arguments, 1, 45156);
-  return _apply_values(context -> lisp, context -> callable, cons(left, cons(right, NULL)), NULL);
+  Var left = x2c_func_value_argument(function, arguments, 0, 45156);  Var right = x2c_func_value_argument(function, arguments, 1, 45156);  return _apply_values(context -> lisp, context -> callable, cons(left, cons(right, NULL)), NULL);
 }
 
 static Var _lisp_predicate_one(Func function, const FuncArg * arguments){
-  LispCallbackContext * context =(void *) Func_context(function);
-  if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate_one",.line = 891};
-    x2c_error_raise_n(& _x2c_error_site_12, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
+  LispCallbackContext * context =(void *) Func_context(function);  if(! lisp_active || lisp_active != context -> lisp){
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_lisp_predicate_one",.line = 891};  x2c_error_raise_n(& _x2c_error_site_12, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp callback")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
     __builtin_unreachable();
   }
   Var value = x2c_func_value_argument(function, arguments, 0, 45156);
@@ -5619,8 +5613,6 @@ static Var _x2c_func_adapt_160(Func _x2c_func_binding_160, const FuncArg * _x2c_
   return Array_var(List_array(a0));
   ;
 }
-
-Array Array_new(void);
 
 static Var _x2c_func_adapt_161(Func _x2c_func_binding_161, const FuncArg * _x2c_func_argv_161){
   return Array_var(Array_new());

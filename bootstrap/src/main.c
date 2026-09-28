@@ -356,6 +356,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
 
 int CliRequest_inspects(CliRequest);
 int Map_truth(Map);
+Map Map_new(void);
 int Path_exists(Path);
 void x2c_driver_error(const char *);
 int Path_is_dir(Path);
@@ -367,8 +368,7 @@ int Map_contains(Map, Var);
 Var Map_getindex(Map, Var);
 Var Map_setindex(Map, Var, Var);
 static void _preflight_translation(CliRequest c, Map unit_dirs){
-  String out_dir = c -> out_dir;  int checked = ! CliRequest_inspects(c) && ! Map_truth(unit_dirs);  Map stems = Map_new();
-  if(! CliRequest_inspects(c)){
+  String out_dir = c -> out_dir;  int checked = ! CliRequest_inspects(c) && ! Map_truth(unit_dirs);  Map stems = Map_new();  if(! CliRequest_inspects(c)){
     if(! Path_exists(out_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(out_dir), NULL))));
     if(! Path_is_dir(out_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(out_dir), NULL))));
     if(access(out_dir, W_OK | X_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(out_dir), NULL))));
@@ -504,6 +504,8 @@ void x2c_exception_mark_handled(ExceptionFrame *);
 Tokenizer Tokenizer_new(char *, Symbol);
 
 void Tokenizer_scan(Tokenizer);
+
+Array Array_new(void);
 
 Token Tokenizer_next(Tokenizer);
 

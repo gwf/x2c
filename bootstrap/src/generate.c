@@ -966,26 +966,16 @@ static List _definition_arms(List source, String name){
 return List_reverse(found);
 }
 
+Array Array_new(void);
 List preproc_within_arms(List, List);
 Var Array_push(Array, Var);
 List Array_list_free(Array);
 static List _within_definitions(List found, List statements){
-  if(! List_truth(found)) return statements;  Array output = Array_new();
-  {
-    List arms;
-    List _x2c_macro_object_2 = found;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      arms = Var_list(_x2c_macro_cursor_output_2);
-      {
-        List item;
-        List _x2c_macro_object_1 = preproc_within_arms(arms, statements);
-        List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-        Var _x2c_macro_cursor_output_1;
-        while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-          item = Var_list(_x2c_macro_cursor_output_1);
-          Array_push(output, List_var(item));
+  if(! List_truth(found)) return statements;  Array output = Array_new(); {
+    List arms;  List _x2c_macro_object_2 = found;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      arms = Var_list(_x2c_macro_cursor_output_2); {
+        List item;  List _x2c_macro_object_1 = preproc_within_arms(arms, statements);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+          item = Var_list(_x2c_macro_cursor_output_1);  Array_push(output, List_var(item));
         }
 
       }
@@ -997,14 +987,9 @@ static List _within_definitions(List found, List statements){
 }
 
 int String_truth(String);
-
 List Sym_reference(Sym, List, Type *);
-
 static List _make_shutdown_registration(Compiler compiler, List source){
-  String shutdown = compiler -> fini_fn;
-  if(! String_truth(shutdown)) return NULL;
-  List binding = Sym_reference(compiler -> sym, cons(String_var(shutdown), NULL), NULL);
-  return _within_definitions(_definition_arms(source, shutdown), cons(List_var(cons(_8, cons(List_var(cons(_1, cons(_11, cons(List_var(cons(_12, cons(_70, cons(List_var(cons(_13, cons(List_var(cons(_1, cons(_78, cons(List_var(cons(_7, cons(List_var(binding), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL))), NULL));
+  String shutdown = compiler -> fini_fn;  if(! String_truth(shutdown)) return NULL;  List binding = Sym_reference(compiler -> sym, cons(String_var(shutdown), NULL), NULL);  return _within_definitions(_definition_arms(source, shutdown), cons(List_var(cons(_8, cons(List_var(cons(_1, cons(_11, cons(List_var(cons(_12, cons(_70, cons(List_var(cons(_13, cons(List_var(cons(_1, cons(_78, cons(List_var(cons(_7, cons(List_var(binding), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL))), NULL));
 }
 
 static List _patch_func_with_init(List type, List bind, List statements, String initializer, List guard){
@@ -1020,10 +1005,8 @@ static List _make_file_init_func(Compiler compiler, List type, List entry, List 
 }
 
 List Sym_introduce(Sym, String);
-
 static List _wrap_protocol_initializer_function(Compiler compiler, List type, List bind, List statements){
-  List guard = Sym_introduce(compiler -> sym, _716);
-  return cons(_17, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_34, cons(List_var(cons(_117, cons(_120, cons(List_var(cons(_121, cons(List_var(cons(_5, cons(_83, cons(List_var(cons(_21, cons(List_var(guard), _100))), _132)))), NULL))), NULL)))), cons(List_var(cons(_0, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _82))), cons(List_var(cons(_8, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_5, cons(_83, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _95)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 1139215899608), List_append(statements, NULL))))))), NULL))));
+  List guard = Sym_introduce(compiler -> sym, _716);  return cons(_17, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_34, cons(List_var(cons(_117, cons(_120, cons(List_var(cons(_121, cons(List_var(cons(_5, cons(_83, cons(List_var(cons(_21, cons(List_var(guard), _100))), _132)))), NULL))), NULL)))), cons(List_var(cons(_0, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _82))), cons(List_var(cons(_8, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_5, cons(_83, cons(List_var(cons(_1, cons(_4, cons(List_var(cons(_7, cons(List_var(guard), NULL))), NULL)))), _95)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 1139215899608), List_append(statements, NULL))))))), NULL))));
 }
 
 static List _make_init_guard(List guard){
@@ -1035,33 +1018,20 @@ static inline int _has_file_init_blocks(Compiler compiler){
 }
 
 static List _prepend_init_prelude(List result, List init_guard, List init_func){
-  result = cons(List_var(init_guard), result);
-  if(List_truth(init_func)) result = cons(List_var(init_func), result);
-  return result;
+  result = cons(List_var(init_guard), result);  if(List_truth(init_func)) result = cons(List_var(init_func), result);  return result;
 }
 
 Symbol preproc_conditional_kind(String);
-
 static int _init_prelude_position(List source){
-  int position = 0, depth = 0, opening = 0;
-  {
-    List item;
-    List _x2c_macro_object_3 = source;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      item = Var_list(_x2c_macro_cursor_output_3);
-      {
+  int position = 0, depth = 0, opening = 0; {
+    List item;  List _x2c_macro_object_3 = source;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      item = Var_list(_x2c_macro_cursor_output_3); {
 
   {
     List _x2c_match_expr = item;
-    Var _x2c_match_values[1];
-        MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;
-        static MatchCaptureSite _x2c_match_site_1;
-        if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_141), &_x2c_match_capture)) {return depth ? opening : position;  break;
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_141), &_x2c_match_capture)) {return depth ? opening : position;  break;
       }
       case 35579270086: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var content = _x2c_match_values[0]; {
         Var _x2c_match_value_2 = content; {
@@ -1122,6 +1092,7 @@ default: break;
 }
 }
 
+Map Map_new(void);
 Var Array_getindex(Array, int);
 static Map _cache_reachable_functions(List source){
   Map callers = Map_new(), reachable = Map_new();  Array queue = Array_new(); {

@@ -33,6 +33,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new("hover");
 }
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -42,6 +46,8 @@ Var int_var(int);
 static Map _location(String path, int start, int end){
   return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
 }
+
+Array Array_new(void);
 
 List Compiler_diagnostics(Compiler);
 

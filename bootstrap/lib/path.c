@@ -272,6 +272,8 @@ double Path_modified_time(Path path){
 
 }
 
+Array Array_new(void);
+
 int strcmp(const char *, const char *);
 
 Var Array_push(Array, Var);

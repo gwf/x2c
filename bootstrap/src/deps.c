@@ -44,6 +44,8 @@ __attribute__((constructor)) static void _file_init_(void){
 
 int String_truth(String);
 
+Array Array_new(void);
+
 Buffer Buffer_new(size_t);
 
 Buffer Buffer_write_char(Buffer, char);

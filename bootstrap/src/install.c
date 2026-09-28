@@ -392,6 +392,8 @@ static List _entries(String directory){
   return List_filter(Path_list_dir(directory), _x2c_func_handle_0);
 }
 
+Array Array_new(void);
+
 int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
@@ -878,6 +880,10 @@ Path Path_basename(Path);
 int String_is_identifier(String);
 
 void Path_copy_tree(Path, Path);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
 
 Path Path_absolute(Path);
 

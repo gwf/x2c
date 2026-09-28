@@ -47,6 +47,10 @@ static Symbol _declarator_kind(Type type);
 
 static Map scalartypes;
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var List_var(List);
 
 _x2c_initializer_choice_2B6ED6EF_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_1), List_var(_9), List_var(_11), List_var(_16), List_var(_18), List_var(_26), List_var(_28), List_var(_36), List_var(_37), List_var(_45), List_var(_47), List_var(_55), List_var(_56), List_var(_64), List_var(_66), List_var(_73), List_var(_74), List_var(_82), List_var(_83), List_var(_91), List_var(_92), List_var(_100), List_var(_102), List_var(_110), List_var(_112), List_var(_120), List_var(_121), List_var(_129))))
@@ -515,6 +519,7 @@ default: break;
 return NULL;
 }
 
+Array Array_new(void);
 Iter Var_iter(Var, Iter);
 Var List_caddr(List);
 Var int_var(int);

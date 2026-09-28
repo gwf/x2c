@@ -469,6 +469,8 @@ static inline String _generate_cache_ident(Var id, String prefix){
 
 int List_truth(List);
 
+Array Array_new(void);
+
 int List_try_next(List, List *, Var *);
 
 List Sym_reference(Sym, List, Type *);
@@ -938,6 +940,7 @@ static void _queue_one_static_initializer(Compiler compiler, List binding, Map p
   Map_setindex(phases, List_var(binding), int_var(late));  Map_setindex(state, List_var(binding), int_var(2));
 }
 
+Map Map_new(void);
 Var Array_var(Array);
 static void _queue_static_initializers(Compiler compiler, Array initializers, Symbol deferred_kind){
   Map pending = Map_new(), state = Map_new(), phases = Map_new(); {
@@ -1017,6 +1020,7 @@ __builtin_unreachable();
 return cons(List_var(list_ids), cons(List_var(string_ids), cons(List_var(var_ids), NULL)));
 }
 
+Array Array_update_n(Array, unsigned, ...);
 void x2c_cleanup_push(X2CCleanup *);
 Var Array_take_last(Array);
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);

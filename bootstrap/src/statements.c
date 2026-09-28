@@ -452,6 +452,8 @@ static Symbol _arm_end(List run){
   return end;
 }
 
+Array Array_new(void);
+
 void x2c_cleanup_push(X2CCleanup *);
 
 Symbol Compiler_peek(Compiler, int);

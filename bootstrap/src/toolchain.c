@@ -534,6 +534,10 @@ Job Job_options(Job, Map);
 
 Job List_job(List);
 
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
 Var List_car(List);
 
 int Job_status(Job);
@@ -548,6 +552,8 @@ int tool_capture(List arguments, String * output, String * errors){
   (* errors) = j -> errors_text;
   return status;
 }
+
+Array Array_new(void);
 
 int String_contains(String, String);
 

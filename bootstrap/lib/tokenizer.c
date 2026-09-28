@@ -447,6 +447,10 @@ String Token_repr(Token token){
   return String_join(NULL, cons(String_var(head), cons(String_var(_6), cons(String_var(location), cons(String_var(_6), cons(String_var(extent), cons(String_var(_7), NULL)))))));
 }
 
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
 Var Symbol_var(Symbol);
 
 Bytes Bytes_new(size_t);
