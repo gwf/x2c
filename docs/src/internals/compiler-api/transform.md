@@ -18,8 +18,8 @@ X2c AST transformation pipeline.
 | [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
 | [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
 | [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
-| [`transform_array_literal`](#transform_array_literal) | Converts an `(array ...)` or `(varray ...)` node to source-ordered `(varray ...)` form, converting every typed element to `Var`. |
-| [`transform_map_literal`](#transform_map_literal) | Converts a `(map ...)` or `(vmap ...)` node to source-ordered `(vmap (vpair ...))` form, converting every typed key and value to `Var`. |
+| [`transform_array_literal`](#transform_array_literal) | Converts an array literal to source-ordered Var arguments for its counted constructor. |
+| [`transform_map_literal`](#transform_map_literal) | Converts a map literal to alternating Var key/value arguments for its counted constructor. |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
@@ -94,20 +94,19 @@ Source: `src/transform.x:2394`
 
 `List transform_array_literal(Compiler compiler, List ast)`
 
-Converts an `(array ...)` or `(varray ...)` node to source-ordered
-`(varray ...)` form, converting every typed element to `Var`.
+Converts an array literal to source-ordered Var arguments for its
+counted constructor.
 
-Source: `src/transform.x:3637`
+Source: `src/transform.x:3675`
 
 #### transform_map_literal
 
 `List transform_map_literal(Compiler compiler, List ast)`
 
-Converts a `(map ...)` or `(vmap ...)` node to source-ordered
-`(vmap (vpair ...))` form, converting every typed key and value to
-`Var`.
+Converts a map literal to alternating Var key/value arguments for its
+counted constructor.
 
-Source: `src/transform.x:3648`
+Source: `src/transform.x:3684`
 
 ### `Compiler`
 
@@ -257,7 +256,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4444`
+Source: `src/transform.x:4480`
 
 ## Design notes
 
