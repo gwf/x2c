@@ -44,6 +44,11 @@ macro Statement $do_loop(Statement $body, Expr $condition) {
   do $body while ($condition)
 }
 
+/* A switch whose body owns its cases. */
+macro Statement $switched(Expr $subject, Statement $body) {
+  switch ($subject) $body
+}
+
 /* Return's result type is binder context, not source syntax. */
 macro Statement $return_empty() { return; }
 macro Statement $return_value(Expr $value) { return $value; }

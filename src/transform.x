@@ -2573,6 +2573,7 @@ static Var _rewrite(Walk walk, Var value) {
   match (node) case %(expr *): return value;
   Macro caught = $caught, tried = $tried;
   Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro switched = $switched;
   match (node) {
     /* First: recognition looks through a position wrapper, which this
        case records for reports. */
@@ -2606,8 +2607,8 @@ static Var _rewrite(Walk walk, Var value) {
     case %(for ?initial ?condition ?increment ?body):
       return %(for ${_rewrite(walk, initial)} ${_rewrite(walk, condition)}
                ${_rewrite(walk, increment)} ${_bounded(walk, body, 1)});
-    case %(switch ?expression ?body):
-      return %(switch ${_rewrite(walk, expression)}
+    case switched(?subject, ?body):
+      return %(switch ${_rewrite(walk, subject)}
                ${_bounded(walk, body, 0)});
     /* A `match` emits a switch over its arms, so an arm's `break` leaves the
        match and no region with it. Its `continue` still reaches the

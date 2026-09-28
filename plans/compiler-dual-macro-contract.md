@@ -2745,6 +2745,36 @@ and result extraction. This proposed outer-call replacement removes too
 little structural code to justify those additions. Keep the current case;
 this finding does not reject other call-form consumers or a different shared
 projection.
+### E30. Bound switch transfer recognition (target readable form)
+
+`_switch_statement` parses a subject and body, and `bind_syntax` publishes
+the same two-child `(switch subject body)` shape with a resolved subject.
+The shared source form is:
+
+```x2c
+macro Statement $switched(Expr $subject, Statement $body) {
+  switch ($subject) $body
+}
+```
+
+The complete `_rewrite` client retains the current child order and switch
+break boundary:
+
+```x2c
+Macro caught = $caught, tried = $tried;
+Macro while_loop = $while_loop, do_loop = $do_loop;
+Macro switched = $switched;
+match (node) {
+  case switched(?subject, ?body):
+    return %(switch ${_rewrite(walk, subject)}
+             ${_bounded(walk, body, 0)});
+}
+```
+
+The outer `at` case still owns source origins, and the result stays a
+canonical switch node. `cleanup-loop-boundary` checks break/continue
+cleanup, `c-body-directive` checks native C output, and
+`comptime-lowering` checks switch execution.
 
 ### F. Static-local initialization exception
 
