@@ -1,8 +1,14 @@
 # Restructure src/stage.x
 
-> Status: needs author review - 2026-09-27. Read-only review of
-> `src/stage.x` at `origin/meta-integration` 87d79f00 (1,311 lines). No
-> source was changed. Waiting for Gary's review before implementation.
+> Status: done - 2026-09-27, `dev` 2e80c7f3. Steps 1, 3, 5, and 6 landed:
+> `src/stage.x` 1,310 -> 377 lines (conversion only), new
+> `src/meta-group.x` (700) and `src/meta-helper-client.x` (263), shared
+> framing `datum_frame`/`datum_unframe` in `lib/datum.x`. Group C is
+> byte-identical after stamp normalization. Step 2 stopped as allowed: a
+> child compiler needed more setup than the 23 assignments, so
+> `_meta_group_code` keeps save/restore with a comment. Step 4 used the
+> fallback unit: placing the client or toolchain in `meta-project.x`
+> makes an include cycle. Net source grew about 56 lines.
 
 ## Goal
 
