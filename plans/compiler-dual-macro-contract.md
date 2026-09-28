@@ -2342,6 +2342,42 @@ The `do` form omits a template trailing semicolon so a macro-produced
 `do ... while` statement matches the same binder case;
 `macro-statement-production` checks that constructed path.
 
+### E18. Parsed return recognition (target readable form)
+
+`macro-string-return` has both a source `return "NaN"` and the same return
+through a Statement macro. `Compiler.finish_return_statement` resolves the
+expression, checks its conversion, and writes the active `return_type` into
+the bound node. An empty return has no type child. The source forms are:
+
+```x2c
+macro Statement $return_empty() { return; }
+macro Statement $return_value(Expr $value) { return $value; }
+```
+
+A return expression parsed inside a function already carries its current
+type annotation. That annotation is binder context, not source syntax. The
+Statement source matcher recognizes both the annotated source form and an
+unannotated macro-produced return without a separate projection operation;
+the binder still writes the active return type after resolving the value.
+
+The complete client in `Compiler.bind_syntax`, before its main match, is:
+
+```x2c
+Macro return_empty = $return_empty, return_value = $return_value;
+match (input) {
+  case return_empty():
+    if (statement_position) return _.finish_return_statement(NULL);
+  case return_value(?expression):
+    if (statement_position) return _.finish_return_statement(expression);
+}
+```
+
+The enclosing `at` case reattaches source positions. The binder continues
+to use its active return type for conversion. `macro-string-return`,
+`macro-statement-production`, `managed-init-return`, and
+`class-init-wrong-return` check source and macro returns, empty return,
+conversion, and rejection diagnostics.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

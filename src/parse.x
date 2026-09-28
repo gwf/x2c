@@ -2477,6 +2477,7 @@ List Compiler.bind_syntax(
   if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro return_empty = $return_empty, return_value = $return_value;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2802,9 +2803,9 @@ List Compiler.bind_syntax(
         Var anchor = origin == <m-origin> ? _.origin : origin;
         return %(at $anchor $bound);
       }
-      case %(return):
+      case return_empty():
         if (statement_position) return _.finish_return_statement(NULL);
-      case %(return ? ?expression):
+      case return_value(?expression):
         if (statement_position) return _.finish_return_statement(expression);
       case %((!or break continue default empty)):
         if (statement_position) return input;

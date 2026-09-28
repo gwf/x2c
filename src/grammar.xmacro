@@ -44,6 +44,10 @@ macro Statement $do_loop(Statement $body, Expr $condition) {
   do $body while ($condition)
 }
 
+/* Return's result type is binder context, not source syntax. */
+macro Statement $return_empty() { return; }
+macro Statement $return_value(Expr $value) { return $value; }
+
 /* A noncapturing lambda expression: its parameters and body. */
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
