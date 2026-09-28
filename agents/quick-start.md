@@ -27,6 +27,11 @@ required sequence.
 
 | Command | Purpose |
 | --- | --- |
+| `make build` | Rebuild the current development compiler. |
+| `make bootstrap-refresh` | Regenerate the bootstrap with the current compiler. |
+| `make build-safe` | Cleanly rebuild stage 0 from bootstrap. |
+| `make stage-2` | Build through stage 2 for a local self-host experiment. |
+| `make proof-raw-symbols` | Optional full-corpus symbol-mode comparison. |
 | `make verify` | Unit suites, compiler fixtures, and focused probes. |
 | `make stage-3` | Build through the third self-hosted stage. |
 | `make stage-diff-all` | Compare generated C/H file sets and bytes across stages. |
@@ -67,9 +72,17 @@ translates it, and source installs compile it with the host C compiler.
 The option stays out of user builds and `unittest/`, whose suites provoke
 region warnings on purpose.
 
-`make precommit` refreshes bootstrap, rebuilds stage 0 safely, builds through
+Private worktree commits may be made whenever useful, with no checks required
+merely to commit. For a language feature followed by adoption, build the
+feature, refresh bootstrap when the seed needs that capability, and try its
+callers locally. The build and stage commands above are available experiments,
+not a required local sequence or a reason to publish the feature separately.
+
+`make precommit` is a publication-readiness target, not a Git commit prerequisite.
+It refreshes bootstrap, rebuilds stage 0 safely, builds through
 stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it,
-`proof-cold-collection`, and the remaining extended checks. Stage 2
+`doc-check`, `proof-cold-collection`, and the remaining extended checks.
+The full `proof-raw-symbols` sweep remains an explicit optional command. Stage 2
 establishes self-host convergence; the fourth build is available on demand.
 `proof-cold-collection` retranslates `lib/` and `src/` with stage 1 and the
 hidden `--no-interfaces` option, then requires stage 2's C, headers, and
@@ -83,9 +96,9 @@ performance.
 
 Source changes can leave `stage-diff-0` red until bootstrap is regenerated:
 it compares checked-in bootstrap C/H with stage 0 output. The publication
-command owns that refresh; inspect its generated diff. Use the individual
-self-host stage comparisons when a staged language transition needs evidence
-before an explicit bootstrap refresh.
+command owns the final refresh; inspect its generated diff. A local language
+transition may refresh bootstrap earlier and use individual self-host stage
+comparisons without running the publication gate.
 
 Use `x2c translate --dump-conformance <units>` for a per-unit conformance
 table. Run package checks when compiler or runtime changes can affect package

@@ -38,7 +38,10 @@ Use focused checks to answer implementation questions and verify what the user
 will observe. Refresh affected symbols, headers, fixtures, and generated docs
 through their documented targets, accepting only reviewed output changes. Let
 the root publication command perform the final bootstrap refresh and build
-sequence unless a staged language transition needs an earlier build.
+sequence. When adopting a new language capability locally, build it and refresh
+bootstrap before compiling its callers; focused probes or stage comparisons
+can check the transition without an intermediate gate or publication. Private
+checkpoint commits may be made at any point under the root local-work policy.
 
 Before publication validation, review and fix the completed authored diff.
 Look for deletion and reuse opportunities, repeated checks of established
