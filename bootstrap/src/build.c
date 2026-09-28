@@ -439,6 +439,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 List translation_depfile_parse(String);
 
 static List _state_dep_inputs(String depfile){
@@ -1214,6 +1218,8 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
 }
 
 String String_str(String);
+
+int x2c_exception_claim(ExceptionFrame *);
 
 static int _same_file_bytes(String first, String second){
   FILE * left = fopen(String_str(first), "rb");

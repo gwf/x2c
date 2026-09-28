@@ -779,6 +779,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 String home_absolute_path(String);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 Array Array_sort(Array);
 
 Compiler Compiler_new_shared(Compiler);
@@ -1360,6 +1362,8 @@ int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 String interface_prelude(void){
   if(! _init_guard_) _file_init_();  String identity = x2c_compiler_identity();  if(! String_truth(identity)) return NULL;  String runtime = _canonical_path(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_89), NULL))));  String header = String_join(NULL, cons(String_var(_142), cons(String_var(identity), cons(String_var(_143), NULL)))); {
     String path;  List _x2c_macro_object_26 = _interface_candidates(runtime);  List _x2c_macro_cursor_26 = _x2c_macro_object_26;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_26, &(_x2c_macro_cursor_26), &(_x2c_macro_cursor_output_23))){

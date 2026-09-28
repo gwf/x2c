@@ -324,6 +324,8 @@ void * Scope_calloc(size_t, size_t);
 
 Var Map_setindex(Map, Var, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 VarDescriptor * x2c_var_declare(Symbol tag){
   VarDescriptor * descriptor = _declared(tag);
   if(descriptor) return descriptor;

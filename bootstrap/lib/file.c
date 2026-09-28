@@ -221,6 +221,10 @@ void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 static void _write_bytes(File file, const void * ptr, size_t size, size_t * written){
   const unsigned char * bytes = ptr;
   size_t volatile offset = 0;
@@ -274,6 +278,8 @@ static void _append_text(Block content, const void * bytes, size_t count){
 }
 
 void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 Block Block_new(size_t);
 

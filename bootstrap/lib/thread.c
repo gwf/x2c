@@ -248,6 +248,8 @@ Symbol Logger_error_handler(List, Var);
 
 Var Context_export(Context, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 void x2c_exception_landed(ExceptionFrame *);
 
 int x2c_exception_is_error_target(ExceptionFrame *);
@@ -257,6 +259,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 void Context_close(Context);
 

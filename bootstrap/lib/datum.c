@@ -376,6 +376,8 @@ Buffer Buffer_new(size_t);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 size_t Buffer_len(Buffer);
 
 String Buffer_str(Buffer);

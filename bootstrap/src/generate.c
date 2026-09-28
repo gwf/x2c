@@ -2014,6 +2014,7 @@ List Sym_resolve_global(Sym, List, Type *);
 int List_equal(List, List);
 List Sym_get(Sym, List);
 List Type_declaration_ast(Type, List);
+void x2c_cleanup_leave(X2CCleanup *);
 static void _collect_forward_dependencies(Compiler compiler, Var value, Map locals, Map statics, Map seen, Array prototypes){
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return;  Array resume = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -2361,6 +2362,8 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
 Var Error_snapshot(Var);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 String String_new(const char *);
 Var List_assoc(List, Var);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);

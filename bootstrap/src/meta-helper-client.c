@@ -323,6 +323,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int datum_frame(Buffer, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 String Buffer_str(Buffer);
 
 int String_len(String);
@@ -406,6 +408,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 Buffer Buffer_write(Buffer, const char *);
 

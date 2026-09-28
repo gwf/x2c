@@ -2382,6 +2382,8 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 Var Map_var(Map);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void _install_source(Compiler compiler, String text, String filename, String marker, int builtin){
   (void) String_try_own(marker);
   Var installed;
@@ -3230,6 +3232,8 @@ int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 static Var _eval_string(Compiler compiler, String source, Token invocation){
   Var volatile result; {
     Token * _x2c_macro_address_1 = & macro_import_invocation;  Token _x2c_macro_previous_1 = * _x2c_macro_address_1; {

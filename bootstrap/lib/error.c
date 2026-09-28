@@ -229,6 +229,8 @@ int x2c_error_catch_site_pending(ErrorCatchSite * site){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int List_try_own(List);
 
 List Var_list(Var);

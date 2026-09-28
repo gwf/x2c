@@ -249,6 +249,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 Var Symbol_var(Symbol);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void Array__core_setslice(Array _x2c_macro_array_7, int _x2c_macro_start_2, int _x2c_macro_end_1, Array _x2c_macro_values_0){
   int _x2c_macro_n_3 =(int) _x2c_macro_array_7 -> length;
   int _x2c_macro_begin_1 = _x2c_macro_start_2, _x2c_macro_finish_1 = _x2c_macro_end_1;

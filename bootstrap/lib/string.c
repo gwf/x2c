@@ -624,6 +624,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int Var_truth(Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 String String_filter(String str, Func fn){
   if(! String_truth(str) || ! fn || ! * str) return str;
   int _x2c_macro_length_3 = String_len(str);
@@ -1037,6 +1039,10 @@ void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
 
 List cons(Var, List);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 static Var _format_convert(Var value, Symbol target, int offset){
   Var volatile converted =((void) 0, Void);

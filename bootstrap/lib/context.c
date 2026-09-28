@@ -170,6 +170,8 @@ void * Error_context_open(void);
 
 void * MatchCache_context_open(void);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static Context _open(const char * name, int isolated){
   Context_initialize();
   Context context = Scope_calloc(1, sizeof(struct Context));

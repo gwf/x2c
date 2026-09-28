@@ -1025,6 +1025,7 @@ void x2c_cleanup_push(X2CCleanup *);
 Var Array_take_last(Array);
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int List_equal(List, List);
+void x2c_cleanup_leave(X2CCleanup *);
 static int _collect_cache_ids(Compiler compiler, Var value, List * seen, Array ids){
   Array pending = Array_update_n(Array_new(), 1, value); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={

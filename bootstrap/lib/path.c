@@ -521,6 +521,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 Var Context_export(Context, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void _remove_tree(Path path, String * failed, int * failure){
   struct stat info;
   if(lstat(path, & info)){

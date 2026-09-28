@@ -1562,6 +1562,7 @@ Var Array_push(Array, Var);
 List Type_declaration_parts(Type);
 List Array_list(Array);
 Var List_getindex(List, int);
+void x2c_cleanup_leave(X2CCleanup *);
 int Var_is(Var, Symbol);
 int Symbol_is_storage_class(Symbol);
 int Symbol_is_inline(Symbol);

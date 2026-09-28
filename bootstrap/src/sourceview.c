@@ -125,6 +125,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 String Buffer_str(Buffer);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 String SourceView_str(SourceView value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
@@ -290,6 +292,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;

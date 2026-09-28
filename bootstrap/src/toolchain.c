@@ -235,6 +235,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 List String_split_lines(String, int);
 
 int List_try_next(List, List *, Var *);

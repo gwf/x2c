@@ -206,6 +206,8 @@ Var Symbol_var(Symbol);
 
 Var String_var(String);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 void x2c_register_type(String name){
   if(! _init_guard_) _file_init_();
   _descriptor_lock();

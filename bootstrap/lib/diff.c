@@ -91,6 +91,8 @@ void * Scope_calloc(size_t, size_t);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 Var int_var(int);
 
 int List_try_next(List, List *, Var *);

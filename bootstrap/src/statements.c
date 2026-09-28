@@ -462,6 +462,8 @@ Var Array_getindex(Array, int);
 
 List Array_list(Array);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 List Compiler_parse_governed(Compiler c, AstPos position){
   if(! _init_guard_) _file_init_();
   Array items = Array_new();

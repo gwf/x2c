@@ -225,6 +225,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 String Buffer_str(Buffer);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 String Job_str(Job value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
@@ -645,6 +647,10 @@ void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 static void Job__start(Job job){
   _Launch * launch = job -> launch;
   job -> started = 1;
@@ -814,6 +820,8 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
 
 static String _captured(File file, int * nul){
   if(! file) return NULL;

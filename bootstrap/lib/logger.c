@@ -328,6 +328,8 @@ int Logger_level_priority(Symbol level){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 Symbol Logger_min_level(Logger logger){
   if(! _init_guard_) Logger_initialize();
   _lock();

@@ -498,6 +498,7 @@ static void _release_blocks(Pool inner){
 }
 
 void x2c_cleanup_push(X2CCleanup *);
+void x2c_cleanup_leave(X2CCleanup *);
 Scope Scope_new_named(const char *);
 void * Scope_malloc_in(Scope *, size_t);
 void Scope_push(Scope *);

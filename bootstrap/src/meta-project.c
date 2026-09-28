@@ -334,6 +334,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 Path Path_dirname(Path);
 
 Tokenizer Tokenizer_new(char *, Symbol);
@@ -451,6 +455,8 @@ static int _meta_scan(CliRequest request, String path, Array imports, Map seen, 
 int Frontend_start(Frontend, String, ParsedUnit *);
 
 void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 int ParsedUnit_collect(ParsedUnit *, Frontend);
 

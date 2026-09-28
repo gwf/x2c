@@ -3793,6 +3793,7 @@ static void _completion_delegates(Compiler compiler, Type receiver, Map seen, Ar
 void x2c_cleanup_push(X2CCleanup *);
 Array Array_sort(Array);
 int Array_try_next(Array, int *, Var *);
+void x2c_cleanup_leave(X2CCleanup *);
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access){
   if(! _init_guard_) _file_init_();  Map seen = Map_new(), visited = Map_new();  Array names = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -6170,6 +6171,8 @@ int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 static List _initializer_conversion(Compiler c, List value, Type type, List condition, List target, int * native_used){
   if(! List_truth(condition)) return _convert_initializer(c, value, type, target, native_used);  if(native_used)(* native_used) = 1;
   {

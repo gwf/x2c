@@ -1098,6 +1098,8 @@ void Scope_move(void *, Scope *);
 
 Block Bytes_block(Bytes);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_6){
   unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_6 -> hashes;
   struct MapIntIntRecord * _x2c_macro_entries_1 = _x2c_macro_map_6 -> entries;

@@ -3247,6 +3247,7 @@ static List _parse_associated_type(Compiler c, Map names, String participant){
 
 void x2c_cleanup_push(X2CCleanup *);
 List Compiler_parse_simple_declaration(Compiler);
+void x2c_cleanup_leave(X2CCleanup *);
 int String_startswith(String, String);
 int String_len(String);
 Type List_type_from_ast(List);

@@ -390,6 +390,8 @@ Var List_cadr(List);
 
 void File_path_error(Var, String, int);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
   String suffix = String_printf(_13, (long) getpid());

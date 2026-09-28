@@ -176,6 +176,8 @@ Buffer Buffer_write(Buffer buf, const char * text){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 Buffer Buffer_printf(Buffer buf, const char * format, ...){
   char stack[160];
   va_list args;

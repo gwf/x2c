@@ -300,6 +300,8 @@ String Var_string(Var);
 
 Map Compiler_collect_symbols(Compiler, Map);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static Map _collect_input(Frontend frontend, Compiler c, Map globs){
   String package = c -> package;
   {
@@ -452,6 +454,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 int Compiler_error_count(Compiler);
 

@@ -347,6 +347,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 Var Array_push(Array, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 List List_append(List a, List b){
   if(! List_truth(a)) return b;
   if(! List_truth(b)) return a;
@@ -1604,6 +1606,10 @@ String List_str(List lst){
 void x2c_exception_push(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 Buffer List_write_str(List lst, Buffer out){
   {

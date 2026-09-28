@@ -924,6 +924,7 @@ int List_try_own(List);
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 MatchPlan MatchPlan_prepare(Var);
 void x2c_cleanup_push(X2CCleanup *);
+void x2c_cleanup_leave(X2CCleanup *);
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   if(! _init_guard_) _file_init_();  Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX

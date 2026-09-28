@@ -329,6 +329,8 @@ void Scope_move(void *, Scope *);
 
 Block Bytes_block(Bytes);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void Map__core_expand(Map _x2c_macro_map_6){
   unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_6 -> hashes;
   struct MapRecord * _x2c_macro_entries_1 = _x2c_macro_map_6 -> entries;

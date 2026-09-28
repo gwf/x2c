@@ -634,6 +634,7 @@ Map Map_new(void);
 void x2c_cleanup_push(X2CCleanup *);
 List datum_result_problem(Var, Map);
 Var List_cadr(List);
+void x2c_cleanup_leave(X2CCleanup *);
 static void _meta_refuse(Compiler c, Var value, Token site){
   Map marks = Map_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={

@@ -2299,6 +2299,7 @@ static void _fixpoint(Walk w, List ast, Array functions){
 
 void x2c_cleanup_push(X2CCleanup *);
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
+void x2c_cleanup_leave(X2CCleanup *);
 void Compiler_check_regions(Compiler c, List ast){
   if(! _init_guard_) _file_init_();  struct Walk walk ={
     .compiler = c, .summaries = Map_new(), .pending = Array_new(), .freed = Array_new()

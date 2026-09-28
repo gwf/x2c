@@ -1275,6 +1275,8 @@ static List Emitter__typedef(Emitter e, List ast){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static List Emitter__block(Emitter e, List ast){
   {
     List * _x2c_macro_address_0 = & e -> native_aliases;

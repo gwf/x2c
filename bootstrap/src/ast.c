@@ -368,6 +368,8 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is_nil(Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int ast_contains_head(Var value, Symbol kind){
   Array pending = Array_new();
   {

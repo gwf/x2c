@@ -731,6 +731,8 @@ int String_equal(String, String);
 
 Var Map_getindex(Map, Var);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void _write_members(Buffer out, Map object, int pretty, int depth){
   Array names = Array_new();
   {

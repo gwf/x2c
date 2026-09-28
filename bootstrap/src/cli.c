@@ -1476,6 +1476,8 @@ void * Scope_calloc(size_t, size_t);
 
 int String_endswith(String, String);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
   Array words = Array_new();

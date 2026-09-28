@@ -1694,6 +1694,7 @@ long Var_integer(Var);
 Var Array_take_last(Array);
 List Array_list(Array);
 Var List_caddr(List);
+void x2c_cleanup_leave(X2CCleanup *);
 static void _scan_conditionals(Compiler c){
   Array stack = Array_new(); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -1919,6 +1920,8 @@ int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 int Compiler_collect_compile_time_definition(Compiler c, int keyword){
   if(! _init_guard_) _file_init_();  int volatile failed = 0;  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics); {

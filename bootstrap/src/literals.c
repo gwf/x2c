@@ -1102,6 +1102,7 @@ Var Compiler_match_pattern_value(Compiler, Var);
 int Map_try_get(Map, Var, Var *);
 Array Array_new(void);
 void x2c_cleanup_push(X2CCleanup *);
+void x2c_cleanup_leave(X2CCleanup *);
 int Var_is_match_op(Var);
 Var Array_setindex(Array, int, Var);
 static List _typed_pattern(Compiler c, List node, Map tags){

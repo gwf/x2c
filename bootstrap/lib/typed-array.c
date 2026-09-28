@@ -967,6 +967,8 @@ Var Context_export_nested(Context, Var);
 
 void Block_append(Block, const void *, size_t);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static ArrayString _prepare_string_array_export(ArrayString array, Context source){
   ArrayString staged = ArrayString_new(), result = NULL;
   {

@@ -289,6 +289,10 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
 static void _release_packages(void){
   String work = _staging;
   _staging = NULL;
@@ -439,6 +443,8 @@ void x2c_cleanup_push(X2CCleanup *);
 String File_sha256(File);
 
 int String_equal(String, String);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 static void _verify(Path p, String expected){
   File input = File_open(p, "rb");

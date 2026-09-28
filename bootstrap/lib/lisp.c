@@ -2117,6 +2117,7 @@ void Scope_push(Scope *);
 void x2c_cleanup_push(X2CCleanup *);
 Tokenizer Tokenizer_new(char *, Symbol);
 void Tokenizer_scan(Tokenizer);
+void x2c_cleanup_leave(X2CCleanup *);
 static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
   Tokenizer tokenizer = NULL; {
     Scope_push(scope); {
@@ -3873,6 +3874,10 @@ void Lisp_set_interrupted(Lisp lisp, int interrupted){
 }
 
 void x2c_exception_push(ExceptionFrame *);
+
+int x2c_exception_claim(ExceptionFrame *);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 

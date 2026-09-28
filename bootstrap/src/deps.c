@@ -143,6 +143,8 @@ Path Path_absolute(Path);
 
 int String_equal(String, String);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
   Array paths = Array_new();
   {
@@ -257,6 +259,10 @@ ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 void x2c_exception_push(ExceptionFrame *);
 
 void file_publish(List);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 void x2c_exception_landed(ExceptionFrame *);
 

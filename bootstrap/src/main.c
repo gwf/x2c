@@ -259,6 +259,7 @@ int Frontend_start(Frontend, String, ParsedUnit *);
 void x2c_cleanup_push(X2CCleanup *);
 void Compiler_own_diagnostics(Compiler);
 void Compiler_dump_tokens(Compiler);
+void x2c_cleanup_leave(X2CCleanup *);
 int ParsedUnit_collect(ParsedUnit *, Frontend);
 int String_truth(String);
 void Compiler_dump_symbol_table(Compiler, Map);
@@ -500,6 +501,10 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
 
 Tokenizer Tokenizer_new(char *, Symbol);
 

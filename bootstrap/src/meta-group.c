@@ -842,6 +842,8 @@ int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 void x2c_exception_mark_handled(ExceptionFrame *);
+void x2c_error_catch_close(ErrorHandler);
+void x2c_exception_leave(ExceptionFrame *);
 List x2c_literal_string(String);
 List x2c_literal_int(int);
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);

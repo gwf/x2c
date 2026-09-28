@@ -344,6 +344,8 @@ Var Array_var(Array);
 
 Array Array_update_n(Array, unsigned, ...);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 static void Compiler__write_json(Compiler c, List entry){
   Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436))), notes = Var_list(List_assoc(entry, Symbol_var(30384486)));

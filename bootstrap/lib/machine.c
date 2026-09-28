@@ -187,6 +187,8 @@ void x2c_cleanup_push(X2CCleanup *);
 
 String Buffer_str(Buffer);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 String MachineProgram_str(MachineProgram value){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);

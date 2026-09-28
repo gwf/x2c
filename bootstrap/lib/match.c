@@ -2158,6 +2158,8 @@ static void _cache_activate(MatchCache cache, int slot, MatchLease * lease){
 
 void x2c_cleanup_push(X2CCleanup *);
 
+void x2c_cleanup_leave(X2CCleanup *);
+
 int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
   if(! _init_guard_) _file_init_();
   (* lease) =(MatchLease){
