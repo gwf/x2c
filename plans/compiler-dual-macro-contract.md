@@ -1985,6 +1985,61 @@ borrowed sink's region. Restoring the original source made all three fixtures
 pass again. This rejects the narrow typed-matcher substitution. A future
 shared recognizer must account for the raw-node boundary and retain those
 escape diagnostics without a parallel raw fallback.
+### E16. Synthetic file initializer: sequence-hole exception
+
+The executable `conditional-type-initializer` fixture establishes the
+important boundary: a type initializer compiled out by preprocessor arms
+still leaves the file's cache and shutdown behavior reachable. The generator
+continues to select a constructor or lazy entry, track conditional arms,
+order `<early>`, `<mid>`, and `<late>` statements, and place shutdown last.
+The trial template tried to write the generated function shape and its
+once-only guard:
+
+```x2c
+macro open Unit $file_initializer(Type $result, Name $name, Name $guard,
+    Statement $entry..., Statement $early..., Statement $mid...,
+    Statement $late..., Statement $shutdown...) {
+  $result $name(void) {
+    $entry...
+    if ($guard) return;
+    $guard = 1;
+    $early...
+    $mid...
+    $late...
+    $shutdown...
+  }
+}
+```
+
+The trial client kept the existing `_file_init` selection and replaced
+`_make_file_init_func`; all phase lists and conditional rows were already
+produced by their current owners:
+
+```x2c
+static List _make_file_init_func(
+  Compiler compiler, List type, List entry, List guard, List initializer,
+  List shutdown) {
+  Macro shape = $file_initializer;
+  return compiler.bind_syntax(
+    shape(type, initializer, guard, entry,
+      compiler.init_statements(<early>),
+      compiler.init_statements(<mid>),
+      compiler.init_statements(<late>), shutdown),
+    AST_UNIT, NULL);
+}
+```
+
+`make build` rejected this shape at the second sequence parameter:
+`sequence macro hole must be the final argument`. Multiple distinct ordered
+phase and conditional sequences therefore cannot be separate holes in a
+single current template. Combining them into one sequence would move their
+visible order and the guard back to the client; it would not provide the
+intended readable generated function. Also, `entry` and `shutdown` may
+contain `preproc` rows from `_within_definitions`, which a Statement sequence
+hole has not been shown to preserve. The `src/generate.x` trial was restored.
+The existing native constructor remains the owner of preprocessor placement,
+guard identity, phase order, and shutdown. No generated C/H comparison of the
+trial was possible because the source could not compile.
 
 ### F. Static-local initialization exception
 
