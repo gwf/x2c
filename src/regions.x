@@ -1007,7 +1007,8 @@ static void _declare(Walk w, Var specifiers, List bindings) {
    defer. A store into a place this block restores is undone before the
    block ends, so it is not an escape. */
 static int _note_restored(Walk w, Var body) {
-  match (body) case %(stmnt ?expression):
+  Macro statement = $expression_statement;
+  match (body) case statement(?expression):
     match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
       Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;

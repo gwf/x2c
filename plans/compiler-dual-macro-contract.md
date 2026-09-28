@@ -2581,6 +2581,41 @@ including parenthesized, unary and type operands. Its checked stdout is
 those generated files were retained as baseline artifacts rather than
 rebaselined.
 
+### E27. Deferred restore statement recognition (target readable form)
+
+`regions.x` reads bound, typed statements before transform. In
+`region-safe`, `defer current_value = saved;` restores a static place after
+the block. Recognition needs only the expression statement wrapper; the
+existing assignment inspection and `_target_place` still decide whether
+the store restores a place.
+
+```x2c
+macro Statement $expression_statement(Expr $value) { $value; }
+
+static int _note_restored(Walk w, Var body) {
+  Macro statement = $expression_statement;
+  match (body) case statement(?expression):
+    match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
+      Var place = _target_place(w, target);
+      if (place == _unwrap(target)) return 0;
+      w.restored = w.restored.copy();
+      w.restored[place] = 1;
+      return 1;
+    }
+  return 0;
+}
+```
+
+The case must capture exactly the bound expression from `(stmnt EXPRESSION)`;
+it must leave the enclosing source position and `w.origin` untouched.
+An isolated matcher probe built the bound expression from the
+`region-safe` AST dump, including its two issued binding identities and
+pointer type. The macro captured a structurally equal expression, with no
+statement wrapper or extra parentheses. `_walk` continues to set and
+restore `w.origin` around the outer `at` node; this match only sees the
+inner statement. This batch changes no other region walker case or
+restoration rule.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
