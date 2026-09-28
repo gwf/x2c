@@ -39,6 +39,28 @@ void Macro_use_subject(Var rows);
 
 List Macro_pattern(Macro t, List names);
 
+typedef struct MacroFixedSlots{
+  int count, slots[MACHINE_BINDER_MAX];
+}
+MacroFixedSlots;
+
+typedef struct MacroPublishing{
+  int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX];
+  int count, binders, complete;
+  unsigned long definite;
+}
+MacroPublishing;
+
+typedef struct MacroCaseSite{
+  MatchCaptureSite match;
+  MacroFixedSlots policy;
+  MacroPublishing route;
+  int ready;
+}
+MacroCaseSite;
+
+int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
+
 int Macro_case_capture(List code, Macro t, List names, MatchCaptureBuffer * published);
 
 List Macro_case_pattern(Macro t, List names);

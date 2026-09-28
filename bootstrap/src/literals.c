@@ -1453,6 +1453,8 @@ List Compiler_parse_string_literal(Compiler compiler){
   return cons(_11, cons(_195, cons(List_var(cons(_204, List_append(segments, NULL))), NULL)));
 }
 
+int Map_truth(Map);
+
 int Symbol_is_builtin_type(Symbol);
 
 int Symbol_is_type_qualifier(Symbol);
@@ -1467,6 +1469,7 @@ List Sym_get(Sym, List);
 
 static int _lambda_looks_typed(Compiler compiler){
   Symbol head = Compiler_peek(compiler, 0);
+  if(head == 73 && Map_truth(compiler -> macro_holes)) return 1;
   if(Symbol_is_builtin_type(head) || Symbol_is_type_qualifier(head) || head == 1318234344 || head == 44977116 || head == 357722 || head == 1473096) return 1;
   if(head == 19147688){
     String folded = Compiler_package_alias_spelling(compiler);
@@ -1854,7 +1857,6 @@ x2c_cleanup_leave(& _x2c_defer_record_7);
 }
 
 SymScope Sym_pop_scope(Sym);
-int Map_truth(Map);
 List Compiler_parse_basic_identifier(Compiler);
 void Sym_push_scope(Sym, SymScope);
 List Compiler_parse_compound_statement(Compiler);

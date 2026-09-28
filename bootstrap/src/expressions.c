@@ -4301,7 +4301,7 @@ List Compiler_func_call_parts(Compiler compiler, Var content){
     List _x2c_match_expr = cons(_0, cons(_16, cons(content, NULL)));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  if (Macro_case_capture(_x2c_match_expr, apply, _839, &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  return cons(callee, NULL);  break;
+      default: ;  static MacroCaseSite _x2c_macro_site_0;  if (Macro_case_capture_at(& _x2c_macro_site_0, _x2c_match_expr, apply, _839, &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  return cons(callee, NULL);  break;
 }
 
     }
@@ -4313,7 +4313,7 @@ case 1077029798: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_
     List _x2c_match_expr = Var_list(block);
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (0) {
-      default: ;  if (Macro_case_capture(_x2c_match_expr, call, _1599, &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var callee = _x2c_match_values[1];  Var count = _x2c_match_values[2];  Var storage = _x2c_match_values[3];  List arguments = Var_list(_x2c_match_values[4]); {
+      default: ;  static MacroCaseSite _x2c_macro_site_3;  if (Macro_case_capture_at(& _x2c_macro_site_3, _x2c_match_expr, call, _1599, &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var callee = _x2c_match_values[1];  Var count = _x2c_match_values[2];  Var storage = _x2c_match_values[3];  List arguments = Var_list(_x2c_match_values[4]); {
   Array parts = Array_update_n(Array_new(), 1, callee); {
     _x2c_defer_env_4 _x2c_defer_env_5 ={
       ._x2c_defer_capture_2 =(const void *) & parts
@@ -4328,13 +4328,13 @@ case 1077029798: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_
     List _x2c_match_expr = three;
     Var _x2c_match_values[8];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 8 };
     switch (0) {
-      default: ;  if (Macro_case_capture(_x2c_match_expr, prepare, _1606, &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var count = _x2c_match_values[1];  Var index = _x2c_match_values[2];  Var reference = _x2c_match_values[3];  Var name = _x2c_match_values[4];  Var address = _x2c_match_values[5];  Var carrier = _x2c_match_values[6];  Var value = _x2c_match_values[7]; {
+      default: ;  static MacroCaseSite _x2c_macro_site_2;  if (Macro_case_capture_at(& _x2c_macro_site_2, _x2c_match_expr, prepare, _1606, &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var count = _x2c_match_values[1];  Var index = _x2c_match_values[2];  Var reference = _x2c_match_values[3];  Var name = _x2c_match_values[4];  Var address = _x2c_match_values[5];  Var carrier = _x2c_match_values[6];  Var value = _x2c_match_values[7]; {
           Var unboxed = List_var(_1608);
   {
     List _x2c_match_expr = Var_list(value);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  if (Macro_case_capture(_x2c_match_expr, boxed, _1073, &_x2c_match_capture)) {Var argument = _x2c_match_values[0];  unboxed = argument;  break;
+      default: ;  static MacroCaseSite _x2c_macro_site_1;  if (Macro_case_capture_at(& _x2c_macro_site_1, _x2c_match_expr, boxed, _1073, &_x2c_match_capture)) {Var argument = _x2c_match_values[0];  unboxed = argument;  break;
         }
 
     }
