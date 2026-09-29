@@ -76,35 +76,23 @@ String Token.repr(Token token) {
    Raises: `<alloc-fail>` or `<size-limit>` while storing tokens or modes. */
 void Tokenizer.scan(Tokenizer t) {
   while (!t._end_of_file()) {
-    Symbol mode = t._scan_mode();
-    switch (mode) {
-      case <x2c>: case <x2c-par>:
-        if (t._common_tokens()) continue;
-        if (t.text[t.pos] == '$' &&
-            (t._embedded_lisp() || t._named_reference()))
-          continue;
-        if (t._percent_tokens() ||
-            t._angle_symbol_literal() ||
-            t._x2c_tokens())
-          continue;
-        break;
-      case <array>: case <map>:
-        if (t._lisp_tokens()) continue;
-        break;
-      case <symbol-set>:
-        if (t._common_tokens() ||
-            t._symbol_set_tokens()) continue;
-        break;
-      case <list>: case <lisp>: case <macro-lisp>:
-        if (t._lisp_tokens()) continue;
-        break;
-      case <string>: if (t._string_tokens()) continue;
-        break;
-    }
+    if (t._step()) continue;
     t.error();
     return;
   }
   if (t.layout) t._layout();
+}
+
+/* Scans one token in the current mode, or returns zero. */
+static int Tokenizer._step(Tokenizer t) {
+  switch (t._scan_mode()) {
+    case <x2c>: case <x2c-par>: return t._x2c_tokens();
+    case <array>: case <map>: case <list>: case <lisp>: case <macro-lisp>:
+      return t._lisp_tokens();
+    case <symbol-set>: return t._common_tokens() || t._symbol_set_tokens();
+    case <string>: return t._string_tokens();
+  }
+  return 0;
 }
 
 /* NUL always ends tokenization, even in a nested mode. The parser or Lisp
@@ -113,6 +101,13 @@ static int Tokenizer._end_of_file(Tokenizer t) {
   if (t.text[t.pos] == '\0') return t.tokenize(0, <eof>);
   return 0;
 }
+
+/* x2c code tries C trivia and numbers, `$` forms, `%` and `<` literals, then
+   C strings, identifiers, and operators. */
+static int Tokenizer._x2c_tokens(Tokenizer t) =>
+  t._common_tokens() ||
+  (t.text[t.pos] == '$' && (t._embedded_lisp() || t._named_reference())) ||
+  t._percent_tokens() || t._angle_symbol_literal() || t._c_tokens();
 
 static int Tokenizer._common_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
@@ -203,7 +198,7 @@ static int Tokenizer._angle_symbol_literal(Tokenizer tokenizer) {
   return 0;
 }
 
-static int Tokenizer._x2c_tokens(Tokenizer tokenizer) {
+static int Tokenizer._c_tokens(Tokenizer tokenizer) {
   static const char *opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
   char *text = tokenizer.text + tokenizer.pos, int n;
   if (text[0] == '"')
@@ -220,12 +215,26 @@ static int Tokenizer._x2c_tokens(Tokenizer tokenizer) {
 
 /* Lisp source and data literals share Atom scanning. The mode decides which
    delimiters nest data, which punctuation terminates an Atom, and whether
-   `$` escapes into x2c. */
+   `$` escapes into x2c. A collection reads C tokens first; Lisp text claims
+   quote characters and signed numbers before the C scanners can. */
 static int Tokenizer._lisp_tokens(Tokenizer t) {
   Symbol mode = t._scan_mode();
   int list = mode == <list>, collection = mode == <array> || mode == <map>;
-  char *text = t.text + t.pos, int len;
   if (collection && t._common_tokens()) return 1;
+  if (t._lisp_prefix(list, collection)) return 1;
+  int punctuation = t._lisp_punctuation(list, collection);
+  if (punctuation >= 0) return punctuation;
+  if (collection) return t._collection_atom();
+  if (t._common_tokens()) return 1;
+  return _status_scanner(t, scan_atom_status, list ? <lit-atom> : <ident>);
+}
+
+/* A token its first characters decide: `void` in a collection, a list's
+   `?(` capture and bare `@` operator atom, and the `$` and `@` escapes into
+   x2c. Lisp source escapes only `$name`, and a collection splices only
+   with `$`. */
+static int Tokenizer._lisp_prefix(Tokenizer t, int list, int collection) {
+  char *text = t.text + t.pos;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
     return t.tokenize(4, <void>);
   if (list && text[0] == '?' && text[1] == '(') return t._operator(2);
@@ -237,53 +246,66 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
     return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
   if ((list && (text[0] == '$' || text[0] == '@')) ||
       (collection && text[0] == '$'))
-    return text[1] == '{'
-         ? t._operator(2)
-         : t._named_reference();
+    return text[1] == '{' ? t._operator(2) : t._named_reference();
+  return 0;
+}
+
+/* Punctuation in Lisp-shaped text, or -1 when the character is not
+   punctuation in this mode. Lists and collections nest strings, arrays,
+   and maps; only a collection ends an atom at `]`, `}`, `:`, or `,`. */
+static int Tokenizer._lisp_punctuation(
+  Tokenizer t, int list, int collection) {
+  char *text = t.text + t.pos;
+  int data = list || collection;
   switch (text[0]) {
-    case '(' : case ')': return t._operator(1);
-    case '"': if (list || collection) return t._operator(1);
+    case '(': case ')': return t._operator(1);
+    case '"':
+      if (data) return t._operator(1);
       return _status_scanner(t, scan_c_string_status, <lit-char*>);
-    case '{': case '[': if (list || collection) return t._operator(1);
+    case '{': case '[': if (data) return t._operator(1);
       break;
     case ']': case '}': case ':': if (collection) return t._operator(1);
       break;
     case '\'': case '`': return t.tokenize(1, Symbol.new_len(text, 1));
-    case ',': if (collection) return t._operator(1);
-      len = text[1] == '@' ? 2 : 1;
+    case ',': {
+      if (collection) return t._operator(1);
+      int len = text[1] == '@' ? 2 : 1;
       return t.tokenize(len, Symbol.new_len(text, len));
-    case '<': {
-      if (!text[1] || text[1] == '=' || strchr("()'`, \n\t\v\f\r", text[1]))
-        break;
-      Symbol status = <ok>;
-      int length = scan_symbol_literal_status(text, &status);
-      if (length > 0) return t.tokenize(length, <lit-symbol>);
-      if (length < 0) return _error(t, status);
-      break;
     }
+    case '<': return t._lisp_symbol();
     case '+': case '-':
       if (scan_ascii_digit((unsigned char) text[1])) return t._number();
       break;
   }
-  if (!collection && t._common_tokens()) return 1;
-  if (collection) {
-    Symbol status = <ok>;
-    len = scan_atom_status(text, &status);
-    if (len < 0) return _error(t, status);
-    for (int i = 0; i < len; i++) {
-      if (text[i] == '\\') {
-        i++;
-        continue;
-      }
-      if (strchr(",:]}", text[i])) {
-        len = i;
-        break;
-      }
+  return -1;
+}
+
+/* A Symbol literal, or -1 when `<` is an operator atom here. */
+static int Tokenizer._lisp_symbol(Tokenizer t) {
+  char *text = t.text + t.pos;
+  if (!text[1] || text[1] == '=' || strchr("()'`, \n\t\v\f\r", text[1]))
+    return -1;
+  Symbol status = <ok>;
+  int length = scan_symbol_literal_status(text, &status);
+  if (length > 0) return t.tokenize(length, <lit-symbol>);
+  if (length < 0) return _error(t, status);
+  return -1;
+}
+
+/* Scans up to an unescaped `,`, `:`, `]`, or `}`. */
+static int Tokenizer._collection_atom(Tokenizer t) {
+  char *text = t.text + t.pos;
+  Symbol status = <ok>;
+  int len = scan_atom_status(text, &status);
+  if (len < 0) return _error(t, status);
+  for (int i = 0; i < len; i++) {
+    if (text[i] == '\\') i++;
+    else if (strchr(",:]}", text[i])) {
+      len = i;
+      break;
     }
-    return len ? t.tokenize(len, <lit-atom>) : 0;
   }
-  return _status_scanner(
-    t, scan_atom_status, list ? <lit-atom> : <ident>);
+  return len ? t.tokenize(len, <lit-atom>) : 0;
 }
 
 static int Tokenizer._symbol_set_tokens(Tokenizer t) {
@@ -543,8 +565,8 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
   return NULL;
 }
 
-/* True when `token` can end an operand, which makes a following `%` or `<`
-   an operator rather than the opening of a literal. */
+/* True when `token` can end an operand, so that a following `%` or `<` is
+   an operator. */
 static int _token_ends_operand(Token token) {
   if (!token) return 0;
   switch (token.type) {
@@ -581,13 +603,6 @@ static Token _significant_before(Tokenizer tokenizer, Token token) {
 
 // indentation syntax
 
-/* One logical line of significant tokens, as indices into `sig`. */
-typedef struct _LayoutLine { int first, last, indent, directive; } _LayoutLine;
-
-/* Edits the layout pass applies to one source token: punctuation inserted
-   before and after it, and a replacement type. */
-typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
-
 /* Rewrites a scanned indentation-syntax stream into the brace form the
    parser reads. Blocks open at a line ending in `:` before a deeper line and
    close at each dedent; other statement lines end with `;`. Inserted tokens
@@ -595,152 +610,277 @@ typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
    dedent or a tab in indentation ends the stream with `<error>` under the
    `<indent>` status. */
 static void Tokenizer._layout(Tokenizer t) {
-  struct Token *all = (struct Token *) t.tokens;
-  int count = t.tokens.len() - 1, nsig = 0, nlines = 0, depth = 0;
-  Token *sig = calloc(count + 1, sizeof(Token));
-  int *depths = calloc(count + 1, sizeof(int));
-  _LayoutLine *lines = calloc(count + 1, sizeof(_LayoutLine));
-  _LayoutEdit *edits = calloc(count + 1, sizeof(_LayoutEdit));
-  int *indents = calloc(count + 2, sizeof(int));
-  String *closers = calloc(count + 2, sizeof(String));
-  char *enums = calloc(count + 2, 1), *ternary = calloc(count + 1, 1);
-  defer {
-    free(sig); free(depths); free(lines); free(edits); free(indents);
-    free(closers); free(enums); free(ternary);
-  }
-  Token error_at = NULL;
+  _Layout l = _layout_open(t);
+  defer l.close();
+  l.split_lines();
+  for (int i = 0; i < l.nlines; i++) l.edit_line(i);
+  if (l.error_at) t.scan_status = <indent>;
+  t.tokens = l.emit();
+}
 
+/* One logical line of significant tokens, as indices into `sig`. */
+typedef struct _LayoutLine { int first, last, indent, directive; } _LayoutLine;
+
+/* Edits the layout pass applies to one source token: punctuation inserted
+   before and after it, and a replacement type. */
+typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
+
+/* What a block header's words say: an aggregate or enum header names no
+   parameters, unlike a function's, and a label keeps its colon. */
+typedef struct _LayoutHeader {
+  int aggregate, enumeration, labeled;
+} _LayoutHeader;
+
+/* The layout pass over one token stream. `sig` holds the significant tokens
+   of `all`, `depths` their bracket depths, and `ternary` marks the colons
+   that close a `?`. `edits` holds the rewrite of each token of `all`.
+   `indents`, `closers`, and `enums` describe the blocks open up to `top`,
+   and `error_at` is the first inconsistently indented token. */
+typedef struct _Layout {
+  struct Token *all, Token *sig, Token error_at;
+  int *depths, *indents, char *ternary, *enums;
+  _LayoutLine *lines, _LayoutEdit *edits, String *closers;
+  int count, nsig, nlines, top;
+} _Layout;
+
+static _Layout _layout_open(Tokenizer t) {
+  int count = t.tokens.len() - 1;
+  _Layout l = {
+    .all = (struct Token *) t.tokens, .count = count,
+    .sig = calloc(count + 1, sizeof(Token)),
+    .depths = calloc(count + 1, sizeof(int)),
+    .lines = calloc(count + 1, sizeof(_LayoutLine)),
+    .edits = calloc(count + 1, sizeof(_LayoutEdit)),
+    .indents = calloc(count + 2, sizeof(int)),
+    .closers = calloc(count + 2, sizeof(String)),
+    .enums = calloc(count + 2, 1), .ternary = calloc(count + 1, 1)};
   for (int i = 0; i < count; i++)
-    if (all[i].type != <space> && all[i].type != <comment>)
-      sig[nsig++] = &all[i];
+    if (l.all[i].type != <space> && l.all[i].type != <comment>)
+      l.sig[l.nsig++] = &l.all[i];
+  return l;
+}
 
-  /* Logical lines run to a line break at bracket depth zero, except that a
-     deeper line or one starting with `.` continues them. A colon that
-     closes a `?` opens no block, so the line after it continues too. */
-  int end_line = 0, pending = 0;
-  for (int k = 0; k < nsig; k++) {
-    Token tok = sig[k];
-    int directive = tok.type == <preproc>;
-    if (directive || !nlines || lines[nlines - 1].directive ||
-        (depth == 0 && tok.line > end_line && tok.text != "." &&
-         (tok.col <= lines[nlines - 1].indent ||
-          (sig[k - 1].text == ":" && !ternary[k - 1])))) {
-      Token space = tok > all ? tok - 1 : NULL;
-      char *newline = space && space.type == <space> ?
-                      strrchr(space.text, '\n') : NULL;
-      if (!directive && newline && strchr(newline, '\t') && !error_at)
-        error_at = tok;
-      lines[nlines++] = (_LayoutLine) {k, k, tok.col, directive};
+static void _Layout.close(_Layout *l) {
+  free(l.sig); free(l.depths); free(l.lines); free(l.edits);
+  free(l.indents); free(l.closers); free(l.enums); free(l.ternary);
+}
+
+/* The edit of significant token `k`. */
+static _LayoutEdit *_Layout.edit(_Layout *l, int k) =>
+  &l.edits[l.sig[k] - l.all];
+
+// logical lines
+
+/* Logical lines run to a line break at bracket depth zero, except that a
+   deeper line or one starting with `.` continues them. A colon that closes
+   a `?` opens no block, so the line after it continues too. */
+static void _Layout.split_lines(_Layout *l) {
+  int depth = 0, end_line = 0, pending = 0;
+  for (int k = 0; k < l.nsig; k++) {
+    Token tok = l.sig[k];
+    if (l.starts_line(k, depth, end_line)) {
+      l.check_tab(tok);
+      l.lines[l.nlines++] =
+        (_LayoutLine) {k, k, tok.col, tok.type == <preproc>};
       pending = 0;
     }
-    lines[nlines - 1].last = k;
+    l.lines[l.nlines - 1].last = k;
     if (_closes(tok)) depth--;
-    depths[k] = depth;
+    l.depths[k] = depth;
     if (!depth && tok.text == "?") pending++;
     else if (!depth && tok.text == ":" && pending) {
-      ternary[k] = 1;
+      l.ternary[k] = 1;
       pending--;
     }
     if (_opens(tok)) depth++;
-    end_line = tok.line;
-    for (char *c = tok.text; c && *c; c++) end_line += *c == '\n';
+    end_line = _end_line(tok);
   }
+}
 
-  int top = 0;
-  for (int i = 0; i < nlines; i++) {
-    _LayoutLine line = lines[i];
-    Token first = sig[line.first], last = sig[line.last];
-    if (line.directive) {
-      if (first.text.strip(" \t\r\n") == "#pragma indent")
-        edits[sig[line.first] - all].type = <comment>;
-      continue;
-    }
-    if (!top && !indents[0]) indents[0] = line.indent;
-    int j = i + 1;
-    while (j < nlines && lines[j].directive) j++;
-    int next = j < nlines ? lines[j].indent : indents[0];
-    _LayoutEdit *tail = &edits[sig[line.last] - all];
-    String suffix = NULL;
-    if (last.text == ":" && !ternary[line.last] && next > line.indent) {
-      /* An aggregate header names no parameters, unlike a function's. A
-         `case`, `default`, or `catch` label keeps its colon. */
-      int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
-      for (int m = line.first; m < line.last; m++) {
-        String word = sig[m].text;
-        aggregate |= word == "struct" || word == "union" || word == "enum";
-        enumeration |= word == "enum";
-        parameters |= sig[m].type == <"(">;
-        labeled |= !depths[m] && (word == "case" || word == "default" ||
-                                  word == "catch");
-      }
-      aggregate &= !parameters;
-      enumeration &= !parameters;
-      if (labeled)
-        tail.after = "{";
-      else if (!_layout_condition(
-        sig, depths, edits, all, line.first, line.last, "{"))
-        tail.type = <"{">;
-      /* `do:` without a `while` trailer is a bare block. */
-      if (first.text == "do" && line.last == line.first + 1) {
-        int k = j;
-        while (k < nlines && (lines[k].directive ||
-                              lines[k].indent > line.indent))
-          k++;
-        if (k == nlines || lines[k].indent != line.indent ||
-            sig[lines[k].first].text != "while" ||
-            sig[lines[k].last].text == ":")
-          edits[sig[line.first] - all].type = <space>;
-      }
-      indents[++top] = next;
-      enums[top] = enumeration;
-      closers[top] = aggregate && first.text != "typedef" ? "};" : "}";
-    }
-    else {
-      /* A one-line body follows the first colon at depth zero that closes
-         no `?`, unless a label owns that colon. */
-      for (int m = line.first + 1; m < line.last; m++) {
-        String word = sig[m].text;
-        if (depths[m]) continue;
-        if (word == "case" || word == "default" || word == "catch") break;
-        if (word != ":" || ternary[m]) continue;
-        if (!_layout_condition(sig, depths, edits, all, line.first, m, NULL)
-            && sig[m - 1].text == "else")
-          edits[sig[m] - all].type = <space>;
-        break;
-      }
-      int lisp = first.type == <"$(">;
-      for (int m = line.first + 1; lisp && m < line.last; m++)
-        lisp = depths[m] > 0;
-      int hole = last.type == <ident> && line.last > line.first &&
-                 sig[line.last - 1].type == <"$"> &&
-                 (line.last - 1 == line.first ||
-                  sig[line.last - 2].type == <")">);
-      if (first.type == <"@">) edits[sig[line.first] - all].type = <space>;
-      else if (last.type != <;> && !enums[top] && !lisp && !hole)
-        suffix = ";";
-    }
-    while (top && next < indents[top])
-      suffix = %"${suffix}${closers[top--]}";
-    if (next != indents[top] && !error_at && j < nlines)
-      error_at = sig[lines[j].first];
-    if (suffix) tail.after = tail.after ? %"${tail.after}$suffix" : suffix;
+static int _Layout.starts_line(_Layout *l, int k, int depth, int end_line) {
+  Token tok = l.sig[k];
+  if (tok.type == <preproc> || !l.nlines || l.lines[l.nlines - 1].directive)
+    return 1;
+  return depth == 0 && tok.line > end_line && tok.text != "." &&
+    (tok.col <= l.lines[l.nlines - 1].indent ||
+     (l.sig[k - 1].text == ":" && !l.ternary[k - 1]));
+}
+
+/* A tab in a statement line's indentation is inconsistent. */
+static void _Layout.check_tab(_Layout *l, Token tok) {
+  if (tok.type == <preproc> || l.error_at || tok <= l.all) return;
+  Token space = tok - 1;
+  if (space.type != <space>) return;
+  char *newline = strrchr(space.text, '\n');
+  if (newline && strchr(newline, '\t')) l.error_at = tok;
+}
+
+static int _end_line(Token tok) {
+  int line = tok.line;
+  for (char *c = tok.text; c && *c; c++) line += *c == '\n';
+  return line;
+}
+
+// line edits
+
+/* A line ending in `:` before a deeper line opens a block, and any other
+   statement line ends with `;` where it needs one. Each dedent after the
+   line closes the blocks it leaves. */
+static void _Layout.edit_line(_Layout *l, int i) {
+  _LayoutLine line = l.lines[i];
+  if (line.directive) {
+    if (l.sig[line.first].text.strip(" \t\r\n") == "#pragma indent")
+      l.edit(line.first).type = <comment>;
+    return;
   }
+  if (!l.top && !l.indents[0]) l.indents[0] = line.indent;
+  int j = l.next_statement(i);
+  int next = j < l.nlines ? l.lines[j].indent : l.indents[0];
+  String suffix = NULL;
+  if (l.sig[line.last].text == ":" && !l.ternary[line.last] &&
+      next > line.indent)
+    l.open_block(line, j, next);
+  else suffix = l.end_statement(line);
+  while (l.top && next < l.indents[l.top])
+    suffix = %"${suffix}${l.closers[l.top--]}";
+  if (next != l.indents[l.top] && !l.error_at && j < l.nlines)
+    l.error_at = l.sig[l.lines[j].first];
+  _LayoutEdit *tail = l.edit(line.last);
+  if (suffix) tail.after = tail.after ? %"${tail.after}$suffix" : suffix;
+}
 
+static int _Layout.next_statement(_Layout *l, int i) {
+  int j = i + 1;
+  while (j < l.nlines && l.lines[j].directive) j++;
+  return j;
+}
+
+static void _Layout.open_block(
+  _Layout *l, _LayoutLine line, int j, int next) {
+  Token first = l.sig[line.first];
+  _LayoutHeader header = l.header(line);
+  if (header.labeled) l.edit(line.last).after = "{";
+  else if (!l.condition(line.first, line.last, "{"))
+    l.edit(line.last).type = <"{">;
+  if (first.text == "do" && line.last == line.first + 1 && l.bare_do(line, j))
+    l.edit(line.first).type = <space>;
+  l.indents[++l.top] = next;
+  l.enums[l.top] = header.enumeration;
+  l.closers[l.top] = header.aggregate && first.text != "typedef" ? "};" : "}";
+}
+
+static _LayoutHeader _Layout.header(_Layout *l, _LayoutLine line) {
+  int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
+  for (int m = line.first; m < line.last; m++) {
+    String word = l.sig[m].text;
+    aggregate |= word == "struct" || word == "union" || word == "enum";
+    enumeration |= word == "enum";
+    parameters |= l.sig[m].type == <"(">;
+    labeled |= !l.depths[m] && _is_label(word);
+  }
+  return (_LayoutHeader) {
+    aggregate && !parameters, enumeration && !parameters, labeled};
+}
+
+/* `do:` without a `while` trailer at its own indentation is a bare block. */
+static int _Layout.bare_do(_Layout *l, _LayoutLine line, int j) {
+  int k = j;
+  for (; k < l.nlines; k++)
+    if (!l.lines[k].directive && l.lines[k].indent <= line.indent) break;
+  if (k == l.nlines) return 1;
+  _LayoutLine trailer = l.lines[k];
+  return trailer.indent != line.indent ||
+    l.sig[trailer.first].text != "while" || l.sig[trailer.last].text == ":";
+}
+
+/* A statement line ends with `;` unless it already does or it is an enum
+   member, one whole `$(...)` form, or a bare macro hole. A leading `@` marks
+   a decorator line, which takes none. */
+static String _Layout.end_statement(_Layout *l, _LayoutLine line) {
+  l.one_line_body(line);
+  if (l.sig[line.first].type == <"@">) {
+    l.edit(line.first).type = <space>;
+    return NULL;
+  }
+  if (l.sig[line.last].type == <;> || l.enums[l.top] || l.lisp_form(line) ||
+      l.hole(line))
+    return NULL;
+  return ";";
+}
+
+/* A one-line body follows the first colon at depth zero that closes no
+   `?`, unless a label owns that colon. */
+static void _Layout.one_line_body(_Layout *l, _LayoutLine line) {
+  for (int m = line.first + 1; m < line.last; m++) {
+    String word = l.sig[m].text;
+    if (l.depths[m]) continue;
+    if (_is_label(word)) return;
+    if (word != ":" || l.ternary[m]) continue;
+    if (!l.condition(line.first, m, NULL) && l.sig[m - 1].text == "else")
+      l.edit(m).type = <space>;
+    return;
+  }
+}
+
+static int _Layout.lisp_form(_Layout *l, _LayoutLine line) {
+  if (l.sig[line.first].type != <"$(">) return 0;
+  for (int m = line.first + 1; m < line.last; m++)
+    if (l.depths[m] <= 0) return 0;
+  return 1;
+}
+
+static int _Layout.hole(_Layout *l, _LayoutLine line) {
+  int last = line.last;
+  return l.sig[last].type == <ident> && last > line.first &&
+    l.sig[last - 1].type == <"$"> &&
+    (last - 1 == line.first || l.sig[last - 2].type == <")">);
+}
+
+/* Makes the colon at `colon` end the condition of the last control keyword
+   at depth zero before it, adding parentheses unless one group already
+   spans the condition. A `for` header keeps the parentheses it must have.
+   The colon then becomes `body`, or goes when `body` is NULL.
+   Returns 0 when no control keyword precedes the colon. */
+static int _Layout.condition(_Layout *l, int first, int colon, String body) {
+  int key = l.control_keyword(first, colon);
+  if (key < 0) return 0;
+  _LayoutEdit *tail = l.edit(colon);
+  if (l.wrapped(key, colon)) tail.type = body ? <"{"> : <space>;
+  else {
+    l.edit(key + 1).before = "(";
+    tail.type = <")">;
+    tail.after = body;
+  }
+  return 1;
+}
+
+static int _Layout.control_keyword(_Layout *l, int first, int colon) {
+  int key = -1;
+  for (int m = first; m < colon; m++)
+    if (!l.depths[m] && _conditional(l.sig[m]) &&
+        (m == first || l.sig[m - 1].text != "."))
+      key = m;
+  return key;
+}
+
+static int _Layout.wrapped(_Layout *l, int key, int colon) {
+  int wrapped = l.sig[key].text == "for" ||
+    (l.sig[key + 1].type == <"("> && l.sig[colon - 1].type == <")">);
+  for (int m = key + 2; wrapped && m < colon - 1; m++)
+    wrapped = l.depths[m] > 0;
+  return wrapped;
+}
+
+// output
+
+/* Copies each token with its edits and ends the stream at the first
+   inconsistently indented token. */
+static Bytes _Layout.emit(_Layout *l) {
   Bytes out = Bytes.new(sizeof(struct Token));
-  for (int i = 0; i <= count; i++) {
-    Token tok = &all[i];
-    if (tok == error_at) {
-      t.scan_status = <indent>;
-      struct Token marks[2] = {
-        {.text = NULL, .type = <error>, .line = tok.line, .col = tok.col,
-         .pos = tok.pos},
-        {.text = NULL, .type = <eof>, .line = tok.line, .col = tok.col,
-         .pos = tok.pos}
-      };
-      out = out.append(marks, 2);
-      break;
-    }
-    _LayoutEdit edit = edits[i];
+  for (int i = 0; i <= l.count; i++) {
+    Token tok = &l.all[i];
+    if (tok == l.error_at) return _append_error(out, tok);
+    _LayoutEdit edit = l.edits[i];
     out = _layout_insert(out, edit.before, tok, 0);
     struct Token copy = *tok;
     if (edit.type && edit.type != <space> && edit.type != <comment>)
@@ -749,36 +889,17 @@ static void Tokenizer._layout(Tokenizer t) {
     out = out.append(&copy, 1);
     out = _layout_insert(out, edit.after, tok, 1);
   }
-  t.tokens = out;
+  return out;
 }
 
-/* Makes the colon at `colon` end the condition of the last control keyword
-   at depth zero before it, adding parentheses unless one group already
-   spans the condition. A `for` header keeps the parentheses it must have.
-   The colon then becomes `body`, or goes when `body` is NULL.
-   Returns 0 when no control keyword precedes the colon. */
-static int _layout_condition(
-  Token *sig, int *depths, _LayoutEdit *edits, struct Token *all, int first,
-  int colon, String body) {
-  int key = -1;
-  for (int m = first; m < colon; m++)
-    if (!depths[m] && _conditional(sig[m]) &&
-        (m == first || sig[m - 1].text != "."))
-      key = m;
-  if (key < 0) return 0;
-  int wrapped = sig[key].text == "for" ||
-                sig[key + 1].type == <"("> && sig[colon - 1].type == <")">;
-  for (int m = key + 2; wrapped && m < colon - 1; m++)
-    wrapped = depths[m] > 0;
-  _LayoutEdit *tail = &edits[sig[colon] - all];
-  if (wrapped)
-    tail.type = body ? <"{"> : <space>;
-  else {
-    edits[sig[key + 1] - all].before = "(";
-    tail.type = <")">;
-    tail.after = body;
-  }
-  return 1;
+static Bytes _append_error(Bytes out, Token at) {
+  struct Token marks[2] = {
+    {.text = NULL, .type = <error>, .line = at.line, .col = at.col,
+     .pos = at.pos},
+    {.text = NULL, .type = <eof>, .line = at.line, .col = at.col,
+     .pos = at.pos}
+  };
+  return out.append(marks, 2);
 }
 
 /* Appends zero-width punctuation tokens at `at`'s start or end. */
@@ -805,6 +926,9 @@ static inline int _closes(Token t) =>
 static inline int _conditional(Token t) =>
   t.text == "if" || t.text == "while" || t.text == "for" ||
   t.text == "foreach" || t.text == "switch" || t.text == "match";
+
+static int _is_label(String word) =>
+  word == "case" || word == "default" || word == "catch";
 
 // lifecycle
 
