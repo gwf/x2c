@@ -19,8 +19,9 @@
 > `c00397af`; discarded destructuring assignment is on dev at `1d5c9b0a`.
 > Protocol descriptor storage is on dev at `6a3674bf`; other protocol
 > shapes and source coverage remain. The complete destructuring and Func
-> construction families are on dev. A Func shape pass and ordinary-call
-> source-form family are locally integrated for the next batch.
+> construction families, Func shape pass, and ordinary-call source-form
+> family are on dev at `e4942f7e`. Region call and assignment families are
+> locally integrated for the next batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -3268,6 +3269,49 @@ converter pattern. Twelve focused fixtures passed, with identical checked
 AST, transform, C, and H artifacts where declared. The corrected worker
 tree builds through stage 1 and yields 192 byte-identical stage C/H files.
 
+### E40. Region call and expression-assignment families
+
+`source_call` and `source_assignment` in `src/grammar.xmacro` project both a
+typed expression and the raw inner node that region analysis visits. They
+preserve the original bound children and do not fabricate an expression type.
+`source_call` normalizes the parser's empty argument marker; the assignment
+projection excludes initialized declarators whose target is a `bind` row.
+An inert probe checks typed/raw capture identity and those exclusions.
+
+`src/regions.x` now uses the call projection in `_callee_of`, `_scan`, and
+the parameter-type read in `_scan_call`. Its raw call and argument-row
+recognizers and `_parameter_types` are deleted. The assignment projection
+replaces the raw expression-assignment arms in `_scan`, `_note_restored`,
+`_note_deferred_stores`, and `_walk`. Region ownership, sink selection,
+restoration, escape flow, and the summary fixpoint stay with the existing
+operations. Initialized declarators in `_declare` are a distinct syntax
+family, not an assignment exception hidden by a fallback.
+
+The authored region diff is +40/-38 lines across the two adopters. Nine
+focused region and cleanup fixtures and stage 2 passed on the worker tree;
+the integrated tree passed `make build` and the same nine fixtures. The
+generated `src/linked-meta.x` refresh is pending publication validation.
+
+### E41. Current family boundaries
+
+A complete protocol helper survey found no remaining source-spellable
+family whose templates delete meaningful builders: direct update and
+descriptor storage already use templates, while discard and adapter calls
+carry resolved types, ownership, and placement. A shared guard statement in
+`cache.x` and `generate.x` would leave both already-bound function builders;
+the available statement rebuild cannot preserve their whole-function stage
+and header placement. The complete Var comparison trial added source
+indirection and a large AST rebaseline without simplifying the family, so
+it was reverted. The parsed try binder trial added a catch-only macro but
+retained the raw try constructor; it also could not cover legal constructed
+bare-try syntax without a fallback, so it was reverted. These conclusions
+apply to the probed implementations, not every future projection.
+
+The standalone raw-symbol sweep is already repaired and passed as recorded
+in `raw-symbol-macros-translation.md`. The synthetic expansion-depth probe
+reported a normal 64-level diagnostic; it did not reproduce a null-site
+crash, so no speculative diagnostic change was made.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
@@ -3283,23 +3327,21 @@ capability merely to force this migration.
 
 ### Migration defect tasks
 
-- **Expansion depth diagnostic:** open; reported by the previous migration.
-  Source and macro-value finite-chain probes reach the 64-level limit with
-  a normal diagnostic on this checkout. The compiler-generated path may
-  have a null invocation token (`macro_invocation_site`), and rendering the
-  whole stack row calls `Token_repr`, which dereferences it. The capability
-  batch reports the first definition location instead of rendering internal
-  stack storage. The synthetic-call crash has not yet been reproduced here.
+- **Expansion depth diagnostic:** the current depth branch reports the first
+  definition location without rendering stack rows. Source, macro-value,
+  and a 65-step compiler-generated pending-Macro probe reach the 64-level
+  limit with a normal diagnostic. The latter retains an initial source
+  invocation token; a truly null-site path remains unverified, so no
+  speculative repair was made.
 - **Parameter redeclaration:** landed in `799875a8`, including the
   `fff7eec6` repair that isolates each invocation's Param argument scope. Ordinary,
   bare/typed lambda and constructed lambda redeclarations now fail at the
   existing declaration check. Nested shadowing and parameter-template
   replay pass. Outer callable bodies share parameter scope; nested blocks
   keep their own scopes.
-- **Standalone raw-symbol sweep:** open and already filed in
+- **Standalone raw-symbol sweep:** repaired and passed as recorded in
   [raw-symbol translation of macros.x](raw-symbol-macros-translation.md).
-  Keep this independent from the capture-hole capability; the current
-  standalone raw translation failure is not evidence against that hole.
+  It remains an optional proof, independent of the capture-hole capability.
 
 
 ## 7. Name, positions and sequences

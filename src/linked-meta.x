@@ -83,6 +83,24 @@ List x2c_type_members(List type) {
 
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
+static List source_call(Var value) {
+  match (value) case %(expr ? ?inner): value = inner;
+  match (value) case %(call ?callee (args *rows)): {
+    match (rows) case %((expr ? ())): rows = NULL;
+    return %($callee $rows);
+  }
+  return NULL;
+}
+
+static List source_assignment(Var value) {
+  match (value) case %(expr ? ?inner): value = inner;
+  match (value) case %(op (!quote =) ?target ?stored): {
+    match (target) case %(bind *): return NULL;
+    return %($target $stored);
+  }
+  return NULL;
+}
+
 static Var source_expression(Var value) {
   while (1) {
     match (value) {
@@ -641,6 +659,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "source_call", source_call);
+  $linked.row(rows, "source_assignment", source_assignment);
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
