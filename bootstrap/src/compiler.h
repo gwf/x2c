@@ -174,6 +174,10 @@ String Compiler_emitted_binding_name(Compiler compiler, List binding);
 
 Symbol preproc_never_active_arm(String s);
 
+int preproc_open_state(String text);
+
+int preproc_branch_state(int state);
+
 void Compiler_tokenize(Compiler c, char * text);
 
 void Compiler_mark_completion(Compiler compiler, int position);

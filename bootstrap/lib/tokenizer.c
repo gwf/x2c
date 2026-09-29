@@ -12,63 +12,77 @@ __attribute__((constructor)) static void _file_init_(void);
 
 #include "exception.h"
 #include <string.h>
+static int Tokenizer__step(Tokenizer t);
+
+static int Tokenizer__end_of_file(Tokenizer t);
+
+static int Tokenizer__x2c_tokens(Tokenizer t);
+
+static int Tokenizer__common_tokens(Tokenizer t);
+
+static int Tokenizer__preprocessor(Tokenizer t);
+
+static int Tokenizer__number(Tokenizer tokenizer);
+
+static int Tokenizer__embedded_lisp(Tokenizer tokenizer);
+
+static int Tokenizer__named_reference(Tokenizer tokenizer);
+
+static int Tokenizer__percent_tokens(Tokenizer t);
+
+static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer);
+
+static int Tokenizer__c_tokens(Tokenizer tokenizer);
+
+static int Tokenizer__lisp_tokens(Tokenizer t);
+
+static int Tokenizer__lisp_prefix(Tokenizer t, int list, int collection);
+
+static int Tokenizer__lisp_punctuation(Tokenizer t, int list, int collection);
+
+static int Tokenizer__lisp_symbol(Tokenizer t);
+
+static int Tokenizer__collection_atom(Tokenizer t);
+
+static int Tokenizer__symbol_set_tokens(Tokenizer t);
+
+static int Tokenizer__string_tokens(Tokenizer t);
+
+static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *), Symbol type);
+
+static int _error(Tokenizer tokenizer, Symbol status);
+
+static int Tokenizer__operator(Tokenizer t, int len);
+
 static inline Symbol Tokenizer__scan_mode(Tokenizer t);
 
 static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode);
 
 static inline void Tokenizer__pop_mode(Tokenizer tokenizer);
 
-static int _error(Tokenizer tokenizer, Symbol status);
+static inline int _percent_is_operator(Tokenizer tokenizer);
 
-static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *), Symbol type);
+static inline int _can_start_symbol_literal(Tokenizer tokenizer);
 
-static int Tokenizer__operator(Tokenizer t, int len);
+static inline int _prev_token_ends_operand(Tokenizer tokenizer);
 
-static int Tokenizer__named_reference(Tokenizer tokenizer);
-
-static int Tokenizer__embedded_lisp(Tokenizer tokenizer);
-
-static int Tokenizer__number(Tokenizer tokenizer);
-
-static Token _significant_back(Tokenizer tokenizer, int back);
-
-static int _token_ends_operand(Token token);
-
-static Token _significant_before(Tokenizer tokenizer, Token token);
-
-static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener);
-
-static inline int _is_control_keyword(Token token);
+static int _layout_statement_start(Tokenizer tokenizer);
 
 static int _closes_control_condition(Tokenizer tokenizer, Token token);
 
 static int _closes_statement_block(Tokenizer tokenizer, Token token);
 
-static int _layout_statement_start(Tokenizer tokenizer);
+static inline int _is_control_keyword(Token token);
 
-static inline int _prev_token_ends_operand(Tokenizer tokenizer);
+static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener);
 
-static inline int _percent_is_operator(Tokenizer tokenizer);
+static int _token_ends_operand(Token token);
 
-static inline int _can_start_symbol_literal(Tokenizer tokenizer);
+static Token _significant_back(Tokenizer tokenizer, int back);
 
-static int Tokenizer__percent_tokens(Tokenizer t);
+static Token _significant_before(Tokenizer tokenizer, Token token);
 
-static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer);
-
-static int Tokenizer__preprocessor(Tokenizer t);
-
-static int Tokenizer__common_tokens(Tokenizer t);
-
-static int Tokenizer__x2c_tokens(Tokenizer tokenizer);
-
-static int Tokenizer__string_tokens(Tokenizer t);
-
-static int Tokenizer__symbol_set_tokens(Tokenizer t);
-
-static int Tokenizer__lisp_tokens(Tokenizer t);
-
-static int Tokenizer__end_of_file(Tokenizer t);
+static void Tokenizer__layout(Tokenizer t);
 
 typedef struct _LayoutLine{
   int first, last, indent, directive;
@@ -81,17 +95,75 @@ typedef struct _LayoutEdit{
 }
 _LayoutEdit;
 
+typedef struct _LayoutHeader{
+  int aggregate, enumeration, labeled;
+}
+_LayoutHeader;
+
+typedef struct _Layout{
+  struct Token * all;
+  Token * sig;
+  Token error_at;
+  int * depths, * indents;
+  char * ternary, * enums;
+  _LayoutLine * lines;
+  _LayoutEdit * edits;
+  String * closers;
+  int count, nsig, nlines, top;
+}
+_Layout;
+
+static _Layout _layout_open(Tokenizer t);
+
+static void _Layout_close(_Layout * l);
+
+static _LayoutEdit * _Layout_edit(_Layout * l, int k);
+
+static void _Layout_split_lines(_Layout * l);
+
+static int _Layout_starts_line(_Layout * l, int k, int depth, int end_line);
+
+static void _Layout_check_tab(_Layout * l, Token tok);
+
+static int _end_line(Token tok);
+
+static void _Layout_edit_line(_Layout * l, int i);
+
+static int _Layout_next_statement(_Layout * l, int i);
+
+static void _Layout_open_block(_Layout * l, _LayoutLine line, int j, int next);
+
+static _LayoutHeader _Layout_header(_Layout * l, _LayoutLine line);
+
+static int _Layout_bare_do(_Layout * l, _LayoutLine line, int j);
+
+static String _Layout_end_statement(_Layout * l, _LayoutLine line);
+
+static void _Layout_one_line_body(_Layout * l, _LayoutLine line);
+
+static int _Layout_lisp_form(_Layout * l, _LayoutLine line);
+
+static int _Layout_hole(_Layout * l, _LayoutLine line);
+
+static int _Layout_condition(_Layout * l, int first, int colon, String body);
+
+static int _Layout_control_keyword(_Layout * l, int first, int colon);
+
+static int _Layout_wrapped(_Layout * l, int key, int colon);
+
+static Bytes _Layout_emit(_Layout * l);
+
+static Bytes _append_error(Bytes out, Token at);
+
+static Bytes _layout_insert(Bytes out, char * chars, Token at, int end);
+
 static inline int _opens(Token t);
 
 static inline int _closes(Token t);
 
 static inline int _conditional(Token t);
 
-static int _layout_condition(Token * sig, int * depths, _LayoutEdit * edits, struct Token * all, int first, int colon, String body);
-
-static Bytes _layout_insert(Bytes out, char * chars, Token at, int end);
-
-static void Tokenizer__layout(Tokenizer t);
+static int _is_label(String word);
 
 static inline String _x2c_proto_token_str_0(Var a0);
 
@@ -148,13 +220,6 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_5;
-  const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-  const void * _x2c_defer_capture_10;
-  const void * _x2c_defer_capture_11;
-  const void * _x2c_defer_capture_12;
 }
 _x2c_defer_env_4;
 
@@ -184,46 +249,46 @@ __attribute__((constructor)) static void _file_init_(void){
   _5 = String_new(", pos:");
   _6 = String_new(", ");
   _7 = String_new("}}");
-  _8 = String_new("tag");
-  _9 = String_new("not");
-  _10 = String_new("is");
-  _11 = String_new("#pragma indent");
-  _12 = String_new("if");
-  _13 = String_new("while");
-  _14 = String_new("for");
-  _15 = String_new("foreach");
-  _16 = String_new("switch");
-  _17 = String_new("match");
-  _18 = String_new(".");
-  _19 = String_new("(");
-  _20 = String_new(":");
-  _21 = String_new("?");
-  _22 = String_new("struct");
-  _23 = String_new("union");
-  _24 = String_new("enum");
-  _25 = String_new("case");
-  _26 = String_new("default");
-  _27 = String_new("catch");
-  _28 = String_new("{");
-  _29 = String_new("do");
-  _30 = String_new("typedef");
-  _31 = String_new("};");
-  _32 = String_new("}");
-  _33 = String_new("else");
-  _34 = String_new(";");
-  _35 = String_new("<Tokenizer: 0x%012lX>");
-  _36 = String_new("Tokenizer { ");
-  _37 = String_new("tokens: ");
-  _38 = String_new("<opaque: 0x%012lX>");
-  _39 = String_new("text: ");
-  _40 = String_new("modes: ");
-  _41 = String_new("cursor: ");
-  _42 = String_new("scan_status: ");
-  _43 = String_new("line: ");
-  _44 = String_new("col: ");
-  _45 = String_new("pos: ");
-  _46 = String_new("layout: ");
-  _47 = String_new(" }");
+  _8 = String_new("#pragma indent");
+  _9 = String_new("tag");
+  _10 = String_new("not");
+  _11 = String_new("is");
+  _12 = String_new("?");
+  _13 = String_new(":");
+  _14 = String_new(".");
+  _15 = String_new("{");
+  _16 = String_new("do");
+  _17 = String_new("typedef");
+  _18 = String_new("};");
+  _19 = String_new("}");
+  _20 = String_new("struct");
+  _21 = String_new("union");
+  _22 = String_new("enum");
+  _23 = String_new("while");
+  _24 = String_new("else");
+  _25 = String_new("(");
+  _26 = String_new("for");
+  _27 = String_new("if");
+  _28 = String_new("foreach");
+  _29 = String_new("switch");
+  _30 = String_new("match");
+  _31 = String_new("case");
+  _32 = String_new("default");
+  _33 = String_new("catch");
+  _34 = String_new("<Tokenizer: 0x%012lX>");
+  _35 = String_new("Tokenizer { ");
+  _36 = String_new("tokens: ");
+  _37 = String_new("<opaque: 0x%012lX>");
+  _38 = String_new("text: ");
+  _39 = String_new("modes: ");
+  _40 = String_new("cursor: ");
+  _41 = String_new("scan_status: ");
+  _42 = String_new("line: ");
+  _43 = String_new("col: ");
+  _44 = String_new("pos: ");
+  _45 = String_new("layout: ");
+  _46 = String_new(" }");
+  _47 = String_new(";");
 }
 
 Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1){
@@ -275,7 +340,7 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer Tokenizer_write_str(Tokenizer value, Buffer out){
   if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _35, (long) value);
+  return Buffer_printf(out, _34, (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -331,9 +396,9 @@ Var int_var(int);
 
 Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
   if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _35, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _34, (long) value);
   RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _35, (long) value);
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _34, (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
@@ -346,35 +411,35 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
+      Buffer_write(out, _35);
       Buffer_write(out, _36);
-      Buffer_write(out, _37);
-      Buffer_printf(out, _38, (long) value -> tokens);
+      Buffer_printf(out, _37, (long) value -> tokens);
+      Buffer_write(out, _6);
+      Buffer_write(out, _38);
+      Buffer_printf(out, _37, (long) value -> text);
       Buffer_write(out, _6);
       Buffer_write(out, _39);
-      Buffer_printf(out, _38, (long) value -> text);
-      Buffer_write(out, _6);
-      Buffer_write(out, _40);
       Array_write_repr(value -> modes, out);
       Buffer_write(out, _6);
-      Buffer_write(out, _41);
-      Buffer_printf(out, _38, (long) value -> cursor);
+      Buffer_write(out, _40);
+      Buffer_printf(out, _37, (long) value -> cursor);
       Buffer_write(out, _6);
-      Buffer_write(out, _42);
+      Buffer_write(out, _41);
       Symbol_write_repr(value -> scan_status, out);
       Buffer_write(out, _6);
-      Buffer_write(out, _43);
+      Buffer_write(out, _42);
       Var_write_repr(int_var(value -> line), out);
       Buffer_write(out, _6);
-      Buffer_write(out, _44);
+      Buffer_write(out, _43);
       Var_write_repr(int_var(value -> col), out);
       Buffer_write(out, _6);
-      Buffer_write(out, _45);
+      Buffer_write(out, _44);
       Var_write_repr(int_var(value -> pos), out);
       Buffer_write(out, _6);
-      Buffer_write(out, _46);
+      Buffer_write(out, _45);
       Var_write_repr(int_var(value -> layout), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _47);
+        Buffer _x2c_return_value_1 = Buffer_write(out, _46);
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -449,39 +514,257 @@ String Token_repr(Token token){
   return String_join(NULL, cons(String_var(head), cons(String_var(_6), cons(String_var(location), cons(String_var(_6), cons(String_var(extent), cons(String_var(_7), NULL)))))));
 }
 
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-Var Symbol_var(Symbol);
-
-Bytes Bytes_new(size_t);
-
-void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
-  tokenizer -> text = text ? text : "";
-  tokenizer -> line = 1;
-  tokenizer -> col = 1;
-  tokenizer -> scan_status = 982;
-  tokenizer -> modes = Array_update_n(Array_new(), 1, Symbol_var(mode));
-  tokenizer -> tokens = Bytes_new(sizeof(struct Token));
+void Tokenizer_scan(Tokenizer t){
+  if(! _init_guard_) _file_init_();
+  while(! Tokenizer__end_of_file(t)){
+    if(Tokenizer__step(t)) continue;
+    Tokenizer_error(t);
+    return;
+  }
+  if(t -> layout) Tokenizer__layout(t);
 }
 
-Var Array_getindex(Array, int);
-
-static inline Symbol Tokenizer__scan_mode(Tokenizer t){
-  return Var_symbol(Array_getindex(t -> modes, - 1));
+static int Tokenizer__step(Tokenizer t){
+  switch(Tokenizer__scan_mode(t)){
+    case 3945159 : case 1059020479160805 : return Tokenizer__x2c_tokens(t);
+    case 3313778 : case 26720 : case 806120 : case 806112 : case 917238583151840 : return Tokenizer__lisp_tokens(t);
+    case 1392880402798952 : return Tokenizer__common_tokens(t) || Tokenizer__symbol_set_tokens(t);
+    case 1318210446 : return Tokenizer__string_tokens(t);
+  }
+  return 0;
 }
 
-Var Array_push(Array, Var);
-
-static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
-  Array_push(tokenizer -> modes, Symbol_var(mode));
+static int Tokenizer__end_of_file(Tokenizer t){
+  if(t -> text[t -> pos] == '\0') return Tokenizer_tokenize(t, 0, 11212);
+  return 0;
 }
 
-Var Array_take_last(Array);
+static int Tokenizer__x2c_tokens(Tokenizer t){
+  return Tokenizer__common_tokens(t) ||(t -> text[t -> pos] == '$' &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) || Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__c_tokens(t);
+}
 
-static inline void Tokenizer__pop_mode(Tokenizer tokenizer){
-  if(Array_len(tokenizer -> modes)) Array_take_last(tokenizer -> modes);
+int scan_white_space(char *);
+
+int scan_line_comment(char *);
+
+int scan_block_comment_status(char *, Symbol *);
+
+int scan_c_character(char *);
+
+int scan_ascii_digit(int);
+
+static int Tokenizer__common_tokens(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  switch(text[0]){
+    case ' ' : case '\t' : case '\v' : case '\f' : case '\n' : case '\r' : return Tokenizer_do_scanner(t, scan_white_space, 40896714);
+    case '#' : return Tokenizer__preprocessor(t);
+    case '/' : if(text[1] == '/') return Tokenizer_do_scanner(t, scan_line_comment, 7477210024);
+    if(text[1] == '*') return _status_scanner(t, scan_block_comment_status, 7477210024);
+    return 0;
+    case '\'' : return Tokenizer_do_scanner(t, scan_c_character, 845368475748);
+    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Tokenizer__number(t);
+    case '.' : if(scan_ascii_digit((unsigned char) text[1])) return Tokenizer__number(t);
+  }
+  return 0;
+}
+
+int scan_preprocessor(char *);
+
+int String_startswith(String, String);
+
+int String_equal(String, String);
+
+String String_strip(String, char *);
+
+static int Tokenizer__preprocessor(Tokenizer t){
+  if(! Tokenizer_do_scanner(t, scan_preprocessor, 35579270086)) return 0;
+  Token directive = _significant_back(t, 0), before = directive;
+  if(t -> layout || ! String_startswith(directive -> text, _8) || ! String_equal(String_strip(directive -> text, " \t\r\n"), _8)) return 1;
+  while((before = _significant_before(t, before)) && before -> type == 35579270086){
+
+  }
+  if(! before) t -> layout = 1;
+  return 1;
+}
+
+int scan_number_typed(char *, Symbol *);
+
+static int Tokenizer__number(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  Symbol type;
+  int len = scan_number_typed(text, & type);
+  if(len < 0) return _error(tokenizer, 28682226919752);
+  if(len == 0) return 0;
+  type =(type == 19368) ? 26417777576 : 27051797805160;
+  return Tokenizer_tokenize(tokenizer, len, type);
+}
+
+static int Tokenizer__embedded_lisp(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  if(text[0] != '$' || text[1] != '(') return 0;
+  return Tokenizer__operator(tokenizer, 2);
+}
+
+int scan_ascii_alpha(int);
+
+int scan_identifier(char *);
+
+static int Tokenizer__named_reference(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  Tokenizer__operator(tokenizer, 1);
+  if(text[1] == '_' || scan_ascii_alpha((unsigned char) text[1])) return Tokenizer_do_scanner(tokenizer, scan_identifier, 19147688);
+  return 1;
+}
+
+Symbol Symbol_new_len(const char *, int);
+
+static int Tokenizer__percent_tokens(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  if(text[0] != '%' || ! text[1]) return 0;
+  char next = text[1];
+  if(next == '!'){
+    if(_percent_is_operator(t)) return Tokenizer__operator(t, 1);
+    return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
+  }
+  if(! strchr("([{<\"", next)) return 0;
+  int quoted = next == '"' || next == '[' ||(next == '<' && text[2] == '<');
+  if(! quoted && _percent_is_operator(t)) return Tokenizer__operator(t, 1);
+  if(next == '<' && text[2] != '<') return Tokenizer_error(t);
+  return Tokenizer__operator(t, next == '<' ? 3 : 2);
+}
+
+int scan_symbol_literal(char *);
+
+static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer){
+  char * text = tokenizer -> text + tokenizer -> pos;
+  if(text[0] != '<' || ! _can_start_symbol_literal(tokenizer)) return 0;
+  int len = scan_symbol_literal(text);
+  if(len > 0) return Tokenizer_tokenize(tokenizer, len, 865658429314008);
+  if(len < 0) return Tokenizer_error(tokenizer);
+  return 0;
+}
+
+int scan_c_string_status(char *, Symbol *);
+
+Symbol scan_keyword_type(const char *, int);
+
+int scan_c_operator(char *);
+
+static int Tokenizer__c_tokens(Tokenizer tokenizer){
+  static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
+  char * text = tokenizer -> text + tokenizer -> pos;
+  int n;
+  if(text[0] == '"') return _status_scanner(tokenizer, scan_c_string_status, 27051791223990);
+  if(text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])){
+    n = scan_identifier(text);
+    Symbol type = scan_keyword_type(text, n);
+    return Tokenizer_tokenize(tokenizer, n, type ? type : 19147688);
+  }
+  if(strchr(opchars, text[0]) &&(n = scan_c_operator(text)) > 0) return Tokenizer__operator(tokenizer, n);
+  return 0;
+}
+
+int scan_atom_status(char *, Symbol *);
+
+static int Tokenizer__lisp_tokens(Tokenizer t){
+  Symbol mode = Tokenizer__scan_mode(t);
+  int list = mode == 806120, collection = mode == 3313778 || mode == 26720;
+  if(collection && Tokenizer__common_tokens(t)) return 1;
+  if(Tokenizer__lisp_prefix(t, list, collection)) return 1;
+  int punctuation = Tokenizer__lisp_punctuation(t, list, collection);
+  if(punctuation >= 0) return punctuation;
+  if(collection) return Tokenizer__collection_atom(t);
+  if(Tokenizer__common_tokens(t)) return 1;
+  return _status_scanner(t, scan_atom_status, list ? 845368370138 : 19147688);
+}
+
+int strncmp(const char *, const char *, size_t);
+
+static int Tokenizer__lisp_prefix(Tokenizer t, int list, int collection){
+  char * text = t -> text + t -> pos;
+  if(collection && ! strncmp(text, "void", 4) && scan_identifier(text) == 4) return Tokenizer_tokenize(t, 4, 1473096);
+  if(list && text[0] == '?' && text[1] == '(') return Tokenizer__operator(t, 2);
+  if(text[0] == '$' && ! list && ! collection) return Tokenizer__named_reference(t);
+  if(list && text[0] == '@' &&(! text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1]))) return Tokenizer_tokenize(t, text[1] == '=' ? 2 : 1, 845368370138);
+  if((list &&(text[0] == '$' || text[0] == '@')) ||(collection && text[0] == '$')) return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
+  return 0;
+}
+
+static int Tokenizer__lisp_punctuation(Tokenizer t, int list, int collection){
+  char * text = t -> text + t -> pos;
+  int data = list || collection;
+  switch(text[0]){
+    case '(' : case ')' : return Tokenizer__operator(t, 1);
+    case '"' : if(data) return Tokenizer__operator(t, 1);
+    return _status_scanner(t, scan_c_string_status, 27051791223990);
+    case '{' : case '[' : if(data) return Tokenizer__operator(t, 1);
+    break;
+    case ']' : case '}' : case ':' : if(collection) return Tokenizer__operator(t, 1);
+    break;
+    case '\'' : case '`' : return Tokenizer_tokenize(t, 1, Symbol_new_len(text, 1));
+    case ',' :{
+      if(collection) return Tokenizer__operator(t, 1);
+      int len = text[1] == '@' ? 2 : 1;
+      return Tokenizer_tokenize(t, len, Symbol_new_len(text, len));
+    }
+    case '<' : return Tokenizer__lisp_symbol(t);
+    case '+' : case '-' : if(scan_ascii_digit((unsigned char) text[1])) return Tokenizer__number(t);
+    break;
+  }
+  return - 1;
+}
+
+int scan_symbol_literal_status(char *, Symbol *);
+
+static int Tokenizer__lisp_symbol(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  if(! text[1] || text[1] == '=' || strchr("()'`, \n\t\v\f\r", text[1])) return - 1;
+  Symbol status = 982;
+  int length = scan_symbol_literal_status(text, & status);
+  if(length > 0) return Tokenizer_tokenize(t, length, 865658429314008);
+  if(length < 0) return _error(t, status);
+  return - 1;
+}
+
+static int Tokenizer__collection_atom(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  Symbol status = 982;
+  int len = scan_atom_status(text, & status);
+  if(len < 0) return _error(t, status);
+  for(int i = 0;  i < len;  i ++){
+    if(text[i] == '\\') i ++;
+    else if(strchr(",:]}", text[i])){
+      len = i;
+      break;
+    }
+
+  }
+  return len ? Tokenizer_tokenize(t, len, 845368370138) : 0;
+}
+
+int scan_symbol_set_atom(char *);
+
+static int Tokenizer__symbol_set_tokens(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  if(text[0] == '>' && text[1] == '>') return Tokenizer__operator(t, 2);
+  if(text[0] == '$' || text[0] == '@') return Tokenizer__operator(t, 1);
+  if(text[0] == '<'){
+    int length = scan_symbol_literal(text);
+    if(length > 0) return Tokenizer_tokenize(t, length, 865658429314008);
+    if(length < 0) return Tokenizer_error(t);
+  }
+  return Tokenizer_do_scanner(t, scan_symbol_set_atom, 845368370138);
+}
+
+int scan_string_segment(char *);
+
+static int Tokenizer__string_tokens(Tokenizer t){
+  char * text = t -> text + t -> pos;
+  if(text[0] == '$') return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
+  if(text[0] == '"') return Tokenizer__operator(t, 1);
+  int len = scan_string_segment(text);
+  if(len < 0) return Tokenizer_error(t);
+  return Tokenizer_tokenize(t, len, 41153276840);
 }
 
 String String_new_len(const char *, int);
@@ -502,17 +785,6 @@ int Tokenizer_tokenize(Tokenizer t, int len, Symbol type){
   return 1;
 }
 
-static int _error(Tokenizer tokenizer, Symbol status){
-  if(tokenizer -> scan_status == 982) tokenizer -> scan_status = status;
-  Tokenizer_tokenize(tokenizer, 0, 11703268);
-  Tokenizer_tokenize(tokenizer, 0, 11212);
-  return 0;
-}
-
-int Tokenizer_error(Tokenizer tokenizer){
-  return _error(tokenizer, 28682226919752);
-}
-
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type){
   int len = scanner(t -> text + t -> pos);
   if(len > 0) return Tokenizer_tokenize(t, len, type);
@@ -528,7 +800,16 @@ static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *)
   return 0;
 }
 
-Symbol Symbol_new_len(const char *, int);
+int Tokenizer_error(Tokenizer tokenizer){
+  return _error(tokenizer, 28682226919752);
+}
+
+static int _error(Tokenizer tokenizer, Symbol status){
+  if(tokenizer -> scan_status == 982) tokenizer -> scan_status = status;
+  Tokenizer_tokenize(tokenizer, 0, 11703268);
+  Tokenizer_tokenize(tokenizer, 0, 11212);
+  return 0;
+}
 
 static int Tokenizer__operator(Tokenizer t, int len){
   Symbol op = Symbol_new_len(t -> text + t -> pos, len), push = 0;
@@ -637,79 +918,59 @@ static int Tokenizer__operator(Tokenizer t, int len){
 
 }
 
-int scan_ascii_alpha(int);
+Var Array_getindex(Array, int);
 
-int scan_identifier(char *);
-
-static int Tokenizer__named_reference(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  Tokenizer__operator(tokenizer, 1);
-  if(text[1] == '_' || scan_ascii_alpha((unsigned char) text[1])) return Tokenizer_do_scanner(tokenizer, scan_identifier, 19147688);
-  return 1;
+static inline Symbol Tokenizer__scan_mode(Tokenizer t){
+  return Var_symbol(Array_getindex(t -> modes, - 1));
 }
 
-static int Tokenizer__embedded_lisp(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  if(text[0] != '$' || text[1] != '(') return 0;
-  return Tokenizer__operator(tokenizer, 2);
+Var Array_push(Array, Var);
+
+Var Symbol_var(Symbol);
+
+static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
+  Array_push(tokenizer -> modes, Symbol_var(mode));
 }
 
-int scan_number_typed(char *, Symbol *);
+Var Array_take_last(Array);
 
-static int Tokenizer__number(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  Symbol type;
-  int len = scan_number_typed(text, & type);
-  if(len < 0) return _error(tokenizer, 28682226919752);
-  if(len == 0) return 0;
-  type =(type == 19368) ? 26417777576 : 27051797805160;
-  return Tokenizer_tokenize(tokenizer, len, type);
+static inline void Tokenizer__pop_mode(Tokenizer tokenizer){
+  if(Array_len(tokenizer -> modes)) Array_take_last(tokenizer -> modes);
 }
 
-static Token _significant_back(Tokenizer tokenizer, int back){
+static inline int _percent_is_operator(Tokenizer tokenizer){
+  if(_layout_statement_start(tokenizer)) return 0;
+  Token token = _significant_back(tokenizer, 0);
+  return _token_ends_operand(token) && ! _closes_control_condition(tokenizer, token) && ! _closes_statement_block(tokenizer, token);
+}
+
+static inline int _can_start_symbol_literal(Tokenizer tokenizer){
+  if(! _prev_token_ends_operand(tokenizer)) return 1;
+  Token keyword = _significant_back(tokenizer, 0);
+  int back = 1;
+  if(keyword -> type != 19147688) return 0;
+  if(String_equal(keyword -> text, _9)) return 1;
+  if(String_equal(keyword -> text, _10)){
+    keyword = _significant_back(tokenizer, back ++);
+    if(! keyword || keyword -> type != 19147688) return 0;
+  }
+  return String_equal(keyword -> text, _11) && _token_ends_operand(_significant_back(tokenizer, back));
+}
+
+static inline int _prev_token_ends_operand(Tokenizer tokenizer){
+  return ! _layout_statement_start(tokenizer) && _token_ends_operand(_significant_back(tokenizer, 0));
+}
+
+static int _layout_statement_start(Tokenizer tokenizer){
+  if(! tokenizer -> layout) return 0;
   struct Token * tokens =(struct Token *) tokenizer -> tokens;
-  for(size_t count = Bytes_len(tokenizer -> tokens);  count;  count --){
-    Symbol type = tokens[count - 1].type;
-    if(type == 40896714 || type == 7477210024) continue;
-    if(! back --) return & tokens[count - 1];
-  }
-  return NULL;
-}
-
-static int _token_ends_operand(Token token){
-  if(! token) return 0;
-  switch(token -> type){
-    case 19147688 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368475748 : case 845368370138 : case 865658429314008 : case 83 : case 187 : case 251 : case 1848 : case 2046 : return 1;
-  }
-  return 0;
-}
-
-static Token _significant_before(Tokenizer tokenizer, Token token){
-  struct Token * first =(struct Token *) tokenizer -> tokens;
-  while(token > first){
-    token --;
-    if(token -> type != 40896714 && token -> type != 7477210024) return token;
-  }
-  return NULL;
-}
-
-static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener){
-  struct Token * first =(struct Token *) tokenizer -> tokens;
-  int depth = 0;
-  for(Token scan = close + 1;  scan > first; ){
-    switch((-- scan) -> type){
-      case 83 : case 251 : depth ++;
-      break;
-      case 81 : case 9553 : case 9297 : case 16209 : case 247 : case 9719 : case 9463 : case 16631 : if(-- depth) break;
-      return scan -> type == opener ? _significant_before(tokenizer, scan) : NULL;
-    }
-
-  }
-  return NULL;
-}
-
-static inline int _is_control_keyword(Token token){
-  return token &&(token -> type == 588 || token -> type == 48777994 || token -> type == 13284 || token -> type == 1323933904);
+  size_t count = Bytes_len(tokenizer -> tokens);
+  if(! count || tokens[count - 1].type != 40896714 || ! strchr(tokens[count - 1].text, '\n')) return 0;
+  Token previous = _significant_back(tokenizer, 0);
+  if(! previous) return 0;
+  Token start = previous;
+  for(struct Token * scan = previous;  scan > tokens && scan[- 1].line == previous -> line; ) if((-- scan) -> type != 40896714 && scan -> type != 7477210024) start = scan;
+  return tokenizer -> col <= start -> col;
 }
 
 static int _closes_control_condition(Tokenizer tokenizer, Token token){
@@ -731,252 +992,295 @@ static int _closes_statement_block(Tokenizer tokenizer, Token token){
   return 0;
 }
 
-static int _layout_statement_start(Tokenizer tokenizer){
-  if(! tokenizer -> layout) return 0;
-  struct Token * tokens =(struct Token *) tokenizer -> tokens;
-  size_t count = Bytes_len(tokenizer -> tokens);
-  if(! count || tokens[count - 1].type != 40896714 || ! strchr(tokens[count - 1].text, '\n')) return 0;
-  Token previous = _significant_back(tokenizer, 0);
-  if(! previous) return 0;
-  Token start = previous;
-  for(struct Token * scan = previous;  scan > tokens && scan[- 1].line == previous -> line; ) if((-- scan) -> type != 40896714 && scan -> type != 7477210024) start = scan;
-  return tokenizer -> col <= start -> col;
+static inline int _is_control_keyword(Token token){
+  return token &&(token -> type == 588 || token -> type == 48777994 || token -> type == 13284 || token -> type == 1323933904);
 }
 
-static inline int _prev_token_ends_operand(Tokenizer tokenizer){
-  return ! _layout_statement_start(tokenizer) && _token_ends_operand(_significant_back(tokenizer, 0));
-}
-
-static inline int _percent_is_operator(Tokenizer tokenizer){
-  if(_layout_statement_start(tokenizer)) return 0;
-  Token token = _significant_back(tokenizer, 0);
-  return _token_ends_operand(token) && ! _closes_control_condition(tokenizer, token) && ! _closes_statement_block(tokenizer, token);
-}
-
-int String_equal(String, String);
-
-static inline int _can_start_symbol_literal(Tokenizer tokenizer){
-  if(! _prev_token_ends_operand(tokenizer)) return 1;
-  Token keyword = _significant_back(tokenizer, 0);
-  int back = 1;
-  if(keyword -> type != 19147688) return 0;
-  if(String_equal(keyword -> text, _8)) return 1;
-  if(String_equal(keyword -> text, _9)){
-    keyword = _significant_back(tokenizer, back ++);
-    if(! keyword || keyword -> type != 19147688) return 0;
-  }
-  return String_equal(keyword -> text, _10) && _token_ends_operand(_significant_back(tokenizer, back));
-}
-
-static int Tokenizer__percent_tokens(Tokenizer t){
-  char * text = t -> text + t -> pos;
-  if(text[0] != '%' || ! text[1]) return 0;
-  char next = text[1];
-  if(next == '!'){
-    if(_percent_is_operator(t)) return Tokenizer__operator(t, 1);
-    return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
-  }
-  if(! strchr("([{<\"", next)) return 0;
-  int quoted = next == '"' || next == '[' ||(next == '<' && text[2] == '<');
-  if(! quoted && _percent_is_operator(t)) return Tokenizer__operator(t, 1);
-  if(next == '<' && text[2] != '<') return Tokenizer_error(t);
-  return Tokenizer__operator(t, next == '<' ? 3 : 2);
-}
-
-int scan_symbol_literal(char *);
-
-static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer){
-  char * text = tokenizer -> text + tokenizer -> pos;
-  if(text[0] != '<' || ! _can_start_symbol_literal(tokenizer)) return 0;
-  int len = scan_symbol_literal(text);
-  if(len > 0) return Tokenizer_tokenize(tokenizer, len, 865658429314008);
-  if(len < 0) return Tokenizer_error(tokenizer);
-  return 0;
-}
-
-int scan_preprocessor(char *);
-
-int String_startswith(String, String);
-
-String String_strip(String, char *);
-
-static int Tokenizer__preprocessor(Tokenizer t){
-  if(! Tokenizer_do_scanner(t, scan_preprocessor, 35579270086)) return 0;
-  Token directive = _significant_back(t, 0), before = directive;
-  if(t -> layout || ! String_startswith(directive -> text, _11) || ! String_equal(String_strip(directive -> text, " \t\r\n"), _11)) return 1;
-  while((before = _significant_before(t, before)) && before -> type == 35579270086){
-
-  }
-  if(! before) t -> layout = 1;
-  return 1;
-}
-
-int scan_white_space(char *);
-
-int scan_line_comment(char *);
-
-int scan_block_comment_status(char *, Symbol *);
-
-int scan_c_character(char *);
-
-int scan_ascii_digit(int);
-
-static int Tokenizer__common_tokens(Tokenizer t){
-  char * text = t -> text + t -> pos;
-  switch(text[0]){
-    case ' ' : case '\t' : case '\v' : case '\f' : case '\n' : case '\r' : return Tokenizer_do_scanner(t, scan_white_space, 40896714);
-    case '#' : return Tokenizer__preprocessor(t);
-    case '/' : if(text[1] == '/') return Tokenizer_do_scanner(t, scan_line_comment, 7477210024);
-    if(text[1] == '*') return _status_scanner(t, scan_block_comment_status, 7477210024);
-    return 0;
-    case '\'' : return Tokenizer_do_scanner(t, scan_c_character, 845368475748);
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Tokenizer__number(t);
-    case '.' : if(scan_ascii_digit((unsigned char) text[1])) return Tokenizer__number(t);
-  }
-  return 0;
-}
-
-int scan_c_string_status(char *, Symbol *);
-
-Symbol scan_keyword_type(const char *, int);
-
-int scan_c_operator(char *);
-
-static int Tokenizer__x2c_tokens(Tokenizer tokenizer){
-  static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
-  char * text = tokenizer -> text + tokenizer -> pos;
-  int n;
-  if(text[0] == '"') return _status_scanner(tokenizer, scan_c_string_status, 27051791223990);
-  if(text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])){
-    n = scan_identifier(text);
-    Symbol type = scan_keyword_type(text, n);
-    return Tokenizer_tokenize(tokenizer, n, type ? type : 19147688);
-  }
-  if(strchr(opchars, text[0]) &&(n = scan_c_operator(text)) > 0) return Tokenizer__operator(tokenizer, n);
-  return 0;
-}
-
-int scan_string_segment(char *);
-
-static int Tokenizer__string_tokens(Tokenizer t){
-  char * text = t -> text + t -> pos;
-  if(text[0] == '$') return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
-  if(text[0] == '"') return Tokenizer__operator(t, 1);
-  int len = scan_string_segment(text);
-  if(len < 0) return Tokenizer_error(t);
-  return Tokenizer_tokenize(t, len, 41153276840);
-}
-
-int scan_symbol_set_atom(char *);
-
-static int Tokenizer__symbol_set_tokens(Tokenizer t){
-  char * text = t -> text + t -> pos;
-  if(text[0] == '>' && text[1] == '>') return Tokenizer__operator(t, 2);
-  if(text[0] == '$' || text[0] == '@') return Tokenizer__operator(t, 1);
-  if(text[0] == '<'){
-    int length = scan_symbol_literal(text);
-    if(length > 0) return Tokenizer_tokenize(t, length, 865658429314008);
-    if(length < 0) return Tokenizer_error(t);
-  }
-  return Tokenizer_do_scanner(t, scan_symbol_set_atom, 845368370138);
-}
-
-int strncmp(const char *, const char *, size_t);
-
-int scan_symbol_literal_status(char *, Symbol *);
-
-int scan_atom_status(char *, Symbol *);
-
-static int Tokenizer__lisp_tokens(Tokenizer t){
-  Symbol mode = Tokenizer__scan_mode(t);
-  int list = mode == 806120, collection = mode == 3313778 || mode == 26720;
-  char * text = t -> text + t -> pos;
-  int len;
-  if(collection && Tokenizer__common_tokens(t)) return 1;
-  if(collection && ! strncmp(text, "void", 4) && scan_identifier(text) == 4) return Tokenizer_tokenize(t, 4, 1473096);
-  if(list && text[0] == '?' && text[1] == '(') return Tokenizer__operator(t, 2);
-  if(text[0] == '$' && ! list && ! collection) return Tokenizer__named_reference(t);
-  if(list && text[0] == '@' &&(! text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1]))) return Tokenizer_tokenize(t, text[1] == '=' ? 2 : 1, 845368370138);
-  if((list &&(text[0] == '$' || text[0] == '@')) ||(collection && text[0] == '$')) return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
-  switch(text[0]){
-    case '(' : case ')' : return Tokenizer__operator(t, 1);
-    case '"' : if(list || collection) return Tokenizer__operator(t, 1);
-    return _status_scanner(t, scan_c_string_status, 27051791223990);
-    case '{' : case '[' : if(list || collection) return Tokenizer__operator(t, 1);
-    break;
-    case ']' : case '}' : case ':' : if(collection) return Tokenizer__operator(t, 1);
-    break;
-    case '\'' : case '`' : return Tokenizer_tokenize(t, 1, Symbol_new_len(text, 1));
-    case ',' : if(collection) return Tokenizer__operator(t, 1);
-    len = text[1] == '@' ? 2 : 1;
-    return Tokenizer_tokenize(t, len, Symbol_new_len(text, len));
-    case '<' :{
-      if(! text[1] || text[1] == '=' || strchr("()'`, \n\t\v\f\r", text[1])) break;
-      Symbol status = 982;
-      int length = scan_symbol_literal_status(text, & status);
-      if(length > 0) return Tokenizer_tokenize(t, length, 865658429314008);
-      if(length < 0) return _error(t, status);
+static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener){
+  struct Token * first =(struct Token *) tokenizer -> tokens;
+  int depth = 0;
+  for(Token scan = close + 1;  scan > first; ){
+    switch((-- scan) -> type){
+      case 83 : case 251 : depth ++;
       break;
+      case 81 : case 9553 : case 9297 : case 16209 : case 247 : case 9719 : case 9463 : case 16631 : if(-- depth) break;
+      return scan -> type == opener ? _significant_before(tokenizer, scan) : NULL;
     }
-    case '+' : case '-' : if(scan_ascii_digit((unsigned char) text[1])) return Tokenizer__number(t);
-    break;
-  }
-  if(! collection && Tokenizer__common_tokens(t)) return 1;
-  if(collection){
-    Symbol status = 982;
-    len = scan_atom_status(text, & status);
-    if(len < 0) return _error(t, status);
-    for(int i = 0;  i < len;  i ++){
-      if(text[i] == '\\'){
-        i ++;
-        continue;
-      }
-      if(strchr(",:]}", text[i])){
-        len = i;
-        break;
-      }
 
-    }
-    return len ? Tokenizer_tokenize(t, len, 845368370138) : 0;
   }
-  return _status_scanner(t, scan_atom_status, list ? 845368370138 : 19147688);
+  return NULL;
 }
 
-static int Tokenizer__end_of_file(Tokenizer t){
-  if(t -> text[t -> pos] == '\0') return Tokenizer_tokenize(t, 0, 11212);
+static int _token_ends_operand(Token token){
+  if(! token) return 0;
+  switch(token -> type){
+    case 19147688 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368475748 : case 845368370138 : case 865658429314008 : case 83 : case 187 : case 251 : case 1848 : case 2046 : return 1;
+  }
   return 0;
 }
 
-int String_getindex(String, int);
-
-static inline int _opens(Token t){
-  return t -> type != 27051791223990 && t -> type != 845368475748 && t -> type != 41153276840 && t -> len && strchr("([{", String_getindex(t -> text, t -> len - 1));
+static Token _significant_back(Tokenizer tokenizer, int back){
+  struct Token * tokens =(struct Token *) tokenizer -> tokens;
+  for(size_t count = Bytes_len(tokenizer -> tokens);  count;  count --){
+    Symbol type = tokens[count - 1].type;
+    if(type == 40896714 || type == 7477210024) continue;
+    if(! back --) return & tokens[count - 1];
+  }
+  return NULL;
 }
 
-static inline int _closes(Token t){
-  return t -> type == 83 || t -> type == 187 || t -> type == 251;
+static Token _significant_before(Tokenizer tokenizer, Token token){
+  struct Token * first =(struct Token *) tokenizer -> tokens;
+  while(token > first){
+    token --;
+    if(token -> type != 40896714 && token -> type != 7477210024) return token;
+  }
+  return NULL;
 }
 
-static inline int _conditional(Token t){
-  return String_equal(t -> text, _12) || String_equal(t -> text, _13) || String_equal(t -> text, _14) || String_equal(t -> text, _15) || String_equal(t -> text, _16) || String_equal(t -> text, _17);
+static void Tokenizer__layout(Tokenizer t){
+  _Layout l = _layout_open(t);
+  {
+    _x2c_defer_env_4 _x2c_macro_environment_4 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_4._x2c_defer_capture_5 =(const void *) & l;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
+    {
+      _Layout_split_lines(&(l));
+      for(int i = 0;  i < l.nlines;  i ++) _Layout_edit_line(&(l), i);
+      if(l.error_at) t -> scan_status = 633613224;
+      t -> tokens = _Layout_emit(&(l));
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_4);
+  }
+
+}
+
+static _Layout _layout_open(Tokenizer t){
+  int count = Bytes_len(t -> tokens) - 1;
+  _Layout l ={
+    .all =(struct Token *) t -> tokens, .count = count, .sig = calloc(count + 1, sizeof(Token)), .depths = calloc(count + 1, sizeof(int)), .lines = calloc(count + 1, sizeof(_LayoutLine)), .edits = calloc(count + 1, sizeof(_LayoutEdit)), .indents = calloc(count + 2, sizeof(int)), .closers = calloc(count + 2, sizeof(String)), .enums = calloc(count + 2, 1), .ternary = calloc(count + 1, 1)
+  }
+  ;
+  for(int i = 0;  i < count;  i ++) if(l.all[i].type != 40896714 && l.all[i].type != 7477210024) l.sig[l.nsig ++] = & l.all[i];
+  return l;
+}
+
+static void _Layout_close(_Layout * l){
+  free(l -> sig);
+  free(l -> depths);
+  free(l -> lines);
+  free(l -> edits);
+  free(l -> indents);
+  free(l -> closers);
+  free(l -> enums);
+  free(l -> ternary);
+}
+
+static _LayoutEdit * _Layout_edit(_Layout * l, int k){
+  return & l -> edits[l -> sig[k] - l -> all];
+}
+
+static void _Layout_split_lines(_Layout * l){
+  int depth = 0, end_line = 0, pending = 0;
+  for(int k = 0;  k < l -> nsig;  k ++){
+    Token tok = l -> sig[k];
+    if(_Layout_starts_line(l, k, depth, end_line)){
+      _Layout_check_tab(l, tok);
+      l -> lines[l -> nlines ++] =(_LayoutLine){
+        k, k, tok -> col, tok -> type == 35579270086
+      }
+      ;
+      pending = 0;
+    }
+    l -> lines[l -> nlines - 1].last = k;
+    if(_closes(tok)) depth --;
+    l -> depths[k] = depth;
+    if(! depth && String_equal(tok -> text, _12)) pending ++;
+    else if(! depth && String_equal(tok -> text, _13) && pending){
+      l -> ternary[k] = 1;
+      pending --;
+    }
+    if(_opens(tok)) depth ++;
+    end_line = _end_line(tok);
+  }
+
+}
+
+static int _Layout_starts_line(_Layout * l, int k, int depth, int end_line){
+  Token tok = l -> sig[k];
+  if(tok -> type == 35579270086 || ! l -> nlines || l -> lines[l -> nlines - 1].directive) return 1;
+  return depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _14) &&(tok -> col <= l -> lines[l -> nlines - 1].indent ||(String_equal(l -> sig[k - 1] -> text, _13) && ! l -> ternary[k - 1]));
+}
+
+static void _Layout_check_tab(_Layout * l, Token tok){
+  if(tok -> type == 35579270086 || l -> error_at || tok <= l -> all) return;
+  Token space = tok - 1;
+  if(space -> type != 40896714) return;
+  char * newline = strrchr(space -> text, '\n');
+  if(newline && strchr(newline, '\t')) l -> error_at = tok;
+}
+
+static int _end_line(Token tok){
+  int line = tok -> line;
+  for(char * c = tok -> text;  c && * c;  c ++) line += * c == '\n';
+  return line;
 }
 
 int String_truth(String);
 
-static int _layout_condition(Token * sig, int * depths, _LayoutEdit * edits, struct Token * all, int first, int colon, String body){
-  int key = - 1;
-  for(int m = first;  m < colon;  m ++) if(! depths[m] && _conditional(sig[m]) &&(m == first || ! String_equal(sig[m - 1] -> text, _18))) key = m;
+static void _Layout_edit_line(_Layout * l, int i){
+  _LayoutLine line = l -> lines[i];
+  if(line.directive){
+    if(String_equal(String_strip(l -> sig[line.first] -> text, " \t\r\n"), _8)) _Layout_edit(l, line.first) -> type = 7477210024;
+    return;
+  }
+  if(! l -> top && ! l -> indents[0]) l -> indents[0] = line.indent;
+  int j = _Layout_next_statement(l, i);
+  int next = j < l -> nlines ? l -> lines[j].indent : l -> indents[0];
+  String suffix = NULL;
+  if(String_equal(l -> sig[line.last] -> text, _13) && ! l -> ternary[line.last] && next > line.indent) _Layout_open_block(l, line, j, next);
+  else suffix = _Layout_end_statement(l, line);
+  while(l -> top && next < l -> indents[l -> top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(l -> closers[l -> top --]), NULL)));
+  if(next != l -> indents[l -> top] && ! l -> error_at && j < l -> nlines) l -> error_at = l -> sig[l -> lines[j].first];
+  _LayoutEdit * tail = _Layout_edit(l, line.last);
+  if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;
+}
+
+static int _Layout_next_statement(_Layout * l, int i){
+  int j = i + 1;
+  while(j < l -> nlines && l -> lines[j].directive) j ++;
+  return j;
+}
+
+static void _Layout_open_block(_Layout * l, _LayoutLine line, int j, int next){
+  Token first = l -> sig[line.first];
+  _LayoutHeader header = _Layout_header(l, line);
+  if(header.labeled) _Layout_edit(l, line.last) -> after = _15;
+  else if(! _Layout_condition(l, line.first, line.last, _15)) _Layout_edit(l, line.last) -> type = 247;
+  if(String_equal(first -> text, _16) && line.last == line.first + 1 && _Layout_bare_do(l, line, j)) _Layout_edit(l, line.first) -> type = 40896714;
+  l -> indents[++ l -> top] = next;
+  l -> enums[l -> top] = header.enumeration;
+  l -> closers[l -> top] = header.aggregate && ! String_equal(first -> text, _17) ? _18 : _19;
+}
+
+static _LayoutHeader _Layout_header(_Layout * l, _LayoutLine line){
+  int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
+  for(int m = line.first;  m < line.last;  m ++){
+    String word = l -> sig[m] -> text;
+    aggregate |= String_equal(word, _20) || String_equal(word, _21) || String_equal(word, _22);
+    enumeration |= String_equal(word, _22);
+    parameters |= l -> sig[m] -> type == 81;
+    labeled |= ! l -> depths[m] && _is_label(word);
+  }
+  return(_LayoutHeader){
+    aggregate && ! parameters, enumeration && ! parameters, labeled
+  }
+  ;
+}
+
+static int _Layout_bare_do(_Layout * l, _LayoutLine line, int j){
+  int k = j;
+  for(;  k < l -> nlines;  k ++) if(! l -> lines[k].directive && l -> lines[k].indent <= line.indent) break;
+  if(k == l -> nlines) return 1;
+  _LayoutLine trailer = l -> lines[k];
+  return trailer.indent != line.indent || ! String_equal(l -> sig[trailer.first] -> text, _23) || String_equal(l -> sig[trailer.last] -> text, _13);
+}
+
+static String _Layout_end_statement(_Layout * l, _LayoutLine line){
+  _Layout_one_line_body(l, line);
+  if(l -> sig[line.first] -> type == 129){
+    _Layout_edit(l, line.first) -> type = 40896714;
+    return NULL;
+  }
+  if(l -> sig[line.last] -> type == 119 || l -> enums[l -> top] || _Layout_lisp_form(l, line) || _Layout_hole(l, line)) return NULL;
+  return _47;
+}
+
+static void _Layout_one_line_body(_Layout * l, _LayoutLine line){
+  for(int m = line.first + 1;  m < line.last;  m ++){
+    String word = l -> sig[m] -> text;
+    if(l -> depths[m]) continue;
+    if(_is_label(word)) return;
+    if(! String_equal(word, _13) || l -> ternary[m]) continue;
+    if(! _Layout_condition(l, line.first, m, NULL) && String_equal(l -> sig[m - 1] -> text, _24)) _Layout_edit(l, m) -> type = 40896714;
+    return;
+  }
+
+}
+
+static int _Layout_lisp_form(_Layout * l, _LayoutLine line){
+  if(l -> sig[line.first] -> type != 9297) return 0;
+  for(int m = line.first + 1;  m < line.last;  m ++) if(l -> depths[m] <= 0) return 0;
+  return 1;
+}
+
+static int _Layout_hole(_Layout * l, _LayoutLine line){
+  int last = line.last;
+  return l -> sig[last] -> type == 19147688 && last > line.first && l -> sig[last - 1] -> type == 73 &&(last - 1 == line.first || l -> sig[last - 2] -> type == 83);
+}
+
+static int _Layout_condition(_Layout * l, int first, int colon, String body){
+  int key = _Layout_control_keyword(l, first, colon);
   if(key < 0) return 0;
-  int wrapped = String_equal(sig[key] -> text, _14) || sig[key + 1] -> type == 81 && sig[colon - 1] -> type == 83;
-  for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped = depths[m] > 0;
-  _LayoutEdit * tail = & edits[sig[colon] - all];
-  if(wrapped) tail -> type = String_truth(body) ? 247 : 40896714;
+  _LayoutEdit * tail = _Layout_edit(l, colon);
+  if(_Layout_wrapped(l, key, colon)) tail -> type = String_truth(body) ? 247 : 40896714;
   else{
-    edits[sig[key + 1] - all].before = _19;
+    _Layout_edit(l, key + 1) -> before = _25;
     tail -> type = 83;
     tail -> after = body;
   }
   return 1;
+}
+
+static int _Layout_control_keyword(_Layout * l, int first, int colon){
+  int key = - 1;
+  for(int m = first;  m < colon;  m ++) if(! l -> depths[m] && _conditional(l -> sig[m]) &&(m == first || ! String_equal(l -> sig[m - 1] -> text, _14))) key = m;
+  return key;
+}
+
+static int _Layout_wrapped(_Layout * l, int key, int colon){
+  int wrapped = String_equal(l -> sig[key] -> text, _26) ||(l -> sig[key + 1] -> type == 81 && l -> sig[colon - 1] -> type == 83);
+  for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped = l -> depths[m] > 0;
+  return wrapped;
+}
+
+Bytes Bytes_new(size_t);
+
+static Bytes _Layout_emit(_Layout * l){
+  Bytes out = Bytes_new(sizeof(struct Token));
+  for(int i = 0;  i <= l -> count;  i ++){
+    Token tok = & l -> all[i];
+    if(Token_equal(tok, l -> error_at)) return _append_error(out, tok);
+    _LayoutEdit edit = l -> edits[i];
+    out = _layout_insert(out, edit.before, tok, 0);
+    struct Token copy = * tok;
+    if(edit.type && edit.type != 40896714 && edit.type != 7477210024) copy.text = Symbol_str(edit.type);
+    if(edit.type) copy.type = edit.type;
+    out = Bytes_append(out, & copy, 1);
+    out = _layout_insert(out, edit.after, tok, 1);
+  }
+  return out;
+}
+
+static Bytes _append_error(Bytes out, Token at){
+  struct Token marks[2] ={
+    {
+      .text = NULL, .type = 11703268, .line = at -> line, .col = at -> col, .pos = at -> pos
+    }
+    , {
+      .text = NULL, .type = 11212, .line = at -> line, .col = at -> col, .pos = at -> pos
+    }
+
+  }
+  ;
+  return Bytes_append(out, marks, 2);
 }
 
 static Bytes _layout_insert(Bytes out, char * chars, Token at, int end){
@@ -990,173 +1294,35 @@ static Bytes _layout_insert(Bytes out, char * chars, Token at, int end){
   return out;
 }
 
-static void Tokenizer__layout(Tokenizer t){
-  struct Token * all =(struct Token *) t -> tokens;
-  int count = Bytes_len(t -> tokens) - 1, nsig = 0, nlines = 0, depth = 0;
-  Token * sig = calloc(count + 1, sizeof(Token));
-  int * depths = calloc(count + 1, sizeof(int));
-  _LayoutLine * lines = calloc(count + 1, sizeof(_LayoutLine));
-  _LayoutEdit * edits = calloc(count + 1, sizeof(_LayoutEdit));
-  int * indents = calloc(count + 2, sizeof(int));
-  String * closers = calloc(count + 2, sizeof(String));
-  char * enums = calloc(count + 2, 1), * ternary = calloc(count + 1, 1);
-  {
-    _x2c_defer_env_4 _x2c_macro_environment_4 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_4._x2c_defer_capture_5 =(const void *) & sig;
-    _x2c_macro_environment_4._x2c_defer_capture_6 =(const void *) & depths;
-    _x2c_macro_environment_4._x2c_defer_capture_7 =(const void *) & lines;
-    _x2c_macro_environment_4._x2c_defer_capture_8 =(const void *) & edits;
-    _x2c_macro_environment_4._x2c_defer_capture_9 =(const void *) & indents;
-    _x2c_macro_environment_4._x2c_defer_capture_10 =(const void *) & closers;
-    _x2c_macro_environment_4._x2c_defer_capture_11 =(const void *) & enums;
-    _x2c_macro_environment_4._x2c_defer_capture_12 =(const void *) & ternary;
-    X2CCleanup _x2c_defer_record_4 ={
-      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_4);
-    {
-      Token error_at = NULL;
-      for(int i = 0;  i < count;  i ++) if(all[i].type != 40896714 && all[i].type != 7477210024) sig[nsig ++] = & all[i];
-      int end_line = 0, pending = 0;
-      for(int k = 0;  k < nsig;  k ++){
-        Token tok = sig[k];
-        int directive = tok -> type == 35579270086;
-        if(directive || ! nlines || lines[nlines - 1].directive ||(depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _18) &&(tok -> col <= lines[nlines - 1].indent ||(String_equal(sig[k - 1] -> text, _20) && ! ternary[k - 1])))){
-          Token space = tok > all ? tok - 1 : NULL;
-          char * newline = space && space -> type == 40896714 ? strrchr(space -> text, '\n') : NULL;
-          if(! directive && newline && strchr(newline, '\t') && ! error_at) error_at = tok;
-          lines[nlines ++] =(_LayoutLine){
-            k, k, tok -> col, directive
-          }
-          ;
-          pending = 0;
-        }
-        lines[nlines - 1].last = k;
-        if(_closes(tok)) depth --;
-        depths[k] = depth;
-        if(! depth && String_equal(tok -> text, _21)) pending ++;
-        else if(! depth && String_equal(tok -> text, _20) && pending){
-          ternary[k] = 1;
-          pending --;
-        }
-        if(_opens(tok)) depth ++;
-        end_line = tok -> line;
-        for(char * c = tok -> text;  c && * c;  c ++) end_line += * c == '\n';
-      }
-      int top = 0;
-      for(int i = 0;  i < nlines;  i ++){
-        _LayoutLine line = lines[i];
-        Token first = sig[line.first], last = sig[line.last];
-        if(line.directive){
-          if(String_equal(String_strip(first -> text, " \t\r\n"), _11)) edits[sig[line.first] - all].type = 7477210024;
-          continue;
-        }
-        if(! top && ! indents[0]) indents[0] = line.indent;
-        int j = i + 1;
-        while(j < nlines && lines[j].directive) j ++;
-        int next = j < nlines ? lines[j].indent : indents[0];
-        _LayoutEdit * tail = & edits[sig[line.last] - all];
-        String suffix = NULL;
-        if(String_equal(last -> text, _20) && ! ternary[line.last] && next > line.indent){
-          int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
-          for(int m = line.first;  m < line.last;  m ++){
-            String word = sig[m] -> text;
-            aggregate |= String_equal(word, _22) || String_equal(word, _23) || String_equal(word, _24);
-            enumeration |= String_equal(word, _24);
-            parameters |= sig[m] -> type == 81;
-            labeled |= ! depths[m] &&(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27));
-          }
-          aggregate &= ! parameters;
-          enumeration &= ! parameters;
-          if(labeled) tail -> after = _28;
-          else if(! _layout_condition(sig, depths, edits, all, line.first, line.last, _28)) tail -> type = 247;
-          if(String_equal(first -> text, _29) && line.last == line.first + 1){
-            int k = j;
-            while(k < nlines &&(lines[k].directive || lines[k].indent > line.indent)) k ++;
-            if(k == nlines || lines[k].indent != line.indent || ! String_equal(sig[lines[k].first] -> text, _13) || String_equal(sig[lines[k].last] -> text, _20)) edits[sig[line.first] - all].type = 40896714;
-          }
-          indents[++ top] = next;
-          enums[top] = enumeration;
-          closers[top] = aggregate && ! String_equal(first -> text, _30) ? _31 : _32;
-        }
-        else{
-          for(int m = line.first + 1;  m < line.last;  m ++){
-            String word = sig[m] -> text;
-            if(depths[m]) continue;
-            if(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27)) break;
-            if(! String_equal(word, _20) || ternary[m]) continue;
-            if(! _layout_condition(sig, depths, edits, all, line.first, m, NULL) && String_equal(sig[m - 1] -> text, _33)) edits[sig[m] - all].type = 40896714;
-            break;
-          }
-          int lisp = first -> type == 9297;
-          for(int m = line.first + 1;  lisp && m < line.last;  m ++) lisp = depths[m] > 0;
-          int hole = last -> type == 19147688 && line.last > line.first && sig[line.last - 1] -> type == 73 &&(line.last - 1 == line.first || sig[line.last - 2] -> type == 83);
-          if(first -> type == 129) edits[sig[line.first] - all].type = 40896714;
-          else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _34;
-        }
-        while(top && next < indents[top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(closers[top --]), NULL)));
-        if(next != indents[top] && ! error_at && j < nlines) error_at = sig[lines[j].first];
-        if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;
-      }
-      Bytes out = Bytes_new(sizeof(struct Token));
-      for(int i = 0;  i <= count;  i ++){
-        Token tok = & all[i];
-        if(Token_equal(tok, error_at)){
-          t -> scan_status = 633613224;
-          struct Token marks[2] ={
-            {
-              .text = NULL, .type = 11703268, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
-            }
-            , {
-              .text = NULL, .type = 11212, .line = tok -> line, .col = tok -> col, .pos = tok -> pos
-            }
+int String_getindex(String, int);
 
-          }
-          ;
-          out = Bytes_append(out, marks, 2);
-          break;
-        }
-        _LayoutEdit edit = edits[i];
-        out = _layout_insert(out, edit.before, tok, 0);
-        struct Token copy = * tok;
-        if(edit.type && edit.type != 40896714 && edit.type != 7477210024) copy.text = Symbol_str(edit.type);
-        if(edit.type) copy.type = edit.type;
-        out = Bytes_append(out, & copy, 1);
-        out = _layout_insert(out, edit.after, tok, 1);
-      }
-      t -> tokens = out;
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_4);
-  }
-
+static inline int _opens(Token t){
+  return t -> type != 27051791223990 && t -> type != 845368475748 && t -> type != 41153276840 && t -> len && strchr("([{", String_getindex(t -> text, t -> len - 1));
 }
 
-void Tokenizer_scan(Tokenizer t){
-  if(! _init_guard_) _file_init_();
-  while(! Tokenizer__end_of_file(t)){
-    Symbol mode = Tokenizer__scan_mode(t);
-    switch(mode){
-      case 3945159 : case 1059020479160805 : if(Tokenizer__common_tokens(t)) continue;
-      if(t -> text[t -> pos] == '$' &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) continue;
-      if(Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__x2c_tokens(t)) continue;
-      break;
-      case 3313778 : case 26720 : if(Tokenizer__lisp_tokens(t)) continue;
-      break;
-      case 1392880402798952 : if(Tokenizer__common_tokens(t) || Tokenizer__symbol_set_tokens(t)) continue;
-      break;
-      case 806120 : case 806112 : case 917238583151840 : if(Tokenizer__lisp_tokens(t)) continue;
-      break;
-      case 1318210446 : if(Tokenizer__string_tokens(t)) continue;
-      break;
-    }
-    Tokenizer_error(t);
-    return;
-  }
-  if(t -> layout) Tokenizer__layout(t);
+static inline int _closes(Token t){
+  return t -> type == 83 || t -> type == 187 || t -> type == 251;
+}
+
+static inline int _conditional(Token t){
+  return String_equal(t -> text, _27) || String_equal(t -> text, _23) || String_equal(t -> text, _26) || String_equal(t -> text, _28) || String_equal(t -> text, _29) || String_equal(t -> text, _30);
+}
+
+static int _is_label(String word){
+  return String_equal(word, _31) || String_equal(word, _32) || String_equal(word, _33);
+}
+
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode){
+  tokenizer -> text = text ? text : "";
+  tokenizer -> line = 1;
+  tokenizer -> col = 1;
+  tokenizer -> scan_status = 982;
+  tokenizer -> modes = Array_update_n(Array_new(), 1, Symbol_var(mode));
+  tokenizer -> tokens = Bytes_new(sizeof(struct Token));
 }
 
 Token Tokenizer_next(Tokenizer tokenizer){
@@ -1242,16 +1408,6 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  {
-    free((*(Token * *) _x2c_defer_data_4->_x2c_defer_capture_5));
-    free((*(int * *) _x2c_defer_data_4->_x2c_defer_capture_6));
-    free((*(_LayoutLine * *) _x2c_defer_data_4->_x2c_defer_capture_7));
-    free((*(_LayoutEdit * *) _x2c_defer_data_4->_x2c_defer_capture_8));
-    free((*(int * *) _x2c_defer_data_4->_x2c_defer_capture_9));
-    free((*(String * *) _x2c_defer_data_4->_x2c_defer_capture_10));
-    free((*(char * *) _x2c_defer_data_4->_x2c_defer_capture_11));
-    free((*(char * *) _x2c_defer_data_4->_x2c_defer_capture_12));
-  }
-
+  _Layout_close(&((*(_Layout *) _x2c_defer_data_4->_x2c_defer_capture_5)));
 }
 

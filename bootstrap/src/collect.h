@@ -7,29 +7,29 @@
 
 #include "x2c.h"
 #include "compiler.h"
+Map Compiler_collect_symbols(Compiler c, Map globs);
+
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
 
-void collect_forget_preload_entries(void);
+void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
-List collect_cached_paths(void);
-
-void collect_forget_entries_since(List before);
+void Compiler_collect_package(Compiler c, String name, Token token);
 
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, int included_only);
 
 void Compiler_replay_included_package_imports(Compiler c, Map globs, String path, Map visited);
-
-void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
-
-Map Compiler_collect_symbols(Compiler c, Map globs);
-
-void Compiler_collect_package(Compiler c, String name, Token token);
 
 void interface_configure(String out_dir, int cold);
 
 String interface_prelude(void);
 
 String interface_text(Compiler compiler, List selected);
+
+void collect_forget_preload_entries(void);
+
+List collect_cached_paths(void);
+
+void collect_forget_entries_since(List before);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

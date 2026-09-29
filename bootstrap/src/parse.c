@@ -857,7 +857,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _456 = cons(_455, NULL);
   _457 = cons(_423, _456);
   _458 = List_var(_457);
-  _459 = String_new("/Users/gary/.codex/worktrees/4211/x2c/src/parse.x");
+  _459 = String_new("/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/src/parse.x");
   _460 = String_var(_459);
   _461 = cons(_460, NULL);
   _462 = cons(_424, _461);
@@ -1258,7 +1258,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _897 = cons(_896, NULL);
   _898 = cons(_423, _897);
   _899 = List_var(_898);
-  _900 = String_new("/Users/gary/.codex/worktrees/4211/x2c/src/grammar.xmacro");
+  _900 = String_new("/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/src/grammar.xmacro");
   _901 = String_var(_900);
   _902 = cons(_901, NULL);
   _903 = cons(_424, _902);

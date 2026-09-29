@@ -63,15 +63,15 @@ String Token_str(Token token);
 
 String Token_repr(Token token);
 
-void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode);
+void Tokenizer_scan(Tokenizer t);
 
 int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
 
-int Tokenizer_error(Tokenizer tokenizer);
-
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
 
-void Tokenizer_scan(Tokenizer t);
+int Tokenizer_error(Tokenizer tokenizer);
+
+void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode);
 
 Token Tokenizer_next(Tokenizer tokenizer);
 

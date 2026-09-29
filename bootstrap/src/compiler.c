@@ -1645,6 +1645,14 @@ Symbol preproc_never_active_arm(String s){
   if(! _init_guard_) _file_init_();  Tokenizer scanned = Tokenizer_new(preproc_directive(s), 3945159);  Tokenizer_scan(scanned);  Array words = Array_new();  for(Token t = _skip_forward(scanned -> tokens);  t -> type != 11212;  t = _skip_forward(t + 1)) Array_push(words, _never_defined(t -> text) ? String_var(_791) : String_var(t -> text));  String line = String_replace(String_join(_106, Array_list_free(words)), _792, _793);  if(String_equal(line, _107) || String_equal(line, _108) || String_equal(line, _109) || String_equal(line, _110) ||(String_startswith(line, _794) && ! String_contains(line, _795))) return 13210856;  return String_equal(line, _111) || String_equal(line, _112) ? 1191144 : 0;
 }
 
+int preproc_open_state(String text){
+  if(! _init_guard_) _file_init_();  Symbol never = preproc_never_active_arm(text);  return never == 13210856 ? 2 : never == 1191144;
+}
+
+int preproc_branch_state(int state){
+  return state == 1 ? 2 : 0;
+}
+
 String String_strip(String, char *);
 static int _layout_attribute(Token open, int * packed){
   Token close = Token_group_close(open);  int depth = 0, layout = 0;  for(Token t = open;  t < close;  t ++){
@@ -1722,11 +1730,8 @@ static void _scan_conditionals(Compiler c){
               }
               continue;
             }
-            Symbol kind = preproc_conditional_kind(token -> text);  int conditional = kind == 1016156 ||(kind && Array_len(stack));  if(kind == 1016156){
-              Symbol never = preproc_never_active_arm(token -> text);  Array_push(stack, List_var(cons(int_var(++ serial), cons(_118, cons(int_var(never == 13210856 ? 2 : never == 1191144), NULL)))));
-            }
-            else if(kind == 172060880 && Array_len(stack)){
-              Var id, arm, state;  List _x2c_destructure_0 = Var_list(Array_getindex(stack, - 1));  id = List_getindex(_x2c_destructure_0, 0);  arm = List_getindex(_x2c_destructure_0, 1);  state = List_getindex(_x2c_destructure_0, 2);  Array_setindex(stack, - 1, List_var(cons(id, cons(long_var(Var_integer(arm) + 1), cons(int_var(Var_integer(state) == 1 ? 2 : 0), NULL)))));
+            Symbol kind = preproc_conditional_kind(token -> text);  int conditional = kind == 1016156 ||(kind && Array_len(stack));  if(kind == 1016156) Array_push(stack, List_var(cons(int_var(++ serial), cons(_118, cons(int_var(preproc_open_state(token -> text)), NULL)))));  else if(kind == 172060880 && Array_len(stack)){
+              Var id, arm, state;  List _x2c_destructure_0 = Var_list(Array_getindex(stack, - 1));  id = List_getindex(_x2c_destructure_0, 0);  arm = List_getindex(_x2c_destructure_0, 1);  state = List_getindex(_x2c_destructure_0, 2);  Array_setindex(stack, - 1, List_var(cons(id, cons(long_var(Var_integer(arm) + 1), cons(int_var(preproc_branch_state(Var_int(Var_convert(state, 3453797)))), NULL)))));
             }
             else if(kind == 7109834 && Array_len(stack)) Array_take_last(stack);  else if(! hidden) _note_layout_macro(token -> text, layout, Array_len(stack));  if(! conditional) continue;  Map_setindex(c -> arm_stacks, long_var((long) i), List_var(Array_list(stack)));  hidden = 0; {
               List group;  Array _x2c_macro_object_3 = stack;  int _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_3;  while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
@@ -1818,7 +1823,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(compiler)) return;  List rows = Sym_visible_symbols(compiler -> sym); {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 986};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 996};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -1845,7 +1850,7 @@ Token Token_after_group(Token t){
 Symbol Compiler_peek(Compiler compiler, int steps){
   if(! _init_guard_) _file_init_();  Token token = compiler -> token;  if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1036};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1046};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -1860,7 +1865,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1054};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1064};  x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }

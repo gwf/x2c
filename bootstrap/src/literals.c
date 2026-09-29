@@ -708,7 +708,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _522 = cons(_521, NULL);
   _523 = cons(_491, _522);
   _524 = List_var(_523);
-  _525 = String_new("/Users/gary/.codex/worktrees/4211/x2c/src/grammar.xmacro");
+  _525 = String_new("/Users/gary/Git/x2c/.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e/src/grammar.xmacro");
   _526 = String_var(_525);
   _527 = cons(_526, NULL);
   _528 = cons(_492, _527);
