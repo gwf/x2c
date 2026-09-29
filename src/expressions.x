@@ -46,6 +46,41 @@ static int _exact_iter_type(Var value) {
   return type.canonicalize().equal(%("Iter"));
 }
 
+static List _complete_iter_call(
+  Compiler compiler, List expression, List callee, List arguments,
+  List parameters, List binding) {
+  Type result = expression.cadr();
+  String name = binding_identity_spelling(binding);
+  if (!_exact_iter_type(result) || name == "Iter_unzip" ||
+      _parameters_variadic(parameters))
+    return expression;
+  List formal = parameters, actual = arguments;
+  int supplied = arguments.len(), expected = formal.len();
+  if (!formal ||
+      (supplied != expected && supplied + 1 != expected) ||
+      !_exact_iter_type(formal.last()))
+    return expression;
+  Array completed = [];
+  int changed = 0;
+  while (actual) {
+    List argument = actual.car(), rewritten = argument;
+    if (_exact_iter_type(formal.car()))
+      rewritten = compiler.complete_iter_chain(argument);
+    if (rewritten != argument) changed = 1;
+    completed.push(rewritten);
+    actual = actual.cdr();
+    formal = formal.cdr();
+  }
+  List values = completed.list_free();
+  if (supplied + 1 == expected) {
+    values = values.append(%(${_iter_destination()}));
+    changed = 1;
+  }
+  if (!changed) return expression;
+  Macro called = $called;
+  return compiler.rebuild_expression(%("Iter"), called(callee, values));
+}
+
 /** Completes an eligible resolved `Iter` call chain for immediate consumption.
     It accepts only a typed identifier call of the form
     `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
@@ -55,44 +90,12 @@ static int _exact_iter_type(Var value) {
 */
 List Compiler.complete_iter_chain(Compiler compiler, List expression) {
   Macro called = $called;
-  match (expression) case called(?callee, *arguments): {
+  match (expression) case called(?callee, *arguments):
     match (callee)
       case %(expr ((func (!set ?parameters (*))) ?)
-                  (ident ?binding)): {
-        Type result = expression.cadr();
-        String name = binding_identity_spelling(binding);
-        if (!_exact_iter_type(result) || name == "Iter_unzip" ||
-            _parameters_variadic(parameters))
-          return expression;
-
-        Array completed = [];
-        List formal = parameters, actual = arguments;
-        int supplied = arguments.len(), expected = formal.len();
-        if (!formal ||
-            (supplied != expected && supplied + 1 != expected) ||
-            !_exact_iter_type(formal.last()))
-          return expression;
-        int changed = 0;
-        while (actual) {
-          List argument = actual.car(), rewritten = argument;
-          if (_exact_iter_type(formal.car()))
-            rewritten = compiler.complete_iter_chain(argument);
-          if (rewritten != argument) changed = 1;
-          completed.push(rewritten);
-          actual = actual.cdr();
-          formal = formal.cdr();
-        }
-
-        List values = completed.list_free();
-        if (supplied + 1 == expected) {
-          values = values.append(%(${_iter_destination()}));
-          changed = 1;
-        }
-        if (!changed) return expression;
-        return compiler.rebuild_expression(
-          %("Iter"), called(callee, values));
-      }
-  }
+                  (ident ?binding)):
+        return _complete_iter_call(
+          compiler, expression, callee, arguments, parameters, binding);
   return expression;
 }
 
@@ -121,18 +124,8 @@ static List _parse_slice(Compiler c, List expr, List start) {
   return %(expr $type (slice $expr $start $stop $step));
 }
 
-static List Compiler._postfix_index_expression(
-  Compiler c, List expr, List index) {
-  Type type = expr.cadr();
-  // `T *const p` indexes like `T *p`.
-  while (type && type.car() is <symbol> &&
-         Symbol.is_type_qualifier(type.car()))
-    type = cdr(type);
-  if (type.is_pointer() || type.is_array()) {
-    type = type.dereference();
-    return %(expr $type (index $expr $index));
-  }
-  if (!type.is_typedef_name()) return NULL;
+static List _typedef_index(
+  Compiler c, List expr, List index, Type type) {
   String owner = type.car(), Type receiver = type;
   if (c.sym.is_array_type(type)) {
     owner = "Array";
@@ -166,6 +159,19 @@ static List Compiler._postfix_index_expression(
       (native.is_pointer() && !c.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
+}
+
+static List Compiler._postfix_index_expression(
+  Compiler c, List expr, List index) {
+  Type type = expr.cadr();
+  // `T *const p` indexes like `T *p`.
+  while (type && type.car() is <symbol> &&
+         Symbol.is_type_qualifier(type.car()))
+    type = cdr(type);
+  if (type.is_pointer() || type.is_array())
+    return %(expr ${type.dereference()} (index $expr $index));
+  if (!type.is_typedef_name()) return NULL;
+  return _typedef_index(c, expr, index, type);
 }
 
 static List _parse_postfix_index(Compiler c, List expr) {
@@ -264,7 +270,7 @@ String Compiler.printf_static_format(
    parameter type. A method receiver selects the method and is not a
    destination, and a call the compiler builds for an operator is not a
    destination the source spelled. */
-static void _check_explicit_converter_arguments(
+static void _check_converter_args(
   Compiler compiler, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
   Macro called = $called;
@@ -337,7 +343,7 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
   int method = !!expr.match(%(expr () (op . ? (?))));
-  _check_explicit_converter_arguments(c, result, method, notes.list_free());
+  _check_converter_args(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
@@ -914,7 +920,7 @@ static int _macro_hole_starts_cast_type(Compiler compiler, Token after) {
   return _cast_operand_follows(after.type);
 }
 
-static int _parenthesized_cast_operand_follows(Compiler c) =>
+static int _cast_operand_after_parens(Compiler c) =>
   c.peek(0) == <"("> &&
   _cast_operand_follows(c.token.after_group().type);
 
@@ -949,7 +955,7 @@ static int _casts_to_template_typedef(Compiler c, List declaration) {
 
 static List _parse_cast(Compiler c) {
   Token head = c.token;
-  if (_parenthesized_cast_operand_follows(c) && c.test(<(>)) {
+  if (_cast_operand_after_parens(c) && c.test(<(>)) {
     if (c.test_declaration() ||
         _macro_hole_starts_cast_type(c, head.after_group())) {
       List decl = c.parse_simple_declaration(), type = decl.type_from_ast();
@@ -1039,7 +1045,23 @@ static Type _parse_is_type(Compiler c, Token origin) {
   return type;
 }
 
-static int _expression_requires_resolution(Compiler compiler, Var value) {
+static int _identifier_needs_resolution(
+  Compiler compiler, List binding) {
+  String spelling = binding_identity_spelling(binding);
+  Map facts = compiler.semantic_binding_facts();
+  int retained_parameter = %(lambda-param $binding) in facts;
+  int retained_capture = %(lambda-depth $binding) in facts;
+  if (compiler.lambda_capture_required(binding)) return 1;
+  if (retained_parameter &&
+      (compiler.local_macro_captures != NULL ||
+       %(local-macro-capture $binding) in facts))
+    return 1;
+  return !spelling ||
+    (compiler.sym.lookup(%($spelling), NULL) != binding &&
+     !retained_parameter && !retained_capture);
+}
+
+static int _needs_resolution(Compiler compiler, Var value) {
   // The scan is an any-search; a worklist keeps deep operator chains from
   // costing one C frame per nesting level.
   Array pending = $auto([]);
@@ -1063,23 +1085,8 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       case %(at m-origin ?):
         if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot meta-call) *): return 1;
-      case %(ident ?(List binding)): {
-        String spelling = binding_identity_spelling(binding);
-        int retained_parameter =
-          %(lambda-param $binding) in compiler.semantic_binding_facts();
-        int retained_capture =
-          %(lambda-depth $binding) in compiler.semantic_binding_facts();
-        if (compiler.lambda_capture_required(binding)) return 1;
-        if (retained_parameter &&
-            (compiler.local_macro_captures != NULL ||
-             %(local-macro-capture $binding) in
-               compiler.semantic_binding_facts()))
-          return 1;
-        if (!spelling ||
-            (compiler.sym.lookup(%($spelling), NULL) != binding &&
-             !retained_parameter && !retained_capture))
-          return 1;
-      }
+      case %(ident ?(List binding)):
+        if (_identifier_needs_resolution(compiler, binding)) return 1;
       case %(ident ?): return 1;
       // A Type hole can supply declarators with the base they bind to.
       case %(decl ?(List base) *):
@@ -2354,6 +2361,86 @@ static List _resolve_postfix_op(
   return %(expr $operand_type (postfix $operator $operand));
 }
 
+static List _resolve_macro_slot(
+  Compiler c, List input, List content, Token origin) {
+  if (c.macro_holes) return input;
+  Var value = c.evaluate_macro_slot(content);
+  match (value)
+    case %(!set ?expression (expr ? ?)):
+      return c.resolve_expression(expression, origin);
+  return c.resolve_expression(
+    c.lift_macro_lisp_expression(value, origin), origin);
+}
+
+static List _resolve_map(
+  Compiler c, Type input_type, List entries, Token origin) {
+  Array resolved = [];
+  foreach (Var entry, entries)
+    foreach (Var row, c.evaluate_macro_rows(entry))
+      resolved.push(c.resolve_map_entry(row, origin));
+  return %(expr $input_type (map @{resolved.list_free()}));
+}
+
+static List _resolve_destructure(
+  Compiler c, List targets, List source, Token origin) {
+  Array resolved = [];
+  foreach (List target, targets)
+    resolved.push(c.resolve_expression(target, origin));
+  source = c.resolve_expression(source, origin);
+  return %(expr ${source.cadr()}
+           (dstrasgn (targets @{resolved.list_free()}) $source));
+}
+
+static List _resolve_commas(
+  Compiler c, Type input_type, List expressions, Token origin) {
+  Array resolved = [];
+  foreach (List expression, expressions)
+    resolved.push(c.resolve_expression(expression, origin));
+  List values = resolved.list_free();
+  Type type = input_type;
+  if (values) type = values.last().cadr();
+  return %(expr $type (commas @values));
+}
+
+static List _resolve_array(
+  Compiler c, Type input_type, List elements, Token origin) {
+  Array resolved = [];
+  foreach (List element, elements)
+    resolved.push(c.resolve_expression(element, origin));
+  return %(expr $input_type (array @{resolved.list_free()}));
+}
+
+static List _resolve_composite(
+  Compiler c, Type input_type, List elements, Token origin) {
+  Array values = [];
+  foreach (List element, elements)
+    values.push(_resolve_initializer(c, element, origin));
+  return %(expr $input_type (composite (commas @{values.list_free()})));
+}
+
+static List _resolve_managed_init(
+  Compiler c, List initializer, Token origin) {
+  initializer = c.resolve_expression(initializer, origin);
+  Type type = initializer.cadr();
+  return %(expr $type (managed-init $initializer));
+}
+
+static List _resolve_invocation(
+  Compiler c, List input, Var definition, List arguments,
+  Var invocation) {
+  Token site = c.macro_invocation_site(invocation);
+  if (!site) return input;
+  return c.expand_macro_invocation_node(
+    definition, arguments, site, AST_EXPRESSION);
+}
+
+static List _resolve_binary(
+  Compiler c, Var operator, List left, List right, Token origin) {
+  List lhs = c.resolve_expression(left, origin);
+  List rhs = c.resolve_expression(right, origin);
+  return c._binary_expression(operator, lhs, rhs, origin);
+}
+
 static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
@@ -2392,11 +2479,8 @@ static List _resolve_content(
   match (input) case called(?callee, *supplied):
     return _resolve_call(c, input_type, callee, supplied, origin);
   match (content) {
-    case %(managed-init ?initializer): {
-      initializer = c.resolve_expression(initializer, origin);
-      Type type = initializer.cadr();
-      return %(expr $type (managed-init $initializer));
-    }
+    case %(managed-init ?initializer):
+      return _resolve_managed_init(c, initializer, origin);
     case %(ident ?value):
       return _resolve_identifier(c, value, input_type, origin);
     case %(!set ?binding (binding ? ?)):
@@ -2409,28 +2493,12 @@ static List _resolve_content(
       return c.evaluate_meta_expression(input, origin);
     }
     case %(meta-cap *): return input;
-    case %(macro-invoke ?definition ?arguments ?invocation): {
-      Token site = c.macro_invocation_site(invocation);
-      if (!site) return input;
-      return c.expand_macro_invocation_node(
-        definition, arguments, site, AST_EXPRESSION);
-    }
-    case %(macro-slot ? ? *): {
-      if (c.macro_holes) return input;
-      Var value = c.evaluate_macro_slot(content);
-      match (value)
-        case %(!set ?expression (expr ? ?)):
-          return c.resolve_expression(expression, origin);
-      return c.resolve_expression(
-        c.lift_macro_lisp_expression(value, origin), origin);
-    }
-    case %(map *entries): {
-      Array resolved = [];
-      foreach (Var entry, entries)
-        foreach (Var row, c.evaluate_macro_rows(entry))
-          resolved.push(c.resolve_map_entry(row, origin));
-      return %(expr $input_type (map @{resolved.list_free()}));
-    }
+    case %(macro-invoke ?definition ?arguments ?invocation):
+      return _resolve_invocation(c, input, definition, arguments, invocation);
+    case %(macro-slot ? ? *):
+      return _resolve_macro_slot(c, input, content, origin);
+    case %(map *entries):
+      return _resolve_map(c, input_type, entries, origin);
     case %(segments *items): return _resolve_segments(c, items, origin);
     case %(cons ?head ?tail):
       return _resolve_cons(c, input_type, head, tail, origin);
@@ -2443,14 +2511,8 @@ static List _resolve_content(
       return %(expr $input_type
                (getindex ${c.resolve_expression(receiver, origin)}
                          ${c.resolve_expression(selector, origin)}));
-    case %(dstrasgn (targets *targets) ?source): {
-      Array resolved = [];
-      foreach (List target, targets)
-        resolved.push(c.resolve_expression(target, origin));
-      source = c.resolve_expression(source, origin);
-      return %(expr ${source.cadr()}
-               (dstrasgn (targets @{resolved.list_free()}) $source));
-    }
+    case %(dstrasgn (targets *targets) ?source):
+      return _resolve_destructure(c, targets, source, origin);
     case %(sizeof (parens ?(List argument))):
       return %(expr $input_type
                (sizeof (parens ${c.resolve_expression(argument, origin)})));
@@ -2463,24 +2525,13 @@ static List _resolve_content(
       return %(expr $input_type
                (va-arg ${c.resolve_expression(argument, origin)}
                        ${c.resolve_expression(declaration, origin)}));
-    case %(commas *expressions): {
-      Array resolved = [];
-      foreach (List expression, expressions)
-        resolved.push(c.resolve_expression(expression, origin));
-      List values = resolved.list_free();
-      Type type = input_type;
-      if (values) type = values.last().cadr();
-      return %(expr $type (commas @values));
-    }
+    case %(commas *expressions):
+      return _resolve_commas(c, input_type, expressions, origin);
     case %(splice ?expression):
       return %(expr $input_type
                (splice ${c.resolve_expression(expression, origin)}));
-    case %(array *elements): {
-      Array resolved = [];
-      foreach (List element, elements)
-        resolved.push(c.resolve_expression(element, origin));
-      return %(expr $input_type (array @{resolved.list_free()}));
-    }
+    case %(array *elements):
+      return _resolve_array(c, input_type, elements, origin);
     case %((!or offsetof nil cache macro-bind) *): return input;
     case %(parens ?inner): {
       inner = c.resolve_expression(inner, origin);
@@ -2489,13 +2540,8 @@ static List _resolve_content(
     }
     case %(initval *choices):
       return _resolve_initval(c, input_type, content, origin);
-    case %(composite (commas *elements)): {
-      Array values = [];
-      foreach (List element, elements)
-        values.push(_resolve_initializer(c, element, origin));
-      return %(expr $input_type
-               (composite (commas @{values.list_free()})));
-    }
+    case %(composite (commas *elements)):
+      return _resolve_composite(c, input_type, elements, origin);
     case %(cast (!set ?declaration (decl *)) ?operand):
       return _resolve_cast(c, declaration, operand, origin);
     case %(type-tag ?target):
@@ -2512,11 +2558,8 @@ static List _resolve_content(
     case %(op ?operator ?condition ?ontrue ?onfalse):
       return _resolve_conditional(
         c, operator, condition, ontrue, onfalse, origin);
-    case %(op ?operator ?left ?right): {
-      List lhs = c.resolve_expression(left, origin);
-      List rhs = c.resolve_expression(right, origin);
-      return c._binary_expression(operator, lhs, rhs, origin);
-    }
+    case %(op ?operator ?left ?right):
+      return _resolve_binary(c, operator, left, right, origin);
     case %(postfix ?operator ?operand):
       return _resolve_postfix_op(c, operator, operand, origin);
     case %(tadapt ?target ?source):
@@ -2557,7 +2600,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
     case %(expr ?type ?(List content)): {
-      if (type && !_expression_requires_resolution(c, input)) return input;
+      if (type && !_needs_resolution(c, input)) return input;
       return _resolve_content(c, input, type, content, origin);
     }
   }
@@ -2885,7 +2928,7 @@ static List _parse_expression_tail(Compiler compiler, List expr) {
 List Compiler.parse_expression(Compiler compiler) =>
   _parse_expression_tail(compiler, compiler.parse_assignment());
 
-static List _finish_parenthesized_statement_expression(
+static List _finish_paren_statement(
   Compiler compiler, List expression, int postfix) {
   if (postfix) expression = _parse_postfix_tail(compiler, expression);
   expression = _parse_binary_levels_from(compiler, expression);
@@ -2917,7 +2960,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
         List declaration = %(decl $type (bindings $binding));
         List operand = _parse_cast(c);
         List expression = %(expr $type (cast $declaration $operand));
-        return _finish_parenthesized_statement_expression(c, expression, 0);
+        return _finish_paren_statement(c, expression, 0);
       }
     c.expect(<=>);
     List source = c.parse_assignment();
@@ -2931,7 +2974,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
   match (expression)
     case %(expr ?type ?):
       expression = %(expr $type (parens $expression));
-  return _finish_parenthesized_statement_expression(c, expression, 1);
+  return _finish_paren_statement(c, expression, 1);
 }
 
 /* Answer whether an expression is certainly a zero integer literal,
@@ -4279,7 +4322,6 @@ static List _read_var(
     c.report_error(
       <type>, %"cannot convert Var to ${target.repr()}", NULL,
       %("write &value for its address, or value.pointer() to unbox a stored pointer"));
-    return expr;
   }
   if (target.is_pointer())
     return %(expr $target (call "Var_pointer" (args $expr)));
@@ -4338,6 +4380,80 @@ static List _box_var(Compiler c, List expr, Type type) {
   String message = %"cannot convert ${type.repr()} to Var without loss";
   // Conversion runs after parsing; a NULL token anchors the statement.
   c.report_error(<type>, message, NULL, NULL);
+}
+
+/* Same-address conversions must keep qualifiers, including void pointers. */
+static void _check_qualifiers(
+  Compiler c, Type type, Type target, Type source, Type destination) {
+  int take_reference =
+    (target.car() == <&> || target.car() == <opt-ref>) &&
+    type === cdr(target);
+  Type qualified = take_reference ? source.reference() : source;
+  if ((take_reference || type == target || cdr(type) == cdr(target) ||
+       (type.is_pointer() && target.is_pointer() &&
+        (destination.base_type() === %(void) ||
+         source.base_type() === %(void)))) &&
+      qualified.discards_qualifiers(destination)) {
+    String message =
+      %"cannot convert ${source.repr()} to ${destination.repr()}";
+    c.report_error(
+      <type>, message, NULL,
+      %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
+  }
+}
+
+static List _convert_reference(
+  Compiler c, List expr, Type type, Type target) {
+  // T -> &T: pass the address of an addressable value.
+  if (type === cdr(target) &&
+      (target.car() == <&> || target.car() == <opt-ref>)) {
+    if (!_expression_is_addressable(c, expr))
+      c.report_error(
+        <type>, "reference argument must name an addressable object",
+        NULL, NULL);
+    return %(expr $target (op & (parens $expr)));
+  }
+  if (type.car() == <&> && target.car() == <opt-ref> &&
+      cdr(type) === cdr(target))
+    return %(expr $target $expr);
+  if (cdr(type) == cdr(target) && type.car() == <&> && target.car() == <*>)
+    return %(expr $target $expr);
+  if (type.car() == <&> && cdr(type) === target)
+    return %(expr $target (op * (parens $expr)));
+  return NULL;
+}
+
+static void _check_native_crossing(
+  Compiler c, List expr, Type type, Type target,
+  Type declared_source, Type declared_target) {
+  String integer = _not_null_pointer_constant(c, expr);
+  if (integer && c.sym.resolve_key(target).is_pointer()) {
+    String message =
+      %"cannot convert the integer $integer to pointer type ${target.repr()}";
+    List hint =
+      %( "only a zero integer constant expression converts to a pointer" );
+    c.report_error(<type>, message, NULL, hint);
+  }
+  if (_unrelated_pointers(c, type, target)) {
+    String message =
+      %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
+    c.report_error(
+      <type>, message, NULL,
+      %("the pointer types are unrelated: cast the expression to say so on purpose"));
+  }
+  if (declared_source.is_bare_typedef_name() &&
+      declared_target.is_bare_typedef_name() &&
+      !declared_source.equal(declared_target) &&
+      c.sym.resolve_key(declared_target).is_pointer() &&
+      c.sym.resolve_key(declared_source).base_type() !== %(void) &&
+      !_typedef_names(c, declared_source).contains(declared_target) &&
+      !_typedef_names(c, declared_target).contains(declared_source)) {
+    String message =
+      %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
+    c.report_error(
+      <type>, message, NULL,
+      %("the names share one C type but not one meaning: declare the converter ${declared_source.car()}_${declared_target.car().str().lower()}, or cast the expression to say so on purpose"));
+  }
 }
 
 /** Adds operations to convert a resolved expression AST to `target`.
@@ -4405,33 +4521,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     }
     return expr;
   }
-  /* The conversions below that keep the same canonical type hand the same
-     address on without a call, so the target must promise every qualifier
-     the source declares. A conversion that reaches a converter function
-     copies the value instead and is unaffected.
-
-     A pointer to void also hands the same address on, and it is the one
-     type whose base differs by construction, so the same-canonical test
-     above cannot see it. Without this it was the one conversion that
-     silently discarded const, in both directions: `void *`
-     took a `const char *` going in, and `char *` took a `const void *`
-     coming back out. */
-  int take_reference =
-    (target.car() == <&> || target.car() == <opt-ref>) &&
-    type === cdr(target);
-  Type qualifier_source = take_reference
-                        ? declared_source.reference() : declared_source;
-  if ((take_reference || type == target || cdr(type) == cdr(target) ||
-       (type.is_pointer() && target.is_pointer() &&
-        (declared_target.base_type() === %(void) ||
-         declared_source.base_type() === %(void)))) &&
-      qualifier_source.discards_qualifiers(declared_target)) {
-    String message =
-      %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
-    c.report_error(
-      <type>, message, NULL,
-      %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
-  }
+  _check_qualifiers(c, type, target, declared_source, declared_target);
   if (type == target || (type_is_var && target_is_var)) return expr;
   /* An optional reference outside a proven path is still an address; it
      forwards to a reference or pointer and yields no value. */
@@ -4439,7 +4529,6 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       target.car() != <opt-ref> && !c.sym.resolve_key(target).is_pointer()) {
     c.report_error(
       <type>, "check optional reference before using its value", NULL, NULL);
-    return expr;
   }
   /* A reference names an object, so its argument is an lvalue of the
      referenced type; a pointer or null is spelled `*p` by the caller. */
@@ -4450,7 +4539,6 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       <type>,
       %"cannot pass ${type.repr()} where ${target.repr()} is expected",
       NULL, %("pass an lvalue of the referenced type; write *p for a pointer"));
-    return expr;
   }
   if (_integer_literal_kind(expr, NULL) == <zero> &&
       c.sym.resolve_key(target).is_pointer())
@@ -4465,28 +4553,10 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
         <type>,
         %"cannot pass ${type.repr()} where ${target.repr()} is expected",
         NULL, %("write &value to pass its address"));
-      return expr;
     }
   }
-  // pointers, references, and address-of/dereference conversions
-  // T -> &T : pass address of LHS as ref w/ updated type
-  if (type === cdr(target) &&
-      (target.car() == <&> || target.car() == <opt-ref>)) {
-    if (!_expression_is_addressable(c, expr))
-      c.report_error(
-        <type>, "reference argument must name an addressable object",
-        NULL, NULL);
-    return %(expr $target (op & (parens $expr)));
-  }
-  if (type.car() == <&> && target.car() == <opt-ref> &&
-      cdr(type) === cdr(target))
-    return %(expr $target $expr);
-  // &T -> *T : pass ref as pointer w/ updated type
-  if (cdr(type) == cdr(target) && type.car() == <&> && target.car() == <*>)
-    return %(expr $target $expr);
-  // &T -> T : pass deref ref as value
-  if (type.car() == <&> && cdr(type) === target)
-    return %(expr $target (op * (parens $expr)));
+  List reference = _convert_reference(c, expr, type, target);
+  if (reference) return reference;
   if (type.match(%((!or (dim *) (!quote *)) char))) {
     List string = _raw_string_to_string(c, expr);
     if (c.sym.is_string_type(target))
@@ -4511,56 +4581,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (c.sym.resolve_numeric_type(type) &&
       c.sym.resolve_numeric_type(target))
     return expr; // allow implicit numeric conversions
-  // An integer reaching a pointer is the one shape that falls through to C
-  // as a constraint violation rather than as a conversion the C compiler
-  // completes on its own.  Everything else below is delegated:
-  // array and function decay, void *, typedef spelling, varargs, and every
-  // type out of a system header the collector never sees.  Only a
-  // zero-valued integer constant expression makes a null pointer, so an
-  // operand that is provably not one is provably wrong; rejecting it here
-  // keeps `match (42)` from emitting `List _x2c_match_expr = 42;`.
-  // Resolving the target first means a typedef the resolver cannot see is
-  // not a pointer under this rule, so a system type stays silent.
-  String integer = _not_null_pointer_constant(c, expr);
-  if (integer && c.sym.resolve_key(target).is_pointer()) {
-    String message =
-      %"cannot convert the integer $integer to pointer type ${target.repr()}";
-    List hint =
-      %( "only a zero integer constant expression converts to a pointer" );
-    c.report_error(<type>, message, NULL, hint);
-  }
-  // Two unrelated pointers are the other shape C diagnoses without
-  // stopping, and x2c writes the C, so that warning is never
-  // read.  Everything listed above stays delegated; only a pointer
-  // whose target is known on both sides is judged here.
-  if (_unrelated_pointers(c, type, target)) {
-    String message =
-      %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
-    c.report_error(
-      <type>, message, NULL,
-      %("the pointer types are unrelated: cast the expression to say so on purpose"));
-  }
-  /* Two names defined from one third name resolve to one C type, which
-     leaves the crossing silent even though neither name means the other:
-     every typed array is a `typedef Block`, so an ArrayDbl reached an
-     ArrayInt and its doubles were read as ints.  Such a pair needs a
-     converter, which the lookup above would already have taken, or a cast.
-     A `void *` source is the one pointer C itself lets stand for any
-     other. A name defined from the other, as an Array is a Block, is the
-     same type by construction, in both directions. */
-  if (declared_source.is_bare_typedef_name() &&
-      declared_target.is_bare_typedef_name() &&
-      !declared_source.equal(declared_target) &&
-      c.sym.resolve_key(declared_target).is_pointer() &&
-      c.sym.resolve_key(declared_source).base_type() !== %(void) &&
-      !_typedef_names(c, declared_source).contains(declared_target) &&
-      !_typedef_names(c, declared_target).contains(declared_source)) {
-    String message =
-      %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
-    c.report_error(
-      <type>, message, NULL,
-      %("the names share one C type but not one meaning: declare the converter ${declared_source.car()}_${declared_target.car().str().lower()}, or cast the expression to say so on purpose"));
-  }
+  _check_native_crossing(
+    c, expr, type, target, declared_source, declared_target);
   // Everything reaching here is delegated to C: a typedef alias, array or
   // function decay, varargs, a system-header type the collector never
   // sees.  The report_error calls above cover every conversion x2c
