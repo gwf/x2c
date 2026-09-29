@@ -41,36 +41,13 @@ protocol Cleanup(Bytes);
 #include "exception.x"
 #include "scope.x"
 
+// storage layout
+
 static int _allocation_size(size_t width, size_t cap, size_t &out) {
   if (!width || cap > (SIZE_MAX - sizeof(Block)) / width) return 0;
   out = sizeof(Block) + width * cap;
   return 1;
 }
-
-/** Allocates an empty `Block` for elements of `width` bytes.
-    Raises: `<bad-arg>` when `width` is zero, `<size-limit>` when the initial
-    allocation size cannot be represented, or `<alloc-fail>` when allocation
-    fails.
-*/
-Block Block.new(size_t width) {
-  if (!width) raise %(bad-arg);
-  Block block = Scope.malloc(sizeof(struct Block));
-  *block = (struct Block) {.width = width, .length = 0, .cap = 1};
-  size_t size;
-  if (!_allocation_size(width, block.cap, size))
-    raise %(size-limit (width $width));
-  unsigned char *allocation = Scope.malloc(size);
-  *((Block *) allocation) = block;
-  block.bytes = allocation + sizeof(Block);
-  return block;
-}
-
-/** Allocates empty byte storage for elements of `width` bytes.
-    The result is the base view of a `Scope`-owned `Block`. Methods that may
-    grow it return the current `Bytes` pointer, which callers must keep.
-    Raises: the same causes as `Block.new`.
-*/
-Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 
 /** Returns the stable `Block` that owns the live `bytes` base pointer.
     An interior or stale pointer is invalid; NULL returns NULL.
@@ -81,57 +58,7 @@ inline Block Bytes.block(Bytes bytes) {
   return *((Block *) (data - sizeof(Block)));
 }
 
-/** Ensures `block` can hold at least `minimum` elements.
-    The `Block` handle and contents remain stable, but growth may replace
-    `block.bytes` and invalidate saved `Bytes` or element pointers.
-    Raises: `<bad-arg>` when `block` is null, `<size-limit>` when the requested
-    capacity cannot be represented, or `<alloc-fail>` when growth fails.
-    These failures leave the `Block` unchanged.
-*/
-void Block.reserve(Block block, size_t minimum) {
-  if (block == NULL) raise %(bad-arg);
-
-  if (minimum <= block.cap) return;
-  size_t cap = block.cap ? block.cap : 1;
-  while (cap < minimum) {
-    if (cap > SIZE_MAX / 2) {
-      cap = minimum;
-      break;
-    }
-    cap *= 2;
-  }
-  size_t size;
-  if (!_allocation_size(block.width, cap, size)) {
-    size_t width = block.width;
-    raise %(size-limit (width $width) (cap $cap));
-  }
-  unsigned char *allocation = (unsigned char *) block.bytes - sizeof(Block);
-  allocation = Scope.realloc(allocation, size);
-  *((Block *) allocation) = block;
-  block.bytes = allocation + sizeof(Block);
-  block.cap = cap;
-}
-
-/** Ensures `bytes` can hold at least `minimum` elements and returns its base.
-    Growth may relocate storage, so callers must use the returned `Bytes` and
-    discard earlier views. Raises: the same causes as `Block.reserve`; failure
-    leaves the original view live.
-*/
-inline Self Bytes.reserve(Self bytes, size_t minimum) {
-  Block block = bytes;
-  block.reserve(minimum);
-  return block.bytes;
-}
-
-/** Shortens `block` to at most `length` elements. */
-inline void Block.truncate(Block block, size_t length) {
-  if (block != NULL && length < block.length) block.length = length;
-}
-
-/** Removes every element from `block` without releasing capacity. */
-inline void Block.clear(Block block) {
-  if (block != NULL) block.length = 0;
-}
+// appending
 
 /** Appends `count` elements copied from `source` to `block`.
     The source may be NULL for zero-filled elements; otherwise it must name
@@ -253,6 +180,80 @@ inline Self Bytes.append_fill(Self bytes, const void *element, size_t count) {
   return block.bytes;
 }
 
+/** Appends one copied element; storage and failures follow `Block.append`. */
+inline void Block.push(Block block, const void *source) {
+  block.append(source, 1);
+}
+
+/** Appends one element and returns the possibly relocated `Bytes` base. */
+inline Self Bytes.push(Self bytes, const void *source) =>
+  bytes.append(source, 1);
+
+// capacity
+
+/** Ensures `block` can hold at least `minimum` elements.
+    The `Block` handle and contents remain stable, but growth may replace
+    `block.bytes` and invalidate saved `Bytes` or element pointers.
+    Raises: `<bad-arg>` when `block` is null, `<size-limit>` when the requested
+    capacity cannot be represented, or `<alloc-fail>` when growth fails.
+    These failures leave the `Block` unchanged.
+*/
+void Block.reserve(Block block, size_t minimum) {
+  if (block == NULL) raise %(bad-arg);
+
+  if (minimum <= block.cap) return;
+  size_t cap = block.cap ? block.cap : 1;
+  while (cap < minimum) {
+    if (cap > SIZE_MAX / 2) {
+      cap = minimum;
+      break;
+    }
+    cap *= 2;
+  }
+  size_t size;
+  if (!_allocation_size(block.width, cap, size)) {
+    size_t width = block.width;
+    raise %(size-limit (width $width) (cap $cap));
+  }
+  unsigned char *allocation = (unsigned char *) block.bytes - sizeof(Block);
+  allocation = Scope.realloc(allocation, size);
+  *((Block *) allocation) = block;
+  block.bytes = allocation + sizeof(Block);
+  block.cap = cap;
+}
+
+/** Ensures `bytes` can hold at least `minimum` elements and returns its base.
+    Growth may relocate storage, so callers must use the returned `Bytes` and
+    discard earlier views. Raises: the same causes as `Block.reserve`; failure
+    leaves the original view live.
+*/
+inline Self Bytes.reserve(Self bytes, size_t minimum) {
+  Block block = bytes;
+  block.reserve(minimum);
+  return block.bytes;
+}
+
+/** Returns the number of elements stored in `b`. */
+inline size_t Block.len(Block b) => b != NULL ? b.length : 0;
+
+/** Returns how many elements `b` can hold without growing. */
+inline size_t Block.capacity(Block b) => b != NULL ? b.cap : 0;
+
+/** Returns nonzero when `block` contains at least one element. */
+int Block.truth(Block block) => block != NULL && block.length != 0;
+
+// removal
+
+/** Shortens `block` to at most `length` elements. */
+inline void Block.truncate(Block block, size_t length) {
+  if (block != NULL && length < block.length) block.length = length;
+}
+
+/** Removes every element from `block` without releasing capacity. */
+inline void Block.clear(Block block) {
+  if (block != NULL) block.length = 0;
+}
+
 /** Removes the final element of `b`, copying it to `out` when present.
     Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
     `out` still removes a present element.
@@ -268,19 +269,37 @@ inline int Block.try_pop(Block b, void *out) {
 /** Removes the final element through `bytes` as `Block.try_pop` does. */
 inline int Bytes.try_pop(Bytes bytes, void *out) => bytes.block().try_pop(out);
 
-/** Appends one copied element; storage and failures follow `Block.append`. */
-inline void Block.push(Block block, const void *source) {
-  block.append(source, 1);
-}
-
-/** Appends one element and returns the possibly relocated `Bytes` base. */
-inline Self Bytes.push(Self bytes, const void *source) =>
-  bytes.append(source, 1);
-
 /** Removes the final element of `block` when present. */
 inline void Block.pop(Block block) {
   block.try_pop(NULL);
 }
+
+// lifecycle
+
+/** Allocates an empty `Block` for elements of `width` bytes.
+    Raises: `<bad-arg>` when `width` is zero, `<size-limit>` when the initial
+    allocation size cannot be represented, or `<alloc-fail>` when allocation
+    fails.
+*/
+Block Block.new(size_t width) {
+  if (!width) raise %(bad-arg);
+  Block block = Scope.malloc(sizeof(struct Block));
+  *block = (struct Block) {.width = width, .length = 0, .cap = 1};
+  size_t size;
+  if (!_allocation_size(width, block.cap, size))
+    raise %(size-limit (width $width));
+  unsigned char *allocation = Scope.malloc(size);
+  *((Block *) allocation) = block;
+  block.bytes = allocation + sizeof(Block);
+  return block;
+}
+
+/** Allocates empty byte storage for elements of `width` bytes.
+    The result is the base view of a `Scope`-owned `Block`. Methods that may
+    grow it return the current `Bytes` pointer, which callers must keep.
+    Raises: the same causes as `Block.new`.
+*/
+Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 
 /** Releases the `Block` and its backing storage, invalidating every alias. */
 void Block.free(Block block) {
@@ -305,15 +324,6 @@ void Block.move_to(Block block, Scope *scope) {
     Scope.move((unsigned char *) block.bytes - sizeof(Block), scope);
   Scope.move(block, scope);
 }
-
-/** Returns the number of elements stored in `b`. */
-inline size_t Block.len(Block b) => b != NULL ? b.length : 0;
-
-/** Returns nonzero when `block` contains at least one element. */
-int Block.truth(Block block) => block != NULL && block.length != 0;
-
-/** Returns how many elements `b` can hold without growing. */
-inline size_t Block.capacity(Block b) => b != NULL ? b.cap : 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Block.cleanup(Block value) { value.free(); }
