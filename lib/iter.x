@@ -86,6 +86,8 @@ $var.raw.pointer(UnzipSharedRef, unzipsharedref);
 protocol Var(UnzipColumnRef) as void *;
 protocol Var(UnzipSharedRef) as void *;
 
+// traversal
+
 /** Initializes caller-supplied iterator storage and returns it.
     `iter` is caller-owned storage, normally a `struct Iter` local. This call
     writes `obj`, the `next` callback, and the initial `state`, clears the
@@ -148,40 +150,6 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
 */
 meta native Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
 
-static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
-  if (pair is not <list>)
-    raise %(bad-types (owner "Iter.unzip") (want "two-element List")
-            (value $pair));
-  List list = pair;
-  if (!list || !list.cdr() || list.cdr().cdr())
-    raise %(bad-arg (owner "Iter.unzip") (want "two-element List")
-            (value $pair));
-  Var (first, second) = list;
-  shared.buffers[0].push(first);
-  shared.buffers[1].push(second);
-}
-
-static void _unzip_compact(UnzipShared *shared, int column) {
-  int consumed = shared.heads[column];
-  if (consumed < UNZIP_COMPACT_THRESHOLD) return;
-  Array removed = shared.buffers[column].remslice(0, consumed);
-  removed.free();
-  shared.heads[column] = 0;
-}
-
-static int _unzip_ensure(UnzipShared *shared, int column) {
-  while (shared.heads[column] >= shared.buffers[column].len()) {
-    if (shared.done) return 0;
-    Var pair;
-    if (!shared.source.try_next(pair)) {
-      shared.done = 1;
-      return 0;
-    }
-    _unzip_buffer_push(shared, pair);
-  }
-  return 1;
-}
-
 /** Advances `iter`, writing the next element through `out`.
     Returns nonzero when it produced an element and zero once the iterator
     is exhausted, and writes `out` only in the nonzero case. Prefer this
@@ -229,26 +197,36 @@ meta native Var Iter.next(Iter iter) {
   return iter.try_next(out) ? out : void;
 }
 
-static Var _range_raw_int(int value) =>
-  (Var) { .u64 = (unsigned long) ((long long) value - INT_MIN) };
-
-static int _range_raw_value(Var value) =>
-  (int) ((long long) (unsigned) value.u64 + INT_MIN);
-
-/* Range packs the full native int domain into Iter's two Var-sized carrier
-   words without allocating an auxiliary state object. The unit-step forms
-   store one offset integer per word; the general form packs `end` above
-   `step`. These raw words stay inside range callbacks and never enter Var
-   dispatch or escape as yielded values. */
-static Var _range_raw_pair(int high, int low) {
-  unsigned long upper = (unsigned) ((long long) high - INT_MIN);
-  unsigned lower = (unsigned) ((long long) low - INT_MIN);
-  return (Var) { .u64 = (upper << 32) | lower };
+/** Returns `iter` unchanged as its own iterator.
+    `dest` is ignored; ownership and remaining traversal state are unchanged.
+*/
+Iter Iter.iter(Iter x, Iter dest) {
+  (void) dest;
+  return x;
 }
 
-static int _range_raw_high(Var value) {
-  unsigned high = (unsigned) (value.u64 >> 32);
-  return (int) ((long long) high + INT_MIN);
+// ranges
+
+/** Returns an inclusive integer range over caller-supplied `iter` storage.
+    Both endpoints belong to the range when the step direction reaches them:
+    `range(1, 4, 1, &storage)` yields 1, 2, 3, 4, and `range(3, 1, -1,
+    &storage)` counts down 3, 2, 1. A step that would cross `end` stops short
+    of it, so `range(0, 9, 2, &storage)` yields 0, 2, 4, 6, 8. A range
+    pointed against its step is empty. A range needs no state struct and no
+    cleanup.
+    Raises: `<bad-arg>` when `step` is zero. A null `iter` returns NULL
+    without raising.
+*/
+meta native Iter range(int start, int end, int step, Iter iter) {
+  if (!iter) return NULL;
+  if (!step) raise %(bad-arg (owner "range") (step $step));
+  if (step == 1)
+    return iter.init(
+      _range_raw_int(end), _range_up_next, _range_raw_int(start));
+  if (step == -1)
+    return iter.init(
+      _range_raw_int(end), _range_down_next, _range_raw_int(start));
+  return iter.init(_range_raw_pair(end, step), _range_general_next, start);
 }
 
 static int _range_up_next(Iter iter, Var *out) {
@@ -283,79 +261,29 @@ static int _range_general_next(Iter iter, Var *out) {
   return 1;
 }
 
-/** Returns an inclusive integer range over caller-supplied `iter` storage.
-    Both endpoints belong to the range when the step direction reaches them:
-    `range(1, 4, 1, &storage)` yields 1, 2, 3, 4, and `range(3, 1, -1,
-    &storage)` counts down 3, 2, 1. A step that would cross `end` stops short
-    of it, so `range(0, 9, 2, &storage)` yields 0, 2, 4, 6, 8. A range
-    pointed against its step is empty. A range needs no state struct and no
-    cleanup.
-    Raises: `<bad-arg>` when `step` is zero. A null `iter` returns NULL
-    without raising.
-*/
-meta native Iter range(int start, int end, int step, Iter iter) {
-  if (!iter) return NULL;
-  if (!step) raise %(bad-arg (owner "range") (step $step));
-  if (step == 1)
-    return iter.init(
-      _range_raw_int(end), _range_up_next, _range_raw_int(start));
-  if (step == -1)
-    return iter.init(
-      _range_raw_int(end), _range_down_next, _range_raw_int(start));
-  return iter.init(_range_raw_pair(end, step), _range_general_next, start);
+static Var _range_raw_int(int value) =>
+  (Var) { .u64 = (unsigned long) ((long long) value - INT_MIN) };
+
+static int _range_raw_value(Var value) =>
+  (int) ((long long) (unsigned) value.u64 + INT_MIN);
+
+/* Range packs the full native int domain into Iter's two Var-sized carrier
+   words without allocating an auxiliary state object. The unit-step forms
+   store one offset integer per word; the general form packs `end` above
+   `step`. These raw words stay inside range callbacks and never enter Var
+   dispatch or escape as yielded values. */
+static Var _range_raw_pair(int high, int low) {
+  unsigned long upper = (unsigned) ((long long) high - INT_MIN);
+  unsigned lower = (unsigned) ((long long) low - INT_MIN);
+  return (Var) { .u64 = (upper << 32) | lower };
 }
 
-static Var _apply1(Func fn, Var value) {
-  FuncArg arguments[1] = { FuncArg.value(value) };
-  return fn.apply(1, arguments);
+static int _range_raw_high(Var value) {
+  unsigned high = (unsigned) (value.u64 >> 32);
+  return (int) ((long long) high + INT_MIN);
 }
 
-static Var _apply2(Func fn, Var left, Var right) {
-  FuncArg arguments[2] = {
-    FuncArg.value(left), FuncArg.value(right)
-  };
-  return fn.apply(2, arguments);
-}
-
-static int _filter_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  Func func = iter.aux;
-  if (!source || !func) return 0;
-  foreach (Var value, source) {
-    if (_apply1(func, value)) {
-      *out = value;
-      return 1;
-    }
-  }
-  return 0;
-}
-
-/** Returns a lazy iterator over elements accepted by `func`'s `Var`
-    truthiness.
-    The predicate fits in `dest`, so that storage is all you declare.
-    Rejected elements are consumed without being yielded, so one request for
-    an element can pull many from the source.
-
-    Elements are passed as values. Both `iter` and its storage, `dest`, and any
-    dynamic or captured `func` must remain valid while the result is used.
-
-    A null `dest` returns NULL, and a null `func` yields an
-    exhausted iterator. An empty source does not invoke or check `func`.
-    Raises: whatever the source, `Func.apply`, or `func` raises while pulling.
-*/
-meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
-  if (!dest) return NULL;
-  dest.init(iter, _filter_next, void);
-  dest.aux = func;
-  return dest;
-}
-
-static int _map_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  if (!source || !source.try_next(*out)) return 0;
-  if (iter.aux) *out = _apply1(iter.aux, *out);
-  return 1;
-}
+// mapping stages
 
 /** Returns a lazy iterator over `func` applied to each element of `iter`.
     `dest` is caller-owned `struct Iter` storage. It and the source iterator's
@@ -391,195 +319,49 @@ meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
   return dest;
 }
 
-static int _zip_next(Iter iter, Var *out) {
-  Iter left_iter = iter.obj, right_iter = iter.state;
-  if (!left_iter || !right_iter) return 0;
-  Var left, right;
-  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  *out = %($left $right);
+static int _map_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  if (!source || !source.try_next(*out)) return 0;
+  if (iter.aux) *out = _apply1(iter.aux, *out);
   return 1;
 }
 
-/** Returns a lazy iterator over canonical `(left right)` `List`s.
-    Destructure each pair with `Var (a, b) = pair;`. Pairing
-    ends as soon as either source does. Each pull advances the left side first:
-    if the right side is exhausted, that unmatched left value is consumed; if
-    the left side is exhausted, the right side is not pulled. Both sources and
-    `dest` must outlive traversal. Each yielded pair follows the lifetime of
-    the `List` pool owning its canonical match.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
-    cause raised by either source. A null `dest` returns NULL.
-*/
-meta native Iter Iter.zip(Iter left, Iter right, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(left, _zip_next, right);
+static Var _apply1(Func fn, Var value) {
+  FuncArg arguments[1] = { FuncArg.value(value) };
+  return fn.apply(1, arguments);
 }
 
-static int _zip_with_next(Iter iter, Var *out) {
-  Iter left_iter = iter.obj, right_iter = iter.state;
-  if (!left_iter || !right_iter) return 0;
-  Var left, right;
-  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  if (iter.aux) *out = _apply2(iter.aux, left, right);
-  else *out = %($left $right);
-  return 1;
-}
+/** Returns a lazy iterator over elements accepted by `func`'s `Var`
+    truthiness.
+    The predicate fits in `dest`, so that storage is all you declare.
+    Rejected elements are consumed without being yielded, so one request for
+    an element can pull many from the source.
 
-/** Returns a lazy iterator over `fn(left, right)`, applied pairwise.
-    Like `Iter.zip`, but each pair is combined by `fn` instead of being
-    built into a `List`, and the result likewise ends with the shorter side.
-    `fn` is optional. A null `fn` yields two-element pair `List`s as `Iter.zip`
-    does. `Iter.map2` is the same operation with the callback required.
+    Elements are passed as values. Both `iter` and its storage, `dest`, and any
+    dynamic or captured `func` must remain valid while the result is used.
 
-    Both sources and their storage, `dest`, and any dynamic or captured `fn`
-    must remain valid while the result is used. Values are passed, not aliases
-    into either source. A null `dest` returns NULL. If either source is empty,
-    pulling does not invoke or check `fn`.
-    Raises: whatever either source, `Func.apply`, or `fn` raises while
-    pulling. With a null `fn`, pair interning may raise `<alloc-fail>` or
-    `<size-limit>`.
+    A null `dest` returns NULL, and a null `func` yields an
+    exhausted iterator. An empty source does not invoke or check `func`.
+    Raises: whatever the source, `Func.apply`, or `func` raises while pulling.
 */
-meta native Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
+meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
   if (!dest) return NULL;
-  dest.init(left, _zip_with_next, right);
-  dest.aux = fn;
+  dest.init(iter, _filter_next, void);
+  dest.aux = func;
   return dest;
 }
 
-/** Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
-    The strict form of `Iter.zip_with`. Behavior is identical, except that a
-    null `fn` returns NULL instead of yielding pairs. Use it when a missing
-    callback should fail at construction instead of changing the element
-    type.
-
-    The sources, destination, callback lifetime, value passing, and pull-time
-    failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
-*/
-meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
-  if (!fn) return NULL;
-  return left.zip_with(right, fn, dest);
-}
-
-static int _chain_next(Iter iter, Var *out) {
-  Iter current = iter.obj;
-  if (current && current.try_next(*out)) return 1;
-  current = iter.state;
-  iter.obj = current;
-  iter.state = void;
-  return current && current.try_next(*out);
-}
-
-/** Returns a lazy iterator over `first` followed by `second`.
-    Pulls do not reach `second` until `first` is exhausted. Both sources and
-    `dest` are borrowed and must outlive traversal. A null source contributes
-    no elements, and a null `dest` returns NULL. Pulling may raise any cause
-    raised by either source.
-*/
-meta native Iter Iter.chain(Iter first, Iter second, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(first, _chain_next, second);
-}
-
-static int _enumerate_next(Iter iter, Var *out) {
+static int _filter_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source) return 0;
-  Var value;
-  if (!source.try_next(value)) return 0;
-  int index = iter.state;
-  iter.state = index + 1;
-  *out = %($index $value);
-  return 1;
-}
-
-/** Returns a lazy iterator over `(index value)` `List`s starting at `start`.
-    The first pulled value is paired with exactly `start`, then the native
-    `int` index increases by one for each source value. The source and `dest`
-    are borrowed and must outlive traversal; `start` plus the number of
-    successfully pulled values must remain within the `int` range.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
-    cause raised by the source. A null `dest` returns NULL.
-*/
-meta native Iter Iter.enumerate(Iter iter, int start, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(iter, _enumerate_next, start);
-}
-
-static int _repeat_next(Iter iter, Var *out) {
-  int remaining = iter.state;
-  if (remaining <= 0) return 0;
-  iter.state = remaining - 1;
-  *out = iter.obj;
-  return 1;
-}
-
-/** Returns a lazy iterator that yields `value` at most `count` times.
-    A nonpositive count yields nothing. `dest` is caller-owned, and any
-    storage referenced by `value` must outlive traversal. A null `dest`
-    returns NULL. Pulling a repeated `void` raises `<void-op>`.
-*/
-meta native Iter Iter.repeat(Var value, int count, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(value, _repeat_next, count > 0 ? count : 0);
-}
-
-static int _head_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  int remaining = iter.state;
-  if (!source || remaining <= 0) return 0;
-  if (!source.try_next(*out)) return 0;
-  iter.state = remaining - 1;
-  return 1;
-}
-
-/** Returns a lazy iterator over at most `count` leading source values.
-    Construction consumes nothing. Pulling stops after `count` values or
-    source exhaustion, whichever comes first, and leaves any later source
-    values unconsumed. A nonpositive count yields nothing. The source and
-    caller-owned `dest` must outlive traversal; a null `dest` returns NULL.
-    Pulling may raise any cause raised by the source.
-*/
-meta native Iter Iter.head(Iter iter, int count, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(iter, _head_next, count > 0 ? count : 0);
-}
-
-static int _accumulate_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  if (!source) return 0;
-  Var item;
-  if (!source.try_next(item)) return 0;
-  iter.state = iter.state.binary(<+>, item);
-  *out = iter.state;
-  return 1;
-}
-
-/** Returns a lazy iterator over the running numeric sum of `iter`.
-    The numeric special case of `Iter.scan`. Each element is added through
-    `Var.binary` with the same promotion and failure rules as `Iter.sum`, and
-    the resulting `Var` is yielded without narrowing. A `void`
-    `initial` starts the total at integer zero; any other `initial` seeds it,
-    and the seed itself is never yielded. Prefer `Iter.scan` for a different
-    operation and `Iter.sum` when only the final total matters.
-
-    Raises: any cause from the source or `Var.binary` while adding an element
-    to the running total. A null `dest` returns NULL without raising.
-*/
-meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(
-    iter, _accumulate_next, initial is void ? (Var) 0 : initial);
-}
-
-static int _scan_next(Iter iter, Var *out) {
-  Iter source = iter.obj;
-  if (!source || !iter.aux) return 0;
-  Var item;
-  if (!source.try_next(item)) return 0;
-  iter.state = _apply2(iter.aux, iter.state, item);
-  *out = iter.state;
-  return 1;
+  Func func = iter.aux;
+  if (!source || !func) return 0;
+  foreach (Var value, source) {
+    if (_apply1(func, value)) {
+      *out = value;
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /** Returns a lazy iterator over every new accumulator of `fn`.
@@ -617,19 +399,206 @@ meta native Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
   return dest;
 }
 
-static int _unique_next(Iter iter, Var *out) {
+static int _scan_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  Map seen = iter.state;
+  if (!source || !iter.aux) return 0;
+  Var item;
+  if (!source.try_next(item)) return 0;
+  iter.state = _apply2(iter.aux, iter.state, item);
+  *out = iter.state;
+  return 1;
+}
+
+static Var _apply2(Func fn, Var left, Var right) {
+  FuncArg arguments[2] = {
+    FuncArg.value(left), FuncArg.value(right)
+  };
+  return fn.apply(2, arguments);
+}
+
+/** Returns a lazy iterator over the running numeric sum of `iter`.
+    The numeric special case of `Iter.scan`. Each element is added through
+    `Var.binary` with the same promotion and failure rules as `Iter.sum`, and
+    the resulting `Var` is yielded without narrowing. A `void`
+    `initial` starts the total at integer zero; any other `initial` seeds it,
+    and the seed itself is never yielded. Prefer `Iter.scan` for a different
+    operation and `Iter.sum` when only the final total matters.
+
+    Raises: any cause from the source or `Var.binary` while adding an element
+    to the running total. A null `dest` returns NULL without raising.
+*/
+meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(
+    iter, _accumulate_next, initial is void ? (Var) 0 : initial);
+}
+
+static int _accumulate_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
   if (!source) return 0;
-  loop {
-    Var value;
-    if (!source.try_next(value)) return 0;
-    if (!seen.contains(value)) {
-      seen[value] = value;
-      *out = value;
-      return 1;
-    }
-  }
+  Var item;
+  if (!source.try_next(item)) return 0;
+  iter.state = iter.state.binary(<+>, item);
+  *out = iter.state;
+  return 1;
+}
+
+// pairing stages
+
+/** Returns a lazy iterator over canonical `(left right)` `List`s.
+    Destructure each pair with `Var (a, b) = pair;`. Pairing
+    ends as soon as either source does. Each pull advances the left side first:
+    if the right side is exhausted, that unmatched left value is consumed; if
+    the left side is exhausted, the right side is not pulled. Both sources and
+    `dest` must outlive traversal. Each yielded pair follows the lifetime of
+    the `List` pool owning its canonical match.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
+    cause raised by either source. A null `dest` returns NULL.
+*/
+meta native Iter Iter.zip(Iter left, Iter right, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(left, _zip_next, right);
+}
+
+static int _zip_next(Iter iter, Var *out) {
+  Iter left_iter = iter.obj, right_iter = iter.state;
+  if (!left_iter || !right_iter) return 0;
+  Var left, right;
+  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
+  *out = %($left $right);
+  return 1;
+}
+
+/** Returns a lazy iterator over `fn(left, right)`, applied pairwise.
+    Like `Iter.zip`, but each pair is combined by `fn` instead of being
+    built into a `List`, and the result likewise ends with the shorter side.
+    `fn` is optional. A null `fn` yields two-element pair `List`s as `Iter.zip`
+    does. `Iter.map2` is the same operation with the callback required.
+
+    Both sources and their storage, `dest`, and any dynamic or captured `fn`
+    must remain valid while the result is used. Values are passed, not aliases
+    into either source. A null `dest` returns NULL. If either source is empty,
+    pulling does not invoke or check `fn`.
+    Raises: whatever either source, `Func.apply`, or `fn` raises while
+    pulling. With a null `fn`, pair interning may raise `<alloc-fail>` or
+    `<size-limit>`.
+*/
+meta native Iter Iter.zip_with(Iter left, Iter right, Func fn, Iter dest) {
+  if (!dest) return NULL;
+  dest.init(left, _zip_with_next, right);
+  dest.aux = fn;
+  return dest;
+}
+
+static int _zip_with_next(Iter iter, Var *out) {
+  Iter left_iter = iter.obj, right_iter = iter.state;
+  if (!left_iter || !right_iter) return 0;
+  Var left, right;
+  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
+  if (iter.aux) *out = _apply2(iter.aux, left, right);
+  else *out = %($left $right);
+  return 1;
+}
+
+/** Returns a lazy iterator over `fn(left, right)`, requiring `fn`.
+    The strict form of `Iter.zip_with`. Behavior is identical, except that a
+    null `fn` returns NULL instead of yielding pairs. Use it when a missing
+    callback should fail at construction instead of changing the element
+    type.
+
+    The sources, destination, callback lifetime, value passing, and pull-time
+    failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
+*/
+meta native Iter Iter.map2(Iter left, Iter right, Func fn, Iter dest) {
+  if (!fn) return NULL;
+  return left.zip_with(right, fn, dest);
+}
+
+/** Returns a lazy iterator over `(index value)` `List`s starting at `start`.
+    The first pulled value is paired with exactly `start`, then the native
+    `int` index increases by one for each source value. The source and `dest`
+    are borrowed and must outlive traversal; `start` plus the number of
+    successfully pulled values must remain within the `int` range.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
+    cause raised by the source. A null `dest` returns NULL.
+*/
+meta native Iter Iter.enumerate(Iter iter, int start, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(iter, _enumerate_next, start);
+}
+
+static int _enumerate_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  if (!source) return 0;
+  Var value;
+  if (!source.try_next(value)) return 0;
+  int index = iter.state;
+  iter.state = index + 1;
+  *out = %($index $value);
+  return 1;
+}
+
+// sequence stages
+
+/** Returns a lazy iterator over `first` followed by `second`.
+    Pulls do not reach `second` until `first` is exhausted. Both sources and
+    `dest` are borrowed and must outlive traversal. A null source contributes
+    no elements, and a null `dest` returns NULL. Pulling may raise any cause
+    raised by either source.
+*/
+meta native Iter Iter.chain(Iter first, Iter second, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(first, _chain_next, second);
+}
+
+static int _chain_next(Iter iter, Var *out) {
+  Iter current = iter.obj;
+  if (current && current.try_next(*out)) return 1;
+  current = iter.state;
+  iter.obj = current;
+  iter.state = void;
+  return current && current.try_next(*out);
+}
+
+/** Returns a lazy iterator over at most `count` leading source values.
+    Construction consumes nothing. Pulling stops after `count` values or
+    source exhaustion, whichever comes first, and leaves any later source
+    values unconsumed. A nonpositive count yields nothing. The source and
+    caller-owned `dest` must outlive traversal; a null `dest` returns NULL.
+    Pulling may raise any cause raised by the source.
+*/
+meta native Iter Iter.head(Iter iter, int count, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(iter, _head_next, count > 0 ? count : 0);
+}
+
+static int _head_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  int remaining = iter.state;
+  if (!source || remaining <= 0) return 0;
+  if (!source.try_next(*out)) return 0;
+  iter.state = remaining - 1;
+  return 1;
+}
+
+/** Returns a lazy iterator that yields `value` at most `count` times.
+    A nonpositive count yields nothing. `dest` is caller-owned, and any
+    storage referenced by `value` must outlive traversal. A null `dest`
+    returns NULL. Pulling a repeated `void` raises `<void-op>`.
+*/
+meta native Iter Iter.repeat(Var value, int count, Iter dest) {
+  if (!dest) return NULL;
+  return dest.init(value, _repeat_next, count > 0 ? count : 0);
+}
+
+static int _repeat_next(Iter iter, Var *out) {
+  int remaining = iter.state;
+  if (remaining <= 0) return 0;
+  iter.state = remaining - 1;
+  *out = iter.obj;
+  return 1;
 }
 
 /** Returns a lazy iterator that yields the first occurrence of each value.
@@ -647,43 +616,22 @@ meta native Iter Iter.unique(Iter iter, Iter dest) {
   return dest.init(iter, _unique_next, %{});
 }
 
-static int _unzip_column_next(Iter iter, Var *out) {
-  UnzipColumnRef state = iter.obj;
-  if (!state) return 0;
-  UnzipShared *shared = state.shared;
-  if (!_unzip_ensure(shared, state.column)) return 0;
-  *out = shared.buffers[state.column][shared.heads[state.column]];
-  shared.heads[state.column] += 1;
-  _unzip_compact(shared, state.column);
-  return 1;
-}
-
-static void _unzip_shared_init(UnzipShared *u, Iter source) {
-  if (!u) return;
-  u.source = source;
-  u.buffers[0] = [];
-  u.buffers[1] = [];
-  u.heads[0] = u.heads[1] = 0;
-  u.done = 0;
-  for (int i = 0; i < 2; i++) {
-    u.columns[i].shared = u;
-    u.columns[i].column = i;
-    Iter.init(
-      &u.column_iters[i], (UnzipColumnRef) &u.columns[i],
-      _unzip_column_next, 1);
+static int _unique_next(Iter iter, Var *out) {
+  Iter source = iter.obj;
+  Map seen = iter.state;
+  if (!source) return 0;
+  loop {
+    Var value;
+    if (!source.try_next(value)) return 0;
+    if (!seen.contains(value)) {
+      seen[value] = value;
+      *out = value;
+      return 1;
+    }
   }
 }
 
-static int _unzip_next(Iter iter, Var *out) {
-  UnzipSharedRef shared = iter.obj;
-  if (!shared) return 0;
-  int stage = iter.state;
-  if (stage >= 2) return 0;
-  Iter child = &shared.column_iters[stage];
-  iter.state = stage + 1;
-  *out = child;
-  return 1;
-}
+// unzip columns
 
 /** Returns an iterator over the two column iterators of paired elements.
     Every element of `iter` must be a two-element `List`. The result yields
@@ -723,6 +671,80 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
   _unzip_shared_init(shared, iter);
   return dest.init((UnzipSharedRef) shared, _unzip_next, 0);
 }
+
+static void _unzip_shared_init(UnzipShared *u, Iter source) {
+  if (!u) return;
+  u.source = source;
+  u.buffers[0] = [];
+  u.buffers[1] = [];
+  u.heads[0] = u.heads[1] = 0;
+  u.done = 0;
+  for (int i = 0; i < 2; i++) {
+    u.columns[i].shared = u;
+    u.columns[i].column = i;
+    Iter.init(
+      &u.column_iters[i], (UnzipColumnRef) &u.columns[i],
+      _unzip_column_next, 1);
+  }
+}
+
+static int _unzip_next(Iter iter, Var *out) {
+  UnzipSharedRef shared = iter.obj;
+  if (!shared) return 0;
+  int stage = iter.state;
+  if (stage >= 2) return 0;
+  Iter child = &shared.column_iters[stage];
+  iter.state = stage + 1;
+  *out = child;
+  return 1;
+}
+
+static int _unzip_column_next(Iter iter, Var *out) {
+  UnzipColumnRef state = iter.obj;
+  if (!state) return 0;
+  UnzipShared *shared = state.shared;
+  if (!_unzip_ensure(shared, state.column)) return 0;
+  *out = shared.buffers[state.column][shared.heads[state.column]];
+  shared.heads[state.column] += 1;
+  _unzip_compact(shared, state.column);
+  return 1;
+}
+
+static int _unzip_ensure(UnzipShared *shared, int column) {
+  while (shared.heads[column] >= shared.buffers[column].len()) {
+    if (shared.done) return 0;
+    Var pair;
+    if (!shared.source.try_next(pair)) {
+      shared.done = 1;
+      return 0;
+    }
+    _unzip_buffer_push(shared, pair);
+  }
+  return 1;
+}
+
+static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
+  if (pair is not <list>)
+    raise %(bad-types (owner "Iter.unzip") (want "two-element List")
+            (value $pair));
+  List list = pair;
+  if (!list || !list.cdr() || list.cdr().cdr())
+    raise %(bad-arg (owner "Iter.unzip") (want "two-element List")
+            (value $pair));
+  Var (first, second) = list;
+  shared.buffers[0].push(first);
+  shared.buffers[1].push(second);
+}
+
+static void _unzip_compact(UnzipShared *shared, int column) {
+  int consumed = shared.heads[column];
+  if (consumed < UNZIP_COMPACT_THRESHOLD) return;
+  Array removed = shared.buffers[column].remslice(0, consumed);
+  removed.free();
+  shared.heads[column] = 0;
+}
+
+// reductions
 
 /** Folds `fn` over `iter` from `seed`, left to right, and returns the final
     accumulator.
@@ -868,12 +890,4 @@ meta native Var Iter.min(Iter iter) {
   if (!iter.try_next(best)) return void;
   foreach (Var item, iter) if (item < best) best = item;
   return best;
-}
-
-/** Returns `iter` unchanged as its own iterator.
-    `dest` is ignored; ownership and remaining traversal state are unchanged.
-*/
-Iter Iter.iter(Iter x, Iter dest) {
-  (void) dest;
-  return x;
 }
