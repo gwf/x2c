@@ -99,6 +99,29 @@ static void *_input(Thread thread) =>
 Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   if (!function || (input_size && !input))
     raise %(bad-arg (owner "Thread.start"));
+  Thread thread = _new_handle(function, input, input_size);
+  if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
+    Error.policy_release(thread.policy);
+    free(thread);
+    fprintf(stderr, "Thread: could not register shutdown\n");
+    abort();
+  }
+  __atomic_fetch_add(&thread_live_count, 1, __ATOMIC_SEQ_CST);
+  Pool.thread_start();
+  int error = _create_native(thread);
+  if (error) {
+    __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
+    Error.policy_release(thread.policy);
+    free(thread);
+    _error("pthread_create", error);
+  }
+  return thread;
+}
+
+/* The handle holds the copied input after its own fields, and this thread's
+   `Error` policy until the worker adopts it. */
+static Thread _new_handle(
+  ThreadFn function, const void *input, size_t input_size) {
   size_t input_offset = _input_offset();
   if (input_size > SIZE_MAX - input_offset) raise %(size-limit);
   void *policy = Error.policy_capture();
@@ -114,29 +137,6 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   thread.errors = void;
   __atomic_store_n(&thread.state, THREAD_RUNNING, __ATOMIC_SEQ_CST);
   if (input_size) memcpy(_input(thread), input, input_size);
-  if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
-    Error.policy_release(thread.policy);
-    free(thread);
-    fprintf(stderr, "Thread: could not register shutdown\n");
-    abort();
-  }
-  __atomic_fetch_add(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-  Pool.thread_start();
-  pthread_attr_t attributes;
-  _stack_attributes(&attributes);
-  /* Hold descriptor registration stable across pthread_create. Success makes
-     it permanently read-only; failure unlocks it, restores the live count,
-     and releases the handle while pool locking stays enabled. */
-  x2c_descriptor_thread_start_begin();
-  int error = pthread_create(&thread.native, &attributes, _run, thread);
-  x2c_descriptor_thread_start_end(!error);
-  pthread_attr_destroy(&attributes);
-  if (error) {
-    __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-    Error.policy_release(thread.policy);
-    free(thread);
-    _error("pthread_create", error);
-  }
   return thread;
 }
 
@@ -155,6 +155,19 @@ static void _shutdown(void) {
     fprintf(stderr, "Thread: %d worker(s) still live at shutdown\n", live);
     abort();
   }
+}
+
+/* Descriptor registration stays stable across pthread_create. Success makes
+   it permanently read-only; failure unlocks it, and the caller restores the
+   live count and releases the handle while pool locking stays enabled. */
+static int _create_native(Thread thread) {
+  pthread_attr_t attributes;
+  _stack_attributes(&attributes);
+  x2c_descriptor_thread_start_begin();
+  int error = pthread_create(&thread.native, &attributes, _run, thread);
+  x2c_descriptor_thread_start_end(!error);
+  pthread_attr_destroy(&attributes);
+  return error;
 }
 
 /* Library recursion limits, such as the `Regex` repetition depth, are sized
@@ -178,6 +191,11 @@ static void _error(const char *operation, int error) {
 
 // running the callback
 
+/* The worker sets up its own runtime state under the starting thread's
+   `Error` policy and opens the result stores before the callback runs.
+   Detaching the result pool and popping its Scope afterward seal both for
+   the joining thread. Error and other per-thread state shut down last,
+   after no worker-private value still needs them. */
 static void *_run(void *argument) {
   Thread thread = argument;
   (void) Scope.top();
@@ -189,23 +207,22 @@ static void *_run(void *argument) {
   thread.result_scope = Scope.new_named("Thread result");
   Scope.push(&thread.result_scope);
   thread.result_pool = Pool.open_named("Thread result");
+  _work(thread);
+  thread.result_pool = Pool.detach();
+  Scope.pop();
 
-  /* Callback temporaries belong to `work`; its exported result or Error
-     snapshot is moved or copied into the outer result stores before `work`
-     closes. Detach that result pool and pop its Scope only afterward, sealing
-     both for the joining thread. Error and other per-thread state shut down
-     last, after no worker-private value still needs them. */
+  Error.shutdown_raw();
+  x2c_thread_state_release();
+  return NULL;
+}
+
+/* Callback temporaries belong to `work`; its exported result or Error
+   snapshot is moved or copied into the outer result stores before `work`
+   closes. */
+static void _work(Thread thread) {
   Context work = Context.open_isolated_named("Thread callback");
   int mark = Error.mark();
-  try {
-    ErrorHandler observer = Error.push(_capture_errors, thread);
-    defer Error.pop(observer);
-    ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
-    defer Error.pop(logger_handler);
-    const void *input = thread.input_size ? _input(thread) : NULL;
-    Var result = thread.function(input, thread.input_size);
-    thread.result = work.export(result);
-  }
+  try _call(thread, work);
   /* A registered catch is consulted during dispatch, before `Error` reaches
      its policy table, so a bare `catch:` would match first and no policy could
      ever resume inside a worker. `_capture_errors` converts the causes that
@@ -214,12 +231,17 @@ static void *_run(void *argument) {
   catch %(join-fail *): _worker_failed(thread, mark);
   catch %(alloc-fail *): _worker_failed(thread, mark);
   work.close();
-  thread.result_pool = Pool.detach();
-  Scope.pop();
+}
 
-  Error.shutdown_raw();
-  x2c_thread_state_release();
-  return NULL;
+/* The exported result reaches the result stores while both handlers are
+   registered. */
+static void _call(Thread thread, Context work) {
+  ErrorHandler observer = Error.push(_capture_errors, thread);
+  defer Error.pop(observer);
+  ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
+  defer Error.pop(logger_handler);
+  const void *input = thread.input_size ? _input(thread) : NULL;
+  thread.result = work.export(thread.function(input, thread.input_size));
 }
 
 /* The outermost of the worker's registrations, so a cause the callback did not
@@ -229,7 +251,8 @@ static void *_run(void *argument) {
    leaves the callback as `<join-fail>` carrying this snapshot instead. Any
    other policy resolves the cause and returns to its raise, exactly as it does
    on the starting thread, so the backstop never sees it. The replacement cause
-   dispatches outward from here, which is the `try` below and nothing else. */
+   dispatches outward from here, which is the `try` in `_work` and nothing
+   else. */
 static Symbol _capture_errors(List errors, Var data) {
   Thread thread = data;
   if (!errors) return <declined>;
