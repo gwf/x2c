@@ -536,28 +536,51 @@ static Var _new_pointer(TagId id, void *ptr) {
   return v;
 }
 
-/* `<f32>` arrives promoted to `double`, and the discrete NaN and infinity
-   tags box their payload as an `<f64>`. */
+/* `<f32>` arrives promoted to `double`. */
 static Var _floating_arg(TagId id, Symbol tag, va_list ap) {
   if (tag == <ldouble>) return Var.box_long_double(va_arg(ap, long double));
-  double d = va_arg(ap, double);
-  return id == _f32_ ? Var.box_f32((float) d) : Var.box_f64(d);
+  return _new_floating(id, va_arg(ap, double));
 }
 
-/* Tags up to 32 bits arrive promoted to `int` or `unsigned int`, and
-   `<ullong>` is the one integer row the switch leaves. */
+/* An `<f32>` fills the low half under its row's prefix. An `<f64>` is the
+   double shifted by (1 << 52); NaN, the infinities, and -DBL_MAX have their
+   own encodings. Reading the prefixes from the table keeps each case a
+   branch, where `Var.box_f32` and `Var.box_f64` let clang compute both
+   encodings and select one. */
+static Var _new_floating(TagId id, double d) {
+  if (id == _f32_) {
+    float f = (float) d;
+    unsigned u;
+    memcpy(&u, &f, sizeof u);
+    return (Var) { .u64 = u | _prefix(_f32_) };
+  }
+  if (d != d) return (Var) { .u64 = _prefix(_nan_) };
+  if (d > 0 && d == 1.0 / 0.0) return (Var) { .u64 = _prefix(_posinf_) };
+  if (d < 0 && d == -1.0 / 0.0) return (Var) { .u64 = _prefix(_neginf_) };
+  unsigned long u;
+  memcpy(&u, &d, sizeof u);
+  if (u == VAR_F64_NEG_MAX_RAW) return (Var) { .u64 = VAR_F64_NEG_MAX_ESCAPE };
+  return (Var) { .u64 = u + VAR_F64_SHIFT };
+}
+
+/* The top and middle fields of an immediate row. */
+static unsigned long _prefix(TagId id) =>
+  x2c_var_taginfo[id].top << 48 | x2c_var_taginfo[id].middle << 32;
+
+/* Tags up to 32 bits arrive promoted to `int` or `unsigned int`. */
 static Var _integer_arg(TagId id, Symbol tag, va_list ap) {
   switch (tag) {
     case <u8>: case <i8>: case <u16>: case <i16>: case <i32>:
       return _new_integer(id, va_arg(ap, int));
-    case <u32>:   return _new_integer(id, (long) va_arg(ap, unsigned int));
-    case <u48>:   return _new_integer(id, (long) va_arg(ap, unsigned long));
-    case <i48>:   return _new_integer(id, va_arg(ap, long));
-    case <long>:  return Var.box_long(va_arg(ap, long));
-    case <ulong>: return Var.box_ulong(va_arg(ap, unsigned long));
-    case <llong>: return Var.box_long_long(va_arg(ap, long long));
+    case <u32>:    return _new_integer(id, (long) va_arg(ap, unsigned int));
+    case <u48>:    return _new_integer(id, (long) va_arg(ap, unsigned long));
+    case <i48>:    return _new_integer(id, va_arg(ap, long));
+    case <long>:   return Var.box_long(va_arg(ap, long));
+    case <ulong>:  return Var.box_ulong(va_arg(ap, unsigned long));
+    case <llong>:  return Var.box_long_long(va_arg(ap, long long));
+    case <ullong>: return Var.box_ulong_long(va_arg(ap, unsigned long long));
   }
-  return Var.box_ulong_long(va_arg(ap, unsigned long long));
+  raise %(invariant (owner "Var.new") (target $tag));
 }
 
 /* An immediate integer keeps its tag's width of payload bits. The 48-bit
@@ -873,12 +896,28 @@ meta native long Var.integer(Var v) {
   unsigned top = _top_bits(v);
   if (top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
   if (top == x2c_var_taginfo[_i48_].top) return _i48_integer(v);
-  if (top == x2c_var_taginfo[_u8_].top) return _narrow_integer(v);
+  /* The 8-, 16-, and 32-bit rows share one top and differ in the middle.
+     The switch stays here: in a helper that returns 0 for another middle,
+     clang computes all six arms and selects one, 11 more instructions. */
+  if (top == x2c_var_taginfo[_u8_].top) {
+    switch (_middle_bits(v)) {
+      case 0x1: return (unsigned char)  (v.u64 & _bitmask(8));
+      case 0x2: return (char)           (v.u64 & _bitmask(8));
+      case 0x3: return (unsigned short) (v.u64 & _bitmask(16));
+      case 0x4: return (short)          (v.u64 & _bitmask(16));
+      case 0x5: return (unsigned int)   (v.u64 & _bitmask(32));
+      case 0x6: return (int)            (v.u64 & _bitmask(32));
+    }
+  }
   if (top == 0x0005) return _wide_integer(v);
   if (top == 0x0007 && _bottom_bits(v) == 0x6)
     return (long) _wide_box(v).value.ulong_long_value;
-  if (top >= 0x8004 && top <= 0x800B)
-    return (Symbol) (v.u64 - VAR_SYMBOL_OFFSET);
+  /* The offset comes from the table: with the VAR_SYMBOL_OFFSET constant,
+     clang also subtracts it on the path of every other tag. */
+  if (top >= 0x8004 && top <= 0x800B) {
+    unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
+    return (Symbol) (v.u64 - offset);
+  }
   return 0;
 }
 
@@ -886,19 +925,6 @@ static long _i48_integer(Var v) {
   unsigned long mask = _bitmask(48), raw = v.u64 & mask;
   if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
   return (long) raw;
-}
-
-/* The 8-, 16-, and 32-bit rows share one top and differ in the middle. */
-static long _narrow_integer(Var v) {
-  switch (_middle_bits(v)) {
-    case 0x1: return (unsigned char)  (v.u64 & _bitmask(8));
-    case 0x2: return (char)           (v.u64 & _bitmask(8));
-    case 0x3: return (unsigned short) (v.u64 & _bitmask(16));
-    case 0x4: return (short)          (v.u64 & _bitmask(16));
-    case 0x5: return (unsigned int)   (v.u64 & _bitmask(32));
-    case 0x6: return (int)            (v.u64 & _bitmask(32));
-  }
-  return 0;
 }
 
 /* `<long>`, `<ulong>`, and `<llong>` share top 0x0005. */
@@ -993,24 +1019,23 @@ void *Var.pointer(Var v) {
 /** Returns a supported wide scalar box's content hash, or 0 otherwise. */
 unsigned Var.wide_hash(Var v) {
   if (!v.is_wide()) return 0;
-  VarWideBox box = _wide_box(v);
+  VarWideValue *value = &_wide_box(v).value;
   Symbol tag = v.tag();
-  size_t width = _wide_width(tag);
-  return width ? x2c_hash_bytes((unsigned) tag, &box.value, width) : 0;
-}
-
-/* The payload bytes of a wide family. Every member of the box's union
-   starts at the union, so the payload is the union's first `width` bytes. */
-static size_t _wide_width(Symbol tag) {
   switch (tag) {
-    case <long>:    return sizeof(long);
-    case <ulong>:   return sizeof(unsigned long);
-    case <llong>:   return sizeof(long long);
-    case <ullong>:  return sizeof(unsigned long long);
-    case <ldouble>: return sizeof(long double);
+    case <long>:    return _hash_wide(tag, value, sizeof(long));
+    case <ulong>:   return _hash_wide(tag, value, sizeof(unsigned long));
+    case <llong>:   return _hash_wide(tag, value, sizeof(long long));
+    case <ullong>:  return _hash_wide(tag, value, sizeof(unsigned long long));
+    case <ldouble>: return _hash_wide(tag, value, sizeof(long double));
   }
   return 0;
 }
+
+/* Every member of the box's union starts at the union, so a family's
+   payload is its first `width` bytes. Each arm passes a constant width,
+   which lets `x2c_hash_bytes` unroll its word loop. */
+static unsigned _hash_wide(Symbol tag, VarWideValue *value, size_t width) =>
+  x2c_hash_bytes((unsigned) tag, value, width);
 
 /** Reports content equality for supported wide scalar boxes.
     Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values
