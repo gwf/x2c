@@ -1177,7 +1177,7 @@ static void _help_command(Array args){
   if(Array_len(args) > 2) x2c_driver_error("help accepts at most one command");
   String name = Var_string(Array_getindex(args, 1));
   if(String_equal(name, _53) || String_equal(name, _49) || String_equal(name, _50)) _help_exit(535328, 0);
-  CliCommand * asked = _command_row(name);
+  CliCommand * asked = String_truth(name) ? _command_row(name) : NULL;
   if(! asked) x2c_driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(name), cons(String_var(_58), NULL)))));
   _help_exit(asked -> name, 0);
 }
@@ -1498,7 +1498,7 @@ static void _expand_argument(Array out, String arg, List stack){
     Array_push(out, String_var(String_getslice(arg, 1, -2147483648, 1)));
     return;
   }
-  if(! String_getindex(arg, 1)) x2c_driver_error("empty response-file reference '@'");
+  if(String_len(arg) == 1) x2c_driver_error("empty response-file reference '@'");
   String path = String_getslice(arg, 1, -2147483648, 1), identity = Path_absolute(path);
   if(List_contains(stack, String_var(identity))) _fail(String_join(NULL, cons(String_var(_83), cons(String_var(path), NULL))), NULL);
   List nested = cons(String_var(identity), stack);
