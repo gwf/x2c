@@ -1,8 +1,47 @@
 # x2c Beautification Project
 
-> Status: active. Gary started Wave 0 and the pilot on 2026-09-28. The
-> baseline measurements are from `dev` `f6606dbf`. Track H waits for Gary's
-> approval of its book text.
+> Status: active. Wave 0 and the pilot are complete and wait for Gary's
+> review of the pilot files before Wave 2. The baseline measurements are
+> from `dev` `f6606dbf`. Track H waits for Gary's approval of its book text.
+
+## Progress
+
+Wave 0, delivered 2026-09-28:
+
+- The style guide has the "Shape" chapter, the reading-order section, the
+  naming glossary, and shape questions in its review checklist.
+- `beautify-x2c-source` holds the procedure, with a coverage-probe
+  reference. `x2c lint` reports `long-function`, `deep-nesting`,
+  `long-parameter-list`, and `long-name` candidates.
+- The coverage probe ran once over the whole workload: 87.6% of 29,644
+  executable `.x` lines ran, and 485 of 4,160 functions never ran. Most of
+  those serve `x2c build`, project manifests, and the editor adapter,
+  which the workload does not run. Three have no callers:
+  `Compiler.shared_definition` (`src/macros.x`),
+  `Compiler.region_no_lifetime_effect` (`src/regions.x`), and
+  `Macro_case_capture` (`lib/meta.x`). Their waves delete them.
+
+Pilot results:
+
+| File | Lines | Functions | Mean length | Longest | Over 40 | Most parameters |
+| --- | --- | --- | --- | --- | --- | --- |
+| src/collect.x before | 1,104 | 55 | 15.5 | 130 | 2 | 12 |
+| src/collect.x after | 1,189 | 94 | 8.7 | 22 | 0 | 6 |
+| lib/tokenizer.x before | 843 | 48 | 13.3 | 157 | 3 | 7 |
+| lib/tokenizer.x after | 968 | 75 | 9.1 | 57 (a mode table) | 1 | 4 |
+
+Both files grew, mainly from the new records' definitions, helper
+signatures, and section labels. Stage 1 translated `src/` and `lib/`
+byte-identically to stage 0 after each file. Five alternating timing pairs
+of six compiler sources measured the candidate 1.7% faster with interfaces
+and 0.4% faster without them, both inside the run-to-run noise.
+
+The rewrite exposed a latent defect. `collect_forget_entries_since`
+deleted cache entries while iterating the same Map, so it skipped entries
+depending on allocation addresses; `meta-import-included` then failed from
+a cold cache. It is fixed on its own commit. `.xi` interfaces still write
+selected definition rows that no reader has used since `30615669`; the
+loader no longer passes them along, and the format is unchanged.
 
 ## Context
 
