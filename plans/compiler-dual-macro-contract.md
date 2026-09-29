@@ -1,4 +1,4 @@
-> Status: active -- dual-macro compiler migration, updated 2026-09-28.
+> Status: active -- dual-macro compiler migration, updated 2026-09-29.
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
 > support landed at b59b8ade; reconstruction and parameter-scope fixes
 > landed at 799875a8. Lambda source recognition and construction are
@@ -18,7 +18,9 @@
 > under the process ceiling. Managed declaration cleanup is on dev at
 > `c00397af`; discarded destructuring assignment is on dev at `1d5c9b0a`.
 > Protocol descriptor storage is on dev at `6a3674bf`; other protocol
-> shapes and source coverage remain.
+> shapes and source coverage remain. The complete destructuring and Func
+> construction families are on dev. A Func shape pass and ordinary-call
+> source-form family are locally integrated for the next batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -3215,13 +3217,56 @@ aggregate insertion is illegal in an expression slot. Canonical field rows,
 typed identifier leaves, and argument carriers remain structural data for
 the rebuilt source forms, not competing complete-expression builders.
 
-The integrated local family passed `make build`, 13 focused compiler
+The published family passed `make build`, 13 focused compiler
 fixtures, `func_suite` (35 tests, 126 assertions), and inert by-value
 record argument/result probes. The final callback and dereference pass also
 passed its exact fixture and the record probe, with byte-identical final
-transform AST and C/H for that probe. Publication validation and the
-batch-level advisory performance attempt apply to the final integrated
-tree.
+transform AST and C/H for that probe. Its final integrated tree passed
+`agent-pr-check` and reached dev at `f77c37b5`. The batch-level advisory
+snapshot succeeded; its build-cost score was essentially flat, while other
+upstream changes prevented a Func-only timing attribution.
+
+### E38. Func adapter shape pass
+
+The construction family exposed two hard-to-read clients. The follow-up
+groups argument-reader state in `FuncReaders`, then names the reference,
+pointer/record, and tagged-value paths. It groups captured-lambda state in
+`CaptureBuild`, with separate field, environment, adapter, inline factory,
+and ordinary construction steps. The shared capture storage builder serves
+both branches. An unused indirect-adapter `key` parameter is deleted.
+Binding identities, first-use capture order, sequential argument reads,
+inline bridge placement, and the final GNU statement-expression value stay
+in their established owners.
+
+The authored `src/transform.x` shape diff is +227/-183 lines. The argument
+dispatcher falls from 49 to 16 lines and 11 to 4 parameters; the captured
+lambda entry point falls from 137 to 22 lines. Its helpers run at most 30
+lines. Whole-file over-40-line functions fall from 21 to 19; the largest
+parameter list falls from 11 to 8. The remaining long functions are outside
+this bounded Func construction area. Focused Func fixtures, `func_suite`
+(35 tests, 126 assertions), an inert by-value record probe, and an
+independent inline-header consumer pass. Stage 0 and stage 1 generate the
+same 192 C/H files on the worker tree.
+
+### E39. Ordinary call expression family
+
+`$called` now carries the ordinary callee-and-arguments shape through
+postfix parsing, explicit-converter checks, Iter completion, resolved-call
+dispatch, operator temporary recognition, and typed reconstruction in
+`src/expressions.x`. Existing semantic owners still select methods,
+prepare receivers and arguments, check arity and types, and decide return
+ownership. Complete typed-callee raw call builders and recognizers displaced
+by `$called` are deleted. The authored expression diff is +106/-81 lines;
+textual `(call` occurrences fall from 42 to 22. The remaining executable
+raw calls have String callees for native or compiler-stage operations,
+including `__builtin_choose_expr` and runtime helper forms.
+
+`$called` also recognizes a raw String-callee call, so `_resolve_content`
+keeps its existing String-callee case before the source-form match. An inert
+probe demonstrated that boundary and preserved the exact-one-argument
+converter pattern. Twelve focused fixtures passed, with identical checked
+AST, transform, C, and H artifacts where declared. The corrected worker
+tree builds through stage 1 and yields 192 byte-identical stage C/H files.
 
 ### F. Static-local initialization exception
 
