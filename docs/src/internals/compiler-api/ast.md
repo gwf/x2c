@@ -38,7 +38,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:146`
+Source: `src/ast.x:189`
 
 #### ast_contains_head
 
@@ -47,7 +47,7 @@ Source: `src/ast.x:146`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:151`
+Source: `src/ast.x:81`
 
 #### binding_identity_new
 
@@ -56,7 +56,7 @@ Source: `src/ast.x:151`
 Constructs a `(binding identity spelling)` node.
 The caller must supply a positive compiler-issued identity.
 
-Source: `src/ast.x:39`
+Source: `src/ast.x:42`
 
 #### binding_identity_spelling
 
@@ -64,17 +64,17 @@ Source: `src/ast.x:39`
 
 Returns a valid binding node's source spelling, or `NULL`.
 
-Source: `src/ast.x:58`
+Source: `src/ast.x:62`
 
 #### binding_identity_try_parts
 
-`int binding_identity_try_parts(List binding, int &?identity, String &?spelling)`
+`int binding_identity_try_parts( List binding, int &?identity, String &?spelling)`
 
 Extracts a valid `(binding positive-integer string)` node.
 Returns one on success and writes only non-`NULL` outputs; failure returns
 zero without changing either output.
 
-Source: `src/ast.x:46`
+Source: `src/ast.x:49`
 
 #### preproc_conditional_kind
 
@@ -84,7 +84,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/ast.x:68`
+Source: `src/ast.x:245`
 
 #### preproc_directive
 
@@ -93,17 +93,17 @@ Source: `src/ast.x:68`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/ast.x:78`
+Source: `src/ast.x:255`
 
 #### preproc_include_target
 
 `String preproc_include_target(String text, int &angle)`
 
 Returns the file named by the `#include` line `text`, or `NULL` for any
-other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after
+other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/ast.x:85`
+Source: `src/ast.x:262`
 
 #### preproc_track_arms
 
@@ -113,7 +113,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/ast.x:100`
+Source: `src/ast.x:277`
 
 #### preproc_within_arms
 
@@ -123,7 +123,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/ast.x:113`
+Source: `src/ast.x:290`
 
 ### `Ast`
 
@@ -134,7 +134,7 @@ Source: `src/ast.x:113`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:242`
+Source: `src/ast.x:195`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -145,7 +145,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:256`
+Source: `src/ast.x:209`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -158,7 +158,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:228`
+Source: `src/ast.x:103`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -170,7 +170,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:170`
+Source: `src/ast.x:74`
 
 ### `Symbol`
 
@@ -181,7 +181,7 @@ Source: `src/ast.x:170`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:136`
+Source: `src/ast.x:179`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -190,7 +190,7 @@ Source: `src/ast.x:136`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:130`
+Source: `src/ast.x:173`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -199,7 +199,7 @@ Source: `src/ast.x:130`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:142`
+Source: `src/ast.x:185`
 
 ## Public types
 
@@ -230,5 +230,5 @@ Source: `src/ast.x:16`
 
 ## Design notes
 
-Keeps sequence placement in one place. Simple fixed-shape nodes remain
-direct immutable `List`s.
+Simple fixed-shape nodes remain direct immutable `List`s. This module
+holds the node operations that several compiler phases share.

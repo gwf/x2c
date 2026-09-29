@@ -21,12 +21,11 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `preproc_conditional_kind`, `preproc_directive`,
-`preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`,
-`Symbol.compound_operator`, `Symbol.compound_assignment`,
-`Symbol.is_assignment_op`, `ast_changes_left_operand`, `ast_contains_head`,
-`Ast.rewrite_children`, `Ast.never_returns`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`binding_identity_spelling`, `Ast.rewrite_children`, `ast_contains_head`,
+`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
+`Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
+`Ast.initializer_functions`, `preproc_conditional_kind`, `preproc_directive`,
+`preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/build.x](../src/build.x)
 
@@ -259,15 +258,15 @@ x2c literal and lambda parsing.
 
 Public functions:
 
-`Compiler.typed_match_pattern`, `Compiler.parse_list_literal`,
-`Compiler.symbol_set_expression`, `Compiler.parse_symbol_set_literal`,
+`Compiler.parse_list_literal`, `Compiler.typed_match_pattern`,
 `Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
-`Compiler.parse_array_literal`, `Compiler.parse_map_entry`,
-`Compiler.parse_map_entries`, `Compiler.parse_map_literal`,
-`Compiler.parse_string_literal`, `Compiler.lambda_capture_required`,
-`Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
-`Compiler.capture_lambda_identifier`, `Compiler.bind_lambda_expression`,
-`Compiler.parse_lambda_literal`, `Compiler.parse_atomic_literal`
+`Compiler.parse_symbol_set_literal`, `Compiler.symbol_set_expression`,
+`Compiler.parse_array_literal`, `Compiler.parse_map_literal`,
+`Compiler.parse_map_entries`, `Compiler.parse_map_entry`,
+`Compiler.parse_string_literal`, `Compiler.parse_lambda_literal`,
+`Compiler.bind_lambda_expression`, `Compiler.begin_lambda_captures`,
+`Compiler.end_lambda_captures`, `Compiler.lambda_capture_required`,
+`Compiler.capture_lambda_identifier`, `Compiler.parse_atomic_literal`
 
 ### [src/macros.x](../src/macros.x)
 
@@ -458,7 +457,7 @@ the values crossing between meta code and the program.
 
 Public functions:
 
-`literal_text_value`, `Compiler.folded_constant`, `Compiler.meta_argument`,
+`Compiler.meta_argument`, `Compiler.folded_constant`, `literal_text_value`,
 `Compiler.meta_value_expression`, `Compiler.check_meta_call`,
 `Compiler.meta_is_comptime_only`
 
@@ -468,12 +467,12 @@ x2c statement parsing.
 
 Public functions:
 
-`Compiler.parse_governed`, `Compiler.finish_return_statement`,
+`Compiler.parse_statement`, `Compiler.with_binding`,
+`Compiler.finish_return_statement`, `Compiler.parse_match_row_argument`,
 `Compiler.begin_match_arm`, `Compiler.begin_catch_arm`,
-`Compiler.parse_match_row_argument`, `Compiler.with_binding`,
-`Compiler.parse_block_item`, `Compiler.parse_statement`,
-`Compiler.parse_block_items`, `Compiler.parse_callable_body`,
-`Compiler.parse_compound_statement`
+`Compiler.parse_governed`, `Compiler.parse_block_item`,
+`Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
+`Compiler.parse_callable_body`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -517,25 +516,25 @@ x2c semantic types.
 
 Public functions:
 
-`Type.declaration_parts`, `Type.declaration_ast`, `ast_addressed_identifier`,
-`ast_direct_identifier`, `ast_indirect_identifier`, `ast_prototype_declarator`,
-`Type.parameter_ast`, `Var.type`, `Type.list`, `List.type`,
-`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
-`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
-`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
-`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
-`Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
-`Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.numeric_literal_value`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
-`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
-`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
-`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
-`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
-`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
-`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
-`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`Var.type`, `Type.list`, `List.type`, `List.type_from_ast`,
+`Type.declaration_parts`, `Type.declaration_ast`, `Type.parameter_ast`,
+`ast_prototype_declarator`, `Symbol.is_storage_class`, `Symbol.is_inline`,
+`Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
+`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
+`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
+`Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
+`Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.dereference`,
+`Type.reference`, `Type.apply`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `Type.is_typedef`, `Type.base_type`,
+`Type.canonicalize`, `Type.declared`, `Type.discards_qualifiers`,
+`Type.is_builtin`, `Type.is_typedef_name`, `Type.is_bare_typedef_name`,
+`Type.is_number`, `Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
+`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
+`Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
+`ast_addressed_identifier`, `ast_direct_identifier`, `ast_indirect_identifier`,
+`Type.var_tag`, `Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.begin_unit`,
+`Type.end_unit`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -913,9 +912,9 @@ Public functions:
 
 `MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.emit`,
 `MachineBuilder.constant`, `MachineBuilder.binder`,
-`MachineBuilder.set_target`, `MachineBuilder.patch`, `MachineBuilder.view`,
-`MachineBuilder.freeze`, `MachineProgram.view`, `MachineProgram.bytes`,
-`MachineBuilder.init`, `MachineBuilder.drop`
+`MachineBuilder.set_target`, `MachineBuilder.patch`, `MachineBuilder.freeze`,
+`MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.init`,
+`MachineBuilder.drop`
 
 ### [lib/map.x](../lib/map.x)
 

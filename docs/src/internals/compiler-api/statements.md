@@ -29,36 +29,36 @@ X2c statement parsing.
 <a id="Compiler.begin_catch_arm"></a>
 #### Compiler.begin_catch_arm
 
-`List Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start)`
+`List Compiler.begin_catch_arm(Compiler c, List pattern, Token start)`
 
 Opens a `Sym` scope for one catch arm and defines a nonempty filter's
 definite pattern binders. Returns their capture-token/binding pairs.
 The caller must pop the scope after parsing or binding the arm body;
 binder diagnostics use `start`.
 
-Source: `src/statements.x:285`
+Source: `src/statements.x:618`
 
 <a id="Compiler.begin_match_arm"></a>
 #### Compiler.begin_match_arm
 
-`void Compiler.begin_match_arm( Compiler compiler, List pattern, Token start, int binds)`
+`void Compiler.begin_match_arm( Compiler c, List pattern, Token start, int binds)`
 
 Opens a `Sym` scope for one match arm and optionally defines its definite
 pattern binders. The caller must pop the scope after parsing or binding the
 arm body; binder diagnostics use `start`.
 
-Source: `src/statements.x:274`
+Source: `src/statements.x:446`
 
 <a id="Compiler.finish_return_statement"></a>
 #### Compiler.finish_return_statement
 
-`List Compiler.finish_return_statement(Compiler compiler, List expression)`
+`List Compiler.finish_return_statement(Compiler c, List expr)`
 
 Builds a return node for an optional expression without consuming tokens.
 A present expression is resolved in the current `Sym` scope and includes
 the current `return_type` for later conversion.
 
-Source: `src/statements.x:186`
+Source: `src/statements.x:262`
 
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
@@ -69,7 +69,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:564`
+Source: `src/statements.x:718`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -79,7 +79,7 @@ Source: `src/statements.x:564`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:721`
+Source: `src/statements.x:762`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -88,7 +88,7 @@ Source: `src/statements.x:721`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:728`
+Source: `src/statements.x:769`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -98,7 +98,7 @@ Source: `src/statements.x:728`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:733`
+Source: `src/statements.x:757`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -114,7 +114,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:70`
+Source: `src/statements.x:636`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -123,7 +123,7 @@ Source: `src/statements.x:70`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:383`
+Source: `src/statements.x:393`
 
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement
@@ -134,7 +134,7 @@ Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:592`
+Source: `src/statements.x:25`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
@@ -144,12 +144,12 @@ Source: `src/statements.x:592`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:550`
+Source: `src/statements.x:154`
 
 ## Design notes
 
-Parses control flow and block constructs: `if`/`else`, `while`/`for`/`do`,
-`switch`/`match`/`case`/`default`, labels/`goto`, `break`/`continue`,
-`try`/`catch`, `raise`, `defer`, `return`, empty statements, and compound
-blocks. Return checking uses the return type that declaration parsing
-recorded. Catch arms select `Error` records with `%()` match patterns.
+`Compiler.parse_statement` dispatches each statement form to one
+production, which consumes its tokens in grammar order and returns its
+node. Preprocessor directives between statements stay in the tree, so
+each one emits where C read it. Return checking uses the return type
+that declaration parsing recorded.
