@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// tagged spellings
+
 /* Whether `value` is a List the tagged spellings would misread. */
 static int _datum_tagged(Var value) {
   if (value is not <list> || value.is_nil()) return 0;
@@ -36,15 +38,7 @@ static int _datum_tagged(Var value) {
   return 0;
 }
 
-static void _datum_number(Buffer out, Var value) {
-  X2CVarNumeric number;
-  value.numeric_decode(number);
-  out.printf("(x2c.number %s \"", (char *) value.tag().str());
-  if (number.floating) out.printf("%.21Lg", number.floating_value);
-  else if (number.unsigned_value) out.printf("%llu", number.raw);
-  else out.printf("%lld", (long long) value.integer());
-  out.write("\")");
-}
+// writing
 
 /* Writes `value` to `out` as reader text and returns 1, or returns 0 for a
     value the grammar cannot spell. With `tagged`, the tagged spellings this
@@ -106,27 +100,31 @@ int datum_write(Buffer out, Var value, int tagged) {
   return 1;
 }
 
+static void _datum_number(Buffer out, Var value) {
+  X2CVarNumeric number;
+  value.numeric_decode(number);
+  out.printf("(x2c.number %s \"", (char *) value.tag().str());
+  if (number.floating) out.printf("%.21Lg", number.floating_value);
+  else if (number.unsigned_value) out.printf("%llu", number.raw);
+  else out.printf("%lld", (long long) value.integer());
+  out.write("\")");
+}
+
+// reading
+
+/* Reads the datum at `cursor` in `text` into `out`, decoding the tagged
+    spellings `datum_write` makes, and advances `cursor` past it. Returns 0
+    at the end of `text`.
+
+    Raises: `<incomplete>` or `<malformed>` for text that is not a datum. */
+int datum_read(String text, unsigned &cursor, Var &out) {
+  Var value = void;
+  if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
+  out = _datum_decode(value);
+  return 1;
+}
+
 static Var _datum_decode(Var value);
-
-static Var _datum_decode_number(String tag, String text) {
-  Symbol target = Symbol.new(tag);
-  if (tag.startswith("f") || tag == "ldouble") {
-    long double value = strtold(text, NULL);
-    return Var.convert(value, target);
-  }
-  if (tag.startswith("u")) {
-    unsigned long long value = strtoull(text, NULL, 10);
-    return Var.convert(value, target);
-  }
-  long long value = strtoll(text, NULL, 10);
-  return Var.convert(value, target);
-}
-
-static List _datum_decode_list(List list) {
-  Array items = [];
-  foreach (Var item, list) items.push(_datum_decode(item));
-  return items.list_free();
-}
 
 /* The value a tagged spelling stands for. */
 static Var _datum_decode(Var value) {
@@ -150,17 +148,27 @@ static Var _datum_decode(Var value) {
   return map;
 }
 
-/* Reads the datum at `cursor` in `text` into `out`, decoding the tagged
-    spellings `datum_write` makes, and advances `cursor` past it. Returns 0
-    at the end of `text`.
-
-    Raises: `<incomplete>` or `<malformed>` for text that is not a datum. */
-int datum_read(String text, unsigned &cursor, Var &out) {
-  Var value = void;
-  if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
-  out = _datum_decode(value);
-  return 1;
+static List _datum_decode_list(List list) {
+  Array items = [];
+  foreach (Var item, list) items.push(_datum_decode(item));
+  return items.list_free();
 }
+
+static Var _datum_decode_number(String tag, String text) {
+  Symbol target = Symbol.new(tag);
+  if (tag.startswith("f") || tag == "ldouble") {
+    long double value = strtold(text, NULL);
+    return Var.convert(value, target);
+  }
+  if (tag.startswith("u")) {
+    unsigned long long value = strtoull(text, NULL, 10);
+    return Var.convert(value, target);
+  }
+  long long value = strtoll(text, NULL, 10);
+  return Var.convert(value, target);
+}
+
+// frames
 
 /* Writes `value` to `out` as one frame, its tagged datum's length in
    decimal and a newline before it, and returns 1, or writes nothing and
@@ -189,6 +197,8 @@ int datum_unframe(String input, size_t &used, Var &value) {
   used = newline + 1 + length;
   return 1;
 }
+
+// compile-time results
 
 /* Returns why the compile-time result `value` cannot become data in the
    program, as `(MESSAGE (NOTE))`, or NULL: it holds a compiler address,
