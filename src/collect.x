@@ -215,7 +215,7 @@ static void Walk.split(Walk *w, Token first) {
 /* An include or a visibility pragma ends the current segment. An include
    in an arm that C never takes is not read. */
 static void Walk.directive(Walk *w, Token token, int hidden) {
-  int angle = 0, visibility = _visibility_pragma(token.text);
+  int angle = 0, visibility = preproc_visibility(token.text);
   String target = hidden ? NULL : preproc_include_target(token.text, angle);
   if (!target && visibility < 0) return;
   w.flush(w.text[w.pos:token.pos]);
@@ -253,13 +253,6 @@ static int _track_arms(Array arms, String text) {
 static int _hidden(Array arms) {
   foreach (int state, arms) if (state == 2) return 1;
   return 0;
-}
-
-/* 1 for `#pragma private`, 0 for `#pragma public`, and -1 for any other
-   directive, matching Compiler.update_source_visibility. */
-static int _visibility_pragma(String directive) {
-  if (directive.contains("pragma private")) return 1;
-  return directive.contains("pragma public") ? 0 : -1;
 }
 
 // segments

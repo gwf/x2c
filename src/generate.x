@@ -446,8 +446,8 @@ static void _partition_alias(
 static void _partition_preproc(
   Array header, Array source, List node, String content, int &private) {
   if (_is_pragma_once(content)) return;
-  if (content.contains("pragma public")) private = 0;
-  else if (content.contains("pragma private")) private = 1;
+  int visibility = preproc_visibility(content);
+  if (visibility >= 0) private = visibility;
   else (private ? source : header).push(node);
 }
 
