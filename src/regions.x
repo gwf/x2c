@@ -845,6 +845,13 @@ static void _scan(Walk w, Var value, int deferred) {
       if (arguments) w.pending.push(arguments);
       continue;
     }
+    List assignment = source_assignment(node);
+    if (assignment && _unwrap(node) != root) {
+      (Var target, Var stored) = assignment;
+      _store(w, target, stored);
+      w.pending.push(target);
+      continue;
+    }
     match (node) {
       case %(expr ? ?inner): w.pending.push(inner);
       case %(ident (!set ?binding (binding ? ?))): {
@@ -865,10 +872,6 @@ static void _scan(Walk w, Var value, int deferred) {
         _warn(
           w, <after-free>, w.origin, %"'$name' is used after $ended", NULL);
         fact.dead = 0;
-      }
-      case %(op (!quote =) ?target ?stored) if (node != root): {
-        _store(w, target, stored);
-        w.pending.push(target);
       }
       /* A statement expression declares locals of its own. */
       case %((!or declare decl) ?specifiers (bindings *bindings)):
@@ -1007,7 +1010,7 @@ static void _declare(Walk w, Var specifiers, List bindings) {
 static int _note_restored(Walk w, Var body) {
   Macro statement = $expression_statement;
   match (body) case statement(?expression):
-    match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
+    match (source_assignment(_unwrap(expression))) case %(?target ?): {
       Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;
       w.restored = w.restored.copy();
@@ -1020,11 +1023,12 @@ static int _note_restored(Walk w, Var body) {
 /* A place a `defer` writes is put back when its block ends, so a store
    into it after the `defer` is not an escape. */
 static void _note_deferred_stores(Walk w, Var node) {
-  match (node) {
-    case %(op (!quote =) ?target ?): w.restored[_unwrap(target)] = 1;
-    case %(*children):
-      foreach (Var child, children) _note_deferred_stores(w, child);
+  match (source_assignment(node)) case %(?target ?): {
+    w.restored[_unwrap(target)] = 1;
+    return;
   }
+  match (node) case %(*children):
+    foreach (Var child, children) _note_deferred_stores(w, child);
 }
 
 /* A `defer` beside a region closes it at block exit, a deferred free or
@@ -1126,8 +1130,8 @@ static void _walk(Walk w, Var node) {
       List arguments = NULL;
       String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;
-      match (_unwrap(expression)) {
-        case %(op (!quote =) ?target ?value): _store(w, target, value);
+      match (source_assignment(_unwrap(expression))) {
+        case %(?target ?value): _store(w, target, value);
         default: _scan(w, expression, 0);
       }
     }
