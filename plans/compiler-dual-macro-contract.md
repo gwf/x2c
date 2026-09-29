@@ -3178,11 +3178,13 @@ Seven focused fixtures, `destructuring_suite` (9/9, 55 assertions), and an
 inert lambda-local probe pass. The three primary fixtures have byte-identical
 AST/transform dumps, stderr, generated C/H and diagnostics against the
 capability-plus-E36 baseline; their checked stdout/status pass. Matching
-`--source-map` C/H and diagnostic probes also agree byte-for-byte. Shipped
-`bin/x2c` cannot yet parse `DeclaratorRow`, so a local capable compiler
-built this adopter. The separate capability self-host `lib/error.x:1171`
-failure and root publication gate are still pending; this is a private
-candidate, not a published result.
+`--source-map` C/H and diagnostic probes also agree byte-for-byte. The
+integrated tree has refreshed bootstrap and passes `make build-safe` plus
+the three primary fixtures from that seed. `DeclaratorRow` interception is
+limited to declared holes, preserving ordinary binding for Lisp-produced
+declarator names. The completed candidate's performance snapshot passed all
+four stage comparisons; its timing comparison uses an older baseline and
+does not establish the cost of this family.
 
 ### F. Static-local initialization exception
 
