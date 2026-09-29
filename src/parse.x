@@ -22,11 +22,7 @@ $(import "../src/grammar.xmacro")
 #include "macros.x"
 #include "protocol.x"
 
-/* top-level forms
-
-   One classifier reads each file-scope form in both passes. Collection
-   records declarations and skips runtime bodies; the full parse applies
-   each form's compiler effects in source order. */
+// top-level forms
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
@@ -443,7 +439,6 @@ static String _package_name(Compiler c) {
   return name;
 }
 
-// `as ALIAS` names the package locally; the alias defaults to its name.
 static String _import_alias(Compiler c, String name) {
   if (!_test_contextual(c, "as")) return name;
   if (c.peek(0) != <ident>)
@@ -1305,7 +1300,7 @@ static List _field(Compiler compiler, List context, int delegated) {
   return %(seq @rows);
 }
 
-// A delegate field forwards members, so each of its declarators names one.
+// Each declarator of a delegate field must name the field.
 static void _declare_delegates(Compiler c, List context, List rows) {
   foreach (List declaration, rows)
     match (declaration)
@@ -1383,8 +1378,8 @@ static List _record_body(Compiler c, String name, Token start) {
                        : _publish_aggregate_type(c, tag, name, fields, start);
 }
 
-/* The abstract declarator after the base completes the named type, which
-   keeps an aggregate's body in place of its tag. */
+/* Completes a named type from the abstract declarator after its base. The
+   type keeps an aggregate's body in place of its tag. */
 static Type _declare_named_type(
   Compiler c, List key, List base, Token start) {
   List method = NULL;
@@ -1596,8 +1591,7 @@ static List _declarator_list(
 }
 
 /* Install each declaration binding before resolving its initializer so later
-   declarators and source-order dependency analysis share the same identity.
-*/
+   declarators and source-order dependency analysis share the same identity. */
 static List _declarator_init(
   Compiler c, List type, List context) {
   // A Lisp-produced declarator name still needs ordinary binding.
@@ -1784,7 +1778,7 @@ List Compiler.parse_declarator_argument(Compiler c) {
    slot, a Name hole, a member hole, or a name each expansion introduces. A
    method's owner may be a literal type or a type hole. */
 
-// Other tokens take the ordinary identifier path, which this reports as NULL.
+// Returns NULL for another token, which takes the ordinary identifier path.
 static List _template_declarator(Compiler c, int member) {
   List method = _literal_method(c);
   if (!method) method = _hole_method(c);
@@ -1924,9 +1918,9 @@ static Var _declared_name(Compiler c, Var name, int &exact_name) {
   return name;
 }
 
-/* A literal owner folds with its member into the C spelling and names the
-   method. A constructed source owner is no concrete owner, so only a static
-   method declares its member as an exact spelling. */
+/* Folds a literal owner and its member into the C spelling and records
+   the method. A constructed source owner is no concrete owner, so only a
+   static method declares its member as an exact spelling. */
 static Var _method_spelling(
   Compiler c, Var name, Type declared_type, List &method, int &exact_name) {
   match (name) {
@@ -1979,7 +1973,7 @@ static void _check_rebinding(
   }
 }
 
-// A constructed identity binds unless it is already its spelling's binding.
+// Binds a constructed identity unless it is already its spelling's binding.
 static void _bind_identity(
   Compiler c, List context, List binding, List declaration) {
   String spelling = binding_identity_spelling(binding);
@@ -2485,10 +2479,7 @@ static List _cleanup_statement(Compiler c, Type type, List binding) {
   return c.bind_syntax(cleanup(receiver), AST_STATEMENT, c.return_type);
 }
 
-/* constructed syntax
-
-   Macro templates and compile-time Lisp construct canonical AST, and the
-   binder completes it through the operations source parsing uses. */
+// constructed syntax
 
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
@@ -2516,8 +2507,8 @@ List Compiler.bind_syntax(
     return _bind_form(c, input, context, pending);
 }
 
-/* A staged code value stands for its retained result, or else for the
-   syntax to bind in its place. */
+/* Replaces `syntax` with a staged code value and reports whether that
+   value is a retained result, which binds no further. */
 static int _take_staged(Compiler c, Var &syntax) {
   Var staged;
   int retained;
@@ -2527,9 +2518,9 @@ static int _take_staged(Compiler c, Var &syntax) {
   return retained;
 }
 
-/* An enumerator position publishes a name, a declarator, or an initialized
-   one as an enumerator of the aggregate being bound. Other forms go to the
-   dispatcher, so this returns NULL for them. */
+/* Publishes a name, a declarator, or an initialized one at an enumerator
+   position as an enumerator of the aggregate being bound. Other forms go
+   to the dispatcher, so this returns NULL for them. */
 static List _bind_enumerator(Compiler c, List input) {
   match (input) {
     case %(!or
@@ -2674,7 +2665,7 @@ static List _bind_form(
   return _construction_error(c);
 }
 
-/* Reports constructed syntax that no arm admits at its position.
+/* Reports a constructed form at a position that does not admit it.
    `report_error` never returns, so a caller may return this call. */
 static List _construction_error(Compiler c) {
   c.report_error(
@@ -2743,8 +2734,8 @@ static List _bind_named_type(Compiler c, String name, Var type) {
   return _construction_error(c);
 }
 
-/* A declaration bundle binds its rows in order. Collection first runs the
-   pending declaration effects and keeps the rows in their bundle. */
+/* Binds a declaration bundle's rows in order. Collection first runs the
+   pending declaration effects and returns the rows as a bundle. */
 static List _bind_bundle(Compiler c, List rows) {
   if (c.shallow) {
     c.declaration_produced = 1;
@@ -2793,6 +2784,32 @@ static List _bind_default(Compiler c, Var function) {
   return c.bind_syntax(function, AST_UNIT, c.return_type);
 }
 
+/* Binds a local macro definition in a block and publishes any other one
+   at file scope. */
+static List _bind_macrodef(Compiler c, Var definition, AstPos context) {
+  List macro = definition;
+  int local = macro.assoc(<local>).int();
+  if (local && context == AST_BLOCK) {
+    c.sym.define_macro(macro.assoc(<name>), macro);
+    return %(seq);
+  }
+  if (!local && context == AST_UNIT)
+    return c.publish_macro_definition_node(macro);
+  return _construction_error(c);
+}
+
+static List _bind_preproc(Compiler c, List directive) {
+  c.update_source_visibility(%($directive));
+  return directive;
+}
+
+static List _bind_alias(Compiler c, Var declaration, Var native) {
+  List bound = c.bind_syntax(declaration, AST_UNIT, c.return_type);
+  return c.finish_foreign_alias(bound, native);
+}
+
+// constructed functions
+
 /* Collection binds a constructed function's declaration and keeps its body
    (see `_collected_function`). The full parse binds the whole function
    under the macro stack that constructed it, as a declaration default. */
@@ -2809,7 +2826,7 @@ static List _bind_collected_function(
   }
 }
 
-/* A constructed function binds its parameters in a fresh prototype scope,
+/* Binds a constructed function's parameters in a fresh prototype scope,
    which becomes its parameter scope, and then its declaration. */
 static List _bind_function(
   Compiler c, Var return_type, Var function_name, List parameter_values,
@@ -2856,30 +2873,6 @@ static List _collected_function(Compiler c, List declaration, Var body) {
   return %(declaration-function $declaration $body ${c.freeze_macro_stack()});
 }
 
-/* A local macro definition binds in a block; any other one publishes at
-   file scope. */
-static List _bind_macrodef(Compiler c, Var definition, AstPos context) {
-  List macro = definition;
-  int local = macro.assoc(<local>).int();
-  if (local && context == AST_BLOCK) {
-    c.sym.define_macro(macro.assoc(<name>), macro);
-    return %(seq);
-  }
-  if (!local && context == AST_UNIT)
-    return c.publish_macro_definition_node(macro);
-  return _construction_error(c);
-}
-
-static List _bind_preproc(Compiler c, List directive) {
-  c.update_source_visibility(%($directive));
-  return directive;
-}
-
-static List _bind_alias(Compiler c, Var declaration, Var native) {
-  List bound = c.bind_syntax(declaration, AST_UNIT, c.return_type);
-  return c.finish_foreign_alias(bound, native);
-}
-
 // constructed declarations and expressions
 
 /* A statement position admits a sequence of one statement. Elsewhere the
@@ -2905,8 +2898,8 @@ static List _bind_args(Compiler c, List arguments) {
 static List _bind_assert(Compiler c, Var condition, Var message) =>
   %(c-assert ${_resolve(c, condition)} ${_resolve(c, message)});
 
-/* A constructed declaration completes its base type, then installs each
-   declarator as the parser does. Only a field declares a bit-field. */
+/* Completes a constructed declaration's base type, then installs each
+   declarator as the parser does. Only a field may declare a bit-field. */
 static List _bind_declaration(
   Compiler c, Var tag, Var base, List declarators, AstPos context) {
   if (!_declaration_legal(tag, context)) return _construction_error(c);
@@ -2999,8 +2992,9 @@ static List _bind_while(Compiler c, Var condition, Var body) =>
 static List _bind_switch(Compiler c, Var expr, Var body) =>
   %(switch ${_resolve(c, expr)} ${_bind_statement(c, body)});
 
-/* A test of an optional reference marks it present in the arm where the
-   test holds, and after the `if` when the other arm cannot fall through. */
+/* Binds the arm where an optional-reference test holds with the reference
+   present, and marks it present after the `if` when the other arm cannot
+   fall through. */
 static List _bind_if(Compiler c, Var condition, Var ontrue) {
   List test = _resolve(c, condition);
   int true_is_present = 1;
@@ -3055,8 +3049,8 @@ static List _bind_raise(Compiler c, Var code, List details) {
   return %(raise ${_resolve(c, code)} (args @{bound.list_free()}));
 }
 
-/* Each catch arm binds its pattern's names in a scope of its own, followed
-   by the arm's binder declarations and body. */
+/* Binds each catch arm's pattern names in a scope of its own, with the
+   arm's binder declarations before its body. */
 static List _bind_catchcases(Compiler c, Var arms, List handler) {
   List handle = handler ? handler.car().list()
     : c.sym.introduce(c.fresh_name("error_handler"));
@@ -3090,7 +3084,7 @@ static List _bind_try(Compiler c, List body, List catches, List cleanup) {
     ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
 }
 
-/* Each `match` arm binds its pattern's captures in a scope of its own. */
+/* Binds each `match` arm's captures in a scope of its own. */
 static List _bind_match(Compiler c, Var subject, List cases) {
   Array bound = [];
   foreach (List row, cases) {
