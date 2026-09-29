@@ -58,7 +58,10 @@ static void regex_repeats_greedy_and_lazy(void) {
   EXPECT_STR_EQ(Regex.compile("a{1,3}").match("aaaa")[0], "aaa");
   EXPECT_STR_EQ(Regex.compile("a{1,3}?").match("aaaa")[0], "a");
   EXPECT_NULL(Regex.compile("a{3}").match("aa"));
+  EXPECT_NULL(Regex.compile("a{2147483647}").match("aaa"));
   EXPECT_STR_EQ(Regex.compile("a{").match("a{")[0], "a{");
+  EXPECT_STR_EQ(Regex.compile("a{99999999999").match("a{99999999999")[0],
+                "a{99999999999");
   EXPECT_STR_EQ(Regex.compile("x{,2}").match("x{,2}")[0], "x{,2}");
   EXPECT_STR_EQ(Regex.compile("colou?r").match("color")[0], "color");
   EXPECT_STR_EQ(Regex.compile("(ab)+").match("xababab")[0], "ababab");
@@ -166,6 +169,10 @@ static void regex_rejects_bad_patterns(void) {
                  ("*a" "nothing to repeat" 0)
                  ("^*" "nothing to repeat" 1)
                  ("a{3,1}" "repetition range out of order" 6)
+                 ("a{2147483648}" "repetition count too large" 13)
+                 ("a{4294967297}" "repetition count too large" 13)
+                 ("a{99999999999}" "repetition count too large" 14)
+                 ("a{1,4294967297}" "repetition count too large" 15)
                  ("[z-a]" "character range out of order" 4)
                  ("\\q" "unknown escape" 1)
                  ("ab\\" "pattern ends in a backslash" 3)

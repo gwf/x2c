@@ -479,7 +479,8 @@ with those names, rename the types, and add the options argument to
 `compile`.
 
 A pattern that does not parse raises `<bad-arg>` with `why`, the `pattern`,
-and the zero-based byte `offset` of the problem.
+and the zero-based byte `offset` of the problem. So does a repetition count
+above `INT_MAX`, 2147483647.
 
 ### Matching
 

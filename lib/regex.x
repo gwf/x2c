@@ -225,30 +225,40 @@ static int _Parser.bounds(_Parser *p, int &min, int &max) {
    the brace. */
 static int _Parser.braces(_Parser *p, int &min, int &max) {
   int start = p.pos++;
-  if (!p.digits(min)) {
+  long long low, high;
+  if (!p.digits(low)) {
     p.pos = start;
     return 0;
   }
-  max = min;
+  high = low;
   if (p.peek() == ',') {
     p.pos++;
-    if (!p.digits(max)) max = -1;
+    if (!p.digits(high)) high = -1;
   }
   if (p.peek() != '}') {
     p.pos = start;
     return 0;
   }
-  if (max >= 0 && max < min) {
+  if (low > INT_MAX || high > INT_MAX) {
+    p.pos++;
+    p.fail("repetition count too large");
+  }
+  if (high >= 0 && high < low) {
     p.pos++;
     p.fail("repetition range out of order");
   }
+  min = (int) low;
+  max = (int) high;
   return 1;
 }
 
-static int _Parser.digits(_Parser *p, int &out) {
-  int start = p.pos, value = 0;
-  while (scan_ascii_digit(p.peek()))
-    value = value * 10 + (p.text[p.pos++] - '0');
+/* Reads a decimal count into `out`, which stops growing once it passes
+   INT_MAX. */
+static int _Parser.digits(_Parser *p, long long &out) {
+  int start = p.pos;
+  long long value = 0;
+  for (; scan_ascii_digit(p.peek()); p.pos++)
+    if (value <= INT_MAX) value = value * 10 + (p.text[p.pos] - '0');
   out = value;
   return p.pos > start;
 }

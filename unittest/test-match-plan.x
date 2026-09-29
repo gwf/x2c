@@ -418,6 +418,27 @@ static void plan_status_categorization(void) {
 
 }
 
+/* Wraps `inner` `?` wildcards in a list that lowers to `inner + 7` words. */
+static List _wide_operand(int inner) {
+  List sub = NULL;
+  for (int i = 0; i < inner; i++) sub = cons(<?>, sub);
+  return %($sub);
+}
+
+/* Across these sizes a guard arm or block ends on or just past the last
+   word of code. A branch patched to the word after full code reports
+   `code-capacity`, as an emission past the limit does. */
+static void plan_guard_at_the_code_limit_reports_capacity(void) {
+  for (int inner = 4084; inner <= 4087; inner++) {
+    List wide = _wide_operand(inner);
+    _status_case(%(!or $wide x y), MACHINE_INELIGIBLE, "code-capacity");
+  }
+  for (int inner = 4079; inner <= 4085; inner++) {
+    List wide = _wide_operand(inner);
+    _status_case(%(!not $wide x y), MACHINE_INELIGIBLE, "code-capacity");
+  }
+}
+
 // fenced patterns are loud, not silently unmatchable - - - - - - - - - - - -
 
 /* Preparation still reports INELIGIBLE, but no entry point can answer for
@@ -1028,6 +1049,7 @@ void match_plan_suite(void) {
   $test.run(plan_star_matrix);
   $test.run(plan_star_supplementals);
   $test.run(plan_status_categorization);
+  $test.run(plan_guard_at_the_code_limit_reports_capacity);
   $test.run(plan_fenced_pattern_raises_at_every_entry);
   $test.run(fenced_pattern_raises_at_every_consumer);
   $test.run(plan_search_parity);
