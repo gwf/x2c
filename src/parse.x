@@ -1346,16 +1346,18 @@ List Compiler.parse_enumerators(Compiler c, List context) {
   while (c.peek(0) != <"}">) {
     if (c.shallow && c.macro_starts_target_at(AST_ENUMERATOR))
       c.skip_macro_invocation();
-    else {
-      List enumerator = c.parse_enumerator(context);
-      if (enumerator.car() == <seq>)
-        foreach (Var sibling, enumerator.cdr()) enumerators.push(sibling);
-      else enumerators.push(enumerator);
-    }
+    else _push_items(enumerators, c.parse_enumerator(context));
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
   return enumerators.list_free();
+}
+
+/* Pushes the items of a `seq`, or any other node itself. */
+static void _push_items(Array out, List node) {
+  if (node.car() == <seq>)
+    foreach (Var item, node.cdr()) out.push(item);
+  else out.push(node);
 }
 
 /** Parses one enumerator for enum type `context` and returns its AST.
@@ -1514,7 +1516,7 @@ static List _declarator_init(
   Token first = NULL, after = NULL;
   List bind = _declarator(c, type, context, method, first, after);
   int preserved_self = 0;
-  bind = _install_declarator_node(
+  bind = _install_declarator(
     c, type, context, bind, method, preserved_self);
   c.record_source_declaration(bind.cadr(), first, after);
   int function_arrow = !c.in_proto && c._at_function_arrow() &&
@@ -1733,7 +1735,7 @@ void Compiler.bind_template_local(
   }
 }
 
-static List _install_declarator_node(
+static List _install_declarator(
   Compiler compiler, List base, List declaration_context,
   List declarator, List method_identity, int &preserved_self) {
   if (compiler.macro_holes) return declarator;
@@ -1912,7 +1914,7 @@ static List _finish_parameter(
   Token source_first, Token source_after) {
   base = _finish_type(compiler, base);
   int preserved_self = 0;
-  declarator = _install_declarator_node(
+  declarator = _install_declarator(
     compiler, base, NULL, declarator,
     method_identity, preserved_self);
   compiler.record_source_declaration(
@@ -2308,7 +2310,10 @@ static void _append_managed_declaration(
   output.push(declaration);
 }
 
-// constructed syntax
+/* constructed syntax
+
+   Macro templates and compile-time Lisp construct canonical AST, and the
+   binder completes it through the operations source parsing uses. */
 
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
@@ -2318,29 +2323,40 @@ static void _append_managed_declaration(
 */
 List Compiler.bind_syntax(
   Compiler c, Var syntax, AstPos context, Type return_type) {
+  int pending = syntax is <list> && syntax.list().car() == "x2c.template";
+  if (_take_staged(c, syntax)) return syntax;
+  syntax = c.evaluate_macro_slot(syntax);
+  if (_take_staged(c, syntax)) return syntax;
+  if (syntax is not <list>)
+    c.report_error(<parse>, "expected syntax", c.token, NULL);
+  List input = syntax;
+  if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
+  List enumerator =
+    context == AST_ENUMERATOR ? _bind_enumerator(c, input) : NULL;
+  if (enumerator) return enumerator;
+  if (context == AST_MAP_ENTRY && input.car() != <seq> &&
+      input.car() != Atom.intern("macro-invoke"))
+    return c.resolve_map_entry(input, c.token);
+  $let(c.return_type, return_type)
+    return _bind_form(c, input, context, pending);
+}
+
+/* A staged code value stands for its retained result, or else for the
+   syntax to bind in its place. */
+static int _take_staged(Compiler c, Var &syntax) {
   Var staged;
   int retained;
-  int pending = syntax is <list> && syntax.list().car() == "x2c.template";
-  if (c.macro_application && c.take_code_value(syntax, staged, retained)) {
-    if (retained) return staged;
-    syntax = staged;
-  }
-  Var value = c.evaluate_macro_slot(syntax);
-  if (c.macro_application && c.take_code_value(value, staged, retained)) {
-    if (retained) return staged;
-    value = staged;
-  }
-  if (value is not <list>)
-    c.report_error(<parse>, "expected syntax", c.token, NULL);
-  List input = value;
-  if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
-  Macro if_then = $if_then, if_else = $if_else;
-  Macro while_loop = $while_loop, do_loop = $do_loop;
-  Macro return_empty = $return_empty, return_value = $return_value;
-  Macro deferred = $deferred;
-  Macro matched = $matched;
-  Macro tried = $tried, caught = $caught;
-  if (context == AST_ENUMERATOR) match (input) {
+  if (!c.macro_application || !c.take_code_value(syntax, staged, retained))
+    return 0;
+  syntax = staged;
+  return retained;
+}
+
+/* An enumerator position publishes a name, a declarator, or an initialized
+   one as an enumerator of the aggregate being bound. Other forms go to the
+   dispatcher, so this returns NULL for them. */
+static List _bind_enumerator(Compiler c, List input) {
+  match (input) {
     case %(!or
            (binding ? (!is ? type string))
            ((!is ? type string))
@@ -2359,501 +2375,538 @@ List Compiler.bind_syntax(
              ?)):
       return _publish_enumerator(c, node, c.aggregate_type, c.token);
   }
-  if (context == AST_MAP_ENTRY && input.car() != <seq> &&
-      input.car() != Atom.intern("macro-invoke"))
-    return c.resolve_map_entry(input, c.token);
-  /* Parsed templates and compile-time Lisp are the intended producers. There
-     is no separate validation pass before or after expansion. The structural
-     match below enforces `AstPos` and rejects unmatched shapes at
-     `construction_error`; existing expression types and binding identities
-     are trusted, and strings are never reparsed.
+  return NULL;
+}
 
-     Binding mutates the current `Sym` in visitation order. Macro invocation
-     opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
-     later ones while preserving whole-expansion rollback on failure. */
-  $let(c.return_type, return_type) with c {
-    int statement_position = context == AST_BLOCK ||
-                             context == AST_STATEMENT;
-    match (input) {
-      case %(macro-invoke ?definition ?arguments ?invocation): {
-        Token site = _.macro_invocation_site(invocation);
-        if (invocation != <m-invoke>)
-          return _.expand_macro_invocation_node(
-            definition, arguments, site, context);
-        /* A macro value application owns the transaction that covers the
-           effects its producers request. */
-        $let(_.macro_application, _.macro_application + 1) {
-          SymTxn transaction = _.begin_semantic_transaction();
-          defer transaction.rollback();
-          List bound = _.expand_macro_invocation_node(
-            definition, arguments, site, context);
-          transaction.commit();
-          /* A Macro value applied directly stands for one statement or
-             unit item. */
-          if (pending && (statement_position || context == AST_UNIT))
-            match (bound) case %(seq ?item): return item;
-          return bound;
-        }
-      }
-      case %(macro-slot ? ? *):
-        if (_.macro_holes) return input;
-      case %(src ? ?syntax): {
-        return _.bind_syntax(syntax, context, _.return_type);
-      }
-      case %(api-source ?line ?doc ?syntax): {
-        if (context != AST_UNIT) goto construction_error;
-        List bound = _.bind_syntax(syntax, context, _.return_type);
-        Token invocation = _.macro_stack
-                         ? _.macro_stack.last().list()[3] : NULL;
-        String invocation_doc = invocation
-                              ? _.definition_doc(invocation) : NULL;
-        _definition_source(
-          _, bound, invocation ? invocation.line : line,
-          invocation_doc ? invocation_doc : doc, NULL);
-        return bound;
-      }
-      case %(named-type ?(String name) ?type): {
-        if (context != AST_UNIT) goto construction_error;
-        List key = %($name);
-        if (!_.sym.get_exact(key)) _.sym.define(key, %(typedef $name));
-        if (!type.list()) return %(seq);
-        List declaration = type.type().declaration_ast(key);
-        match (declaration)
-          case %(declare ?base ?bindings):
-            return _.bind_syntax(%(typedef $base $bindings), context, NULL);
-      }
-      case %(declaration-bundle (rows *rows)): {
-        if (context != AST_UNIT) goto construction_error;
-        if (_.shallow) {
-          _.declaration_produced = 1;
-          _.run_declaration_effects();
-        }
-        $let(_.declaration_projection, _.declaration_projection + 1) {
-          Array projected = [];
-          foreach (List row, rows) {
-            List bound = _.bind_syntax(row, context, _.return_type);
-            _append_declaration_rows(projected, bound);
-          }
-          List result = projected.list_free();
-          return _.shallow ? %(declaration-bundle (rows @result))
-                           : %(seq @result);
-        }
-      }
-      case %(syntax-recipe ?callback ?arguments): {
-        Var result = _.evaluate_declaration_recipe(callback, arguments);
-        return _.bind_syntax(result, context, _.return_type);
-      }
-      case %(declaration-recipe ?callback ?arguments): {
-        if (context != AST_UNIT) goto construction_error;
-        if (_.shallow)
-          return %(declaration-pending $callback $arguments
-                    ${_.freeze_macro_stack()}
-                    ${_.source_private});
-        Var result = _.evaluate_declaration_recipe(callback, arguments);
-        return _.bind_syntax(result, context, _.return_type);
-      }
-      case %(default-forward ?child ?parent ?member *fallback): {
-        if (context != AST_UNIT) goto construction_error;
-        return %(declaration-forward $child $parent $member
-                  $fallback ${_.source_private});
-      }
-      case %(default ?function): {
-        if (context != AST_UNIT) goto construction_error;
-        if (_.shallow)
-          return %(declaration-default $function
-                    ${_.freeze_macro_stack()}
-                    ${_.source_private});
-        return _.bind_syntax(function, context, _.return_type);
-      }
-      case %(declaration-function
-               (declare ?return_type (bindings ?declarator))
-               ?body ?construction): {
-        if (context != AST_UNIT) goto construction_error;
-        if (_.shallow) return input;
-        match (declarator) case %(bind ?binding *):
-          _.semantic_binding_facts()[
-            %(declaration-default ${binding_identity_spelling(binding)})] = 1;
-        $let(_.macro_stack, _.thaw_declaration_syntax(construction)) {
-          return _.bind_syntax(
-            %(function $return_type $declarator $body),
-            context, _.return_type);
-        }
-      }
-      case %(seq *items): {
-        if (context == AST_STATEMENT) {
-          match (items) case %(?only):
-            return _.bind_syntax(only, context, _.return_type);
-          _.report_error(<parse>, "expected one statement", _.token, NULL);
-        }
-        Array bound = [];
-        foreach (Var item, items) {
-          List value = _.bind_syntax(item, context, _.return_type);
-          if (value.car() == <seq>)
-            foreach (Var child, value.cdr()) bound.push(child);
-          else bound.push(value);
-        }
-        return %(seq @{bound.list_free()});
-      }
-      case %(args *arguments): {
-        if (context != AST_EXPRESSION) goto construction_error;
-        Array bound = [];
-        foreach (List argument, arguments)
-          bound.push(_.resolve_expression(argument, _.token));
-        return %(args @{bound.list_free()});
-      }
-      case %(c-assert ?condition ?message): {
-        if (context == AST_UNIT || context == AST_BLOCK ||
-            context == AST_FIELD)
-          return %(c-assert
-                   ${_.resolve_expression(condition, _.token)}
-                   ${_.resolve_expression(message, _.token)});
-        goto construction_error;
-      }
-      case %(falias ?declaration ?native_syntax): {
-        if (context != AST_UNIT) goto construction_error;
-        declaration = _.bind_syntax(declaration, AST_UNIT, _.return_type);
-        return _.finish_foreign_alias(declaration, native_syntax);
-      }
-      case %(!set ?initializer (managed-init ?)): {
-        if (context == AST_EXPRESSION)
-          return _.resolve_expression(%(expr () $initializer), _.token);
-        goto construction_error;
-      }
-      case %(!set ?expression (expr *)):
-        if (context == AST_EXPRESSION)
-          return _.resolve_expression(expression, _.token);
-      case %((!set ?tag (!or declare decl typedef))
-             ?base (bindings *declarators)):
-        {
-          int legal = tag == <typedef> ? context == AST_UNIT ||
-                                       context == AST_BLOCK
-                    : tag == <decl> ? context == AST_BLOCK
-                    : context == AST_UNIT || context == AST_BLOCK ||
-                      context == AST_FIELD;
-          if (!legal) goto construction_error;
-          base = _finish_type(_, base);
-          List field_context = context == AST_FIELD
-                             ? _.aggregate_type : NULL;
-          List declaration_context = tag == <typedef>
-                                   ? %(typedef) : field_context;
-          Array output = [];
-          int preserved_self = 0;
-          foreach (List declarator, declarators) {
-            declarator = _finish_declarator_parameters(_, declarator);
-            List syntax = declarator;
-            match (syntax) case %(op = ?binding ?): syntax = binding;
-            match (syntax)
-              case %(bind ? ?modifiers): {
-                Type mods = modifiers;
-                if (context != AST_FIELD && mods.is_bitfield())
-                  goto construction_error;
-              }
-            output.push(
-              _install_declarator_node(
-                _, base, declaration_context, declarator, NULL,
-                preserved_self));
-          }
-          List result = _finish_declaration(
-            _, tag, base, output.list_free(), preserved_self);
-          if (context == AST_UNIT) _.record_declaration_visibility(result);
-          if (context == AST_BLOCK && tag == <declare>)
-            return _.finish_managed_declaration(result, _.token);
-          return result;
-      }
-      case %(dstrdecl ?base (targets *targets) ?source): {
-        if (context != AST_BLOCK) goto construction_error;
-        Array declarators = [];
-        foreach (Var target, targets) declarators.push(%(bind $target ()));
-        List declaration = _.bind_syntax(
-          %(declare $base
-              (bindings @{declarators.list_free()})),
-          context, _.return_type
-        );
-        match (declaration)
-          case %(declare ?bound_base (bindings *bindings)): {
-            Array bound_targets = [];
-            foreach (List binding, bindings)
-              match (binding)
-                case %(bind ?name ?): bound_targets.push(name);
-            return %(dstrdecl $bound_base
-                     (targets @{bound_targets.list_free()})
-                     ${_.resolve_expression(source, _.token)});
-          }
-      }
-      case %(dstrdecl (params *parameters) ?source): {
-        if (context != AST_BLOCK) goto construction_error;
-        Array bound_parameters = [];
-        foreach (List parameter, parameters)
-          match (parameter)
-            case %(param ?base (!set ?declarator (bind ? ?))): {
-              List declaration = _.bind_syntax(
-                %(declare $base (bindings $declarator)),
-                context, _.return_type);
-              match (declaration)
-                case %(declare ?bound_base (bindings ?binding)):
-                  bound_parameters.push(%( param $bound_base $binding ));
-            }
-        return %(dstrdecl (params @{bound_parameters.list_free()})
-                 ${_.resolve_expression(source, _.token)});
-      }
-      case %(!set ?function
-             (function ?return_type
-               (bind ?function_name
-                 ((fnmod (params *parameter_values)) *return_modifiers))
-               ?body)): {
-        if (context != AST_UNIT) goto construction_error;
-        Array parameters = [];
-        _.sym.push_new_scope();
-        {
-          defer _.params = _.sym.pop_scope();
-          foreach (Var value, parameter_values) {
-            foreach (Var row, _.evaluate_macro_rows(value)) match (row) {
-              case %(...): parameters.push(row);
-              case %(param ?base (!set ?declarator (bind ? ?))):
-                parameters.push(
-                  _finish_parameter(_, base, declarator, NULL, NULL, NULL));
-            }
-          }
-        }
-        List parameter_list = parameters.list_free();
-        List declarator = %(
-          bind $function_name
-            ((fnmod (params @parameter_list)) @return_modifiers)
-        );
-        List declaration = _.bind_syntax(
-          %(declare $return_type (bindings $declarator)),
-          context, _.return_type);
-        if (_.shallow) {
-          match (declaration)
-            case %(declare ?type (bindings (bind ?binding ?))): {
-              String name = binding_identity_spelling(binding);
-              // A static definition stays in its unit, as in source.
-              if (type.type().is_static())
-                _.sym.mark_static(%(function $name));
-              else _.fn_defs[name] = 1;
-              _.record_declaration_visibility(declaration);
-            }
-          return %(declaration-function $declaration $body
-                    ${_.freeze_macro_stack()});
-        }
-        return _finish_function(_, declaration, body);
-      }
-      case %(!set ?node ((!or protocol adopt meta-protocol) *)):
-        if (context == AST_UNIT)
-          return _.publish_protocol_node(node, _.token, NULL);
-      case %(!set ?definition (macrodef *)): {
-        List macro_definition = definition;
-        if (macro_definition.assoc(<local>).int()) {
-          if (context == AST_BLOCK) {
-            _.sym.define_macro(
-              macro_definition.assoc(<name>), macro_definition);
-            return %(seq);
-          }
-        }
-        else if (context == AST_UNIT)
-          return _.publish_macro_definition_node(macro_definition);
-      }
-      case %(preproc ?(String directive)): {
-        if (context != AST_UNIT && context != AST_BLOCK)
-          goto construction_error;
-        _.update_source_visibility(%($input));
-        return input;
-      }
-      case %(at ?origin ?node): {
-        List bound = _.bind_syntax(node, context, _.return_type);
-        match (bound) case %(seq ?only): bound = only;
-        Var anchor = origin == <m-origin> ? _.origin : origin;
-        return %(at $anchor $bound);
-      }
-      case return_empty():
-        if (statement_position) return _.finish_return_statement(NULL);
-      case return_value(?expression):
-        if (statement_position) return _.finish_return_statement(expression);
-      case %((!or break continue default empty)):
-        if (statement_position) return input;
-      case %(case ?expression):
-        if (statement_position)
-          return %(case ${_.resolve_expression(expression, _.token)});
-      case %((!set ?tag (!or goto label)) ?name):
-        if (statement_position) return %($tag $name);
-      case %(stmnt ?expression):
-        if (statement_position)
-          return %(stmnt ${_.resolve_expression(expression, _.token)});
-      case deferred(?body):
-        if (statement_position)
-          return %(defer ${_.bind_syntax(
-            body, AST_STATEMENT, _.return_type)});
-      case do_loop(?body, ?condition):
-        if (statement_position)
-          return %(do
-            ${_.bind_syntax(body, AST_STATEMENT, _.return_type)}
-            ${_.resolve_expression(condition, _.token)});
-      case while_loop(?condition, ?body):
-        if (statement_position)
-          return %(while
-            ${_.resolve_expression(condition, _.token)}
-            ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
-      case %(switch ?expression ?body):
-        if (statement_position)
-          return %(switch
-            ${_.resolve_expression(expression, _.token)}
-            ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
-      case if_then(?condition, ?ontrue):
-        if (statement_position) {
-          List test = _.resolve_expression(condition, _.token);
-          int true_is_present = 1;
-          List binding = _.optional_reference_test(test, true_is_present);
-          List yes = _bind_optional_reference_arm(
-            _, ontrue, binding, true_is_present);
-          if (binding && !true_is_present && reference_guard_exits(yes))
-            _.mark_reference_present(binding);
-          return %(if $test $yes);
-        }
-      case if_else(?condition, ?ontrue, ?onfalse):
-        if (statement_position) {
-          List test = _.resolve_expression(condition, _.token);
-          int true_is_present = 1;
-          List binding = _.optional_reference_test(test, true_is_present);
-          List yes = _bind_optional_reference_arm(
-            _, ontrue, binding, true_is_present);
-          List no = _bind_optional_reference_arm(
-            _, onfalse, binding, !true_is_present);
-          if (binding &&
-              ((reference_guard_exits(yes) && !true_is_present) ||
-               (reference_guard_exits(no) && true_is_present)))
-            _.mark_reference_present(binding);
-          return %(if $test $yes $no);
-        }
-      case %(for ?init ?condition ?increment ?body): {
-        if (!statement_position) goto construction_error;
-        _.sym.push_new_scope();
-        defer _.sym.pop_scope();
-        if (init is <list>) {
-          List node = init;
-          init = node.car() == <decl>
-               ? _.bind_syntax(node, AST_BLOCK, _.return_type)
-               : _.resolve_expression(node, _.token);
-        }
-        if (condition is <list>)
-          condition = _.resolve_expression(condition, _.token);
-        if (increment is <list>)
-          increment = _.resolve_expression(increment, _.token);
-        return %(for $init $condition $increment
-          ${_.bind_syntax(body, AST_STATEMENT, _.return_type)});
-      }
-      case %(raise ?code (args *details)): {
-        if (!statement_position) goto construction_error;
-        Array bound = [];
-        foreach (List detail, details)
-          bound.push(_.resolve_expression(detail, _.token));
-        return %(raise ${_.resolve_expression(code, _.token)}
-                       (args @{bound.list_free()}));
-      }
-      case %(catchcases ?arms *handler): {
-        if (context != AST_STATEMENT) goto construction_error;
-        List handle = handler ? handler.car().list()
-          : _.sym.introduce(_.fresh_name("error_handler"));
-        Array bound = [];
-        foreach (List arm, arms.list()) {
-          List pattern = arm.car();
-          List bindings = _.begin_catch_arm(pattern, _.token);
-          {
-            defer _.sym.pop_scope();
-            bound.push(
-              %(
-                $pattern
-                (block
-                  @{_.catch_binder_declarations(bindings, handle)}
-                  ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)})
-              ));
-          }
-        }
-        return %(catchcases ${bound.list_free()} $handle);
-      }
-      case caught(?body, ?cleanup, *arms): {
-        if (!statement_position) goto construction_error;
-        return _bind_try(_, body, input.caddr(), cleanup);
-      }
-      case tried(?body, ?cleanup): {
-        if (!statement_position) goto construction_error;
-        return _bind_try(_, body, NULL, cleanup);
-      }
-      case matched(?subject, *cases): {
-        if (!statement_position) goto construction_error;
-        Array bound = [];
-        foreach (List row, cases) {
-          if (row.car() == <preproc>) {
-            bound.push(row);
-            continue;
-          }
-          List pattern = row.car();
-          int binds = pattern !== %(*);
-          if (binds) pattern = _.resolve_expression(pattern, _.token);
-          _.begin_match_arm(pattern, _.token, binds);
-          {
-            defer _.sym.pop_scope();
-            List body = row.cadr();
-            match (body) {
-              case %(guarded ?statements):
-                body = %(guarded ${_.bind_syntax(
-                  statements, AST_STATEMENT, _.return_type)});
-              default:
-                body = _.bind_syntax(body, AST_STATEMENT, _.return_type);
-            }
-            bound.push(%($pattern $body));
-          }
-        }
-        return %(match ${_.resolve_expression(subject, _.token)}
-                       ${bound.list_free()});
-      }
-      case %(block *children): {
-        if (!statement_position) goto construction_error;
-        _.sym.push_new_scope();
-        defer _.sym.pop_scope();
-        return _.bind_callable_body(input, _.return_type);
-      }
-      case %(group *children): {
-        if (!statement_position) goto construction_error;
-        Array items = [];
-        foreach (Var child, children)
-          items.push(_.bind_syntax(child, AST_BLOCK, _.return_type));
-        return %(group @{items.list_free()});
-      }
-    }
-  construction_error:
-    _.report_error(
-      <parse>, "syntax cannot be constructed at this position",
-      _.token, NULL);
+/* Parsed templates and compile-time Lisp are the intended producers. There
+   is no separate validation pass before or after expansion. The structural
+   match below enforces `AstPos`: a form that no arm admits at its position
+   leaves the match for `_construction_error`. Existing expression types and
+   binding identities are trusted, and strings are never reparsed.
+
+   Binding mutates the current `Sym` in visitation order. Macro invocation
+   opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
+   later ones while preserving whole-expansion rollback on failure. */
+static List _bind_form(
+  Compiler c, List input, AstPos context, int pending) {
+  Macro if_then = $if_then, if_else = $if_else;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro return_empty = $return_empty, return_value = $return_value;
+  Macro deferred = $deferred;
+  Macro matched = $matched;
+  Macro tried = $tried, caught = $caught;
+  int unit = context == AST_UNIT, block = context == AST_BLOCK;
+  int statement = block || context == AST_STATEMENT;
+  match (input) {
+    case %(macro-invoke ?definition ?arguments ?invocation):
+      return _bind_invocation(
+        c, definition, arguments, invocation, context, pending);
+    case %(macro-slot ? ? *): if (c.macro_holes) return input;
+    case %(src ? ?syntax):
+      return c.bind_syntax(syntax, context, c.return_type);
+    case %(api-source ?line ?doc ?syntax):
+      if (unit) return _bind_api_source(c, line, doc, syntax);
+    case %(named-type ?(String name) ?type):
+      if (unit) return _bind_named_type(c, name, type);
+    case %(declaration-bundle (rows *rows)):
+      if (unit) return _bind_bundle(c, rows);
+    case %(syntax-recipe ?callback ?arguments):
+      return _bind_recipe(c, callback, arguments, context);
+    case %(declaration-recipe ?callback ?arguments):
+      if (unit) return _bind_decl_recipe(c, callback, arguments);
+    case %(default-forward ?child ?parent ?member *fallback):
+      if (unit) return %(declaration-forward $child $parent $member
+                         $fallback ${c.source_private});
+    case %(default ?function): if (unit) return _bind_default(c, function);
+    case %(declaration-function
+             (declare ?return_type (bindings ?declarator))
+             ?body ?construction):
+      if (unit) return _bind_collected_function(
+        c, input, return_type, declarator, body, construction);
+    case %(seq *items): return _bind_items(c, items, context);
+    case %(args *arguments):
+      if (context == AST_EXPRESSION) return _bind_args(c, arguments);
+    case %(c-assert ?condition ?message):
+      if (unit || block || context == AST_FIELD)
+        return _bind_assert(c, condition, message);
+    case %(falias ?declaration ?native_syntax):
+      if (unit) return _bind_alias(c, declaration, native_syntax);
+    case %(!set ?initializer (managed-init ?)):
+      if (context == AST_EXPRESSION)
+        return _resolve(c, %(expr () $initializer));
+    case %(!set ?expression (expr *)):
+      if (context == AST_EXPRESSION) return _resolve(c, expression);
+    case %((!set ?tag (!or declare decl typedef))
+           ?base (bindings *declarators)):
+      return _bind_declaration(c, tag, base, declarators, context);
+    case %(dstrdecl ?base (targets *targets) ?source):
+      if (block) return _bind_targets(c, base, targets, source);
+    case %(dstrdecl (params *parameters) ?source):
+      if (block) return _bind_typed_targets(c, parameters, source);
+    case %(!set ?function
+           (function ?return_type
+             (bind ?function_name
+               ((fnmod (params *parameter_values)) *return_modifiers))
+             ?body)):
+      if (unit)
+        return _bind_function(c, return_type, function_name,
+                              parameter_values, return_modifiers, body);
+    case %(!set ?node ((!or protocol adopt meta-protocol) *)):
+      if (unit) return c.publish_protocol_node(node, c.token, NULL);
+    case %(!set ?definition (macrodef *)):
+      return _bind_macrodef(c, definition, context);
+    case %(preproc ?(String directive)):
+      if (unit || block) return _bind_preproc(c, input);
+    case %(at ?origin ?node):
+      return _anchor(c, origin, c.bind_syntax(node, context, c.return_type));
+    case return_empty(): if (statement) return c.finish_return_statement(NULL);
+    case return_value(?expression):
+      if (statement) return c.finish_return_statement(expression);
+    case %((!or break continue default empty)): if (statement) return input;
+    case %(case ?expression):
+      if (statement) return %(case ${_resolve(c, expression)});
+    case %((!set ?tag (!or goto label)) ?name):
+      if (statement) return %($tag $name);
+    case %(stmnt ?expression):
+      if (statement) return %(stmnt ${_resolve(c, expression)});
+    case deferred(?body):
+      if (statement) return %(defer ${_bind_statement(c, body)});
+    case do_loop(?body, ?condition):
+      if (statement) return _bind_do(c, body, condition);
+    case while_loop(?condition, ?body):
+      if (statement) return _bind_while(c, condition, body);
+    case %(switch ?expression ?body):
+      if (statement) return _bind_switch(c, expression, body);
+    case if_then(?condition, ?ontrue):
+      if (statement) return _bind_if(c, condition, ontrue);
+    case if_else(?condition, ?ontrue, ?onfalse):
+      if (statement) return _bind_if_else(c, condition, ontrue, onfalse);
+    case %(for ?init ?condition ?increment ?body):
+      if (statement) return _bind_for(c, init, condition, increment, body);
+    case %(raise ?code (args *details)):
+      if (statement) return _bind_raise(c, code, details);
+    case %(catchcases ?arms *handler):
+      if (context == AST_STATEMENT) return _bind_catchcases(c, arms, handler);
+    case caught(?body, ?cleanup, *arms):
+      if (statement) return _bind_try(c, body, input.caddr(), cleanup);
+    case tried(?body, ?cleanup):
+      if (statement) return _bind_try(c, body, NULL, cleanup);
+    case matched(?subject, *cases):
+      if (statement) return _bind_match(c, subject, cases);
+    case %(block *children): if (statement) return _bind_block(c, input);
+    case %(group *children): if (statement) return _bind_group(c, children);
+  }
+  return _construction_error(c);
+}
+
+/* Reports constructed syntax that no arm admits at its position.
+   `report_error` never returns, so a caller may return this call. */
+static List _construction_error(Compiler c) {
+  c.report_error(
+    <parse>, "syntax cannot be constructed at this position", c.token, NULL);
+}
+
+static List _resolve(Compiler c, List expr) =>
+  c.resolve_expression(expr, c.token);
+
+static List _bind_statement(Compiler c, Var stmt) =>
+  c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+
+/* A macro invocation expands at the position that holds it. A Macro value
+   applied directly owns the transaction that covers the effects its
+   producers request, and stands for one statement or unit item. */
+static List _bind_invocation(
+  Compiler c, Var definition, Var arguments, Var invocation, AstPos context,
+  int pending) {
+  Token site = c.macro_invocation_site(invocation);
+  if (invocation != <m-invoke>)
+    return c.expand_macro_invocation_node(
+      definition, arguments, site, context);
+  $let(c.macro_application, c.macro_application + 1) {
+    SymTxn transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    List bound = c.expand_macro_invocation_node(
+      definition, arguments, site, context);
+    transaction.commit();
+    if (pending && (context == AST_BLOCK || context == AST_STATEMENT ||
+                    context == AST_UNIT))
+      match (bound) case %(seq ?item): return item;
+    return bound;
   }
 }
 
-static void _append_declaration_rows(Array output, List syntax) {
+/* An anchor keeps a lone bound item, and a macro's origin marker becomes
+   the compiler's current origin. */
+static List _anchor(Compiler c, Var origin, List bound) {
+  match (bound) case %(seq ?only): bound = only;
+  Var anchor = origin == <m-origin> ? c.origin : origin;
+  return %(at $anchor $bound);
+}
+
+// constructed file-scope forms
+
+/* A definition an API source form wraps keeps its line and doc comment,
+   or those of the invocation that expands it. */
+static List _bind_api_source(Compiler c, Var line, Var doc, Var syntax) {
+  List bound = c.bind_syntax(syntax, AST_UNIT, c.return_type);
+  Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
+  String invocation_doc = invocation ? c.definition_doc(invocation) : NULL;
+  _definition_source(
+    c, bound, invocation ? invocation.line : line,
+    invocation_doc ? invocation_doc : doc, NULL);
+  return bound;
+}
+
+static List _bind_named_type(Compiler c, String name, Var type) {
+  List key = %($name);
+  if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
+  if (!type.list()) return %(seq);
+  List declaration = type.type().declaration_ast(key);
+  match (declaration)
+    case %(declare ?base ?bindings):
+      return c.bind_syntax(%(typedef $base $bindings), AST_UNIT, NULL);
+  return _construction_error(c);
+}
+
+/* A declaration bundle binds its rows in order. Collection first runs the
+   pending declaration effects and keeps the rows in their bundle. */
+static List _bind_bundle(Compiler c, List rows) {
+  if (c.shallow) {
+    c.declaration_produced = 1;
+    c.run_declaration_effects();
+  }
+  $let(c.declaration_projection, c.declaration_projection + 1) {
+    Array projected = [];
+    foreach (List row, rows) {
+      List bound = c.bind_syntax(row, AST_UNIT, c.return_type);
+      _append_rows(projected, bound);
+    }
+    List items = projected.list_free();
+    return c.shallow ? %(declaration-bundle (rows @items)) : %(seq @items);
+  }
+}
+
+static void _append_rows(Array output, List syntax) {
   match (syntax) {
     case %(seq *rows):
-      foreach (List row, rows) _append_declaration_rows(output, row);
+      foreach (List row, rows) _append_rows(output, row);
     case %(declaration-bundle (rows *rows)):
-      foreach (List row, rows) _append_declaration_rows(output, row);
+      foreach (List row, rows) _append_rows(output, row);
     default: output.push(syntax);
   }
 }
 
-static List _bind_optional_reference_arm(
-  Compiler c, Var arm, List binding, int present) {
-  if (!binding)
-    return c.bind_syntax(arm, AST_STATEMENT, c.return_type);
+static List _bind_recipe(
+  Compiler c, Var callback, Var arguments, AstPos context) {
+  Var syntax = c.evaluate_declaration_recipe(callback, arguments);
+  return c.bind_syntax(syntax, context, c.return_type);
+}
+
+/* Collection keeps a declaration recipe pending with the macro stack that
+   constructed it; the full parse evaluates it. */
+static List _bind_decl_recipe(Compiler c, Var callback, Var arguments) {
+  if (c.shallow)
+    return %(declaration-pending $callback $arguments
+              ${c.freeze_macro_stack()} ${c.source_private});
+  return _bind_recipe(c, callback, arguments, AST_UNIT);
+}
+
+static List _bind_default(Compiler c, Var function) {
+  if (c.shallow)
+    return %(declaration-default $function ${c.freeze_macro_stack()}
+              ${c.source_private});
+  return c.bind_syntax(function, AST_UNIT, c.return_type);
+}
+
+/* Collection binds a constructed function's declaration and keeps its body
+   (see `_collected_function`). The full parse binds the whole function
+   under the macro stack that constructed it, as a declaration default. */
+static List _bind_collected_function(
+  Compiler c, List input, Var return_type, Var declarator, Var body,
+  Var construction) {
+  if (c.shallow) return input;
+  match (declarator) case %(bind ?binding *):
+    c.semantic_binding_facts()[
+      %(declaration-default ${binding_identity_spelling(binding)})] = 1;
+  $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
+    return c.bind_syntax(
+      %(function $return_type $declarator $body), AST_UNIT, c.return_type);
+  }
+}
+
+/* A constructed function binds its parameters in a fresh prototype scope,
+   which becomes its parameter scope, and then its declaration. */
+static List _bind_function(
+  Compiler c, Var return_type, Var function_name, List parameter_values,
+  List return_modifiers, Var body) {
+  List parameter_list = _bind_parameters(c, parameter_values);
+  List declarator = %(
+    bind $function_name
+      ((fnmod (params @parameter_list)) @return_modifiers)
+  );
+  List declaration = c.bind_syntax(
+    %(declare $return_type (bindings $declarator)), AST_UNIT, c.return_type);
+  if (c.shallow) return _collected_function(c, declaration, body);
+  return _finish_function(c, declaration, body);
+}
+
+static List _bind_parameters(Compiler c, List values) {
+  Array parameters = [];
+  c.sym.push_new_scope();
+  {
+    defer c.params = c.sym.pop_scope();
+    foreach (Var value, values)
+      foreach (Var row, c.evaluate_macro_rows(value)) match (row) {
+        case %(...): parameters.push(row);
+        case %(param ?base (!set ?declarator (bind ? ?))):
+          parameters.push(
+            _finish_parameter(c, base, declarator, NULL, NULL, NULL));
+      }
+  }
+  return parameters.list_free();
+}
+
+/* Collection publishes a constructed function's declaration and keeps its
+   body for the full parse. */
+static List _collected_function(Compiler c, List declaration, Var body) {
+  match (declaration)
+    case %(declare ?type (bindings (bind ?binding ?))): {
+      String name = binding_identity_spelling(binding);
+      // A static definition stays in its unit, as in source.
+      if (type.type().is_static())
+        c.sym.mark_static(%(function $name));
+      else c.fn_defs[name] = 1;
+      c.record_declaration_visibility(declaration);
+    }
+  return %(declaration-function $declaration $body ${c.freeze_macro_stack()});
+}
+
+/* A local macro definition binds in a block; any other one publishes at
+   file scope. */
+static List _bind_macrodef(Compiler c, Var definition, AstPos context) {
+  List macro = definition;
+  int local = macro.assoc(<local>).int();
+  if (local && context == AST_BLOCK) {
+    c.sym.define_macro(macro.assoc(<name>), macro);
+    return %(seq);
+  }
+  if (!local && context == AST_UNIT)
+    return c.publish_macro_definition_node(macro);
+  return _construction_error(c);
+}
+
+static List _bind_preproc(Compiler c, List directive) {
+  c.update_source_visibility(%($directive));
+  return directive;
+}
+
+static List _bind_alias(Compiler c, Var declaration, Var native) {
+  List bound = c.bind_syntax(declaration, AST_UNIT, c.return_type);
+  return c.finish_foreign_alias(bound, native);
+}
+
+// constructed declarations and expressions
+
+/* A statement position admits a sequence of one statement. Elsewhere the
+   items bind in order, and a nested sequence contributes its items. */
+static List _bind_items(Compiler c, List items, AstPos context) {
+  if (context == AST_STATEMENT) {
+    match (items) case %(?only):
+      return c.bind_syntax(only, context, c.return_type);
+    c.report_error(<parse>, "expected one statement", c.token, NULL);
+  }
+  Array bound = [];
+  foreach (Var item, items)
+    _push_items(bound, c.bind_syntax(item, context, c.return_type));
+  return %(seq @{bound.list_free()});
+}
+
+static List _bind_args(Compiler c, List arguments) {
+  Array bound = [];
+  foreach (List argument, arguments) bound.push(_resolve(c, argument));
+  return %(args @{bound.list_free()});
+}
+
+static List _bind_assert(Compiler c, Var condition, Var message) =>
+  %(c-assert ${_resolve(c, condition)} ${_resolve(c, message)});
+
+/* A constructed declaration completes its base type, then installs each
+   declarator as the parser does. Only a field declares a bit-field. */
+static List _bind_declaration(
+  Compiler c, Var tag, Var base, List declarators, AstPos context) {
+  if (!_declaration_legal(tag, context)) return _construction_error(c);
+  base = _finish_type(c, base);
+  List field_context = context == AST_FIELD ? c.aggregate_type : NULL;
+  List declaration_context = tag == <typedef> ? %(typedef) : field_context;
+  Array output = [];
+  int preserved_self = 0;
+  foreach (List declarator, declarators) {
+    declarator = _finish_fnmods(c, declarator);
+    if (context != AST_FIELD && _has_bitfield(declarator))
+      return _construction_error(c);
+    output.push(_install_declarator(
+      c, base, declaration_context, declarator, NULL, preserved_self));
+  }
+  List decl = _finish_declaration(
+    c, tag, base, output.list_free(), preserved_self);
+  if (context == AST_UNIT) c.record_declaration_visibility(decl);
+  if (context == AST_BLOCK && tag == <declare>)
+    return c.finish_managed_declaration(decl, c.token);
+  return decl;
+}
+
+/* A typedef stands in a unit or a block, a `decl` only in a block, and any
+   other declaration also in an aggregate. */
+static int _declaration_legal(Var tag, AstPos context) {
+  if (tag == <typedef>) return context == AST_UNIT || context == AST_BLOCK;
+  if (tag == <decl>) return context == AST_BLOCK;
+  return context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;
+}
+
+static int _has_bitfield(List declarator) {
+  List syntax = declarator;
+  match (syntax) case %(op = ?binding ?): syntax = binding;
+  match (syntax)
+    case %(bind ? ?modifiers): {
+      Type mods = modifiers;
+      return mods.is_bitfield();
+    }
+  return 0;
+}
+
+/* Destructuring targets share one base type, so they bind as one
+   declaration before the source resolves. */
+static List _bind_targets(Compiler c, Var base, List targets, Var source) {
+  Array declarators = [];
+  foreach (Var target, targets) declarators.push(%(bind $target ()));
+  List declaration = c.bind_syntax(
+    %(declare $base
+        (bindings @{declarators.list_free()})),
+    AST_BLOCK, c.return_type
+  );
+  match (declaration)
+    case %(declare ?bound_base (bindings *bindings)): {
+      Array bound_targets = [];
+      foreach (List binding, bindings)
+        match (binding)
+          case %(bind ?name ?): bound_targets.push(name);
+      return %(dstrdecl $bound_base
+               (targets @{bound_targets.list_free()})
+               ${_resolve(c, source)});
+    }
+  return _construction_error(c);
+}
+
+/* Typed destructuring targets bind one declaration each. */
+static List _bind_typed_targets(Compiler c, List parameters, Var source) {
+  Array bound_parameters = [];
+  foreach (List parameter, parameters)
+    match (parameter)
+      case %(param ?base (!set ?declarator (bind ? ?))): {
+        List declaration = c.bind_syntax(
+          %(declare $base (bindings $declarator)), AST_BLOCK, c.return_type);
+        match (declaration)
+          case %(declare ?bound_base (bindings ?binding)):
+            bound_parameters.push(%( param $bound_base $binding ));
+      }
+  return %(dstrdecl (params @{bound_parameters.list_free()})
+           ${_resolve(c, source)});
+}
+
+// constructed statements
+
+static List _bind_do(Compiler c, Var body, Var condition) =>
+  %(do ${_bind_statement(c, body)} ${_resolve(c, condition)});
+
+static List _bind_while(Compiler c, Var condition, Var body) =>
+  %(while ${_resolve(c, condition)} ${_bind_statement(c, body)});
+
+static List _bind_switch(Compiler c, Var expr, Var body) =>
+  %(switch ${_resolve(c, expr)} ${_bind_statement(c, body)});
+
+/* A test of an optional reference marks it present in the arm where the
+   test holds, and after the `if` when the other arm cannot fall through. */
+static List _bind_if(Compiler c, Var condition, Var ontrue) {
+  List test = _resolve(c, condition);
+  int true_is_present = 1;
+  List binding = c.optional_reference_test(test, true_is_present);
+  List yes = _bind_branch(c, ontrue, binding, true_is_present);
+  if (binding && !true_is_present && reference_guard_exits(yes))
+    c.mark_reference_present(binding);
+  return %(if $test $yes);
+}
+
+static List _bind_if_else(
+  Compiler c, Var condition, Var ontrue, Var onfalse) {
+  List test = _resolve(c, condition);
+  int true_is_present = 1;
+  List binding = c.optional_reference_test(test, true_is_present);
+  List yes = _bind_branch(c, ontrue, binding, true_is_present);
+  List no = _bind_branch(c, onfalse, binding, !true_is_present);
+  if (binding &&
+      ((reference_guard_exits(yes) && !true_is_present) ||
+       (reference_guard_exits(no) && true_is_present)))
+    c.mark_reference_present(binding);
+  return %(if $test $yes $no);
+}
+
+static List _bind_branch(Compiler c, Var arm, List binding, int present) {
+  if (!binding) return _bind_statement(c, arm);
   List before = c.present_references();
   if (present) c.mark_reference_present(binding);
-  List bound = c.bind_syntax(arm, AST_STATEMENT, c.return_type);
+  List bound = _bind_statement(c, arm);
   c.restore_reference_presence(before);
   return bound;
 }
 
+static List _bind_for(
+  Compiler c, Var init, Var condition, Var increment, Var body) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  if (init is <list>) {
+    List node = init;
+    init = node.car() == <decl>
+         ? c.bind_syntax(node, AST_BLOCK, c.return_type)
+         : _resolve(c, node);
+  }
+  if (condition is <list>) condition = _resolve(c, condition);
+  if (increment is <list>) increment = _resolve(c, increment);
+  return %(for $init $condition $increment ${_bind_statement(c, body)});
+}
+
+static List _bind_raise(Compiler c, Var code, List details) {
+  Array bound = [];
+  foreach (List detail, details) bound.push(_resolve(c, detail));
+  return %(raise ${_resolve(c, code)} (args @{bound.list_free()}));
+}
+
+/* Each catch arm binds its pattern's names in a scope of its own, followed
+   by the arm's binder declarations and body. */
+static List _bind_catchcases(Compiler c, Var arms, List handler) {
+  List handle = handler ? handler.car().list()
+    : c.sym.introduce(c.fresh_name("error_handler"));
+  Array bound = [];
+  foreach (List arm, arms.list()) {
+    List pattern = arm.car();
+    List bindings = c.begin_catch_arm(pattern, c.token);
+    {
+      defer c.sym.pop_scope();
+      bound.push(
+        %(
+          $pattern
+          (block
+            @{c.catch_binder_declarations(bindings, handle)}
+            ${_bind_statement(c, arm.cadr())})
+        ));
+    }
+  }
+  return %(catchcases ${bound.list_free()} $handle);
+}
+
 static List _bind_try(Compiler c, List body, List catches, List cleanup) {
-  if (catches) catches = c.bind_syntax(
-    catches, AST_STATEMENT, c.return_type);
-  if (cleanup) cleanup = c.bind_syntax(
-    cleanup, AST_STATEMENT, c.return_type);
-  body = c.bind_syntax(body, AST_STATEMENT, c.return_type);
+  if (catches) catches = _bind_statement(c, catches);
+  if (cleanup) cleanup = _bind_statement(c, cleanup);
+  body = _bind_statement(c, body);
   Macro tried = $tried, caught = $caught;
   List rebuilt = c.rebuild_statement(catches
     ? caught(body, cleanup, catches.cadr())
@@ -2862,28 +2915,65 @@ static List _bind_try(Compiler c, List body, List catches, List cleanup) {
     ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
 }
 
+/* Each `match` arm binds its pattern's captures in a scope of its own. */
+static List _bind_match(Compiler c, Var subject, List cases) {
+  Array bound = [];
+  foreach (List row, cases) {
+    if (row.car() == <preproc>) {
+      bound.push(row);
+      continue;
+    }
+    List pattern = row.car();
+    int binds = pattern !== %(*);
+    if (binds) pattern = _resolve(c, pattern);
+    c.begin_match_arm(pattern, c.token, binds);
+    {
+      defer c.sym.pop_scope();
+      List body = _bind_arm_body(c, row.cadr());
+      bound.push(%($pattern $body));
+    }
+  }
+  return %(match ${_resolve(c, subject)} ${bound.list_free()});
+}
+
+static List _bind_arm_body(Compiler c, List body) {
+  match (body) {
+    case %(guarded ?statements):
+      body = %(guarded ${_bind_statement(c, statements)});
+    default: body = _bind_statement(c, body);
+  }
+  return body;
+}
+
+/* A constructed block opens its own scope; a callable's outer block binds
+   in its parameter scope instead. */
+static List _bind_block(Compiler c, List block) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  return c.bind_callable_body(block, c.return_type);
+}
+
+static List _bind_group(Compiler c, List children) {
+  Array items = [];
+  foreach (Var child, children)
+    items.push(c.bind_syntax(child, AST_BLOCK, c.return_type));
+  return %(group @{items.list_free()});
+}
+
 /** Binds a callable's outer block in its active parameter scope. Ordinary
     constructed blocks open their own scope before using this operation.
 */
 List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
   match (syntax) {
-    case %(at ?origin ?body): {
-      List bound = c.bind_callable_body(body, return_type);
-      match (bound) case %(seq ?only): bound = only;
-      Var anchor = origin == <m-origin> ? c.origin : origin;
-      return %(at $anchor $bound);
-    }
+    case %(at ?origin ?body):
+      return _anchor(c, origin, c.bind_callable_body(body, return_type));
     case %(block *children): {
-      Array fields = [];
+      Array stmts = [];
       List present_before = c.present_references();
       defer c.restore_reference_presence(present_before);
-      foreach (Var child, children) {
-        List bound = c.bind_syntax(child, AST_BLOCK, return_type);
-        if (bound.car() == <seq>)
-          foreach (Var item, bound.cdr()) fields.push(item);
-        else fields.push(bound);
-      }
-      return %(block @{fields.list_free()});
+      foreach (Var child, children)
+        _push_items(stmts, c.bind_syntax(child, AST_BLOCK, return_type));
+      return %(block @{stmts.list_free()});
     }
   }
   return c.bind_syntax(syntax, AST_BLOCK, return_type);
@@ -2897,32 +2987,32 @@ static List _finish_type(Compiler compiler, List type) {
   if (whole != type || type.car() == <struct> ||
       type.car() == <union> || type.car() == <enum>) {
     List constructed = whole;
-    Type type = constructed.car() == <seq>
-              ? constructed.cdr() : constructed;
-    return compiler.sym.local_type(type);
+    Type finished = constructed.car() == <seq>
+                  ? constructed.cdr() : constructed;
+    return compiler.sym.local_type(finished);
   }
   Array bound = [];
   foreach (Var spec, type) {
-    Var value = _finish_type_spec(compiler, spec);
-    if (value is <list> && !value.is_nil() &&
-        value.car() == <seq>)
-      foreach (Var item, value.list().cdr()) bound.push(item);
-    else bound.push(value);
+    Var finished = _finish_type_spec(compiler, spec);
+    if (finished is <list> && !finished.is_nil() &&
+        finished.car() == <seq>)
+      foreach (Var item, finished.list().cdr()) bound.push(item);
+    else bound.push(finished);
   }
   Type resolved = bound.list_free();
   return compiler.sym.local_type(resolved);
 }
 
-static Var _finish_type_spec(Compiler compiler, Var value) {
-  int slot = value is <list> && !value.is_nil() &&
-             value.car() == <macro-slot>;
-  value = compiler.evaluate_macro_slot(value);
-  if (slot && value is <list>) {
-    Type type = value.type().canonicalize();
+static Var _finish_type_spec(Compiler compiler, Var spec) {
+  int slot = spec is <list> && !spec.is_nil() &&
+             spec.car() == <macro-slot>;
+  spec = compiler.evaluate_macro_slot(spec);
+  if (slot && spec is <list>) {
+    Type type = spec.type().canonicalize();
     return %(seq @type);
   }
-  if (value is not <list>) return value;
-  match (value) {
+  if (spec is not <list>) return spec;
+  match (spec) {
     case %((!set ?tag (!or struct union)) ?name):
       return %($tag ${_finish_tag_name(compiler, name)});
     case %((!set ?tag (!or struct union)) ?name (fields *members)):
@@ -2934,7 +3024,7 @@ static Var _finish_type_spec(Compiler compiler, Var value) {
     // Semantic types name an expanded template typedef by its spelling.
     case %(binding ? ?(String name)): return name;
   }
-  return value;
+  return spec;
 }
 
 static Var _finish_tag_name(Compiler c, Var name) {
@@ -2951,14 +3041,11 @@ static List _finish_aggregate_type(
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = %($tag $name);
   Array bound = [];
+  AstPos position = tag == <enum> ? AST_ENUMERATOR : AST_FIELD;
   $let(c.aggregate_type, type) {
-    foreach (List member, members) {
-      foreach (Var row, c.evaluate_macro_rows(member)) {
-        if (tag == <enum>)
-          bound.push(c.bind_syntax(row, AST_ENUMERATOR, c.return_type));
-        else bound.push(c.bind_syntax(row, AST_FIELD, c.return_type));
-      }
-    }
+    foreach (List member, members)
+      foreach (Var row, c.evaluate_macro_rows(member))
+        bound.push(c.bind_syntax(row, position, c.return_type));
   }
   return _publish_aggregate_type(
     c, tag, name, bound.list_free(), c.token);
@@ -2966,39 +3053,41 @@ static List _finish_aggregate_type(
 
 /* Constructed function modifiers have not passed through the parameter
    parser. Bind their parameter types in the same temporary prototype scope. */
-static List _finish_declarator_parameters(Compiler compiler, List declarator) {
+static List _finish_fnmods(Compiler c, List declarator) {
   match (declarator) {
     case %(op = ?binding ?value):
-      return %(op = ${_finish_declarator_parameters(compiler, binding)}
-               $value);
+      return %(op = ${_finish_fnmods(c, binding)} $value);
     case %(bind ?binding ?modifiers): {
       Array output = [];
-      foreach (Var modifier, modifiers.list()) {
-        match (modifier) {
-          case %(fnmod (params *parameters)): {
-            Array params = [];
-            compiler.sym.push_new_scope();
-            {
-              defer compiler.sym.pop_scope();
-              foreach (List parameter, parameters) match (parameter) {
-                case %(param ?base ?declarator):
-                  params.push(
-                    _finish_parameter(
-                      compiler, base,
-                      _finish_declarator_parameters(compiler, declarator),
-                      NULL, NULL, NULL));
-                default: params.push(parameter);
-              }
-            }
-            modifier = %(fnmod (params @{params.list_free()}));
-          }
-        }
-        output.push(modifier);
-      }
+      foreach (Var modifier, modifiers.list())
+        output.push(_finish_fnmod(c, modifier));
       return %(bind $binding (@{output.list_free()}));
     }
   }
   return declarator;
+}
+
+static Var _finish_fnmod(Compiler c, Var modifier) {
+  match (modifier)
+    case %(fnmod (params *parameters)):
+      return %(fnmod (params @{_finish_prototype(c, parameters)}));
+  return modifier;
+}
+
+static List _finish_prototype(Compiler c, List parameters) {
+  Array params = [];
+  c.sym.push_new_scope();
+  {
+    defer c.sym.pop_scope();
+    foreach (List parameter, parameters) match (parameter) {
+      case %(param ?base ?declarator):
+        params.push(
+          _finish_parameter(
+            c, base, _finish_fnmods(c, declarator), NULL, NULL, NULL));
+      default: params.push(parameter);
+    }
+  }
+  return params.list_free();
 }
 
 // foreign aliases
@@ -3021,39 +3110,52 @@ List Compiler.finish_foreign_alias(
     case %(declare (!set ?base (*))
            (bindings
              (bind ?binding ((fnmod (params *parameters)) *)))): {
-      foreach (Var part, base) {
-        if (part is not <symbol>) continue;
-        Symbol specifier = part;
-        if (specifier.is_storage_class() && specifier != <static>)
-          c.report_error(
-            <parse>, "foreign alias has invalid storage class",
-            c.token, %("allowed storage: static or inline"));
-      }
-      foreach (Var parameter, parameters)
-        match (parameter) case %(...):
-          c.report_error(
-            <parse>, "foreign alias cannot be variadic",
-            c.token, NULL);
-      List native = c.resolve_expression(native_syntax, c.token);
-      match (native)
-        case %(expr (!set ?native_type (*))
-               (ident ?native_binding)): {
-          if (native_type && !native_type.type().is_function())
-            c.report_error(
-              <type>, "foreign alias native target is not a function",
-              c.token, %("type: ${native_type.repr()}"));
-          if (List.equal(binding, native_binding))
-            c.report_error(
-              <parse>, "foreign alias cannot name itself",
-              c.token, NULL);
-          return %(falias $declaration $native_binding);
-        }
-      c.report_error(
-        <parse>, "foreign alias native target must be a direct identifier",
-        c.token, NULL);
+      _alias_storage(c, base);
+      _alias_parameters(c, parameters);
+      return _alias_target(c, declaration, binding, native_syntax);
     }
   }
   c.report_error(
     <parse>, "foreign alias target must be one direct function declaration",
+    c.token, NULL);
+}
+
+static void _alias_storage(Compiler c, Var base) {
+  foreach (Var part, base) {
+    if (part is not <symbol>) continue;
+    Symbol specifier = part;
+    if (specifier.is_storage_class() && specifier != <static>)
+      c.report_error(
+        <parse>, "foreign alias has invalid storage class",
+        c.token, %("allowed storage: static or inline"));
+  }
+}
+
+static void _alias_parameters(Compiler c, List parameters) {
+  foreach (Var parameter, parameters)
+    match (parameter) case %(...):
+      c.report_error(
+        <parse>, "foreign alias cannot be variadic",
+        c.token, NULL);
+}
+
+static List _alias_target(
+  Compiler c, List declaration, Var binding, List native_syntax) {
+  List native = c.resolve_expression(native_syntax, c.token);
+  match (native)
+    case %(expr (!set ?native_type (*))
+           (ident ?native_binding)): {
+      if (native_type && !native_type.type().is_function())
+        c.report_error(
+          <type>, "foreign alias native target is not a function",
+          c.token, %("type: ${native_type.repr()}"));
+      if (List.equal(binding, native_binding))
+        c.report_error(
+          <parse>, "foreign alias cannot name itself",
+          c.token, NULL);
+      return %(falias $declaration $native_binding);
+    }
+  c.report_error(
+    <parse>, "foreign alias native target must be a direct identifier",
     c.token, NULL);
 }
