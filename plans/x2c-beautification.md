@@ -206,8 +206,10 @@ batch:
   `os.killpg` after a timeout.
 - `make bm-match-cache` does not build: its runner never translates
   `unittest/match-recursive.x`.
-- `MatchPlan.prepare` raises `<bad-arg>` instead of reporting
-  `code-capacity` when an `!or` arm ends at the 4,096-word limit.
+- `MatchPlan.prepare` raised `<bad-arg>` instead of reporting
+  `code-capacity` when an `!or` arm ended at the 4,096-word limit; `!not`,
+  guard binders, and search stars failed the same way. Fixed by
+  `1edf04d3`.
 - `Var.new` with a built-in aligned pointer tag and a misaligned pointer
   builds a box whose `.tag()` crashes.
 - Regex repetition counts past `INT_MAX` wrap: `a{2147483648}` acts like
