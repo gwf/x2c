@@ -2209,97 +2209,111 @@ static List Compiler._generate_protocol_thunk(
   return %($member $thunk_binding $target);
 }
 
+typedef struct ProtocolAdapters {
+  Compiler c;
+  Type base, participant;
+  String forward, reverse, binder;
+  Map variables, bindings;
+  List adoption;
+  Array thunks;
+  int shares_var_tag, central_initializer;
+} ProtocolAdapters;
+
+static void ProtocolAdapters.default_member(
+  ProtocolAdapters *a, String member, String source, Type expected,
+  Type template) {
+  List decision = _generated_owner(a.c, a.participant, member);
+  match (decision) {
+    case %(owner ? ? ? ?storage): {
+      int make_static = storage == <static>;
+      String generated = _member_spelling(a.participant, member);
+      a.c.add_early(a.c._generate_protocol_function(
+        generated, make_static, expected, a.c.sym.get(%($source)),
+        template, a.variables, a.binder, source, a.forward, NULL));
+      if (!make_static) a.c.record_generated_symbol(generated, expected);
+    }
+    case %((!set ?kind (!or linkage conflict)) ?first ?second *):
+      _report_generated_collision(
+        a.c, a.participant, member, kind, first, second);
+  }
+}
+
+static void ProtocolAdapters.inherited_member(
+  ProtocolAdapters *a, String member, Type expected, Type template) {
+  List requirement = _descriptor_requirement(
+    a.c, a.base, a.binder, member, template, a.forward, a.reverse);
+  if (requirement) {
+    _report_requirement(a.c, a.base, a.participant, requirement);
+    return;
+  }
+  String inherited = _member_spelling(a.participant, member);
+  a.c.add_early(_declaration_from_signature(a.c, inherited, expected, 0));
+  if (!a.c.sym.lookup_field(%(struct "VarMethods"), %($member))) return;
+  a.thunks.push(a.c._generate_protocol_thunk(
+    a.participant, member, expected, template, a.variables,
+    a.bindings, a.binder, inherited, a.reverse));
+}
+
+static void ProtocolAdapters.missing_member(
+  ProtocolAdapters *a, String member, Type template) {
+  if (a.base !== %("Var") || a.shares_var_tag) return;
+  List decision = _generated_owner(a.c, a.participant, member);
+  match (decision) {
+    case %(owner ? ? ?owner_expected ?):
+      a.inherited_member(member, owner_expected, template);
+    case %((!set ?kind (!or linkage conflict)) ?first ?second *):
+      _report_generated_collision(
+        a.c, a.participant, member, kind, first, second);
+  }
+}
+
+static void ProtocolAdapters.implemented_member(
+  ProtocolAdapters *a, String member, String source, Type expected,
+  Type template) {
+  if (a.base !== %("Var") || a.shares_var_tag) return;
+  if (!a.c.sym.lookup_field(%(struct "VarMethods"), %($member))) return;
+  a.thunks.push(a.c._generate_protocol_thunk(
+    a.participant, member, expected, template, a.variables,
+    a.bindings, a.binder, source, a.reverse));
+}
+
+static void ProtocolAdapters.member(ProtocolAdapters *a, List row) {
+  match (row)
+    case %(?(String member) ?(Symbol status) ?(String source)
+           ?(Type expected) ? ?(Type template)): {
+      if (status == <base-dflt>)
+        a.default_member(member, source, expected, template);
+      else if (status == <no-member>)
+        a.missing_member(member, template);
+      else if (status == <implmntd>)
+        a.implemented_member(member, source, expected, template);
+    }
+}
+
+static void ProtocolAdapters.register_descriptor(ProtocolAdapters *a) {
+  List thunks = a.thunks.list_free();
+  if (a.base !== %("Var") || a.shares_var_tag) return;
+  Symbol tag = _protocol_tag_value(_adoption_tag(a.adoption));
+  String name = a.participant.car().str();
+  if (!tag) name = name.lower();
+  a.c._generate_descriptor_registration(
+    a.participant, name, tag, thunks, a.central_initializer);
+}
+
 static void Compiler._generate_ordinary_protocol_adapters(
   Compiler c, Type base, Type participant, String forward,
   String reverse, Map variables, Map bindings, String binder, List rows,
   int central_initializer) {
   List adoption = _visible_adoption_row(c, base, participant);
-  int shares_var_tag = base === %("Var") &&
-    _adoption_representation(adoption);
-  Array thunks = [];
-  foreach (List row, rows)
-    match (row)
-      case %(?(String member) ?(Symbol status) ?(String source)
-             ?(Type expected) ? ?(Type template)): {
-        if (status == <base-dflt>) {
-          List decision = _generated_owner(c, participant, member);
-          match (decision) {
-            case %(owner ? ? ? ?storage): {
-              int make_static = storage == <static>;
-              String generated = _member_spelling(participant, member);
-              c.add_early(
-                c._generate_protocol_function(
-                  generated, make_static, expected,
-                  c.sym.get(%($source)), template,
-                  variables, binder, source, forward, NULL)
-              );
-              if (!make_static)
-                c.record_generated_symbol(generated, expected);
-            }
-            case %(
-              (!set ?kind (!or linkage conflict))
-              ?first ?second *
-            ):
-              _report_generated_collision(
-                c, participant, member, kind,
-                first, second);
-          }
-          continue;
-        }
-        if (status == <no-member>) {
-          if (base !== %("Var") || shares_var_tag) continue;
-          List decision = _generated_owner(c, participant, member);
-          match (decision) {
-            case %(owner ? ? ?owner_expected ?): {
-              List requirement = _descriptor_requirement(
-                c, base, binder, member, template, forward, reverse);
-              if (requirement) {
-                _report_requirement(c, base, participant, requirement);
-                continue;
-              }
-              String inherited = _member_spelling(participant, member);
-              Type inherited_type = owner_expected;
-              c.add_early(
-                _declaration_from_signature(
-                  c, inherited, inherited_type, 0)
-              );
-              if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-                continue;
-              thunks.push(
-                c._generate_protocol_thunk(
-                  participant, member, inherited_type, template,
-                  variables, bindings, binder, inherited, reverse)
-              );
-            }
-            case %(
-              (!set ?kind (!or linkage conflict))
-              ?first ?second *
-            ):
-              _report_generated_collision(
-                c, participant, member, kind,
-                first, second);
-          }
-          continue;
-        }
-        if (status != <implmntd> || base !== %("Var") || shares_var_tag)
-          continue;
-        if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-          continue;
-        thunks.push(
-          c._generate_protocol_thunk(
-            participant, member, expected, template,
-            variables, bindings, binder, source, reverse)
-        );
-      }
-  List thunk_rows = thunks.list_free();
-  if (base === %("Var") && !shares_var_tag) {
-    List tag_expression = _adoption_tag(adoption);
-    Symbol explicit_tag = _protocol_tag_value(tag_expression);
-    String name = participant.car().str();
-    if (!explicit_tag) name = name.lower();
-    c._generate_descriptor_registration(
-      participant, name, explicit_tag, thunk_rows, central_initializer);
-  }
+  ProtocolAdapters adapters = {
+    .c = c, .base = base, .participant = participant,
+    .forward = forward, .reverse = reverse, .binder = binder,
+    .variables = variables, .bindings = bindings, .adoption = adoption,
+    .thunks = [], .central_initializer = central_initializer,
+    .shares_var_tag = base === %("Var") &&
+      _adoption_representation(adoption)};
+  foreach (List row, rows) adapters.member(row);
+  adapters.register_descriptor();
 }
 
 /** Generates adapters and descriptor registration for resolved conformances.
@@ -2357,9 +2371,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   return ast;
 }
 
-static List _parse_associated_type(
-  Compiler c, Map names, String participant) {
-  (void) participant;
+static List _parse_associated_type(Compiler c, Map names) {
   c.expect(<associated>);
   if (c.peek(0) != <ident>)
     c.report_error(
@@ -2378,6 +2390,32 @@ static List _parse_associated_type(
   return %($name $type);
 }
 
+static String _member_name(
+  List identity, String participant) {
+  String name = NULL;
+  match (identity)
+    case %((!or (!is ?owner type <string>)
+                ((!is ?owner type <string>)))
+           (!is ?member type <string>)):
+      if (owner == participant) name = member;
+  if (name) return name;
+  String full_name = binding_identity_spelling(identity);
+  String prefix = %"${participant}_";
+  return full_name && full_name.startswith(prefix)
+    ? full_name[prefix.len():] : NULL;
+}
+
+static String _native_member(Compiler c) {
+  if (!c.test(<=>)) return NULL;
+  if (c.peek(0) != <ident>)
+    c.report_error(
+      <protocol>, "native protocol member requires an identifier",
+      c.token, NULL);
+  String native = c.token.text;
+  c.next();
+  return native;
+}
+
 static List _parse_protocol_member(
   Compiler c, String participant, Map members) {
   List declaration = NULL;
@@ -2394,18 +2432,7 @@ static List _parse_protocol_member(
     c.report_error(
       <protocol>, "protocol member must declare one function",
       c.token, NULL);
-  String name = NULL;
-  match (identity)
-    case %((!or (!is ?owner type <string>)
-                ((!is ?owner type <string>)))
-           (!is ?member type <string>)):
-      if (owner == participant) name = member;
-  if (!name) {
-    String full_name = binding_identity_spelling(identity);
-    String prefix = %"${participant}_";
-    if (full_name && full_name.startswith(prefix))
-      name = full_name[prefix.len():];
-  }
+  String name = _member_name(identity, participant);
   if (!name)
     c.report_error(
       <protocol>, "protocol member must be owned by its participant",
@@ -2419,127 +2446,126 @@ static List _parse_protocol_member(
     c.report_error(
       <protocol>, %"duplicate protocol member '$name'",
       c.token, NULL);
-  String native = NULL;
-  if (c.test(<=>)) {
-    if (c.peek(0) != <ident>)
-      c.report_error(
-        <protocol>, "native protocol member requires an identifier",
-        c.token, NULL);
-    native = c.token.text;
-    c.next();
-  }
+  String native = _native_member(c);
   c.expect(<;>);
   members[name] = 1;
   return %($name $signature $native);
 }
 
-/** Parses a protocol body or concrete adoption at the current token.
-    The method consumes through the closing brace or semicolon. Full parsing
-    publishes the normalized row immediately. Macro-hole parsing returns syntax
-    for later binding; shallow parsing publishes only when protocol collection
-    is enabled and otherwise returns the uninstalled node. A leading `meta`
-    makes an adoption's witnesses available to compile-time code.
-*/
-List Compiler.parse_protocol_declaration(Compiler c) {
-  Token start = c.token, meta = NULL;
+typedef struct ProtocolSyntax {
+  Token start, meta, participant_token, modifier_token;
+  Type base, participant_type, representation;
+  String participant;
+  List tag;
+  Symbol storage;
+  int generated_base;
+} ProtocolSyntax;
+
+static ProtocolSyntax _parse_protocol_head(Compiler c) {
+  ProtocolSyntax syntax = {.start = c.token, .storage = <external>};
   if (c.peek(0) == <ident> && c.token.text == "meta") {
-    meta = c.token;
+    syntax.meta = c.token;
     c.next();
   }
-  Symbol storage = <external>;
-  if (c.test(<static>)) storage = <static>;
+  if (c.test(<static>)) syntax.storage = <static>;
   c.expect(<protocol>);
-  int generated_base = c.macro_holes &&
+  syntax.generated_base = c.macro_holes &&
     (c.peek(0) == <$> || c.peek(0) == <"$(">);
-  Type base = c.parse_type_name();
+  syntax.base = c.parse_type_name();
   c.expect(<(>);
-  Token participant_token = c.token;
-  Type participant_type = c.parse_type_name();
-  String participant = participant_type.len() == 1 &&
+  syntax.participant_token = c.token;
+  syntax.participant_type = c.parse_type_name();
+  Type participant_type = syntax.participant_type;
+  syntax.participant = participant_type.len() == 1 &&
                        participant_type.car() is <string>
                      ? participant_type.car() : NULL;
   c.expect(<)>);
-  Type representation = NULL;
-  List tag = NULL;
-  Token modifier_token = NULL;
   if (c.peek(0) == <ident> && c.token.text == "as") {
-    modifier_token = c.token;
+    syntax.modifier_token = c.token;
     c.next();
-    representation = c.parse_type_name().canonicalize();
-    if (!generated_base && base !== %("Var"))
+    syntax.representation = c.parse_type_name().canonicalize();
+    if (!syntax.generated_base && syntax.base !== %("Var"))
       c.report_error(
         <protocol>, "'as' applies only to a Var adoption",
-        modifier_token, NULL);
+        syntax.modifier_token, NULL);
   }
   if (c.peek(0) == <ident> && c.token.text == "tag") {
-    modifier_token = c.token;
+    syntax.modifier_token = c.token;
     c.next();
-    if (representation)
+    if (syntax.representation)
       c.report_error(
         <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
-        modifier_token, NULL);
-    tag = c.try_parse_macro_slot(<expression>);
-    if (!tag) tag = c.parse_atomic_literal();
-    if (!generated_base && base !== %("Var"))
+        syntax.modifier_token, NULL);
+    syntax.tag = c.try_parse_macro_slot(<expression>);
+    if (!syntax.tag) syntax.tag = c.parse_atomic_literal();
+    if (!syntax.generated_base && syntax.base !== %("Var"))
       c.report_error(
         <protocol>, "'tag' applies only to a Var adoption",
-        modifier_token, NULL);
+        syntax.modifier_token, NULL);
   }
+  return syntax;
+}
 
-  /* A bodyless declaration adopts the protocol and produces no AST. */
-  if (c.peek(0) == <;>) {
-    c.next();
-    List location = c.token_location(start);
-    if (c.macro_holes || (c.shallow && !c.collect_protocols)) {
-      List adoption = _adoption_node(
-        base, participant_type, storage, representation, tag, location);
-      return meta ? %(meta-protocol $adoption) : adoption;
-    }
-    List adoption = c._publish_protocol_adoption(
-      base, participant_type, storage, representation, tag, location,
-      participant_token, modifier_token);
-    if (meta) c._retain_meta_protocol(adoption);
-    return adoption;
+static List _parse_adoption(Compiler c, ProtocolSyntax syntax) {
+  c.next();
+  List location = c.token_location(syntax.start);
+  if (c.macro_holes || (c.shallow && !c.collect_protocols)) {
+    List adoption = _adoption_node(
+      syntax.base, syntax.participant_type, syntax.storage,
+      syntax.representation, syntax.tag, location);
+    return syntax.meta ? %(meta-protocol $adoption) : adoption;
   }
+  List adoption = c._publish_protocol_adoption(
+    syntax.base, syntax.participant_type, syntax.storage,
+    syntax.representation, syntax.tag, location,
+    syntax.participant_token, syntax.modifier_token);
+  if (syntax.meta) c._retain_meta_protocol(adoption);
+  return adoption;
+}
 
-  if (meta)
+static void _check_protocol_body(Compiler c, ProtocolSyntax syntax) {
+  if (syntax.meta)
     c.report_error(
       <protocol>, "'meta' applies only to a concrete protocol adoption",
-      meta, %("mark each adoption: meta protocol BASE(TYPE);"));
+      syntax.meta, %("mark each adoption: meta protocol BASE(TYPE);"));
 
-  if (representation || tag)
+  if (syntax.representation || syntax.tag)
     c.report_error(
-      <protocol>, representation
+      <protocol>, syntax.representation
         ? "'as' applies only to a concrete protocol adoption"
         : "'tag' applies only to a concrete protocol adoption",
-      start, NULL);
+      syntax.start, NULL);
 
-  if (!participant)
+  if (!syntax.participant)
     c.report_error(
       <protocol>, "expected protocol participant name",
-      participant_token, NULL);
+      syntax.participant_token, NULL);
 
-  if (storage == <static>)
+  if (syntax.storage == <static>)
     c.report_error(
       <protocol>,
       "'static' applies only to a concrete protocol adoption",
-      start,
+      syntax.start,
       %("remove 'static' from the reusable protocol body"));
   c.expect(<"{">);
+}
 
+static void _warn_shadowed_binder(Compiler c, ProtocolSyntax syntax) {
   /* Only the full parse warns about a binder shadowing a visible type. */
-  if (!c.shallow) {
-    List shadowed = c.sym.get(%($participant));
-    if (shadowed && shadowed.type().is_typedef()) {
-      String hint = %"hint: a bodyless `protocol BASE($participant);` " +
-        "declares an adoption; a body introduces a fresh type variable";
-      c.report_warning(
-        <shadow>,
-        %"protocol binder '$participant' shadows a visible type name",
-        participant_token, %($hint));
-    }
-  }
+  if (c.shallow) return;
+  String participant = syntax.participant;
+  List shadowed = c.sym.get(%($participant));
+  if (!shadowed || !shadowed.type().is_typedef()) return;
+  String hint = %"hint: a bodyless `protocol BASE($participant);` " +
+    "declares an adoption; a body introduces a fresh type variable";
+  c.report_warning(
+    <shadow>,
+    %"protocol binder '$participant' shadows a visible type name",
+    syntax.participant_token, %($hint));
+}
 
+static List _parse_protocol_body(Compiler c, ProtocolSyntax syntax) {
+  String participant = syntax.participant;
   Array associations = [], members = [];
   Map type_names = {}, member_names = {};
   c.sym.push_new_scope();
@@ -2552,7 +2578,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
         c.report_error(
           <protocol>, "associated types must precede protocol members",
           c.token, NULL);
-      associations.push(_parse_associated_type(c, type_names, participant));
+      associations.push(_parse_associated_type(c, type_names));
       continue;
     }
     saw_member = 1;
@@ -2562,12 +2588,27 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   c.sym.pop_scope();
 
   List record = %(
-    "protocol-record" $base $participant
+    "protocol-record" ${syntax.base} $participant
     (associated @{associations.list_free()})
     (members @{members.list_free()})
   );
-  List location = c.token_location(start);
+  List location = c.token_location(syntax.start);
   if (c.macro_holes || (c.shallow && !c.collect_protocols))
-    return %(protocol $record $storage $location);
-  return c._publish_protocol_record(record, base, location);
+    return %(protocol $record ${syntax.storage} $location);
+  return c._publish_protocol_record(record, syntax.base, location);
+}
+
+/** Parses a protocol body or concrete adoption at the current token.
+    The method consumes through the closing brace or semicolon. Full parsing
+    publishes the normalized row immediately. Macro-hole parsing returns syntax
+    for later binding; shallow parsing publishes only when protocol collection
+    is enabled and otherwise returns the uninstalled node. A leading `meta`
+    makes an adoption's witnesses available to compile-time code.
+*/
+List Compiler.parse_protocol_declaration(Compiler c) {
+  ProtocolSyntax syntax = _parse_protocol_head(c);
+  if (c.peek(0) == <;>) return _parse_adoption(c, syntax);
+  _check_protocol_body(c, syntax);
+  _warn_shadowed_binder(c, syntax);
+  return _parse_protocol_body(c, syntax);
 }
