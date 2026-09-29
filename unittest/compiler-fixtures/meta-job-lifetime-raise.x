@@ -1,20 +1,29 @@
 #include "x2c.x"
 #include "meta.x"
 #include "process.x"
+#include <errno.h>
+#include <signal.h>
 
 /* A Job that a compile-time call starts ends when that call raises. The
    failure in `starts` leaves it with the job running; the job is
-   terminated and reaped, and translation continues to the next call. */
+   terminated and reaped, and translation continues to the next call,
+   which finds the process gone. */
+
+meta static long started = 0;
 
 meta void starts(void) {
   List command = %(sleep 30);
   Job job = List.job(command);
   job.start();
+  started = job.pids[0];
   x2c_diagnostic_fail("failed with a job running", %());
 }
 
 meta void after(void) {
-  x2c_diagnostic_fail("translation continued", %());
+  int gone = started > 0 && kill((pid_t) started, 0) == -1 && errno == ESRCH;
+  x2c_diagnostic_fail(
+    gone ? "translation continued with the job gone"
+         : "translation continued with the job running", %());
 }
 
 void first(void) { $starts(); }
