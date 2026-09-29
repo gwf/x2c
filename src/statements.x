@@ -397,9 +397,8 @@ List Compiler.parse_match_row_argument(Compiler c) => _match_case(c);
 static List _match_case(Compiler c) {
   Symbol peek = c.peek(0), Token start = c.token;
   List pattern = NULL, types = NULL;
-  c.next();
-  if (peek == <case>) pattern = _case_pattern(c, start, types);
-  else if (peek == <default>) pattern = %(*);
+  if (c.test(<case>)) pattern = _case_pattern(c, start, types);
+  else if (c.test(<default>)) pattern = %(*);
   else
     c.report_error(
       <parse>, "expected 'case' or 'default' in match statement",
