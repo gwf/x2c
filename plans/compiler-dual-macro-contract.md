@@ -3,8 +3,9 @@
 > support landed at b59b8ade; reconstruction and parameter-scope fixes
 > landed at 799875a8. Lambda source recognition and construction are
 > published at c99dd68d; the single five-pair cost run measured +3.24% default / +2.30% live. Ownership
-> boundaries are recorded in compiler-dual-macro-architecture.md. Next:
-> Protocol helper synthesis. Callable-defer helper synthesis is on dev at
+> boundaries are recorded in compiler-dual-macro-architecture.md. The
+> current campaign handoff and E43 govern next work. Callable-defer helper
+> synthesis is on dev at
 > `308709aa`; Var array/map literals are on dev at `aaba3ca4`; try/defer
 > cleanup calls are on dev at `4f89a063`. Their timing attempts are recorded
 > below. A narrow structural Var optimization could not retain the named
@@ -22,7 +23,9 @@
 > construction families, Func shape pass, and ordinary-call source-form
 > family are on dev at `e4942f7e`. Region call and assignment families are
 > on dev at `bfcc3cb4`. Retained Function initialization and try-binder
-> families form one publication batch.
+> families are on dev at `2445be7e`. The remaining-source audit in E43
+> found no complete family that removes competing builders with current
+> source-form capabilities. Broader syntax capabilities remain undecided.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -3345,6 +3348,53 @@ variadic expression splicing into a List literal to preserve the short-path
 cons representation; truth conversion would add several macros while retaining
 semantic selection; indexed sequencing uses a native block-expression stage.
 These are concrete boundaries, not migrated families.
+
+### E43. Remaining-source audit at `2445be7e`
+
+Three isolated read-only audits partitioned the hand-authored compiler
+source: parsing/expression/type/stage owners; transform/protocol/region/
+generation/emission owners; and the remaining compiler, macro, metadata,
+collection, and support owners. They grouped raw AST uses by production and
+checked the strongest candidates against current source and focused fixtures.
+No additional complete family both uses current source forms and deletes a
+meaningful competing builder. This is a conclusion about the current tree and
+the deletion standard, not a claim that every raw List should become syntax.
+
+The remaining source-like cases are small recognition or construction sites
+inside larger semantic owners. `parse.x` still has raw `switch` and expression
+statement binder cases; the available macros would only replace their case
+headers. `for` needs distinct optional and declaration-init forms, while
+the parser and constructed-form binder must retain separate scope/binding
+work. In `type.x`, designation queries inspect typed expressions and bare
+operator children; Expression macros match only the former. In
+`compiler.x`, `meta-group.x`, and `macros.x`, Function and declaration clients
+read already-bound identities, modifiers, linkage, and type facts. A private
+Function projection would replace short case headers without removing those
+operations. Existing Function decorator capture already projects return and
+declarator fields; it is not a source Function result or an inverse of
+binding. `ast.x` and the remaining support owners offer no larger family.
+
+Array/Map and String sequence-hole probes found a capability possibility,
+but no deletion case for adopting it now. The aggregate family would replace
+about seven one-line constructors while retaining quoted/ordinary parsing,
+brace classification, sequence flattening, recursive resolution, and cache
+semantics. The String path would remove the five-line `_build_cons_list` and
+one short-path call while retaining conversion and the `>128` native
+`List_list_n` boundary. Four aggregate source macros plus parser capability
+would add more code than these deletions. The bounded aggregate prototype
+was reverted; quoted Map Entry insertion already works, while Array Expr
+sequence insertion does not. Broadening bare-brace classification would
+change public native-composite behavior and is not authorized by this audit.
+
+Other raw forms have specific owners: cache graph IDs and literal values,
+pending declaration/macro applications, generated match/catch control,
+region flow, protocol selection and registration, header/source placement,
+native static initialization, interface identity renumbering, helper wire
+records, and emission tokens. Their current List structure represents
+derived state or a stage boundary. The source-form campaign can resume only
+with a concrete capability that deletes one of these complete owners while
+preserving its semantic facts, or with an explicit new objective that values
+additional macro expressiveness despite a near-term source increase.
 
 ### F. Static-local initialization exception
 
