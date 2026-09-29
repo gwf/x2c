@@ -1347,6 +1347,29 @@ set -e
 [[ $spanning_status == 2 ]]
 grep -Fq 'unterminated array' "$spanning/open.stderr"
 
+# A field without a value is an error at its line, and so is a second
+# [dependencies] section, even after an empty first one.
+invalid="$BUILD/invalid-manifest"
+mkdir -p "$invalid"
+printf 'int main(void) { return 0; }\n' >"$invalid/main.x"
+printf '[target.a]\nsources =\n' >"$invalid/empty.toml"
+printf '[dependencies]\n[dependencies]\n[target.a]\nsources = ["main.x"]\n' \
+  >"$invalid/repeated.toml"
+set +e
+"$X2C" build -### --manifest-path "$invalid/empty.toml" \
+  2>"$invalid/empty.stderr"
+invalid_empty=$?
+"$X2C" build -### --manifest-path "$invalid/repeated.toml" \
+  2>"$invalid/repeated.stderr"
+invalid_repeated=$?
+set -e
+[[ $invalid_empty == 2 ]]
+grep -Fq "empty.toml':2: expected an array of quoted strings" \
+  "$invalid/empty.stderr"
+[[ $invalid_repeated == 2 ]]
+grep -Fq "repeated.toml':2: duplicate dependencies section" \
+  "$invalid/repeated.stderr"
+
 # A profile reaches the dependency targets that define it.
 profiles="$BUILD/profiles"
 mkdir -p "$profiles/src"

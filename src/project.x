@@ -62,7 +62,7 @@ typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
   ProjectDependency dependencies;
   Map dependency_seen;
-  int declared;
+  int declared, dependency_declared;
   SourceView sources;
   ProjectTarget targets;
   CliRequest command, ProjectTarget selected;
@@ -230,7 +230,9 @@ static void Manifest.enter_project(Manifest *m) {
 
 static void Manifest.enter_dependencies(Manifest *m) {
   Project p = m.project;
-  if (p.dependency_seen) _error(p, m.line, "duplicate dependencies section");
+  if (p.dependency_declared)
+    _error(p, m.line, "duplicate dependencies section");
+  p.dependency_declared = 1;
   p.dependency_seen = {};
   m.section = DEPENDENCIES;
 }
@@ -452,7 +454,7 @@ static int _bool_value(Project p, int line, String value) {
    part of the string. */
 static int _array_open(String value) {
   int depth = 0, quoted = 0;
-  for (const char *at = value; *at; at++) {
+  for (const char *at = value ? value : ""; *at; at++) {
     if (quoted) {
       if (*at == '\\' && at[1]) at++;
       else if (*at == '"') quoted = 0;
