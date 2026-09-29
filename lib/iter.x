@@ -6,7 +6,7 @@
     Lazy operations borrow their source iterators and callbacks. The caller
     supplies iterator storage, which must outlive traversal. Iterators cannot
     yield `void`.
- */
+*/
 
 #pragma once
 $(import "error-macros.xmacro")
@@ -40,9 +40,9 @@ struct Iter {
 
 /** Caller-owned buffering shared by the two iterators from `Iter.unzip`.
     Its source and this record must outlive both columns. `Buffer` allocations
-    belong to the `Scope` that owns the `Array`s created at
-    initialization; that
-    `Scope` must remain live through all column pulls and provides cleanup.
+    belong to the `Scope` that owns the `Array`s created at initialization;
+    that `Scope` must remain live through all column pulls and provides
+    cleanup.
 */
 typedef struct UnzipShared UnzipShared;
 
@@ -205,7 +205,13 @@ Iter Iter.iter(Iter x, Iter dest) {
   return x;
 }
 
-// ranges
+/* ranges
+
+   Range packs the full native int domain into Iter's two Var-sized carrier
+   words without allocating an auxiliary state object. The unit-step forms
+   store one offset integer per word; the general form packs `end` above
+   `step`. These raw words stay inside range callbacks and never enter Var
+   dispatch or escape as yielded values. */
 
 /** Returns an inclusive integer range over caller-supplied `iter` storage.
     Both endpoints belong to the range when the step direction reaches them:
@@ -230,30 +236,32 @@ meta native Iter range(int start, int end, int step, Iter iter) {
 }
 
 static int _range_up_next(Iter iter, Var *out) {
-  int result = _range_raw_value(iter.state), stop = _range_raw_value(iter.obj);
-  if (result > stop) return 0;
-  *out = result;
-  if (result == stop) iter.next = NULL;
-  else iter.state = _range_raw_int(result + 1);
+  int current = _range_raw_value(iter.state);
+  int stop = _range_raw_value(iter.obj);
+  if (current > stop) return 0;
+  *out = current;
+  if (current == stop) iter.next = NULL;
+  else iter.state = _range_raw_int(current + 1);
   return 1;
 }
 
 static int _range_down_next(Iter iter, Var *out) {
-  int result = _range_raw_value(iter.state), stop = _range_raw_value(iter.obj);
-  if (result < stop) return 0;
-  *out = result;
-  if (result == stop) iter.next = NULL;
-  else iter.state = _range_raw_int(result - 1);
+  int current = _range_raw_value(iter.state);
+  int stop = _range_raw_value(iter.obj);
+  if (current < stop) return 0;
+  *out = current;
+  if (current == stop) iter.next = NULL;
+  else iter.state = _range_raw_int(current - 1);
   return 1;
 }
 
 static int _range_general_next(Iter iter, Var *out) {
   int stop = _range_raw_high(iter.obj);
   int step = _range_raw_value(iter.obj);
-  int result = iter.state;
-  if ((step > 0 && result > stop) || (step < 0 && result < stop)) return 0;
-  *out = result;
-  long long next = (long long) result + step;
+  int current = iter.state;
+  if ((step > 0 && current > stop) || (step < 0 && current < stop)) return 0;
+  *out = current;
+  long long next = (long long) current + step;
   if ((step > 0 && next > stop) || (step < 0 && next < stop) ||
       next > INT_MAX || next < INT_MIN)
     iter.next = NULL;
@@ -267,11 +275,6 @@ static Var _range_raw_int(int value) =>
 static int _range_raw_value(Var value) =>
   (int) ((long long) (unsigned) value.u64 + INT_MIN);
 
-/* Range packs the full native int domain into Iter's two Var-sized carrier
-   words without allocating an auxiliary state object. The unit-step forms
-   store one offset integer per word; the general form packs `end` above
-   `step`. These raw words stay inside range callbacks and never enter Var
-   dispatch or escape as yielded values. */
 static Var _range_raw_pair(int high, int low) {
   unsigned long upper = (unsigned) ((long long) high - INT_MIN);
   unsigned lower = (unsigned) ((long long) low - INT_MIN);
@@ -332,16 +335,15 @@ static Var _apply1(Func fn, Var value) {
 }
 
 /** Returns a lazy iterator over elements accepted by `func`'s `Var`
-    truthiness.
-    The predicate fits in `dest`, so that storage is all you declare.
-    Rejected elements are consumed without being yielded, so one request for
-    an element can pull many from the source.
+    truthiness. The predicate fits in `dest`, so that storage is all you
+    declare. Rejected elements are consumed without being yielded, so one
+    request for an element can pull many from the source.
 
     Elements are passed as values. Both `iter` and its storage, `dest`, and any
     dynamic or captured `func` must remain valid while the result is used.
 
-    A null `dest` returns NULL, and a null `func` yields an
-    exhausted iterator. An empty source does not invoke or check `func`.
+    A null `dest` returns NULL, and a null `func` yields an exhausted
+    iterator. An empty source does not invoke or check `func`.
     Raises: whatever the source, `Func.apply`, or `func` raises while pulling.
 */
 meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
@@ -446,12 +448,12 @@ static int _accumulate_next(Iter iter, Var *out) {
 // pairing stages
 
 /** Returns a lazy iterator over canonical `(left right)` `List`s.
-    Destructure each pair with `Var (a, b) = pair;`. Pairing
-    ends as soon as either source does. Each pull advances the left side first:
-    if the right side is exhausted, that unmatched left value is consumed; if
-    the left side is exhausted, the right side is not pulled. Both sources and
-    `dest` must outlive traversal. Each yielded pair follows the lifetime of
-    the `List` pool owning its canonical match.
+    Destructure each pair with `Var (a, b) = pair;`. Pairing ends as soon as
+    either source does. Each pull advances the left side first: if the right
+    side is exhausted, that unmatched left value is consumed; if the left side
+    is exhausted, the right side is not pulled. Both sources and `dest` must
+    outlive traversal. Each yielded pair follows the lifetime of the `List`
+    pool owning its canonical match.
 
     Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
     cause raised by either source. A null `dest` returns NULL.
@@ -604,8 +606,8 @@ static int _repeat_next(Iter iter, Var *out) {
 /** Returns a lazy iterator that yields the first occurrence of each value.
     Equality and hashing follow `Map`, so source order decides which equal
     value survives. Construction allocates a `Scope`-owned seen table; pulls
-    may
-    grow it. The source, `dest`, and owning `Scope` must outlive traversal.
+    may grow it. The source, `dest`, and owning `Scope` must outlive
+    traversal.
 
     Raises: `<alloc-fail>`, `<size-limit>`, `<invariant>`, or a cause from the
     source, hashing, or equality while constructing or pulling. A null `dest`
@@ -636,10 +638,10 @@ static int _unique_next(Iter iter, Var *out) {
 /** Returns an iterator over the two column iterators of paired elements.
     Every element of `iter` must be a two-element `List`. The result yields
     two elements, the left column and then the right one, and is exhausted
-    after that. Each column arrives as a `Var` holding an iterator
-    embedded in `shared`. Passing nonnull storage to `.iter(&storage)` performs
-    the `Var` conversion, but `Iter.iter` ignores that storage and returns the
-    embedded column; `shared` remains its owner.
+    after that. Each column arrives as a `Var` holding an iterator embedded in
+    `shared`. Passing nonnull storage to `.iter(&storage)` performs the `Var`
+    conversion, but `Iter.iter` ignores that storage and returns the embedded
+    column; `shared` remains its owner.
 
     The columns are independent, and only the lag between them is buffered.
     Draining one column holds every element the other has not reached yet, so
@@ -673,7 +675,6 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
 }
 
 static void _unzip_shared_init(UnzipShared *u, Iter source) {
-  if (!u) return;
   u.source = source;
   u.buffers[0] = [];
   u.buffers[1] = [];
@@ -747,11 +748,10 @@ static void _unzip_compact(UnzipShared *shared, int column) {
 // reductions
 
 /** Folds `fn` over `iter` from `seed`, left to right, and returns the final
-    accumulator.
-    Consumes the whole iterator. A `void` `seed` means "use the first
-    element as the seed", so folding an empty iterator from `void` returns
-    `void`; any other `seed` is returned unchanged when there is nothing to
-    fold. A null `fn` drains the iterator and returns the seed.
+    accumulator. Consumes the whole iterator. A `void` `seed` means "use the
+    first element as the seed", so folding an empty iterator from `void`
+    returns `void`; any other `seed` is returned unchanged when there is
+    nothing to fold. A null `fn` drains the iterator and returns the seed.
     The accumulator and elements are passed as values. Empty input, or one
     element with a `void` seed, does not invoke or check `fn`.
     Raises: whatever the source, `Func.apply`, or `fn` raises.
@@ -785,16 +785,15 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 */
 int Iter.any(Iter iter, Func pred) {
   if (!pred) return 0;
-  foreach (Var item, iter)
-    if (_apply1(pred, item)) return 1;
+  foreach (Var item, iter) if (_apply1(pred, item)) return 1;
   return 0;
 }
 
 /** Reports whether every remaining element satisfies `pred`.
     Vacuously true for an empty iterator, decided before `pred` is consulted.
-    Otherwise it stops at the first element the predicate
-    rejects and answers 0, leaving the rest unconsumed. Elements are passed as
-    values and the result uses ordinary `Var` truthiness.
+    Otherwise it stops at the first element the predicate rejects and answers
+    0, leaving the rest unconsumed. Elements are passed as values and the
+    result uses ordinary `Var` truthiness.
     Raises: whatever the source, `Func.apply`, or `pred` raises. A null `pred`
     answers 1 for an empty iterator and 0 for any other.
 */
@@ -809,17 +808,15 @@ int Iter.all(Iter iter, Func pred) {
 }
 
 /** Returns the first element accepted by `pred`'s `Var` truthiness, else
-    `void`.
-    Stops as soon as it finds one, so the iterator can be pulled further for
-    the elements after the match. `void` means "no element matched", which is
-    unambiguous because no iterator may yield `void`.
+    `void`. Stops as soon as it finds one, so the iterator can be pulled
+    further for the elements after the match. `void` means "no element
+    matched", which is unambiguous because no iterator may yield `void`.
     Elements are passed as values. Raises: whatever the source, `Func.apply`,
     or `pred` raises. A null `pred` returns `void`.
 */
 Var Iter.find(Iter iter, Func pred) {
   if (!pred) return void;
-  foreach (Var item, iter)
-    if (_apply1(pred, item)) return item;
+  foreach (Var item, iter) if (_apply1(pred, item)) return item;
   return void;
 }
 
