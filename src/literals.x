@@ -915,7 +915,11 @@ static int _continuation(String raw, int i, int n) {
   return raw[i + 1] == '\r' && i + 2 < n && raw[i + 2] == '\n' ? 3 : 0;
 }
 
-// lambda literals
+/* lambda literals
+
+   `%!(params) using &name, ... => body` parses its parameters in a scope
+   of their own, which the body reopens. A template keeps its type open and
+   takes captures and body from the holes that expansion fills. */
 
 /** Parses a `%!(...) => ...` literal and returns its typed lambda expression.
     Parameter bindings are in a new `Sym` scope, block bodies use `Var` as the
@@ -927,144 +931,148 @@ List Compiler.parse_lambda_literal(Compiler c) {
   c.expect(<"%!">);
   c.expect(<(>);
   c.sym.push_new_scope();
-  List names = %(), typed_params = NULL, int used_typed = 0;
-  if (c.peek(0) != <)>) {
-    if (_lambda_looks_typed(c)) {
-      used_typed = 1;
-      typed_params = _lambda_parse_typed_params(c, names);
-    }
-    else names = _lambda_parse_bare_params(c);
-  }
+  List entries = c.peek(0) == <)> ? NULL : _parse_params(c);
   c.expect(<)>);
   SymScope params = c.sym.pop_scope();
   Array references = [], prescribed = [];
-  if (c.peek(0) == <ident> && c.token.text == "using") {
-    c.next();
-    List hole = c.try_parse_macro_slot(<captures>);
-    if (hole) prescribed.push(hole);
-    else do {
-      c.expect(<&>);
-      if (c.macro_holes) {
-        List name = NULL, value = NULL;
-        Type reference = %(& <macro-expr>);
-        if (c.peek(0) == <$>) {
-          name = c.try_parse_macro_slot(<name>);
-          value = %(expr (<macro-expr>) (ident $name));
-        }
-        else {
-          Token origin = c.token;
-          name = c.parse_basic_identifier();
-          value = c.resolve_expression(%(expr () (ident $name)), origin);
-          name = c.sym.lookup(name, NULL);
-          reference = cons(<&>, value.cadr());
-        }
-        prescribed.push(
-          %(capture $name $reference (expr $reference (op & $value))));
-        continue;
-      }
-      Token origin = c.token;
-      String spelling = c.token.text;
-      c.expect(<ident>);
-      Type type = NULL;
-      List binding = c.sym.lookup(%($spelling), type);
-      if (!type)
-        c.report_error(
-          <type>, %"identifier '$spelling' has no semantic type",
-          origin, NULL);
-      references.push(binding);
-    } while (c.test(<,>));
+  if (c.peek(0) == <ident> && c.token.text == "using")
+    _parse_using(c, references, prescribed);
+  c.expect(<"=">);
+  c.expect(<">">);
+  $let(c.lambda_scopes, c.lambda_scopes) {
+    c.begin_lambda_captures(references.list_free(), NULL);
+    c.sym.push_scope(params);
+    List body = _parse_lambda_body(c);
+    List ftype = %((func ${c.lambda_param_types(entries)}) "Var");
+    List captures = c.end_lambda_captures();
+    c.check_lambda_captures(body);
+    if (c.macro_holes) captures = prescribed.list_free();
+    c.sym.pop_scope();
+    if (c.macro_holes) return _lambda_template(c, body, captures, entries);
+    Type type = captures ? %("Func") : ftype;
+    return c.rebuild_expression(type, _lambda_node(body, captures, entries));
   }
-  _lambda_expect_arrow(c);
-  List previous = c.lambda_scopes;
-  c.begin_lambda_captures(references.list_free(), NULL);
-  defer c.lambda_scopes = previous;
-  c.sym.push_scope(params);
-
-  List body = NULL;
-  if (c.test(<"{">)) {
-    $let(c.return_type, %("Var")) {
-      body = c.parse_callable_body();
-    }
-  }
-  else body = c.parse_assignment();
-  List rtype = %("Var");
-  List entries = used_typed ? typed_params : names;
-  List param_types = c.lambda_param_types(entries);
-  List ftype = %((func $param_types) @rtype);
-  List captures = c.end_lambda_captures();
-  c.check_lambda_captures(body);
-  if (c.macro_holes) captures = prescribed.list_free();
-  c.sym.pop_scope();
-  if (c.macro_holes) {
-    ftype = %(<macro-expr>);
-    /* The body hole may supply either an expression or a block. */
-    match (body)
-      case %(expr (<macro-expr>) (!set ?hole (macro-bind ?))): body = hole;
-  }
-  Macro captured = $lambda_captured, lambda = $lambda_expression;
-  if (captures)
-    return c.rebuild_expression(
-      c.macro_holes ? ftype : %("Func"),
-      captured(body, captures, entries));
-  return c.rebuild_expression(ftype, lambda(body, entries));
 }
 
-static int _lambda_looks_typed(Compiler compiler) {
-  Symbol head = compiler.peek(0);
-  if (head == <$> && compiler.macro_holes) return 1;
+static List _parse_params(Compiler c) =>
+  _params_look_typed(c) ? _parse_typed_params(c) : _parse_bare_params(c);
+
+/* Typed parameters begin with a type: a type keyword, a typedef name, or
+   a template's `$` hole. */
+static int _params_look_typed(Compiler c) {
+  Symbol head = c.peek(0);
+  if (head == <$> && c.macro_holes) return 1;
   if (head.is_builtin_type() || head.is_type_qualifier() ||
       head == <struct> || head == <union> || head == <enum> || head == <void>)
     return 1;
-  if (head == <ident>) {
-    String folded = compiler.package_alias_spelling();
-    if (!folded)
-      folded = compiler.package_member_spelling(compiler.token.text);
-    String nm = folded ? folded : compiler.token.text;
-    if (compiler.sym.get(%($nm)).type().is_typedef()) return 1;
-  }
-  return 0;
+  if (head != <ident>) return 0;
+  String folded = c.package_alias_spelling();
+  if (!folded) folded = c.package_member_spelling(c.token.text);
+  String name = folded ? folded : c.token.text;
+  return c.sym.get(%($name)).type().is_typedef();
 }
 
-static List _lambda_parse_typed_params(Compiler compiler, List &out_names) {
-  Array names = [], List typed_params = compiler.parse_parameter_list();
-  foreach (List param, typed_params)
-    match (param) {
-      case %(param ? (bind ?binding ?)): {
-        names.push(binding);
-        compiler.semantic_binding_facts()[%(lambda-param $binding)] = 1;
-      }
-    }
-  List result = names.list_free();
-  out_names = result;
-  return typed_params;
+static List _parse_typed_params(Compiler c) {
+  List params = c.parse_parameter_list();
+  foreach (List param, params)
+    match (param)
+      case %(param ? (bind ?binding ?)):
+        c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
+  return params;
 }
 
-static List _lambda_parse_bare_params(Compiler compiler) {
+static List _parse_bare_params(Compiler c) {
   Array names = [];
-  loop {
-    if (compiler.peek(0) != <ident>)
-      compiler.report_error(
-        <parse>, "expected identifier in parameter list",
-        compiler.token, NULL);
-    String pname = compiler.token.text;
-    List binding = compiler.sym.define(%($pname), %("Var"));
-    names.push(binding);
-    compiler.semantic_binding_facts()[%(parameter $binding)] = 1;
-    compiler.semantic_binding_facts()[%(lambda-param $binding)] = 1;
-    compiler.semantic_binding_facts()[%(automatic $binding)] = 1;
-    compiler.semantic_binding_facts()[%(type $binding)] = %("Var");
-    compiler.next();
-    if (!compiler.test(<,>)) break;
-  }
+  do names.push(_parse_bare_param(c));
+  while (c.test(<,>));
   return names.list_free();
 }
 
-static void _lambda_expect_arrow(Compiler compiler) {
-  compiler.expect(<"=">);
-  compiler.expect(<">">);
+/* A bare parameter is an automatic Var. */
+static List _parse_bare_param(Compiler c) {
+  if (c.peek(0) != <ident>)
+    c.report_error(
+      <parse>, "expected identifier in parameter list", c.token, NULL);
+  String name = c.token.text;
+  List binding = c.sym.define(%($name), %("Var"));
+  Map facts = c.semantic_binding_facts();
+  facts[%(parameter $binding)] = 1;
+  facts[%(lambda-param $binding)] = 1;
+  facts[%(automatic $binding)] = 1;
+  facts[%(type $binding)] = %("Var");
+  c.next();
+  return binding;
 }
 
-// constructed lambdas
+/* `using` shares source bindings by reference. A template instead lists
+   reference rows, or one captures hole, for expansion to complete. */
+static void _parse_using(Compiler c, Array references, Array prescribed) {
+  c.next();
+  List hole = c.try_parse_macro_slot(<captures>);
+  if (hole) prescribed.push(hole);
+  else do {
+    c.expect(<&>);
+    if (c.macro_holes) prescribed.push(_template_capture(c));
+    else references.push(_shared_binding(c));
+  } while (c.test(<,>));
+}
+
+/* A template's `&$name` leaves the binding to expansion, while `&name`
+   resolves it now. */
+static List _template_capture(Compiler c) {
+  List name = NULL, value = NULL;
+  Type reference = %(& <macro-expr>);
+  if (c.peek(0) == <$>) {
+    name = c.try_parse_macro_slot(<name>);
+    value = %(expr (<macro-expr>) (ident $name));
+  }
+  else {
+    Token origin = c.token;
+    name = c.parse_basic_identifier();
+    value = c.resolve_expression(%(expr () (ident $name)), origin);
+    name = c.sym.lookup(name, NULL);
+    reference = cons(<&>, value.cadr());
+  }
+  return %(capture $name $reference (expr $reference (op & $value)));
+}
+
+static List _shared_binding(Compiler c) {
+  Token origin = c.token;
+  String spelling = c.token.text;
+  c.expect(<ident>);
+  Type type = NULL;
+  List binding = c.sym.lookup(%($spelling), type);
+  if (!type)
+    c.report_error(
+      <type>, %"identifier '$spelling' has no semantic type", origin, NULL);
+  return binding;
+}
+
+/* A block body returns Var. */
+static List _parse_lambda_body(Compiler c) {
+  if (!c.test(<"{">)) return c.parse_assignment();
+  $let(c.return_type, %("Var")) return c.parse_callable_body();
+}
+
+/* The body hole may supply either an expression or a block. */
+static List _lambda_template(
+  Compiler c, List body, List captures, List entries) {
+  match (body)
+    case %(expr (<macro-expr>) (!set ?hole (macro-bind ?))): body = hole;
+  return c.rebuild_expression(
+    %(<macro-expr>), _lambda_node(body, captures, entries));
+}
+
+static List _lambda_node(List body, List captures, List params) {
+  Macro captured = $lambda_captured, lambda = $lambda_expression;
+  return captures ? captured(body, captures, params) : lambda(body, params);
+}
+
+/* constructed lambdas
+
+   A lambda that a macro or transform builds binds through the capture
+   operations of source lambdas. Its supplied rows name their targets and
+   fix their capture mode. */
 
 /** Binds a constructed lambda through the lexical capture operations used by
     source literals. Parameter declarations keep their existing declarators;
@@ -1073,85 +1081,125 @@ static void _lambda_expect_arrow(Compiler compiler) {
 List Compiler.bind_lambda_expression(
   Compiler c, Type type, List parameters, List supplied, List body) {
   Array prescribed = [], aliases = [];
-  foreach (List row, supplied)
-    match (row)
-      case %(capture ?target ?captured_type ?expression): {
-        Type source = NULL, target_type = captured_type;
-        List binding = target is <string>
-                     ? c.sym.lookup(%($target), source) : target;
-        if (<macro-expr> in target_type)
-          target_type = source.car() == <&> ? source : cons(<&>, source);
-        if (!binding_identity_spelling(binding)) {
-          String spelling = target is <string> ? target : NULL;
-          match (binding) {
-            case %(?(String name)): spelling = name;
-            case %("x2c.ident" ?(String name)): spelling = name;
-          }
-          binding = c.sym.introduce(spelling);
-          aliases.push(%($binding $target_type));
-        }
-        prescribed.push(%(capture $binding $target_type $expression));
-      }
+  foreach (List row, supplied) _prescribe(c, row, prescribed, aliases);
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
+  _bind_aliases(c, aliases);
+  $let(c.lambda_scopes, c.lambda_scopes) {
+    c.begin_lambda_captures(NULL, prescribed.list_free());
+    c.sym.push_new_scope();
+    defer c.sym.pop_scope();
+    Array entries = [];
+    foreach (List entry, parameters.cdr())
+      _add_param(c, entries, _declare_param(c, entry));
+    body = _bind_body(c, body);
+    List captures = c.end_lambda_captures();
+    c.check_lambda_captures(body);
+    List params = entries.list_free();
+    type = _bound_type(c, type, supplied, params);
+    if (captures)
+      return c.rebuild_expression(
+        %("Func"), _lambda_node(body, captures, params));
+    return _plain_lambda(c, type, params, body);
+  }
+}
+
+/* A row's target is a spelling or a binding. An open captured type
+   becomes a reference to the target's type, and a target without a
+   binding identity gets a fresh binding that the lambda binds as an
+   alias. */
+static void _prescribe(
+  Compiler c, List row, Array prescribed, Array aliases) {
+  match (row)
+    case %(capture ?target ?captured_type ?expression): {
+      Type source = NULL, target_type = captured_type;
+      List binding = target is <string>
+                   ? c.sym.lookup(%($target), source) : target;
+      if (<macro-expr> in target_type)
+        target_type = source.car() == <&> ? source : cons(<&>, source);
+      if (!binding_identity_spelling(binding)) {
+        binding = c.sym.introduce(_alias_spelling(target, binding));
+        aliases.push(%($binding $target_type));
+      }
+      prescribed.push(%(capture $binding $target_type $expression));
+    }
+}
+
+static String _alias_spelling(Var target, List binding) {
+  String spelling = target is <string> ? target : NULL;
+  match (binding) {
+    case %(?(String name)): spelling = name;
+    case %("x2c.ident" ?(String name)): spelling = name;
+  }
+  return spelling;
+}
+
+static void _bind_aliases(Compiler c, Array aliases) {
   foreach (List alias, aliases)
     match (alias) case %(?binding ?captured_type): {
       Type annotation = captured_type;
-      c.sym.bind_identity(
-        NULL, binding, annotation.declaration_ast(binding));
+      c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
     }
-  List previous = c.lambda_scopes;
-  c.begin_lambda_captures(NULL, prescribed.list_free());
-  defer c.lambda_scopes = previous;
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  Array entries = [];
-  foreach (List entry, parameters.cdr()) {
-    List declaration = NULL;
-    match (entry) {
-      case %(param ?base ?binding):
-        declaration = c.bind_syntax(
-          %(declare $base (bindings $binding)), AST_BLOCK, %("Var"));
-      case %(binding ? ?):
-        declaration = c.bind_syntax(
-          %(declare ("Var") (bindings (bind $entry ()))),
-          AST_BLOCK, %("Var"));
+}
+
+/* A `param` keeps its base and declarator; a bare binding declares a Var. */
+static List _declare_param(Compiler c, List entry) {
+  match (entry) {
+    case %(param ?base ?binding):
+      return c.bind_syntax(
+        %(declare $base (bindings $binding)), AST_BLOCK, %("Var"));
+    case %(binding ? ?):
+      return c.bind_syntax(
+        %(declare ("Var") (bindings (bind $entry ()))), AST_BLOCK, %("Var"));
+  }
+  return NULL;
+}
+
+static void _add_param(Compiler c, Array entries, List declaration) {
+  match (declaration)
+    case %(declare ?base (bindings (!set ?declarator (bind ?binding ?)))): {
+      Map facts = c.semantic_binding_facts();
+      facts[%(parameter $binding)] = 1;
+      facts[%(lambda-param $binding)] = 1;
+      if (declaration.type_from_ast().car() == <&>)
+        facts[%(reference-param $binding)] = 1;
+      entries.push(%(param $base $declarator));
     }
-    match (declaration)
-      case %(declare ?base (bindings (!set ?declarator (bind ?binding ?)))): {
-        c.semantic_binding_facts()[%(parameter $binding)] = 1;
-        c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
-        if (declaration.type_from_ast().car() == <&>)
-          c.semantic_binding_facts()[%(reference-param $binding)] = 1;
-        entries.push(%(param $base $declarator));
-      }
-  }
-  match (body) {
-    case %(block *): body = c.bind_callable_body(body, %("Var"));
-    default: body = c.resolve_expression(body, c.token);
-  }
-  List captures = c.end_lambda_captures();
-  c.check_lambda_captures(body);
-  List params = entries.list_free();
-  Macro captured = $lambda_captured, lambda = $lambda_expression;
+}
+
+/* A block body returns Var. */
+static List _bind_body(Compiler c, List body) {
+  match (body) case %(block *): return c.bind_callable_body(body, %("Var"));
+  return c.resolve_expression(body, c.token);
+}
+
+/* An open type is a Func when rows were supplied, and otherwise the
+   native function type of the parameters. */
+static Type _bound_type(Compiler c, Type type, List supplied, List params) {
   if (type === %(<macro-expr>))
     type = supplied ? %("Func")
          : %((func ${c.lambda_param_types(params)}) "Var");
-  if (captures)
-    return c.rebuild_expression(
-      %("Func"), captured(body, captures, params));
-  /* A meta body keeps the lambda for meta lowering to adapt; the transform
-     lifts it for native code. */
+  return type;
+}
+
+/* A meta body keeps the lambda for meta lowering to adapt; the transform
+   lifts it for native code. */
+static List _plain_lambda(Compiler c, Type type, List params, List body) {
+  Macro lambda = $lambda_expression;
   if (type === %("Func") && !c.meta_body) {
-    Type signature = %(
-      (func ${c.lambda_param_types(params)}) "Var");
+    Type signature = %((func ${c.lambda_param_types(params)}) "Var");
     return c.lift_func_expression(
       c.rebuild_expression(signature, lambda(body, params)));
   }
   return c.rebuild_expression(type, lambda(body, params));
 }
 
-// lambda captures
+/* lambda captures
+
+   Each open lambda has a frame `(lambda-scope SCOPE DEPTH REFERENCES
+   SUPPLIED)` in `lambda_scopes`, innermost first. Capture rows and their
+   order live in semantic binding facts, so macro transactions restore
+   them. */
 
 /** Opens lexical capture resolution while a lambda body is parsed or bound.
     `references` names explicitly shared surrounding bindings; `supplied`
@@ -1172,9 +1220,8 @@ List Compiler.end_lambda_captures(Compiler c) {
   match (c.lambda_scopes.car())
     case %(lambda-scope ?scope ? ? ?): {
       Var stored;
-      if (c.semantic_binding_facts().try_get(
-        %(lambda-order $scope), stored))
-        rows = stored;
+      Map facts = c.semantic_binding_facts();
+      if (facts.try_get(%(lambda-order $scope), stored)) rows = stored;
     }
   c.lambda_scopes = c.lambda_scopes.cdr();
   return rows.reverse();
@@ -1187,7 +1234,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
       foreach (List row, supplied.list())
         match (row) case %(capture ?target ? ?):
           if (target == binding) return 1;
-      return _lambda_binding_is_outer(c, binding, depth);
+      return _declared_outside(c, binding, depth);
     }
   return 0;
 }
@@ -1197,86 +1244,129 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
     rewriting. Reference captures preserve qualifiers; snapshots of reference
     parameters copy their current referents.
 */
-List Compiler.capture_lambda_identifier(
-  Compiler c, List binding, Type type) {
+List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
   List original = binding;
   foreach (List frame, c.lambda_scopes.reverse())
-    match (frame)
-      case %(lambda-scope ?scope ?depth ?references ?supplied): {
-        List prescribed = NULL;
-        foreach (List row, supplied.list())
-          match (row)
-            case %(capture ?target ? ?)
-              if (target == binding || target == original):
-                prescribed = row;
-        if (!prescribed &&
-            !_lambda_binding_is_outer(c, binding, depth)) continue;
-        if (type.is_static()) continue;
-        Map facts = c.semantic_binding_facts();
-        List key = %(lambda-capture $scope $binding);
-        Var stored;
-        List row = NULL;
-        if (facts.try_get(key, stored)) row = stored;
-        else {
-          Type captured_type = type.car() == <&> ? type.cdr() : type;
-          List expression = %(expr $type (ident $binding));
-          int reference = original in references.list();
-          if (prescribed) {
-            match (prescribed)
-              case %(capture ? ?target_type ?value): {
-                captured_type = target_type;
-                List previous = c.lambda_scopes;
-                while (c.lambda_scopes.car() != frame)
-                  c.lambda_scopes = c.lambda_scopes.cdr();
-                c.lambda_scopes = c.lambda_scopes.cdr();
-                {
-                  defer c.lambda_scopes = previous;
-                  expression = c.resolve_expression(value, c.token);
-                }
-                reference = captured_type.car() == <&>;
-              }
-          }
-          else if (reference) {
-            captured_type = cons(<&>, captured_type);
-            if (type.car() != <&>)
-              expression = %(expr $captured_type (op & $expression));
-          }
-          else if (type.car() == <&>)
-            expression = %(expr $captured_type (op * $expression));
-          if (reference && %(lambda-snapshot $binding) in facts)
-            c.report_error(
-              <type>,
-              "reference capture requires an enclosing reference capture",
-              c.token, %("binding: ${binding_identity_spelling(original)}"));
-          List captured = c.sym.introduce(binding_identity_spelling(binding));
-          row = %(capture $captured $captured_type $expression);
-          facts[key] = row;
-          facts[%(automatic $captured)] = 1;
-          facts[%(type $captured)] = captured_type;
-          facts[%(lambda-depth $captured)] = depth;
-          if (reference) facts[%(reference-param $captured)] = 1;
-          else facts[%(lambda-snapshot $captured)] = 1;
-          List order = NULL;
-          if (facts.try_get(%(lambda-order $scope), stored)) order = stored;
-          facts[%(lambda-order $scope)] = cons(row, order);
-        }
-        match (row)
-          case %(capture ?captured ?captured_type ?): {
-            binding = captured;
-            type = captured_type;
-          }
+    match (_frame_capture(c, frame, binding, original, type))
+      case %(capture ?captured ?captured_type ?): {
+        binding = captured;
+        type = captured_type;
       }
   return %(expr $type (ident $binding));
 }
 
-static int _lambda_binding_is_outer(
-  Compiler c, List binding, int depth) {
+/* One binding's capture through one lambda frame: the frame's fields, the
+   binding and type that the frame sees, and the identifier's source
+   binding. `facts` is read before a supplied value resolves. */
+typedef struct Capture {
+  Compiler c;
+  Map facts;
+  List frame, key, prescribed, binding, original;
+  Type type;
+  Var scope, depth, references;
+} Capture;
+
+/* The row that captures `binding` in `frame`, or NULL when the binding is
+   the frame's own or static. */
+static List _frame_capture(
+  Compiler c, List frame, List binding, List original, Type type) {
+  match (frame)
+    case %(lambda-scope ?scope ?depth ?references ?supplied): {
+      List prescribed = _prescribed_row(supplied, binding, original);
+      if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
+      if (type.is_static()) return NULL;
+      Map facts = c.semantic_binding_facts();
+      List key = %(lambda-capture $scope $binding);
+      Var stored;
+      if (facts.try_get(key, stored)) return stored;
+      Capture k = {
+        .c = c, .facts = facts, .frame = frame, .key = key,
+        .prescribed = prescribed, .binding = binding, .original = original,
+        .type = type, .scope = scope, .depth = depth,
+        .references = references};
+      return k.add();
+    }
+  return NULL;
+}
+
+/* The last supplied row whose target is the binding or the identifier's
+   source binding. */
+static List _prescribed_row(Var supplied, List binding, List original) {
+  List prescribed = NULL;
+  foreach (List row, supplied.list())
+    match (row)
+      case %(capture ?target ? ?)
+        if (target == binding || target == original):
+          prescribed = row;
+  return prescribed;
+}
+
+/* A binding that an outer lambda captured belongs to that lambda's depth;
+   another automatic binding belongs to the scope that declared it. */
+static int _declared_outside(Compiler c, List binding, int depth) {
   Var captured_depth;
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(lambda-depth $binding), captured_depth))
     return captured_depth.integer() < depth;
   return %(automatic $binding) in facts &&
          c.sym.binding_is_local_before(binding, depth);
+}
+
+/* A supplied row fixes the captured type and value. Otherwise a binding
+   listed after `using` captures by reference, and a snapshot of a
+   reference parameter copies its referent. */
+static List Capture.add(Capture *k) {
+  Type type = k.type, captured_type = type.car() == <&> ? type.cdr() : type;
+  List binding = k.binding, expression = %(expr $type (ident $binding));
+  int reference = k.original in k.references.list();
+  if (k.prescribed) {
+    match (k.prescribed)
+      case %(capture ? ?target_type ?value): {
+        captured_type = target_type;
+        expression = _resolve_outside(k.c, k.frame, value);
+        reference = captured_type.car() == <&>;
+      }
+  }
+  else if (reference) {
+    captured_type = cons(<&>, captured_type);
+    if (type.car() != <&>)
+      expression = %(expr $captured_type (op & $expression));
+  }
+  else if (type.car() == <&>)
+    expression = %(expr $captured_type (op * $expression));
+  if (reference && %(lambda-snapshot $binding) in k.facts)
+    k.c.report_error(
+      <type>, "reference capture requires an enclosing reference capture",
+      k.c.token, %("binding: ${binding_identity_spelling(k.original)}"));
+  return k.record(captured_type, expression, reference);
+}
+
+/* A supplied value resolves outside its lambda and the lambdas inside it. */
+static List _resolve_outside(Compiler c, List frame, Var value) {
+  List outside = c.lambda_scopes;
+  while (outside.car() != frame) outside = outside.cdr();
+  $let(c.lambda_scopes, outside.cdr())
+    return c.resolve_expression(value, c.token);
+}
+
+/* The captured copy is a fresh automatic binding: a reference parameter or
+   a snapshot. Rows join the lambda's order newest first. */
+static List Capture.record(
+  Capture *k, Type captured_type, List expression, int reference) {
+  Map facts = k.facts;
+  List captured = k.c.sym.introduce(binding_identity_spelling(k.binding));
+  List row = %(capture $captured $captured_type $expression);
+  facts[k.key] = row;
+  facts[%(automatic $captured)] = 1;
+  facts[%(type $captured)] = captured_type;
+  facts[%(lambda-depth $captured)] = k.depth;
+  if (reference) facts[%(reference-param $captured)] = 1;
+  else facts[%(lambda-snapshot $captured)] = 1;
+  Var scope = k.scope, stored;
+  List order = NULL;
+  if (facts.try_get(%(lambda-order $scope), stored)) order = stored;
+  facts[%(lambda-order $scope)] = cons(row, order);
+  return row;
 }
 
 // atoms and Symbols
