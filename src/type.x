@@ -55,38 +55,38 @@ Type List.type_from_ast(List ast) {
 /* Each declaration form has its own step; any other node is a modifier
    chain or converts its children. A nested declaration, such as a struct
    field that is a pointer, converts the same way. */
-static List _from_ast(List ast, List context) {
-  if (!ast) return ast;
+static List _from_ast(List node, List context) {
+  if (!node) return node;
   // Initializers do not contribute to the declared Type.
-  match (ast)
+  match (node)
     case %(op = (!set ?binding (bind *)) ?):
       return _from_ast(binding, context);
-  Var head = ast.car();
+  Var head = node.car();
   switch (head.symbol()) {
-    case <declare>:  return _from_declare(ast);
-    case <bind>:     return _from_bind(ast, context);
+    case <declare>:  return _from_declare(node);
+    case <bind>:     return _from_bind(node, context);
     case <params>:
-    case <bindings>: return _from_items(ast.cdr(), context);
-    case <fields>:   return _from_fields(ast, context);
-    case <typedef>:  return _from_typedef(ast);
-    case <fnmod>:    return _from_fnmod(ast);
-    case <param>:    return _from_param(ast);
+    case <bindings>: return _from_items(node.cdr(), context);
+    case <fields>:   return _from_fields(node, context);
+    case <typedef>:  return _from_typedef(node);
+    case <fnmod>:    return _from_fnmod(node);
+    case <param>:    return _from_param(node);
     // Binding identity is AST metadata; semantic Types retain the spelling.
-    case <binding>:  return %(${ast.caddr()});
+    case <binding>:  return %(${node.caddr()});
     case <struct>:
-    case <union>:    return _from_aggregate(ast, head);
-    case <expr>:     return _from_expr(ast, context);
+    case <union>:    return _from_aggregate(node, head);
+    case <expr>:     return _from_expr(node, context);
   }
-  return _from_modifiers(ast, context);
+  return _from_modifiers(node, context);
 }
 
 /* A modifier chain in source order: pointer marks, qualifiers, storage
    classes, `inline`, and nested pointer, array, function, and bitfield
    declarators, then the Type they modify. A node that starts with no
    modifier converts its children. */
-static List _from_modifiers(List ast, List context) {
+static List _from_modifiers(List node, List context) {
   Array modifiers = NULL;
-  List rest = ast;
+  List rest = node;
   while (rest) {
     Var modifier = rest.car();
     if (modifier is <symbol>) {
@@ -102,7 +102,7 @@ static List _from_modifiers(List ast, List context) {
     rest = rest.cdr();
   }
   if (modifiers) return modifiers.list_free().append(_from_ast(rest, context));
-  return _from_items(ast, context);
+  return _from_items(node, context);
 }
 
 static int _modifier_symbol(Symbol prefix) =>
@@ -123,26 +123,27 @@ static List _from_items(List items, List context) {
 
 // declaration forms
 
-static List _from_declare(List ast) {
-  (List source_type, List bindings) = ast.cdr();
+static List _from_declare(List node) {
+  (List source_type, List bindings) = node.cdr();
   List type = _from_ast(_without_leading_text(source_type), NULL);
   return _from_ast(bindings, type);
 }
 
 /* (bind ?ident ?mods): a declarator modifier is never a named type, so all
    of its source attribute text, `("__attribute__((unused))")`, drops. */
-static List _from_bind(List ast, List context) {
+static List _from_bind(List node, List context) {
   Array typed = [];
-  foreach (Var item, ast.caddr()) if (!_is_source_text(item)) typed.push(item);
+  foreach (Var item, node.caddr())
+    if (!_is_source_text(item)) typed.push(item);
   List mods = _from_ast(typed.list_free(), context);
   return context.type()._modify(mods);
 }
 
 /* A static assertion among the fields, under any origin wrappers, declares
    no field. */
-static List _from_fields(List ast, List context) {
+static List _from_fields(List node, List context) {
   Array types = [];
-  foreach (List field, ast.cdr()) {
+  foreach (List field, node.cdr()) {
     List declaration = field;
     while (declaration.car() == <at>) declaration = declaration.caddr();
     if (declaration.car() != <c-assert>) types.push(_from_ast(field, context));
@@ -150,38 +151,38 @@ static List _from_fields(List ast, List context) {
   return types.list_free();
 }
 
-static List _from_typedef(List ast) {
-  (List source_type, List bindings) = ast.cdr();
+static List _from_typedef(List node) {
+  (List source_type, List bindings) = node.cdr();
   List type = _from_ast(source_type, NULL);
   return _from_ast(bindings, type);
 }
 
-static List _from_fnmod(List ast) {
-  List params = _from_ast(ast.cdr(), NULL);
+static List _from_fnmod(List node) {
+  List params = _from_ast(node.cdr(), NULL);
   return %( func @params );
 }
 
-static List _from_param(List ast) {
-  (Type parameter_type, List mods) = ast.cdr();
+static List _from_param(List node) {
+  (Type parameter_type, List mods) = node.cdr();
   return _from_ast(mods, parameter_type);
 }
 
 /* (struct tag) stays as written, (struct (fields)) converts its fields, and
    (struct tag (fields)) drops its body; a union converts the same way. */
-static List _from_aggregate(List ast, Var head) {
-  if (ast.type().is_aggregate_tag()) return ast;
-  if (ast.type()._is_aggregate_body()) {
-    List fields = _from_ast(ast.cadr(), NULL).flatten();
+static List _from_aggregate(List node, Var head) {
+  if (node.type().is_aggregate_tag()) return node;
+  if (node.type()._is_aggregate_body()) {
+    List fields = _from_ast(node.cadr(), NULL).flatten();
     return %( $head $fields );
   }
-  return %( $head ${ast.cadr()} );
+  return %( $head ${node.cadr()} );
 }
 
 /* An integer literal, such as an array bound, keeps only its spelling; any
    other expression converts its children. */
-static List _from_expr(List ast, List context) {
-  match (ast) case %(expr (int) (literal ? ?value)): return %($value);
-  return _from_items(ast, context);
+static List _from_expr(List node, List context) {
+  match (node) case %(expr (int) (literal ? ?value)): return %($value);
+  return _from_items(node, context);
 }
 
 /* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,
@@ -696,10 +697,10 @@ Type Type.numeric_literal(String text, int floating) {
     if (ch == 'u' || ch == 'U') is_unsigned = 1;
     else longs++;
   }
-  unsigned long long value;
+  unsigned long long magnitude;
   int decimal;
-  if (!_literal_magnitude(text, suffix, value, decimal)) return NULL;
-  return _integer_literal_type(value, decimal, is_unsigned, longs);
+  if (!_literal_magnitude(text, suffix, magnitude, decimal)) return NULL;
+  return _integer_literal_type(magnitude, decimal, is_unsigned, longs);
 }
 
 /** Reads a validated numeric literal at its semantic type's precision.
@@ -736,16 +737,16 @@ static int _integer_literal_end(String text) {
 /* Reads a validated integer token's unsigned magnitude. `decimal` is 1 when
    the token has no radix prefix and no octal leading zero. */
 static int _literal_magnitude(
-  String text, int end, unsigned long long &value, int &decimal) {
+  String text, int end, unsigned long long &magnitude, int &decimal) {
   int pos = 0, base = _radix(text, end, pos);
   decimal = base == 10;
-  unsigned long long result = 0;
+  unsigned long long sum = 0;
   for (; pos < end; pos++) {
     unsigned digit = _literal_digit((unsigned char) text[pos]);
-    if (result > (ULLONG_MAX - digit) / (unsigned) base) return 0;
-    result = result * (unsigned) base + digit;
+    if (sum > (ULLONG_MAX - digit) / (unsigned) base) return 0;
+    sum = sum * (unsigned) base + digit;
   }
-  value = result;
+  magnitude = sum;
   return 1;
 }
 
@@ -767,32 +768,32 @@ static unsigned _literal_digit(int ch) =>
 /* C gives an integer literal the first type of its suffix's list that holds
    the value; a decimal literal without `u` skips the unsigned types. */
 static Type _integer_literal_type(
-  unsigned long long value, int decimal, int is_unsigned, int longs) {
+  unsigned long long magnitude, int decimal, int is_unsigned, int longs) {
   if (!is_unsigned && !longs) {
-    if (value <= INT_MAX) return %(int);
-    if (!decimal && value <= UINT_MAX) return %(unsigned);
-    if (value <= LONG_MAX) return %(long);
-    if (!decimal && value <= ULONG_MAX) return %(unsigned long);
-    if (value <= LLONG_MAX) return %(long long);
+    if (magnitude <= INT_MAX) return %(int);
+    if (!decimal && magnitude <= UINT_MAX) return %(unsigned);
+    if (magnitude <= LONG_MAX) return %(long);
+    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (magnitude <= LLONG_MAX) return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && !longs) {
-    if (value <= UINT_MAX) return %(unsigned);
-    if (value <= ULONG_MAX) return %(unsigned long);
+    if (magnitude <= UINT_MAX) return %(unsigned);
+    if (magnitude <= ULONG_MAX) return %(unsigned long);
     return %(unsigned long long);
   }
   if (!is_unsigned && longs == 1) {
-    if (value <= LONG_MAX) return %(long);
-    if (!decimal && value <= ULONG_MAX) return %(unsigned long);
-    if (value <= LLONG_MAX) return %(long long);
+    if (magnitude <= LONG_MAX) return %(long);
+    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (magnitude <= LLONG_MAX) return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && longs == 1)
-    return value <= ULONG_MAX ? %(unsigned long) : %(unsigned long long);
+    return magnitude <= ULONG_MAX ? %(unsigned long) : %(unsigned long long);
   if (!is_unsigned && longs == 2) {
-    if (value <= LLONG_MAX) return %(long long);
+    if (magnitude <= LLONG_MAX) return %(long long);
     return decimal ? NULL : %(unsigned long long);
   }
   return %(unsigned long long);
@@ -853,18 +854,18 @@ String ast_indirect_identifier(Var value) {
    What remains is a name, a designation through a pointer, or neither. */
 static Var _designated(Var value) {
   while (value is <list>) {
-    List ast = value;
-    Var inner = _same_object(ast);
-    if (inner is void) return ast;
+    List node = value;
+    Var inner = _same_object(node);
+    if (inner is void) return node;
     value = inner;
   }
   return NULL;
 }
 
 /* One step inward through an `expr` wrapper, parentheses, a member, or an
-   array index; `void` when `ast` is none of them. */
-static Var _same_object(List ast) {
-  match (ast) {
+   array index; `void` when `node` is none of them. */
+static Var _same_object(List node) {
+  match (node) {
     case %(!or (expr ? ?inner) (parens ?inner)): return inner;
     case %(index (!set ?base (expr ?base_type ?)) ?): {
       Type type = base_type;
