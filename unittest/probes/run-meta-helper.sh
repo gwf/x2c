@@ -4,7 +4,8 @@ set -euo pipefail
 # The project meta helper: a body that crashes, exits, overflows the stack,
 # or passes the deadline is reported at its call, the next call runs in a
 # new helper, and no helper outlives the translation that started it, with
-# one translation worker or eight.
+# one translation worker or eight. No process that compile-time code starts
+# outlives the helper either.
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd -P)
 BUILD="$ROOT/unittest/build/meta-helper"
@@ -99,6 +100,121 @@ if grep -q "slow.x:5:" slow.out; then
   fail "call after a timeout failed"
 fi
 [ -z "$(helpers)" ] || fail "helper left running after a timeout"
+
+# A job that a call starts ends with the call, and one that a unit's
+# `meta static` initializer starts ends by the next unit's reset. Whatever
+# compile-time code leaves running ends with the helper, whether it quits,
+# crashes, passes the deadline, or loses the translation that started it.
+# Each job records its pid in jobs.pids.
+export META_HELPER_JOBS="$BUILD/jobs.pids" META_HELPER_UNIT="$BUILD/unit.pid"
+mkdir -p units
+for unit in a b; do
+  cat > "units/$unit.x" <<'EOF'
+#include <errno.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "process.x"
+
+meta static long started(void) {
+  Job job = List.job(%(sleep 30));
+  job.start();
+  FILE *out = fopen(getenv("META_HELPER_JOBS"), "a");
+  fprintf(out, "%ld\n", job.pids[0]);
+  fclose(out);
+  return job.pids[0];
+}
+
+meta static long unit_job = started();
+
+/* Whether the job that the last unit's initializer started has ended;
+   this unit's takes its place. */
+meta static int last_ended(void) {
+  long last = 0;
+  FILE *in = fopen(getenv("META_HELPER_UNIT"), "r");
+  if (in) {
+    if (fscanf(in, "%ld", &last) != 1) last = 0;
+    fclose(in);
+  }
+  FILE *out = fopen(getenv("META_HELPER_UNIT"), "w");
+  fprintf(out, "%ld\n", unit_job);
+  fclose(out);
+  return last > 0 && kill((pid_t) last, 0) == -1 && errno == ESRCH;
+}
+
+meta static int run(int x) {
+  started();
+  if (getenv("META_HELPER_CRASH")) {
+    volatile int *p = (volatile int *) (long) (x - 1);
+    *p = x;
+  }
+  if (getenv("META_HELPER_SPIN")) for (;;) x++;
+  return x;
+}
+
+int ended = $last_ended();
+int ran = $run(1);
+EOF
+done
+
+# Whether every job in jobs.pids has ended, allowing three seconds for a
+# killed one to be reaped. Jobs still running are killed.
+jobs_ended() {
+  local pid alive
+  [ -s jobs.pids ] || return 1
+  for _ in $(seq 30); do
+    alive=
+    while read -r pid; do
+      if kill -0 "$pid" 2>/dev/null; then alive=$pid; fi
+    done <jobs.pids
+    [ -z "$alive" ] && return 0
+    sleep 0.1
+  done
+  xargs kill -KILL <jobs.pids 2>/dev/null || true
+  return 1
+}
+
+: >jobs.pids
+rm -f unit.pid
+"$X2C" translate -j 1 --out-dir out units/a.x units/b.x >units.out 2>&1 ||
+  fail "job units did not translate: $(cat units.out)"
+grep -q "int ended = 1;" out/b.c ||
+  fail "an initializer's job outlived the next unit's reset"
+jobs_ended || fail "a job outlived its translation"
+
+: >jobs.pids
+META_HELPER_CRASH=1 X2C_META_TIMEOUT=20 "$X2C" translate --out-dir out \
+  units/a.x >units.out 2>&1 || true
+grep -q "units/a.x:.*: macro: this meta call stopped" units.out ||
+  fail "crash with a job running not reported: $(cat units.out)"
+jobs_ended || fail "a job outlived a crashed helper"
+
+: >jobs.pids
+META_HELPER_SPIN=1 X2C_META_TIMEOUT=2 "$X2C" translate --out-dir out \
+  units/a.x >units.out 2>&1 || true
+grep -q "units/a.x:.*: macro: this meta call ran longer than 2 s" \
+  units.out || fail "timeout with a job running not reported"
+jobs_ended || fail "a job outlived a helper past its deadline"
+
+# The helper leads its own process group, which a signal to the
+# translation's group does not reach, so it ends itself and its jobs when
+# the translation that started it is killed.
+: >jobs.pids
+META_HELPER_SPIN=1 X2C_META_TIMEOUT=0 "$X2C" translate --out-dir out \
+  units/a.x >units.out 2>&1 &
+translation=$!
+for _ in $(seq 100); do
+  (($(wc -l <jobs.pids) >= 3)) && break
+  sleep 0.1
+done
+kill -KILL "$translation"
+wait "$translation" 2>/dev/null || true
+jobs_ended || fail "a job outlived a killed translation"
+for _ in $(seq 30); do
+  [ -z "$(helpers)" ] && break
+  sleep 0.1
+done
+[ -z "$(helpers)" ] || fail "helper left running after a killed translation"
 
 for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
   printf '#include <stdio.h>\n$(import "../calls.xmacro")\n' >"jobs/u$i.x"

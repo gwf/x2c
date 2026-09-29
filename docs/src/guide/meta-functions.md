@@ -722,7 +722,9 @@ is an ordinary call of `f`. `$` keeps its meaning only where program code
 meets compile-time code, and says evaluate now and insert the result.
 
 Each unit gets its own `meta static` values: the helper runs their
-initializers again before the first call a unit makes.
+initializers again before the first call a unit makes. What those
+initializers allocate, a Job one starts included, lasts until the next
+unit's reset or the end of the helper.
 
 A project `meta` function receives what it needs as arguments and returns
 a value; it does not query the compiler. The syntax builders of
@@ -744,6 +746,13 @@ reported with the function and the reason, and the next call starts a new
 helper. A `$` call that runs longer than 60 seconds is stopped the same
 way; `X2C_META_TIMEOUT` sets another limit in seconds, and `0` turns the
 limit off.
+
+A process that compile-time code starts ends no later than its helper.
+The helper leads a process group of its own, and everything in that group
+ends when the helper ends, whether it quits, crashes, or passes the
+deadline, and when the translation that started it ends. Since that group
+is not the terminal's, compile-time code that reads the terminal is
+stopped until the call's deadline.
 
 ### Arguments and results
 

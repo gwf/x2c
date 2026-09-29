@@ -8,7 +8,7 @@
 
 static List _6, _5, _4;
 
-static String _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _2;
+static String _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _2;
 
 static Var _3, _1, _0;
 
@@ -63,7 +63,7 @@ static int _Parser_bounds(_Parser * p, int * min, int * max);
 
 static int _Parser_braces(_Parser * p, int * min, int * max);
 
-static int _Parser_digits(_Parser * p, int * out);
+static int _Parser_digits(_Parser * p, long long * out);
 
 static int _is_quantifier(int byte);
 
@@ -263,15 +263,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _18 = String_new(" }");
   _19 = String_new("unmatched closing parenthesis");
   _20 = String_new("nothing to repeat");
-  _21 = String_new("repetition range out of order");
-  _22 = String_new("missing closing parenthesis");
-  _23 = String_new("unknown group syntax");
-  _24 = String_new("malformed group name");
-  _25 = String_new("unterminated character class");
-  _26 = String_new("character range out of order");
-  _27 = String_new("pattern ends in a backslash");
-  _28 = String_new("unknown escape");
-  _29 = String_new("}");
+  _21 = String_new("repetition count too large");
+  _22 = String_new("repetition range out of order");
+  _23 = String_new("missing closing parenthesis");
+  _24 = String_new("unknown group syntax");
+  _25 = String_new("malformed group name");
+  _26 = String_new("unterminated character class");
+  _27 = String_new("character range out of order");
+  _28 = String_new("pattern ends in a backslash");
+  _29 = String_new("unknown escape");
+  _30 = String_new("}");
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -609,29 +610,37 @@ static int _Parser_bounds(_Parser * p, int * min, int * max){
 
 static int _Parser_braces(_Parser * p, int * min, int * max){
   int start = p -> pos ++;
-  if(! _Parser_digits(p, &((* min)))){
+  long long low, high;
+  if(! _Parser_digits(p, &(low))){
     p -> pos = start;
     return 0;
   }
-  (* max) =(* min);
+  high = low;
   if(_Parser_peek(p) == ','){
     p -> pos ++;
-    if(! _Parser_digits(p, &((* max))))(* max) = - 1;
+    if(! _Parser_digits(p, &(high))) high = - 1;
   }
   if(_Parser_peek(p) != '}'){
     p -> pos = start;
     return 0;
   }
-  if((* max) >= 0 &&(* max) <(* min)){
+  if(low > INT_MAX || high > INT_MAX){
     p -> pos ++;
     _Parser_fail(p, _21);
   }
+  if(high >= 0 && high < low){
+    p -> pos ++;
+    _Parser_fail(p, _22);
+  }
+  (* min) =(int) low;
+  (* max) =(int) high;
   return 1;
 }
 
-static int _Parser_digits(_Parser * p, int * out){
-  int start = p -> pos, value = 0;
-  while(scan_ascii_digit(_Parser_peek(p))) value = value * 10 +(p -> text[p -> pos ++] - '0');
+static int _Parser_digits(_Parser * p, long long * out){
+  int start = p -> pos;
+  long long value = 0;
+  for(;  scan_ascii_digit(_Parser_peek(p));  p -> pos ++) if(value <= INT_MAX) value = value * 10 +(p -> text[p -> pos] - '0');
   (* out) = value;
   return p -> pos > start;
 }
@@ -646,7 +655,7 @@ static int _Parser_peek(_Parser * p){
 
 _Noreturn static void _Parser_fail(_Parser * p, String why){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "_Parser_fail",.line = 263};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "_Parser_fail",.line = 273};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(34470112412), String_var(p -> regex -> pattern), Symbol_var(1019648360), int_var(p -> pos));
     __builtin_unreachable();
   }
@@ -686,7 +695,7 @@ static _RegexNode _Parser_literal(_Parser * p, int byte){
 static _RegexNode _Parser_group(_Parser * p){
   int index = _Parser_peek(p) == '?' ? _Parser_group_syntax(p) : _Parser_add_capture(p, NULL);
   _RegexNode body = _Parser_alternation(p);
-  if(_Parser_peek(p) != ')') _Parser_fail(p, _22);
+  if(_Parser_peek(p) != ')') _Parser_fail(p, _23);
   p -> pos ++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
@@ -700,7 +709,7 @@ static int _Parser_group_syntax(_Parser * p){
   }
   if(marker != '<'){
     p -> pos --;
-    _Parser_fail(p, _23);
+    _Parser_fail(p, _24);
   }
   p -> pos ++;
   return _Parser_add_capture(p, _Parser_name(p));
@@ -711,7 +720,7 @@ static String _Parser_name(_Parser * p){
   while(_is_word(_Parser_peek(p))) p -> pos ++;
   if(p -> pos == start || scan_ascii_digit(p -> text[start]) || _Parser_peek(p) != '>'){
     p -> pos = start;
-    _Parser_fail(p, _24);
+    _Parser_fail(p, _25);
   }
   String name = String_getslice(p -> regex -> pattern, start, p -> pos, 1);
   p -> pos ++;
@@ -742,7 +751,7 @@ static _RegexNode _Parser_set(_Parser * p){
   if(negate) p -> pos ++;
   int first = p -> pos;
   while(p -> pos == first || _Parser_peek(p) != ']'){
-    if(p -> pos >= p -> len) _Parser_fail(p, _25);
+    if(p -> pos >= p -> len) _Parser_fail(p, _26);
     _Parser_member(p, node);
   }
   p -> pos ++;
@@ -763,12 +772,12 @@ static int _Parser_range_end(_Parser * p, int low){
   p -> pos ++;
   int high =(unsigned char) p -> text[p -> pos ++];
   if(high == '\\') high = _Parser_escape(p);
-  if(high < low) _Parser_fail(p, _26);
+  if(high < low) _Parser_fail(p, _27);
   return high;
 }
 
 static int _Parser_escape(_Parser * p){
-  if(p -> pos >= p -> len) _Parser_fail(p, _27);
+  if(p -> pos >= p -> len) _Parser_fail(p, _28);
   int byte =(unsigned char) p -> text[p -> pos ++];
   switch(byte){
     case 't' : return '\t';
@@ -781,7 +790,7 @@ static int _Parser_escape(_Parser * p){
   }
   if(! _is_word(byte) && byte < 128) return byte;
   p -> pos --;
-  _Parser_fail(p, _28);
+  _Parser_fail(p, _29);
 }
 
 static RegexMatch _search(Regex regex, String subject, int offset){
@@ -974,7 +983,7 @@ static int _Matcher_iterate(_Matcher * m, _RegexNode rep, int count, int pos, in
 
 _Noreturn static void _Matcher_too_deep(_Matcher * m){
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_Matcher_too_deep",.line = 605};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "_Matcher_too_deep",.line = 615};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))), Symbol_var(34470112412), String_var(m -> regex -> pattern), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL))), Symbol_var(25782888), int_var(_DEPTH_LIMIT));
     __builtin_unreachable();
   }
@@ -1077,7 +1086,7 @@ static int _reference(Buffer out, RegexMatch found, String text, int i){
     String_write_str(RegexMatch_getindex(found, int_var(next - '0')), out);
     return i + 1;
   }
-  int close = next == '{' ? String_find_within(text, _29, i + 2, - 1) : - 1;
+  int close = next == '{' ? String_find_within(text, _30, i + 2, - 1) : - 1;
   if(close < 0){
     Buffer_write_char(out, '$');
     return i;

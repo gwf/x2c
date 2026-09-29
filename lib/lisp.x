@@ -303,6 +303,7 @@ static Var _call_native(Lisp lisp, Func fn, List values) {
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
     ? narrow : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
+  defer if (argv != narrow) Scope.free(argv);
   unsigned argc = 0;
   foreach (Var value, values) argv[argc++] = FuncArg.value(value);
   return fn.apply(argc, argv);

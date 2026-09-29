@@ -42,6 +42,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
 
 /* The generated table unit supplies each module's name-to-`Func` Map. */
 Map x2c_meta_helper_table(int index);
@@ -56,6 +59,10 @@ static Array helper_notices = NULL;
    loaded it. */
 static Map helper_modules = NULL;
 static Scope helper_module_scope = NULL;
+
+/* What the unit's `meta static` initializers allocate, a Job one starts
+   included, which lasts until the next unit's reset or the helper's end. */
+static Scope helper_unit_scope = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
 static void _fail(String message, List notes) {
@@ -317,10 +324,41 @@ $scope() static void _apply(Var target, String name, List arguments) {
         ("function: $name")));
 }
 
+/* Runs the `meta static` initializers of `table` again, in a new unit
+   Scope once the last unit's has ended. Returns the failure that the next
+   call replies with, or NULL. */
+static List _reset(Map table) {
+  helper_unit_scope.destroy();
+  helper_unit_scope = NULL;
+  Var reset;
+  if (!table || !table.try_get("x2c_module_reset", reset)) return NULL;
+  $scope(&helper_unit_scope) {
+    try ((Func) reset.pointer()).apply(0, NULL);
+    catch %(?code *detail):
+      return %(failure ${Error.snapshot(cons(code, detail))});
+  }
+  return NULL;
+}
+
+/* Ends the helper and every process it started once the process that
+   started it has gone. The helper leads its own process group, which a
+   signal to the compiler's group, such as Ctrl-C, does not reach. */
+static void *_watch(void *parent) {
+  while (getppid() == (pid_t) (long) parent) usleep(100000);
+  killpg(getpid(), SIGKILL);
+  return NULL;
+}
+
 int main(void) {
   Lisp.kernel();
   helper_out = fdopen(4, "wb");
   if (!helper_out) _exit(2);
+  /* A process that a body starts inherits neither end of the protocol, so
+     the compiler reads the end of the replies as soon as the helper ends. */
+  fcntl(3, F_SETFD, FD_CLOEXEC);
+  fcntl(4, F_SETFD, FD_CLOEXEC);
+  pthread_t watcher;
+  pthread_create(&watcher, NULL, _watch, (void *) (long) getppid());
   helper_modules = {};
   Buffer input = Buffer.new(0);
   Map tables = {};
@@ -332,23 +370,21 @@ int main(void) {
   /* A failed reset is the reply to the next call it prepared. */
   List reset_failure = NULL;
   for (;;) {
-    Var request = _request(3, input), table, reset;
+    Var request = _request(3, input), table;
     match (request) {
       case %(reset ?(int index)): {
         current = tables.try_get(index, table) ? table : NULL;
-        reset_failure = NULL;
-        if (current && current.try_get("x2c_module_reset", reset))
-          try ((Func) reset.pointer()).apply(0, NULL);
-          catch %(?code *detail):
-            reset_failure =
-              %(failure ${Error.snapshot(cons(code, detail))});
+        reset_failure = _reset(current);
       }
       case %(call ?(String name) ?(List arguments) ?(List globals)): {
         Macro.use_subject(globals);
         if (reset_failure) _reply(reset_failure);
         else _call(current, name, arguments);
       }
-      default: _exit(0);
+      default: {
+        helper_unit_scope.destroy();
+        _exit(0);
+      }
     }
   }
 }

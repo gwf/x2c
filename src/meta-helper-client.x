@@ -31,11 +31,12 @@ static Map helper_failures = NULL, helper_units = NULL;
 static Scope helper_scope = NULL;
 
 /* The helper this process runs, its ends of the two pipes, the reply bytes
-   read so far, the table the unit being translated calls, and whether that
-   unit's reset is still to be sent. */
+   read so far, the table the unit being translated calls, whether that
+   unit's reset is still to be sent, and the helper's wait status once it
+   has been reaped, or -1. */
 static pid_t helper_pid = 0, helper_owner = 0;
 static int helper_to = -1, helper_from = -1, helper_table = 0;
-static int helper_reset = 0;
+static int helper_reset = 0, helper_status = -1;
 static Buffer helper_input = NULL;
 
 // calls
@@ -128,7 +129,9 @@ static Var Call.next_reply(Call *call) {
 /* Starts the helper unless this process runs one. Every pipe end is
    close-on-exec, and the helper keeps only its descriptors 3 and 4, so it
    reads the end of its requests as soon as this process closes its end or
-   ends. */
+   ends. The helper leads a process group of its own, which every process
+   it starts joins; this side sets the group too, so it exists before the
+   helper runs. */
 static int _helper_start(void) {
   if (_helper_running()) return 1;
   helper_pid = 0;
@@ -152,6 +155,7 @@ static int _helper_start(void) {
     close(replies[0]);
     return 0;
   }
+  setpgid(pid, pid);
   helper_pid = pid;
   helper_owner = getpid();
   helper_to = requests[1];
@@ -162,13 +166,15 @@ static int _helper_start(void) {
 }
 
 /* Runs the helper in the forked child with its requests on descriptor 3
-   and its replies on 4. Copying each end above 10 first keeps `dup2` from
-   overwriting the other end or leaving one close-on-exec. */
+   and its replies on 4, as the leader of a new process group. Copying each
+   end above 10 first keeps `dup2` from overwriting the other end or
+   leaving one close-on-exec. */
 static void _helper_exec(int requests, int replies) {
   int in = fcntl(requests, F_DUPFD_CLOEXEC, 10);
   int out = fcntl(replies, F_DUPFD_CLOEXEC, 10);
   dup2(in, 3);
   dup2(out, 4);
+  setpgid(0, 0);
   execl(helper_path, helper_path, (char *) NULL);
   _exit(127);
 }
@@ -177,18 +183,34 @@ static void _helper_exec(int requests, int replies) {
    forked from a process that runs one starts its own. */
 static int _helper_running(void) => helper_pid > 0 && helper_owner == getpid();
 
+/* Whether the helper has ended, which reaps it and keeps its status. */
+static int _helper_reaped(void) {
+  int status;
+  if (helper_status < 0 &&
+      waitpid(helper_pid, &status, WNOHANG) == helper_pid)
+    helper_status = status;
+  return helper_status >= 0;
+}
+
 /* Ends the helper this process started, if any, and forgets it: asks it
-   to quit, or sends it `signal`, and reaps it. Returns its wait status. */
+   to quit, or sends `signal` to its process group, and reaps it. A process
+   group lasts, under its id, while any process in it runs, so killing the
+   helper's group after the reap ends only what the helper started and
+   left running, such as a job whose body crashed. Returns the helper's
+   wait status. */
 static int _helper_stop(int signal) {
   int status = 0;
   if (_helper_running()) {
-    if (signal) kill(helper_pid, signal);
+    if (signal) killpg(helper_pid, signal);
     else _helper_send(%(quit));
     close(helper_to);
     close(helper_from);
-    waitpid(helper_pid, &status, 0);
+    if (helper_status < 0) waitpid(helper_pid, &helper_status, 0);
+    killpg(helper_pid, SIGKILL);
+    status = helper_status;
   }
   helper_pid = 0;
+  helper_status = -1;
   helper_to = helper_from = -1;
   if (helper_input) helper_input.clear();
   return status;
@@ -252,18 +274,21 @@ static int _take_frame(Var &reply) {
 
 /* Waits for more reply bytes until `deadline`, or for as long as it takes
    when it is 0, and reads them. Returns 1 to look for a frame again, 0
-   when the helper ended, or -1 when `deadline` passed first. */
+   when the helper ended, or -1 when `deadline` passed first. A process
+   that the helper started before it could close its end of the replies
+   keeps that end open after the helper ends, so a wait lasts at most
+   100 ms before it asks whether the helper has ended. */
 static int _read_input(double deadline) {
-  int wait = -1;
+  int wait = 100;
   if (deadline > 0) {
     double left = deadline - _now();
     if (left <= 0) return -1;
-    wait = (int) (left * 1000) + 1;
+    if (left < 0.1) wait = (int) (left * 1000) + 1;
   }
   struct pollfd ready = { .fd = helper_from, .events = POLLIN };
   int polled = poll(&ready, 1, wait);
   if (polled < 0 && errno == EINTR) return 1;
-  if (polled == 0) return -1;
+  if (polled == 0) return _helper_reaped() ? 0 : 1;
   char bytes[65536];
   ssize_t n = read(helper_from, bytes, sizeof bytes);
   if (n < 0 && errno == EINTR) return 1;

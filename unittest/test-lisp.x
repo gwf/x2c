@@ -461,6 +461,23 @@ static void lisp_apply_uses_evaluated_values(void) {
   lisp.destroy();
 }
 
+/* Nine values do not fit the inline argument array, so `apply` takes their
+   FuncArgs from the session scope and frees them when the native returns
+   and when it raises. Each form runs once first, so the measured runs count
+   only storage that a repeated call keeps. */
+static void lisp_apply_frees_wide_native_arguments(void) {
+  Lisp lisp = _boot_session();
+  const char *sum = "(apply + '(1 2 3 4 5 6 7 8 9))";
+  const char *bad_sum = "(apply + '(1 2 3 4 5 6 7 8 (9)))";
+  _ev(lisp, sum);
+  _raised_code(lisp, bad_sum);
+  size_t before = Scope.stats().live_requested_bytes;
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, sum)), 45);
+  EXPECT_INT_EQ(_raised_code(lisp, bad_sum), <bad-types>);
+  EXPECT_INT_EQ(Scope.stats().live_requested_bytes, before);
+  lisp.destroy();
+}
+
 static void lisp_call_budget_stops_a_loop(void) {
   // A loop that recurses in tail position reuses its frame and nests
   // nothing, so the call-depth budget never sees it. The call budget does.
@@ -1625,6 +1642,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
   $test.run(lisp_apply_uses_evaluated_values);
+  $test.run(lisp_apply_frees_wide_native_arguments);
   $test.run(lisp_call_budget_stops_a_loop);
   $test.run(lisp_call_budget_stays_exhausted);
   $test.run(lisp_eval_rest_parameters);
