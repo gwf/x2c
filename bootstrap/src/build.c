@@ -1776,8 +1776,8 @@ int Build_finish(Build b){
   report_progress(action -> phase, 0, 1, b -> output);
   int input_count = List_len(inputs);
   String noun = action -> phase == 3362278794 ?(input_count == 1 ? _168 : _169) :(input_count == 1 ? _170 : _171);
-  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_81), cons(String_var(_key(b -> output)), NULL)))) : NULL;
-  if(String_truth(state_path) && ! b -> request -> dry_run && ! access(b -> output, R_OK)){
+  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 && ! b -> request -> dry_run ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_81), cons(String_var(_key(b -> output)), NULL)))) : NULL;
+  if(String_truth(state_path) && ! access(b -> output, R_OK)){
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, &(ok));
     if(ok && _state_matches(state_path, hash)){
