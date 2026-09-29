@@ -19,6 +19,15 @@
 #include "parse.x"
 #include "meta.x"
 
+macro Decorator $guard_value_rendering(
+  Function $function, Name $path, Expr $enter, Expr $fallback,
+  Expr $leave, Statement $body...) {
+  RenderPath $path;
+  if (!$enter) return $fallback;
+  defer $leave;
+  $body...
+}
+
 /* A relative path names a file below the working directory, or else one below
    the x2c root, where `Compiler.display_path` spells root sources. */
 static String _normalize_file(Compiler compiler, String file) {
@@ -2169,7 +2178,6 @@ static List _guard_value_rendering(
              (bind ? ((fnmod (params
                (param ? (bind ?boxed ?)) *remaining)) *)))
            (block *body)): {
-      Type returns = result.type().declared();
       List value = %(expr ("Var") (ident $boxed));
       List fallback = NULL;
       if (member == "str" || member == "repr")
@@ -2188,13 +2196,10 @@ static List _guard_value_rendering(
       List enter = %(expr (int)
         (call "RenderPath_enter" (args $address
           (expr (* void) (call "Var_pointer" (args $value))))));
-      return %(function $result $declarator
-        (block
-          (declare ("RenderPath") (bindings (bind $path ())))
-          (if (expr (int) (op ! $enter)) (return $returns $fallback))
-          (defer (stmnt (expr (void)
-            (call "RenderPath_leave" (args $address)))))
-          @body));
+      List leave = %(expr (void) (call "RenderPath_leave" (args $address)));
+      Macro shape = $guard_value_rendering;
+      return compiler.rebuild_function(function,
+        shape(path, enter, fallback, leave, body));
     }
   return function;
 }

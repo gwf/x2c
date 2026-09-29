@@ -32,6 +32,21 @@ macro Decorator $initialized_entry(
   $body...
 }
 
+macro Unit $cache_function(Type $type, Name $name,
+    Statement $body...) {
+  $type $name(void) {
+    $body...
+  }
+}
+
+macro Statement $header_cache_setup(Statement $protocol, Expr $guard,
+    Statement $body...) {
+  $protocol
+  if ($guard) return;
+  $guard = 1;
+  $body...
+}
+
 /* Cache ids keep the identity assigned by `Compiler.cache`. Source slots use
    compact `_id` names; the generated-header prefix qualifies private slots
    with the source filename hash. */
@@ -468,9 +483,9 @@ static List _rewrite_file_scope_statics(
       List helper = compiler.sym.introduce(
         compiler.fresh_name("static_initialize"));
       initializers[i] = %($binding $assignment $helper $arms);
-      List function = %(function (static void)
-        (bind $helper ((fnmod (params (param (void) (bind () ()))))))
-        (block $assignment));
+      Macro shape = $cache_function;
+      List function = compiler.rebuild_unit_function(
+        shape(%(static void), helper, %($assignment)));
       output.push(%(sourceinit $function));
     }
   }
@@ -567,17 +582,17 @@ List _initialization_guard(List guard) => %(declare (static int)
     (bindings (op = (bind $guard ()) (expr (int) (literal (int) "0")))));
 
 static List _make_header_cache_init(
-  List guard, List initializer, List statements) => %(
-    function (("__attribute__((constructor))") static void)
-      (bind $initializer ((fnmod (params (param (void) (bind () ()))))))
-      (block
-        (stmnt (expr (void) (call "x2c_initialize_protocols" (args))))
-        (if (expr (int) (ident $guard)) (return))
-        (stmnt
-          (expr (int) (op = (expr (int) (ident $guard))
-            (expr (int) (literal (int) "1")))))
-        @statements)
-  );
+  Compiler c, List guard, List initializer, List statements) {
+  Macro setup = $header_cache_setup;
+  Macro shape = $cache_function;
+  List type = %(("__attribute__((constructor))") static void);
+  List protocol_call = %(stmnt
+    (expr (void) (call "x2c_initialize_protocols" (args))));
+  List body = c.rebuild_statement(setup(
+    protocol_call, %(expr (int) (ident $guard)), statements)).cdr();
+  return c.rebuild_unit_function(
+    shape(type, initializer, body));
+}
 
 List _patch_initialized_entry(
   Compiler c, List function, List body, List guard, List entry) {
@@ -612,7 +627,7 @@ static List _setup_header_cache(
     statements.push(_rewrite_header_cache_refs(c, statement, prefix, NULL));
   }
   declarations.push(
-    _make_header_cache_init(guard, initializer, statements.list_free()));
+    _make_header_cache_init(c, guard, initializer, statements.list_free()));
   ids.free();
   List prelude = declarations.list_free(), Array output = [];
   int inserted = 0;

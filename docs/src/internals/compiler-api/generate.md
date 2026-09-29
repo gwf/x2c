@@ -64,7 +64,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1192`
+Source: `src/generate.x:1207`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -76,7 +76,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1295`
+Source: `src/generate.x:1310`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -85,7 +85,7 @@ Source: `src/generate.x:1295`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:781`
+Source: `src/generate.x:796`
 
 ## Design notes
 
