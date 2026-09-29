@@ -627,6 +627,9 @@ static int _Matcher.iteration(
 
 // replacement
 
+/* `subject` with its first match, or every match when `all` is set,
+   replaced by what `fn` returns for the match or else by `replacement`
+   with its references expanded. */
 static String _rebuild(
   Regex r, String subject, int all, Func fn, String replacement) {
   Buffer out = $auto(Buffer.new(0));
