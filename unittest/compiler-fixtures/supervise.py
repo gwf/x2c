@@ -14,6 +14,8 @@ import time
 def stop_group(process, grace=1):
   # Descendants can remain after the worker exits. Address its whole group,
   # allowing signal handlers a short grace before killing stubborn children.
+  # macOS fails with EPERM when the group holds only zombies or members this
+  # process may not signal. Like a vanished group, it has nothing to stop.
   try:
     os.killpg(process.pid, signal.SIGTERM)
     deadline = time.monotonic() + grace
@@ -22,7 +24,7 @@ def stop_group(process, grace=1):
       os.killpg(process.pid, 0)
       time.sleep(0.02)
     os.killpg(process.pid, signal.SIGKILL)
-  except ProcessLookupError:
+  except (ProcessLookupError, PermissionError):
     pass
   process.wait()
 
