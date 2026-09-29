@@ -61,11 +61,13 @@ List Macro_pattern(Macro t, List names);
 
 typedef struct MacroFixedSlots{
   int count, slots[MACHINE_BINDER_MAX];
+  int names, name_slots[MACHINE_BINDER_MAX];
 }
 MacroFixedSlots;
 
 typedef struct MacroPublishing{
-  int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX];
+  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
+  int to[MACHINE_BINDER_MAX];
   int count, binders, complete;
   unsigned long definite;
 }
