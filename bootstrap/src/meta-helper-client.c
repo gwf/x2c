@@ -373,7 +373,10 @@ static int _helper_start(void){
   if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests) || pipe(replies)) return 0;  for(int i = 0;  i < 2;  i ++){
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);  fcntl(replies[i], F_SETFD, FD_CLOEXEC);
   }
-  pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  helper_pid = pid;  helper_owner = getpid();  helper_to = requests[1];  helper_from = replies[0];  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  helper_reset = 1;  return 1;
+  pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  if(pid < 0){
+    close(requests[1]);  close(replies[0]);  return 0;
+  }
+  helper_pid = pid;  helper_owner = getpid();  helper_to = requests[1];  helper_from = replies[0];  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  helper_reset = 1;  return 1;
 }
 
 _Noreturn static void _helper_exec(int requests, int replies){
