@@ -3,27 +3,20 @@
     Copyright (c) 2025 Gary William Flake
 
     A `String` is an immutable, interned, NUL-terminated byte sequence. Equal
-    non-empty `String`s visible in one pool chain have one canonical pointer;
-    empty `String` is native zero. The private header owns
-    exact byte length and
-    a cached content hash.
+    nonempty `String`s visible in one pool chain share one canonical pointer,
+    and the empty `String` is native zero. A private header before the bytes
+    holds the exact length and a cached content hash. A `String` cannot hold
+    an embedded NUL, and every operation here works on bytes, without Unicode
+    character semantics.
 
-    `String.malloc` creates a transient mutable buffer in the active pool whose
-    byte count includes room for the final NUL. Finish and release that buffer
-    with `String.intern_free`; `String.intern` instead copies borrowed C input.
-    `String.free` releases transient buffers early but leaves visible canonical
-    `String`s intact. Releasing the owning pool invalidates a transient buffer,
-    and invalidates a canonical `String` unless it was promoted. A canonical
-    `String` may instead belong to an ancestor pool.
-
-    `String`s cannot contain embedded NUL bytes and do not claim Unicode
-    character semantics. Case, classification, indexing, slicing, padding,
-    escaping, and iteration operate on bytes.
-
-    Constructing or interning a nonempty canonical `String` may raise
-    `<alloc-fail>`, `<size-limit>`, or `<invariant>` through pool storage and
-    registration. These causes transfer and do not return to the operation.
- */
+    A canonical `String` belongs to the pool that interned it or to an
+    ancestor, and releasing that pool invalidates it unless it was promoted.
+    A transient `String.malloc` buffer belongs to the active pool until
+    `String.intern_free` makes it canonical or `String.free` releases it.
+    Constructing a nonempty `String` may raise `<alloc-fail>`, `<size-limit>`,
+    or `<invariant>` through pool storage and registration; these causes
+    transfer and never return to the operation.
+*/
 
 #pragma once
 
@@ -68,14 +61,13 @@ protocol const char *(String);
 
 // representation
 
+/* `length` includes the trailing NUL. A zero hash marks an unfinished
+   String.malloc buffer; canonical nonempty Strings have their content hash
+   installed before entering a pool table. */
 typedef struct StringHeader {
   int length;
   unsigned hash;
 } *StringHeader;
-
-/* `length` includes the trailing NUL. A zero hash marks an unfinished
-   String.malloc buffer; canonical nonempty Strings have their content hash
-   installed before entering a pool table. */
 
 /* Canonical String payloads are custom-object-safe: Scope allocations are
    max-aligned and the payload begins eight bytes after the base. */
@@ -83,11 +75,14 @@ _Static_assert(
   sizeof(struct StringHeader) == 8,
   "the String header is 8 bytes, so payloads stay aligned");
 
+/* Results up to this many bytes are built and probed on the stack. */
 #define STRING_STACK_BYTES 256
 
+/* A short String and its header on the stack, so probing the pool chain
+   for it allocates nothing. */
 typedef union StringQuery {
   unsigned long align;
-  char bytes[sizeof(struct StringHeader) + 257];
+  char bytes[sizeof(struct StringHeader) + STRING_STACK_BYTES + 1];
 } StringQuery;
 
 static inline StringHeader _header(String str) =>
@@ -98,13 +93,11 @@ static unsigned _hash_n(const char *str, int length) =>
 
 /** Returns the byte length of `str`, excluding the terminating NUL.
     Constant time: the length is cached in the `String`'s private header.
-    Lengths are bytes, not
-    characters, so a multibyte UTF-8 sequence counts once per byte. On a
-    transient `String.malloc` buffer this reports the writable byte count
-    rather than the length of anything written so far.
+    Lengths count bytes, so a multibyte UTF-8 sequence counts once per byte.
+    On a transient `String.malloc` buffer this reports the writable byte
+    count.
 
-    The empty `String` is the null pointer, whose length
-    is 0.
+    The empty `String` is the null pointer, whose length is 0.
 */
 int String.len(String str) {
   if (!str) return 0;
@@ -186,15 +179,12 @@ String String.new_len(const char *str, int len) {
   return _from_bytes(str, (int) length);
 }
 
-/* Copies and canonicalizes bytes in the given pool without changing the
-   process-wide active String pool. Error uses this for its record-local value
-   regions. */
 /** Returns the canonical `String` for at most `length` borrowed bytes in
     `pool`.
-    Copying stops at the first NUL. An existing equal `String` in `pool` or an
-    ancestor is returned with that owner's lifetime; otherwise the new value is
-    owned by `pool`. A null argument, nonpositive length, or empty input
-    returns NULL.
+    The active pool does not change. Copying stops at the first NUL. An
+    existing equal `String` in `pool` or an ancestor is returned with that
+    owner's lifetime; otherwise the new value is owned by `pool`. A null
+    argument, nonpositive length, or empty input returns NULL.
     Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning.
 */
 String String.new_in(Pool pool, const char *bytes, int length) {
@@ -211,19 +201,18 @@ String String.new_in(Pool pool, const char *bytes, int length) {
     argument. It is not the finalizer for a `String.malloc` buffer:
     handing one here interns a second copy and leaves the buffer for the
     caller to free. Use `String.intern_free` for an owned buffer.
-    Raises: `<alloc-fail>` when canonical storage cannot be
-    allocated. `Null` or
-    empty input returns NULL, the empty `String`, without raising.
+    Raises: `<alloc-fail>` when canonical storage cannot be allocated. `Null`
+    or empty input returns NULL, the empty `String`, without raising.
 */
 meta native Self String.intern(Self string) => string.new();
 
 static String _from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
 
+/* A short `String` probes the whole ancestor chain from a stack copy before
+   anything is allocated, and a miss is installed in `pool`. A long one is
+   stored first, and Pool.intern releases that candidate on a hit. */
 static String _from_bytes_in(Pool pool, const char *bytes, int length) {
-  /* Probe the full ancestor chain before allocation for short strings. Long
-     strings allocate first because Pool.intern handles the candidate-hit
-     cleanup. A miss is installed in the supplied pool. */
   if (!pool || !bytes || length <= 0) return NULL;
   unsigned hash = _hash_n(bytes, length);
   if (length <= STRING_STACK_BYTES) {
@@ -232,32 +221,31 @@ static String _from_bytes_in(Pool pool, const char *bytes, int length) {
   }
   size_t total = sizeof(struct StringHeader) + (size_t) length + 1;
   StringHeader header = pool.malloc(total);
+  String string = _store(header, bytes, length, hash);
+  if (length > STRING_STACK_BYTES) return pool.intern(string, header);
+  pool.insert(string);
+  return string;
+}
+
+/* Probes the pool chain from a stack copy of at most STRING_STACK_BYTES
+   bytes. */
+static Var _lookup_bytes(
+  Pool pool, const char *bytes, int length, unsigned hash) {
+  StringQuery query;
+  return pool.lookup(_store((StringHeader) query.bytes, bytes, length, hash));
+}
+
+/* Fills `header` and the `length` bytes after it, with their NUL, and
+   returns those bytes as a String. */
+static inline String _store(
+  StringHeader header, const char *bytes, int length, unsigned hash) {
   header.length = length + 1;
   header.hash = hash;
   String string = (String) ((char *) header + sizeof(struct StringHeader));
   memcpy(string, bytes, length);
   char *out = string;
   out[length] = '\0';
-  if (length <= STRING_STACK_BYTES) {
-    pool.insert(string);
-    return string;
-  }
-  Var canonical = pool.intern(string, header);
-  return canonical;
-}
-
-static Var _lookup_bytes(
-  Pool pool, const char *bytes, int length, unsigned hash) {
-  if (length > STRING_STACK_BYTES) return void;
-  StringQuery query;
-  StringHeader header = (StringHeader) query.bytes;
-  String string = query.bytes + sizeof(struct StringHeader);
-  header.length = length + 1;
-  header.hash = hash;
-  memcpy(string, bytes, length);
-  char *out = string;
-  out[length] = '\0';
-  return pool.lookup(string);
+  return string;
 }
 
 // transient buffers
@@ -270,8 +258,7 @@ static Var _lookup_bytes(
     it with native indexing, then call `String.intern_free` to canonicalize
     and release it, or `String.free` to discard it. The backing allocation
     belongs to the active `String`/`List` pool and is invalidated when that
-    pool
-    is released, even though the caller controls finalization.
+    pool is released, even though the caller controls finalization.
 
     ```x2c
     String buf = String.malloc(6);
@@ -311,9 +298,8 @@ String String.malloc(int len) {
     printf("%s %d\n", canonical, canonical == "abcde");
     ```
     Raises: `<alloc-fail>` when the canonical value cannot be registered. A
-    null argument returns NULL, and a buffer
-    empty at its first byte is released and reported as NULL, the empty
-    `String`, without raising.
+    null argument returns NULL, and a buffer empty at its first byte is
+    released and reported as NULL, the empty `String`, without raising.
 */
 Self String.intern_free(Self string) {
   if (string == NULL) return NULL;
@@ -321,14 +307,12 @@ Self String.intern_free(Self string) {
     _free_unchecked(string);
     return NULL;
   }
-  String result = _intern_owned(string);
-  if (result !== string) _free_unchecked(string);
-  return result;
+  return _intern_owned(string);
 }
 
+/* Finalization consumes a mutable Pool allocation: install the header,
+   then keep the buffer or the canonical hit. */
 static String _finish(String string, int length) {
-  /* Finalization consumes a mutable Pool allocation: install the header,
-     then keep it or the canonical hit. */
   if (length <= 0) {
     _free_unchecked(string);
     return NULL;
@@ -339,17 +323,14 @@ static String _finish(String string, int length) {
   StringHeader header = _header(string);
   header.length = length + 1;
   header.hash = _hash_n(string, length);
-  String result = _intern_owned(string);
-  if (result !== string) _free_unchecked(string);
-  return result;
+  return _intern_owned(string);
 }
 
+/* Installs a nonempty buffer that the active pool chain owns without
+   copying it, or releases it for an equal canonical `String`. Installing a
+   detached or sibling-owned pointer would leave a table entry dangling when
+   that other pool is released. */
 static String _intern_owned(String string) {
-  /* The buffer allocation must belong to the active pool chain. This installs
-     it without copying; installing a detached or sibling-owned pointer would
-     leave a table entry dangling when that other pool is released. The caller
-     disposes of an ancestor-hit candidate. */
-  if (string == NULL || !*string) return NULL;
   StringHeader header = _header(string);
   if (!header.hash) {
     int length = strlen(string);
@@ -358,9 +339,13 @@ static String _intern_owned(String string) {
   }
   Pool pool = Pool.current();
   Var existing = pool.lookup(string);
-  if (existing is not void) return existing;
-  pool.insert(string);
-  return string;
+  if (existing is void) {
+    pool.insert(string);
+    return string;
+  }
+  String found = existing;
+  if (found !== string) _free_unchecked(string);
+  return found;
 }
 
 /** Releases a transient `String.malloc` buffer early.
@@ -374,27 +359,21 @@ static String _intern_owned(String string) {
 */
 meta native void String.free(String str) {
   if (str == NULL) return;
-  if (!_header(str).hash) {
-    _free_unchecked(str);
-    return;
+  if (_header(str).hash) {
+    Var existing = Pool.current().lookup(str);
+    if (existing is not void && existing.string() === str) return;
   }
-  Var existing = Pool.current().lookup(str);
-  if (existing is not void && existing.string() === str) return;
   _free_unchecked(str);
 }
 
+/* Only Pool-backed transient or losing-candidate storage may enter here;
+   callers establish that the pointer is not a live canonical table entry. */
 static void _free_unchecked(String str) {
-  /* Only Pool-backed transient or losing-candidate storage may enter here;
-     callers establish that the pointer is not a live canonical table entry. */
-  if (str != NULL)
-    Pool.current().free(_header(str));
+  if (str != NULL) Pool.current().free(_header(str));
 }
 
 // pool ownership
 
-/* Move a canonical String owned by the innermost pool into its parent.
-   The pointer never changes; ancestor-owned and transient Strings are
-   left where they are. */
 /** Moves `str` from the active pool to its parent and returns the same
     pointer. Empty, transient, and ancestor-owned `String`s are returned
     unchanged.
@@ -431,24 +410,25 @@ int String.is_permanent(String str) {
   return Pool.is_permanent(str);
 }
 
+/* True when `str` is the canonical `String` visible from the active pool,
+   which an operation that changes nothing may return. */
 static int _is_active_canonical(String str) =>
   Pool.current().lookup(str) === str;
 
 // search
 
 /** Returns the index of the first occurrence of `sub` in `str`, or -1.
-    The search is byte-oriented rather than character-oriented, so an index
-    may land inside a multibyte sequence. An empty `sub` matches at index
-    0. Use `String.find_within` to bound the search to a range, or
-    `String.rfind` to scan from the end.
+    The search compares bytes, so an index may land inside a multibyte
+    sequence. An empty `sub` matches at index 0. Use `String.find_within` to
+    bound the search to a range, or `String.rfind` to scan from the end.
 */
 meta native int String.find(String str, String sub) =>
   str.find_within(sub, 0, -1);
 
 /** Returns the first index of `sub` within `str[start:end]`, or -1.
-    The returned index is absolute, measured from the start of `str` rather
-    than from `start`. Negative `start` and `end` count from the end of
-    `str`, and both are then clamped to the `String`.
+    The returned index is absolute and counts from the start of `str`.
+    Negative `start` and `end` count from the end of `str`, and both are then
+    clamped to the `String`.
 
     An `end` of -1 is the sentinel for "to the end of `str`", not "one byte
     before the end". There is therefore no negative `end` that excludes only
@@ -467,14 +447,19 @@ meta native int String.find_within(
   if (start < 0) start += n;
   if (end == -1) end = n;
   else if (end < 0) end += n;
-  start = start < 0 ? 0 : (start > n ? n : start);
-  end = end < 0 ? 0 : (end > n ? n : end);
+  start = _clamp(start, n);
+  end = _clamp(end, n);
   if (start + m > end) return -1;
   if (m == 0) return start;
   if (!str) return -1;
   const char *p = _find_bytes(str + start, end - start, sub, m);
   if (!p) return -1;
   return (int) (p - str);
+}
+
+static int _clamp(int index, int n) {
+  if (index < 0) return 0;
+  return index > n ? n : index;
 }
 
 static const char *_find_bytes(
@@ -610,17 +595,9 @@ meta native String String.replace_n(
   int replacement_len = replacement.len();
   int count = _count_matches(str, old, max_replacements);
   if (count == 0) return str;
-  size_t output_len = (size_t) str_len;
-  if (replacement_len >= old_len) {
-    size_t growth = (size_t) (replacement_len - old_len);
-    if (growth && (size_t) count >
-        ((size_t) (INT_MAX - 1) - output_len) / growth)
-      return NULL;
-    output_len += (size_t) count * growth;
-  }
-  else output_len -= (size_t) count * (old_len - replacement_len);
-  if (output_len > INT_MAX - 1) return NULL;
-  String string = String.malloc((int) output_len + 1);
+  int length = _replaced_length(str_len, count, old_len, replacement_len);
+  if (length < 0) return NULL;
+  String string = String.malloc(length + 1);
   char *dst = string, int copied = 0, replaced = 0;
   while (copied <= str_len - old_len && replaced < count) {
     const char *found = _find_bytes(
@@ -636,15 +613,29 @@ meta native String String.replace_n(
     replaced++;
   }
   memcpy(dst, str + copied, str_len - copied);
-  return _finish(string, (int) output_len);
+  return _finish(string, length);
+}
+
+/* The length after `count` replacements of `old_len` bytes by `new_len`
+   bytes, or -1 when the result cannot fit a String. */
+static int _replaced_length(int length, int count, int old_len, int new_len) {
+  size_t total = (size_t) length;
+  if (new_len >= old_len) {
+    size_t growth = (size_t) (new_len - old_len);
+    if (growth && (size_t) count > ((size_t) (INT_MAX - 1) - total) / growth)
+      return -1;
+    total += (size_t) count * growth;
+  }
+  else total -= (size_t) count * (old_len - new_len);
+  return total > INT_MAX - 1 ? -1 : (int) total;
 }
 
 // indexing and slicing
 
 /** Returns the byte at `index` in `str` as an int, or -1 if out of range.
-    This is what `str[index]` lowers to on a canonical `String`, and it
-    yields a byte value rather than a one-byte `String`. A negative `index`
-    counts from the end, so -1 is the last byte.
+    This is what `str[index]` lowers to on a canonical `String`, so indexing
+    yields an int byte value. A negative `index` counts from the end, so -1
+    is the last byte.
 
     The byte is unsigned, so the result is 0 through 255 on every platform and
     -1 means out of range and nothing else. An `index` at or beyond the length
@@ -681,10 +672,9 @@ meta native String String.getslice(String s, int start, int stop, int step) {
 /** Returns a canonical copy of `str` with the byte at `index` set.
     Canonical `String`s are immutable, so `str` is not modified. When the byte
     already has `value`, this may return `str`; otherwise a new `String` is
-    built
-    and interned. Native assignment `str[index] = value` writes through shared
-    canonical storage and belongs only on a transient `String.malloc` buffer.
-    A negative `index` counts from the end.
+    built and interned. Native assignment `str[index] = value` writes through
+    shared canonical storage and belongs only on a transient `String.malloc`
+    buffer. A negative `index` counts from the end.
 
     ```x2c
     String word = "hello";
@@ -788,42 +778,52 @@ meta native String String.new_fill(char fill, int count) {
     convert to the empty `String`.
     Raises: `<alloc-fail>` when result storage cannot be allocated. A null or
     empty `List`, or an oversized result, also returns NULL, the empty
-    `String`,
-    without raising.
+    `String`, without raising.
 */
 meta native String String.join(String sep, List strings) {
   if (!strings) return NULL;
   int n = strings.len();
   if (n == 0) return NULL;
   int sep_len = sep ? sep.len() : 0;
+  int total = _join_length(strings, n, sep_len);
+  if (total < 0) return NULL;
+  if (total <= STRING_STACK_BYTES) {
+    char bytes[STRING_STACK_BYTES];
+    _join_into(bytes, strings, sep, sep_len);
+    return _from_bytes(bytes, total);
+  }
+  String string = String.malloc(total + 1);
+  _join_into(string, strings, sep, sep_len);
+  return _finish(string, total);
+}
+
+/* The joined length of the `n` elements, or -1 when it cannot fit a
+   String. */
+static int _join_length(List strings, int n, int sep_len) {
   if (sep_len && (size_t) (n - 1) > (size_t) (INT_MAX - 1) / (size_t) sep_len)
-    return NULL;
+    return -1;
   size_t total = (size_t) (n - 1) * (size_t) sep_len;
   foreach (String str, strings) {
     int length = str.len();
-    if ((size_t) length > (size_t) (INT_MAX - 1) - total) return NULL;
+    if ((size_t) length > (size_t) (INT_MAX - 1) - total) return -1;
     total += (size_t) length;
   }
-  char stack_bytes[STRING_STACK_BYTES], String string = NULL;
-  char *dst = stack_bytes;
-  if (total > STRING_STACK_BYTES) {
-    string = String.malloc((int) total + 1);
-    dst = string;
-  }
-  for (List strs = strings; strs; strs = strs.cdr()) {
-    String str = strs.car();
+  return (int) total;
+}
+
+static void _join_into(char *out, List strings, String sep, int sep_len) {
+  for (List p = strings; p; p = p.cdr()) {
+    String str = p.car();
     if (str) {
       int length = str.len();
-      memcpy(dst, str, length);
-      dst += length;
+      memcpy(out, str, length);
+      out += length;
     }
-    if (strs.cdr() && sep) {
-      memcpy(dst, sep, sep_len);
-      dst += sep_len;
+    if (p.cdr() && sep) {
+      memcpy(out, sep, sep_len);
+      out += sep_len;
     }
   }
-  if (string != NULL) return _finish(string, (int) total);
-  return _from_bytes(stack_bytes, (int) total);
 }
 
 /** Pads the left side of `str` to the requested width.
@@ -846,14 +846,16 @@ meta native String String.pad_right(String str, int width, char fill) =>
 meta native String String.pad_center(String str, int width, char fill) =>
   _pad(str, width, fill, -1);
 
-static String _pad(String str, int width, char fill, int left_padding) {
+/* `side` puts the padding on the left when 1, on the right when 0, and on
+   both sides when -1, with an odd byte on the right. */
+static String _pad(String str, int width, char fill, int side) {
   if (fill == '\0') raise %(bad-arg (owner "String.pad"));
   int length = str.len();
   if (width <= length) return str;
   if (width == INT_MAX)
     raise %(size-limit (owner "String.pad") (width $width));
-  int padding = width - length;
-  int left = left_padding < 0 ? padding / 2 : left_padding ? padding : 0;
+  int padding = width - length, left = side ? padding : 0;
+  if (side < 0) left = padding / 2;
   int right = padding - left, String string = String.malloc(width + 1);
   memset(string, fill, left);
   if (length) memcpy(string + left, str, length);
@@ -866,9 +868,9 @@ static String _pad(String str, int width, char fill, int left_padding) {
 /** Returns `str` with leading and trailing bytes in `negChars` removed.
     `negChars` is a NUL-terminated C string listing the bytes to remove, not
     a substring and not a pattern; order and repetition in it are irrelevant.
-    Passing NULL uses the default whitespace set
-    " \t\n\v\f\r". Trimming stops at each end on the first byte not in the
-    set, and `str` itself is returned when nothing is trimmed.
+    Passing NULL uses the default whitespace set " \t\n\v\f\r". Trimming
+    stops at each end on the first byte not in the set, and `str` itself is
+    returned when nothing is trimmed.
     Raises: `<alloc-fail>` while constructing the result. A `String` made
     entirely of removable bytes trims to NULL, the empty `String`, without
     raising.
@@ -922,19 +924,23 @@ String String.rstrip(String str, char *negChars) {
 */
 meta native String String.dedent(String str) {
   if (!str) return NULL;
-  int length = str.len();
-  int skip = str.startswith("\r\n") ? 2 : (str.startswith("\n") ? 1 : 0);
-  int width = 0;
+  int length = str.len(), skip = _newline_width(str), width = 0;
   while (skip + width < length &&
          (str[skip + width] == ' ' || str[skip + width] == '\t'))
     width++;
   String prefix = String.new_len(str + skip, width);
-  String body = width ? String.new(str + skip + width).replace(
-    %"\n$prefix", "\n") : String.new(str + skip);
+  String body = String.new(str + skip + width);
+  if (width) body = body.replace(%"\n$prefix", "\n");
   int end = body.len(), tail = end;
   while (tail > 0 && (body[tail - 1] == ' ' || body[tail - 1] == '\t')) tail--;
   if (tail == end || (tail > 0 && body[tail - 1] != '\n')) return body;
   return String.new_len(body, tail);
+}
+
+/* The width of the one line break that may open a dedented text. */
+static int _newline_width(String str) {
+  if (str.startswith("\r\n")) return 2;
+  return str.startswith("\n") ? 1 : 0;
 }
 
 /** Removes `prefix` when `str` starts with it and returns a canonical
@@ -994,21 +1000,20 @@ meta native List String.partition(String str, String sep) {
 meta native List String.rpartition(String str, String sep) {
   String empty = NULL;
   if (!sep) return %( $empty $empty $str );
-  int found = str.rfind(sep);
+  int sep_length = sep.len(), found = str.rfind(sep);
   if (found < 0) return %( $empty $empty $str );
   String before = String.new_len(str, found);
   String after = String.new_len(
-    str + found + sep.len(), str.len() - found - sep.len());
+    str + found + sep_length, str.len() - found - sep_length);
   return %( $before $sep $after );
 }
 
 // byte maps
 
-/*  Builds a same-length copy whose byte `$index` is `$mapped`, with the
-    source byte offered as `$byte` so each family member gives only its own C
-    case mapping. A copy that changes nothing is released and `$subject`
-    itself is returned.
-*/
+/* Builds a same-length copy whose byte `$index` is `$mapped`, with the
+   source byte offered as `$byte` so each family member gives only its own C
+   case mapping. A copy that changes nothing is released and `$subject`
+   itself is returned. */
 macro Statement $string.remap(
   Expr $subject, Name $index, Name $byte, Expr $mapped) {
   if (!$subject || !*$subject) return $subject;
@@ -1030,9 +1035,9 @@ macro Statement $string.remap(
 
 /** Returns `str` with every upper-case byte lowered.
     Case mapping runs byte by byte through C's `tolower`, so it covers
-    ASCII in the default locale and leaves multibyte text alone rather than
-    case-folding it. When no byte would change, `str` itself is returned after
-    the unchanged temporary buffer is released.
+    ASCII in the default locale and does not case-fold multibyte text. When
+    no byte would change, `str` itself is returned after the unchanged
+    temporary buffer is released.
     Raises: `<alloc-fail>` while constructing the result.
 */
 meta native String String.lower(String str) {
@@ -1078,8 +1083,7 @@ macro Statement $string.select(
     or a null `fn`, returns `str` without invoking the callback. Otherwise `fn`
     is called once per byte from left to right and is not retained.
     Raises: whatever `Func.apply`, `fn`, or the returned `Var`'s truth
-    operation
-    raises, or `<alloc-fail>` when the result cannot be allocated.
+    operation raises, or `<alloc-fail>` when the result cannot be allocated.
 */
 String String.filter(String str, Func fn) {
   if (!str || !fn || !*str) return str;
@@ -1094,7 +1098,8 @@ static Var _apply(Func fn, char value) {
 /** Returns `str` with `fn` applied to every byte.
     Each byte is boxed from `char` and passed by value. Each result is
     converted to `int` and truncated to the byte that is stored, and that byte
-    is what is checked, so a result such as 256 raises rather than storing NUL.
+    is what is checked, so a result such as 256 raises because its stored byte
+    would be NUL.
     A null or empty `str`, or a null `fn`, returns `str` without invoking the
     callback. Otherwise `fn` is called once per byte from left to right and is
     not retained. Each result must convert to a non-NUL byte.
@@ -1139,7 +1144,7 @@ meta native String String.reject(String str, String chars) {
 }
 
 /** Collapses adjacent runs of each byte listed in `chars`.
-    `Bytes` outside `chars` are preserved even when repeated. `Null` or empty
+    Bytes outside `chars` are preserved even when repeated. `Null` or empty
     `str`, or null `chars`, returns `str` unchanged.
     Raises: `<alloc-fail>` while constructing a changed result.
 */
@@ -1149,7 +1154,11 @@ meta native String String.squeeze(String str, String chars) {
     str, i, !(i && str[i] == str[i - 1] && strchr(chars, str[i])));
 }
 
-// formatting
+/* formatting
+
+   `String.printf` passes C arguments to `vsnprintf`. `String.format` parses
+   a checked subset of the same syntax itself and converts each `Var` value
+   to the C type its conversion names. */
 
 /** Formats a canonical `String` from `fmt` and the trailing arguments.
     The receiver is the format `String`, so format-dependent construction reads
@@ -1190,23 +1199,30 @@ String String.printf(String fmt, ...) {
   return _finish(string, n);
 }
 
-typedef struct StringFormatSpec {
-  int flags, width, precision, has_width, has_precision, length;
+/* One conversion specification: the flag bits, the width and precision with
+   their presence, a length modifier, and the conversion byte. */
+typedef struct _Spec {
+  int flags, width, precision, has_width, has_precision, modifier;
   char conversion;
-} StringFormatSpec;
+} _Spec;
 
+// The flag bits of `-+ #0`, in that order.
 enum {
-  STRING_FORMAT_LEFT = 1,
-  STRING_FORMAT_PLUS = 2,
-  STRING_FORMAT_SPACE = 4,
-  STRING_FORMAT_ALT = 8,
-  STRING_FORMAT_ZERO = 16,
-  STRING_FORMAT_HH = 1,
-  STRING_FORMAT_H = 2,
-  STRING_FORMAT_L = 3,
-  STRING_FORMAT_LL = 4,
-  STRING_FORMAT_CAP_L = 5
+  FORMAT_LEFT = 1, FORMAT_PLUS = 2, FORMAT_SPACE = 4, FORMAT_ALT = 8,
+  FORMAT_ZERO = 16
 };
+
+// The length modifiers `hh h l ll L`; zero is none.
+enum {
+  FORMAT_HH = 1, FORMAT_H = 2, FORMAT_L = 3, FORMAT_LL = 4, FORMAT_CAP_L = 5
+};
+
+/* One pass of `String.format`. The bytes from `literal` to `cursor` are
+   text not yet written, `offset` is the `%` of the conversion being read,
+   which its errors report, and `args` holds the values still to take. */
+typedef struct _Format {
+  String fmt, int length, literal, cursor, offset, List args, Buffer out;
+} _Format;
 
 /** Formats `values` through a checked, C-style subset of `fmt`.
     The receiver is decoded runtime text, so this fixed-signature operation is
@@ -1232,298 +1248,313 @@ String String.format(String fmt, List values) {
     return NULL;
   }
   Buffer out = $auto(Buffer.new(0));
-  int length = fmt.len(), literal = 0, cursor = 0;
-  while (cursor < length) {
-    if (fmt[cursor] != '%') { cursor++; continue; }
-    int offset = cursor;
-    out.write_len(fmt + literal, (size_t) (cursor - literal));
-    cursor++;
-    if (cursor == length) _format_error(offset, "incomplete conversion");
-    if (fmt[cursor] == '%') {
-      out.write_char('%');
-      cursor++;
-      literal = cursor;
-      continue;
-    }
-
-    StringFormatSpec parsed = { 0 };
-    for (;;) {
-      switch (fmt[cursor]) {
-        case '-': parsed.flags |= STRING_FORMAT_LEFT; break;
-        case '+': parsed.flags |= STRING_FORMAT_PLUS; break;
-        case ' ': parsed.flags |= STRING_FORMAT_SPACE; break;
-        case '#': parsed.flags |= STRING_FORMAT_ALT; break;
-        case '0': parsed.flags |= STRING_FORMAT_ZERO; break;
-        default: goto flags_done;
-      }
-      if (++cursor == length)
-        _format_error(offset, "incomplete conversion");
-    }
-flags_done:
-    if (fmt[cursor] == '*') {
-      int width = _format_star(values, offset);
-      if (width == INT_MIN) _format_error(offset, "width exceeds int range");
-      if (width < 0) {
-        parsed.flags |= STRING_FORMAT_LEFT;
-        width = -width;
-      }
-      parsed.has_width = 1;
-      parsed.width = width;
-      cursor++;
-    }
-    else if (fmt[cursor] >= '0' && fmt[cursor] <= '9') {
-      parsed.has_width = 1;
-      parsed.width = _format_decimal(fmt, length, cursor, "width");
-    }
-    if (cursor < length && fmt[cursor] == '.') {
-      parsed.has_precision = 1;
-      cursor++;
-      if (cursor == length) _format_error(offset, "incomplete conversion");
-      if (fmt[cursor] == '*') {
-        int precision = _format_star(values, offset);
-        if (precision < 0) parsed.has_precision = 0;
-        else parsed.precision = precision;
-        cursor++;
-      }
-      else if (fmt[cursor] >= '0' && fmt[cursor] <= '9')
-        parsed.precision = _format_decimal(
-          fmt, length, cursor, "precision");
-    }
-    if (cursor == length) _format_error(offset, "incomplete conversion");
-    if (fmt[cursor] == 'h') {
-      parsed.length = STRING_FORMAT_H;
-      if (++cursor < length && fmt[cursor] == 'h') {
-        parsed.length = STRING_FORMAT_HH;
-        cursor++;
-      }
-    }
-    else if (fmt[cursor] == 'l') {
-      parsed.length = STRING_FORMAT_L;
-      if (++cursor < length && fmt[cursor] == 'l') {
-        parsed.length = STRING_FORMAT_LL;
-        cursor++;
-      }
-    }
-    else if (fmt[cursor] == 'L') {
-      parsed.length = STRING_FORMAT_CAP_L;
-      cursor++;
-    }
-    else if (fmt[cursor] == 'j' || fmt[cursor] == 'z' || fmt[cursor] == 't')
-      _format_error(offset, "unsupported length modifier");
-    if (cursor == length) _format_error(offset, "incomplete conversion");
-    parsed.conversion = fmt[cursor++];
-    int integer = strchr("diouxX", parsed.conversion) != NULL;
-    int floating = strchr("fFeEgGaA", parsed.conversion) != NULL;
-    if (parsed.conversion == '$')
-      _format_error(offset, "positional formats are unsupported");
-    if (!integer && !floating && parsed.conversion != 'c' &&
-        parsed.conversion != 's')
-      _format_error(offset, "unsupported conversion");
-    if (integer && parsed.length == STRING_FORMAT_CAP_L)
-      _format_error(offset, "unsupported integer length");
-    if (floating && parsed.length != 0 &&
-        parsed.length != STRING_FORMAT_L &&
-        parsed.length != STRING_FORMAT_CAP_L)
-      _format_error(offset, "unsupported floating length");
-    if ((parsed.conversion == 'c' || parsed.conversion == 's') &&
-        parsed.length)
-      _format_error(offset, "wide strings and characters are unsupported");
-    if ((parsed.conversion == 'c' || parsed.conversion == 's') &&
-        (parsed.flags & ~STRING_FORMAT_LEFT))
-      _format_error(offset, "unsupported flag for conversion");
-    if (parsed.conversion == 'c' && parsed.has_precision)
-      _format_error(offset, "unsupported precision for %c");
-    if (!values) _format_error(offset, "missing value");
-    Var value = values.car();
-    values = values.cdr();
-    char spec[48];
-    _format_specifier(spec, parsed);
-    _format_value(out, spec, parsed, value, offset);
-    literal = cursor;
-  }
-  out.write_len(fmt + literal, (size_t) (length - literal));
-  if (values) _format_error(length, "excess values");
+  _Format f = {.fmt = fmt, .length = fmt.len(), .args = values, .out = out};
+  while (f.cursor < f.length)
+    if (f.byte() == '%') f.conversion();
+    else f.cursor++;
+  f.write_literal();
+  if (f.args) _format_error(f.length, "excess values");
   return out;
+}
+
+/* Writes the text before the `%` at the cursor, then the conversion that
+   `%` starts. */
+static void _Format.conversion(_Format *f) {
+  f.write_literal();
+  f.offset = f.cursor++;
+  f.need_byte();
+  if (f.byte() == '%') {
+    f.out.write_char('%');
+    f.cursor++;
+  }
+  else {
+    _Spec spec = f.spec();
+    f.print(spec, f.take("missing value"));
+  }
+  f.literal = f.cursor;
+}
+
+static void _Format.write_literal(_Format *f) {
+  f.out.write_len(f.fmt + f.literal, (size_t) (f.cursor - f.literal));
 }
 
 static void _format_error(int offset, String reason) {
   raise %(format (offset $offset) (reason $reason));
 }
 
-// format specifications
-
-static int _format_star(List &values, int offset) {
-  if (!values) _format_error(offset, "missing star value");
-  Var value = values.car();
-  values = values.cdr();
-  return (int) _format_convert(value, <i32>, offset).integer();
+static void _Format.fail(_Format *f, String reason) {
+  _format_error(f.offset, reason);
 }
 
-static int _format_decimal(
-  String fmt, int length, int &cursor, String label) {
-  int value = 0, start = cursor;
-  while (cursor < length && fmt[cursor] >= '0' && fmt[cursor] <= '9') {
-    int digit = fmt[cursor] - '0';
-    if (value > (INT_MAX - digit) / 10)
+/* A conversion that reaches the end of the format is incomplete. */
+static void _Format.need_byte(_Format *f) {
+  if (f.cursor == f.length) f.fail("incomplete conversion");
+}
+
+// conversion specifications
+
+/* Parses the flags, width, precision, length modifier, and conversion
+   after `%`, then rejects what the checked subset leaves out. */
+static _Spec _Format.spec(_Format *f) {
+  _Spec spec = {.flags = f.flags()};
+  f.width(spec);
+  f.precision(spec);
+  f.need_byte();
+  spec.modifier = f.modifier();
+  f.need_byte();
+  spec.conversion = f.fmt[f.cursor++];
+  f.check(spec);
+  return spec;
+}
+
+static int _Format.flags(_Format *f) {
+  int flags = 0;
+  for (;;) {
+    switch (f.byte()) {
+      case '-': flags |= FORMAT_LEFT; break;
+      case '+': flags |= FORMAT_PLUS; break;
+      case ' ': flags |= FORMAT_SPACE; break;
+      case '#': flags |= FORMAT_ALT; break;
+      case '0': flags |= FORMAT_ZERO; break;
+      default: return flags;
+    }
+    f.cursor++;
+    f.need_byte();
+  }
+}
+
+/* A `*` width takes the next value, and a negative one also sets `-`. */
+static void _Format.width(_Format *f, _Spec &spec) {
+  if (f.byte() == '*') {
+    int width = f.star();
+    if (width == INT_MIN) f.fail("width exceeds int range");
+    if (width < 0) {
+      spec.flags |= FORMAT_LEFT;
+      width = -width;
+    }
+    spec.has_width = 1;
+    spec.width = width;
+    f.cursor++;
+  }
+  else if (f.digit()) {
+    spec.has_width = 1;
+    spec.width = f.decimal("width");
+  }
+}
+
+/* A `*` width or precision is the next value as an int. */
+static int _Format.star(_Format *f) =>
+  (int) f.number(f.take("missing star value"), <i32>).integer();
+
+/* A `*` precision takes the next value, and a negative one means none. */
+static void _Format.precision(_Format *f, _Spec &spec) {
+  if (f.cursor >= f.length || f.byte() != '.') return;
+  spec.has_precision = 1;
+  f.cursor++;
+  f.need_byte();
+  if (f.byte() == '*') {
+    int precision = f.star();
+    if (precision < 0) spec.has_precision = 0;
+    else spec.precision = precision;
+    f.cursor++;
+  }
+  else if (f.digit()) spec.precision = f.decimal("precision");
+}
+
+/* Reads the digits at the cursor. An overflow reports the offset of the
+   first digit and names the field with `label`. */
+static int _Format.decimal(_Format *f, String label) {
+  int number = 0, start = f.cursor;
+  while (f.cursor < f.length && f.digit()) {
+    int digit = f.byte() - '0';
+    if (number > (INT_MAX - digit) / 10)
       _format_error(start, %"$label exceeds int range");
-    value = value * 10 + digit;
-    cursor++;
+    number = number * 10 + digit;
+    f.cursor++;
   }
-  return value;
+  return number;
 }
 
-// format values
+static int _Format.byte(_Format *f) => f.fmt[f.cursor];
 
-static Buffer _format_value(
-  Buffer out, const char *spec, StringFormatSpec parsed, Var value,
-  int offset) {
-  switch (parsed.conversion) {
-    case 'd': case 'i': case 'o': case 'u': case 'x': case 'X':
-      return _format_integer(out, spec, parsed, value, offset);
-    case 'f': case 'F': case 'e': case 'E': case 'g': case 'G':
-    case 'a': case 'A':
-      if (parsed.length == STRING_FORMAT_CAP_L) {
-        long double number = _format_convert(
-          value, <ldouble>, offset).long_double_value();
-        return out.printf(spec, number);
-      }
-      else {
-        double number = _format_convert(value, <f64>, offset).floating();
-        return out.printf(spec, number);
-      }
-    case 'c': {
-      int byte = (int) _format_convert(value, <i32>, offset).integer();
-      if (!(unsigned char) byte)
-        _format_error(offset, "%c cannot produce an embedded NUL");
-      return out.printf(spec, byte);
-    }
-    case 's': {
-      String string = _format_string(value, offset);
-      return out.printf(spec, string ? string : "");
-    }
+static int _Format.digit(_Format *f) => f.byte() >= '0' && f.byte() <= '9';
+
+static int _Format.modifier(_Format *f) {
+  switch (f.byte()) {
+    case 'h': return f.doubled('h', FORMAT_H, FORMAT_HH);
+    case 'l': return f.doubled('l', FORMAT_L, FORMAT_LL);
+    case 'L': f.cursor++; return FORMAT_CAP_L;
+    case 'j': case 'z': case 't': f.fail("unsupported length modifier");
   }
-  _format_error(offset, "unsupported conversion");
-  return out;
+  return 0;
 }
 
-static void _format_specifier(char *out, StringFormatSpec spec) {
-  int length = 0;
-  out[length++] = '%';
-  if (spec.flags & STRING_FORMAT_LEFT) out[length++] = '-';
-  if (spec.flags & STRING_FORMAT_PLUS) out[length++] = '+';
-  if (spec.flags & STRING_FORMAT_SPACE) out[length++] = ' ';
-  if (spec.flags & STRING_FORMAT_ALT) out[length++] = '#';
-  if (spec.flags & STRING_FORMAT_ZERO) out[length++] = '0';
-  if (spec.has_width && spec.width)
-    length += snprintf(out + length, 16, "%d", spec.width);
-  if (spec.has_precision) {
-    out[length++] = '.';
-    length += snprintf(out + length, 16, "%d", spec.precision);
-  }
-  switch (spec.length) {
-    case STRING_FORMAT_HH: out[length++] = 'h'; out[length++] = 'h'; break;
-    case STRING_FORMAT_H: out[length++] = 'h'; break;
-    case STRING_FORMAT_L: out[length++] = 'l'; break;
-    case STRING_FORMAT_LL: out[length++] = 'l'; out[length++] = 'l'; break;
-    case STRING_FORMAT_CAP_L: out[length++] = 'L'; break;
-  }
-  out[length++] = spec.conversion;
-  out[length] = '\0';
+/* `h` or `hh`, and `l` or `ll`. */
+static int _Format.doubled(_Format *f, char letter, int once, int twice) {
+  f.cursor++;
+  if (f.cursor >= f.length || f.byte() != letter) return once;
+  f.cursor++;
+  return twice;
 }
 
-static Buffer _format_integer(
-  Buffer out, const char *spec, StringFormatSpec parsed, Var value,
-  int offset) {
-  int unsigned_value = parsed.conversion == 'o' ||
-    parsed.conversion == 'u' || parsed.conversion == 'x' ||
-    parsed.conversion == 'X';
-  switch (parsed.length) {
-    case STRING_FORMAT_HH:
-      if (unsigned_value) {
-        unsigned int number = (unsigned char) _format_convert(
-          value, <u8>, offset).integer();
-        return out.printf(spec, number);
-      }
-      else {
-        int number = (signed char) _format_convert(
-          value, <i8>, offset).integer();
-        return out.printf(spec, number);
-      }
-    case STRING_FORMAT_H:
-      if (unsigned_value) {
-        unsigned int number = (unsigned short) _format_convert(
-          value, <u16>, offset).integer();
-        return out.printf(spec, number);
-      }
-      else {
-        int number = (short) _format_convert(
-          value, <i16>, offset).integer();
-        return out.printf(spec, number);
-      }
-    case STRING_FORMAT_L:
-      if (unsigned_value) {
-        unsigned long number = _format_convert(
-          value, <ulong>, offset).ulong_value();
-        return out.printf(spec, number);
-      }
-      else {
-        long number = _format_convert(value, <long>, offset).long_value();
-        return out.printf(spec, number);
-      }
-    case STRING_FORMAT_LL:
-      if (unsigned_value) {
-        unsigned long long number = _format_convert(
-          value, <ullong>, offset).ulong_long_value();
-        return out.printf(spec, number);
-      }
-      else {
-        long long number = _format_convert(
-          value, <llong>, offset).long_long_value();
-        return out.printf(spec, number);
-      }
-    default:
-      if (unsigned_value) {
-        unsigned int number = (unsigned int) _format_convert(
-          value, <u32>, offset).integer();
-        return out.printf(spec, number);
-      }
-      else {
-        int number = (int) _format_convert(
-          value, <i32>, offset).integer();
-        return out.printf(spec, number);
-      }
-  }
+/* Rejects the conversions and combinations the checked subset leaves out,
+   in this order. */
+static void _Format.check(_Format *f, _Spec spec) {
+  char ch = spec.conversion;
+  int integer = strchr("diouxX", ch) != NULL;
+  int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
+  if (ch == '$') f.fail("positional formats are unsupported");
+  if (!integer && !floating && !text) f.fail("unsupported conversion");
+  if (integer && spec.modifier == FORMAT_CAP_L)
+    f.fail("unsupported integer length");
+  if (floating && spec.modifier && spec.modifier != FORMAT_L &&
+      spec.modifier != FORMAT_CAP_L)
+    f.fail("unsupported floating length");
+  if (text && spec.modifier)
+    f.fail("wide strings and characters are unsupported");
+  if (text && (spec.flags & ~FORMAT_LEFT))
+    f.fail("unsupported flag for conversion");
+  if (ch == 'c' && spec.has_precision) f.fail("unsupported precision for %c");
 }
 
-static Var _format_convert(Var value, Symbol target, int offset) {
+// conversion arguments
+
+/* The next argument, or a failure with `reason` when none is left. */
+static Var _Format.take(_Format *f, String reason) {
+  if (!f.args) f.fail(reason);
+  Var arg = f.args.car();
+  f.args = f.args.cdr();
+  return arg;
+}
+
+/* Prints `arg` through the C spelling of `spec`. The check leaves only
+   these conversions, so the floating ones are the rest. */
+static Buffer _Format.print(_Format *f, _Spec spec, Var arg) {
+  char text[48];
+  spec.spell(text);
+  switch (spec.conversion) {
+    case 'd': case 'i': return f.signed_int(text, spec.modifier, arg);
+    case 'o': case 'u': case 'x': case 'X':
+      return f.unsigned_int(text, spec.modifier, arg);
+    case 'c': return f.character(text, arg);
+    case 's': return f.string(text, arg);
+  }
+  return f.floating(text, spec.modifier, arg);
+}
+
+/* Writes the C spelling of `s`, with `*` values as numbers. */
+static void _Spec.spell(_Spec s, char *out) {
+  int n = 0;
+  out[n++] = '%';
+  if (s.flags & FORMAT_LEFT) out[n++] = '-';
+  if (s.flags & FORMAT_PLUS) out[n++] = '+';
+  if (s.flags & FORMAT_SPACE) out[n++] = ' ';
+  if (s.flags & FORMAT_ALT) out[n++] = '#';
+  if (s.flags & FORMAT_ZERO) out[n++] = '0';
+  if (s.has_width && s.width) n += snprintf(out + n, 16, "%d", s.width);
+  if (s.has_precision) {
+    out[n++] = '.';
+    n += snprintf(out + n, 16, "%d", s.precision);
+  }
+  switch (s.modifier) {
+    case FORMAT_HH: out[n++] = 'h'; out[n++] = 'h'; break;
+    case FORMAT_H: out[n++] = 'h'; break;
+    case FORMAT_L: out[n++] = 'l'; break;
+    case FORMAT_LL: out[n++] = 'l'; out[n++] = 'l'; break;
+    case FORMAT_CAP_L: out[n++] = 'L'; break;
+  }
+  out[n++] = s.conversion;
+  out[n] = '\0';
+}
+
+/* Integer conversions print a long or a long long for `l` and `ll`, and
+   otherwise an int or unsigned holding the value at the modifier's width. */
+static Buffer _Format.signed_int(
+  _Format *f, const char *text, int modifier, Var arg) {
+  switch (modifier) {
+    case FORMAT_L:
+      return f.out.printf(text, f.number(arg, <long>).long_value());
+    case FORMAT_LL:
+      return f.out.printf(text, f.number(arg, <llong>).long_long_value());
+  }
+  return f.out.printf(text, f.narrow_signed(arg, modifier));
+}
+
+static int _Format.narrow_signed(_Format *f, Var arg, int modifier) {
+  switch (modifier) {
+    case FORMAT_HH: return (signed char) f.number(arg, <i8>).integer();
+    case FORMAT_H: return (short) f.number(arg, <i16>).integer();
+  }
+  return (int) f.number(arg, <i32>).integer();
+}
+
+static Buffer _Format.unsigned_int(
+  _Format *f, const char *text, int modifier, Var arg) {
+  switch (modifier) {
+    case FORMAT_L:
+      return f.out.printf(text, f.number(arg, <ulong>).ulong_value());
+    case FORMAT_LL:
+      return f.out.printf(text, f.number(arg, <ullong>).ulong_long_value());
+  }
+  return f.out.printf(text, f.narrow_unsigned(arg, modifier));
+}
+
+static unsigned _Format.narrow_unsigned(_Format *f, Var arg, int modifier) {
+  switch (modifier) {
+    case FORMAT_HH: return (unsigned char) f.number(arg, <u8>).integer();
+    case FORMAT_H: return (unsigned short) f.number(arg, <u16>).integer();
+  }
+  return (unsigned int) f.number(arg, <u32>).integer();
+}
+
+/* `L` prints a long double, and the other modifiers a double. */
+static Buffer _Format.floating(
+  _Format *f, const char *text, int modifier, Var arg) {
+  if (modifier == FORMAT_CAP_L)
+    return f.out.printf(text, f.number(arg, <ldouble>).long_double_value());
+  return f.out.printf(text, f.number(arg, <f64>).floating());
+}
+
+static Buffer _Format.character(_Format *f, const char *text, Var arg) {
+  int byte = (int) f.number(arg, <i32>).integer();
+  if (!(unsigned char) byte) f.fail("%c cannot produce an embedded NUL");
+  return f.out.printf(text, byte);
+}
+
+static Buffer _Format.string(_Format *f, const char *text, Var arg) {
+  String string = f.text(arg);
+  return f.out.printf(text, string ? string : "");
+}
+
+/* Converts `arg` to the numeric `target`, nesting a failure's cause. */
+static Var _Format.number(_Format *f, Var arg, Symbol target) {
   Var converted = void;
-  try converted = value.convert(target);
-  catch %(?code *details): {
-    List cause = cons(code, details);
-    raise %(format (offset $offset) (reason "value conversion failed")
-                   (cause $cause));
-  }
+  try converted = arg.convert(target);
+  catch %(?code *details): f.nested("value conversion failed", code, details);
   return converted;
 }
 
-static String _format_string(Var value, int offset) {
+/* The display text of `arg`, nesting a failure's cause. */
+static String _Format.text(_Format *f, Var arg) {
   String converted = NULL;
-  try converted = value.str();
-  catch %(?code *details): {
-    List cause = cons(code, details);
-    raise %(format (offset $offset) (reason "string conversion failed")
-                   (cause $cause));
-  }
+  try converted = arg.str();
+  catch %(?code *details): f.nested("string conversion failed", code, details);
   return converted;
+}
+
+/* Raises `<format>` for the current conversion with the cause of a failed
+   conversion nested. */
+static void _Format.nested(_Format *f, String reason, Var code, List details) {
+  List cause = cons(code, details);
+  raise %(format (offset ${f.offset}) (reason $reason) (cause $cause));
 }
 
 // escapes
 
 /** Returns a canonical escaped representation of the bytes in `str`.
     Common control and delimiter bytes use named escapes, printable ASCII is
-    copied, and every other byte uses a three-digit octal
-    escape. `Null` input or
-    an oversized result returns NULL.
+    copied, and every other byte uses a three-digit octal escape. `Null`
+    input or an oversized result returns NULL.
     Raises: `<alloc-fail>` while constructing the result.
 */
 meta native String String.escape(String str) {
@@ -1535,28 +1566,18 @@ meta native String String.escape(String str) {
     bytes += width;
   }
   String string = String.malloc(bytes + 1), char *dst = string;
-  foreach (int byte, str)
-    dst += _escape_byte((unsigned char) byte, dst);
+  foreach (int byte, str) dst += _escape_byte((unsigned char) byte, dst);
   return _finish(string, bytes);
 }
 
+/* Writes the escape of `ch` to `out` unless `out` is NULL, and returns its
+   width: a named escape, the printable byte itself, or an octal escape. */
 static inline int _escape_byte(unsigned char ch, char *out) {
-  char escaped = 0;
-  switch (ch) {
-    case '\n': escaped = 'n'; break;
-    case '\r': escaped = 'r'; break;
-    case '\t': escaped = 't'; break;
-    case '\b': escaped = 'b'; break;
-    case '\f': escaped = 'f'; break;
-    case '\v': escaped = 'v'; break;
-    case '\\': escaped = '\\'; break;
-    case '"':  escaped = '"'; break;
-    case '\'': escaped = '\''; break;
-  }
-  if (escaped) {
+  char letter = _escape_letter(ch);
+  if (letter) {
     if (out) {
       out[0] = '\\';
-      out[1] = escaped;
+      out[1] = letter;
     }
     return 2;
   }
@@ -1573,13 +1594,28 @@ static inline int _escape_byte(unsigned char ch, char *out) {
   return 4;
 }
 
+/* The letter of the named escape for `ch`, or 0 when it has none. */
+static inline char _escape_letter(unsigned char ch) {
+  switch (ch) {
+    case '\n': return 'n';
+    case '\r': return 'r';
+    case '\t': return 't';
+    case '\b': return 'b';
+    case '\f': return 'f';
+    case '\v': return 'v';
+    case '\\': return '\\';
+    case '"':  return '"';
+    case '\'': return '\'';
+  }
+  return 0;
+}
+
 /** Decodes supported backslash escapes in `str` into a canonical `String`.
     Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
     or `U`, and up to three octal digits are consumed. A backslash-newline is
     removed, an unknown escape yields its following byte, and a trailing
     backslash is dropped. `Null` input returns NULL and input without a
-    backslash
-    is returned unchanged.
+    backslash is returned unchanged.
     Raises: `<bad-arg>` for an octal escape above `\377`, which does not fit
     a byte, or `<alloc-fail>` while constructing a changed result.
 */
@@ -1588,72 +1624,55 @@ meta native String String.unescape(String str) {
   if (n == 0) return NULL;
   if (!str.contains("\\")) return str;
   String string = String.malloc(n + 1);
-  char *dst = string, const char *src = str;
-  while (*src) {
-    if (*src == '\\') {
-      src++;
-      if (!*src) break;
-      const char *cursor = src;
-      int emit, esc = _decode_escape_char(cursor, emit);
-      if (esc > 0377) {
-        _free_unchecked(string);
-        raise %(bad-arg (owner "String.unescape"));
-      }
-      src = cursor;
-      if (emit && esc) *dst++ = esc;
-    }
-    else *dst++ = *src++;
+  int length = _unescape_into(string, str);
+  if (length < 0) {
+    _free_unchecked(string);
+    raise %(bad-arg (owner "String.unescape"));
   }
-  return _finish(string, (int) (dst - string));
+  return _finish(string, length);
 }
 
-static inline int _decode_escape_char(const char *&psrc, int &emit) {
-  const char *src = psrc, int result = 0, esc = (unsigned char) *src++;
-  emit = 1;
-  switch (esc) {
-    case 'a':  result = '\a'; break;
-    case 'b':  result = '\b'; break;
-    case 'f':  result = '\f'; break;
-    case 'n':  result = '\n'; break;
-    case 'r':  result = '\r'; break;
-    case 't':  result = '\t'; break;
-    case 'v':  result = '\v'; break;
-    case '?':  result = '\?'; break;
-    case '"':  result = '"'; break;
-    case '\'': result = '\''; break;
-    case '\\': result = '\\'; break;
-    case '$':  result = '$'; break;
-    case 'x': case 'X': case 'u': case 'U': {
-      int value = 0, digits = 0;
-      while (*src && digits < 2) {
-        int hex = _hex_digit(*src);
-        if (hex < 0) break;
-        value = (value << 4) | hex;
-        src++, digits++;
-      }
-      result = digits ? value : esc;
-      break;
+/* Decodes the escapes of `src` into `out` and returns the bytes written, or
+   -1 at an octal escape above `\377`. A trailing backslash is dropped. */
+static int _unescape_into(char *out, const char *src) {
+  char *dst = out;
+  while (*src) {
+    if (*src != '\\') {
+      *dst++ = *src++;
+      continue;
     }
-    case '0': case '1': case '2': case '3':
-    case '4': case '5': case '6': case '7': {
-      int value = esc - '0', digits = 1;
-      while (*src && digits < 3) {
-        char next = *src;
-        if (next < '0' || next > '7') break;
-        value = (value << 3) | (next - '0');
-        src++, digits++;
-      }
-      result = value;
-      break;
-    }
-    case '\n': result = 0;
-      emit = 0;
-      break;
-    default: result = esc;
-      break;
+    src++;
+    if (!*src) break;
+    int byte = _decode_escape(src);
+    if (byte > 0377) return -1;
+    if (byte > 0) *dst++ = byte;
   }
-  psrc = src;
-  return result;
+  return (int) (dst - out);
+}
+
+/* Decodes the escape after a backslash and advances `at` past it. Returns
+   its byte, a value above `\377` for an octal escape too large for a byte,
+   or -1 for a backslash-newline, which stands for no byte. */
+static inline int _decode_escape(const char *&at) {
+  int esc = (unsigned char) *at++;
+  switch (esc) {
+    case 'x': case 'X': case 'u': case 'U': return _hex_escape(at, esc);
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7': return _octal_escape(at, esc);
+    case '\n': return -1;
+  }
+  return _named_escape(esc);
+}
+
+/* Up to two hexadecimal digits; with none, the escape is its letter. */
+static inline int _hex_escape(const char *&at, int esc) {
+  int byte = 0, digits = 0;
+  for (; *at && digits < 2; at++, digits++) {
+    int hex = _hex_digit(*at);
+    if (hex < 0) break;
+    byte = (byte << 4) | hex;
+  }
+  return digits ? byte : esc;
 }
 
 static inline int _hex_digit(int ch) {
@@ -1661,6 +1680,32 @@ static inline int _hex_digit(int ch) {
   if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
   if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
   return -1;
+}
+
+/* Up to three octal digits, the first of them `esc`. */
+static inline int _octal_escape(const char *&at, int esc) {
+  int byte = esc - '0';
+  for (int digits = 1; *at && digits < 3; at++, digits++) {
+    char next = *at;
+    if (next < '0' || next > '7') break;
+    byte = (byte << 3) | (next - '0');
+  }
+  return byte;
+}
+
+/* A letter escape's control byte. Every other escaped byte, such as `\\`,
+   `\"`, or `\$`, stands for itself. */
+static inline int _named_escape(int esc) {
+  switch (esc) {
+    case 'a': return '\a';
+    case 'b': return '\b';
+    case 'f': return '\f';
+    case 'n': return '\n';
+    case 'r': return '\r';
+    case 't': return '\t';
+    case 'v': return '\v';
+  }
+  return esc;
 }
 
 /** Parses one leading single-quoted escaped or literal byte, or returns -1.
@@ -1671,27 +1716,21 @@ static inline int _hex_digit(int ch) {
 */
 meta native int String.parse_char(String str) {
   if (!str || !*str) return -1;
-  const char *s = str;
-  if (*s++ != '\'') return -1;
-  int value;
-  if (*s == '\\') {
-    s++;
-    if (!*s) return -1;
-    const char *cursor = s;
-    int emit, esc = _decode_escape_char(cursor, emit);
-    if (!emit || esc > 0377) return -1;
-    value = esc;
-    s = cursor;
+  const char *at = str;
+  if (*at++ != '\'') return -1;
+  int byte = *at++;
+  if (byte == '\\') {
+    if (!*at) return -1;
+    byte = _decode_escape(at);
+    if (byte < 0 || byte > 0377) return -1;
   }
-  else value = *s++;
-  return (*s == '\'') ? value : -1;
+  return *at == '\'' ? byte : -1;
 }
 
 /** Returns the canonical unescaped contents of `str`.
     Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input
     is unescaped directly. `Null` or empty input returns NULL. An unquoted
-    input
-    without backslashes is returned unchanged.
+    input without backslashes is returned unchanged.
     Raises: `<alloc-fail>` while copying or decoding.
 */
 meta native String String.parse(String str) {
@@ -1729,7 +1768,7 @@ String String.repr(String str) {
 Buffer String.write_str(String str, Buffer out) => str ? out.write(str) : out;
 
 /** Appends a quoted escaped representation of `str` to borrowed `out`.
-    `Bytes` are streamed without first allocating an intermediate `String`. The
+    Bytes are streamed without first allocating an intermediate `String`. The
     same `out` is returned and not retained. Text written before a failure
     remains in the `Buffer`.
     Raises: any cause from `Buffer.write_char` or `Buffer.write_len`.
@@ -1760,8 +1799,7 @@ meta native Symbol String.symbol(String str) {
     The caller owns `dest`; it borrows `x`, which must remain live through
     traversal. A null `dest` returns NULL, and null `x` is exhausted. Each pull
     yields the next byte as an `<i32>` `Var` in index order. The function
-    retains
-    neither argument.
+    retains neither argument.
     Foreach may convert each yielded byte to either `int` or `char`:
 
     ```x2c
