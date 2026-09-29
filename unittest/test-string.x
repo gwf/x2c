@@ -101,6 +101,27 @@ static void string_empty_is_native_zero(void) {
   EXPECT_TRUE(literal.repr() == "\"\"");
 }
 
+/* A transient buffer that begins with NUL holds the same bytes as the empty
+   String. */
+static void string_empty_buffer_equals_the_empty_string(void) {
+  String first = String.malloc(4), second = String.malloc(4);
+  char *first_bytes = first, *second_bytes = second;
+  first_bytes[0] = '\0';
+  second_bytes[0] = '\0';
+
+  EXPECT_TRUE(first.equal(second));
+  EXPECT_TRUE(first.equal(NULL));
+  EXPECT_TRUE(String.equal(NULL, first));
+  EXPECT_FALSE(first.equal("a"));
+  EXPECT_INT_EQ(first.compare(second), 0);
+  EXPECT_INT_EQ(first.compare(NULL), 0);
+  EXPECT_INT_EQ(String.compare(NULL, first), 0);
+  EXPECT_INT_EQ(first.compare("a"), -1);
+  EXPECT_INT_EQ(String.compare("a", first), 1);
+  first.free();
+  second.free();
+}
+
 /* A C string literal receives String methods. */
 static void string_literal_receives_methods(void) {
   EXPECT_INT_EQ("hello".len(), 5);
@@ -719,6 +740,7 @@ static void string_checked_format_failures(void) {
 void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
+  $test.run(string_empty_buffer_equals_the_empty_string);
   $test.run(string_add_and_len);
   $test.run(string_literal_receives_methods);
   $test.run(string_slice_and_contains);

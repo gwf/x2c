@@ -124,7 +124,7 @@ meta native unsigned String.hash(String str) {
 */
 int String.equal(String x, String y) {
   if ((void *) x == (void *) y) return 1;
-  if (!x || !y) return 0;
+  if (!x || !y) return !x && !y;
   return strcmp(x, y) == 0;
 }
 
@@ -136,7 +136,7 @@ int String.equal(String x, String y) {
 */
 meta native int String.compare(String x, String y) {
   if ((void *) x == (void *) y) return 0;
-  if (!x) return -1;
+  if (!x) return y ? -1 : 0;
   if (!y) return 1;
   int result = strcmp(x, y);
   return (result > 0) - (result < 0);
