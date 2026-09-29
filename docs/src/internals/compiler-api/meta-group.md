@@ -38,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:702`
+Source: `src/meta-group.x:734`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -69,7 +69,7 @@ Source: `src/meta-group.x:79`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:599`
+Source: `src/meta-group.x:631`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -89,7 +89,7 @@ Source: `src/meta-group.x:63`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group.x:492`
+Source: `src/meta-group.x:524`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -100,7 +100,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group.x:524`
+Source: `src/meta-group.x:556`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -131,7 +131,7 @@ Source: `src/meta-group.x:106`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:618`
+Source: `src/meta-group.x:650`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -142,7 +142,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:628`
+Source: `src/meta-group.x:660`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -161,7 +161,7 @@ Source: `src/meta-group.x:73`
 Directs the group of each unit the project meta build parses into
 `directory`, or stops that when it is NULL.
 
-Source: `src/meta-group.x:568`
+Source: `src/meta-group.x:600`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -184,7 +184,7 @@ directory as `group-K.c` and `group-K.h`, K being its table, with the
 x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. A unit without `meta` functions writes nothing.
 
-Source: `src/meta-group.x:576`
+Source: `src/meta-group.x:608`
 
 ## Design notes
 
