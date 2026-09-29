@@ -377,10 +377,9 @@ static void _move(Fact fact, Region region) {
 
 static void _warn(
   Walk w, Symbol code, int origin, String message, List notes) {
-  w.warnings.push(w.audit
-    ? %(${w.function} $code $origin $message $notes)
-    : %($code $origin $message $notes)
-  );
+  w.warnings.push(
+    w.audit ? %(${w.function} $code $origin $message $notes)
+            : %($code $origin $message $notes));
 }
 
 static List _opened(Walk w, Region region) {
@@ -504,19 +503,8 @@ static Region _birth(
     /* A closure holds what it captures, so it lives no longer than they. A
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
-    case captured(?body, *captures, *params): {
-      foreach (Var capture, captures)
-        match (capture) case %(capture ? ? ?captured): {
-          Var place = _address_of(captured);
-          Fact fact = _fact_of(w, place is void ? captured : place, NULL);
-          if (fact && (fact.born || fact.region || fact.other)) {
-            if (fact.born) born = fact.born;
-            other = fact.other;
-            return fact.region;
-          }
-        }
-      return _active(w);
-    }
+    case captured(?body, *captures, *params):
+      return _captured_birth(w, captures, born, other);
   }
   match (_unwrap(value)) {
     case %(cons *): return _pooled(w, born);
@@ -525,18 +513,40 @@ static Region _birth(
       if (_class(w, type ? type : _expression_type(value)) == <container>):
       return _active(w);
   }
-  if (callee) {
-    int owner = _summary(w, callee).car().int();
-    if (owner == 3) {
-      born = owner;
-      other = _innermost(w, <pool>);
-      return _active(w);
-    }
-    if (owner & 2) return _pooled(w, born);
-    if (owner & 1) return _active(w);
-  }
+  if (callee) return _summary_birth(w, callee, born, other);
   born = 0;
   return NULL;
+}
+
+static Region _summary_birth(
+  Walk w, String callee, int &born, Region &other) {
+  int owner = _summary(w, callee).car().int();
+  if (owner == 3) {
+    born = owner;
+    other = _innermost(w, <pool>);
+    return _active(w);
+  }
+  if (owner & 2) return _pooled(w, born);
+  if (owner & 1) return _active(w);
+  born = 0;
+  return NULL;
+}
+
+/* A closure keeps the first captured value with an owner; an address
+   capture keeps the place it names. */
+static Region _captured_birth(
+  Walk w, List captures, int &born, Region &other) {
+  foreach (Var capture, captures)
+    match (capture) case %(capture ? ? ?captured): {
+      Var place = _address_of(captured);
+      Fact fact = _fact_of(w, place is void ? captured : place, NULL);
+      if (fact && (fact.born || fact.region || fact.other)) {
+        if (fact.born) born = fact.born;
+        other = fact.other;
+        return fact.region;
+      }
+    }
+  return _active(w);
 }
 
 // flows
@@ -547,17 +557,46 @@ static Region _birth(
    destination copies. A parameter adds the sink to this function's summary;
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
+struct Flow {
+  Walk walk;
+  Var value;
+  Type type;
+  Symbol sink;
+  Fact fact;
+  List named;
+};
+
+static String _flow_exit(struct Flow flow, Fact target, Region region) {
+  Walk w = flow.walk;
+  switch (flow.sink) {
+    case <return>: return "returned";
+    case <static>: return "stored into a static";
+    case <local>:
+      return target.depth < region.depth
+        ? "assigned to a local declared outside the region" : NULL;
+    default:
+      if (!target) return "stored through an unknown pointer";
+      if (target.param >= 0) return "stored through a parameter";
+      if (target.region == region) return NULL;
+      /* Every region a function opens ends before its own storage. */
+      if (target.region)
+        return region == w.frame ? NULL
+          : "stored into an object of another region";
+      return "stored into an object of an outer region";
+  }
+}
+
 static int _flow_region(
-  Walk w, Var value, Type type, Symbol sink, Fact target, Fact fact,
-  List named, Region region, int born, int report) {
-  if (_copies(w, type, value) && !(born & 2) &&
+  struct Flow flow, Fact target, Region region, int born, int report) {
+  Walk w = flow.walk;
+  if (_copies(w, flow.type, flow.value) && !(born & 2) &&
       (!region || region.kind != <pool>))
     return 0;
   if (!region) {
-    if (sink == <return>) w.fresh |= born;
+    if (flow.sink == <return>) w.fresh |= born;
     return 0;
   }
-  String subject = _subject(w, value, named, fact);
+  String subject = _subject(w, flow.value, flow.named, flow.fact);
   if (region.closed) {
     if (report)
       _warn(
@@ -567,24 +606,7 @@ static int _flow_region(
     return 1;
   }
   if (region.kind == <local>) return 0;
-  String exit = NULL;
-  switch (sink) {
-    case <return>: exit = "returned"; break;
-    case <static>: exit = "stored into a static"; break;
-    case <local>:
-      if (target.depth < region.depth)
-        exit = "assigned to a local declared outside the region";
-      break;
-    default:
-      if (!target) exit = "stored through an unknown pointer";
-      else if (target.param >= 0) exit = "stored through a parameter";
-      else if (target.region == region) exit = NULL;
-      /* Every region a function opens ends before its own storage. */
-      else if (target.region)
-        exit = region == w.frame ? NULL
-                                 : "stored into an object of another region";
-      else exit = "stored into an object of an outer region";
-  }
+  String exit = _flow_exit(flow, target, region);
   if (!exit) return 0;
   if (report) {
     if (region == w.frame) {
@@ -603,6 +625,39 @@ static int _flow_region(
   return 1;
 }
 
+static void _flow_parameter(
+  Walk w, Fact fact, Symbol sink, Fact target) {
+  Var row = sink;
+  if (sink == <heap>) {
+    if (!target) row = <unknown>;
+    else if (target.param >= 0) row = %(param ${target.param});
+    else row = target.born ? <result>
+           : (target.region || target.other) ? void : <return>;
+  }
+  if (sink != <local> && row is not void)
+    w.sinks[%(${fact.param} $row)] = 1;
+}
+
+static int _flow_owners(
+  struct Flow flow, Fact target, Region region, Region other, int born) {
+  int reported = 0;
+  for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
+    Region owner = choice ? other : region;
+    int kind = born;
+    if (born == 3) kind = choice ? 2 : 1;
+    if (owner && target && target.born == 3 && flow.sink == <heap>) {
+      struct Fact pooled = *target;
+      pooled.region = target.other;
+      pooled.born = 2;
+      reported |= _flow_region(flow, target, owner, kind, !reported);
+      reported |= _flow_region(flow, &pooled, owner, kind, !reported);
+    }
+    else
+      reported |= _flow_region(flow, target, owner, kind, !reported);
+  }
+  return reported;
+}
+
 static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
   match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
     return _flow(w, yes, type, sink, target) ||
@@ -616,40 +671,15 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
                        : _birth(w, value, NULL, born, other);
   if (!fact && !born) return 0;
   if (fact && fact.param >= 0) {
-    Var row = sink;
-    if (sink == <heap>) {
-      if (!target) row = <unknown>;
-      else if (target.param >= 0) row = %(param ${target.param});
-      else row = target.born ? <result>
-             : (target.region || target.other) ? void : <return>;
-    }
-    if (sink != <local> && row is not void)
-      w.sinks[%(${fact.param} $row)] = 1;
+    _flow_parameter(w, fact, sink, target);
     return 0;
   }
   if (fact) {
     born = fact.born;
     other = fact.other;
   }
-  int reported = 0;
-  for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
-    Region owner = choice ? other : region;
-    int kind = born;
-    if (born == 3) kind = choice ? 2 : 1;
-    if (owner && target && target.born == 3 && sink == <heap>) {
-      struct Fact pooled = *target;
-      pooled.region = target.other;
-      pooled.born = 2;
-      reported |= _flow_region(
-        w, value, type, sink, target, fact, named, owner, kind, !reported);
-      reported |= _flow_region(
-        w, value, type, sink, &pooled, fact, named, owner, kind, !reported);
-    }
-    else
-      reported |= _flow_region(
-        w, value, type, sink, target, fact, named, owner, kind, !reported);
-  }
-  return reported;
+  struct Flow flow = {w, value, type, sink, fact, named};
+  return _flow_owners(flow, target, region, other, born);
 }
 
 /* How a warning names the value that leaves: a local by its name, and an
@@ -716,9 +746,8 @@ static Fact _borrow(Walk w, Var place, List &?named) {
   Fact base = _fact_of(w, place, named);
   if (!base) base = _base(w, place, through);
   if (!base) return NULL;
-  if (named) {
+  if (named)
     if (!named) named = _root(place);
-  }
   Fact borrow = _fact(w, NULL, -1);
   borrow.points = base;
   borrow.place = _unwrap(place);
@@ -827,74 +856,89 @@ static void _scan(Walk w, Var value, int deferred) {
   w.pending.push(value);
   while ((int) w.pending.len() > base) {
     Var node = w.pending.take_last();
-    List call = source_call(node);
-    if (call) {
-      (Var function, List arguments) = call;
-      String callee = binding_identity_spelling(_binding_of(function));
-      match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
-                   : void) {
-        case %((!or exit wrap)): break;
-        case %(free): _end(w, arguments.car(), NULL, <freed>);
-        case %(free scope):
-          _end(w, arguments.car(), "Scope.free", <freed>);
-        case %(alloc moved):
-          _end(w, arguments.car(), "Scope.realloc", <moved>);
-        default: if (callee)
-          _scan_call(w, node, function, callee, arguments);
-      }
-      if (arguments) w.pending.push(arguments);
-      continue;
-    }
-    List assignment = source_assignment(node);
-    if (assignment && _unwrap(node) != root) {
-      (Var target, Var stored) = assignment;
-      _store(w, target, stored);
-      w.pending.push(target);
-      continue;
-    }
-    match (node) {
-      case %(expr ? ?inner): w.pending.push(inner);
-      case %(ident (!set ?binding (binding ? ?))): {
-        Var found = w.facts[binding];
-        if (found is void) break;
-        Fact fact = found;
-        if (w.audit && ((fact.region && fact.region.closed) ||
-                        (fact.other && fact.other.closed))) {
-          String name = binding_identity_spelling(binding);
-          _warn(w, <region>, w.origin,
-                %"'$name' is read after its owning region ended", NULL);
-          break;
-        }
-        if (!fact.dead) break;
-        String name = binding_identity_spelling(binding);
-        String ended = fact.dead == <moved> ? "Scope.realloc moved it"
-                                            : "it was freed";
-        _warn(
-          w, <after-free>, w.origin, %"'$name' is used after $ended", NULL);
-        fact.dead = 0;
-      }
-      /* A statement expression declares locals of its own. */
-      case %((!or declare decl) ?specifiers (bindings *bindings)):
-        _declare(w, specifiers, bindings);
-      /* A List literal retains its values in the active Pool. */
-      case %(cons ?head ?tail): {
-        int born = 0;
-        Region other = NULL;
-        Region region = _birth(w, node, NULL, born, other);
-        struct Fact result = {.param = -1, .born = born, .region = region};
-        _flow(w, head, NULL, <heap>, &result);
-        _flow(w, tail, NULL, <heap>, &result);
-        w.pending.push(tail);
-        w.pending.push(head);
-      }
-      case %(*children):
-        for (int i = children.len() - 1; i >= 0; i--)
-          w.pending.push(children[i]);
-    }
+    if (_scan_call_node(w, node)) continue;
+    if (_scan_assignment(w, node, root)) continue;
+    _scan_node(w, node);
   }
   while ((int) w.freed.len() > mark) {
     Fact fact = w.freed.take_last();
     if (!deferred) fact.dead = fact.ending;
+  }
+}
+
+static int _scan_call_node(Walk w, Var node) {
+  List call = source_call(node);
+  if (!call) return 0;
+  (Var function, List arguments) = call;
+  String callee = binding_identity_spelling(_binding_of(function));
+  match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
+               : void) {
+    case %((!or exit wrap)): break;
+    case %(free): _end(w, arguments.car(), NULL, <freed>);
+    case %(free scope): _end(w, arguments.car(), "Scope.free", <freed>);
+    case %(alloc moved):
+      _end(w, arguments.car(), "Scope.realloc", <moved>);
+    default: if (callee) _scan_call(w, node, function, callee, arguments);
+  }
+  if (arguments) w.pending.push(arguments);
+  return 1;
+}
+
+static int _scan_assignment(Walk w, Var node, Var root) {
+  List assignment = source_assignment(node);
+  if (!assignment || _unwrap(node) == root) return 0;
+  (Var target, Var stored) = assignment;
+  _store(w, target, stored);
+  w.pending.push(target);
+  return 1;
+}
+
+static void _scan_ident(Walk w, Var binding) {
+  Var found = w.facts[binding];
+  if (found is void) return;
+  Fact fact = found;
+  if (w.audit && ((fact.region && fact.region.closed) ||
+                  (fact.other && fact.other.closed))) {
+    String name = binding_identity_spelling(binding);
+    _warn(
+      w, <region>, w.origin,
+      %"'$name' is read after its owning region ended", NULL);
+    return;
+  }
+  if (!fact.dead) return;
+  String name = binding_identity_spelling(binding);
+  String ended = fact.dead == <moved> ? "Scope.realloc moved it"
+                                      : "it was freed";
+  _warn(w, <after-free>, w.origin, %"'$name' is used after $ended", NULL);
+  fact.dead = 0;
+}
+
+static void _scan_cons(Walk w, Var node, Var head, Var tail) {
+  int born = 0;
+  Region other = NULL;
+  Region region = _birth(w, node, NULL, born, other);
+  struct Fact result = {.param = -1, .born = born, .region = region};
+  _flow(w, head, NULL, <heap>, &result);
+  _flow(w, tail, NULL, <heap>, &result);
+  w.pending.push(tail);
+  w.pending.push(head);
+}
+
+static void _scan_children(Walk w, List children) {
+  for (int i = children.len() - 1; i >= 0; i--)
+    w.pending.push(children[i]);
+}
+
+static void _scan_node(Walk w, Var node) {
+  match (node) {
+    case %(expr ? ?inner): w.pending.push(inner);
+    case %(ident (!set ?binding (binding ? ?))): _scan_ident(w, binding);
+    /* A statement expression declares locals of its own. */
+    case %((!or declare decl) ?specifiers (bindings *bindings)):
+      _declare(w, specifiers, bindings);
+    /* A List literal retains its values in the active Pool. */
+    case %(cons ?head ?tail): _scan_cons(w, node, head, tail);
+    case %(*children): _scan_children(w, children);
   }
 }
 
@@ -1102,56 +1146,71 @@ static void _walk_block(Walk w, List statements) {
   w.depth -= 1;
 }
 
+static void _walk_sequence(Walk w, List statements) {
+  foreach (Var statement, statements) _walk(w, statement);
+}
+
+static void _walk_at(Walk w, int origin, Var inner) {
+  int outer = w.origin;
+  w.origin = origin;
+  _walk(w, inner);
+  w.origin = outer;
+}
+
+static void _walk_return(Walk w, Type type, Var result) {
+  _scan(w, result, 0);
+  _flow(w, result, type, <return>, NULL);
+  _revive(w);
+}
+
+static void _walk_expression(Walk w, Var expression) {
+  List arguments = NULL;
+  String callee = _callee_of(expression, arguments);
+  if (callee && _walk_region_call(w, callee, arguments)) return;
+  match (source_assignment(_unwrap(expression))) {
+    case %(?target ?value): _store(w, target, value);
+    default: _scan(w, expression, 0);
+  }
+}
+
+static void _walk_conditional(Walk w, List children) {
+  Map restored = w.restored;
+  w.depth += 1;
+  foreach (Var child, children) _walk(w, child);
+  w.depth -= 1;
+  w.restored = restored;
+}
+
+static void _walk_rows(Walk w, List rows) {
+  foreach (List row, rows) {
+    _scan(w, row.car(), 0);
+    foreach (Var statement, row.cdr()) _walk(w, statement);
+  }
+}
+
 static void _walk(Walk w, Var node) {
   Macro statement = $expression_statement;
   match (node) {
-    case %(at ?origin ?inner): {
-      int outer = w.origin;
-      w.origin = origin;
-      _walk(w, inner);
-      w.origin = outer;
-    }
+    case %(at ?origin ?inner): _walk_at(w, origin, inner);
     case %(block *statements): _walk_block(w, statements);
-    case %(seq *statements):
-      foreach (Var statement, statements) _walk(w, statement);
+    case %(seq *statements): _walk_sequence(w, statements);
     case %(defer ?body *): _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
-    case %(return ?type ?result): {
-      _scan(w, result, 0);
-      _flow(w, result, type, <return>, NULL);
-      _revive(w);
-    }
+    case %(return ?type ?result): _walk_return(w, type, result);
     /* A jump leaves the statements after it to another path, and a label is
        where that path arrives, so neither carries forward what the path
        before it freed. */
     case %((!or goto label) *): _revive(w);
-    case statement(?expression): {
-      List arguments = NULL;
-      String callee = _callee_of(expression, arguments);
-      if (callee && _walk_region_call(w, callee, arguments)) break;
-      match (source_assignment(_unwrap(expression))) {
-        case %(?target ?value): _store(w, target, value);
-        default: _scan(w, expression, 0);
-      }
-    }
+    case statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
     case %((!or if while do for switch try with match foreach finally)
-           *children): {
-      Map restored = w.restored;
-      w.depth += 1;
-      foreach (Var child, children) _walk(w, child);
-      w.depth -= 1;
-      w.restored = restored;
-    }
+           *children): _walk_conditional(w, children);
     case %(catchcases ?rows): _walk(w, rows);
     case %((!or expr parens case) *): _scan(w, node, 0);
     /* Match and catch arms are bare `(PATTERN STATEMENT ...)` rows. */
-    case %((*) *): foreach (List row, node) {
-      _scan(w, row.car(), 0);
-      foreach (Var statement, row.cdr()) _walk(w, statement);
-    }
+    case %((*) *): _walk_rows(w, node);
   }
 }
 
@@ -1267,8 +1326,8 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
     the emitted names visible in this unit. `effects` adds audit-only native
     contracts; neither input changes ordinary translation. Findings carry
     their function name and are returned without compiler diagnostics. */
-Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects,
-                           Array findings) {
+Map Compiler.audit_regions(
+  Compiler c, List ast, Map seed, Map effects, Array findings) {
   struct Walk walk = {
     .compiler = c, .summaries = seed.copy(), .effects = effects,
     .pending = [], .freed = [], .audit = 1};
