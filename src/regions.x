@@ -292,9 +292,8 @@ static Var _address_of(Var value) {
 /* The C name a call names directly, or NULL for a call through a value.
    `arguments` omits the marker an empty argument list parses to. */
 static String _callee_of(Var value, List &arguments) {
-  match (_unwrap(value)) case %(call ?function (args *rows)): {
+  match (source_call(_unwrap(value))) case %(?function ?rows): {
     List name = _binding_of(function);
-    match (rows) case %((expr ? ())): rows = NULL;
     arguments = rows;
     return binding_identity_spelling(name);
   }
@@ -754,18 +753,14 @@ static Symbol _sink_of(Fact base, int through, Fact &target) {
   return !through && own ? <local> : <heap>;
 }
 
-/* The declared parameter types of the function a call names, so an
-   argument that a canonical parameter converts by copying is not stored. */
-static List _parameter_types(Var call) {
-  match (_unwrap(call)) case %(call (expr ((func ?types) *) ?) *):
-    return types;
-  return NULL;
-}
-
 /* A call sinks each argument where the callee's summary says. */
-static void _scan_call(Walk w, Var call, String callee, List arguments) {
+static void _scan_call(
+  Walk w, Var call, Var function, String callee, List arguments) {
   int count = arguments.len();
-  List types = _parameter_types(call);
+  /* The callee's bound function type determines canonical conversions. */
+  List types = NULL;
+  match (function) case %(expr ((func ?parameters) *) ?):
+    types = parameters;
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (index >= count) continue;
@@ -832,6 +827,31 @@ static void _scan(Walk w, Var value, int deferred) {
   w.pending.push(value);
   while ((int) w.pending.len() > base) {
     Var node = w.pending.take_last();
+    List call = source_call(node);
+    if (call) {
+      (Var function, List arguments) = call;
+      String callee = binding_identity_spelling(_binding_of(function));
+      match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
+                   : void) {
+        case %((!or exit wrap)): break;
+        case %(free): _end(w, arguments.car(), NULL, <freed>);
+        case %(free scope):
+          _end(w, arguments.car(), "Scope.free", <freed>);
+        case %(alloc moved):
+          _end(w, arguments.car(), "Scope.realloc", <moved>);
+        default: if (callee)
+          _scan_call(w, node, function, callee, arguments);
+      }
+      if (arguments) w.pending.push(arguments);
+      continue;
+    }
+    List assignment = source_assignment(node);
+    if (assignment && _unwrap(node) != root) {
+      (Var target, Var stored) = assignment;
+      _store(w, target, stored);
+      w.pending.push(target);
+      continue;
+    }
     match (node) {
       case %(expr ? ?inner): w.pending.push(inner);
       case %(ident (!set ?binding (binding ? ?))): {
@@ -852,25 +872,6 @@ static void _scan(Walk w, Var value, int deferred) {
         _warn(
           w, <after-free>, w.origin, %"'$name' is used after $ended", NULL);
         fact.dead = 0;
-      }
-      case %(op (!quote =) ?target ?stored) if (node != root): {
-        _store(w, target, stored);
-        w.pending.push(target);
-      }
-      case %(call ? ?args): {
-        List arguments = NULL;
-        String callee = _callee_of(node, arguments);
-        match (callee ? (w.audit ? _effect(w, callee) : runtime[callee])
-                     : void) {
-          case %((!or exit wrap)): break;
-          case %(free): _end(w, arguments.car(), NULL, <freed>);
-          case %(free scope):
-            _end(w, arguments.car(), "Scope.free", <freed>);
-          case %(alloc moved):
-            _end(w, arguments.car(), "Scope.realloc", <moved>);
-          default: if (callee) _scan_call(w, node, callee, arguments);
-        }
-        w.pending.push(args);
       }
       /* A statement expression declares locals of its own. */
       case %((!or declare decl) ?specifiers (bindings *bindings)):
@@ -1009,7 +1010,7 @@ static void _declare(Walk w, Var specifiers, List bindings) {
 static int _note_restored(Walk w, Var body) {
   Macro statement = $expression_statement;
   match (body) case statement(?expression):
-    match (_unwrap(expression)) case %(op (!quote =) ?target ?): {
+    match (source_assignment(_unwrap(expression))) case %(?target ?): {
       Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;
       w.restored = w.restored.copy();
@@ -1022,11 +1023,12 @@ static int _note_restored(Walk w, Var body) {
 /* A place a `defer` writes is put back when its block ends, so a store
    into it after the `defer` is not an escape. */
 static void _note_deferred_stores(Walk w, Var node) {
-  match (node) {
-    case %(op (!quote =) ?target ?): w.restored[_unwrap(target)] = 1;
-    case %(*children):
-      foreach (Var child, children) _note_deferred_stores(w, child);
+  match (source_assignment(node)) case %(?target ?): {
+    w.restored[_unwrap(target)] = 1;
+    return;
   }
+  match (node) case %(*children):
+    foreach (Var child, children) _note_deferred_stores(w, child);
 }
 
 /* A `defer` beside a region closes it at block exit, a deferred free or
@@ -1128,8 +1130,8 @@ static void _walk(Walk w, Var node) {
       List arguments = NULL;
       String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;
-      match (_unwrap(expression)) {
-        case %(op (!quote =) ?target ?value): _store(w, target, value);
+      match (source_assignment(_unwrap(expression))) {
+        case %(?target ?value): _store(w, target, value);
         default: _scan(w, expression, 0);
       }
     }

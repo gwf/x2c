@@ -3465,7 +3465,7 @@ static int _macro_expression_continues(Token token) {
     case <%>: case <@>: case <?>: case <,>:
       return 1;
   }
-  return type == <ident> && token.text == "is";
+  return type == <ident> && (token.text == "is" || token.text == "in");
 }
 
 static int _legacy_expression_body(Compiler c) {

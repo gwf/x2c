@@ -54,41 +54,44 @@ static int _exact_iter_type(Var value) {
     hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 */
 List Compiler.complete_iter_chain(Compiler compiler, List expression) {
-  match (expression) {
-    case %(expr ?result (call (!set ?callee
-           (expr ((func (!set ?parameters (*))) ?)
-              (ident ?binding))) (args *arguments))): {
-      String name = binding_identity_spelling(binding);
-      if (!_exact_iter_type(result) || name == "Iter_unzip" ||
-          _parameters_variadic(parameters))
-        return expression;
+  Macro called = $called;
+  match (expression) case called(?callee, *arguments): {
+    match (callee)
+      case %(expr ((func (!set ?parameters (*))) ?)
+                  (ident ?binding)): {
+        Type result = expression.cadr();
+        String name = binding_identity_spelling(binding);
+        if (!_exact_iter_type(result) || name == "Iter_unzip" ||
+            _parameters_variadic(parameters))
+          return expression;
 
-      Array completed = [];
-      List formal = parameters, actual = arguments;
-      int supplied = arguments.len(), expected = formal.len();
-      if (!formal ||
-          (supplied != expected && supplied + 1 != expected) ||
-          !_exact_iter_type(formal.last()))
-        return expression;
-      int changed = 0;
-      while (actual) {
-        List argument = actual.car(), rewritten = argument;
-        if (_exact_iter_type(formal.car()))
-          rewritten = compiler.complete_iter_chain(argument);
-        if (rewritten != argument) changed = 1;
-        completed.push(rewritten);
-        actual = actual.cdr();
-        formal = formal.cdr();
-      }
+        Array completed = [];
+        List formal = parameters, actual = arguments;
+        int supplied = arguments.len(), expected = formal.len();
+        if (!formal ||
+            (supplied != expected && supplied + 1 != expected) ||
+            !_exact_iter_type(formal.last()))
+          return expression;
+        int changed = 0;
+        while (actual) {
+          List argument = actual.car(), rewritten = argument;
+          if (_exact_iter_type(formal.car()))
+            rewritten = compiler.complete_iter_chain(argument);
+          if (rewritten != argument) changed = 1;
+          completed.push(rewritten);
+          actual = actual.cdr();
+          formal = formal.cdr();
+        }
 
-      List values = completed.list_free();
-      if (supplied + 1 == expected) {
-        values = values.append(%(${_iter_destination()}));
-        changed = 1;
+        List values = completed.list_free();
+        if (supplied + 1 == expected) {
+          values = values.append(%(${_iter_destination()}));
+          changed = 1;
+        }
+        if (!changed) return expression;
+        return compiler.rebuild_expression(
+          %("Iter"), called(callee, values));
       }
-      if (!changed) return expression;
-      return %(expr ("Iter") (call $callee (args @values)));
-    }
   }
   return expression;
 }
@@ -185,13 +188,15 @@ static List _parse_postfix_index(Compiler c, List expr) {
 static void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
-  if (!result.match(%(?)) || !call.match(%(expr ? (call ? (args ?)))))
-    return;
-  String spelled = result.car().str().lower();
-  if (method != spelled && (method != "str" || result !== %("String")))
-    return;
-  c.protocol_helpers["explicit-converter"] =
-    %($call $method ${c.token_location(origin)});
+  if (!result.match(%(?))) return;
+  Macro called = $called;
+  match (call) case called(?callee, ?argument): {
+    String spelled = result.car().str().lower();
+    if (method != spelled && (method != "str" || result !== %("String")))
+      return;
+    c.protocol_helpers["explicit-converter"] =
+      %($call $method ${c.token_location(origin)});
+  }
 }
 
 static const PrintfFn printf_family_info[] = {
@@ -262,8 +267,9 @@ String Compiler.printf_static_format(
 static void _check_explicit_converter_arguments(
   Compiler compiler, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
-  match (result) case %(expr ? (call ?called (args *values))): {
-    callee = called;
+  Macro called = $called;
+  match (result) case called(?function, *values): {
+    callee = function;
     supplied = values;
     arguments = method ? cdr(values) : values;
     match (callee) case %(expr ((func ?declared) *) ?):
@@ -306,8 +312,10 @@ static List _apply_macro_value(
       (cons ${c.convert_expression(argument, %("Var"))} $values));
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_apply")), origin);
+  Macro called = $called;
   return c.resolve_expression(
-    %(expr ("List") (call $callee (args $expr $values))), origin);
+    c.rebuild_expression(%("List"), called(callee, %($expr $values))),
+    origin);
 }
 
 static List _parse_postfix_apply(Compiler c, List expr) {
@@ -325,8 +333,9 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   List supplied = arguments.list_free();
   if (c.sym.is_named_value_type(expr.cadr(), "Macro"))
     return _apply_macro_value(c, expr, supplied, origin);
+  Macro called = $called;
   List result = c.resolve_expression(
-    %(expr () (call $expr (args @supplied))), origin);
+    c.rebuild_expression(NULL, called(expr, supplied)), origin);
   int method = !!expr.match(%(expr () (op . ? (?))));
   _check_explicit_converter_arguments(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
@@ -892,7 +901,7 @@ static int _cast_operand_follows(Symbol s) {
   return 0;
 }
 
-static int _macro_hole_starts_cast_type(Compiler compiler) {
+static int _macro_hole_starts_cast_type(Compiler compiler, Token after) {
   if (!compiler.macro_holes || compiler.peek(0) != <$> ||
       compiler.peek(2) != <)>) return 0;
   List hole = compiler.peek_macro_hole();
@@ -901,9 +910,8 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   if (kind && kind != <type>) return 0;
   /* `($items)[0]` subscripts the hole's value and `($key) in table` tests
      it; only a hole declared a type casts an array literal or a name `in`. */
-  Symbol next = compiler.peek(3);
-  if ((next == <[> || next == <in>) && kind != <type>) return 0;
-  return _cast_operand_follows(next);
+  if ((after.type == <[> || after.text == "in") && kind != <type>) return 0;
+  return _cast_operand_follows(after.type);
 }
 
 static int _parenthesized_cast_operand_follows(Compiler c) =>
@@ -942,7 +950,8 @@ static int _casts_to_template_typedef(Compiler c, List declaration) {
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_parenthesized_cast_operand_follows(c) && c.test(<(>)) {
-    if (c.test_declaration() || _macro_hole_starts_cast_type(c)) {
+    if (c.test_declaration() ||
+        _macro_hole_starts_cast_type(c, head.after_group())) {
       List decl = c.parse_simple_declaration(), type = decl.type_from_ast();
       decl = %(decl @{decl.cdr()});
       c.expect(<)>);
@@ -985,6 +994,12 @@ static inline int _precedence(Symbol op) {
     default:                   return 0;   // not a binary operator
   }
 }
+
+/* The keyword pass leaves `in` a name where a neighbor could also be C, as
+   before a bare `[` literal. No name follows a complete operand, so there
+   it is the membership operator. */
+static inline Symbol _binary_operator(Compiler c) =>
+  c.peek(0) == <ident> && c.token.text == "in" ? <in> : c.peek(0);
 
 static inline int _is_type_operator(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
@@ -1221,10 +1236,12 @@ static void _note_fresh_callee(Compiler compiler, List binding) {
 static int _is_operator_temporary(Compiler c, List expression) {
   match (expression) {
     case %(expr ? (parens ?inner)): return _is_operator_temporary(c, inner);
-    case %(expr ? (call (expr ? (ident (!set ?binding (*)))) *)):
+  }
+  Macro called = $called;
+  match (expression) case called(?callee, *arguments):
+    match (callee) case %(expr ? (ident (!set ?binding (*)))):
       return c.protocol_helpers.contains(
         %"fresh-callee ${(long) binding.list()}");
-  }
   return 0;
 }
 
@@ -1236,13 +1253,13 @@ static List Compiler._protocol_operator_expression(
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
   int which = 0;
-  if (!rhs) arguments = %(args $lhs);
+  if (!rhs) arguments = %($lhs);
   else if (op == <in>) {
     List parameters = signature.car().cadr();
     lhs = c.convert_expression(lhs, parameters.cadr());
-    arguments = %(args $rhs $lhs);
+    arguments = %($rhs $lhs);
   }
-  else arguments = %(args $lhs $rhs);
+  else arguments = %($lhs $rhs);
   if (op != <in>) {
     if (_is_operator_temporary(c, lhs)) which |= 1;
     if (rhs && _is_operator_temporary(c, rhs)) which |= 2;
@@ -1258,8 +1275,9 @@ static List Compiler._protocol_operator_expression(
       participant, member, which);
     if (helper) (binding, signature) = helper;
   }
-  List call = %(expr $result
-    (call (expr $signature (ident $binding)) $arguments));
+  Macro called = $called;
+  List callee = %(expr $signature (ident $binding));
+  List call = c.rebuild_expression(result, called(callee, arguments));
   if (!derived) return call;
   if (derived == <equal>) return %(expr (int) (op ! $call));
   List zero = %(expr (int) (literal (int) "0"));
@@ -1593,8 +1611,9 @@ static List _finish_call(
             origin, NULL);
   compiler.check_meta_call(callee, origin);
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
-  return %(expr $result_type
-           (call $callee (args @arguments)));
+  Macro called = $called;
+  return compiler.rebuild_expression(
+    result_type, called(callee, arguments));
 }
 
 /* A dynamic Func call stores its callee once, prepares each argument into
@@ -2015,10 +2034,12 @@ static List _constant_row_test(
   unsigned long top, mask, bottom;
   if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
   List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
-  return %(expr (int) (call $callee (args $lhs
+  List arguments = %($lhs
     (expr (unsigned) (literal (unsigned) "$top"))
     (expr (unsigned long) (literal (unsigned long) "$mask"))
-    (expr (unsigned long) (literal (unsigned long) "$bottom")))));
+    (expr (unsigned long) (literal (unsigned long) "$bottom")));
+  Macro called = $called;
+  return c.rebuild_expression(%(int), called(callee, arguments));
 }
 
 static List _resolve_initializer(Compiler c, List node, Token origin) {
@@ -2083,6 +2104,13 @@ static List _resolve_content(
         : %"type $receiver_type does not support indexing",
       origin, %());
   }
+  match (content) case %(call ?(String callee) (args *supplied)): {
+    List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
+    return %(expr $input_type (call $callee (args @arguments)));
+  }
+  Macro called = $called;
+  match (input) case called(?callee, *supplied):
+    return _resolve_call(c, input_type, callee, supplied, origin);
   match (content) {
     case %(managed-init ?initializer): {
       initializer = c.resolve_expression(initializer, origin);
@@ -2280,15 +2308,15 @@ static List _resolve_content(
           origin, %("operand type: ${lhs_type.repr()}"));
       if (target === %(void) || target === %("Void")) {
         List callee = _resolve_identifier(c, "Var_is_void", NULL, origin);
-        return %(expr (int) (call $callee (args $lhs)));
+        return c.rebuild_expression(%(int), called(callee, %($lhs)));
       }
       Symbol vartag = c.require_var_tag(target, origin);
       List direct = _constant_row_test(c, lhs, vartag, origin);
       if (direct) return direct;
       String tagsym = %"${(unsigned long) vartag}";
       List callee = _resolve_identifier(c, "Var_is", NULL, origin);
-      return %(expr (int) (call $callee (args
-        $lhs (expr ("Symbol") $tagsym))));
+      return c.rebuild_expression(%(int), called(
+        callee, %($lhs (expr ("Symbol") $tagsym))));
     }
     case %(is-symbol ?operand ?selector): {
       List lhs = c.resolve_expression(operand, origin);
@@ -2311,15 +2339,9 @@ static List _resolve_content(
           if (direct) return direct;
         }
       List callee = _resolve_identifier(c, "Var_is", NULL, origin);
-      return %(expr (int) (call $callee (args $lhs $selector)));
+      return c.rebuild_expression(
+        %(int), called(callee, %($lhs $selector)));
     }
-    case %(call ?(String callee) (args *supplied)): {
-      List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
-      return %(expr $input_type
-               (call $callee (args @arguments)));
-    }
-    case %(call ?callee (args *supplied)):
-      return _resolve_call(c, input_type, callee, supplied, origin);
     case %(op (!or (!set ?operator .) (!set ?operator (!quote ->)))
               ?receiver (!set ?field (*))): {
       receiver = c.resolve_expression(receiver, origin);
@@ -2483,7 +2505,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
    deferred expression nodes. */
 static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
   int first = 1;
-  while (_precedence(c.peek(0)) == level ||
+  while (_precedence(_binary_operator(c)) == level ||
          (level == 7 && _is_type_operator(c))) {
     if (_is_type_operator(c)) {
       Token origin = c.token;
@@ -2507,7 +2529,7 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
         : test;
       continue;
     }
-    Symbol op = c.peek(0);
+    Symbol op = _binary_operator(c);
     Token origin = c.token;
     c.next();
     List rhs = _parse_binary_level(c, level + 1);
@@ -2701,9 +2723,9 @@ List Compiler.parse_assignment(Compiler compiler) =>
 
 /* A name adjacent to a C string literal is a preprocessor word: a macro this
    unit defines to a string literal, or a name it cannot resolve, as a
-   header's `PRId64` is. */
+   header's `PRId64` is. `in` there is the membership operator. */
 static int _string_word_follows(Compiler c) {
-  if (c.peek(0) != <ident>) return 0;
+  if (c.peek(0) != <ident> || c.token.text == "in") return 0;
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition))
     return definition.equal(<string>);
@@ -2973,7 +2995,8 @@ static List _var_exact_reader(Compiler compiler, List expr, Type target) {
       !readertype.cdr().equal(target))
     return NULL;
   List callee = %(expr $readertype (ident $binding));
-  return %(expr $target (call $callee (args $expr)));
+  Macro called = $called;
+  return compiler.rebuild_expression(target, called(callee, %($expr)));
 }
 
 /* A converter's result exists only for the operator that asked for it.
@@ -2983,8 +3006,10 @@ static List _converted_temporary(
   Compiler compiler, List call, Type owner, Type target) {
   if (compiler.sym.resolve_numeric_type(owner) &&
       compiler.resolve_protocol_member(target, "discard")) {
-    match (call) case %(expr ? (call (expr ? (ident (!set ?binding (*)))) *)):
-      _note_fresh_callee(compiler, binding);
+    Macro called = $called;
+    match (call) case called(?callee, *arguments):
+      match (callee) case %(expr ? (ident (!set ?binding (*)))):
+        _note_fresh_callee(compiler, binding);
   }
   return call;
 }
@@ -3010,6 +3035,7 @@ static List _converter_owned_call(
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
     ? expr : %(expr $owner $expr);
+  Macro called = $called;
   if (cvrtrtype && cvrtrtype.car() is <list>) {
     List function = cvrtrtype.car();
     (Var function_tag, List parameters) = function;
@@ -3017,19 +3043,21 @@ static List _converter_owned_call(
     if (function_tag == <func> &&
         parameters && !parameters.cdr() &&
         List.equal(parameters.car(), owner) &&
-        result.equal(target))
-      return _converted_temporary(
-        compiler, %(expr $target (call $callee (args $argument))), owner,
-        target);
+        result.equal(target)) {
+      List call = compiler.rebuild_expression(
+        target, called(callee, %($argument)));
+      return _converted_temporary(compiler, call, owner, target);
+    }
   }
   /* The relaxed form exists so a converter may spell its parameter as a
      typedef of the source type, which the exact comparison above rejects.
      It still takes exactly one argument: matching a longer parameter list
      emitted a call with the arguments missing. */
-  if (cvrtrtype.match(%((func (($typename))) ?)))
-    return _converted_temporary(
-      compiler, %(expr $target (call $callee (args $argument))), owner,
-      target);
+  if (cvrtrtype.match(%((func (($typename))) ?))) {
+    List call = compiler.rebuild_expression(
+      target, called(callee, %($argument)));
+    return _converted_temporary(compiler, call, owner, target);
+  }
   return NULL;
 }
 
@@ -3839,7 +3867,9 @@ static List _initializer_adapters(
     (List condition, List path, Type destination, List value) = choice;
     List adapter = _initializer_adapter(c, source, value);
     Type callable = adapter.cadr(), result = callable.apply();
-    value = %(expr $result (call $adapter (args $placeholder)));
+    Macro called = $called;
+    value = c.rebuild_expression(
+      result, called(adapter, %($placeholder)));
     adapted.push(%($condition $path $destination $value));
   }
   return adapted.list_free();
@@ -4313,9 +4343,10 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       if (cvrtrtype === %((func (($typename))) "Var")) {
         List argument = type == converter_type
           ? expr : %(expr $converter_type $expr);
-        return %(expr ("Var")
-          (call (expr $cvrtrtype (ident $converter_binding))
-                (args $argument)));
+        List callee = %(expr $cvrtrtype (ident $converter_binding));
+        Macro called = $called;
+        return c.rebuild_expression(
+          %("Var"), called(callee, %($argument)));
       }
       String message = %"cannot convert ${type.repr()} to Var without loss";
       c.report_error(<type>, message, NULL, NULL);

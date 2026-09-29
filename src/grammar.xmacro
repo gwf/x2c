@@ -77,6 +77,29 @@ macro Expression $indexed(Expr $receiver, Expr $selector) =>
 macro Expression $called(Expr $callee, Expr $arguments...) =>
   $callee($arguments...);
 
+/* Project either a typed source expression or its lowered call content.
+   Keep the typed callee and argument rows; the parser's empty argument
+   marker represents no arguments. */
+meta static List source_call(Var value) {
+  match (value) case %(expr ? ?inner): value = inner;
+  match (value) case %(call ?callee (args *rows)): {
+    match (rows) case %((expr ? ())): rows = NULL;
+    return %($callee $rows);
+  }
+  return NULL;
+}
+
+/* Project a source assignment at either expression stage. A declarator's
+   initializer uses the same operator node but is not an assignment. */
+meta static List source_assignment(Var value) {
+  match (value) case %(expr ? ?inner): value = inner;
+  match (value) case %(op (!quote =) ?target ?stored): {
+    match (target) case %(bind *): return NULL;
+    return %($target $stored);
+  }
+  return NULL;
+}
+
 /* The source expression beneath casts and parentheses, retaining its type. */
 meta static Var source_expression(Var value) {
   while (1) {
