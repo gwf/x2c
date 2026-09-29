@@ -7,6 +7,7 @@
 */
 
 #pragma once
+#include "cli.x"
 #include "path.x"
 #include "process.x"
 
@@ -51,22 +52,33 @@ typedef struct ToolRun {
 
 // tool selection
 
-/** Creates a `Scope`-owned host toolchain and resolves its native layout.
-    Tool selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
+/** Creates a `Scope`-owned host toolchain with the tools, native options,
+    and verbose and dry-run modes of `request`, and resolves its native
+    layout. Tool
+    selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
     installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
     option `List`s are borrowed.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the toolchain
     or its canonical layout.
 */
-Toolchain toolchain_new(
-  String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose,
-  int dry_run) {
+Toolchain toolchain_new(CliRequest request) {
+  Toolchain t = _toolchain(request.cc, request.ar);
+  t.cpp_args = request.cpp_args; t.cc_args = request.cc_args;
+  t.ld_args = request.ld_args;
+  t.verbose = request.verbose; t.dry_run = request.dry_run;
+  return t;
+}
+
+/** Creates the toolchain that builds meta code with `cc`. It selects the
+    archiver as `toolchain_new` does and has no native options.
+*/
+Toolchain toolchain_meta(String cc) => _toolchain(cc, NULL);
+
+static Toolchain _toolchain(String cc, String ar) {
   Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
   t.cc = _tool(cc, "CC", "cc");
   t.ar = _tool(ar, "AR", "ar");
-  t.cpp_args = cpp_args; t.cc_args = cc_args; t.ld_args = ld_args;
-  t.verbose = verbose; t.dry_run = dry_run;
   t._layout();
   return t;
 }

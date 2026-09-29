@@ -197,6 +197,16 @@ static String _cache_note(int count, int cached) {
   return cached ? %", $cached cached" : "";
 }
 
+/** Writes the muted receipt for `n` generated C files and as many headers,
+    `bytes` in all, when receipts are enabled.
+*/
+void report_generated(int n, unsigned long long bytes) {
+  String size = report_size(bytes);
+  String c_noun = n == 1 ? "C file" : "C files";
+  String h_noun = n == 1 ? "header" : "headers";
+  report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
+}
+
 // terminal output
 
 // A carriage return, then an erase to the end of the line.

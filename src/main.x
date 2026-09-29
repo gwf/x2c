@@ -258,10 +258,7 @@ static void Translation.report(Translation *t, unsigned long started_at) {
   int n = t.total;
   String noun = n == 1 ? "file" : "files";
   report_line(<success>, %"Translated $n x2c $noun to $out_dir in $duration");
-  String size = report_size(bytes);
-  String c_noun = n == 1 ? "C file" : "C files";
-  String h_noun = n == 1 ? "header" : "headers";
-  report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
+  report_generated(n, bytes);
 }
 
 // translation workers
@@ -582,9 +579,7 @@ static int _run_env(CliRequest request) {
 
 // The resolved values in print order. An absent value prints empty.
 static List _env_rows(CliRequest request) {
-  Toolchain toolchain = toolchain_new(
-    request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, request.verbose, request.dry_run);
+  Toolchain toolchain = toolchain_new(request);
   String executable = x2c_get_executable();
   String roots = ":".join(request.package_roots());
   interface_configure(request.out_dir, 0);

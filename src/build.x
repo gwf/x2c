@@ -167,17 +167,12 @@ static void Build._check_compile_only(Build b) {
 /* The selected compiler and archiver go back to the request. */
 static void Build._select_tools(Build b) {
   CliRequest request = b.request;
-  b.toolchain = _toolchain(request, request.verbose, request.dry_run);
+  b.toolchain = toolchain_new(request);
   request.cc = b.toolchain.cc; request.ar = b.toolchain.ar;
   // A module's code is placed wherever the loader maps it.
   if (request.kind == <module>)
     b.toolchain.cc_args = %("-fPIC" @{b.toolchain.cc_args});
 }
-
-static Toolchain _toolchain(CliRequest request, int verbose, int dry_run) =>
-  toolchain_new(
-    request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, verbose, dry_run);
 
 /* An unnamed output is named for the first input and the kind.
    `Build.finish` places a run's output in the work directory. */
@@ -929,13 +924,7 @@ static void Build._extension_sources(
 void Build.report_success(Build b) {
   if (!report_receipts()) return;
   report_line(<success>, b._headline());
-  if (b.xlat_n) {
-    int n = b.xlat_n;
-    String size = report_size(b.gen_bytes);
-    String c_noun = n == 1 ? "C file" : "C files";
-    String h_noun = n == 1 ? "header" : "headers";
-    report_line(<muted>, %"  Generated $n $c_noun and $n $h_noun ($size)");
-  }
+  if (b.xlat_n) report_generated(b.xlat_n, b.gen_bytes);
   if (b.cc_n) {
     int n = b.request.jobs;
     String jobs = n == 1 ? "1 job" : %"$n jobs";
@@ -1121,7 +1110,7 @@ int CliRequest.script_current(CliRequest request, String directory) {
   List lines = NULL;
   try lines = Path.read_text(record).split_lines(0);
   catch %(io-fail *): return 0;
-  String cc = _toolchain(request, 0, 0).cc;
+  String cc = toolchain_new(request).cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, lines.cdr(), ok);
   return ok && _state_matches(record, hash);

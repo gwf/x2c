@@ -465,9 +465,7 @@ Frontend Frontend.new(CliRequest request) {
   Frontend f = Scope.calloc(1, sizeof(struct Frontend));
   f.request = request;
   f.include_dirs = request.include_dirs.append(x2c_default_include_dirs());
-  f.toolchain = toolchain_new(
-    request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, request.verbose, request.dry_run);
+  f.toolchain = toolchain_new(request);
   Compiler.use_meta_toolchain(
     toolchain_meta_cc(request.meta_cc), f.toolchain.include_dir);
   return f;
