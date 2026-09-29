@@ -19,218 +19,244 @@ $(import "../src/grammar.xmacro")
 #include <stdint.h>
 #include <string.h>
 
-// list literals
+/* list literals
+
+   `%(...)` and a nested `(...)` read quoted data into typed cons cells. In
+   a pattern, a List headed by `!is` accepts the reserved binder spellings,
+   and one headed by `!quote` records no typed captures. */
 
 /** Parses a `List` literal beginning at `(` or `%(` and returns its typed
     expression after consuming `)`. Pattern parsing sets and restores
     `match_is`; `runtime_literals` disables stable-cell caching.
 */
 List Compiler.parse_list_literal(Compiler c) {
-  int runtime_literal = c.peek(0) == <"%(">;
+  int percent = c.peek(0) == <"%(">;
   c.next();
   if (c.test(<)>)) return %(expr ("List") (nil));
   Symbol operator = _match_operator_head(c);
   $let(c.match_is, operator == <!is>)
   $let(c.match_types, operator == <!quote> ? NULL : c.match_types) {
-    List reader_form = runtime_literal
-      ? _parse_list_reader_prefix(c)
-      : NULL;
+    // A `%(` literal that holds only a reader form is that form.
+    List reader_form = percent ? _parse_reader_prefix(c) : NULL;
     if (reader_form && c.test(<)>)) return reader_form;
     List head = reader_form ? reader_form : _parse_list_head(c);
     List tail = _parse_list_tail(c);
     c.expect(<)>);
-    return %(expr ("List") ${_build_cons_cell(c, head, tail)});
+    return %(expr ("List") ${_cons_cell(c, head, tail)});
   }
 }
 
-static Symbol _match_operator_head(Compiler compiler) {
-  if (!compiler.in_pattern) return 0;
-  if (compiler.peek(0) == <lit-atom>) {
-    Atom atom = Atom.intern(compiler.token.text.unescape());
+/* A pattern List may open with a match operator, spelled as an Atom or as
+   a `<...>` Symbol. */
+static Symbol _match_operator_head(Compiler c) {
+  if (!c.in_pattern) return 0;
+  if (c.peek(0) == <lit-atom>) {
+    Atom atom = Atom.intern(c.token.text.unescape());
     return atom is <symbol> ? atom.symbol() : 0;
   }
-  if (compiler.peek(0) == <lit-symbol>) {
-    Token token = compiler.token;
-    String spelling = _angle_spelling(token.text);
-    Symbol symbol = _exact_symbol(compiler, token, spelling);
-    return symbol;
-  }
-  return 0;
+  if (c.peek(0) != <lit-symbol>) return 0;
+  Token token = c.token;
+  return _exact_symbol(c, token, _angle_spelling(token.text));
 }
 
-static List _parse_list_reader_prefix(Compiler compiler) {
+/* A Lisp reader prefix reads as the List it abbreviates: `'x` is
+   `(quote x)`. */
+static List _parse_reader_prefix(Compiler c) {
   String spelling = NULL;
-  switch (compiler.peek(0)) {
+  switch (c.peek(0)) {
     case <"'">:  spelling = "quote";            break;
     case <"`">:  spelling = "quasiquote";       break;
     case <",">:  spelling = "unquote";          break;
     case <",@">: spelling = "unquote-splicing"; break;
     default: return NULL;
   }
-  compiler.next();
-  List value = _parse_list_head(compiler);
-  List tail = _build_cons_cell(compiler, value, %(nil));
-  return _build_cons_cell(
-    compiler, _list_prefix_atom(compiler, spelling), tail);
+  c.next();
+  List value = _parse_list_head(c);
+  List tail = _cons_cell(c, value, %(nil));
+  return _cons_cell(c, _atom_element(c, spelling), tail);
 }
 
-static List _list_prefix_atom(Compiler compiler, String spelling) {
+/* An Atom element that the parser adds, such as a reader form's name or a
+   typed capture's `!is`, cached unless literals are built at runtime. */
+static List _atom_element(Compiler c, String spelling) {
   Atom atom = Atom.intern(spelling);
   List literal = atom is <symbol>
     ? %(literal ("Symbol") $spelling ${atom.symbol()})
     : %(literal ("Atom") $spelling $atom);
   List expression = %(expr ${literal.cadr()} $literal);
-  if (compiler.runtime_literals) return expression;
-  return compiler.cache(%(var $expression));
+  if (c.runtime_literals) return expression;
+  return c.cache(%(var $expression));
 }
 
-static List _parse_list_head(Compiler compiler) {
+static List _parse_list_head(Compiler c) {
   List elem = NULL;
-  if ((elem = _parse_list_reader_prefix(compiler))) return elem;
-  if ((elem = _parse_splice_element(compiler))) return %(expr ("List") $elem);
-  if ((elem = _parse_variable_reference(compiler))) return elem;
-  elem = _parse_literal_element(compiler);
+  if ((elem = _parse_reader_prefix(c))) return elem;
+  if ((elem = _parse_splice(c))) return %(expr ("List") $elem);
+  if ((elem = _parse_insertion(c))) return elem;
+  return _cache_if_stable(c, _parse_literal_element(c));
+}
+
+/* A nested literal without references is built once, in the cache. */
+static List _cache_if_stable(Compiler c, List elem) {
   Var matched;
   List bindings;
   /* A reference is `(ident <binding-list>)`. The binding sublist has to be
      part of the search: `%(ident *)` also matches the final cell of a
      literal node ending in the Symbol <ident>. */
   if (elem.try_search(%(ident (*)), matched, bindings)) return elem;
-  if (compiler.runtime_literals) return elem;
+  if (c.runtime_literals) return elem;
   /* Each evaluation builds a fresh Array or Map, so a List that holds one,
      at any depth, is built at runtime too. */
   if (elem.match(%(expr (!or ("Array") ("Map")) *)) ||
       elem.match(%(expr ("List") (expr ("List") (cons *)))))
     return elem;
-  return compiler.cache(%(var $elem));
+  return c.cache(%(var $elem));
 }
 
-static List _parse_list_tail(Compiler compiler) {
-  if (compiler.peek(0) == <)>) return %(nil);
-  List head = _parse_list_head(compiler), tail = _parse_list_tail(compiler);
-  return _build_cons_cell(compiler, head, tail);
+static List _parse_list_tail(Compiler c) {
+  if (c.peek(0) == <)>) return %(nil);
+  List head = _parse_list_head(c), tail = _parse_list_tail(c);
+  return _cons_cell(c, head, tail);
 }
 
-// list elements
+/* list elements
 
-static List _parse_splice_element(Compiler compiler) {
-  if (compiler.peek(0) == <@>) {
+   `$` inserts one value and `@` splices a List, each followed by a name or
+   a braced expression. Any other element is a nested literal. */
+
+static List _parse_splice(Compiler c) {
+  if (c.peek(0) == <@>) {
     List expr = _parse_named_reference(
-      compiler, <@>, "use '@{...}' to splice an expression");
+      c, <@>, "use '@{...}' to splice an expression");
     return %(splice $expr);
   }
-  if (!compiler.test(<"@{">)) return NULL;
-  List expr = compiler.parse_expression();
-  compiler.expect(<"}">);
+  if (!c.test(<"@{">)) return NULL;
+  List expr = c.parse_expression();
+  c.expect(<"}">);
   return %(splice $expr);
 }
 
-static List _parse_variable_reference(Compiler compiler) {
-  if (compiler.peek(0) == <$>)
+static List _parse_insertion(Compiler c) {
+  if (c.peek(0) == <$>)
     return _parse_named_reference(
-      compiler, <$>, "use '${...}' to insert an expression");
-  if (compiler.peek(0) != <"${"> || compiler.token.len != 2)
-    return NULL;
-  compiler.next();
-  List expr = compiler.parse_expression();
-  compiler.check_explicit_converter(expr, %("Var"), 0);
-  compiler.expect(<"}">);
+      c, <$>, "use '${...}' to insert an expression");
+  if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
+  c.next();
+  List expr = c.parse_expression();
+  c.check_explicit_converter(expr, %("Var"), 0);
+  c.expect(<"}">);
   return expr;
 }
 
-static List _parse_named_reference(
-  Compiler compiler, Symbol sigil, String hint) {
-  compiler.expect(sigil);
-  if (compiler.peek(0) != <ident>) {
+static List _parse_named_reference(Compiler c, Symbol sigil, String hint) {
+  c.expect(sigil);
+  if (c.peek(0) != <ident>) {
     String message = %"expected identifier after '$sigil'";
-    compiler.report_error(<parse>, message, compiler.token, %( $hint ));
+    c.report_error(<parse>, message, c.token, %( $hint ));
   }
-  return compiler.parse_variable();
+  return c.parse_variable();
 }
 
-static List _parse_literal_element(Compiler compiler) {
-  switch (compiler.peek(0)) {
-    case <"?(">:     return _parse_typed_capture(compiler);
-    case <"(">:      return compiler.parse_list_literal();
-    case <"%\"">:    return compiler.parse_string_literal();
-    case <"%[">:     return compiler.parse_array_literal();
-    case <"%{">:     return compiler.parse_map_literal();
-    default:         return compiler.parse_atomic_literal();
+static List _parse_literal_element(Compiler c) {
+  switch (c.peek(0)) {
+    case <"?(">:  return _parse_typed_capture(c);
+    case <"(">:   return c.parse_list_literal();
+    case <"%\"">: return c.parse_string_literal();
+    case <"%[">:  return c.parse_array_literal();
+    case <"%{">:  return c.parse_map_literal();
+    default:      return c.parse_atomic_literal();
   }
 }
 
-static List _parse_collection_element(Compiler compiler) {
-  List reference = _parse_variable_reference(compiler);
-  return reference ? reference : _parse_literal_element(compiler);
+/* An Array or Map element has no splice form. */
+static List _parse_element(Compiler c) {
+  List inserted = _parse_insertion(c);
+  return inserted ? inserted : _parse_literal_element(c);
 }
 
-// list cells
+/* list cells
 
-static List _build_cons_cell(Compiler compiler, List head, List tail) {
-  match (head) {
-    case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))): {
-      head = sexpr;
-      if (compiler.sym.is_var_type(head.cadr()))
-        head = %(expr ("List") (call "Var_list" (args $head)));
-      else head = compiler.convert_expression(head, %("List"));
-      return %(expr ("List") (append $head $tail) );
-    }
-  }
+   A cell conses one element onto the cells after it. When the element and
+   the tail both have cache forms, the cell folds into the cache too. */
+
+static List _cons_cell(Compiler c, List head, List tail) {
+  match (head)
+    case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))):
+      return _append_splice(c, sexpr, tail);
   if (head.match(%(expr (<macro-expr>) ?)))
     return %(expr ("List") (cons $head $tail));
   /* A nested `List` that already folded enters the cache as its own key, the
      way a parsed element does, so the enclosing cell folds too. Converting it
      to `Var` first would leave a `List_var` call the cache cannot represent,
-     which is what stopped a rebuilt typed-capture pattern from folding. */
+     and a pattern that _typed_pattern rebuilds would not fold. */
   if (head.match(%(expr ("List") (expr ("List") (cache *)))))
-    head = compiler.cache(%(var $head));
-  head = compiler.convert_expression(head, %("Var"));
-  List cached = compiler.cache_cons_cell(head, tail);
+    head = c.cache(%(var $head));
+  head = c.convert_expression(head, %("Var"));
+  List cached = c.cache_cons_cell(head, tail);
   if (cached) return cached;
   return %(expr ("List") (cons $head $tail));
 }
 
-static List _build_error_pattern_list(Compiler compiler, Array values) {
-  List result = %(nil);
-  for (int i = values.len() - 1; i >= 0; i--)
-    result = _build_cons_cell(compiler, values[i], result);
-  return %(expr ("List") $result);
+/* A splice appends the List its expression produces. */
+static List _append_splice(Compiler c, List head, List tail) {
+  if (c.sym.is_var_type(head.cadr()))
+    head = %(expr ("List") (call "Var_list" (args $head)));
+  else head = c.convert_expression(head, %("List"));
+  return %(expr ("List") (append $head $tail));
 }
 
-// typed captures
+/* The typed List of `elements` consed onto `tail`. */
+static List _cons_list(Compiler c, Array elements, List tail) {
+  for (int i = (int) elements.len() - 1; i >= 0; i--)
+    tail = _cons_cell(c, elements[i], tail);
+  return %(expr ("List") $tail);
+}
+
+/* typed captures
+
+   `?(Type name)` binds `?name` only to a value with that type's Var tag.
+   In a source `match` arm, the arm records `(name Type)` and
+   `typed_match_pattern` adds the test to every occurrence; elsewhere the
+   capture becomes the pattern `(!is ?name type TAG)`. */
 
 static List _parse_typed_capture(Compiler c) {
-  Token start = c.token;
+  Token origin = c.token;
   c.expect(<"?(">);
   Type type = c.parse_type_name();
   String name = c.token.text;
   c.expect(<ident>);
   c.expect(<")">);
   Atom binder = Atom.intern(%"?$name");
-  List tag = c.var_tag_expression(type, start);
+  List tag = c.var_tag_expression(type, origin);
   if ((void *) c.match_types) {
     List row = %($name $type);
-    int repeated = 0;
-    foreach (List previous, c.match_types) match (previous)
-      case %(?previous_name ?previous_type):
-        if (previous_name == name &&
-            c.var_tag_expression(previous_type, start) == tag &&
-            c.sym.normalize_declared_type(previous_type) ==
-            c.sym.normalize_declared_type(type)) repeated = 1;
-    if (!repeated) c.match_types.push(row);
-    return _list_prefix_atom(c, binder.str());
+    if (!_recorded(c, name, type, tag, origin)) c.match_types.push(row);
+    return _atom_element(c, binder.str());
   }
-  return _typed_capture_pattern(c, binder, tag);
+  return _tag_test(c, binder, tag);
 }
 
-static List _typed_capture_pattern(Compiler c, Atom binder, List tag) {
-  List elements = binder.is_atom_binder()
-                ? %(!is $binder type) : %(!is type);
+/* An arm records a binder once for each Var tag and declared type. */
+static int _recorded(
+  Compiler c, String name, Type type, List tag, Token origin) {
+  int repeated = 0;
+  foreach (List previous, c.match_types) match (previous)
+    case %(?previous_name ?previous_type):
+      if (previous_name == name &&
+          c.var_tag_expression(previous_type, origin) == tag &&
+          c.sym.normalize_declared_type(previous_type) ==
+          c.sym.normalize_declared_type(type)) repeated = 1;
+  return repeated;
+}
+
+/* `(!is ?binder type TAG)`, or `(!is type TAG)` without a binder. */
+static List _tag_test(Compiler c, Atom binder, List tag) {
+  List elements = binder.is_atom_binder() ? %(!is $binder type) : %(!is type);
   match (tag)
     case %(expr ("Symbol") ?): tag = c.cache(%(var $tag));
-  List tail = _build_cons_cell(c, tag, %(nil));
+  List tail = _cons_cell(c, tag, %(nil));
   foreach (Var element, elements.reverse())
-    tail = _build_cons_cell(c, _list_prefix_atom(c, element.str()), tail);
+    tail = _cons_cell(c, _atom_element(c, element.str()), tail);
   return %(expr ("List") $tail);
 }
 
@@ -239,33 +265,40 @@ List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
   foreach (List row, types) match (row)
     case %(?name ?type):
-      tags[Atom.intern(%"?${name}")] =
-        c.var_tag_expression(type, c.token);
+      tags[Atom.intern(%"?${name}")] = c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
 
 static List _typed_pattern(Compiler c, List node, Map tags) {
   Var value = c.match_pattern_value(node), tag;
   if (value.is_atom_binder() && tags.try_get(value, tag))
-    return _typed_capture_pattern(c, value, tag);
+    return _tag_test(c, value, tag);
   List content = _pattern_content(c, node);
-  match (content) {
-    case %(cons ? ?): break;
-    default: return node;
+  match (content)
+    case %(cons ? ?): return _typed_list(c, node, content, tags);
+  return node;
+}
+
+/* A pattern hides under typed, cached, and boxed wrappers. */
+static List _pattern_content(Compiler c, List node) {
+  match (node) {
+    case %(expr ? ?value): return _pattern_content(c, value);
+    case %(cache ?id): return _pattern_content(c, c.id_keys[id]);
+    case %(var ?value): return _pattern_content(c, value);
+    case %(call (expr ? (ident ?binding)) (args ?value)):
+      if (binding_identity_spelling(binding) == "List_var")
+        return _pattern_content(c, value);
   }
+  return node;
+}
+
+/* An operator's operands follow it and its binder, which `!set` has only
+   before a single pattern. `!quote` and `!is` operands stay as written,
+   and a typed binder's test joins the whole pattern. */
+static List _typed_list(Compiler c, List node, List content, Map tags) {
   Array elements = $auto([]);
-  List tail = content;
-  loop {
-    match (tail) {
-      case %(cons ?head ?rest): {
-        elements.push(head);
-        tail = _pattern_content(c, rest);
-        continue;
-      }
-    }
-    break;
-  }
-  Var operator = c.match_pattern_value(elements[0]);
+  List tail = _pattern_elements(c, content, elements);
+  Var operator = c.match_pattern_value(elements[0]), tag;
   if (operator == <!quote>) return node;
   int first = operator.is_match_op() ? 1 : 0;
   List capture_tag = NULL;
@@ -280,32 +313,35 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
   if (operator != <!is>)
     for (int i = first; i < elements.len(); i++)
       elements[i] = _typed_pattern(c, elements[i], tags);
-  for (int i = (int) elements.len() - 1; i >= 0; i--)
-    tail = _build_cons_cell(c, elements[i], tail);
-  List result = %(expr ("List") $tail);
-  if (capture_tag) {
-    tail = _build_cons_cell(c, result, %(nil));
-    tail = _build_cons_cell(
-      c, _typed_capture_pattern(c, void, capture_tag), tail);
-    tail = _build_cons_cell(c, _list_prefix_atom(c, "!and"), tail);
-    result = %(expr ("List") $tail);
-  }
-  return result;
+  List pattern = _cons_list(c, elements, tail);
+  return capture_tag ? _and_tag_test(c, pattern, capture_tag) : pattern;
 }
 
-static List _pattern_content(Compiler c, List node) {
-  match (node) {
-    case %(expr ? ?value): return _pattern_content(c, value);
-    case %(cache ?id): return _pattern_content(c, c.id_keys[id]);
-    case %(var ?value): return _pattern_content(c, value);
-    case %(call (expr ? (ident ?binding)) (args ?value)):
-      if (binding_identity_spelling(binding) == "List_var")
-        return _pattern_content(c, value);
+/* Pushes the heads of a cons chain and returns what ends it. */
+static List _pattern_elements(Compiler c, List tail, Array elements) {
+  loop {
+    match (tail) case %(cons ?head ?rest): {
+      elements.push(head);
+      tail = _pattern_content(c, rest);
+      continue;
+    }
+    return tail;
   }
-  return node;
 }
 
-// error payloads
+/* `(!and (!is type TAG) PATTERN)` */
+static List _and_tag_test(Compiler c, List pattern, List tag) {
+  List tail = _cons_cell(c, pattern, %(nil));
+  tail = _cons_cell(c, _tag_test(c, void, tag), tail);
+  tail = _cons_cell(c, _atom_element(c, "!and"), tail);
+  return %(expr ("List") $tail);
+}
+
+/* error payloads
+
+   A `raise` payload and a filtered `catch` read a code and then detail
+   pairs. A pair's key is a bare Symbol, and its one value or pattern
+   cannot splice. Payload literals are built at runtime. */
 
 /** Parses the `%()` payload following `raise` into a `(raise CODE (args ...))`
     node and consumes its closing `)`. The code is a bare `Symbol` or a
@@ -315,38 +351,16 @@ static List _pattern_content(Compiler c, List node) {
 List Compiler.parse_raise_literal(Compiler c) {
   c.expect(<"%(">);
   $let(c.runtime_literals, 1) {
-    List code = _parse_error_symbol(
-      c, "raise", "code", "use raise %(code (key value)...);");
-
+    List code = c.try_parse_macro_slot(<expression>);
+    if (!code) code = _parse_insertion(c);
+    if (!code)
+      code = _parse_bare_symbol(
+        c, "raise", "code", "use raise %(code (key value)...);");
     Array args = [];
     while (c.peek(0) != <)>) {
       List slot = c.try_parse_macro_slot(<argument>);
-      if (slot) {
-        args.push(slot);
-        continue;
-      }
-      Token pair_token = c.token;
-      c.expect(<(>);
-      List key = _parse_error_symbol(
-        c, "raise", "detail key",
-        "use raise %(code (key value)...);");
-      if (c.peek(0) == <)>)
-        c.report_error(
-          <parse>, "raise detail requires exactly one value",
-          pair_token, NULL);
-      List value = _parse_list_head(c);
-      if (value.match(%(expr ("List") (splice *))) ||
-          value.match(%(splice *)))
-        c.report_error(
-          <parse>, "raise detail value cannot splice",
-          pair_token, %("pass one value expression"));
-      if (c.peek(0) != <)>)
-        c.report_error(
-          <parse>, "raise detail requires exactly one value",
-          pair_token, NULL);
-      c.expect(<)>);
-      args.push(key);
-      args.push(value);
+      if (slot) args.push(slot);
+      else _parse_raise_detail(c, args);
     }
     c.expect(<)>);
     List values = args;
@@ -355,78 +369,92 @@ List Compiler.parse_raise_literal(Compiler c) {
   }
 }
 
-static List _parse_error_symbol(
-  Compiler compiler, String owner, String role, String hint) {
-  List slot = owner == "raise"
-    ? compiler.try_parse_macro_slot(<expression>) : NULL;
-  if (!slot && owner == "raise" && role == "code")
-    slot = _parse_variable_reference(compiler);
-  if (slot) return slot;
-  Token token = compiler.token;
-  if (compiler.peek(0) != <lit-atom>)
-    compiler.report_error(
-      <parse>, %"$owner $role must be a bare Symbol",
-      token, %($hint));
+/* A raise detail's key may also come from a macro slot. */
+static void _parse_raise_detail(Compiler c, Array args) {
+  Token origin = c.token;
+  c.expect(<(>);
+  List key = c.try_parse_macro_slot(<expression>);
+  if (!key)
+    key = _parse_bare_symbol(
+      c, "raise", "detail key", "use raise %(code (key value)...);");
+  List value = _parse_detail_value(
+    c, origin, "raise detail requires exactly one value",
+    "raise detail value cannot splice", %("pass one value expression"));
+  args.push(key);
+  args.push(value);
+}
+
+static List _parse_bare_symbol(
+  Compiler c, String owner, String role, String hint) {
+  Token token = c.token;
+  if (c.peek(0) != <lit-atom>)
+    c.report_error(
+      <parse>, %"$owner $role must be a bare Symbol", token, %($hint));
   String text = token.text.unescape();
-  Symbol symbol = _exact_symbol(compiler, token, text);
-  compiler.next();
+  Symbol symbol = _exact_symbol(c, token, text);
+  c.next();
   return %(expr ("Symbol") (literal ("Symbol") $text $symbol));
+}
+
+/* Each report locates the pair at its `(`. */
+static List _parse_detail_value(
+  Compiler c, Token origin, String arity, String spliced, List note) {
+  if (c.peek(0) == <)>) c.report_error(<parse>, arity, origin, NULL);
+  List value = _parse_list_head(c);
+  if (value.match(%(expr ("List") (splice *))) || value.match(%(splice *)))
+    c.report_error(<parse>, spliced, origin, note);
+  if (c.peek(0) != <)>) c.report_error(<parse>, arity, origin, NULL);
+  c.expect(<)>);
+  return value;
 }
 
 /** Parses a filtered-catch `%()` payload into a typed `List` pattern.
     The call consumes the closing `)`. A code `Symbol`, binder, or pattern
-    may be followed by `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state
-    is restored on every exit.
+    may be followed by `*` patterns or `(key pattern)` pairs; pattern and
+    runtime-literal state is restored on every exit.
 */
 List Compiler.parse_catch_pattern_literal(Compiler c) {
   c.expect(<"%(">);
   $let(c.in_pattern, 1)
   $let(c.runtime_literals, 1) {
-    List code = c.peek(0) == <lit-atom>
-      ? _parse_error_symbol(
-          c, "catch filter", "code", "use catch %(code (key pattern)...):")
-      : _parse_list_head(c);
-
+    List code = _parse_catch_code(c);
     Array elements = [];
     elements.push(code);
-    while (c.peek(0) != <)>) {
-      Token detail_token = c.token;
-      if (c.peek(0) == <lit-atom> &&
-          c.token.text.unescape()[0] == '*') {
-        elements.push(_parse_list_head(c));
-        continue;
-      }
-      if (!c.test(<(>))
-        c.report_error(
-          <parse>, "catch filter detail must be '*' or '(key pattern)'",
-          detail_token, %("wrap keyed detail patterns in parentheses"));
-      List key = _parse_error_symbol(
-        c, "catch filter", "detail key",
-        "use catch %(code (key pattern)...):");
-      if (c.peek(0) == <)>)
-        c.report_error(
-          <parse>, "catch filter detail requires exactly one pattern",
-          detail_token, NULL);
-      List value = _parse_list_head(c);
-      if (value.match(%(expr ("List") (splice *))) ||
-          value.match(%(splice *)))
-        c.report_error(
-          <parse>, "catch filter detail pattern cannot splice",
-          detail_token, %("write one match pattern"));
-      if (c.peek(0) != <)>)
-        c.report_error(
-          <parse>, "catch filter detail requires exactly one pattern",
-          detail_token, NULL);
-      c.expect(<)>);
-      Array pair = [key, value];
-      elements.push(_build_error_pattern_list(c, pair));
-      pair.free();
-    }
+    while (c.peek(0) != <)>) _parse_catch_detail(c, elements);
     c.expect(<)>);
-    List result = _build_error_pattern_list(c, elements);
+    List pattern = _cons_list(c, elements, %(nil));
     elements.free();
-    return result;
+    return pattern;
   }
+}
+
+static List _parse_catch_code(Compiler c) {
+  if (c.peek(0) != <lit-atom>) return _parse_list_head(c);
+  return _parse_bare_symbol(
+    c, "catch filter", "code", "use catch %(code (key pattern)...):");
+}
+
+/* A `*` pattern stands alone, and a `(key pattern)` pair becomes a
+   two-element pattern. */
+static void _parse_catch_detail(Compiler c, Array elements) {
+  Token origin = c.token;
+  if (c.peek(0) == <lit-atom> && c.token.text.unescape()[0] == '*') {
+    elements.push(_parse_list_head(c));
+    return;
+  }
+  if (!c.test(<(>))
+    c.report_error(
+      <parse>, "catch filter detail must be '*' or '(key pattern)'",
+      origin, %("wrap keyed detail patterns in parentheses"));
+  List key = _parse_bare_symbol(
+    c, "catch filter", "detail key", "use catch %(code (key pattern)...):");
+  List value = _parse_detail_value(
+    c, origin, "catch filter detail requires exactly one pattern",
+    "catch filter detail pattern cannot splice",
+    %("write one match pattern"));
+  Array pair = [key, value];
+  elements.push(_cons_list(c, pair, %(nil)));
+  pair.free();
 }
 
 // Symbol sets
@@ -631,10 +659,10 @@ List Compiler.parse_array_literal(Compiler compiler) {
 static List _parse_quoted_array_elements(Compiler compiler) {
   if (compiler.peek(0) == <]>) return NULL;
   Array values = [];
-  values.push(_parse_collection_element(compiler));
+  values.push(_parse_element(compiler));
   while (compiler.test(<,>)) {
     if (compiler.peek(0) == <]>) break;
-    values.push(_parse_collection_element(compiler));
+    values.push(_parse_element(compiler));
   }
   return values.list_free();
 }
@@ -675,12 +703,12 @@ static List _parse_quoted_map_entry(Compiler c) {
     List key = c.parse_expression();
     c.expect(<"}">);
     c.expect(<:>);
-    List value = _parse_collection_element(c);
+    List value = _parse_element(c);
     return c.resolve_map_entry(%(map-entry $key $value), origin);
   }
-  List key = _parse_collection_element(c);
+  List key = _parse_element(c);
   c.expect(<:>);
-  List value = _parse_collection_element(c);
+  List value = _parse_element(c);
   return c.resolve_map_entry(%(map-entry $key $value), origin);
 }
 
