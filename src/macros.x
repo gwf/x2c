@@ -2103,7 +2103,18 @@ static List _expression_decorator(
   return %(expr (<macro-expr>) $node);
 }
 
-// expansion
+/* expansion
+
+   Expanding an invocation node matches its capture rows against the
+   definition's pattern, adds a binding for each fresh name and member
+   hole, fills the template, and binds the result at the invocation's
+   position with the invocation as its origin. */
+
+/* One expansion. `direct` holds the bindings that fresh names and member
+   holes add to the pattern's captures. */
+typedef struct Expansion {
+  Compiler c, List definition, input, template, direct, Token invocation;
+} Expansion;
 
 /** Expands canonical macro capture rows and binds the result at `position`.
     `stored` is a `macrodef` or visible macro name. The active expansion stack
@@ -2113,112 +2124,145 @@ static List _expression_decorator(
 */
 List Compiler.expand_macro_invocation_node(
   Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
+  Expansion x = {
+    .c = c, .definition = _stored_definition(c, stored, invocation),
+    .input = arguments, .invocation = invocation};
+  int block_scope = x.definition.assoc(<kind>) == <decorator> &&
+                    x.definition.assoc(<target>) == <block>;
+  if (block_scope) c.sym.push_new_scope();
+  defer if (block_scope) c.sym.pop_scope();
+  $let(c.token, invocation) {
+    x.check();
+    c.macro_count++;
+    List result = NULL;
+    $let(c.macro_stack, c.macro_stack) {
+      result = x.bind(position);
+    }
+    return result;
+  }
+}
+
+/* The definition a node names: a visible macro, a local macro, or a Macro
+   value whose references bind in this unit. */
+static List _stored_definition(Compiler c, Var stored, Token invocation) {
   List definition = NULL;
   if (stored.is_atom())
-    definition = _lookup(
-      c, Atom.intern(stored.str()), invocation);
+    definition = _lookup(c, Atom.intern(stored.str()), invocation);
   else match (stored)
     case %(local-macro (!is ?name type atom)):
       definition = c.sym.lookup_macro(name);
   if (!definition) definition = _macro_value_bindings(c, stored);
-  List input = arguments;
-  with c {
-    int block_scope = definition.assoc(<kind>) == <decorator> &&
-                      definition.assoc(<target>) == <block>;
-    if (block_scope) _.sym.push_new_scope();
-    defer if (block_scope) _.sym.pop_scope();
-    $let(_.token, invocation) {
-      Atom name = definition.assoc(<name>);
-      foreach (List active, _.macro_stack) {
-        (List prior, List prior_input, Var bindings, Var site) = active;
-        (void) bindings, (void) site;
-        if (prior.equal(definition) &&
-            prior_input.equal(input)) {
-          String spelling = name.str();
-          List captured = input.search_replace(
-            %(capture (source ?syntax) *), <?syntax>);
-          Var shown = _source_unwrap(captured);
-          _.report_error(
-            <macro>, %"identical recursive expansion of '$spelling'",
-            invocation,
-            %(${_definition_note(definition)} "input: ${shown.repr()}"));
-        }
-      }
-      if (_.macro_stack.len() >= 64) {
-        /* Compiler-generated applications can have no invocation token. */
-        List first = c.macro_stack.last().list().car();
-        String first_note = %"first expansion: ${_definition_note(first)}";
-        _.report_error(
-          <macro>, "macro expansion depth exceeds 64",
-          invocation,
-          %(${_definition_note(definition)} $first_note)
-        );
-      }
-      if (_.macro_count >= 10000)
-        _.report_error(
-          <macro>, "macro expansion count exceeds 10000",
-          invocation, NULL);
+  return definition;
+}
 
-      _.macro_count++;
-      List result = NULL;
-      $let(_.macro_stack, _.macro_stack) {
-        List old_stack = _.macro_stack;
-        List template = _template(_, definition);
-        Map file_locals = {};
-        // The outermost active row's fourth field is its invocation token.
-        Token root = old_stack ? old_stack.last().list()[3] : invocation;
-        if (_.sym.at_file_scope())
-          _file_scope_locals(%($template), file_locals);
-        Array fresh_values = [];
-        List direct_bindings = NULL;
-        foreach (List fresh, definition.assoc(<fresh>).list()) {
-          Var (binder, spelling, lisp) = fresh;
-          List binding = _introduced_binding(
-            _, spelling.str(), binder in file_locals ? root : NULL);
-          if (lisp.int()) {
-            List hole = _hole(binder, <name>, 0);
-            fresh_values.push(_capture_row(_, hole, %($binding)));
-          }
-          else {
-            _.semantic_binding_facts()[%(source-spelling $binding)] =
-              spelling.str();
-            direct_bindings = cons(%($binder $binding), direct_bindings);
-          }
-        }
-        List members = _member_bindings(
-          _, definition.assoc(<parameters>), input);
-        direct_bindings = direct_bindings.append(members);
-        List fresh_input = fresh_values.list_free();
-        List match_input = fresh_input
-          ? input.append(%((fresh @fresh_input))) : input;
-        List replacement_bindings = match_input.match(
-          definition.assoc(<pattern>));
-        int matched = !!replacement_bindings;
-        replacement_bindings = replacement_bindings.append(direct_bindings);
-        List lisp_bindings = _lisp_bindings(replacement_bindings);
-        Var stored = definition;
-        _.macro_stack = %(
-          ($stored $input $lisp_bindings $invocation) @old_stack
-        );
-        int expansion_origin = _.record_origin(invocation);
-        Ast constructed = matched
-                        ? template.replace(replacement_bindings) : NULL;
-        if (constructed &&
-            (definition.assoc(<kind>) == <decl-unit> ||
-             definition.assoc(<target>) == <named-type>)) {
-          List rows = constructed.car() == <seq>
-                    ? constructed.cdr() : %($constructed);
-          constructed = %(declaration-bundle (rows @rows));
-        }
-        $let(_.origin, expansion_origin) {
-          result = _.bind_syntax(
-            matched ? constructed : void,
-            position, _.return_type);
-        }
-      }
-      return result;
+/* An identical recursive expansion, nesting deeper than 64, or more than
+   10000 expansions stops the compile. */
+static void Expansion.check(Expansion *x) {
+  Compiler c = x.c;
+  foreach (List active, c.macro_stack) {
+    (List prior, List prior_input, Var bindings, Var site) = active;
+    (void) bindings, (void) site;
+    if (prior.equal(x.definition) && prior_input.equal(x.input)) x.recursion();
+  }
+  if (c.macro_stack.len() >= 64) x.too_deep();
+  if (c.macro_count >= 10000)
+    c.report_error(
+      <macro>, "macro expansion count exceeds 10000",
+      x.invocation, NULL);
+}
+
+static void Expansion.recursion(Expansion *x) {
+  Atom name = x.definition.assoc(<name>);
+  String spelling = name.str();
+  List captured = x.input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  Var shown = _source_unwrap(captured);
+  x.c.report_error(
+    <macro>, %"identical recursive expansion of '$spelling'",
+    x.invocation,
+    %(${_definition_note(x.definition)} "input: ${shown.repr()}"));
+}
+
+static void Expansion.too_deep(Expansion *x) {
+  /* Compiler-generated applications can have no invocation token. */
+  List first = x.c.macro_stack.last().list().car();
+  String first_note = %"first expansion: ${_definition_note(first)}";
+  x.c.report_error(
+    <macro>, "macro expansion depth exceeds 64", x.invocation,
+    %(${_definition_note(x.definition)} $first_note));
+}
+
+/* Pushes this expansion's frame on the macro stack, fills the template,
+   and binds the result. A failed match binds nothing. */
+static List Expansion.bind(Expansion *x, AstPos position) {
+  Compiler c = x.c;
+  List old_stack = c.macro_stack;
+  x.template = _template(c, x.definition);
+  List fresh_input = x.fresh_names(old_stack);
+  List match_input = fresh_input
+    ? x.input.append(%((fresh @fresh_input))) : x.input;
+  List replacement_bindings = match_input.match(
+    x.definition.assoc(<pattern>));
+  int matched = !!replacement_bindings;
+  replacement_bindings = replacement_bindings.append(x.direct);
+  List lisp_bindings = _lisp_bindings(replacement_bindings);
+  c.macro_stack = %(
+    (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
+  );
+  int expansion_origin = c.record_origin(x.invocation);
+  Ast constructed = matched ? x.construct(replacement_bindings) : NULL;
+  List result = NULL;
+  $let(c.origin, expansion_origin) {
+    result = c.bind_syntax(
+      matched ? constructed : void,
+      position, c.return_type);
+  }
+  return result;
+}
+
+/* Allocates each fresh name of the definition. A name compile-time Lisp
+   reads joins the match input as a Name capture row; the others, with the
+   member holes, bind directly. Returns the Name rows. */
+static List Expansion.fresh_names(Expansion *x, List old_stack) {
+  Compiler c = x.c;
+  Map file_locals = {};
+  // The outermost active row's fourth field is its invocation token.
+  Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
+  if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
+  Array fresh_values = [];
+  foreach (List fresh, x.definition.assoc(<fresh>).list()) {
+    Var (binder, spelling, lisp) = fresh;
+    List binding = _introduced_binding(
+      c, spelling.str(), binder in file_locals ? root : NULL);
+    if (lisp.int()) {
+      List hole = _hole(binder, <name>, 0);
+      fresh_values.push(_capture_row(c, hole, %($binding)));
+    }
+    else {
+      c.semantic_binding_facts()[%(source-spelling $binding)] =
+        spelling.str();
+      x.direct = cons(%($binder $binding), x.direct);
     }
   }
+  List members = _member_bindings(
+    c, x.definition.assoc(<parameters>), x.input);
+  x.direct = x.direct.append(members);
+  return fresh_values.list_free();
+}
+
+/* The filled template. A Declaration result, or a NamedType decorator's,
+   becomes one declaration bundle. */
+static Ast Expansion.construct(Expansion *x, List replacement_bindings) {
+  List definition = x.definition;
+  Ast constructed = x.template.replace(replacement_bindings);
+  if (constructed &&
+      (definition.assoc(<kind>) == <decl-unit> ||
+       definition.assoc(<target>) == <named-type>)) {
+    List rows = constructed.car() == <seq>
+              ? constructed.cdr() : %($constructed);
+    constructed = %(declaration-bundle (rows @rows));
+  }
+  return constructed;
 }
 
 static List _template(Compiler c, List definition) {
@@ -2260,11 +2304,8 @@ static Var _open_natives(Compiler c, Var value, Map natives) {
   match (value) {
     case %(expr ? (call (expr ? (ident ?binding)) (args *arguments))): {
       Var native;
-      if (natives.try_get(binding, native)) {
-        Var (callee, result) = native;
-        List args = _open_natives(c, arguments, natives);
-        return %(expr $result (call $callee (args @args)));
-      }
+      if (natives.try_get(binding, native))
+        return _native_call(c, native, arguments, natives);
     }
     case %(decl ?base ?declarators): {
       Type resolved = base is <list> && base.type().is_bare_typedef_name()
@@ -2277,6 +2318,12 @@ static Var _open_natives(Compiler c, Var value, Map natives) {
   foreach (Var child, value.list())
     items.push(_open_natives(c, child, natives));
   return items.list();
+}
+
+static List _native_call(Compiler c, Var native, List arguments, Map natives) {
+  Var (callee, result) = native;
+  List args = _open_natives(c, arguments, natives);
+  return %(expr $result (call $callee (args @args)));
 }
 
 /* A Name hole in a member position supplies the captured spelling, so a
@@ -2304,6 +2351,8 @@ static List _member_bindings(Compiler c, List parameters, List input) {
   return bindings;
 }
 
+/* The bindings compile-time Lisp sees: the author's binders, without the
+   `__macro_` binders the compiler makes. */
 static List _lisp_bindings(List bindings) {
   Array result = [];
   foreach (List pair, bindings) {
@@ -2329,7 +2378,12 @@ Token Compiler.macro_invocation_site(Compiler compiler, Var site) {
   return invocation;
 }
 
-// expansion names
+/* expansion names
+
+   A fresh name gets a private spelling. At file scope a declaration with
+   external or no linkage can reach another unit through a header or an
+   interface, so its spelling is stable: collection and full parsing expand
+   the same invocation to the same spelling. */
 
 static List _introduced_binding(
   Compiler compiler, String source, Token root) =>
@@ -2337,36 +2391,37 @@ static List _introduced_binding(
     root ? _file_scope_name(compiler, root, source)
          : compiler.fresh_name(%"macro_$source"));
 
-/* A declaration with external or no linkage can reach another unit through
-   a header or an interface. Its private spelling names the full owning unit
-   and root invocation offset. Home and package paths stay portable; other
-   paths use their canonical absolute identity. Collection and full parsing
-   expand the same invocation to the same spelling. */
+/* The spelling names the owning unit and the root invocation's offset, and
+   counts repeats of the same name there. */
 static String _file_scope_name(Compiler c, Token root, String source) {
-  List owner_key = %(${c.filename} ${c.package});
-  Var cached;
-  String owner;
-  if (c.names.file_scope_owners.try_get(owner_key, cached)) owner = cached;
-  else {
-    owner = "";
-    if (c.filename) {
-      String path = c.canonical_path(Path.absolute(c.filename));
-      owner = home_portable_path(path);
-      Var package_root = c.package ? c.package_roots[c.package] : void;
-      if (package_root is <string>) {
-        String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
-        if (path.startswith(prefix))
-          owner = %"package:${c.package}/${path[prefix.len():]}";
-      }
-    }
-    c.names.file_scope_owners[owner_key] = owner;
-  }
-  String key = %"macro:$owner:${root.pos}:$source";
+  String key = %"macro:${_scope_owner(c)}:${root.pos}:$source";
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
   c.names.counters[key] = count + 1;
   String digest = "%08x".printf(%"$key:$count".hash());
   return %"_x2c_macro_${source}_$digest";
+}
+
+/* The unit's owner spelling, cached per file and package. */
+static String _scope_owner(Compiler c) {
+  List owner_key = %(${c.filename} ${c.package});
+  Var cached;
+  if (c.names.file_scope_owners.try_get(owner_key, cached)) return cached;
+  String owner = c.filename ? _owner_spelling(c) : "";
+  c.names.file_scope_owners[owner_key] = owner;
+  return owner;
+}
+
+/* Home and package paths stay portable; other paths use their canonical
+   absolute identity. */
+static String _owner_spelling(Compiler c) {
+  String path = c.canonical_path(Path.absolute(c.filename));
+  String owner = home_portable_path(path);
+  Var package_root = c.package ? c.package_roots[c.package] : void;
+  if (package_root is not <string>) return owner;
+  String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
+  if (!path.startswith(prefix)) return owner;
+  return %"package:${c.package}/${path[prefix.len():]}";
 }
 
 /* Collects the template locals that a file-scope row declares with external
@@ -2377,8 +2432,7 @@ static void _file_scope_locals(List rows, Map locals) {
     case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
     case %(function ?type (bind ?binder ?) ?):
-      if (binder.is_binder() && !type.type().is_static())
-        locals[binder] = 1;
+      if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
     case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
       match (type) case %(* (!or struct union enum) ?tag *):
         if (tag.is_binder()) locals[tag] = 1;
@@ -2396,7 +2450,10 @@ static void _file_scope_declarators(List declarators, Map locals) {
       if (binder.is_binder()) locals[binder] = 1;
 }
 
-// template slots
+/* template slots
+
+   A slot in a template, `$(...)` or a meta call, runs while its expansion
+   binds. Its value fills the slot, and a splice slot's List becomes rows. */
 
 /** Evaluates an active template's `(macro-slot ...)` value, or a pending
     Macro value application into the invocation that expands it.
@@ -2409,6 +2466,14 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   if (slot.car() == "x2c.template") return _helper_result(c, value);
   if (slot.car() != <macro-slot>) return value;
   if (c.macro_holes || !c.macro_stack) return value;
+  return _slot_value(c, slot);
+}
+
+/* A Lisp form evaluates with the active expansion's bindings, and a meta
+   call runs. A construction requirement travels with an identifier the
+   slot built, and a splice slot around a Unit target replaces the target
+   among the items it produced. */
+static Var _slot_value(Compiler c, List slot) {
   int splice = slot.cadr();
   Var form = slot.caddr();
   List active = c.macro_stack.car();
@@ -2424,25 +2489,29 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
-    result = _decorator_target_replaced(
-      result, _source_unwrap(required), required);
+    result = _replace_target(result, _source_unwrap(required), required);
   }
-  if (construction is not void) {
-    String exact = NULL;
-    match (result)
-      case %("x2c.ident" ?(String spelling)):
-        exact = spelling;
-    if (exact) result = %($construction $exact);
-  }
-  if (splice && result is <list>) {
-    match (result) {
-      case %(code-value ? ? ?): return result;
-      case %(macro-invoke ? ? ?): return %(seq $result);
-      case %(seq *): return result;
-    }
-    return %(seq @{result});
-  }
+  if (construction is not void)
+    result = _constructed_identifier(result, construction);
+  return splice && result is <list> ? _slot_rows(result) : result;
+}
+
+static Var _constructed_identifier(Var result, Var construction) {
+  String exact = NULL;
+  match (result)
+    case %("x2c.ident" ?(String spelling)):
+      exact = spelling;
+  if (exact) return %($construction $exact);
   return result;
+}
+
+static Var _slot_rows(Var result) {
+  match (result) {
+    case %(code-value ? ? ?): return result;
+    case %(macro-invoke ? ? ?): return %(seq $result);
+    case %(seq *): return result;
+  }
+  return %(seq @{result});
 }
 
 /** Evaluates a macro slot and returns its syntax as a row sequence.
@@ -2456,13 +2525,14 @@ List Compiler.evaluate_macro_rows(Compiler compiler, Var value) {
        ? value.list().cdr() : %($value);
 }
 
-/* Scratch names for one template evaluation. The count is process-wide
-   rather than per-compiler: a shared parent session holds every name its
-   filling bound, and a child cannot rebind an inherited one, so a per-
-   compiler count would refuse the second compiler that expanded the same
-   macro. */
+/* Scratch names for one template evaluation. The count is process-wide: a
+   shared parent session holds every name its filling bound, and a child
+   cannot rebind an inherited one, so a count per compiler would refuse the
+   second compiler that expanded the same macro. */
 static unsigned long template_serial = 0;
 
+/* Evaluates a template's Lisp form, which reads each captured binding
+   through a scratch global. */
 static Var _eval_template_form(
   Compiler compiler, String form, List bindings, Token invocation,
   String source_file, Var construction) {
@@ -2471,7 +2541,23 @@ static Var _eval_template_form(
   unsigned long serial = template_serial++;
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
-  List references = NULL, Map source_captures = _source_captures(bindings);
+  Map source_captures = _source_captures(bindings);
+  List references = _bind_references(compiler, serial, bindings);
+  if (references) form = _rewrite_references(form, references);
+  if (construction is not void)
+    form = _with_construction(compiler, serial, form, construction);
+  $let(sdk_references, !!references)
+  $let(sdk_captures, source_captures)
+  $let(sdk_file, source_file)
+  $let(sdk_compiler, compiler)
+    return _eval_string(compiler, form, invocation);
+}
+
+/* Binds each captured value to a scratch global and returns the
+   `(spelling global)` rows, newest first. */
+static List _bind_references(
+  Compiler compiler, unsigned long serial, List bindings) {
+  List references = NULL;
   foreach (List pair, bindings) {
     if (!pair) continue;
     Var (binder, syntax) = pair;
@@ -2483,53 +2569,53 @@ static Var _eval_template_form(
     compiler.macro_lisp.set_global(temporary, unwrapped);
     references = cons(%($spelling $temporary), references);
   }
-  if (references) {
-    Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
-    tokenizer.scan();
-    Buffer rewritten = $auto(Buffer.new(0));
-    int copied = 0;
-    Token token = tokenizer.next();
-    while (token && token.type != <eof>) {
-      if (token.type == <$>) {
-        Token name = tokenizer.next();
-        Var replacement = name && name.type == <ident>
-                        ? references.assoc(name.text) : void;
-        String temporary = replacement is <string>
-                         ? replacement : NULL;
-        if (temporary) {
-          rewritten.write_len(form + copied, token.pos - copied);
-          rewritten.write(temporary);
-          copied = name.pos + name.len;
-          token = tokenizer.next();
-          continue;
-        }
-        token = name;
-        continue;
-      }
-      token = tokenizer.next();
-    }
-    rewritten.write_len(form + copied, form.len() - copied);
-    form = rewritten;
-  }
-  if (construction is not void) {
-    String temporary = %"_x2c_meta_${serial}_construction";
-    compiler.macro_lisp.set_global(temporary, construction);
-    form = %"(let ((x2c.ident (lambda (name)
-      (list $temporary name)))) $form)";
-  }
-  $let(sdk_references, !!references)
-  $let(sdk_captures, source_captures)
-  $let(sdk_file, source_file)
-  $let(sdk_compiler, compiler)
-    return _eval_string(compiler, form, invocation);
+  return references;
 }
 
-/* The decorator target is a value to find among the produced items, not a
-   shape to recognize, so it is compared rather than matched. Interpolating
-   it into a pattern would read a binder-shaped symbol inside it, such as the
-   `*=` operator, as a sequence binder. A foreign alias wraps its target, so
-   Match recognizes that wrapper and the comparison still owns the target. */
-static Var _decorator_target_replaced(Var produced, Var target, Var required) {
+/* Replaces each `$name` the references bind with its scratch global. */
+static String _rewrite_references(String form, List references) {
+  Tokenizer tokenizer = Tokenizer.new(form, <macro-lisp>);
+  tokenizer.scan();
+  Buffer rewritten = $auto(Buffer.new(0));
+  int copied = 0;
+  Token token = tokenizer.next();
+  while (token && token.type != <eof>) {
+    if (token.type != <$>) {
+      token = tokenizer.next();
+      continue;
+    }
+    Token name = tokenizer.next();
+    Var replacement = name && name.type == <ident>
+                    ? references.assoc(name.text) : void;
+    String temporary = replacement is <string> ? replacement : NULL;
+    if (temporary) {
+      rewritten.write_len(form + copied, token.pos - copied);
+      rewritten.write(temporary);
+      copied = name.pos + name.len;
+      name = tokenizer.next();
+    }
+    token = name;
+  }
+  rewritten.write_len(form + copied, form.len() - copied);
+  return rewritten;
+}
+
+/* `x2c.ident` in the form builds a name that carries the construction
+   requirement. */
+static String _with_construction(
+  Compiler compiler, unsigned long serial, String form, Var construction) {
+  String temporary = %"_x2c_meta_${serial}_construction";
+  compiler.macro_lisp.set_global(temporary, construction);
+  return %"(let ((x2c.ident (lambda (name)
+      (list $temporary name)))) $form)";
+}
+
+/* The decorator target is a value to find among the produced items, so a
+   comparison finds it. Interpolating it into a pattern would read a
+   binder-shaped symbol inside it, such as the `*=` operator, as a sequence
+   binder. A foreign alias wraps its target, so Match recognizes that
+   wrapper and the comparison still owns the target. */
+static Var _replace_target(Var produced, Var target, Var required) {
   if (produced is not <list>) return void;
   List produced_items = produced;
   Array items = $auto(produced_items);
@@ -2538,15 +2624,12 @@ static Var _decorator_target_replaced(Var produced, Var target, Var required) {
     items[at] = required;
     return items.list();
   }
-  for (int i = 0; i < (int) items.len(); i++) {
-    match (items[i]) {
-      case %(falias ?found ?native):
-        if (found == target) {
-          items[i] = %(falias $required $native);
-          return items.list();
-        }
-    }
-  }
+  for (int i = 0; i < (int) items.len(); i++)
+    match (items[i]) case %(falias ?found ?native):
+      if (found == target) {
+        items[i] = %(falias $required $native);
+        return items.list();
+      }
   return void;
 }
 
@@ -2564,7 +2647,11 @@ Var Compiler.evaluate_declaration_recipe(
     invocation, compiler.filename, void);
 }
 
-// template calls and rebuilds
+/* template calls and rebuilds
+
+   Compile-time code calls a template by name with its argument values, and
+   the compiler rebuilds a pending Macro value application from bound
+   children without binding them again. */
 
 /** Returns the syntax that invokes the template `stored`, a macro name
     spelled as a String or a local definition, with `values`: what a template
@@ -2582,6 +2669,8 @@ static List _sdk_template_call(Var stored, List values) {
     m-invoke);
 }
 
+/* The capture rows of a template call's values. A scalar Lisp value in an
+   Expr hole lifts to an expression first. */
 static List _template_arguments(
   Compiler c, List definition, List values, Token invocation,
   int retain_syntax) {
@@ -2628,37 +2717,35 @@ static Var _helper_result(Compiler c, Var value) {
     its established root `type`, child stage, and source wrappers. Binding,
     capture collection, hygiene, and effects do not run. */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
-  List rebuilt = _rebuild_structural_template(c, application, 0, NULL);
+  List rebuilt = _rebuild(c, application, 0, NULL);
   return %(expr $type @{rebuilt.cddr()});
 }
 
 /** Rebuilds a statement template as a canonical unbraced `seq`. Bound
     children keep their identities and origins; template-origin wrappers
     are omitted because this path does not open an invocation. */
-List Compiler.rebuild_statement(Compiler c, List application) {
-  return _rebuild_structural_template(c, application, 1, NULL);
-}
+List Compiler.rebuild_statement(Compiler c, List application) =>
+  _rebuild(c, application, 1, NULL);
 
 /** Rebuilds a bound function through a Function decorator without binding it
     again. The template keeps the target's return type and declarator. */
-List Compiler.rebuild_function(
-  Compiler c, List target, List application) {
-  return _rebuild_structural_template(c, application, 1, target).cadr();
-}
+List Compiler.rebuild_function(Compiler c, List target, List application) =>
+  _rebuild(c, application, 1, target).cadr();
 
 /* Substitute bound syntax into a structural template without binding it.
    The caller supplies complete children and a template with no free names,
    computed slots, or nested applications. */
-static List _rebuild_structural_template(
+static List _rebuild(
   Compiler c, List application, int statement, List target) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = _template_arguments(c, definition, values, c.token, 1);
-  List input = target
-    ? %(target $arguments
-        ${_capture_row_project(c, definition.assoc(<targetp>),
-                               %($target), 1)})
-    : arguments;
+  List input = arguments;
+  if (target) {
+    List target_row = _capture_row_project(
+      c, definition.assoc(<targetp>), %($target), 1);
+    input = %(target $arguments $target_row);
+  }
   List bindings = input.match(definition.assoc(<pattern>));
   List template = definition.assoc(<template>);
   foreach (List hole, definition.assoc(<parameters>).list())
@@ -2672,7 +2759,12 @@ static List _rebuild_structural_template(
   return template.replace(bindings);
 }
 
-// macro values
+/* macro values
+
+   A `Macro` value carries a definition as run-time data, with its
+   references named by spelling. Applying it binds those names in the
+   applying unit, and a producer can return code with effects into the
+   application. */
 
 /** Returns the literal expression that carries `value`, a macro definition
     or one of its references, as run-time data. */
@@ -2716,7 +2808,7 @@ static Var _macro_value_bindings(Compiler c, Var value) {
   return changed ? parts.list().var() : value;
 }
 
-/** Returns the visible global macro `name` as a `Macro` value. */
+/* NULL for a template's hole of that name or for an unknown macro. */
 static List _macro_value(Compiler c, Atom name) {
   Var stored;
   if (c.macro_holes && _hole_record(c, name)) return NULL;
@@ -2731,21 +2823,33 @@ static List _macro_value(Compiler c, Atom name) {
 */
 List Compiler.try_parse_macro_pattern(Compiler c) {
   Token saved = c.token;
-  List expression = NULL;
-  if (c.peek(0) == <$>) expression = _macro_value(c, _name(c));
-  else if (c.peek(0) == <ident>) {
-    Type type = NULL;
-    List binding = c.sym.lookup(%(${c.token.text}), type);
-    if (binding && c.sym.is_named_value_type(type, "Macro")) {
-      expression = c.resolve_expression(
-        %(expr $type (ident $binding)), c.token);
-      c.next();
-    }
-  }
+  List expression = _pattern_macro(c);
   if (!expression || c.peek(0) != <(>) {
     c.token = saved;
     return NULL;
   }
+  List labels = c.cache_literal_list(_pattern_labels(c));
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_case_pattern")), saved);
+  return c.resolve_expression(
+    %(expr ("List") (call $callee (args $expression $labels))), saved);
+}
+
+/* The Macro value a `$name` or a `Macro` variable at the cursor names. */
+static List _pattern_macro(Compiler c) {
+  if (c.peek(0) == <$>) return _macro_value(c, _name(c));
+  if (c.peek(0) != <ident>) return NULL;
+  Type type = NULL;
+  List binding = c.sym.lookup(%(${c.token.text}), type);
+  if (!binding || !c.sym.is_named_value_type(type, "Macro")) return NULL;
+  List expression = c.resolve_expression(
+    %(expr $type (ident $binding)), c.token);
+  c.next();
+  return expression;
+}
+
+/* The `?a` and `*b` capture labels between the parentheses. */
+static List _pattern_labels(Compiler c) {
   c.expect(<(>);
   Array names = [];
   if (c.peek(0) != <)>) loop {
@@ -2757,11 +2861,7 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
-  List labels = c.cache_literal_list(names.list_free());
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_case_pattern")), saved);
-  return c.resolve_expression(
-    %(expr ("List") (call $callee (args $expression $labels))), saved);
+  return names.list_free();
 }
 
 /** Returns an anonymous macro definition as a `Macro` value. Macro values
@@ -2776,13 +2876,7 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
   foreach (List binding, definition.assoc(<captures>).list()) {
     Type type = c.semantic_binding_facts()[%(type $binding)];
     if (!c.sym.is_named_value_type(type, "Macro")) continue;
-    List identity = c.macro_value_literal(binding);
-    List value = c.resolve_expression(
-      %(expr $type (ident $binding)), c.token);
-    List pair = %(expr ("List")
-      (cons ${c.convert_expression(identity, %("Var"))}
-        (expr ("List") (cons ${c.convert_expression(value, %("Var"))}
-          (expr ("List") (nil))))));
+    List pair = _captured_pair(c, binding, type);
     rows = %(expr ("List")
       (cons ${c.convert_expression(pair, %("Var"))} $rows));
     captured = 1;
@@ -2794,6 +2888,16 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
     %(expr ("Macro") (call $callee (args $literal $rows))), c.token);
 }
 
+/* The `(identity value)` row of one captured Macro binding. */
+static List _captured_pair(Compiler c, List binding, Type type) {
+  List identity = c.macro_value_literal(binding);
+  List value = c.resolve_expression(%(expr $type (ident $binding)), c.token);
+  return %(expr ("List")
+    (cons ${c.convert_expression(identity, %("Var"))}
+      (expr ("List") (cons ${c.convert_expression(value, %("Var"))}
+        (expr ("List") (nil))))));
+}
+
 /** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
     into a macro value application. Effects are applied in order under the
     application's transaction, and their tokens are replaced in the code.
@@ -2803,39 +2907,39 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
 int Compiler.take_code_value(
   Compiler c, Var input, Var &value, int &retained) {
   match (input) case %(code-value ?(String stage) ?code ?effects): {
-    Map replacements = {};
-    foreach (List effect, effects) {
-      match (effect) {
-        case %(new-name ?token ?(String role)):
-          replacements[token] = c.sym.introduce(c.fresh_name(role));
-        case %(cleanup ?token ?placed): {
-          replacements[token] = placed;
-          c.needs_exception = 1;
-        }
-        case %(early ?key ?binding ?declaration): {
-          Var cached;
-          if (c.names.adapters.try_get(key, cached))
-            replacements[binding] = cached;
-          else {
-            c.add_early(
-              _replace_bindings(declaration, replacements));
-            c.names.adapters[key] = replacements[binding];
-          }
-        }
-      }
-    }
+    Map replacements = _code_effects(c, effects);
     value = _replace_bindings(code, replacements);
     Var binder = _carrier_binder(value);
-    if (binder) {
-      String spelling = binder.str();
-      c.report_error(
-        <parse>, %"unbound replacement variable '$spelling'",
-        c.token, NULL);
-    }
+    if (binder) _unbound(c, binder.str(), c.token);
     retained = stage != "source";
     return 1;
   }
   return 0;
+}
+
+/* Applies a carrier's effects in order and returns what replaces each
+   effect's token in the code. */
+static Map _code_effects(Compiler c, Var effects) {
+  Map replacements = {};
+  foreach (List effect, effects)
+    match (effect) {
+      case %(new-name ?token ?(String role)):
+        replacements[token] = c.sym.introduce(c.fresh_name(role));
+      case %(cleanup ?token ?placed): {
+        replacements[token] = placed;
+        c.needs_exception = 1;
+      }
+      case %(early ?key ?binding ?declaration): {
+        Var cached;
+        if (c.names.adapters.try_get(key, cached))
+          replacements[binding] = cached;
+        else {
+          c.add_early(_replace_bindings(declaration, replacements));
+          c.names.adapters[key] = replacements[binding];
+        }
+      }
+    }
+  return replacements;
 }
 
 /* A named binder left as a carrier's code, identifier, or declarator
