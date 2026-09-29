@@ -50,10 +50,12 @@ meta static int spin(int x) {
 meta static int twice(int x) => x * 2;
 EOF
 
+# The first call starts the helper, so the crashing call's deadline covers
+# only the call itself.
 cat > crash.x <<'EOF'
 #include <stdlib.h>
 $(import "calls.xmacro")
-
+int w = $twice(0);
 int a = $boom(1);
 int b = $twice(1);
 int c = $bye(3);
@@ -76,7 +78,7 @@ grep -q "crash.x:8:9: macro: this meta call stopped" crash.out ||
   fail "stack overflow not reported"
 grep -q "crash.x:10:9: macro: this meta call ran longer than 2 s" crash.out ||
   fail "timeout not reported"
-for line in 5 7 9 11; do
+for line in 3 5 7 9 11; do
   if grep -q "crash.x:$line:" crash.out; then
     fail "call after a helper ended failed on line $line"
   fi

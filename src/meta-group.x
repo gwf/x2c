@@ -140,6 +140,34 @@ static int _meta_local_include(Var node, String lib) {
   return 0;
 }
 
+/* Whether `node` holds, by identity, one of `placeholders`: the values the
+   project meta build's parse put in place of calls left for the
+   translation. */
+static int _meta_holds(Var node, Map placeholders) {
+  if (node is not <list>) return 0;
+  if (%"${(long) (void *) (List) node}" in placeholders) return 1;
+  foreach (Var child, (List) node)
+    if (_meta_holds(child, placeholders)) return 1;
+  return 0;
+}
+
+/* `node`, a declaration whose initializer holds a placeholder, without
+   its initializers: a placeholder has the wrong type for C, and the
+   group's copy never had the call's value. */
+static Var _meta_uninitialized(Var node, Map placeholders) {
+  if (!_meta_holds(node, placeholders)) return node;
+  match (node)
+    case %(declare ?spec (bindings *bindings)): {
+      Array bare = [];
+      foreach (List binding, bindings) {
+        match (binding) case %(op = ?bound ?): binding = bound;
+        bare.push(binding);
+      }
+      return %(declare $spec (bindings @{bare.list_free()}));
+    }
+  return node;
+}
+
 /* The unit's definitions so far that the group can reach, in source order:
    every directive and declaration, the imported `meta` definitions where
    their import stands, each function the group reaches, and the group's
@@ -161,6 +189,10 @@ static Array _meta_group_units(Compiler c) {
         %(preproc ${%"#include \"${Path.basename(dependency)}\""}));
   }
   /* Collection parses no bodies, so its group holds only imports. */
+  Map placeholders = {};
+  foreach (List entry, c.meta_group)
+    match (entry) case %(later ?(List placeholder)):
+      placeholders[%"${(long) (void *) placeholder}"] = 1;
   int flushed = 0, count = c.unit_nodes ? c.unit_nodes.len() : 0;
   for (int i = 0; i <= count; i++) {
     foreach (List entry, c.meta_group)
@@ -170,7 +202,7 @@ static Array _meta_group_units(Compiler c) {
             for (; flushed < end; flushed++)
               ordered.push(c.meta_defs[flushed]);
     if (i < count && !_meta_local_include(c.unit_nodes[i], lib))
-      ordered.push(c.unit_nodes[i]);
+      ordered.push(_meta_uninitialized(c.unit_nodes[i], placeholders));
   }
   for (; flushed < (int) c.meta_defs.len(); flushed++)
     ordered.push(c.meta_defs[flushed]);

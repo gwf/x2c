@@ -154,7 +154,9 @@ typedef struct Compiler {
      TYPE)`, and while the project meta build parses the unit or the REPL
      stages it, each `meta static` value as `(static DECLARATION)` and each
      compile-time import as `(import NODES META-DEFS)`, the counts of
-     `unit_nodes` and `meta_defs` after it. `meta_group_bound` holds the
+     `unit_nodes` and `meta_defs` after it, and while the project meta
+     build parses it, each placeholder for a call left for the translation
+     as `(later PLACEHOLDER)`. `meta_group_bound` holds the
      names the REPL bound to staged native code, the modules it reset, and
      each bodyless `meta` prototype nothing supplies. */
   Array unit_nodes, meta_group;

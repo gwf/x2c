@@ -2468,12 +2468,8 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       if (!c.macro_lisp.try_get(name, function) &&
           c.bind_native_meta(name))
         c.macro_lisp.try_get(name, function);
-      if (function is void && c.meta_build) {
-        /* A call the translation refuses by its type is refused here too,
-           which keeps its declaration and placeholder out of the group. */
-        c.refuse_record_meta_call(name, site);
+      if (function is void && c.meta_build)
         raise %(meta-later (name $name));
-      }
       if (function is void)
         c.report_error(
           <macro>, "explicit meta call cannot be resolved", site,
@@ -2530,8 +2526,11 @@ static Var _evaluate_meta_value(
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) {
   Var value = _evaluate_meta_value(c, expression, site, 0);
-  if (value is void && c.meta_build)
-    return %(expr (int) (literal (int) "0"));
+  if (value is void && c.meta_build) {
+    List placeholder = %(expr (int) (literal (int) "0"));
+    c.meta_group.push(%(later $placeholder));
+    return placeholder;
+  }
   Type declared = expression.cadr();
   match (expression) case %(expr ? (meta-call (expr ?signature ?) ?)):
     declared = signature.cdr();
