@@ -2104,6 +2104,10 @@ static List _resolve_content(
         : %"type $receiver_type does not support indexing",
       origin, %());
   }
+  match (content) case %(call ?(String callee) (args *supplied)): {
+    List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
+    return %(expr $input_type (call $callee (args @arguments)));
+  }
   Macro called = $called;
   match (input) case called(?callee, *supplied):
     return _resolve_call(c, input_type, callee, supplied, origin);
@@ -2337,11 +2341,6 @@ static List _resolve_content(
       List callee = _resolve_identifier(c, "Var_is", NULL, origin);
       return c.rebuild_expression(
         %(int), called(callee, %($lhs $selector)));
-    }
-    case %(call ?(String callee) (args *supplied)): {
-      List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
-      return %(expr $input_type
-               (call $callee (args @arguments)));
     }
     case %(op (!or (!set ?operator .) (!set ?operator (!quote ->)))
               ?receiver (!set ?field (*))): {
