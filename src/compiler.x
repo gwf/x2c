@@ -723,6 +723,23 @@ int preproc_open_state(String text) {
     the group's state was 1, and 0 otherwise. */
 int preproc_branch_state(int state) => state == 1 ? 2 : 0;
 
+/** Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when
+    it is `#pragma public`, and -1 otherwise. A comment in the line reads as
+    a blank, as it does in C. */
+int preproc_visibility(String text) {
+  String directive = preproc_directive(text);
+  if (!directive.startswith("pragma")) return -1;
+  Tokenizer scanned = Tokenizer.new(directive, <x2c>);
+  scanned.scan();
+  Array words = [];
+  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
+       t = _skip_forward(t + 1))
+    words.push(t.text);
+  String line = " ".join(words.list_free());
+  if (line == "pragma private") return 1;
+  return line == "pragma public" ? 0 : -1;
+}
+
 /* Reports whether the attribute list the group `open` holds names an
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
@@ -869,21 +886,35 @@ static void _scan_conditionals(Compiler c) {
   }
 }
 
-static int _ends_operand(Symbol type) {
-  switch (type)
+/* Returns the token that opens the group `close` ends, or `close` itself
+   when no token from `first` on opens it. */
+static Token _group_open(Token close, Token first) {
+  int depth = 0;
+  for (Token t = close;; t--) {
+    if (!(depth -= t.type.group_step())) return t;
+    if (t == first) return close;
+  }
+}
+
+/* The `"` that closes a `%"..."` literal ends an operand, and a `}` ends
+   one only when it closes a `%{` literal: after a block, the next
+   statement may begin with the name `in`. */
+static int _ends_operand(Token token, Token first) {
+  switch (token.type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
     case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <)>: case <]>:
+    case <"\"">:
       return 1;
-  return 0;
+  return token.type == <"}"> && _group_open(token, first).type == <"%{">;
 }
 
 static int _starts_operand(Symbol type) {
   switch (type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
     case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <(>:
-    case <"%(">: case <"%[">: case <"%{">: case <"$(">: case <"${">:
-    case <$>: case <!>: case <->: case <*>: case <&>: case <~>: case <++>:
-    case <-->:
+    case <"%(">: case <"%[">: case <"%{">: case <"%\"">: case <"%<<">:
+    case <"$(">: case <"${">: case <$>: case <!>: case <->: case <*>:
+    case <&>: case <~>: case <++>: case <-->:
       return 1;
   return 0;
 }
@@ -898,7 +929,8 @@ static void _retag_contextual_keywords(Tokenizer tokenizer) {
        token = _skip_forward(token + 1)) {
     if (token.type == <in>) {
       Token next = _skip_forward(token + 1);
-      if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))
+      if (!(prev && _ends_operand(prev, tokenizer.tokens) &&
+            _starts_operand(next.type)))
         token.type = <ident>;
     }
     else if (token.type == <match>) {
@@ -1896,9 +1928,8 @@ void Compiler.update_source_visibility(Compiler c, List directives) {
   }
   if (c.source_private < 0) return;
   foreach (List directive, directives) {
-    String content = directive.cadr();
-    if (content.contains("pragma private")) c.source_private = 1;
-    else if (content.contains("pragma public")) c.source_private = 0;
+    int visibility = preproc_visibility(directive.cadr());
+    if (visibility >= 0) c.source_private = visibility;
   }
 }
 

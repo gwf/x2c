@@ -459,8 +459,8 @@ static void Partition.mark_conditional(Partition *p, List node, Symbol kind) {
 static void Partition.place_directive(
   Partition *p, List node, String content) {
   if (_is_pragma_once(content)) return;
-  if ("pragma public" in content) p.private = 0;
-  else if ("pragma private" in content) p.private = 1;
+  int visibility = preproc_visibility(content);
+  if (visibility >= 0) p.private = visibility;
   else p.side().push(node);
 }
 
