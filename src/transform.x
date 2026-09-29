@@ -168,8 +168,8 @@ static List _callback_function(CallbackBuild *build) {
     source, arguments.list_free());
   Macro returned = $return_value;
   List statement = result === %(void) ? call
-    : compiler.rebuild_statement(returned(
-        compiler.convert_expression(call, result))).cadr();
+    : compiler.rebuild_statement(
+      returned(compiler.convert_expression(call, result))).cadr();
   return compiler.wrapper_function(
     %(static @result), build.binding, declaration_params.cdr(),
     %((stmnt $statement)));
@@ -517,9 +517,10 @@ static void _publish_func_adapter(
   List body, List setup) {
   List parameters = _named_decl_params(
     %(("Func") (* const "FuncArg")), %($fn_binding $argv_binding));
-  compiler.add_early(compiler.wrapper_function(
-    %(static "Var"), binding, parameters.cdr(),
-    _helper_body(compiler, body, setup).cdr()));
+  compiler.add_early(
+    compiler.wrapper_function(
+      %(static "Var"), binding, parameters.cdr(),
+      _helper_body(compiler, body, setup).cdr()));
 }
 
 /* A record result is copied into a Var after the native call completes. */
@@ -762,8 +763,9 @@ static List _build_indirect_func_adapter(
     (cast $context_pointer $context_value));
   Macro storage_shape = $func_local;
   List context_declaration = compiler.rebuild_statement(
-    storage_shape(%(const $context_name),
-                  %(op = (bind $context_local (*)) $cast))).cadr();
+    storage_shape(
+      %(const $context_name),
+      %(op = (bind $context_local (*)) $cast))).cadr();
   String field_name = binding_identity_spelling(field_binding);
   List context = _func_bound(context_pointer, context_local);
   List target = %(
@@ -852,9 +854,10 @@ static List _direct_func_value(
   List parameters = %(params (param (void) (bind () ())));
   $adapter.memo(compiler, key, bridge) {
     bridge = _func_bridge_binding(compiler, "func_get");
-    compiler.add_early(compiler.wrapper_function(
-      %("Func"), bridge, parameters.cdr(),
-      _func_return_body(compiler, handle)));
+    compiler.add_early(
+      compiler.wrapper_function(
+        %("Func"), bridge, parameters.cdr(),
+        _func_return_body(compiler, handle)));
   }
   Type getter_type = %((func ((void))) "Func");
   return _func_bridge_call(
@@ -891,8 +894,8 @@ static List _func_present_statement(
   Macro present_shape = $func_present;
   List result = compiler.rebuild_expression(
     %("Func"),
-    present_shape(pointer, constructed,
-                  _func_bound(%("Func"), null_binding)));
+    present_shape(
+      pointer, constructed, _func_bound(%("Func"), null_binding)));
   Macro statement_shape = $expression_statement;
   return compiler.rebuild_statement(statement_shape(result)).cadr();
 }
@@ -904,8 +907,8 @@ static List _func_context_declaration(
     context_type, aggregate_shape(expression));
   Macro storage_shape = $func_local;
   return compiler.rebuild_statement(
-    storage_shape(context_type,
-                  %(op = (bind $context ()) $value))).cadr();
+    storage_shape(
+      context_type, %(op = (bind $context ()) $value))).cadr();
 }
 
 static List _indirect_func_value(
@@ -963,9 +966,10 @@ static List _indirect_func_lift(
     );
     List value = _indirect_func_value(
       compiler, _func_bound(pointer_type, parameter), pointer_type);
-    compiler.add_early(compiler.wrapper_function(
-      %("Func"), bridge, parameters.cdr(),
-      _func_return_body(compiler, value)));
+    compiler.add_early(
+      compiler.wrapper_function(
+        %("Func"), bridge, parameters.cdr(),
+        _func_return_body(compiler, value)));
   }
   List parameters = %(
     params ${pointer_type.parameter_ast(NULL)}
@@ -1436,7 +1440,7 @@ static List _prepare_nested_lambda_regions(
         List prepared = _prepare_lambda_region(compiler, params, body);
         return prepared == body ? ast
              : compiler.rebuild_expression(
-                 ast.cadr(), lambda(prepared, params));
+               ast.cadr(), lambda(prepared, params));
       }
     }
   }
@@ -1541,7 +1545,8 @@ typedef struct CaptureRewrite {
 static List _capture_rows(
   Compiler compiler, List captures, Map slots, List environment_binding,
   Type environment_type) {
-  return Ast.rewrite_children(captures, %!(List record) => {
+  return Ast.rewrite_children(
+    captures, %!(List record) => {
     match (record)
       case %(capture ?binding ?type ?expression): {
         List value = _rewrite_lambda_captures(
@@ -1596,7 +1601,7 @@ static List _rewrite_lambda_captures(
           environment_type);
         return rewritten == captures ? ast
              : compiler.rebuild_expression(
-                 ast.cadr(), captured(body, rewritten, params));
+               ast.cadr(), captured(body, rewritten, params));
       }
       case lambda(?body, *params): return ast;
       case %(expr ?source_type (ident ?bound)): {
@@ -1700,9 +1705,10 @@ static void _capture_environment(CaptureBuild &build, List captures) {
   Compiler c = build.compiler;
   foreach (List capture, captures) _capture_field(build, capture);
   Macro environment = $capture_environment;
-  c.add_early(c.bind_syntax(
-    environment(build.environment_type_binding, build.fields.list_free()),
-    AST_UNIT, NULL));
+  c.add_early(
+    c.bind_syntax(
+      environment(build.environment_type_binding, build.fields.list_free()),
+      AST_UNIT, NULL));
 }
 
 /* The adapter borrows the copied context for each synchronous Func call. */
@@ -1725,8 +1731,9 @@ static void _capture_adapter(CaptureBuild &build) {
     (cast ${build.pointer_type} $context_call));
   Macro local = $func_local;
   List context_setup = c.rebuild_statement(
-    local(%(const ${build.environment_name}),
-          %(op = (bind ${build.environment_local} (*)) $context_cast))).cadr();
+    local(
+      %(const ${build.environment_name}),
+      %(op = (bind ${build.environment_local} (*)) $context_cast))).cadr();
   List rewritten = _rewrite_lambda_captures(
     c, build.body, build.slots, build.environment_local,
     build.pointer_type);
@@ -1754,8 +1761,8 @@ static List _capture_storage(
     (composite (commas @values)));
   Macro local = $func_local;
   return build.compiler.rebuild_statement(
-    local(build.value_type,
-          %(op = (bind $context ()) $initializer))).cadr();
+    local(
+      build.value_type, %(op = (bind $context ()) $initializer))).cadr();
 }
 
 static List _capture_result(
@@ -1786,8 +1793,9 @@ static List _capture_inline(CaptureBuild &build) {
   List factory_body = c.rebuild_statement(
     factory(storage, _capture_construct(build, context)));
   List declaration_params = %(params @{parameters.list_free()});
-  c.add_early(c.wrapper_function(
-    %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
+  c.add_early(
+    c.wrapper_function(
+      %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
   List parameter_types = build.field_types.list_free();
   Type factory_type = %((func $parameter_types) "Func");
   List call = _func_bridge_call(
@@ -1827,7 +1835,7 @@ static List _lower_captured_lambda(
 
 /** The parameter types of a lambda's function signature, keeping typed
     declarators; a bare parameter is a `Var`. */
-List Compiler.lambda_param_types(Compiler compiler, List entries) {
+List Compiler.lambda_param_types(Compiler c, List entries) {
   if (!entries) return %((void));
   Array types = [];
   foreach (List entry, entries)
@@ -1837,7 +1845,7 @@ List Compiler.lambda_param_types(Compiler compiler, List entries) {
         Type type = entry.type_from_ast().declared();
         if (type.car() == <&> || type.car() == <opt-ref>)
           type = cons(
-            type.car(), compiler.sym.normalize_declared_type(type.cdr()));
+            type.car(), c.sym.normalize_declared_type(type.cdr()));
         types.push(type);
       }
     }
@@ -1854,34 +1862,35 @@ List Compiler.lambda_param_types(Compiler compiler, List entries) {
     no value, and synthesized declarations enter the early queue. Parentheses
     remain around lowered helpers; other non-lambda expressions pass through.
 */
-List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
+List Compiler.lower_lambda_expr(Compiler c, List expression) {
   if (expression.car() == <at> || expression.car() == <src>)
-    return Ast.rewrite_children(expression,
-      %!(List child) => compiler.lower_lambda_expr(child));
+    return Ast.rewrite_children(
+      expression, %!(List child) => c.lower_lambda_expr(child));
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (expression) {
     case %(expr ?type (parens ?inner)): {
-      List lowered = compiler.lower_lambda_expr(inner);
+      List lowered = c.lower_lambda_expr(inner);
       if (lowered == inner) return expression;
       return %(expr $type (parens $lowered));
     }
     case captured(?body, *captures, *entries):
-      return _lower_captured_lambda(compiler, entries, captures, body);
+      return _lower_captured_lambda(c, entries, captures, body);
     case lambda(?body, *params): {
       Type type = expression.cadr();
       /* Only a meta body leaves a noncapturing `Func` lambda unlifted. */
       if (type.match(%("Func"))) {
         Type signature = %(
-          (func ${compiler.lambda_param_types(params)}) "Var");
-        return compiler.lift_func_expression(
-          compiler.rebuild_expression(signature, lambda(body, params)));
+          (func ${c.lambda_param_types(params)}) "Var");
+        return c.lift_func_expression(
+          c.rebuild_expression(signature, lambda(body, params)));
       }
-      String lname = compiler.fresh_name("lambda");
-      List lambda_binding = compiler.sym.introduce(lname);
+      String lname = c.fresh_name("lambda");
+      List lambda_binding = c.sym.introduce(lname);
       List decl_params = _params_to_decl_params(params);
-      compiler.add_early(compiler.wrapper_function(
-        %(static "Var"), lambda_binding, decl_params.cdr(),
-        _helper_body(compiler, body, NULL).cdr()));
+      c.add_early(
+        c.wrapper_function(
+          %(static "Var"), lambda_binding, decl_params.cdr(),
+          _helper_body(c, body, NULL).cdr()));
       return %(expr $type (ident $lambda_binding));
     }
   }
@@ -1999,7 +2008,6 @@ static List _try_cleanup(
   return %(code-value "lowered" $result ());
 }
 
-/* The statements a lowered sequence holds, or `code` itself. */
 static List _statements(List code) {
   match (code) case %(code-value ? (seq *statements) ?): return statements;
   return code;
@@ -2569,8 +2577,7 @@ static List _try_region(Walk walk, List cleanup, List body) =>
    the catch site's initial state, the lowered arms, and the patterns of
    the filtered arms, which precede the default arm. */
 
-/* The slot functions the templates call. Declaration collection reads
-   the templates before their definitions below. */
+/* The template names must be bound before builtins registers their slots. */
 List builtin_try_catch_site(List frame, List clause);
 List builtin_catch_patterns(List patterns, List items);
 List builtin_try_landing(List frame, List clause, List cleanup);
@@ -2593,8 +2600,6 @@ macro open Statement $compiler_try(Name $frame, Expr $clause,
   }
 }
 
-/* One catch site: its patterns prepared once, its handler pushed with
-   them. */
 macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
@@ -2647,9 +2652,10 @@ List builtin_try_catch_site(List frame, List clause) {
   match (clause)
     case %(?handle ?(String state) ?(List arms) *patterns): {
       int count = arms.len(), filtered = patterns.len();
-      return site(frame, handle, x2c_literal_int(count),
-                  x2c_literal_int(filtered < count ? filtered : -1),
-                  %(expr (int) $state), patterns);
+      return site(
+        frame, handle, x2c_literal_int(count),
+        x2c_literal_int(filtered < count ? filtered : -1),
+        %(expr (int) $state), patterns);
     }
   return NULL;
 }
@@ -2736,16 +2742,16 @@ static List _lower_try(
   List lowered = _try_region(walk, cleanup, body);
   Macro shape = $compiler_try;
   return c.bind_syntax(
-    shape(frame, _catch_clause(walk, handle, cleanup, arms), lowered,
-          cleanup),
+    shape(
+      frame, _catch_clause(walk, handle, cleanup, arms), lowered, cleanup),
     AST_BLOCK, c.return_type);
 }
 
 /* --- defer -----------------------------------------------------------------
    Registration and its captured addresses share the body's region scope. */
 
-List builtin_defer_record(List record, List callback, List environment,
-                          List records);
+List builtin_defer_record(
+  List record, List callback, List environment, List records);
 List builtin_defer_captures(List environment, List records);
 
 macro open Statement $compiler_defer(Name $record, Expr $callback,
@@ -2776,8 +2782,8 @@ macro open Statement $defer_capture(Expr $environment, Name $field,
 
 /** Selects the record shape; captured records keep the environment beside
     the record in the region's scope. */
-List builtin_defer_record(List record, List callback, List environment,
-                          List records) {
+List builtin_defer_record(
+  List record, List callback, List environment, List records) {
   Macro plain = $defer_plain, captured = $defer_captured;
   if (!environment) return plain(record, callback);
   Type type = %(${binding_identity_spelling(environment)});
@@ -2790,8 +2796,8 @@ List builtin_defer_captures(List environment, List records) {
   Array assignments = [];
   foreach (List row, records) {
     List source = %(expr ${row.cadr()} (ident ${row.car()}));
-    assignments.push(capture(
-      environment, binding_identity_spelling(row.caddr()), source));
+    assignments.push(
+      capture(environment, binding_identity_spelling(row.caddr()), source));
   }
   return assignments.list_free();
 }
@@ -2807,8 +2813,9 @@ static List _lower_defer(
   List function = %(expr ((func ((* void))) void) (ident $callback));
   Macro shape = $compiler_defer;
   return c.bind_syntax(
-    shape(record, function, env, records,
-          _try_region(walk, cleanup, body), cleanup),
+    shape(
+      record, function, env, records,
+      _try_region(walk, cleanup, body), cleanup),
     AST_BLOCK, c.return_type);
 }
 
@@ -3447,8 +3454,9 @@ static List _destructure_statement(Compiler compiler, List ast) {
         compiler.fresh_name("destructure"));
       Macro shape = $destructure_statement;
       return compiler.bind_syntax(
-        shape(temporary, _destructure_source(compiler, source, source_type),
-              _destructure_assignments(compiler, targets, temporary)),
+        shape(
+          temporary, _destructure_source(compiler, source, source_type),
+          _destructure_assignments(compiler, targets, temporary)),
         AST_BLOCK, compiler.return_type);
     }
   }
@@ -3474,8 +3482,9 @@ static List _named_destructure(
     compiler, expressions.list_free(), temporary);
   Macro shape = $destructure_declarations;
   List tail = compiler.bind_syntax(
-    shape(temporary,
-          _destructure_source(compiler, source, source_type), assignments),
+    shape(
+      temporary, _destructure_source(compiler, source, source_type),
+      assignments),
     AST_BLOCK, compiler.return_type);
   Macro sequence = $destructure_sequence;
   return compiler.rebuild_statement(
@@ -3492,8 +3501,8 @@ static List _typed_destructure(
   foreach (List parameter, parameters) match (parameter) {
     case %(param ?type ?bind): {
       List value = _destructure_element(temporary, index++);
-      declarations.push(compiler.rebuild_statement(
-        target_shape(type, bind, value)).cadr());
+      declarations.push(
+        compiler.rebuild_statement(target_shape(type, bind, value)).cadr());
     }
   }
   Macro shape = $destructure_declarations;
@@ -3533,7 +3542,6 @@ static List _lower_lambda_destructuring(Compiler compiler, List ast) {
     ast, %!(List child) => _lower_lambda_destructuring(compiler, child));
 }
 
-// Build a declaration from a bound value and its full declarator type.
 static List _value_declaration(Type type, List binding, List value) {
   (List base, List mods) = type.declaration_parts();
   return value
@@ -3557,8 +3565,8 @@ static List _destructure_value(Compiler compiler, List ast) {
       List assignments = _destructure_assignments(
         compiler, targets, temporary);
       Macro shape = macro Statement(
-          Type $type, Name $result, Expr $source, Name $temporary,
-          Expr $converted) {
+        Type $type, Name $result, Expr $source, Name $temporary,
+        Expr $converted) {
         $type $result = $source;
         List $temporary = $converted;
       };
@@ -3796,8 +3804,8 @@ static List _dynamic_binary(
    is a postfix update, which reads the receiver before the helper runs.
    The converted operand stays in `*rhs` when no helper exists, so a caller
    continues into the dynamic path with the operand it already built. */
-static List _update_call(List target, List operator, List value,
-                         String helper) {
+static List _update_call(
+  List target, List operator, List value, String helper) {
   Type type = target.cadr();
   List address = %(expr ${type.reference()} (op & (parens $target)));
   return value ? %(call $helper (args $address $operator $value))
@@ -4384,8 +4392,9 @@ static List _lower_callable_defer(
                  ? _defer_rewrite_captures(
                    finalizer, state.captures, state.written, env_local_name)
                  : finalizer;
-  c.add_early(_defer_callback_unit(
-    c, callback, opaque, env_binding, env_local, rewritten));
+  c.add_early(
+    _defer_callback_unit(
+      c, callback, opaque, env_binding, env_local, rewritten));
   if (c.fn_name)
     c.semantic_binding_facts()[%(defer-ownr $callback)] =
       c.fn_name;
@@ -4737,8 +4746,8 @@ static Ast _getindex_node(
   if (!resolved)
     c.report_error(
       <xform>, %"type $type does not support bracket indexing", NULL, NULL);
-  return _node(c, _indexed_call_expr(
-    c, resolved, %($expression $index)).caddr());
+  return _node(
+    c, _indexed_call_expr(c, resolved, %($expression $index)).caddr());
 }
 
 static Ast _setindex_node(
@@ -4748,10 +4757,11 @@ static Ast _setindex_node(
     c.report_error(
       <xform>, %"type $type does not support bracket assignment", NULL, NULL);
   if (!_indexed_builtin_helper(c, type))
-    return _node(c, _sequenced_protocol_call(
-      c, resolved, %($expression $index $value)));
-  return _node(c, _indexed_call_expr(
-    c, resolved, %($expression $index $value)).caddr());
+    return _node(
+      c, _sequenced_protocol_call(c, resolved, %($expression $index $value)));
+  return _node(
+    c, _indexed_call_expr(
+      c, resolved, %($expression $index $value)).caddr());
 }
 
 static Ast _slice_node(
