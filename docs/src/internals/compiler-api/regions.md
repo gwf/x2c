@@ -33,7 +33,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions.x:1270`
+Source: `src/regions.x:1291`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -49,7 +49,7 @@ the bound and typed definition. The walk reads the summaries of the
 `meta` functions installed before `fn` and records the summary of `fn`
 in `meta_regions`.
 
-Source: `src/regions.x:1249`
+Source: `src/regions.x:1270`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -61,7 +61,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1225`
+Source: `src/regions.x:1246`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row
@@ -71,7 +71,7 @@ Source: `src/regions.x:1225`
 Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
-Source: `src/regions.x:1284`
+Source: `src/regions.x:1305`
 
 <a id="Compiler.region_no_lifetime_effect"></a>
 #### Compiler.region_no_lifetime_effect
@@ -80,7 +80,7 @@ Source: `src/regions.x:1284`
 
 Reports a built-in call that neither creates nor retains tracked storage.
 
-Source: `src/regions.x:1287`
+Source: `src/regions.x:1308`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result
@@ -92,7 +92,7 @@ for the active Scope, `<slot>` for the Scope its first argument names,
 `<pool>` for the canonical-value pool, or 0 when nothing is known. What
 the operation does to its arguments is a separate fact.
 
-Source: `src/regions.x:249`
+Source: `src/regions.x:250`
 
 <a id="Compiler.region_wrapper"></a>
 #### Compiler.region_wrapper
@@ -102,7 +102,7 @@ Source: `src/regions.x:249`
 Reports whether the runtime operation `name` returns its argument's
 storage unchanged, as a `Var` box or its unboxing does.
 
-Source: `src/regions.x:261`
+Source: `src/regions.x:262`
 
 ## Design notes
 
