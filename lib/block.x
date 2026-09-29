@@ -11,8 +11,8 @@
     A self-source may name any initialized range inside reserved capacity.
     Growth rebases that range after reallocating the owning block.
 
-    The declared `Block` protocol supplies `Bytes`'s generated `truth`, `pop`,
-    `free`, and `truncate` members through the `Bytes.block` storage view.
+    `Bytes` receives the `Block` protocol's generated members through the
+    `Bytes.block` storage view.
 */
 
 #pragma once
@@ -41,13 +41,27 @@ protocol Cleanup(Bytes);
 #include "exception.x"
 #include "scope.x"
 
-// storage layout
+/* storage layout
 
-static int _allocation_size(size_t width, size_t cap, size_t &out) {
+   One allocation holds a back-pointer to the owning `Block` and then the
+   elements; `bytes` points just past the back-pointer. */
+
+/* The size of an allocation for `cap` elements, or zero when it cannot be
+   represented. */
+static size_t _allocation_size(size_t width, size_t cap) {
   if (!width || cap > (SIZE_MAX - sizeof(Block)) / width) return 0;
-  out = sizeof(Block) + width * cap;
-  return 1;
+  return sizeof(Block) + width * cap;
 }
+
+static void *_allocation(Block b) => (unsigned char *) b.bytes - sizeof(Block);
+
+static void _attach(Block b, unsigned char *allocation) {
+  *((Block *) allocation) = b;
+  b.bytes = allocation + sizeof(Block);
+}
+
+static unsigned char *_end(Block b) =>
+  (unsigned char *) b.bytes + b.length * b.width;
 
 /** Returns the stable `Block` that owns the live `bytes` base pointer.
     An interior or stale pointer is invalid; NULL returns NULL.
@@ -72,52 +86,52 @@ inline Block Bytes.block(Bytes bytes) {
 */
 void Block.append(Block b, const void *source, size_t count) {
   if (b == NULL) raise %(bad-arg);
-
   if (!count) return;
-  if (count <= b.cap - b.length) {
-    size_t copy_size = count * b.width;
-    unsigned char *destination =
-      (unsigned char *) b.bytes + b.length * b.width;
-    if (!source) memset(destination, 0, copy_size);
-    else memmove(destination, source, copy_size);
-    b.length += count;
-    return;
-  }
+  if (count <= b.cap - b.length) _append_in_place(b, source, count);
+  else _append_growing(b, source, count);
+}
+
+/* Without growth no source moves, and memmove covers one that overlaps the
+   end. */
+static void _append_in_place(Block b, const void *source, size_t count) {
+  unsigned char *end = _end(b);
+  if (!source) memset(end, 0, count * b.width);
+  else memmove(end, source, count * b.width);
+  b.length += count;
+}
+
+/* A source inside the reserved storage is copied from its offset after the
+   relocation. */
+static void _append_growing(Block b, const void *source, size_t count) {
   if (count > SIZE_MAX - b.length || count > SIZE_MAX / b.width) {
     size_t width = b.width;
     raise %(size-limit (width $width) (count $count));
   }
+  size_t size = count * b.width, offset = _reserved_offset(b, source);
+  if (offset != SIZE_MAX && size > b.cap * b.width - offset)
+    raise %(bad-arg (count $count));
+  size_t length = b.length;
+  b.reserve(length + count);
+  unsigned char *end = _end(b);
+  if (!source) memset(end, 0, size);
+  else if (offset != SIZE_MAX)
+    memmove(end, (unsigned char *) b.bytes + offset, size);
+  else memcpy(end, source, size);
+  b.length = length + count;
+}
 
-  size_t copy_size = count * b.width, source_offset = 0, int internal = 0;
-  if (source) {
-    /* realloc preserves the entire allocation, not only logical content. */
-    size_t offset = (uintptr_t) source - (uintptr_t) b.bytes;
-    size_t capacity_size = b.cap * b.width;
-    if (offset < capacity_size) {
-      source_offset = offset;
-      if (copy_size > capacity_size - source_offset)
-        raise %(bad-arg (count $count));
-
-      internal = 1;
-    }
-  }
-
-  size_t old_length = b.length, new_length = old_length + count;
-  b.reserve(new_length);
-  unsigned char *destination =
-    (unsigned char *) b.bytes + old_length * b.width;
-  if (!source) memset(destination, 0, copy_size);
-  else if (internal)
-    memmove(
-      destination, (unsigned char *) b.bytes + source_offset, copy_size);
-  else memcpy(destination, source, copy_size);
-  b.length = new_length;
+/* The offset of `p` inside `b`'s reserved storage, or SIZE_MAX outside it.
+   The offset survives growth because realloc preserves the entire
+   allocation, not only logical content. */
+static size_t _reserved_offset(Block b, const void *p) {
+  uintptr_t start = (uintptr_t) b.bytes, at = (uintptr_t) p;
+  if (at < start || at - start >= b.cap * b.width) return SIZE_MAX;
+  return at - start;
 }
 
 /** Appends `count` elements to `bytes` and returns its current base pointer.
     Callers must use the return because growth may relocate storage. Raises:
-    the same causes as `Block.append`; failure leaves the original view live
-   .
+    the same causes as `Block.append`; failure leaves the original view live.
 */
 inline Self Bytes.append(Self bytes, const void *source, size_t count) {
   Block block = bytes;
@@ -132,41 +146,32 @@ inline Self Bytes.append(Self bytes, const void *source, size_t count) {
     is preserved if growth relocates storage. Success may invalidate saved
     `Bytes` and element pointers.
     Raises: `<bad-arg>` for a null `Block`, or for a null or invalid
-    self-source
-    element on a nonzero append; `<size-limit>` when the new extent cannot be
-    represented; or `<alloc-fail>` when growth fails. These failures leave the
-    `Block` unchanged.
+    self-source element on a nonzero append; `<size-limit>` when the new
+    extent cannot be represented; or `<alloc-fail>` when growth fails. These
+    failures leave the `Block` unchanged.
 */
 void Block.append_fill(Block b, const void *element, size_t count) {
   if (b == NULL) raise %(bad-arg);
-
   if (!count) return;
   if (!element) raise %(bad-arg);
-
   if (count > SIZE_MAX - b.length) raise %(size-limit (count $count));
-  size_t old_length = b.length, new_length = old_length + count;
-  size_t element_offset = 0, int internal = 0;
-  uintptr_t start = (uintptr_t) b.bytes, pointer = (uintptr_t) element;
-  size_t capacity_size = b.cap * b.width;
-  if (pointer >= start && pointer - start < capacity_size) {
-    size_t logical_size = old_length * b.width;
-    element_offset = pointer - start;
-    if (element_offset > logical_size ||
-        b.width > logical_size - element_offset) {
-      raise %(bad-arg);
-    }
-    internal = 1;
-  }
-  b.reserve(new_length);
-  if (internal) element = (unsigned char *) b.bytes + element_offset;
-  unsigned char *destination =
-    (unsigned char *) b.bytes + old_length * b.width;
-  if (b.width == 1)
-    memset(destination, *((const unsigned char *) element), count);
+  size_t length = b.length, used = length * b.width;
+  size_t offset = _reserved_offset(b, element);
+  if (offset != SIZE_MAX && (offset > used || b.width > used - offset))
+    raise %(bad-arg);
+  b.reserve(length + count);
+  if (offset != SIZE_MAX) element = (unsigned char *) b.bytes + offset;
+  _fill(b, element, count);
+  b.length = length + count;
+}
+
+/* Writes `count` copies of `element` past the end of `b`'s elements. */
+static void _fill(Block b, const void *element, size_t count) {
+  unsigned char *end = _end(b);
+  if (b.width == 1) memset(end, *((const unsigned char *) element), count);
   else
     for (size_t i = 0; i < count; i++)
-      memmove(destination + i * b.width, element, b.width);
-  b.length = new_length;
+      memmove(end + i * b.width, element, b.width);
 }
 
 /** Appends repeated elements to `bytes` and returns its current base pointer.
@@ -200,26 +205,26 @@ inline Self Bytes.push(Self bytes, const void *source) =>
 */
 void Block.reserve(Block block, size_t minimum) {
   if (block == NULL) raise %(bad-arg);
-
   if (minimum <= block.cap) return;
-  size_t cap = block.cap ? block.cap : 1;
-  while (cap < minimum) {
-    if (cap > SIZE_MAX / 2) {
-      cap = minimum;
-      break;
-    }
-    cap *= 2;
-  }
-  size_t size;
-  if (!_allocation_size(block.width, cap, size)) {
+  size_t cap = _grown_capacity(block.cap, minimum);
+  size_t size = _allocation_size(block.width, cap);
+  if (!size) {
     size_t width = block.width;
     raise %(size-limit (width $width) (cap $cap));
   }
-  unsigned char *allocation = (unsigned char *) block.bytes - sizeof(Block);
-  allocation = Scope.realloc(allocation, size);
-  *((Block *) allocation) = block;
-  block.bytes = allocation + sizeof(Block);
+  _attach(block, Scope.realloc(_allocation(block), size));
   block.cap = cap;
+}
+
+/* Doubles `cap` until `minimum` fits, or returns `minimum` when doubling
+   would overflow. */
+static size_t _grown_capacity(size_t cap, size_t minimum) {
+  if (!cap) cap = 1;
+  while (cap < minimum) {
+    if (cap > SIZE_MAX / 2) return minimum;
+    cap *= 2;
+  }
+  return cap;
 }
 
 /** Ensures `bytes` can hold at least `minimum` elements and returns its base.
@@ -285,12 +290,9 @@ Block Block.new(size_t width) {
   if (!width) raise %(bad-arg);
   Block block = Scope.malloc(sizeof(struct Block));
   *block = (struct Block) {.width = width, .length = 0, .cap = 1};
-  size_t size;
-  if (!_allocation_size(width, block.cap, size))
-    raise %(size-limit (width $width));
-  unsigned char *allocation = Scope.malloc(size);
-  *((Block *) allocation) = block;
-  block.bytes = allocation + sizeof(Block);
+  size_t size = _allocation_size(width, block.cap);
+  if (!size) raise %(size-limit (width $width));
+  _attach(block, Scope.malloc(size));
   return block;
 }
 
@@ -302,26 +304,23 @@ Block Block.new(size_t width) {
 Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 
 /** Releases the `Block` and its backing storage, invalidating every alias. */
-void Block.free(Block block) {
-  if (block == NULL) return;
-  if (block.bytes != NULL)
-    Scope.free((unsigned char *) block.bytes - sizeof(Block));
-  Scope.free(block);
+void Block.free(Block b) {
+  if (b == NULL) return;
+  if (b.bytes != NULL) Scope.free(_allocation(b));
+  Scope.free(b);
 }
 
 /** Moves `block` and its backing allocation into `scope`.
     This preserves the `Block` and `Bytes` pointers and contents while changing
     which `Scope` ends their lifetime. `Context` export calls this method
-    instead
-    of assuming a `Block` is one allocation.
+    instead of assuming a `Block` is one allocation.
     For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
     `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
     ownership unchanged.
 */
 void Block.move_to(Block block, Scope *scope) {
   if (block == NULL) return;
-  if (block.bytes != NULL)
-    Scope.move((unsigned char *) block.bytes - sizeof(Block), scope);
+  if (block.bytes != NULL) Scope.move(_allocation(block), scope);
   Scope.move(block, scope);
 }
 
