@@ -934,6 +934,12 @@ static String _embed_path(Compiler c, String source_file, String requested) {
   return c.canonical_path(%"$base/$requested");
 }
 
+/* A definition records its file as `home_portable_path` spells it. */
+static String _definition_file(List definition) {
+  String file = definition.assoc(<file>);
+  return !file || file.startswith("<") ? file : home_absolute_path(file);
+}
+
 /* A relative import names a file beside the importing source, or else one
    under the home's `lib/`. */
 static String _canonical_path(Compiler c, String path) {
@@ -2488,7 +2494,7 @@ static Var _evaluate_meta_value(
   _ensure_lisp(c);
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
   List bindings = active ? active.caddr() : NULL;
-  String source_file = active ? active.car().list().assoc(<file>) : c.filename;
+  String source_file = active ? _definition_file(active.car()) : c.filename;
   Var value;
   $let(macro_sdk_has_references, !!bindings)
   $let(macro_sdk_source_captures, _source_captures(bindings))
@@ -2705,7 +2711,7 @@ Var Compiler.evaluate_macro_slot(Compiler c, Var value) {
   List active = c.macro_stack.car();
   (List definition, Var input, List bindings, Token invocation) = active;
   (void) input;
-  String source_file = definition.assoc(<file>);
+  String source_file = _definition_file(definition);
   Var required = slot.assoc(<construct>);
   Var result = form is <list>
     ? _evaluate_meta_value(c, form, invocation, 1)
@@ -3671,7 +3677,7 @@ List Compiler.parse_macro_definition(Compiler c) {
   List parameters = parameter_holes.list_free();
   (void) c.record_origin(start);
   List origin = c.token_location(start);
-  String source_file = _source_file(c, c.filename);
+  String source_file = home_portable_path(_source_file(c, c.filename));
   int imported = c.import_src != NULL, builtin = c.builtin_defs;
   List definition = _definition(
     name, result_kind, target_kind,
