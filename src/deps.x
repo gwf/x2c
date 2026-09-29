@@ -57,12 +57,7 @@ static String _contents(
   if (!paths.len()) paths.push(input);
   paths.sort();
   Buffer out = $auto(Buffer.new(0));
-  String base = %"${output_dir.rstrip("/")}/${Path.stem(input)}";
-  _write_word(out, request.dep_target ? request.dep_target : %"$base.c");
-  if (!request.dep_target) {
-    out.write_char(' ');
-    _write_word(out, %"$base.h");
-  }
+  _write_targets(out, request, input, output_dir);
   out.write_char(':');
   foreach (String path, paths) {
     out.write_char(' ');
@@ -72,14 +67,26 @@ static String _contents(
   /* Keep the dependency rule first. `translation_depfile_parse` stops at this
      newline so build fingerprints never treat following phony targets as
      prerequisites. */
-  String primary = Path.absolute(input);
-  if (!request.no_phony_deps)
-    foreach (String path, paths)
-      if (path != primary) {
-        _write_word(out, path);
-        out.write(":\n");
-      }
+  if (!request.no_phony_deps) _write_phony(out, paths, Path.absolute(input));
   return out;
+}
+
+static void _write_targets(
+  Buffer out, CliRequest request, String input, String output_dir) {
+  String base = %"${output_dir.rstrip("/")}/${Path.stem(input)}";
+  _write_word(out, request.dep_target ? request.dep_target : %"$base.c");
+  if (request.dep_target) return;
+  out.write_char(' ');
+  _write_word(out, %"$base.h");
+}
+
+// Every prerequisite except the primary input gets an empty phony rule.
+static void _write_phony(Buffer out, Array paths, String primary) {
+  foreach (String path, paths)
+    if (path != primary) {
+      _write_word(out, path);
+      out.write(":\n");
+    }
 }
 
 /* Backslash-escape space, tab, '#', ':', and backslash as Make word bytes.
@@ -98,42 +105,33 @@ static void _write_word(Buffer out, String word) {
 /** Parses prerequisite words after the first literal colon in `text`.
     Backslash escapes and doubled dollars are decoded in that region. A
     backslash-newline continues the rule; an ordinary newline ends it before
-    any phony rules. This accepts internally generated rules with colon-free
-    targets rather than general Make syntax. A NULL input or no parsed
-    prerequisites returns NULL. Returned cells and path `String`s follow the
-    current canonical `List` and `String` pool lifetimes.
+    any phony rules. It reads only internally generated rules, whose targets
+    contain no colon. A NULL input or no parsed prerequisites returns NULL.
+    Returned cells and path `String`s follow the current canonical `List` and
+    `String` pool lifetimes.
 */
 List translation_depfile_parse(String text) {
-  if (!text) return NULL;
-  Array paths = [], Buffer word = Buffer.new(0), int prerequisites = 0;
-  for (const char *ch = text; *ch; ch++) {
-    if (!prerequisites) {
-      if (*ch == ':') prerequisites = 1;
-      continue;
-    }
+  const char *ch = text ? strchr(text, ':') : NULL;
+  if (!ch) return NULL;
+  Array paths = [], Buffer word = Buffer.new(0);
+  // The word before the newline is pushed once, after the loop.
+  for (ch++; *ch && *ch != '\n'; ch++) {
     if (*ch == '\\' && ch[1]) {
       ch++;
-      if (*ch == '\n') continue;
-      word.write_char(*ch);
+      if (*ch != '\n') word.write_char(*ch);
       continue;
     }
-    if (*ch == '$' && ch[1] == '$') {
-      word.write_char('$');
-      ch++;
-      continue;
-    }
-    // The word before the newline is pushed once, after the loop.
-    if (*ch == '\n') break;
-    if (*ch == ' ' || *ch == '\t' || *ch == '\r') {
-      if (word.len()) {
-        paths.push(word.str());
-        word.clear();
-      }
-      continue;
-    }
-    word.write_char(*ch);
+    if (*ch == '$' && ch[1] == '$') ch++;
+    if (*ch == ' ' || *ch == '\t' || *ch == '\r') _push_word(paths, word);
+    else word.write_char(*ch);
   }
-  if (word.len()) paths.push(word.str());
+  _push_word(paths, word);
   word.free();
   return paths.list_free();
+}
+
+static void _push_word(Array paths, Buffer word) {
+  if (!word.len()) return;
+  paths.push(word.str());
+  word.clear();
 }
