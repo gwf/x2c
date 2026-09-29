@@ -365,54 +365,80 @@ macro open Statement $func_local(
   $type $row;
 }
 
-static List _checked_func_argument(
-  Compiler compiler, List adapter_type, Type parameter_type,
-  List value_helper, Type value_helper_type,
-  List reference_helper, Type reference_helper_type,
-  List fn_binding, List argv_binding, int index, Type &storage_type) {
-  if (parameter_type.car() == <&> ||
-      parameter_type.car() == <opt-ref>) {
-    Type target = parameter_type.cdr(), pointer = target.reference();
-    List picked = _adapter_reader_call(
-      compiler, %(* void), reference_helper, reference_helper_type,
-      fn_binding, argv_binding, index,
-      %(${compiler.cache_literal_list(target)}
-        ${_type_literal(compiler, target)}));
-    storage_type = pointer;
-    return compiler.convert_expression(picked, pointer);
-  }
-  Symbol tag = compiler.sym.var_tag_for_type(parameter_type, NULL);
-  Type resolved = compiler.sym.resolve_key(parameter_type);
-  if (!tag && resolved &&
-      (resolved.is_pointer() || resolved.car() == <struct>)) {
-    /* A pointer with no Var tag of its own arrives as `<p48>`, and so does
-       a record passed by value, as the address of its bytes. */
-    Type pointer_type = NULL;
-    List pointer_helper = _adapter_helper(
-      compiler, "x2c_func_pointer_argument", pointer_type);
-    List picked = _adapter_reader_call(
-      compiler, %(* void), pointer_helper, pointer_type,
-      fn_binding, argv_binding, index, NULL);
-    storage_type = parameter_type;
-    if (resolved.is_pointer())
-      return compiler.convert_expression(picked, parameter_type);
-    Type record_pointer = parameter_type.reference();
-    List pointer = %(expr $record_pointer
-      (cast $record_pointer $picked));
-    Macro dereference = $func_dereference;
-    return compiler.rebuild_expression(
-      parameter_type, dereference(pointer));
-  }
+typedef struct FuncReaders {
+  Compiler compiler;
+  Type diagnostic_type;
+  List value, reference, fn, argv;
+  Type value_type, reference_type;
+} FuncReaders;
+
+static List _read_reference_arg(
+  FuncReaders readers, Type parameter_type, int index,
+  Type &storage_type) {
+  Compiler compiler = readers.compiler;
+  Type target = parameter_type.cdr(), pointer = target.reference();
+  List picked = _adapter_reader_call(
+    compiler, %(* void), readers.reference, readers.reference_type,
+    readers.fn, readers.argv, index,
+    %(${compiler.cache_literal_list(target)}
+      ${_type_literal(compiler, target)}));
+  storage_type = pointer;
+  return compiler.convert_expression(picked, pointer);
+}
+
+static List _read_pointer_arg(
+  FuncReaders readers, Type parameter_type, Type resolved, int index,
+  Type &storage_type) {
+  Compiler compiler = readers.compiler;
+  /* A pointer without its own Var tag and a by-value record both arrive as
+     `<p48>`; the latter is the address of the record's bytes. */
+  Type pointer_type = NULL;
+  List pointer_helper = _adapter_helper(
+    compiler, "x2c_func_pointer_argument", pointer_type);
+  List picked = _adapter_reader_call(
+    compiler, %(* void), pointer_helper, pointer_type,
+    readers.fn, readers.argv, index, NULL);
+  storage_type = parameter_type;
+  if (resolved.is_pointer())
+    return compiler.convert_expression(picked, parameter_type);
+  Type record_pointer = parameter_type.reference();
+  List pointer = %(expr $record_pointer (cast $record_pointer $picked));
+  Macro dereference = $func_dereference;
+  return compiler.rebuild_expression(
+    parameter_type, dereference(pointer));
+}
+
+static List _read_value_arg(
+  FuncReaders readers, Type parameter_type, Symbol tag, int index,
+  Type &storage_type) {
+  Compiler compiler = readers.compiler;
   if (!tag)
     _typed_adapter_error(
       compiler,
       "native binding parameter type has no Var representation",
-      adapter_type, parameter_type, NULL);
+      readers.diagnostic_type, parameter_type, NULL);
   List picked = _adapter_reader_call(
-    compiler, %("Var"), value_helper, value_helper_type,
-    fn_binding, argv_binding, index, %(${_adapter_symbol_literal(tag)}));
+    compiler, %("Var"), readers.value, readers.value_type,
+    readers.fn, readers.argv, index, %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
   return compiler.convert_expression(picked, parameter_type);
+}
+
+static List _checked_func_argument(
+  FuncReaders readers, Type parameter_type, int index, Type &storage_type) {
+  if (parameter_type.car() == <&> ||
+      parameter_type.car() == <opt-ref>)
+    return _read_reference_arg(
+      readers, parameter_type, index, storage_type);
+  Compiler compiler = readers.compiler;
+  Symbol tag = compiler.sym.var_tag_for_type(parameter_type, NULL);
+  Type resolved = compiler.sym.resolve_key(parameter_type);
+  if (!tag && resolved &&
+      (resolved.is_pointer() || resolved.car() == <struct>))
+    return _read_pointer_arg(
+      readers, parameter_type, resolved, index, storage_type);
+  return _read_value_arg(
+    readers, parameter_type, tag, index, storage_type);
 }
 
 /* Materialize arguments in index order: C does not sequence call operands,
@@ -425,6 +451,12 @@ static List _func_argument_locals(
     compiler, "x2c_func_value_argument", value_type);
   List reference_helper = _adapter_helper(
     compiler, "x2c_func_declared_reference_argument", reference_type);
+  FuncReaders readers = {
+    .compiler = compiler, .diagnostic_type = diagnostic_type,
+    .value = value_helper, .reference = reference_helper,
+    .fn = fn_binding, .argv = argv_binding,
+    .value_type = value_type, .reference_type = reference_type
+  };
   Array locals = [];
   int index = 0;
   Macro local = $func_local;
@@ -433,9 +465,7 @@ static List _func_argument_locals(
     names = names.cdr();
     Type storage_type = NULL;
     List value = _checked_func_argument(
-      compiler, diagnostic_type, type,
-      value_helper, value_type, reference_helper, reference_type,
-      fn_binding, argv_binding, index++, storage_type);
+      readers, type, index++, storage_type);
     List (base, mods) = storage_type.declaration_parts();
     List row = %(op = (bind $binding $mods) $value);
     locals.push(compiler.rebuild_statement(local(base, row)).cadr());
@@ -642,8 +672,7 @@ static List _func_return_body(Compiler compiler, List value) {
 }
 
 static List _build_indirect_func_adapter(
-  Compiler compiler, Type diagnostic_type, Type pointer_type,
-  List key) {
+  Compiler compiler, Type diagnostic_type, Type pointer_type) {
   String context_name = compiler.fresh_name("func_pointer_context");
   List context_binding = compiler.sym.introduce(context_name);
   List field_binding = compiler.sym.introduce(
@@ -698,7 +727,7 @@ static List _indirect_func_adapter(
   List key = %(findirect $pointer_type), result = NULL;
   $adapter.memo(compiler, key, result) {
     result = _build_indirect_func_adapter(
-      compiler, diagnostic_type, pointer_type, key);
+      compiler, diagnostic_type, pointer_type);
   }
   (List adapter, Type context, List field) = result.cdr();
   out_context_type = context;
@@ -1502,148 +1531,166 @@ macro open Statement $capture_factory(Statement $storage, Expr $value) {
 }
 
 /* Capture rows arrive resolved and in first-use order from `literals.x`.
-   Materialize one local per row before the
-   context aggregate so conversion effects run left to right. `Var` fields are
-   value snapshots; reference fields keep cell or caller addresses without
-   extending their lifetime. `Func.new_context` copies the aggregate into the
-   current Scope, and the emitted helper borrows it through the `FuncAdapter`
-   ABI for each call. */
-static List _lower_captured_lambda(
-  Compiler compiler, List entries, List captures, List body) {
-  String lname = compiler.fresh_name("lambda");
-  List lambda_binding = compiler.sym.introduce(lname);
-  List closure_binding = compiler.sym.introduce(
-    compiler.fresh_name("lambda_closure"));
-  List argv_binding = compiler.sym.introduce(
-    compiler.fresh_name("lambda_argv"));
-  String environment_name = compiler.fresh_name("lambda_context");
-  List environment_typedef = compiler.sym.introduce(environment_name);
-  Type environment_value_type = %($environment_name);
-  Type environment_pointer_type = %(* const $environment_name);
-  List environment_local = compiler.sym.introduce(
-    compiler.fresh_name("lambda_context_value"));
-  compiler.semantic_binding_facts()[%(automatic $environment_local)] = 1;
-  compiler.semantic_binding_facts()[%(type $environment_local)] =
-    environment_pointer_type;
+   Their locals run before the context aggregate; value fields are snapshots
+   and reference fields retain caller or cell addresses. */
+typedef struct CaptureBuild {
+  Compiler compiler;
+  List entries, body, adapter, closure, argv, environment_type_binding;
+  List environment_local, constructor, signature;
+  String environment_name;
+  Type value_type, pointer_type, adapter_type, constructor_type;
+  Map slots;
+  Array fields, field_types, locals, values;
+} CaptureBuild;
 
-  Map slots = {};
-  Array fields = [], field_types = [];
-  Array capture_locals = [], field_values = [];
-  Macro local = $func_local;
-  foreach (List capture, captures)
-    match (capture)
-      case %(capture ?binding ?captured_type ?expression): {
-        Type source_type = captured_type;
-        Type storage_type = source_type.car() == <&>
-                          ? source_type.cdr().type().reference()
-                          : %("Var");
-        List field = compiler.sym.introduce(
-          compiler.fresh_name("lambda_capture"));
-        List (field_base, field_mods) = storage_type.declaration_parts();
-        fields.push(
-          %(declare $field_base (bindings (bind $field $field_mods))));
-        field_types.push(storage_type);
-        slots[binding] = %(capture-field $field $storage_type);
+static void _capture_field(CaptureBuild &build, List capture) {
+  match (capture)
+    case %(capture ?binding ?captured_type ?expression): {
+      Compiler c = build.compiler;
+      Type source_type = captured_type;
+      Type storage_type = source_type.car() == <&>
+                        ? source_type.cdr().type().reference()
+                        : %("Var");
+      List field = c.sym.introduce(c.fresh_name("lambda_capture"));
+      List (field_base, field_mods) = storage_type.declaration_parts();
+      build.fields.push(
+        %(declare $field_base (bindings (bind $field $field_mods))));
+      build.field_types.push(storage_type);
+      build.slots[binding] = %(capture-field $field $storage_type);
 
-        List temporary = compiler.sym.introduce(
-          compiler.fresh_name("lambda_capture_value"));
-        List value = compiler.convert_expression(
-          expression, storage_type);
-        List (base, mods) = storage_type.declaration_parts();
-        List row = %(op = (bind $temporary $mods) $value);
-        capture_locals.push(compiler.rebuild_statement(
-          local(base, row)).cadr());
-        field_values.push(_func_bound(storage_type, temporary));
-      }
-  Macro environment = $capture_environment;
-  compiler.add_early(compiler.bind_syntax(
-    environment(environment_typedef, fields.list_free()), AST_UNIT, NULL));
-
-  Type context_type = NULL, constructor_type = NULL;
-  List context_helper = _adapter_helper(
-    compiler, "Func_context", context_type);
-  List constructor = _adapter_helper(
-    compiler, "Func_new_context", constructor_type);
-  Type adapter_type = compiler.sym.resolve_key(%("FuncAdapter"));
-  List types = entries.map(
-    %!(List entry) => _entry_type(compiler, entry));
-  List names = entries.map(_entry_binding);
-  List locals = _func_argument_locals(
-    compiler, adapter_type, types, names, closure_binding, argv_binding);
-  List context_call = _func_call(
-    compiler, %(* const void),
-    _func_bound(context_type, context_helper),
-    %(${_func_bound(%("Func"), closure_binding)}));
-  List context_cast = %(expr $environment_pointer_type
-    (cast $environment_pointer_type $context_call));
-  List context_setup = compiler.rebuild_statement(
-    local(%(const $environment_name),
-          %(op = (bind $environment_local (*)) $context_cast))).cadr();
-  List rewritten = _rewrite_lambda_captures(
-    compiler, body, slots, environment_local, environment_pointer_type);
-  rewritten = _node(compiler, rewritten);
-  _publish_func_adapter(
-    compiler, lambda_binding, closure_binding, argv_binding, rewritten,
-    %(@locals $context_setup));
-
-  List signature = _signature(compiler, entries);
-  Macro statement_shape = $expression_statement;
-  if (compiler.inline_header) {
-    List bridge = _func_bridge_binding(compiler, "func_from_capture");
-    Array parameters = [], factory_values = [];
-    foreach (Type field_type, field_types) {
-      List parameter = compiler.sym.introduce(
-        compiler.fresh_name("lambda_capture"));
-      parameters.push(field_type.parameter_ast(parameter));
-      factory_values.push(_func_bound(field_type, parameter));
+      List temporary = c.sym.introduce(
+        c.fresh_name("lambda_capture_value"));
+      List value = c.convert_expression(expression, storage_type);
+      List (base, mods) = storage_type.declaration_parts();
+      Macro local = $func_local;
+      List row = %(op = (bind $temporary $mods) $value);
+      build.locals.push(c.rebuild_statement(local(base, row)).cadr());
+      build.values.push(_func_bound(storage_type, temporary));
     }
-    List factory_context = compiler.sym.introduce(
-      compiler.fresh_name("lambda_context"));
-    List factory_initializer = %(expr $environment_value_type
-      (composite (commas @{factory_values.list_free()})));
-    List factory_storage = compiler.rebuild_statement(
-      local(environment_value_type,
-            %(op = (bind $factory_context ()) $factory_initializer))).cadr();
-    List factory_construction = _func_context_call(
-      compiler, environment_value_type, factory_context, lambda_binding,
-      adapter_type, signature, constructor, constructor_type);
-    List declaration_params = %(params @{parameters.list_free()});
-    Macro factory = $capture_factory;
-    List factory_body = compiler.rebuild_statement(
-      factory(factory_storage, factory_construction));
-    compiler.add_early(compiler.wrapper_function(
-      %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
-    List parameter_types = field_types.list_free();
-    Type factory_type = %((func $parameter_types) "Func");
-    List call = _func_bridge_call(
-      compiler, bridge, declaration_params, factory_type,
-      field_values.list_free());
-    List statement = compiler.rebuild_statement(
-      statement_shape(call)).cadr();
-    return %(
-      expr ("Func")
-        (parens
-          (block @{capture_locals.list_free()} $statement))
-    );
-  }
-  List context_value = compiler.sym.introduce(
-    compiler.fresh_name("lambda_context"));
-  List context_initializer = %(expr $environment_value_type
-    (composite (commas @{field_values.list_free()})));
-  List context_storage = compiler.rebuild_statement(
-    local(environment_value_type,
-          %(op = (bind $context_value ()) $context_initializer))).cadr();
-  List construction = _func_context_call(
-    compiler, environment_value_type, context_value, lambda_binding,
-    adapter_type, signature, constructor, constructor_type);
-  List statement = compiler.rebuild_statement(
-    statement_shape(construction)).cadr();
+}
+
+static void _capture_environment(CaptureBuild &build, List captures) {
+  Compiler c = build.compiler;
+  foreach (List capture, captures) _capture_field(build, capture);
+  Macro environment = $capture_environment;
+  c.add_early(c.bind_syntax(
+    environment(build.environment_type_binding, build.fields.list_free()),
+    AST_UNIT, NULL));
+}
+
+/* The adapter borrows the copied context for each synchronous Func call. */
+static void _capture_adapter(CaptureBuild &build) {
+  Compiler c = build.compiler;
+  Type context_type = NULL;
+  List context_helper = _adapter_helper(c, "Func_context", context_type);
+  build.constructor = _adapter_helper(
+    c, "Func_new_context", build.constructor_type);
+  build.adapter_type = c.sym.resolve_key(%("FuncAdapter"));
+  List types = build.entries.map(
+    %!(List entry) => _entry_type(c, entry));
+  List names = build.entries.map(_entry_binding);
+  List locals = _func_argument_locals(
+    c, build.adapter_type, types, names, build.closure, build.argv);
+  List context_call = _func_call(
+    c, %(* const void), _func_bound(context_type, context_helper),
+    %(${_func_bound(%("Func"), build.closure)}));
+  List context_cast = %(expr ${build.pointer_type}
+    (cast ${build.pointer_type} $context_call));
+  Macro local = $func_local;
+  List context_setup = c.rebuild_statement(
+    local(%(const ${build.environment_name}),
+          %(op = (bind ${build.environment_local} (*)) $context_cast))).cadr();
+  List rewritten = _rewrite_lambda_captures(
+    c, build.body, build.slots, build.environment_local,
+    build.pointer_type);
+  rewritten = _node(c, rewritten);
+  _publish_func_adapter(
+    c, build.adapter, build.closure, build.argv, rewritten,
+    %(@locals $context_setup));
+  build.signature = _signature(c, build.entries);
+}
+
+static List _capture_construct(CaptureBuild &build, List context) =>
+  _func_context_call(
+    build.compiler, build.value_type, context, build.adapter,
+    build.adapter_type, build.signature, build.constructor,
+    build.constructor_type);
+
+static List _capture_storage(
+  CaptureBuild &build, List context, List values) {
+  List initializer = %(expr ${build.value_type}
+    (composite (commas @values)));
+  Macro local = $func_local;
+  return build.compiler.rebuild_statement(
+    local(build.value_type,
+          %(op = (bind $context ()) $initializer))).cadr();
+}
+
+static List _capture_result(
+  CaptureBuild &build, List storage, List value) {
+  Macro statement_shape = $expression_statement;
+  List statement = build.compiler.rebuild_statement(
+    statement_shape(value)).cadr();
+  List setup = storage ? %($storage) : NULL;
   return %(
     expr ("Func")
-      (parens
-        (block @{capture_locals.list_free()} $context_storage
-               $statement))
+      (parens (block @{build.locals.list_free()} @setup $statement))
   );
+}
+
+static List _capture_inline(CaptureBuild &build) {
+  Compiler c = build.compiler;
+  List bridge = _func_bridge_binding(c, "func_from_capture");
+  Array parameters = [], factory_values = [];
+  foreach (Type field_type, build.field_types) {
+    List parameter = c.sym.introduce(c.fresh_name("lambda_capture"));
+    parameters.push(field_type.parameter_ast(parameter));
+    factory_values.push(_func_bound(field_type, parameter));
+  }
+  List context = c.sym.introduce(c.fresh_name("lambda_context"));
+  List storage = _capture_storage(
+    build, context, factory_values.list_free());
+  Macro factory = $capture_factory;
+  List factory_body = c.rebuild_statement(
+    factory(storage, _capture_construct(build, context)));
+  List declaration_params = %(params @{parameters.list_free()});
+  c.add_early(c.wrapper_function(
+    %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
+  List parameter_types = build.field_types.list_free();
+  Type factory_type = %((func $parameter_types) "Func");
+  List call = _func_bridge_call(
+    c, bridge, declaration_params, factory_type, build.values.list_free());
+  return _capture_result(build, NULL, call);
+}
+
+static List _capture_plain(CaptureBuild &build) {
+  Compiler c = build.compiler;
+  List context = c.sym.introduce(c.fresh_name("lambda_context"));
+  List storage = _capture_storage(build, context, build.values.list_free());
+  return _capture_result(build, storage, _capture_construct(build, context));
+}
+
+static List _lower_captured_lambda(
+  Compiler c, List entries, List captures, List body) {
+  CaptureBuild build = {
+    .compiler = c, .entries = entries, .body = body,
+    .slots = {}, .fields = [], .field_types = [], .locals = [], .values = []
+  };
+  build.adapter = c.sym.introduce(c.fresh_name("lambda"));
+  build.closure = c.sym.introduce(c.fresh_name("lambda_closure"));
+  build.argv = c.sym.introduce(c.fresh_name("lambda_argv"));
+  build.environment_name = c.fresh_name("lambda_context");
+  build.environment_type_binding = c.sym.introduce(build.environment_name);
+  build.value_type = %(${build.environment_name});
+  build.pointer_type = %(* const ${build.environment_name});
+  build.environment_local = c.sym.introduce(
+    c.fresh_name("lambda_context_value"));
+  c.semantic_binding_facts()[%(automatic ${build.environment_local})] = 1;
+  c.semantic_binding_facts()[%(type ${build.environment_local})] =
+    build.pointer_type;
+  _capture_environment(build, captures);
+  _capture_adapter(build);
+  return c.inline_header ? _capture_inline(build) : _capture_plain(build);
 }
 
 /** The parameter types of a lambda's function signature, keeping typed
