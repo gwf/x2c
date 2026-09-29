@@ -494,12 +494,7 @@ void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
     translation finishes.
 */
 void Compiler.tokenize(Compiler c, char *text) {
-  /* The unit's script settings apply to the one file that carries the
-     shebang, whichever compiler reads it. */
-  if (c.unit_script && c.filename &&
-      (c.filename == c.unit_script.path ||
-       Path.absolute(c.filename) == c.unit_script.path))
-    c.script = c.unit_script;
+  if (_is_script_file(c)) c.script = c.unit_script;
   c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
@@ -508,10 +503,17 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.layout = c.tokenizer.layout;
   _report_malformed_token(c);
   _scan_conditionals(c);
-  _retag_contextual_keywords(c.tokenizer);
+  _retag_keywords(c.tokenizer);
   c.token = _skip_forward(c.tokenizer.tokens);
   c.braces.clear();
 }
+
+/* The unit's script settings apply to the one file that carries the
+   shebang, whichever compiler reads it. */
+static int _is_script_file(Compiler c) =>
+  c.unit_script && c.filename &&
+  (c.filename == c.unit_script.path ||
+   Path.absolute(c.filename) == c.unit_script.path);
 
 /* A lexical failure truncates the token stream, so the parser reaches the
    appended `<eof>` and blames the end of the file. Report the refused byte
@@ -520,12 +522,11 @@ void Compiler.tokenize(Compiler c, char *text) {
 static void _report_malformed_token(Compiler c) {
   Symbol status = c.tokenizer.status();
   if (status != <malformed> && status != <indent>) return;
+  String message =
+    status == <indent> ? "inconsistent indentation" : "invalid token";
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>)
-      c.report_error(
-        <parse>, status == <indent> ? "inconsistent indentation"
-                                    : "invalid token", token, NULL);
+    if (token.type == <error>) c.report_error(<parse>, message, token, NULL);
   }
 }
 
@@ -534,7 +535,7 @@ static void _report_malformed_token(Compiler c) {
    parser reads it by position everywhere else; `match` is the statement
    only as `match (...)` followed by `case` or `{`. Every other occurrence
    is a name, so C that uses them keeps compiling. */
-static void _retag_contextual_keywords(Tokenizer tokenizer) {
+static void _retag_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
        token = _skip_forward(token + 1)) {
@@ -578,10 +579,10 @@ static int _starts_operand(Symbol type) {
     Zero reads the current token; positive and negative steps count forward
     and backward through non-trivia tokens. The parser cursor is unchanged.
 */
-Symbol Compiler.peek(Compiler compiler, int steps) {
-  Token token = compiler.token;
-  if (!steps && compiler.at_completion()) {
-    List rows = compiler.sym.visible_symbols();
+Symbol Compiler.peek(Compiler c, int steps) {
+  Token token = c.token;
+  if (!steps && c.at_completion()) {
+    List rows = c.sym.visible_symbols();
     raise %(replcomp (kind <names>) (rows $rows) (keywords ()));
   }
   while (steps > 0) {
@@ -589,7 +590,7 @@ Symbol Compiler.peek(Compiler compiler, int steps) {
     steps--;
   }
   while (steps < 0) {
-    token = _skip_backward(token - 1, compiler.tokenizer.tokens);
+    token = _skip_backward(token - 1, c.tokenizer.tokens);
     steps++;
   }
   return token.type;
@@ -616,7 +617,7 @@ static Token _skip_backward(Token token, Token origin) {
 }
 
 /** Returns the first non-trivia token at or after `token`. */
-Token Compiler.skip_trivia_from(Compiler compiler, Token token) =>
+Token Compiler.skip_trivia_from(Compiler c, Token token) =>
   _skip_forward(token);
 
 /** Raises `<incomplete>` when a required grammar item reaches the supplied
@@ -646,11 +647,11 @@ Symbol Compiler.expect(Compiler c, Symbol type) {
     This updates the unmatched-brace stack. An unmatched `}` reports a parse
     diagnostic, which raises `<malformed>` under recovery and otherwise exits.
 */
-void Compiler.next(Compiler compiler) {
-  Token consumed = compiler.token;
+void Compiler.next(Compiler c) {
+  Token consumed = c.token;
   if (consumed.type == <eof>) return;
-  compiler.token = _skip_forward(consumed + 1);
-  _update_brace_stack(compiler, consumed);
+  c.token = _skip_forward(consumed + 1);
+  _update_brace_stack(c, consumed);
 }
 
 static void _update_brace_stack(Compiler c, Token consumed) {
@@ -670,17 +671,15 @@ static void _update_brace_stack(Compiler c, Token consumed) {
 }
 
 /** Consumes `type` when current and reports whether it matched. */
-inline int Compiler.test(Compiler compiler, Symbol type) {
-  if (compiler.token.type != type) return 0;
-  compiler.next();
+inline int Compiler.test(Compiler c, Symbol type) {
+  if (c.token.type != type) return 0;
+  c.next();
   return 1;
 }
 
 static void _check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
-  c.report_error(
-    <parse>, "missing '}'", c.braces[-1],
-    %( "'{' opened here" ));
+  c.report_error(<parse>, "missing '}'", c.braces[-1], %( "'{' opened here" ));
 }
 
 /** Returns 1 for a token type that opens a delimited group, -1 for one that
@@ -718,9 +717,9 @@ Token Token.after_group(Token t) {
 // completion
 
 /** Retags the token beginning at `position` as a private completion marker. */
-void Compiler.mark_completion(Compiler compiler, int position) {
-  for (size_t i = 0; i < compiler.tokenizer.tokens.len(); i++) {
-    Token token = &((struct Token *) compiler.tokenizer.tokens)[i];
+void Compiler.mark_completion(Compiler c, int position) {
+  for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.pos == position && token.type == <ident>) {
       token.type = <replcomp>;
       return;
@@ -734,12 +733,10 @@ int Compiler.at_completion(Compiler c) => c.token.type == <replcomp>;
 /* Transfers completion from the grammar production that owns the cursor.
    Rows retain semantic namespace facts; keywords are choices owned by that
    production rather than an editor-side copy of the grammar. */
-void Compiler.__complete_here(Compiler compiler, Symbol role, List keywords) {
-  if (!compiler.at_completion()) return;
-  List rows = compiler.sym.visible_symbols();
-  raise %(
-    replcomp (kind $role) (rows $rows) (keywords $keywords)
-  );
+void Compiler.__complete_here(Compiler c, Symbol role, List keywords) {
+  if (!c.at_completion()) return;
+  List rows = c.sym.visible_symbols();
+  raise %(replcomp (kind $role) (rows $rows) (keywords $keywords));
 }
 
 // source locations
@@ -764,10 +761,10 @@ int Compiler.record_origin(Compiler c, Token token) {
     A null node remains null. Macro construction uses its active `m-origin`
     marker; otherwise a node without a token remains unwrapped.
 */
-List Compiler.anchor_origin(Compiler compiler, List node, Token token) {
+List Compiler.anchor_origin(Compiler c, List node, Token token) {
   if (!node) return node;
-  if (compiler.macro_holes) return %(at m-origin $node);
-  int occurrence = compiler.record_origin(token);
+  if (c.macro_holes) return %(at m-origin $node);
+  int occurrence = c.record_origin(token);
   if (!occurrence) return node;
   return %(at $occurrence $node);
 }
@@ -791,15 +788,14 @@ void Compiler.record_source_declaration(
   }
 }
 
-static List _source_range(Compiler compiler, Token first, Token after) {
-  if (!first || !after || first >= after || compiler.macro_holes) return NULL;
+static List _source_range(Compiler c, Token first, Token after) {
+  if (!first || !after || first >= after || c.macro_holes) return NULL;
   Token last = after - 1;
   while (last > first &&
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
-  String path = Path.absolute(compiler.filename);
-  if (!compiler.source_texts.contains(path))
-    compiler.source_texts[path] = compiler.text;
+  String path = Path.absolute(c.filename);
+  if (!c.source_texts.contains(path)) c.source_texts[path] = c.text;
   return %($path ${first.pos} ${last.pos + last.len});
 }
 
@@ -816,13 +812,13 @@ void Compiler.record_source_reference(
 
 /** Carries declaration metadata with one actual symbol contribution. */
 void Compiler.copy_source_declaration(
-  Compiler compiler, Map target, Map source, List key) {
-  if (!compiler.source_facts) return;
+  Compiler c, Map target, Map source, List key) {
+  if (!c.source_facts) return;
   Var declaration;
   List target_key = %($target $key);
-  if (compiler.source_declarations.try_get(%($source $key), declaration))
-    compiler.source_declarations[target_key] = declaration;
-  else compiler.source_declarations.del(target_key);
+  if (c.source_declarations.try_get(%($source $key), declaration))
+    c.source_declarations[target_key] = declaration;
+  else c.source_declarations.del(target_key);
 }
 
 /** Carries declaration metadata beside a completed symbol-map merge. */
