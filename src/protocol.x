@@ -1853,6 +1853,28 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
+macro open Expression $protocol_discard_call(
+    Name $callee, Name $arguments...) => $callee($arguments...);
+
+macro open Statement $protocol_discard_argument(
+    Name $discard, Name $argument) {
+  $discard($argument);
+}
+
+macro open Statement $protocol_discard_void(
+    Expr $call, Statement $discards...) {
+  $call;
+  $discards...
+  return;
+}
+
+macro open Statement $protocol_discard_value(
+    Type $type, Name $value, Expr $call, Statement $discards...) {
+  $type $value = $call;
+  $discards...
+  return $value;
+}
+
 /** Returns `(binding signature)` for a generated helper that calls the
     function `binding` of type `signature` and then discards the unnamed
     argument temporaries `which` selects (bit `n` for argument `n`). A
@@ -1877,20 +1899,18 @@ List Compiler.discard_helper(
   if (!fresh && (resolved_result.is_pointer() ||
                  resolved_result.is_aggregate()))
     return NULL;
+  Macro call_shape = $protocol_discard_call;
+  Macro drop_shape = $protocol_discard_argument;
   Array declarations = [], arguments = [], discards = [];
   int index = 0;
   foreach (Type parameter, parameters) {
     List argument_binding = c.sym.introduce(%"a$index");
     declarations.push(parameter.parameter_ast(argument_binding));
-    arguments.push(%(expr $parameter (ident $argument_binding)));
+    arguments.push(argument_binding);
     if (which & (1 << index)) {
       List drop = c.resolve_protocol_member(parameter, "discard");
       if (drop) {
-        List (drop_binding, drop_type) = drop;
-        discards.push(
-          %(stmnt (expr (void)
-            (call (expr $drop_type (ident $drop_binding))
-                  (args (expr $parameter (ident $argument_binding)))))));
+        discards.push(drop_shape(drop.car(), argument_binding));
       }
     }
     index++;
@@ -1900,16 +1920,16 @@ List Compiler.discard_helper(
   String name = %"_x2c_discard_${stem}_$which";
   List helper_binding = c.sym.introduce(name);
   List value_binding = c.sym.introduce("value");
-  List call = %(expr $result
-    (call (expr $signature (ident $binding))
-          (args @{arguments.list_free()})));
-  List body = result.equal(%(void))
-    ? %((stmnt $call) @{discards.list_free()} (return))
-    : %((declare $result (bindings (op = (bind $value_binding ()) $call)))
-        @{discards.list_free()}
-        (return $result (expr $result (ident $value_binding))));
+  List call = c.bind_syntax(
+    call_shape(binding, arguments.list_free()), AST_EXPRESSION, result);
+  Macro void_shape = $protocol_discard_void;
+  Macro value_shape = $protocol_discard_value;
+  List shape = result.equal(%(void))
+    ? void_shape(call, discards.list_free())
+    : value_shape(result, value_binding, call, discards.list_free());
+  List body = c.bind_syntax(shape, AST_BLOCK, result);
   c.add_early(c.wrapper_function(
-    %(static @result), helper_binding, declarations.list_free(), body));
+    %(static @result), helper_binding, declarations.list_free(), body.cdr()));
   List entry = %($helper_binding $signature);
   c.protocol_helpers[key] = entry;
   /* Wrapping a call preserves its return ownership. Discarding an argument
