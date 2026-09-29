@@ -1,7 +1,7 @@
 # Raw-symbol translation of macros.x
 
-> Status: both repairs verified in local checkpoints from dev `89da87d0`;
-> publication validation remains with the integrating worktree.
+> Status: both repairs verified; the standalone sweep passed on the
+> integrated pre-publication tree after the import correction.
 > The explicit raw-symbol sweep remains optional; this record adds no gate.
 
 ## Observed behavior
@@ -72,8 +72,8 @@ The optional `make proof-raw-symbols` compared 651 of 652 required sources.
 Its one failure was `unittest/test-diagnostics.x`: the CPP invocation cannot
 open `grammar.xmacro` because it looks under `unittest/`; the raw invocation
 succeeds. Running that source alone reproduces the same CPP/raw result. The
-source and import owner are outside this prototype move, so the sweep remains
-red for that separate import-path issue. No exclusions or sweep flags changed.
+source and import owner are outside this prototype move, so the sweep was
+still red at that checkpoint. No exclusions or sweep flags changed.
 
 That failure also reproduces on an unmodified `89da87d0` archive built with
 `make build-safe`: focused CPP translation exits 1 with path
@@ -92,9 +92,10 @@ Logs in `/Users/gary/.codex/worktrees/d40d/x2c/debug/`:
 `raw-symbol-followup.log`, `raw-symbol-relative.log`,
 `raw-symbol-absolute.log`, and `raw-symbol-cpp.log`.
 
-Integrate and use the ordinary final-tree gate. The complete optional sweep
-has not been rerun after the independent path correction; keep its expected
-contract and exclusions unchanged.
+The complete optional `make proof-raw-symbols` sweep passed after integration:
+652 required sources compared, 414 classified exclusions, and zero failures.
+Its expected contract and exclusions did not change. The ordinary final-tree
+publication gate remains to be run on this batch.
 
 ## Plan review
 
