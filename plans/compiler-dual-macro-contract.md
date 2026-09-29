@@ -3113,81 +3113,76 @@ three fixtures' generated C/H pairs are byte-identical to pre-edit output
 from the same output paths. Their checked AST, transform, warning, stdout,
 and status artifacts, and the latter fixtures' diagnostics, remain unchanged.
 
-### E36. Destructuring construction family and stage boundaries
+### E36. Destructuring construction adopter (local candidate)
 
-The transform receives parser-bound targets. The source is evaluated once,
-converted to `List` once, read by index in source order, and assigned to
-each original target. A value-position assignment returns the original
-typed source. The one remaining source-spellable write has this complete
-template and client:
+`transform.x` receives parser-bound targets. It preserves one source
+conversion to `List`, left-to-right indexed reads and typed writes, outer
+scope for declaration targets, and the original value type. The source
+shapes and structural client are:
 
 ```x2c
 macro open Expression $destructure_write(
     Expr $target, Expr $value) => $target = $value;
-
-static List _destructure_assignments(
-  Compiler compiler, List targets, List temporary) {
-  int index = 0;
-  Macro shape = $destructure_write;
-  return targets.map(
-    %!(List target) using &index => {
-      match (target)
-        case %(expr ?type ?): {
-          List value = _destructure_element(temporary, index++);
-          return %(stmnt ${compiler.rebuild_expression(
-            type, shape(target, value))});
-        }
-    });
+macro open Statement $destructure_targets(
+    Type $type, DeclaratorRow $rows...) {
+  $type $rows...;
 }
+macro open Statement $destructure_typed_target(
+    Type $type, DeclaratorRow $row, Expr $value) {
+  $type $row = $value;
+}
+macro open Statement $destructure_sequence(Statement $items...) {
+  $items...
+}
+
+List target_decl = compiler.rebuild_statement(
+  target_shape(type, declarations.list_free())).cadr();
+List tail = compiler.bind_syntax(
+  temporary_shape(temporary, converted, assignments),
+  AST_BLOCK, compiler.return_type);
+return compiler.rebuild_statement(
+  sequence(cons(target_decl, tail.cdr())));
+
+// For each mixed typed `(param type bind)` row:
+declarations.push(compiler.rebuild_statement(
+  typed_shape(type, bind, _destructure_element(temporary, index++))
+).cadr());
+// Bind its new temporary once, then rebuild the same flat sequence.
 ```
 
-`rebuild_expression` substitutes the two already typed children without
-rebinding or rerunning effects. This replaces the sole raw assignment-op
-builder for statement, shared-type declaration, and value-position writes;
-mixed-type declarations use initialized declarators instead. The statement
-wrapper is still an internal lowered AST node. No parallel raw assignment
-builder remains. The loop, index increment, and helper remain to preserve
-the left-to-right target order and typed result.
+`_destructure_assignments` applies `write` through `rebuild_expression`,
+then the existing `$expression_statement` through `rebuild_statement`.
+The valued path uses the same statement wrapper for its final result.
+The mixed branch reuses `$destructure_declarations` for the temporary;
+its anonymous duplicate template is deleted. `_element_at` is folded into
+its sole `_destructure_element` caller. `rebuild_statement` substitutes
+already bound children without rebinding; its unbraced `seq` keeps the
+shared target declaration and mixed rows in the outer scope.
 
-The other candidate templates were tested and rejected at specific current
-boundaries:
+The raw grouped declaration, mixed initialized declaration, two `seq`
+joins, assignment operation and both expression-statement wrappers are
+displaced. Sixteen raw `%(` sites remain in the bounded family: eight
+recognition patterns, three diagnostic/type data forms, and five
+construction sites. Those five construct the typed internal `getindex`
+with its temporary reference, bare shared-target `bind` rows, typed write
+references, the typed value-result reference, and the native C statement
+expression `(parens (block ...))`. A source bracket read would emit native
+pointer subscripting instead of `List_getindex`; the parser issued the
+shared-target identities, and the valued native expression has no x2c
+source spelling. The nearby `_value_declaration` helper is also used by
+protocol sequencing and is outside this family. Against `23c3a465`,
+authored `transform.x` is +52/-20 lines (net +32), with two helpers/templates
+deleted (`_element_at` and the anonymous mixed temporary template).
 
-- A `Name $names...` grouped declaration template generated invalid `Var;`
-  or `Var List ...` C. A one-name template preserved parser-issued binding
-  IDs but split `Var a, b, c;` into separate declarations, changing checked
-  C and transform origins. A `Decl` hole accepts one declaration; the
-  grouped declarator list has no current source sequence slot. Keep the
-  grouped `declare` from the parser-issued identities.
-- `rebuild_expression(Var, $source[$index])` retained the source `index`
-  form at the lowered stage. Generated C used pointer subscripting instead
-  of `List_getindex` and failed native type checking. A pending read template
-  inside the value-position native block leaked as `x2c.template` at C
-  emission. Keep the typed internal `getindex` constructor until a producer
-  can preserve its already established List indexing operation.
-- A typed target declaration template passed the already bound full `bind`
-  through a `Name` hole and failed with an uncaught `<no-convert>` error.
-  The current raw declaration retains each parameter's type, modifier,
-  binding identity, and initializer order. Reconstructing it from a plain
-  name would lose those facts.
-
-The two internal `seq` constructors concatenate already bound declarations
-without introducing a block scope. The final `(parens (block ...))` is a
-native C statement expression with no x2c source spelling. The raw result
-and temporary references carry issued binding identities; diagnostic forms
-and eight structural recognition patterns remain semantic/data or matching
-operations. The `_value_declaration` helper nearby also serves protocol
-sequencing and is outside this family. The source diff replaces one raw
-assignment constructor with a template/rebuild and retains the other ten
-construction sites; the family still has 22 `%(` sites because the new
-statement wrapper occupies the old assignment site's line. No helper is
-deleted; the authored source rises seven lines to avoid a second binding
-pass while preserving exact behavior.
-
-`make build`, `destructuring_suite` (9 tests, 55 assertions), the existing
-destructuring, AST-leaf, and diagnostic fixtures, and an inert lambda-local
-destructuring run pass. For the three primary fixtures, AST/transform dumps,
-generated C/H, and diagnostics are byte-identical to the pre-edit baseline;
-their checked stdout/status are unchanged.
+Seven focused fixtures, `destructuring_suite` (9/9, 55 assertions), and an
+inert lambda-local probe pass. The three primary fixtures have byte-identical
+AST/transform dumps, stderr, generated C/H and diagnostics against the
+capability-plus-E36 baseline; their checked stdout/status pass. Matching
+`--source-map` C/H and diagnostic probes also agree byte-for-byte. Shipped
+`bin/x2c` cannot yet parse `DeclaratorRow`, so a local capable compiler
+built this adopter. The separate capability self-host `lib/error.x:1171`
+failure and root publication gate are still pending; this is a private
+candidate, not a published result.
 
 ### F. Static-local initialization exception
 
