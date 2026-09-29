@@ -182,6 +182,13 @@ rules; tags hidden inside an opaque native macro retain native scope. Pass
 lowered local objects explicitly to native macros. The language reference
 describes these native boundaries.
 
+A Job started by a meta call outlives the call when it raises, although
+`meta-job-lifetime-raise` states that the job is terminated and reaped.
+On macOS, translating that fixture leaves its `sleep 30` running after the
+translator exits. The fixture checks only compile status and diagnostics,
+and the fixture runner stops each worker's process group, so the suite
+still passes.
+
 ## Retired maintenance notes
 
 - The compiler preserves discarded assignments,
