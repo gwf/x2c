@@ -185,6 +185,8 @@ List Compiler_rebuild_expression(Compiler c, Type type, List application);
 
 List Compiler_rebuild_statement(Compiler c, List application);
 
+List Compiler_rebuild_unit_function(Compiler c, List application);
+
 List Compiler_rebuild_function(Compiler c, List target, List application);
 
 List Compiler_peek_macro_hole(Compiler compiler);
