@@ -77,6 +77,17 @@ declaration template would discard those facts. Retain these current raw
 cases as stage-specific consumers; revisit them only with a projection that
 deletes their structural work while preserving identity and stage.
 
+Two later inert probes narrow other source-form candidates. In `type.x`,
+designation queries receive both typed expressions and bare operator
+children. Five `macro Expression` candidates failed to match every bare
+child because their patterns require an `expr` root; replacing the repeated
+raw arms would need a justified projection of that mixed input. In
+`expressions.x`, dot and arrow macros captured the member spelling as a
+String while the compact combined resolver case uses a one-item field List.
+Two templates, two dispatch arms and reconstruction would add machinery
+without removing the existing semantic body. These are scoped exceptions
+for the probed clients, not claims about all operator templates.
+
 ## Proposed ownership
 
 | Concern | Target owner | What changes or disappears |

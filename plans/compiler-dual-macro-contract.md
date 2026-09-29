@@ -806,6 +806,7 @@ row: do not count successive versions of try twice. The current entry is:
 | Bound switch and region statement recognition (2026-09-28) | f6606dbf / dev fe8fd71a, same staged path and cleared output dir | raw -61.09%, cause unassigned | raw -53.45%, cause unassigned | Not counted | Not counted | Not measured |
 | MatchRow and expression origin preflight (2026-09-28) | 89da87d0 / dev f6606dbf, same staged path and cleared output dir | raw -61.51%, cause unassigned | raw -53.83%, cause unassigned | Not counted | Not counted | Not measured |
 | Match binder and cold raw-symbol repair (2026-09-28) | 65344a45 / dev 89da87d0, same staged path and cleared output dir | raw -61.21%, cause unassigned | raw -53.28%, cause unassigned | Not counted | Not counted | Not measured |
+| Index source form and grammar import (2026-09-28) | 473406af / dev 65344a45, same staged path and cleared output dir | raw -60.85%, cause unassigned | raw -53.43%, cause unassigned | Not counted | Not counted | Not measured |
 | Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
@@ -907,6 +908,15 @@ baseline here. Source-tree and helper/cache effects remain unisolated; these
 raw values cannot be assigned to either change. The candidate (`6cbfa1d3`)
 was restored exactly; samples are in
 `debug/matchbinder-raw-batch-paired-results.json`.
+
+The index and grammar-import batch used the same staged path and cleared
+output directory without concurrent worker builds. Five alternating pairs
+yielded 9.323921 / 3.650647 s default and 10.781229 / 5.020432 s live.
+The exact `6cbfa1d3` compiler was the fast candidate in the preceding
+attempt and the slow baseline here. Source-tree and helper/cache effects
+remain unisolated; the raw values cannot be attributed to this batch. The
+candidate (`8ba22c25`) was restored exactly; samples are in
+`debug/index-import-batch-paired-results.json`.
 
 The production rows are medians of five alternating pairs on one host
 against the dev compiler the migration started from, with the same source
