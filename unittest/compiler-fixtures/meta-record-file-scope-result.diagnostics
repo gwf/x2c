@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-record-file-scope-result.x:13:9: macro: this function cannot run at compile time
+  int v = $pair(1).a;
+          ^
+  note: function: pair reason: a struct or union result has no compile-time value; return its fields as a List or Map
+

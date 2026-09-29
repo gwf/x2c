@@ -343,7 +343,8 @@ Public functions:
 `Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.use_meta_build_directory`,
 `Compiler.write_meta_build`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.bind_meta_group`
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.bind_meta_group`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 

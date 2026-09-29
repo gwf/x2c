@@ -4793,6 +4793,7 @@ static int _shared_meta_definition(Compiler c, String name){
 }
 
 Var Compiler_meta_argument(Compiler, List, Type, Token, MetaCall);
+void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static Var _meta_call_value(Compiler c, List expression, Token site){
 
   {
@@ -4825,7 +4826,10 @@ Array values = Array_new(); {
 
       }
       Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2471};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        Compiler_refuse_record_meta_call(c, name, site); {
+          static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2475};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        }
+
       }
       if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1448, site, cons(String_var(String_join(NULL, cons(String_var(_864), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
     }
@@ -4938,7 +4942,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site, int slo
                                                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
-                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2505};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2509};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                                                             }
 
                                                           }
