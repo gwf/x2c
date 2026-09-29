@@ -88,6 +88,73 @@ static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
     source_wrapper ? " (retained src wrapper)" : "");
 }
 
+static void check_bound_expr_holes(Compiler c, Lisp reader) {
+  Macro indexed = definition(c,
+    "macro Expression $indexed(Expr $base, Expr $selector) => "
+    "$base[$selector];");
+  List base = read_list(reader,
+    "(expr (* int) (ident (binding 17 \"pointer\")))");
+  List selector = read_list(reader,
+    "(expr (long) (cast (long) "
+    "(expr (\"Var\") (ident (binding 18 \"selected\")))))");
+  List result = Compiler_rebuild_expression(c, NULL,
+    Macro_apply(indexed, List_list_n(2, List_var(base),
+      List_var(selector))));
+  List expected = read_list(reader,
+    "(expr () (index "
+    "(expr (* int) (ident (binding 17 \"pointer\"))) "
+    "(expr (long) (cast (long) "
+    "(expr (\"Var\") (ident (binding 18 \"selected\")))))))");
+  require(List_equal(result, expected),
+    "bound index gained expression shells or changed stage");
+  List index = Var_list(List_caddr(result));
+  require(Var_list(List_cadr(index)) == base &&
+    Var_list(List_caddr(index)) == selector,
+    "bound index lost captured expression identities");
+
+  List sourced = read_list(reader,
+    "(src (source \"input.x\" 4 12) "
+    "(expr (* int) (ident (binding 17 \"pointer\"))))");
+  result = Compiler_rebuild_expression(c, NULL,
+    Macro_apply(indexed, List_list_n(2, List_var(sourced),
+      List_var(selector))));
+  index = Var_list(List_caddr(result));
+  require(Var_list(List_cadr(index)) == sourced &&
+    Var_list(List_caddr(index)) == selector,
+    "bound index lost source wrapper or captured identity");
+
+  Macro called = definition(c,
+    "macro Expression $called(Expr $callee, Expr $arguments...) => "
+    "$callee($arguments...);");
+  List callee = read_list(reader,
+    "(expr ((func ((\"Map\") (\"Var\"))) \"Var\") "
+    "(ident (binding 19 \"Map_getindex\")))");
+  List receiver = read_list(reader,
+    "(expr (\"Map\") (ident (binding 20 \"map\")))");
+  List key = read_list(reader,
+    "(expr (\"Var\") (call \"String_var\" "
+    "(args (expr (\"String\") (literal (\"String\") \"key\")))))");
+  List args = List_list_n(2, List_var(receiver), List_var(key));
+  result = Compiler_rebuild_expression(c, read_list(reader, "(\"Var\")"),
+    Macro_apply(called, List_list_n(2, List_var(callee), List_var(args))));
+  expected = read_list(reader,
+    "(expr (\"Var\") (call "
+    "(expr ((func ((\"Map\") (\"Var\"))) \"Var\") "
+    "(ident (binding 19 \"Map_getindex\"))) "
+    "(args (expr (\"Map\") (ident (binding 20 \"map\"))) "
+    "(expr (\"Var\") (call \"String_var\" "
+    "(args (expr (\"String\") "
+    "(literal (\"String\") \"key\"))))))))");
+  require(List_equal(result, expected),
+    "bound call gained expression shells or changed stage");
+  List call = Var_list(List_caddr(result));
+  List captured = Var_list(List_caddr(call));
+  require(Var_list(List_cadr(call)) == callee &&
+    Var_list(List_cadr(captured)) == receiver &&
+    Var_list(List_caddr(captured)) == key,
+    "bound call lost captured expression identities");
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize();
@@ -131,6 +198,7 @@ int main(int argc, char **argv) {
     "%!($params...) using $captures => $body", NULL, 0);
   check(c, reader, plain, captured, "%!($params...) => $body", NULL, 0);
   c->macro_holes = NULL;
+  check_bound_expr_holes(c, reader);
   Lisp_destroy(reader);
   Scope_release();
   return 0;

@@ -3125,19 +3125,28 @@ List x2c_template_call(Var stored, List values) =>
     stored is <string> ? Atom.intern(stored.str()) : stored, values);
 
 /** Rebuilds an expression from a pending Macro value application, preserving
-    its established root `type`, child stage, and source wrappers. The caller
-    supplies bound syntax or parser-template holes and a purely structural
-    Expression template: no introduced names, unresolved free references,
-    computed slots, or child template calls. Capture rows and parameter
-    sequences are Lists. No binding, capture collection, hygiene, or effects
-    run; the returned AST is for the compiler, not ordinary source insertion.
+    its established root `type`, child stage, and source wrappers. An `Expr`
+    hole replaces its parser-only type shell with the already typed child.
+    The caller supplies bound syntax or parser-template holes and a purely
+    structural Expression template: no introduced names, unresolved free
+    references, computed slots, or child template calls. Capture rows and
+    parameter sequences are Lists. Binding, capture collection, hygiene, and
+    effects do not run; the returned AST is for the compiler, not ordinary
+    source insertion.
 */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = _template_arguments(c, definition, values, c.token, 1);
   List bindings = arguments.match(definition.assoc(<pattern>));
-  List rebuilt = definition.assoc(<template>).list().replace(bindings);
+  List template = definition.assoc(<template>);
+  foreach (List hole, definition.assoc(<parameters>).list())
+    if (hole.assoc(<kind>) == <expr>) {
+      Var binder = _hole_key(hole, "expression");
+      template = template.search_replace(
+        %(expr (<macro-expr>) (!quote $binder)), binder);
+    }
+  List rebuilt = template.replace(bindings);
   return %(expr $type @{rebuilt.cddr()});
 }
 
