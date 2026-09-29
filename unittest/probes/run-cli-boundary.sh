@@ -469,6 +469,31 @@ for value in 1 2 3; do
   fi
 done
 
+# A dry run records no archive state, so after a failed archive step the next
+# build still archives the object compiled from the current source.
+archived="$BUILD/direct/retained-archive"
+mkdir -p "$archived"
+printf '#!/bin/sh\nexit 1\n' >"$archived/failing-ar"
+chmod +x "$archived/failing-ar"
+build_archive() {
+  "$X2C" build --kind static-library --build-dir "$archived/build" \
+    --output "$archived/libvalue.a" "$archived/value.c" "$@"
+}
+printf 'int library_value(void) { return 1; }\n' >"$archived/value.c"
+build_archive >"$archived/first.stdout" 2>"$archived/first.stderr"
+printf 'int library_value(void) { return 2; }\n' >"$archived/value.c"
+set +e
+build_archive --ar "$archived/failing-ar" >"$archived/failed.stdout" \
+  2>"$archived/failed.stderr"
+failed_archive_status=$?
+set -e
+[[ $failed_archive_status == 1 ]]
+build_archive -### >"$archived/dry.stdout" 2>"$archived/dry.stderr"
+build_archive -v >"$archived/last.stdout" 2>"$archived/last.stderr"
+"$host_cc" "$BUILD/direct/consumer.c" "$archived/libvalue.a" \
+  -o "$archived/consumer"
+[[ $("$archived/consumer") == 2 ]]
+
 # Binding groups belong to a translation unit, not the shared Lisp parent.
 bindings="$BUILD/binding-units"
 mkdir -p "$bindings"

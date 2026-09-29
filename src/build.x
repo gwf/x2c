@@ -768,12 +768,12 @@ static ToolAction Build._final_action(Build b, String output, List inputs) {
 
 /* The build records a final fingerprint only for a static library. */
 static String Build._final_record(Build b) =>
-  b.state_root && b.request.kind == <static-lib> ?
+  b.state_root && b.request.kind == <static-lib> && !b.request.dry_run ?
     b._state_path("final", b.output) : NULL;
 
 static int Build._archive_current(
   Build b, Symbol phase, String record, uint64_t hash) {
-  if (!record || b.request.dry_run || access(b.output, R_OK)) return 0;
+  if (!record || access(b.output, R_OK)) return 0;
   if (!_state_matches(record, hash)) return 0;
   if (b.request.verbose)
     fprintf(stderr, "x2c: up-to-date %s %s\n", phase.str(), b.output);
