@@ -1624,11 +1624,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1236 = cons(_1235, NULL);
   _1237 = cons(_541, _1236);
   _1238 = List_var(_1237);
-  _1239 = int_var(1617);
+  _1239 = int_var(1619);
   _1240 = cons(_1239, NULL);
   _1241 = cons(_547, _1240);
   _1242 = List_var(_1241);
-  _1243 = int_var(60760);
+  _1243 = int_var(60849);
   _1244 = cons(_1243, NULL);
   _1245 = cons(_560, _1244);
   _1246 = List_var(_1245);
@@ -1768,11 +1768,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1380 = cons(_1379, NULL);
   _1381 = cons(_522, _1380);
   _1382 = List_var(_1381);
-  _1383 = int_var(1625);
+  _1383 = int_var(1627);
   _1384 = cons(_1383, NULL);
   _1385 = cons(_547, _1384);
   _1386 = List_var(_1385);
-  _1387 = int_var(61125);
+  _1387 = int_var(61214);
   _1388 = cons(_1387, NULL);
   _1389 = cons(_560, _1388);
   _1390 = List_var(_1389);
@@ -1869,11 +1869,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1481 = cons(_1480, NULL);
   _1482 = cons(_522, _1481);
   _1483 = List_var(_1482);
-  _1484 = int_var(1636);
+  _1484 = int_var(1638);
   _1485 = cons(_1484, NULL);
   _1486 = cons(_547, _1485);
   _1487 = List_var(_1486);
-  _1488 = int_var(61540);
+  _1488 = int_var(61629);
   _1489 = cons(_1488, NULL);
   _1490 = cons(_560, _1489);
   _1491 = List_var(_1490);
@@ -1951,11 +1951,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1563 = cons(_1562, NULL);
   _1564 = cons(_522, _1563);
   _1565 = List_var(_1564);
-  _1566 = int_var(1638);
+  _1566 = int_var(1640);
   _1567 = cons(_1566, NULL);
   _1568 = cons(_547, _1567);
   _1569 = List_var(_1568);
-  _1570 = int_var(61620);
+  _1570 = int_var(61709);
   _1571 = cons(_1570, NULL);
   _1572 = cons(_560, _1571);
   _1573 = List_var(_1572);
@@ -2056,11 +2056,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1668 = cons(_1667, NULL);
   _1669 = cons(_522, _1668);
   _1670 = List_var(_1669);
-  _1671 = int_var(1642);
+  _1671 = int_var(1644);
   _1672 = cons(_1671, NULL);
   _1673 = cons(_547, _1672);
   _1674 = List_var(_1673);
-  _1675 = int_var(61825);
+  _1675 = int_var(61914);
   _1676 = cons(_1675, NULL);
   _1677 = cons(_560, _1676);
   _1678 = List_var(_1677);
@@ -2266,11 +2266,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1878 = cons(_1877, NULL);
   _1879 = cons(_522, _1878);
   _1880 = List_var(_1879);
-  _1881 = int_var(1605);
+  _1881 = int_var(1607);
   _1882 = cons(_1881, NULL);
   _1883 = cons(_547, _1882);
   _1884 = List_var(_1883);
-  _1885 = int_var(60385);
+  _1885 = int_var(60474);
   _1886 = cons(_1885, NULL);
   _1887 = cons(_560, _1886);
   _1888 = List_var(_1887);
@@ -4089,7 +4089,7 @@ static List _parse_unary_op(Compiler c){
 
 static int _cast_operand_follows(Symbol s){
   switch(s){
-    case 19147688 : case 73 : case 9297 : case 81 : case 247 : case 9553 : case 1227897 : case 183 : case 9655 : case 9719 : case 9541 : case 9539 : case 845368475748 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368370138 : case 865658429314008 : case 1473096 : case 1295657932 : case 1044119921612 : case 1848 : case 2046 : case 60 : case 253 : case 54 : case 77 : case 62 : case 56 : return 1;
+    case 19147688 : case 604 : case 73 : case 9297 : case 81 : case 247 : case 9553 : case 1227897 : case 183 : case 9655 : case 9719 : case 9541 : case 9539 : case 845368475748 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368370138 : case 865658429314008 : case 1473096 : case 1295657932 : case 1044119921612 : case 1848 : case 2046 : case 60 : case 253 : case 54 : case 77 : case 62 : case 56 : return 1;
   }
   return 0;
 }
@@ -4097,7 +4097,7 @@ static int _cast_operand_follows(Symbol s){
 List Compiler_peek_macro_hole(Compiler);
 Var List_assoc(List, Var);
 static int _macro_hole_starts_cast_type(Compiler compiler){
-  if(! Map_truth(compiler -> macro_holes) || Compiler_peek(compiler, 0) != 73 || Compiler_peek(compiler, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(compiler);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  if(Compiler_peek(compiler, 3) == 183 && kind != 1362954) return 0;  return _cast_operand_follows(Compiler_peek(compiler, 3));
+  if(! Map_truth(compiler -> macro_holes) || Compiler_peek(compiler, 0) != 73 || Compiler_peek(compiler, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(compiler);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  Symbol next = Compiler_peek(compiler, 3);  if((next == 183 || next == 604) && kind != 1362954) return 0;  return _cast_operand_follows(next);
 }
 
 Token Token_after_group(Token);
@@ -5627,7 +5627,7 @@ List Compiler_parse_primary(Compiler compiler){
     }
     List keyword = Compiler_try_parse_macro_expression(compiler);  if(List_truth(keyword)) return keyword;  if(String_equal(compiler -> token -> text, _2453)) return _parse_va_arg(compiler);  if(String_equal(compiler -> token -> text, _2454)) return _parse_generic(compiler);  return Compiler_parse_variable(compiler);
   }
-  case 81 : return _parse_parens(compiler);  case 247 : return _parse_composite(compiler);  case 183 : return _parse_bracket_array(compiler);  case 9553 : return Compiler_parse_list_literal(compiler);  case 1227897 : return Compiler_parse_symbol_set_literal(compiler);  case 9655 : return Compiler_parse_array_literal(compiler);  case 9719 : return Compiler_parse_map_literal(compiler);  case 9541 : return Compiler_parse_string_literal(compiler);  case 9539 : return Compiler_parse_lambda_literal(compiler);
+  case 604 : return Compiler_parse_variable(compiler);  case 81 : return _parse_parens(compiler);  case 247 : return _parse_composite(compiler);  case 183 : return _parse_bracket_array(compiler);  case 9553 : return Compiler_parse_list_literal(compiler);  case 1227897 : return Compiler_parse_symbol_set_literal(compiler);  case 9655 : return Compiler_parse_array_literal(compiler);  case 9719 : return Compiler_parse_map_literal(compiler);  case 9541 : return Compiler_parse_string_literal(compiler);  case 9539 : return Compiler_parse_lambda_literal(compiler);
 }
 return Compiler_parse_atomic_literal(compiler);
 }
