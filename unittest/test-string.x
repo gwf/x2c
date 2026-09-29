@@ -407,6 +407,17 @@ static void string_constructor_invariants(void) {
   EXPECT_TRUE(finalized == "short");
 }
 
+/* A transient buffer reports its writable bytes whatever it holds. */
+static void string_malloc_len_counts_writable_bytes(void) {
+  String buffer = String.malloc(6);
+  char *bytes = buffer;
+  bytes[0] = '\0';
+  EXPECT_INT_EQ(buffer.len(), 5);
+  bytes[0] = 'a';
+  EXPECT_INT_EQ(buffer.len(), 5);
+  buffer.free();
+}
+
 static void string_empty_search_contract(void) {
   String empty = NULL, text = "abc";
   EXPECT_INT_EQ(text.find(empty), 0);
@@ -722,6 +733,7 @@ void string_suite(void) {
   $test.run(string_boundary_behavior);
   $test.run(string_high_bytes_read_unsigned);
   $test.run(string_constructor_invariants);
+  $test.run(string_malloc_len_counts_writable_bytes);
   $test.run(string_empty_search_contract);
   $test.run(string_search_and_replace);
   $test.run(string_foreach_bytes_as_int_and_char);

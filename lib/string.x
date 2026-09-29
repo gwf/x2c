@@ -100,7 +100,8 @@ static unsigned _hash_n(const char *str, int length) =>
     The empty `String` is the null pointer, whose length is 0.
 */
 int String.len(String str) {
-  if (!str) return 0;
+  // `!str` also reads the first byte, which a fresh buffer leaves unset.
+  if (str == NULL) return 0;
   return _header(str).length - 1;
 }
 
