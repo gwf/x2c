@@ -1,7 +1,7 @@
 /*  ast.x -- shared helpers for x2c compiler AST nodes
 
-    Keeps sequence placement in one place. Simple fixed-shape nodes remain
-    direct immutable `List`s.
+    Simple fixed-shape nodes remain direct immutable `List`s. This module
+    holds the node operations that several compiler phases share.
 */
 
 #pragma once
@@ -29,12 +29,13 @@ $(import "../lib/error-macros.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "symbolset.x"
 
-// binding nodes
+/* binding nodes
 
-/* A binding node couples source spelling to a positive compiler-issued
-   identity. Semantic lookup uses the identity, while emission and diagnostics
-   recover the spelling; equal spellings in different scopes remain distinct.
-*/
+   A binding node couples source spelling to a positive compiler-issued
+   identity. Semantic lookup uses the identity, while emission and
+   diagnostics recover the spelling; equal spellings in different scopes
+   remain distinct. */
+
 /** Constructs a `(binding identity spelling)` node.
     The caller must supply a positive compiler-issued identity.
 */
@@ -45,7 +46,8 @@ List binding_identity_new(int identity, String spelling) =>
     Returns one on success and writes only non-`NULL` outputs; failure returns
     zero without changing either output.
 */
-int binding_identity_try_parts(List binding, int &?identity, String &?spelling) {
+int binding_identity_try_parts(
+  List binding, int &?identity, String &?spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
@@ -59,11 +61,10 @@ int binding_identity_try_parts(List binding, int &?identity, String &?spelling) 
 /** Returns a valid binding node's source spelling, or `NULL`. */
 String binding_identity_spelling(List binding) {
   String spelling = NULL;
-  return binding_identity_try_parts(binding, NULL, spelling)
-       ? spelling : NULL;
+  return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
 }
 
-// child rewriting
+// traversal
 
 /** Applies `per_child` to each `List` child of `ast` and returns the node
     rebuilt from the results; non-list children pass through. When no child
@@ -91,7 +92,7 @@ int ast_contains_head(Var value, Symbol kind) {
   return 0;
 }
 
-// termination
+// code that never returns
 
 /** Returns whether control cannot flow out the bottom of `ast`.
     Recognized terminals are shared non-returning raises, native termination
@@ -127,8 +128,8 @@ static Ast _unwrap_origin(Ast node) {
 static const SymbolSet nonreturning_error_causes =
   $error.nonreturning.causes();
 
-// A literal raise names its cause in place, so emission can tell whether the
-// Error runtime can let that raise resume.
+/* A literal raise names its cause in place, so emission can tell whether the
+   Error runtime can let that raise resume. */
 static int _raise_never_returns(Ast node) {
   Var code_ast = node.cadr();
   if (code_ast is not <list>) return 0;
@@ -154,8 +155,8 @@ static int _contains_return(Ast node) {
     if (head == <return>) return 1;
     if (head == <function>) return 0;
   }
-  foreach (Var head, node)
-    if (head is <list> && _contains_return(head)) return 1;
+  foreach (Var child, node)
+    if (child is <list> && _contains_return(child)) return 1;
   return 0;
 }
 
@@ -214,18 +215,25 @@ List Ast.initializer_functions(Ast ast, List &source) {
   List argument = %(expr ${value.cadr()} ${input.car()});
   Array functions = $auto([]);
   foreach (List choice, cases) {
-    (List condition, List path, List destination, List expression) = choice;
-    match (expression) {
-      case %(expr ? (call (!set ?callee (expr ? ?)) (args ?actual))): {
-        if (actual !== argument) return NULL;
-        List function = callee;
-        functions.push(%($condition $path ${function.cadr()} $function));
-      }
-      default: return NULL;
-    }
+    List function = _arm_function(choice, argument);
+    if (!function) return NULL;
+    functions.push(function);
   }
   source = value;
   return functions;
+}
+
+/* One arm as the case `(condition path type callee)` when the arm calls
+   `callee` with `argument`, or `NULL`. */
+static List _arm_function(List choice, List argument) {
+  (List condition, List path, List destination, List expression) = choice;
+  match (expression)
+    case %(expr ? (call (!set ?callee (expr ? ?)) (args ?actual))): {
+      if (actual !== argument) return NULL;
+      List function = callee;
+      return %($condition $path ${function.cadr()} $function);
+    }
+  return NULL;
 }
 
 // preprocessor lines
@@ -248,7 +256,7 @@ String preproc_directive(String text) =>
   text.strip(" \t").remove_prefix("#").strip(" \t");
 
 /** Returns the file named by the `#include` line `text`, or `NULL` for any
-    other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after
+    other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
     the name, such as a comment, is ignored.
 */
 String preproc_include_target(String text, int &angle) {
@@ -280,10 +288,10 @@ List preproc_track_arms(List arms, String text) {
     first, then `items`, then one `#endif` per group.
 */
 List preproc_within_arms(List arms, List items) {
-  Array output = [];
+  Array out = [];
   foreach (List group, arms.reverse())
-    foreach (List directive, group) output.push(directive);
-  foreach (Var item, items) output.push(item);
-  for (unsigned i = arms.len(); i; i--) output.push(%(preproc "#endif"));
-  return output.list_free();
+    foreach (List directive, group) out.push(directive);
+  foreach (Var item, items) out.push(item);
+  for (unsigned i = arms.len(); i; i--) out.push(%(preproc "#endif"));
+  return out.list_free();
 }
