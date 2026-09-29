@@ -1159,32 +1159,32 @@ static List _ordinary_requirement(
 }
 
 static List Compiler._resolve_ordinary_protocol(
-  Compiler compiler, Type base, Type participant,
+  Compiler c, Type base, Type participant,
   ProtocolRequirements *requirements, List &failure) {
   failure = NULL;
   Var stored;
   List key = %($base $participant);
-  if (compiler.conforms.try_get(key, stored))
+  if (c.conforms.try_get(key, stored))
     return stored is <list> ? stored : NULL;
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) goto does_not_conform;
   String forward = _forward_binding(
-    compiler, base, participant);
+    c, base, participant);
   String reverse = _reverse_binding(
-    compiler, base, participant);
+    c, base, participant);
   MemberResolution resolution = {
-    .c = compiler, .base = base, .participant = participant,
+    .c = c, .base = base, .participant = participant,
     .binder = requirements.binder,
     .variables = {}, .defaults = {}, .bindings = {},
     .representation = base === %("Var")
       ? _adoption_representation(
-        _visible_adoption_row(compiler, base, participant)) : NULL,
+        _visible_adoption_row(c, base, participant)) : NULL,
     .forward = base !== %("Var")
-      ? _forward_binding(compiler, base, participant) : NULL};
+      ? _forward_binding(c, base, participant) : NULL};
   List rows = _resolve_members(
     &resolution, requirements.associations, requirements.templates);
   List requirement = _ordinary_requirement(
-    compiler, base, requirements.binder, rows, forward, reverse);
+    c, base, requirements.binder, rows, forward, reverse);
   if (requirement) {
     failure = requirement;
     goto does_not_conform;
@@ -1193,9 +1193,9 @@ static List Compiler._resolve_ordinary_protocol(
     protocol-conformance $base $participant $forward $reverse
     ${resolution.variables} ${resolution.bindings} (members @rows)
   );
-  compiler.conforms[key] = conformance;
+  c.conforms[key] = conformance;
   return conformance;
-does_not_conform: compiler.conforms[key] = 0;
+does_not_conform: c.conforms[key] = 0;
   return NULL;
 }
 
@@ -1685,25 +1685,25 @@ typedef struct GeneratedOwners {
 } GeneratedOwners;
 
 static int GeneratedOwners.consider(
-  GeneratedOwners *owners, Compiler compiler, Type base, List row) {
+  GeneratedOwners *g, Compiler compiler, Type base, List row) {
   match (row)
     case %(?(String member) base-dflt ?(String source)
            ?(Type expected) ordinary ?): {
-      if (member != owners.member) return 0;
+      if (member != g.member) return 0;
       Symbol storage = _adoption_visibility(
-        compiler, base, owners.participant);
+        compiler, base, g.participant);
       List owner = %(owner $base $source $expected $storage);
-      owners.candidates.push(owner);
+      g.candidates.push(owner);
       if (storage == <mixed>) {
-        owners.result = %(linkage $owner $owner);
+        g.result = %(linkage $owner $owner);
         return 1;
       }
-      if (!owners.first_linkage) {
-        owners.first_linkage = owner;
-        owners.first_storage = storage;
+      if (!g.first_linkage) {
+        g.first_linkage = owner;
+        g.first_storage = storage;
       }
-      else if (owners.first_storage != storage) {
-        owners.result = %(linkage ${owners.first_linkage} $owner);
+      else if (g.first_storage != storage) {
+        g.result = %(linkage ${g.first_linkage} $owner);
         return 1;
       }
     }
@@ -1971,9 +1971,10 @@ static void ProtocolUpdate.emit(ProtocolUpdate *u) {
     ? saved(u.participant, u.old_binding, u.current, call)
     : ordinary(u.current, call);
   List body = u.c.bind_syntax(shape, AST_BLOCK, u.participant);
-  u.c.add_early(u.c.wrapper_function(
+  List helper = u.c.wrapper_function(
     %(static @{u.participant}), u.helper_binding,
-    u.declarations.list_free(), body.cdr()));
+    u.declarations.list_free(), body.cdr());
+  u.c.add_early(helper);
 }
 
 /** Returns a generated helper for a direct protocol-backed update.
@@ -2062,31 +2063,32 @@ static void DiscardCall.collect(DiscardCall *call) {
   }
 }
 
-static List DiscardCall.emit(DiscardCall *call) {
-  String name = %"_x2c_discard_${call.stem}_${call.which}";
-  List helper_binding = call.c.sym.introduce(name);
-  List value_binding = call.c.sym.introduce("value");
+static List DiscardCall.emit(DiscardCall *d) {
+  String name = %"_x2c_discard_${d.stem}_${d.which}";
+  List helper_binding = d.c.sym.introduce(name);
+  List value_binding = d.c.sym.introduce("value");
   Macro call_shape = $protocol_discard_call;
-  List expression = call.c.bind_syntax(
-    call_shape(call.binding, call.arguments.list_free()),
-    AST_EXPRESSION, call.result);
+  List expression = d.c.bind_syntax(
+    call_shape(d.binding, d.arguments.list_free()),
+    AST_EXPRESSION, d.result);
   Macro void_shape = $protocol_discard_void;
   Macro value_shape = $protocol_discard_value;
-  List shape = call.result.equal(%(void))
-    ? void_shape(expression, call.discards.list_free())
+  List shape = d.result.equal(%(void))
+    ? void_shape(expression, d.discards.list_free())
     : value_shape(
-      call.result, value_binding, expression, call.discards.list_free());
-  List body = call.c.bind_syntax(shape, AST_BLOCK, call.result);
-  call.c.add_early(call.c.wrapper_function(
-    %(static @{call.result}), helper_binding,
-    call.declarations.list_free(), body.cdr()));
-  List entry = %($helper_binding ${call.signature});
-  call.c.protocol_helpers[call.key] = entry;
+      d.result, value_binding, expression, d.discards.list_free());
+  List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
+  List helper = d.c.wrapper_function(
+    %(static @{d.result}), helper_binding,
+    d.declarations.list_free(), body.cdr());
+  d.c.add_early(helper);
+  List entry = %($helper_binding ${d.signature});
+  d.c.protocol_helpers[d.key] = entry;
   /* Wrapping a call preserves its return ownership. Discarding an argument
      does not make an arbitrary method's borrowed result fresh. */
   long identity = (long) helper_binding;
-  call.c.protocol_helpers[%"discard-helper $identity"] = 1;
-  if (call.fresh) call.c.protocol_helpers[%"fresh-callee $identity"] = 1;
+  d.c.protocol_helpers[%"discard-helper $identity"] = 1;
+  if (d.fresh) d.c.protocol_helpers[%"fresh-callee $identity"] = 1;
   return entry;
 }
 
@@ -2305,12 +2307,12 @@ static List _fallback_registration(
 }
 
 static void Compiler._generate_descriptor_registration(
-  Compiler compiler, Type participant, String name, Symbol explicit_tag,
+  Compiler c, Type participant, String name, Symbol explicit_tag,
   List thunks, int central_initializer) {
   Macro methods_shape = $protocol_methods;
   Macro assign_shape = $protocol_methods_value;
-  List methods = compiler.sym.introduce(
-    compiler.fresh_name("_x2c_protocol_methods"));
+  List methods = c.sym.introduce(
+    c.fresh_name("_x2c_protocol_methods"));
   List fields = _descriptor_fields(thunks);
   List value = %(expr ("VarMethods")
     (cast (decl ("VarMethods") (bindings (bind () ())))
@@ -2321,17 +2323,22 @@ static void Compiler._generate_descriptor_registration(
   Symbol tag_symbol = participant.var_tag();
   List early_call = _builtin_registration(methods, name, tag_symbol);
   List registration = _fallback_registration(
-    compiler, methods, name, early_call);
+    c, methods, name, early_call);
   List explicit_call = explicit_tag
-    ? _tagged_registration(compiler, methods, name, explicit_tag) : NULL;
+    ? _tagged_registration(c, methods, name, explicit_tag) : NULL;
   Symbol queue = central_initializer ? <protocol> : <early>;
-  compiler.add_early(compiler.bind_syntax(
-    methods_shape(methods), AST_UNIT, NULL));
-  if (thunks) compiler.add_init(queue, compiler.bind_syntax(
-    assign_shape(methods, value), AST_BLOCK, NULL));
+  List methods_unit = c.bind_syntax(
+    methods_shape(methods), AST_UNIT, NULL);
+  c.add_early(methods_unit);
+  if (thunks) {
+    List assignment = c.bind_syntax(
+      assign_shape(methods, value), AST_BLOCK, NULL);
+    c.add_init(queue, assignment);
+  }
   List call = explicit_tag ? explicit_call : early_call;
-  compiler.add_init(queue,
-    central_initializer || explicit_tag ? %(stmnt $call) : registration);
+  c.add_init(
+    queue, central_initializer || explicit_tag
+      ? %(stmnt $call) : registration);
 }
 
 static void _report_requirement(
@@ -2378,8 +2385,8 @@ static List _guard_value_rendering(
           (expr (* void) (call "Var_pointer" (args $value))))));
       List leave = %(expr (void) (call "RenderPath_leave" (args $address)));
       Macro shape = $guard_value_rendering;
-      return compiler.rebuild_function(function,
-        shape(path, enter, fallback, leave, body));
+      return compiler.rebuild_function(
+        function, shape(path, enter, fallback, leave, body));
     }
   return function;
 }
@@ -2532,9 +2539,11 @@ static List _native_aliases(
   foreach (List row, rows)
     match (row)
       case %(?(String member) ? ?(String binding) ? ?
-             ?(Type signature)):
-        aliases.push(c._generate_native_alias(
-          participant, member, binding, signature, make_static));
+             ?(Type signature)): {
+        List alias = c._generate_native_alias(
+          participant, member, binding, signature, make_static);
+        aliases.push(alias);
+      }
   return _insert_at_visibility_boundary(
     ast, source, private, aliases.list_free(), make_static);
 }
