@@ -10,7 +10,7 @@
 
 static List _1699, _1697, _1696, _1694, _1693, _1692, _1689, _1686, _1684, _1683, _1681, _1679, _1678, _1676, _1675, _1673, _1661, _1658, _1647, _1646, _1644, _1643, _1641, _1640, _1639, _1637, _1635, _1634, _1633, _1632, _1629, _1628, _1627, _1625, _1624, _1622, _1621, _1620, _1618, _1617, _1614, _1613, _1612, _1608, _1607, _1606, _1602, _1601, _1599, _1598, _1597, _1596, _1595, _1593, _1591, _1589, _1588, _1587, _1586, _1585, _1584, _1582, _1581, _1564, _1563, _1562, _1561, _1559, _1558, _1557, _1555, _1554, _1553, _1551, _1550, _1549, _1548, _1547, _1546, _1545, _1544, _1543, _1542, _1541, _1540, _1539, _1524, _1518, _1517, _1510, _1507, _1505, _1504, _1503, _1501, _1500, _1494, _1493, _1492, _1491, _1489, _1488, _1485, _1484, _1483, _1481, _1480, _1479, _1477, _1475, _1474, _1472, _1471, _1470, _1467, _1466, _1465, _1463, _1462, _1446, _1445, _1444, _1442, _1441, _1439, _1438, _1433, _1432, _1431, _1430, _1429, _1428, _1427, _1426, _1425, _1424, _1423, _1421, _1420, _1418, _1417, _1416, _1415, _1414, _1412, _1411, _1408, _1407, _1404, _1403, _1401, _1400, _1398, _1397, _1395, _1394, _1393, _1391, _1390, _1389, _1388, _1386, _1385, _1383, _1382, _1380, _1379, _1377, _1376, _1375, _1373, _1372, _1371, _1370, _1368, _1367, _1364, _1363, _1361, _1359, _1358, _1357, _1356, _1354, _1353, _1350, _1349, _1347, _1346, _1344, _1343, _1341, _1340, _1337, _1336, _1334, _1333, _1332, _1331, _1330, _1329, _1328, _1327, _1326, _1325, _1324, _1322, _1321, _1319, _1318, _1317, _1316, _1315, _1313, _1312, _1309, _1308, _1305, _1304, _1302, _1301, _1299, _1298, _1297, _1295, _1294, _1292, _1291, _1289, _1287, _1286, _1284, _1283, _1281, _1280, _1279, _1277, _1276, _1273, _1272, _1270, _1268, _1267, _1265, _1263, _1262, _1260, _1259, _1256, _1255, _1250, _1246, _1245, _1242, _1241, _1238, _1237, _1236, _1234, _1233, _1232, _1227, _1225, _1222, _1216, _1215, _1214, _1213, _1212, _1211, _1210, _1209, _1208, _1207, _1206, _1204, _1203, _1201, _1200, _1199, _1198, _1197, _1195, _1194, _1191, _1190, _1187, _1186, _1184, _1183, _1182, _1181, _1179, _1178, _1177, _1175, _1174, _1172, _1171, _1170, _1168, _1167, _1165, _1164, _1163, _1161, _1160, _1157, _1156, _1154, _1153, _1152, _1150, _1149, _1148, _1147, _1145, _1144, _1141, _1140, _1137, _1136, _1134, _1132, _1131, _1130, _1129, _1128, _1126, _1125, _1122, _1121, _1119, _1117, _1116, _1114, _1113, _1111, _1110, _1108, _1107, _1104, _1103, _1101, _1100, _1098, _1097, _1095, _1094, _1093, _1092, _1091, _1090, _1089, _1088, _1087, _1086, _1085, _1083, _1082, _1080, _1079, _1078, _1077, _1076, _1074, _1073, _1070, _1069, _1066, _1065, _1063, _1062, _1061, _1059, _1058, _1057, _1054, _1053, _1051, _1050, _1049, _1047, _1046, _1045, _1044, _1042, _1041, _1039, _1038, _1036, _1032, _1031, _1029, _1028, _1027, _1025, _1024, _1023, _1022, _1020, _1019, _1016, _1015, _1013, _1011, _1010, _1009, _1008, _1006, _1005, _1002, _1001, _999, _997, _996, _994, _993, _991, _990, _988, _987, _984, _983, _982, _980, _979, _977, _976, _973, _972, _969, _968, _965, _964, _963, _961, _960, _959, _956, _953, _952, _951, _949, _948, _947, _943, _939, _938, _933, _932, _931, _930, _925, _924, _923, _922, _919, _914, _913, _912, _911, _910, _909, _908, _907, _906, _905, _904, _903, _902, _901, _900, _899, _897, _894, _891, _888, _885, _884, _880, _879, _877, _876, _875, _874, _873, _871, _870, _866, _865, _861, _858, _857, _853, _852, _846, _845, _843, _842, _840, _839, _838, _837, _835, _834, _833, _832, _830, _828, _827, _826, _824, _822, _821, _819, _809, _808, _806, _805, _804, _803, _802, _800, _799, _798, _796, _795, _794, _793, _791, _790, _787, _785, _784, _783, _781, _779, _777, _776, _775, _773, _772, _769, _768, _766, _764, _763, _762, _761, _760, _758, _756, _755, _752, _751, _749, _747, _746, _745, _744, _743, _741, _740, _736, _733, _730, _729, _728, _726, _724, _717, _714, _711, _710, _708, _707, _706, _705, _703, _702, _701, _700, _698, _697, _694, _693, _690, _689, _686, _685, _684, _682, _681, _678, _677, _674, _673, _672, _670, _669, _667, _666, _664, _663, _662, _661, _659, _658, _654, _653, _651, _650, _644, _643, _639, _638, _634, _633, _629, _628, _610, _609, _608, _604, _602, _601, _600, _599, _592, _591, _590, _585, _584, _583, _580, _578, _576, _575, _573, _571, _566, _565, _564, _560, _557, _556, _555, _553, _552, _548, _547, _545, _544, _541, _540, _495, _494, _493, _491, _489, _488, _487, _486, _481, _475, _474, _473, _472, _471, _469, _467, _466, _465, _464, _461, _460, _459, _458, _456, _455, _450, _449, _448, _447, _445, _442, _440, _439, _438, _437, _436, _434, _432, _431, _430, _429, _418, _417, _413, _412, _411, _409, _408, _407, _405, _403, _402, _401, _400, _399, _398, _397, _386, _384, _382, _381, _380, _379, _369, _367, _366, _365, _364, _363, _361, _360, _359, _358, _347, _345, _344, _343, _342, _340, _339, _338, _336, _335, _334, _331, _330, _329, _320, _318, _317, _313, _312, _309, _308, _305, _304, _303, _302, _301, _299, _298, _291, _290, _289, _288, _287, _285, _284, _282, _281, _272, _269, _268, _267, _265, _264, _263, _257, _256, _255, _253, _252, _251, _248, _247, _245, _244, _242, _241, _240, _239, _238, _236, _235, _233, _232, _218, _217, _216, _214, _211, _208, _207, _206, _205, _202, _201, _199, _198, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _170, _169, _167, _166, _165, _149, _148, _147, _145, _144, _143, _142, _138, _137, _136, _134, _133, _121, _120, _119, _117, _116, _115, _114, _112, _111, _110, _109, _96, _93, _92, _88, _85, _84, _83, _81, _79, _78, _76, _68, _67, _66, _65, _64, _62, _61, _59, _58, _57, _56, _55, _53, _52, _51, _50, _49, _47, _44, _43, _42, _40, _37, _36, _35, _33, _32, _31, _25, _24, _23, _20, _19, _16, _15, _14, _13, _8, _7, _6;
 
-static String _1725, _1724, _1723, _1722, _1721, _1720, _1719, _1718, _1717, _1716, _1715, _1714, _1713, _1712, _1711, _1710, _1709, _1708, _1707, _1706, _1705, _1704, _1703, _1702, _1701, _1700, _1687, _1672, _1671, _1670, _1669, _1668, _1667, _1666, _1665, _1664, _1663, _1662, _1659, _1656, _1655, _1654, _1653, _1652, _1650, _1648, _1615, _1533, _1532, _1531, _1529, _1526, _1522, _1515, _1512, _1508, _1497, _1496, _1495, _1458, _1456, _1452, _1450, _1252, _1248, _1243, _1228, _1224, _1220, _1219, _1217, _957, _945, _940, _934, _920, _916, _882, _850, _814, _623, _622, _621, _620, _619, _618, _617, _616, _615, _614, _612, _593, _588, _586, _581, _558, _536, _535, _534, _533, _532, _531, _530, _529, _528, _527, _526, _525, _524, _523, _522, _521, _520, _519, _518, _517, _516, _515, _514, _513, _512, _511, _510, _509, _508, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _496, _415, _323, _322, _321, _270, _192, _191, _190, _187, _186, _185, _184, _183, _182, _130, _127, _126, _125, _124, _122, _94, _1, _0;
+static String _1724, _1723, _1722, _1721, _1720, _1719, _1718, _1717, _1716, _1715, _1714, _1713, _1712, _1711, _1710, _1709, _1708, _1707, _1706, _1705, _1704, _1703, _1702, _1701, _1700, _1687, _1672, _1671, _1670, _1669, _1668, _1667, _1666, _1665, _1664, _1663, _1662, _1659, _1656, _1655, _1654, _1653, _1652, _1650, _1648, _1615, _1533, _1532, _1531, _1529, _1526, _1522, _1515, _1512, _1508, _1497, _1496, _1495, _1458, _1456, _1452, _1450, _1252, _1248, _1243, _1228, _1224, _1220, _1219, _1217, _957, _945, _940, _934, _920, _916, _882, _850, _814, _623, _622, _621, _620, _619, _618, _617, _616, _615, _614, _612, _593, _588, _586, _581, _558, _536, _535, _534, _533, _532, _531, _530, _529, _528, _527, _526, _525, _524, _523, _522, _521, _520, _519, _518, _517, _516, _515, _514, _513, _512, _511, _510, _509, _508, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _496, _415, _323, _322, _321, _270, _192, _191, _190, _187, _186, _185, _184, _183, _182, _130, _127, _126, _125, _124, _122, _94, _1, _0;
 
 static Var _1698, _1695, _1691, _1690, _1688, _1685, _1682, _1680, _1677, _1674, _1660, _1657, _1651, _1649, _1645, _1642, _1638, _1636, _1631, _1630, _1626, _1623, _1619, _1616, _1600, _1594, _1592, _1590, _1583, _1569, _1567, _1565, _1560, _1556, _1552, _1530, _1528, _1527, _1525, _1523, _1521, _1520, _1519, _1516, _1514, _1513, _1511, _1509, _1506, _1502, _1499, _1498, _1490, _1487, _1486, _1482, _1478, _1476, _1473, _1469, _1468, _1464, _1461, _1460, _1459, _1457, _1455, _1454, _1453, _1451, _1449, _1448, _1447, _1443, _1440, _1437, _1436, _1435, _1434, _1422, _1419, _1413, _1410, _1409, _1406, _1405, _1402, _1399, _1396, _1392, _1387, _1384, _1381, _1378, _1374, _1369, _1366, _1365, _1362, _1360, _1355, _1352, _1351, _1348, _1345, _1342, _1339, _1338, _1335, _1323, _1320, _1314, _1311, _1310, _1307, _1306, _1303, _1300, _1296, _1293, _1290, _1288, _1285, _1282, _1278, _1275, _1274, _1271, _1269, _1266, _1264, _1261, _1258, _1257, _1254, _1253, _1251, _1249, _1247, _1244, _1240, _1239, _1235, _1231, _1230, _1229, _1226, _1223, _1221, _1218, _1205, _1202, _1196, _1193, _1192, _1189, _1188, _1185, _1180, _1176, _1173, _1169, _1166, _1162, _1159, _1158, _1155, _1151, _1146, _1143, _1142, _1139, _1138, _1135, _1133, _1127, _1124, _1123, _1120, _1118, _1115, _1112, _1109, _1106, _1105, _1102, _1099, _1096, _1084, _1081, _1075, _1072, _1071, _1068, _1067, _1064, _1060, _1056, _1055, _1052, _1048, _1043, _1040, _1037, _1035, _1034, _1033, _1030, _1026, _1021, _1018, _1017, _1014, _1012, _1007, _1004, _1003, _1000, _998, _995, _992, _989, _986, _985, _981, _978, _975, _974, _971, _970, _967, _966, _962, _958, _955, _954, _950, _946, _944, _942, _941, _937, _936, _935, _921, _918, _917, _915, _898, _896, _895, _893, _892, _890, _889, _887, _886, _883, _881, _878, _872, _869, _868, _867, _864, _863, _862, _860, _859, _856, _855, _854, _851, _849, _848, _847, _844, _841, _836, _831, _829, _825, _823, _820, _818, _817, _816, _815, _813, _812, _811, _810, _807, _801, _797, _792, _789, _788, _786, _782, _780, _778, _774, _771, _770, _767, _765, _759, _757, _754, _753, _750, _748, _742, _739, _738, _737, _735, _734, _732, _731, _727, _725, _723, _722, _721, _720, _719, _718, _716, _715, _713, _712, _709, _704, _699, _696, _695, _692, _691, _688, _687, _683, _680, _679, _676, _675, _671, _668, _665, _660, _657, _656, _655, _652, _649, _648, _647, _646, _645, _642, _641, _640, _637, _636, _635, _632, _631, _630, _627, _626, _625, _624, _613, _611, _607, _606, _605, _603, _594, _589, _587, _582, _579, _577, _572, _567, _559, _554, _546, _543, _542, _539, _537, _497, _492, _490, _479, _477, _476, _470, _463, _462, _457, _446, _443, _441, _435, _433, _421, _419, _416, _414, _410, _406, _404, _389, _387, _385, _383, _375, _373, _372, _371, _370, _368, _362, _350, _348, _346, _341, _337, _333, _332, _328, _327, _326, _325, _324, _319, _314, _311, _310, _307, _306, _300, _286, _283, _273, _271, _266, _258, _254, _250, _246, _243, _237, _234, _226, _215, _213, _212, _210, _209, _204, _200, _194, _193, _189, _188, _171, _168, _164, _150, _146, _141, _140, _139, _135, _132, _131, _129, _128, _123, _118, _113, _108, _98, _97, _95, _89, _87, _86, _82, _80, _77, _75, _70, _69, _63, _60, _54, _48, _46, _45, _41, _39, _38, _34, _30, _29, _28, _27, _26, _22, _21, _18, _17, _12, _11, _10, _9, _5, _4, _3, _2;
 
@@ -1548,7 +1548,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1308 = cons(_1307, NULL);
   _1309 = cons(_855, _1308);
   _1310 = List_var(_1309);
-  _1311 = int_var(78445);
+  _1311 = int_var(78437);
   _1312 = cons(_1311, NULL);
   _1313 = cons(_868, _1312);
   _1314 = List_var(_1313);
@@ -1647,7 +1647,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1407 = cons(_1406, NULL);
   _1408 = cons(_855, _1407);
   _1409 = List_var(_1408);
-  _1410 = int_var(78529);
+  _1410 = int_var(78521);
   _1411 = cons(_1410, NULL);
   _1412 = cons(_868, _1411);
   _1413 = List_var(_1412);
@@ -1921,24 +1921,23 @@ __attribute__((constructor)) static void _file_init_(void){
   _1705 = String_new("rhs");
   _1706 = String_new("discard");
   _1707 = String_new("value");
-  _1708 = String_new("pragma private");
-  _1709 = String_new("_x2c_protocol_methods");
-  _1710 = String_new("render_path");
-  _1711 = String_new("x2c_initialize_protocols");
-  _1712 = String_new("expected associated type name");
-  _1713 = String_new("protocol member must declare one function");
-  _1714 = String_new("protocol member must be owned by its participant");
-  _1715 = String_new("protocol member must be a function");
-  _1716 = String_new("native protocol member requires an identifier");
-  _1717 = String_new("'as' applies only to a Var adoption");
-  _1718 = String_new("a Var adoption cannot use both 'as' and 'tag'");
-  _1719 = String_new("'tag' applies only to a Var adoption");
-  _1720 = String_new("'meta' applies only to a concrete protocol adoption");
-  _1721 = String_new("'as' applies only to a concrete protocol adoption");
-  _1722 = String_new("'tag' applies only to a concrete protocol adoption");
-  _1723 = String_new("expected protocol participant name");
-  _1724 = String_new("'static' applies only to a concrete protocol adoption");
-  _1725 = String_new("associated types must precede protocol members");
+  _1708 = String_new("_x2c_protocol_methods");
+  _1709 = String_new("render_path");
+  _1710 = String_new("x2c_initialize_protocols");
+  _1711 = String_new("expected associated type name");
+  _1712 = String_new("protocol member must declare one function");
+  _1713 = String_new("protocol member must be owned by its participant");
+  _1714 = String_new("protocol member must be a function");
+  _1715 = String_new("native protocol member requires an identifier");
+  _1716 = String_new("'as' applies only to a Var adoption");
+  _1717 = String_new("a Var adoption cannot use both 'as' and 'tag'");
+  _1718 = String_new("'tag' applies only to a Var adoption");
+  _1719 = String_new("'meta' applies only to a concrete protocol adoption");
+  _1720 = String_new("'as' applies only to a concrete protocol adoption");
+  _1721 = String_new("'tag' applies only to a concrete protocol adoption");
+  _1722 = String_new("expected protocol participant name");
+  _1723 = String_new("'static' applies only to a concrete protocol adoption");
+  _1724 = String_new("associated types must precede protocol members");
   _x2c_static_initialize_0();
 }
 
@@ -3377,7 +3376,7 @@ static List Compiler__generate_native_alias(Compiler compiler, Type participant,
   String target = _member_spelling(participant, member);  List declaration = _declaration_from_signature(compiler, target, signature, make_static);  if(! make_static) Compiler_record_generated_symbol(compiler, target, signature);  List native_binding = Sym_reference(compiler -> sym, cons(String_var(source), NULL), NULL);  return Compiler_finish_foreign_alias(compiler, declaration, cons(_86, cons(List_var(signature), cons(List_var(cons(_941, cons(List_var(native_binding), NULL))), NULL))));
 }
 
-int String_contains(String, String);
+int preproc_visibility(String);
 static int _starts_private_region(List node){
 
   {
@@ -3388,7 +3387,7 @@ static int _starts_private_region(List node){
 }
 static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_1238), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  return Type_is_static(Var_type(type));  break;
 }
-static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_1242), &_x2c_match_capture)) {Var text = _x2c_match_values[0];  return String_contains(Var_str(text), _1708);  break;
+static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_1242), &_x2c_match_capture)) {Var text = _x2c_match_values[0];  return preproc_visibility(Var_string(text)) == 1;  break;
 }
 
     }
@@ -3447,7 +3446,7 @@ String Compiler_fresh_name(Compiler, String);
 Symbol Type_var_tag(Type);
 void Compiler_add_init(Compiler, Symbol, List);
 static void Compiler__generate_descriptor_registration(Compiler compiler, Type participant, String name, Symbol explicit_tag, List thunks, int central_initializer){
-  Macro methods_shape = _1334;  Macro assign_shape = _1433;  List methods = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _1709));  Array fields = Array_new(); {
+  Macro methods_shape = _1334;  Macro assign_shape = _1433;  List methods = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _1708));  Array fields = Array_new(); {
     List row;  List _x2c_macro_object_45 = thunks;  List _x2c_macro_cursor_45 = _x2c_macro_object_45;  Var _x2c_macro_cursor_output_51;  while(List_try_next(_x2c_macro_object_45, &(_x2c_macro_cursor_45), &(_x2c_macro_cursor_output_51))){
       row = Var_list(_x2c_macro_cursor_output_51); {
         List _x2c_destructure_12 = row;  String member = Var_string(List_getindex(_x2c_destructure_12, 0));  List thunk = Var_list(List_getindex(_x2c_destructure_12, 1));  Type type = Var_type(List_getindex(_x2c_destructure_12, 2));  Array_push(fields, List_var(cons(_1434, cons(List_var(cons(String_var(member), NULL)), cons(List_var(cons(_86, cons(List_var(type), cons(List_var(cons(_941, cons(List_var(thunk), NULL))), NULL)))), NULL)))));
@@ -3481,7 +3480,7 @@ static List _guard_value_rendering(Compiler compiler, List function, String memb
 
     }
   }
-List path = Sym_introduce(compiler -> sym, _1710);  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_1514, cons(List_var(path), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_77, cons(List_var(path), NULL))), List_var(_1517));  List address = cons(_86, cons(_1519, cons(List_var(cons(_9, cons(_1520, cons(List_var(cons(_86, cons(_1521, cons(List_var(cons(_941, cons(List_var(path), NULL))), NULL)))), NULL)))), NULL)));  List enter = cons(_86, cons(_944, cons(List_var(cons(_966, cons(_1523, cons(List_var(cons(_720, cons(List_var(address), cons(List_var(cons(_86, cons(_1525, cons(List_var(cons(_966, cons(_1527, cons(List_var(cons(_720, cons(List_var(value), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));  return cons(_21, cons(result, cons(declarator, cons(List_var(cons(_680, cons(List_var(cons(_30, cons(_1521, cons(List_var(cons(_39, cons(List_var(cons(_3, cons(List_var(path), _919))), NULL))), NULL)))), cons(List_var(cons(_1454, cons(List_var(cons(_86, cons(_944, cons(List_var(cons(_9, cons(_1455, cons(List_var(enter), NULL)))), NULL)))), cons(List_var(cons(_1056, cons(List_var(returns), cons(List_var(fallback), NULL)))), NULL)))), cons(List_var(cons(_1528, cons(List_var(cons(_1034, cons(List_var(cons(_86, cons(_1223, cons(List_var(cons(_966, cons(_1530, cons(List_var(cons(_720, cons(List_var(address), NULL))), NULL)))), NULL)))), NULL))), NULL))), List_append(body, NULL)))))), NULL))));
+List path = Sym_introduce(compiler -> sym, _1709);  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_1514, cons(List_var(path), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_77, cons(List_var(path), NULL))), List_var(_1517));  List address = cons(_86, cons(_1519, cons(List_var(cons(_9, cons(_1520, cons(List_var(cons(_86, cons(_1521, cons(List_var(cons(_941, cons(List_var(path), NULL))), NULL)))), NULL)))), NULL)));  List enter = cons(_86, cons(_944, cons(List_var(cons(_966, cons(_1523, cons(List_var(cons(_720, cons(List_var(address), cons(List_var(cons(_86, cons(_1525, cons(List_var(cons(_966, cons(_1527, cons(List_var(cons(_720, cons(List_var(value), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));  return cons(_21, cons(result, cons(declarator, cons(List_var(cons(_680, cons(List_var(cons(_30, cons(_1521, cons(List_var(cons(_39, cons(List_var(cons(_3, cons(List_var(path), _919))), NULL))), NULL)))), cons(List_var(cons(_1454, cons(List_var(cons(_86, cons(_944, cons(List_var(cons(_9, cons(_1455, cons(List_var(enter), NULL)))), NULL)))), cons(List_var(cons(_1056, cons(List_var(returns), cons(List_var(fallback), NULL)))), NULL)))), cons(List_var(cons(_1528, cons(List_var(cons(_1034, cons(List_var(cons(_86, cons(_1223, cons(List_var(cons(_966, cons(_1530, cons(List_var(cons(_720, cons(List_var(address), NULL))), NULL)))), NULL)))), NULL))), NULL))), List_append(body, NULL)))))), NULL))));
 }
 break;
 }
@@ -3576,7 +3575,7 @@ List thunk_rows = Array_list_free(thunks);  if(base == _272 && ! shares_var_tag)
 
 Map Var_map(Var);
 List Compiler_generate_protocol_adapters(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  int central_initializer = _defines_function(c, _1711);  Array ordered = Array_new(); {
+  if(! _init_guard_) _file_init_();  int central_initializer = _defines_function(c, _1710);  Array ordered = Array_new(); {
     Var key, value;  Map _x2c_macro_object_48 = c -> conforms;  unsigned _x2c_macro_cursor_48 = 0;  Var _x2c_macro_cursor_output_53;  Var _x2c_macro_cursor_output_54;  while(Map_try_next(_x2c_macro_object_48, &(_x2c_macro_cursor_48), &(_x2c_macro_cursor_output_53), &(_x2c_macro_cursor_output_54))){
       key = _x2c_macro_cursor_output_53;  value = _x2c_macro_cursor_output_54;  if(Var_is_row(value, 9, 7, 4)) Array_push(ordered, List_var(cons(key, cons(value, NULL))));
     }
@@ -3663,7 +3662,7 @@ void Compiler_next(Compiler);
 Type Compiler_parse_type_name(Compiler);
 List Sym_define(Sym, List, List);
 static List _parse_associated_type(Compiler c, Map names, String participant){
-  (void) participant;  Compiler_expect(c, 113488288653640);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 1139215899608, _1712, c -> token, NULL);  String name = c -> token -> text;  Compiler_next(c);  if(Map_contains(names, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_1615), cons(String_var(name), cons(String_var(_504), NULL)))), c -> token, NULL);  Compiler_expect(c, 123);  Type type = Type_canonicalize(Compiler_parse_type_name(c));  Compiler_expect(c, 119);  Map_setindex(names, String_var(name), int_var(1));  Sym_define(c -> sym, cons(String_var(name), NULL), cons(_29, cons(String_var(name), NULL)));  return cons(String_var(name), cons(List_var(type), NULL));
+  (void) participant;  Compiler_expect(c, 113488288653640);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 1139215899608, _1711, c -> token, NULL);  String name = c -> token -> text;  Compiler_next(c);  if(Map_contains(names, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_1615), cons(String_var(name), cons(String_var(_504), NULL)))), c -> token, NULL);  Compiler_expect(c, 123);  Type type = Type_canonicalize(Compiler_parse_type_name(c));  Compiler_expect(c, 119);  Map_setindex(names, String_var(name), int_var(1));  Sym_define(c -> sym, cons(String_var(name), NULL), cons(_29, cons(String_var(name), NULL)));  return cons(String_var(name), cons(List_var(type), NULL));
 }
 
 void x2c_cleanup_push(X2CCleanup *);
@@ -3705,7 +3704,7 @@ static List _parse_protocol_member(Compiler c, String participant, Map members){
 default: break;
     }
   }
-if(! List_truth(binding)) Compiler_report_error(c, 1139215899608, _1713, c -> token, NULL);  String name = NULL;
+if(! List_truth(binding)) Compiler_report_error(c, 1139215899608, _1712, c -> token, NULL);  String name = NULL;
   {
     List _x2c_match_expr = identity;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -3718,8 +3717,8 @@ if(! List_truth(binding)) Compiler_report_error(c, 1139215899608, _1713, c -> to
 if(! String_truth(name)){
   String full_name = binding_identity_spelling(identity);  String prefix = String_join(NULL, cons(String_var(participant), cons(String_var(_185), NULL)));  if(String_truth(full_name) && String_startswith(full_name, prefix)) name = String_getslice(full_name, String_len(prefix), -2147483648, 1);
 }
-if(! String_truth(name)) Compiler_report_error(c, 1139215899608, _1714, c -> token, cons(_1649, cons(String_var(participant), NULL)));  Type signature = Type_canonicalize(List_type_from_ast(declaration));  if(! Type_is_function(signature)) Compiler_report_error(c, 1139215899608, _1715, c -> token, cons(_1651, cons(String_var(name), NULL)));  if(Map_contains(members, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_1652), cons(String_var(name), cons(String_var(_504), NULL)))), c -> token, NULL);  String native = NULL;  if(Compiler_test(c, 123)){
-  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 1139215899608, _1716, c -> token, NULL);  native = c -> token -> text;  Compiler_next(c);
+if(! String_truth(name)) Compiler_report_error(c, 1139215899608, _1713, c -> token, cons(_1649, cons(String_var(participant), NULL)));  Type signature = Type_canonicalize(List_type_from_ast(declaration));  if(! Type_is_function(signature)) Compiler_report_error(c, 1139215899608, _1714, c -> token, cons(_1651, cons(String_var(name), NULL)));  if(Map_contains(members, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_1652), cons(String_var(name), cons(String_var(_504), NULL)))), c -> token, NULL);  String native = NULL;  if(Compiler_test(c, 123)){
+  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 1139215899608, _1715, c -> token, NULL);  native = c -> token -> text;  Compiler_next(c);
 }
 Compiler_expect(c, 119);  Map_setindex(members, String_var(name), int_var(1));  return cons(String_var(name), cons(List_var(signature), cons(String_var(native), NULL)));
 }
@@ -3736,10 +3735,10 @@ List Compiler_parse_protocol_declaration(Compiler c){
     meta = c -> token;  Compiler_next(c);
   }
   Symbol storage = 396490862680;  if(Compiler_test(c, 1317118534)) storage = 1317118534;  Compiler_expect(c, 1139215899608);  int generated_base = Map_truth(c -> macro_holes) &&(Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 9297);  Type base = Compiler_parse_type_name(c);  Compiler_expect(c, 81);  Token participant_token = c -> token;  Type participant_type = Compiler_parse_type_name(c);  String participant = List_len(Type_list(participant_type)) == 1 && Var_is_row(List_car(Type_list(participant_type)), 11, 7, 1) ? Var_string(List_car(Type_list(participant_type))) : NULL;  Compiler_expect(c, 83);  Type representation = NULL;  List tag = NULL;  Token modifier_token = NULL;  if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _1654)){
-    modifier_token = c -> token;  Compiler_next(c);  representation = Type_canonicalize(Compiler_parse_type_name(c));  if(! generated_base && base != _272) Compiler_report_error(c, 1139215899608, _1717, modifier_token, NULL);
+    modifier_token = c -> token;  Compiler_next(c);  representation = Type_canonicalize(Compiler_parse_type_name(c));  if(! generated_base && base != _272) Compiler_report_error(c, 1139215899608, _1716, modifier_token, NULL);
   }
   if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _1655)){
-    modifier_token = c -> token;  Compiler_next(c);  if(List_truth(Type_list(representation))) Compiler_report_error(c, 1139215899608, _1718, modifier_token, NULL);  tag = Compiler_try_parse_macro_slot(c, 405758822009820);  if(! List_truth(tag)) tag = Compiler_parse_atomic_literal(c);  if(! generated_base && base != _272) Compiler_report_error(c, 1139215899608, _1719, modifier_token, NULL);
+    modifier_token = c -> token;  Compiler_next(c);  if(List_truth(Type_list(representation))) Compiler_report_error(c, 1139215899608, _1717, modifier_token, NULL);  tag = Compiler_try_parse_macro_slot(c, 405758822009820);  if(! List_truth(tag)) tag = Compiler_parse_atomic_literal(c);  if(! generated_base && base != _272) Compiler_report_error(c, 1139215899608, _1718, modifier_token, NULL);
   }
   if(Compiler_peek(c, 0) == 119){
     Compiler_next(c);  List location = Compiler_token_location(c, start);  if(Map_truth(c -> macro_holes) ||(c -> shallow && ! c -> collect_protocols)){
@@ -3747,7 +3746,7 @@ List Compiler_parse_protocol_declaration(Compiler c){
     }
     List adoption = Compiler__publish_protocol_adoption(c, base, participant_type, storage, representation, tag, location, participant_token, modifier_token);  if(meta) Compiler__retain_meta_protocol(c, adoption);  return adoption;
   }
-  if(meta) Compiler_report_error(c, 1139215899608, _1720, meta, _1658);  if(List_truth(Type_list(representation)) || List_truth(tag)) Compiler_report_error(c, 1139215899608, List_truth(Type_list(representation)) ? _1721 : _1722, start, NULL);  if(! String_truth(participant)) Compiler_report_error(c, 1139215899608, _1723, participant_token, NULL);  if(storage == 1317118534) Compiler_report_error(c, 1139215899608, _1724, start, _1661);  Compiler_expect(c, 247);  if(! c -> shallow){
+  if(meta) Compiler_report_error(c, 1139215899608, _1719, meta, _1658);  if(List_truth(Type_list(representation)) || List_truth(tag)) Compiler_report_error(c, 1139215899608, List_truth(Type_list(representation)) ? _1720 : _1721, start, NULL);  if(! String_truth(participant)) Compiler_report_error(c, 1139215899608, _1722, participant_token, NULL);  if(storage == 1317118534) Compiler_report_error(c, 1139215899608, _1723, start, _1661);  Compiler_expect(c, 247);  if(! c -> shallow){
     List shadowed = Sym_get(c -> sym, cons(String_var(participant), NULL));  if(List_truth(shadowed) && Type_is_typedef(List_type(shadowed))){
       String hint = String_add(String_join(NULL, cons(String_var(_1662), cons(String_var(participant), cons(String_var(_1663), NULL)))), _1664);  Compiler_report_warning(c, 1291920366, String_join(NULL, cons(String_var(_1665), cons(String_var(participant), cons(String_var(_1666), NULL)))), participant_token, cons(String_var(hint), NULL));
     }
@@ -3755,7 +3754,7 @@ List Compiler_parse_protocol_declaration(Compiler c){
   }
   Array associations = Array_new(), members = Array_new();  Map type_names = Map_new(), member_names = Map_new();  Sym_push_new_scope(c -> sym);  Sym_define(c -> sym, cons(String_var(participant), NULL), cons(_29, cons(String_var(participant), NULL)));  Map_setindex(type_names, String_var(participant), int_var(1));  int saw_member = 0;  while(Compiler_peek(c, 0) != 251 && Compiler_peek(c, 0) != 11212){
     if(Compiler_peek(c, 0) == 113488288653640){
-      if(saw_member) Compiler_report_error(c, 1139215899608, _1725, c -> token, NULL);  Array_push(associations, List_var(_parse_associated_type(c, type_names, participant)));  continue;
+      if(saw_member) Compiler_report_error(c, 1139215899608, _1724, c -> token, NULL);  Array_push(associations, List_var(_parse_associated_type(c, type_names, participant)));  continue;
     }
     saw_member = 1;  Array_push(members, List_var(_parse_protocol_member(c, participant, member_names)));
   }
