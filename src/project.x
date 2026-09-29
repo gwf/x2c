@@ -57,7 +57,7 @@ typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
   ProjectDependency dependencies;
   Map dependency_seen;
-  int declared;
+  int declared, dependency_declared;
   SourceView sources;
   ProjectTarget targets;
   ProjectBuild head;
@@ -289,7 +289,7 @@ static void _set_dependency(Project p, int line, String key, String value) {
    part of the string. */
 static int _array_open(String value) {
   int depth = 0, quoted = 0;
-  for (const char *ch = value; *ch; ch++) {
+  for (const char *ch = value ? value : ""; *ch; ch++) {
     if (quoted) {
       if (*ch == '\\' && ch[1]) ch++;
       else if (*ch == '"') quoted = 0;
@@ -353,8 +353,9 @@ static void _parse_manifest(Project p) {
         continue;
       }
       if (name == "dependencies") {
-        if (p.dependency_seen)
+        if (p.dependency_declared)
           _error(p, line_number, "duplicate dependencies section");
+        p.dependency_declared = 1;
         p.dependency_seen = {};
         section = DEPENDENCIES;
         target = NULL;
