@@ -2934,39 +2934,53 @@ void Compiler.close_child(Compiler c, Compiler child) {
   child.free_lisp();
 }
 
-// retained declaration syntax
+/* retained declaration syntax
+
+   Declaration syntax outlives the segment that parsed it, in the process
+   cache and in `.xi` interfaces. Freezing turns tokens and origin indices
+   into portable rows, and thawing rebuilds them in the current parse. */
 
 /** Retains declaration syntax across source segments and cached interfaces.
     Tokens and origin indices become portable source data; marker-shaped user
     Lists are escaped so thawing preserves their values.
 */
 Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
-  if (syntax is void) return %(declaration-void);
-  if (syntax is <symbol> && !syntax.symbol())
-    return %(declaration-empty-symbol);
-  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
-    return %(declaration-atom ${syntax.str()});
-  if (syntax is <token>) {
-    Token token = syntax;
-    return %(declaration-token ${token.type.str()} ${token.text}
-              ${token.line} ${token.col} ${token.len} ${token.pos});
-  }
-  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
   match (syntax) {
     case %(macrodef *rows): return _declaration_macro(c, rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
         ${c.freeze_declaration_syntax(node)});
-    case %(at ?(int origin) ?node): {
-      List location = c.origin_location(origin);
-      if (!location)
-        return %(at m-origin ${c.freeze_declaration_syntax(node)});
-      return %(declaration-origin ${_declaration_location(c, location, 0)}
-                ${c.freeze_declaration_syntax(node)});
-    }
+    case %(at ?(int origin) ?node): return _freeze_origin(c, origin, node);
   }
+  return _freeze_rows(c, syntax);
+}
+
+// A leaf that a List cannot carry as itself becomes a marker row.
+static Var _freeze_leaf(Var syntax) {
+  if (syntax is void) return %(declaration-void);
+  if (syntax is <symbol> && !syntax.symbol())
+    return %(declaration-empty-symbol);
+  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
+    return %(declaration-atom ${syntax.str()});
+  if (syntax is not <token>) return syntax;
+  Token token = syntax;
+  return %(declaration-token ${token.type.str()} ${token.text}
+            ${token.line} ${token.col} ${token.len} ${token.pos});
+}
+
+// An origin index freezes as the location it names in this parse.
+static List _freeze_origin(Compiler c, int origin, Var node) {
+  List location = c.origin_location(origin);
+  if (!location) return %(at m-origin ${c.freeze_declaration_syntax(node)});
+  return %(declaration-origin ${_declaration_location(location, 0)}
+            ${c.freeze_declaration_syntax(node)});
+}
+
+// A List whose head is a marker is escaped, so thawing keeps its value.
+static List _freeze_rows(Compiler c, List syntax) {
   Array rows = [];
-  foreach (Var row, syntax.list()) rows.push(c.freeze_declaration_syntax(row));
+  foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
   match (syntax)
     case %((!or declaration-void declaration-empty-symbol declaration-atom
                 declaration-token declaration-origin declaration-list) *):
@@ -2990,11 +3004,7 @@ Var Compiler.freeze_macro_stack(Compiler c) {
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
-    case %(declaration-list *rows): {
-      Array values = [];
-      foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
-      return values.list_free();
-    }
+    case %(declaration-list *rows): return _thaw_rows(c, rows);
     case %(macrodef *rows): return _declaration_macro(c, rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 1)} $begin $end)
@@ -3002,43 +3012,54 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
     case %(declaration-void): return void;
     case %(declaration-empty-symbol): return (Symbol) 0;
     case %(declaration-atom ?spelling): return Atom.intern(spelling);
-    case %(declaration-token ?type ?text ?line ?column ?length ?position): {
-      Token token = Scope.calloc(1, sizeof(struct Token));
-      *token = (struct Token) {
-        .text = text, .type = Symbol.new(type.string()), .line = line,
-        .col = column, .len = length, .pos = position};
-      return token;
-    }
-    case %(declaration-origin ?location ?node): {
-      List source = location;
-      c.origins.push(
-        %(source ${source.assoc(<file>)}
-          ${source.assoc(<line>)} ${source.assoc(<column>)}
-          ${source.assoc(<length>)} ${source.assoc(<position>)}));
-      return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
-    }
+    case %(declaration-token ?type ?text ?line ?column ?length ?position):
+      return _thaw_token(type, text, line, column, length, position);
+    case %(declaration-origin ?location ?node):
+      return _thaw_origin(c, location, node);
   }
-  Array rows = [];
-  foreach (Var row, syntax.list()) rows.push(c.thaw_declaration_syntax(row));
-  return rows.list_free();
+  return _thaw_rows(c, syntax);
 }
 
-static List _declaration_macro(Compiler compiler, List rows, int thaw) {
-  Array result = [];
+static List _thaw_rows(Compiler c, List rows) {
+  Array values = [];
+  foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
+  return values.list_free();
+}
+
+static Token _thaw_token(
+  Var type, Var text, Var line, Var column, Var length, Var position) {
+  Token token = Scope.calloc(1, sizeof(struct Token));
+  *token = (struct Token) {
+    .text = text, .type = Symbol.new(type.string()), .line = line,
+    .col = column, .len = length, .pos = position};
+  return token;
+}
+
+// A frozen location becomes a new row of this parse's origin table.
+static List _thaw_origin(Compiler c, List source, Var node) {
+  c.origins.push(
+    %(source ${source.assoc(<file>)}
+      ${source.assoc(<line>)} ${source.assoc(<column>)}
+      ${source.assoc(<length>)} ${source.assoc(<position>)}));
+  return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
+}
+
+static List _declaration_macro(Compiler c, List rows, int thaw) {
+  Array out = [];
   foreach (List row, rows) {
     match (row) {
       case %(origin ?location):
-        row = %(origin ${_declaration_location(compiler, location, thaw)});
+        row = %(origin ${_declaration_location(location, thaw)});
       default:
-        row = thaw ? compiler.thaw_declaration_syntax(row)
-                   : compiler.freeze_declaration_syntax(row);
+        row = thaw ? c.thaw_declaration_syntax(row)
+                   : c.freeze_declaration_syntax(row);
     }
-    result.push(row);
+    out.push(row);
   }
-  return %(macrodef @{result.list_free()});
+  return %(macrodef @{out.list_free()});
 }
 
-static List _declaration_location(Compiler compiler, List location, int thaw) {
+static List _declaration_location(List location, int thaw) {
   Array rows = [];
   foreach (List row, location) {
     match (row)
@@ -3067,8 +3088,8 @@ void Compiler.queue_declaration_effect(
     c.declaration_effects);
 }
 
-static List _declaration_source_key(Compiler compiler, Token token) {
-  String path = home_portable_path(Path.absolute(compiler.filename));
+static List _declaration_source_key(Compiler c, Token token) {
+  String path = home_portable_path(Path.absolute(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 
@@ -3078,57 +3099,53 @@ void Compiler.run_declaration_effects(Compiler c) {
   c.declaration_effects = NULL;
   foreach (List effect, effects) {
     (List key, int end, String form, Var site, String context) = effect;
-    String filename = c.filename;
-    match (key)
-      case %("source-node" (declaration ?path ?)):
-        c.filename = _declaration_path(path, 1);
-    c.import_stack.push(context);
-    defer {
-      c.import_stack.take_last();
-      c.filename = filename;
+    $let(c.filename, _effect_file(c, key)) {
+      c.import_stack.push(context);
+      defer c.import_stack.take_last();
+      Token token = c.thaw_declaration_syntax(site);
+      c.evaluate_declaration_effect(form, token);
+      if (c.collect_protocols)
+        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
     }
-    Token token = c.thaw_declaration_syntax(site);
-    c.evaluate_declaration_effect(form, token);
-    if (c.collect_protocols)
-      c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
   }
+}
+
+// An effect runs in the file whose declaration queued it.
+static String _effect_file(Compiler c, List key) {
+  match (key)
+    case %("source-node" (declaration ?path ?)):
+      return _declaration_path(path, 1);
+  return c.filename;
 }
 
 /** Expands a file-scope unit macro and retains its declarations for collection.
     Its private helpers remain available to later invocations. Generated-name
     counters are restored when the full parse must expand it again.
 */
-void Compiler.collect_unit_macro(Compiler compiler) {
-  with compiler.names {
-    Map saved_counters = _.counters;
-    _.counters = _.counters.copy();
-    with compiler {
-      SymTxn transaction = _.begin_semantic_transaction();
-      Token first = _.token;
-      List syntax = _.parse_top_level();
-      int retained = _retain_declaration_bundle(_, syntax, first, _.token);
-      transaction.commit();
-      if (retained) return;
-    }
-    /* The full parse expands this unit again. Keep the declarations needed
-       by later shallow invocations, but do not count its generated names
-       twice. */
-    _.counters = saved_counters;
-  }
+void Compiler.collect_unit_macro(Compiler c) {
+  Map counters = c.names.counters;
+  c.names.counters = counters.copy();
+  SymTxn transaction = c.begin_semantic_transaction();
+  Token first = c.token;
+  List syntax = c.parse_top_level();
+  int retained = _retain_bundle(c, syntax, first, c.token);
+  transaction.commit();
+  /* The full parse expands this unit again. Keep the declarations needed
+     by later shallow invocations, but do not count its generated names
+     twice. */
+  if (!retained) c.names.counters = counters;
 }
 
 /* The owning source records one declaration production, including its exact
    token span. Full parsing consumes that production instead of invoking its
    compile-time producer again. Ordinary Unit macros retain their old path. */
-static int _retain_declaration_bundle(
-  Compiler compiler, List syntax, Token first, Token after) {
+static int _retain_bundle(Compiler c, List syntax, Token first, Token after) {
   match (syntax) {
-    case %(seq ?only):
-      return _retain_declaration_bundle(compiler, only, first, after);
+    case %(seq ?only): return _retain_bundle(c, only, first, after);
     case %(declaration-bundle (rows *)): {
-      List frozen = compiler.freeze_declaration_syntax(syntax);
-      compiler.sym.set(
-        _declaration_source_key(compiler, first),
+      List frozen = c.freeze_declaration_syntax(syntax);
+      c.sym.set(
+        _declaration_source_key(c, first),
         %(declaration-source ${after.pos} $frozen));
       return 1;
     }
@@ -3136,21 +3153,33 @@ static int _retain_declaration_bundle(
   return 0;
 }
 
-static List _replay_declaration_bundle(Compiler compiler) {
-  List source =
-    compiler.sym.get(_declaration_source_key(compiler, compiler.token));
+static List _replay_bundle(Compiler c) {
+  List source = c.sym.get(_declaration_source_key(c, c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax): {
-      List thawed = compiler.thaw_declaration_syntax(syntax);
-      List result = compiler.bind_syntax(thawed, AST_UNIT, NULL);
-      while (compiler.peek(0) != <eof> && compiler.token.pos < end)
-        compiler.next();
-      return result;
+      List thawed = c.thaw_declaration_syntax(syntax);
+      List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
+      while (c.peek(0) != <eof> && c.token.pos < end) c.next();
+      return bound;
     }
   return NULL;
 }
 
-// declaration defaults
+/* declaration defaults
+
+   A declaration producer can offer defaults: functions that bind only when
+   no other declaration takes their name, and constructors that forward to
+   a parent's constructor. The owning file selects them after all its
+   segments. */
+
+/* One selection of a file's defaults. `shadow` binds them over the file's
+   collected symbols. `sources` holds one `(declarations key end rows)`
+   entry per production, and `pending` the children whose forwarded
+   constructors wait for their parent's constructor. */
+typedef struct Defaults {
+  Compiler shadow, Array parts, sources;
+  Map definitions, pending;
+} Defaults;
 
 /** Selects the owning file's declaration defaults after all its segments.
     The selected signatures join ordinary declarations before protocol and
@@ -3158,184 +3187,199 @@ static List _replay_declaration_bundle(Compiler compiler) {
     signatures for the caller to retain in the header-cache lifetime.
 */
 Map Compiler.select_declaration_defaults(
-  Compiler compiler, String path, Map symbols, Array parts,
-  Map definitions) {
-  Compiler shadow = Compiler.new_shared(compiler);
-  defer compiler.close_child(shadow);
+  Compiler c, String path, Map symbols, Array parts, Map definitions) {
+  Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
+  _prepare_shadow(shadow, c, path, symbols);
+  Array sources = [];
+  Map pending = {};
+  Defaults d = {
+    .shadow = shadow, .parts = parts, .sources = sources,
+    .definitions = definitions, .pending = pending};
+  foreach (Var part, parts) if (part is <map>) d.produce(part);
+  d.select();
+  d.forward();
+  d.store(symbols);
+  Map additions = shadow.sym.current_symbols();
+  symbols.merge(additions);
+  c.merge_source_declarations(symbols, additions);
+  c.fn_defs.merge(shadow.fn_defs);
+  definitions.merge(shadow.fn_defs);
+  return additions;
+}
+
+/* The shadow binds over the file's collected symbols in an overlay,
+   without parsing, in the unit's Lisp session and meta group. */
+static void _prepare_shadow(
+  Compiler shadow, Compiler owner, String path, Map symbols) {
   shadow.filename = path;
-  shadow.macro_lisp = compiler.macro_lisp;
+  shadow.macro_lisp = owner.macro_lisp;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
-  shadow.share_meta_group(compiler);
+  shadow.share_meta_group(owner);
   shadow.sym._reset_overlay(symbols, {});
   shadow.rebuild_protocols(symbols);
   shadow.conforms = {};
   shadow.shallow = 1;
   shadow.declaration_projection = 1;
-  Array sources = [];
-  Map pending = {};
-  foreach (Var part, parts) {
-    if (part is not <map>) continue;
-    Map declarations = part;
-    Array ordered = [];
-    foreach (Var (key, value), declarations)
-      match (key)
-        case %("source-node" (declaration ? ?position)):
-          ordered.push(%($position $key $value));
-    ordered.sort();
-    foreach (List entry, ordered) {
-      (Var position, Var key, Var value) = entry;
-      (void) position;
-      match (value)
-        case %(declaration-source ?end
-                 (declaration-bundle (rows *rows))): {
-          rows = shadow.thaw_declaration_syntax(rows);
-          Array produced = [];
-          _produce_declaration_rows(shadow, rows, produced);
-          sources.push(%($declarations $key $end ${produced.list_free()}));
-        }
-    }
+}
+
+// A part's productions run in source order.
+static void Defaults.produce(Defaults *d, Map declarations) {
+  Array ordered = [];
+  foreach (Var (key, value), declarations)
+    match (key)
+      case %("source-node" (declaration ? ?position)):
+        ordered.push(%($position $key $value));
+  ordered.sort();
+  foreach (List entry, ordered) {
+    (Var position, Var key, Var value) = entry;
+    (void) position;
+    match (value)
+      case %(declaration-source ?end (declaration-bundle (rows *rows))): {
+        rows = d.shadow.thaw_declaration_syntax(rows);
+        Array produced = [];
+        d.shadow._produce(rows, produced);
+        d.sources.push(%($declarations $key $end ${produced.list_free()}));
+      }
   }
-  for (size_t index = 0; index < sources.len(); index++) {
-    (Map declarations, Var key, Var end, List rows) = sources[index];
-    List selected = _select_declaration_rows(
-      shadow, rows, parts, definitions);
-    foreach (List row, selected)
-      match (row)
-        case %(declaration-forward ?child *): pending[child] = 1;
-    sources[index] = %($declarations $key $end $selected);
+}
+
+/* A pending row runs its recipe under the macro stack and privacy of its
+   construction, and the rows it generates are produced in turn. */
+static void Compiler._produce(Compiler c, List rows, Array selected) {
+  foreach (List row, rows) {
+    match (row)
+      case %(declaration-pending ?callback ?arguments
+               ?construction ?privacy): {
+        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.source_private, privacy)
+          c._produce(_generated_rows(c, callback, arguments), selected);
+        continue;
+      }
+    selected.push(row);
   }
-  int remaining = pending.len();
-  while (remaining) {
-    int previous = remaining;
-    remaining = 0;
-    for (size_t index = 0; index < sources.len(); index++) {
-      (Map declarations, Var key, Var end, List rows) = sources[index];
-      rows = _select_declaration_forwards(shadow, rows, pending, remaining);
-      sources[index] = %($declarations $key $end $rows);
-    }
-    if (remaining && remaining == previous)
-      shadow.report_error(
-        <type>,
-        "a forwarded class constructor has no completed parent constructor",
-        shadow.token, NULL);
+}
+
+// A recipe's rows: the children of a sequence or bundle, or its one node.
+static List _generated_rows(Compiler c, Var callback, Var arguments) {
+  List generated = c.bind_syntax(
+    c.evaluate_declaration_recipe(callback, arguments), AST_UNIT, NULL);
+  List additions = %($generated);
+  match (generated) {
+    case %(seq *children): additions = children;
+    case %(declaration-bundle (rows *children)): additions = children;
   }
-  foreach (List source, sources) {
-    (Map declarations, Var key, Var end, List rows) = source;
-    declarations[key] = shadow.freeze_declaration_syntax(
-      %(declaration-source $end (declaration-bundle (rows @rows))));
-    symbols[key] = declarations[key];
-  }
-  Map additions = shadow.sym.current_symbols();
-  symbols.merge(additions);
-  compiler.merge_source_declarations(symbols, additions);
-  compiler.fn_defs.merge(shadow.fn_defs);
-  definitions.merge(shadow.fn_defs);
   return additions;
 }
 
-static void _produce_declaration_rows(
-  Compiler compiler, List rows, Array selected) {
-  foreach (List row, rows) {
-    match (row) {
-      case %(declaration-pending ?callback ?arguments
-               ?construction ?privacy): {
-        $let(compiler.macro_stack,
-             compiler.thaw_declaration_syntax(construction))
-        $let(compiler.source_private, privacy) {
-          List generated = compiler.bind_syntax(
-            compiler.evaluate_declaration_recipe(callback, arguments),
-            AST_UNIT, NULL);
-          List additions = %($generated);
-          match (generated) {
-            case %(seq *children): additions = children;
-            case %(declaration-bundle (rows *children)): additions = children;
-          }
-          _produce_declaration_rows(compiler, additions, selected);
-        }
-        continue;
-      }
-    }
-    selected.push(row);
+/* Each production selects its defaults, and a forwarded constructor
+   waits for its parent's constructor. */
+static void Defaults.select(Defaults *d) {
+  for (size_t index = 0; index < d.sources.len(); index++) {
+    (Map declarations, Var key, Var end, List rows) = d.sources[index];
+    List selected = d._select_rows(rows);
+    foreach (List row, selected)
+      match (row)
+        case %(declaration-forward ?child *): d.pending[child] = 1;
+    d.sources[index] = %($declarations $key $end $selected);
   }
 }
 
-static List _select_declaration_rows(
-  Compiler compiler, List rows, Array parts, Map definitions) {
+static List Defaults._select_rows(Defaults *d, List rows) {
+  Compiler c = d.shadow;
   Array selected = [];
   foreach (List row, rows) {
-    match (row) {
+    match (row)
       case %(declaration-default ?function ?construction ?privacy): {
-        $let(compiler.macro_stack,
-             compiler.thaw_declaration_syntax(construction))
-        $let(compiler.source_private, privacy) {
-          List syntax = function;
-          match (syntax)
-            case %(function ?return_type (bind ?name ?modifiers) ?body): {
-              name = compiler.evaluate_macro_slot(name);
-              String spelling = binding_identity_spelling(name);
-              match (name) {
-                case %(?(String literal)): spelling = literal;
-                case %("x2c.ident" ?(String literal)): spelling = literal;
-              }
-              if (spelling &&
-                  _declaration_default_taken(
-                    compiler, spelling, parts, definitions))
-                continue;
-              syntax = %(function $return_type (bind $name $modifiers) $body);
-            }
-          selected.push(_bind_declaration_default(compiler, syntax));
+        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.source_private, privacy) {
+          Var syntax = d._unless_taken(function);
+          if (syntax is not void) selected.push(_bind_default(c, syntax));
         }
         continue;
       }
-    }
     selected.push(row);
   }
   return selected.list_free();
+}
+
+/* Returns the function to bind for a default, named through its macro
+   slot, or void when a declaration already takes its name. */
+static Var Defaults._unless_taken(Defaults *d, List syntax) {
+  match (syntax)
+    case %(function ?return_type (bind ?name ?modifiers) ?body): {
+      name = d.shadow.evaluate_macro_slot(name);
+      String spelling = binding_identity_spelling(name);
+      match (name) {
+        case %(?(String literal)): spelling = literal;
+        case %("x2c.ident" ?(String literal)): spelling = literal;
+      }
+      if (spelling && d._taken(spelling)) return void;
+      return %(function $return_type (bind $name $modifiers) $body);
+    }
+  return syntax;
 }
 
 /* A default yields to any declaration of its name except a bodyless,
    non-static function prototype in the default's own file, which the
    default then completes. */
-static int _declaration_default_taken(
-  Compiler compiler, String spelling, Array parts, Map definitions) {
+static int Defaults._taken(Defaults *d, String spelling) {
+  Compiler c = d.shadow;
   List key = %($spelling);
-  Type declared = compiler.sym.get(key);
+  Type declared = c.sym.get(key);
   if (!declared) return 0;
-  if (!declared.is_function() || spelling in definitions ||
-      spelling in compiler.fn_defs ||
-      %(function $spelling) in compiler.sym.file_statics())
+  if (!declared.is_function() || spelling in d.definitions ||
+      spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
     return 1;
-  foreach (Var part, parts)
+  foreach (Var part, d.parts)
     if (part is <map> && key in part.map()) return 0;
   return 1;
 }
 
-static List _bind_declaration_default(Compiler compiler, List syntax) {
-  if (compiler.source_private)
+static List _bind_default(Compiler c, List syntax) {
+  if (c.source_private)
     match (syntax)
       case %(function ?type ?declarator ?body):
         if (!type.type().is_static())
           syntax = %(function (static @type) $declarator $body);
-  return compiler.bind_syntax(syntax, AST_UNIT, NULL);
+  return c.bind_syntax(syntax, AST_UNIT, NULL);
 }
 
-static List _select_declaration_forwards(
-  Compiler compiler, List rows, Map pending, int &remaining) {
+/* Forwarded constructors bind as their parents' constructors complete; a
+   round that completes none leaves a parent that never will. */
+static void Defaults.forward(Defaults *d) {
+  int remaining = d.pending.len();
+  while (remaining) {
+    int previous = remaining;
+    remaining = 0;
+    for (size_t index = 0; index < d.sources.len(); index++) {
+      (Map declarations, Var key, Var end, List rows) = d.sources[index];
+      rows = d._forward_rows(rows, remaining);
+      d.sources[index] = %($declarations $key $end $rows);
+    }
+    if (remaining && remaining == previous)
+      d.shadow.report_error(
+        <type>,
+        "a forwarded class constructor has no completed parent constructor",
+        d.shadow.token, NULL);
+  }
+}
+
+static List Defaults._forward_rows(Defaults *d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
-        $let(compiler.source_private, privacy) {
-          List bound = _declaration_forward(
-            compiler, child, parent, member, fallback, pending);
-          if (!bound) {
-            remaining++;
-            selected.push(row);
-          }
-          else {
-            pending.del(child);
-            if (bound.car() != <seq>) selected.push(bound);
-          }
+        List bound = NULL;
+        $let(d.shadow.source_private, privacy)
+          bound = d._forwarded(child, parent, member, fallback);
+        if (!bound) {
+          remaining++;
+          selected.push(row);
+        }
+        else {
+          d.pending.del(child);
+          if (bound.car() != <seq>) selected.push(bound);
         }
         continue;
       }
@@ -3344,16 +3388,19 @@ static List _select_declaration_forwards(
   return selected.list_free();
 }
 
-static List _declaration_forward(
-  Compiler compiler, Type child, Type parent, String member,
-  List fallback, Map pending) {
+/* Binds the constructor `child_member` that forwards to the parent's
+   `member`. It is `(seq)` when that name is already declared, the fallback
+   when the parent has no such member, and NULL while the parent's own
+   constructor is still pending. */
+static List Defaults._forwarded(
+  Defaults *d, Type child, Type parent, String member, List fallback) {
+  Compiler c = d.shadow;
   String name = %"${child.car()}_$member";
-  if (compiler.sym.get(%($name))) return %(seq);
-  List method = compiler.resolve_postfix_member(parent, %($member), <.>, 1);
+  if (c.sym.get(%($name))) return %(seq);
+  List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
   if (!method) {
-    if (parent in pending) return NULL;
-    return fallback ? _bind_declaration_default(compiler, fallback.car())
-                    : NULL;
+    if (parent in d.pending) return NULL;
+    return fallback ? _bind_default(c, fallback.car()) : NULL;
   }
   List binding = NULL, Type signature = NULL;
   match (method)
@@ -3362,15 +3409,21 @@ static List _declaration_forward(
       signature = type;
     }
   if (!signature) return NULL;
+  return _bind_default(c, _forwarder(c, name, child, binding, signature));
+}
+
+// The forwarding constructor passes each argument on and casts the result.
+static List _forwarder(
+  Compiler c, String name, Type child, List binding, Type signature) {
   List types = NULL;
   match (signature) case %((func ?parameters) *): types = parameters;
   Array parameters = [], arguments = [];
   int index = 0;
   foreach (Var type, types) {
     if (type == <...>)
-      compiler.report_error(
+      c.report_error(
         <type>, %"'$name' requires an explicit variadic constructor",
-        compiler.token, NULL);
+        c.token, NULL);
     if (type == %(void)) continue;
     String argument = %"argument$index";
     index++;
@@ -3380,9 +3433,19 @@ static List _declaration_forward(
   List call = %(expr ()
     (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
   List body = %(block (return () (expr () (cast $child $call))));
-  List function = %(function $child
+  return %(function $child
     (bind ($name) ((fnmod (params @{parameters.list_free()})))) $body);
-  return _bind_declaration_default(compiler, function);
+}
+
+/* The selected rows replace each production's bundle in its part and in
+   the unit's symbols. */
+static void Defaults.store(Defaults *d, Map symbols) {
+  foreach (List source, d.sources) {
+    (Map declarations, Var key, Var end, List rows) = source;
+    declarations[key] = d.shadow.freeze_declaration_syntax(
+      %(declaration-source $end (declaration-bundle (rows @rows))));
+    symbols[key] = declarations[key];
+  }
 }
 
 // shallow collection
@@ -3611,7 +3674,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
             if (c.script && c.script.defines_main &&
                 c.script_statement_executes())
               _report_script_statement(c);
-            Ast node = _replay_declaration_bundle(c);
+            Ast node = _replay_bundle(c);
             if (!node) node = c.parse_top_level();
             int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
             if (node && node.car() == <seq>) {
