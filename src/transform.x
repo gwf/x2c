@@ -605,6 +605,41 @@ static Type _func_pointer_value_type(Compiler compiler, Type type) {
   return pointer.dereference().is_function() ? pointer : NULL;
 }
 
+macro open Statement $func_static_handle(Name $handle, Expr $value) {
+  static Func $handle = $value;
+}
+
+macro open Statement $func_bridge_prototype(
+    Name $bridge, Param $parameters...) {
+  extern Func $bridge($parameters...);
+}
+
+macro open Statement $func_local(Type $type, DeclaratorRow $row) {
+  $type $row;
+}
+
+macro open Expression $func_cast(Type $type, Expr $value) =>
+  ($type)($value);
+
+macro open Expression $func_address(Expr $value) => &$value;
+
+macro open Expression $func_size(Expr $value) => sizeof $value;
+
+macro open Expression $func_present(
+    Expr $pointer, Expr $value, Expr $fallback) =>
+  $pointer ? $value : $fallback;
+
+/* A Name expression hole leaves an untyped inner shell. Keep the issued
+   identity in its canonical typed expression until rebuild can remove it. */
+static List _func_bound(Type type, List binding) =>
+  %(expr $type (ident $binding));
+
+static List _func_call(
+  Compiler compiler, Type type, List callee, List arguments) {
+  Macro shape = $called;
+  return compiler.rebuild_expression(type, shape(callee, arguments));
+}
+
 static List _build_indirect_func_adapter(
   Compiler compiler, Type diagnostic_type, Type pointer_type,
   List key) {
@@ -634,25 +669,23 @@ static List _build_indirect_func_adapter(
       diagnostic_type, pointer_type, NULL);
   List fn_binding = compiler.sym.introduce(
     compiler.fresh_name("func_binding"));
-  String field_name = binding_identity_spelling(field_binding);
-  List context_value = %(
-    expr (* const void)
-      (call (expr $context_helper_type (ident $context_helper))
-            (args (expr ("Func") (ident $fn_binding))))
-  );
+  List context_value = _func_call(
+    compiler, %(* const void),
+    _func_bound(context_helper_type, context_helper),
+    %(${_func_bound(%("Func"), fn_binding)}));
   List context_local = compiler.sym.introduce(
     compiler.fresh_name("func_pointer_context"));
-  List context_declaration = %(
-    declare (const $context_name)
-      (bindings
-        (op = (bind $context_local (*))
-              (expr $context_pointer
-                (cast $context_pointer $context_value))))
-  );
-  List context = %(expr $context_pointer (ident $context_local));
+  Macro cast_shape = $func_cast;
+  List cast = compiler.rebuild_expression(
+    context_pointer, cast_shape(context_pointer, context_value));
+  Macro storage_shape = $func_local;
+  List context_declaration = compiler.rebuild_statement(
+    storage_shape(%(const $context_name),
+                  %(op = (bind $context_local (*)) $cast))).cadr();
+  String field_name = binding_identity_spelling(field_binding);
+  List context = _func_bound(context_pointer, context_local);
   List target = %(
-    expr $pointer_type (op -> $context ($field_name))
-  );
+    expr $pointer_type (op -> $context ($field_name)));
   List adapter = _build_func_adapter(
     compiler, diagnostic_type, pointer_type, target, fn_binding,
     %($context_declaration));
@@ -691,18 +724,15 @@ static List _direct_func_handle(
       %("Func"), source_type, NULL);
   handle = compiler.sym.introduce(
     compiler.fresh_name("func_handle"));
-  List value = %(
-    expr ("Func")
-      (call (expr $constructor_type (ident $constructor))
-            (args (expr ("FuncAdapter") (ident $adapter)) $signature))
-  );
+  List value = _func_call(
+    compiler, %("Func"),
+    _func_bound(constructor_type, constructor),
+    %(${_func_bound(%("FuncAdapter"), adapter)} $signature));
+  Macro shape = $func_static_handle;
   compiler.add_early(
-    %(
-    declare (static "Func")
-      (bindings (op = (bind $handle ()) $value))
-  ));
+    compiler.rebuild_statement(shape(handle, value)).cadr());
   }
-  return %(expr ("Func") (ident $handle));
+  return _func_bound(%("Func"), handle);
 }
 
 static List _func_bridge_binding(Compiler compiler, String stem) {
@@ -712,17 +742,19 @@ static List _func_bridge_binding(Compiler compiler, String stem) {
 }
 
 static List _func_bridge_call(
-  List bridge, List parameters, Type function_type, List arguments) {
-  List prototype = %(
-    declare (extern "Func")
-      (bindings (bind $bridge ((fnmod $parameters))))
-  );
-  List call = %(
-    expr ("Func")
-      (call (expr $function_type (ident $bridge)) (args @arguments))
-  );
+  Compiler compiler, List bridge, List parameters,
+  Type function_type, List arguments) {
+  Macro prototype_shape = $func_bridge_prototype;
+  List prototype = compiler.rebuild_statement(
+    prototype_shape(bridge, parameters.cdr())).cadr();
+  List call = _func_call(
+    compiler, %("Func"),
+    _func_bound(function_type, bridge), arguments);
+  Macro statement_shape = $expression_statement;
+  List statement = compiler.rebuild_statement(
+    statement_shape(call)).cadr();
   return %(
-    expr ("Func") (parens (block $prototype (stmnt $call)))
+    expr ("Func") (parens (block $prototype $statement))
   );
 }
 
@@ -744,19 +776,25 @@ static List _direct_func_value(
   }
   Type getter_type = %((func ((void))) "Func");
   return _func_bridge_call(
-    bridge, parameters, getter_type, NULL);
+    compiler, bridge, parameters, getter_type, NULL);
 }
 
 static List _func_context_call(
-  Type type, List context, List adapter, Type adapter_type, List signature,
-  List constructor, Type constructor_type) {
-  List address = %(expr ${type.reference()}
-    (op & (expr $type (ident $context))));
-  List size = %(expr (size_t) (sizeof (expr $type (ident $context))));
-  return %(expr ("Func")
-    (call (expr $constructor_type (ident $constructor))
-          (args (expr $adapter_type (ident $adapter))
-                $signature $address $size)));
+  Compiler compiler, Type type, List context, List adapter,
+  Type adapter_type, List signature, List constructor,
+  Type constructor_type) {
+  List value = _func_bound(type, context);
+  Macro address_shape = $func_address;
+  List address = compiler.rebuild_expression(
+    type.reference(), address_shape(value));
+  Macro size_shape = $func_size;
+  List size = compiler.rebuild_expression(
+    %(size_t), size_shape(value));
+  return _func_call(
+    compiler, %("Func"),
+    _func_bound(constructor_type, constructor),
+    %(${_func_bound(adapter_type, adapter)}
+      $signature $address $size));
 }
 
 static List _indirect_func_value(
@@ -779,29 +817,29 @@ static List _indirect_func_value(
   List context = compiler.sym.introduce(
     compiler.fresh_name("func_pointer_context"));
   List context_value = %(
-    expr $context_type
-      (composite (commas $expression))
-  );
-  List declaration = %(
-    declare $context_type
-      (bindings (op = (bind $context ()) $context_value))
-  );
+    expr $context_type (composite (commas $expression)));
+  Macro storage_shape = $func_local;
+  List declaration = compiler.rebuild_statement(
+    storage_shape(context_type,
+                  %(op = (bind $context ()) $context_value))).cadr();
   String field_name = binding_identity_spelling(context_field);
   List pointer = %(
     expr $pointer_type
-      (op . (expr $context_type (ident $context)) ($field_name))
-  );
+      (op . ${_func_bound(context_type, context)} ($field_name)));
   List constructed = _func_context_call(
-    context_type, context, adapter, %("FuncAdapter"), signature,
+    compiler, context_type, context, adapter, %("FuncAdapter"), signature,
     constructor, constructor_type);
   List null_binding = compiler.sym.reference(%("NULL"), NULL);
-  List result = %(
-    expr ("Func")
-      (op ? $pointer $constructed
-            (expr ("Func") (ident $null_binding)))
-  );
+  Macro present_shape = $func_present;
+  List result = compiler.rebuild_expression(
+    %("Func"),
+    present_shape(pointer, constructed,
+                  _func_bound(%("Func"), null_binding)));
+  Macro statement_shape = $expression_statement;
+  List statement = compiler.rebuild_statement(
+    statement_shape(result)).cadr();
   return %(
-    expr ("Func") (parens (block $declaration (stmnt $result)))
+    expr ("Func") (parens (block $declaration $statement))
   );
 }
 
@@ -831,7 +869,7 @@ static List _indirect_func_lift(
   );
   Type factory_type = %((func ($pointer_type)) "Func");
   return _func_bridge_call(
-    bridge, parameters, factory_type, %($expression));
+    compiler, bridge, parameters, factory_type, %($expression));
 }
 
 /* A dereferenced function pointer reaches the lift untyped or typed as a
