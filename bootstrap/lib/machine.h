@@ -249,8 +249,6 @@ void MachineBuilder_set_target(MachineBuilder b, int site, int target);
 
 void MachineBuilder_patch(MachineBuilder b, int * sites, int count, int target);
 
-MachineView MachineBuilder_view(MachineBuilder b);
-
 MachineProgram MachineBuilder_freeze(MachineBuilder b);
 
 MachineView MachineProgram_view(MachineProgram program);

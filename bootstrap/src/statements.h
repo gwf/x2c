@@ -7,27 +7,27 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_parse_governed(Compiler c, AstPos position);
-
-List Compiler_finish_return_statement(Compiler compiler, List expression);
-
-void Compiler_begin_match_arm(Compiler compiler, List pattern, Token start, int binds);
-
-List Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
-
-List Compiler_parse_match_row_argument(Compiler c);
+List Compiler_parse_statement(Compiler c);
 
 List Compiler_with_binding(Compiler c);
 
+List Compiler_finish_return_statement(Compiler c, List expr);
+
+List Compiler_parse_match_row_argument(Compiler c);
+
+void Compiler_begin_match_arm(Compiler c, List pattern, Token start, int binds);
+
+List Compiler_begin_catch_arm(Compiler c, List pattern, Token start);
+
+List Compiler_parse_governed(Compiler c, AstPos position);
+
 List Compiler_parse_block_item(Compiler c);
 
-List Compiler_parse_statement(Compiler c);
+List Compiler_parse_compound_statement(Compiler c);
 
 List Compiler_parse_block_items(Compiler c, int anchor_items);
 
 List Compiler_parse_callable_body(Compiler c);
-
-List Compiler_parse_compound_statement(Compiler c);
 
 
 #endif /* __GUARD_0x670D7DD9__ */

@@ -542,14 +542,6 @@ void MachineBuilder_patch(MachineBuilder b, int * sites, int count, int target){
   for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(b, sites[i], target);
 }
 
-MachineView MachineBuilder_view(MachineBuilder b){
-  MachineView view ={
-    b -> code, b -> consts, b -> binders, b -> length, b -> const_count, b -> binder_count, b -> root
-  }
-  ;
-  return view;
-}
-
 static int MachineBuilder__fail(MachineBuilder b, const char * reason){
   if(b -> status == MACHINE_PREPARED){
     b -> status = MACHINE_INELIGIBLE;

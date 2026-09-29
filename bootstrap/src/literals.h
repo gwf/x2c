@@ -7,39 +7,39 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
-
 List Compiler_parse_list_literal(Compiler c);
 
-List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
-
-List Compiler_parse_symbol_set_literal(Compiler c);
+List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
 
 List Compiler_parse_raise_literal(Compiler c);
 
 List Compiler_parse_catch_pattern_literal(Compiler c);
 
+List Compiler_parse_symbol_set_literal(Compiler c);
+
+List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
+
 List Compiler_parse_array_literal(Compiler compiler);
-
-List Compiler_parse_map_entry(Compiler compiler);
-
-List Compiler_parse_map_entries(Compiler c);
 
 List Compiler_parse_map_literal(Compiler compiler);
 
+List Compiler_parse_map_entries(Compiler c);
+
+List Compiler_parse_map_entry(Compiler compiler);
+
 List Compiler_parse_string_literal(Compiler compiler);
 
-int Compiler_lambda_capture_required(Compiler c, List binding);
+List Compiler_parse_lambda_literal(Compiler c);
+
+List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body);
 
 void Compiler_begin_lambda_captures(Compiler c, List references, List supplied);
 
 List Compiler_end_lambda_captures(Compiler c);
 
+int Compiler_lambda_capture_required(Compiler c, List binding);
+
 List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
-
-List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body);
-
-List Compiler_parse_lambda_literal(Compiler c);
 
 List Compiler_parse_atomic_literal(Compiler c);
 

@@ -10,20 +10,6 @@
 #include "meta.h"
 typedef List Type;
 
-List Type_declaration_parts(Type type);
-
-List Type_declaration_ast(Type type, List binding);
-
-String ast_addressed_identifier(Var value);
-
-String ast_direct_identifier(Var value);
-
-String ast_indirect_identifier(Var value);
-
-List ast_prototype_declarator(List declarator);
-
-List Type_parameter_ast(Type type, List binding);
-
 static inline Type Var_type(Var x){
   return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
@@ -35,6 +21,16 @@ static inline List Type_list(Type x){
 static inline Type List_type(List x){
   return(void *) x;
 }
+
+Type List_type_from_ast(List ast);
+
+List Type_declaration_parts(Type type);
+
+List Type_declaration_ast(Type type, List binding);
+
+List Type_parameter_ast(Type type, List binding);
+
+List ast_prototype_declarator(List declarator);
 
 int Symbol_is_storage_class(Symbol sym);
 
@@ -58,7 +54,11 @@ int Type_is_enum_tag(Type type);
 
 int Type_is_enum_tag_body(Type type);
 
-int Type_is_pointer(Type type);
+List Type_tag(Type type);
+
+List Type_body(Type t);
+
+int Type_is_pointer(Type t);
 
 int Type_is_array(Type type);
 
@@ -66,37 +66,21 @@ int Type_is_function(Type type);
 
 int Type_is_bitfield(Type type);
 
-Type Type_scalar(Type type);
+Type Type_dereference(Type type);
 
-Symbol Type_scalar_tag(Type type);
+Type Type_reference(Type type);
 
-String Type_var_numeric_extractor(Type type);
+Type Type_apply(Type type);
 
-String Type_var_numeric_update_helper(Type type);
+int Type_is_static(Type type);
 
-Var Type_numeric_literal_value(Type type, String text);
+int Type_is_inline(Type type);
 
-Type Type_numeric_literal(String text, int floating);
+int Type_is_extern(Type type);
 
-List Type_tag(Type type);
+int Type_is_threaded(Type type);
 
-List Type_body(Type t);
-
-int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom);
-
-void Type_begin_unit(void);
-
-void Type_end_unit(void);
-
-void Type_register_var_tag(Type t, String name, String converter);
-
-void Type_register_var_adoption(Type type, Type representation, Symbol tag);
-
-String Type_var_converter(Type type);
-
-Symbol Type_fixed_var_tag(Type type);
-
-Symbol Type_var_tag(Type type);
+int Type_is_typedef(Type type);
 
 Type Type_base_type(Type type);
 
@@ -112,31 +96,47 @@ int Type_is_typedef_name(Type type);
 
 int Type_is_bare_typedef_name(Type type);
 
-int Type_is_typedef(Type type);
-
 int Type_is_number(Type type);
 
 int Type_is_integral(Type type);
 
-Type Type_dereference(Type type);
+Type Type_scalar(Type t);
 
-Type Type_reference(Type type);
+Symbol Type_scalar_tag(Type type);
 
-Type Type_apply(Type type);
+String Type_var_numeric_extractor(Type type);
+
+String Type_var_numeric_update_helper(Type type);
 
 Type Type_promote(Type type);
 
 Type Type_widest(Type a, Type b);
 
-int Type_is_static(Type type);
+Type Type_numeric_literal(String text, int floating);
 
-int Type_is_inline(Type type);
+Var Type_numeric_literal_value(Type type, String text);
 
-int Type_is_extern(Type type);
+String ast_addressed_identifier(Var value);
 
-int Type_is_threaded(Type type);
+String ast_direct_identifier(Var value);
 
-Type List_type_from_ast(List ast);
+String ast_indirect_identifier(Var value);
+
+Symbol Type_var_tag(Type type);
+
+Symbol Type_fixed_var_tag(Type type);
+
+String Type_var_converter(Type type);
+
+int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom);
+
+void Type_register_var_tag(Type t, String name, String converter);
+
+void Type_register_var_adoption(Type type, Type representation, Symbol tag);
+
+void Type_begin_unit(void);
+
+void Type_end_unit(void);
 
 
 #endif /* __GUARD_0x2B6ED6EF__ */
