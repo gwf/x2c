@@ -112,4 +112,21 @@ grep -q '"diagnostics":\[\]' editor.json ||
   fail "editor request reported: $(cat editor.json)"
 [ -z "$(helpers)" ] || fail "helper left running after an editor request"
 
+# A helper that cannot start is reported at the call. The first
+# translation builds the helper, so the second, limited to one process,
+# forks only to start it. The limit does not apply to root.
+if [ "$(id -u)" != 0 ]; then
+  cat > nofork.x <<'EOF'
+#include <stdlib.h>
+$(import "calls.xmacro")
+int b = $twice(1);
+EOF
+  "$X2C" translate --out-dir out nofork.x >nofork.out 2>&1 ||
+    fail "helper build for the fork probe failed: $(cat nofork.out)"
+  (ulimit -u 1; exec "$X2C" translate --out-dir out nofork.x) \
+    >nofork.out 2>&1 || true
+  grep -q "reason: the compile-time helper did not start" nofork.out ||
+    fail "helper that did not start not reported: $(cat nofork.out)"
+fi
+
 echo "meta helper probes passed"

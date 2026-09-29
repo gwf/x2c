@@ -34,7 +34,7 @@
 
 static List _197, _195, _194, _193, _192, _190, _188, _186, _184, _182, _181, _179, _178, _177, _176, _175, _174, _173, _172, _170, _169, _168, _167, _166, _165, _137, _135, _134, _132, _131, _130, _128, _127, _126, _125, _117, _111, _110, _108, _107, _106, _103, _102, _101, _100, _99, _98, _97, _82, _80, _79, _75, _73, _71, _69, _68, _67, _66, _54, _50, _40, _38, _33, _31, _26, _24, _22, _20, _19, _17, _10, _8, _7;
 
-static String _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _141, _140, _139, _138, _90, _89, _88, _87, _86, _85, _84, _83, _61, _60, _59, _58, _57, _56, _55, _51, _48, _47, _46, _45, _43, _41, _4, _3, _2, _1, _0;
+static String _205, _204, _203, _202, _201, _200, _199, _198, _141, _140, _139, _138, _90, _89, _88, _87, _86, _85, _84, _83, _61, _60, _59, _58, _57, _56, _55, _51, _48, _47, _46, _45, _43, _41, _4, _3, _2, _1, _0;
 
 static Var _191, _189, _187, _185, _183, _180, _171, _154, _152, _150, _148, _146, _144, _143, _142, _136, _133, _129, _116, _114, _113, _109, _105, _104, _96, _95, _94, _93, _92, _91, _81, _76, _74, _72, _70, _65, _62, _53, _52, _49, _44, _42, _39, _34, _32, _27, _25, _23, _21, _18, _16, _11, _9, _6, _5;
 
@@ -109,8 +109,6 @@ static int _starts_line(Token first, Token token);
 static int _track_arms(Array arms, String text);
 
 static int _hidden(Array arms);
-
-static int _visibility_pragma(String directive);
 
 static void Walk_flush(Walk * w, String segment);
 
@@ -530,12 +528,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _199 = String_new("\" ");
   _200 = String_new("cannot read runtime source");
   _201 = String_new("\n");
-  _202 = String_new("pragma private");
-  _203 = String_new("pragma public");
-  _204 = String_new("cannot read include");
-  _205 = String_new("/");
-  _206 = String_new(".");
-  _207 = String_new("failed to write interface file");
+  _202 = String_new("cannot read include");
+  _203 = String_new("/");
+  _204 = String_new(".");
+  _205 = String_new("failed to write interface file");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -949,6 +945,8 @@ static void Walk_split(Walk * w, Token first){
 
 }
 
+int preproc_visibility(String);
+
 String preproc_include_target(String, int *);
 
 int String_truth(String);
@@ -956,7 +954,7 @@ int String_truth(String);
 Var Array_push(Array, Var);
 
 static void Walk_directive(Walk * w, Token token, int hidden){
-  int angle = 0, visibility = _visibility_pragma(token -> text);
+  int angle = 0, visibility = preproc_visibility(token -> text);
   String target = hidden ? NULL : preproc_include_target(token -> text, &(angle));
   if(! String_truth(target) && visibility < 0) return;
   Walk_flush(w, String_getslice(w -> text, w -> pos, token -> pos, 1));
@@ -1016,11 +1014,6 @@ static int _hidden(Array arms){
 
   }
   return 0;
-}
-
-static int _visibility_pragma(String directive){
-  if(String_contains(directive, _202)) return 1;
-  return String_contains(directive, _203) ? 0 : - 1;
 }
 
 unsigned Map_len(Map);
@@ -1251,7 +1244,7 @@ static String _walked_hash(Compiler c, String target, String canonical){
 }
 
 static String _include_text(Compiler c, String target, String path){
-  String text = NULL;  if(Compiler_read_source(c, path, &(text))) return text;  Compiler_report_error(c, 306819428, _204, c -> token, cons(_44, cons(String_var(String_join(NULL, cons(String_var(_45), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_2), cons(String_var(path), NULL)))), NULL))));
+  String text = NULL;  if(Compiler_read_source(c, path, &(text))) return text;  Compiler_report_error(c, 306819428, _202, c -> token, cons(_44, cons(String_var(String_join(NULL, cons(String_var(_45), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_2), cons(String_var(path), NULL)))), NULL))));
 }
 
 static List _walk_cold(Compiler c, String target, String canonical, Map globs, Map visited){
@@ -1265,7 +1258,7 @@ static void _walk_apart(Compiler c, String path, String text, Map globs, Map vis
 int SourceView_exists(SourceView, String);
 int String_equal(String, String);
 static String _resolve_include(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
-  (* covered) = 0;  if(String_startswith(target, _205)) return SourceView_exists(sources, target) ? target : NULL;  Array dirs = _include_dirs(extra_dirs, angle ? NULL : includer_dir); {
+  (* covered) = 0;  if(String_startswith(target, _203)) return SourceView_exists(sources, target) ? target : NULL;  Array dirs = _include_dirs(extra_dirs, angle ? NULL : includer_dir); {
     _x2c_defer_env_7 _x2c_macro_environment_7 ={
       0
     }
@@ -1337,7 +1330,7 @@ static String _canonical_src(void){
 }
 
 static String _canonical_cwd(void){
-  static char cache[PATH_MAX];  return _cached_canonical(cache, _206);
+  static char cache[PATH_MAX];  return _cached_canonical(cache, _204);
 }
 
 int macro_library_filling(void);
@@ -1572,7 +1565,7 @@ static void Surface_take(Surface * s, Map rows, List key, Var value){
 Var List_last(List);
 List String_split(String, String);
 static void Surface_reject(Surface * s, String path, String spelling){
-  String name = s -> name, unit = Var_string(List_last(String_split(path, _205)));  String fix = String_join(NULL, cons(String_var(_84), cons(String_var(name), cons(String_var(_85), NULL))));  Compiler_report_error(s -> compiler, 306819428, String_join(NULL, cons(String_var(_86), cons(String_var(name), cons(String_var(_87), cons(String_var(spelling), cons(String_var(_56), NULL)))))), s -> token, cons(String_var(String_join(NULL, cons(String_var(_56), cons(String_var(unit), cons(String_var(_88), cons(String_var(fix), NULL)))))), NULL));
+  String name = s -> name, unit = Var_string(List_last(String_split(path, _203)));  String fix = String_join(NULL, cons(String_var(_84), cons(String_var(name), cons(String_var(_85), NULL))));  Compiler_report_error(s -> compiler, 306819428, String_join(NULL, cons(String_var(_86), cons(String_var(name), cons(String_var(_87), cons(String_var(spelling), cons(String_var(_56), NULL)))))), s -> token, cons(String_var(String_join(NULL, cons(String_var(_56), cons(String_var(unit), cons(String_var(_88), cons(String_var(fix), NULL)))))), NULL));
 }
 
 void Sym_set(Sym, List, List);
@@ -2040,7 +2033,7 @@ String interface_text(Compiler compiler, List selected){
         }
 
       }
-      Compiler_report_error(compiler, 354920, _207, NULL, NULL);
+      Compiler_report_error(compiler, 354920, _205, NULL, NULL);
     }
     x2c_cleanup_leave(& _x2c_defer_record_16);
   }

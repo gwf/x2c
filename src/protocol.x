@@ -2040,7 +2040,7 @@ static int _starts_private_region(List node) {
   match (node) {
     case %((!or function falias) *): return 1;
     case %(declare ?type *): return type.type().is_static();
-    case %(preproc ?text *): return text.str().contains("pragma private");
+    case %(preproc ?text *): return preproc_visibility(text) == 1;
   }
   return 0;
 }
