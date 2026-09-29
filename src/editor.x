@@ -3,7 +3,9 @@
     Copyright (c) 2026 Gary William Flake
 
     Uses the ordinary compiler frontend and a separate response file so
-    macro output cannot corrupt editor results. Each process owns one request.
+    macro output cannot corrupt editor results. A request passes its
+    metadata in argv and its source snapshots in files, so no JSON input
+    parser is needed. Each process owns one request.
 */
 
 #pragma once
@@ -25,6 +27,15 @@
 
 // requests
 
+/* One editor query: the file the reply goes to, the document with the
+   source snapshots, and what the editor asks, a kind at a byte offset.
+   While the reply is built, `needed` holds each file a location in it
+   names. */
+typedef struct Query {
+  String response, source, kind, int offset, SourceView sources;
+  Compiler compiler, Map reply, needed;
+} Query;
+
 /** Serves one private editor request after process environment initialization.
     Metadata precedes ordinary compiler arguments after `--`; source snapshots
     and the JSON response use separate files. Returns zero for a written
@@ -32,171 +43,178 @@
 */
 int editor_request(int argc, char **argv) {
   if (argc < 7) return 2;
-  String response = String.new(argv[1]);
-  String source = Path.absolute(String.new(argv[2]));
-  String kind = String.new(argv[3]);
-  int offset = atoi(argv[4]), count = atoi(argv[5]);
+  Query q = {
+    .response = String.new(argv[1]),
+    .source = Path.absolute(String.new(argv[2])),
+    .kind = String.new(argv[3]), .offset = atoi(argv[4])};
+  int count = atoi(argv[5]);
   if (count < 0 || count > (argc - 7) / 3) return 2;
   int boundary = 6 + count * 3;
   if (strcmp(argv[boundary], "--")) return 2;
-  SourceView sources = SourceView.new();
-  for (int index = 0; index < count; index++) {
-    int arg = 6 + index * 3;
-    String logical = String.new(argv[arg]);
-    String snapshot = String.new(argv[arg + 1]), text;
-    if (!SourceView.read(NULL, snapshot, text)) return 2;
-    sources.set(logical, text, !strcmp(argv[arg + 2], "1"));
-  }
+  q.sources = _snapshots(argv + 6, count);
+  if (q.sources == NULL) return 2;
   // Reuse the private metadata delimiter as the compiler's argv[0].
   argv[boundary] = argv[0];
-  CliRequest request = _configure(
-    argc - boundary, argv + boundary, sources, source);
-  Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 2;
-  frontend.prepare_meta(%($source));
-  Context command = Context.open_isolated_named("editor request");
-  ParsedUnit unit;
-  int parsed = frontend.open(source, unit);
-  if ((request.live_symbols || request.cpp_symbols) &&
-      _changed_dependency(unit.compiler, sources)) {
-    fputs(
-      "x2c editor: unsaved sources with native CPP symbol modes are "
-      "not supported; syntax highlighting remains available\n", stderr);
-    unit.close();
-    command.close();
-    return 2;
-  }
-  File result = fopen(response, "w");
-  if (!result) {
-    unit.close();
-    command.close();
-    return 2;
-  }
-  Map needed = {};
-  Map reply = {file: source, diagnostics: _diagnostics(unit.compiler, needed)};
-  if (parsed) _query(reply, unit.compiler, source, kind, offset, needed);
-  reply[<sources>] = _sources(unit.compiler, needed);
-  fprintf(result, "%s\n", Var.json(reply));
-  int failed = fclose(result);
-  unit.close();
-  command.close();
-  return failed ? 2 : 0;
+  return q.serve(q.configure(argc - boundary, argv + boundary));
 }
 
-static CliRequest _configure(
-  int argc, char **argv, SourceView sources, String source) {
+/* Each snapshot is three arguments: the logical path, the file that holds
+   its text, and "1" when that text is unsaved. Returns NULL when a
+   snapshot cannot be read. */
+static SourceView _snapshots(char **argv, int count) {
+  SourceView sources = SourceView.new();
+  for (int i = 0; i < count; i++) {
+    char **row = argv + 3 * i;
+    String logical = String.new(row[0]);
+    String snapshot = String.new(row[1]), text;
+    if (!SourceView.read(NULL, snapshot, text)) return NULL;
+    sources.set(logical, text, !strcmp(row[2], "1"));
+  }
+  return sources;
+}
+
+/* Unsaved text cannot reach the host preprocessor, which reads the saved
+   files. */
+static const char *unsaved_cpp =
+  "x2c editor: unsaved sources with native CPP symbol modes are "
+  "not supported; syntax highlighting remains available\n";
+
+/* The compiler request the arguments after `--` configure. The snapshots
+   are its sources, so an unsaved project manifest selects the target. */
+static CliRequest Query.configure(Query *q, int argc, char **argv) {
   char *defaults[] = { argv[0], "build", NULL };
   CliRequest request = argc == 1 ? cli_parse(2, defaults) :
                                  cli_parse(argc, argv);
-  request.sources = sources;
-  if (request.command != <build> && request.command != <translate>) {
-    fputs("x2c editor: use a build or translate configuration\n", stderr);
-    exit(2);
-  }
-  if (!request.inputs && request.command == <build>) {
-    String manifest = project_manifest(request);
-    if (manifest) {
-      request.manifest = manifest;
-      CliRequest selected = NULL;
-      ProjectBuild plan = project_plan(request);
-      for (ProjectBuild node = plan; node; node = node.next) {
-        foreach (String input, node.request.inputs) {
-          if (Path.absolute(input) != source) continue;
-          if (selected && selected != node.request) {
-            fputs(
-              "x2c editor: source belongs to multiple selected targets\n",
-              stderr);
-            exit(2);
-          }
-          selected = node.request;
-        }
-      }
-      if (!selected) {
-        fputs(
-          "x2c editor: this document is not a selected target input; "
-          "open its owning source for semantic results or configure "
-          "a direct translate command\n", stderr);
-        exit(2);
-      }
-      request = selected;
-    }
-  }
-  request.sources = sources;
-  if (sources.is_changed(source) &&
-      (request.live_symbols || request.cpp_symbols)) {
-    fputs(
-      "x2c editor: unsaved sources with native CPP symbol modes are "
-      "not supported; syntax highlighting remains available\n", stderr);
-    exit(2);
-  }
+  request.sources = q.sources;
+  if (request.command != <build> && request.command != <translate>)
+    _fail("x2c editor: use a build or translate configuration\n");
+  if (!request.inputs && request.command == <build>)
+    request = _project_target(request, q.source);
+  request.sources = q.sources;
+  if (q.sources.is_changed(q.source) && _native_cpp(request))
+    _fail(unsaved_cpp);
   request.source_facts = 1;
   return request;
 }
 
-static int _changed_dependency(Compiler compiler, SourceView sources) {
-  foreach (Var path, compiler.deps.keys())
-    if (sources.is_changed(path)) return 1;
-  foreach (Var path, compiler.source_texts.keys())
+/* With a project manifest, the request becomes the one selected target
+   whose inputs hold `source`. */
+static CliRequest _project_target(CliRequest request, String source) {
+  String manifest = project_manifest(request);
+  if (!manifest) return request;
+  request.manifest = manifest;
+  CliRequest selected = NULL;
+  for (ProjectBuild node = project_plan(request); node; node = node.next)
+    foreach (String input, node.request.inputs) {
+      if (Path.absolute(input) != source) continue;
+      if (selected && selected != node.request)
+        _fail("x2c editor: source belongs to multiple selected targets\n");
+      selected = node.request;
+    }
+  if (!selected)
+    _fail(
+      "x2c editor: this document is not a selected target input; "
+      "open its owning source for semantic results or configure "
+      "a direct translate command\n");
+  return selected;
+}
+
+/* Ends a request the adapter does not serve. */
+static void _fail(const char *message) {
+  fputs(message, stderr);
+  exit(2);
+}
+
+static int _native_cpp(CliRequest request) =>
+  request.live_symbols || request.cpp_symbols;
+
+/* Parses the document as its configured translation would and writes the
+   reply, unless the request preprocesses natively and a file the unit
+   read is unsaved. */
+static int Query.serve(Query *q, CliRequest request) {
+  Frontend frontend = Frontend.new(request);
+  if (!frontend.preload_macro_libraries()) return 2;
+  frontend.prepare_meta(%(${q.source}));
+  Context command = Context.open_isolated_named("editor request");
+  defer command.close();
+  ParsedUnit unit;
+  int parsed = frontend.open(q.source, unit);
+  defer unit.close();
+  q.compiler = unit.compiler;
+  if (_native_cpp(request) && _changed_dependency(q.compiler, q.sources)) {
+    fputs(unsaved_cpp, stderr);
+    return 2;
+  }
+  return q.write(parsed);
+}
+
+/* Whether a file the unit read, or whose text it kept, is unsaved. */
+static int _changed_dependency(Compiler c, SourceView sources) {
+  foreach (Var path, c.deps.keys()) if (sources.is_changed(path)) return 1;
+  foreach (Var path, c.source_texts.keys())
     if (sources.is_changed(path)) return 1;
   return 0;
 }
 
 // replies
 
-static Array _diagnostics(Compiler compiler, Map needed) {
+/* The reply holds the document's diagnostics, the answer to the query when
+   the unit parsed, and the text of each file a location names. */
+static int Query.write(Query *q, int parsed) {
+  File out = fopen(q.response, "w");
+  if (!out) return 2;
+  q.needed = {};
+  q.reply = {file: q.source, diagnostics: q.diagnostics()};
+  if (parsed) q.answer();
+  q.reply[<sources>] = q.texts();
+  fprintf(out, "%s\n", Var.json(q.reply));
+  return fclose(out) ? 2 : 0;
+}
+
+static Array Query.diagnostics(Query *q) {
   Array diagnostics = [];
-  foreach (List entry, compiler.diagnostics()) {
-    List location = entry.assoc(<location>);
-    Var source = location.assoc(<file>);
-    String path = source is <string> ? source : compiler.filename;
-    Var position = location.assoc(<position>);
-    Var width = location.assoc(<length>);
-    int start = position is void ? 0 : position;
-    int length = width is void ? 0 : width;
-    path = Path.absolute(path);
-    needed[path] = 1;
-    Map diagnostic = _location(path, start, start + length);
-    diagnostic[<message>] = entry.assoc(<message>);
-    diagnostic[<code>] = entry.assoc(<code>);
-    diagnostic[<severity>] = entry.assoc(<severity>);
-    diagnostics.push(diagnostic);
-  }
+  foreach (List entry, q.compiler.diagnostics())
+    diagnostics.push(q.diagnostic(entry));
   return diagnostics;
 }
 
-/* The private request uses argv for metadata and separate files for source
-   snapshots. Only this response file carries JSON; macros can print freely
-   to stdout/stderr without corrupting it. No JSON input parser is needed. */
-static Map _location(String path, int start, int end) =>
-  {file: path, start: start, end: end};
-
-static void _query(
-  Map reply, Compiler compiler, String path, String kind, int offset,
-  Map needed) {
-  List row = _occurrence(compiler, path, offset);
-  if (!row) return;
-  List binding = row[3];
-  Type type = row[4];
-  if (kind == "definition") {
-    Var value = compiler.source_definitions[binding];
-    if (value is not <list>) return;
-    List target = value;
-    needed[target[0]] = 1;
-    reply[<definition>] = _location(target[0], target[1], target[2]);
-  }
-  else if (kind == "hover" && type) {
-    needed[row[0]] = 1;
-    List declaration = type.declaration_ast(binding);
-    Map hover = _location(row[0], row[1], row[2]);
-    hover[<text>] = String.new(
-      compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
-    reply[<hover>] = hover;
-  }
+/* A diagnostic without a file is in the unit's file, and a missing
+   position or length counts as 0. */
+static Map Query.diagnostic(Query *q, List entry) {
+  List location = entry.assoc(<location>);
+  Var file = location.assoc(<file>), position = location.assoc(<position>);
+  Var width = location.assoc(<length>);
+  String path = file is <string> ? file : q.compiler.filename;
+  int start = position is void ? 0 : position;
+  int length = width is void ? 0 : width;
+  Map diagnostic = q.location(Path.absolute(path), start, start + length);
+  diagnostic[<message>] = entry.assoc(<message>);
+  diagnostic[<code>] = entry.assoc(<code>);
+  diagnostic[<severity>] = entry.assoc(<severity>);
+  return diagnostic;
 }
 
-static List _occurrence(Compiler compiler, String path, int offset) {
+/* A location in the reply. Its file joins `needed`, so the reply carries
+   the text its offsets count in. */
+static Map Query.location(Query *q, String path, int start, int end) {
+  q.needed[path] = 1;
+  return {file: path, start: start, end: end};
+}
+
+/* Answers a definition or hover query at the narrowest occurrence that
+   holds the offset. */
+static void Query.answer(Query *q) {
+  List row = _occurrence(q.compiler, q.source, q.offset);
+  if (!row) return;
+  if (q.kind == "definition") q.definition(row);
+  else if (q.kind == "hover") q.hover(row);
+}
+
+/* The narrowest row that holds `offset`. Each row is
+   `(FILE START END BINDING TYPE)`. */
+static List _occurrence(Compiler c, String path, int offset) {
   List found = NULL;
-  foreach (List row, compiler.source_occurrences) {
+  foreach (List row, c.source_occurrences) {
     String file = row[0];
     int start = row[1], end = row[2];
     if (file != path || offset < start || offset >= end) continue;
@@ -205,12 +223,34 @@ static List _occurrence(Compiler compiler, String path, int offset) {
   return found;
 }
 
-static Array _sources(Compiler compiler, Map needed) {
-  Array sources = [];
-  foreach (Var key, needed.keys()) {
+static void Query.definition(Query *q, List row) {
+  List binding = row[3];
+  Var value = q.compiler.source_definitions[binding];
+  if (value is not <list>) return;
+  List target = value;
+  q.reply[<definition>] = q.location(target[0], target[1], target[2]);
+}
+
+/* The declaration of the occurrence's binding, printed as C, when the
+   occurrence has a type. */
+static void Query.hover(Query *q, List row) {
+  Type type = row[4];
+  if (!type) return;
+  Compiler c = q.compiler;
+  List declaration = type.declaration_ast(row[3]);
+  Map hover = q.location(row[0], row[1], row[2]);
+  hover[<text>] =
+    String.new(c.code_pretty_string(c.emit(%($declaration)), NULL));
+  q.reply[<hover>] = hover;
+}
+
+/* The text the unit kept of each file a location names. */
+static Array Query.texts(Query *q) {
+  Array texts = [];
+  foreach (Var path, q.needed.keys()) {
     Var text;
-    if (compiler.source_texts.try_get(key, text))
-      sources.push({file: key, text: text});
+    if (q.compiler.source_texts.try_get(path, text))
+      texts.push({file: path, text: text});
   }
-  return sources;
+  return texts;
 }
