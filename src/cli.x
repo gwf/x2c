@@ -56,7 +56,7 @@ $(import "../lib/system-macros.xmacro")
 #include "report.x"
 #include "utils.x"
 
-// cli metadata
+// commands and options
 
 enum {
   CLI_TOP       = 1,
@@ -72,17 +72,6 @@ enum {
   // Commands that build native code from options on the command line.
   CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
-
-/* `spelling` is the text an argument must match, and is also the help label
-   unless `label` overrides it. `alias` is a second accepted spelling, and
-   `prefix` matches an option whose text continues in the same argument. */
-typedef struct CliOption {
-  Symbol id, int commands, Symbol group, String spelling;
-  const char *value, *description, int hidden;
-  String alias, label, int prefix;
-  int apply, package_native;
-  size_t offset;
-} CliOption;
 
 typedef struct CliCommand {
   Symbol name, int mask, const char *description;
@@ -103,6 +92,17 @@ static CliCommand cli_commands[] = {
   { <help>,      CLI_TOP,       "Show help for x2c or one command" },
   { 0 }
 };
+
+/* `spelling` is the text an argument must match, and is also the help label
+   unless `label` overrides it. `alias` is a second accepted spelling, and
+   `prefix` matches an option whose text continues in the same argument. */
+typedef struct CliOption {
+  Symbol id, int commands, Symbol group, String spelling;
+  const char *value, *description, int hidden;
+  String alias, label, int prefix;
+  int apply, package_native;
+  size_t offset;
+} CliOption;
 
 #define CLI_FIELD_FLAG(field) .apply = 1, \
   .offset = offsetof(struct CliRequest, field)
@@ -307,38 +307,6 @@ static CliOption cli_options[] = {
   { 0 }
 };
 
-// diagnostics
-
-static void _removed_output(void) {
-  fputs(
-    "x2c: error: option '-o' was removed\n"
-    "note: use '--out-dir' with translate or '--output' with build and run\n",
-    stderr);
-  exit(2);
-}
-
-static void _expected_command(const char *arg) {
-  fprintf(stderr, "x2c: error: expected a command before '%s'\n", arg);
-  fprintf(stderr, "note: use 'x2c translate --out-dir <dir> %s'\n", arg);
-  exit(2);
-}
-
-static void _response_error(
-  const char *path, int line, const char *message) {
-  fprintf(
-    stderr, "x2c: error: response file '%s':%d: %s\n",
-    path, line, message);
-  exit(2);
-}
-
-// help
-
-static int _command_mask(Symbol command) {
-  for (CliCommand *row = cli_commands; row.name; row++)
-    if (row.name == command) return row.mask;
-  return CLI_TOP;
-}
-
 // The command spelled `word`, or NULL. `help` never matches: it parses no
 // options and is not a subject of `x2c help <command>`.
 static CliCommand *_command_row(const char *word) {
@@ -347,69 +315,552 @@ static CliCommand *_command_row(const char *word) {
   return NULL;
 }
 
-/** Reports whether a raw command name belongs to the built-in parser. */
-int cli_builtin_command(const char *word) =>
-  !strcmp(word, "help") || _command_row(word) != NULL;
-
-static const char *_group_title(Symbol command, Symbol group) {
-  switch (group) {
-    case <target>:     return "Target options:";
-    case <output>:     return "Output options:";
-    case <source>:
-      return command == <translate> ?
-             "Source options:" : "Translation options:";
-    case <package>:    return "Package options:";
-    case <c-compiler>: return "C compiler options:";
-    case <linker>:     return "Linker options:";
-    case <inspection>: return "Inspection options:";
-    case <general>:    return "General options:";
-  }
-  return "Global options:";
+static int _command_mask(Symbol command) {
+  for (CliCommand *row = cli_commands; row.name; row++)
+    if (row.name == command) return row.mask;
+  return CLI_TOP;
 }
 
-static void _print_help_row(
-  const char *label, const char *description, int indent) {
-  const int description_column = 30, int width = indent + (int) strlen(label);
-  if (width >= description_column) {
-    printf("%*s%s\n", indent, "", label);
-    printf("%*s%s\n", description_column, "", description);
+// parsing
+
+/** Expands response files and parses `argv[1..]` into one validated request.
+    Help and version requests print and exit with status zero. An empty command
+    line prints help and exits with status two; other invalid input reports an
+    error and exits with status two. The result has the active `Scope` and
+    canonical-pool lifetimes described by `CliRequest`.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while expanding response files or
+    constructing request values.
+*/
+CliRequest cli_parse(int argc, char **argv) {
+  Array args = $auto([]);
+  // A script's arguments are its own, so `script` expands response files
+  // only while it parses its options.
+  int script = argc > 1 && !strcmp(argv[1], "script");
+  for (int i = 1; i < argc; i++) {
+    if (script) args.push(String.new(argv[i]));
+    else _expand_argument(args, String.new(argv[i]), NULL);
   }
-  else {
-    printf("%*s%s", indent, "", label);
-    printf("%*s%s\n", description_column - width, "", description);
+  if (!args.len()) {
+    _print_help(0);
+    exit(2);
+  }
+  String first = args[0];
+  if (!first)
+    x2c_driver_error("expected a command, found an empty argument");
+  if (first == "--help" || first == "-h") {
+    _print_help(0);
+    exit(0);
+  }
+  if (first == "--version" || first == "-V") {
+    _print_version();
+    exit(0);
+  }
+  if (first == "help") {
+    if (args.len() == 1) {
+      _print_help(0);
+      exit(0);
+    }
+    if (args.len() > 2) x2c_driver_error("help accepts at most one command");
+    String name = args[1];
+    CliCommand *asked = _command_row(name);
+    if (name == "help" || name == "--help" || name == "-h")
+      _print_help(<help>);
+    else if (asked) _print_help(asked.name);
+    else x2c_driver_error(%"unknown help command '$name'");
+    exit(0);
+  }
+  CliCommand *command = _command_row(first);
+  if (command) return _parse_command(args, command);
+  if (first == "-o") _removed_output();
+  String attached;
+  if (first.len() > 2 && first[0] == '-' && first[1] != '-' &&
+      _find_option(%"-$first", CLI_TRANSLATE, attached)) {
+    fprintf(
+      stderr,
+      "x2c: error: one-dash long option '%s' was removed\n", first);
+    fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
+    exit(2);
+  }
+  if (first[0] != '-') _expected_command(first);
+  x2c_driver_error(%"unknown command or global option '$first'");
+}
+
+static CliRequest _parse_command(Array args, CliCommand *command) {
+  Symbol name = command.name, int mask = command.mask;
+  CliRequest request = cli_request(name);
+  Array inputs = [], run_args = [], x_paths = [];
+  Array cpp_args = [], cc_args = [], ld_args = [], int operands = 0;
+  int expanded_end = 0;
+  for (int i = 1; i < args.len(); i++) {
+    String arg = args[i], int dashed = arg && arg[0] == '-';
+    if (!operands && dashed && arg == "--") {
+      operands = 1;
+      continue;
+    }
+    // Expanded words are parsed next but never expanded again.
+    if (mask == CLI_SCRIPT && !operands && i >= expanded_end &&
+        arg.startswith("@")) {
+      Array expanded = [];
+      _expand_argument(expanded, arg, NULL);
+      args.splice(i, 1, expanded);
+      expanded_end = i + expanded.len();
+      i--;
+      continue;
+    }
+    if (operands || !dashed) {
+      if (operands && name == <run>) run_args.push(arg);
+      else inputs.push(arg);
+      // Every word after a script belongs to the script, `@` and `--` too.
+      if (mask == CLI_SCRIPT)
+        while (++i < args.len()) run_args.push(args[i]);
+      continue;
+    }
+    if (arg == "-o") _removed_output();
+    if ((mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
+      request.save_temps = 1;
+      request.temps_dir = arg.remove_prefix("--save-temps=");
+      if (!request.temps_dir)
+        x2c_driver_error("--save-temps= requires a directory");
+      continue;
+    }
+    String spelling = NULL, value = NULL, int attached = 0;
+    CliOption *option =
+      _take_option(args, i, mask, spelling, value, attached);
+    if (!option) {
+      if (mask == CLI_TRANSLATE) _one_dash_removed(arg);
+      x2c_driver_error(%"unknown option '$arg'");
+    }
+    _apply_option(
+      request, option, spelling, value, attached,
+      x_paths,
+      cpp_args, cc_args, ld_args);
+  }
+  request.inputs = inputs.list_free();
+  request.run_args = run_args.list_free();
+  request.include_dirs = x_paths.list_free();
+  request.cpp_args = cpp_args.list_free();
+  request.cc_args = cc_args.list_free();
+  request.ld_args = ld_args.list_free();
+  if (request.package_dirs)
+    request.package_dirs = request.package_dirs.reverse();
+  request.native_modules = request.native_modules.reverse();
+  request.extensions = request.extensions.reverse();
+  if (mask == CLI_TRANSLATE && !request.inputs)
+    x2c_driver_error("translate requires at least one input");
+  if (request.inputs.cdr() && (request.dep_file || request.dep_target))
+    x2c_driver_error("--dep-file and --dep-target require exactly one input");
+  if (request.no_deps && (request.dep_file || request.dep_target ||
+                          request.no_phony_deps))
+    x2c_driver_error("--no-deps conflicts with dependency output options");
+  if (request.compile_only && request.kind != <executable>)
+    x2c_driver_error("--compile-only conflicts with a library target kind");
+  if (mask == CLI_ENV && request.inputs.cdr())
+    x2c_driver_error("env accepts at most one name");
+  if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
+      (!request.inputs || request.inputs.cdr()))
+    x2c_driver_error(%"${name} requires exactly one operand");
+  if (mask == CLI_LIST && request.inputs)
+    x2c_driver_error(%"${name} accepts no operands");
+  if (mask == CLI_SCRIPT && !request.inputs)
+    x2c_driver_error("script requires a script file");
+  return request;
+}
+
+// options
+
+/* Reads the option at `*index` for `mask`, advancing it past a separate
+   value argument. Returns NULL for an unknown spelling so each command can
+   phrase its own diagnostic. The driver asks for `spelling` and `attached`
+   because it forwards the argument as written to the C compiler and
+   linker. */
+static CliOption *_take_option(
+  Array args, int &index, int mask,
+  String &?spelling, String &value, int &?attached) {
+  // A long option may carry its value after '=', as `--out-dir=gen`. An
+  // empty one is the option's own missing-value case, not the next word.
+  String arg = args[index], written = arg, joined = NULL;
+  int equals = arg.startswith("--") ? arg.find("=") : -1;
+  if (equals > 2) {
+    written = arg[:equals];
+    joined = arg[equals + 1:];
+    if (joined && !joined[0]) joined = NULL;
+  }
+  String suffix = NULL;
+  CliOption *option = _find_option(written, mask, suffix);
+  if (!option) return NULL;
+  if (equals > 2 && !option.value)
+    x2c_driver_error(%"option takes no value '$arg'");
+  if (spelling) spelling = written;
+  if (attached) attached = suffix != NULL;
+  value = equals > 2 ? joined : suffix;
+  if (option.value && !value && equals <= 2) {
+    if (++index == args.len())
+      x2c_driver_error(%"option requires a value '$arg'");
+    value = args[index];
+  }
+  return option;
+}
+
+/* Finds the option `spelling` names for `mask`. A two-letter option that
+   takes a value also accepts it in the same argument, as `-Idir`, and
+   reports the remainder through `attached`. */
+static CliOption *_find_option(
+  String spelling, int command_mask, String &attached) {
+  attached = NULL;
+  for (CliOption *option = cli_options; option.spelling; option++) {
+    if (!(option.commands & command_mask)) continue;
+    String form = option.spelling;
+    int longer = spelling.len() > form.len() && spelling.startswith(form);
+    if (option.prefix) {
+      if (longer) return option;
+      continue;
+    }
+    if (spelling == form || spelling == option.alias) return option;
+    if (option.value && form.len() == 2 && longer) {
+      attached = spelling[2:];
+      return option;
+    }
+  }
+  return NULL;
+}
+
+static void _apply_option(
+  CliRequest c, CliOption *option, String spelling, String value,
+  int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args) {
+  char *destination = (char *) c + option.offset;
+  switch (option.apply) {
+    case 1: *(int *) destination = 1; return;
+    case 2: *(String *) destination = value; return;
+    case 3: *(List *) destination = cons(value, *(List *) destination); return;
+  }
+  $switch(option.id)
+  {
+    case <help>: _print_help(c.command);
+      exit(0);
+    case <color>:
+      if (!value)
+        x2c_driver_error("--color requires auto, always, or never");
+      if (value == "auto") c.color_mode = <auto>;
+      else if (value == "always") c.color_mode = <always>;
+      else if (value == "never") c.color_mode = <never>;
+      else x2c_driver_error(%"invalid color mode '$value'");
+    case <include>: x_paths.push(value);
+      // build and run also hand the directory to the C compiler.
+      if (c.command != <translate>) _push_pair(cc_args, "-I", value);
+    case <x-include>: x_paths.push(value);
+    case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
+    case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
+    case <dump-cache>: case <conform>: case <dump-defs>:
+      c.dump = option.id;
+    case <kind>: _driver_kind(c, value);
+    case <jobs>: c.jobs = _driver_count(value, 1, "job count");
+    case <max-errors>:
+      c.max_errors = _driver_count(value, 0, "error limit");
+    case <cc-db>:
+      c.compile_commands = value;
+      c.save_temps = 1;
+    case <c-include>: _push_pair(cc_args, "-I", value);
+    case <c-system>: _push_pair(cc_args, "-isystem", value);
+    case <opt>: case <g>: cc_args.push(spelling);
+    case <define>:
+    case <undefine>:
+      if (attached) {
+        cpp_args.push(spelling);
+        cc_args.push(spelling);
+      }
+      else {
+        _push_pair(cpp_args, spelling, value);
+        _push_pair(cc_args, spelling, value);
+      }
+    case <xcc>:
+      if (cli_dependency_pass_through(value))
+        x2c_driver_error(%"C dependency option is driver-owned '$value'");
+      cc_args.push(value);
+    case <lib-dir>: case <library>: if (attached) ld_args.push(spelling);
+      else _push_pair(ld_args, spelling, value);
+    case <rpath>: ld_args.push(%"-Wl,-rpath,$value");
+    case <pthread>: cc_args.push(spelling); ld_args.push(spelling);
+    case <framework>:
+    case <xlinker>: _push_pair(ld_args, spelling, value);
+    case <wl>: ld_args.push(spelling);
   }
 }
 
-static void _print_option(const CliOption *option) {
-  String spelled = option.label ? option.label :
-                   option.alias ? %"${option.spelling}, ${option.alias}" :
-                   option.spelling;
-  String label = option.value ? %"$spelled ${option.value}" : spelled;
-  _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
+static void _push_pair(Array arguments, String option, String value) {
+  arguments.push(option);
+  arguments.push(value);
 }
 
-static void _print_options(Symbol command) {
-  int mask = _command_mask(command);
-  if (mask == CLI_TOP) {
-    puts("\nGlobal options:");
-    for (CliOption *option = cli_options; option.spelling; option++)
-      if (!option.hidden && (option.commands & mask)) _print_option(option);
+static void _driver_kind(CliRequest request, String value) {
+  request.kind_explicit = 1;
+  if (value == "executable") request.kind = <executable>;
+  else if (value == "static-library") request.kind = <static-lib>;
+  else if (value == "meta-module") request.kind = <module>;
+  else if (value == "shared-library")
+    x2c_driver_error("shared-library is not supported by this compiler");
+  else x2c_driver_error(%"unknown target kind '$value'");
+}
+
+static int _driver_count(String value, int minimum, String noun) {
+  char *end = NULL;
+  errno = 0;
+  long count = value ? strtol(value, &end, 10) : 0;
+  if (!value || errno || *end || count < minimum || count > INT_MAX)
+    x2c_driver_error(%"invalid $noun '$value'");
+  return (int) count;
+}
+
+/** Returns whether `argument` contains a driver-owned dependency option.
+    Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
+    comma-delimited pass-through argument; `NULL` returns zero.
+*/
+int cli_dependency_pass_through(String s) {
+  return s && (
+    s.startswith("-MMD") || s.startswith("-MP") ||
+    s.startswith("-MF") || s.startswith("-MT") ||
+    s.contains(",-MMD") || s.contains(",-MP") ||
+    s.contains(",-MF") || s.contains(",-MT")
+  );
+}
+
+// package options
+
+/** Reads a package's native response options, expanding literal `{package}`
+    after tokenization. Only native include/define/thread options, ordered
+    archive/library/framework inputs, run-time library search directories,
+    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+    `cc_args` and `ld_args`
+    serve native actions; no source-preprocessing options are returned.
+*/
+CliRequest cli_package_options(String path, String package) {
+  Array words = $auto([]);
+  foreach (String word, cli_response_arguments(path))
+    words.push(word.replace("{package}", package));
+  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  request.command = <build>;
+  Array includes = [], cpp = [], compile = [], link = [];
+  for (int i = 0; i < words.len(); i++) {
+    String argument = words[i];
+    if (!argument) x2c_driver_error("empty package native argument");
+    if (argument[0] != '-' && argument[0] != '@' &&
+        argument.endswith(".a")) {
+      link.push(argument);
+      continue;
+    }
+    String spelling = NULL, value = NULL, int attached = 0;
+    CliOption *option = _take_option(
+      words, i, CLI_BUILD, spelling, value, attached);
+    if (!option || !option.package_native)
+      x2c_driver_error(%"unsupported package native argument '$argument'");
+    _apply_option(
+      request, option, spelling, value, attached, includes, cpp, compile,
+      link);
+  }
+  includes.free();
+  cpp.free();
+  request.cc_args = compile.list_free();
+  request.ld_args = link.list_free();
+  return request;
+}
+
+// response files
+
+static void _expand_argument(Array output, String argument, List stack) {
+  if (!argument || argument[0] != '@') {
+    output.push(argument);
     return;
   }
-  Symbol groups[] = {
-    <global>, <target>, <output>, <source>, <package>, <c-compiler>,
-    <linker>, <inspection>, <general>
-  };
-  for (int i = 0; i < 9; i++) {
-    Symbol group = groups[i], int found = 0;
-    for (CliOption *option = cli_options; option.spelling; option++)
-      if (!option.hidden && (option.commands & mask) &&
-          option.group == group) found = 1;
-    if (!found) continue;
-    printf("\n%s\n", _group_title(command, group));
-    for (CliOption *option = cli_options; option.spelling; option++)
-      if (!option.hidden && (option.commands & mask) &&
-          option.group == group) _print_option(option);
+  if (argument[1] == '@') {
+    output.push(String.new(argument + 1));
+    return;
+  }
+  if (!argument[1]) x2c_driver_error("empty response-file reference '@'");
+  String path = String.new(argument + 1);
+  String identity = Path.absolute(path);
+  if (_response_on_stack(stack, identity)) {
+    fprintf(
+      stderr,
+      "x2c: error: recursive response-file inclusion: %s\n", path);
+    exit(2);
+  }
+  List nested = cons(identity, stack);
+  foreach (String word, cli_response_arguments(path))
+    _expand_argument(output, word, nested);
+}
+
+static int _response_on_stack(List stack, String path) {
+  foreach (String entry, stack) if (entry == path) return 1;
+  return 0;
+}
+
+/** Reads response-file tokens with ordinary quoting and UTF-8 checks.
+    Returns canonical Strings without expanding `@` references. Paths and
+    arguments retain the producing pool lifetime.
+*/
+List cli_response_arguments(String path) {
+  size_t length = 0, char *text = _read_response_file(path, length);
+  Array arguments = [];
+  _tokenize_response(arguments, path, text, length);
+  Scope.free(text);
+  return arguments.list_free();
+}
+
+static char *_read_response_file(const char *path, size_t &length) {
+  FILE *file = fopen(path, "rb");
+  if (!file) _response_error(path, 1, strerror(errno));
+  if (fseek(file, 0, SEEK_END)) {
+    int error = errno;
+    fclose(file);
+    _response_error(path, 1, strerror(error));
+  }
+  long end = ftell(file);
+  if (end < 0 || fseek(file, 0, SEEK_SET)) {
+    int error = errno;
+    fclose(file);
+    _response_error(path, 1, strerror(error));
+  }
+  char *text = Scope.malloc((size_t) end + 1);
+  size_t got = fread(text, 1, (size_t) end, file), int failed = ferror(file);
+  fclose(file);
+  if (failed || got != (size_t) end)
+    _response_error(path, 1, "could not read complete file");
+  text[got] = 0;
+  if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
+  if (!_valid_utf8((unsigned char *) text, got))
+    _response_error(path, 1, "input is not valid UTF-8");
+  length = got;
+  return text;
+}
+
+static int _valid_utf8(const unsigned char *text, size_t length) {
+  size_t i = 0;
+  while (i < length) {
+    unsigned char c = text[i++];
+    if (c < 0x80) continue;
+    int extra = 0, minimum = 0;
+    unsigned code = 0;
+    if ((c & 0xe0) == 0xc0) {
+      extra = 1;
+      minimum = 0x80;
+      code = c & 0x1f;
+    }
+    else if ((c & 0xf0) == 0xe0) {
+      extra = 2;
+      minimum = 0x800;
+      code = c & 0x0f;
+    }
+    else if ((c & 0xf8) == 0xf0) {
+      extra = 3;
+      minimum = 0x10000;
+      code = c & 0x07;
+    }
+    else return 0;
+    if (i + extra > length) return 0;
+    while (extra--) {
+      unsigned char next = text[i++];
+      if ((next & 0xc0) != 0x80) return 0;
+      code = (code << 6) | (next & 0x3f);
+    }
+    if (code < minimum || (code >= 0xd800 && code <= 0xdfff) ||
+        code > 0x10ffff)
+      return 0;
+  }
+  return 1;
+}
+
+static void _tokenize_response(
+  Array output, String path, const char *text, size_t length) {
+  Buffer token = Buffer.new(0), int quote = 0, escaped = 0, line = 1, have = 0;
+  int first_nonspace = 1, comment = 0;
+  for (size_t i = 0; i <= length; i++) {
+    int c = i == length ? 0 : (unsigned char) text[i];
+    if (comment) {
+      if (c == '\n') {
+        comment = 0;
+        first_nonspace = 1;
+        line++;
+      }
+      else if (!c) break;
+      continue;
+    }
+    if (escaped) {
+      if (!c) _response_error(path, line, "trailing backslash");
+      token.write_char(c);
+      have = 1;
+      escaped = 0;
+      if (c == '\n') line++;
+      continue;
+    }
+    if (c == '\\') {
+      escaped = 1;
+      first_nonspace = 0;
+      continue;
+    }
+    if (quote) {
+      if (!c) _response_error(path, line, "unterminated quote");
+      if (c == quote) quote = 0;
+      else {
+        token.write_char(c);
+        have = 1;
+        if (c == '\n') line++;
+      }
+      continue;
+    }
+    if (c == '\'' || c == '"') {
+      quote = c;
+      have = 1;
+      first_nonspace = 0;
+      continue;
+    }
+    if (first_nonspace && c == '#') {
+      comment = 1;
+      continue;
+    }
+    if (!c || isspace(c)) {
+      if (have) {
+        output.push(token.str());
+        token.clear();
+        have = 0;
+      }
+      if (c == '\n') {
+        first_nonspace = 1;
+        line++;
+      }
+      else if (c && first_nonspace) first_nonspace = 1;
+      if (!c) break;
+      continue;
+    }
+    first_nonspace = 0;
+    token.write_char(c);
+    have = 1;
+  }
+  token.free();
+}
+
+// help
+
+static void _print_help(Symbol command) {
+  $switch(command)
+  {
+    case 0:            _print_top_help();
+    case <translate>:  _print_translate_help();
+    case <build>:
+    case <run>:        _print_driver_help(command);
+    case <new>:        _print_new_help();
+    case <script>:     _print_script_help();
+    case <env>:        _print_env_help();
+    case <install>:
+    case <remove>:
+    case <list>:       _print_package_help(command);
+    case <help>:
+      puts(
+        "Usage:\n"
+        "  x2c help [command]\n"
+        "\n"
+        "Show top-level help, or help for translate, build, run, new, script, "
+        "repl,\nenv, install, remove, or list.");
+    default: x2c_driver_error(%"unknown help command '${command}'");
   }
 }
 
@@ -520,6 +971,46 @@ static void _print_driver_help(Symbol command) {
         x2c returns the program's exit status."));
 }
 
+static void _print_new_help(void) {
+  puts(
+    $dedent(%"
+      Usage:
+        x2c new [options] <dir>
+
+      Create a project in <dir> that builds and runs as written: x2c.toml,
+      src/main.x, and .gitignore. The directory may be missing or empty."));
+  _print_options(<new>);
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  puts("");
+  puts(
+    $dedent(%"
+      The target is named after the last component of <dir>, which may
+      contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next."));
+}
+
+static void _print_script_help(void) {
+  puts(
+    $dedent(%"
+      Usage:
+        x2c script [options] <file> [<argument>...]
+
+      Run an x2c source file as a script. The first run builds an executable in
+      the per-user cache; later runs start it directly until the script, a file
+      it includes or imports, the compiler, the runtime, or an option changes."));
+  _print_options(<script>);
+  _print_help_row(
+    "@<file>", "Read additional options from a response file", 2);
+  puts("");
+  puts(
+    $dedent(%"
+      Every word after <file> is passed unchanged to the script, including
+      words that begin with - or @. A script whose first line is the shebang
+      '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
+      XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
+      scripts that no longer exist."));
+}
+
 static void _print_env_help(void) {
   puts(
     $dedent(%"
@@ -577,459 +1068,86 @@ static void _print_package_help(Symbol command) {
       dependencies is refused; install its bundle instead."));
 }
 
-static void _print_new_help(void) {
-  puts(
-    $dedent(%"
-      Usage:
-        x2c new [options] <dir>
-
-      Create a project in <dir> that builds and runs as written: x2c.toml,
-      src/main.x, and .gitignore. The directory may be missing or empty."));
-  _print_options(<new>);
-  _print_help_row(
-    "@<file>", "Read additional arguments from a response file", 2);
-  puts("");
-  puts(
-    $dedent(%"
-      The target is named after the last component of <dir>, which may
-      contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next."));
-}
-
-static void _print_script_help(void) {
-  puts(
-    $dedent(%"
-      Usage:
-        x2c script [options] <file> [<argument>...]
-
-      Run an x2c source file as a script. The first run builds an executable in
-      the per-user cache; later runs start it directly until the script, a file
-      it includes or imports, the compiler, the runtime, or an option changes."));
-  _print_options(<script>);
-  _print_help_row(
-    "@<file>", "Read additional options from a response file", 2);
-  puts("");
-  puts(
-    $dedent(%"
-      Every word after <file> is passed unchanged to the script, including
-      words that begin with - or @. A script whose first line is the shebang
-      '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
-      XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
-      scripts that no longer exist."));
-}
-
-static void _print_help(Symbol command) {
-  $switch(command)
-  {
-    case 0:            _print_top_help();
-    case <translate>:  _print_translate_help();
-    case <build>:
-    case <run>:        _print_driver_help(command);
-    case <new>:        _print_new_help();
-    case <script>:     _print_script_help();
-    case <env>:        _print_env_help();
-    case <install>:
-    case <remove>:
-    case <list>:       _print_package_help(command);
-    case <help>:
-      puts(
-        "Usage:\n"
-        "  x2c help [command]\n"
-        "\n"
-        "Show top-level help, or help for translate, build, run, new, script, "
-        "repl,\nenv, install, remove, or list.");
-    default: x2c_driver_error(%"unknown help command '${command}'");
+static void _print_options(Symbol command) {
+  int mask = _command_mask(command);
+  if (mask == CLI_TOP) {
+    puts("\nGlobal options:");
+    for (CliOption *option = cli_options; option.spelling; option++)
+      if (!option.hidden && (option.commands & mask)) _print_option(option);
+    return;
   }
+  Symbol groups[] = {
+    <global>, <target>, <output>, <source>, <package>, <c-compiler>,
+    <linker>, <inspection>, <general>
+  };
+  for (int i = 0; i < 9; i++) {
+    Symbol group = groups[i], int found = 0;
+    for (CliOption *option = cli_options; option.spelling; option++)
+      if (!option.hidden && (option.commands & mask) &&
+          option.group == group) found = 1;
+    if (!found) continue;
+    printf("\n%s\n", _group_title(command, group));
+    for (CliOption *option = cli_options; option.spelling; option++)
+      if (!option.hidden && (option.commands & mask) &&
+          option.group == group) _print_option(option);
+  }
+}
+
+static void _print_option(const CliOption *option) {
+  String spelled = option.label ? option.label :
+                   option.alias ? %"${option.spelling}, ${option.alias}" :
+                   option.spelling;
+  String label = option.value ? %"$spelled ${option.value}" : spelled;
+  _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
+}
+
+static void _print_help_row(
+  const char *label, const char *description, int indent) {
+  const int description_column = 30, int width = indent + (int) strlen(label);
+  if (width >= description_column) {
+    printf("%*s%s\n", indent, "", label);
+    printf("%*s%s\n", description_column, "", description);
+  }
+  else {
+    printf("%*s%s", indent, "", label);
+    printf("%*s%s\n", description_column - width, "", description);
+  }
+}
+
+static const char *_group_title(Symbol command, Symbol group) {
+  switch (group) {
+    case <target>:     return "Target options:";
+    case <output>:     return "Output options:";
+    case <source>:
+      return command == <translate> ?
+             "Source options:" : "Translation options:";
+    case <package>:    return "Package options:";
+    case <c-compiler>: return "C compiler options:";
+    case <linker>:     return "Linker options:";
+    case <inspection>: return "Inspection options:";
+    case <general>:    return "General options:";
+  }
+  return "Global options:";
 }
 
 static void _print_version(void) {
   puts(cli_version());
 }
 
-// response files
+// diagnostics
 
-static int _valid_utf8(const unsigned char *text, size_t length) {
-  size_t i = 0;
-  while (i < length) {
-    unsigned char c = text[i++];
-    if (c < 0x80) continue;
-    int extra = 0, minimum = 0;
-    unsigned code = 0;
-    if ((c & 0xe0) == 0xc0) {
-      extra = 1;
-      minimum = 0x80;
-      code = c & 0x1f;
-    }
-    else if ((c & 0xf0) == 0xe0) {
-      extra = 2;
-      minimum = 0x800;
-      code = c & 0x0f;
-    }
-    else if ((c & 0xf8) == 0xf0) {
-      extra = 3;
-      minimum = 0x10000;
-      code = c & 0x07;
-    }
-    else return 0;
-    if (i + extra > length) return 0;
-    while (extra--) {
-      unsigned char next = text[i++];
-      if ((next & 0xc0) != 0x80) return 0;
-      code = (code << 6) | (next & 0x3f);
-    }
-    if (code < minimum || (code >= 0xd800 && code <= 0xdfff) ||
-        code > 0x10ffff)
-      return 0;
-  }
-  return 1;
+static void _removed_output(void) {
+  fputs(
+    "x2c: error: option '-o' was removed\n"
+    "note: use '--out-dir' with translate or '--output' with build and run\n",
+    stderr);
+  exit(2);
 }
 
-static char *_read_response_file(const char *path, size_t &length) {
-  FILE *file = fopen(path, "rb");
-  if (!file) _response_error(path, 1, strerror(errno));
-  if (fseek(file, 0, SEEK_END)) {
-    int error = errno;
-    fclose(file);
-    _response_error(path, 1, strerror(error));
-  }
-  long end = ftell(file);
-  if (end < 0 || fseek(file, 0, SEEK_SET)) {
-    int error = errno;
-    fclose(file);
-    _response_error(path, 1, strerror(error));
-  }
-  char *text = Scope.malloc((size_t) end + 1);
-  size_t got = fread(text, 1, (size_t) end, file), int failed = ferror(file);
-  fclose(file);
-  if (failed || got != (size_t) end)
-    _response_error(path, 1, "could not read complete file");
-  text[got] = 0;
-  if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
-  if (!_valid_utf8((unsigned char *) text, got))
-    _response_error(path, 1, "input is not valid UTF-8");
-  length = got;
-  return text;
-}
-
-static int _response_on_stack(List stack, String path) {
-  foreach (String entry, stack) if (entry == path) return 1;
-  return 0;
-}
-
-static void _tokenize_response(
-  Array output, String path, const char *text, size_t length) {
-  Buffer token = Buffer.new(0), int quote = 0, escaped = 0, line = 1, have = 0;
-  int first_nonspace = 1, comment = 0;
-  for (size_t i = 0; i <= length; i++) {
-    int c = i == length ? 0 : (unsigned char) text[i];
-    if (comment) {
-      if (c == '\n') {
-        comment = 0;
-        first_nonspace = 1;
-        line++;
-      }
-      else if (!c) break;
-      continue;
-    }
-    if (escaped) {
-      if (!c) _response_error(path, line, "trailing backslash");
-      token.write_char(c);
-      have = 1;
-      escaped = 0;
-      if (c == '\n') line++;
-      continue;
-    }
-    if (c == '\\') {
-      escaped = 1;
-      first_nonspace = 0;
-      continue;
-    }
-    if (quote) {
-      if (!c) _response_error(path, line, "unterminated quote");
-      if (c == quote) quote = 0;
-      else {
-        token.write_char(c);
-        have = 1;
-        if (c == '\n') line++;
-      }
-      continue;
-    }
-    if (c == '\'' || c == '"') {
-      quote = c;
-      have = 1;
-      first_nonspace = 0;
-      continue;
-    }
-    if (first_nonspace && c == '#') {
-      comment = 1;
-      continue;
-    }
-    if (!c || isspace(c)) {
-      if (have) {
-        output.push(token.str());
-        token.clear();
-        have = 0;
-      }
-      if (c == '\n') {
-        first_nonspace = 1;
-        line++;
-      }
-      else if (c && first_nonspace) first_nonspace = 1;
-      if (!c) break;
-      continue;
-    }
-    first_nonspace = 0;
-    token.write_char(c);
-    have = 1;
-  }
-  token.free();
-}
-
-/** Reads response-file tokens with ordinary quoting and UTF-8 checks.
-    Returns canonical Strings without expanding `@` references. Paths and
-    arguments retain the producing pool lifetime.
-*/
-List cli_response_arguments(String path) {
-  size_t length = 0, char *text = _read_response_file(path, length);
-  Array arguments = [];
-  _tokenize_response(arguments, path, text, length);
-  Scope.free(text);
-  return arguments.list_free();
-}
-
-static void _expand_argument(Array output, String argument, List stack) {
-  if (!argument || argument[0] != '@') {
-    output.push(argument);
-    return;
-  }
-  if (argument[1] == '@') {
-    output.push(String.new(argument + 1));
-    return;
-  }
-  if (!argument[1]) x2c_driver_error("empty response-file reference '@'");
-  String path = String.new(argument + 1);
-  String identity = Path.absolute(path);
-  if (_response_on_stack(stack, identity)) {
-    fprintf(
-      stderr,
-      "x2c: error: recursive response-file inclusion: %s\n", path);
-    exit(2);
-  }
-  List nested = cons(identity, stack);
-  foreach (String word, cli_response_arguments(path))
-    _expand_argument(output, word, nested);
-}
-
-// parsing
-
-/* Finds the option `spelling` names for `mask`. A two-letter option that
-   takes a value also accepts it in the same argument, as `-Idir`, and
-   reports the remainder through `attached`. */
-static CliOption *_find_option(
-  String spelling, int command_mask, String &attached) {
-  attached = NULL;
-  for (CliOption *option = cli_options; option.spelling; option++) {
-    if (!(option.commands & command_mask)) continue;
-    String form = option.spelling;
-    int longer = spelling.len() > form.len() && spelling.startswith(form);
-    if (option.prefix) {
-      if (longer) return option;
-      continue;
-    }
-    if (spelling == form || spelling == option.alias) return option;
-    if (option.value && form.len() == 2 && longer) {
-      attached = spelling[2:];
-      return option;
-    }
-  }
-  return NULL;
-}
-
-/* Reads the option at `*index` for `mask`, advancing it past a separate
-   value argument. Returns NULL for an unknown spelling so each command can
-   phrase its own diagnostic. The driver asks for `spelling` and `attached`
-   because it forwards the argument as written to the C compiler and
-   linker. */
-static CliOption *_take_option(
-  Array args, int &index, int mask,
-  String &?spelling, String &value, int &?attached) {
-  // A long option may carry its value after '=', as `--out-dir=gen`. An
-  // empty one is the option's own missing-value case, not the next word.
-  String arg = args[index], written = arg, joined = NULL;
-  int equals = arg.startswith("--") ? arg.find("=") : -1;
-  if (equals > 2) {
-    written = arg[:equals];
-    joined = arg[equals + 1:];
-    if (joined && !joined[0]) joined = NULL;
-  }
-  String suffix = NULL;
-  CliOption *option = _find_option(written, mask, suffix);
-  if (!option) return NULL;
-  if (equals > 2 && !option.value)
-    x2c_driver_error(%"option takes no value '$arg'");
-  if (spelling) spelling = written;
-  if (attached) attached = suffix != NULL;
-  value = equals > 2 ? joined : suffix;
-  if (option.value && !value && equals <= 2) {
-    if (++index == args.len())
-      x2c_driver_error(%"option requires a value '$arg'");
-    value = args[index];
-  }
-  return option;
-}
-
-static void _push_pair(Array arguments, String option, String value) {
-  arguments.push(option);
-  arguments.push(value);
-}
-
-/** Returns whether `argument` contains a driver-owned dependency option.
-    Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
-    comma-delimited pass-through argument; `NULL` returns zero.
-*/
-int cli_dependency_pass_through(String s) {
-  return s && (
-    s.startswith("-MMD") || s.startswith("-MP") ||
-    s.startswith("-MF") || s.startswith("-MT") ||
-    s.contains(",-MMD") || s.contains(",-MP") ||
-    s.contains(",-MF") || s.contains(",-MT")
-  );
-}
-
-static void _driver_kind(CliRequest request, String value) {
-  request.kind_explicit = 1;
-  if (value == "executable") request.kind = <executable>;
-  else if (value == "static-library") request.kind = <static-lib>;
-  else if (value == "meta-module") request.kind = <module>;
-  else if (value == "shared-library")
-    x2c_driver_error("shared-library is not supported by this compiler");
-  else x2c_driver_error(%"unknown target kind '$value'");
-}
-
-static int _driver_count(String value, int minimum, String noun) {
-  char *end = NULL;
-  errno = 0;
-  long count = value ? strtol(value, &end, 10) : 0;
-  if (!value || errno || *end || count < minimum || count > INT_MAX)
-    x2c_driver_error(%"invalid $noun '$value'");
-  return (int) count;
-}
-
-static void _apply_option(
-  CliRequest c, CliOption *option, String spelling, String value,
-  int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args) {
-  char *destination = (char *) c + option.offset;
-  switch (option.apply) {
-    case 1: *(int *) destination = 1; return;
-    case 2: *(String *) destination = value; return;
-    case 3: *(List *) destination = cons(value, *(List *) destination); return;
-  }
-  $switch(option.id)
-  {
-    case <help>: _print_help(c.command);
-      exit(0);
-    case <color>:
-      if (!value)
-        x2c_driver_error("--color requires auto, always, or never");
-      if (value == "auto") c.color_mode = <auto>;
-      else if (value == "always") c.color_mode = <always>;
-      else if (value == "never") c.color_mode = <never>;
-      else x2c_driver_error(%"invalid color mode '$value'");
-    case <include>: x_paths.push(value);
-      // build and run also hand the directory to the C compiler.
-      if (c.command != <translate>) _push_pair(cc_args, "-I", value);
-    case <x-include>: x_paths.push(value);
-    case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
-    case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
-    case <dump-cache>: case <conform>: case <dump-defs>:
-      c.dump = option.id;
-    case <kind>: _driver_kind(c, value);
-    case <jobs>: c.jobs = _driver_count(value, 1, "job count");
-    case <max-errors>:
-      c.max_errors = _driver_count(value, 0, "error limit");
-    case <cc-db>:
-      c.compile_commands = value;
-      c.save_temps = 1;
-    case <c-include>: _push_pair(cc_args, "-I", value);
-    case <c-system>: _push_pair(cc_args, "-isystem", value);
-    case <opt>: case <g>: cc_args.push(spelling);
-    case <define>:
-    case <undefine>:
-      if (attached) {
-        cpp_args.push(spelling);
-        cc_args.push(spelling);
-      }
-      else {
-        _push_pair(cpp_args, spelling, value);
-        _push_pair(cc_args, spelling, value);
-      }
-    case <xcc>:
-      if (cli_dependency_pass_through(value))
-        x2c_driver_error(%"C dependency option is driver-owned '$value'");
-      cc_args.push(value);
-    case <lib-dir>: case <library>: if (attached) ld_args.push(spelling);
-      else _push_pair(ld_args, spelling, value);
-    case <rpath>: ld_args.push(%"-Wl,-rpath,$value");
-    case <pthread>: cc_args.push(spelling); ld_args.push(spelling);
-    case <framework>:
-    case <xlinker>: _push_pair(ld_args, spelling, value);
-    case <wl>: ld_args.push(spelling);
-  }
-}
-
-/** Reads a package's native response options, expanding literal `{package}`
-    after tokenization. Only native include/define/thread options, ordered
-    archive/library/framework inputs, run-time library search directories,
-    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
-    `cc_args` and `ld_args`
-    serve native actions; no source-preprocessing options are returned.
-*/
-CliRequest cli_package_options(String path, String package) {
-  Array words = $auto([]);
-  foreach (String word, cli_response_arguments(path))
-    words.push(word.replace("{package}", package));
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
-  request.command = <build>;
-  Array includes = [], cpp = [], compile = [], link = [];
-  for (int i = 0; i < words.len(); i++) {
-    String argument = words[i];
-    if (!argument) x2c_driver_error("empty package native argument");
-    if (argument[0] != '-' && argument[0] != '@' &&
-        argument.endswith(".a")) {
-      link.push(argument);
-      continue;
-    }
-    String spelling = NULL, value = NULL, int attached = 0;
-    CliOption *option = _take_option(
-      words, i, CLI_BUILD, spelling, value, attached);
-    if (!option || !option.package_native)
-      x2c_driver_error(%"unsupported package native argument '$argument'");
-    _apply_option(
-      request, option, spelling, value, attached, includes, cpp, compile,
-      link);
-  }
-  includes.free();
-  cpp.free();
-  request.cc_args = compile.list_free();
-  request.ld_args = link.list_free();
-  return request;
-}
-
-// An outer Make owns concurrency unless the caller explicitly supplies -j.
-static int _default_build_jobs(void) {
-  if (report_make_owned()) return 1;
-  long count = sysconf(_SC_NPROCESSORS_ONLN);
-  return count > 0 && count <= INT_MAX ? (int) count : 1;
-}
-
-/** Constructs a request with the command's ordinary CLI defaults. */
-CliRequest cli_request(Symbol command) {
-  int mask = _command_mask(command);
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
-  request.command = command;
-  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
-  request.max_errors = 20;
-  if (mask & CLI_NATIVE) request.kind = <executable>;
-  return request;
+static void _expected_command(const char *arg) {
+  fprintf(stderr, "x2c: error: expected a command before '%s'\n", arg);
+  fprintf(stderr, "note: use 'x2c translate --out-dir <dir> %s'\n", arg);
+  exit(2);
 }
 
 /* translate reports the diagnostic for x2c's single-dash long-option
@@ -1046,149 +1164,37 @@ static void _one_dash_removed(String arg) {
   }
 }
 
-static CliRequest _parse_command(Array args, CliCommand *command) {
-  Symbol name = command.name, int mask = command.mask;
-  CliRequest request = cli_request(name);
-  Array inputs = [], run_args = [], x_paths = [];
-  Array cpp_args = [], cc_args = [], ld_args = [], int operands = 0;
-  int expanded_end = 0;
-  for (int i = 1; i < args.len(); i++) {
-    String arg = args[i], int dashed = arg && arg[0] == '-';
-    if (!operands && dashed && arg == "--") {
-      operands = 1;
-      continue;
-    }
-    // Expanded words are parsed next but never expanded again.
-    if (mask == CLI_SCRIPT && !operands && i >= expanded_end &&
-        arg.startswith("@")) {
-      Array expanded = [];
-      _expand_argument(expanded, arg, NULL);
-      args.splice(i, 1, expanded);
-      expanded_end = i + expanded.len();
-      i--;
-      continue;
-    }
-    if (operands || !dashed) {
-      if (operands && name == <run>) run_args.push(arg);
-      else inputs.push(arg);
-      // Every word after a script belongs to the script, `@` and `--` too.
-      if (mask == CLI_SCRIPT)
-        while (++i < args.len()) run_args.push(args[i]);
-      continue;
-    }
-    if (arg == "-o") _removed_output();
-    if ((mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
-      request.save_temps = 1;
-      request.temps_dir = arg.remove_prefix("--save-temps=");
-      if (!request.temps_dir)
-        x2c_driver_error("--save-temps= requires a directory");
-      continue;
-    }
-    String spelling = NULL, value = NULL, int attached = 0;
-    CliOption *option =
-      _take_option(args, i, mask, spelling, value, attached);
-    if (!option) {
-      if (mask == CLI_TRANSLATE) _one_dash_removed(arg);
-      x2c_driver_error(%"unknown option '$arg'");
-    }
-    _apply_option(
-      request, option, spelling, value, attached,
-      x_paths,
-      cpp_args, cc_args, ld_args);
-  }
-  request.inputs = inputs.list_free();
-  request.run_args = run_args.list_free();
-  request.include_dirs = x_paths.list_free();
-  request.cpp_args = cpp_args.list_free();
-  request.cc_args = cc_args.list_free();
-  request.ld_args = ld_args.list_free();
-  if (request.package_dirs)
-    request.package_dirs = request.package_dirs.reverse();
-  request.native_modules = request.native_modules.reverse();
-  request.extensions = request.extensions.reverse();
-  if (mask == CLI_TRANSLATE && !request.inputs)
-    x2c_driver_error("translate requires at least one input");
-  if (request.inputs.cdr() && (request.dep_file || request.dep_target))
-    x2c_driver_error("--dep-file and --dep-target require exactly one input");
-  if (request.no_deps && (request.dep_file || request.dep_target ||
-                          request.no_phony_deps))
-    x2c_driver_error("--no-deps conflicts with dependency output options");
-  if (request.compile_only && request.kind != <executable>)
-    x2c_driver_error("--compile-only conflicts with a library target kind");
-  if (mask == CLI_ENV && request.inputs.cdr())
-    x2c_driver_error("env accepts at most one name");
-  if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
-      (!request.inputs || request.inputs.cdr()))
-    x2c_driver_error(%"${name} requires exactly one operand");
-  if (mask == CLI_LIST && request.inputs)
-    x2c_driver_error(%"${name} accepts no operands");
-  if (mask == CLI_SCRIPT && !request.inputs)
-    x2c_driver_error("script requires a script file");
+static void _response_error(
+  const char *path, int line, const char *message) {
+  fprintf(
+    stderr, "x2c: error: response file '%s':%d: %s\n",
+    path, line, message);
+  exit(2);
+}
+
+// requests
+
+/** Constructs a request with the command's ordinary CLI defaults. */
+CliRequest cli_request(Symbol command) {
+  int mask = _command_mask(command);
+  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  request.command = command;
+  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  request.max_errors = 20;
+  if (mask & CLI_NATIVE) request.kind = <executable>;
   return request;
 }
 
-/** Expands response files and parses `argv[1..]` into one validated request.
-    Help and version requests print and exit with status zero. An empty command
-    line prints help and exits with status two; other invalid input reports an
-    error and exits with status two. The result has the active `Scope` and
-    canonical-pool lifetimes described by `CliRequest`.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while expanding response files or
-    constructing request values.
-*/
-CliRequest cli_parse(int argc, char **argv) {
-  Array args = $auto([]);
-  // A script's arguments are its own, so `script` expands response files
-  // only while it parses its options.
-  int script = argc > 1 && !strcmp(argv[1], "script");
-  for (int i = 1; i < argc; i++) {
-    if (script) args.push(String.new(argv[i]));
-    else _expand_argument(args, String.new(argv[i]), NULL);
-  }
-  if (!args.len()) {
-    _print_help(0);
-    exit(2);
-  }
-  String first = args[0];
-  if (!first)
-    x2c_driver_error("expected a command, found an empty argument");
-  if (first == "--help" || first == "-h") {
-    _print_help(0);
-    exit(0);
-  }
-  if (first == "--version" || first == "-V") {
-    _print_version();
-    exit(0);
-  }
-  if (first == "help") {
-    if (args.len() == 1) {
-      _print_help(0);
-      exit(0);
-    }
-    if (args.len() > 2) x2c_driver_error("help accepts at most one command");
-    String name = args[1];
-    CliCommand *asked = _command_row(name);
-    if (name == "help" || name == "--help" || name == "-h")
-      _print_help(<help>);
-    else if (asked) _print_help(asked.name);
-    else x2c_driver_error(%"unknown help command '$name'");
-    exit(0);
-  }
-  CliCommand *command = _command_row(first);
-  if (command) return _parse_command(args, command);
-  if (first == "-o") _removed_output();
-  String attached;
-  if (first.len() > 2 && first[0] == '-' && first[1] != '-' &&
-      _find_option(%"-$first", CLI_TRANSLATE, attached)) {
-    fprintf(
-      stderr,
-      "x2c: error: one-dash long option '%s' was removed\n", first);
-    fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
-    exit(2);
-  }
-  if (first[0] != '-') _expected_command(first);
-  x2c_driver_error(%"unknown command or global option '$first'");
+// An outer Make owns concurrency unless the caller explicitly supplies -j.
+static int _default_build_jobs(void) {
+  if (report_make_owned()) return 1;
+  long count = sysconf(_SC_NPROCESSORS_ONLN);
+  return count > 0 && count <= INT_MAX ? (int) count : 1;
 }
+
+/** Reports whether a raw command name belongs to the built-in parser. */
+int cli_builtin_command(const char *word) =>
+  !strcmp(word, "help") || _command_row(word) != NULL;
 
 /** Returns the version line `--version` prints, without a newline. */
 String cli_version(void) => "x2c 0.14.0";
