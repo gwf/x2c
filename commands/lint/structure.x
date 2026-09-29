@@ -1,13 +1,14 @@
 #pragma indent
-/*  structure.x -- rules for source structure worth a deletion review
+/*  structure.x -- rules for source structure worth a review
 
     Each rule marks a place to read, not a defect: a switch that repeats a
     table's order, identifiers an enum, a table, and a switch all repeat,
     field-by-field and whole-struct copies, paired lifecycle functions,
-    functions dense with counters or cleanup calls, and functions whose
-    control and call sequences nearly repeat another's. Two rules compare
-    every file on the command line: a type no other file mentions, and a
-    function body that another file repeats.
+    functions dense with counters or cleanup calls, functions whose control
+    and call sequences nearly repeat another's, and functions over the
+    shape limits for lines, brace depth, parameters, and name length. Two
+    rules compare every file on the command line: a type no other file
+    mentions, and a function body that another file repeats.
 */
 #include "lint.x"
 #include <ctype.h>
@@ -100,6 +101,54 @@ static void _bookkeeping(Lint l, List function):
   if stats >= 5 || cleanup >= 5:
     l.add("manual-bookkeeping", _line(l, start),
           %"$stats statistics sites and $cleanup cleanup calls in $name")
+
+/* The deepest nesting of code braces among the tokens `from` up to `to`.
+   Braces in quoted Lisp forms and interpolated strings do not count. */
+static int _brace_depth(Lint l, int from, int to):
+  int deepest = 0
+  for (int at = from; at < to; at = l.next(at)):
+    if l.tokens[at].type != <"{"> || l.quoted[at]: continue
+    int depth = 1 + _brace_depth(l, at + 1, l.partner[at])
+    if depth > deepest: deepest = depth
+    at = l.partner[at]
+  return deepest
+
+/* The parameters in the first parenthesized list from `start` up to
+   `body`: one more than its top-level commas, or none for `()` and
+   `(void)`. */
+static int _parameter_count(Lint l, int start, int body):
+  int open = start
+  while open < body && l.tokens[open].type != <"(">: open++
+  int close = l.partner[open], first = l.next(open)
+  if first == close || _is(l, first, "void") && l.next(first) == close:
+    return 0
+  int count = 1
+  for (int at = first; at < close; at = l.next(at)):
+    if lint_opens(l.at(at)): at = l.partner[at]
+    else if l.tokens[at].type == <",">: count++
+  return count
+
+/* A function over 40 lines, with braces 5 deep, with 7 or more
+   parameters, or whose name without its owner has 30 or more
+   characters. */
+static void _shape(Lint l, List function):
+  Var (key, start, body, end) = function
+  String (owner, dot, name) = lint_name(function).rpartition(".")
+  int line = _line(l, start), lines = _last_line(l, end) - line + 1
+  int depth = _brace_depth(l, body.int(), end.int())
+  int parameters = _parameter_count(l, start.int(), body.int())
+  if lines > 40:
+    l.add("long-function", line,
+          %"function spans $lines lines; review above 40")
+  if depth >= 5:
+    l.add("deep-nesting", line, %"brace depth reaches $depth; review at 5")
+  if parameters >= 7:
+    l.add("long-parameter-list", line,
+          %"function takes $parameters parameters; group shared context " +
+          "in a record or receiver")
+  if name.len() >= 30:
+    l.add("long-name", line,
+          %"name has ${name.len()} characters; review at 30")
 
 /* The id of `word` in `ids`, which numbers words as they first appear. */
 static int _id(Map ids, String word):
@@ -291,6 +340,7 @@ void Lint.structure_rules(Lint l):
   foreach List function in l.functions:
     _copies(l, function)
     _bookkeeping(l, function)
+    _shape(l, function)
   _routes(l)
   _lifecycles(l)
   _tables(l)
