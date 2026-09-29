@@ -711,6 +711,18 @@ Symbol preproc_never_active_arm(String s) {
     ? <rest> : 0;
 }
 
+/** Returns the hidden-arm state of the conditional group that `text` opens:
+    2 when C never takes its first arm, 1 when C never takes the arms after
+    its first `#else`, and 0 otherwise. */
+int preproc_open_state(String text) {
+  Symbol never = preproc_never_active_arm(text);
+  return never == <first> ? 2 : never == <rest>;
+}
+
+/** Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
+    the group's state was 1, and 0 otherwise. */
+int preproc_branch_state(int state) => state == 1 ? 2 : 0;
+
 /* Reports whether the attribute list the group `open` holds names an
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
@@ -841,13 +853,11 @@ static void _scan_conditionals(Compiler c) {
     }
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
-    if (kind == <open>) {
-      Symbol never = preproc_never_active_arm(token.text);
-      stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
-    }
+    if (kind == <open>)
+      stack.push(%(${++serial} 0 ${preproc_open_state(token.text)}));
     else if (kind == <branch> && stack.len()) {
       Var (id, arm, state) = stack[-1];
-      stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+      stack[-1] = %($id ${arm.integer() + 1} ${preproc_branch_state(state)});
     }
     else if (kind == <close> && stack.len()) stack.take_last();
     else if (!hidden)
