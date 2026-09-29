@@ -38,167 +38,7 @@ static int helper_to = -1, helper_from = -1, helper_table = 0;
 static int helper_reset = 0;
 static Buffer helper_input = NULL;
 
-/** Stops the helper this process runs, which a translation worker does
-    when its units are done and every process does as it ends. */
-void Compiler.stop_meta_helper(void) { _helper_stop(0); }
-
-static void _helper_shutdown(void) {
-  _helper_stop(0);
-  helper_scope.destroy();
-  helper_scope = NULL;
-  helper_path = NULL;
-  helper_failures = helper_units = NULL;
-  helper_input = NULL;
-}
-
-/** Uses the helper at `path`, or none when it is NULL, whose tables named
-    in `failures` could not be built, each with why, and whose table for
-    each input path is in `units`. */
-void Compiler.use_meta_helper(String path, Map failures, Map units) {
-  if (!path && !failures) return;
-  if (!helper_scope) Scope.shutdown_hook(_helper_shutdown);
-  Scope.push(&helper_scope);
-  helper_path = path ? String.new(path) : NULL;
-  helper_failures = failures ? failures.copy() : NULL;
-  helper_units = units ? units.copy() : NULL;
-  helper_input = Buffer.new(0);
-  Scope.pop();
-}
-
-/** Selects the table of the unit at `filename` for the calls that follow,
-    and resets the unit's `meta static` values before the first one. */
-void Compiler.begin_meta_unit(String filename) {
-  Var table;
-  helper_table = helper_units && filename &&
-    helper_units.try_get(Path.absolute(filename), table) ? table.integer() : 0;
-  helper_reset = 1;
-}
-
-/* Ends the helper this process started, if any, and forgets it: asks it
-   to quit, or sends it `signal`, and reaps it. Returns its wait status. */
-static int _helper_stop(int signal) {
-  int status = 0;
-  if (helper_pid > 0 && helper_owner == getpid()) {
-    if (signal) kill(helper_pid, signal);
-    else _helper_send(%(quit));
-    close(helper_to);
-    close(helper_from);
-    waitpid(helper_pid, &status, 0);
-  }
-  helper_pid = 0;
-  helper_to = helper_from = -1;
-  if (helper_input) helper_input.clear();
-  return status;
-}
-
-/* Starts the helper unless this process runs one. A worker forked from a
-   process that ran one starts its own. Every pipe end is close-on-exec,
-   and the helper keeps only its descriptors 3 and 4, so it reads the end
-   of its requests as soon as this process closes its end or ends. */
-static int _helper_start(void) {
-  if (helper_pid > 0 && helper_owner == getpid()) return 1;
-  helper_pid = 0;
-  int requests[2], replies[2];
-  if (pipe(requests) || pipe(replies)) return 0;
-  for (int i = 0; i < 2; i++) {
-    fcntl(requests[i], F_SETFD, FD_CLOEXEC);
-    fcntl(replies[i], F_SETFD, FD_CLOEXEC);
-  }
-  pid_t pid = fork();
-  if (!pid) {
-    int in = fcntl(requests[0], F_DUPFD_CLOEXEC, 10);
-    int out = fcntl(replies[1], F_DUPFD_CLOEXEC, 10);
-    dup2(in, 3);
-    dup2(out, 4);
-    execl(helper_path, helper_path, (char *) NULL);
-    _exit(127);
-  }
-  close(requests[0]);
-  close(replies[1]);
-  helper_pid = pid;
-  helper_owner = getpid();
-  helper_to = requests[1];
-  helper_from = replies[0];
-  if (helper_input) helper_input.clear();
-  helper_reset = 1;
-  return 1;
-}
-
-/* Sends one frame, or returns 0 when the helper has gone. A write to a
-   helper that has exited must not end the compiler with SIGPIPE. */
-static int _helper_send(List message) {
-  Buffer out = $auto(Buffer.new(0));
-  if (!datum_frame(out, message)) return 0;
-  String frame = %"$out";
-  void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
-  size_t done = 0, size = frame.len();
-  while (done < size) {
-    ssize_t n = write(helper_to, (char *) frame + done, size - done);
-    if (n < 0 && errno == EINTR) continue;
-    if (n <= 0) break;
-    done += n;
-  }
-  signal(SIGPIPE, previous);
-  return done == size;
-}
-
-/* The limit on one call from `X2C_META_TIMEOUT` in seconds, 60 by default;
-   zero or less is none. */
-static double _helper_limit(void) {
-  String text = Env.get("X2C_META_TIMEOUT");
-  return text ? atof(text) : 60.0;
-}
-
-static double _helper_now(void) {
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec + now.tv_nsec / 1e9;
-}
-
-/* Reads the next reply frame into `reply`. Returns 1, 0 when the helper
-   ended, or -1 when `deadline` passed first. */
-static int _helper_receive(double deadline, Var &reply) {
-  for (;;) {
-    String input = helper_input;
-    size_t used = 0;
-    int framed = 0;
-    try framed = datum_unframe(input, used, reply);
-    catch %((!or incomplete malformed) *): return 0;
-    if (framed) {
-      String rest = input[used:];
-      helper_input.clear();
-      if (rest) helper_input.write(rest);
-      return 1;
-    }
-    int wait = -1;
-    if (deadline > 0) {
-      double left = deadline - _helper_now();
-      if (left <= 0) return -1;
-      wait = (int) (left * 1000) + 1;
-    }
-    struct pollfd ready = { .fd = helper_from, .events = POLLIN };
-    int polled = poll(&ready, 1, wait);
-    if (polled < 0 && errno == EINTR) continue;
-    if (polled == 0) return -1;
-    char bytes[65536];
-    ssize_t n = read(helper_from, bytes, sizeof bytes);
-    if (n < 0 && errno == EINTR) continue;
-    if (n <= 0) return 0;
-    helper_input.write(String.new_len(bytes, n));
-  }
-}
-
-/* Why the helper that answered no more ended: how it exited, or the signal
-   that stopped it, which is also how a body that overflows the stack
-   ends. */
-static String _helper_ending(void) {
-  int status = _helper_stop(0);
-  int code = WEXITSTATUS(status);
-  if (!WIFSIGNALED(status)) return %"the body exited with status $code";
-  int signal = WTERMSIG(status);
-  String name = String.new(strsignal(signal));
-  return %"the body crashed or overflowed the stack (signal $signal: $name)";
-}
+// calls
 
 /** Calls the project `meta` function `name` in the helper with the values
     `arguments`, for the call at `site`, and returns its result. A warning
@@ -260,4 +100,172 @@ Var Compiler.meta_helper_call(
           %("function: $name" "reason: the helper sent an unknown reply"));
     }
   }
+}
+
+/* The limit on one call from `X2C_META_TIMEOUT` in seconds, 60 by default;
+   zero or less is none. */
+static double _helper_limit(void) {
+  String text = Env.get("X2C_META_TIMEOUT");
+  return text ? atof(text) : 60.0;
+}
+
+static double _helper_now(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+// the helper process
+
+/* Starts the helper unless this process runs one. A worker forked from a
+   process that ran one starts its own. Every pipe end is close-on-exec,
+   and the helper keeps only its descriptors 3 and 4, so it reads the end
+   of its requests as soon as this process closes its end or ends. */
+static int _helper_start(void) {
+  if (helper_pid > 0 && helper_owner == getpid()) return 1;
+  helper_pid = 0;
+  int requests[2], replies[2];
+  if (pipe(requests) || pipe(replies)) return 0;
+  for (int i = 0; i < 2; i++) {
+    fcntl(requests[i], F_SETFD, FD_CLOEXEC);
+    fcntl(replies[i], F_SETFD, FD_CLOEXEC);
+  }
+  pid_t pid = fork();
+  if (!pid) {
+    int in = fcntl(requests[0], F_DUPFD_CLOEXEC, 10);
+    int out = fcntl(replies[1], F_DUPFD_CLOEXEC, 10);
+    dup2(in, 3);
+    dup2(out, 4);
+    execl(helper_path, helper_path, (char *) NULL);
+    _exit(127);
+  }
+  close(requests[0]);
+  close(replies[1]);
+  helper_pid = pid;
+  helper_owner = getpid();
+  helper_to = requests[1];
+  helper_from = replies[0];
+  if (helper_input) helper_input.clear();
+  helper_reset = 1;
+  return 1;
+}
+
+/* Ends the helper this process started, if any, and forgets it: asks it
+   to quit, or sends it `signal`, and reaps it. Returns its wait status. */
+static int _helper_stop(int signal) {
+  int status = 0;
+  if (helper_pid > 0 && helper_owner == getpid()) {
+    if (signal) kill(helper_pid, signal);
+    else _helper_send(%(quit));
+    close(helper_to);
+    close(helper_from);
+    waitpid(helper_pid, &status, 0);
+  }
+  helper_pid = 0;
+  helper_to = helper_from = -1;
+  if (helper_input) helper_input.clear();
+  return status;
+}
+
+/* Why the helper that answered no more ended: how it exited, or the signal
+   that stopped it, which is also how a body that overflows the stack
+   ends. */
+static String _helper_ending(void) {
+  int status = _helper_stop(0);
+  int code = WEXITSTATUS(status);
+  if (!WIFSIGNALED(status)) return %"the body exited with status $code";
+  int signal = WTERMSIG(status);
+  String name = String.new(strsignal(signal));
+  return %"the body crashed or overflowed the stack (signal $signal: $name)";
+}
+
+// frames
+
+/* Sends one frame, or returns 0 when the helper has gone. A write to a
+   helper that has exited must not end the compiler with SIGPIPE. */
+static int _helper_send(List message) {
+  Buffer out = $auto(Buffer.new(0));
+  if (!datum_frame(out, message)) return 0;
+  String frame = %"$out";
+  void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
+  size_t done = 0, size = frame.len();
+  while (done < size) {
+    ssize_t n = write(helper_to, (char *) frame + done, size - done);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) break;
+    done += n;
+  }
+  signal(SIGPIPE, previous);
+  return done == size;
+}
+
+/* Reads the next reply frame into `reply`. Returns 1, 0 when the helper
+   ended, or -1 when `deadline` passed first. */
+static int _helper_receive(double deadline, Var &reply) {
+  for (;;) {
+    String input = helper_input;
+    size_t used = 0;
+    int framed = 0;
+    try framed = datum_unframe(input, used, reply);
+    catch %((!or incomplete malformed) *): return 0;
+    if (framed) {
+      String rest = input[used:];
+      helper_input.clear();
+      if (rest) helper_input.write(rest);
+      return 1;
+    }
+    int wait = -1;
+    if (deadline > 0) {
+      double left = deadline - _helper_now();
+      if (left <= 0) return -1;
+      wait = (int) (left * 1000) + 1;
+    }
+    struct pollfd ready = { .fd = helper_from, .events = POLLIN };
+    int polled = poll(&ready, 1, wait);
+    if (polled < 0 && errno == EINTR) continue;
+    if (polled == 0) return -1;
+    char bytes[65536];
+    ssize_t n = read(helper_from, bytes, sizeof bytes);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) return 0;
+    helper_input.write(String.new_len(bytes, n));
+  }
+}
+
+// lifecycle
+
+/** Uses the helper at `path`, or none when it is NULL, whose tables named
+    in `failures` could not be built, each with why, and whose table for
+    each input path is in `units`. */
+void Compiler.use_meta_helper(String path, Map failures, Map units) {
+  if (!path && !failures) return;
+  if (!helper_scope) Scope.shutdown_hook(_helper_shutdown);
+  Scope.push(&helper_scope);
+  helper_path = path ? String.new(path) : NULL;
+  helper_failures = failures ? failures.copy() : NULL;
+  helper_units = units ? units.copy() : NULL;
+  helper_input = Buffer.new(0);
+  Scope.pop();
+}
+
+/** Selects the table of the unit at `filename` for the calls that follow,
+    and resets the unit's `meta static` values before the first one. */
+void Compiler.begin_meta_unit(String filename) {
+  Var table;
+  helper_table = helper_units && filename &&
+    helper_units.try_get(Path.absolute(filename), table) ? table.integer() : 0;
+  helper_reset = 1;
+}
+
+/** Stops the helper this process runs, which a translation worker does
+    when its units are done and every process does as it ends. */
+void Compiler.stop_meta_helper(void) { _helper_stop(0); }
+
+static void _helper_shutdown(void) {
+  _helper_stop(0);
+  helper_scope.destroy();
+  helper_scope = NULL;
+  helper_path = NULL;
+  helper_failures = helper_units = NULL;
+  helper_input = NULL;
 }
