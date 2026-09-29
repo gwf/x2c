@@ -38,6 +38,8 @@ List Compiler_parse_named_type(Compiler c);
 
 void Compiler_bind_template_local(Compiler c, List key, List type, List context);
 
+List Compiler_parse_declarator_argument(Compiler c);
+
 int Compiler_test_declaration(Compiler c);
 
 List Compiler_parse_simple_declaration(Compiler c);

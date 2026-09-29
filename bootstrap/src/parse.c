@@ -829,7 +829,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _428 = cons(_424, _427);
   _429 = List_var(_428);
   _430 = Symbol_var(805770);
-  _431 = int_var(1449);
+  _431 = int_var(1468);
   _432 = cons(_431, NULL);
   _433 = cons(_430, _432);
   _434 = List_var(_433);
@@ -844,7 +844,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _443 = cons(_440, _442);
   _444 = List_var(_443);
   _445 = Symbol_var(1133019155420);
-  _446 = int_var(53330);
+  _446 = int_var(54061);
   _447 = cons(_446, NULL);
   _448 = cons(_445, _447);
   _449 = List_var(_448);
@@ -3130,6 +3130,9 @@ int Compiler__at_function_arrow(Compiler);
 void Compiler_check_explicit_converter(Compiler, List, Type, int);
 int binding_identity_try_parts(List, int *, String *);
 static List _declarator_init(Compiler c, List type, List context){
+  List slot = List_truth(Compiler_peek_macro_hole(c)) ? Compiler_try_parse_macro_slot(c, 285843887086) : NULL;  if(List_truth(slot)){
+    if(Compiler_test(c, 123)) return cons(_61, cons(_62, cons(List_var(slot), cons(List_var(Compiler_parse_assignment(c)), NULL))));  return slot;
+  }
   Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, &(method), &(first), &(after));  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, &(preserved_self));  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_120, cons(List_var(type), cons(List_var(cons(_68, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
     if(c -> shallow){
       Compiler__skip_shallow_expression(c, 1);  return bind;
@@ -3140,6 +3143,10 @@ static List _declarator_init(Compiler c, List type, List context){
     return cons(_61, cons(_62, cons(List_var(bind), cons(List_var(init), NULL))));
   }
   return bind;
+}
+
+List Compiler_parse_declarator_argument(Compiler c){
+  if(! _init_guard_) _file_init_();  List slot = Compiler_try_parse_macro_slot(c, 285843887086);  if(List_truth(slot)) return slot;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, NULL, NULL, &(method), &(first), &(after));  if(Compiler_test(c, 123)) return cons(_61, cons(_62, cons(List_var(bind), cons(List_var(Compiler_parse_assignment(c)), NULL))));  return bind;
 }
 
 static List _declarator_list(Compiler compiler, List type, List context, int row){
