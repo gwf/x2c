@@ -317,3 +317,17 @@ probe produced `aN2b`; new-kind roundtrip and performance are still unproved.
   The orchestrator reproduced the failure on the current-dev-based compiler,
   reviewed the one-line fix, and independently reran the passing fixture.
   This changes no public Segment syntax and awaits the Wave 5 transform release.
+
+- `5ec79ed9490ba7a148a972973cdc46525ef64843` completes isolated Array/Map
+  outer semantic adoption, on old adopter base `9356cc12` plus capture repair
+  dependency `5977ba5c`. Shared templates replace the direct-pattern workaround;
+  root-tag dispatch preserves wrapper boundaries, and empty construction stays
+  lazy in Map-first order. Entry reconstruction remains the explicit primitive
+  boundary. Nine existing fixtures, two new semantic fixtures, and the native
+  bound-template probe pass. The new converter/order programs also pass the
+  baseline seed with identical output. Root independently compiled and ran
+  the native probe and reran both new fixtures successfully. The local build
+  used a capable seed; shipped-bootstrap and final integrated-tree validation
+  remain outstanding. Independent authored-diff review found no concrete regression; it inspected
+  wrapper boundaries, Map row order, and lazy converter precedence and reran
+  the native probe. Whole-corpus output and performance remain integration work.
