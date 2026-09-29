@@ -24,7 +24,11 @@ $(import "../src/grammar.xmacro")
 #include "macros.x"
 #include "protocol.x"
 
-// top-level forms
+/* top-level forms
+
+   One classifier reads each file-scope form in both passes. Collection
+   records declarations and skips runtime bodies; the full parse applies
+   each form's compiler effects in source order. */
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
@@ -36,128 +40,35 @@ $(import "../src/grammar.xmacro")
     This continuation is independent of the compiler's shallow-parse state.
 */
 List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
-  if (!c.macro_holes) {
-    c.update_source_visibility(c.leading_preproc());
-    if (!skip_body) _track_conditional_arms(c);
-  }
+  _leading_directives(c, skip_body);
   if (c.skip_linkage_brace()) return NULL;
   if (skip_body && c.skip_collected_script_statement()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
-  if (c.keyword_form_is_definition()) {
-    if (skip_body) c.collect_compile_time_definition(1);
-    else c.parse_keyword_definition();
-    return NULL;
-  }
+  if (c.keyword_form_is_definition()) return _keyword_definition(c, skip_body);
   if (skip_body) {
     if (c.protocol_form_starts()) return c.parse_protocol_declaration();
-    if (c.macro_form_is_definition()) {
-      c.collect_compile_time_definition(0);
-      return NULL;
-    }
-    if (!c.collect_protocols && c.skip_named_type_declaration()) return NULL;
-    if (c.macro_starts_target_at(AST_UNIT)) {
-      if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion()) {
-        c.collect_unit_macro();
-        return NULL;
-      }
-      do {
-        c.skip_macro_invocation();
-        if (c.test(<;>)) return NULL;
-      } while (c.macro_starts_target_at(AST_UNIT));
-    }
+    if (_skip_collected_form(c)) return NULL;
   }
   List macro = skip_body ? NULL : c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
-    case <import>:   return c.parse_import_declaration();
-    case <"$(">: {
-      if (skip_body) {
-        c.parse_macro_lisp_shallow();
-        return NULL;
-      }
-      List imported = c.parse_macro_lisp_top_level();
-      if (imported) foreach (Var definition, imported.cdr())
-        c.meta_defs.push(definition);
-      c.record_meta_import();
-      return NULL;
-    }
-    case <@>:
-      c.report_error(
-        <parse>, "top-level decorators are not supported", c.token,
-        %( "module initialization: void TYPE.initialize(void)" ));
+    case <import>: return c.parse_import_declaration();
+    case <"$(">:   return _top_level_lisp(c, skip_body);
+    case <@>:      return _top_level_decorator(c);
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
-  Token meta = NULL;
-  int native = 0;
-  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
-  Token definition_start = c.token;
-  List decl = c.parse_declaration_row();
-  if (skip_body) {
-    c.finish_collected_declaration(decl, meta, native);
-    return NULL;
-  }
-  if (native && !decl.type_from_ast().is_function())
-    c.report_error(
-      <parse>, "a native meta declaration must be a function", meta, NULL);
-  if (c.test(<;>)) {
-    if (meta && decl.type_from_ast().is_function())
-      c.install_native_meta_function(decl, meta);
-    else if (meta) c.install_meta_declaration(decl, meta);
-    c.record_declaration_visibility(decl);
-    if (meta)
-      _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
-    else
-      match (decl)
-        case %(declare ? (bindings (bind (binding ? ?(String name)) *))):
-          if (decl.type_from_ast().is_function()) c.meta_comptime.del(name);
-    return decl;
-  }
-  if (c.peek(0) == <"{"> || c._at_function_arrow()) {
-    match (decl) case %(seq *):
-      c.report_error(
-        <parse>, "a function definition cannot share a declaration row",
-        c.token, NULL);
-    List function;
-    Token tokens = c.tokenizer.tokens;
-    int start = (meta ? meta : definition_start) - tokens;
-    int body = c.token - tokens;
-    Token staged = native ? NULL : meta;
-    if (staged) _reject_expanded_meta(c, decl, meta);
-    if (native) c.install_native_meta_function(decl, meta);
-    $let(c.meta_body, staged != NULL) {
-      function = _finish_function_definition(c, decl);
-    }
-    _record_meta_hash(c, function, definition_start, meta != NULL);
-    if (staged && !c.bind_linked_meta(
-          function, decl.type_from_ast().canonicalize()))
-      c.install_meta_function(function, staged);
-    c.record_declaration_visibility(function);
-    /* Compile-time only describes a `meta` definition. An ordinary
-       declaration or definition of the same name, such as a copy the
-       compiler links, is callable at run time. */
-    if (!meta)
-      match (function)
-        case %(function ? (bind (binding ? ?(String name)) *) ?):
-          c.meta_comptime.del(name);
-    /* A `meta` function that reaches a `Meta` operation exists only inside
-       the compiler, so there is no runtime form to emit. */
-    if (staged && c.meta_is_comptime_only(function)) return NULL;
-    if (c.macro_holes)
-      return %(api-source ${definition_start.line}
-               ${c.definition_doc(definition_start)} $function);
-    _definition_source(
-      c, function, definition_start.line, NULL, %($start $body));
-    return function;
-  }
-  c.require_input();
-  Symbol unexpected = c.peek(0);
-  c.report_error(
-    <parse>, "expected ';', '{', or '=>'",
-    c.token,
-    %("token:" ${c.token.text} "symbol:" ${unexpected.str()}));
+  return _declaration_form(c, skip_body);
+}
+
+/* The directives before a form set its visibility and, in the full parse,
+   the conditional groups it is in. A template's forms have neither. */
+static void _leading_directives(Compiler c, int skip_body) {
+  if (c.macro_holes) return;
+  c.update_source_visibility(c.leading_preproc());
+  if (!skip_body) _track_conditional_arms(c);
 }
 
 /* Takes the conditional groups open after the last conditional directive
@@ -199,6 +110,79 @@ int Compiler.skip_linkage_brace(Compiler c) {
   return 1;
 }
 
+static List _keyword_definition(Compiler c, int skip_body) {
+  if (skip_body) c.collect_compile_time_definition(1);
+  else c.parse_keyword_definition();
+  return NULL;
+}
+
+/* Collection records a macro definition, skips a named type unless it
+   collects protocols, and expands or skips unit macro invocations. It
+   reports whether that finished the form. */
+static int _skip_collected_form(Compiler c) {
+  if (c.macro_form_is_definition()) {
+    c.collect_compile_time_definition(0);
+    return 1;
+  }
+  if (!c.collect_protocols && c.skip_named_type_declaration()) return 1;
+  if (!c.macro_starts_target_at(AST_UNIT)) return 0;
+  if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion()) {
+    c.collect_unit_macro();
+    return 1;
+  }
+  do {
+    c.skip_macro_invocation();
+    if (c.test(<;>)) return 1;
+  } while (c.macro_starts_target_at(AST_UNIT));
+  return 0;
+}
+
+/* Top-level Lisp updates compiler state only. The `meta` declarations of a
+   macro import keep their runtime forms for the unit to emit. */
+static List _top_level_lisp(Compiler c, int skip_body) {
+  if (skip_body) {
+    c.parse_macro_lisp_shallow();
+    return NULL;
+  }
+  List imported = c.parse_macro_lisp_top_level();
+  if (imported) foreach (Var definition, imported.cdr())
+    c.meta_defs.push(definition);
+  c.record_meta_import();
+  return NULL;
+}
+
+static List _top_level_decorator(Compiler c) {
+  c.report_error(
+    <parse>, "top-level decorators are not supported", c.token,
+    %( "module initialization: void TYPE.initialize(void)" ));
+}
+
+/* A declaration row after any `meta` marker. Collection records it; the
+   full parse completes a declaration at `;` or a definition at its body. */
+static List _declaration_form(Compiler c, int skip_body) {
+  Token meta = NULL;
+  int native = 0;
+  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
+  Token first = c.token;
+  List decl = c.parse_declaration_row();
+  if (skip_body) {
+    c.finish_collected_declaration(decl, meta, native);
+    return NULL;
+  }
+  if (native && !decl.type_from_ast().is_function())
+    c.report_error(
+      <parse>, "a native meta declaration must be a function", meta, NULL);
+  if (c.test(<;>)) return _declared(c, decl, meta);
+  if (c.peek(0) == <"{"> || c._at_function_arrow())
+    return _defined(c, decl, meta, native, first);
+  c.require_input();
+  Symbol unexpected = c.peek(0);
+  c.report_error(
+    <parse>, "expected ';', '{', or '=>'",
+    c.token,
+    %("token:" ${c.token.text} "symbol:" ${unexpected.str()}));
+}
+
 /** Parses one full top-level form through the shared classifier. */
 List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
 
@@ -228,6 +212,49 @@ List Compiler.parse_submission(Compiler c, int end_position) {
 }
 
 // file-scope definitions
+
+/* A declaration ends at `;`. A `meta` one installs its compile-time form
+   and publishes its prose; an ordinary function prototype keeps its name
+   callable at run time. */
+static List _declared(Compiler c, List decl, Token meta) {
+  if (meta && decl.type_from_ast().is_function())
+    c.install_native_meta_function(decl, meta);
+  else if (meta) c.install_meta_declaration(decl, meta);
+  c.record_declaration_visibility(decl);
+  if (meta)
+    _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
+  else
+    match (decl)
+      case %(declare ? (bindings (bind (binding ? ?(String name)) *))):
+        if (decl.type_from_ast().is_function()) c.meta_comptime.del(name);
+  return decl;
+}
+
+/* A definition's body follows its declarator. A staged `meta` body parses
+   as compile-time code, and a `meta` function that reaches a `Meta`
+   operation exists only inside the compiler, with no runtime form. */
+static List _defined(
+  Compiler c, List decl, Token meta, int native, Token first) {
+  match (decl) case %(seq *):
+    c.report_error(
+      <parse>, "a function definition cannot share a declaration row",
+      c.token, NULL);
+  List function;
+  Token tokens = c.tokenizer.tokens;
+  int start = (meta ? meta : first) - tokens;
+  int body = c.token - tokens;
+  Token staged = native ? NULL : meta;
+  if (staged) _reject_expanded_meta(c, decl, meta);
+  if (native) c.install_native_meta_function(decl, meta);
+  $let(c.meta_body, staged != NULL) function = _finish_function(c, decl, NULL);
+  _record_meta_hash(c, function, first, meta != NULL);
+  _publish_definition(c, decl, function, meta, staged);
+  if (staged && c.meta_is_comptime_only(function)) return NULL;
+  if (c.macro_holes)
+    return %(api-source ${first.line} ${c.definition_doc(first)} $function);
+  _definition_source(c, function, first.line, NULL, %($start $body));
+  return function;
+}
 
 /* A macro expansion cannot produce a bodied `meta` function: the project
    meta build extracts meta code from source files, not from expansions. */
@@ -277,6 +304,22 @@ static void _referenced_names(Var node, Map seen, Array names) {
       return;
     }
   foreach (Var child, syntax) _referenced_names(child, seen, names);
+}
+
+/* A staged `meta` definition installs its compile-time form unless the
+   compiler's linked copy answers for it. Compile-time only describes a
+   `meta` definition: an ordinary declaration or definition of the same
+   name, such as a copy the compiler links, is callable at run time. */
+static void _publish_definition(
+  Compiler c, List decl, List function, Token meta, Token staged) {
+  if (staged && !c.bind_linked_meta(
+        function, decl.type_from_ast().canonicalize()))
+    c.install_meta_function(function, staged);
+  c.record_declaration_visibility(function);
+  if (!meta)
+    match (function)
+      case %(function ? (bind (binding ? ?(String name)) *) ?):
+        c.meta_comptime.del(name);
 }
 
 /* A generated default that completes a documented `meta` prototype
@@ -343,9 +386,8 @@ Token Compiler.take_meta_marker(Compiler c, int &?native) {
   Token meta = c.token;
   c.next();
   Token after = c.token;
-  int marked = c.peek(0) == <ident> && c.token.text == "native";
+  int marked = _test_contextual(c, "native");
   if (marked) {
-    c.next();
     Token declaration = c.token;
     marked = c.test_declaration();
     c.token = marked ? declaration : after;
@@ -354,7 +396,8 @@ Token Compiler.take_meta_marker(Compiler c, int &?native) {
   return meta;
 }
 
-// `as` and `with` are contextual: ordinary identifiers everywhere else.
+/* Consumes the contextual keyword `word` and reports whether it was there.
+   `as`, `with`, and `native` are ordinary identifiers everywhere else. */
 static int _test_contextual(Compiler compiler, String word) {
   if (compiler.peek(0) != <ident> || compiler.token.text != word) return 0;
   compiler.next();
@@ -2061,7 +2104,7 @@ List Compiler.parse_function_definition(Compiler compiler) {
       <parse>, "Function macro argument requires a function body",
       compiler.token, NULL);
   int first = start - tokens, body = compiler.token - tokens;
-  List function = _finish_function_definition(compiler, declaration);
+  List function = _finish_function(compiler, declaration, NULL);
   if (!compiler.macro_holes)
     _definition_source(compiler, function, start.line, NULL, %($first $body));
   return function;
@@ -2077,9 +2120,6 @@ List Compiler.parse_function_target(Compiler compiler) {
   match (macro) case %(seq ?function): return function;
   return macro;
 }
-
-static List _finish_function_definition(Compiler compiler, List decl) =>
-  _finish_function(compiler, decl, NULL);
 
 // Complete a token-parsed or generated function in its parameter scope.
 static List _finish_function(
