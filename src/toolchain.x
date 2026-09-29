@@ -52,6 +52,31 @@ typedef struct ToolRun {
 #include "report.x"
 #include "utils.x"
 
+// tool selection
+
+/** Creates a `Scope`-owned host toolchain and resolves its native layout.
+    Tool selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
+    installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
+    option `List`s are borrowed.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the toolchain
+    or its canonical layout.
+*/
+Toolchain toolchain_new(
+  String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose,
+  int dry_run) {
+  Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
+  t.cc = _tool(cc, "CC", "cc");
+  t.ar = _tool(ar, "AR", "ar");
+  t.cpp_args = cpp_args;
+  t.cc_args = cc_args;
+  t.ld_args = ld_args;
+  t.verbose = verbose;
+  t.dry_run = dry_run;
+  t._layout();
+  return t;
+}
+
 /* The explicit tool, `X2C_<NAME>`, `<NAME>`, the installed toolchain
    record's `<NAME>=` line, then `fallback`. */
 static String _tool(String explicit, String name, String fallback) {
@@ -89,38 +114,33 @@ static void Toolchain._layout(Toolchain t) {
     t.runtime_lib = %"$home/builds/0/libx2c.a";
 }
 
-/** Creates a `Scope`-owned host toolchain and resolves its native layout.
-    Tool selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
-    installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
-    option `List`s are borrowed.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing the toolchain
-    or its canonical layout.
-*/
-Toolchain toolchain_new(
-  String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose,
-  int dry_run) {
-  Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
-  t.cc = _tool(cc, "CC", "cc");
-  t.ar = _tool(ar, "AR", "ar");
-  t.cpp_args = cpp_args;
-  t.cc_args = cc_args;
-  t.ld_args = ld_args;
-  t.verbose = verbose;
-  t.dry_run = dry_run;
-  t._layout();
-  return t;
-}
-
 /** Returns the host C compiler that builds meta code, which runs in this
     process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
     the target compiler. */
 String toolchain_meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
 
-static List _compile_arguments(Toolchain t, List gen_dirs) => %(
-  ${t.cc} "-fsigned-char"
-  @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}
-  "-iquote" ${t.include_dir} @{t.cc_args});
+// actions
+
+/** Creates a `Scope`-owned action that reports nonzero status by default.
+    The action retains `arguments` without copying them.
+
+    Raises: `<alloc-fail>` when the action cannot be allocated.
+*/
+ToolAction tool_action_new(
+  Symbol phase, List arguments, int verbose, int dry_run) {
+  ToolAction action = Scope.calloc(1, sizeof(struct ToolAction));
+  *action = (struct ToolAction) {
+    .phase = phase, .arguments = arguments, .verbose = verbose,
+    .dry_run = dry_run, .report = 1};
+  return action;
+}
+
+/** Inherits the standard streams and suppresses the failure summary.
+*/
+void ToolAction.as_program(ToolAction action) {
+  action.inherit_stdio = 1;
+  action.report = 0;
+}
 
 /** Builds but does not start one C compilation action.
     Generated include directories precede the x2c include directory and
@@ -149,6 +169,11 @@ ToolAction Toolchain.preprocess_action(
     <preprocess>,
     %(@{_compile_arguments(t, gen_dirs)} "-E" $source "-o" $output),
     t.verbose, t.dry_run);
+
+static List _compile_arguments(Toolchain t, List gen_dirs) => %(
+  ${t.cc} "-fsigned-char"
+  @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}
+  "-iquote" ${t.include_dir} @{t.cc_args});
 
 /** Builds but does not start an `ar rcs` action in object-list order.
     The action does not remove an existing archive, so callers requiring exact
@@ -192,125 +217,14 @@ ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) {
     t.verbose, t.dry_run);
 }
 
-/** Creates a `Scope`-owned action that reports nonzero status by default.
-    The action retains `arguments` without copying them.
+// running tools
 
-    Raises: `<alloc-fail>` when the action cannot be allocated.
+/** Starts and waits for the action, returning its final status.
+
+    Raises: the same construction and capture-reading causes as
+    `ToolAction.start` and `ToolRun.wait`.
 */
-ToolAction tool_action_new(
-  Symbol phase, List arguments, int verbose, int dry_run) {
-  ToolAction action = Scope.calloc(1, sizeof(struct ToolAction));
-  *action = (struct ToolAction) {
-    .phase = phase, .arguments = arguments, .verbose = verbose,
-    .dry_run = dry_run, .report = 1};
-  return action;
-}
-
-/** Inherits the standard streams and suppresses the failure summary.
-*/
-void ToolAction.as_program(ToolAction action) {
-  action.inherit_stdio = 1;
-  action.report = 0;
-}
-
-static int _shell_safe(String argument) {
-  if (!argument || !argument[0]) return 0;
-  foreach (char raw, argument) {
-    unsigned char ch = raw;
-    if (!(isalnum(ch) || strchr("_+-=.,/:@", ch))) return 0;
-  }
-  return 1;
-}
-
-static void _print_argument(String argument) {
-  if (_shell_safe(argument)) {
-    fputs(argument, stderr);
-    return;
-  }
-  fputc('\'', stderr);
-  foreach (char ch, argument) {
-    if (ch == '\'') fputs("'\\''", stderr);
-    else fputc(ch, stderr);
-  }
-  fputc('\'', stderr);
-}
-
-static void _print_action(Symbol phase, List arguments) {
-  fprintf(stderr, "x2c: %s", phase.str());
-  foreach (String argument, arguments) {
-    fputc(' ', stderr);
-    _print_argument(argument);
-  }
-  fputc('\n', stderr);
-}
-
-static String _start_failure(String program, List detail) {
-  long error = detail.assoc(<"errno">);
-  String reason = String.new(strerror((int) error));
-  return %"x2c: unable to execute $program: $reason\n";
-}
-
-/* A tool that cannot start reports like a child that exited 127, the status
-   a shell gives a missing program, so every caller keeps one failure path. */
-static Job _start_tool(Job command, String program, String &failure) {
-  Job job = NULL;
-  try job = command.start();
-  catch %((!or not-found io-fail) *detail):
-    failure = _start_failure(program, detail);
-  return job;
-}
-
-/** Runs the host tool `arguments` without a shell, captures both streams,
-    and returns its shell-style status. A tool that cannot start returns 127
-    and leaves the reason in `errors`.
-*/
-int tool_capture(List arguments, String &output, String &errors) {
-  Job command =
-    arguments.job().options({stdout: <capture>, stderr: <capture>});
-  Job j = _start_tool(command, arguments.car(), errors);
-  if (!j) return 127;
-  int status = j.status();
-  output = j.output_text;
-  errors = j.errors_text;
-  return status;
-}
-
-/** Returns the directories the C compiler searches for headers and libraries
-    without explicit options, as it reports them, plus the `lib` directory
-    beside each reported `include` directory. A compiler that reports none
-    contributes none.
-*/
-List Toolchain.search_directories(Toolchain t) {
-  Array directories = [];
-  List flags = t.cc_args;
-  String output = NULL, errors = NULL;
-  if (!tool_capture(
-    %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"), output, errors)) {
-    int listing = 0;
-    foreach (String line, errors.split_lines(0)) {
-      if (line.startswith("End of search list")) break;
-      if (line.contains("search starts here")) {
-        listing = 1;
-        continue;
-      }
-      if (!listing) continue;
-      String directory = line.strip(" ");
-      int note = directory.find(" (");
-      if (note >= 0) directory = directory[:note];
-      directories.push(directory);
-      if (directory.endswith("/include"))
-        directories.push(Path.dirname(directory).join("lib"));
-    }
-  }
-  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), output, errors))
-    foreach (String line, output.split_lines(0)) {
-      if (!line.startswith("libraries: ")) continue;
-      String list = line.remove_prefix("libraries: ").remove_prefix("=");
-      foreach (String directory, list.split(":"))
-        if (directory) directories.push(directory);
-    }
-  return directories.list_free();
-}
+int ToolAction.run(ToolAction action) => action.start().wait();
 
 /** Starts the action without a shell and returns a `Scope`-owned execution.
     Verbose and dry-run actions print their quoted argv to stderr. A dry run
@@ -364,15 +278,38 @@ int ToolRun.wait(ToolRun execution) {
   return status;
 }
 
-/** Starts and waits for the action, returning its final status.
-
-    Raises: the same construction and capture-reading causes as
-    `ToolAction.start` and `ToolRun.wait`.
+/** Runs the host tool `arguments` without a shell, captures both streams,
+    and returns its shell-style status. A tool that cannot start returns 127
+    and leaves the reason in `errors`.
 */
-int ToolAction.run(ToolAction action) => action.start().wait();
+int tool_capture(List arguments, String &output, String &errors) {
+  Job command =
+    arguments.job().options({stdout: <capture>, stderr: <capture>});
+  Job j = _start_tool(command, arguments.car(), errors);
+  if (!j) return 127;
+  int status = j.status();
+  output = j.output_text;
+  errors = j.errors_text;
+  return status;
+}
 
-static List _includes(List directories) =>
-  directories.map(%!(directory) => %("-I" $directory)).flatten();
+/* A tool that cannot start reports like a child that exited 127, the status
+   a shell gives a missing program, so every caller keeps one failure path. */
+static Job _start_tool(Job command, String program, String &failure) {
+  Job job = NULL;
+  try job = command.start();
+  catch %((!or not-found io-fail) *detail):
+    failure = _start_failure(program, detail);
+  return job;
+}
+
+static String _start_failure(String program, List detail) {
+  long error = detail.assoc(<"errno">);
+  String reason = String.new(strerror((int) error));
+  return %"x2c: unable to execute $program: $reason\n";
+}
+
+// host preprocessing
 
 /** Runs the configured C preprocessor without a shell.
     System headers keep their include directives when the host supports
@@ -425,4 +362,79 @@ int Toolchain.preprocess(
   catch %(not-found *): {}
   scratch.remove_tree();
   return result;
+}
+
+static List _includes(List directories) =>
+  directories.map(%!(directory) => %("-I" $directory)).flatten();
+
+// search directories
+
+/** Returns the directories the C compiler searches for headers and libraries
+    without explicit options, as it reports them, plus the `lib` directory
+    beside each reported `include` directory. A compiler that reports none
+    contributes none.
+*/
+List Toolchain.search_directories(Toolchain t) {
+  Array directories = [];
+  List flags = t.cc_args;
+  String output = NULL, errors = NULL;
+  if (!tool_capture(
+    %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"), output, errors)) {
+    int listing = 0;
+    foreach (String line, errors.split_lines(0)) {
+      if (line.startswith("End of search list")) break;
+      if (line.contains("search starts here")) {
+        listing = 1;
+        continue;
+      }
+      if (!listing) continue;
+      String directory = line.strip(" ");
+      int note = directory.find(" (");
+      if (note >= 0) directory = directory[:note];
+      directories.push(directory);
+      if (directory.endswith("/include"))
+        directories.push(Path.dirname(directory).join("lib"));
+    }
+  }
+  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), output, errors))
+    foreach (String line, output.split_lines(0)) {
+      if (!line.startswith("libraries: ")) continue;
+      String list = line.remove_prefix("libraries: ").remove_prefix("=");
+      foreach (String directory, list.split(":"))
+        if (directory) directories.push(directory);
+    }
+  return directories.list_free();
+}
+
+// quoted argv
+
+static void _print_action(Symbol phase, List arguments) {
+  fprintf(stderr, "x2c: %s", phase.str());
+  foreach (String argument, arguments) {
+    fputc(' ', stderr);
+    _print_argument(argument);
+  }
+  fputc('\n', stderr);
+}
+
+static void _print_argument(String argument) {
+  if (_shell_safe(argument)) {
+    fputs(argument, stderr);
+    return;
+  }
+  fputc('\'', stderr);
+  foreach (char ch, argument) {
+    if (ch == '\'') fputs("'\\''", stderr);
+    else fputc(ch, stderr);
+  }
+  fputc('\'', stderr);
+}
+
+static int _shell_safe(String argument) {
+  if (!argument || !argument[0]) return 0;
+  foreach (char raw, argument) {
+    unsigned char ch = raw;
+    if (!(isalnum(ch) || strchr("_+-=.,/:@", ch))) return 0;
+  }
+  return 1;
 }
