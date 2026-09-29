@@ -2486,19 +2486,22 @@ Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
     A binding without an explicit emission rename uses its identity spelling.
 */
-String Compiler.emitted_binding_name(Compiler compiler, List binding) {
+String Compiler.emitted_binding_name(Compiler c, List binding) {
   Var renamed;
-  Map facts = compiler.semantic_binding_facts();
+  Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(emitted $binding), renamed)) return renamed;
   return binding_identity_spelling(binding);
 }
 
-/** Returns the optional references proven present in this lexical path. */
-List Compiler.present_references(Compiler c) {
+// The List a binding fact holds, or NULL when the fact is absent.
+static List _fact(Compiler c, List key) {
   Var stored;
-  return c.semantic_binding_facts().try_get(%(present-references), stored)
-       ? stored.list() : NULL;
+  return c.semantic_binding_facts().try_get(key, stored) ? stored : NULL;
 }
+
+/** Returns the optional references proven present in this lexical path. */
+List Compiler.present_references(Compiler c) =>
+  _fact(c, %(present-references));
 
 /** Records a nonnull optional parameter for the current lexical path. */
 void Compiler.mark_reference_present(Compiler c, List binding) {
@@ -2527,16 +2530,8 @@ List Compiler.optional_reference_test(
       truth = !truth;
       return c.optional_reference_test(operand, truth);
     }
-    case %(expr ? (op (!set ?op (!or == !=)) ?left ?right)): {
-      if (_optional_reference_null(right)) {
-        truth = op == <!=>;
-        return c.optional_reference_test(left, truth);
-      }
-      if (_optional_reference_null(left)) {
-        truth = op == <!=>;
-        return c.optional_reference_test(right, truth);
-      }
-    }
+    case %(expr ? (op (!set ?op (!or == !=)) ?left ?right)):
+      return _null_comparison(c, op, left, right, truth);
   }
   match (condition)
     case %(expr (opt-ref *) (ident ?binding)):
@@ -2545,10 +2540,22 @@ List Compiler.optional_reference_test(
   return NULL;
 }
 
-static int _optional_reference_null(List expression) {
-  match (expression) {
-    case %(expr ? (parens ?inner)):
-      return _optional_reference_null(inner);
+/* A comparison with a null literal tests the other operand; its true arm
+   proves presence for `!=`. */
+static List _null_comparison(
+  Compiler c, Var op, Var left, Var right, int &truth) {
+  if (_null_literal(right)) {
+    truth = op == <!=>;
+    return c.optional_reference_test(left, truth);
+  }
+  if (!_null_literal(left)) return NULL;
+  truth = op == <!=>;
+  return c.optional_reference_test(right, truth);
+}
+
+static int _null_literal(List expr) {
+  match (expr) {
+    case %(expr ? (parens ?inner)): return _null_literal(inner);
     case %(expr ? (ident (binding ? "NULL"))): return 1;
     case %(expr ? (literal ? "0")): return 1;
   }
@@ -2578,12 +2585,12 @@ int reference_guard_exits(List arm) {
     unit's own counter or the two modes emit different C. Those names carry
     an `m` before the stem, so they cannot collide with the unit's.
 */
-String Compiler.fresh_name(Compiler compiler, String stem) {
-  String key = compiler.import_src ? %"m$stem" : stem;
+String Compiler.fresh_name(Compiler c, String stem) {
+  String key = c.import_src ? %"m$stem" : stem;
   Var stored;
-  int count = compiler.names.counters.try_get(key, stored) ? stored : 0;
+  int count = c.names.counters.try_get(key, stored) ? stored : 0;
   String name = %"_x2c_${key}_${count++}";
-  compiler.names.counters[key] = count;
+  c.names.counters[key] = count;
   return name;
 }
 
@@ -2603,16 +2610,16 @@ List Compiler.gensym(Compiler c) {
 }
 
 /** Appends a generated declaration to the early-declaration queue. */
-void Compiler.add_early(Compiler compiler, List decl) {
-  compiler.early_decls.push(decl);
+void Compiler.add_early(Compiler c, List decl) {
+  c.early_decls.push(decl);
 }
 
 /** Appends a statement to file initialization order under `phase`, which is
     `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for
     the file initializer's three stages.
 */
-void Compiler.add_init(Compiler compiler, Symbol phase, List stmt) {
-  compiler.inits.push(%($phase $stmt));
+void Compiler.add_init(Compiler c, Symbol phase, List stmt) {
+  c.inits.push(%($phase $stmt));
 }
 
 // the literal cache
@@ -2641,8 +2648,8 @@ static List _cache_alias(List key) {
     Returns `NULL` when runtime literals are required or either part cannot
     be represented by the immutable cache graph.
 */
-List Compiler.cache_cons_cell(Compiler compiler, List head, List tail) {
-  if (compiler.runtime_literals) return NULL;
+List Compiler.cache_cons_cell(Compiler c, List head, List tail) {
+  if (c.runtime_literals) return NULL;
   List head_cache = NULL, tail_cache = NULL;
   if (head.match(%(expr ("Var") (cache *)))) head_cache = head.caddr();
   else if (head.match(%(cache *))) head_cache = head;
@@ -2650,7 +2657,7 @@ List Compiler.cache_cons_cell(Compiler compiler, List head, List tail) {
   if (tail.match(%(expr ("List") (cache *)))) tail_cache = tail.caddr();
   else if (tail.match(%(nil))) tail_cache = tail;
   if (!tail_cache) return NULL;
-  List cached = compiler.cache(%(cons $head_cache $tail_cache));
+  List cached = c.cache(%(cons $head_cache $tail_cache));
   return %(expr ("List") $cached);
 }
 
@@ -2658,42 +2665,42 @@ List Compiler.cache_cons_cell(Compiler compiler, List head, List tail) {
     `value` is a `List` of such values, a `String`, a number with its tag, or
     a `Symbol`; any other value returns NULL.
 */
-List Compiler.cache_literal_var(Compiler compiler, Var value) {
+List Compiler.cache_literal_var(Compiler c, Var value) {
   if (value is <list>) {
-    List cached = _cache_literal_list(compiler, value);
-    return compiler.cache(%( var (expr ("List") (expr ("List") $cached)) ));
+    List cached = _cache_literal_list(c, value);
+    return c.cache(%( var (expr ("List") (expr ("List") $cached)) ));
   }
   if (value is <string>) {
     List literal = %(expr ("String") (literal ("String") $value));
-    List cached = compiler.cache(%(string $literal));
-    return compiler.cache(%(var (expr ("String") $cached)));
+    List cached = c.cache(%(string $literal));
+    return c.cache(%(var (expr ("String") $cached)));
   }
-  if (value.is_integer() || value.is_floating()) {
-    List literal = compiler.meta_value_expression(NULL, value, NULL);
-    literal = compiler.convert_expression(literal, %("Var"));
-    return compiler.cache(%(var $literal));
-  }
-  if (value is <lsym>) {
-    List literal = %(expr ("Atom") (literal ("Atom") ${value.str()} $value));
-    literal = compiler.convert_expression(literal, %("Var"));
-    return compiler.cache(%(var $literal));
-  }
+  if (value.is_integer() || value.is_floating())
+    return _cache_boxed(c, c.meta_value_expression(NULL, value, NULL));
+  if (value is <lsym>)
+    return _cache_boxed(
+      c, %(expr ("Atom") (literal ("Atom") ${value.str()} $value)));
   if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
   List literal = %(
     expr ("Symbol") (literal ("Symbol") $spelling $value)
   );
-  return compiler.cache(%(var $literal));
+  return c.cache(%(var $literal));
 }
 
-static List _cache_literal_list(Compiler compiler, List values) {
+// A number or atom is cached through its conversion to a `Var`.
+static List _cache_boxed(Compiler c, List literal) {
+  literal = c.convert_expression(literal, %("Var"));
+  return c.cache(%(var $literal));
+}
+
+static List _cache_literal_list(Compiler c, List values) {
   Array heads = $auto([]);
-  foreach (Var value, values)
-    heads.push(compiler.cache_literal_var(value));
+  foreach (Var value, values) heads.push(c.cache_literal_var(value));
   List result = %(nil);
   for (int i = (int) heads.len() - 1; i >= 0; i--) {
     List head = heads[i];
-    result = compiler.cache(%(cons $head $result));
+    result = c.cache(%(cons $head $result));
   }
   return result;
 }
@@ -2703,12 +2710,16 @@ static List _cache_literal_list(Compiler compiler, List values) {
     `values` may contain nested `List`s, `String`s, integer `Var`s, and
     `Symbol`s.
 */
-List Compiler.cache_literal_list(Compiler compiler, List values) {
-  List cached = _cache_literal_list(compiler, values);
+List Compiler.cache_literal_list(Compiler c, List values) {
+  List cached = _cache_literal_list(c, values);
   return %(expr ("List") (expr ("List") $cached));
 }
 
-// match pattern values
+/* match pattern values
+
+   The compile-time value graph behind a Match pattern represents dynamic
+   expressions by a private marker, so binder analysis can distinguish a
+   computed operator head from ordinary literal data. */
 
 /** Recovers a pattern value graph, using `x2c-dyn` for computed values. */
 Var Compiler.match_pattern_value(Compiler c, Var node) {
@@ -2720,31 +2731,36 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (head == <expr>) return c.match_pattern_value(ast.last());
   if (head == <var>) return c.match_pattern_value(second);
   if (head == <string>) return c.match_pattern_value(second);
-  String converter = head == <call>
-                   ? _match_pattern_converter_name(second) : NULL;
-  if (converter == "List_var" || converter == "Symbol_var")
-    match (third) case %(args ?argument):
-      return c.match_pattern_value(argument);
-  if (converter == "Macro_case_pattern")
-    match (third) case %(args ? ?names): {
-      List labels = c.match_pattern_value(names);
-      return %(!and x2c-dyn @labels);
-    }
+  if (head == <call>) return _call_value(c, second, third);
   if (head == <literal>) return ast.last();
   if (head == <nil>) return %();
-  if (head == <cons>) {
-    Var value = c.match_pattern_value(second);
-    Var tail = c.match_pattern_value(third);
-    if (tail is not <list>) return <x2c-dyn>;
-    return cons(value, tail);
-  }
+  if (head == <cons>) return _cons_value(c, second, third);
   return <x2c-dyn>;
 }
 
-/* Recover the compile-time value graph behind a Match pattern.  Dynamic
-   expressions are represented by a private marker so binder analysis can
-   distinguish a computed operator head from ordinary literal data. */
-static String _match_pattern_converter_name(Var node) {
+/* A converter call has the value it converts, and a case pattern matches
+   what its labels match. Any other call is computed. */
+static Var _call_value(Compiler c, Var callee, Var args) {
+  String converter = _converter_name(callee);
+  if (converter == "List_var" || converter == "Symbol_var")
+    match (args) case %(args ?argument):
+      return c.match_pattern_value(argument);
+  if (converter == "Macro_case_pattern")
+    match (args) case %(args ? ?names): {
+      List labels = c.match_pattern_value(names);
+      return %(!and x2c-dyn @labels);
+    }
+  return <x2c-dyn>;
+}
+
+static Var _cons_value(Compiler c, Var head, Var tail) {
+  Var value = c.match_pattern_value(head);
+  Var rest = c.match_pattern_value(tail);
+  if (rest is not <list>) return <x2c-dyn>;
+  return cons(value, rest);
+}
+
+static String _converter_name(Var node) {
   if (node is <string>) return node;
   if (node is not <list>) return NULL;
   List matched = node.list().match(%(expr ? (ident ?binding)));
@@ -2763,8 +2779,8 @@ int match_value_is_static(Var value) {
 }
 
 /** Reports whether a typed `Match` pattern has a fully static value graph. */
-int Compiler.match_pattern_is_static(Compiler compiler, List pattern) =>
-  match_value_is_static(compiler.match_pattern_value(pattern));
+int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
+  match_value_is_static(c.match_pattern_value(pattern));
 
 /** Returns a recovered pattern value's fixed literal head symbol, or zero.
 
@@ -2828,7 +2844,8 @@ static Symbol _flat_capture_tag(Var element, Var binder) {
 
     When `possible` is non-null, stores every binder appearing on any path.
 */
-List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible) {
+List Compiler.match_pattern_binders(
+  Compiler c, List pattern, List &?possible) {
   Var value = c.match_pattern_value(pattern);
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
   List definite = layout.definite_list();
@@ -2838,38 +2855,34 @@ List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible) {
 }
 
 /** Defines a typed `Match` pattern's definite binders in the current scope. */
-void Compiler.define_match_binders(Compiler compiler, List pattern) =>
-  _define_match_binders(compiler, pattern, NULL);
+void Compiler.define_match_binders(Compiler c, List pattern) {
+  foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
+    String name = binder.str()[1:];
+    c.sym.define(%($name), _binder_type(binder));
+  }
+}
 
 /** Defines catch binders and returns their capture-token/binding pairs. */
-List Compiler.define_catch_binders(Compiler compiler, List pattern) {
-  List bindings = NULL;
-  _define_match_binders(compiler, pattern, bindings);
-  return bindings;
+List Compiler.define_catch_binders(Compiler c, List pattern) {
+  Array rows = [];
+  foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
+    String name = binder.str()[1:];
+    List binding = c.sym.declare(NULL, %($name), _binder_type(binder));
+    rows.push(%($binder $binding));
+  }
+  return rows.list_free();
 }
 
-/* Define once; catch lowering also retains the issued identities. */
-static void _define_match_binders(
-  Compiler compiler, List pattern, List &?bindings) {
-  Array rows = bindings ? [] : NULL;
-  foreach (Var binder, compiler.match_pattern_binders(pattern, NULL)) {
-    String name = binder.str()[1:];
-    List type = binder.is_list_binder() ? %("List") : %("Var");
-    List binding = bindings
-      ? compiler.sym.declare(NULL, %($name), type)
-      : compiler.sym.define(%($name), type);
-    if (bindings) rows.push(%($binder $binding));
-  }
-  if (bindings) bindings = rows.list_free();
-}
+static List _binder_type(Var binder) =>
+  binder.is_list_binder() ? %("List") : %("Var");
 
 /** Builds ordinary declarations from a catch scope's issued bindings. */
 List Compiler.catch_binder_declarations(
-  Compiler compiler, List bindings, List handle) {
+  Compiler c, List bindings, List handle) {
   Array declarations = [];
   int index = 0;
   foreach (List row, bindings) {
-    Type type = row.car().is_list_binder() ? %("List") : %("Var");
+    Type type = _binder_type(row.car());
     List value = %(expr ("Var")
       (call "x2c_error_catch_capture"
         (args (expr ("ErrorHandler") (ident $handle))
@@ -2877,8 +2890,8 @@ List Compiler.catch_binder_declarations(
     if (row.car().is_list_binder())
       value = %(expr $type (call "Var_list" (args $value)));
     declarations.push(%(declare $type (bindings (bind ${row.cadr()} ()))));
-    declarations.push(%(stmnt (expr $type
-      (op = (expr $type (ident ${row.cadr()})) $value))));
+    declarations.push(
+      %(stmnt (expr $type (op = (expr $type (ident ${row.cadr()})) $value))));
   }
   return declarations.list_free();
 }
