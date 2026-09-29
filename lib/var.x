@@ -122,22 +122,11 @@ extern const VarDecodeGroup x2c_var_decode_groups[];
 
 static TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
 
-static inline unsigned long _bitmask(unsigned n) => (1ul << n)-1;
+static inline unsigned long _bitmask(unsigned n) => (1ul << n) - 1;
 
-static inline unsigned _top_bits(Var v) {
-  const unsigned long mask = _bitmask(16) << 48; // top 16 bits
-  return (v.u64 & mask) >> 48;
-}
-
-static inline unsigned _middle_bits(Var v) {
-  const unsigned long mask = _bitmask(16) << 32; // second 16 bits
-  return (v.u64 & mask) >> 32;
-}
-
-static inline unsigned _bottom_bits(Var v) {
-  const unsigned long mask = _bitmask(3); // bottom 3 bits
-  return v.u64 & mask;
-}
+static inline unsigned _top_bits(Var v)    => v.u64 >> 48;
+static inline unsigned _middle_bits(Var v) => (v.u64 >> 32) & _bitmask(16);
+static inline unsigned _bottom_bits(Var v) => v.u64 & _bitmask(3);
 
 static void *_address(Var value) =>
   (void *) (value.u64 & (_bitmask(48) - 0x7));
@@ -145,8 +134,7 @@ static void *_address(Var value) =>
 /** Returns the top encoding field of built-in `tag`. */
 meta native unsigned long Var.tag_top(Symbol tag) {
   TagId id = _tag2id(tag);
-  if (id == _invalid_)
-    raise %(bad-target (owner "Var.tag_top") (target $tag));
+  if (id == _invalid_) raise %(bad-target (owner "Var.tag_top") (target $tag));
   return x2c_var_taginfo[id].top;
 }
 
@@ -178,10 +166,7 @@ typedef struct VarWideBox {
   VarWideValue value;
 } *VarWideBox;
 
-static VarWideBox _wide_box(Var v) {
-  uintptr_t raw = v.u64 & (_bitmask(48) - 0x7);
-  return (VarWideBox) raw;
-}
+static VarWideBox _wide_box(Var v) => (VarWideBox) _address(v);
 
 // custom classes
 
@@ -237,37 +222,49 @@ static VarDescriptor *_row_descriptor(int id, Var value) {
   return rows[id];
 }
 
+/* The four custom tops hold 32 rows, eight to a top in the bottom bits. A
+   direct row is valid once assigned; an overflow row needs the address of
+   its cell or record. */
+static inline int _custom_top(unsigned top) =>
+  top >= VAR_CUSTOM_TAG_TOP &&
+  top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8;
+
+static inline int _custom_id(unsigned top, unsigned bottom) =>
+  (int) ((top - VAR_CUSTOM_TAG_TOP) * 8 + bottom);
+
+static inline int _custom_valid(int id, Var value) =>
+  id < VAR_DIRECT_ROWS ? id < (int) _row_count() : _address(value) != NULL;
+
 // decoding
 
 /* The ledger's group table resolves the pointer, object, and immediate tops.
    Reserved encodings report invalid structure and use the f64 tag and kind.
 */
 static VarDecoded _decode(Var value) {
-  unsigned top = _top_bits(value), mid = _middle_bits(value);
-  unsigned btm = _bottom_bits(value);
+  unsigned top = _top_bits(value), btm = _bottom_bits(value);
   if (value.u64 == VAR_VOID_BITS) return (VarDecoded) { _void_, -1, 1 };
   if (value.u64 == VAR_F64_NEG_MAX_ESCAPE)
     return (VarDecoded) { _f64_, -1, 1 };
-  // Rotating the top left one bit puts 0x0000-0x000F on the even slots and
-  // 0x8000-0x800F on the odd slots below 32; every other top lands above.
-  unsigned slot = ((top << 1) | (top >> 15)) & 0xFFFF;
-  if (slot < 32) {
-    const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
-    unsigned selector = group.by_middle ? mid : btm & group.mask;
-    int id = selector < 8 ? group.ids[selector] : _invalid_;
-    if (id != _invalid_) return _decode_builtin((TagId) id, value);
-  }
+  int id = _group_id(top, _middle_bits(value), btm);
+  if (id != _invalid_) return _decode_builtin((TagId) id, value);
   if (top >= 0x8004 && top <= 0x800B) return (VarDecoded) { _symbol_, -1, 1 };
-  if (top >= VAR_CUSTOM_TAG_TOP &&
-      top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) {
-    int id = (int) ((top - VAR_CUSTOM_TAG_TOP) * 8 + btm);
-    int valid = id < VAR_DIRECT_ROWS ? id < (int) _row_count()
-              : _address(value) != NULL;
-    return (VarDecoded) { _invalid_, id, valid };
+  if (_custom_top(top)) {
+    int custom = _custom_id(top, btm);
+    return (VarDecoded) { _invalid_, custom, _custom_valid(custom, value) };
   }
   if ((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010)
     return (VarDecoded) { _f64_, -1, 1 };
   return (VarDecoded) { _f64_, -1, 0 };
+}
+
+/* Rotating the top left one bit puts 0x0000-0x000F on the even slots and
+   0x8000-0x800F on the odd slots below 32; every other top lands above. */
+static inline int _group_id(unsigned top, unsigned mid, unsigned btm) {
+  unsigned slot = ((top << 1) | (top >> 15)) & 0xFFFF;
+  if (slot >= 32) return _invalid_;
+  const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
+  unsigned selector = group.by_middle ? mid : btm & group.mask;
+  return selector < 8 ? group.ids[selector] : _invalid_;
 }
 
 /* Wide rows validate the family recorded inside their readable box. Array and
@@ -280,9 +277,7 @@ static VarDecoded _decode_builtin(TagId id, Var value) {
     case _long_: case _ulong_: case _llong_: case _ullong_: case _ldouble_:
       valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
       break;
-    case _array_: case _map_:
-      valid = (value.u64 & (_bitmask(48) - 0x7)) != 0;
-      break;
+    case _array_: case _map_: valid = _address(value) != NULL; break;
     case _u8_: case _i8_: valid = (payload & ~0xffu) == 0; break;
     case _u16_: case _i16_: valid = (payload & ~0xffffu) == 0; break;
     case _nan_: case _neginf_: case _posinf_:
@@ -374,9 +369,8 @@ meta native int Var.is_reference(Var v) => v.kind() == <reference>;
 /** Reports whether `v` holds a registered boxed object.
     True for the builtin classes such as `String`, `List`, `Array`, `Map`,
     `File`, and `Iter`, and for any tag registered with
-    `Var.register_object_tag`. A
-    pointer to a handle, such as `<string*>`, is `<reference>` instead and
-    answers 0 here.
+    `Var.register_object_tag`. A pointer to a handle, such as `<string*>`, is
+    `<reference>` instead and answers 0 here.
 */
 meta native int Var.is_object(Var v)    => v.kind() == <object>;
 
@@ -405,8 +399,8 @@ int Var.is_void(Var v)      => v.u64 == VAR_VOID_BITS;
 /** Reports whether `v` is the all-zero `Null` value.
     `Null` is a value: the null pointer and the external `nil`. It is legal
     collection data, iterating a `List` can return it, and it is false in a
-    condition. Its tag decodes as `<p48>`, so there is no
-    dedicated null family for `Var.is` to match.
+    condition. Its tag decodes as `<p48>`, so there is no dedicated null
+    family for `Var.is` to match.
 
     Write `Null` as `(Var) { .u64 = 0 }`. An unresolved C `NULL` macro also
     converts to this value when its x2c target is `Var`.
@@ -416,11 +410,7 @@ meta native int Var.is_null(Var v)      => v.u64 == VAR_NULL_BITS;
 /** Returns `Null`, the all-zero `Var` that stands for external `nil`.
     Generated call adapters return it for a `void` target.
 */
-meta native Var Var.null(void) {
-  Var v;
-  v.u64 = VAR_NULL_BITS;
-  return v;
-}
+meta native Var Var.null(void) => (Var) { .u64 = VAR_NULL_BITS };
 
 /** Reports whether `v` is the typed empty `List`.
     The empty `List` is a native null pointer carrying the `<list>` tag.
@@ -461,10 +451,8 @@ int Var.custom_descriptor_index(Var value) {
 /** Returns a boxed custom object's descriptor, or NULL for another value. */
 VarDescriptor *x2c_var_custom_descriptor(Var value) {
   unsigned top = _top_bits(value);
-  if (top < VAR_CUSTOM_TAG_TOP ||
-      top >= VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8)
-    return NULL;
-  int id = (int) ((top - VAR_CUSTOM_TAG_TOP) * 8 + _bottom_bits(value));
+  if (!_custom_top(top)) return NULL;
+  int id = _custom_id(top, _bottom_bits(value));
   if (id < VAR_DIRECT_ROWS) return id < (int) _row_count() ? rows[id] : NULL;
   return _address(value) ? _row_descriptor(id, value) : NULL;
 }
@@ -516,130 +504,97 @@ Var Var.new(Symbol tag, ...) {
     if (row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
     return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
-  Var v;
-  switch (x2c_var_taginfo[id].kind) {
-    case <pointer>: case <reference>: case <object>: {
-      void *pointer = va_arg(ap, void *);
-      if ((id == _array_ || id == _map_) && !pointer) {
-        va_end(ap);
-        raise %(bad-arg (owner "Var.new") (target $tag));
-      }
-      v = _new_pointer(id, pointer);
-      break;
-    }
-    case <floating>:
-      if (tag == <ldouble>) v = Var.box_long_double(va_arg(ap, long double));
-      else v = _new_floating(id, va_arg(ap, double));
-      break;
-    case <integer>:
-      switch (tag) {
-        case <u8>: case <i8>: case <u16>: case <i16>: case <i32>:
-          v = _new_integer(id, va_arg(ap, int)); break;
-        case <u32>:
-          v = _new_integer(id, (long) va_arg(ap, unsigned int)); break;
-        case <u48>:
-          v = _new_integer(id, (long) va_arg(ap, unsigned long)); break;
-        case <i48>: v = _new_integer(id, va_arg(ap, long)); break;
-        case <long>: v = Var.box_long(va_arg(ap, long)); break;
-        case <ulong>: v = Var.box_ulong(va_arg(ap, unsigned long)); break;
-        case <llong>: v = Var.box_long_long(va_arg(ap, long long)); break;
-        case <ullong>:
-          v = Var.box_ulong_long(va_arg(ap, unsigned long long)); break;
-      }
-      break;
-    case <symbol>: v = _new_symbol(id, va_arg(ap, unsigned long)); break;
-    case <void>: v = void; break;
-    default: va_end(ap);
-      raise %(invariant (owner "Var.new") (target $tag));
-  }
+  Var v = _new_builtin(id, tag, ap);
   va_end(ap);
   return v;
 }
 
+/* The row's kind names the C type of the one variadic payload. */
+static Var _new_builtin(TagId id, Symbol tag, va_list ap) {
+  switch (x2c_var_taginfo[id].kind) {
+    case <pointer>: case <reference>: case <object>:
+      return _new_pointer(id, va_arg(ap, void *));
+    case <floating>: return _floating_arg(id, tag, ap);
+    case <integer>:  return _integer_arg(id, tag, ap);
+    case <symbol>:   return _new_symbol(va_arg(ap, unsigned long));
+    case <void>:     return void;
+  }
+  raise %(invariant (owner "Var.new") (target $tag));
+}
+
+/* Pointer families store only the low 48 address bits and reclaim the
+   alignment bits implied by their C type for the row subtype. Array and Map
+   are the only rows whose null payload is invalid. */
 static Var _new_pointer(TagId id, void *ptr) {
-  /* Pointer families store only the low 48 address bits and reclaim the
-     alignment bits implied by their C type for the row subtype. */
+  if ((id == _array_ || id == _map_) && !ptr) {
+    Symbol tag = x2c_var_taginfo[id].tag;
+    raise %(bad-arg (owner "Var.new") (target $tag));
+  }
   Var v = { .p64 = ptr };
   v.u64 |= x2c_var_taginfo[id].top << 48;
   v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
 }
 
-static Var _new_floating(TagId id, double d) {
-  Var v;
-  if (id == _f32_) {
-    float f = (float) d;
-    unsigned u;
-    memcpy(&u, &f, sizeof u);
-    v.u64 = u;
-    v.u64 |= x2c_var_taginfo[id].top << 48;
-    v.u64 |= x2c_var_taginfo[id].middle << 32;
+/* `<f32>` arrives promoted to `double`, and the discrete NaN and infinity
+   tags box their payload as an `<f64>`. */
+static Var _floating_arg(TagId id, Symbol tag, va_list ap) {
+  if (tag == <ldouble>) return Var.box_long_double(va_arg(ap, long double));
+  double d = va_arg(ap, double);
+  return id == _f32_ ? Var.box_f32((float) d) : Var.box_f64(d);
+}
+
+/* Tags up to 32 bits arrive promoted to `int` or `unsigned int`, and
+   `<ullong>` is the one integer row the switch leaves. */
+static Var _integer_arg(TagId id, Symbol tag, va_list ap) {
+  switch (tag) {
+    case <u8>: case <i8>: case <u16>: case <i16>: case <i32>:
+      return _new_integer(id, va_arg(ap, int));
+    case <u32>:   return _new_integer(id, (long) va_arg(ap, unsigned int));
+    case <u48>:   return _new_integer(id, (long) va_arg(ap, unsigned long));
+    case <i48>:   return _new_integer(id, va_arg(ap, long));
+    case <long>:  return Var.box_long(va_arg(ap, long));
+    case <ulong>: return Var.box_ulong(va_arg(ap, unsigned long));
+    case <llong>: return Var.box_long_long(va_arg(ap, long long));
   }
-  // id == _f64_
-  else {
-    // NaN
-    if (d != d) {  // NaN test: NaN != NaN
-      v.u64 = x2c_var_taginfo[_nan_].top << 48;
-      v.u64 |= x2c_var_taginfo[_nan_].middle << 32;
-    }
-    // +Inf
-    else if (d > 0 && d == 1.0/0.0) {
-      v.u64 = x2c_var_taginfo[_posinf_].top << 48;
-      v.u64 |= x2c_var_taginfo[_posinf_].middle << 32;
-    }
-    // -Inf
-    else if (d < 0 && d == -1.0/0.0) {
-      v.u64 = x2c_var_taginfo[_neginf_].top << 48;
-      v.u64 |= x2c_var_taginfo[_neginf_].middle << 32;
-    }
-    // normal number
-    else {
-      unsigned long u;
-      memcpy(&u, &d, sizeof u);
-      if (u == VAR_F64_NEG_MAX_RAW) v.u64 = VAR_F64_NEG_MAX_ESCAPE;
-      else v.u64 = u + VAR_F64_SHIFT;
-    }
+  return Var.box_ulong_long(va_arg(ap, unsigned long long));
+}
+
+/* An immediate integer keeps its tag's width of payload bits. The 48-bit
+   rows carry no middle field. */
+static Var _new_integer(TagId id, long value) {
+  unsigned bits = _integer_width(id);
+  if (!_integer_fits(id, value, bits)) {
+    Symbol target = x2c_var_taginfo[id].tag;
+    raise %(conv-range (owner "Var.new") (target $target));
   }
+  Var v = { .u64 = (unsigned long) value & _bitmask(bits) };
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  if (bits != 48) v.u64 |= x2c_var_taginfo[id].middle << 32;
   return v;
 }
 
-static Var _new_integer(TagId id, long value) {
-  unsigned bits = 0;
-  int is_signed = 0;
+static unsigned _integer_width(TagId id) {
   switch (id) {
-    case _u8_:  case _i8_:  bits = 8;  break;
-    case _u16_: case _i16_: bits = 16; break;
-    case _u32_: case _i32_: bits = 32; break;
-    case _u48_: case _i48_: bits = 48; break;
+    case _u8_:  case _i8_:  return 8;
+    case _u16_: case _i16_: return 16;
+    case _u32_: case _i32_: return 32;
+    case _u48_: case _i48_: return 48;
     default: raise %(invariant (owner "Var.new"));
   }
-  is_signed = (id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_);
-  unsigned long long mask = (bits == 64) ? ~0ull : ((1ull << bits) - 1ull);
-  if (is_signed) {
-    long long min = -(1ll << (bits - 1)), max = (1ll << (bits - 1)) - 1ll;
-    if ((long long) value < min || (long long) value > max) {
-      Symbol target = x2c_var_taginfo[id].tag;
-      raise %(conv-range (owner "Var.new") (target $target));
-    }
-  }
-  else {
-    if (value < 0 || (unsigned long long) value > mask) {
-      Symbol target = x2c_var_taginfo[id].tag;
-      raise %(conv-range (owner "Var.new") (target $target));
-    }
-  }
-  unsigned long payload = ((unsigned long) value) & (unsigned long) mask;
-  Var v = { .u64 = payload };
-  v.u64 |= x2c_var_taginfo[id].top << 48;
-  if (bits != 48)  v.u64 |= x2c_var_taginfo[id].middle << 32;
-  return v;
 }
 
-static Var _new_symbol(TagId id, unsigned long u) {
-  unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
+static int _integer_fits(TagId id, long value, unsigned bits) {
+  if (id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_) {
+    long long bound = 1ll << (bits - 1);
+    return value >= -bound && value < bound;
+  }
+  return value >= 0 && (unsigned long) value <= _bitmask(bits);
+}
+
+static Var _new_symbol(unsigned long u) {
   if (u >= (1ul << 51)) raise %(conv-range (owner "Var.new") (target symbol));
-  Var v = { .u64 = u + offset };
-  return v;
+  return (Var) { .u64 = u + VAR_SYMBOL_OFFSET };
 }
 
 // custom objects
@@ -667,8 +622,7 @@ Var Var.box_record(Symbol tag, const void *record, size_t size) {
    no direct row. */
 static int _custom_row(Symbol tag, VarDescriptor *&descriptor) {
   unsigned count = _row_count();
-  for (unsigned i = 0; i < count; i++)
-    if (rows[i].tag == tag) return (int) i;
+  for (unsigned i = 0; i < count; i++) if (rows[i].tag == tag) return (int) i;
   descriptor = _declared(tag);
   return descriptor ? _assign_row(descriptor) : -1;
 }
@@ -700,12 +654,12 @@ static VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
   $scope(&class_scope) {
     if (cells == NULL) cells = {};
     Var head = cells[key];
-    cell = head is void ? NULL : head.pointer();
+    VarCell *first = head is void ? NULL : head.pointer();
+    cell = first;
     while (cell && cell.descriptor != descriptor) cell = cell.next;
     if (!cell) {
       cell = Scope.malloc(sizeof(VarCell));
-      *cell = (VarCell) { descriptor, pointer, head is void ? NULL
-                                                          : head.pointer() };
+      *cell = (VarCell) { descriptor, pointer, first };
       cells[key] = (void *) cell;
     }
   }
@@ -844,8 +798,7 @@ meta native Var Var.clone_wide(Var value) {
     another family.
     For a wide value, raises `<bad-arg>` when `scope` is NULL, or
     `<alloc-fail>` when a new destination `Scope` cannot be allocated.
-    Ownership
-    is unchanged on failure.
+    Ownership is unchanged on failure.
 */
 Self Var.move_wide_to(Self value, Scope *scope) {
   if (!value.is_wide()) return value;
@@ -874,25 +827,24 @@ Scope Var.wide_owner(Var v) => v.is_wide() ? Scope.owner(_wide_box(v)) : NULL;
 */
 meta native double Var.floating(Var v) {
   switch (v.tag()) {
-    case <f32>: case <float>: {
-      unsigned u = v.u64 & _bitmask(32);
-      float f;
-      memcpy(&f, &u, sizeof f);
-      return f;
-    }
-    case <f64>: case <double>: {
-      unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE
-                      ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
-      double d;
-      memcpy(&d, &u, sizeof d);
-      return d;
-    }
-    case <"nan">:    return  0.0 / 0.0;  // Generate NaN
-    case <"-inf">:   return -1.0 / 0.0;
-    case <"+inf">:   return  1.0 / 0.0;
-    case <ldouble>:      return (double) _wide_box(v).value.long_double_value;
+    case <f32>: case <float>:  return v.decode_f32();
+    case <f64>: case <double>: return _f64_floating(v);
+    case <"nan">:   return  0.0 / 0.0;
+    case <"-inf">:  return -1.0 / 0.0;
+    case <"+inf">:  return  1.0 / 0.0;
+    case <ldouble>: return (double) _wide_box(v).value.long_double_value;
   }
   return 0.0;
+}
+
+/* `Var.decode_f64` would first test the NaN and infinity patterns, which an
+   `<f64>` tag has already excluded. */
+static double _f64_floating(Var v) {
+  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE
+                  ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
+  double d;
+  memcpy(&d, &u, sizeof d);
+  return d;
 }
 
 /** Returns `v`'s payload as a `long` when its tag is integral, or 0.
@@ -920,35 +872,41 @@ meta native double Var.floating(Var v) {
 meta native long Var.integer(Var v) {
   unsigned top = _top_bits(v);
   if (top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
-  if (top == x2c_var_taginfo[_i48_].top) {
-    unsigned long mask = _bitmask(48), raw = v.u64 & mask;
-    if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
-    return (long) raw;
+  if (top == x2c_var_taginfo[_i48_].top) return _i48_integer(v);
+  if (top == x2c_var_taginfo[_u8_].top) return _narrow_integer(v);
+  if (top == 0x0005) return _wide_integer(v);
+  if (top == 0x0007 && _bottom_bits(v) == 0x6)
+    return (long) _wide_box(v).value.ulong_long_value;
+  if (top >= 0x8004 && top <= 0x800B)
+    return (Symbol) (v.u64 - VAR_SYMBOL_OFFSET);
+  return 0;
+}
+
+static long _i48_integer(Var v) {
+  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
+  if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);
+  return (long) raw;
+}
+
+/* The 8-, 16-, and 32-bit rows share one top and differ in the middle. */
+static long _narrow_integer(Var v) {
+  switch (_middle_bits(v)) {
+    case 0x1: return (unsigned char)  (v.u64 & _bitmask(8));
+    case 0x2: return (char)           (v.u64 & _bitmask(8));
+    case 0x3: return (unsigned short) (v.u64 & _bitmask(16));
+    case 0x4: return (short)          (v.u64 & _bitmask(16));
+    case 0x5: return (unsigned int)   (v.u64 & _bitmask(32));
+    case 0x6: return (int)            (v.u64 & _bitmask(32));
   }
-  if (top == x2c_var_taginfo[_u8_].top) {
-    switch (_middle_bits(v)) {
-      case 0x1: return (unsigned char)  (v.u64 & _bitmask(8));
-      case 0x2: return (char)           (v.u64 & _bitmask(8));
-      case 0x3: return (unsigned short) (v.u64 & _bitmask(16));
-      case 0x4: return (short)          (v.u64 & _bitmask(16));
-      case 0x5: return (unsigned int)   (v.u64 & _bitmask(32));
-      case 0x6: return (int)            (v.u64 & _bitmask(32));
-    }
-  }
-  if (top == 0x0005) {
-    switch (_bottom_bits(v)) {
-      case 0x5: return _wide_box(v).value.long_value;
-      case 0x6: return (long) _wide_box(v).value.ulong_value;
-      case 0x7: return (long) _wide_box(v).value.long_long_value;
-    }
-  }
-  if (top == 0x0007) {
-    unsigned bottom = _bottom_bits(v);
-    if (bottom == 0x6) return (long) _wide_box(v).value.ulong_long_value;
-  }
-  if (top >= 0x8004 && top <= 0x800B) {
-    unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
-    return (Symbol) (v.u64 - offset);
+  return 0;
+}
+
+/* `<long>`, `<ulong>`, and `<llong>` share top 0x0005. */
+static long _wide_integer(Var v) {
+  switch (_bottom_bits(v)) {
+    case 0x5: return _wide_box(v).value.long_value;
+    case 0x6: return (long) _wide_box(v).value.ulong_value;
+    case 0x7: return (long) _wide_box(v).value.long_long_value;
   }
   return 0;
 }
@@ -1005,10 +963,9 @@ meta native long double Var.long_double_value(Var v) =>
 
     Nothing here proves that an accepted address is live or came from the
     right constructor; that remains the typed API's precondition. This raw
-    decoder
-    also accepts some reserved pointer-shaped bit patterns. Validate external
-    bits with `Var.encoding_valid`, then confirm the family with `Var.tag` or
-    `Var.is` before trusting the result.
+    decoder also accepts some reserved pointer-shaped bit patterns. Validate
+    external bits with `Var.encoding_valid`, then confirm the family with
+    `Var.tag` or `Var.is` before trusting the result.
 */
 void *Var.pointer(Var v) {
   // Pointer families reserve zero, one, two, or three low subtype bits.
@@ -1020,47 +977,37 @@ void *Var.pointer(Var v) {
   if (top == 0x0007 && btm > 0x5) return NULL;
   if (top == 0x000B && (btm == 0x2 || btm > 0x6)) return NULL;
   if (top == 0x000F && btm > 0x6) return NULL;
-  if (top >= 0x0005 && top <= 0x000F)
-    return (void *) (v.u64 & (_bitmask(48) - 0x7));
+  if (top >= 0x0005 && top <= 0x000F) return _address(v);
   if ((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS)
     return ((VarCell *) _address(v)).pointer;
-  if (top >= VAR_CUSTOM_TAG_TOP &&
-      top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8)
-    return _address(v);
+  if (_custom_top(top)) return _address(v);
   return NULL;
 }
 
-// wide equality
+/* wide equality
 
-/* A wide box holds one or two machine words, so it mixes as words rather
+   A wide box holds one or two machine words, so it mixes as words rather
    than as bytes. The tag seeds the chain, so two boxes with equal bits but
    different tags hash differently. */
-static unsigned _hash_bytes(unsigned hash, void *ptr, int width) =>
-  x2c_hash_bytes(hash, ptr, (size_t) width);
 
 /** Returns a supported wide scalar box's content hash, or 0 otherwise. */
 unsigned Var.wide_hash(Var v) {
   if (!v.is_wide()) return 0;
   VarWideBox box = _wide_box(v);
   Symbol tag = v.tag();
-  with box.value {
-    switch (tag) {
-      case <long>:
-        return _hash_bytes(
-          (unsigned) tag, &_.long_value, sizeof(_.long_value));
-      case <ulong>:
-        return _hash_bytes(
-          (unsigned) tag, &_.ulong_value, sizeof(_.ulong_value));
-      case <llong>:
-        return _hash_bytes(
-          (unsigned) tag, &_.long_long_value, sizeof(_.long_long_value));
-      case <ullong>:
-        return _hash_bytes(
-          (unsigned) tag, &_.ulong_long_value, sizeof(_.ulong_long_value));
-      case <ldouble>:
-        return _hash_bytes(
-          (unsigned) tag, &_.long_double_value, sizeof(_.long_double_value));
-    }
+  size_t width = _wide_width(tag);
+  return width ? x2c_hash_bytes((unsigned) tag, &box.value, width) : 0;
+}
+
+/* The payload bytes of a wide family. Every member of the box's union
+   starts at the union, so the payload is the union's first `width` bytes. */
+static size_t _wide_width(Symbol tag) {
+  switch (tag) {
+    case <long>:    return sizeof(long);
+    case <ulong>:   return sizeof(unsigned long);
+    case <llong>:   return sizeof(long long);
+    case <ullong>:  return sizeof(unsigned long long);
+    case <ldouble>: return sizeof(long double);
   }
   return 0;
 }
@@ -1099,8 +1046,7 @@ int Var.wide_equal(Var a, Var b) {
 // ordering
 
 typedef struct VarIntegerParts {
-  int negative;
-  unsigned long long magnitude;
+  int negative, unsigned long long magnitude;
 } VarIntegerParts;
 
 /** Orders the integer payloads of `a` and `b`, returning -1, 0, or 1.
@@ -1122,30 +1068,22 @@ int Var.integer_compare(Var a, Var b) {
 }
 
 static VarIntegerParts _integer_parts(Var v) {
-  VarIntegerParts parts = {0};
-  Symbol tag = v.tag();
-  switch (tag) {
+  switch (v.tag()) {
     case <u8>: case <u16>: case <u32>: case <u48>:
-      parts.magnitude = (unsigned long long) v.integer();
-      return parts;
-    case <ulong>: parts.magnitude = v.ulong_value();
-      return parts;
-    case <ullong>: parts.magnitude = v.ulong_long_value();
-      return parts;
-    case <long>: parts.negative = v.long_value() < 0;
-      parts.magnitude = _signed_magnitude(v.long_value());
-      return parts;
-    case <llong>: parts.negative = v.long_long_value() < 0;
-      parts.magnitude = _signed_magnitude(v.long_long_value());
-      return parts;
-    default: {
-      long value = v.integer();
-      parts.negative = value < 0;
-      parts.magnitude = _signed_magnitude(value);
-      return parts;
-    }
+      return _unsigned_parts((unsigned long long) v.integer());
+    case <ulong>:  return _unsigned_parts(v.ulong_value());
+    case <ullong>: return _unsigned_parts(v.ulong_long_value());
+    case <long>:   return _signed_parts(v.long_value());
+    case <llong>:  return _signed_parts(v.long_long_value());
   }
+  return _signed_parts(v.integer());
 }
+
+static VarIntegerParts _unsigned_parts(unsigned long long magnitude) =>
+  (VarIntegerParts) { 0, magnitude };
+
+static VarIntegerParts _signed_parts(long long value) =>
+  (VarIntegerParts) { value < 0, _signed_magnitude(value) };
 
 static unsigned long long _signed_magnitude(long long value) {
   if (value >= 0) return (unsigned long long) value;
@@ -1170,13 +1108,13 @@ int Var.integer_floating_compare(Var integer, Var floating) {
   if (value == -1.0L / 0.0L) return 1;
   if (parts.negative) {
     if (value >= 0.0L) return -1;
-    return -_magnitude_floating_compare(parts.magnitude, -value);
+    return -_magnitude_compare(parts.magnitude, -value);
   }
   if (value < 0.0L) return 1;
-  return _magnitude_floating_compare(parts.magnitude, value);
+  return _magnitude_compare(parts.magnitude, value);
 }
 
-static int _magnitude_floating_compare(
+static int _magnitude_compare(
   unsigned long long integer, long double floating) {
   long double limit = (long double) (1ull << 63) * 2.0L;
   if (floating >= limit) return -1;
