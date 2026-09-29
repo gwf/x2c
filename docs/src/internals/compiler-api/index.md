@@ -28,12 +28,12 @@ Functions and types exposed by each compiler module.
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
 | [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
-| [`src/macros.x`](macros.md) | compile-time macro definitions and expression expansion. |
+| [`src/macros.x`](macros.md) | source macros and the compile-time code they run. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
 | [`src/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
-| [`src/parse.x`](parse.md) | x2c recursive-descent parser core. |
+| [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |

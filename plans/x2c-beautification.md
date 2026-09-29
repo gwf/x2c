@@ -1,9 +1,8 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`, with
-> the first part of Wave 4. The rest of Wave 4 is on the GitHub branch
-> `beautification-wave4`; "Wave 4 handoff" below says how to finish it.
-> Wave 5 follows. The baseline measurements are from `dev` `f6606dbf`.
+> Status: active. Wave 0, the pilot, and Waves 2 through 4 are on `dev`.
+> Wave 5 needs Gary's go-ahead and exact file boundaries agreed with the
+> dual-macro session. The baseline measurements are from `dev` `f6606dbf`.
 > Track H waits for Gary's approval of its book text.
 
 ## Progress
@@ -236,45 +235,52 @@ Candidates left for later:
 - `x2c lint` suggests `LispEnv &local` for `_bind_values`, which the
   compiler's region check then rejects.
 
-Wave 4 handoff, 2026-09-29. The batch started from `dev` `8466809c`, and
-its workers stopped at a weekly usage limit.
+Wave 4, delivered 2026-09-29: ten compiler front-end and core files. Each
+file's columns show the measure before and after, as `before / after`. The
+baseline is `dev` `8466809c`; the final tree also contains the separate
+match-row location fix and the dual-macro session's eight-line
+`Compiler.rebuild_unit_function` helper.
 
-- On `dev`: the rewrites of `statements.x`, `stage.x`, `literals.x`,
-  `type.x`, and `ast.x`, each verified by its worker (`make verify`, stage
-  1 equal to stage 0, commands check, instructions within noise), and the
-  deletion of `MachineBuilder.view`, which Gary approved. `type-ledger.x`
-  stays as it is: it is written by hand and inside the bands. The batch's
-  translation timing did not run; each worker's instruction check came out
-  between -0.4% and +0.3%.
-- On the GitHub branch `beautification-wave4`, built on that `dev` commit,
-  one commit series per file, none verified after its last commit:
-  - `compiler.x`: eleven commits. The last planned group, shallow
-    collection through meta definitions, may be unfinished.
-  - `parse.x`: five commits. The rewrite is done; the worker stopped while
-    running `make commands-check`.
-  - `meta-group.x` and `builtins.x`: four commits that order both files and
-    split the main functions. The 9-parameter builtin may remain.
-  - `macros.x`: six commits through imports, then a `wip:` checkpoint of the
-    next group that may not build. It comes last on the branch.
-- To finish: on that branch, check each file's commits in turn (`make
-  build`, `make verify`, `make stage-1 && make stage-diff-1`,
-  `make commands && make commands-check`, lint, and the instruction check
-  of the Wave 4 brief), and complete the unfinished groups. Then time
-  translation against a `dev` baseline built through stage 1, running both
-  compilers from paths of equal length and comparing retired instructions.
-  Record Wave 4 here, run `tools/land-dev "refresh bootstrap for
-  beautification wave 4"`, and post the landing commit in the Claude chat
-  for the Codex dual-macro session.
-- The Wave 2 to 4 worker briefs, `shape.py`, and the timing scripts are in
-  `.context/beautification/` of the old integration worktree; their paths
-  name the old session's scratchpad.
-- Candidates found so far: `statements.x` spells the `with`/`as` keyword
-  test inline three times, which an exported `_test_contextual` from
-  `parse.x` could own; the Symbol-set hash is written in both
-  `lib/symbolset.x` and `src/literals.x`; and `literals.x`'s lambda
-  sections, about 450 lines, could become their own unit.
-- The Codex dual-macro session reserved no files as of 2026-09-29 and will
-  announce any overlap in the Claude chat first.
+| File | Lines | Functions | Longest | Over 40 | Most parameters |
+| --- | --- | --- | --- | --- | --- |
+| src/statements.x | 733 / 816 | 46 / 66 | 86 / 30 | 2 / 0 | 5 / 5 |
+| src/stage.x | 385 / 431 | 12 / 27 | 67 / 29 | 2 / 0 | 5 / 5 |
+| src/literals.x | 1,267 / 1,467 | 57 / 104 | 85 / 25 | 8 / 0 | 5 / 5 |
+| src/type.x | 930 / 974 | 83 / 100 | 106 / 31 | 2 / 0 | 4 / 4 |
+| src/ast.x | 277 / 297 | 21 / 22 | 22 / 16 | 0 / 0 | 3 / 3 |
+| src/compiler.x | 4,024 / 4,330 | 238 / 317 | 115 / 28 | 7 / 0 | 6 / 6 |
+| src/parse.x | 3,029 / 3,332 | 121 / 206 | 510 / 112 | 9 / 1 | 6 / 6 |
+| src/meta-group.x | 740 / 855 | 34 / 52 | 79 / 29 | 4 / 0 | 5 / 5 |
+| src/builtins.x | 902 / 960 | 70 / 78 | 92 / 64 | 3 / 1 | 9 / 8 |
+| src/macros.x | 4,830 / 5,514 | 257 / 394 | 302 / 33 | 15 / 0 | 14 / 6 |
+
+The ten files grew from 17,117 to 18,976 lines. Wave 4 itself added
+15,320 `.x` lines and deleted 13,468; the separate match-row fix changed
+one more net line and the dual-macro helper added eight. Functions over 40
+lines fell from 52 to 2: `parse.x`'s structural dispatcher has one-line
+arms, and `builtins.x`'s 64-line function is a binding table. The remaining
+eight-parameter `_foreach_expand` is the existing compile-time Lisp entry;
+changing its call signature would change the binding contract. Public names
+and signatures otherwise stayed as they were. `type-ledger.x` was already
+inside the bands; Gary approved deleting the unused `MachineBuilder.view`.
+
+Each file's final rewrite passed `make build`, `make verify`, stage 1 equal
+to stage 0 across 192 C/H files, `make commands && make commands-check`,
+and lint review. The final integrated tree passed `make build-safe` and
+stage equality after merging current `dev`. Five alternating translation
+pairs of six compiler sources, with both trees built through stage 1 and
+compiler paths of equal length, retired 0.4% fewer instructions without
+interfaces and 0.8% fewer with interfaces at the median. Median wall time
+was 1.6% and 1.0% lower, respectively; the host's other work makes those
+small wall differences uncertain. No instruction increase was found.
+
+The separate match-row fix reproduced and repaired a pre-existing location
+defect. Wave 4 kept that behavior outside the rewrite. Candidates left for
+later: `statements.x` repeats the `with`/`as` contextual-keyword test three
+times; `lib/symbolset.x` and `literals.x` both spell the Symbol-set hash;
+and `literals.x`'s lambda sections could become their own unit. The
+dual-macro session owns its active `protocol.x` work; Wave 5 files require
+new exact boundaries before editing.
 
 ## Context
 
