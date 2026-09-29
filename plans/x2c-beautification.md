@@ -1,8 +1,10 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0 and the pilot are complete and wait for Gary's
-> review of the pilot files before Wave 2. The baseline measurements are
-> from `dev` `f6606dbf`. Track H waits for Gary's approval of its book text.
+> Status: active. Wave 0 and the pilot are on `dev` at `28c8ce22`. Wave 2
+> started 2026-09-28 on every driver file except `generate.x`, which waits
+> for the separate fix that stops generated C from embedding checkout
+> paths. The baseline measurements are from `dev` `f6606dbf`. Track H waits
+> for Gary's approval of its book text.
 
 ## Progress
 
