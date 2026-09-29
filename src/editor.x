@@ -23,76 +23,64 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* The private request uses argv for metadata and separate files for source
-   snapshots. Only this response file carries JSON; macros can print freely
-   to stdout/stderr without corrupting it. No JSON input parser is needed. */
-static Map _location(String path, int start, int end) =>
-  {file: path, start: start, end: end};
+// requests
 
-static Array _diagnostics(Compiler compiler, Map needed) {
-  Array diagnostics = [];
-  foreach (List entry, compiler.diagnostics()) {
-    List location = entry.assoc(<location>);
-    Var source = location.assoc(<file>);
-    String path = source is <string> ? source : compiler.filename;
-    Var position = location.assoc(<position>);
-    Var width = location.assoc(<length>);
-    int start = position is void ? 0 : position;
-    int length = width is void ? 0 : width;
-    path = Path.absolute(path);
-    needed[path] = 1;
-    Map diagnostic = _location(path, start, start + length);
-    diagnostic[<message>] = entry.assoc(<message>);
-    diagnostic[<code>] = entry.assoc(<code>);
-    diagnostic[<severity>] = entry.assoc(<severity>);
-    diagnostics.push(diagnostic);
+/** Serves one private editor request after process environment initialization.
+    Metadata precedes ordinary compiler arguments after `--`; source snapshots
+    and the JSON response use separate files. Returns zero for a written
+    response and two for a failed request or unsupported configuration.
+*/
+int editor_request(int argc, char **argv) {
+  if (argc < 7) return 2;
+  String response = String.new(argv[1]);
+  String source = Path.absolute(String.new(argv[2]));
+  String kind = String.new(argv[3]);
+  int offset = atoi(argv[4]), count = atoi(argv[5]);
+  if (count < 0 || count > (argc - 7) / 3) return 2;
+  int boundary = 6 + count * 3;
+  if (strcmp(argv[boundary], "--")) return 2;
+  SourceView sources = SourceView.new();
+  for (int index = 0; index < count; index++) {
+    int arg = 6 + index * 3;
+    String logical = String.new(argv[arg]);
+    String snapshot = String.new(argv[arg + 1]), text;
+    if (!SourceView.read(NULL, snapshot, text)) return 2;
+    sources.set(logical, text, !strcmp(argv[arg + 2], "1"));
   }
-  return diagnostics;
-}
-
-static List _occurrence(Compiler compiler, String path, int offset) {
-  List found = NULL;
-  foreach (List row, compiler.source_occurrences) {
-    String file = row[0];
-    int start = row[1], end = row[2];
-    if (file != path || offset < start || offset >= end) continue;
-    if (!found || end - start < found[2].int() - found[1].int()) found = row;
+  // Reuse the private metadata delimiter as the compiler's argv[0].
+  argv[boundary] = argv[0];
+  CliRequest request = _configure(
+    argc - boundary, argv + boundary, sources, source);
+  Frontend frontend = Frontend.new(request);
+  if (!frontend.preload_macro_libraries()) return 2;
+  frontend.prepare_meta(%($source));
+  Context command = Context.open_isolated_named("editor request");
+  ParsedUnit unit;
+  int parsed = frontend.open(source, unit);
+  if ((request.live_symbols || request.cpp_symbols) &&
+      _changed_dependency(unit.compiler, sources)) {
+    fputs(
+      "x2c editor: unsaved sources with native CPP symbol modes are "
+      "not supported; syntax highlighting remains available\n", stderr);
+    unit.close();
+    command.close();
+    return 2;
   }
-  return found;
-}
-
-static void _query(
-  Map reply, Compiler compiler, String path, String kind, int offset,
-  Map needed) {
-  List row = _occurrence(compiler, path, offset);
-  if (!row) return;
-  List binding = row[3];
-  Type type = row[4];
-  if (kind == "definition") {
-    Var value = compiler.source_definitions[binding];
-    if (value is not <list>) return;
-    List target = value;
-    needed[target[0]] = 1;
-    reply[<definition>] = _location(target[0], target[1], target[2]);
+  File result = fopen(response, "w");
+  if (!result) {
+    unit.close();
+    command.close();
+    return 2;
   }
-  else if (kind == "hover" && type) {
-    needed[row[0]] = 1;
-    List declaration = type.declaration_ast(binding);
-    Map hover = _location(row[0], row[1], row[2]);
-    hover[<text>] = String.new(
-      compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
-    reply[<hover>] = hover;
-  }
-}
-
-static Array _sources(Compiler compiler, Map needed) {
-  Array sources = [];
-  foreach (Var key, needed.keys()) {
-    Var text;
-    if (compiler.source_texts.try_get(key, text))
-      sources.push({file: key, text: text});
-  }
-  return sources;
+  Map needed = {};
+  Map reply = {file: source, diagnostics: _diagnostics(unit.compiler, needed)};
+  if (parsed) _query(reply, unit.compiler, source, kind, offset, needed);
+  reply[<sources>] = _sources(unit.compiler, needed);
+  fprintf(result, "%s\n", Var.json(reply));
+  int failed = fclose(result);
+  unit.close();
+  command.close();
+  return failed ? 2 : 0;
 }
 
 static CliRequest _configure(
@@ -153,60 +141,76 @@ static int _changed_dependency(Compiler compiler, SourceView sources) {
   return 0;
 }
 
-/** Serves one private editor request after process environment initialization.
-    Metadata precedes ordinary compiler arguments after `--`; source snapshots
-    and the JSON response use separate files. Returns zero for a written
-    response and two for a failed request or unsupported configuration.
-*/
-int editor_request(int argc, char **argv) {
-  if (argc < 7) return 2;
-  String response = String.new(argv[1]);
-  String source = Path.absolute(String.new(argv[2]));
-  String kind = String.new(argv[3]);
-  int offset = atoi(argv[4]), count = atoi(argv[5]);
-  if (count < 0 || count > (argc - 7) / 3) return 2;
-  int boundary = 6 + count * 3;
-  if (strcmp(argv[boundary], "--")) return 2;
-  SourceView sources = SourceView.new();
-  for (int index = 0; index < count; index++) {
-    int arg = 6 + index * 3;
-    String logical = String.new(argv[arg]);
-    String snapshot = String.new(argv[arg + 1]), text;
-    if (!SourceView.read(NULL, snapshot, text)) return 2;
-    sources.set(logical, text, !strcmp(argv[arg + 2], "1"));
+// replies
+
+static Array _diagnostics(Compiler compiler, Map needed) {
+  Array diagnostics = [];
+  foreach (List entry, compiler.diagnostics()) {
+    List location = entry.assoc(<location>);
+    Var source = location.assoc(<file>);
+    String path = source is <string> ? source : compiler.filename;
+    Var position = location.assoc(<position>);
+    Var width = location.assoc(<length>);
+    int start = position is void ? 0 : position;
+    int length = width is void ? 0 : width;
+    path = Path.absolute(path);
+    needed[path] = 1;
+    Map diagnostic = _location(path, start, start + length);
+    diagnostic[<message>] = entry.assoc(<message>);
+    diagnostic[<code>] = entry.assoc(<code>);
+    diagnostic[<severity>] = entry.assoc(<severity>);
+    diagnostics.push(diagnostic);
   }
-  // Reuse the private metadata delimiter as the compiler's argv[0].
-  argv[boundary] = argv[0];
-  CliRequest request = _configure(
-    argc - boundary, argv + boundary, sources, source);
-  Frontend frontend = Frontend.new(request);
-  if (!frontend.preload_macro_libraries()) return 2;
-  frontend.prepare_meta(%($source));
-  Context command = Context.open_isolated_named("editor request");
-  ParsedUnit unit;
-  int parsed = frontend.open(source, unit);
-  if ((request.live_symbols || request.cpp_symbols) &&
-      _changed_dependency(unit.compiler, sources)) {
-    fputs(
-      "x2c editor: unsaved sources with native CPP symbol modes are "
-      "not supported; syntax highlighting remains available\n", stderr);
-    unit.close();
-    command.close();
-    return 2;
+  return diagnostics;
+}
+
+/* The private request uses argv for metadata and separate files for source
+   snapshots. Only this response file carries JSON; macros can print freely
+   to stdout/stderr without corrupting it. No JSON input parser is needed. */
+static Map _location(String path, int start, int end) =>
+  {file: path, start: start, end: end};
+
+static void _query(
+  Map reply, Compiler compiler, String path, String kind, int offset,
+  Map needed) {
+  List row = _occurrence(compiler, path, offset);
+  if (!row) return;
+  List binding = row[3];
+  Type type = row[4];
+  if (kind == "definition") {
+    Var value = compiler.source_definitions[binding];
+    if (value is not <list>) return;
+    List target = value;
+    needed[target[0]] = 1;
+    reply[<definition>] = _location(target[0], target[1], target[2]);
   }
-  File result = fopen(response, "w");
-  if (!result) {
-    unit.close();
-    command.close();
-    return 2;
+  else if (kind == "hover" && type) {
+    needed[row[0]] = 1;
+    List declaration = type.declaration_ast(binding);
+    Map hover = _location(row[0], row[1], row[2]);
+    hover[<text>] = String.new(
+      compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
+    reply[<hover>] = hover;
   }
-  Map needed = {};
-  Map reply = {file: source, diagnostics: _diagnostics(unit.compiler, needed)};
-  if (parsed) _query(reply, unit.compiler, source, kind, offset, needed);
-  reply[<sources>] = _sources(unit.compiler, needed);
-  fprintf(result, "%s\n", Var.json(reply));
-  int failed = fclose(result);
-  unit.close();
-  command.close();
-  return failed ? 2 : 0;
+}
+
+static List _occurrence(Compiler compiler, String path, int offset) {
+  List found = NULL;
+  foreach (List row, compiler.source_occurrences) {
+    String file = row[0];
+    int start = row[1], end = row[2];
+    if (file != path || offset < start || offset >= end) continue;
+    if (!found || end - start < found[2].int() - found[1].int()) found = row;
+  }
+  return found;
+}
+
+static Array _sources(Compiler compiler, Map needed) {
+  Array sources = [];
+  foreach (Var key, needed.keys()) {
+    Var text;
+    if (compiler.source_texts.try_get(key, text))
+      sources.push({file: key, text: text});
+  }
+  return sources;
 }
