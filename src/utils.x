@@ -3,9 +3,10 @@
     Copyright (c) 2025 Gary William Flake
 
     Owns the environment the driver modules share: where the executable,
-    home, stage, and packages are, how a file is locked or replaced, the
-    driver's fatal error line, and translation workers. Host tools run
-    through `lib/process.x`.
+    home, stage, and packages are, which files are x2c source, the
+    compiler's identity, how a file is locked or replaced, translation
+    workers, and the driver's fatal error line. Host tools run through
+    `lib/process.x`.
 */
 
 #pragma once
@@ -28,10 +29,13 @@ $(import "../lib/private-keywords.xmacro")
 
 // environment state
 
-static String x2c_executable_path = NULL, x2c_root_path = NULL;
-static String x2c_identity = NULL;
-static int x2c_root_found = 0;
-static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
+/* Environment setup fills these once per process, and `x2c_set_root` may
+   replace the root and its include `List`s. The root is the home when
+   `root_found` is set and the current directory otherwise. */
+static String executable_path = NULL, root_path = NULL;
+static String compiler_identity = NULL;
+static int root_found = 0;
+static List default_include_dirs = NULL, cpp_include_dirs = NULL;
 
 // environment setup
 
@@ -52,7 +56,8 @@ void x2c_initialize_environment(const char *argv0) {
 }
 
 /** Initializes an external command with the compiler identity embedded when
-    it was built. A driver-supplied identity must match that compiler. */
+    it was built. A driver-supplied identity must match that compiler.
+*/
 void x2c_initialize_command_environment(
   const char *argv0, String embedded_identity) {
   String supplied = Env.get("X2C_IDENTITY");
@@ -66,16 +71,16 @@ void x2c_initialize_command_environment(
 /* Initializes ordinary and external command paths with the chosen identity. */
 static void _initialize_environment(
   const char *argv0, String embedded_identity) {
-  if (x2c_root_path) return;
-  x2c_executable_path = _executable(argv0);
-  x2c_identity = embedded_identity ? embedded_identity : _identity();
+  if (root_path) return;
+  executable_path = _executable(argv0);
+  compiler_identity = embedded_identity ? embedded_identity : _identity();
   String home = Env.get("X2C_HOME");
   if (home && !home[0]) home = NULL;
-  String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
+  String root = home ? home.rstrip("/") : _locate_home(executable_path);
   if (!root) root = _locate_home(Path.absolute("."));
-  x2c_root_found = root != NULL;
-  x2c_root_path = Path.absolute(root ? root : ".");
-  _prepare_repo_defaults();
+  root_found = root != NULL;
+  root_path = Path.absolute(root ? root : ".");
+  _prepare_include_dirs();
 }
 
 static String _executable(const char *argv0) {
@@ -94,8 +99,8 @@ static String _executable(const char *argv0) {
 /* Linux names the running image itself, which stays the same file even if
    the executable's path is replaced while the process runs. */
 static String _identity(void) =>
-  x2c_file_identity(Path.exists("/proc/self/exe") ? %"/proc/self/exe"
-                                                   : x2c_executable_path);
+  x2c_file_identity(
+    Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
 
 static String _locate_home(Path p) {
   if (!p) return NULL;
@@ -110,13 +115,12 @@ static String _locate_home(Path p) {
 static int _is_home(Path p) =>
   p.join("include").is_dir() && p.join("etc/compiler-sdk.xlisp").is_file();
 
-static void _prepare_repo_defaults(void) {
-  if (!x2c_root_path) return;
-  String include_dir = %"$x2c_root_path/include/x2c";
-  String src_dir = %"$x2c_root_path/src", lib_dir = %"$x2c_root_path/lib";
-  x2c_base_include_dirs = cons(include_dir, NULL);
-  x2c_repo_cpp_include_dirs = Path.is_dir(src_dir)
-    ? %( $src_dir $lib_dir ) : %( $lib_dir );
+static void _prepare_include_dirs(void) {
+  if (!root_path) return;
+  String include_dir = %"$root_path/include/x2c";
+  String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
+  default_include_dirs = cons(include_dir, NULL);
+  cpp_include_dirs = Path.is_dir(src_dir) ? %($src_dir $lib_dir) : %($lib_dir);
 }
 
 /** Overrides the repository root and rebuilds its default include `List`s.
@@ -125,11 +129,11 @@ static void _prepare_repo_defaults(void) {
     them.
 */
 void x2c_set_root(String root) {
-  x2c_root_path = Path.absolute(root);
-  x2c_root_found = 1;
-  x2c_base_include_dirs = NULL;
-  x2c_repo_cpp_include_dirs = NULL;
-  _prepare_repo_defaults();
+  root_path = Path.absolute(root);
+  root_found = 1;
+  default_include_dirs = NULL;
+  cpp_include_dirs = NULL;
+  _prepare_include_dirs();
 }
 
 // environment queries
@@ -138,21 +142,21 @@ void x2c_set_root(String root) {
     The root is absolute with symbolic links resolved, the one spelling
     paths below the home are compared in.
 */
-String x2c_get_root(void) => x2c_root_path;
+String x2c_get_root(void) => root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
-String x2c_get_executable(void) => x2c_executable_path;
+String x2c_get_executable(void) => executable_path;
 
 /** Returns the discovered or configured home, or NULL when there is none. */
-String x2c_home(void) => x2c_root_found ? x2c_root_path : NULL;
+String x2c_home(void) => root_found ? root_path : NULL;
 
 /** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
     or NULL for any other compiler.
 */
 String x2c_stage_dir(void) {
-  if (!x2c_executable_path) return NULL;
-  String stage = Path.dirname(x2c_executable_path);
-  return Path.dirname(stage) == %"$x2c_root_path/builds" ? stage : NULL;
+  if (!executable_path) return NULL;
+  String stage = Path.dirname(executable_path);
+  return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
 /** Returns `<home>/packages`, which may not exist, or NULL without a home. */
@@ -172,13 +176,13 @@ String x2c_home_libexec(void) {
 /** Returns the borrowed default include `List` containing `<root>/include`.
     Returns NULL before environment setup.
 */
-List x2c_default_include_dirs(void) => x2c_base_include_dirs;
+List x2c_default_include_dirs(void) => default_include_dirs;
 
 /** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
     `<root>/src` is present only when the home has that directory. Returns
     NULL before environment setup.
 */
-List x2c_cpp_include_dirs(void) => x2c_repo_cpp_include_dirs;
+List x2c_cpp_include_dirs(void) => cpp_include_dirs;
 
 /** Returns the spelling of the first `PATH` candidate for the program `name`
     that this process may execute, searched as `execvp` searches, or NULL.
@@ -232,7 +236,8 @@ String x2c_package_directory(List roots, String path) {
 
 /** Resolves the first readable package entry under `roots`, using the same
     source view as the importing compiler. Returns its canonical directory
-    through `directory`, or NULL when the package does not exist. */
+    through `directory`, or NULL when the package does not exist.
+*/
 String x2c_package_entry(
   SourceView sources, List roots, String name, String &directory) {
   foreach (String package_dir, roots) {
@@ -262,7 +267,7 @@ int x2c_package_source(String directory, String path) {
     command uses the identity embedded from the compiler that built it.
     Returns NULL if ordinary startup could not read its executable.
 */
-String x2c_compiler_identity(void) => x2c_identity;
+String x2c_compiler_identity(void) => compiler_identity;
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
     running compiler's identity. Returns NULL when the executable cannot be
@@ -391,12 +396,16 @@ int worker_wait_any(long *pids, int count, int &status) {
       int raw;
       pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
       if (!done || (done < 0 && errno == EINTR)) continue;
-      status = done < 0 ? -1 : WIFEXITED(raw) ? WEXITSTATUS(raw) :
-                WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
+      status = done < 0 ? -1 : _shell_status(raw);
       return i;
     }
     usleep(1000);
   }
+}
+
+static int _shell_status(int raw) {
+  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
+  return WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
 }
 
 // driver errors
