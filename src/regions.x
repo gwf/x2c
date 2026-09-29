@@ -29,6 +29,7 @@
 #include "compiler.x"
 
 #pragma private
+#include "meta.x"
 $(import "../src/grammar.xmacro")
 
 #include "ast.x"
@@ -262,6 +263,26 @@ int Compiler.region_wrapper(String name) => runtime[name] == %(wrap);
 
 // canonical forms the pass reads
 
+/* The parser's empty argument marker represents no arguments. */
+static List _source_call(Var value) {
+  match (value)
+    case $source_pattern($called, %(?callee *rows)): {
+      match (rows) case %((expr ? ())): rows = NULL;
+      return %($callee $rows);
+    }
+  return NULL;
+}
+
+/* A declarator initializer shares the operator but is not an assignment. */
+static List _source_assignment(Var value) {
+  match (value)
+    case $source_pattern($assigned, %(?target ?stored)): {
+      match (target) case %(bind *): return NULL;
+      return %($target $stored);
+    }
+  return NULL;
+}
+
 /* The storage an expression names, without the wrappers that keep it. */
 static Var _unwrap(Var value) {
   while (1)
@@ -292,7 +313,7 @@ static Var _address_of(Var value) {
 /* The C name a call names directly, or NULL for a call through a value.
    `arguments` omits the marker an empty argument list parses to. */
 static String _callee_of(Var value, List &arguments) {
-  match (source_call(_unwrap(value))) case %(?function ?rows): {
+  match (_source_call(_unwrap(value))) case %(?function ?rows): {
     List name = _binding_of(function);
     arguments = rows;
     return binding_identity_spelling(name);
@@ -827,7 +848,7 @@ static void _scan(Walk w, Var value, int deferred) {
   w.pending.push(value);
   while ((int) w.pending.len() > base) {
     Var node = w.pending.take_last();
-    List call = source_call(node);
+    List call = _source_call(node);
     if (call) {
       (Var function, List arguments) = call;
       String callee = binding_identity_spelling(_binding_of(function));
@@ -845,7 +866,7 @@ static void _scan(Walk w, Var value, int deferred) {
       if (arguments) w.pending.push(arguments);
       continue;
     }
-    List assignment = source_assignment(node);
+    List assignment = _source_assignment(node);
     if (assignment && _unwrap(node) != root) {
       (Var target, Var stored) = assignment;
       _store(w, target, stored);
@@ -1010,7 +1031,7 @@ static void _declare(Walk w, Var specifiers, List bindings) {
 static int _note_restored(Walk w, Var body) {
   Macro statement = $expression_statement;
   match (body) case statement(?expression):
-    match (source_assignment(_unwrap(expression))) case %(?target ?): {
+    match (_source_assignment(_unwrap(expression))) case %(?target ?): {
       Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;
       w.restored = w.restored.copy();
@@ -1023,7 +1044,7 @@ static int _note_restored(Walk w, Var body) {
 /* A place a `defer` writes is put back when its block ends, so a store
    into it after the `defer` is not an escape. */
 static void _note_deferred_stores(Walk w, Var node) {
-  match (source_assignment(node)) case %(?target ?): {
+  match (_source_assignment(node)) case %(?target ?): {
     w.restored[_unwrap(target)] = 1;
     return;
   }
@@ -1130,7 +1151,7 @@ static void _walk(Walk w, Var node) {
       List arguments = NULL;
       String callee = _callee_of(expression, arguments);
       if (callee && _walk_region_call(w, callee, arguments)) break;
-      match (source_assignment(_unwrap(expression))) {
+      match (_source_assignment(_unwrap(expression))) {
         case %(?target ?value): _store(w, target, value);
         default: _scan(w, expression, 0);
       }
