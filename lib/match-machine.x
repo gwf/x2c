@@ -21,6 +21,8 @@
 #include "exception.x"
 #include "match.x"
 
+// registers
+
 static List *MatchMachine._cursor(MatchMachine m, int reg) =>
   &m.regs[m.fp].cursors[reg];
 
@@ -32,178 +34,15 @@ static int *MatchMachine._int_reg(MatchMachine m, int reg) =>
 
 static MachineMark *MatchMachine._mark(MatchMachine m) => &m.regs[m.fp].mark;
 
-static void MatchMachine._rollback(MatchMachine m, int undo_mark) {
-  while (m.undo_count > undo_mark) {
-    MachineUndo undo = m.undo[--m.undo_count];
-    m.slots[undo.slot] = undo.prior;
-  }
-}
-
 static void MatchMachine._clear_registers(MatchMachine m, int depth) {
   memset(&m.regs[depth], 0, sizeof(MachineRegs));
 }
 
-static void MatchMachine._error_value(MatchMachine m, Var error) {
-  m._rollback(0);
-  for (int depth = 0; depth <= m.fp; depth++) m._clear_registers(depth);
-  m.fp = 0;
-  m.current_entry_undo = 0;
-  m.error = error;
-  m.status = <error>;
-  m.running = 0;
-}
+// execution
 
-/* A code reaches the caller as the `why` detail of the Machine invariant and
-   is told apart by comparison. Each one stays within the ten alphabet
-   characters a compact Symbol holds. */
-static void MatchMachine._error(MatchMachine m, Symbol error) {
-  m._error_value(error);
-}
-
-/* Journal every slot replacement before mutation. A failed subprogram rolls
-   back to its entry position; an enclosing failure can still undo successful
-   inner captures because their entries remain in the shared journal. */
-static void MatchMachine._journal_slot(
-  MatchMachine m, int slot, MachineSlot value) {
-  if (m.undo_count >= MACHINE_UNDO_MAX) {
-    m._error(<undo-max>);
-    return;
-  }
-  m.undo[m.undo_count].slot = slot;
-  m.undo[m.undo_count].prior = m.slots[slot];
-  m.undo_count++;
-  m.slots[slot] = value;
-}
-
-static void MatchMachine._set_value(
-  MatchMachine m, int slot, Var value, int replace_span) {
-  MachineSlot data;
-  memset(&data, 0, sizeof(data));
-  data.kind = MACHINE_SLOT_VALUE;
-  data.value = value;
-  MachineSlotKind expected = replace_span ? MACHINE_SLOT_SPAN
-                                          : MACHINE_SLOT_INVALID;
-  if (m.slots[slot].kind != expected) {
-    m._error(<slot-state>);
-    return;
-  }
-  m._journal_slot(slot, data);
-}
-
-static void MatchMachine._set_span(
-  MatchMachine m, int slot, List begin, List end, int length) {
-  MachineSlot data;
-  memset(&data, 0, sizeof(data));
-  data.kind = MACHINE_SLOT_SPAN;
-  data.span.begin = begin;
-  data.span.end = end;
-  data.span.length = length;
-  if (m.stats) m.stats.span_descriptors++;
-  if (m.slots[slot].kind != MACHINE_SLOT_INVALID) {
-    m._error(<slot-state>);
-    return;
-  }
-  m._journal_slot(slot, data);
-}
-
-static int MatchMachine._slot_value_equal(
-  MatchMachine m, MachineSlot *slot, Var value) {
-  if (slot.kind != MACHINE_SLOT_VALUE) return 0;
-  if (m.relation)
-    return m.relation(m, (int) (slot - m.slots), slot.value, value,
-                      m.relation_context);
-  return slot.value == value;
-}
-
-/* A sequence comparison under a relation materializes both sides once; the
-   default path keeps the allocation-free span comparison. */
-static int MatchMachine._slot_sequence_equal(
-  MatchMachine m, int index, List input, int length, int final) {
-  MachineSlot *slot = &m.slots[index];
-  if (!m.relation)
-    return final ? slot.final_equal(input, m.stats)
-                 : slot.prefix_equal(input, length, m.stats);
-  List expected = slot.kind == MACHINE_SLOT_SPAN
-    ? m.materialize_span(slot.span) : slot.value.list();
-  if (m.status == <error>) return 0;
-  List candidate = input;
-  if (!final) {
-    Array items = [];
-    for (int n = 0; n < length; n++) {
-      if (!input) return 0;
-      items.push(input.car());
-      input = input.cdr();
-    }
-    candidate = items.list_free();
-  }
-  return m.relation(m, index, expected, candidate, m.relation_context);
-}
-
-static int MatchMachine._push_frame(MatchMachine m) {
-  if (m.fp + 1 >= MACHINE_FRAME_MAX) {
-    m._error(<frame-max>);
-    return 0;
-  }
-  MatchFrame *frame = &m.frames[m.fp++];
-  frame.return_pc = m.pc;
-  frame.caller_entry_undo = m.current_entry_undo;
-  frame.caller_value = m.value;
-  memset(&m.regs[m.fp], 0, sizeof(MachineRegs));
-  m.current_entry_undo = m.undo_count;
-  if (m.stats) {
-    m.stats.calls++;
-    if (m.fp + 1 > m.stats.max_frames) m.stats.max_frames = m.fp + 1;
-  }
-  return 1;
-}
-
-static void MatchMachine._pop_frame(MatchMachine m) {
-  assert(m.fp > 0);
-  m.fp--;
-  MatchFrame *frame = &m.frames[m.fp];
-  m.pc = frame.return_pc;
-  m.current_entry_undo = frame.caller_entry_undo;
-  m.value = frame.caller_value;
-}
-
-static void MatchMachine._return_from_call(MatchMachine m, int success) {
-  if (!success) m._rollback(m.current_entry_undo);
-  m.status = success ? <ok> : <fail>;
-  if (m.stats) m.stats.returns++;
-  m._clear_registers(m.fp);
-  if (!m.fp) {
-    m.running = 0;
-    return;
-  }
-  m._pop_frame();
-}
-
-/* Begin execution of a valid Match program in opened, completed storage and
-   borrow its view and input Lists until finish. Zero undo entries prove every
-   slot of the previous program was restored, so only the new program's binder
-   slots are initialized. A dirty machine records <not-idle> and stops. */
-void MatchMachine.begin(MatchMachine m, MachineView program, Var input) {
-  if (m.running || m.undo_count || m.fp) {
-    m._error(<not-idle>);
-    return;
-  }
-  m.program = program;
-  m.pc = program.root;
-  m.status = <running>;
-  m.running = 1;
-  m.value = input;
-  m.error = void;
-  m.current_entry_undo = 0;
-  m.slot_count = program.binder_count;
-  for (int i = 0; i < m.slot_count; i++) {
-    memset(&m.slots[i], 0, sizeof(MachineSlot));
-    m.slots[i].kind = MACHINE_SLOT_INVALID;
-  }
-  memset(&m.regs[0], 0, sizeof(MachineRegs));
-  if (m.stats) {
-    m.stats.calls++;
-    if (m.stats.max_frames < 1) m.stats.max_frames = 1;
-  }
+/* Execute Match words until success, failure, or a stored machine error. */
+void MatchMachine.run(MatchMachine m) {
+  while (m.step()) {}
 }
 
 /* Execute one Match word and report whether another word remains. Fetch
@@ -482,20 +321,136 @@ int MatchMachine.step(MatchMachine m) {
   return m.running;
 }
 
-/* Execute Match words until success, failure, or a stored machine error. */
-void MatchMachine.run(MatchMachine m) {
-  while (m.step()) {}
-}
-// spans, cleanup, and invariants
+// calls
 
-static void MatchMachine._ensure_scratch(MatchMachine m, int length) {
-  if (length <= m.scratch_capacity) return;
-  int capacity = m.scratch_capacity ? m.scratch_capacity : 16;
-  while (capacity < length) capacity *= 2;
-  Var *grown = Scope.realloc(m.scratch, sizeof(Var) * capacity);
-  m.scratch = grown;
-  m.scratch_capacity = capacity;
+static int MatchMachine._push_frame(MatchMachine m) {
+  if (m.fp + 1 >= MACHINE_FRAME_MAX) {
+    m._error(<frame-max>);
+    return 0;
+  }
+  MatchFrame *frame = &m.frames[m.fp++];
+  frame.return_pc = m.pc;
+  frame.caller_entry_undo = m.current_entry_undo;
+  frame.caller_value = m.value;
+  memset(&m.regs[m.fp], 0, sizeof(MachineRegs));
+  m.current_entry_undo = m.undo_count;
+  if (m.stats) {
+    m.stats.calls++;
+    if (m.fp + 1 > m.stats.max_frames) m.stats.max_frames = m.fp + 1;
+  }
+  return 1;
 }
+
+static void MatchMachine._return_from_call(MatchMachine m, int success) {
+  if (!success) m._rollback(m.current_entry_undo);
+  m.status = success ? <ok> : <fail>;
+  if (m.stats) m.stats.returns++;
+  m._clear_registers(m.fp);
+  if (!m.fp) {
+    m.running = 0;
+    return;
+  }
+  m._pop_frame();
+}
+
+static void MatchMachine._pop_frame(MatchMachine m) {
+  assert(m.fp > 0);
+  m.fp--;
+  MatchFrame *frame = &m.frames[m.fp];
+  m.pc = frame.return_pc;
+  m.current_entry_undo = frame.caller_entry_undo;
+  m.value = frame.caller_value;
+}
+
+// captures
+
+static void MatchMachine._rollback(MatchMachine m, int undo_mark) {
+  while (m.undo_count > undo_mark) {
+    MachineUndo undo = m.undo[--m.undo_count];
+    m.slots[undo.slot] = undo.prior;
+  }
+}
+
+static void MatchMachine._set_value(
+  MatchMachine m, int slot, Var value, int replace_span) {
+  MachineSlot data;
+  memset(&data, 0, sizeof(data));
+  data.kind = MACHINE_SLOT_VALUE;
+  data.value = value;
+  MachineSlotKind expected = replace_span ? MACHINE_SLOT_SPAN
+                                          : MACHINE_SLOT_INVALID;
+  if (m.slots[slot].kind != expected) {
+    m._error(<slot-state>);
+    return;
+  }
+  m._journal_slot(slot, data);
+}
+
+/* Journal every slot replacement before mutation. A failed subprogram rolls
+   back to its entry position; an enclosing failure can still undo successful
+   inner captures because their entries remain in the shared journal. */
+static void MatchMachine._journal_slot(
+  MatchMachine m, int slot, MachineSlot value) {
+  if (m.undo_count >= MACHINE_UNDO_MAX) {
+    m._error(<undo-max>);
+    return;
+  }
+  m.undo[m.undo_count].slot = slot;
+  m.undo[m.undo_count].prior = m.slots[slot];
+  m.undo_count++;
+  m.slots[slot] = value;
+}
+
+static void MatchMachine._set_span(
+  MatchMachine m, int slot, List begin, List end, int length) {
+  MachineSlot data;
+  memset(&data, 0, sizeof(data));
+  data.kind = MACHINE_SLOT_SPAN;
+  data.span.begin = begin;
+  data.span.end = end;
+  data.span.length = length;
+  if (m.stats) m.stats.span_descriptors++;
+  if (m.slots[slot].kind != MACHINE_SLOT_INVALID) {
+    m._error(<slot-state>);
+    return;
+  }
+  m._journal_slot(slot, data);
+}
+
+static int MatchMachine._slot_value_equal(
+  MatchMachine m, MachineSlot *slot, Var value) {
+  if (slot.kind != MACHINE_SLOT_VALUE) return 0;
+  if (m.relation)
+    return m.relation(m, (int) (slot - m.slots), slot.value, value,
+                      m.relation_context);
+  return slot.value == value;
+}
+
+/* A sequence comparison under a relation materializes both sides once; the
+   default path keeps the allocation-free span comparison. */
+static int MatchMachine._slot_sequence_equal(
+  MatchMachine m, int index, List input, int length, int final) {
+  MachineSlot *slot = &m.slots[index];
+  if (!m.relation)
+    return final ? slot.final_equal(input, m.stats)
+                 : slot.prefix_equal(input, length, m.stats);
+  List expected = slot.kind == MACHINE_SLOT_SPAN
+    ? m.materialize_span(slot.span) : slot.value.list();
+  if (m.status == <error>) return 0;
+  List candidate = input;
+  if (!final) {
+    Array items = [];
+    for (int n = 0; n < length; n++) {
+      if (!input) return 0;
+      items.push(input.car());
+      input = input.cdr();
+    }
+    candidate = items.list_free();
+  }
+  return m.relation(m, index, expected, candidate, m.relation_context);
+}
+
+// spans
 
 /* Materialize a borrowed span. A complete suffix shares the existing
    immutable List directly, an empty span returns nil, and a proper prefix
@@ -536,6 +491,64 @@ List MatchMachine.materialize_span(MatchMachine m, MachineSpan span) {
   }
   if (m.stats) m.stats.materialization_completions++;
   return result;
+}
+
+static void MatchMachine._ensure_scratch(MatchMachine m, int length) {
+  if (length <= m.scratch_capacity) return;
+  int capacity = m.scratch_capacity ? m.scratch_capacity : 16;
+  while (capacity < length) capacity *= 2;
+  Var *grown = Scope.realloc(m.scratch, sizeof(Var) * capacity);
+  m.scratch = grown;
+  m.scratch_capacity = capacity;
+}
+
+// errors
+
+/* A code reaches the caller as the `why` detail of the Machine invariant and
+   is told apart by comparison. Each one stays within the ten alphabet
+   characters a compact Symbol holds. */
+static void MatchMachine._error(MatchMachine m, Symbol error) {
+  m._error_value(error);
+}
+
+static void MatchMachine._error_value(MatchMachine m, Var error) {
+  m._rollback(0);
+  for (int depth = 0; depth <= m.fp; depth++) m._clear_registers(depth);
+  m.fp = 0;
+  m.current_entry_undo = 0;
+  m.error = error;
+  m.status = <error>;
+  m.running = 0;
+}
+
+// lifecycle
+
+/* Begin execution of a valid Match program in opened, completed storage and
+   borrow its view and input Lists until finish. Zero undo entries prove every
+   slot of the previous program was restored, so only the new program's binder
+   slots are initialized. A dirty machine records <not-idle> and stops. */
+void MatchMachine.begin(MatchMachine m, MachineView program, Var input) {
+  if (m.running || m.undo_count || m.fp) {
+    m._error(<not-idle>);
+    return;
+  }
+  m.program = program;
+  m.pc = program.root;
+  m.status = <running>;
+  m.running = 1;
+  m.value = input;
+  m.error = void;
+  m.current_entry_undo = 0;
+  m.slot_count = program.binder_count;
+  for (int i = 0; i < m.slot_count; i++) {
+    memset(&m.slots[i], 0, sizeof(MachineSlot));
+    m.slots[i].kind = MACHINE_SLOT_INVALID;
+  }
+  memset(&m.regs[0], 0, sizeof(MachineRegs));
+  if (m.stats) {
+    m.stats.calls++;
+    if (m.stats.max_frames < 1) m.stats.max_frames = 1;
+  }
 }
 
 /* Return a stopped invocation to idle and clear its borrowed execution state.

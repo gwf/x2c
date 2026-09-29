@@ -142,6 +142,27 @@ typedef struct MachineView {
   const Atom *binders, int length, const_count, binder_count, root;
 } MachineView;
 
+/* Owns an exact-sized immutable frozen wordcode program.
+
+    One allocation holds this header followed by aligned code, constant, and
+    binder sections. The copied Var and Atom bits do not own their pointees.
+    The program contains no execution state and never changes after freeze. */
+class MachineProgram struct {
+  int length, const_count, binder_count, root;
+} *;
+
+/* Accumulates a mutable program in the active Scope.
+
+    The first ineligibility reason is sticky. Constants and binders are
+    shallow values whose pointees must outlive any frozen program. */
+class MachineBuilder struct {
+  MachineWord *code;
+  Var *consts;
+  Atom binders[MACHINE_BINDER_MAX];
+  int length, code_capacity, const_count, const_capacity, binder_count, root;
+  MachinePrepare status, const char *reason;
+} *;
+
 // execution state
 
 /* Borrows the half-open List range from begin to end with its cell count. */
@@ -235,27 +256,6 @@ typedef struct MatchMachine {
   MachineUndo undo[MACHINE_UNDO_MAX];
 } *MatchMachine;
 
-/* Owns an exact-sized immutable frozen wordcode program.
-
-    One allocation holds this header followed by aligned code, constant, and
-    binder sections. The copied Var and Atom bits do not own their pointees.
-    The program contains no execution state and never changes after freeze. */
-class MachineProgram struct {
-  int length, const_count, binder_count, root;
-} *;
-
-/* Accumulates a mutable program in the active Scope.
-
-    The first ineligibility reason is sticky. Constants and binders are
-    shallow values whose pointees must outlive any frozen program. */
-class MachineBuilder struct {
-  MachineWord *code;
-  Var *consts;
-  Atom binders[MACHINE_BINDER_MAX];
-  int length, code_capacity, const_count, const_capacity, binder_count, root;
-  MachinePrepare status, const char *reason;
-} *;
-
 /* Compares a captured value or span with an exact List prefix.
 
     VALUE slots use language equality and require an exact-length List. SPAN
@@ -321,40 +321,6 @@ inline int MachineSlot.final_equal(
 
 // builder
 
-static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
-  if (b.status == MACHINE_PREPARED) {
-    b.status = MACHINE_INELIGIBLE;
-    b.reason = reason;
-  }
-  return -1;
-}
-
-/* Prepare a builder in the active Scope with no root selected. */
-void MachineBuilder.init(MachineBuilder b) {
-  b.status = MACHINE_PREPARED;
-  b.reason = "prepared";
-  b.root = -1;
-}
-
-/* Free the builder's mutable arrays when the builder is freed. Any builder
-   view becomes invalid; constant and binder pointees are not freed. */
-void MachineBuilder.drop(MachineBuilder b) {
-  Scope.free(b.code);
-  Scope.free(b.consts);
-}
-
-static int MachineBuilder._grow_code(MachineBuilder b) {
-  if (b.length < b.code_capacity) return 1;
-  if (b.code_capacity >= MACHINE_CODE_MAX)
-    return b._fail("code-capacity") + 1;
-  int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
-  if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord *grown = Scope.realloc(b.code, sizeof(MachineWord) * capacity);
-  b.code = grown;
-  b.code_capacity = capacity;
-  return 1;
-}
-
 /* Append one range-checked instruction and return its site. The opcode need
    only fit in a byte; a decoder reports unsupported words. A failed builder
    keeps its first reason and all later emissions return -1. Allocation can
@@ -371,6 +337,18 @@ int MachineBuilder.emit(
     .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target};
   b.code[b.length] = word;
   return b.length++;
+}
+
+static int MachineBuilder._grow_code(MachineBuilder b) {
+  if (b.length < b.code_capacity) return 1;
+  if (b.code_capacity >= MACHINE_CODE_MAX)
+    return b._fail("code-capacity") + 1;
+  int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
+  if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
+  MachineWord *grown = Scope.realloc(b.code, sizeof(MachineWord) * capacity);
+  b.code = grown;
+  b.code_capacity = capacity;
+  return 1;
 }
 
 /* Intern a constant by raw Var bits and return its byte-sized index. The
@@ -436,7 +414,38 @@ MachineView MachineBuilder.view(MachineBuilder b) {
   return view;
 }
 
+static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
+  if (b.status == MACHINE_PREPARED) {
+    b.status = MACHINE_INELIGIBLE;
+    b.reason = reason;
+  }
+  return -1;
+}
+
 // immutable programs
+
+/* Copy a prepared builder with a selected root into one immutable Scope
+   allocation. Return null for an ineligible or rootless builder. The producer
+   must make root name emitted code; freeze only checks that it is
+   nonnegative. */
+MachineProgram MachineBuilder.freeze(MachineBuilder b) {
+  if (b.status != MACHINE_PREPARED || b.root < 0) return NULL;
+  size_t bytes = _program_bytes(
+    b.length, b.const_count, b.binder_count);
+
+  MachineProgram program = Scope.malloc(bytes);
+  *program = (struct MachineProgram) {
+    .length = b.length, .const_count = b.const_count,
+    .binder_count = b.binder_count, .root = b.root};
+  MachineWord *code = (MachineWord *) (program + 1);
+  Var *consts = (Var *) (code + b.length);
+  Atom *binders = (Atom *) (consts + b.const_count);
+  if (b.length) memcpy(code, b.code, sizeof(MachineWord) * b.length);
+  if (b.const_count) memcpy(consts, b.consts, sizeof(Var) * b.const_count);
+  if (b.binder_count)
+    memcpy(binders, b.binders, sizeof(Atom) * b.binder_count);
+  return program;
+}
 
 static size_t _program_bytes(
   int length, int const_count, int binder_count) =>
@@ -460,25 +469,18 @@ MachineView MachineProgram.view(MachineProgram program) {
 size_t MachineProgram.bytes(MachineProgram program) => _program_bytes(
   program.length, program.const_count, program.binder_count);
 
-/* Copy a prepared builder with a selected root into one immutable Scope
-   allocation. Return null for an ineligible or rootless builder. The producer
-   must make root name emitted code; freeze only checks that it is
-   nonnegative. */
-MachineProgram MachineBuilder.freeze(MachineBuilder b) {
-  if (b.status != MACHINE_PREPARED || b.root < 0) return NULL;
-  size_t bytes = _program_bytes(
-    b.length, b.const_count, b.binder_count);
+// lifecycle
 
-  MachineProgram program = Scope.malloc(bytes);
-  *program = (struct MachineProgram) {
-    .length = b.length, .const_count = b.const_count,
-    .binder_count = b.binder_count, .root = b.root};
-  MachineWord *code = (MachineWord *) (program + 1);
-  Var *consts = (Var *) (code + b.length);
-  Atom *binders = (Atom *) (consts + b.const_count);
-  if (b.length) memcpy(code, b.code, sizeof(MachineWord) * b.length);
-  if (b.const_count) memcpy(consts, b.consts, sizeof(Var) * b.const_count);
-  if (b.binder_count)
-    memcpy(binders, b.binders, sizeof(Atom) * b.binder_count);
-  return program;
+/* Prepare a builder in the active Scope with no root selected. */
+void MachineBuilder.init(MachineBuilder b) {
+  b.status = MACHINE_PREPARED;
+  b.reason = "prepared";
+  b.root = -1;
+}
+
+/* Free the builder's mutable arrays when the builder is freed. Any builder
+   view becomes invalid; constant and binder pointees are not freed. */
+void MachineBuilder.drop(MachineBuilder b) {
+  Scope.free(b.code);
+  Scope.free(b.consts);
 }
