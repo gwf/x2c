@@ -39,17 +39,17 @@ $(import "../src/ast-rewrite.xmacro")
    dynamically scoped evaluation context. Lisp entry points restore the
    relevant frame after nested import evaluation; captured-source entries are
    valid only while their expansion is active. */
-static Compiler macro_sdk_compiler = NULL;
-static String macro_sdk_source_file = NULL;
-static Map macro_sdk_source_captures = NULL;
-static int macro_sdk_has_references = 0;
-static Compiler macro_import_compiler = NULL;
-static Token macro_import_invocation = NULL;
+static Compiler sdk_compiler = NULL;
+static String sdk_file = NULL;
+static Map sdk_captures = NULL;
+static int sdk_references = 0;
+static Compiler lisp_compiler = NULL;
+static Token lisp_site = NULL;
 
 /** Returns the compiler running the current compile-time call. A slot
     function compiled into the compiler reads its facts through it. */
 Compiler Compiler.expanding(void) =>
-  macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  sdk_compiler ? sdk_compiler : lisp_compiler;
 
 // macro definitions
 
@@ -2230,10 +2230,10 @@ static Var _eval_template_form(
     form = %"(let ((x2c.ident (lambda (name)
       (list $temporary name)))) $form)";
   }
-  $let(macro_sdk_has_references, !!references)
-  $let(macro_sdk_source_captures, source_captures)
-  $let(macro_sdk_source_file, source_file)
-  $let(macro_sdk_compiler, compiler)
+  $let(sdk_references, !!references)
+  $let(sdk_captures, source_captures)
+  $let(sdk_file, source_file)
+  $let(sdk_compiler, compiler)
     return _eval_string(compiler, form, invocation);
 }
 
@@ -2287,11 +2287,11 @@ List x2c_template_call(Var stored, List values) =>
     stored is <string> ? Atom.intern(stored.str()) : stored, values);
 
 static List _sdk_template_call(Var stored, List values) {
-  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  Compiler c = sdk_compiler ? sdk_compiler : lisp_compiler;
   List definition = stored.is_atom()
-    ? _lookup(c, stored, macro_import_invocation) : stored;
+    ? _lookup(c, stored, lisp_site) : stored;
   return %(macro-invoke $stored
-    ${_template_arguments(c, definition, values, macro_import_invocation, 0)}
+    ${_template_arguments(c, definition, values, lisp_site, 0)}
     m-invoke);
 }
 
@@ -2328,8 +2328,8 @@ static Var _helper_result(Compiler c, Var value) {
     case %("x2c.template" ?stored ?(List values)): {
       Token site = c.macro_invocation_site(<m-invoke>);
       if (!site) site = c.token;
-      $let(macro_sdk_compiler, c)
-      $let(macro_import_invocation, site)
+      $let(sdk_compiler, c)
+      $let(lisp_site, site)
         return _sdk_template_call(
           stored is <string> ? Atom.intern(stored.str()) : stored, values);
     }
@@ -2603,8 +2603,8 @@ static void _ensure_lisp(Compiler compiler) {
 static Var _eval_string(
   Compiler compiler, String source, Token invocation) {
   Var result;
-  $let(macro_import_invocation, invocation)
-  $let(macro_import_compiler, compiler) {
+  $let(lisp_site, invocation)
+  $let(lisp_compiler, compiler) {
     /* A compiler operation called from Lisp has already reported its
        failure; wrapping the transfer would report it a second time. */
     try result = compiler.macro_lisp.eval_string(source);
@@ -2738,9 +2738,9 @@ static Var _sdk_identifier_result(Var value) {
 }
 
 static Var _lisp_import_hook(String path) {
-  Compiler compiler = macro_import_compiler;
+  Compiler compiler = lisp_compiler;
   if (!compiler) raise %(bad-state (operation "compile-time import"));
-  _import(compiler, path, macro_import_invocation);
+  _import(compiler, path, lisp_site);
   return %();
 }
 
@@ -3049,7 +3049,7 @@ static Map library_definitions = NULL;
 static Map library_comptime = NULL;
 
 static Lisp library_session = NULL, static Scope library_scope = NULL;
-static int library_shutdown_registered = 0;
+static int library_hooked = 0;
 
 /** Builds the shared compile-time session, leaving it open for the caller to
     fill and then publish. Returns the session, or null when this home cannot
@@ -3063,9 +3063,9 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
   if (library_session != NULL) return NULL;
   Scope.push(&library_scope);
   defer Scope.pop();
-  if (!library_shutdown_registered) {
+  if (!library_hooked) {
     Scope.shutdown_hook(_library_shutdown);
-    library_shutdown_registered = 1;
+    library_hooked = 1;
   }
   Lisp shared = Lisp.kernel();
   library_imports = {};
@@ -3204,7 +3204,7 @@ macro Expression $_embed_builtin_macros() =>
   $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"));
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
-static String lisp_binding_macros_marker = NULL;
+static String lisp_bindings_marker = NULL;
 static String builtin_macros = $_embed_builtin_macros();
 static String builtin_macros_marker = NULL;
 
@@ -3256,10 +3256,10 @@ static void _install_source(
 /* Every `lisp.` lookup records the bindings file, which is installed only
    when `install` is nonzero and the bindings are not yet installed. */
 static void _use_lisp_bindings(Compiler compiler, int install) {
-  if (!lisp_binding_macros_marker)
-    lisp_binding_macros_marker = "_x2c.lisp.bindings";
+  if (!lisp_bindings_marker)
+    lisp_bindings_marker = "_x2c.lisp.bindings";
   int loaded =
-    !install || lisp_binding_macros_marker in compiler.macros;
+    !install || lisp_bindings_marker in compiler.macros;
   if (!loaded) _ensure_lisp(compiler);
   _eval_library(
     compiler, loaded, "etc/lisp-bindings.xlisp",
@@ -3271,7 +3271,7 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
     %(begin (def lisp.binding.rows ()) (def lisp.binding.sealed ())));
   _install_source(
     compiler, lisp_binding_macros, "<builtin:lisp-bindings>",
-    lisp_binding_macros_marker, 0);
+    lisp_bindings_marker, 0);
 }
 
 // native operations
@@ -3462,9 +3462,9 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
 
 /* The compiler that runs a stub's call, and where the call stands. */
 static Compiler _stub_compiler(String name, Token &site) {
-  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  Compiler c = sdk_compiler ? sdk_compiler : lisp_compiler;
   if (!c) _sdk_reject(%"$name used outside compilation", NULL);
-  site = macro_import_invocation ? macro_import_invocation : c.token;
+  site = lisp_site ? lisp_site : c.token;
   return c;
 }
 
@@ -3524,12 +3524,12 @@ static Var _evaluate_meta_value(
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;
   Var value;
-  $let(macro_sdk_has_references, !!bindings)
-  $let(macro_sdk_source_captures, _source_captures(bindings))
-  $let(macro_sdk_source_file, source_file)
-  $let(macro_sdk_compiler, c)
-  $let(macro_import_compiler, c)
-  $let(macro_import_invocation, site) {
+  $let(sdk_references, !!bindings)
+  $let(sdk_captures, _source_captures(bindings))
+  $let(sdk_file, source_file)
+  $let(sdk_compiler, c)
+  $let(lisp_compiler, c)
+  $let(lisp_site, site) {
     try value = _meta_call_value(c, expression, site);
     catch %(meta-later *): {
       value = void;
@@ -3864,8 +3864,8 @@ static int _native_owned(Compiler c, List type) {
    those declared in the files `paths` names when it is not empty. Sorting
    makes that inventory independent of Map order. */
 static List _native_meta_targets(List paths) {
-  Compiler compiler = macro_sdk_compiler
-                    ? macro_sdk_compiler : macro_import_compiler;
+  Compiler compiler = sdk_compiler
+                    ? sdk_compiler : lisp_compiler;
   if (!compiler) return %();
   Map selected = {};
   foreach (Var (key, value), compiler.sym.base_symbols()) {
@@ -4018,7 +4018,7 @@ static int _linked_texts_match(
 /** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
   _sdk_guard("x2c.meta.definition.hashes");
-  return macro_sdk_compiler.meta_hashes;
+  return sdk_compiler.meta_hashes;
 }
 
 // native modules
@@ -4241,15 +4241,15 @@ String Compiler.extension_archive(void) =>
    rejected operation's caller cannot continue with a missing answer. With
    no active invocation it is a bad state. */
 static void _sdk_reject(String message, List notes) {
-  Compiler compiler = macro_import_compiler;
+  Compiler compiler = lisp_compiler;
   if (compiler)
-    compiler.report_error(<macro>, message, macro_import_invocation, notes);
+    compiler.report_error(<macro>, message, lisp_site, notes);
   raise %(bad-state (operation "x2c SDK rejection") (why $message));
 }
 
 // SDK operations reject use outside an active expansion.
 static void _sdk_guard(String operation) {
-  if (!macro_sdk_compiler)
+  if (!sdk_compiler)
     _sdk_reject(%"$operation used outside macro expansion", NULL);
 }
 
@@ -4280,7 +4280,7 @@ List x2c_syntax_type(List value) {
 }
 
 static List _sdk_binding_type(List binding) =>
-  macro_sdk_compiler.semantic_binding_facts()[
+  sdk_compiler.semantic_binding_facts()[
     %(type $binding)
   ];
 
@@ -4288,14 +4288,14 @@ static List _sdk_binding_type(List binding) =>
 List x2c_protocol_member(
   List participant, List base, String member) {
   List conformance =
-    macro_sdk_compiler.protocol_members_for(participant, base);
+    sdk_compiler.protocol_members_for(participant, base);
   if (!conformance) return %();
   foreach (List row, conformance.last().list().cdr()) {
     (String row_member, Symbol status, String source, Type signature,
      Symbol default_kind, Type template) = row;
     (void) default_kind; (void) template;
     if (status != <implmntd> || row_member != member) continue;
-    List binding = macro_sdk_compiler.sym.lookup(%($source), NULL);
+    List binding = sdk_compiler.sym.lookup(%($source), NULL);
     if (binding) return %(expr $signature (ident $binding));
     return %();
   }
@@ -4310,7 +4310,7 @@ List x2c_method_resolve(List type_value, String name) {
       "x2c.method.resolve requires an identifier String",
       %("value: ${name.repr()}"));
   Type type = type_value;
-  List resolution = macro_sdk_compiler.resolve_postfix_member(
+  List resolution = sdk_compiler.resolve_postfix_member(
     type, %($name), <.>, 1);
   match (resolution) {
     case %(ambiguous *packages): {
@@ -4365,7 +4365,7 @@ static Var _sdk_declaration_bindings(List declaration) {
 /* This reads the symbol table only, so it serves any compile-time Lisp
    evaluation, not just an active macro expansion. */
 static Var _sdk_function_reference(String name) {
-  Compiler compiler = macro_import_compiler;
+  Compiler compiler = lisp_compiler;
   if (!compiler) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
   List binding = compiler.sym.lookup(%($name), type);
@@ -4405,21 +4405,21 @@ List x2c_type_parts(List value) => value.type().declaration_parts();
 /** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
 String x2c_type_reverse_name(String base, String participant) {
   _sdk_guard("x2c.type.reverse-name");
-  return macro_sdk_compiler.reverse_converter_spelling(
+  return sdk_compiler.reverse_converter_spelling(
     base, "", participant);
 }
 
 /** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
 List x2c_type_resolve(List value) {
   _sdk_guard("x2c.type.resolve");
-  return macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
+  return sdk_compiler.sym.resolve_key(value).type_from_ast();
 }
 
 /** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
 List x2c_type_layout(List value) {
   _sdk_guard("x2c.type.layout");
-  Type type = macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
-  return macro_sdk_compiler.sym.field_order(type).cdr();
+  Type type = sdk_compiler.sym.resolve_key(value).type_from_ast();
+  return sdk_compiler.sym.field_order(type).cdr();
 }
 
 /** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
@@ -4428,15 +4428,15 @@ int x2c_type_is_value(List value) {
   Type type = value.type().canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
   foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
-    if (macro_sdk_compiler.sym.is_named_value_type(type, name)) return 1;
-  return macro_sdk_compiler.sym.resolve_key(type).is_number();
+    if (sdk_compiler.sym.is_named_value_type(type, name)) return 1;
+  return sdk_compiler.sym.resolve_key(type).is_number();
 }
 
 /** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
 Symbol x2c_type_tag_name(String name) {
   _sdk_guard("x2c.type.tag-name");
-  String file = _source_file(macro_sdk_compiler, macro_sdk_compiler.filename);
-  file = macro_sdk_compiler.display_path(file);
+  String file = _source_file(sdk_compiler, sdk_compiler.filename);
+  file = sdk_compiler.display_path(file);
   String identity = %"$file:$name";
   unsigned hash = identity.hash();
   const char *alphabet = "abcdefghijklmnopqrstuvwxyz*+?!-";
@@ -4453,12 +4453,12 @@ List x2c_type_fields(List value) {
   _sdk_guard("x2c.type.fields");
   Type type = value;
   type = type.canonicalize();
-  Type resolved = macro_sdk_compiler.sym.resolve_key(type);
+  Type resolved = sdk_compiler.sym.resolve_key(type);
   if (!resolved || !resolved.is_aggregate_tag())
     _sdk_reject(
       "x2c.type.fields requires a struct or union Type",
       %("value: ${value.repr()}"));
-  List metadata = macro_sdk_compiler.sym.field_order(resolved);
+  List metadata = sdk_compiler.sym.field_order(resolved);
   if (!metadata)
     _sdk_reject(
       "x2c.type.fields requires a complete struct or union Type",
@@ -4506,7 +4506,7 @@ String x2c_binding_spelling(Var syntax) {
       "x2c.binding.spelling requires an identifier or binding",
       %("value: ${syntax.repr()}" ));
   Var registered =
-    macro_sdk_compiler.semantic_binding_facts()[%(known $identity)];
+    sdk_compiler.semantic_binding_facts()[%(known $identity)];
   if (registered is not <string> || !registered.string().equal(spelling))
     _sdk_reject(
       "x2c.binding.spelling requires a known binding",
@@ -4528,8 +4528,8 @@ static Var _sdk_ident_unique(String stem) {
   if (!stem.is_identifier()) _sdk_reject(
     "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
-  String spelling = macro_sdk_compiler.fresh_name(%"macro_$stem");
-  return macro_sdk_compiler.sym.introduce(spelling);
+  String spelling = sdk_compiler.fresh_name(%"macro_$stem");
+  return sdk_compiler.sym.introduce(spelling);
 }
 
 /** Answers `x2c.function.name`, declared in `lib/meta.x`. */
@@ -4561,14 +4561,14 @@ List x2c_function_parameter(List function, String wanted) {
 static List _sdk_native_function_type(List syntax) {
   match (syntax)
     case %(function ?rtype ?declarator ?):
-      return macro_sdk_compiler.func_signature(
+      return sdk_compiler.func_signature(
         %(declare $rtype (bindings $declarator)).type_from_ast());
-  return macro_sdk_compiler.func_signature(x2c_syntax_type(syntax));
+  return sdk_compiler.func_signature(x2c_syntax_type(syntax));
 }
 
 /* Lisp-built signatures become cached literals of the expanding unit. */
 static List _sdk_literal_list(List values) =>
-  macro_sdk_compiler.cache_literal_list(values);
+  sdk_compiler.cache_literal_list(values);
 
 static Var _sdk_symbol_set(List values) {
   _sdk_guard("_x2c.symbol-set");
@@ -4578,7 +4578,7 @@ static Var _sdk_symbol_set(List values) {
         "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
-  List expression = macro_sdk_compiler.symbol_set_expression(
+  List expression = sdk_compiler.symbol_set_expression(
     values, duplicate);
   if (duplicate >= 0)
     _sdk_reject(
@@ -4597,25 +4597,25 @@ static Var _sdk_source_text(Var value) {
   _sdk_guard("x2c.source.text");
   Var stored = void;
   Var key = ((ulong) value.u64);
-  if (!macro_sdk_source_captures ||
-      !macro_sdk_source_captures.try_get(key, stored))
+  if (!sdk_captures ||
+      !sdk_captures.try_get(key, stored))
     _sdk_reject(
       "x2c.source.text requires complete captured syntax",
-      macro_sdk_has_references ? NULL : %("value: ${value.repr()}"));
+      sdk_references ? NULL : %("value: ${value.repr()}"));
   List source = stored;
   int begin = source.caddr(), end = source.last();
-  return String.new_len(macro_sdk_compiler.text + begin, end - begin);
+  return String.new_len(sdk_compiler.text + begin, end - begin);
 }
 
 /** Answers `x2c.embed.text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var path) => _sdk_embed_text(path);
 
 static Var _sdk_embed_text(Var requested) {
-  Compiler compiler = macro_sdk_compiler;
+  Compiler compiler = sdk_compiler;
   if (!compiler)
     _sdk_reject(
       "x2c.embed.text used outside macro expansion", NULL);
-  String source_file = macro_sdk_source_file, requested_path = NULL;
+  String source_file = sdk_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
   else {
     Var stored = void, syntax = requested;
@@ -4624,8 +4624,8 @@ static Var _sdk_embed_text(Var requested) {
         syntax = carried;
         stored = %(source $file);
       }
-    if (stored is void && macro_sdk_source_captures)
-      macro_sdk_source_captures.try_get(((ulong) requested.u64), stored);
+    if (stored is void && sdk_captures)
+      sdk_captures.try_get(((ulong) requested.u64), stored);
     if (stored is void || !_literal_string(syntax, requested_path))
       _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
@@ -4730,10 +4730,10 @@ Var x2c_literal_value(Var syntax) {
 // sdk invocations and diagnostics
 
 static Var _sdk_invocation_location(void) {
-  if (!macro_sdk_compiler || !macro_import_invocation)
+  if (!sdk_compiler || !lisp_site)
     _sdk_reject(
       "x2c invocation location used outside macro expansion", NULL);
-  return macro_sdk_compiler.token_location(macro_import_invocation);
+  return sdk_compiler.token_location(lisp_site);
 }
 
 /** Answers `x2c.invocation.file`, declared in `lib/meta.x`. */
@@ -4768,8 +4768,8 @@ void x2c_diagnostic_warn(String message, List notes) {
       _sdk_reject(
         "x2c.diagnostic.warn notes must be Strings",
         %("value: ${note.repr()}" ));
-  macro_sdk_compiler.report_warning(
-    <macro>, message, macro_sdk_compiler.token, notes);
+  sdk_compiler.report_warning(
+    <macro>, message, sdk_compiler.token, notes);
 }
 
 // meta parameter descriptions
@@ -4803,7 +4803,7 @@ List meta_type_description(Var value) {
       else if (_symbol_words(shape)) kind = <scalar>;
   }
   if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
-  Compiler c = macro_sdk_compiler;
+  Compiler c = sdk_compiler;
   Array methods = [];
   foreach (String member, c.postfix_completions(type, <.>))
     match (c.resolve_postfix_member(type, %($member), <.>, 1))
@@ -4823,7 +4823,7 @@ static int _symbol_words(List type) {
     is the text the developer wrote and `F` the file it is in. */
 List meta_source_description(Var value) {
   String text = _sdk_source_text(value);
-  List source = macro_sdk_source_captures[((ulong) value.u64)];
+  List source = sdk_captures[((ulong) value.u64)];
   return %((text $text) (file ${source.cadr()}) (syntax $value));
 }
 
@@ -4861,12 +4861,12 @@ List binding_literal_list(List values) => _sdk_literal_list(values);
 
 static Var _sdk_complete_iter_chain(List expression) {
   _sdk_guard("private foreach iterator completion");
-  return macro_sdk_compiler.complete_iter_chain(expression);
+  return sdk_compiler.complete_iter_chain(expression);
 }
 
 static Var _sdk_string_collection(List expression) {
   _sdk_guard("private foreach string conversion");
-  return macro_sdk_compiler.promote_string_literal(expression);
+  return sdk_compiler.promote_string_literal(expression);
 }
 
 // diagnostics
