@@ -1,6 +1,7 @@
 > Status: active
 > Plan prepared 2026-09-29. Array capability and adoption are private
-> checkpoints; Map has a reconstruction probe; String adoption is unimplemented.
+> checkpoints; capture repair is checked in an isolated worktree. Map adoption
+> is in progress; String public syntax remains under design.
 > No aggregate changes have been published. Wave 5 publishes first.
 
 # Aggregate source forms
@@ -262,3 +263,57 @@ are incorporated. The current-dev capture reproduction was independently
 rerun by the orchestrator (`direct=1 case=0 pending=0`, malformed logical
 layout versus ordinary slot 0). Repair, final bootstrap proof, performance,
 and publication remain future implementation work.
+
+## Implementation checkpoints
+
+- `a6df045ebef8c9b11f06d06040f65b0c175c6ae0`, based on `d537e8d8`:
+  capture publication uses `MatchCaptureLayout.analyze(names)`. The new
+  `macro-sequence-case` fixture fails before the repair and passes afterward;
+  covers empty/populated, pending/expanded, mixed, reordered, repeated, and
+  zero-binder cases. Existing `macro-mixed-name-case` and `macro-values` pass.
+  The orchestrator reviewed the authored diff and independently reran the new
+  fixture successfully with separate temporary output. No publication gate.
+- `f867642a6b4054d14e99f2019ccbcfdf5980a491` adds Array sequence parsing
+  on top of the capture repair in current `literals.x`. Its fixture failed
+  before the change; it and `quoted-collections`/`bracket-array-parity` passed
+  afterward. The orchestrator independently reran `macro-array-sequence`
+  successfully. Array/Map semantic adoption is proceeding
+  in the existing isolated adoption tree; final port waits for Wave 5 release.
+- String investigation identified a further requirement: a public Segment
+  parameter needs an ordinary invocation argument contract, not just a hole
+  spelling inside a String template. Do not present the template spelling as
+  a complete public design. The design worker is resolving that contract.
+
+### Proposed String public contract (awaiting Gary's decision)
+
+`Segment` represents one complete String row. An ordinary argument is a
+percent String fragment containing exactly one row: `%"text"`, `%"$name"`, or
+`%"${count}"`. A variadic parameter takes zero or more comma-separated
+fragments; `$join()` supplies zero. Empty and multi-row fragments do not
+satisfy a single Segment argument. Programmatic macro-value calls may supply
+canonical rows, including constructed `segraw`, as other row kinds do.
+
+Proposed definitions and calls:
+
+```text
+macro Expression $join(Segment $rows...) => %"prefix${$rows...}suffix";
+macro Expression $wrap(Segment $row) => %"<${$row}>";
+$join(%"a", %"$name", %"${count}")
+$wrap(%"text")
+```
+
+The argument parser uses the existing String parser and projects its one row;
+the template parser recognizes only registered Segment holes after `${`.
+Existing expression interpolation retains its meaning. No tokenizer change is
+needed. Changes belong to macro kind/role/argument handling, String template
+parsing, the grammar adopter, and documentation/fixtures. This contract is a
+proposal, not implemented syntax. A temporary existing-syntax row rebuild
+probe produced `aN2b`; new-kind roundtrip and performance are still unproved.
+
+- `51309e98be118c50ca71b11403fab8af669d1172` repairs a reproduced existing
+  constructed `segraw` code-generation defect: the C literal lacked its type,
+  causing an argumentless `String_new()`. The focused native fixture fails
+  before the fix and passes afterward; three neighboring String fixtures pass.
+  The orchestrator reproduced the failure on the current-dev-based compiler,
+  reviewed the one-line fix, and independently reran the passing fixture.
+  This changes no public Segment syntax and awaits the Wave 5 transform release.
