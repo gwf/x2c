@@ -20,20 +20,35 @@ typedef enum Diff {
 
 #pragma private
 
+// line edits
+
 static const int _LIMIT = 2000;
-static const int _CONTEXT = 3;
 
 typedef struct {
   Array old, new;
   List edits;
 } _Diff;
 
-static void _emit(_Diff &d, Symbol kind, String line) {
-  d.edits = cons(%($kind $line), d.edits);
+/** Returns the line edits that turn `old` into `new`: a `List` of
+    `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
+    each line's ending removed. Two equal texts give only `same` forms.
+    Past 2,000 edits the differing middle is one run of deletions followed
+    by one run of insertions.
+*/
+meta native List Diff.lines(String old, String new) {
+  _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
+  int lo = 0, old_hi = d.old.len(), new_hi = d.new.len();
+  while (lo < old_hi && lo < new_hi && _same(d, lo, lo)) {
+    _emit(d, <same>, d.old[lo]);
+    lo++;
+  }
+  int tail = 0;
+  while (old_hi > lo && new_hi > lo && _same(d, old_hi - 1, new_hi - 1))
+    old_hi--, new_hi--, tail++;
+  if (_myers(d, lo, old_hi, new_hi) < 0) _replace(d, lo, old_hi, new_hi);
+  for (int i = old_hi; i < old_hi + tail; i++) _emit(d, <same>, d.old[i]);
+  return d.edits.reverse();
 }
-
-static int _same(_Diff &d, int i, int j) =>
-  d.old[i].string() == d.new[j].string();
 
 /* Myers' greedy search over old[lo..old_hi) and new[lo..new_hi). Returns
    the edit count, or -1 past the limit, after emitting the edits. The
@@ -100,37 +115,16 @@ static void _replace(_Diff &d, int lo, int old_hi, int new_hi) {
   for (int j = lo; j < new_hi; j++) _emit(d, <insert>, d.new[j]);
 }
 
-static Symbol _kind(Array edits, int at) => edits[at].list().car();
-
-static void _hunk(
-  Buffer out, List lines, int old_start, int old_count, int new_start,
-  int new_count) {
-  out.printf(
-    "@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
-    old_count, new_count ? new_start + 1 : new_start, new_count);
-  foreach (String line, lines) out.write(line);
+static void _emit(_Diff &d, Symbol kind, String line) {
+  d.edits = cons(%($kind $line), d.edits);
 }
 
-/** Returns the line edits that turn `old` into `new`: a `List` of
-    `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
-    each line's ending removed. Two equal texts give only `same` forms.
-    Past 2,000 edits the differing middle is one run of deletions followed
-    by one run of insertions.
-*/
-meta native List Diff.lines(String old, String new) {
-  _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
-  int lo = 0, old_hi = d.old.len(), new_hi = d.new.len();
-  while (lo < old_hi && lo < new_hi && _same(d, lo, lo)) {
-    _emit(d, <same>, d.old[lo]);
-    lo++;
-  }
-  int tail = 0;
-  while (old_hi > lo && new_hi > lo && _same(d, old_hi - 1, new_hi - 1))
-    old_hi--, new_hi--, tail++;
-  if (_myers(d, lo, old_hi, new_hi) < 0) _replace(d, lo, old_hi, new_hi);
-  for (int i = old_hi; i < old_hi + tail; i++) _emit(d, <same>, d.old[i]);
-  return d.edits.reverse();
-}
+static int _same(_Diff &d, int i, int j) =>
+  d.old[i].string() == d.new[j].string();
+
+// unified differences
+
+static const int _CONTEXT = 3;
 
 /** Returns the unified difference between `old` and `new`, as `diff -u`
     prints it with `old_name` and `new_name` in the header and three lines
@@ -168,4 +162,15 @@ meta native String Diff.unified(
     at = end;
   }
   return out;
+}
+
+static Symbol _kind(Array edits, int at) => edits[at].list().car();
+
+static void _hunk(
+  Buffer out, List lines, int old_start, int old_count, int new_start,
+  int new_count) {
+  out.printf(
+    "@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
+    old_count, new_count ? new_start + 1 : new_start, new_count);
+  foreach (String line, lines) out.write(line);
 }
