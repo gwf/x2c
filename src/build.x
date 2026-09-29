@@ -873,9 +873,9 @@ int Build.finish(Build b) {
                 (input_count == 1 ? "object" : "objects") :
                 (input_count == 1 ? "input" : "inputs");
   String state_path =
-    b.state_root && b.request.kind == <static-lib> ?
+    b.state_root && b.request.kind == <static-lib> && !b.request.dry_run ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
-  if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
+  if (state_path && !access(b.output, R_OK)) {
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, ok);
     if (ok && _state_matches(state_path, hash)) {
