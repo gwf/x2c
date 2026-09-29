@@ -159,9 +159,9 @@ creating region-specific call macros.
 Verified duplicate shape owners:
 
 - `cache.x:_make_header_cache_guard` and
-  `generate.x:_make_init_guard` both build the same static integer guard.
+  `generate.x:_declare_guard` both build the same static integer guard.
 - `cache.x:_patch_header_cache_function` and
-  `generate.x:_patch_func_with_init` both prefix a function body with a
+  `generate.x:Init.patch` both prefix a function body with a
   guarded call to an initializer.
 
 An illustrative common template is:
