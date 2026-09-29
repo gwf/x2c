@@ -1174,7 +1174,9 @@ static List _declarator(
    expression parsing finishes. */
 static List _declarator_init(
   Compiler c, List type, List context) {
-  List slot = c.try_parse_macro_slot(<decl-row>);
+  // A Lisp-produced declarator name still needs ordinary binding.
+  List slot = c.peek_macro_hole()
+    ? c.try_parse_macro_slot(<decl-row>) : NULL;
   if (slot) {
     if (c.test(<=>)) return %(op = $slot ${c.parse_assignment()});
     return slot;
