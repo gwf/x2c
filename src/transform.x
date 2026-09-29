@@ -138,9 +138,18 @@ static int _typed_param_allowed(Compiler compiler, Type target, Type source) {
   }
 }
 
-static List _callback_function(
-  Compiler compiler, List binding, List parameters, Type result,
-  List source_binding, Type source_type, List source_parameters) {
+typedef struct CallbackBuild {
+  Compiler compiler;
+  List binding, parameters, source_binding, source_parameters;
+  Type result, source_type;
+} CallbackBuild;
+
+static List _callback_function(CallbackBuild *build) {
+  Compiler compiler = build.compiler;
+  List parameters = build.parameters;
+  Type result = build.result;
+  Type source_type = build.source_type;
+  List source_parameters = build.source_parameters;
   List names = _auto_names(compiler, parameters.len());
   List declaration_params = _named_decl_params(parameters, names);
   Array arguments = [];
@@ -152,6 +161,7 @@ static List _callback_function(
     arguments.push(
       compiler.convert_expression(argument, source_parameters.car()));
   }
+  List source_binding = build.source_binding;
   List source = %(expr $source_type (ident $source_binding));
   List call = _func_call(
     compiler, source_type.apply().canonicalize(),
@@ -161,8 +171,101 @@ static List _callback_function(
     : compiler.rebuild_statement(returned(
         compiler.convert_expression(call, result))).cadr();
   return compiler.wrapper_function(
-    %(static @result), binding, declaration_params.cdr(),
+    %(static @result), build.binding, declaration_params.cdr(),
     %((stmnt $statement)));
+}
+
+typedef struct TypedAdapter {
+  Compiler compiler;
+  Type target, source, target_return, source_return;
+  List target_params, source_params, source_binding;
+} TypedAdapter;
+
+static void _typed_adapter_parts(TypedAdapter *adapter) {
+  Compiler c = adapter.compiler;
+  Type target = adapter.target, source = adapter.source;
+  if (!adapter.source_binding || !source || source.is_pointer() ||
+      !source.is_function())
+    _typed_adapter_error(
+      c, "typed callback adapter source must be a direct function",
+      target, source,
+      %("supported: a free function or Type.method designator"));
+  if (!_typed_function_parts(
+    target, adapter.target_params, adapter.target_return))
+    _typed_adapter_error(
+      c, "typed callback adapter target is incomplete", target, source, NULL);
+  if (!_typed_function_parts(
+    source, adapter.source_params, adapter.source_return))
+    _typed_adapter_error(
+      c, "typed callback adapter source is incomplete", target, source, NULL);
+  if (_typed_params_variadic(adapter.target_params) ||
+      _typed_params_variadic(adapter.source_params))
+    _typed_adapter_error(
+      c, "typed callback adapter cannot be variadic", target, source, NULL);
+}
+
+static void _typed_adapter_signature(TypedAdapter *adapter) {
+  Compiler c = adapter.compiler;
+  Type target = adapter.target, source = adapter.source;
+  int target_count = adapter.target_params.len();
+  int source_count = adapter.source_params.len();
+  if (target_count != source_count) {
+    String detail = "target has %d parameters; source has %d".printf(
+      target_count, source_count);
+    _typed_adapter_error(
+      c, "typed callback adapter arity mismatch", target, source, %($detail));
+  }
+  adapter.target_return = adapter.target_return.canonicalize();
+  adapter.source_return = adapter.source_return.canonicalize();
+  if (adapter.target_return === %(void) ||
+      adapter.source_return === %(void))
+    _typed_adapter_error(
+      c, "typed callback adapter does not support void return",
+      target, source, NULL);
+  if (adapter.target_return != adapter.source_return)
+    _typed_adapter_error(
+      c, "typed callback adapter return type mismatch", target, source, NULL);
+}
+
+static void _typed_adapter_parameters(TypedAdapter *adapter) {
+  Compiler c = adapter.compiler;
+  int index = 0;
+  List targets = adapter.target_params, sources = adapter.source_params;
+  for (; targets;
+       targets = targets.cdr(), sources = sources.cdr(), index++) {
+    Type target_param = targets.car();
+    Type source_param = sources.car();
+    if (!_typed_param_allowed(c, target_param, source_param)) {
+      String detail = "parameter %d: %s cannot adapt to %s".printf(
+        index + 1, target_param.repr(), source_param.repr());
+      _typed_adapter_error(
+        c, "typed callback adapter parameter mismatch",
+        adapter.target, adapter.source, %($detail));
+    }
+  }
+}
+
+static List _publish_typed_adapter(
+  TypedAdapter *adapter, Type target_spelling) {
+  Compiler c = adapter.compiler;
+  Type target_type = adapter.target;
+  List source_binding = adapter.source_binding;
+  List key = %(tadapt $source_binding $target_type);
+  List adapter_binding = NULL;
+  $adapter.memo(c, key, adapter_binding) {
+    String adapter_name = c.fresh_name("callback_adapt");
+    adapter_binding = c.sym.introduce(adapter_name);
+    CallbackBuild build = {
+      .compiler = c, .binding = adapter_binding,
+      .parameters = adapter.target_params, .result = adapter.target_return,
+      .source_binding = source_binding, .source_type = adapter.source,
+      .source_parameters = adapter.source_params,
+    };
+    List function = _callback_function(&build);
+    c.semantic_binding_facts()[%(function $adapter_binding)] = 1;
+    c.add_early(function);
+  }
+  return %(expr $target_spelling (ident $adapter_binding));
 }
 
 /** Lowers a resolved `tadapt` expression to a typed callback helper.
@@ -195,78 +298,14 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
     default: return expression;
   }
   $let(c.origin, origin) {
-    Type target_type = c.sym.resolve_key(target_spelling);
-    if (!source_binding || !source_type || source_type.is_pointer() ||
-        !source_type.is_function()) {
-      _typed_adapter_error(
-        c,
-        "typed callback adapter source must be a direct function",
-        target_type, source_type,
-        %("supported: a free function or Type.method designator"));
-    }
-    List target_params = NULL, source_params = NULL;
-    Type target_return = NULL, source_return = NULL;
-    if (!_typed_function_parts(target_type, target_params, target_return))
-      _typed_adapter_error(
-        c, "typed callback adapter target is incomplete",
-        target_type, source_type, NULL);
-    if (!_typed_function_parts(source_type, source_params, source_return))
-      _typed_adapter_error(
-        c, "typed callback adapter source is incomplete",
-        target_type, source_type, NULL);
-    if (_typed_params_variadic(target_params) ||
-        _typed_params_variadic(source_params)) {
-      _typed_adapter_error(
-        c, "typed callback adapter cannot be variadic",
-        target_type, source_type, NULL);
-    }
-    int target_count = target_params.len(), source_count = source_params.len();
-    if (target_count != source_count) {
-      String detail =
-        "target has %d parameters; source has %d".printf(
-          target_count, source_count);
-      _typed_adapter_error(
-        c, "typed callback adapter arity mismatch",
-        target_type, source_type, %($detail));
-    }
-    target_return = target_return.canonicalize();
-    source_return = source_return.canonicalize();
-    if (target_return === %(void) || source_return === %(void))
-      _typed_adapter_error(
-        c, "typed callback adapter does not support void return",
-        target_type, source_type, NULL);
-    if (target_return != source_return)
-      _typed_adapter_error(
-        c, "typed callback adapter return type mismatch",
-        target_type, source_type, NULL);
-    int index = 0;
-    List targets = target_params, sources = source_params;
-    for (; targets;
-         targets = targets.cdr(), sources = sources.cdr(), index++) {
-      Type target_param = targets.car();
-      Type source_param = sources.car();
-      if (!_typed_param_allowed(c, target_param, source_param)) {
-        String detail =
-          "parameter %d: %s cannot adapt to %s".printf(
-            index + 1, target_param.repr(), source_param.repr());
-        _typed_adapter_error(
-          c, "typed callback adapter parameter mismatch",
-          target_type, source_type, %($detail));
-      }
-    }
-
-    List key = %(tadapt $source_binding $target_type);
-    List adapter_binding = NULL;
-    $adapter.memo(c, key, adapter_binding) {
-      String adapter_name = c.fresh_name("callback_adapt");
-      adapter_binding = c.sym.introduce(adapter_name);
-      List function = _callback_function(
-        c, adapter_binding, target_params, target_return,
-        source_binding, source_type, source_params);
-      c.semantic_binding_facts()[%(function $adapter_binding)] = 1;
-      c.add_early(function);
-    }
-    return %(expr $target_spelling (ident $adapter_binding));
+    TypedAdapter adapter = {
+      .compiler = c, .target = c.sym.resolve_key(target_spelling),
+      .source = source_type, .source_binding = source_binding,
+    };
+    _typed_adapter_parts(&adapter);
+    _typed_adapter_signature(&adapter);
+    _typed_adapter_parameters(&adapter);
+    return _publish_typed_adapter(&adapter, target_spelling);
   }
 }
 
@@ -492,6 +531,41 @@ macro open Statement $func_record_result(
   }
 }
 
+static List _func_record_call(
+  Compiler c, Type return_type, List call) {
+  /* A record result is returned as `<p48>` to a copy of its bytes. */
+  Type result_type = NULL;
+  List result_helper = _adapter_helper(
+    c, "x2c_func_record_result", result_type);
+  List result = c.sym.introduce(c.fresh_name("func_record"));
+  List (base, mods) = return_type.declaration_parts();
+  List value = _func_bound(return_type, result);
+  Macro address_shape = $func_address, size_shape = $func_size;
+  List address = c.rebuild_expression(
+    return_type.reference(), address_shape(value));
+  List size = c.rebuild_expression(
+    %(unsigned long), size_shape(value));
+  List helper = %(expr $result_type (ident $result_helper));
+  List boxed = _func_call(c, %("Var"), helper, %($address $size));
+  Macro record = $func_record_result;
+  List row = %(op = (bind $result $mods) $call);
+  return c.rebuild_statement(record(base, row, boxed)).cadr();
+}
+
+static void _require_func_readers(
+  Compiler c, Type diagnostic_type, Type source_type) {
+  foreach (String helper_name,
+           %("x2c_func_value_argument"
+             "x2c_func_declared_reference_argument")) {
+    Type helper_type = NULL;
+    List helper = _adapter_helper(c, helper_name, helper_type);
+    if (!helper || !helper_type)
+      _typed_adapter_error(
+        c, "native binding needs Func argument readers from lib/func.x",
+        diagnostic_type, source_type, NULL);
+  }
+}
+
 static List _build_func_adapter(
   Compiler c, Type diagnostic_type, Type source_type,
   List target, List supplied_fn_binding, List prefix) {
@@ -508,16 +582,7 @@ static List _build_func_adapter(
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
 
-  foreach (String helper_name,
-           %("x2c_func_value_argument"
-             "x2c_func_declared_reference_argument")) {
-    Type helper_type = NULL;
-    List helper = _adapter_helper(c, helper_name, helper_type);
-    if (!helper || !helper_type)
-      _typed_adapter_error(
-        c, "native binding needs Func argument readers from lib/func.x",
-        diagnostic_type, source_type, NULL);
-  }
+  _require_func_readers(c, diagnostic_type, source_type);
 
   String name = c.fresh_name("func_adapt");
   List adapter_binding = c.sym.introduce(name);
@@ -532,25 +597,8 @@ static List _build_func_adapter(
     names, %!(Type type, List binding) => %(expr $type (ident $binding)));
   List call = _func_call(c, return_type, target, arguments);
   Type resolved_result = c.sym.resolve_key(return_type);
-  if (resolved_result && resolved_result.car() == <struct>) {
-    /* A record result is returned as `<p48>` to a copy of its bytes. */
-    Type result_type = NULL;
-    List result_helper = _adapter_helper(
-      c, "x2c_func_record_result", result_type);
-    List result = c.sym.introduce(c.fresh_name("func_record"));
-    List (base, mods) = return_type.declaration_parts();
-    List value = _func_bound(return_type, result);
-    Macro address_shape = $func_address, size_shape = $func_size;
-    List address = c.rebuild_expression(
-      return_type.reference(), address_shape(value));
-    List size = c.rebuild_expression(
-      %(unsigned long), size_shape(value));
-    List helper = %(expr $result_type (ident $result_helper));
-    List boxed = _func_call(c, %("Var"), helper, %($address $size));
-    Macro record = $func_record_result;
-    List row = %(op = (bind $result $mods) $call);
-    call = c.rebuild_statement(record(base, row, boxed)).cadr();
-  }
+  if (resolved_result && resolved_result.car() == <struct>)
+    call = _func_record_call(c, return_type, call);
   _publish_func_adapter(
     c, adapter_binding, fn_binding, argv_binding, call, %(@prefix @locals));
   return adapter_binding;
@@ -668,11 +716,12 @@ static List _func_return_body(Compiler compiler, List value) {
   return compiler.rebuild_statement(shape(value)).cdr();
 }
 
-static List _build_indirect_func_adapter(
-  Compiler compiler, Type diagnostic_type, Type pointer_type) {
-  String context_name = compiler.fresh_name("func_pointer_context");
+static void _func_pointer_context(
+  Compiler compiler, Type pointer_type, String &context_name,
+  List &field_binding) {
+  context_name = compiler.fresh_name("func_pointer_context");
   List context_binding = compiler.sym.introduce(context_name);
-  List field_binding = compiler.sym.introduce(
+  field_binding = compiler.sym.introduce(
     compiler.fresh_name("func_pointer"));
   List (field_base, field_mods) = pointer_type.declaration_parts();
   compiler.add_early(
@@ -684,7 +733,14 @@ static List _build_indirect_func_adapter(
             (bindings (bind $field_binding $field_mods)))))
       (bindings (bind $context_binding ()))
   ));
+}
 
+static List _build_indirect_func_adapter(
+  Compiler compiler, Type diagnostic_type, Type pointer_type) {
+  String context_name = NULL;
+  List field_binding = NULL;
+  _func_pointer_context(
+    compiler, pointer_type, context_name, field_binding);
   Type context_type = %($context_name);
   Type context_pointer = %(* const $context_name);
   Type context_helper_type = NULL;
@@ -805,10 +861,16 @@ static List _direct_func_value(
     compiler, bridge, parameters, getter_type, NULL);
 }
 
-static List _func_context_call(
-  Compiler compiler, Type type, List context, List adapter,
-  Type adapter_type, List signature, List constructor,
-  Type constructor_type) {
+typedef struct FuncContextCall {
+  Compiler compiler;
+  Type type, adapter_type, constructor_type;
+  List context, adapter, signature, constructor;
+} FuncContextCall;
+
+static List _func_context_call(FuncContextCall *call) {
+  Compiler compiler = call.compiler;
+  Type type = call.type;
+  List context = call.context;
   List value = _func_bound(type, context);
   Macro address_shape = $func_address;
   List address = compiler.rebuild_expression(
@@ -818,9 +880,32 @@ static List _func_context_call(
     %(size_t), size_shape(value));
   return _func_call(
     compiler, %("Func"),
-    _func_bound(constructor_type, constructor),
-    %(${_func_bound(adapter_type, adapter)}
-      $signature $address $size));
+    _func_bound(call.constructor_type, call.constructor),
+    %(${_func_bound(call.adapter_type, call.adapter)}
+      ${call.signature} $address $size));
+}
+
+static List _func_present_statement(
+  Compiler compiler, List pointer, List constructed) {
+  List null_binding = compiler.sym.reference(%("NULL"), NULL);
+  Macro present_shape = $func_present;
+  List result = compiler.rebuild_expression(
+    %("Func"),
+    present_shape(pointer, constructed,
+                  _func_bound(%("Func"), null_binding)));
+  Macro statement_shape = $expression_statement;
+  return compiler.rebuild_statement(statement_shape(result)).cadr();
+}
+
+static List _func_context_declaration(
+  Compiler compiler, Type context_type, List context, List expression) {
+  Macro aggregate_shape = $func_aggregate;
+  List value = compiler.rebuild_expression(
+    context_type, aggregate_shape(expression));
+  Macro storage_shape = $func_local;
+  return compiler.rebuild_statement(
+    storage_shape(context_type,
+                  %(op = (bind $context ()) $value))).cadr();
 }
 
 static List _indirect_func_value(
@@ -842,29 +927,20 @@ static List _indirect_func_value(
 
   List context = compiler.sym.introduce(
     compiler.fresh_name("func_pointer_context"));
-  Macro aggregate_shape = $func_aggregate;
-  List context_value = compiler.rebuild_expression(
-    context_type, aggregate_shape(expression));
-  Macro storage_shape = $func_local;
-  List declaration = compiler.rebuild_statement(
-    storage_shape(context_type,
-                  %(op = (bind $context ()) $context_value))).cadr();
+  List declaration = _func_context_declaration(
+    compiler, context_type, context, expression);
   String field_name = binding_identity_spelling(context_field);
   List pointer = %(
     expr $pointer_type
       (op . ${_func_bound(context_type, context)} ($field_name)));
-  List constructed = _func_context_call(
-    compiler, context_type, context, adapter, %("FuncAdapter"), signature,
-    constructor, constructor_type);
-  List null_binding = compiler.sym.reference(%("NULL"), NULL);
-  Macro present_shape = $func_present;
-  List result = compiler.rebuild_expression(
-    %("Func"),
-    present_shape(pointer, constructed,
-                  _func_bound(%("Func"), null_binding)));
-  Macro statement_shape = $expression_statement;
-  List statement = compiler.rebuild_statement(
-    statement_shape(result)).cadr();
+  FuncContextCall call = {
+    .compiler = compiler, .type = context_type, .context = context,
+    .adapter = adapter, .adapter_type = %("FuncAdapter"),
+    .signature = signature, .constructor = constructor,
+    .constructor_type = constructor_type,
+  };
+  List constructed = _func_context_call(&call);
+  List statement = _func_present_statement(compiler, pointer, constructed);
   return %(
     expr ("Func") (parens (block $declaration $statement))
   );
@@ -978,6 +1054,51 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   return _deref_func_lift(c, expression, payload);
 }
 
+static int _lambda_adapter_signature(
+  List expected_type, List &raw_params, Var &return_type) {
+  if (!expected_type) return 0;
+  Type expected = expected_type;
+  expected = expected.canonicalize();
+  if (!expected) expected = expected_type;
+  match (expected) {
+    case %((func (*parameters)) ?return_head *): {
+      raw_params = parameters;
+      return_type = return_head;
+      return 1;
+    }
+    case %((!or (!quote *) & ^)
+           (func (*parameters)) ?return_head *): {
+      raw_params = parameters;
+      return_type = return_head;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+typedef struct LambdaAdapter {
+  Compiler compiler;
+  List expected_type, param_types, return_type;
+  List source_binding, source_param_types;
+  Type source_type;
+} LambdaAdapter;
+
+static List _publish_lambda_adapter(LambdaAdapter *adapter) {
+  Compiler c = adapter.compiler;
+  String name = c.fresh_name("lambda_adapt");
+  List binding = c.sym.introduce(name);
+  CallbackBuild build = {
+    .compiler = c, .binding = binding,
+    .parameters = adapter.param_types, .result = adapter.return_type,
+    .source_binding = adapter.source_binding,
+    .source_type = adapter.source_type,
+    .source_parameters = adapter.source_param_types,
+  };
+  List callback = _callback_function(&build);
+  c.add_early(callback);
+  return %(expr ${adapter.expected_type} (ident $binding));
+}
+
 /** Adapts a lowered noncapturing lambda helper to a typed callback.
     `argument` must be a resolved helper reference produced by
     `Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
@@ -1002,25 +1123,10 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
     }
     default: return argument;
   }
-  if (!expected_type) return argument;
-
-  Type expected = expected_type;
-  expected = expected.canonicalize();
-  if (!expected) expected = expected_type;
   List raw_params = NULL;
   Var return_type = void;
-  match (expected) {
-    case %((func (*parameters)) ?return_head *): {
-      raw_params = parameters;
-      return_type = return_head;
-    }
-    case %((!or (!quote *) & ^)
-           (func (*parameters)) ?return_head *): {
-      raw_params = parameters;
-      return_type = return_head;
-    }
-    default: return argument;
-  }
+  if (!_lambda_adapter_signature(expected_type, raw_params, return_type))
+    return argument;
   if (_typed_params_variadic(raw_params)) return argument;
 
   List param_types = NULL;
@@ -1032,13 +1138,13 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
     ? return_type : %( $return_type );
   if (all_params_var && return_type_list === %("Var")) return argument;
 
-  String adapter = c.fresh_name("lambda_adapt");
-  List adapter_binding = c.sym.introduce(adapter);
-  List callback = _callback_function(
-    c, adapter_binding, param_types, return_type_list,
-    orig_binding, orig_type, source_param_types);
-  c.add_early(callback);
-  return %(expr $expected_type (ident $adapter_binding));
+  LambdaAdapter adapter = {
+    .compiler = c, .expected_type = expected_type,
+    .param_types = param_types, .return_type = return_type_list,
+    .source_binding = orig_binding, .source_type = orig_type,
+    .source_param_types = source_param_types,
+  };
+  return _publish_lambda_adapter(&adapter);
 }
 
 static Type _entry_type(Compiler compiler, List entry) {
@@ -1425,6 +1531,58 @@ List Compiler.prepare_lambda_cells(Compiler c, List declarator, List body) {
 /* Rewrite capture-construction expressions through this environment, but do
    not enter a nested lambda body. Its own environment and lowering handle
    that body once the rewritten capture values are available. */
+typedef struct CaptureRewrite {
+  Compiler compiler;
+  Map slots;
+  List environment_binding;
+  Type environment_type;
+} CaptureRewrite;
+
+static List _capture_rows(
+  Compiler compiler, List captures, Map slots, List environment_binding,
+  Type environment_type) {
+  return Ast.rewrite_children(captures, %!(List record) => {
+    match (record)
+      case %(capture ?binding ?type ?expression): {
+        List value = _rewrite_lambda_captures(
+          compiler, expression, slots, environment_binding,
+          environment_type);
+        if (value != expression) return %(capture $binding $type $value);
+      }
+    return record;
+  });
+}
+
+static List _capture_read(
+  CaptureRewrite *context, List ast, Type source_type, List bound) {
+  Var stored;
+  if (!context.slots.try_get(bound, stored)) return ast;
+  List field = NULL;
+  Type storage_type = NULL;
+  match (stored)
+    case %(capture-field ?matched_field ?matched_type): {
+      field = matched_field;
+      storage_type = matched_type;
+    }
+  String field_name = binding_identity_spelling(field);
+  Type environment_type = context.environment_type;
+  List environment_binding = context.environment_binding;
+  List read = %(
+    expr $storage_type
+      (op -> (expr $environment_type (ident $environment_binding))
+             ($field_name))
+  );
+  if (source_type.car() == <&>)
+    return %(expr $source_type ${read.caddr()});
+  List converted = context.compiler.convert_expression(read, source_type);
+  match (converted)
+    case %(expr ? (call "Var_pointer" ?)):
+      return %(expr $source_type
+               (parens (expr $source_type
+                 (cast $source_type $converted))));
+  return converted;
+}
+
 static List _rewrite_lambda_captures(
   Compiler compiler, List ast, Map slots, List environment_binding,
   Type environment_type) {
@@ -1433,49 +1591,21 @@ static List _rewrite_lambda_captures(
   if (ast.car() == <expr>) {
     match (ast) {
       case captured(?body, *captures, *params): {
-        List rewritten = Ast.rewrite_children(captures, %!(List record) => {
-          match (record)
-            case %(capture ?binding ?type ?expression): {
-              List value = _rewrite_lambda_captures(
-                compiler, expression, slots, environment_binding,
-                environment_type);
-              if (value != expression)
-                return %(capture $binding $type $value);
-            }
-          return record;
-        });
+        List rewritten = _capture_rows(
+          compiler, captures, slots, environment_binding,
+          environment_type);
         return rewritten == captures ? ast
              : compiler.rebuild_expression(
                  ast.cadr(), captured(body, rewritten, params));
       }
       case lambda(?body, *params): return ast;
       case %(expr ?source_type (ident ?bound)): {
-        Var stored;
-        if (slots.try_get(bound, stored)) {
-          List field = NULL;
-          Type storage_type = NULL;
-          match (stored)
-            case %(capture-field ?matched_field ?matched_type): {
-              field = matched_field;
-              storage_type = matched_type;
-            }
-          String field_name = binding_identity_spelling(field);
-          List read = %(
-            expr $storage_type
-              (op -> (expr $environment_type (ident $environment_binding))
-                     ($field_name))
-          );
-          if (source_type.car() == <&>)
-            return %(expr $source_type ${read.caddr()});
-          List converted = compiler.convert_expression(read, source_type);
-          match (converted)
-            case %(expr ? (call "Var_pointer" ?)):
-              return %(expr $source_type
-                       (parens (expr $source_type
-                         (cast $source_type $converted))));
-          return converted;
-        }
-        return ast;
+        CaptureRewrite context = {
+          .compiler = compiler, .slots = slots,
+          .environment_binding = environment_binding,
+          .environment_type = environment_type,
+        };
+        return _capture_read(&context, ast, source_type, bound);
       }
     }
   }
@@ -1607,11 +1737,16 @@ static void _capture_adapter(CaptureBuild &build) {
   build.signature = _signature(c, build.entries);
 }
 
-static List _capture_construct(CaptureBuild &build, List context) =>
-  _func_context_call(
-    build.compiler, build.value_type, context, build.adapter,
-    build.adapter_type, build.signature, build.constructor,
-    build.constructor_type);
+static List _capture_construct(CaptureBuild &build, List context) {
+  FuncContextCall call = {
+    .compiler = build.compiler, .type = build.value_type,
+    .context = context, .adapter = build.adapter,
+    .adapter_type = build.adapter_type, .signature = build.signature,
+    .constructor = build.constructor,
+    .constructor_type = build.constructor_type,
+  };
+  return _func_context_call(&call);
+}
 
 static List _capture_storage(
   CaptureBuild &build, List context, List values) {
@@ -2045,6 +2180,71 @@ static int _runtime_sizeof_dimensions(Compiler c, List operand, Map runtime) {
   return 0;
 }
 
+static int _runtime_address(
+  Compiler c, List node, Map runtime, Array pending, Array modes) {
+  match (node) {
+    case %(!or (expr ? ?inner) (parens ?inner)
+               (op . ?inner ?)): {
+      pending.push(inner);
+      modes.push(1);
+      return 0;
+    }
+    case %(ident ?binding):
+      return (runtime && binding in runtime) ||
+             _automatic_static_input(c, binding);
+    case %(index (!set ?base (expr ?type ?)) ?index): {
+      pending.push(index);
+      modes.push(0);
+      pending.push(base);
+      modes.push(type.list().type().is_array());
+      return 0;
+    }
+    case %(op (!quote *) ?inner): {
+      pending.push(inner);
+      modes.push(0);
+      return 0;
+    }
+  }
+  return 1;
+}
+
+/* -1 means descend, 0 means this node is handled, 1 means runtime. */
+static int _runtime_value(
+  Compiler c, List node, Map runtime, Array pending, Array modes) {
+  match (node) {
+    case %((!or cache call var array map varray vmap initval cons append) *):
+      return 1;
+    case %(expr ?type (ident ?binding)): {
+      if ((runtime && binding in runtime) ||
+          _automatic_static_input(c, binding)) return 1;
+      if (%(function $binding) in c.semantic_binding_facts()) return 0;
+      Type native = type;
+      if (native && !native.is_enum() && !native.is_function() &&
+          !native.is_array() &&
+          (native.is_pointer() || !native.contains(<const>))) return 1;
+      return 0;
+    }
+    case %(expr ? (op & ?inner)): {
+      pending.push(inner);
+      modes.push(1);
+      return 0;
+    }
+    case %(expr ?type (!set ?content (index *))): {
+      Type native = type;
+      if (native.is_array()) {
+        pending.push(content);
+        modes.push(1);
+        return 0;
+      }
+      if (native.is_pointer() || !native.contains(<const>)) return 1;
+      break;
+    }
+    case %(expr ? (sizeof ?operand)):
+      return _runtime_sizeof_dimensions(c, operand, runtime);
+  }
+  return -1;
+}
+
 /** Reports whether the static initializer `value` has to run at runtime,
     because it calls, allocates, or reads an object other than a function
     name. `runtime` holds the function-local statics already known to run
@@ -2058,64 +2258,13 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
     List node = pending.take_last();
     int address = modes.take_last();
     if (address) {
-      match (node) {
-        case %(!or (expr ? ?inner) (parens ?inner)
-                   (op . ?inner ?)): {
-          pending.push(inner);
-          modes.push(1);
-          continue;
-        }
-        case %(ident ?binding): {
-          if ((runtime && binding in runtime) ||
-              _automatic_static_input(c, binding)) return 1;
-          continue;
-        }
-        case %(index (!set ?base (expr ?type ?)) ?index): {
-          pending.push(index);
-          modes.push(0);
-          pending.push(base);
-          modes.push(type.list().type().is_array());
-          continue;
-        }
-        case %(op (!quote *) ?inner): {
-          pending.push(inner);
-          modes.push(0);
-          continue;
-        }
-      }
-      return 1;
+      if (_runtime_address(c, node, runtime, pending, modes)) return 1;
+      continue;
     }
-    match (node) {
-      case %((!or cache call var array map varray vmap initval cons append) *):
-        return 1;
-      case %(expr ?type (ident ?binding)): {
-        if ((runtime && binding in runtime) ||
-            _automatic_static_input(c, binding)) return 1;
-        if (%(function $binding) in c.semantic_binding_facts()) continue;
-        Type native = type;
-        if (native && !native.is_enum() && !native.is_function() &&
-            !native.is_array() &&
-            (native.is_pointer() || !native.contains(<const>))) return 1;
-        continue;
-      }
-      case %(expr ? (op & ?inner)): {
-        pending.push(inner);
-        modes.push(1);
-        continue;
-      }
-      case %(expr ?type (!set ?content (index *))): {
-        Type native = type;
-        if (native.is_array()) {
-          pending.push(content);
-          modes.push(1);
-          continue;
-        }
-        if (native.is_pointer() || !native.contains(<const>)) return 1;
-      }
-      case %(expr ? (sizeof ?operand)): {
-        if (_runtime_sizeof_dimensions(c, operand, runtime)) return 1;
-        continue;
-      }
+    int result = _runtime_value(c, node, runtime, pending, modes);
+    if (result >= 0) {
+      if (result) return 1;
+      continue;
     }
     foreach (Var child, node)
       if (child is <list>) {
@@ -2180,6 +2329,15 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
    is not qualified. Taking its address already forces it to memory, so the
    register `siglongjmp` would restore is not where its value lives, and
    qualifying it would discard the qualifier at every such call instead. */
+static void _preserved_write(
+  Compiler c, List node, Map names, Map holders) {
+  Var operand = _changed_operand(c, node);
+  String name = ast_direct_identifier(operand);
+  if (name) names[name] = 1;
+  String holder = ast_indirect_identifier(operand);
+  if (holder) holders[holder] = 1;
+}
+
 static void _collect_preserved(
   Compiler c, Var value, int in_try, Map names, Map holders) {
   /* A long expression chain nests as deeply as it is long, so the walk keeps
@@ -2190,13 +2348,7 @@ static void _collect_preserved(
     int inside = flags.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
-    if (inside) {
-      Var operand = _changed_operand(c, node);
-      String name = ast_direct_identifier(operand);
-      if (name) names[name] = 1;
-      String holder = ast_indirect_identifier(operand);
-      if (holder) holders[holder] = 1;
-    }
+    if (inside) _preserved_write(c, node, names, holders);
     match (node) {
       case %(function *): continue;
       case %(defer ?body ? ? ? ?written *): {
@@ -2324,6 +2476,53 @@ static int _declares_pointee(List bindings, Map names, Map pointers) {
    on the whole declaration - on the declarator for the object itself, and on
    the base type for a pointee - so a statement that qualifies any of several
    names splits into one declaration each. */
+static List _preserve_block(List statements, Map names, Map pointers) {
+  Array output = [];
+  foreach (Var statement, statements) {
+    List origin = NULL, Var inner = statement;
+    match (inner) case %(at ?anchor ?wrapped): {
+      origin = anchor;
+      inner = wrapped;
+    }
+    /* Split before qualifying, so a base-type qualifier one declarator
+       needs does not reach the names beside it. */
+    match (inner)
+      case %(!set ?declaration
+             ((!or declare decl) ?type
+              (!set ?bindings (bindings ? ? *)))):
+        if (_is_automatic(declaration) &&
+            (_declares_preserved(bindings, names) ||
+             _declares_pointee(bindings, names, pointers))) {
+          Symbol head = declaration.car();
+          foreach (List binding, bindings.cdr()) {
+            Var one = _preserve(
+              %($head $type (bindings $binding)), names, pointers);
+            output.push(origin ? %(at $origin $one) : one);
+          }
+          continue;
+        }
+    output.push(_preserve(statement, names, pointers));
+  }
+  return %(block @{output.list_free()});
+}
+
+static List _preserve_declaration(
+  List declaration, Type type, List bindings, Map names, Map pointers) {
+  Symbol head = declaration.car();
+  if (!_is_automatic(declaration)) return declaration;
+  if (_declares_pointee(bindings, names, pointers) &&
+      !type.type().flatten_all().contains(<volatile>))
+    type = cons(<volatile>, type);
+  Array preserved = [];
+  foreach (List binding, bindings.cdr())
+    match (binding) {
+      case %(op = ?bind ?value):
+        preserved.push(%(op = ${_preserve_binding(bind, names)} $value));
+      case %(bind * ): preserved.push(_preserve_binding(binding, names));
+    }
+  return %($head $type (bindings @{preserved.list_free()}));
+}
+
 static Var _preserve(Var value, Map names, Map pointers) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
@@ -2333,52 +2532,12 @@ static Var _preserve(Var value, Map names, Map pointers) {
   match (node) {
     case %(param ?type ?bind):
       return %(param $type ${_preserve_binding(bind, names)});
-    case %(block *statements): {
-      Array output = [];
-      foreach (Var statement, statements) {
-        List origin = NULL, Var inner = statement;
-        match (inner) case %(at ?anchor ?wrapped): {
-          origin = anchor;
-          inner = wrapped;
-        }
-        /* Split before qualifying, so a base-type qualifier one declarator
-           needs does not reach the names beside it. */
-        match (inner)
-          case %(!set ?declaration
-                 ((!or declare decl) ?type
-                  (!set ?bindings (bindings ? ? *)))):
-            if (_is_automatic(declaration) &&
-                (_declares_preserved(bindings, names) ||
-                 _declares_pointee(bindings, names, pointers))) {
-              Symbol head = declaration.car();
-              foreach (List binding, bindings.cdr()) {
-                Var one = _preserve(
-                  %($head $type (bindings $binding)), names, pointers);
-                output.push(origin ? %(at $origin $one) : one);
-              }
-              continue;
-            }
-        output.push(_preserve(statement, names, pointers));
-      }
-      return %(block @{output.list_free()});
-    }
+    case %(block *statements):
+      return _preserve_block(statements, names, pointers);
     case %(!set ?declaration
-           ((!or declare decl) ?type (!set ?bindings (bindings *)))): {
-      Symbol head = declaration.car();
-      if (!_is_automatic(declaration)) return node;
-      if (_declares_pointee(bindings, names, pointers) &&
-          !type.type().flatten_all().contains(<volatile>))
-        type = cons(<volatile>, type);
-      Array preserved = [];
-      foreach (List binding, bindings.cdr())
-        match (binding) {
-          case %(op = ?bind ?value):
-            preserved.push(
-              %(op = ${_preserve_binding(bind, names)} $value));
-          case %(bind * ): preserved.push(_preserve_binding(binding, names));
-        }
-      return %($head $type (bindings @{preserved.list_free()}));
-    }
+           ((!or declare decl) ?type (!set ?bindings (bindings *)))):
+      return _preserve_declaration(
+        declaration, type, bindings, names, pointers);
   }
   Var child;
   $ast.rewrite_children(node, child, _preserve(child, names, pointers));
@@ -2670,35 +2829,50 @@ static List _lower_return(Walk walk, List node, List expression) {
   return _return_value(walk, expression);
 }
 
+/* A function-static initializer remains in ancestry for label checks,
+   although no exit runs its record. */
+static List _rewrite_localinit(Walk walk, List node, List guard, List body) =>
+  %(localinit ${_rewrite(walk, guard)} ${_inside(walk, NULL, node, body)});
+
+static List _rewrite_while(Walk walk, List condition, List body) =>
+  %(while ${_rewrite(walk, condition)} ${_bounded(walk, body, 1)});
+
+static List _rewrite_do(Walk walk, List body, List condition) =>
+  %(do ${_bounded(walk, body, 1)} ${_rewrite(walk, condition)});
+
+static List _rewrite_for(
+  Walk walk, List initial, List condition, List increment, List body) =>
+  %(for ${_rewrite(walk, initial)} ${_rewrite(walk, condition)}
+        ${_rewrite(walk, increment)} ${_bounded(walk, body, 1)});
+
+static List _rewrite_switch(Walk walk, List subject, List body) =>
+  %(switch ${_rewrite(walk, subject)} ${_bounded(walk, body, 0)});
+
+/* A match arm's break exits the match; continue reaches the loop. */
+static List _rewrite_matchcases(Walk walk, List subject, List records) =>
+  %(matchcases ${_rewrite(walk, subject)}
+               ${_bounded(walk, records, 0)});
+
+/* Expressions cannot hold transfers or regions and may nest arbitrarily.
+   Position wrappers supply report origins. Bound returns carry one expression;
+   the source template's declared-type slot is not a matching source form. */
 static Var _rewrite(Walk walk, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
-  // An expression holds no transfer and no region, and nests as deeply as it
-  // is long, so the walk stops here.
   match (node) case %(expr *): return value;
   Macro caught = $caught, tried = $tried;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro switched = $switched;
   match (node) {
-    /* First: recognition looks through a position wrapper, which this
-       case records for reports. */
     case %(at ?(int origin) ?inner): return _lower_at(walk, origin, inner);
-    /* A defer's bound form carries what binding computed; no source form
-       writes it. */
     case %(defer ?body ?env ?callback ?records ?):
       return _lower_defer(walk, body, env, callback, records);
     case caught(?body, ?finalizer, *arms):
       return _lower_try(walk, node, body, arms, finalizer);
     case tried(?body, ?finalizer):
       return _lower_try(walk, node, body, NULL, finalizer);
-    /* A function-static initializer leaves its own record at the end of its
-       block. No exit runs that record, but a jump still may not enter the
-       region, so it takes part in the ancestry a label is compared by. */
     case %(localinit ?guard ?body):
-      return %(localinit ${_rewrite(walk, guard)}
-               ${_inside(walk, NULL, node, body)});
-    /* A bound return is `(return EXPRESSION)`; a template writes it with a
-       declared-type slot, so no source form matches it. */
+      return _rewrite_localinit(walk, node, guard, body);
     case %(return): return _transfer(walk, 0, node);
     case %(return (!set ?expression (expr ? ?))):
       return _lower_return(walk, node, expression);
@@ -2706,21 +2880,15 @@ static Var _rewrite(Walk walk, Var value) {
     case %(continue): return _transfer(walk, walk.continue_stop, node);
     case %(goto ?label): return _transfer(walk, _goto_stop(walk, label), node);
     case while_loop(?condition, ?body):
-      return %(while ${_rewrite(walk, condition)} ${_bounded(walk, body, 1)});
+      return _rewrite_while(walk, condition, body);
     case do_loop(?body, ?condition):
-      return %(do ${_bounded(walk, body, 1)} ${_rewrite(walk, condition)});
+      return _rewrite_do(walk, body, condition);
     case %(for ?initial ?condition ?increment ?body):
-      return %(for ${_rewrite(walk, initial)} ${_rewrite(walk, condition)}
-               ${_rewrite(walk, increment)} ${_bounded(walk, body, 1)});
+      return _rewrite_for(walk, initial, condition, increment, body);
     case switched(?subject, ?body):
-      return %(switch ${_rewrite(walk, subject)}
-               ${_bounded(walk, body, 0)});
-    /* A `match` emits a switch over its arms, so an arm's `break` leaves the
-       match and no region with it. Its `continue` still reaches the
-       enclosing loop. */
+      return _rewrite_switch(walk, subject, body);
     case %(matchcases ?subject ?records):
-      return %(matchcases ${_rewrite(walk, subject)}
-               ${_bounded(walk, records, 0)});
+      return _rewrite_matchcases(walk, subject, records);
     case %(function *): return _function(walk.compiler, node);
   }
   Var child;
@@ -2894,6 +3062,120 @@ static void _lower_printf_star(
     values[index] = compiler.convert_expression(arg, %(int));
 }
 
+typedef struct PrintfWalk {
+  Compiler compiler;
+  Array values;
+  String format, family;
+  int cursor, end, value_index;
+} PrintfWalk;
+
+static void _printf_position(PrintfWalk *walk) {
+  int probe = walk.cursor;
+  while (probe < walk.end && _printf_is_digit(walk.format[probe])) probe++;
+  if (probe < walk.end && walk.format[probe] == '$')
+    _printf_error(
+      walk.compiler, walk.family,
+      "positional formats cannot infer Var argument types");
+}
+
+static void _printf_width(PrintfWalk *walk) {
+  while (walk.cursor < walk.end &&
+         (walk.format[walk.cursor] == '-' ||
+          walk.format[walk.cursor] == '+' ||
+          walk.format[walk.cursor] == ' ' ||
+          walk.format[walk.cursor] == '#' ||
+          walk.format[walk.cursor] == '0'))
+    walk.cursor++;
+  if (walk.cursor < walk.end && walk.format[walk.cursor] == '*') {
+    walk.cursor++;
+    _printf_position(walk);
+    _lower_printf_star(
+      walk.compiler, walk.values, walk.value_index++, walk.family);
+  }
+  else while (walk.cursor < walk.end &&
+              _printf_is_digit(walk.format[walk.cursor])) walk.cursor++;
+}
+
+static void _printf_precision(PrintfWalk *walk) {
+  if (walk.cursor >= walk.end || walk.format[walk.cursor] != '.') return;
+  walk.cursor++;
+  if (walk.cursor < walk.end && walk.format[walk.cursor] == '*') {
+    walk.cursor++;
+    _printf_position(walk);
+    _lower_printf_star(
+      walk.compiler, walk.values, walk.value_index++, walk.family);
+  }
+  else while (walk.cursor < walk.end &&
+              _printf_is_digit(walk.format[walk.cursor])) walk.cursor++;
+}
+
+static PrintfLength _printf_length(PrintfWalk *walk) {
+  PrintfLength length = _printf_default;
+  if (walk.cursor + 1 < walk.end && walk.format[walk.cursor] == 'h' &&
+      walk.format[walk.cursor + 1] == 'h') {
+    length = _printf_hh;
+    walk.cursor += 2;
+  }
+  else if (walk.cursor + 1 < walk.end &&
+           walk.format[walk.cursor] == 'l' &&
+           walk.format[walk.cursor + 1] == 'l') {
+    length = _printf_ll;
+    walk.cursor += 2;
+  }
+  else if (walk.cursor < walk.end) {
+    switch (walk.format[walk.cursor]) {
+      case 'h': length = _printf_h; walk.cursor++; break;
+      case 'l': length = _printf_l; walk.cursor++; break;
+      case 'j': length = _printf_j; walk.cursor++; break;
+      case 'z': length = _printf_z; walk.cursor++; break;
+      case 't': length = _printf_t; walk.cursor++; break;
+      case 'L': length = _printf_L; walk.cursor++; break;
+    }
+  }
+  return length;
+}
+
+static void _printf_conversion(PrintfWalk *walk) {
+  _printf_position(walk);
+  _printf_width(walk);
+  _printf_precision(walk);
+  PrintfLength length = _printf_length(walk);
+  if (walk.cursor >= walk.end)
+    _printf_error(walk.compiler, walk.family, "incomplete format conversion");
+  int conversion = walk.format[walk.cursor++];
+  if (!_printf_valid_length(length, conversion)) {
+    String message =
+      "unsupported or malformed format conversion %%%c".printf(conversion);
+    _printf_error(walk.compiler, walk.family, message);
+  }
+  if (walk.value_index >= walk.values.len()) {
+    String message =
+      "format conversion %%%c consumes a missing argument".printf(conversion);
+    _printf_error(walk.compiler, walk.family, message);
+  }
+  _lower_printf_value(
+    walk.compiler, walk.values, walk.value_index++, walk.family,
+    length, conversion);
+}
+
+static void _printf_scan(PrintfWalk *walk, int raw) {
+  while (walk.cursor < walk.end) {
+    if (raw && walk.format[walk.cursor] == '\\') {
+      walk.cursor += walk.cursor + 1 < walk.end ? 2 : 1;
+      continue;
+    }
+    if (walk.format[walk.cursor++] != '%') continue;
+    if (walk.cursor >= walk.end)
+      _printf_error(
+        walk.compiler, walk.family, "incomplete format conversion");
+    if (walk.format[walk.cursor] == '%') {
+      walk.cursor++;
+      continue;
+    }
+    _printf_conversion(walk);
+  }
+}
+
 // Align static format conversions with variadic arguments and lower only
 // Var crossings. The parser understands the standard output grammar far
 // enough to preserve native arguments around the safe automatic subset.
@@ -2916,102 +3198,15 @@ static List _lower_printf_vars(Compiler c, List ast) {
       c, family,
       "Var arguments require a single static format literal");
 
-  int cursor = raw ? 1 : 0, end = raw ? format.len() - 1 : format.len();
-  int value_index = info.first_arg;
-  while (cursor < end) {
-    if (raw && format[cursor] == '\\') {
-      cursor += cursor + 1 < end ? 2 : 1;
-      continue;
-    }
-    if (format[cursor++] != '%') continue;
-    if (cursor >= end)
-      _printf_error(c, family, "incomplete format conversion");
-    if (format[cursor] == '%') {
-      cursor++;
-      continue;
-    }
+  PrintfWalk walk = {
+    .compiler = c, .values = values, .format = format, .family = family,
+    .cursor = raw ? 1 : 0,
+    .end = raw ? format.len() - 1 : format.len(),
+    .value_index = info.first_arg,
+  };
+  _printf_scan(&walk, raw);
 
-    int probe = cursor;
-    while (probe < end && _printf_is_digit(format[probe])) probe++;
-    if (probe < end && format[probe] == '$')
-      _printf_error(
-        c, family,
-        "positional formats cannot infer Var argument types");
-
-    while (cursor < end &&
-           (format[cursor] == '-' || format[cursor] == '+' ||
-            format[cursor] == ' ' || format[cursor] == '#' ||
-            format[cursor] == '0'))
-      cursor++;
-
-    if (cursor < end && format[cursor] == '*') {
-      cursor++;
-      probe = cursor;
-      while (probe < end && _printf_is_digit(format[probe])) probe++;
-      if (probe < end && format[probe] == '$')
-        _printf_error(
-          c, family,
-          "positional formats cannot infer Var argument types");
-      _lower_printf_star(c, values, value_index++, family);
-    }
-    else while (cursor < end && _printf_is_digit(format[cursor])) cursor++;
-
-    if (cursor < end && format[cursor] == '.') {
-      cursor++;
-      if (cursor < end && format[cursor] == '*') {
-        cursor++;
-        probe = cursor;
-        while (probe < end && _printf_is_digit(format[probe])) probe++;
-        if (probe < end && format[probe] == '$')
-          _printf_error(
-            c, family,
-            "positional formats cannot infer Var argument types");
-        _lower_printf_star(c, values, value_index++, family);
-      }
-      else while (cursor < end && _printf_is_digit(format[cursor])) cursor++;
-    }
-
-    PrintfLength length = _printf_default;
-    if (cursor + 1 < end && format[cursor] == 'h' &&
-        format[cursor + 1] == 'h') {
-      length = _printf_hh;
-      cursor += 2;
-    }
-    else if (cursor + 1 < end && format[cursor] == 'l' &&
-             format[cursor + 1] == 'l') {
-      length = _printf_ll;
-      cursor += 2;
-    }
-    else if (cursor < end) {
-      switch (format[cursor]) {
-        case 'h': length = _printf_h; cursor++; break;
-        case 'l': length = _printf_l; cursor++; break;
-        case 'j': length = _printf_j; cursor++; break;
-        case 'z': length = _printf_z; cursor++; break;
-        case 't': length = _printf_t; cursor++; break;
-        case 'L': length = _printf_L; cursor++; break;
-      }
-    }
-    if (cursor >= end)
-      _printf_error(c, family, "incomplete format conversion");
-    int conversion = format[cursor++];
-    if (!_printf_valid_length(length, conversion)) {
-      String message =
-        "unsupported or malformed format conversion %%%c"
-          .printf(conversion);
-      _printf_error(c, family, message);
-    }
-    if (value_index >= values.len()) {
-      String message =
-        "format conversion %%%c consumes a missing argument"
-          .printf(conversion);
-      _printf_error(c, family, message);
-    }
-    _lower_printf_value(
-      c, values, value_index++, family, length, conversion);
-  }
-
-  for (int i = value_index; i < values.len(); i++) {
+  for (int i = walk.value_index; i < values.len(); i++) {
     List arg = values[i];
     if (c.sym.is_var_type(arg.cadr()))
       _printf_error(
@@ -3263,56 +3458,64 @@ static List _destructure_statement(Compiler compiler, List ast) {
 
 // Keep parser-bound targets out of rebinding so their names retain scope and
 // emitted identity; bind only the new temporary and unbound writes.
+static List _named_destructure(
+  Compiler compiler, Type type, List targets, List source,
+  Type source_type) {
+  List temporary = compiler.sym.introduce(
+    compiler.fresh_name("destructure"));
+  Array declarations = [], expressions = [];
+  foreach (List ident, targets) {
+    declarations.push(%(bind $ident ()));
+    expressions.push(%(expr $type (ident $ident)));
+  }
+  Macro target_shape = $destructure_targets;
+  List target_decl = compiler.rebuild_statement(
+    target_shape(type, declarations.list_free())).cadr();
+  List assignments = _destructure_assignments(
+    compiler, expressions.list_free(), temporary);
+  Macro shape = $destructure_declarations;
+  List tail = compiler.bind_syntax(
+    shape(temporary,
+          _destructure_source(compiler, source, source_type), assignments),
+    AST_BLOCK, compiler.return_type);
+  Macro sequence = $destructure_sequence;
+  return compiler.rebuild_statement(
+    sequence(cons(target_decl, tail.cdr())));
+}
+
+static List _typed_destructure(
+  Compiler compiler, List parameters, List source, Type source_type) {
+  List temporary = compiler.sym.introduce(
+    compiler.fresh_name("destructure"));
+  Array declarations = [];
+  int index = 0;
+  Macro target_shape = $destructure_typed_target;
+  foreach (List parameter, parameters) match (parameter) {
+    case %(param ?type ?bind): {
+      List value = _destructure_element(temporary, index++);
+      declarations.push(compiler.rebuild_statement(
+        target_shape(type, bind, value)).cadr());
+    }
+  }
+  Macro shape = $destructure_declarations;
+  List temp = compiler.bind_syntax(
+    shape(temporary, _destructure_source(compiler, source, source_type)),
+    AST_BLOCK, compiler.return_type);
+  Macro sequence = $destructure_sequence;
+  return compiler.rebuild_statement(
+    sequence(cons(temp, declarations.list_free())));
+}
+
 static List _destructure_declaration(Compiler compiler, List ast) {
   match (ast) {
     case %(dstrdecl ?type (targets *targets)
-                    (!set ?source (expr ?source_type ?))): {
-      List temporary = compiler.sym.introduce(
-        compiler.fresh_name("destructure"));
-
-      Array declarations = [], expressions = [];
-      foreach (List ident, targets) {
-        declarations.push(%(bind $ident ()));
-        expressions.push(%(expr $type (ident $ident)));
-      }
-      Macro target_shape = $destructure_targets;
-      List target_decl = compiler.rebuild_statement(
-        target_shape(type, declarations.list_free())).cadr();
-      List assignments =
-        _destructure_assignments(
-          compiler, expressions.list_free(), temporary);
-      Macro shape = $destructure_declarations;
-      List tail = compiler.bind_syntax(
-        shape(temporary,
-              _destructure_source(compiler, source, source_type),
-              assignments), AST_BLOCK, compiler.return_type);
-      Macro sequence = $destructure_sequence;
-      return compiler.rebuild_statement(
-        sequence(cons(target_decl, tail.cdr())));
-    }
+                    (!set ?source (expr ?source_type ?))):
+      return _named_destructure(
+        compiler, type, targets, source, source_type);
     case %(dstrdecl (params *parameters)
-                    (!set ?source (expr ?source_type ?))): {
-      List temporary = compiler.sym.introduce(
-        compiler.fresh_name("destructure"));
-      Array declarations = [];
-      int index = 0;
-      Macro target_shape = $destructure_typed_target;
-      foreach (List parameter, parameters) match (parameter) {
-        case %(param ?type ?bind): {
-          List value = _destructure_element(temporary, index++);
-          declarations.push(compiler.rebuild_statement(
-            target_shape(type, bind, value)).cadr());
-        }
-      }
-      Macro shape = $destructure_declarations;
-      List temp = compiler.bind_syntax(
-        shape(temporary,
-              _destructure_source(compiler, source, source_type)),
-        AST_BLOCK, compiler.return_type);
-      Macro sequence = $destructure_sequence;
-      return compiler.rebuild_statement(
-        sequence(cons(temp, declarations.list_free())));
-    }
+                    (!set ?source (expr ?source_type ?))):
+      return _typed_destructure(
+        compiler, parameters, source, source_type);
   }
   return ast;
 }
@@ -3513,13 +3716,9 @@ static List _sequenced_protocol_call(
 
 /* Compound, prefix and postfix brackets share the same resolved element,
    protocol lookup, and built-in conversion. A missing rhs means postfix. */
-static List _indexed_change(
-  Compiler c, List target, Symbol op, List rhs) {
-  Symbol owner, List base, selector;
-  if (!_indexed_parts(c, target, owner, base, selector)) return NULL;
+static List _indexed_resolution(
+  Compiler c, Type base_type, Symbol owner, Symbol op, List rhs) {
   int postfix = !rhs;
-  (Var base_tag, Type base_type) = base;
-  (void) base_tag;
   List resolved = c.resolve_protocol_member(
     base_type, postfix ? "postfixindex" : "updateindex");
   if (!resolved) {
@@ -3538,6 +3737,17 @@ static List _indexed_change(
       : "indexed compound assignment requires a numeric or Var operand";
     c.report_error(<xform>, message, NULL, %($details));
   }
+  return resolved;
+}
+
+static List _indexed_change(
+  Compiler c, List target, Symbol op, List rhs) {
+  Symbol owner, List base, selector;
+  if (!_indexed_parts(c, target, owner, base, selector)) return NULL;
+  int postfix = !rhs;
+  (Var base_tag, Type base_type) = base;
+  (void) base_tag;
+  List resolved = _indexed_resolution(c, base_type, owner, op, rhs);
 
   List operation = _symbol_expression(op);
   List arguments = postfix
@@ -3618,6 +3828,41 @@ static List _protocol_update(
   return _update_call(arg, spell, value, helper);
 }
 
+static void _dynamic_rhs(
+  Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
+  if (lhs_type.is_bitfield())
+    c.report_error(
+      <xform>, "dynamic compound assignment cannot target a bitfield",
+      NULL, NULL);
+  int rhs_allowed = rhs_is_var || c.sym.resolve_numeric_type(rhs_type) ||
+                    (op == <+> && _string_operand(c, rhs_type));
+  if (!rhs_allowed) {
+    String details = %"right type: ${rhs_type.repr()}";
+    c.report_error(
+      <xform>,
+      op == <+>
+        ? "dynamic += requires a numeric, Var, or String operand"
+        : "dynamic compound assignment requires a numeric or Var operand",
+      NULL, %($details));
+  }
+}
+
+static String _dynamic_helper(Compiler c, Type lhs_type) {
+  Type scalar = c.sym.resolve_numeric_type(lhs_type);
+  if (scalar && scalar.is_enum())
+    c.report_error(
+      <xform>, "dynamic compound assignment cannot target an enum",
+      NULL, NULL);
+  String helper = scalar ? scalar.var_numeric_update_helper() : NULL;
+  if (!helper) {
+    String details = %"left type: ${lhs_type.repr()}";
+    c.report_error(
+      <xform>, "dynamic compound assignment requires a numeric lvalue",
+      NULL, %($details));
+  }
+  return helper;
+}
+
 static List _dynamic_compound(
   Compiler c, List ast, Symbol op, List lhs, List rhs) {
   (Var lhs_tag, Type lhs_type) = lhs;
@@ -3650,41 +3895,52 @@ static List _dynamic_compound(
     (rhs_tag, rhs_type) = rhs;
   }
   if (!lhs_is_var && !rhs_is_var) return ast;
-  if (lhs_type.is_bitfield())
-    c.report_error(
-      <xform>, "dynamic compound assignment cannot target a bitfield",
-      NULL, NULL);
-  int rhs_allowed = rhs_is_var
-                 || c.sym.resolve_numeric_type(rhs_type)
-                 || (op == <+> && _string_operand(c, rhs_type));
-  if (!rhs_allowed) {
-    String details = %"right type: ${rhs_type.repr()}";
-    c.report_error(
-      <xform>,
-      op == <+>
-        ? "dynamic += requires a numeric, Var, or String operand"
-        : "dynamic compound assignment requires a numeric or Var operand",
-      NULL, %($details));
-  }
+  _dynamic_rhs(c, op, lhs_type, rhs_type, rhs_is_var);
 
   String helper = "x2c_var_update_volatile";
-  if (!lhs_is_var) {
-    Type scalar = c.sym.resolve_numeric_type(lhs_type);
-    if (scalar && scalar.is_enum())
-      c.report_error(
-        <xform>, "dynamic compound assignment cannot target an enum",
-        NULL, NULL);
-    helper = scalar ? scalar.var_numeric_update_helper() : NULL;
-    if (!helper) {
-      String details = %"left type: ${lhs_type.repr()}";
-      c.report_error(
-        <xform>, "dynamic compound assignment requires a numeric lvalue",
-        NULL, %($details));
-    }
-  }
+  if (!lhs_is_var) helper = _dynamic_helper(c, lhs_type);
 
   rhs = c.convert_expression(rhs, %("Var"));
   return _update_call(lhs, _symbol_expression(op), rhs, helper);
+}
+
+static List _binary_operator(
+  Compiler c, List ast, Symbol operator, List lhs, List rhs) {
+  Symbol compound = Symbol.compound_operator(operator);
+  if (compound) {
+    List indexed = _indexed_change(c, lhs, compound, rhs);
+    if (indexed) return indexed;
+    return _dynamic_compound(c, ast, compound, lhs, rhs);
+  }
+  switch (operator) {
+    case <=>: return _assignment(c, operator, lhs, rhs);
+    case <==>:  case <!=>:  case <===>: case <!==>:
+    case <"<">: case <"<=">: case <">">:  case <">=">:
+      return _comparison(c, ast, operator, lhs, rhs);
+  }
+  if (_dynamic_binary_operator(operator))
+    return _dynamic_binary(c, ast, operator, lhs, rhs);
+  return ast;
+}
+
+static List _unary_change(
+  Compiler c, List ast, Symbol operator, List argument, Type type) {
+  Symbol binary = operator == <++> ? <+> : <->;
+  List one = %(expr (int) (literal (int) "1"));
+  List indexed = _indexed_change(c, argument, binary, one);
+  if (indexed) return indexed;
+  if (!c.sym.is_var_type(type)) {
+    List updated = _protocol_update(
+      c, type, binary, argument, one, binary);
+    if (updated) return updated;
+  }
+  if (c.sym.is_var_type(type)) {
+    one = c.convert_expression(one, %("Var"));
+    return _update_call(
+      argument, _symbol_expression(binary), one,
+      "x2c_var_update_volatile");
+  }
+  return ast;
 }
 
 static List _operator(Compiler c, List ast) {
@@ -3692,29 +3948,8 @@ static List _operator(Compiler c, List ast) {
   if (truthy != ast) return truthy;
   match (ast) {
     case %(op ?operator (!set ?lhs (expr ? ?))
-             (!set ?rhs (expr ? ?))): {
-      Symbol compound = Symbol.compound_operator(operator);
-      if (compound) {
-        List indexed = _indexed_change(
-          c, lhs, compound, rhs);
-        if (indexed) return indexed;
-        return _dynamic_compound(
-          c, ast, compound, lhs, rhs);
-      }
-      switch (operator.symbol()) {
-        case <=>:
-          return _assignment(
-            c, operator, lhs, rhs);
-        case <==>:  case <!=>:  case <===>: case <!==>:
-        case <"<">: case <"<=">: case <">">:  case <">=">:
-          return _comparison(
-            c, ast, operator, lhs, rhs);
-      }
-      if (_dynamic_binary_operator(operator))
-        return _dynamic_binary(
-          c, ast, operator, lhs, rhs);
-      return ast;
-    }
+             (!set ?rhs (expr ? ?))):
+      return _binary_operator(c, ast, operator, lhs, rhs);
     case %(op (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?))): {
       if (c.sym.is_var_type(argument_type))
@@ -3724,23 +3959,8 @@ static List _operator(Compiler c, List ast) {
       return ast;
     }
     case %(op (!set ?operator (!or ++ --))
-             (!set ?argument (expr ?argument_type ?))): {
-      Type type = argument_type, List arg = argument;
-      Symbol binary = operator == <++> ? <+> : <->;
-      List one = %(expr (int) (literal (int) "1"));
-      List indexed = _indexed_change(c, arg, binary, one);
-      if (indexed) return indexed;
-      if (!c.sym.is_var_type(type)) {
-        List updated = _protocol_update(c, type, binary, arg, one, binary);
-        if (updated) return updated;
-      }
-      if (c.sym.is_var_type(type)) {
-        one = c.convert_expression(one, %("Var"));
-        return _update_call(
-          arg, _symbol_expression(binary), one, "x2c_var_update_volatile");
-      }
-      return ast;
-    }
+             (!set ?argument (expr ?argument_type ?))):
+      return _unary_change(c, ast, operator, argument, argument_type);
   }
   return ast;
 }
@@ -3899,6 +4119,33 @@ static List _build_cons_list(List list) {
   return %(cons $head $tail);
 }
 
+static List _segment_value(Compiler compiler, List seg) {
+  Symbol kind = seg.car();
+  switch (kind) {
+    case <segraw>: seg = _process_raw_segment(compiler, seg); break;
+    case <segvar>:
+    case <segexp>: seg = compiler.convert_segment_to_string(seg.cadr()); break;
+    case <cache>: seg = %(expr ("String") $seg); break;
+  }
+  return compiler.convert_expression(seg, %("Var"));
+}
+
+static List _join_segments(
+  Compiler compiler, List segments, int segment_count) {
+  // Keep nested cons expressions below host-C bracket-depth limits.
+  if (segment_count <= 128) {
+    segments = _build_cons_list(segments);
+    return %("String_join(NULL, " (expr ("List") $segments) ")");
+  }
+  String count = %"${segment_count}U";
+  Type signature = NULL;
+  List binding = compiler.sym.reference(%("List_list_n"), signature);
+  List list = %(expr ("List")
+    (call (expr $signature (ident $binding))
+          (args (expr (unsigned) (literal (unsigned) $count)) @segments)));
+  return %("String_join(NULL, " $list ")");
+}
+
 static List _string_segments(Compiler compiler, List ast) {
   /* A lone constant segment is already the whole string. Reuse the parsed
      literal's cache slot instead of joining a one-element List at runtime.
@@ -3912,34 +4159,10 @@ static List _string_segments(Compiler compiler, List ast) {
           %(string (expr ("String") (literal ("String") $text))));
   }
   Array values = [];
-  foreach (List seg, ast.cdr()) {
-    Symbol kind = seg.car();
-    switch (kind) {
-      case <segraw>: seg = _process_raw_segment(compiler, seg);
-        break;
-      case <segvar>:
-      case <segexp>:
-        seg = compiler.convert_segment_to_string(seg.cadr());
-        break;
-      case <cache>: seg = %(expr ("String") $seg); break;
-    }
-    seg = compiler.convert_expression(seg, %("Var"));
-    values.push(seg);
-  }
+  foreach (List seg, ast.cdr()) values.push(_segment_value(compiler, seg));
   int segment_count = values.len();
   List segments = values.list_free();
-  // Keep nested cons expressions below host-C bracket-depth limits.
-  if (segment_count <= 128) {
-    segments = _build_cons_list(segments);
-    return %("String_join(NULL, " (expr ("List") $segments) ")");
-  }
-  String count = %"${segment_count}U";
-  Type signature = NULL;
-  List binding = compiler.sym.reference(%("List_list_n"), signature);
-  List list = %(expr ("List")
-    (call (expr $signature (ident $binding))
-          (args (expr (unsigned) (literal (unsigned) $count)) @segments)));
-  return %("String_join(NULL, " $list ")");
+  return _join_segments(compiler, segments, segment_count);
 }
 
 // Look through the `(at N ...)` anchors a node arrived wrapped in.
@@ -4004,33 +4227,41 @@ static List _defer_direct_binding(Var value) {
   return NULL;
 }
 
-static void _defer_collect_captures(
-  Compiler compiler, List ast, List &declared, Map captures, Array records,
-  List &written, int &unsupported) {
-  if (!ast || unsupported) return;
+typedef struct DeferCaptures {
+  Compiler compiler;
+  List declared, written;
+  Map captures;
+  Array records;
+  int unsupported;
+} DeferCaptures;
+
+static void _defer_capture_ident(DeferCaptures *state, List binding) {
+  Var automatic, existing, stored_type;
+  if (!binding || state.declared.contains(binding) ||
+      !state.compiler.semantic_binding_facts().try_get(
+        %(automatic $binding), automatic) ||
+      state.captures.try_get(binding, existing)) return;
+  stored_type = state.compiler.semantic_binding_facts()[%(type $binding)];
+  if (!_defer_type_hoistable(state.compiler, stored_type)) {
+    state.unsupported = 1;
+    return;
+  }
+  String field_name = state.compiler.fresh_name("defer_capture");
+  List field = state.compiler.sym.introduce(field_name);
+  state.captures[binding] = field;
+  state.records.push(%($binding $stored_type $field));
+}
+
+static void _defer_collect_captures(DeferCaptures *state, List ast) {
+  if (!ast || state.unsupported) return;
   match (ast)
     case %(bind ?bound *): {
-      List binding = bound, known = declared;
-      if (!known.contains(binding)) declared = cons(binding, known);
+      List binding = bound, known = state.declared;
+      if (!known.contains(binding)) state.declared = cons(binding, known);
     }
   match (ast)
     case %(expr ? (ident ?bound)): {
-      List binding = bound;
-      Var automatic, existing, stored_type;
-      if (binding && !declared.contains(binding) &&
-          compiler.semantic_binding_facts().try_get(
-            %(automatic $binding), automatic) &&
-          !captures.try_get(binding, existing)) {
-        stored_type = compiler.semantic_binding_facts()[%(type $binding)];
-        if (!_defer_type_hoistable(compiler, stored_type)) {
-          unsupported = 1;
-          return;
-        }
-        String field_name = compiler.fresh_name("defer_capture");
-        List field = compiler.sym.introduce(field_name);
-        captures[binding] = field;
-        records.push(%($binding $stored_type $field));
-      }
+      _defer_capture_ident(state, bound);
       return;
     }
   List modified = NULL;
@@ -4042,14 +4273,12 @@ static void _defer_collect_captures(
   }
   foreach (Var child, ast)
     if (child is <list>)
-      _defer_collect_captures(
-        compiler, child, declared, captures, records, written,
-        unsupported);
+      _defer_collect_captures(state, child);
   Var field;
-  List changed = written;
-  if (modified && captures.try_get(modified, field) &&
+  List changed = state.written;
+  if (modified && state.captures.try_get(modified, field) &&
       !changed.contains(modified))
-    written = cons(modified, changed);
+    state.written = cons(modified, changed);
 }
 
 // Replace captured object references with pointer dereferences through the
@@ -4129,17 +4358,18 @@ static List _defer_callback_unit(
 
 static List _lower_callable_defer(
   Compiler c, List body, List finalizer) {
-  List declared = %(), written = %();
-  Map captures = {}, Array records = [], int unsupported = 0;
-  _defer_collect_captures(
-    c, finalizer, declared, captures, records, written, unsupported);
-  if (unsupported) {
-    records.free();
+  DeferCaptures state = {
+    .compiler = c, .declared = %(), .written = %(),
+    .captures = {}, .records = [], .unsupported = 0,
+  };
+  _defer_collect_captures(&state, finalizer);
+  if (state.unsupported) {
+    state.records.free();
     return %(try $body () $finalizer);
   }
 
   List env_binding = NULL, env_local = NULL, String env_name = NULL;
-  List record_list = records.list_free();
+  List record_list = state.records.list_free();
   if (record_list) {
     env_name = c.fresh_name("defer_env");
     env_binding = c.sym.introduce(env_name);
@@ -4153,7 +4383,7 @@ static List _lower_callable_defer(
                         ? binding_identity_spelling(env_local) : NULL;
   List rewritten = env_local_name
                  ? _defer_rewrite_captures(
-                   finalizer, captures, written, env_local_name)
+                   finalizer, state.captures, state.written, env_local_name)
                  : finalizer;
   c.add_early(_defer_callback_unit(
     c, callback, opaque, env_binding, env_local, rewritten));
@@ -4161,7 +4391,7 @@ static List _lower_callable_defer(
     c.semantic_binding_facts()[%(defer-ownr $callback)] =
       c.fn_name;
 
-  return %(defer $body $env_binding $callback $record_list $written);
+  return %(defer $body $env_binding $callback $record_list ${state.written});
 }
 
 // Choose the callable chain for ordinary cleanup statements and retain the
@@ -4466,6 +4696,109 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
    the normalized shapes consumed by the emitter. A helper rewrites only its
    current node: this dispatcher recurses into returned children, while
    _sequence alone splices `(seq ...)` results into a sequence. */
+static Ast _origin_node(Compiler c, Ast ast, int occurrence, List inner) {
+  List transformed = NULL;
+  $let(c.origin, occurrence) {
+    transformed = _node(c, inner);
+  }
+  if (transformed == inner) return ast;
+  c.origins.push(%(generated $occurrence xform));
+  int generated = c.origins.len();
+  return %(at $generated $transformed);
+}
+
+static Ast _function_node(
+  Compiler c, List return_type, List declarator, List binding, List body) {
+  String owner = binding_identity_spelling(binding);
+  Var stored_owner;
+  if (c.semantic_binding_facts().try_get(
+    %(defer-ownr $binding), stored_owner))
+    owner = stored_owner;
+  String previous = c.fn_name;
+  int previous_inline = c.inline_header;
+  c.fn_name = owner;
+  Type function_type = return_type;
+  c.inline_header = function_type.is_inline() &&
+                    !function_type.is_static();
+  List new_return = _node(c, return_type);
+  List new_decl = _node(c, declarator);
+  List prepared_body = _lower_lambda_destructuring(c, body);
+  prepared_body = c.prepare_lambda_cells(declarator, prepared_body);
+  List new_body = _node(c, prepared_body);
+  List transformed = %(function $new_return $new_decl $new_body);
+  c.fn_name = previous;
+  c.inline_header = previous_inline;
+  return transformed;
+}
+
+static Ast _getindex_node(
+  Compiler c, List expression, Type type, List index) {
+  List resolved = _nominal_getindex(c, type);
+  if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
+  if (!resolved)
+    c.report_error(
+      <xform>, %"type $type does not support bracket indexing", NULL, NULL);
+  return _node(c, _indexed_call_expr(
+    c, resolved, %($expression $index)).caddr());
+}
+
+static Ast _setindex_node(
+  Compiler c, List expression, Type type, List index, List value) {
+  List resolved = c.resolve_protocol_member(type, "setindex");
+  if (!resolved)
+    c.report_error(
+      <xform>, %"type $type does not support bracket assignment", NULL, NULL);
+  if (!_indexed_builtin_helper(c, type))
+    return _node(c, _sequenced_protocol_call(
+      c, resolved, %($expression $index $value)));
+  return _node(c, _indexed_call_expr(
+    c, resolved, %($expression $index $value)).caddr());
+}
+
+static Ast _slice_node(
+  Compiler c, List expression, Type type, List start, List stop, List step) {
+  String nominal = NULL;
+  match (type)
+    case %(?(String name)): nominal = name;
+  if (!nominal)
+    c.report_error(
+      <xform>, %"type $type does not support slicing", NULL, NULL);
+  String fnname = %"${nominal}_getslice";
+  if (!c.sym.get(%($fnname)))
+    c.report_error(
+      <xform>, %"type $type does not support slicing", NULL, %());
+  String none = "-2147483648";
+  start = start ? start : %(literal (int) $none);
+  stop = stop ? stop : %(literal (int) $none);
+  step = step ? step : %(literal (int) "1");
+  return _node(c, %(call "$fnname" (args $expression $start $stop $step)));
+}
+
+static Ast _defer_node(Compiler c, Ast ast) {
+  match (ast)
+    case %(defer ?finalizer):
+      return _lower_defer_region(c, %(block), finalizer);
+  return ast;
+}
+
+static Ast _raise_node(Compiler c, Ast ast) {
+  // Raise details intern at raise time, never in constructors.
+  int old_runtime = c.runtime_literals;
+  c.runtime_literals = 1;
+  match (ast)
+    case %(raise ?cause (args *arguments)):
+      ast = _raise(c, ast, cause, arguments);
+  ast = _children(c, ast);
+  c.runtime_literals = old_runtime;
+  return ast;
+}
+
+static Ast _block_node(Compiler c, Ast ast) {
+  List statements = ast.cdr();
+  List body = _rewrite_defer_list(c, statements);
+  return body !== statements ? %(block @body) : ast;
+}
+
 static Ast _step(Compiler c, Ast ast) {
   if (!ast) return NULL;
   match (ast)
@@ -4477,161 +4810,62 @@ static Ast _step(Compiler c, Ast ast) {
   Var head = ast.car();
   if (head is not <symbol>) return _children(c, ast);
   match (ast) {
-    case %(at ?origin ?inner): {
-      int occurrence = origin;
-      List transformed = NULL;
-      $let(c.origin, occurrence) {
-        transformed = _node(c, inner);
-      }
-      if (transformed == inner) {
-        return ast;
-      }
-      c.origins.push(%(generated $occurrence xform));
-      int generated = c.origins.len();
-      return %(at $generated $transformed);
-    }
+    case %(at ?origin ?inner):
+      return _origin_node(c, ast, origin, inner);
     case %(function ?return_type
-           (!set ?declarator (bind ?binding ?)) ?body): {
-      String owner = binding_identity_spelling(binding);
-      Var stored_owner;
-      if (c.semantic_binding_facts().try_get(
-        %(defer-ownr $binding), stored_owner))
-        owner = stored_owner;
-      String previous = c.fn_name;
-      int previous_inline = c.inline_header;
-      c.fn_name = owner;
-      Type function_type = return_type;
-      c.inline_header = function_type.is_inline() &&
-                        !function_type.is_static();
-      List new_return = _node(c, return_type);
-      List new_decl = _node(c, declarator);
-      List prepared_body = _lower_lambda_destructuring(
-        c, body);
-      prepared_body = c.prepare_lambda_cells(
-        declarator, prepared_body);
-      List new_body = _node(c, prepared_body);
-      List transformed = %(function $new_return
-                           $new_decl $new_body);
-      c.fn_name = previous;
-      c.inline_header = previous_inline;
-      return transformed;
-    }
+           (!set ?declarator (bind ?binding ?)) ?body):
+      return _function_node(c, return_type, declarator, binding, body);
     case %(getindex
-           (!set ?expression (expr ?matched_type ?)) ?index): {
-      Type type = matched_type;
-      List resolved = _nominal_getindex(c, type);
-      if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
-      if (!resolved)
-        c.report_error(
-          <xform>,
-          %"type $type does not support bracket indexing", NULL, NULL);
-      return _node(c, _indexed_call_expr(
-        c, resolved, %($expression $index)).caddr());
-    }
+           (!set ?expression (expr ?matched_type ?)) ?index):
+      return _getindex_node(c, expression, matched_type, index);
     case %(setindex
-           (!set ?expression (expr ?matched_type ?)) ?index ?value): {
-      Type type = matched_type;
-      List resolved = c.resolve_protocol_member(type, "setindex");
-      if (!resolved)
-        c.report_error(
-          <xform>,
-          %"type $type does not support bracket assignment", NULL, NULL);
-      if (!_indexed_builtin_helper(c, type))
-        return _node(
-          c,
-          _sequenced_protocol_call(
-            c, resolved, %($expression $index $value))
-        );
-      return _node(c, _indexed_call_expr(
-        c, resolved, %($expression $index $value)).caddr());
-    }
+           (!set ?expression (expr ?matched_type ?)) ?index ?value):
+      return _setindex_node(c, expression, matched_type, index, value);
     case %(slice
            (!set ?expression
              (expr (!set ?matched_type (*)) ?))
-           ?start ?stop ?step): {
-      Type type = matched_type;
-      String nominal = NULL;
-      match (type)
-        case %(?(String name)): nominal = name;
-      if (!nominal)
-        c.report_error(
-          <xform>, %"type $type does not support slicing", NULL, NULL);
-      String fnname = %"${nominal}_getslice";
-      if (!c.sym.get(%($fnname)))
-        c.report_error(
-          <xform>,
-          %"type $type does not support slicing", NULL, %());
-      String none = "-2147483648";
-      start = start ? start : %(literal (int) $none);
-      stop = stop ? stop : %(literal (int) $none);
-      step = step ? step : %(literal (int) "1");
-      return _node(
-        c,
-        %(call "$fnname" (args $expression $start $stop $step)));
-    }
+           ?start ?stop ?step):
+      return _slice_node(c, expression, matched_type, start, stop, step);
+    case %(raise *): return _raise_node(c, ast);
   }
-  Ast original = ast;
-  switch (head.symbol()) {
-    case <protocol>: case <adopt>: case <macrodef>: return ast;
-    case <literal>:  return ast;
-    case <expr>: ast = c.lower_typed_adapter_expr(ast);
-      ast = c.lower_lambda_expr(ast);
-      match (ast)
-        case %(expr ? (op ? ?(List first) *))
-          if (first.match(%(expr ? (op *)))):
-            return _op_chain(c, ast);
-      break;
-    case <array>: case <varray>:
-      ast = transform_array_literal(c, ast); break;
-    case <map>: case <vmap>:
-      ast = transform_map_literal(c, ast); break;
-    case <cast>:     ast = _cast(c, ast);             break;
-    case <index>:    ast = _index(c, ast);            break;
-    case <cons>:     ast = _cons(c, ast);             break;
-    case <append>:   ast = _append(c, ast);           break;
-    case <var>:      ast = _to_var(c, ast.cadr());    break;
-    case <segments>: ast = _string_segments(c, ast);  break;
-    case <declare>: case <decl>:
-      ast = _declaration(c, ast);                     break;
-    case <dstrdecl>:
-      ast = _destructure_declaration(c, ast);        break;
-    case <stmnt>:    ast = _destructure_statement(
-      c,
-      ast);     break;
-    case <dstrasgn>:
-      ast = _destructure_value(c, ast);              break;
-    case <match>:    ast = _match_cases(c, ast);      break;
-    case <defer>: {
-      match (ast)
-        case %(defer ?finalizer):
-          ast = _lower_defer_region(c, %(block), finalizer);
-      break;
-    }
-    case <raise>: {
-      // Raise details intern at raise time, never in constructors.
-      int old_runtime = c.runtime_literals;
-      c.runtime_literals = 1;
-      match (ast)
-        case %(raise ?cause (args *arguments)):
-          ast = _raise(c, ast, cause, arguments);
-      ast = _children(c, ast);
-      c.runtime_literals = old_runtime;
-      return ast;
-    }
-    case <block>: {
-      List statements = ast.cdr();
-      List body = _rewrite_defer_list(c, statements);
-      if (body !== statements) ast = %(block @body);
-      break;
-    }
-    case <return>:   ast = _return(c, ast);           break;
+  Symbol tag = head;
+  if (tag == <protocol> || tag == <adopt> || tag == <macrodef> ||
+      tag == <literal>) return ast;
+  if (tag == <expr>) {
+    Ast expression = c.lower_typed_adapter_expr(ast);
+    expression = c.lower_lambda_expr(expression);
+    match (expression)
+      case %(expr ? (op ? ?(List first) *))
+        if (first.match(%(expr ? (op *)))):
+          return _op_chain(c, expression);
+    if (expression != ast) return _node(c, expression);
+    return _finish(c, expression);
+  }
+  Ast next = ast;
+  switch (tag) {
+    case <array>: case <varray>: next = transform_array_literal(c, ast); break;
+    case <map>: case <vmap>: next = transform_map_literal(c, ast); break;
+    case <cast>: next = _cast(c, ast); break;
+    case <index>: next = _index(c, ast); break;
+    case <cons>: next = _cons(c, ast); break;
+    case <append>: next = _append(c, ast); break;
+    case <var>: next = _to_var(c, ast.cadr()); break;
+    case <segments>: next = _string_segments(c, ast); break;
+    case <declare>: case <decl>: next = _declaration(c, ast); break;
+    case <dstrdecl>: next = _destructure_declaration(c, ast); break;
+    case <stmnt>: next = _destructure_statement(c, ast); break;
+    case <dstrasgn>: next = _destructure_value(c, ast); break;
+    case <match>: next = _match_cases(c, ast); break;
+    case <defer>: next = _defer_node(c, ast); break;
+    case <block>: next = _block_node(c, ast); break;
+    case <return>: next = _return(c, ast); break;
     case <if>: case <while>: case <do>: case <for>:
-      ast = _truthy(c, ast);                           break;
-    case <call>:     ast = _call(c, ast);             break;
-    case <op>:       ast = _operator(c, ast);         break;
-    case <postfix>:  ast = _postfix(c, ast);          break;
+      next = _truthy(c, ast); break;
+    case <call>: next = _call(c, ast); break;
+    case <op>: next = _operator(c, ast); break;
+    case <postfix>: next = _postfix(c, ast); break;
   }
-  if (ast != original) return _node(c, ast);
+  if (next != ast) return _node(c, next);
   return _finish(c, ast);
 }
 
