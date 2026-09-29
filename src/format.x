@@ -24,7 +24,6 @@ typedef struct Pretty {
   int output_line, scanned, source_line;
 } Pretty;
 
-
 /** Returns a canonical formatted C `String` for an emitted token `List`.
     Token order and `code` are unchanged. Braces indent by two spaces,
     semicolons break lines only outside parentheses, and preprocessor tokens
@@ -148,7 +147,6 @@ static void Pretty.after(Pretty *p, String token, char last, List rest) {
 }
 
 // whitespace rules
-
 
 static int _is_prefix_punct(char ch) =>
   ch == '.' || ch == '[' || ch == '(' || ch == '{';
