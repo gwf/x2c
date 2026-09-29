@@ -27,93 +27,7 @@
 /* Evaluates a nested `$` call among a call's arguments. */
 typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 
-/* --- the arguments of a `$` call ---------------------------------------- */
-
-/** Returns the value of a String or character literal from its source
-    `spelling`, quotes included: adjacent pieces are unescaped on their own
-    and joined, as C does, and a character is its code. */
-Var literal_text_value(String spelling) {
-  int len = spelling.len();
-  if (len >= 2 && spelling[0] == '"') {
-    String text = "";
-    for (int i = 0; i < len; i++) {
-      if (spelling[i] != '"') continue;
-      int start = ++i;
-      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
-      String piece = String.new_len(spelling + start, i - start).unescape();
-      text = %"$text$piece";
-    }
-    return text;
-  }
-  if (len >= 3 && spelling[0] == '\'') {
-    String body = String.new_len(spelling + 1, len - 2).unescape();
-    return (char) (body.len() ? body[0] : 0);
-  }
-  return spelling;
-}
-
-/* The value of one folded leaf, or void when it is only known at run
-   time. */
-static Var _meta_constant_leaf(Compiler c, List value) {
-  match (value) {
-    case %(expr ? (parens ?inner)): return _meta_constant_leaf(c, inner);
-    case %(expr ?type (cast ? ?inner)): {
-      Var constant = _meta_constant_leaf(c, inner);
-      if (constant is void) return void;
-      Symbol tag = ((Type) type).scalar_tag();
-      return tag ? constant.convert(tag) : constant;
-    }
-    case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
-    case %(expr ? (!set ?node (expr ? (cache ?)))):
-      return c.folded_constant(node);
-    case %(expr ? (nil)):                       return %();
-    case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? (literal ? ? ?symbol)):       return symbol;
-    case %(expr ("String")
-      (call (expr ? (ident (binding ? "String_add")))
-            (args ?left ?right))): {
-      Var a = c.folded_constant(left), b = c.folded_constant(right);
-      if (a is void || b is void) return void;
-      return a.string().add(b);
-    }
-    case %(expr ("String") (call "String_new" (args ?inner))):
-      return _meta_constant_leaf(c, inner);
-    case %(expr ("Var")
-      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
-      return _meta_constant_leaf(c, inner);
-    case %(expr ("String") (literal ? ?(String text))): return text;
-    case %(expr (* char) (literal ? ?(String text))):
-      return literal_text_value(text);
-    case %(expr ?type (literal ? ?(String text))):
-      return ((Type) type).numeric_literal_value(text);
-  }
-  if (value && value.car() == <expr>) return void;
-  return value;
-}
-
-/** Returns the value of the folded constant `node`, or void when part of it
-    is only known at run time. Literal folding hoists a constant into the
-    compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
-    `var` and `string` leaves. */
-Var Compiler.folded_constant(Compiler c, Var node) {
-  match (node) {
-    case %(cache ?(int id)): {
-      List key = c.id_keys[id];
-      match (key) {
-        case %(cons ?head ?tail):
-          return cons(c.folded_constant(head), c.folded_constant(tail));
-        case %(var ?value):    return _meta_constant_leaf(c, value);
-        case %(string ?value): return _meta_constant_leaf(c, value);
-        case %(nil): return %();
-      }
-      return key;
-    }
-    case %(cons ?head ?tail):
-      return cons(c.folded_constant(head), c.folded_constant(tail));
-    case %(nil): return %();
-  }
-  return _meta_constant_leaf(c, node);
-}
+// arguments of a `$` call
 
 /* The binary operators a constant argument may apply. */
 static const SymbolSet meta_operators = %<<"+" "-" "*" "/" "%" "<<" ">>"
@@ -174,109 +88,95 @@ Var Compiler.meta_argument(
   return value;
 }
 
-/* --- compile-time values in code ---------------------------------------- */
+// folded constants
 
-/* Untyped Lisp numbers retain their native Var family at the code boundary. */
-static Type _meta_value_type(Var value) {
-  switch (value.tag()) {
-    case <i8>: return %(signed char);
-    case <u8>: return %(unsigned char);
-    case <i16>: return %(short);
-    case <u16>: return %(unsigned short);
-    case <i32>: return %(int);
-    case <u32>: return %(unsigned);
-    case <long>: return %(long);
-    case <ulong>: return %(unsigned long);
-    case <llong>: return %(long long);
-    case <ullong>: return %(unsigned long long);
-    case <f32>: return %(float);
-    case <ldouble>: return %(long double);
-  }
-  if (value.is_floating()) return %(double);
-  if (value.is_integer()) {
-    long n = value.integer();
-    return n == (int) n ? %(int) : %(long long);
-  }
-  return NULL;
-}
-
-/* Whether a value and everything it holds is immutable data. */
-static int _meta_immutable(Var value) {
-  if (value is <list>) {
-    foreach (Var item, value.list())
-      if (!_meta_immutable(item)) return 0;
-    return 1;
-  }
-  return value is <string> || value is <symbol> ||
-    value.is_integer() || value.is_floating();
-}
-
-/* Spells finite `n` exactly as a normalized hex literal. Printf's %La
-   layout depends on the host's long double. */
-static String _meta_hex_float(long double n) {
-  const char *sign = signbit(n) ? "-" : "";
-  if (n == 0) return "%s0x0p+0L".printf(sign);
-  int exponent;
-  long double fraction = frexpl(fabsl(n), &exponent) * 2 - 1;
-  char digits[32];
-  int count = 0;
-  for (; fraction != 0; count++) {
-    fraction *= 16;
-    int digit = (int) fraction;
-    fraction -= digit;
-    digits[count] = "0123456789abcdef"[digit];
-  }
-  digits[count] = 0;
-  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
-}
-
-/* Reports at `site` a result that cannot become data in the program. */
-static void _meta_refuse(Compiler c, Var value, Token site) {
-  Map marks = $auto({});
-  List problem = datum_result_problem(value, marks);
-  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
-}
-
-/* Builds the parser's form of one data value, which
-   `datum_result_problem` accepted. Immutable values come from the literal
-   cache; each Array or Map becomes a literal that builds a fresh
-   collection every time it runs. */
-static List _meta_data(Compiler c, Var value) {
-  if (_meta_immutable(value)) {
-    if (value is <list>) return c.cache_literal_list(value);
-    return %(expr ("Var") ${c.cache_literal_var(value)});
-  }
-  if (value is <list>) {
-    List result = %(nil);
-    foreach (Var item, value.list().reverse()) {
-      List head = _meta_data(c, item);
-      if (!head) return NULL;
-      result = %(expr ("List") (cons $head $result));
+/** Returns the value of the folded constant `node`, or void when part of it
+    is only known at run time. Literal folding hoists a constant into the
+    compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
+    `var` and `string` leaves. */
+Var Compiler.folded_constant(Compiler c, Var node) {
+  match (node) {
+    case %(cache ?(int id)): {
+      List key = c.id_keys[id];
+      match (key) {
+        case %(cons ?head ?tail):
+          return cons(c.folded_constant(head), c.folded_constant(tail));
+        case %(var ?value):    return _meta_constant_leaf(c, value);
+        case %(string ?value): return _meta_constant_leaf(c, value);
+        case %(nil): return %();
+      }
+      return key;
     }
-    return result;
+    case %(cons ?head ?tail):
+      return cons(c.folded_constant(head), c.folded_constant(tail));
+    case %(nil): return %();
   }
-  if (value is <array>) {
-    Array items = $auto([]);
-    foreach (Var item, value.array()) {
-      List code = _meta_data(c, item);
-      if (!code) return NULL;
-      items.push(code);
-    }
-    return %(expr ("Array") (array @{items.list()}));
-  }
-  if (value is not <map>) return NULL;
-  Map map = value;
-  Array keys = $auto([]), entries = $auto([]);
-  foreach (Var (key, item), map) keys.push(key);
-  // Cache ids and emission must not depend on bucket layout.
-  foreach (Var key, keys.sort()) {
-    List key_code = _meta_data(c, key);
-    List value_code = key_code ? _meta_data(c, map[key]) : NULL;
-    if (!value_code) return NULL;
-    entries.push(%(map-entry $key_code $value_code));
-  }
-  return %(expr ("Map") (map @{entries.sort().list()}));
+  return _meta_constant_leaf(c, node);
 }
+
+/* The value of one folded leaf, or void when it is only known at run
+   time. */
+static Var _meta_constant_leaf(Compiler c, List value) {
+  match (value) {
+    case %(expr ? (parens ?inner)): return _meta_constant_leaf(c, inner);
+    case %(expr ?type (cast ? ?inner)): {
+      Var constant = _meta_constant_leaf(c, inner);
+      if (constant is void) return void;
+      Symbol tag = ((Type) type).scalar_tag();
+      return tag ? constant.convert(tag) : constant;
+    }
+    case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
+    case %(expr ? (!set ?node (expr ? (cache ?)))):
+      return c.folded_constant(node);
+    case %(expr ? (nil)):                       return %();
+    case %(expr ? (expr ? (nil))):              return %();
+    case %(expr ? (literal ? ? ?symbol)):       return symbol;
+    case %(expr ("String")
+      (call (expr ? (ident (binding ? "String_add")))
+            (args ?left ?right))): {
+      Var a = c.folded_constant(left), b = c.folded_constant(right);
+      if (a is void || b is void) return void;
+      return a.string().add(b);
+    }
+    case %(expr ("String") (call "String_new" (args ?inner))):
+      return _meta_constant_leaf(c, inner);
+    case %(expr ("Var")
+      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
+      return _meta_constant_leaf(c, inner);
+    case %(expr ("String") (literal ? ?(String text))): return text;
+    case %(expr (* char) (literal ? ?(String text))):
+      return literal_text_value(text);
+    case %(expr ?type (literal ? ?(String text))):
+      return ((Type) type).numeric_literal_value(text);
+  }
+  if (value && value.car() == <expr>) return void;
+  return value;
+}
+
+/** Returns the value of a String or character literal from its source
+    `spelling`, quotes included: adjacent pieces are unescaped on their own
+    and joined, as C does, and a character is its code. */
+Var literal_text_value(String spelling) {
+  int len = spelling.len();
+  if (len >= 2 && spelling[0] == '"') {
+    String text = "";
+    for (int i = 0; i < len; i++) {
+      if (spelling[i] != '"') continue;
+      int start = ++i;
+      while (i < len && spelling[i] != '"') i += spelling[i] == '\\' ? 2 : 1;
+      String piece = String.new_len(spelling + start, i - start).unescape();
+      text = %"$text$piece";
+    }
+    return text;
+  }
+  if (len >= 3 && spelling[0] == '\'') {
+    String body = String.new_len(spelling + 1, len - 2).unescape();
+    return (char) (body.len() ? body[0] : 0);
+  }
+  return spelling;
+}
+
+// values in code
 
 /** Returns literal code for a compile-time `value`, preserving `declared`
     when supplied. An Array or Map, at any depth, becomes a literal that
@@ -351,6 +251,114 @@ List Compiler.meta_value_expression(
                   ${value.symbol().str()} ${value.symbol()}));
   return NULL;
 }
+
+/* Reports at `site` a result that cannot become data in the program. */
+static void _meta_refuse(Compiler c, Var value, Token site) {
+  Map marks = $auto({});
+  List problem = datum_result_problem(value, marks);
+  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
+}
+
+/* Untyped Lisp numbers retain their native Var family at the code boundary. */
+static Type _meta_value_type(Var value) {
+  switch (value.tag()) {
+    case <i8>: return %(signed char);
+    case <u8>: return %(unsigned char);
+    case <i16>: return %(short);
+    case <u16>: return %(unsigned short);
+    case <i32>: return %(int);
+    case <u32>: return %(unsigned);
+    case <long>: return %(long);
+    case <ulong>: return %(unsigned long);
+    case <llong>: return %(long long);
+    case <ullong>: return %(unsigned long long);
+    case <f32>: return %(float);
+    case <ldouble>: return %(long double);
+  }
+  if (value.is_floating()) return %(double);
+  if (value.is_integer()) {
+    long n = value.integer();
+    return n == (int) n ? %(int) : %(long long);
+  }
+  return NULL;
+}
+
+// number literals
+
+/* Spells finite `n` exactly as a normalized hex literal. Printf's %La
+   layout depends on the host's long double. */
+static String _meta_hex_float(long double n) {
+  const char *sign = signbit(n) ? "-" : "";
+  if (n == 0) return "%s0x0p+0L".printf(sign);
+  int exponent;
+  long double fraction = frexpl(fabsl(n), &exponent) * 2 - 1;
+  char digits[32];
+  int count = 0;
+  for (; fraction != 0; count++) {
+    fraction *= 16;
+    int digit = (int) fraction;
+    fraction -= digit;
+    digits[count] = "0123456789abcdef"[digit];
+  }
+  digits[count] = 0;
+  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
+}
+
+// data literals
+
+/* Builds the parser's form of one data value, which
+   `datum_result_problem` accepted. Immutable values come from the literal
+   cache; each Array or Map becomes a literal that builds a fresh
+   collection every time it runs. */
+static List _meta_data(Compiler c, Var value) {
+  if (_meta_immutable(value)) {
+    if (value is <list>) return c.cache_literal_list(value);
+    return %(expr ("Var") ${c.cache_literal_var(value)});
+  }
+  if (value is <list>) {
+    List result = %(nil);
+    foreach (Var item, value.list().reverse()) {
+      List head = _meta_data(c, item);
+      if (!head) return NULL;
+      result = %(expr ("List") (cons $head $result));
+    }
+    return result;
+  }
+  if (value is <array>) {
+    Array items = $auto([]);
+    foreach (Var item, value.array()) {
+      List code = _meta_data(c, item);
+      if (!code) return NULL;
+      items.push(code);
+    }
+    return %(expr ("Array") (array @{items.list()}));
+  }
+  if (value is not <map>) return NULL;
+  Map map = value;
+  Array keys = $auto([]), entries = $auto([]);
+  foreach (Var (key, item), map) keys.push(key);
+  // Cache ids and emission must not depend on bucket layout.
+  foreach (Var key, keys.sort()) {
+    List key_code = _meta_data(c, key);
+    List value_code = key_code ? _meta_data(c, map[key]) : NULL;
+    if (!value_code) return NULL;
+    entries.push(%(map-entry $key_code $value_code));
+  }
+  return %(expr ("Map") (map @{entries.sort().list()}));
+}
+
+/* Whether a value and everything it holds is immutable data. */
+static int _meta_immutable(Var value) {
+  if (value is <list>) {
+    foreach (Var item, value.list())
+      if (!_meta_immutable(item)) return 0;
+    return 1;
+  }
+  return value is <string> || value is <symbol> ||
+    value.is_integer() || value.is_floating();
+}
+
+// compile-time-only functions
 
 /** Refuses a run-time call to a `meta` function this compiler derived
     compile-time only.

@@ -16,574 +16,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "literals.x"
 #include "macros.x"
 
-static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
-  compiler.expect(keyword);
-  compiler.expect(<(>);
-  List expr = compiler.parse_expression();
-  compiler.expect(<)>);
-  return expr;
-}
-
-/* How many conditional groups the directive `s` opens, or -1 when it
-   closes one. */
-static int _group_step(String s) {
-  Symbol kind = preproc_conditional_kind(s);
-  return kind == <open> ? 1 : kind == <close> ? -1 : 0;
-}
-
-/* Adds the directives before the cursor to `items` and returns how many
-   conditional groups they open, less those they close. */
-static int _take_directives(Compiler c, Array items) {
-  int depth = 0;
-  foreach (List directive, c.leading_preproc()) {
-    items.push(directive);
-    depth += _group_step(directive.cadr());
-  }
-  return depth;
-}
-
-/* `<branch>` when the directives `run` begin a later arm of a conditional
-   group open before them, `<close>` when they close one, or 0 when the next
-   statement is in the same arm. */
-static Symbol _arm_end(List run) {
-  int level = 0;
-  Symbol end = 0;
-  foreach (List directive, run) {
-    Symbol kind = preproc_conditional_kind(directive.cadr());
-    if (kind == <open>) level++;
-    else if (!kind) continue;
-    else if (!level) end = kind;
-    else if (kind == <close>) level--;
-  }
-  return end;
-}
-
-/** Parses the statement a control keyword or statement macro governs, or a
-    block item at `AST_BLOCK`. Directives written before it stay in front of
-    it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
-    each directive stays where C read it. A conditional group they open also
-    takes the statement of each later arm and the closing directive, so a
-    statement macro that wraps its body in braces keeps the whole group
-    inside them. A later statement in the same arm follows the governed one,
-    as in C.
-*/
-List Compiler.parse_governed(Compiler c, AstPos position) {
-  Array items = $auto([]);
-  int depth = _take_directives(c, items);
-  loop {
-    Token start = c.token;
-    items.push(
-      position == AST_BLOCK ? c.parse_block_item() : c.parse_statement());
-    /* A directive inside the statement may close the group; those after its
-       last token precede the next item. */
-    int pending = 0;
-    for (Token token = start; depth > 0 && token < c.token; token++)
-      if (token.type == <preproc>) pending += _group_step(token.text);
-      else if (token.type != <space> && token.type != <comment>) {
-        depth += pending;
-        pending = 0;
-      }
-    if (depth <= 0) break;
-    Symbol end = _arm_end(c.leading_preproc());
-    if (!end) break;
-    depth += _take_directives(c, items);
-    c.directives_taken = c.token;
-    if (depth <= 0 || end == <close> || c.peek(0) == <"}"> ||
-        c.peek(0) == <eof>)
-      break;
-  }
-  return items.len() == 1 ? items[0] : %(group @{items.list()});
-}
-
-/* Directives written before the `else`, `while`, `catch`, or `finally` that
-   continues a statement follow that statement. */
-static List _continued(Compiler c, List statement) {
-  if (c.token == c.directives_taken) return statement;
-  List directives = c.leading_preproc();
-  return directives ? %(group $statement @directives) : statement;
-}
-
-static List _parse_reference_arm(Compiler c, List binding, int present) {
-  if (!binding) return c.parse_governed(AST_STATEMENT);
-  List before = c.present_references();
-  if (present) c.mark_reference_present(binding);
-  List arm = c.parse_governed(AST_STATEMENT);
-  c.restore_reference_presence(before);
-  return arm;
-}
-
-static List _if_statement(Compiler compiler) {
-  List cond = _keyword_paren_expr(compiler, <if>);
-  int true_is_present = 1;
-  List binding = compiler.optional_reference_test(cond, true_is_present);
-  List ontrue = _parse_reference_arm(
-    compiler, binding, true_is_present);
-  compiler.__complete_here(<continue>, %("else"));
-  if (compiler.peek(0) != <else>) {
-    if (binding && !true_is_present && reference_guard_exits(ontrue))
-      compiler.mark_reference_present(binding);
-    return %(if $cond $ontrue);
-  }
-  ontrue = _continued(compiler, ontrue);
-  compiler.next();
-  List onfalse = _parse_reference_arm(
-    compiler, binding, !true_is_present);
-  if (binding && reference_guard_exits(ontrue) && !true_is_present)
-    compiler.mark_reference_present(binding);
-  if (binding && reference_guard_exits(onfalse) && true_is_present)
-    compiler.mark_reference_present(binding);
-  return %(if $cond $ontrue $onfalse);
-}
-
-static List _while_statement(Compiler compiler) {
-  List cond = _keyword_paren_expr(compiler, <while>);
-  List body = compiler.parse_governed(AST_STATEMENT);
-  return %(while $cond $body);
-}
-
-static List _for_statement(Compiler c) {
-  List init, cond, inc, body;
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  c.expect(<for>);
-  c.expect(<(>);
-  /* Each clause peeks for its terminator and leaves the token for the
-     expect below, so an omitted clause consumes exactly what a present
-     one does. */
-  if (c.peek(0) == <;>) init = NULL;
-  else if (c.test_declaration()) {
-    init = c.parse_simple_declaration();
-    init = cons(<decl>, init.cdr());
-  }
-  else init = c.parse_expression();
-  c.expect(<;>);
-  if (c.peek(0) == <;>) cond = NULL;
-  else cond = c.parse_expression();
-  c.expect(<;>);
-  if (c.peek(0) == <)>) inc = NULL;
-  else inc = c.parse_expression();
-  c.expect(<)>);
-  body = c.parse_governed(AST_STATEMENT);
-  return %(for $init $cond $inc $body);
-}
-
-static List _do_statement(Compiler compiler) {
-  compiler.expect(<do>);
-  List body = _continued(compiler, compiler.parse_governed(AST_STATEMENT));
-  List cond = _keyword_paren_expr(compiler, <while>);
-  return %(do $body $cond);
-}
-
-static List _defer_statement(Compiler c) {
-  c.expect(<defer>);
-  return %(defer ${c.parse_governed(AST_STATEMENT)});
-}
-
-/** Builds a return node for an optional expression without consuming tokens.
-    A present expression is resolved in the current `Sym` scope and includes
-    the current `return_type` for later conversion.
-*/
-List Compiler.finish_return_statement(Compiler compiler, List expression) {
-  if (!expression) return %(return);
-  List resolved = compiler.resolve_expression(expression, compiler.token);
-  compiler.check_explicit_converter(resolved, compiler.return_type, 0);
-  return %(return ${compiler.return_type} $resolved);
-}
-
-static List _return_statement(Compiler compiler) {
-  compiler.expect(<return>);
-  compiler.__complete_here(<expr>, %());
-  if (compiler.peek(0) == <;>) {
-    compiler.next();
-    return compiler.finish_return_statement(NULL);
-  }
-  List expr = compiler.parse_expression();
-  compiler.expect(<;>);
-  return compiler.finish_return_statement(expr);
-}
-
-static List _case_statement(Compiler compiler) {
-  compiler.expect(<case>);
-  List expr = compiler.parse_expression();
-  compiler.expect(<:>);
-  return %(case $expr);
-}
-
-static List _break_statement(Compiler compiler) {
-  compiler.expect(<break>);
-  compiler.expect(<;>);
-  return %(break);
-}
-
-static List _continue_statement(Compiler compiler) {
-  compiler.expect(<continue>);
-  compiler.expect(<;>);
-  return %(continue);
-}
-
-static List _goto_statement(Compiler compiler) {
-  compiler.expect(<goto>);
-  List label = compiler.parse_optional_identifier();
-  compiler.expect(<;>);
-  return %(goto $label);
-}
-
-static List _switch_statement(Compiler compiler) {
-  List expr = _keyword_paren_expr(compiler, <switch>);
-  List body = compiler.parse_governed(AST_STATEMENT);
-  return %(switch $expr $body);
-}
-
-static List _default_statement(Compiler compiler) {
-  compiler.expect(<default>);
-  compiler.expect(<:>);
-  return %(default);
-}
-
-/* Define the binders a match case or catch filter captures, rejecting the two
-   ways a pattern can name one it does not reliably bind. `role` is the keyword
-   the diagnostics name. */
-static void _define_pattern_binders(
-  Compiler compiler, List pattern, Token start, String role,
-  List &?bindings) {
-  List possible = NULL;
-  List definite = compiler.match_pattern_binders(pattern, possible);
-  foreach (Var binder, possible) {
-    if (!definite.contains(binder))
-      compiler.report_error(
-        <type>, %"$role binder is not definitely assigned",
-        start, %( "binder:" ${binder.str()}
-                  "bind it in every alternative and never under !not")
-      );
-    String name = binder.str()[1:];
-    foreach (Var other, possible) {
-      if (other == binder || other.str()[1:] != name) continue;
-      compiler.report_error(
-        <type>, %"$role binder has conflicting capture kinds",
-        start, %( "binder:" $name "use either '?' or '*' consistently"));
-    }
-  }
-  if (bindings) bindings = compiler.define_catch_binders(pattern);
-  else compiler.define_match_binders(pattern);
-}
-
-/** Opens a `Sym` scope for one match arm and optionally defines its definite
-    pattern binders. The caller must pop the scope after parsing or binding the
-    arm body; binder diagnostics use `start`.
-*/
-void Compiler.begin_match_arm(
-  Compiler compiler, List pattern, Token start, int binds) {
-  compiler.sym.push_new_scope();
-  if (binds) _define_pattern_binders(compiler, pattern, start, "match", NULL);
-}
-
-/** Opens a `Sym` scope for one catch arm and defines a nonempty filter's
-    definite pattern binders. Returns their capture-token/binding pairs.
-    The caller must pop the scope after parsing or binding the arm body;
-    binder diagnostics use `start`.
-*/
-List Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start) {
-  compiler.sym.push_new_scope();
-  List bindings = NULL;
-  if (pattern)
-    _define_pattern_binders(compiler, pattern, start, "catch", bindings);
-  return bindings;
-}
-
-static List _match_capture_declaration(
-  Compiler compiler, Type type, String name, List initializer, int temporary) {
-  List binding;
-  if (compiler.macro_holes) {
-    binding = compiler.macro_introduced_name(name);
-    initializer = compiler.resolve_expression(initializer, compiler.token);
-    compiler.bind_template_local(binding, type, NULL);
-  }
-  else binding = temporary ? compiler.sym.introduce(name)
-                           : %("x2c.ident" $name);
-  return compiler.bind_syntax(
-    %(declare $type
-      (bindings (op = (bind $binding ()) $initializer))),
-    AST_BLOCK, compiler.return_type);
-}
-
-static List _match_capture_temporaries(Compiler c, List types, Array locals) {
-  Array declarations = [];
-  foreach (List row, types) match (row)
-    case %(?name ?type): {
-      String temporary = c.fresh_name("match_value");
-      declarations.push(
-        _match_capture_declaration(
-          c, %("Var"), temporary, %(expr () (ident ($name))), 1));
-      locals.push(%($name $type $temporary));
-    }
-  return declarations.list_free();
-}
-
-static List _match_capture_locals(Compiler c, Array locals) {
-  Array declarations = [];
-  foreach (List row, locals) match (row)
-    case %(?name ?type ?temporary):
-      declarations.push(
-        _match_capture_declaration(
-          c, type, name, %(expr () (ident ($temporary))), 0));
-  return declarations.list_free();
-}
-
-static List _match_case(Compiler c) {
-  Symbol peek = c.peek(0), List pattern = NULL;
-  List types = NULL;
-  Token start = c.token;
-  c.next();
-  if (peek == <case>) {
-    {
-      Array captures = $auto([]);
-      $let(c.in_pattern, 1)
-      $let(c.match_types, captures) {
-        pattern = c.try_parse_macro_pattern();
-        if (!pattern) pattern = c.parse_expression();
-        types = captures;
-      }
-    }
-    if (types) pattern = c.typed_match_pattern(pattern, types);
-    match (pattern)
-      case %(!not (expr ("List") *)):
-        c.report_error(
-          <parse>, "match case pattern must be a %() list literal",
-          start, %( "pattern:" ${pattern.repr()} ));
-  }
-  else if (peek == <default>)  pattern = %(*);
-  else                         goto error;
-  c.begin_match_arm(pattern, start, peek == <case>);
-  List temporaries = NULL, declarations = NULL;
-  if (types) {
-    Array locals = [];
-    temporaries = _match_capture_temporaries(c, types, locals);
-    c.sym.push_new_scope();
-    declarations = _match_capture_locals(c, locals);
-    locals.free();
-  }
-  List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
-  c.expect(<:>);
-  List body = c.parse_governed(AST_STATEMENT);
-  if (guard) body = %(if $guard (block $body (break)));
-  if (types) {
-    body = %(block @temporaries (block @declarations $body));
-    c.sym.pop_scope();
-  }
-  if (guard) body = %(guarded $body);
-  c.sym.pop_scope();
-  return %($pattern $body);
-error:
-  c.report_error(
-    <parse>, "expected 'case' or 'default' in match statement",
-    c.token, %( "token:" ${c.token.text} ));
-}
-
-/** Parses one MatchRow macro argument with the ordinary match-arm owner. */
-List Compiler.parse_match_row_argument(Compiler c) => _match_case(c);
-
-/* A default arm must be last in each preprocessor configuration. `groups`
-   holds, per open conditional group, whether a default preceded the group
-   and whether one ended any of its branches; `saw_default` is the state of
-   the current branch. */
-static int _default_after_directive(Array groups, int saw_default, List d) {
-  Symbol kind = preproc_conditional_kind(d.cadr());
-  if (kind == <open>) groups.push(%($saw_default $saw_default));
-  else if (kind && groups.len()) {
-    (int before, int any) = groups.take_last();
-    any |= saw_default;
-    if (kind == <close>) return any;
-    groups.push(%($before $any));
-    return before;
-  }
-  return saw_default;
-}
-
-static List _match_cases(Compiler c) {
-  Array cases = [], groups = $auto([]);
-  Symbol peek = c.peek(0), int saw_default = 0;
-  loop {
-    // Directives around whole arms stay between them as `preproc` rows.
-    if (c.token != c.directives_taken)
-      foreach (List directive, c.leading_preproc()) {
-        cases.push(directive);
-        saw_default = _default_after_directive(groups, saw_default, directive);
-      }
-    List hole = c.try_parse_macro_slot(<match-row>);
-    if (hole) {
-      cases.push(hole);
-      peek = c.peek(0);
-      continue;
-    }
-    if (peek != <case> && peek != <default>) break;
-    if (saw_default)
-      c.report_error(
-        <parse>, "match default arm must be last",
-        c.token, %("move default after every case arm"));
-    if (peek == <default>) saw_default = 1;
-    List mcase = _match_case(c);
-    cases.push(mcase);
-    peek = c.peek(0);
-  }
-  return cases.list_free();
-}
-
-static List _match_statement(Compiler compiler) {
-  List cases = NULL, expr = _keyword_paren_expr(compiler, <match>);
-  if (compiler.test(<"{">)) {
-    cases = _match_cases(compiler);
-    compiler.expect(<"}">);
-  }
-  else cases = cons(_match_case(compiler), NULL);
-  return %(match ${compiler.resolve_expression(expr, compiler.token)} $cases);
-}
-
-static List _empty_statement(Compiler compiler) {
-  compiler.expect(<;>);
-  return %(empty);
-}
-
-static List _block_completion_keywords(void) => %(
-  "void" "char" "short" "int" "long" "float" "double"
-  "signed" "unsigned" "if" "while" "for" "do" "return"
-  "case" "break" "continue" "goto" "try" "raise" "defer"
-  "match" "switch" "default" "with"
-);
-
-static List _filtered_catch_arm(Compiler c, int &is_default, List handle) {
-  Token start = c.token;
-  List pattern = NULL;
-  if (c.test(<:>)) is_default = 1;
-  else {
-    if (c.peek(0) != <"%(">)
-      c.report_error(
-        <parse>, "catch filter requires a %() pattern literal",
-        c.token, %("use catch %(code (key pattern)...):"));
-    pattern = c.parse_catch_pattern_literal();
-    c.expect(<:>);
-  }
-  List bindings = c.begin_catch_arm(pattern, start);
-  List body = c.parse_governed(AST_STATEMENT);
-  c.__complete_here(<continue>, %("catch" "finally"));
-  if (c.peek(0) == <catch> || c.peek(0) == <finally>)
-    body = _continued(c, body);
-  c.sym.pop_scope();
-  return %($pattern (block
-    @{c.catch_binder_declarations(bindings, handle)} $body));
-}
-
-static List _filtered_catches(Compiler compiler) {
-  /* A template's handler is its own local, like any it declares. */
-  List handle = compiler.macro_holes
-    ? compiler.macro_introduced_name("error_handler")
-    : compiler.sym.introduce(compiler.fresh_name("error_handler"));
-  Array arms = [], int saw_default = 0;
-  loop {
-    /* A template writes its catch arms as one `Catch` sequence hole. */
-    List hole = compiler.try_parse_macro_slot(<catch>);
-    if (hole) {
-      arms.push(hole);
-      if (!compiler.test(<catch>)) break;
-      continue;
-    }
-    int is_default = 0;
-    List arm = _filtered_catch_arm(compiler, is_default, handle);
-    arms.push(arm);
-    if (is_default) saw_default = 1;
-    if (!compiler.test(<catch>)) break;
-    if (saw_default)
-      compiler.report_error(
-        <parse>, "catch default arm must be last",
-        compiler.token, %("move catch: after every filtered arm"));
-  }
-  return %(catchcases ${arms.list_free()} $handle);
-}
-
-static List _try_statement(Compiler c) {
-  c.expect(<try>);
-  List body = _continued(c, c.parse_governed(AST_STATEMENT)), ctch = NULL;
-  c.__complete_here(<continue>, %("catch" "finally"));
-  if (c.test(<catch>)) ctch = _filtered_catches(c);
-  c.__complete_here(<continue>, %("finally"));
-  List fnly = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
-  if (ctch || fnly) return %(try $body $ctch $fnly);
-  c.report_error(
-    <parse>, "expected 'catch' or 'finally' after try block",
-    c.token, NULL);
-}
-
-static List _raise_statement(Compiler compiler) {
-  compiler.expect(<raise>);
-  if (compiler.peek(0) != <"%(">)
-    compiler.report_error(
-      <parse>, "raise requires a %() payload literal",
-      compiler.token, %("use raise %(code (key value)...);"));
-  List result = compiler.parse_raise_literal();
-  compiler.expect(<;>);
-  return result;
-}
-
-static List _optional_label_statement(Compiler compiler) {
-  Token head = compiler.token;
-  if (compiler.peek(0) == <ident> ||
-      (compiler.macro_holes && compiler.peek_macro_hole() &&
-       compiler.peek(2) == <:>)) {
-    List label = compiler.try_parse_macro_slot(<name>);
-    if (!label) label = compiler.parse_optional_identifier();
-    if (compiler.test(<:>)) return %(label $label);
-    compiler.token = head;
-  }
-  return NULL;
-}
-
-static List _expression_statement(Compiler compiler) {
-  List expr = _optional_label_statement(compiler);
-  if (expr) return expr;
-  expr = compiler.parse_expression();
-  compiler.expect(<;>);
-  return %(stmnt $expr);
-}
-
-/** Returns the binding of the current identifier when it names a live
-    `with` expression, or NULL.
-*/
-List Compiler.with_binding(Compiler c) {
-  Var candidate;
-  if (c.peek(0) != <ident> ||
-      !c.semantic_binding_facts().try_get(
-        %(with-name ${c.token.text}), candidate))
-    return NULL;
-  List binding = c.sym.lookup(%(${c.token.text}), NULL);
-  return binding.equal(candidate) ? binding : NULL;
-}
-
-/** Parses one block-position declaration, statement, or macro insertion.
-    The caller owns the surrounding scope; a macro insertion may return a
-    `(seq ...)` node containing several block items.
-*/
-List Compiler.parse_block_item(Compiler c) {
-  c.__complete_here(<block>, _block_completion_keywords());
-  if (c.test_static_assert()) return c.parse_static_assert();
-  List slot = c.try_parse_macro_slot(<block>);
-  if (slot) return slot;
-  if (c.local_macro_form_is_definition()) {
-    List definition = c.parse_macro_definition();
-    return c.macro_holes ? definition : %(seq);
-  }
-  if (c.peek(0) == <ident> && c.token.text == "with")
-    return c.parse_statement();
-  // An identifier naming a live `with` expression is no macro target.
-  int with_expression = !!c.with_binding();
-  List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
-  if (macro) return macro;
-  if (c.test_declaration()) {
-    Token origin = c.token;
-    List declaration = c.parse_declaration_row();
-    c.expect(<;>);
-    return c.finish_managed_declaration(declaration, origin);
-  }
-  return c.parse_statement();
-}
+// statements
 
 /** Parses and binds one statement or statement-position macro at the current
     token. On return, the cursor follows the complete statement and any
@@ -676,6 +109,606 @@ List Compiler.parse_statement(Compiler c) {
   return _expression_statement(c);
 }
 
+static List _expression_statement(Compiler compiler) {
+  List expr = _optional_label_statement(compiler);
+  if (expr) return expr;
+  expr = compiler.parse_expression();
+  compiler.expect(<;>);
+  return %(stmnt $expr);
+}
+
+static List _optional_label_statement(Compiler compiler) {
+  Token head = compiler.token;
+  if (compiler.peek(0) == <ident> ||
+      (compiler.macro_holes && compiler.peek_macro_hole() &&
+       compiler.peek(2) == <:>)) {
+    List label = compiler.try_parse_macro_slot(<name>);
+    if (!label) label = compiler.parse_optional_identifier();
+    if (compiler.test(<:>)) return %(label $label);
+    compiler.token = head;
+  }
+  return NULL;
+}
+
+// with statements
+
+/** Returns the binding of the current identifier when it names a live
+    `with` expression, or NULL.
+*/
+List Compiler.with_binding(Compiler c) {
+  Var candidate;
+  if (c.peek(0) != <ident> ||
+      !c.semantic_binding_facts().try_get(
+        %(with-name ${c.token.text}), candidate))
+    return NULL;
+  List binding = c.sym.lookup(%(${c.token.text}), NULL);
+  return binding.equal(candidate) ? binding : NULL;
+}
+
+// control flow
+
+static List _if_statement(Compiler compiler) {
+  List cond = _keyword_paren_expr(compiler, <if>);
+  int true_is_present = 1;
+  List binding = compiler.optional_reference_test(cond, true_is_present);
+  List ontrue = _parse_reference_arm(
+    compiler, binding, true_is_present);
+  compiler.__complete_here(<continue>, %("else"));
+  if (compiler.peek(0) != <else>) {
+    if (binding && !true_is_present && reference_guard_exits(ontrue))
+      compiler.mark_reference_present(binding);
+    return %(if $cond $ontrue);
+  }
+  ontrue = _continued(compiler, ontrue);
+  compiler.next();
+  List onfalse = _parse_reference_arm(
+    compiler, binding, !true_is_present);
+  if (binding && reference_guard_exits(ontrue) && !true_is_present)
+    compiler.mark_reference_present(binding);
+  if (binding && reference_guard_exits(onfalse) && true_is_present)
+    compiler.mark_reference_present(binding);
+  return %(if $cond $ontrue $onfalse);
+}
+
+static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
+  compiler.expect(keyword);
+  compiler.expect(<(>);
+  List expr = compiler.parse_expression();
+  compiler.expect(<)>);
+  return expr;
+}
+
+static List _parse_reference_arm(Compiler c, List binding, int present) {
+  if (!binding) return c.parse_governed(AST_STATEMENT);
+  List before = c.present_references();
+  if (present) c.mark_reference_present(binding);
+  List arm = c.parse_governed(AST_STATEMENT);
+  c.restore_reference_presence(before);
+  return arm;
+}
+
+static List _while_statement(Compiler compiler) {
+  List cond = _keyword_paren_expr(compiler, <while>);
+  List body = compiler.parse_governed(AST_STATEMENT);
+  return %(while $cond $body);
+}
+
+static List _for_statement(Compiler c) {
+  List init, cond, inc, body;
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  c.expect(<for>);
+  c.expect(<(>);
+  /* Each clause peeks for its terminator and leaves the token for the
+     expect below, so an omitted clause consumes exactly what a present
+     one does. */
+  if (c.peek(0) == <;>) init = NULL;
+  else if (c.test_declaration()) {
+    init = c.parse_simple_declaration();
+    init = cons(<decl>, init.cdr());
+  }
+  else init = c.parse_expression();
+  c.expect(<;>);
+  if (c.peek(0) == <;>) cond = NULL;
+  else cond = c.parse_expression();
+  c.expect(<;>);
+  if (c.peek(0) == <)>) inc = NULL;
+  else inc = c.parse_expression();
+  c.expect(<)>);
+  body = c.parse_governed(AST_STATEMENT);
+  return %(for $init $cond $inc $body);
+}
+
+static List _do_statement(Compiler compiler) {
+  compiler.expect(<do>);
+  List body = _continued(compiler, compiler.parse_governed(AST_STATEMENT));
+  List cond = _keyword_paren_expr(compiler, <while>);
+  return %(do $body $cond);
+}
+
+static List _return_statement(Compiler compiler) {
+  compiler.expect(<return>);
+  compiler.__complete_here(<expr>, %());
+  if (compiler.peek(0) == <;>) {
+    compiler.next();
+    return compiler.finish_return_statement(NULL);
+  }
+  List expr = compiler.parse_expression();
+  compiler.expect(<;>);
+  return compiler.finish_return_statement(expr);
+}
+
+/** Builds a return node for an optional expression without consuming tokens.
+    A present expression is resolved in the current `Sym` scope and includes
+    the current `return_type` for later conversion.
+*/
+List Compiler.finish_return_statement(Compiler compiler, List expression) {
+  if (!expression) return %(return);
+  List resolved = compiler.resolve_expression(expression, compiler.token);
+  compiler.check_explicit_converter(resolved, compiler.return_type, 0);
+  return %(return ${compiler.return_type} $resolved);
+}
+
+static List _case_statement(Compiler compiler) {
+  compiler.expect(<case>);
+  List expr = compiler.parse_expression();
+  compiler.expect(<:>);
+  return %(case $expr);
+}
+
+static List _break_statement(Compiler compiler) {
+  compiler.expect(<break>);
+  compiler.expect(<;>);
+  return %(break);
+}
+
+static List _continue_statement(Compiler compiler) {
+  compiler.expect(<continue>);
+  compiler.expect(<;>);
+  return %(continue);
+}
+
+static List _goto_statement(Compiler compiler) {
+  compiler.expect(<goto>);
+  List label = compiler.parse_optional_identifier();
+  compiler.expect(<;>);
+  return %(goto $label);
+}
+
+static List _raise_statement(Compiler compiler) {
+  compiler.expect(<raise>);
+  if (compiler.peek(0) != <"%(">)
+    compiler.report_error(
+      <parse>, "raise requires a %() payload literal",
+      compiler.token, %("use raise %(code (key value)...);"));
+  List result = compiler.parse_raise_literal();
+  compiler.expect(<;>);
+  return result;
+}
+
+static List _defer_statement(Compiler c) {
+  c.expect(<defer>);
+  return %(defer ${c.parse_governed(AST_STATEMENT)});
+}
+
+static List _switch_statement(Compiler compiler) {
+  List expr = _keyword_paren_expr(compiler, <switch>);
+  List body = compiler.parse_governed(AST_STATEMENT);
+  return %(switch $expr $body);
+}
+
+static List _default_statement(Compiler compiler) {
+  compiler.expect(<default>);
+  compiler.expect(<:>);
+  return %(default);
+}
+
+static List _empty_statement(Compiler compiler) {
+  compiler.expect(<;>);
+  return %(empty);
+}
+
+// match statements
+
+static List _match_statement(Compiler compiler) {
+  List cases = NULL, expr = _keyword_paren_expr(compiler, <match>);
+  if (compiler.test(<"{">)) {
+    cases = _match_cases(compiler);
+    compiler.expect(<"}">);
+  }
+  else cases = cons(_match_case(compiler), NULL);
+  return %(match ${compiler.resolve_expression(expr, compiler.token)} $cases);
+}
+
+static List _match_cases(Compiler c) {
+  Array cases = [], groups = $auto([]);
+  Symbol peek = c.peek(0), int saw_default = 0;
+  loop {
+    // Directives around whole arms stay between them as `preproc` rows.
+    if (c.token != c.directives_taken)
+      foreach (List directive, c.leading_preproc()) {
+        cases.push(directive);
+        saw_default = _default_after_directive(groups, saw_default, directive);
+      }
+    List hole = c.try_parse_macro_slot(<match-row>);
+    if (hole) {
+      cases.push(hole);
+      peek = c.peek(0);
+      continue;
+    }
+    if (peek != <case> && peek != <default>) break;
+    if (saw_default)
+      c.report_error(
+        <parse>, "match default arm must be last",
+        c.token, %("move default after every case arm"));
+    if (peek == <default>) saw_default = 1;
+    List mcase = _match_case(c);
+    cases.push(mcase);
+    peek = c.peek(0);
+  }
+  return cases.list_free();
+}
+
+/* A default arm must be last in each preprocessor configuration. `groups`
+   holds, per open conditional group, whether a default preceded the group
+   and whether one ended any of its branches; `saw_default` is the state of
+   the current branch. */
+static int _default_after_directive(Array groups, int saw_default, List d) {
+  Symbol kind = preproc_conditional_kind(d.cadr());
+  if (kind == <open>) groups.push(%($saw_default $saw_default));
+  else if (kind && groups.len()) {
+    (int before, int any) = groups.take_last();
+    any |= saw_default;
+    if (kind == <close>) return any;
+    groups.push(%($before $any));
+    return before;
+  }
+  return saw_default;
+}
+
+/** Parses one MatchRow macro argument with the ordinary match-arm owner. */
+List Compiler.parse_match_row_argument(Compiler c) => _match_case(c);
+
+// match arms
+
+static List _match_case(Compiler c) {
+  Symbol peek = c.peek(0), List pattern = NULL;
+  List types = NULL;
+  Token start = c.token;
+  c.next();
+  if (peek == <case>) {
+    {
+      Array captures = $auto([]);
+      $let(c.in_pattern, 1)
+      $let(c.match_types, captures) {
+        pattern = c.try_parse_macro_pattern();
+        if (!pattern) pattern = c.parse_expression();
+        types = captures;
+      }
+    }
+    if (types) pattern = c.typed_match_pattern(pattern, types);
+    match (pattern)
+      case %(!not (expr ("List") *)):
+        c.report_error(
+          <parse>, "match case pattern must be a %() list literal",
+          start, %( "pattern:" ${pattern.repr()} ));
+  }
+  else if (peek == <default>)  pattern = %(*);
+  else                         goto error;
+  c.begin_match_arm(pattern, start, peek == <case>);
+  List temporaries = NULL, declarations = NULL;
+  if (types) {
+    Array locals = [];
+    temporaries = _match_capture_temporaries(c, types, locals);
+    c.sym.push_new_scope();
+    declarations = _match_capture_locals(c, locals);
+    locals.free();
+  }
+  List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
+  c.expect(<:>);
+  List body = c.parse_governed(AST_STATEMENT);
+  if (guard) body = %(if $guard (block $body (break)));
+  if (types) {
+    body = %(block @temporaries (block @declarations $body));
+    c.sym.pop_scope();
+  }
+  if (guard) body = %(guarded $body);
+  c.sym.pop_scope();
+  return %($pattern $body);
+error:
+  c.report_error(
+    <parse>, "expected 'case' or 'default' in match statement",
+    c.token, %( "token:" ${c.token.text} ));
+}
+
+/** Opens a `Sym` scope for one match arm and optionally defines its definite
+    pattern binders. The caller must pop the scope after parsing or binding the
+    arm body; binder diagnostics use `start`.
+*/
+void Compiler.begin_match_arm(
+  Compiler compiler, List pattern, Token start, int binds) {
+  compiler.sym.push_new_scope();
+  if (binds) _define_pattern_binders(compiler, pattern, start, "match", NULL);
+}
+
+/* Define the binders a match case or catch filter captures, rejecting the two
+   ways a pattern can name one it does not reliably bind. `role` is the keyword
+   the diagnostics name. */
+static void _define_pattern_binders(
+  Compiler compiler, List pattern, Token start, String role,
+  List &?bindings) {
+  List possible = NULL;
+  List definite = compiler.match_pattern_binders(pattern, possible);
+  foreach (Var binder, possible) {
+    if (!definite.contains(binder))
+      compiler.report_error(
+        <type>, %"$role binder is not definitely assigned",
+        start, %( "binder:" ${binder.str()}
+                  "bind it in every alternative and never under !not")
+      );
+    String name = binder.str()[1:];
+    foreach (Var other, possible) {
+      if (other == binder || other.str()[1:] != name) continue;
+      compiler.report_error(
+        <type>, %"$role binder has conflicting capture kinds",
+        start, %( "binder:" $name "use either '?' or '*' consistently"));
+    }
+  }
+  if (bindings) bindings = compiler.define_catch_binders(pattern);
+  else compiler.define_match_binders(pattern);
+}
+
+static List _match_capture_temporaries(Compiler c, List types, Array locals) {
+  Array declarations = [];
+  foreach (List row, types) match (row)
+    case %(?name ?type): {
+      String temporary = c.fresh_name("match_value");
+      declarations.push(
+        _match_capture_declaration(
+          c, %("Var"), temporary, %(expr () (ident ($name))), 1));
+      locals.push(%($name $type $temporary));
+    }
+  return declarations.list_free();
+}
+
+static List _match_capture_declaration(
+  Compiler compiler, Type type, String name, List initializer, int temporary) {
+  List binding;
+  if (compiler.macro_holes) {
+    binding = compiler.macro_introduced_name(name);
+    initializer = compiler.resolve_expression(initializer, compiler.token);
+    compiler.bind_template_local(binding, type, NULL);
+  }
+  else binding = temporary ? compiler.sym.introduce(name)
+                           : %("x2c.ident" $name);
+  return compiler.bind_syntax(
+    %(declare $type
+      (bindings (op = (bind $binding ()) $initializer))),
+    AST_BLOCK, compiler.return_type);
+}
+
+static List _match_capture_locals(Compiler c, Array locals) {
+  Array declarations = [];
+  foreach (List row, locals) match (row)
+    case %(?name ?type ?temporary):
+      declarations.push(
+        _match_capture_declaration(
+          c, type, name, %(expr () (ident ($temporary))), 0));
+  return declarations.list_free();
+}
+
+// try statements
+
+static List _try_statement(Compiler c) {
+  c.expect(<try>);
+  List body = _continued(c, c.parse_governed(AST_STATEMENT)), ctch = NULL;
+  c.__complete_here(<continue>, %("catch" "finally"));
+  if (c.test(<catch>)) ctch = _filtered_catches(c);
+  c.__complete_here(<continue>, %("finally"));
+  List fnly = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
+  if (ctch || fnly) return %(try $body $ctch $fnly);
+  c.report_error(
+    <parse>, "expected 'catch' or 'finally' after try block",
+    c.token, NULL);
+}
+
+static List _filtered_catches(Compiler compiler) {
+  /* A template's handler is its own local, like any it declares. */
+  List handle = compiler.macro_holes
+    ? compiler.macro_introduced_name("error_handler")
+    : compiler.sym.introduce(compiler.fresh_name("error_handler"));
+  Array arms = [], int saw_default = 0;
+  loop {
+    /* A template writes its catch arms as one `Catch` sequence hole. */
+    List hole = compiler.try_parse_macro_slot(<catch>);
+    if (hole) {
+      arms.push(hole);
+      if (!compiler.test(<catch>)) break;
+      continue;
+    }
+    int is_default = 0;
+    List arm = _filtered_catch_arm(compiler, is_default, handle);
+    arms.push(arm);
+    if (is_default) saw_default = 1;
+    if (!compiler.test(<catch>)) break;
+    if (saw_default)
+      compiler.report_error(
+        <parse>, "catch default arm must be last",
+        compiler.token, %("move catch: after every filtered arm"));
+  }
+  return %(catchcases ${arms.list_free()} $handle);
+}
+
+static List _filtered_catch_arm(Compiler c, int &is_default, List handle) {
+  Token start = c.token;
+  List pattern = NULL;
+  if (c.test(<:>)) is_default = 1;
+  else {
+    if (c.peek(0) != <"%(">)
+      c.report_error(
+        <parse>, "catch filter requires a %() pattern literal",
+        c.token, %("use catch %(code (key pattern)...):"));
+    pattern = c.parse_catch_pattern_literal();
+    c.expect(<:>);
+  }
+  List bindings = c.begin_catch_arm(pattern, start);
+  List body = c.parse_governed(AST_STATEMENT);
+  c.__complete_here(<continue>, %("catch" "finally"));
+  if (c.peek(0) == <catch> || c.peek(0) == <finally>)
+    body = _continued(c, body);
+  c.sym.pop_scope();
+  return %($pattern (block
+    @{c.catch_binder_declarations(bindings, handle)} $body));
+}
+
+/** Opens a `Sym` scope for one catch arm and defines a nonempty filter's
+    definite pattern binders. Returns their capture-token/binding pairs.
+    The caller must pop the scope after parsing or binding the arm body;
+    binder diagnostics use `start`.
+*/
+List Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start) {
+  compiler.sym.push_new_scope();
+  List bindings = NULL;
+  if (pattern)
+    _define_pattern_binders(compiler, pattern, start, "catch", bindings);
+  return bindings;
+}
+
+// governed statements
+
+/** Parses the statement a control keyword or statement macro governs, or a
+    block item at `AST_BLOCK`. Directives written before it stay in front of
+    it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
+    each directive stays where C read it. A conditional group they open also
+    takes the statement of each later arm and the closing directive, so a
+    statement macro that wraps its body in braces keeps the whole group
+    inside them. A later statement in the same arm follows the governed one,
+    as in C.
+*/
+List Compiler.parse_governed(Compiler c, AstPos position) {
+  Array items = $auto([]);
+  int depth = _take_directives(c, items);
+  loop {
+    Token start = c.token;
+    items.push(
+      position == AST_BLOCK ? c.parse_block_item() : c.parse_statement());
+    /* A directive inside the statement may close the group; those after its
+       last token precede the next item. */
+    int pending = 0;
+    for (Token token = start; depth > 0 && token < c.token; token++)
+      if (token.type == <preproc>) pending += _group_step(token.text);
+      else if (token.type != <space> && token.type != <comment>) {
+        depth += pending;
+        pending = 0;
+      }
+    if (depth <= 0) break;
+    Symbol end = _arm_end(c.leading_preproc());
+    if (!end) break;
+    depth += _take_directives(c, items);
+    c.directives_taken = c.token;
+    if (depth <= 0 || end == <close> || c.peek(0) == <"}"> ||
+        c.peek(0) == <eof>)
+      break;
+  }
+  return items.len() == 1 ? items[0] : %(group @{items.list()});
+}
+
+/* Adds the directives before the cursor to `items` and returns how many
+   conditional groups they open, less those they close. */
+static int _take_directives(Compiler c, Array items) {
+  int depth = 0;
+  foreach (List directive, c.leading_preproc()) {
+    items.push(directive);
+    depth += _group_step(directive.cadr());
+  }
+  return depth;
+}
+
+/* How many conditional groups the directive `s` opens, or -1 when it
+   closes one. */
+static int _group_step(String s) {
+  Symbol kind = preproc_conditional_kind(s);
+  return kind == <open> ? 1 : kind == <close> ? -1 : 0;
+}
+
+/* `<branch>` when the directives `run` begin a later arm of a conditional
+   group open before them, `<close>` when they close one, or 0 when the next
+   statement is in the same arm. */
+static Symbol _arm_end(List run) {
+  int level = 0;
+  Symbol end = 0;
+  foreach (List directive, run) {
+    Symbol kind = preproc_conditional_kind(directive.cadr());
+    if (kind == <open>) level++;
+    else if (!kind) continue;
+    else if (!level) end = kind;
+    else if (kind == <close>) level--;
+  }
+  return end;
+}
+
+/* Directives written before the `else`, `while`, `catch`, or `finally` that
+   continues a statement follow that statement. */
+static List _continued(Compiler c, List statement) {
+  if (c.token == c.directives_taken) return statement;
+  List directives = c.leading_preproc();
+  return directives ? %(group $statement @directives) : statement;
+}
+
+// blocks
+
+/** Parses one block-position declaration, statement, or macro insertion.
+    The caller owns the surrounding scope; a macro insertion may return a
+    `(seq ...)` node containing several block items.
+*/
+List Compiler.parse_block_item(Compiler c) {
+  c.__complete_here(<block>, _block_completion_keywords());
+  if (c.test_static_assert()) return c.parse_static_assert();
+  List slot = c.try_parse_macro_slot(<block>);
+  if (slot) return slot;
+  if (c.local_macro_form_is_definition()) {
+    List definition = c.parse_macro_definition();
+    return c.macro_holes ? definition : %(seq);
+  }
+  if (c.peek(0) == <ident> && c.token.text == "with")
+    return c.parse_statement();
+  // An identifier naming a live `with` expression is no macro target.
+  int with_expression = !!c.with_binding();
+  List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
+  if (macro) return macro;
+  if (c.test_declaration()) {
+    Token origin = c.token;
+    List declaration = c.parse_declaration_row();
+    c.expect(<;>);
+    return c.finish_managed_declaration(declaration, origin);
+  }
+  return c.parse_statement();
+}
+
+static List _block_completion_keywords(void) => %(
+  "void" "char" "short" "int" "long" "float" "double"
+  "signed" "unsigned" "if" "while" "for" "do" "return"
+  "case" "break" "continue" "goto" "try" "raise" "defer"
+  "match" "switch" "default" "with"
+);
+
+/** Parses a compound body after its opening brace and consumes the closing
+    `}`, returning an origin-anchored `(block ...)` node.
+*/
+List Compiler.parse_compound_statement(Compiler c) => c.parse_block_items(1);
+
+/** Parses block items after an already-consumed opening brace through `}` in
+    a new lexical scope. `anchor_items` records statement origins.
+*/
+List Compiler.parse_block_items(Compiler c, int anchor_items) {
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
+  return _parse_block_items(c, anchor_items);
+}
+
+/** Parses a callable's outer block in its active parameter scope. */
+List Compiler.parse_callable_body(Compiler c) => _parse_block_items(c, 1);
+
 static List _parse_block_items(Compiler c, int anchor_items) {
   Array block = $auto([]), List stmt = NULL;
   List present_before = c.present_references();
@@ -714,20 +747,3 @@ static List _parse_block_items(Compiler c, int anchor_items) {
   c.expect(<"}">);
   return cons(<block>, block);
 }
-
-/** Parses block items after an already-consumed opening brace through `}` in
-    a new lexical scope. `anchor_items` records statement origins.
-*/
-List Compiler.parse_block_items(Compiler c, int anchor_items) {
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  return _parse_block_items(c, anchor_items);
-}
-
-/** Parses a callable's outer block in its active parameter scope. */
-List Compiler.parse_callable_body(Compiler c) => _parse_block_items(c, 1);
-
-/** Parses a compound body after its opening brace and consumes the closing
-    `}`, returning an origin-anchored `(block ...)` node.
-*/
-List Compiler.parse_compound_statement(Compiler c) => c.parse_block_items(1);
