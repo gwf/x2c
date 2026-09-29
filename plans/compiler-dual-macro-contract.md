@@ -3113,6 +3113,82 @@ three fixtures' generated C/H pairs are byte-identical to pre-edit output
 from the same output paths. Their checked AST, transform, warning, stdout,
 and status artifacts, and the latter fixtures' diagnostics, remain unchanged.
 
+### E36. Destructuring construction family and stage boundaries
+
+The transform receives parser-bound targets. The source is evaluated once,
+converted to `List` once, read by index in source order, and assigned to
+each original target. A value-position assignment returns the original
+typed source. The one remaining source-spellable write has this complete
+template and client:
+
+```x2c
+macro open Expression $destructure_write(
+    Expr $target, Expr $value) => $target = $value;
+
+static List _destructure_assignments(
+  Compiler compiler, List targets, List temporary) {
+  int index = 0;
+  Macro shape = $destructure_write;
+  return targets.map(
+    %!(List target) using &index => {
+      match (target)
+        case %(expr ?type ?): {
+          List value = _destructure_element(temporary, index++);
+          return %(stmnt ${compiler.rebuild_expression(
+            type, shape(target, value))});
+        }
+    });
+}
+```
+
+`rebuild_expression` substitutes the two already typed children without
+rebinding or rerunning effects. This replaces the sole raw assignment-op
+builder for statement, shared-type declaration, and value-position writes;
+mixed-type declarations use initialized declarators instead. The statement
+wrapper is still an internal lowered AST node. No parallel raw assignment
+builder remains. The loop, index increment, and helper remain to preserve
+the left-to-right target order and typed result.
+
+The other candidate templates were tested and rejected at specific current
+boundaries:
+
+- A `Name $names...` grouped declaration template generated invalid `Var;`
+  or `Var List ...` C. A one-name template preserved parser-issued binding
+  IDs but split `Var a, b, c;` into separate declarations, changing checked
+  C and transform origins. A `Decl` hole accepts one declaration; the
+  grouped declarator list has no current source sequence slot. Keep the
+  grouped `declare` from the parser-issued identities.
+- `rebuild_expression(Var, $source[$index])` retained the source `index`
+  form at the lowered stage. Generated C used pointer subscripting instead
+  of `List_getindex` and failed native type checking. A pending read template
+  inside the value-position native block leaked as `x2c.template` at C
+  emission. Keep the typed internal `getindex` constructor until a producer
+  can preserve its already established List indexing operation.
+- A typed target declaration template passed the already bound full `bind`
+  through a `Name` hole and failed with an uncaught `<no-convert>` error.
+  The current raw declaration retains each parameter's type, modifier,
+  binding identity, and initializer order. Reconstructing it from a plain
+  name would lose those facts.
+
+The two internal `seq` constructors concatenate already bound declarations
+without introducing a block scope. The final `(parens (block ...))` is a
+native C statement expression with no x2c source spelling. The raw result
+and temporary references carry issued binding identities; diagnostic forms
+and eight structural recognition patterns remain semantic/data or matching
+operations. The `_value_declaration` helper nearby also serves protocol
+sequencing and is outside this family. The source diff replaces one raw
+assignment constructor with a template/rebuild and retains the other ten
+construction sites; the family still has 22 `%(` sites because the new
+statement wrapper occupies the old assignment site's line. No helper is
+deleted; the authored source rises seven lines to avoid a second binding
+pass while preserving exact behavior.
+
+`make build`, `destructuring_suite` (9 tests, 55 assertions), the existing
+destructuring, AST-leaf, and diagnostic fixtures, and an inert lambda-local
+destructuring run pass. For the three primary fixtures, AST/transform dumps,
+generated C/H, and diagnostics are byte-identical to the pre-edit baseline;
+their checked stdout/status are unchanged.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

@@ -3084,16 +3084,22 @@ static List _element_at(List source, int index) {
 static List _destructure_element(List temporary, int index) =>
   _element_at(%(expr ("List") (ident $temporary)), index);
 
+macro open Expression $destructure_write(
+    Expr $target, Expr $value) => $target = $value;
+
 // Preserve typed targets, including the indirection of mutable lambda
 // captures, while constructing their writes in source order.
-static List _destructure_assignments(List targets, List temporary) {
+static List _destructure_assignments(
+  Compiler compiler, List targets, List temporary) {
   int index = 0;
+  Macro shape = $destructure_write;
   return targets.map(
     %!(List target) using &index => {
       match (target)
         case %(expr ?type ?): {
           List value = _destructure_element(temporary, index++);
-          return %(stmnt (expr $type (op = $target $value)));
+          return %(stmnt ${compiler.rebuild_expression(
+            type, shape(target, value))});
         }
     });
 }
@@ -3123,7 +3129,7 @@ static List _destructure_statement(Compiler compiler, List ast) {
       Macro shape = $destructure_statement;
       return compiler.bind_syntax(
         shape(temporary, _destructure_source(compiler, source, source_type),
-              _destructure_assignments(targets, temporary)),
+              _destructure_assignments(compiler, targets, temporary)),
         AST_BLOCK, compiler.return_type);
     }
   }
@@ -3148,7 +3154,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
         %(declare $type (bindings @{declarations.list_free()}));
       List assignments =
         _destructure_assignments(
-          expressions.list_free(), temporary);
+          compiler, expressions.list_free(), temporary);
       Macro shape = $destructure_declarations;
       List tail = compiler.bind_syntax(
         shape(temporary,
@@ -3217,7 +3223,8 @@ static List _destructure_value(Compiler compiler, List ast) {
       List result_expr = %(expr $type (ident $result));
       List converted = _destructure_source(
         compiler, result_expr, type);
-      List assignments = _destructure_assignments(targets, temporary);
+      List assignments = _destructure_assignments(
+        compiler, targets, temporary);
       Macro shape = macro Statement(
           Type $type, Name $result, Expr $source, Name $temporary,
           Expr $converted) {
