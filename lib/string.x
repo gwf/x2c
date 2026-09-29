@@ -100,7 +100,8 @@ static unsigned _hash_n(const char *str, int length) =>
     The empty `String` is the null pointer, whose length is 0.
 */
 int String.len(String str) {
-  if (!str) return 0;
+  // `!str` also reads the first byte, which a fresh buffer leaves unset.
+  if (str == NULL) return 0;
   return _header(str).length - 1;
 }
 
@@ -123,7 +124,7 @@ meta native unsigned String.hash(String str) {
 */
 int String.equal(String x, String y) {
   if ((void *) x == (void *) y) return 1;
-  if (!x || !y) return 0;
+  if (!x || !y) return !x && !y;
   return strcmp(x, y) == 0;
 }
 
@@ -135,7 +136,7 @@ int String.equal(String x, String y) {
 */
 meta native int String.compare(String x, String y) {
   if ((void *) x == (void *) y) return 0;
-  if (!x) return -1;
+  if (!x) return y ? -1 : 0;
   if (!y) return 1;
   int result = strcmp(x, y);
   return (result > 0) - (result < 0);
@@ -1717,7 +1718,7 @@ static inline int _named_escape(int esc) {
 meta native int String.parse_char(String str) {
   if (!str || !*str) return -1;
   const char *at = str;
-  if (*at++ != '\'') return -1;
+  if (*at++ != '\'' || !*at) return -1;
   int byte = *at++;
   if (byte == '\\') {
     if (!*at) return -1;
