@@ -376,7 +376,7 @@ static Symbol _integer_result_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
 
 static void _promote_integer(X2CVarNumeric &value) {
   if (value.rank >= 3) return;
-  value.raw = _extended(value);
+  if (!value.unsigned_value) value.raw = _extended(value);
   value.tag = <i32>;
   value.unsigned_value = 0;
   value.bits = 32;
@@ -539,9 +539,11 @@ Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op) {
   if (!lhs) raise %(bad-arg (owner "Var.postfix"));
   _valid_operand(lhs);
   if (lhs is void) raise %(void-op (op $op));
-  if (op != <++> && op != <-->) raise %(bad-op (op $op));
+  Symbol binary_op;
+  if (op == <++>) binary_op = <+>;
+  else if (op == <-->) binary_op = <->;
+  else raise %(bad-op (op $op));
   Var old = lhs, one = Var.box_i32_bits(1);
-  Symbol binary_op = op == <++> ? <+> : <->;
   if (x2c_var_update_volatile(lhs, binary_op, one) is void) return void;
   return old;
 }
@@ -552,23 +554,30 @@ static Var _native_update(Var lhs, Symbol target, Symbol op, Var rhs) {
   return result.convert(target);
 }
 
-// operand checks
+/* operand checks
+
+   The tests inline into the operators, and the raises live in helpers:
+   clang does not inline a check that holds a raise's error construction.
+   The side travels as a Symbol, because a String literal argument would
+   add a lazy interning guard to the top of every operator. */
 
 static inline void _valid_operand(Var value) {
-  if (!value.encoding_valid()) {
-    unsigned long bits = value.u64;
-    raise %(bad-enc (value $bits));
-  }
+  if (!value.encoding_valid()) _bad_bits(value);
 }
 
 /* The left operand is checked first. */
 static inline void _valid_operands(Var lhs, Var rhs) {
-  if (!lhs.encoding_valid()) {
-    unsigned long bits = lhs.u64;
-    raise %(bad-enc (value $bits) (side "left"));
-  }
-  if (!rhs.encoding_valid()) {
-    unsigned long bits = rhs.u64;
-    raise %(bad-enc (value $bits) (side "right"));
-  }
+  if (!lhs.encoding_valid()) _bad_side(lhs, <left>);
+  if (!rhs.encoding_valid()) _bad_side(rhs, <right>);
+}
+
+static void _bad_bits(Var value) {
+  unsigned long bits = value.u64;
+  raise %(bad-enc (value $bits));
+}
+
+static void _bad_side(Var value, Symbol side) {
+  unsigned long bits = value.u64;
+  String text = side;
+  raise %(bad-enc (value $bits) (side $text));
 }
