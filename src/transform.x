@@ -3084,19 +3084,17 @@ static List _element_at(List source, int index) {
 static List _destructure_element(List temporary, int index) =>
   _element_at(%(expr ("List") (ident $temporary)), index);
 
-macro open Statement $destructure_write(Expr $target, Expr $value) {
-  $target = $value;
-}
-
-// The binder supplied typed targets; the enclosing template binds their
-// writes in source order.
+// Preserve typed targets, including the indirection of mutable lambda
+// captures, while constructing their writes in source order.
 static List _destructure_assignments(List targets, List temporary) {
-  Macro write = $destructure_write;
   int index = 0;
   return targets.map(
     %!(List target) using &index => {
-      List value = _destructure_element(temporary, index++);
-      return write(target, value);
+      match (target)
+        case %(expr ?type ?): {
+          List value = _destructure_element(temporary, index++);
+          return %(stmnt (expr $type (op = $target $value)));
+        }
     });
 }
 
@@ -3208,15 +3206,6 @@ static List _value_declaration(Type type, List binding, List value) {
 
 /* Keep the source's exact static type and value in one result temporary,
    then convert it to List once for the left-to-right assignments. */
-macro open Statement $destructure_value_block(
-    Type $type, Name $result, Expr $source, Name $temporary,
-    Expr $converted, Statement $assignments...) {
-  $type $result = $source;
-  List $temporary = $converted;
-  $assignments...
-  $result;
-}
-
 static List _destructure_value(Compiler compiler, List ast) {
   match (ast) {
     case %(dstrasgn (targets *targets)
@@ -3229,12 +3218,18 @@ static List _destructure_value(Compiler compiler, List ast) {
       List converted = _destructure_source(
         compiler, result_expr, type);
       List assignments = _destructure_assignments(targets, temporary);
-      Macro shape = $destructure_value_block;
-      List body = compiler.bind_syntax(
-        shape(type, result, source, temporary, converted, assignments),
+      Macro shape = macro Statement(
+          Type $type, Name $result, Expr $source, Name $temporary,
+          Expr $converted) {
+        $type $result = $source;
+        List $temporary = $converted;
+      };
+      List bindings = compiler.bind_syntax(
+        shape(type, result, source, temporary, converted),
         AST_BLOCK, compiler.return_type);
       // x2c has no source spelling for this native statement expression.
-      return %(parens (block @{body.cdr()}));
+      return %(parens (block @{bindings.cdr()} @assignments
+                             (stmnt $result_expr)));
     }
   }
   return ast;
