@@ -73,6 +73,10 @@ macro Expression $lambda_captured(Expr $body, Captures $captures,
 macro Expression $indexed(Expr $receiver, Expr $selector) =>
   $receiver[$selector];
 
+/* A call with its typed callee and source-ordered arguments. */
+macro Expression $called(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
+
 /* The source expression beneath casts and parentheses, retaining its type. */
 meta static Var source_expression(Var value) {
   while (1) {

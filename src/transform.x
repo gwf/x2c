@@ -2941,22 +2941,22 @@ static List _typed_call(
     values.push(converted);
   }
   List newargs = values.list_free();
-  return %(call ${ast.cadr()} (args @newargs));
+  Macro called = $called;
+  return compiler.rebuild_expression(
+    NULL, called(ast.cadr(), newargs)).caddr();
 }
 
 static List _call(Compiler compiler, List ast) {
   ast = _lower_printf_vars(compiler, ast);
-  match (ast) {
-    case %(call (expr ((func ?matched_params) *) ?) (args *args)): {
-      return _typed_call(
-        compiler, ast, matched_params, args);
-    }
-    case %(call (expr ((!or (!quote *) & ^) (func ?pointer_params) *) ?)
-                 (args *pointer_args)): {
-      return _typed_call(
-        compiler, ast, pointer_params, pointer_args);
-    }
-  }
+  Macro called = $called;
+  match (%(expr () $ast))
+    case called(?callee, *arguments):
+      match (callee.cadr()) {
+        case %((func ?parameters) *):
+          return _typed_call(compiler, ast, parameters, arguments);
+        case %((!or (!quote *) & ^) (func ?parameters) *):
+          return _typed_call(compiler, ast, parameters, arguments);
+      }
   return ast;
 }
 
@@ -3041,12 +3041,16 @@ static List _declaration(Compiler compiler, List ast) {
 
 // A `Var` subscript of a native pointer or array reads as an integer.
 static List _index(Compiler compiler, List ast) {
-  match (ast)
-    case %(index ?base (!set ?selector (expr ?type ?)))
-      if (compiler.sym.is_var_type(type)): {
-        List converted = compiler.convert_expression(selector, %(long));
-        return %(index $base $converted);
-      }
+  Macro indexed = $indexed;
+  match (%(expr () $ast))
+    case indexed(?base, ?selector):
+      match (selector)
+        case %(expr ?type ?)
+          if (compiler.sym.is_var_type(type)): {
+            List converted = compiler.convert_expression(selector, %(long));
+            return compiler.rebuild_expression(
+              NULL, indexed(base, converted)).caddr();
+          }
   return ast;
 }
 
@@ -3331,12 +3335,21 @@ static int _indexed_rhs_allowed(Compiler compiler, Symbol op, List rhs) {
   return op == <+> && _string_operand(compiler, type);
 }
 
+static List _indexed_call_expr(
+  Compiler compiler, List resolved, List arguments) {
+  (List binding, Type signature) = resolved;
+  Macro called = $called;
+  List callee = %(expr $signature (ident $binding));
+  return compiler.rebuild_expression(
+    signature.cdr(), called(callee, arguments));
+}
+
 // Preserve x2c source order across C's unspecified call-argument order.
 static List _sequenced_protocol_call(
   Compiler compiler, List resolved, List arguments) {
-  (List binding, Type signature) = resolved;
+  Type signature = resolved.cadr();
   List parameters = signature.car().list().cadr();
-  Type result = signature.cdr(), Array converted = [];
+  Array converted = [];
   for (List actual = arguments, expected = parameters;
        actual && expected;
        actual = actual.cdr(), expected = expected.cdr()) {
@@ -3358,8 +3371,8 @@ static List _sequenced_protocol_call(
     arguments_out.push(%(expr $type (ident $temporary)));
   }
   converted.free();
-  List call = %(expr $result (call (expr $signature (ident $binding))
-    (args @{arguments_out.list_free()})));
+  List call = _indexed_call_expr(
+    compiler, resolved, arguments_out.list_free());
   return %(parens (block @{declarations.list_free()} (stmnt $call)));
 }
 
@@ -4377,12 +4390,8 @@ static Ast _step(Compiler c, Ast ast) {
         c.report_error(
           <xform>,
           %"type $type does not support bracket indexing", NULL, NULL);
-      (List binding, Type signature) = resolved;
-      return _node(
-        c,
-        %(call (expr $signature (ident $binding))
-               (args $expression $index))
-      );
+      return _node(c, _indexed_call_expr(
+        c, resolved, %($expression $index)).caddr());
     }
     case %(setindex
            (!set ?expression (expr ?matched_type ?)) ?index ?value): {
@@ -4398,12 +4407,8 @@ static Ast _step(Compiler c, Ast ast) {
           _sequenced_protocol_call(
             c, resolved, %($expression $index $value))
         );
-      (List binding, Type signature) = resolved;
-      return _node(
-        c,
-        %(call (expr $signature (ident $binding))
-               (args $expression $index $value))
-      );
+      return _node(c, _indexed_call_expr(
+        c, resolved, %($expression $index $value)).caddr());
     }
     case %(slice
            (!set ?expression
