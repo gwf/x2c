@@ -977,7 +977,7 @@ static int _hidden_group(Array stack) {
 /* Hides a token of an arm C never takes and marks layout attributes, and
    returns the index of the token's last part. A lexical failure ends the
    token stream, so the rest of the unit is missing whichever arm holds it;
-   the parser reports the `<error>` token rather than hiding it. */
+   the `<error>` token stays visible, and the parser reports it. */
 static size_t ArmScan.code(ArmScan *s, Token token, size_t i) {
   if (s.hidden && token.type != <space> && token.type != <error>)
     token.type = <comment>;
@@ -1328,8 +1328,7 @@ Map Sym.global_symbols(Sym s) => s.globals;
 */
 Map Sym.base_symbols(Sym s) {
   Map seed = {};
-  for (int i = 0; i < s.base_scopes; i++)
-    seed.merge(_scope_at(s, i).symbols);
+  for (int i = 0; i < s.base_scopes; i++) seed.merge(_scope_at(s, i).symbols);
   return seed;
 }
 
@@ -1370,7 +1369,7 @@ List Sym.visible_symbols(Sym s) {
 }
 
 static int _unseen(Map seen, Var name) {
-  if (seen.contains(name)) return 0;
+  if (name in seen) return 0;
   seen[name] = 1;
   return 1;
 }
@@ -1671,9 +1670,8 @@ static String _declared_spelling(List key) {
 }
 
 /* A source declaration may not take a compiler-generated spelling or one
-   in an imported package's space. A shallow parse reads emitted C, where
-   generated spellings are the compiler's own output rather than a source
-   declaration. */
+   in an imported package's space. A shallow parse reads emitted C, whose
+   generated spellings are the compiler's own output. */
 static void _check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling)) {
     String message = %"'$spelling' is reserved for compiler-generated names";
@@ -2280,7 +2278,7 @@ Type Sym.local_type(Sym s, Type type) {
   return base.is_bare_typedef_name() ? _local_alias(s, type, base) : type;
 }
 
-// A local tag resolves to the binding of its nearest declaration.
+// The binding of the nearest declaration replaces a block-scoped name.
 static Type _local_tag(Sym s, Type type, Type base) {
   for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
     SymScope *scope = _scope_at(s, i);
@@ -2430,8 +2428,7 @@ Type Sym.lookup_field(Sym s, Type type, List field) {
   if (found) return found;
   foreach (List row, s.field_order(type).cdr()) {
     Type member = row.cadr();
-    if (row.car().truth() || !s.resolve_key(member).is_aggregate())
-      continue;
+    if (row.car().truth() || !s.resolve_key(member).is_aggregate()) continue;
     found = s.lookup_field(member, field);
     if (found) return found;
   }
@@ -2485,7 +2482,10 @@ Type Sym.delegate_aggregate(Sym s, Type type) {
   return type && type.is_aggregate_tag() ? type : NULL;
 }
 
-// binding facts
+/* binding facts
+
+   Facts about bindings share one map, keyed by rows such as
+   `(emitted BINDING)` and `(completion BINDING)`. */
 
 /** Returns the current borrowed semantic-facts map indexed by binding.
 
@@ -2784,8 +2784,7 @@ static String _converter_name(Var node) {
 int match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
-  foreach (Var part, value.list())
-    if (!match_value_is_static(part)) return 0;
+  foreach (Var part, value.list()) if (!match_value_is_static(part)) return 0;
   return 1;
 }
 
@@ -2849,7 +2848,10 @@ static Symbol _flat_capture_tag(Var element, Var binder) {
   return tag;
 }
 
-// match binders
+/* match binders
+
+   A pattern's definite binders become declarations in the scope of its
+   case, or of its catch clause, whose lowering keeps the issued bindings. */
 
 /** Returns definite binders from a typed `Match` pattern AST.
 
@@ -3127,7 +3129,6 @@ void Compiler.run_declaration_effects(Compiler c) {
   }
 }
 
-// An effect runs in the file whose declaration queued it.
 static String _effect_file(Compiler c, List key) {
   match (key)
     case %("source-node" (declaration ?path ?)):
@@ -3349,8 +3350,7 @@ static int Defaults._taken(Defaults *d, String spelling) {
   if (!declared.is_function() || spelling in d.definitions ||
       spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
     return 1;
-  foreach (Var part, d.parts)
-    if (part is <map> && key in part.map()) return 0;
+  foreach (Var part, d.parts) if (part is <map> && key in part.map()) return 0;
   return 1;
 }
 
@@ -3592,7 +3592,7 @@ static void _skip_body(Compiler c, List declaration, Token meta, int native) {
   else _shallow_block(c);
 }
 
-// Remember the spelling of one function body found while collecting `.x`.
+// `fn_defs` holds each non-static function the unit defines.
 static void _note_function_body(Compiler c, Type type, List binding) {
   if (!type.is_function() || type.is_static()) return;
   c.fn_defs[binding_identity_spelling(binding)] = 1;
@@ -3778,7 +3778,7 @@ static void FullParse.add(FullParse *p, List node, int begin, int end) {
   p.nodes.push(node);
 }
 
-// The index just past the last non-trivia token before the cursor.
+// The index after the last non-trivia token before the cursor.
 static long _end_index(Compiler c, Token tokens) =>
   _skip_backward(c.token - 1, tokens) + 1 - tokens;
 
@@ -4008,7 +4008,11 @@ static void _check_local_uses(Compiler c, List items, Map locals) {
     }
 }
 
-// top-level definitions
+/* top-level definitions
+
+   Each form the full parse reads records the facts that later checks use:
+   its object and function definitions, prototypes, static initializers,
+   and the token span of its source. */
 
 static void _record_top_level(Compiler c, List node) {
   match (node) {
