@@ -5052,6 +5052,10 @@ String x2c_binding_spelling(Var syntax) {
   }
   match (value)
     case %((!is ?name type string)): return name;
+  return _binding_spelling(value, syntax);
+}
+
+static String _binding_spelling(List value, Var syntax) {
   int identity = 0, String spelling = NULL;
   match (value)
     case %(binding ?id (!is ? type string)):
@@ -5175,36 +5179,54 @@ static Var _sdk_embed_text(Var requested) {
       "x2c.embed.text used outside macro expansion", NULL);
   String source_file = sdk_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
-  else {
-    Var stored = void, syntax = requested;
-    match (requested)
-      case %((text ?) (file ?(String file)) (syntax ?carried)): {
-        syntax = carried;
-        stored = %(source $file);
-      }
-    if (stored is void && sdk_captures)
-      sdk_captures.try_get(((ulong) requested.u64), stored);
-    if (stored is void || !_literal_string(syntax, requested_path))
-      _sdk_reject(
-        "x2c.embed.text requires a String or captured String literal",
-        %("value: ${requested.repr()}"));
-    List source = stored;
-    source_file = source.cadr();
-  }
+  else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
     _sdk_reject(
       "x2c.embed.text requires a non-empty path", NULL);
   String path = _embed_path(compiler, source_file, requested_path);
-  if (compiler.sources) {
-    String text;
-    if (!compiler.read_source(path, text))
-      _sdk_reject(
-        "cannot read embedded text",
-        %("path: ${compiler.display_path(path)}"));
-    compiler.deps.merge_translation_dependency(
-      path, "%08x".printf(text.hash()));
-    return text;
-  }
+  if (compiler.sources) return _embed_source(compiler, path);
+  return _embed_file(compiler, path);
+}
+
+static String _embed_literal(Var requested, String &source_file) {
+  Var stored = void, syntax = requested;
+  match (requested)
+    case %((text ?) (file ?(String file)) (syntax ?carried)): {
+      syntax = carried;
+      stored = %(source $file);
+    }
+  if (stored is void && sdk_captures)
+    sdk_captures.try_get(((ulong) requested.u64), stored);
+  String requested_path = NULL;
+  if (stored is void || !_literal_string(syntax, requested_path))
+    _sdk_reject(
+      "x2c.embed.text requires a String or captured String literal",
+      %("value: ${requested.repr()}"));
+  List source = stored;
+  source_file = source.cadr();
+  return requested_path;
+}
+
+static String _embed_source(Compiler compiler, String path) {
+  String text;
+  if (!compiler.read_source(path, text))
+    _sdk_reject(
+      "cannot read embedded text",
+      %("path: ${compiler.display_path(path)}"));
+  compiler.deps.merge_translation_dependency(
+    path, "%08x".printf(text.hash()));
+  return text;
+}
+
+static String _embed_file(Compiler compiler, String path) {
+  File file = _open_embed_file(compiler, path);
+  String result = _read_embed_file(compiler, path, file);
+  String content_hash = "%08x".printf(result.hash());
+  compiler.deps.merge_translation_dependency(path, content_hash);
+  return result;
+}
+
+static File _open_embed_file(Compiler compiler, String path) {
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
     _sdk_reject(
@@ -5229,6 +5251,10 @@ static Var _sdk_embed_text(Var requested) {
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
   }
+  return file;
+}
+
+static String _read_embed_file(Compiler compiler, String path, File file) {
   String result = NULL;
   int read_failed = 0, embedded_nul = 0, size_overflow = 0;
   try result = file.string_close();
@@ -5247,8 +5273,6 @@ static Var _sdk_embed_text(Var requested) {
     _sdk_reject(
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
-  String content_hash = "%08x".printf(result.hash());
-  compiler.deps.merge_translation_dependency(path, content_hash);
   return result;
 }
 
