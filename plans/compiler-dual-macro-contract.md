@@ -3113,6 +3113,79 @@ three fixtures' generated C/H pairs are byte-identical to pre-edit output
 from the same output paths. Their checked AST, transform, warning, stdout,
 and status artifacts, and the latter fixtures' diagnostics, remain unchanged.
 
+### E36. Destructuring construction adopter (local candidate)
+
+`transform.x` receives parser-bound targets. It preserves one source
+conversion to `List`, left-to-right indexed reads and typed writes, outer
+scope for declaration targets, and the original value type. The source
+shapes and structural client are:
+
+```x2c
+macro open Expression $destructure_write(
+    Expr $target, Expr $value) => $target = $value;
+macro open Statement $destructure_targets(
+    Type $type, DeclaratorRow $rows...) {
+  $type $rows...;
+}
+macro open Statement $destructure_typed_target(
+    Type $type, DeclaratorRow $row, Expr $value) {
+  $type $row = $value;
+}
+macro open Statement $destructure_sequence(Statement $items...) {
+  $items...
+}
+
+List target_decl = compiler.rebuild_statement(
+  target_shape(type, declarations.list_free())).cadr();
+List tail = compiler.bind_syntax(
+  temporary_shape(temporary, converted, assignments),
+  AST_BLOCK, compiler.return_type);
+return compiler.rebuild_statement(
+  sequence(cons(target_decl, tail.cdr())));
+
+// For each mixed typed `(param type bind)` row:
+declarations.push(compiler.rebuild_statement(
+  typed_shape(type, bind, _destructure_element(temporary, index++))
+).cadr());
+// Bind its new temporary once, then rebuild the same flat sequence.
+```
+
+`_destructure_assignments` applies `write` through `rebuild_expression`,
+then the existing `$expression_statement` through `rebuild_statement`.
+The valued path uses the same statement wrapper for its final result.
+The mixed branch reuses `$destructure_declarations` for the temporary;
+its anonymous duplicate template is deleted. `_element_at` is folded into
+its sole `_destructure_element` caller. `rebuild_statement` substitutes
+already bound children without rebinding; its unbraced `seq` keeps the
+shared target declaration and mixed rows in the outer scope.
+
+The raw grouped declaration, mixed initialized declaration, two `seq`
+joins, assignment operation and both expression-statement wrappers are
+displaced. Sixteen raw `%(` sites remain in the bounded family: eight
+recognition patterns, three diagnostic/type data forms, and five
+construction sites. Those five construct the typed internal `getindex`
+with its temporary reference, bare shared-target `bind` rows, typed write
+references, the typed value-result reference, and the native C statement
+expression `(parens (block ...))`. A source bracket read would emit native
+pointer subscripting instead of `List_getindex`; the parser issued the
+shared-target identities, and the valued native expression has no x2c
+source spelling. The nearby `_value_declaration` helper is also used by
+protocol sequencing and is outside this family. Against `23c3a465`,
+authored `transform.x` is +52/-20 lines (net +32), with two helpers/templates
+deleted (`_element_at` and the anonymous mixed temporary template).
+
+Seven focused fixtures, `destructuring_suite` (9/9, 55 assertions), and an
+inert lambda-local probe pass. The three primary fixtures have byte-identical
+AST/transform dumps, stderr, generated C/H and diagnostics against the
+capability-plus-E36 baseline; their checked stdout/status pass. Matching
+`--source-map` C/H and diagnostic probes also agree byte-for-byte. The
+integrated tree has refreshed bootstrap and passes `make build-safe` plus
+the three primary fixtures from that seed. `DeclaratorRow` interception is
+limited to declared holes, preserving ordinary binding for Lisp-produced
+declarator names. The completed candidate's performance snapshot passed all
+four stage comparisons; its timing comparison uses an older baseline and
+does not establish the cost of this family.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`
