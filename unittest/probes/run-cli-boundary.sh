@@ -50,6 +50,12 @@ cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
 [[ $("$X2C" --version) == "x2c 0.14.0" ]]
 [[ $("$X2C" -V) == "x2c 0.14.0" ]]
+set +e
+"$X2C" help '' >"$BUILD/help-empty.stdout" 2>"$BUILD/help-empty.stderr"
+help_empty_status=$?
+set -e
+[[ $help_empty_status == 2 ]]
+[[ $(<"$BUILD/help-empty.stderr") == "x2c: error: unknown help command ''" ]]
 "$X2C" build -q --help >"$BUILD/build-short-quiet.help"
 "$X2C" build --compile-only --help >"$BUILD/build-long-compile.help"
 "$X2C" build -j 1 --help >"$BUILD/build-short-jobs.help"
@@ -123,11 +129,16 @@ printf '\377' >"$BUILD/invalid-utf8.rsp"
 "$X2C" @"$BUILD/invalid-utf8.rsp" >"$BUILD/utf8.stdout" \
   2>"$BUILD/utf8.stderr"
 utf8_status=$?
+"$X2C" @ >"$BUILD/empty-reference.stdout" 2>"$BUILD/empty-reference.stderr"
+empty_reference_status=$?
 set -e
 [[ $cycle_status == 2 && $malformed_status == 2 && $utf8_status == 2 ]]
+[[ $empty_reference_status == 2 ]]
 grep -Fq "recursive response-file inclusion" "$BUILD/cycle.stderr"
 grep -Fq "unterminated quote" "$BUILD/malformed.stderr"
 grep -Fq "input is not valid UTF-8" "$BUILD/utf8.stderr"
+[[ $(<"$BUILD/empty-reference.stderr") == \
+   "x2c: error: empty response-file reference '@'" ]]
 
 printf '#include "x2c.x"\n' >"$BUILD/a/item.x"
 printf '#include "x2c.x"\n' >"$BUILD/b/item.x"
