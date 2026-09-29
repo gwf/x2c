@@ -17,6 +17,285 @@ $(import "error-macros.xmacro")
 #include "common.x"
 #include "map.x"
 
+#pragma private
+#include "var.x"
+#include "varconvert.x"
+#include "symbol.x"
+#include "string.x"
+#include "array.x"
+#include "buffer.x"
+#include "list.x"
+#include "file.x"
+#include "iter.x"
+#include "exception.x"
+#include "mutex.x"
+#include <float.h>
+#include <stdint.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// descriptor rows
+
+/* One row per boxed ledger tag, in ledger order, so a decoded value indexes
+   the table without another tag search. */
+static VarDescriptor
+  builtin_descriptors[_var_ - _array_ + 1] = {0};
+
+int x2c_var_descriptor_index(Var value);
+VarDescriptor *x2c_var_custom_descriptor(Var value);
+VarDescriptor *x2c_var_declare(Symbol tag);
+int x2c_var_tag_descriptor_index(Symbol tag);
+
+static VarDescriptor *_descriptor_for_value(Var value) {
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  int index = x2c_var_descriptor_index(value);
+  VarDescriptor *builtin = index >= 0 && index < count
+                         ? &builtin_descriptors[index] : NULL;
+  VarDescriptor *descriptor = builtin ? builtin
+                           : x2c_var_custom_descriptor(value);
+  if (!descriptor || !descriptor.value_dispatch) return NULL;
+  return descriptor;
+}
+
+// display text
+
+/** Returns the display `String` of `Var`. */
+String Var.str(Var v) {
+  VarDescriptor *descriptor = _descriptor_for_value(v);
+  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
+  return v.fallback_str();
+}
+
+/** Returns the non-dispatch display `String` of `Var`. */
+String Var.fallback_str(Var v) {
+  Symbol tag = v.tag();
+  switch (v.kind()) {
+    case <floating>: case <integer>:   return _primitive_str(v, tag);
+    case <pointer>:  case <reference>: return v.pointer_string();
+    case <void>:     return "void";
+  }
+  return v.pointer_string();
+}
+
+static String _primitive_str(Var v, Symbol tag) {
+  switch (tag) {
+    case <i8>:   case <u8>:   return "%c".printf(v);
+    case <i16>:  case <i32>:  return "%d".printf(v);
+    case <i48>:  return "%ld".printf(v);
+    case <long>:  return "%ld".printf(v);
+    case <llong>: return "%lld".printf(v);
+    case <u16>:  case <u32>:  return "%u".printf(v);
+    case <u48>:  return "%lu".printf(v);
+    case <ulong>:  return "%lu".printf(v);
+    case <ullong>: return "%llu".printf(v);
+    case <f32>:  case <f64>:  return "%lf".printf(v);
+    case <ldouble>: return "%Lf".printf(v);
+    case <nan>:  case <+inf>: case <-inf>: return %"$tag";
+  }
+  return v.pointer_string();
+}
+
+/** Formats the fallback display `String` for a pointer-bearing `Var`. */
+String Var.pointer_string(Var v) {
+  Symbol tag = v.tag();
+  if (tag == <p48>) return "<0x%012lX>".printf((long) v.pointer());
+  return "<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
+}
+
+/** Appends the display text of `Var` to a `Buffer`.
+    A descriptor that registers `write_str` streams straight into `out`. One
+    that registers only `str` writes its `String` through, which materializes
+    the text but keeps existing custom descriptors working. Neither fallback
+    re-enters this function, so a descriptor providing neither cannot
+    recurse.
+*/
+Buffer Var.write_str(Var v, Buffer out) {
+  if (out == NULL) return NULL;
+  VarDescriptor *descriptor = _descriptor_for_value(v);
+  if (descriptor && descriptor.methods.write_str)
+    return descriptor.methods.write_str(v, out);
+  if (descriptor && descriptor.methods.str) {
+    String text = descriptor.methods.str(v);
+    return text ? out.write(text) : out;
+  }
+  return v.fallback_write_str(out);
+}
+
+/** Appends the non-dispatch display text of `Var` to a `Buffer`.
+    A primitive, pointer, or `void` renders straight into `out` instead of
+    through an intermediate `String`.
+*/
+Buffer Var.fallback_write_str(Var v, Buffer out) {
+  Symbol tag = v.tag();
+  switch (v.kind()) {
+    case <floating>:
+    case <integer>:   return _write_primitive_str(v, tag, out);
+    case <pointer>: case <reference>:
+      return out.write(v.pointer_string());
+    case <void>:      return out.write("void");
+  }
+  return out.write(v.pointer_string());
+}
+
+static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
+  switch (tag) {
+    case <i8>:   case <u8>:   return out.printf("%c", v);
+    case <i16>:  case <i32>:  return out.printf("%d", v);
+    case <i48>:  case <long>:  return out.printf("%ld", v);
+    case <llong>: return out.printf("%lld", v);
+    case <u16>:  case <u32>:  return out.printf("%u", v);
+    case <u48>:  case <ulong>:  return out.printf("%lu", v);
+    case <ullong>: return out.printf("%llu", v);
+    case <f32>:  case <f64>:  return out.printf("%lf", v);
+    case <ldouble>: return out.printf("%Lf", v);
+    case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
+  }
+  return out.write(v.pointer_string());
+}
+
+// readable representation
+
+/** Returns the readable representation of `Var`. */
+String Var.repr(Var v) {
+  VarDescriptor *descriptor = _descriptor_for_value(v);
+  if (descriptor && descriptor.methods.repr) return descriptor.methods.repr(v);
+  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
+  return v.fallback_repr();
+}
+
+/** Returns the non-dispatch readable representation of `Var`. */
+String Var.fallback_repr(Var v) {
+  Symbol tag = v.tag();
+  switch (v.kind()) {
+    case <floating>: case <integer>:   return _primitive_repr(v, tag);
+    case <pointer>:  case <reference>: return v.pointer_string();
+    case <void>:     return "void";
+  }
+  return v.pointer_string();
+}
+
+/* `_write_primitive_repr` is the one owner of the numeric repr spellings. The
+   `String` form renders through a `Buffer` rather than keeping a second copy
+   of the table that could drift from it again. */
+static String _primitive_repr(Var v, Symbol tag) =>
+  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
+
+/** Appends the readable representation of `Var` to a `Buffer`. */
+Buffer Var.write_repr(Var v, Buffer out) {
+  if (out == NULL) return NULL;
+  VarDescriptor *descriptor = _descriptor_for_value(v);
+  if (descriptor && descriptor.methods.write_repr)
+    return descriptor.methods.write_repr(v, out);
+  if (descriptor && descriptor.methods.repr) {
+    String text = descriptor.methods.repr(v);
+    return text ? out.write(text) : out;
+  }
+  if (descriptor && descriptor.methods.str) {
+    String text = descriptor.methods.str(v);
+    return text ? out.write(text) : out;
+  }
+  return v.fallback_write_repr(out);
+}
+
+/** Appends the non-dispatch representation of `Var` to a `Buffer`. */
+Buffer Var.fallback_write_repr(Var v, Buffer out) {
+  Symbol tag = v.tag();
+  switch (v.kind()) {
+    case <floating>:
+    case <integer>:   return _write_primitive_repr(v, tag, out);
+    case <pointer>: case <reference>:
+      return v.write_pointer_repr(out);
+    case <void>:      return out.write("void");
+  }
+  return v.write_pointer_repr(out);
+}
+
+/* Each numeric tag prints its own value with its own C spelling, so the text
+   names both the number and the width it was boxed at. The narrow integer
+   tags read their payload through `Var.long`, which does not widen a signed
+   value into another tag's domain. */
+static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
+  switch (tag) {
+    case <i8>:  case <u8>:
+      return _write_byte_repr(out, (unsigned) (uchar) v.long());
+    case <u16>: case <i16>:
+      return out.printf("0x%04X", (unsigned) (ushort) v.long());
+    case <i32>:  return out.printf("%d", (int) v.long());
+    case <u32>:  return out.printf("%uu", (unsigned) v.long());
+    case <u48>:  return out.printf("0x%012lXul", v.ulong() & 0xFFFFFFFFFFFFul);
+    case <i48>:
+      return out.printf("0x%012lXl", (ulong) v.long() & 0xFFFFFFFFFFFFul);
+    case <long>:  return out.printf("%ldl", v.long());
+    case <ulong>:  return out.printf("%luul", v.ulong());
+    case <llong>: return out.printf("%lldll", v.long_long());
+    case <ullong>: return out.printf("%lluull", v.ulong_long());
+    case <f32>:  return _write_float_repr(out, v.floating(), <f32>, "f");
+    case <f64>:  return _write_float_repr(out, v.floating(), <f64>, NULL);
+    case <ldouble>:
+      return _write_float_repr(out, v.long_double(), <ldouble>, "l");
+    case <nan>:  return out.write("NaN");
+    case <+inf>: return out.write("+Inf");
+    case <-inf>: return out.write("-Inf");
+  }
+  return v.write_pointer_repr(out);
+}
+
+/* A byte is spelled the way C spells a character constant. Writing the raw
+   byte instead would put a NUL or a control byte inside the repr text. */
+static Buffer _write_byte_repr(Buffer out, unsigned byte) {
+  switch (byte) {
+    case '\\': return out.write("'\\\\'");
+    case '\'': return out.write("'\\''");
+    case '\n': return out.write("'\\n'");
+    case '\t': return out.write("'\\t'");
+    case '\r': return out.write("'\\r'");
+  }
+  if (byte >= 0x20 && byte < 0x7F) return out.printf("'%c'", (int) byte);
+  return out.printf("'\\x%02X'", byte);
+}
+
+/* The shortest decimal that reads back as `value`, followed by the suffix
+   that names its C type. `*_DECIMAL_DIG` is the precision that always
+   round-trips that width on this target; starting three digits short keeps
+   0.1 spelled `0.1` instead of `0.10000000000000001`. The candidate is
+   narrowed to `width` before the comparison, so a float is not asked to match
+   a double's digits. */
+static Buffer _write_float_repr(
+  Buffer out, long double value, Symbol width, String suffix) {
+  int limit = width == <f32> ? FLT_DECIMAL_DIG
+            : (width == <f64> ? DBL_DECIMAL_DIG : LDBL_DECIMAL_DIG);
+  char text[48];
+  int digits = limit - 3;
+  for (; digits < limit; digits++) {
+    snprintf(text, sizeof text, "%.*Lg", digits, value);
+    long double back = strtold(text, NULL);
+    if (width == <f32>) back = (float) back;
+    else if (width == <f64>) back = (double) back;
+    if (back == value) break;
+  }
+  if (digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
+  /* `%g` drops the point for a whole value, and bare digits read back as an
+     integer, so restore the form that says floating. */
+  if (text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
+  out.write(text);
+  return suffix ? out.write(suffix) : out;
+}
+
+/** Writes the fallback readable form of a pointer-bearing `Var`. */
+Buffer Var.write_pointer_repr(Var v, Buffer out) {
+  Symbol tag = v.tag();
+  if (tag == <p48>) return out.printf("<0x%012lX>", (long) v.pointer());
+  char name[32] = { 0 };
+  tag.decode(name);
+  return out.printf("<%s: 0x%012lX>", name, (long) v.pointer());
+}
+
+// recursive rendering
+
+static threaded RenderPath *render_path;
+
 /** Enters an object's recursive rendering, or returns zero for a cycle.
     Keep `path` alive and defer `path.leave()` after a successful entry.
     Identities are compared only along this thread's active path, so repeated
@@ -37,6 +316,339 @@ int RenderPath.enter(RenderPath *path, const void *identity) {
 void RenderPath.leave(RenderPath *path) {
   render_path = path.previous;
 }
+
+// hashing and equality
+
+/** Returns the runtime hash of `Var`.
+    Raises: `<void-op>` for `void`.
+*/
+unsigned Var.hash(Var v) {
+  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.hash"));
+  if (v.is_wide()) return v.wide_hash();
+  /* Canonical `List`s are most of what the pool tables hash, and both these
+     hashes are constant time. Unboxing a known tag is one mask and compare,
+     where the descriptor row costs a full decode. `nil` and the empty
+     `String` unbox as NULL and take the general path, which hashes them the
+     same way it always did. */
+  List lst = v;
+  if (lst) return List.hash(lst);
+  String str = v;
+  if (str) {
+    unsigned hash = str.hash();
+    return hash ? hash : -1;
+  }
+  VarDescriptor *descriptor = _descriptor_for_value(v);
+  if (descriptor && descriptor.methods.hash) {
+    unsigned hash = descriptor.methods.hash(v);
+    return hash ? hash : -1;
+  }
+  return _default_hash(v);
+}
+
+/** Returns the non-dispatch runtime hash of `Var`.
+    Raises: `<void-op>` for `void`.
+*/
+unsigned Var.fallback_hash(Var v) {
+  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.fallback_hash"));
+  if (v.is_wide()) return v.wide_hash();
+  return _default_hash(v);
+}
+
+/* A Var is one 64-bit word, so it hashes as one through the shared mixer.
+   Every Map, Set, and symbol table runs this hash on every lookup. Map masks
+   the low bits, which fmix64 avalanches as well as the high ones. */
+static unsigned _default_hash(Var var) => x2c_hash_word(var.u64);
+
+/** Applies the registered equality operation for `a` and `b`. */
+int Var.equal(Var a, Var b) {
+  if (a.u64 == b.u64) return 1;
+  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  /* Built-in object and Symbol rows identify the tag, so equal rows are
+     equal tags and the row selects the descriptor without a second decode. */
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  int row = x2c_var_descriptor_index(a);
+  if (row >= 0 && row < count) {
+    if (x2c_var_descriptor_index(b) != row) return 0;
+    VarDescriptor *descriptor = &builtin_descriptors[row];
+    return descriptor.value_dispatch && descriptor.methods.equal
+         ? descriptor.methods.equal(a, b) : 0;
+  }
+  Symbol tag = a.tag(), btag = b.tag();
+  if (tag == btag) {
+    if (a.is_wide()) return a.wide_equal(b);
+    VarDescriptor *descriptor = _descriptor_for_value(a);
+    if (descriptor && descriptor.methods.equal)
+      return descriptor.methods.equal(a, b);
+  }
+  return 0;
+}
+
+/** Applies non-dispatch equality to `a` and `b`. */
+int Var.fallback_equal(Var a, Var b) {
+  if (a.u64 == b.u64) return 1;
+  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  if (a.tag() == b.tag() && a.is_wide()) return a.wide_equal(b);
+  return 0;
+}
+
+/** Reports whether `a` and `b` have identical `Var` bits. */
+meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
+
+// ordering
+
+/** Compares `a` and `b` by runtime value group and registered ordering.
+    Raises: `<void-op>` when either operand is `void`.
+*/
+meta native int Var.compare(Var a, Var b) {
+  if (a.u64 == b.u64) {
+    if (a.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.compare"));
+    return 0;
+  }
+  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
+    raise %(void-op (owner "Var.compare"));
+
+  Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
+  int ag = _var_group(ak, atag), bg = _var_group(bk, btag);
+  if (ag != bg) return (ag < bg) ? -1 : 1;
+  switch (ag) {
+    case 0:  return _numeric_compare(a, b, ak, bk, atag, btag);
+    default: break;
+  }
+  if (atag == btag) {
+    VarDescriptor *descriptor = _descriptor_for_value(a);
+    if (descriptor && descriptor.methods.compare)
+      return descriptor.methods.compare(a, b);
+  }
+  int tc = atag.compare(btag);
+  if (tc) return tc;
+  if (ak == <pointer> || ak == <reference> || ak == <object>)
+    return _cmp_ptr(a, b);
+  return _compare_default(a, b);
+}
+
+/** Compares without consulting a runtime descriptor.
+    Raises: `<void-op>` when either operand is `void`.
+*/
+int Var.fallback_compare(Var a, Var b) {
+  if (a.u64 == b.u64) {
+    if (a.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.compare"));
+    return 0;
+  }
+  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
+    raise %(void-op (owner "Var.compare"));
+  Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
+  int ag = _var_group(ak, atag), bg = _var_group(bk, btag);
+  if (ag != bg) return (ag < bg) ? -1 : 1;
+  if (ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
+  int tc = atag.compare(btag);
+  if (tc) return tc;
+  if (ak == <pointer> || ak == <reference> || ak == <object>)
+    return _cmp_ptr(a, b);
+  return _compare_default(a, b);
+}
+
+/* Total ordering for ordinary Var values:
+     numbers < symbols < strings < arrays < lists < maps
+          < objects < references < pointers.
+   Numbers: -Inf < finite < +Inf < NaN; ties broken by rank (wider first).
+   Arrays/Lists: lexicographic by elements. */
+static int _var_group(Symbol kind, Symbol tag) {
+  if (_is_numeric_kind(kind)) return 0;
+  if (kind == <symbol>) return 1;
+  switch (tag) {
+    case <string>: return 2;
+    case <array>:  return 3;
+    case <list>:   return 4;
+    case <map>:    return 5;
+  }
+  if (kind == <object>) return 6;
+  if (kind == <reference>) return 7;
+  if (kind == <pointer>) return 8;
+  return 9;
+}
+
+static int _is_numeric_kind(Symbol kind) =>
+  (kind == <integer>) || (kind == <floating>);
+
+static int _cmp_ptr(Var a, Var b) {
+  uintptr_t ap = (uintptr_t) a.pointer(), bp = (uintptr_t) b.pointer();
+  if (ap == bp) return 0;
+  return (ap < bp) ? -1 : 1;
+}
+
+static int _compare_default(Var a, Var b) {
+  if (a.u64 == b.u64) return 0;
+  return (a.u64 < b.u64) ? -1 : 1;
+}
+
+// numeric ordering
+
+static int _numeric_compare(
+  Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag) {
+  int awide = a.is_wide(), bwide = b.is_wide();
+  long double da = ak == <floating>
+                 ? awide ? a.long_double_value() : (long double) a.floating()
+                 : 0.0L;
+  long double db = bk == <floating>
+                 ? bwide ? b.long_double_value() : (long double) b.floating()
+                 : 0.0L;
+  int ca = _numeric_class(atag, da), cb = _numeric_class(btag, db);
+  if (ca != cb) return (ca < cb) ? -1 : 1;
+  if (ca == 1) {
+    int cmp;
+    if (ak == <integer> && bk == <integer>) cmp = a.integer_compare(b);
+    else if (ak == <integer>) cmp = a.integer_floating_compare(b);
+    else if (bk == <integer>) cmp = -b.integer_floating_compare(a);
+    else cmp = da < db ? -1 : da > db ? 1 : 0;
+    if (cmp) return cmp;
+  }
+  int ra = _numeric_rank(atag), rb = _numeric_rank(btag);
+  if (ra != rb) return (ra < rb) ? 1 : -1;  // Higher rank sorts first.
+  int tc = atag.compare(btag);
+  if (tc) return tc;
+  if (atag == btag && awide && bwide) return a.wide_compare(b);
+  // preserve strict ordering among encodings of the same value
+  return _compare_default(a, b);
+}
+
+static int _numeric_class(Symbol tag, long double value) {
+  if (tag == <-inf>) return 0;
+  if (tag == <+inf>) return 2;
+  if (tag == <nan> || value != value) return 3;
+  if (value == 1.0 / 0.0) return 2;
+  if (value == -1.0 / 0.0) return 0;
+  return 1;
+}
+
+static int _numeric_rank(Symbol tag) {
+  if (tag == <float>) tag = <f32>;
+  if (tag == <double>) tag = <f64>;
+  X2CVarNumericInfo info;
+  return Var.numeric_info(tag, info) ? info.rank : 0;
+}
+
+// iteration
+
+/** Returns an iterator over `Var`.
+    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
+    raising.
+*/
+meta native Iter Var.iter(Var x, Iter dest) {
+  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
+  if (!dest) return NULL;
+  VarDescriptor *descriptor = _descriptor_for_value(x);
+  if (descriptor && descriptor.methods.iter)
+    return descriptor.methods.iter(x, dest);
+  return x.fallback_iter(dest);
+}
+
+/** Returns a non-dispatch iterator over `Var`.
+    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
+    raising.
+*/
+Iter Var.fallback_iter(Var x, Iter dest) {
+  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
+  if (!dest) return NULL;
+  return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
+}
+
+// indexed members
+
+/** Tests dynamic membership through the receiver's registered protocol row.
+    Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
+    receiver cannot perform membership.
+*/
+meta native int Var.contains(Var value, Var needle) {
+  _valid_member_operand(value, "receiver");
+  _valid_member_operand(needle, "needle");
+  Symbol member = <contains>;
+  VarDescriptor *descriptor = _required_descriptor(value, member);
+  if (descriptor.methods.contains)
+    return descriptor.methods.contains(value, needle);
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+/** Reads a dynamic indexed value through the receiver's protocol row.
+    Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
+    receiver cannot be indexed.
+*/
+meta native Var Var.getindex(Var value, Var key) {
+  _valid_member_operand(value, "receiver");
+  _valid_member_operand(key, "key");
+  Symbol member = <getindex>;
+  VarDescriptor *descriptor = _required_descriptor(value, member);
+  if (descriptor.methods.getindex)
+    return descriptor.methods.getindex(value, key);
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+/** Stores and returns a dynamic indexed value through its protocol row.
+    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
+    receiver's indexed assignment.
+*/
+meta native Var Var.setindex(Var value, Var key, Var replacement) {
+  _valid_member_operand(value, "receiver");
+  _valid_member_operand(key, "key");
+  _valid_member_operand(replacement, "value");
+  Symbol member = <setindex>;
+  VarDescriptor *descriptor = _required_descriptor(value, member);
+  if (descriptor.methods.setindex)
+    return descriptor.methods.setindex(value, key, replacement);
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+/** Applies the registered dynamic compound update at `key` and returns its
+    result. Mutation and failure behavior belong to that callback; this
+    dispatch adds no thread or failure atomicity guarantee.
+    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
+    receiver's indexed update.
+*/
+meta native Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
+  _valid_member_operand(value, "receiver");
+  _valid_member_operand(key, "key");
+  _valid_member_operand(rhs, "right");
+  Symbol member = <update-idx>;
+  VarDescriptor *descriptor = _required_descriptor(value, member);
+  if (descriptor.methods.updateindex)
+    return descriptor.methods.updateindex(value, key, op, rhs);
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+/** Applies a dynamic postfix update at `key` and returns its prior value.
+    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
+    receiver's indexed update.
+*/
+meta native Var Var.postfixindex(Var value, Var key, Symbol op) {
+  _valid_member_operand(value, "receiver");
+  _valid_member_operand(key, "key");
+  Symbol member = <postfx-idx>;
+  VarDescriptor *descriptor = _required_descriptor(value, member);
+  if (descriptor.methods.postfixindex)
+    return descriptor.methods.postfixindex(value, key, op);
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+static void _valid_member_operand(Var value, String side) {
+  if (!value.encoding_valid()) {
+    unsigned long bits = value.u64;
+    raise %(bad-enc (value $bits) (side $side));
+  }
+  if (value is void) raise %(void-op (side $side));
+}
+
+static VarDescriptor *_required_descriptor(Var value, Symbol member) {
+  VarDescriptor *descriptor = _descriptor_for_value(value);
+  if (descriptor) return descriptor;
+  Symbol tag = value.tag();
+  raise %(no-member (tag $tag) (member $member));
+}
+
+// optional callbacks
 
 /** Tries the registered truth callback for `value`.
     A null `handled`, missing descriptor, or missing callback returns zero.
@@ -91,6 +703,20 @@ int Var.try_dispatch_unary(Var value, Symbol member, Var &?result) {
   result = descriptor.methods.neg(value);
   return 1;
 }
+
+/** Calls the registered `Context` exporter for `value` when one exists.
+    Returns nonzero when the descriptor registers an exporter, and writes its
+    result to `out`. `Context` handles built-in value families directly.
+*/
+int Var.try_export_context(Var value, Context source, Var &?out) {
+  if (!out) return 0;
+  VarDescriptor *descriptor = _descriptor_for_value(value);
+  if (!descriptor || !descriptor.methods.export_context) return 0;
+  out = descriptor.methods.export_context(value, source);
+  return 1;
+}
+
+// registration
 
 /** Attempts to make lowercase `name` available as a process-global `Var` tag.
     This no-result form silently ignores invalid names. A custom tag spends a
@@ -206,210 +832,9 @@ void x2c_register_tagged_descriptor(
                      (tag $tag) (name $name));
 }
 
-/** Formats the fallback display `String` for a pointer-bearing `Var`. */
-String Var.pointer_string(Var v) {
-  Symbol tag = v.tag();
-  if (tag == <p48>) return "<0x%012lX>".printf((long) v.pointer());
-  return "<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
-}
-
-/** Writes the fallback readable form of a pointer-bearing `Var`. */
-Buffer Var.write_pointer_repr(Var v, Buffer out) {
-  Symbol tag = v.tag();
-  if (tag == <p48>) return out.printf("<0x%012lX>", (long) v.pointer());
-  char name[32] = { 0 };
-  tag.decode(name);
-  return out.printf("<%s: 0x%012lX>", name, (long) v.pointer());
-}
-
-#pragma private
-#include "var.x"
-#include "varconvert.x"
-#include "symbol.x"
-#include "string.x"
-#include "array.x"
-#include "buffer.x"
-#include "list.x"
-#include "file.x"
-#include "iter.x"
-#include "exception.x"
-#include "mutex.x"
-#include <float.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-/* One row per boxed ledger tag, in ledger order, so a decoded value indexes
-   the table without another tag search. */
-static VarDescriptor
-  builtin_descriptors[_var_ - _array_ + 1] = {0};
-
-int x2c_var_descriptor_index(Var value);
-VarDescriptor *x2c_var_custom_descriptor(Var value);
-VarDescriptor *x2c_var_declare(Symbol tag);
-int x2c_var_tag_descriptor_index(Symbol tag);
-
-static threaded RenderPath *render_path;
-static pthread_mutex_t descriptor_mutex;
-static pthread_once_t descriptor_mutex_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
-static int descriptor_registration_frozen;
-
-static void _descriptor_mutex_initialize(void) =>
-  x2c_mutex_recursive_initialize(
-    &descriptor_mutex, "Var descriptor: could not initialize mutex");
-
-static void _descriptor_lock(void) =>
-  x2c_mutex_recursive_lock(
-    &descriptor_mutex, &descriptor_mutex_once, _descriptor_mutex_initialize,
-    "Var descriptor: could not lock mutex");
-
-static void _descriptor_unlock(void) =>
-  x2c_mutex_recursive_unlock(
-    &descriptor_mutex, "Var descriptor: could not unlock mutex");
-
-/** Locks descriptor registration while a native worker starts.
-    The caller must pair this on the same thread with
-    `x2c_descriptor_thread_start_end`.
-*/
-void x2c_descriptor_thread_start_begin(void) {
-  _descriptor_lock();
-}
-
-/** Ends a native worker start and unlocks descriptor registration.
-    A nonzero `success` permanently freezes subsequent registration; zero
-    leaves it open for another attempt.
-*/
-void x2c_descriptor_thread_start_end(int success) {
-  if (success) descriptor_registration_frozen = 1;
-  _descriptor_unlock();
-}
-
-/** Reports under the descriptor lock whether registration is frozen. */
-int x2c_descriptor_registration_frozen(void) {
-  _descriptor_lock();
-  int result = descriptor_registration_frozen;
-  _descriptor_unlock();
-  return result;
-}
-
-static VarDescriptor *_reserved_builtin_descriptor_for_tag(Symbol tag) {
-  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
-  int index = x2c_var_tag_descriptor_index(tag);
-  if (index < 0 || index >= count) return NULL;
-  return &builtin_descriptors[index];
-}
-
-static VarDescriptor *_builtin_descriptor_for_tag(Symbol tag) {
-  VarDescriptor *descriptor = _reserved_builtin_descriptor_for_tag(tag);
-  return descriptor && descriptor.value_dispatch ? descriptor : NULL;
-}
-
-static VarDescriptor *_descriptor_for_value(Var value) {
-  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
-  int index = x2c_var_descriptor_index(value);
-  VarDescriptor *builtin = index >= 0 && index < count
-                         ? &builtin_descriptors[index] : NULL;
-  VarDescriptor *descriptor = builtin ? builtin
-                           : x2c_var_custom_descriptor(value);
-  if (!descriptor || !descriptor.value_dispatch) return NULL;
-  return descriptor;
-}
-
-static void _valid_member_operand(Var value, String side) {
-  if (!value.encoding_valid()) {
-    unsigned long bits = value.u64;
-    raise %(bad-enc (value $bits) (side $side));
-  }
-  if (value is void) raise %(void-op (side $side));
-}
-
-static VarDescriptor *_required_descriptor(Var value, Symbol member) {
-  VarDescriptor *descriptor = _descriptor_for_value(value);
-  if (descriptor) return descriptor;
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
-/** Tests dynamic membership through the receiver's registered protocol row.
-    Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
-    receiver cannot perform membership.
-*/
-meta native int Var.contains(Var value, Var needle) {
-  _valid_member_operand(value, "receiver");
-  _valid_member_operand(needle, "needle");
-  Symbol member = <contains>;
-  VarDescriptor *descriptor = _required_descriptor(value, member);
-  if (descriptor.methods.contains)
-    return descriptor.methods.contains(value, needle);
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
-/** Reads a dynamic indexed value through the receiver's protocol row.
-    Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
-    receiver cannot be indexed.
-*/
-meta native Var Var.getindex(Var value, Var key) {
-  _valid_member_operand(value, "receiver");
-  _valid_member_operand(key, "key");
-  Symbol member = <getindex>;
-  VarDescriptor *descriptor = _required_descriptor(value, member);
-  if (descriptor.methods.getindex)
-    return descriptor.methods.getindex(value, key);
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
-/** Stores and returns a dynamic indexed value through its protocol row.
-    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
-    receiver's indexed assignment.
-*/
-meta native Var Var.setindex(Var value, Var key, Var replacement) {
-  _valid_member_operand(value, "receiver");
-  _valid_member_operand(key, "key");
-  _valid_member_operand(replacement, "value");
-  Symbol member = <setindex>;
-  VarDescriptor *descriptor = _required_descriptor(value, member);
-  if (descriptor.methods.setindex)
-    return descriptor.methods.setindex(value, key, replacement);
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
-/** Applies the registered dynamic compound update at `key` and returns its
-    result. Mutation and failure behavior belong to that callback; this
-    dispatch adds no thread or failure atomicity guarantee.
-    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
-    receiver's indexed update.
-*/
-meta native Var Var.updateindex(Var value, Var key, Symbol op, Var rhs) {
-  _valid_member_operand(value, "receiver");
-  _valid_member_operand(key, "key");
-  _valid_member_operand(rhs, "right");
-  Symbol member = <update-idx>;
-  VarDescriptor *descriptor = _required_descriptor(value, member);
-  if (descriptor.methods.updateindex)
-    return descriptor.methods.updateindex(value, key, op, rhs);
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
-}
-
-/** Applies a dynamic postfix update at `key` and returns its prior value.
-    Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
-    receiver's indexed update.
-*/
-meta native Var Var.postfixindex(Var value, Var key, Symbol op) {
-  _valid_member_operand(value, "receiver");
-  _valid_member_operand(key, "key");
-  Symbol member = <postfx-idx>;
-  VarDescriptor *descriptor = _required_descriptor(value, member);
-  if (descriptor.methods.postfixindex)
-    return descriptor.methods.postfixindex(value, key, op);
-  Symbol tag = value.tag();
-  raise %(no-member (tag $tag) (member $member));
+static VarDescriptor *_reserve_descriptor(String name) {
+  if (!name || name != name.lower()) return 0;
+  return _reserve_tagged_descriptor(Symbol.new(name), name, 1);
 }
 
 static VarDescriptor *_reserve_tagged_descriptor(
@@ -443,9 +868,16 @@ static VarDescriptor *_reserve_tagged_descriptor(
   return descriptor;
 }
 
-static VarDescriptor *_reserve_descriptor(String name) {
-  if (!name || name != name.lower()) return 0;
-  return _reserve_tagged_descriptor(Symbol.new(name), name, 1);
+static VarDescriptor *_builtin_descriptor_for_tag(Symbol tag) {
+  VarDescriptor *descriptor = _reserved_builtin_descriptor_for_tag(tag);
+  return descriptor && descriptor.value_dispatch ? descriptor : NULL;
+}
+
+static VarDescriptor *_reserved_builtin_descriptor_for_tag(Symbol tag) {
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  int index = x2c_var_tag_descriptor_index(tag);
+  if (index < 0 || index >= count) return NULL;
+  return &builtin_descriptors[index];
 }
 
 /*  Every VarMethods field is a function pointer, so one pass over the struct
@@ -467,454 +899,47 @@ static void _install_descriptor_methods(
   }
 }
 
-/* `_write_primitive_repr` is the one owner of the numeric repr spellings. The
-   `String` form renders through a `Buffer` rather than keeping a second copy
-   of the table that could drift from it again. */
-static String _primitive_repr(Var v, Symbol tag) =>
-  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
+// registration lock
 
-static String _primitive_str(Var v, Symbol tag) {
-  switch (tag) {
-    case <i8>:   case <u8>:   return "%c".printf(v);
-    case <i16>:  case <i32>:  return "%d".printf(v);
-    case <i48>:  return "%ld".printf(v);
-    case <long>:  return "%ld".printf(v);
-    case <llong>: return "%lld".printf(v);
-    case <u16>:  case <u32>:  return "%u".printf(v);
-    case <u48>:  return "%lu".printf(v);
-    case <ulong>:  return "%lu".printf(v);
-    case <ullong>: return "%llu".printf(v);
-    case <f32>:  case <f64>:  return "%lf".printf(v);
-    case <ldouble>: return "%Lf".printf(v);
-    case <nan>:  case <+inf>: case <-inf>: return %"$tag";
-  }
-  return v.pointer_string();
-}
+static pthread_mutex_t descriptor_mutex;
+static pthread_once_t descriptor_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+static int descriptor_registration_frozen;
 
-/** Returns the non-dispatch display `String` of `Var`. */
-String Var.fallback_str(Var v) {
-  Symbol tag = v.tag();
-  switch (v.kind()) {
-    case <floating>: case <integer>:   return _primitive_str(v, tag);
-    case <pointer>:  case <reference>: return v.pointer_string();
-    case <void>:     return "void";
-  }
-  return v.pointer_string();
-}
+static void _descriptor_lock(void) =>
+  x2c_mutex_recursive_lock(
+    &descriptor_mutex, &descriptor_mutex_once, _descriptor_mutex_initialize,
+    "Var descriptor: could not lock mutex");
 
-/** Returns the display `String` of `Var`. */
-String Var.str(Var v) {
-  VarDescriptor *descriptor = _descriptor_for_value(v);
-  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
-  return v.fallback_str();
-}
+static void _descriptor_unlock(void) =>
+  x2c_mutex_recursive_unlock(
+    &descriptor_mutex, "Var descriptor: could not unlock mutex");
 
-static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
-  switch (tag) {
-    case <i8>:   case <u8>:   return out.printf("%c", v);
-    case <i16>:  case <i32>:  return out.printf("%d", v);
-    case <i48>:  case <long>:  return out.printf("%ld", v);
-    case <llong>: return out.printf("%lld", v);
-    case <u16>:  case <u32>:  return out.printf("%u", v);
-    case <u48>:  case <ulong>:  return out.printf("%lu", v);
-    case <ullong>: return out.printf("%llu", v);
-    case <f32>:  case <f64>:  return out.printf("%lf", v);
-    case <ldouble>: return out.printf("%Lf", v);
-    case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
-  }
-  return out.write(v.pointer_string());
-}
+static void _descriptor_mutex_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &descriptor_mutex, "Var descriptor: could not initialize mutex");
 
-/** Appends the non-dispatch display text of `Var` to a `Buffer`.
-    A primitive, pointer, or `void` renders straight into `out` instead of
-    through an intermediate `String`.
+/** Locks descriptor registration while a native worker starts.
+    The caller must pair this on the same thread with
+    `x2c_descriptor_thread_start_end`.
 */
-Buffer Var.fallback_write_str(Var v, Buffer out) {
-  Symbol tag = v.tag();
-  switch (v.kind()) {
-    case <floating>:
-    case <integer>:   return _write_primitive_str(v, tag, out);
-    case <pointer>: case <reference>:
-      return out.write(v.pointer_string());
-    case <void>:      return out.write("void");
-  }
-  return out.write(v.pointer_string());
+void x2c_descriptor_thread_start_begin(void) {
+  _descriptor_lock();
 }
 
-/** Appends the display text of `Var` to a `Buffer`.
-    A descriptor that registers `write_str` streams straight into `out`. One
-    that registers only `str` writes its `String` through, which materializes
-    the text but keeps existing custom descriptors working. Neither fallback
-    re-enters this function, so a descriptor providing neither cannot
-    recurse.
+/** Ends a native worker start and unlocks descriptor registration.
+    A nonzero `success` permanently freezes subsequent registration; zero
+    leaves it open for another attempt.
 */
-Buffer Var.write_str(Var v, Buffer out) {
-  if (out == NULL) return NULL;
-  VarDescriptor *descriptor = _descriptor_for_value(v);
-  if (descriptor && descriptor.methods.write_str)
-    return descriptor.methods.write_str(v, out);
-  if (descriptor && descriptor.methods.str) {
-    String text = descriptor.methods.str(v);
-    return text ? out.write(text) : out;
-  }
-  return v.fallback_write_str(out);
+void x2c_descriptor_thread_start_end(int success) {
+  if (success) descriptor_registration_frozen = 1;
+  _descriptor_unlock();
 }
 
-/** Returns the non-dispatch readable representation of `Var`. */
-String Var.fallback_repr(Var v) {
-  Symbol tag = v.tag();
-  switch (v.kind()) {
-    case <floating>: case <integer>:   return _primitive_repr(v, tag);
-    case <pointer>:  case <reference>: return v.pointer_string();
-    case <void>:     return "void";
-  }
-  return v.pointer_string();
-}
-
-/** Returns the readable representation of `Var`. */
-String Var.repr(Var v) {
-  VarDescriptor *descriptor = _descriptor_for_value(v);
-  if (descriptor && descriptor.methods.repr) return descriptor.methods.repr(v);
-  if (descriptor && descriptor.methods.str) return descriptor.methods.str(v);
-  return v.fallback_repr();
-}
-
-/* A byte is spelled the way C spells a character constant. Writing the raw
-   byte instead would put a NUL or a control byte inside the repr text. */
-static Buffer _write_byte_repr(Buffer out, unsigned byte) {
-  switch (byte) {
-    case '\\': return out.write("'\\\\'");
-    case '\'': return out.write("'\\''");
-    case '\n': return out.write("'\\n'");
-    case '\t': return out.write("'\\t'");
-    case '\r': return out.write("'\\r'");
-  }
-  if (byte >= 0x20 && byte < 0x7F) return out.printf("'%c'", (int) byte);
-  return out.printf("'\\x%02X'", byte);
-}
-
-/* The shortest decimal that reads back as `value`, followed by the suffix
-   that names its C type. `*_DECIMAL_DIG` is the precision that always
-   round-trips that width on this target; starting three digits short keeps
-   0.1 spelled `0.1` instead of `0.10000000000000001`. The candidate is
-   narrowed to `width` before the comparison, so a float is not asked to match
-   a double's digits. */
-static Buffer _write_float_repr(
-  Buffer out, long double value, Symbol width, String suffix) {
-  int limit = width == <f32> ? FLT_DECIMAL_DIG
-            : (width == <f64> ? DBL_DECIMAL_DIG : LDBL_DECIMAL_DIG);
-  char text[48];
-  int digits = limit - 3;
-  for (; digits < limit; digits++) {
-    snprintf(text, sizeof text, "%.*Lg", digits, value);
-    long double back = strtold(text, NULL);
-    if (width == <f32>) back = (float) back;
-    else if (width == <f64>) back = (double) back;
-    if (back == value) break;
-  }
-  if (digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
-  /* `%g` drops the point for a whole value, and bare digits read back as an
-     integer, so restore the form that says floating. */
-  if (text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
-  out.write(text);
-  return suffix ? out.write(suffix) : out;
-}
-
-/* Each numeric tag prints its own value with its own C spelling, so the text
-   names both the number and the width it was boxed at. The narrow integer
-   tags read their payload through `Var.long`, which does not widen a signed
-   value into another tag's domain. */
-static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
-  switch (tag) {
-    case <i8>:  case <u8>:
-      return _write_byte_repr(out, (unsigned) (uchar) v.long());
-    case <u16>: case <i16>:
-      return out.printf("0x%04X", (unsigned) (ushort) v.long());
-    case <i32>:  return out.printf("%d", (int) v.long());
-    case <u32>:  return out.printf("%uu", (unsigned) v.long());
-    case <u48>:  return out.printf("0x%012lXul", v.ulong() & 0xFFFFFFFFFFFFul);
-    case <i48>:
-      return out.printf("0x%012lXl", (ulong) v.long() & 0xFFFFFFFFFFFFul);
-    case <long>:  return out.printf("%ldl", v.long());
-    case <ulong>:  return out.printf("%luul", v.ulong());
-    case <llong>: return out.printf("%lldll", v.long_long());
-    case <ullong>: return out.printf("%lluull", v.ulong_long());
-    case <f32>:  return _write_float_repr(out, v.floating(), <f32>, "f");
-    case <f64>:  return _write_float_repr(out, v.floating(), <f64>, NULL);
-    case <ldouble>:
-      return _write_float_repr(out, v.long_double(), <ldouble>, "l");
-    case <nan>:  return out.write("NaN");
-    case <+inf>: return out.write("+Inf");
-    case <-inf>: return out.write("-Inf");
-  }
-  return v.write_pointer_repr(out);
-}
-
-/** Appends the non-dispatch representation of `Var` to a `Buffer`. */
-Buffer Var.fallback_write_repr(Var v, Buffer out) {
-  Symbol tag = v.tag();
-  switch (v.kind()) {
-    case <floating>:
-    case <integer>:   return _write_primitive_repr(v, tag, out);
-    case <pointer>: case <reference>:
-      return v.write_pointer_repr(out);
-    case <void>:      return out.write("void");
-  }
-  return v.write_pointer_repr(out);
-}
-
-/** Appends the readable representation of `Var` to a `Buffer`. */
-Buffer Var.write_repr(Var v, Buffer out) {
-  if (out == NULL) return NULL;
-  VarDescriptor *descriptor = _descriptor_for_value(v);
-  if (descriptor && descriptor.methods.write_repr)
-    return descriptor.methods.write_repr(v, out);
-  if (descriptor && descriptor.methods.repr) {
-    String text = descriptor.methods.repr(v);
-    return text ? out.write(text) : out;
-  }
-  if (descriptor && descriptor.methods.str) {
-    String text = descriptor.methods.str(v);
-    return text ? out.write(text) : out;
-  }
-  return v.fallback_write_repr(out);
-}
-
-/* A Var is one 64-bit word, so it hashes as one through the shared mixer.
-   Every Map, Set, and symbol table runs this hash on every lookup. Map masks
-   the low bits, which fmix64 avalanches as well as the high ones. */
-static unsigned _default_hash(Var var) => x2c_hash_word(var.u64);
-
-/** Applies non-dispatch equality to `a` and `b`. */
-int Var.fallback_equal(Var a, Var b) {
-  if (a.u64 == b.u64) return 1;
-  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
-  if (a.tag() == b.tag() && a.is_wide()) return a.wide_equal(b);
-  return 0;
-}
-
-/** Returns the non-dispatch runtime hash of `Var`.
-    Raises: `<void-op>` for `void`.
-*/
-unsigned Var.fallback_hash(Var v) {
-  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.fallback_hash"));
-  if (v.is_wide()) return v.wide_hash();
-  return _default_hash(v);
-}
-
-/** Returns the runtime hash of `Var`.
-    Raises: `<void-op>` for `void`.
-*/
-unsigned Var.hash(Var v) {
-  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.hash"));
-  if (v.is_wide()) return v.wide_hash();
-  /* Canonical `List`s are most of what the pool tables hash, and both these
-     hashes are constant time. Unboxing a known tag is one mask and compare,
-     where the descriptor row costs a full decode. `nil` and the empty
-     `String` unbox as NULL and take the general path, which hashes them the
-     same way it always did. */
-  List lst = v;
-  if (lst) return List.hash(lst);
-  String str = v;
-  if (str) {
-    unsigned hash = str.hash();
-    return hash ? hash : -1;
-  }
-  VarDescriptor *descriptor = _descriptor_for_value(v);
-  if (descriptor && descriptor.methods.hash) {
-    unsigned hash = descriptor.methods.hash(v);
-    return hash ? hash : -1;
-  }
-  return _default_hash(v);
-}
-
-/** Applies the registered equality operation for `a` and `b`. */
-int Var.equal(Var a, Var b) {
-  if (a.u64 == b.u64) return 1;
-  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
-  /* Built-in object and Symbol rows identify the tag, so equal rows are
-     equal tags and the row selects the descriptor without a second decode. */
-  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
-  int row = x2c_var_descriptor_index(a);
-  if (row >= 0 && row < count) {
-    if (x2c_var_descriptor_index(b) != row) return 0;
-    VarDescriptor *descriptor = &builtin_descriptors[row];
-    return descriptor.value_dispatch && descriptor.methods.equal
-         ? descriptor.methods.equal(a, b) : 0;
-  }
-  Symbol tag = a.tag(), btag = b.tag();
-  if (tag == btag) {
-    if (a.is_wide()) return a.wide_equal(b);
-    VarDescriptor *descriptor = _descriptor_for_value(a);
-    if (descriptor && descriptor.methods.equal)
-      return descriptor.methods.equal(a, b);
-  }
-  return 0;
-}
-
-/** Reports whether `a` and `b` have identical `Var` bits. */
-meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
-
-static int _compare_default(Var a, Var b) {
-  if (a.u64 == b.u64) return 0;
-  return (a.u64 < b.u64) ? -1 : 1;
-}
-
-static int _is_numeric_kind(Symbol kind) =>
-  (kind == <integer>) || (kind == <floating>);
-
-static int _cmp_ptr(Var a, Var b) {
-  uintptr_t ap = (uintptr_t) a.pointer(), bp = (uintptr_t) b.pointer();
-  if (ap == bp) return 0;
-  return (ap < bp) ? -1 : 1;
-}
-
-static int _numeric_rank(Symbol tag) {
-  if (tag == <float>) tag = <f32>;
-  if (tag == <double>) tag = <f64>;
-  X2CVarNumericInfo info;
-  return Var.numeric_info(tag, info) ? info.rank : 0;
-}
-
-static int _numeric_class(Symbol tag, long double value) {
-  if (tag == <-inf>) return 0;
-  if (tag == <+inf>) return 2;
-  if (tag == <nan> || value != value) return 3;
-  if (value == 1.0 / 0.0) return 2;
-  if (value == -1.0 / 0.0) return 0;
-  return 1;
-}
-
-static int _numeric_compare(
-  Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag) {
-  int awide = a.is_wide(), bwide = b.is_wide();
-  long double da = ak == <floating>
-                 ? awide ? a.long_double_value() : (long double) a.floating()
-                 : 0.0L;
-  long double db = bk == <floating>
-                 ? bwide ? b.long_double_value() : (long double) b.floating()
-                 : 0.0L;
-  int ca = _numeric_class(atag, da), cb = _numeric_class(btag, db);
-  if (ca != cb) return (ca < cb) ? -1 : 1;
-  if (ca == 1) {
-    int cmp;
-    if (ak == <integer> && bk == <integer>) cmp = a.integer_compare(b);
-    else if (ak == <integer>) cmp = a.integer_floating_compare(b);
-    else if (bk == <integer>) cmp = -b.integer_floating_compare(a);
-    else cmp = da < db ? -1 : da > db ? 1 : 0;
-    if (cmp) return cmp;
-  }
-  int ra = _numeric_rank(atag), rb = _numeric_rank(btag);
-  if (ra != rb) return (ra < rb) ? 1 : -1;  // Higher rank sorts first.
-  int tc = atag.compare(btag);
-  if (tc) return tc;
-  if (atag == btag && awide && bwide) return a.wide_compare(b);
-  // preserve strict ordering among encodings of the same value
-  return _compare_default(a, b);
-}
-
-/* Total ordering for ordinary Var values:
-     numbers < symbols < strings < arrays < lists < maps
-          < objects < references < pointers.
-   Numbers: -Inf < finite < +Inf < NaN; ties broken by rank (wider first).
-   Arrays/Lists: lexicographic by elements. */
-static int _var_group(Symbol kind, Symbol tag) {
-  if (_is_numeric_kind(kind)) return 0;
-  if (kind == <symbol>) return 1;
-  switch (tag) {
-    case <string>: return 2;
-    case <array>:  return 3;
-    case <list>:   return 4;
-    case <map>:    return 5;
-  }
-  if (kind == <object>) return 6;
-  if (kind == <reference>) return 7;
-  if (kind == <pointer>) return 8;
-  return 9;
-}
-
-/** Compares without consulting a runtime descriptor.
-    Raises: `<void-op>` when either operand is `void`.
-*/
-int Var.fallback_compare(Var a, Var b) {
-  if (a.u64 == b.u64) {
-    if (a.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.compare"));
-    return 0;
-  }
-  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
-    raise %(void-op (owner "Var.compare"));
-  Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
-  int ag = _var_group(ak, atag), bg = _var_group(bk, btag);
-  if (ag != bg) return (ag < bg) ? -1 : 1;
-  if (ag == 0) return _numeric_compare(a, b, ak, bk, atag, btag);
-  int tc = atag.compare(btag);
-  if (tc) return tc;
-  if (ak == <pointer> || ak == <reference> || ak == <object>)
-    return _cmp_ptr(a, b);
-  return _compare_default(a, b);
-}
-
-/** Compares `a` and `b` by runtime value group and registered ordering.
-    Raises: `<void-op>` when either operand is `void`.
-*/
-meta native int Var.compare(Var a, Var b) {
-  if (a.u64 == b.u64) {
-    if (a.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.compare"));
-    return 0;
-  }
-  if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
-    raise %(void-op (owner "Var.compare"));
-
-  Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
-  int ag = _var_group(ak, atag), bg = _var_group(bk, btag);
-  if (ag != bg) return (ag < bg) ? -1 : 1;
-  switch (ag) {
-    case 0:  return _numeric_compare(a, b, ak, bk, atag, btag);
-    default: break;
-  }
-  if (atag == btag) {
-    VarDescriptor *descriptor = _descriptor_for_value(a);
-    if (descriptor && descriptor.methods.compare)
-      return descriptor.methods.compare(a, b);
-  }
-  int tc = atag.compare(btag);
-  if (tc) return tc;
-  if (ak == <pointer> || ak == <reference> || ak == <object>)
-    return _cmp_ptr(a, b);
-  return _compare_default(a, b);
-}
-
-/** Returns a non-dispatch iterator over `Var`.
-    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
-    raising.
-*/
-Iter Var.fallback_iter(Var x, Iter dest) {
-  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
-  if (!dest) return NULL;
-  return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
-}
-
-/** Returns an iterator over `Var`.
-    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
-    raising.
-*/
-meta native Iter Var.iter(Var x, Iter dest) {
-  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
-  if (!dest) return NULL;
-  VarDescriptor *descriptor = _descriptor_for_value(x);
-  if (descriptor && descriptor.methods.iter)
-    return descriptor.methods.iter(x, dest);
-  return x.fallback_iter(dest);
-}
-
-/** Calls the registered `Context` exporter for `value` when one exists.
-    Returns nonzero when the descriptor registers an exporter, and writes its
-    result to `out`. `Context` handles built-in value families directly.
-*/
-int Var.try_export_context(Var value, Context source, Var &?out) {
-  if (!out) return 0;
-  VarDescriptor *descriptor = _descriptor_for_value(value);
-  if (!descriptor || !descriptor.methods.export_context) return 0;
-  out = descriptor.methods.export_context(value, source);
-  return 1;
+/** Reports under the descriptor lock whether registration is frozen. */
+int x2c_descriptor_registration_frozen(void) {
+  _descriptor_lock();
+  int result = descriptor_registration_frozen;
+  _descriptor_unlock();
+  return result;
 }
