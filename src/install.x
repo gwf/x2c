@@ -88,6 +88,16 @@ static void _host_error(List detail) {
 
 // installing
 
+/* One install under the packages lock. The package comes from the local
+   directory or tarball `source`, or from the archive at `url`; `sha256`
+   checks a download or a tarball. `spec` is the operand that named the
+   package, and `version` the version it resolved to. `packages` is the
+   home's packages directory and `work` the staging directory. */
+typedef struct Install {
+  CliRequest request, String spec, source, url, sha256, version;
+  String packages, work;
+} Install;
+
 /** Installs the package named by the request's one operand and returns 0.
     The operand is a local directory, a local `.tar.gz`, a URL with
     `--sha256`, or a name resolved through the package index. A bundle is
@@ -95,25 +105,11 @@ static void _host_error(List detail) {
     source package is built by this compiler. Failures exit with status 2.
 */
 int install_command(CliRequest request) {
-  String spec = request.inputs.car();
-  String packages = _locked_packages("install", request.quiet);
-  Path work = _work_directory(packages);
+  Install i = _locked_install(request, request.inputs.car());
   defer _release_packages();
-  String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
-  if (_remote(spec)) {
-    if (!sha256) _error("a URL needs --sha256 <hex>");
-    url = spec;
-  }
-  else if (Path.exists(spec)) source = spec;
-  else if (spec.is_identifier()) {
-    List row = _index_row(request, spec, work);
-    version = row.nth_cdr(1).car();
-    url = row.nth_cdr(4).car();
-    sha256 = row.nth_cdr(5).car();
-  }
-  else _error(%"unknown package spec '$spec'");
-  (void) _install(
-    request, spec, source, url, sha256, version, packages, work);
+  i.sha256 = request.sha256;
+  i.locate();
+  i.run();
   return 0;
 }
 
@@ -126,56 +122,92 @@ int install_command(CliRequest request) {
 */
 List install_require(
   CliRequest request, String name, String version, List locked) {
-  String packages = _locked_packages("install", request.quiet);
-  Path work = _work_directory(packages);
+  Install i = _locked_install(request, name);
   defer _release_packages();
-  List row = locked ? locked : _index_row(request, name, work);
-  String resolved = row.nth_cdr(1).car();
+  List row = locked ? locked : _index_row(request, name, i.work);
+  String resolved = row[1];
   if (resolved != version)
     _error(%"the index has $name $resolved, not the pinned $version");
-  if (_installed_version(%"$packages/$name") != version)
-    (void) _install(
-      request, name, NULL, row.nth_cdr(4).car(), row.nth_cdr(5).car(),
-      resolved, packages, work);
+  if (_installed_version(%"${i.packages}/$name") != version) {
+    i.resolve(row);
+    i.run();
+  }
   return row;
 }
 
-/* Stages, builds, and publishes one package. `source` is a local directory
-   or tarball, or NULL when `url` names the archive to fetch. */
-static String _install(
-  CliRequest request, String spec, String source, String url, String sha256,
-  String version, String packages, String work) {
-  if (url) {
-    source = _fetch(url, work, "package.tar.gz");
-    _verify(source, sha256);
+/* An install of `spec` that holds the packages lock and owns a fresh
+   staging directory; the caller defers `_release_packages`. */
+static Install _locked_install(CliRequest request, String spec) {
+  String packages = _locked_packages("install", request.quiet);
+  return (Install) {
+    .request = request, .spec = spec, .packages = packages,
+    .work = _work_directory(packages)};
+}
+
+/* The operand is a URL, a local path, or a name the index resolves. */
+static void Install.locate(Install *i) {
+  String spec = i.spec;
+  if (_remote(spec)) {
+    if (!i.sha256) _error("a URL needs --sha256 <hex>");
+    i.url = spec;
   }
-  else if (sha256 && !Path.is_dir(source)) _verify(source, sha256);
-  String package = Path.is_dir(source) ? source : _unpack(source, work);
-  String name = Path.basename(package);
+  else if (Path.exists(spec)) i.source = spec;
+  else if (spec.is_identifier())
+    i.resolve(_index_row(i.request, spec, i.work));
+  else _error(%"unknown package spec '$spec'");
+}
+
+/* A resolved row names the version to record and the archive to fetch. */
+static void Install.resolve(Install *i, List row) {
+  i.version = row[1];
+  i.url = row[4];
+  i.sha256 = row[5];
+}
+
+/* Stages, builds, and publishes one package. */
+static void Install.run(Install *i) {
+  String package = i.unpacked(), name = Path.basename(package);
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
-  String staged = %"$work/$name";
+  String staged = %"${i.work}/$name";
   try Path.copy_tree(package, staged);
   catch %(io-fail *detail): _host_error(detail);
   if (Path.exists(%"$staged/BUNDLE.json"))
-    _check_bundle(request, staged, name);
+    _check_bundle(i.request, staged, name);
   else {
-    _build_source(staged, name, spec);
-    // A local path carries no version of its own. The package it replaces
-    // recorded one, and a project pin matches a name and a version, so
-    // dropping it would send the next build back to the index.
-    if (!version) version = _installed_version(%"$packages/$name");
-    Map record = {
-      "package": name, "source": url ? url : Path.absolute(spec),
-      "x2c_version": cli_version()
-    };
-    if (version) record["version"] = version;
-    if (sha256) record["sha256"] = sha256;
-    Path.write_text(%"$staged/SOURCE.json", %"${Var.pretty_json(record)}\n");
+    _build_source(staged, name, i.spec);
+    i.mark_source(staged, name);
   }
-  _publish(staged, packages, name);
-  if (!request.quiet)
-    fprintf(stderr, "x2c: installed %s/%s\n", packages, name);
-  return name;
+  _publish(staged, i.packages, name);
+  if (!i.request.quiet)
+    fprintf(stderr, "x2c: installed %s/%s\n", i.packages, name);
+}
+
+/* The package directory: `source` itself, or the tarball that `source`
+   names or `url` downloads, checked and unpacked in the work directory. */
+static String Install.unpacked(Install *i) {
+  String source = i.source;
+  if (i.url) {
+    source = _fetch(i.url, i.work, "package.tar.gz");
+    _verify(source, i.sha256);
+  }
+  else if (i.sha256 && !Path.is_dir(source)) _verify(source, i.sha256);
+  return Path.is_dir(source) ? source : _unpack(source, i.work);
+}
+
+/* SOURCE.json records where a source package came from. A local path
+   carries no version of its own. The package it replaces recorded one, and
+   a project pin matches a name and a version, so dropping it would send the
+   next build back to the index. */
+static void Install.mark_source(Install *i, String staged, String name) {
+  String version = i.version;
+  if (!version) version = _installed_version(%"${i.packages}/$name");
+  Map record = {
+    "package": name, "source": i.url ? i.url : Path.absolute(i.spec),
+    "x2c_version": cli_version()
+  };
+  if (version) record["version"] = version;
+  if (i.sha256) record["sha256"] = i.sha256;
+  Path.write_text(%"$staged/SOURCE.json", %"${Var.pretty_json(record)}\n");
 }
 
 /* Publishes the staged package with one rename, replacing an installed
@@ -211,48 +243,61 @@ static void _check_bundle(CliRequest request, String package, String name) {
    it also builds the module an import loads. These are the commands
    `packages/package.mk` runs. */
 static void _build_source(String package, String name, String spec) {
+  String src = %"$package/src", x2c = x2c_get_executable();
+  List units = _source_units(src, name, spec);
+  _refuse_native(package, name);
+  Path builds = _empty_builds(package);
+  List paths =
+    %("--x-include-dir" $src "--package-dir" ${Path.dirname(package)});
+  _run(%($x2c "translate" "--out-dir" $builds @paths @units), "translate");
+  _run(
+    %($x2c "build" "--kind" "static-library" "--output" "$builds/lib$name.a"
+      "--build-dir" "$builds/cc" @{_files_with(builds, ".c")}
+      @{_files_with(src, ".c")}),
+    "build");
+  if (_native_meta(builds, name))
+    _run(
+      %($x2c "build" "--kind" "meta-module" "--output" "$builds/$name.module"
+        "--build-dir" "$builds/module" @paths @units
+        @{_files_with(src, ".c")}),
+      "module build");
+  Path.write_text(%"$builds/$name.native.rsp", NULL);
+}
+
+/* The package's x2c units, which include its `src/<name>.x` entry unit. */
+static List _source_units(String src, String name, String spec) {
   List units = NULL;
-  try units = _files_with(%"$package/src", ".x")
-    .append(_files_with(%"$package/src", ".xp"));
+  try units = _files_with(src, ".x").append(_files_with(src, ".xp"));
   catch %(not-found *): {}
-  if (!units.contains(%"$package/src/$name.x") &&
-      !units.contains(%"$package/src/$name.xp"))
+  if (!units.contains(%"$src/$name.x") && !units.contains(%"$src/$name.xp"))
     _error(%"$spec has no src/$name.x entry unit");
+  return units;
+}
+
+/* A package that needs native dependencies installs only as a bundle. */
+static void _refuse_native(String package, String name) {
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||
         Path.stem(manifest).startswith("dependency-"))
       _error(%"$name needs native dependencies; install its bundle");
-  // Only what this compiler builds belongs in the installed package, so a
-  // builds directory the source tree carried is not archived with it.
-  Path builds = %"$package/builds", String x2c = x2c_get_executable();
+}
+
+/* Only what this compiler builds belongs in the installed package, so a
+   builds directory the source tree carried is not archived with it. */
+static Path _empty_builds(String package) {
+  Path builds = %"$package/builds";
   try builds.remove_tree();
   catch %(io-fail *detail): _host_error(detail);
   builds.make_dirs();
-  _run(
-    %( $x2c "translate" "--out-dir" $builds
-       "--x-include-dir" "$package/src"
-       "--package-dir" ${Path.dirname(package)} ).append(units),
-    "translate");
-  List inputs = _files_with(builds, ".c")
-    .append(_files_with(%"$package/src", ".c"));
-  _run(
-    %( $x2c "build" "--kind" "static-library"
-       "--output" "$builds/lib$name.a"
-       "--build-dir" "$builds/cc" ).append(inputs),
-    "build");
+  return builds;
+}
+
+/* Whether translation recorded a native `meta` prototype that the package
+   owns, so an import loads its module. */
+static int _native_meta(String builds, String name) {
   String row = %"native-meta \"${name}__";
-  if (_files_with(builds, ".xi").any(
-    %!(String path) => row in Path.read_text(path)))
-    _run(
-      %( $x2c "build" "--kind" "meta-module"
-         "--output" "$builds/$name.module"
-         "--build-dir" "$builds/module"
-         "--x-include-dir" "$package/src"
-         "--package-dir" ${Path.dirname(package)} )
-        .append(units)
-        .append(_files_with(%"$package/src", ".c")),
-      "module build");
-  Path.write_text(%"$builds/$name.native.rsp", NULL);
+  return _files_with(builds, ".xi").any(
+    %!(String path) => row in Path.read_text(path));
 }
 
 // installed packages
@@ -273,9 +318,10 @@ static String _installed_version(String package) {
 
 /* `bundle` or `source` for an installed package, or NULL for a directory
    without an install marker. */
-static String _installed_kind(String package) =>
-  Path.exists(%"$package/BUNDLE.json") ? "bundle" :
-  Path.exists(%"$package/SOURCE.json") ? "source" : NULL;
+static String _installed_kind(String package) {
+  if (Path.exists(%"$package/BUNDLE.json")) return "bundle";
+  return Path.exists(%"$package/SOURCE.json") ? "source" : NULL;
+}
 
 /* The string `field` of the JSON object at `path`, or NULL when the file is
    absent, is not readable JSON, is not an object, or records no such string.
@@ -306,6 +352,8 @@ List install_rows(String text) {
   return rows.list_free();
 }
 
+/* The index's first bundle row for `name` on this platform, else its last
+   source row for `name`. */
 static List _index_row(CliRequest request, String name, String work) {
   String location = request.index ? request.index :
     "https://x2c-lang.dev/packages/index.txt";
@@ -316,7 +364,7 @@ static List _index_row(CliRequest request, String name, String work) {
   catch %(not-found *): _error(%"no package index at $location");
   foreach (List row, install_rows(text)) {
     if (row.car() != name) continue;
-    String kind = row.nth_cdr(2).car(), target = row.nth_cdr(3).car();
+    String kind = row[2], target = row[3];
     if (kind == "bundle" && target == platform) return row;
     if (kind == "source") source = row;
   }
@@ -341,12 +389,11 @@ static String _platform(void) {
   return %"${String.new(host.sysname).lower()}-${String.new(host.machine)}";
 }
 
-/* Runs one host tool and returns its stdout, or exits with its stderr. */
-static String _run(List arguments, const char *what) {
+/* Runs one host tool, or exits with what it wrote to stderr. */
+static void _run(List arguments, const char *what) {
   String output = NULL, errors = NULL;
-  if (!tool_capture(arguments, output, errors)) return output;
-  _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
-  return NULL;
+  if (tool_capture(arguments, output, errors))
+    _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
 }
 
 static int _remote(String spec) =>
@@ -355,7 +402,7 @@ static int _remote(String spec) =>
 
 static String _fetch(String url, String directory, String name) {
   String target = %"$directory/$name";
-  _run(%( "curl" "-fsSL" "-o" $target $url ), "download");
+  _run(%("curl" "-fsSL" "-o" $target $url), "download");
   return target;
 }
 
@@ -370,7 +417,7 @@ static void _verify(Path p, String expected) {
 static String _unpack(String tarball, String work) {
   Path extracted = %"$work/extracted";
   extracted.make_dirs();
-  _run(%( "tar" "-xzf" $tarball "-C" $extracted ), "extract");
+  _run(%("tar" "-xzf" $tarball "-C" $extracted), "extract");
   List top = _entries(extracted);
   if (!top || top.cdr() || !Path.is_dir(%"$extracted/${top.car()}"))
     _error(%"$tarball must contain one package directory");
