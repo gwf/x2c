@@ -43,55 +43,7 @@ static inline int _ascii_hex(int c) => scan_ascii_digit(c) ||
 static inline int _token_break(int c) =>
   !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 
-/* Classifies an already validated `n`-byte numeric token as integer or
-   floating. A leading `+` is not skipped, so `e` or `E` in a plus-prefixed
-   hexadecimal token is classified as a decimal exponent. The input is
-   borrowed and need not end at `n`. */
-Symbol scan_number_type(char *s, int n) {
-  int i = n > 0 && s[0] == '-';
-  int ishex = i + 1 < n && s[i] == '0' && (s[i+1] == 'x' || s[i+1] == 'X');
-  while (i < n) {
-    switch (s[i]) {
-      case '.': case 'p': case 'P': return <float>;
-      case 'e': case 'E': if (!ishex) return <float>;
-        break;
-    }
-    i++;
-  }
-  return <int>;
-}
-
-/* Advances one-based `*l` and `*c` across `n` borrowed bytes.
-   Each newline increments the line and resets the next byte to column one.
-   `n` is nonnegative and all pointers are valid; columns count bytes. */
-void scan_next_line_col(char *s, int n, int *l, int *c) {
-  int line = *l, col = *c, char *next = s, *end = s + n, *newline;
-  int found = 0;
-  while (next < end && (newline = memchr(next, '\n', end - next))) {
-    found = 1;
-    line++;
-    col = 1;
-    next = newline + 1;
-  }
-  if (found) col += end - next;
-  else col += n;
-  *l = line; *c = col;
-}
-
-/* Returns the borrowed preprocessor-line byte count without its final newline.
-   Backslash-LF and backslash-CRLF continuations remain in the token. A
-   trailing backslash at NUL returns -1. The caller has recognized `#`. */
-int scan_preprocessor(char *s) {
-  int n = 0;
-  while (s[n]) {
-    if (s[n] == '\\' && s[n+1] == '\n') n += 2;
-    else if (s[n] == '\\' && s[n+1] == '\r' && s[n+2] == '\n') n += 3;
-    else if (s[n] == '\\' && !s[n+1]) return -1;
-    else if (s[n] == '\n') return n;
-    else n++;
-  }
-  return n;
-}
+// white space and comments
 
 /* Returns the leading C-whitespace byte count, zero for another first byte,
    and -1 for an empty input. */
@@ -138,6 +90,238 @@ int scan_block_comment_status(char *s, Symbol *status) {
 /* Returns the same length as `scan_block_comment_status` without a status. */
 int scan_block_comment(char *s) => scan_block_comment_status(s, NULL);
 
+/* Returns the borrowed preprocessor-line byte count without its final newline.
+   Backslash-LF and backslash-CRLF continuations remain in the token. A
+   trailing backslash at NUL returns -1. The caller has recognized `#`. */
+int scan_preprocessor(char *s) {
+  int n = 0;
+  while (s[n]) {
+    if (s[n] == '\\' && s[n+1] == '\n') n += 2;
+    else if (s[n] == '\\' && s[n+1] == '\r' && s[n+2] == '\n') n += 3;
+    else if (s[n] == '\\' && !s[n+1]) return -1;
+    else if (s[n] == '\n') return n;
+    else n++;
+  }
+  return n;
+}
+
+// numbers
+
+/* Scans a signed or unsigned C/x2c numeric token from borrowed NUL-terminated
+   input. Returns a positive byte count, zero when no number starts here, or -1
+   for a malformed numeric prefix. On success a nonnull `type` receives `<int>`
+   or `<float>`; otherwise it is unchanged. */
+int scan_number_typed(char *s, Symbol *type) {
+  if (!s) return 0;
+  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign, int n;
+  Symbol found = <int>;
+  if (number[0] == '0') {
+    switch (number[1]) {
+      case 'x': case 'X': n = _hex_number(number + 2, &found);
+        if (n < 0) return -1;
+        n += 2;
+        break;
+      case 'b': case 'B': n = _radix_integer(number + 2, 2, 0);
+        if (n < 0) return -1;
+        n += 2;
+        break;
+      case 'o': case 'O': n = _radix_integer(number + 2, 8, 0);
+        if (n < 0) return -1;
+        n += 2;
+        break;
+      case '1': case '2': case '3': case '4': case '5':
+      case '6': case '7': {
+        // As in C, a point or exponent makes the digits decimal floating.
+        char after = number[_digits(number, 10)];
+        if (after == '.' || after == 'e' || after == 'E') {
+          n = _decimal_number(number, &found);
+          break;
+        }
+        n = _radix_integer(number + 2, 8, 1);
+        if (n < 0) return -1;
+        n += 2;
+        break;
+      }
+      default: n = _decimal_number(number, &found);
+        break;
+    }
+  }
+  else n = _decimal_number(number, &found);
+  if (n <= 0) return sign ? 0 : n;
+  if (type) *type = found;
+  return sign + n;
+}
+
+/* Returns the same result as `scan_number_typed` without its type. */
+int scan_number(char *s) => scan_number_typed(s, NULL);
+
+/* Classifies an already validated `n`-byte numeric token as integer or
+   floating. A leading `+` is not skipped, so `e` or `E` in a plus-prefixed
+   hexadecimal token is classified as a decimal exponent. The input is
+   borrowed and need not end at `n`. */
+Symbol scan_number_type(char *s, int n) {
+  int i = n > 0 && s[0] == '-';
+  int ishex = i + 1 < n && s[i] == '0' && (s[i+1] == 'x' || s[i+1] == 'X');
+  while (i < n) {
+    switch (s[i]) {
+      case '.': case 'p': case 'P': return <float>;
+      case 'e': case 'E': if (!ishex) return <float>;
+        break;
+    }
+    i++;
+  }
+  return <int>;
+}
+
+/* Scans an unsigned decimal integer or floating spelling.
+   Returns its byte count, zero when no number starts here, or -1 when a
+   numeric prefix has a malformed continuation. */
+int scan_digital(char *s) => _decimal_number(s, NULL);
+
+/* Returns the numeric-tail length after a decimal point already consumed
+   following at least one digit, or -1 for a malformed tail. */
+int scan_float(char *s) => _float_tail(s, 1);
+
+/* Returns the hexadecimal exponent tail after an already consumed `p` or `P`,
+   or -1 when the required decimal exponent is malformed. */
+int scan_hexponent(char *s) => _exponent(s);
+
+static int _hex_number(char *s, Symbol *type) {
+  int n = 0;
+  while (_ascii_hex((unsigned char) s[n])) n++;
+  int digits = n, has_point = 0;
+  if (s[n] == '.') {
+    has_point = 1;
+    n++;
+    int fraction = _digits(s + n, 16);
+    digits += fraction;
+    n += fraction;
+  }
+  if (!digits) return -1;
+  if (s[n] == 'p' || s[n] == 'P') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + exponent;
+  }
+  if (has_point) return -1;
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  if (type) *type = <int>;
+  return n + suffix;
+}
+
+static int _decimal_number(char *s, Symbol *type) {
+  int n = 0;
+  while (scan_ascii_digit((unsigned char) s[n])) n++;
+  if (s[n] == '.') {
+    int fraction = _float_tail(s + n + 1, n > 0);
+    if (fraction < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + fraction;
+  }
+  if (!n) return 0;
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + exponent;
+  }
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  if (type) *type = <int>;
+  return n + suffix;
+}
+
+static int _radix_integer(char *s, int base, int digit_before) {
+  int n = _digits(s, base);
+  if (!digit_before && !n) return -1;
+  int suffix = _int_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+/* `digit_before` says a digit was consumed before the decimal point, which
+   is what scan_float promises its callers. */
+static int _float_tail(char *s, int digit_before) {
+  int n = _digits(s, 10);
+  if (!digit_before && !n) return -1;
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    return exponent < 0 ? -1 : n + 1 + exponent;
+  }
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+static int _exponent(char *s) {
+  int n = 0;
+  if (s[n] == '+' || s[n] == '-') n++;
+  int digits = _digits(s + n, 10);
+  if (!digits) return -1;
+  n += digits;
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
+}
+
+static int _digits(char *s, int base) {
+  int n = 0;
+  loop {
+    int c = (unsigned char) s[n];
+    unsigned digit = (unsigned) (c - '0');
+    int valid = digit < 10 && digit < (unsigned) base;
+    if (base == 16)
+      valid = valid || (c >= 'a' && c <= 'f') ||
+              (c >= 'A' && c <= 'F');
+    if (!valid) return n;
+    n++;
+  }
+}
+
+/* Precondition: the integer digits have already been scanned. */
+static int _int_suffix(char *s) {
+  int n = 0;
+  switch (s[n]) {
+    case 'u': case 'U':  n++;
+      switch (s[n]) {
+        case 'l': case 'L':  n++;
+          switch (s[n]) {
+            case 'l': case 'L':  n++; break;
+            default: break;
+          }
+          break;
+        default: break;
+      }
+      break;
+    case 'l': case 'L': n++;
+      switch (s[n]) {
+        case 'l': case 'L': n++;
+          switch (s[n]) {
+            case 'u': case 'U': n++; break;
+            default: break;
+          }
+          break;
+        case 'u': case 'U': n++; break;
+        default: break;
+      }
+      break;
+    default: break;
+  }
+  if (!_token_break(s[n])) return -1;
+  return n;
+}
+
+/* Precondition: the floating digits have already been scanned. */
+static int _float_suffix(char *s) {
+  int n = 0;
+  switch (s[n]) {
+    case 'f': case 'F': case 'l': case 'L': n++; break;
+  }
+  if (!_token_break(s[n])) return -1;
+  return n;
+}
+
+// identifiers, keywords, and operators
+
 /* Returns an ASCII C identifier's byte count. Raises: `<bad-arg>` for NULL
    or a non-identifier start. */
 int scan_identifier(char *s) {
@@ -146,6 +330,13 @@ int scan_identifier(char *s) {
   int n = 1;
   while (!_token_break((unsigned char) s[n])) n++;
   return n;
+}
+
+/* Returns a keyword identifier's byte count or -1 for another identifier.
+   Raises: `<bad-arg>` when `s` does not begin an identifier. */
+int scan_keyword(char *s) {
+  int n = scan_identifier(s);
+  return scan_keyword_type(s, n) ? n : -1;
 }
 
 /* Returns the keyword Symbol for exactly `n` borrowed bytes, or zero.
@@ -223,13 +414,6 @@ Symbol scan_keyword_type(const char *s, int n) {
   return 0;
 }
 
-/* Returns a keyword identifier's byte count or -1 for another identifier.
-   Raises: `<bad-arg>` when `s` does not begin an identifier. */
-int scan_keyword(char *s) {
-  int n = scan_identifier(s);
-  return scan_keyword_type(s, n) ? n : -1;
-}
-
 /* Returns the longest supported C or x2c operator prefix, or -1.
    The caller supplies a nonnull NUL-terminated input. */
 int scan_c_operator(char *s) {
@@ -269,6 +453,195 @@ int scan_c_operator(char *s) {
     default: return -1;
   }
 }
+
+// strings and characters
+
+/* Returns a C String literal's complete byte count, or -1 on malformed or
+   truncated input. The caller supplies the opening quote. `status`, when
+   nonnull, distinguishes `<malformed>` from `<incomplete>`. */
+int scan_c_string_status(char *s, Symbol *status) {
+  if (status) *status = <ok>;
+  int m, n = 1;
+  while (s[n]) {
+    if (s[n] == '\\') {
+      if ((m = _c_escape_sequence_status(s + n, status)) < 0) return -1;
+      n += m;
+    }
+    else if (s[n] == '"') return n + 1;
+    else if (s[n] == '\n' || s[n] == '\r') {
+      if (status) *status = <malformed>;
+      return -1;
+    }
+    else n++;
+  }
+  if (status) *status = <incomplete>;
+  return -1;
+}
+
+/* Returns the same result as `scan_c_string_status` without a status. */
+int scan_c_string(char *s) => scan_c_string_status(s, NULL);
+
+/* Returns one complete C character literal's byte count, or -1.
+   The caller supplies the opening quote; raw newlines and empty or multi-byte
+   unescaped contents are malformed. */
+int scan_c_character(char *s) {
+  int m, n = 1;
+  if (s[n] == '\\') {
+    if ((m = _c_escape_sequence(s + n)) < 0) return -1;
+    n += m;
+  }
+  else {
+    if (!s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return -1;
+    n++;
+  }
+  return s[n] == '\'' ? n + 1 : -1;
+}
+
+// percent strings, symbols, and atoms
+
+/* Percent strings differ from C strings:
+
+   - embedded newlines are literal bytes;
+   - backslash-newline and backslash-CRLF continue the source line;
+   - `$` must be escaped or doubled unless it starts interpolation;
+   - `$name` and `${expression}` begin interpolation.
+
+   The caller has consumed the opening `%"`; `s[0]` is neither `$` nor the
+   closing quote. Returns the bytes before the next interpolation or closing
+   quote, excluding that delimiter, or -1 for a malformed escape or NUL before
+   either delimiter.
+*/
+int scan_string_segment(char *s) {
+  int n = 0;
+  while (s[n]) {
+    if (s[n] == '\\') {
+      if (s[n+1] == '$') n += 2;
+      else {
+        int m = scan_escape_sequence(s + n);
+        if (m < 0) return -1;
+        n += m;
+      }
+    }
+    else if (s[n] == '$' && s[n+1] == '$') n += 2;
+    else if (s[n] == '$' || s[n] == '"') return n;
+    else n++;
+  }
+  return -1;
+}
+
+/* Scans `<simple>` or `<"...">` from borrowed NUL-terminated input.
+   Returns zero without an opening angle, a positive byte count on success, or
+   -1. `status`, when nonnull, distinguishes `<incomplete>` from `<malformed>`;
+   the input must be nonnull. */
+int scan_symbol_literal_status(char *s, Symbol *status) {
+  if (status) *status = <ok>;
+  if (s[0] != '<') return 0;
+  int n = 1;
+  if (s[n] == '"') {
+    int m = _quoted_symbol_status(s + n, status);
+    if (m < 0) return -1;
+    n += m;
+    if (s[n] == '>') return n + 1;
+    if (status) *status = s[n] ? <malformed> : <incomplete>;
+    return -1;
+  }
+  int start = n;
+  while (s[n]) {
+    if (s[n] == '>') {
+      if (n > start) return n + 1;
+      if (status) *status = <malformed>;
+      return -1;
+    }
+    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
+        s[n] == '\v' || s[n] == '\f') {
+      if (status) *status = <malformed>;
+      return -1;
+    }
+    n++;
+  }
+  if (status) *status = <incomplete>;
+  return -1;
+}
+
+/* Returns the same result as `scan_symbol_literal_status` without a status. */
+int scan_symbol_literal(char *s) => scan_symbol_literal_status(s, NULL);
+
+/* Scans a quoted Symbol spelling from its opening quote through its closing
+   quote, using x2c byte escapes. A raw newline is ordinary text. */
+static int _quoted_symbol_status(char *s, Symbol *status) {
+  int n = 1;
+  while (s[n]) {
+    if (s[n] == '\\') {
+      int m = _escape_sequence_status(s + n, status);
+      if (m < 0) return -1;
+      n += m;
+    }
+    else if (s[n] == '"') return n + 1;
+    else n++;
+  }
+  if (status) *status = <incomplete>;
+  return -1;
+}
+
+/* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
+   spelling of `<"...">` without its angle brackets, so `>>` inside the quotes
+   belongs to the atom. Otherwise it shares only whitespace, `$`, `@` and the
+   backslash escape with scan_atom: reader punctuation and comment openers are
+   ordinary bytes here, `>>` ends the atom, and the spelling may be empty
+   because the caller has not ruled the first byte out. Returns -1 for a
+   malformed quoted spelling or trailing backslash. */
+int scan_symbol_set_atom(char *s) {
+  if (!s || !*s) return 0;
+  if (s[0] == '"') return _quoted_symbol_status(s, NULL);
+  int n = 0;
+  while (s[n]) {
+    if (s[n] == '>' && s[n + 1] == '>') break;
+    if (strchr(" \n\t\v\f\r$@", s[n])) break;
+    if (s[n] == '\\') {
+      if (!s[n + 1]) return -1;
+      n += 2;
+    }
+    else n++;
+  }
+  return n;
+}
+
+/* One atom spelling for Lisp source and `%(...)` list literals. Reader
+   punctuation, the x2c escape openers, whitespace, and a comment opener end
+   it; a backslash escapes the next byte. Returns zero when no atom starts and
+   -1 only for a trailing backslash. `status`, when nonnull, receives `<ok>` or
+   `<incomplete>`. */
+int scan_atom_status(char *s, Symbol *status) {
+  if (status) *status = <ok>;
+  if (!s || !*s || strchr("()'`,\"$@{[", *s)) return 0;
+  if (s[0] == '\\' && !s[1]) {
+    if (status) *status = <incomplete>;
+    return -1;
+  }
+  int n = s[0] == '\\' ? 2 : 1;
+  while (s[n]) {
+    if (strchr("()'`,\"$@{[", s[n]) || strchr(" \n\t\v\f\r", s[n])) return n;
+    if (s[n] == '/' && (s[n + 1] == '/' || s[n + 1] == '*')) return n;
+    if (s[n] == '\\') {
+      if (!s[n + 1]) {
+        if (status) *status = <incomplete>;
+        return -1;
+      }
+      n += 2;
+    }
+    else n++;
+  }
+  return n;
+}
+
+/* Returns the same result as `scan_atom_status` without a status. */
+int scan_atom(char *s) => scan_atom_status(s, NULL);
+
+// escapes
+
+/* Returns one x2c byte-oriented escape's length or -1 for malformed or
+   truncated input. The caller has already recognized the backslash. */
+int scan_escape_sequence(char *s) => _escape_sequence_status(s, NULL);
 
 /* Scans x2c byte escapes and classifies truncation separately. */
 static int _escape_sequence_status(char *s, Symbol *status) {
@@ -310,10 +683,6 @@ static int _escape_sequence_status(char *s, Symbol *status) {
   if (status) *status = <malformed>;
   return -1;
 }
-
-/* Returns one x2c byte-oriented escape's length or -1 for malformed or
-   truncated input. The caller has already recognized the backslash. */
-int scan_escape_sequence(char *s) => _escape_sequence_status(s, NULL);
 
 /* Scans a C escape and classifies truncation separately. */
 static int _c_escape_sequence_status(char *s, Symbol *status) {
@@ -374,376 +743,21 @@ malformed: if (status) *status = <malformed>;
 /* Decodes one escape for C character literals and string scanners. */
 static int _c_escape_sequence(char *s) => _c_escape_sequence_status(s, NULL);
 
-/* Returns a C String literal's complete byte count, or -1 on malformed or
-   truncated input. The caller supplies the opening quote. `status`, when
-   nonnull, distinguishes `<malformed>` from `<incomplete>`. */
-int scan_c_string_status(char *s, Symbol *status) {
-  if (status) *status = <ok>;
-  int m, n = 1;
-  while (s[n]) {
-    if (s[n] == '\\') {
-      if ((m = _c_escape_sequence_status(s + n, status)) < 0) return -1;
-      n += m;
-    }
-    else if (s[n] == '"') return n + 1;
-    else if (s[n] == '\n' || s[n] == '\r') {
-      if (status) *status = <malformed>;
-      return -1;
-    }
-    else n++;
+// source positions
+
+/* Advances one-based `*l` and `*c` across `n` borrowed bytes.
+   Each newline increments the line and resets the next byte to column one.
+   `n` is nonnegative and all pointers are valid; columns count bytes. */
+void scan_next_line_col(char *s, int n, int *l, int *c) {
+  int line = *l, col = *c, char *next = s, *end = s + n, *newline;
+  int found = 0;
+  while (next < end && (newline = memchr(next, '\n', end - next))) {
+    found = 1;
+    line++;
+    col = 1;
+    next = newline + 1;
   }
-  if (status) *status = <incomplete>;
-  return -1;
+  if (found) col += end - next;
+  else col += n;
+  *l = line; *c = col;
 }
-
-/* Returns the same result as `scan_c_string_status` without a status. */
-int scan_c_string(char *s) => scan_c_string_status(s, NULL);
-
-/* Returns one complete C character literal's byte count, or -1.
-   The caller supplies the opening quote; raw newlines and empty or multi-byte
-   unescaped contents are malformed. */
-int scan_c_character(char *s) {
-  int m, n = 1;
-  if (s[n] == '\\') {
-    if ((m = _c_escape_sequence(s + n)) < 0) return -1;
-    n += m;
-  }
-  else {
-    if (!s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return -1;
-    n++;
-  }
-  return s[n] == '\'' ? n + 1 : -1;
-}
-
-/* Precondition: the integer digits have already been scanned. */
-static int _int_suffix(char *s) {
-  int n = 0;
-  switch (s[n]) {
-    case 'u': case 'U':  n++;
-      switch (s[n]) {
-        case 'l': case 'L':  n++;
-          switch (s[n]) {
-            case 'l': case 'L':  n++; break;
-            default: break;
-          }
-          break;
-        default: break;
-      }
-      break;
-    case 'l': case 'L': n++;
-      switch (s[n]) {
-        case 'l': case 'L': n++;
-          switch (s[n]) {
-            case 'u': case 'U': n++; break;
-            default: break;
-          }
-          break;
-        case 'u': case 'U': n++; break;
-        default: break;
-      }
-      break;
-    default: break;
-  }
-  if (!_token_break(s[n])) return -1;
-  return n;
-}
-
-/* Precondition: the floating digits have already been scanned. */
-static int _float_suffix(char *s) {
-  int n = 0;
-  switch (s[n]) {
-    case 'f': case 'F': case 'l': case 'L': n++; break;
-  }
-  if (!_token_break(s[n])) return -1;
-  return n;
-}
-
-static int _digits(char *s, int base) {
-  int n = 0;
-  loop {
-    int c = (unsigned char) s[n];
-    unsigned digit = (unsigned) (c - '0');
-    int valid = digit < 10 && digit < (unsigned) base;
-    if (base == 16)
-      valid = valid || (c >= 'a' && c <= 'f') ||
-              (c >= 'A' && c <= 'F');
-    if (!valid) return n;
-    n++;
-  }
-}
-
-static int _exponent(char *s) {
-  int n = 0;
-  if (s[n] == '+' || s[n] == '-') n++;
-  int digits = _digits(s + n, 10);
-  if (!digits) return -1;
-  n += digits;
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-/* `digit_before` says a digit was consumed before the decimal point, which
-   is what scan_float promises its callers. */
-static int _float_tail(char *s, int digit_before) {
-  int n = _digits(s, 10);
-  if (!digit_before && !n) return -1;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    return exponent < 0 ? -1 : n + 1 + exponent;
-  }
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-/* Returns the numeric-tail length after a decimal point already consumed
-   following at least one digit, or -1 for a malformed tail. */
-int scan_float(char *s) => _float_tail(s, 1);
-
-/* Returns the hexadecimal exponent tail after an already consumed `p` or `P`,
-   or -1 when the required decimal exponent is malformed. */
-int scan_hexponent(char *s) => _exponent(s);
-
-static int _radix_integer(char *s, int base, int digit_before) {
-  int n = _digits(s, base);
-  if (!digit_before && !n) return -1;
-  int suffix = _int_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
-}
-
-static int _hex_number(char *s, Symbol *type) {
-  int n = 0;
-  while (_ascii_hex((unsigned char) s[n])) n++;
-  int digits = n, has_point = 0;
-  if (s[n] == '.') {
-    has_point = 1;
-    n++;
-    int fraction = _digits(s + n, 16);
-    digits += fraction;
-    n += fraction;
-  }
-  if (!digits) return -1;
-  if (s[n] == 'p' || s[n] == 'P') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + exponent;
-  }
-  if (has_point) return -1;
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  if (type) *type = <int>;
-  return n + suffix;
-}
-
-static int _decimal_number(char *s, Symbol *type) {
-  int n = 0;
-  while (scan_ascii_digit((unsigned char) s[n])) n++;
-  if (s[n] == '.') {
-    int fraction = _float_tail(s + n + 1, n > 0);
-    if (fraction < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + fraction;
-  }
-  if (!n) return 0;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + exponent;
-  }
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  if (type) *type = <int>;
-  return n + suffix;
-}
-
-/* Scans an unsigned decimal integer or floating spelling.
-   Returns its byte count, zero when no number starts here, or -1 when a
-   numeric prefix has a malformed continuation. */
-int scan_digital(char *s) => _decimal_number(s, NULL);
-
-/* Scans a signed or unsigned C/x2c numeric token from borrowed NUL-terminated
-   input. Returns a positive byte count, zero when no number starts here, or -1
-   for a malformed numeric prefix. On success a nonnull `type` receives `<int>`
-   or `<float>`; otherwise it is unchanged. */
-int scan_number_typed(char *s, Symbol *type) {
-  if (!s) return 0;
-  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign, int n;
-  Symbol found = <int>;
-  if (number[0] == '0') {
-    switch (number[1]) {
-      case 'x': case 'X': n = _hex_number(number + 2, &found);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case 'b': case 'B': n = _radix_integer(number + 2, 2, 0);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case 'o': case 'O': n = _radix_integer(number + 2, 8, 0);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case '1': case '2': case '3': case '4': case '5':
-      case '6': case '7': {
-        // As in C, a point or exponent makes the digits decimal floating.
-        char after = number[_digits(number, 10)];
-        if (after == '.' || after == 'e' || after == 'E') {
-          n = _decimal_number(number, &found);
-          break;
-        }
-        n = _radix_integer(number + 2, 8, 1);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      }
-      default: n = _decimal_number(number, &found);
-        break;
-    }
-  }
-  else n = _decimal_number(number, &found);
-  if (n <= 0) return sign ? 0 : n;
-  if (type) *type = found;
-  return sign + n;
-}
-
-/* Returns the same result as `scan_number_typed` without its type. */
-int scan_number(char *s) => scan_number_typed(s, NULL);
-
-/* Percent strings differ from C strings:
-
-   - embedded newlines are literal bytes;
-   - backslash-newline and backslash-CRLF continue the source line;
-   - `$` must be escaped or doubled unless it starts interpolation;
-   - `$name` and `${expression}` begin interpolation.
-
-   The caller has consumed the opening `%"`; `s[0]` is neither `$` nor the
-   closing quote. Returns the bytes before the next interpolation or closing
-   quote, excluding that delimiter, or -1 for a malformed escape or NUL before
-   either delimiter.
-*/
-int scan_string_segment(char *s) {
-  int n = 0;
-  while (s[n]) {
-    if (s[n] == '\\') {
-      if (s[n+1] == '$') n += 2;
-      else {
-        int m = scan_escape_sequence(s + n);
-        if (m < 0) return -1;
-        n += m;
-      }
-    }
-    else if (s[n] == '$' && s[n+1] == '$') n += 2;
-    else if (s[n] == '$' || s[n] == '"') return n;
-    else n++;
-  }
-  return -1;
-}
-
-/* One atom spelling for Lisp source and `%(...)` list literals. Reader
-   punctuation, the x2c escape openers, whitespace, and a comment opener end
-   it; a backslash escapes the next byte. Returns zero when no atom starts and
-   -1 only for a trailing backslash. `status`, when nonnull, receives `<ok>` or
-   `<incomplete>`. */
-int scan_atom_status(char *s, Symbol *status) {
-  if (status) *status = <ok>;
-  if (!s || !*s || strchr("()'`,\"$@{[", *s)) return 0;
-  if (s[0] == '\\' && !s[1]) {
-    if (status) *status = <incomplete>;
-    return -1;
-  }
-  int n = s[0] == '\\' ? 2 : 1;
-  while (s[n]) {
-    if (strchr("()'`,\"$@{[", s[n]) || strchr(" \n\t\v\f\r", s[n])) return n;
-    if (s[n] == '/' && (s[n + 1] == '/' || s[n + 1] == '*')) return n;
-    if (s[n] == '\\') {
-      if (!s[n + 1]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      n += 2;
-    }
-    else n++;
-  }
-  return n;
-}
-
-/* Returns the same result as `scan_atom_status` without a status. */
-int scan_atom(char *s) => scan_atom_status(s, NULL);
-
-/* Scans a quoted Symbol spelling from its opening quote through its closing
-   quote, using x2c byte escapes. A raw newline is ordinary text. */
-static int _quoted_symbol_status(char *s, Symbol *status) {
-  int n = 1;
-  while (s[n]) {
-    if (s[n] == '\\') {
-      int m = _escape_sequence_status(s + n, status);
-      if (m < 0) return -1;
-      n += m;
-    }
-    else if (s[n] == '"') return n + 1;
-    else n++;
-  }
-  if (status) *status = <incomplete>;
-  return -1;
-}
-
-/* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
-   spelling of `<"...">` without its angle brackets, so `>>` inside the quotes
-   belongs to the atom. Otherwise it shares only whitespace, `$`, `@` and the
-   backslash escape with scan_atom: reader punctuation and comment openers are
-   ordinary bytes here, `>>` ends the atom, and the spelling may be empty
-   because the caller has not ruled the first byte out. Returns -1 for a
-   malformed quoted spelling or trailing backslash. */
-int scan_symbol_set_atom(char *s) {
-  if (!s || !*s) return 0;
-  if (s[0] == '"') return _quoted_symbol_status(s, NULL);
-  int n = 0;
-  while (s[n]) {
-    if (s[n] == '>' && s[n + 1] == '>') break;
-    if (strchr(" \n\t\v\f\r$@", s[n])) break;
-    if (s[n] == '\\') {
-      if (!s[n + 1]) return -1;
-      n += 2;
-    }
-    else n++;
-  }
-  return n;
-}
-
-/* Scans `<simple>` or `<"...">` from borrowed NUL-terminated input.
-   Returns zero without an opening angle, a positive byte count on success, or
-   -1. `status`, when nonnull, distinguishes `<incomplete>` from `<malformed>`;
-   the input must be nonnull. */
-int scan_symbol_literal_status(char *s, Symbol *status) {
-  if (status) *status = <ok>;
-  if (s[0] != '<') return 0;
-  int n = 1;
-  if (s[n] == '"') {
-    int m = _quoted_symbol_status(s + n, status);
-    if (m < 0) return -1;
-    n += m;
-    if (s[n] == '>') return n + 1;
-    if (status) *status = s[n] ? <malformed> : <incomplete>;
-    return -1;
-  }
-  int start = n;
-  while (s[n]) {
-    if (s[n] == '>') {
-      if (n > start) return n + 1;
-      if (status) *status = <malformed>;
-      return -1;
-    }
-    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
-        s[n] == '\v' || s[n] == '\f') {
-      if (status) *status = <malformed>;
-      return -1;
-    }
-    n++;
-  }
-  if (status) *status = <incomplete>;
-  return -1;
-}
-
-/* Returns the same result as `scan_symbol_literal_status` without a status. */
-int scan_symbol_literal(char *s) => scan_symbol_literal_status(s, NULL);
