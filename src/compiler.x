@@ -3468,19 +3468,21 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
     contributes above `base`.
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  int initialize_macros = c.macros == NULL || !c.macros.len();
-  if (initialize_macros) {
-    c.macros = {};
-    if (c.kw_aliases == NULL) c.kw_aliases = {};
-    if (c.kw_seen == NULL) c.kw_seen = {};
-    c.imports = {};
-    c.import_stack.clear();
-  }
+  if (c.macros == NULL || !c.macros.len()) _start_macros(c);
   c.sym._reset_overlay(base, overlay);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
   // Only linkage groups remain open; a later segment of the file closes them.
   c.open_linkage += c.braces.len();
+}
+
+// A unit with no macros yet starts its macro, keyword, and import state.
+static void _start_macros(Compiler c) {
+  c.macros = {};
+  if (c.kw_aliases == NULL) c.kw_aliases = {};
+  if (c.kw_seen == NULL) c.kw_seen = {};
+  c.imports = {};
+  c.import_stack.clear();
 }
 
 static void _shallow_parse_loop(Compiler c) {
@@ -3491,7 +3493,7 @@ static void _shallow_parse_loop(Compiler c) {
   while (c.peek(0) != <eof>) {
     Token start = c.token;
     (void) c.parse_top_level_mode(1);
-    _debug_tokens(c, start, c.token);
+    _debug_tokens(start, c.token);
   }
   /* Definitions after the last declaration, as before an include, still
      define macros for the segments that follow. */
@@ -3500,7 +3502,7 @@ static void _shallow_parse_loop(Compiler c) {
   c.shallow = 0;
 }
 
-static void _debug_tokens(Compiler compiler, Token start, Token end) {
+static void _debug_tokens(Token start, Token end) {
   if (!log_should_log(<debug>, <tokenizer>)) return;
   for (Token tok = start; tok < end; tok++)
     if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
@@ -3542,25 +3544,15 @@ void Compiler.finish_collected_declaration(
      the native binding a bodyless or `native` marker advertises; the
      compile-time form is installed by the full parse. */
   c.record_declaration_visibility(declaration);
+  /* Lexical privacy also marks a name in Sym.statics, so a static function
+     is marked again as `(function name)`. File collection reads that key to
+     keep the function out of what a private region publishes. */
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
         c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
-  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
-      c._at_function_arrow()) {
-    if (native) c.record_native_meta_effect(declaration, meta);
-    match (declaration)
-      case %(declare ? (bindings (bind ?binding ?))):
-        _shallow_record_function_definition(
-          c, declaration.type_from_ast(), binding);
-    if (c._at_function_arrow()) {
-      c.next();
-      c.next();
-      c._skip_shallow_expression(0);
-      c.expect(<;>);
-    }
-    else _shallow_block(c);
-  }
+  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c._at_function_arrow())
+    _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
     if (meta) c.record_native_meta_effect(declaration, meta);
     c.next();
@@ -3568,19 +3560,29 @@ void Compiler.finish_collected_declaration(
   else c.next();
 }
 
-/* Lexical privacy also marks a name in Sym.statics, so a static function is
-   marked again as `(function name)`. File collection reads that key to keep
-   the function out of what a private region publishes. */
+static void _skip_body(Compiler c, List declaration, Token meta, int native) {
+  if (native) c.record_native_meta_effect(declaration, meta);
+  match (declaration)
+    case %(declare ? (bindings (bind ?binding ?))):
+      _note_function_body(c, declaration.type_from_ast(), binding);
+  if (c._at_function_arrow()) {
+    c.next();
+    c.next();
+    c._skip_shallow_expression(0);
+    c.expect(<;>);
+  }
+  else _shallow_block(c);
+}
+
 // Remember the spelling of one function body found while collecting `.x`.
-static void _shallow_record_function_definition(
-  Compiler compiler, Type type, List binding) {
+static void _note_function_body(Compiler c, Type type, List binding) {
   if (!type.is_function() || type.is_static()) return;
-  compiler.fn_defs[binding_identity_spelling(binding)] = 1;
+  c.fn_defs[binding_identity_spelling(binding)] = 1;
 }
 
 /** Reports whether the current two tokens are `=>`. */
-int Compiler._at_function_arrow(Compiler compiler) =>
-  compiler.peek(0) == <=> && compiler.peek(1) == <">">;
+int Compiler._at_function_arrow(Compiler c) =>
+  c.peek(0) == <=> && c.peek(1) == <">">;
 
 /** Skips a balanced shallow expression without consuming its terminator.
     A top-level comma also terminates the expression when `stop_at_comma` is
@@ -3596,20 +3598,31 @@ void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
 }
 
 static void _shallow_block(Compiler c) {
-  Symbol peek;
   c.next();
-  while ((peek = c.peek(0)) != <"}">) {
+  for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
       c.report_error(<parse>, "unexpected end of file", c.token, NULL);
-    if (peek == <"{"> || peek == <"%{"> ||
-        peek == <"${"> || peek == <"@{">)
+    if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
       _shallow_block(c);
     else c.next();
   }
   c.expect(<"}">);
 }
 
-// the parse driver
+/* the parse driver
+
+   A full parse reads the unit's top-level forms in source order. A form
+   that fails is skipped whole, so one error does not hide the next. */
+
+/* One full parse of a unit. A script unit that does not define `main`
+   hoists its statements: `statements` holds each run's first and
+   past-the-end token index, `runs` counts the runs, `first` is where the
+   first one starts, and `gap` is the index after the last form, where the
+   next form's conditional directives begin. */
+typedef struct FullParse {
+  Compiler c, Array nodes, statements;
+  int hoisting, gap, runs, first;
+} FullParse;
 
 /** Parses and types the positioned source against `globs`.
 
@@ -3620,6 +3633,20 @@ static void _shallow_block(Compiler c) {
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.unit_nodes = nodes;
+  c._reset_parse(globs, generated_symbols);
+  Token conflict = NULL;
+  $let(c.recovery_depth, c.recovery_depth + 1)
+    conflict = _parse_forms(c, nodes);
+  if (conflict) {
+    c.token = conflict;
+    _report_script_statement(c);
+  }
+  return c._finish_parse(nodes);
+}
+
+/* A full parse starts from the unit's collected symbols, without the parse
+   state that collection or an earlier parse left. */
+static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
   c.meta_group_bound = {};
   c.origins.clear();
@@ -3635,6 +3662,14 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.arms = NULL;
   c.sym.reset(globs);
   c.rebuild_protocols(globs);
+  c._reset_macros();
+  c.resolve_protocols();
+  if (generated) c.install_generated_protocol_symbols();
+  c.install_native_meta_effects(globs);
+  c.replay_included_package_imports(globs, c.filename, {});
+}
+
+static void Compiler._reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
   c.kw_seen = {};
@@ -3644,100 +3679,97 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.macro_count = 0;
   c.macro_stack = NULL;
   c.source_private = 0;
-  c.resolve_protocols();
-  if (generated_symbols) c.install_generated_protocol_symbols();
-  c.install_native_meta_effects(globs);
-  c.replay_included_package_imports(globs, c.filename, {});
-  Token conflict = NULL;
-  $let(c.recovery_depth, c.recovery_depth + 1) {
-    _append_preproc(c, nodes);
-    Array statements = [];
-    int hoisting = c.script && !c.script.defines_main;
-    int gap = 0, runs = 0, first = 0;
-    loop {
-      while (c.peek(0) != <eof>) {
-        Token start = c.token;
-        int braces = c.braces.len();
-        try {
-          Token tokens = c.tokenizer.tokens;
-          if (hoisting)
-            _push_script_conditionals(c, statements, gap, start - tokens);
-          if (hoisting && c.script_statement_starts()) {
-            c.skip_script_statement();
-            int begin = start - tokens;
-            int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
-            statements.push(begin);
-            statements.push(end);
-            if (!runs++) first = begin;
-          }
-          else {
-            if (c.script && c.script.defines_main &&
-                c.script_statement_executes())
-              _report_script_statement(c);
-            Ast node = _replay_bundle(c);
-            if (!node) node = c.parse_top_level();
-            int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
-            if (node && node.car() == <seq>) {
-              foreach (List item, node.cdr()) {
-                _record_top_level_function_state(c, item);
-                _record_definition_span(c, item, start - tokens, end);
-                nodes.push(item);
-              }
-            }
-            else if (node) {
-              _record_top_level_function_state(c, node);
-              _record_definition_span(c, node, start - tokens, end);
-              nodes.push(node);
-            }
-          }
-          gap = _skip_backward(c.token - 1, tokens) + 1 - tokens;
-          _append_preproc(c, nodes);
-          _debug_tokens(c, start, c.token);
-        }
-        catch %(malformed (category ?category) *): {
-          (void) category;
-          if (c.diagnostics.reached_limit()) break;
-          _sync_top_level(c, start, braces);
-          Token tokens = c.tokenizer.tokens;
-          gap = _skip_backward(c.token - 1, tokens) + 1 - tokens;
-          _append_preproc(c, nodes);
-          if (c.peek(0) == <eof>) break;
-          continue;
-        }
-      }
-      if (!runs) break;
-      Token tokens = c.tokenizer.tokens;
-      // A macro can still define `main` where the token scan saw none.
-      if (c.fn_defs.contains("main")) {
-        conflict = tokens + first;
-        break;
-      }
-      _push_script_conditionals(c, statements, gap, c.token - tokens);
-      _append_script_main(c, statements);
-      hoisting = runs = 0;
-    }
-  }
-  if (conflict) {
-    c.token = conflict;
-    _report_script_statement(c);
-  }
-  if (c.meta_build) c.write_meta_build();
-  _append_meta_definitions(c, nodes);
-  c.unit_nodes = NULL;
-  List ast = nodes.list_free();
-  if (c.script && !c.script.defines_main && !c.error_count())
-    _check_script_locals(c, ast);
-  _check_unmatched_braces(c);
-  if (!c.error_count())
-    _validate_static_object_initializers(c);
-  return ast;
 }
 
-// Prepend source-ordered directives to an AST accumulated in reverse order.
-static void _append_preproc(Compiler compiler, Array ast) {
-  List directives = compiler.leading_preproc();
-  compiler.update_source_visibility(directives);
-  foreach (Var directive, directives) ast.push(directive);
+/* Parses every form, then the `main` that a script's statement runs
+   become. Returns the first hoisted statement when a macro defined `main`
+   where the token scan saw none, and NULL otherwise. */
+static Token _parse_forms(Compiler c, Array nodes) {
+  _append_preproc(c, nodes);
+  Array statements = [];
+  FullParse p = {
+    .c = c, .nodes = nodes, .statements = statements,
+    .hoisting = c.script && !c.script.defines_main};
+  loop {
+    while (c.peek(0) != <eof>) if (!p.form()) break;
+    if (!p.runs) return NULL;
+    Token tokens = c.tokenizer.tokens;
+    if ("main" in c.fn_defs) return tokens + p.first;
+    _push_conditionals(c, statements, p.gap, c.token - tokens);
+    _append_script_main(c, statements);
+    p.hoisting = p.runs = 0;
+  }
+}
+
+/* Parses one form, or skips a failed one whole. Returns 0 when the parse
+   stops: the error limit is reached, or the skip reached the end. */
+static int FullParse.form(FullParse *p) {
+  Compiler c = p.c;
+  Token start = c.token;
+  int braces = c.braces.len();
+  try {
+    p.parse(start);
+  }
+  catch %(malformed (category ?category) *): {
+    (void) category;
+    if (c.diagnostics.reached_limit()) return 0;
+    _sync_top_level(c, start, braces);
+    p.gap = _end_index(c, c.tokenizer.tokens);
+    _append_preproc(c, p.nodes);
+    return c.peek(0) != <eof>;
+  }
+  return 1;
+}
+
+static void FullParse.parse(FullParse *p, Token start) {
+  Compiler c = p.c;
+  Token tokens = c.tokenizer.tokens;
+  int begin = start - tokens;
+  if (p.hoisting) _push_conditionals(c, p.statements, p.gap, begin);
+  if (p.hoisting && c.script_statement_starts()) p.hoist(begin, tokens);
+  else p.top_level(begin, tokens);
+  p.gap = _end_index(c, tokens);
+  _append_preproc(c, p.nodes);
+  _debug_tokens(start, c.token);
+}
+
+// A script statement joins the runs that `main` executes.
+static void FullParse.hoist(FullParse *p, int begin, Token tokens) {
+  p.c.skip_script_statement();
+  int end = _end_index(p.c, tokens);
+  p.statements.push(begin);
+  p.statements.push(end);
+  if (!p.runs++) p.first = begin;
+}
+
+// A retained declaration bundle replays; any other form parses.
+static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
+  Compiler c = p.c;
+  _reject_statement(c);
+  Ast node = _replay_bundle(c);
+  if (!node) node = c.parse_top_level();
+  int end = _end_index(c, tokens);
+  if (node && node.car() == <seq>)
+    foreach (List item, node.cdr()) p.add(item, begin, end);
+  else if (node) p.add(node, begin, end);
+}
+
+static void FullParse.add(FullParse *p, List node, int begin, int end) {
+  _record_top_level(p.c, node);
+  _record_span(p.c, node, begin, end);
+  p.nodes.push(node);
+}
+
+// The index just past the last non-trivia token before the cursor.
+static long _end_index(Compiler c, Token tokens) =>
+  _skip_backward(c.token - 1, tokens) + 1 - tokens;
+
+/* The directives before the cursor join the nodes in source order, after
+   they update source visibility and the unit's macro names. */
+static void _append_preproc(Compiler c, Array nodes) {
+  List directives = c.leading_preproc();
+  c.update_source_visibility(directives);
+  foreach (Var directive, directives) nodes.push(directive);
 }
 
 /* A failed declaration is skipped whole from its first token, because a
@@ -3767,6 +3799,18 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
   }
 }
 
+static List Compiler._finish_parse(Compiler c, Array nodes) {
+  if (c.meta_build) c.write_meta_build();
+  _append_meta_definitions(c, nodes);
+  c.unit_nodes = NULL;
+  List ast = nodes.list_free();
+  if (c.script && !c.script.defines_main && !c.error_count())
+    _check_script_locals(c, ast);
+  _check_unmatched_braces(c);
+  if (!c.error_count()) _check_static_inits(c);
+  return ast;
+}
+
 // script units
 
 /** Skips a collected script statement, or diagnoses one beside `main`.
@@ -3778,8 +3822,7 @@ int Compiler.skip_collected_script_statement(Compiler c) {
     c.skip_script_statement();
     return 1;
   }
-  if (c.script.defines_main && c.script_statement_executes())
-    _report_script_statement(c);
+  _reject_statement(c);
   return 0;
 }
 
@@ -3802,6 +3845,11 @@ void Compiler.skip_script_statement(Compiler c) {
 
 /* A script unit either defines `main` or runs its top-level statements, so
    a statement beside `main` is the one form it rejects. */
+static void _reject_statement(Compiler c) {
+  if (c.script && c.script.defines_main && c.script_statement_executes())
+    _report_script_statement(c);
+}
+
 static void _report_script_statement(Compiler c) {
   c.report_error(
     <parse>, "a script that defines main cannot have top-level statements",
@@ -3812,7 +3860,7 @@ static void _report_script_statement(Compiler c) {
 /* A file-scope conditional directive also governs the statements it
    surrounds, so a copy of each joins the statement runs in source order and
    the script body keeps the file's conditional structure. */
-static void _push_script_conditionals(
+static void _push_conditionals(
   Compiler c, Array statements, int first, int end) {
   Token tokens = c.tokenizer.tokens;
   for (int i = first; i < end; i++) {
@@ -3855,36 +3903,43 @@ static const char *script_main =
 /* Replaces the token stream with a copy that ends in the script's `main`.
    The copy keeps every consumed token at its index, so recorded token
    indices stay valid, and drops the trivia already read before end of file.
-   Template tokens take the first statement's position with no length, so a
-   diagnostic about them names the script without reading past its text.
    `statements` holds each run's first and past-the-end token index. */
 static void _append_script_main(Compiler c, Array statements) {
   Token tokens = c.tokenizer.tokens, eof = c.token;
-  long kept = _skip_backward(eof - 1, tokens) + 1 - tokens;
+  long kept = _end_index(c, tokens);
   Token first = tokens + statements[0].integer();
   Bytes stream = Bytes.new(sizeof(struct Token));
   stream = stream.append(tokens, kept);
   Tokenizer template = Tokenizer.new((char *) script_main, <x2c>);
   template.scan();
   for (Token token = template.tokens; token.type != <eof>; token++) {
-    if (token.text == "x2c_script_statements") {
-      for (int i = 0; i < statements.len(); i += 2) {
-        long start = statements[i];
-        long end = statements[i + 1];
-        stream = stream.append(tokens + start, end - start);
-      }
-      continue;
-    }
-    struct Token placed = *token;
-    placed.line = first.line;
-    placed.col = first.col;
-    placed.pos = first.pos;
-    placed.len = 0;
-    stream = stream.append(&placed, 1);
+    if (token.text == "x2c_script_statements")
+      stream = _append_runs(stream, tokens, statements);
+    else stream = _append_placed(stream, token, first);
   }
   stream = stream.append(eof, 1);
   c.tokenizer.tokens = stream;
   c.token = _skip_forward((Token) stream + kept);
+}
+
+static Bytes _append_runs(Bytes stream, Token tokens, Array statements) {
+  for (int i = 0; i < statements.len(); i += 2) {
+    long start = statements[i];
+    long end = statements[i + 1];
+    stream = stream.append(tokens + start, end - start);
+  }
+  return stream;
+}
+
+/* A template token takes the first statement's position with no length, so
+   a diagnostic about it names the script without reading past its text. */
+static Bytes _append_placed(Bytes stream, Token token, Token first) {
+  struct Token placed = *token;
+  placed.line = first.line;
+  placed.col = first.col;
+  placed.pos = first.pos;
+  placed.len = 0;
+  return stream.append(&placed, 1);
 }
 
 /* A script's functions cannot see the variables declared among its
@@ -3892,6 +3947,16 @@ static void _append_script_main(Compiler c, Array statements) {
    as undeclared; this names the cause and the `static` spelling that
    shares it. */
 static void _check_script_locals(Compiler c, List ast) {
+  Map locals = _script_locals(ast);
+  if (!locals.len()) return;
+  foreach (List node, ast) match (node)
+    case %(function ? (bind (binding ? ?(String function)) ?)
+           (block *items)):
+      if (function != "x2c_script" && function != "main")
+        _check_local_uses(c, items, locals);
+}
+
+static Map _script_locals(List ast) {
   Map locals = {};
   foreach (List node, ast) match (node)
     case %(function ? (bind (binding ? "x2c_script") ?) (block *items)):
@@ -3901,58 +3966,55 @@ static void _check_script_locals(Compiler c, List ast) {
             case %(!or (bind (binding ? ?(String name)) ?)
                        (op = (bind (binding ? ?(String name)) ?) ?)):
               locals[name] = 1;
-  if (!locals.len()) return;
-  foreach (List node, ast) match (node)
-    case %(function ? (bind (binding ? ?(String function)) ?)
-           (block *items)): {
-      if (function == "x2c_script" || function == "main") continue;
-      foreach (List item, items) match (item) case %(at ?origin ?statement):
-        foreach (Var name, locals.keys()) {
-          Var found;
-          List bindings;
-          int present = statement.list().try_search(
-            %(expr () (ident (binding ? $name))), found, bindings);
-          if (!present) continue;
-          c.origin = origin;
-          c.report_error(
-            <type>,
-            %"'$name' is declared among the script's statements",
-            NULL,
-            %("functions cannot see those locals;"
-              "declare it static to share it"));
-        }
+  return locals;
+}
+
+static void _check_local_uses(Compiler c, List items, Map locals) {
+  foreach (List item, items) match (item) case %(at ?origin ?statement):
+    foreach (Var name, locals.keys()) {
+      Var found;
+      List bindings;
+      int present = statement.list().try_search(
+        %(expr () (ident (binding ? $name))), found, bindings);
+      if (!present) continue;
+      c.origin = origin;
+      c.report_error(
+        <type>,
+        %"'$name' is declared among the script's statements",
+        NULL,
+        %("functions cannot see those locals;"
+          "declare it static to share it"));
     }
 }
 
 // top-level definitions
 
-static void _record_top_level_function_state(Compiler compiler, List node) {
+static void _record_top_level(Compiler c, List node) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
-      _record_object_definitions(compiler, bindings);
-      _record_static_object(compiler, type, bindings);
-      _record_function_prototypes(compiler, type, bindings);
+      _record_objects(c, bindings);
+      _record_static_object(c, type, bindings);
+      _record_prototypes(c, type, bindings);
     }
     case %(function ?return_type
            (!set ?target (bind ?binding *)) ?): {
       List declaration = %(declare $return_type (bindings $target));
-      _record_function_definition(
-        compiler, declaration.type_from_ast(), binding);
+      _record_definition(c, declaration.type_from_ast(), binding);
     }
   }
 }
 
 /* An initializer makes a file-scope declaration a definition; a tentative
    one may be repeated. */
-static void _record_object_definitions(Compiler c, List bindings) {
+static void _record_objects(Compiler c, List bindings) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
-      if (key in c.semantic_binding_facts())
-        _report_redefinition(c, "variable", binding);
-      c.semantic_binding_facts()[key] = 1;
-      c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+      Map facts = c.semantic_binding_facts();
+      if (key in facts) _report_redefinition(c, "variable", binding);
+      facts[key] = 1;
+      facts[%(arms $binding)] = c.arms;
     }
 }
 
@@ -3976,8 +4038,7 @@ static void _report_redefinition(Compiler c, String kind, List binding) {
    produced it, and whether that form is private, for the definition walk.
    A typedef or declaration may repeat its name, so each statement keys its
    own range. */
-static void _record_definition_span(
-  Compiler c, List node, int start, int end) {
+static void _record_span(Compiler c, List node, int start, int end) {
   List key = NULL;
   match (node) {
     case %(function ? (bind ?binding ?) ?): key = binding;
@@ -3989,133 +4050,128 @@ static void _record_definition_span(
       %($start $end ${c.source_private > 0});
 }
 
-// function completion
+/* function completion
+
+   A function's completion fact records its contract: a prototype, a
+   definition, a definition that completed a prototype, or a conflict
+   between two prototypes. */
 
 // Record only prototypes reached in positioned full-parse source order.
-static void _record_function_prototypes(
-  Compiler c, Type declared_type, List items) {
+static void _record_prototypes(Compiler c, Type declared_type, List items) {
   foreach (List target, items)
     match (target)
       case %(bind ?binding ?modifiers): {
         List single = %(declare $declared_type (bindings $target));
         Type type = single.type_from_ast();
-        if (!type.is_function()) continue;
-        /* A source attribute on the prototype belongs to the function; the
-           generator writes it on the prototype it derives from the
-           definition. */
-        List attributes = NULL;
-        foreach (Var item, modifiers)
-          if (item is <list> && car(item) is <string>)
-            attributes = attributes ? %( @attributes $item ) : %($item);
-        if (attributes)
-          c.semantic_binding_facts()[%(attributes $binding)] = attributes;
-        List contract = _function_completion_contract(
-          type, _binding_method_identity(c, binding),
-          _binding_self_signature(c, binding));
-        Var stored;
-        if (c.semantic_binding_facts().try_get(
-          %(completion $binding), stored)) {
-          List state = stored;
-          Var (state_kind, prior_contract) = state;
-          if (state_kind == <definition> || state_kind == <completed>)
-            continue;
-          if (state_kind != <prototype> ||
-              !List.equal(prior_contract, contract)) {
-            c.semantic_binding_facts()[%(completion $binding)] =
-              %(conflict);
-            continue;
-          }
-        }
-        c.semantic_binding_facts()[%(completion $binding)] =
-          %(prototype $contract);
+        if (type.is_function()) _record_prototype(c, binding, type, modifiers);
       }
 }
 
-static void _record_function_definition(
-  Compiler c, Type type, List binding) {
-  List contract = _function_completion_contract(
-    type, _binding_method_identity(c, binding),
-    _binding_self_signature(c, binding));
+static void _record_prototype(
+  Compiler c, List binding, Type type, List modifiers) {
+  _record_attributes(c, binding, modifiers);
+  List contract = _contract(c, type, binding);
   Var stored;
   if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
     List state = stored;
     Var (state_kind, prior_contract) = state;
-    String spelling = binding_identity_spelling(binding);
+    if (state_kind == <definition> || state_kind == <completed>) return;
+    if (state_kind != <prototype> || !List.equal(prior_contract, contract)) {
+      c.semantic_binding_facts()[%(completion $binding)] = %(conflict);
+      return;
+    }
+  }
+  c.semantic_binding_facts()[%(completion $binding)] = %(prototype $contract);
+}
+
+/* A source attribute on the prototype belongs to the function; the
+   generator writes it on the prototype it derives from the definition. */
+static void _record_attributes(Compiler c, List binding, List modifiers) {
+  List attributes = NULL;
+  foreach (Var item, modifiers)
+    if (item is <list> && car(item) is <string>)
+      attributes = attributes ? %( @attributes $item ) : %($item);
+  if (attributes)
+    c.semantic_binding_facts()[%(attributes $binding)] = attributes;
+}
+
+static void _record_definition(Compiler c, Type type, List binding) {
+  List contract = _contract(c, type, binding);
+  Var stored;
+  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
+    List state = stored;
+    Var (state_kind, prior_contract) = state;
     if (state_kind == <prototype>) {
-      /* A definition without `static` after a `static` prototype keeps the
-         prototype's internal linkage in C. */
-      match (prior_contract)
-        case %(function-contract ?a ?b static ?d)
-          if (contract.equal(%(function-contract $a $b extern $d))):
-            contract = prior_contract;
-      if (List.equal(prior_contract, contract)) {
-        c.semantic_binding_facts()[%(completion $binding)] =
-          %(completed $contract);
-        c.semantic_binding_facts()[%(arms $binding)] = c.arms;
-        return;
-      }
-      c.report_error(
-        <type>,
-        %"definition '$spelling' does not match prior prototype",
-        c.token,
-        %(
-          "prototype: ${prior_contract.repr()}"
-          "definition: ${contract.repr()}"
-        )
-      );
+      _complete_prototype(c, binding, prior_contract, contract);
+      return;
     }
     if (state_kind == <definition> || state_kind == <completed>)
       _report_redefinition(c, "function", binding);
   }
-  c.semantic_binding_facts()[%(completion $binding)] =
-    %(definition $contract);
+  c.semantic_binding_facts()[%(completion $binding)] = %(definition $contract);
   c.semantic_binding_facts()[%(arms $binding)] = c.arms;
   String spelling = binding_identity_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }
 
-static List _function_completion_contract(
+/* A definition completes the prior prototype whose contract it matches. A
+   definition without `static` after a `static` prototype keeps the
+   prototype's internal linkage in C. */
+static void _complete_prototype(
+  Compiler c, List binding, List prior_contract, List contract) {
+  match (prior_contract)
+    case %(function-contract ?a ?b static ?d)
+      if (contract.equal(%(function-contract $a $b extern $d))):
+        contract = prior_contract;
+  if (!List.equal(prior_contract, contract)) {
+    String spelling = binding_identity_spelling(binding);
+    c.report_error(
+      <type>,
+      %"definition '$spelling' does not match prior prototype",
+      c.token,
+      %(
+        "prototype: ${prior_contract.repr()}"
+        "definition: ${contract.repr()}"
+      )
+    );
+  }
+  c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
+  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+}
+
+static List _contract(Compiler c, Type type, List binding) =>
+  _completion_contract(
+    type, _fact(c, %(method $binding)), _fact(c, %(self $binding)));
+
+static List _completion_contract(
   Type type, List method_identity, List self_signature) {
   Symbol linkage = type.is_static() ? <static> : <extern>;
   List contract = %(
     function-contract
-    ${_function_contract_type(type, 0)}
-    ${_function_contract_type(type, 1)}
+    ${_contract_type(type, 0)}
+    ${_contract_type(type, 1)}
     $linkage
     $method_identity
   );
   return self_signature ? contract.append(%($self_signature)) : contract;
 }
 
-static Type _function_contract_type(Type type, int keep_qualifiers) {
-  Array result = [];
+static Type _contract_type(Type type, int keep_qualifiers) {
+  Array kept = [];
   foreach (Var item, type) {
-    if (item is <list>) {
-      result.push(_function_contract_type(item, keep_qualifiers));
-      continue;
-    }
-    if (item is <symbol>) {
-      Symbol symbol = item;
-      if (symbol.is_storage_class() ||
-          (!keep_qualifiers && symbol.is_type_qualifier()) ||
-          symbol.is_inline())
-        continue;
-    }
-    result.push(item);
+    if (item is <list>) kept.push(_contract_type(item, keep_qualifiers));
+    else if (!_omitted_specifier(item, keep_qualifiers)) kept.push(item);
   }
-  return result.list_free();
+  return kept.list_free();
 }
 
-static List _binding_method_identity(Compiler compiler, List binding) {
-  Var stored;
-  return compiler.semantic_binding_facts().try_get(
-    %(method $binding), stored) ? stored : NULL;
-}
-
-static List _binding_self_signature(Compiler compiler, List binding) {
-  Var stored;
-  return compiler.semantic_binding_facts().try_get(
-    %(self $binding), stored) ? stored : NULL;
+// A contract omits storage classes, `inline`, and qualifiers unless kept.
+static int _omitted_specifier(Var item, int keep_qualifiers) {
+  if (item is not <symbol>) return 0;
+  Symbol symbol = item;
+  return symbol.is_storage_class() ||
+         (!keep_qualifiers && symbol.is_type_qualifier()) ||
+         symbol.is_inline();
 }
 
 // static initializers
@@ -4123,14 +4179,12 @@ static List _binding_self_signature(Compiler compiler, List binding) {
 static void _record_static_object(Compiler c, Type declared, List bindings) {
   if (!declared.is_static()) return;
   int declared_var = c.sym.is_var_type(declared);
-  if (!declared_var &&
-      !_is_initializable_object_type(c, declared)) return;
+  if (!declared_var && !_initializable_type(c, declared)) return;
   foreach (List binding_init, bindings)
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !_is_initializable_object_type(
-          c, initializer_type))
+        if (declared_var && !_initializable_type(c, initializer_type))
           continue;
         Map references = {}, Array ordered = [];
         _collect_references(value, references, ordered);
@@ -4138,12 +4192,10 @@ static void _record_static_object(Compiler c, Type declared, List bindings) {
       }
 }
 
-static int _is_initializable_object_type(Compiler compiler, Type type) =>
-  compiler.sym.is_string_type(type) ||
-         compiler.sym.is_named_value_type(type, "List") ||
-         compiler.sym.is_array_type(type) ||
-         compiler.sym.is_map_type(type) ||
-         compiler.sym.is_named_value_type(type, "Func");
+static int _initializable_type(Compiler c, Type type) =>
+  c.sym.is_string_type(type) || c.sym.is_named_value_type(type, "List") ||
+  c.sym.is_array_type(type) || c.sym.is_map_type(type) ||
+  c.sym.is_named_value_type(type, "Func");
 
 static void _collect_references(Var value, Map references, Array ordered) {
   if (value is not <list> || value.is_nil()) return;
@@ -4171,26 +4223,27 @@ static void _collect_references(Var value, Map references, Array ordered) {
   foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-static void _validate_static_object_initializers(Compiler compiler) {
-  Map statics = compiler.sym.file_statics();
-  foreach (Var (key, value), compiler.static_init_deps) {
+static void _check_static_inits(Compiler c) {
+  Map statics = c.sym.file_statics();
+  foreach (Var (key, value), c.static_init_deps) {
     List binding = key, dependencies = value;
     foreach (List reference, dependencies) {
       String name = binding_identity_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
-      Token token = NULL;
-      Var token_index;
-      if (compiler.init_tokens.try_get(binding, token_index)) {
-        Token tokens = compiler.tokenizer.tokens;
-        token = tokens + token_index.integer();
-      }
-      compiler.report_error(
+      c.report_error(
         <parse>,
         %"file-static x2c initializer depends on non-static '$name'",
-        token, target ? %("initializer: $target") : NULL);
+        _init_token(c, binding), target ? %("initializer: $target") : NULL);
     }
   }
+}
+
+static Token _init_token(Compiler c, List binding) {
+  Var index;
+  if (!c.init_tokens.try_get(binding, index)) return NULL;
+  Token tokens = c.tokenizer.tokens;
+  return tokens + index.integer();
 }
 
 // meta definitions
@@ -4206,7 +4259,7 @@ static void _validate_static_object_initializers(Compiler compiler) {
 static void _append_meta_definitions(Compiler c, Array nodes) {
   if (!c.meta_defs.len()) return;
   Map referenced = {}, reached = {};
-  foreach (List node, nodes) _collect_binding_references(node, referenced);
+  foreach (List node, nodes) ast_collect_binding_references(node, referenced);
   /* A `meta` declaration uses only ones declared before it, so one pass
      from the last declaration back reaches every one an emitted one
      needs. */
@@ -4215,13 +4268,13 @@ static void _append_meta_definitions(Compiler c, Array nodes) {
     Var identity = _meta_identity(definition);
     if (identity in referenced) {
       reached[identity] = 1;
-      _collect_binding_references(definition, referenced);
+      ast_collect_binding_references(definition, referenced);
     }
   }
   foreach (List definition, c.meta_defs)
     if (_meta_identity(definition) in reached &&
         !c.meta_is_comptime_only(definition)) {
-      _record_top_level_function_state(c, definition);
+      _record_top_level(c, definition);
       nodes.push(definition);
     }
 }
@@ -4238,20 +4291,14 @@ static Var _meta_identity(List definition) {
   return void;
 }
 
-/* Records every binding `node` names, so a `meta` definition is emitted only
-   where the unit reaches it. A definition's own binder is a `bind`, not an
-   `ident`, so a function does not name itself here. */
-static void _collect_binding_references(Var node, Map referenced) {
+/** Records in `referenced` the identity of every binding `node` names. */
+void ast_collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;
   List syntax = node;
+  // A definition's own binder is a `bind`, so a function does not name itself.
   match (syntax) case %(ident (binding ?identity ?)): {
     referenced[identity] = 1;
     return;
   }
-  foreach (Var child, syntax) _collect_binding_references(child, referenced);
-}
-
-/** Records in `referenced` the identity of every binding `node` names. */
-void ast_collect_binding_references(Var node, Map referenced) {
-  _collect_binding_references(node, referenced);
+  foreach (Var child, syntax) ast_collect_binding_references(child, referenced);
 }
