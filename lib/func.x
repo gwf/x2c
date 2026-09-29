@@ -28,9 +28,9 @@ typedef union FuncArgData {
 
 /** Argument carrier borrowed for one synchronous `Func.apply` call.
     A null `reference_type` selects the copied `Var` bits; otherwise
-    `reference`
-    and the canonical source type are borrowed and must remain valid through
-    the call. A reference target may be mutated by the native function.
+    `reference` and the canonical source type are borrowed and must remain
+    valid through the call. A reference target may be mutated by the native
+    function.
 */
 typedef struct FuncArg {
   FuncArgData data;
@@ -43,8 +43,7 @@ typedef struct FuncArg {
     the `Func`. Compiler-generated adapters use the checked value and reference
     readers, call their native target, and box its result. A returned `void`
     remains no-value. Adapters receive no count. Fixed bindings check arity
-    first,
-    and rest bindings receive one packed `List` argument.
+    first, and rest bindings receive one packed `List` argument.
 */
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 
@@ -83,8 +82,7 @@ static size_t _context_offset(void) {
                    : sizeof(struct Func);
 }
 
-static void *_context(Func function) =>
-  (unsigned char *) function + _context_offset();
+static void *_context(Func fn) => (unsigned char *) fn + _context_offset();
 
 // calls
 
@@ -104,43 +102,32 @@ static void *_context(Func function) =>
     adapter returned. */
 Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   if (!f || (argc && !argv)) raise %(bad-arg (operation "Func.apply"));
-  Var packed = void;
-  FuncArg packed_argument;
-  if (f.rest) {
-    List rest = NULL;
-    for (unsigned i = argc; i; i--) {
-      if (argv[i - 1].reference_type) {
-        List sig = f.sig;
-        unsigned index = i - 1;
-        raise %(bad-types (sig $sig) (index $index) (want value));
-      }
-      Var value = argv[i - 1].data.value;
-      if (value is void) {
-        List sig = f.sig;
-        unsigned index = i - 1;
-        raise %(void-op (sig $sig) (index $index));
-      }
-      rest = cons(value, rest);
+  if (!f.rest) {
+    if (argc != f.nparams) {
+      List sig = f.sig;
+      unsigned expected = f.nparams;
+      raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
     }
-    packed = rest;
-    packed_argument = FuncArg.value(packed);
-    argv = &packed_argument;
+    return f.adapter(f, argv);
   }
-  else if (argc != f.nparams) {
-    unsigned expected = f.nparams;
-    List sig = f.sig;
-    raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
+  List sig = f.sig, rest = NULL;
+  for (unsigned i = argc; i; i--) {
+    unsigned index = i - 1;
+    if (argv[index].reference_type)
+      raise %(bad-types (sig $sig) (index $index) (want value));
+    Var value = argv[index].data.value;
+    if (value is void) raise %(void-op (sig $sig) (index $index));
+    rest = cons(value, rest);
   }
-  return f.adapter(f, argv);
+  FuncArg packed = FuncArg.value(rest);
+  return f.adapter(f, &packed);
 }
 
 /** Constructs a `Func` argument by copying one `Var` value.
     Pointer-bearing payload storage is not copied or retained and must outlive
     the call that consumes the argument.
 */
-inline FuncArg FuncArg.value(Var value) {
-  return (FuncArg) { .data.value = value };
-}
+inline FuncArg FuncArg.value(Var value) => (FuncArg) { .data.value = value };
 
 /** Constructs a `Func` argument borrowing a typed lvalue address.
     The address and canonical `type` must remain valid through `Func.apply`;
@@ -148,18 +135,18 @@ inline FuncArg FuncArg.value(Var value) {
     no validation. Compiler-generated adapters use the checked reference
     reader before calling native code.
 */
-inline FuncArg FuncArg.reference(const void *reference, List type) {
-  return (FuncArg) { .data.reference = reference, .reference_type = type };
-}
+inline FuncArg FuncArg.reference(const void *reference, List type) =>
+  (FuncArg) { .data.reference = reference, .reference_type = type };
 
-// adapter arguments
+/* adapter arguments
 
-/* Dynamic-call lowering evaluates the Func expression once, queries every
+   Dynamic-call lowering evaluates the Func expression once, queries every
    parameter before evaluating that source argument, initializes one FuncArg
    local at a time in source order, and only then calls Func.apply. The
-   query-before-evaluation rule keeps output-only references unread; the locals
-   keep argument order independent of C call evaluation. The helpers below
-   consume that prepared array and do not retain it. */
+   query-before-evaluation rule keeps output-only references unread; the
+   locals keep argument order independent of C call evaluation. The helpers
+   below consume that prepared array and do not retain it. */
+
 /** Returns the borrowed pointee type for reference parameter `index`.
     A value or rest parameter returns NULL. Generated direct calls query it
     before evaluating the source argument, so an output-only lvalue is not
@@ -167,30 +154,28 @@ inline FuncArg FuncArg.reference(const void *reference, List type) {
 
     Raises: `<bad-arg>` for a null `Func` or an index outside `argc`, or
     `<bad-arity>` when `argc` disagrees with a fixed signature. */
-List x2c_func_reference_type(
-  Func function, unsigned argc, unsigned index) {
-  if (!function || index >= argc)
+List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
+  if (!fn || index >= argc)
     raise %(bad-arg (operation "Func.apply") (index $index));
-  if (function.rest) return NULL;
-  if (argc != function.nparams) {
-    List sig = function.sig;
-    unsigned expected = function.nparams;
+  if (fn.rest) return NULL;
+  if (argc != fn.nparams) {
+    List sig = fn.sig;
+    unsigned expected = fn.nparams;
     raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
   }
-  List parameter = _parameter(function, index);
-  return parameter &&
-         (parameter.car() == <&> || parameter.car() == <opt-ref>)
-       ? parameter.cdr() : NULL;
+  List parameter = _parameter(fn, index);
+  return _is_reference(parameter) ? parameter.cdr() : NULL;
 }
 
-static List _parameter(Func function, unsigned index) {
-  if (!function || index >= function.nparams) return NULL;
-  List params = _parameters(function);
+static List _parameter(Func fn, unsigned index) {
+  if (!fn || index >= fn.nparams) return NULL;
+  List params = fn.params;
   while (params && index--) params = params.cdr();
   return params && params.car() is <list> ? params.car() : NULL;
 }
 
-static List _parameters(Func function) => function ? function.params : NULL;
+static int _is_reference(List parameter) =>
+  parameter && (parameter.car() == <&> || parameter.car() == <opt-ref>);
 
 /** Checks and converts value argument `i`, reporting its position.
     Generated adapters call this once per value parameter before unboxing, so a
@@ -198,9 +183,8 @@ static List _parameters(Func function) => function ? function.params : NULL;
     `argv` must address the prepared argument array and `i` must be in bounds;
     compiler-generated adapters establish both facts.
     Raises: `<void-op>` for a `void` argument, `<bad-types>` when an object or
-    `Symbol` argument does not carry `want` or the carrier holds
-    a reference, and
-    `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
+    `Symbol` argument does not carry `want` or the carrier holds a reference,
+    and `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
     `<no-convert>` from a numeric conversion. The result has tag `want`.
     A detail names the argument's tag rather than the argument: any tag may
     arrive here, and an identity-bearing detail value terminates at the error
@@ -210,8 +194,7 @@ Var x2c_func_value_argument(
   Func fn, const FuncArg *argv, unsigned i, Symbol want) {
   List sig = fn ? fn.sig : NULL;
   if (argv[i].reference_type)
-    raise %(bad-types (sig $sig) (index $i)
-                      (want value));
+    raise %(bad-types (sig $sig) (index $i) (want value));
   Var value = argv[i].data.value;
   if (want == <var>) return value;
   if (value is void) raise %(void-op (sig $sig) (index $i));
@@ -258,8 +241,7 @@ void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i) {
     Generated calls use this branch instead of compiling an impossible
     conversion. Raises: `<bad-types>`.
 */
-FuncArg x2c_func_unrepresentable_argument(
-  Func fn, unsigned i, List source) {
+FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source) {
   List sig = fn ? fn.sig : NULL;
   raise %(bad-types (sig $sig) (index $i) (source $source) (want value));
 }
@@ -281,8 +263,7 @@ void *x2c_func_reference_argument(
     and its resolved `want` against the source address before casting.
     Raises: `<bad-types>` on either mismatch. */
 void *x2c_func_declared_reference_argument(
-  Func fn, const FuncArg *argv, unsigned i, List declared_target,
-  List want) =>
+  Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) =>
   _reference_argument(fn, argv, i, declared_target, want);
 
 /* Returns reference argument `i` after checking its declared source type.
@@ -295,11 +276,9 @@ void *x2c_func_declared_reference_argument(
     failure.
 */
 static void *_reference_argument(
-  Func fn, const FuncArg *argv, unsigned i, List declared_target,
-  List want) {
+  Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) {
   List declared = _parameter(fn, i), source = argv[i].reference_type;
-  int signature_reference = declared &&
-    (declared.car() == <&> || declared.car() == <opt-ref>);
+  int signature_reference = _is_reference(declared);
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source ||
       (!argv[i].data.reference && declared.car() != <opt-ref>) ||
@@ -308,8 +287,7 @@ static void *_reference_argument(
       (!_reference_type_accepts(want, source) &&
        !_reference_type_accepts(declared_target, source))) {
     List sig = fn ? fn.sig : NULL;
-    raise %(bad-types (sig $sig) (index $i)
-                      (source $source) (want $want));
+    raise %(bad-types (sig $sig) (index $i) (source $source) (want $want));
   }
   return (void *) argv[i].data.reference;
 }
@@ -359,8 +337,7 @@ Func Func.new(FuncAdapter adapter, List signature) =>
     conses the arguments itself. Use this for a variadic operation; a fixed one
     belongs in `Func.new`, which is faster and reports a wrong count. The
     canonical `signature` and adapter code are borrowed for the `Func`
-    lifetime.
-    The result belongs to the current `Scope`.
+    lifetime. The result belongs to the current `Scope`.
     Raises: `<bad-sig>` for a null adapter, a malformed signature, or a
     signature whose parameters are anything but one `List`, and `<alloc-fail>`
     when binding storage cannot be allocated.
@@ -385,8 +362,7 @@ Func Func.new_context(
 
 /* Constructors accept canonical `((func (ptype ...)) rtype ...)` Lists. The
    pattern checks only that outer shape; compiler-generated adapters
-   interpret the parameters and result. A failure after allocation frees the
-   partially built Func. */
+   interpret the parameters and result. */
 static Func _new(
   FuncAdapter adapter, List signature, int rest,
   const void *context, size_t context_size) {
@@ -402,13 +378,10 @@ static Func _new(
     raise %(bad-arg (operation "Func.new_context"));
   size_t context_offset = _context_offset();
   if (context_size > SIZE_MAX - context_offset)
-    raise %(size-limit (operation "Func.new_context")
-                       (size $context_size));
+    raise %(size-limit (operation "Func.new_context") (size $context_size));
   int void_params = params.len() == 1 && params.car() is <list> &&
                     params.car() == %(void);
-  size_t bytes = context_offset + context_size;
-  Func fn = Scope.calloc(1, bytes), result = NULL;
-  defer if (!result) Scope.free(fn);
+  Func fn = Scope.calloc(1, context_offset + context_size);
   fn.sig = signature;
   fn.params = void_params ? NULL : params;
   fn.adapter = adapter;
@@ -416,8 +389,7 @@ static Func _new(
   fn.context_size = context_size;
   fn.nparams = void_params ? 0 : params.len();
   if (context_size) memcpy(_context(fn), context, context_size);
-  result = fn;
-  return result;
+  return fn;
 }
 
 // access and boxing
@@ -432,8 +404,7 @@ List Func.signature(Func function) {
 
 /** Returns borrowed read-only access to a `Func`'s copied context.
     The pointer remains valid only for the `Func`'s `Scope` lifetime and is
-    NULL
-    when the binding has no context.
+    NULL when the binding has no context.
     Raises: `<bad-arg>` for a null binding. It does not return on failure.
 */
 const void *Func.context(Func function) {
