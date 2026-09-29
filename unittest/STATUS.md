@@ -182,6 +182,16 @@ rules; tags hidden inside an opaque native macro retain native scope. Pass
 lowered local objects explicitly to native macros. The language reference
 describes these native boundaries.
 
+The contextual `in` is decided from its neighboring tokens before parsing.
+Every `)` counts as the end of an operand, so the C name `in` directly
+after a control condition or a cast is read as the operator when an operand
+can follow it: `if (flag) in(3);`, `if (flag) in++;`, and `(int) in * 2`
+fail to parse. A bare `[...]` or `{...}` literal directly after `in`, or a
+bare `{...}` or `%<<...>>` literal directly before it, still leaves `in` a
+name; those delimiters also begin array declarators and blocks or close
+blocks and shifts. A parenthesized operand works. The
+`operator-in-literals` fixture covers the literal operands that count.
+
 ## Retired maintenance notes
 
 - The compiler preserves discarded assignments,
