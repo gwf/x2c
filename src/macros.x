@@ -1169,6 +1169,14 @@ static int _fixed_alias(Compiler c, Atom alias) {
 static const SymbolSet alias_kinds =
   %<<expression block-item field enumerator map-entry unit decorator>>;
 
+/* Parses one keyword alias of `c`'s source into `aliases`. */
+static void _record_alias(Compiler c, Map aliases) {
+  Token token = c.skip_trivia_from(c.token + 1);
+  Atom alias = Atom.intern(token.text);
+  c.parse_keyword_definition();
+  aliases[alias] = c.kw_aliases[alias];
+}
+
 /* invocation recognition
 
    At each syntax position the parser asks whether the tokens start an
@@ -2962,37 +2970,40 @@ static Var _carrier_binder(Var value) {
   return NULL;
 }
 
-// compile-time lisp
+/* compile-time Lisp
 
-/* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
-   parser borrows that session; the parent Compiler frees it. */
+   Each Compiler initializes one Lisp session lazily, as a child of the
+   shared library session when one is published. A `$(...)` form at file
+   scope evaluates there, or imports a file; in an expression its value
+   lifts into syntax. */
+
+/* An `.xmacro` import parser borrows its parent's session; the parent
+   Compiler frees it. Every use records the library files as dependencies,
+   and a session loads them once. */
 static void _ensure_lisp(Compiler compiler) {
-  with compiler {
-    int loaded = _.macro_lisp != NULL;
-    int shared = library_session != NULL;
-    if (!loaded) {
-      _.macro_lisp = Lisp.kernel();
-      _.macro_lisp.adopt(library_session);
-    }
-    _eval_library(
-      _, loaded || shared, "etc/init.xlisp",
-      "cannot open the compile-time Lisp environment");
-    _eval_library(
-      _, loaded || shared, "etc/lisp-values.xlisp",
-      "cannot open the compile-time value operations");
-    _eval_library(
-      _, loaded || shared, "etc/compiler-sdk.xlisp",
-      "cannot open the compile-time Lisp SDK");
-    if (!loaded && !shared) _install_builtins(_.macro_lisp);
-    _eval_library(
-      _, loaded || shared, "etc/builtin-core.xlisp",
-      "cannot open the built-in macro support");
-    if (!loaded && !shared) _install_native_operations(_);
+  int loaded = compiler.macro_lisp != NULL;
+  int shared = library_session != NULL, ready = loaded || shared;
+  if (!loaded) {
+    compiler.macro_lisp = Lisp.kernel();
+    compiler.macro_lisp.adopt(library_session);
   }
+  _eval_library(
+    compiler, ready, "etc/init.xlisp",
+    "cannot open the compile-time Lisp environment");
+  _eval_library(
+    compiler, ready, "etc/lisp-values.xlisp",
+    "cannot open the compile-time value operations");
+  _eval_library(
+    compiler, ready, "etc/compiler-sdk.xlisp",
+    "cannot open the compile-time Lisp SDK");
+  if (!ready) _install_builtins(compiler.macro_lisp);
+  _eval_library(
+    compiler, ready, "etc/builtin-core.xlisp",
+    "cannot open the built-in macro support");
+  if (!ready) _install_native_operations(compiler);
 }
 
-static Var _eval_string(
-  Compiler compiler, String source, Token invocation) {
+static Var _eval_string(Compiler compiler, String source, Token invocation) {
   Var result;
   $let(lisp_site, invocation)
   $let(lisp_compiler, compiler) {
@@ -3047,26 +3058,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
 void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
   String requested = NULL;
   if (_import_path(compiler, requested)) {
-    Token first = compiler.token;
-    List imported = compiler.parse_macro_lisp_top_level();
-    if (imported)
-      foreach (Var definition, imported.cdr())
-        compiler.meta_defs.push(definition);
-    compiler.record_meta_import();
-    String name = compiler.package;
-    if (name && !compiler.source_private &&
-        requested.endswith(".xmacro")) {
-      String root = compiler.package_roots[name];
-      String entry = compiler.filename;
-      if (entry == %"$root/src/$name.x" || entry == %"$root/$name.x") {
-        String path = _canonical_path(compiler, requested);
-        String source = home_portable_path(Path.absolute(entry));
-        if (path.startswith(%"$root/")) path = path[root.len() + 1:];
-        compiler.sym.set(
-          %("source-node" (package-macro $source ${first.pos})),
-          %(package-macro $name $path));
-      }
-    }
+    _shallow_import(compiler, requested);
     return;
   }
   Token first = compiler.token;
@@ -3075,6 +3067,34 @@ void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
      import's forms, and running one again would rebind an ancestor's name. */
   if (compiler.inherited_lisp) return;
   compiler.queue_declaration_effect(form, first, compiler.token);
+}
+
+static void _shallow_import(Compiler compiler, String requested) {
+  Token first = compiler.token;
+  List imported = compiler.parse_macro_lisp_top_level();
+  if (imported)
+    foreach (Var definition, imported.cdr())
+      compiler.meta_defs.push(definition);
+  compiler.record_meta_import();
+  if (compiler.package && !compiler.source_private &&
+      requested.endswith(".xmacro"))
+    _record_package_macro(compiler, requested, first);
+}
+
+/* A package entry records its public macro imports, which a consumer loads
+   where it imports the package. */
+static void _record_package_macro(
+  Compiler compiler, String requested, Token first) {
+  String name = compiler.package;
+  String root = compiler.package_roots[name];
+  String entry = compiler.filename;
+  if (entry != %"$root/src/$name.x" && entry != %"$root/$name.x") return;
+  String path = _canonical_path(compiler, requested);
+  String source = home_portable_path(Path.absolute(entry));
+  if (path.startswith(%"$root/")) path = path[root.len() + 1:];
+  compiler.sym.set(
+    %("source-node" (package-macro $source ${first.pos})),
+    %(package-macro $name $path));
 }
 
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
@@ -3106,20 +3126,17 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
     an unsupported result.
 */
 List Compiler.lift_macro_lisp_expression(
-  Compiler compiler, Var value, Token invocation) {
-  List literal = compiler.meta_value_expression(NULL, value, invocation);
+  Compiler c, Var value, Token invocation) {
+  List literal = c.meta_value_expression(NULL, value, invocation);
   if (literal) return literal;
   Var identifier = _sdk_identifier_result(value);
   if (identifier is not void) return %(expr () (ident $identifier));
   if (value is <list> && !value.is_nil())
-    return compiler.bind_syntax(
-      _helper_result(compiler, value), AST_EXPRESSION, NULL);
-  compiler.report_error(
+    return c.bind_syntax(_helper_result(c, value), AST_EXPRESSION, NULL);
+  c.report_error(
     <macro>, "compile-time Lisp result cannot fill an expression slot",
     invocation, %( "value:" ${value.repr()} ));
 }
-
-static Var _helper_result(Compiler c, Var value);
 
 static Var _sdk_identifier_result(Var value) {
   match (value)
@@ -3135,172 +3152,213 @@ static Var _lisp_import_hook(String path) {
   return %();
 }
 
-// imports
+/* imports
 
-/* An import is cached only after it completes. Cached `.xmacro` aliases are
+   `$(import "file")` evaluates an `.xlisp` file in the unit's session or
+   reads an `.xmacro` file's definitions, aliases, and `meta` declarations.
+   An import is cached only after it completes. Cached `.xmacro` aliases are
    replayed once per source alias map, while definitions and the Lisp session
    remain shared by the translation unit. CPP reads definitions and aliases;
    imported Lisp stays pending until a declaration needs its evaluation. */
-static List _import(
-  Compiler c, String requested, Token invocation) {
+
+/* One import while its file is read. `meta` records that the file
+   contributed a `meta` declaration, which is what makes the next pass read
+   it again instead of replaying a cached entry. A compile-time-only
+   function installs and contributes no runtime definition, so the two are
+   counted separately. */
+typedef struct Import {
+  Compiler c, String path, Token invocation;
+  Map aliases, Array metas, int meta;
+} Import;
+
+static List _import(Compiler c, String requested, Token invocation) {
   _ensure_lisp(c);
   String path = _canonical_path(c, requested);
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
   Var cached;
-  int replay = 0;
-  if (c.imports.try_get(path, cached)) {
-    match (cached)
-      case %(imported ?aliases ?definitions ?dependencies ?(int meta)): {
-        c.merge_translation_dependencies(dependencies);
-        /* A `meta` definition is bound in the current symbol table and
-           emitted where its import stands, so a pass that has not seen this
-           path yet reads the file again instead of replaying definitions. */
-        if (meta) {
-          replay = !c.kw_seen.contains(path);
-          /* The re-read defines this import's macros again, so the ones the
-             previous pass left behind are dropped first. Without that the
-             second definition reads as a collision with another import,
-             which is what the check below the parse loop is for. */
-          if (replay)
-            foreach (Var (name, definition), definitions.map())
-              c.macros.del(name);
-        }
-        else if (!c.kw_seen.contains(path)) {
-          foreach (Var (name, definition), definitions.map())
-            c.macros[name] = _rebind_import_definition(c, definition);
-          if (aliases is <map>) c.kw_aliases.merge(aliases);
-          c.kw_seen[path] = 1;
-        }
-      }
-    if (!replay) return NULL;
-  }
-  if (path in c.import_stack) {
-    String display = c.display_path(path);
-    Array notes = [ %"import: $display" ];
-    foreach (Var parent, c.import_stack)
-      notes.push(%"from: ${c.display_path(parent)}");
-    c.report_error(
-      <macro>, "compile-time import cycle",
-      invocation, notes.list_free());
-  }
+  if (c.imports.try_get(path, cached) && !_reuse_import(c, path, cached))
+    return NULL;
+  if (path in c.import_stack) _import_cycle(c, path, invocation);
+  Import in = {.c = c, .path = path, .invocation = invocation};
+  return in.read();
+}
+
+/* Applies a completed import's cache entry to this pass and answers whether
+   the file must be read again. A `meta` definition is bound in the current
+   symbol table and emitted where its import stands, so a pass that has not
+   seen the path yet reads a `meta` file again instead of replaying it. */
+static int _reuse_import(Compiler c, String path, Var cached) {
+  match (cached)
+    case %(imported ?aliases ?definitions ?dependencies ?(int meta)): {
+      c.merge_translation_dependencies(dependencies);
+      if (meta) return _forget_import(c, path, definitions);
+      if (!(path in c.kw_seen)) _replay_import(c, path, aliases, definitions);
+    }
+  return 0;
+}
+
+/* The re-read defines this import's macros again, so the ones the previous
+   pass left behind are dropped first; Definition.naming would otherwise
+   report the second definition as a collision with another import. */
+static int _forget_import(Compiler c, String path, Var definitions) {
+  if (path in c.kw_seen) return 0;
+  foreach (Var (name, definition), definitions.map()) c.macros.del(name);
+  return 1;
+}
+
+static void _replay_import(
+  Compiler c, String path, Var aliases, Var definitions) {
+  foreach (Var (name, definition), definitions.map())
+    c.macros[name] = _rebind_imported(c, definition);
+  if (aliases is <map>) c.kw_aliases.merge(aliases);
+  c.kw_seen[path] = 1;
+}
+
+static void _import_cycle(Compiler c, String path, Token invocation) {
+  String display = c.display_path(path);
+  Array notes = [ %"import: $display" ];
+  foreach (Var parent, c.import_stack)
+    notes.push(%"from: ${c.display_path(parent)}");
+  c.report_error(
+    <macro>, "compile-time import cycle",
+    invocation, notes.list_free());
+}
+
+/* Reads the file and caches what it added: macros, dependencies, aliases,
+   and whether it contributed `meta` declarations, which the import returns
+   as a `seq`. */
+static List Import.read(Import *in) {
+  Compiler c = in.c;
   Map previous_definitions = c.macros.copy();
   Map previous_dependencies = c.deps.copy();
-  c.import_stack.push(path);
-  Map imported_aliases = NULL;
-  /* `meta_installed` records that the file contributed a `meta`
-     declaration, which is what makes the next pass read it again rather
-     than replay a cached entry. A compile-time-only function installs and
-     contributes no runtime definition, so the two are counted separately. */
-  Array meta_definitions = [], int meta_installed = 0;
+  c.import_stack.push(in.path);
+  in.metas = [];
   {
     defer c.import_stack.take_last();
-    if (path.endswith(".xlisp")) {
-      String text = _read_source(
-        c, path, "cannot open compile-time Lisp import", invocation,
-        %( "path: ${c.display_path(path)}" ));
-      /* The shared session evaluated this file once for the target, and a
-         session cannot replace a name an ancestor binds. The read above
-         still reports a file that has gone missing. */
-      if (_inherited_import(path)) { }
-      else if (c.collect_protocols) _eval_string(c, text, invocation);
-      else c.queue_declaration_effect(text, invocation, invocation);
-    }
-    else if (path.endswith(".xmacro") || path.endswith(".xpmacro")) {
-      imported_aliases = {};
-      String text = _read_source(
-        c, path, "cannot open macro import", invocation,
-        %( "path: ${c.display_path(path)}" ));
-      /* The import parser borrows the caller's semantic maps and Lisp. Its
-         diagnostics are returned to the caller before release; lasting
-         effects enter the shared definitions, aliases, dependencies, literal
-         cache, and Lisp session. A `meta` definition the import returns is
-         emitted by the caller when the caller reaches it, so its
-         `(cache id)` references have to index the caller's keys. */
-      Compiler imported = Compiler.new_shared(c);
-      defer c.close_child(imported);
-      imported.filename = path;
-      imported.collect_protocols = c.collect_protocols;
-      /* The caller's collection pass parses no bodies and so keeps its
-         protocol registries empty. A `meta` definition here is the one body it
-         does parse, and its `foreach` is the only reader, so the import
-         installs the protocols visible to it when one is asked for. */
-      imported.import_protocols = c.shallow;
-      $let(c.diagnostics.printer, c.diagnostics.printer) {
-        imported.borrow_diagnostics(c);
-        imported.borrow_unit_semantics(c);
-        imported.macros = c.macros;
-        imported.kw_aliases = c.kw_aliases;
-        imported.kw_seen = c.kw_seen;
-        imported.macro_lisp = c.macro_lisp;
-        imported.meta_group = c.meta_group;
-        imported.meta_group_bound = c.meta_group_bound;
-        imported.unit_nodes = c.unit_nodes;
-        imported.borrowed_lisp = 1;
-        imported.import_src = path;
-        imported.inherited_lisp = _inherited_import(path);
-        imported.imports = c.imports;
-        imported.import_stack = c.import_stack;
-        imported.declaration_effects = c.declaration_effects;
-        imported.tokenize(text);
-        while (imported.peek(0) != <eof>) {
-          if (imported.keyword_form_is_definition()) {
-            Token alias_token = imported.skip_trivia_from(imported.token + 1);
-            Atom alias = Atom.intern(alias_token.text);
-            imported.parse_keyword_definition();
-            imported_aliases[alias] = imported.kw_aliases[alias];
-          }
-          else if (imported.macro_form_is_definition())
-            imported.parse_macro_definition();
-          else if (imported.meta_form_is_declaration()) {
-            meta_installed = 1;
-            List definition = imported.parse_top_level();
-            if (definition) meta_definitions.push(definition);
-          }
-          else if (imported.peek(0) == <"$(">) {
-            if (c.collect_protocols || _import_path(imported, NULL)) {
-              /* A nested import's own `meta` definitions belong to the same
-                 consuming unit. */
-              List nested = imported.parse_macro_lisp_top_level();
-              if (nested) {
-                meta_installed = 1;
-                foreach (Var form, nested.cdr()) meta_definitions.push(form);
-              }
-            }
-            else imported.parse_macro_lisp_shallow();
-          }
-          else
-            imported.report_error(
-              <macro>, "unexpected form in macro import",
-              imported.token, NULL);
-        }
-        c.merge_translation_dependencies(imported.deps);
-        c.declaration_effects = imported.declaration_effects;
-      }
-    }
-    else
-      c.report_error(
-        <macro>, "compile-time import requires .xlisp or .xmacro",
-        invocation,
-        %( "path: ${c.display_path(path)}" ));
+    in.file();
   }
-  Map definitions = {}, dependencies = {};
-  foreach (Var (name, definition), c.macros)
-    if (previous_definitions[name] != definition)
-      definitions[name] = definition;
-  foreach (Var (dependency, hash), c.deps)
-    if (previous_dependencies[dependency] != hash)
-      dependencies[dependency] = hash;
-  Var aliases = imported_aliases ? imported_aliases : %();
-  c.imports[path] =
-    %(imported $aliases $definitions $dependencies $meta_installed);
-  c.kw_seen[path] = 1;
-  if (!meta_installed) {
-    meta_definitions.free();
+  Map definitions = _changed(c.macros, previous_definitions);
+  Map dependencies = _changed(c.deps, previous_dependencies);
+  Var aliases = in.aliases ? in.aliases : %();
+  c.imports[in.path] =
+    %(imported $aliases $definitions $dependencies ${in.meta});
+  c.kw_seen[in.path] = 1;
+  if (!in.meta) {
+    in.metas.free();
     return NULL;
   }
-  List forms = meta_definitions.list_free();
+  List forms = in.metas.list_free();
   return %(seq @forms);
+}
+
+/* The entries of `now` whose values differ from `before`'s. */
+static Map _changed(Map now, Map before) {
+  Map changed = {};
+  foreach (Var (key, value), now)
+    if (before[key] != value) changed[key] = value;
+  return changed;
+}
+
+static void Import.file(Import *in) {
+  String path = in.path;
+  if (path.endswith(".xlisp")) in.lisp();
+  else if (path.endswith(".xmacro") || path.endswith(".xpmacro"))
+    in.macros();
+  else
+    in.c.report_error(
+      <macro>, "compile-time import requires .xlisp or .xmacro",
+      in.invocation, _path_note(in.c, path));
+}
+
+/* The shared session evaluated this file once for the target, and a session
+   cannot replace a name an ancestor binds. The read still reports a file
+   that has gone missing. */
+static void Import.lisp(Import *in) {
+  Compiler c = in.c;
+  String text = _read_source(
+    c, in.path, "cannot open compile-time Lisp import", in.invocation);
+  if (_inherited_import(in.path)) return;
+  if (c.collect_protocols) _eval_string(c, text, in.invocation);
+  else c.queue_declaration_effect(text, in.invocation, in.invocation);
+}
+
+/* The import parser borrows the caller's semantic maps and Lisp. Its
+   diagnostics are returned to the caller before release; lasting effects
+   enter the shared definitions, aliases, dependencies, literal cache, and
+   Lisp session. */
+static void Import.macros(Import *in) {
+  Compiler c = in.c;
+  in.aliases = {};
+  String text = _read_source(
+    c, in.path, "cannot open macro import", in.invocation);
+  Compiler child = Compiler.new_shared(c);
+  defer c.close_child(child);
+  child.filename = in.path;
+  child.collect_protocols = c.collect_protocols;
+  /* The caller's collection pass parses no bodies and so keeps its
+     protocol registries empty. A `meta` definition here is the one body it
+     does parse, and its `foreach` is the only reader, so the import
+     installs the protocols visible to it when one is asked for. */
+  child.import_protocols = c.shallow;
+  $let(c.diagnostics.printer, c.diagnostics.printer) {
+    in.borrow(child);
+    child.tokenize(text);
+    while (child.peek(0) != <eof>) in.form(child);
+    c.merge_translation_dependencies(child.deps);
+    c.declaration_effects = child.declaration_effects;
+  }
+}
+
+/* A `meta` definition the import returns is emitted by the caller when the
+   caller reaches it, so its `(cache id)` references index the caller's
+   keys. */
+static void Import.borrow(Import *in, Compiler child) {
+  Compiler c = in.c;
+  child.borrow_diagnostics(c);
+  child.borrow_unit_semantics(c);
+  child.macros = c.macros;
+  child.kw_aliases = c.kw_aliases;
+  child.kw_seen = c.kw_seen;
+  child.macro_lisp = c.macro_lisp;
+  child.meta_group = c.meta_group;
+  child.meta_group_bound = c.meta_group_bound;
+  child.unit_nodes = c.unit_nodes;
+  child.borrowed_lisp = 1;
+  child.import_src = in.path;
+  child.inherited_lisp = _inherited_import(in.path);
+  child.imports = c.imports;
+  child.import_stack = c.import_stack;
+  child.declaration_effects = c.declaration_effects;
+}
+
+static void Import.form(Import *in, Compiler child) {
+  if (child.keyword_form_is_definition()) _record_alias(child, in.aliases);
+  else if (child.macro_form_is_definition()) child.parse_macro_definition();
+  else if (child.meta_form_is_declaration()) in.meta_declaration(child);
+  else if (child.peek(0) == <"$(">) in.lisp_form(child);
+  else
+    child.report_error(
+      <macro>, "unexpected form in macro import", child.token, NULL);
+}
+
+static void Import.meta_declaration(Import *in, Compiler child) {
+  in.meta = 1;
+  List definition = child.parse_top_level();
+  if (definition) in.metas.push(definition);
+}
+
+/* A nested import's own `meta` definitions belong to the same consuming
+   unit. */
+static void Import.lisp_form(Import *in, Compiler child) {
+  if (!in.c.collect_protocols && !_import_path(child, NULL)) {
+    child.parse_macro_lisp_shallow();
+    return;
+  }
+  List nested = child.parse_macro_lisp_top_level();
+  if (!nested) return;
+  in.meta = 1;
+  foreach (Var form, nested.cdr()) in.metas.push(form);
 }
 
 static int _import_path(Compiler compiler, String &?path) {
@@ -3319,17 +3377,17 @@ static int _import_path(Compiler compiler, String &?path) {
 
 /* Cached templates retain global references across symbol-table resets.
    Bind those names in the current global scope without replaying imports. */
-static Var _rebind_import_definition(Compiler compiler, Var stored) {
+static Var _rebind_imported(Compiler compiler, Var stored) {
   if (stored is not <list>) return stored;
   List definition = stored;
   if (definition.car() != <macrodef>) return definition;
   Map replacements = {};
-  _import_reference_bindings(compiler, definition, replacements);
+  _reference_bindings(compiler, definition, replacements);
   if (!replacements.len()) return definition;
   return _replace_bindings(definition, replacements);
 }
 
-static void _import_reference_bindings(
+static void _reference_bindings(
   Compiler compiler, List syntax, Map replacements) {
   match (syntax)
     case %(expr ? (ident ?binding)): {
@@ -3339,14 +3397,24 @@ static void _import_reference_bindings(
       return;
     }
   foreach (Var child, syntax)
-    if (child is <list>)
-      _import_reference_bindings(compiler, child, replacements);
+    if (child is <list>) _reference_bindings(compiler, child, replacements);
 }
 
 /** Loads the public macro imports recorded by a package entry at this
     consumer's import position. */
 void Compiler.import_package_macros(
   Compiler c, String name, Token invocation) {
+  foreach (List entry, _package_exports(c, name)) {
+    String path = entry.cadr();
+    if (!path.startswith("/")) path = %"${c.package_roots[name]}/$path";
+    List imported = _import(c, path, invocation);
+    if (imported)
+      foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
+  }
+}
+
+/* The macro imports package `name` recorded, in source order. */
+static Array _package_exports(Compiler c, String name) {
   Map symbols = c.sym.base_symbols();
   Map current = c.sym.current_symbols();
   if (current) symbols.merge(current);
@@ -3358,13 +3426,7 @@ void Compiler.import_package_macros(
           case %(package-macro ?(String package) ?(String path)):
             if (package == name) exports.push(%($position $path));
   exports.sort();
-  foreach (List entry, exports) {
-    String path = entry.cadr();
-    if (!path.startswith("/")) path = %"${c.package_roots[name]}/$path";
-    List imported = _import(c, path, invocation);
-    if (imported)
-      foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
-  }
+  return exports;
 }
 
 // source files
@@ -3401,15 +3463,18 @@ static String _embed_path(Compiler c, String source_file, String requested) {
   return c.canonical_path(%"$base/$requested");
 }
 
-/* A definition records its file as `home_portable_path` spells it. */
+/* An absolute path; the definition keeps the home-portable spelling. */
 static String _definition_file(List definition) {
   String file = definition.assoc(<file>);
   return !file || file.startswith("<") ? file : home_absolute_path(file);
 }
 
+/* Reads a compile-time source and records its content hash as a
+   dependency. */
 static String _read_source(
-  Compiler compiler, String path, String message, Token token, List notes) {
-  String text = _source_text(compiler, path, message, token, notes);
+  Compiler compiler, String path, String message, Token token) {
+  String text = _source_text(
+    compiler, path, message, token, _path_note(compiler, path));
   compiler.deps.merge_translation_dependency(
     path, "%08x".printf(text.hash()));
   return text;
@@ -3424,7 +3489,11 @@ static String _source_text(
   return text;
 }
 
-// the shared library session
+/* the shared library session
+
+   A build target fills one Lisp session with the home's compile-time
+   libraries and native operations, freezes it, and makes it the parent of
+   every unit's session. */
 
 /* The paths whose top-level Lisp the shared session evaluated while it was
    being filled. A unit that reaches one of these registers the file's macro
@@ -3452,19 +3521,22 @@ static int library_hooked = 0;
 */
 Lisp Compiler.open_macro_library(Compiler compiler) {
   if (library_session != NULL) return NULL;
-  Scope.push(&library_scope);
-  defer Scope.pop();
-  if (!library_hooked) {
-    Scope.shutdown_hook(_library_shutdown);
-    library_hooked = 1;
+  $scope(&library_scope) {
+    if (!library_hooked) {
+      Scope.shutdown_hook(_library_shutdown);
+      library_hooked = 1;
+    }
+    Lisp shared = Lisp.kernel();
+    library_imports = {};
+    library_definitions = {};
+    library_comptime = {};
+    $let(compiler.macro_lisp, shared)
+      return _fill_library(compiler, shared);
   }
-  Lisp shared = Lisp.kernel();
-  library_imports = {};
-  library_definitions = {};
-  library_comptime = {};
-  Lisp was = compiler.macro_lisp;
-  defer compiler.macro_lisp = was;
-  compiler.macro_lisp = shared;
+}
+
+/* A failure while filling leaves no session, so each unit loads its own. */
+static Lisp _fill_library(Compiler compiler, Lisp shared) {
   library_filling = 1;
   try {
     _install_builtins(shared);
@@ -3477,24 +3549,6 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
     return NULL;
   }
   return shared;
-}
-
-/** Prepares and freezes the shared session and makes it every unit's parent.
-    `shared` must be the session `Compiler.open_macro_library` returned.
-*/
-void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
-  (void) compiler;
-  library_filling = 0;
-  /* A second preload for the same target finds the session published. */
-  if (library_session) return;
-  if (!shared) {
-    library_imports = NULL;
-    library_definitions = NULL;
-    library_comptime = NULL;
-    return;
-  }
-  shared.freeze();
-  library_session = shared;
 }
 
 /* The four libraries and the message each failure reports, in the order a
@@ -3519,6 +3573,24 @@ static void _eval_library(
   _eval_string(compiler, text, compiler.token);
 }
 
+/** Prepares and freezes the shared session and makes it every unit's parent.
+    `shared` must be the session `Compiler.open_macro_library` returned.
+*/
+void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
+  (void) compiler;
+  library_filling = 0;
+  /* A second preload for the same target finds the session published. */
+  if (library_session) return;
+  if (!shared) {
+    library_imports = NULL;
+    library_definitions = NULL;
+    library_comptime = NULL;
+    return;
+  }
+  shared.freeze();
+  library_session = shared;
+}
+
 static int _inherited_import(String path) {
   /* An empty `Map` is false, so the test is for the allocation. */
   return !library_filling && library_imports != NULL &&
@@ -3534,12 +3606,9 @@ int Compiler.inherits_import(String path) => _inherited_import(path);
    session when it is being filled. */
 static void _record_comptime(Compiler c, String name) {
   c.meta_comptime[name] = 1;
-  if (library_filling && (void *) library_comptime) {
-    Scope.push(&library_scope);
-    library_comptime[name] = 1;
-    Scope.pop();
-    name.try_own();
-  }
+  if (!library_filling || !(void *) library_comptime) return;
+  $scope(&library_scope) library_comptime[name] = 1;
+  name.try_own();
 }
 
 /** Marks the shared session's compile-time-only definitions in a fresh
@@ -3564,29 +3633,17 @@ Map Compiler.shared_definitions(Compiler compiler) {
 /* Whether the published shared session already holds the definition of
    `name` from this file, which a unit reading the file again leaves alone. */
 static int _shared_meta_definition(Compiler c, String name) {
-  if (library_filling || library_definitions == NULL || !c.filename)
-    return 0;
+  if (library_filling || library_definitions == NULL || !c.filename) return 0;
   String key = %"${Path.absolute(c.filename)}#$name";
   return key in library_definitions;
 }
 
-/** Records or reports one compile-time definition of the shared session.
-    The answer is whether that session already holds `key`, which is a file
-    and a name, and while the session is being filled the key is recorded as
-    well. A reader that reads the same file again therefore installs nothing,
-    whether it is a later unit or the filling itself reaching the file twice:
-    the definition it would install is the one it already has.
-*/
-int Compiler.shared_definition(Compiler compiler, String key) {
-  (void) compiler;
-  /* An empty `Map` is false, so the test is for the allocation. */
-  if (library_definitions == NULL) return 0;
-  int known = key in library_definitions;
-  if (library_filling) library_definitions[key] = 1;
-  return known;
-}
+/* built-in macros
 
-// built-in macros
+   The compiler carries two macro sources in its own image: the built-in
+   macros, and the Lisp binding macros that a `lisp.` name installs on
+   first use. A unit parses each source once and keeps its aliases under a
+   marker. */
 
 macro Expression $_embed_lisp_binding_macros() =>
   $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"));
@@ -3601,8 +3658,7 @@ static String builtin_macros_marker = NULL;
 
 /** Installs the compiler-shipped source macros into `compiler` once. */
 void Compiler.install_builtin_macros(Compiler compiler) {
-  if (!builtin_macros_marker)
-    builtin_macros_marker = "_x2c.builtin.macros";
+  if (!builtin_macros_marker) builtin_macros_marker = "_x2c.builtin.macros";
   _install_source(
     compiler, builtin_macros, "<builtin:macros>",
     builtin_macros_marker, 1);
@@ -3617,38 +3673,37 @@ static void _install_source(
     compiler.kw_aliases.merge(installed);
     return;
   }
-  Map aliases = {};
-  Compiler definitions = Compiler.new_shared(compiler);
-  defer compiler.close_child(definitions);
-  definitions.filename = filename;
-  definitions.sym = compiler.sym;
-  definitions.fn_defs = compiler.fn_defs;
-  definitions.macros = compiler.macros;
-  definitions.kw_aliases = compiler.kw_aliases;
-  definitions.builtin_defs = builtin;
-  definitions.tokenize(text);
-  while (definitions.peek(0) != <eof>) {
-    if (definitions.keyword_form_is_definition()) {
-      Token token = definitions.skip_trivia_from(definitions.token + 1);
-      Atom alias = Atom.intern(token.text);
-      definitions.parse_keyword_definition();
-      aliases[alias] = definitions.kw_aliases[alias];
-    }
-    else if (definitions.macro_form_is_definition())
-      definitions.parse_macro_definition();
-    else
-      definitions.report_error(
-        <macro>, "unexpected form in built-in macro source",
-        definitions.token, NULL);
-  }
+  Compiler child = Compiler.new_shared(compiler);
+  defer compiler.close_child(child);
+  child.filename = filename;
+  child.sym = compiler.sym;
+  child.fn_defs = compiler.fn_defs;
+  child.macros = compiler.macros;
+  child.kw_aliases = compiler.kw_aliases;
+  child.builtin_defs = builtin;
+  child.tokenize(text);
+  Map aliases = _read_definitions(child);
   compiler.macros[marker] = aliases;
+}
+
+/* A shipped source holds only definitions and keyword aliases. */
+static Map _read_definitions(Compiler child) {
+  Map aliases = {};
+  while (child.peek(0) != <eof>) {
+    if (child.keyword_form_is_definition()) _record_alias(child, aliases);
+    else if (child.macro_form_is_definition()) child.parse_macro_definition();
+    else
+      child.report_error(
+        <macro>, "unexpected form in built-in macro source",
+        child.token, NULL);
+  }
+  return aliases;
 }
 
 /* Every `lisp.` lookup records the bindings file, which is installed only
    when `install` is nonzero and the bindings are not yet installed. */
 static void _use_lisp_bindings(Compiler compiler, int install) {
-  if (!lisp_bindings_marker)
-    lisp_bindings_marker = "_x2c.lisp.bindings";
+  if (!lisp_bindings_marker) lisp_bindings_marker = "_x2c.lisp.bindings";
   int loaded =
     !install || lisp_bindings_marker in compiler.macros;
   if (!loaded) _ensure_lisp(compiler);
@@ -3665,52 +3720,43 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
     lisp_bindings_marker, 0);
 }
 
-// native operations
+/* native operations
 
-/* Native operations use the active expansion context, not the session
-   that owns their callable. The shared parent therefore owns them once. */
+   Native operations read the active expansion's context, not the session
+   that owns their callable, so the shared parent owns them once. */
+
 static void _install_native_operations(Compiler compiler) {
-  with compiler {
-    /* Cold declaration collection needs literals before the meta surface is
-       parsed. These are the runtime's own compiled builders. */
-    $lisp.bind(_.macro_lisp, "x2c_literal_string", x2c_literal_string);
-    $lisp.bind(_.macro_lisp, "x2c_literal_int", x2c_literal_int);
-    $lisp.bind(_.macro_lisp, "x2c_literal_symbol", x2c_literal_symbol);
-    /* Internal primitives carry the `_x2c.` prefix. */
-    $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.function.native-type",
-      _sdk_native_function_type);
-    $lisp.bind(_.macro_lisp, "_x2c.literal.list", _sdk_literal_list);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.native-meta.targets", _sdk_native_meta_targets);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.native-meta.declared",
-      _sdk_native_meta_declared);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.complete-iter-chain",
-      _sdk_complete_iter_chain);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.string-collection",
-      _sdk_string_collection);
-    $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
-    $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
-    $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
-    $lisp.bind(_.macro_lisp, "_x2c.tpl-call", _sdk_template_call);
-    $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
-    if (!Compiler.native_module_loaded(compiler_supplier))
-      Compiler.add_native_module(compiler_supplier, _compiler_targets);
-    foreach (Var (name, function), _compiler_targets()) {
-      _.macro_lisp.set_global(name, function);
-      Compiler.bind_meta_operation(_.macro_lisp, name, function);
-    }
+  _bind_primitives(compiler.macro_lisp);
+  if (!Compiler.native_module_loaded(compiler_supplier))
+    Compiler.add_native_module(compiler_supplier, _compiler_targets);
+  foreach (Var (name, function), _compiler_targets()) {
+    compiler.macro_lisp.set_global(name, function);
+    Compiler.bind_meta_operation(compiler.macro_lisp, name, function);
   }
+}
+
+/* Cold declaration collection needs literals before the meta surface is
+   parsed, so the runtime's own compiled builders come first. Internal
+   primitives carry the `_x2c.` prefix. */
+static void _bind_primitives(Lisp lisp) {
+  $lisp.bind(lisp, "x2c_literal_string", x2c_literal_string);
+  $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
+  $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
+  $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
+  $lisp.bind(lisp, "_x2c.function.reference", _sdk_function_reference);
+  $lisp.bind(lisp, "_x2c.function.native-type", _sdk_native_type);
+  $lisp.bind(lisp, "_x2c.literal.list", _sdk_literal_list);
+  $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);
+  $lisp.bind(lisp, "_x2c.native-meta.declared", _sdk_meta_declared);
+  $lisp.bind(lisp, "_x2c.foreach.complete-iter-chain", _sdk_iter_chain);
+  $lisp.bind(lisp, "_x2c.foreach.string-collection", _sdk_string_collection);
+  $lisp.bind(lisp, "_x2c.source.text", _sdk_source_text);
+  $lisp.bind(lisp, "_x2c.embed.text", _sdk_embed_text);
+  $lisp.bind(lisp, "_x2c.invocation.location", _sdk_invocation_location);
+  $lisp.bind(lisp, "_x2c.symbol-set", _sdk_symbol_set);
+  $lisp.bind(lisp, "_x2c.tpl-call", _sdk_template_call);
+  $lisp.bind(lisp, "_x2c.name.unique", _sdk_ident_unique);
+  $lisp.bind(lisp, "_x2c.declaration.bindings", _sdk_bindings);
 }
 
 /* Binds the built-in macro algorithms into `lisp` under the names its
@@ -4329,11 +4375,11 @@ static int _iterator_operation(List signature) {
   return 0;
 }
 
-static List _sdk_native_meta_targets(void) => _native_meta_targets(NULL);
+static List _sdk_meta_targets(void) => _native_meta_targets(NULL);
 
 /* A native module's entry exports the prototypes its own sources declare,
    and a module that declares none is a mistake. */
-static List _sdk_native_meta_declared(List paths) {
+static List _sdk_meta_declared(List paths) {
   List rows = _native_meta_targets(paths);
   if (!rows)
     _sdk_reject(
@@ -4719,7 +4765,7 @@ List x2c_method_resolve(List type_value, String name) {
   return %();
 }
 
-static Var _sdk_declaration_bindings(List declaration) {
+static Var _sdk_bindings(List declaration) {
   Array result = [];
   match (declaration)
     case %((!or declare decl typedef) ? (bindings *bindings)):
@@ -4949,7 +4995,7 @@ List x2c_function_parameter(List function, String wanted) {
 }
 
 /* A native binding stores the same signature as an ordinary Func adapter. */
-static List _sdk_native_function_type(List syntax) {
+static List _sdk_native_type(List syntax) {
   match (syntax)
     case %(function ?rtype ?declarator ?):
       return sdk_compiler.func_signature(
@@ -5229,7 +5275,7 @@ Var builtin_foreach_unique(String name) => _sdk_ident_unique(name);
 
 /** Returns `expression` with the iterator chain `foreach` reads completed. */
 List builtin_foreach_complete(List expression) =>
-  _sdk_complete_iter_chain(expression);
+  _sdk_iter_chain(expression);
 
 /** Returns the collection `foreach` iterates for `expression`, promoting a
     String literal. */
@@ -5238,19 +5284,19 @@ List builtin_foreach_collection(List expression) =>
 
 /** Returns an expression reading each binding `declaration` declares. */
 List builtin_foreach_bindings(List declaration) =>
-  _sdk_declaration_bindings(declaration);
+  _sdk_bindings(declaration);
 
 /** Returns the location of the active macro invocation. */
 List builtin_class_location(void) => _sdk_invocation_location();
 
 /** Returns the `Func` signature of the function syntax `function`. */
 List binding_native_type(List function) =>
-  _sdk_native_function_type(function);
+  _sdk_native_type(function);
 
 /** Returns `values` as a cached literal of the expanding unit. */
 List binding_literal_list(List values) => _sdk_literal_list(values);
 
-static Var _sdk_complete_iter_chain(List expression) {
+static Var _sdk_iter_chain(List expression) {
   _sdk_guard("private foreach iterator completion");
   return sdk_compiler.complete_iter_chain(expression);
 }
@@ -5277,6 +5323,9 @@ static void _report_lisp_failure(
     <macro>, "compile-time Lisp evaluation failed",
     invocation, %($form_note $error_note));
 }
+
+static List _path_note(Compiler c, String path) =>
+  %("path: ${c.display_path(path)}");
 
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */
