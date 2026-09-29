@@ -83,13 +83,14 @@ the "Generated N C files and N headers" receipt that `main.x` and
 
 The workers found these defects, which predate the wave. Each reproduces
 on the original code and has its own fix task, so the wave keeps the
-behavior:
+behavior. Two fixes are merged into this batch, and the others land
+separately:
 
-- `x2c build -###` records the final archive fingerprint, so a later build
-  keeps an archive built from older objects.
-- A manifest field with an empty value, such as `output =`, crashes
-  `x2c build`. A second `[dependencies]` section is accepted when the
-  first one is empty.
+- `x2c build -###` recorded the final archive fingerprint, so a later
+  build kept an archive built from older objects. Fixed by `a4fdb9f0`.
+- A manifest field with an empty value, such as `output =`, crashed
+  `x2c build`, and a second `[dependencies]` section was accepted when the
+  first one was empty. Fixed by `99d6e8f3`.
 - `in` after an interpolated String literal does not parse.
 - `x2c help ''` crashes, and `x2c @` reports `response file '(null)'`
   where it means `empty response-file reference '@'`.
