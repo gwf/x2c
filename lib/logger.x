@@ -11,7 +11,7 @@
     Every sink for an event observes the same immutable LogEvent. Built-in text
     sinks render through `Buffer` and `Var.write_repr` without constructing
     canonical presentation `String`s.
- */
+*/
 
 #pragma once
 #include "common.x"
@@ -236,14 +236,19 @@ int Logger.set_min_level(Logger logger, Symbol level) {
   return 1;
 }
 
-// sinks
+/* sinks
+
+   Sink nodes and built-in sink state are in the Logger's private Scope.
+   Callback sinks borrow `data`; retiring them invalidates the handle without
+   releasing anything reachable through that value. Built-in destructors
+   release only their wrapper storage and never close a borrowed File. */
 
 /** Appends a callback sink and returns its `Logger`-owned handle.
     A NULL `Logger` returns NULL; a quiescent `Logger` also returns NULL for a
-    NULL
-    emitter. The `Logger` borrows `data` and both callbacks until the sink is
-    removed, cleared, or the `Logger` is freed, so anything they reference must
-    remain live. Emitters run synchronously in registration order.
+    NULL emitter. The `Logger` borrows `data` and both callbacks until the
+    sink is removed, cleared, or the `Logger` is freed, so anything they
+    reference must remain live. Emitters run synchronously in registration
+    order.
     Raises: `<bad-state>` during active sink delivery, or `<alloc-fail>` when
     the sink cannot be allocated.
 */
@@ -321,10 +326,6 @@ static LogSink _new_sink(
   return result = sink;
 }
 
-/* Sink nodes and built-in sink state are in the Logger's private Scope.
-   Callback sinks borrow `data`; retiring them invalidates the handle without
-   releasing anything reachable through that value. Built-in destructors
-   release only their wrapper storage and never close a borrowed File. */
 /* Emission walks the sink list, so changing it from inside an emitter raises,
    as freeing the Logger during delivery does. */
 static void _require_quiescent(Logger logger, String owner) {
@@ -360,9 +361,8 @@ static void _retire_sink(LogSink sink) {
 // text sinks
 
 /** Adds a text sink for borrowed `stderr` and returns its `Logger`-owned
-    handle.
-    The sink selects color from terminal state at registration and flushes
-    after every event. A NULL `Logger` returns NULL.
+    handle. The sink selects color from terminal state at registration and
+    flushes after every event. A NULL `Logger` returns NULL.
     Raises: `<alloc-fail>` or `<bad-enc>` when sink state cannot be
     represented.
 */
@@ -372,10 +372,8 @@ LogSink Logger.add_stderr_sink(Logger logger) =>
 
 /** Adds a plain-text sink for borrowed `file` and returns its handle.
     The caller must keep `file` open until the sink is removed or the `Logger`
-    is
-    freed. Removing the sink flushes but never closes the `File`. A NULL
-    argument
-    returns NULL.
+    is freed. Removing the sink flushes but never closes the `File`. A NULL
+    argument returns NULL.
     Raises: `<alloc-fail>` or `<bad-enc>` when sink state cannot be
     represented.
 */
@@ -394,13 +392,7 @@ static LogSink _add_text_sink(
   context.file = file;
   context.color = color;
   context.flush_each = flush_each;
-  int pushed = 0;
-  if (Scope.top() != &logger.storage) {
-    Scope.push(&logger.storage);
-    pushed = 1;
-  }
-  {
-    defer if (pushed) Scope.pop();
+  $scope(&logger.storage) {
     context.scratch = Block.new(sizeof(Buffer));
   }
   handed_off = 1;
@@ -410,26 +402,26 @@ static LogSink _add_text_sink(
 static void _emit_text(Logger logger, const LogEvent *event, Var data) {
   LogTextSink context = data;
   if (!logger || !context || !context.file || context.depth < 0) return;
-  if (context.depth == (int) context.scratch.length) {
-    /* Appending may grow the backing store. Allocate it with the Buffer in
-       logger storage, outside the caller's transient scope. */
-    int pushed = 0;
-    if (Scope.top() != &logger.storage) {
-      Scope.push(&logger.storage);
-      pushed = 1;
-    }
-    defer if (pushed) Scope.pop();
-    Buffer added = Buffer.new(0), int appended = 0;
-    defer if (!appended) added.free();
-    context.scratch.append(&added, 1);
-    appended = 1;
-  }
+  if (context.depth == (int) context.scratch.length)
+    _add_scratch(logger, context);
   Buffer *buffers = context.scratch.bytes;
   Buffer out = buffers[context.depth].clear();
   $let(context.depth, context.depth + 1) {
     _render_text(out, event, context.color);
     context.file.write(out.content.bytes, 1, out.content.length);
     if (context.flush_each) fflush(context.file);
+  }
+}
+
+/* Each nested emission renders into its own Buffer. Appending may grow the
+   backing store, so the Buffer and the store live in logger storage, outside
+   the caller's transient scope. */
+static void _add_scratch(Logger logger, LogTextSink context) {
+  $scope(&logger.storage) {
+    Buffer added = Buffer.new(0), int appended = 0;
+    defer if (!appended) added.free();
+    context.scratch.append(&added, 1);
+    appended = 1;
   }
 }
 
@@ -460,39 +452,52 @@ static const char *_color_warn = "\x1b[33m", *_color_error = "\x1b[31m";
 static const char *_color_fatal = "\x1b[91m";
 
 static void _render_text(Buffer out, const LogEvent *event, int color) {
-  long long milliseconds = event.elapsed_us / 1000LL;
-  long long minutes = milliseconds / 60000LL;
-  long long seconds = (milliseconds / 1000LL) % 60LL;
-  long long millis = milliseconds % 1000LL;
-  if (color) out.write(_color_time);
-  out.printf("%lld:%02lld.%03lld", minutes, seconds, millis);
-  if (color) out.write(_color_reset);
-  out.write(" ");
-  if (color) out.write(_level_color(event.level));
-  _write_symbol(out, event.level);
-  if (color) out.write(_color_reset);
-  out.write("/");
-  if (color) out.write(_color_category);
-  _write_symbol(out, event.category);
-  if (color) out.write(_color_reset);
-  if (event.sequence == 0) {
-    out.write(" ");
-    if (color) out.write(_color_key);
-    out.write("start_time");
-    if (color) out.write(_color_reset).write(_color_time);
-    out.write("=");
-    if (color) out.write(_color_reset).write(_color_string);
-    out.write_char('"');
-    _write_absolute_time(out, event.wall_time_us);
-    out.write_char('"');
-    if (color) out.write(_color_reset);
-  }
+  _write_elapsed(out, event.elapsed_us, color);
+  _write_label(out, event.level, event.category, color);
+  if (event.sequence == 0) _write_start_time(out, event.wall_time_us, color);
   foreach (List field, event.fields) {
     if (!field) continue;
     out.write(" ");
     _write_field(out, field, color);
   }
   out.write_char('\n');
+}
+
+static void _write_elapsed(Buffer out, long long elapsed_us, int color) {
+  long long milliseconds = elapsed_us / 1000LL;
+  long long minutes = milliseconds / 60000LL;
+  long long seconds = (milliseconds / 1000LL) % 60LL;
+  long long millis = milliseconds % 1000LL;
+  if (color) out.write(_color_time);
+  out.printf("%lld:%02lld.%03lld", minutes, seconds, millis);
+  if (color) out.write(_color_reset);
+}
+
+/* The label is ` level/category`, each part in its own color. */
+static void _write_label(
+  Buffer out, Symbol level, Symbol category, int color) {
+  out.write(" ");
+  if (color) out.write(_level_color(level));
+  _write_symbol(out, level);
+  if (color) out.write(_color_reset);
+  out.write("/");
+  if (color) out.write(_color_category);
+  _write_symbol(out, category);
+  if (color) out.write(_color_reset);
+}
+
+/* A Logger's first event also records the wall-clock time it started. */
+static void _write_start_time(Buffer out, long long wall_time_us, int color) {
+  out.write(" ");
+  if (color) out.write(_color_key);
+  out.write("start_time");
+  if (color) out.write(_color_reset).write(_color_time);
+  out.write("=");
+  if (color) out.write(_color_reset).write(_color_string);
+  out.write_char('"');
+  _write_absolute_time(out, wall_time_us);
+  out.write_char('"');
+  if (color) out.write(_color_reset);
 }
 
 static void _write_field(Buffer out, List field, int color) {
@@ -550,15 +555,21 @@ static const char *_value_color(Var value) {
   return _color_other;
 }
 
-// memory sinks
+/* memory sinks
+
+   A memory sink interns List cells and copied canonical values through the
+   pool captured by Logger.new; a canonical hit may still belong to an
+   ancestor pool. Wide boxes cannot live there, so they remain in a private
+   Scope until sink retirement moves them to the Logger's owning Scope. Other
+   pointer-bearing values stay borrowed. */
 
 /** Adds a sink that prepends captured events to `destination`.
-    The destination pointer is borrowed until the sink is retired. `Entry`
-    `List`s,
-    `String`s, and Lisp symbols are interned through the pool captured by
-    `Logger.new`; a canonical hit may retain an ancestor pool's lifetime. Wide
-    values move to the `Logger`'s owning `Scope` on retirement, while other
-    pointer-bearing values remain borrowed. Newest events appear first.
+    The destination pointer is borrowed until the sink is retired. Entry
+    `List`s, `String`s, and Lisp symbols are interned through the pool
+    captured by `Logger.new`; a canonical hit may retain an ancestor pool's
+    lifetime. Wide values move to the `Logger`'s owning `Scope` on retirement,
+    while other pointer-bearing values remain borrowed. Newest events appear
+    first.
     A NULL `Logger` or destination returns NULL.
     Registration may raise `<alloc-fail>` or `<bad-enc>` while constructing
     sink state. Later event delivery may raise `<alloc-fail>`, `<size-limit>`,
@@ -580,35 +591,20 @@ LogSink Logger.add_memory_sink(Logger logger, List *destination) {
     logger, _emit_memory, NULL, Var.new(<p48>, context), _destroy_memory);
 }
 
-/* A memory sink interns List cells and copied canonical values through the
-   pool captured by Logger.new; a canonical hit may still belong to an ancestor
-   pool. Wide boxes cannot live there, so they remain in a private Scope until
-   sink retirement moves them to the Logger's owning Scope. Other
-   pointer-bearing values stay borrowed. */
 static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
   (void) logger;
-  LogMemorySink context = data.pointer();
-  unsigned long sequence = event.sequence;
-  long long wall_time_us = event.wall_time_us;
-  long long elapsed_us = event.elapsed_us;
-  List entry = NULL;
-  entry = List.cons_in(
-    context.pool,
-    _memory_retain_value(context, event.fields), entry);
-  entry = List.cons_in(context.pool, event.category, entry);
-  entry = List.cons_in(context.pool, event.level, entry);
-  entry = List.cons_in(
-    context.pool,
-    _memory_retain_value(context, Var.box_long_long(elapsed_us)), entry);
-  entry = List.cons_in(
-    context.pool,
-    _memory_retain_value(context, Var.box_long_long(wall_time_us)), entry);
-  entry = List.cons_in(
-    context.pool,
-    _memory_retain_value(context, Var.box_ulong(sequence)), entry);
-  *context.destination = List.cons_in(
-    context.pool, entry, *context.destination);
+  LogMemorySink l = data.pointer();
+  List entry = _cons_retained(l, event.fields, NULL);
+  entry = List.cons_in(l.pool, event.category, entry);
+  entry = List.cons_in(l.pool, event.level, entry);
+  entry = _cons_retained(l, Var.box_long_long(event.elapsed_us), entry);
+  entry = _cons_retained(l, Var.box_long_long(event.wall_time_us), entry);
+  entry = _cons_retained(l, Var.box_ulong(event.sequence), entry);
+  *l.destination = List.cons_in(l.pool, entry, *l.destination);
 }
+
+static List _cons_retained(LogMemorySink l, Var value, List tail) =>
+  List.cons_in(l.pool, _retain(l, value), tail);
 
 static void _destroy_memory(Var data) {
   LogMemorySink context = data.pointer();
@@ -620,49 +616,57 @@ static void _destroy_memory(Var data) {
   Scope.free(context);
 }
 
-static Var _memory_retain_value(LogMemorySink l, Var value) {
+static Var _retain(LogMemorySink l, Var value) {
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
-  if (value.is_wide()) {
-    Var copy;
-    $scope(&l.values) { copy = value.clone_wide(); }
-    l.wide_values.push(&copy);
-    return copy;
-  }
+  if (value.is_wide()) return _retain_wide(l, value);
   if (value.is_integer() || value.is_floating()) return value;
-  if (value is <string>) {
-    if (_memory_pool_owns(l.pool, value)) return value;
-    String string = value;
-    return String.new_in(l.pool, string, string.len());
-  }
-  if (value is <lsym>) {
-    String spelling = value.str();
-    if (_memory_pool_owns(l.pool, spelling)) return value;
-    String copy = String.new_in(l.pool, spelling, spelling.len());
-    return Var.new(<lsym>, copy);
-  }
-  if (value is <list>) {
-    List list = value;
-    if (!list || _memory_pool_owns(l.pool, value)) return value;
-    Var head = _memory_retain_value(l, list.car);
-    List source_tail = list.cdr;
-    List tail = _memory_retain_value(l, source_tail);
-    return List.cons_in(l.pool, head, tail);
-  }
+  if (value is <string>) return _retain_string(l, value);
+  if (value is <lsym>) return _retain_lisp_symbol(l, value);
+  if (value is <list>) return _retain_list(l, value);
   return value;
 }
 
-static int _memory_pool_owns(Pool pool, Var value) {
+static Var _retain_wide(LogMemorySink l, Var value) {
+  Var copy;
+  $scope(&l.values) { copy = value.clone_wide(); }
+  l.wide_values.push(&copy);
+  return copy;
+}
+
+static Var _retain_string(LogMemorySink l, Var value) {
+  if (_pool_chain_owns(l.pool, value)) return value;
+  String string = value;
+  return String.new_in(l.pool, string, string.len());
+}
+
+static Var _retain_lisp_symbol(LogMemorySink l, Var value) {
+  String spelling = value.str();
+  if (_pool_chain_owns(l.pool, spelling)) return value;
+  String copy = String.new_in(l.pool, spelling, spelling.len());
+  return Var.new(<lsym>, copy);
+}
+
+static Var _retain_list(LogMemorySink l, Var value) {
+  List list = value;
+  if (!list || _pool_chain_owns(l.pool, value)) return value;
+  Var head = _retain(l, list.car);
+  List source_tail = list.cdr;
+  List tail = _retain(l, source_tail);
+  return List.cons_in(l.pool, head, tail);
+}
+
+static int _pool_chain_owns(Pool pool, Var value) {
   for (Pool owner = pool; owner; owner = owner.up)
     if (owner.owns(value)) return 1;
   return 0;
 }
 
-// the global logger
+// the process logger
 
 /** Installs a borrowed global `Logger` and returns the previous borrowed
-    value.
-    Neither `Logger` is flushed, freed, or otherwise retained by this call; the
-    installed `Logger` must remain live until it is replaced or shutdown runs.
+    value. Neither `Logger` is flushed, freed, or otherwise retained by this
+    call; the installed `Logger` must remain live until it is replaced or
+    shutdown runs.
 */
 synchronized
 Logger log_set_global_logger(Logger logger) {
@@ -677,8 +681,7 @@ Logger log_get_global_logger(void) => global_logger;
 
 /** Delivers one event synchronously through the current global `Logger`.
     With no global `Logger` this is a no-op; otherwise delivery and failures
-    are
-    those of `Logger.log`.
+    are those of `Logger.log`.
 */
 synchronized
 void log_event(Symbol level, Symbol category, List fields) {
@@ -765,8 +768,7 @@ $logger.global(fatal, log_fatal, <fatal>);
 
 /** Creates a `Logger` in the active `Scope`, filtering below `min_level`.
     The `Logger` borrows the active canonical pool for any memory sinks and
-    owns
-    a private `Scope` for sink state. An invalid level returns NULL.
+    owns a private `Scope` for sink state. An invalid level returns NULL.
     Raises: `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
     allocated.
 */
@@ -804,9 +806,8 @@ void Logger.free(Logger logger) {
 /** Installs the process-wide info-level `Logger` and stderr sink.
     `Error` initializes first, then this function records its handler watermark
     and installs an observing `Error` handler. Runtime initialization calls
-    this
-    once and later shutdown hooks invoke `Logger.shutdown` before `Error` shuts
-    down.
+    this once and later shutdown hooks invoke `Logger.shutdown` before `Error`
+    shuts down.
     Raises: any cause from `Error` or `Logger` initialization.
 */
 synchronized
@@ -821,11 +822,10 @@ void Logger.initialize(void) {
 
 /** Shuts down process-wide `Logger` integration.
     Pending root `Error`s are offered to the active `Logger` before the
-    observing
-    handler is removed. The global slot is then cleared; a custom active
-    `Logger`
-    is flushed but remains caller-owned, while the default `Logger` is flushed,
-    retired, and freed. A repeated call after shutdown is a no-op.
+    observing handler is removed. The global slot is then cleared; a custom
+    active `Logger` is flushed but remains caller-owned, while the default
+    `Logger` is flushed, retired, and freed. A repeated call after shutdown is
+    a no-op.
     Raises: `<alloc-fail>` while opening the temporary canonical pool,
     `<bad-state>` when default-`Logger` delivery is active, or any cause from
     event delivery or a sink flusher. The failure may interrupt the remaining
@@ -835,14 +835,7 @@ synchronized
 void Logger.shutdown(void) {
   Logger active = global_logger;
   if (logger_error_handler) {
-    if (active) {
-      Pool.open_named("Logger shutdown errors");
-      List pending = Error.since(logger_error_mark);
-      foreach (List entry, pending)
-        active.log(<error>, <err-report>, entry);
-
-      Pool.close();
-    }
+    if (active) _log_pending(active);
     // exit() can run shutdown while newer registrations are still live
     Error.trim(logger_error_handler, Error.count());
     Error.pop(logger_error_handler);
@@ -856,4 +849,12 @@ void Logger.shutdown(void) {
     default_logger.free();
   }
   default_logger = NULL;
+}
+
+/* Offers the root Errors recorded since initialization to `active`. */
+static void _log_pending(Logger active) {
+  Pool.open_named("Logger shutdown errors");
+  List pending = Error.since(logger_error_mark);
+  foreach (List entry, pending) active.log(<error>, <err-report>, entry);
+  Pool.close();
 }
