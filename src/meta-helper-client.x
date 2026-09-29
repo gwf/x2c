@@ -143,6 +143,11 @@ static int _helper_start(void) {
   if (!pid) _helper_exec(requests[0], replies[1]);
   close(requests[0]);
   close(replies[1]);
+  if (pid < 0) {
+    close(requests[1]);
+    close(replies[0]);
+    return 0;
+  }
   helper_pid = pid;
   helper_owner = getpid();
   helper_to = requests[1];
