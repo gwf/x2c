@@ -3889,7 +3889,7 @@ static List _process_raw_segment(Compiler compiler, List seg) {
   List constructor = compiler.sym.reference(%("String_new"), NULL);
   return %(expr ("String") (call
            (expr ((func ((* char))) "String") (ident $constructor))
-           (args (expr (* char) (literal $literal)))));
+           (args (expr (* char) (literal (* char) $literal)))));
 }
 
 static List _build_cons_list(List list) {
