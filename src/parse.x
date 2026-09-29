@@ -307,7 +307,7 @@ static void _referenced_names(Var node, Map seen, Array names) {
 static void _publish_definition(
   Compiler c, List decl, List function, Token meta, Token staged) {
   if (staged && !c.bind_linked_meta(
-        function, decl.type_from_ast().canonicalize()))
+    function, decl.type_from_ast().canonicalize()))
     c.install_meta_function(function, staged);
   c.record_declaration_visibility(function);
   if (!meta)
@@ -423,7 +423,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   return %(import $name $alias);
 }
 
-// The quoted package name after `import` spells a C identifier.
+// Rejects unquoted package names before parsing their identifier.
 static String _package_name(Compiler c) {
   if (c.peek(0) != <lit-char*>)
     c.report_error(
@@ -1693,7 +1693,7 @@ static List _direct_declarator(
   return %(bind $ident ());
 }
 
-// Parenthesized declarator: ( declarator )
+// Carries the source span across a nested declarator.
 static List _parenthesized(
   Compiler c, List context, List &method_identity, Token &source_first,
   Token &source_after) {
@@ -2615,8 +2615,9 @@ static List _bind_form(
                ((fnmod (params *parameter_values)) *return_modifiers))
              ?body)):
       if (unit)
-        return _bind_function(c, return_type, function_name,
-                              parameter_values, return_modifiers, body);
+        return _bind_function(
+          c, return_type, function_name, parameter_values,
+          return_modifiers, body);
     case %(!set ?node ((!or protocol adopt meta-protocol) *)):
       if (unit) return c.publish_protocol_node(node, c.token, NULL);
     case %(!set ?definition (macrodef *)):
@@ -2912,8 +2913,9 @@ static List _bind_declaration(
     declarator = _finish_fnmods(c, declarator);
     if (context != AST_FIELD && _has_bitfield(declarator))
       return _construction_error(c);
-    output.push(_install_declarator(
-      c, base, declaration_context, declarator, NULL, preserved_self));
+    List installed = _install_declarator(
+      c, base, declaration_context, declarator, NULL, preserved_self);
+    output.push(installed);
   }
   List decl = _finish_declaration(
     c, tag, base, output.list_free(), preserved_self);
@@ -2965,7 +2967,7 @@ static List _bind_targets(Compiler c, Var base, List targets, Var source) {
   return _construction_error(c);
 }
 
-/* Typed destructuring targets bind one declaration each. */
+/* Each typed target contributes one bound declaration. */
 static List _bind_typed_targets(Compiler c, List parameters, Var source) {
   Array bound_parameters = [];
   foreach (List parameter, parameters)
@@ -3077,9 +3079,9 @@ static List _bind_try(Compiler c, List body, List catches, List cleanup) {
   if (cleanup) cleanup = _bind_statement(c, cleanup);
   body = _bind_statement(c, body);
   Macro tried = $tried, caught = $caught;
-  List rebuilt = c.rebuild_statement(catches
-    ? caught(body, cleanup, catches.cadr())
-    : tried(body, cleanup)).cadr();
+  List statement = catches
+    ? caught(body, cleanup, catches.cadr()) : tried(body, cleanup);
+  List rebuilt = c.rebuild_statement(statement).cadr();
   return catches
     ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
 }
